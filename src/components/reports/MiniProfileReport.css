@@ -1,0 +1,508 @@
+/**
+ * MINI PROFILE REPORT STYLING
+ * 
+ * Clean, minimal, premium feel.
+ * PDF-ready (can be printed to PDF).
+ * Fixed 5-page structure with consistent spacing.
+ */
+
+:root {
+  --color-primary: #1a1a1a;
+  --color-secondary: #666666;
+  --color-accent: #00a86b;
+  --color-border: #e0e0e0;
+  --color-bg: #ffffff;
+  --spacing-unit: 1rem;
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+/* Container */
+.mini-profile-report {
+  font-family: var(--font-family);
+  color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+/* Page structure */
+.page {
+  page-break-after: always;
+  min-height: 100vh;
+  padding: 3.5rem;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-border);
+}
+
+@media print {
+  .page {
+    page-break-after: always;
+  }
+}
+
+.page-inner {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* PAGE 1: COVER PAGE */
+.page-cover {
+  background: #ffffff;
+  text-align: center;
+  justify-content: space-between;
+  padding: 5rem 3rem;
+}
+
+.cover-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+}
+
+.cover-header {
+  margin-bottom: 4rem;
+}
+
+.cover-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #999999;
+  margin: 0 0 1.5rem 0;
+}
+
+.cover-system-title {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.8px;
+  line-height: 1.1;
+}
+
+.cover-system-subtitle {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #808080;
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+.cover-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 4.5rem 0;
+}
+
+.cover-main-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0 0 3rem 0;
+  letter-spacing: -0.4px;
+}
+
+.cover-name {
+  font-size: 1.75rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  margin: 0 0 1.25rem 0;
+}
+
+.cover-date {
+  font-size: 0.95rem;
+  color: #999999;
+  margin: 0;
+  font-weight: 400;
+}
+
+.cover-patterns {
+  display: flex;
+  justify-content: center;
+  gap: 4.5rem;
+  margin: 4rem 0;
+  padding: 2.5rem 0;
+  border-top: 1px solid #e8e8e8;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.pattern-block {
+  text-align: center;
+}
+
+.pattern-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #999999;
+  margin: 0 0 1rem 0;
+}
+
+.pattern-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.cover-body {
+  margin: 4rem 0;
+  text-align: center;
+}
+
+.cover-body p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #666666;
+  margin: 0 0 1.25rem 0;
+  max-width: 620px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cover-body p:last-child {
+  margin-bottom: 0;
+}
+
+.cover-footer {
+  padding-top: 2.5rem;
+  border-top: 1px solid #e8e8e8;
+}
+
+.footer-prepared {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.footer-system {
+  font-size: 0.85rem;
+  color: #999999;
+  margin: 0;
+}
+
+/* PAGE 2: DIMENSIONS & SUMMARY */
+.page-dimensions {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0 0 2.5rem 0;
+  color: var(--color-primary);
+}
+
+.dimensions-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+  margin-bottom: 3.5rem;
+}
+
+.dimension-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dimension-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.35rem;
+}
+
+.dimension-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--color-primary);
+  flex: 1;
+}
+
+.dimension-score {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  margin-left: 1.5rem;
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+.dimension-bar-container {
+  background: #f0f0f0;
+  border-radius: 2px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.dimension-bar {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+}
+
+.dimension-bar-fill {
+  height: 100%;
+  background: var(--color-accent);
+  transition: width 0.3s ease;
+}
+
+.dominance-structure-section {
+  margin: 3rem 0;
+  padding: 0;
+}
+
+.dominance-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-primary);
+}
+
+.dominance-note {
+  font-size: 0.9rem;
+  color: #999999;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+.dominance-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.dominance-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dominance-group-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #666666;
+  margin: 0;
+}
+
+.dominance-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.dominance-list li {
+  font-size: 0.95rem;
+  color: var(--color-primary);
+  margin: 0;
+  padding: 0.5rem 0 0.5rem 0.75rem;
+  border-left: 3px solid #e8e8e8;
+  padding-left: 1rem;
+}
+
+.summary-section {
+  border-top: 2px solid var(--color-border);
+  padding-top: 3rem;
+  margin-top: 2rem;
+}
+
+.summary-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 1.5rem 0;
+  color: var(--color-primary);
+}
+
+.summary-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #666666;
+  margin: 0;
+  max-width: 760px;
+}
+
+/* PAGE 3: PRIMARY & SECONDARY PATTERNS */
+.page-patterns {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.patterns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  margin-top: 2rem;
+}
+
+.pattern-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 2rem;
+  background: #f9f9f9;
+  border-radius: 6px;
+  border: 1px solid var(--color-border);
+}
+
+.pattern-card-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-secondary);
+}
+
+.pattern-card-value {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-accent);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* PAGE 4: HOW YOU OPERATE */
+.page-operate {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.operate-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 2.5rem;
+}
+
+.operate-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.operate-subsection:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.subsection-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.subsection-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #666666;
+  margin: 0;
+  max-width: 760px;
+}
+
+/* PAGE 5: REAL WORLD APPLICATION */
+.page-application {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.application-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  margin-top: 2.5rem;
+}
+
+.application-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.application-subsection.last {
+  border-bottom: none;
+  padding-bottom: 0;
+  border-top: 2px solid #e8e8e8;
+  padding-top: 2.5rem;
+}
+
+.application-subsection .subsection-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+.application-subsection .subsection-text {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #666666;
+  margin: 0;
+  max-width: 760px;
+}
+
+/* Error state */
+.report-error {
+  padding: 2rem;
+  text-align: center;
+  color: #d32f2f;
+  font-size: 1rem;
+}
+
+/* Print optimization */
+@media print {
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .mini-profile-report {
+    margin: 0;
+    padding: 0;
+  }
+
+  .page {
+    margin: 0;
+    border: none;
+    box-shadow: none;
+  }
+}
+
+/* Screen-only controls (removed in PDF) */
+@media screen {
+  .mini-profile-report {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .page {
+    margin: 2rem auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--color-border);
+    border-bottom: none;
+  }
+}

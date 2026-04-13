@@ -1,0 +1,218 @@
+================================================================================
+PHASE 1 FRONTEND DIAGNOSIS — COMPLETE
+================================================================================
+
+QUESTION: Why isn't Phase 1 expanded output appearing in the frontend?
+
+ANSWER: Frontend is using OLD field names, not new Phase 1 fields.
+
+================================================================================
+STEP 1: FIELDS CURRENTLY BEING USED (MiniProfileReport.jsx)
+================================================================================
+
+Page 1 (Cover):
+  ✓ miniProfile.primary_pattern
+  ✓ miniProfile.secondary_pattern
+  ✓ miniProfile.summary
+
+Page 2 (Dimensions & Summary):
+  ✓ scoringPayload.ranked_dimensions
+  ✓ miniProfile.summary          ← WRONG! Should be what_this_means
+
+Page 3 (Primary & Secondary):
+  ✓ miniProfile.primary_pattern
+  ✓ miniProfile.secondary_pattern
+
+Page 4 (How You Operate):
+  ✓ miniProfile.how_you_move
+  ✓ miniProfile.communication_style
+  ✓ miniProfile.decision_pattern
+
+Page 5 (Real World Application):
+  ✓ miniProfile.sales_behavior
+  ✓ miniProfile.leadership_snapshot
+  ✓ miniProfile.friction_pattern
+  ✓ miniProfile.recommended_next_step
+
+================================================================================
+STEP 2: NEW PHASE 1 FIELDS NOT BEING USED
+================================================================================
+
+Available from backend but NOT rendered:
+
+  ✗ miniProfile.what_this_means
+    Status: NEW, 4-5 paragraphs, dominance + tradeoff synthesis
+    Currently: Being ignored (Page 2 shows old summary instead)
+
+  ✗ miniProfile.dominance_structure
+    Status: NEW, contains primary/secondary/suppressed arrays
+    Currently: No page/section displays this
+
+  ✗ miniProfile.dominance_note
+    Status: NEW, explains "low scores = de-prioritized"
+    Currently: Not shown to user
+
+================================================================================
+STEP 3: BACKEND VS FRONTEND
+================================================================================
+
+BACKEND RETURNS:
+  {
+    miniProfile: {
+      dominance_structure: { primary: [...], secondary: [...], suppressed: [...] },
+      headline: "...",
+      summary: "...",
+      what_this_means: "...",       ← NEW, AVAILABLE, NOT USED
+      how_you_move: "...",
+      communication_style: "...",
+      decision_pattern: "...",
+      leadership_snapshot: "...",
+      friction_pattern: "...",
+      sales_behavior: "...",
+      primary_pattern: "...",
+      secondary_pattern: "...",
+      recommended_next_step: "...",
+      dominance_note: "..."         ← NEW, AVAILABLE, NOT USED
+    }
+  }
+
+FRONTEND RENDERS (Page 2):
+  <p className="summary-text">{miniProfile.summary}</p>
+                                     ↑
+                                     Using old field!
+
+SHOULD RENDER (Page 2):
+  <p className="summary-text">{miniProfile.what_this_means}</p>
+                                     ↑
+                                     Use new field!
+
+================================================================================
+STEP 4: EXACT PROBLEM LOCATIONS
+================================================================================
+
+FILE: /Users/rrg/moremindmap/src/components/reports/MiniProfileReport.jsx
+
+PROBLEM 1: Wrong field on Page 2
+  Line: ~73 (in Page 2 render)
+  Current: {miniProfile.summary}
+  Fix: {miniProfile.what_this_means}
+
+PROBLEM 2: Missing dominance_structure display
+  Location: Entire section missing
+  Needed: New page or section showing:
+    - Primary dimensions (2 items)
+    - Secondary dimensions (2 items)
+    - Suppressed dimensions (4 items)
+
+PROBLEM 3: Missing dominance_note
+  Location: Entire section missing
+  Needed: Display of miniProfile.dominance_note
+
+================================================================================
+STEP 5: WHAT'S IN THE RESPONSE (Confirmed Working)
+================================================================================
+
+✓ Dominance structure (primary/secondary/suppressed breakdown)
+✓ Expanded "what_this_means" (4-5 paragraphs)
+✓ All tradeoff content embedded
+✓ Dominance note explanation
+✓ All existing fields preserved
+
+Status: BACKEND 100% WORKING
+
+================================================================================
+STEP 6: WHAT'S NOT RENDERING (Confirmed Not Working)
+================================================================================
+
+✗ New "what_this_means" field
+✗ Dominance structure breakdown
+✗ Dominance note explanation
+✗ Long-form expanded content in general
+
+Status: FRONTEND NOT UPDATED
+
+================================================================================
+STEP 7: ROOT CAUSE
+================================================================================
+
+MiniProfileReport.jsx was written BEFORE Phase 1 backend was completed.
+
+Frontend has:
+  ✓ All old field references (summary, how_you_move, etc.)
+  ✗ No new field references (what_this_means, dominance_structure)
+  ✗ No new sections for dominance breakdown
+  ✗ No dominance note display
+
+Backend has:
+  ✓ All old fields (for backward compatibility)
+  ✓ All new Phase 1 fields (what_this_means, dominance_structure, dominance_note)
+  ✓ Multi-paragraph expanded content
+
+Mismatch: Frontend doesn't know about Phase 1 output.
+
+================================================================================
+STEP 8: FIX CHECKLIST
+================================================================================
+
+In MiniProfileReport.jsx:
+
+- [ ] Page 2: Change miniProfile.summary → miniProfile.what_this_means (1 line)
+- [ ] Add dominance_structure display section (15-20 lines)
+- [ ] Add dominance_note explanation (3-5 lines)
+- [ ] Check MiniProfileReport.css for text truncation:
+      - max-height limits on .subsection-text?
+      - text-overflow: ellipsis?
+      - line-clamp classes?
+- [ ] Test rendering with actual Phase 1 output
+- [ ] Verify multi-paragraph content displays without truncation
+
+================================================================================
+STEP 9: CONSOLE VERIFICATION
+================================================================================
+
+To verify backend is sending all Phase 1 fields:
+
+In browser DevTools → Console:
+
+  // After submitting assessment, the miniProfile object should have:
+  console.log("Full object:", window.lastMiniProfile || {})
+  
+  // Should show:
+  {
+    dominance_structure: {...},
+    what_this_means: "...",
+    dominance_note: "...",
+    ...all other fields
+  }
+
+If these fields are present in console but not on page:
+  → Frontend rendering issue (not data issue)
+  → Need to update MiniProfileReport.jsx
+
+================================================================================
+CONCLUSION
+================================================================================
+
+✓ BACKEND: 100% Working
+  - Phase 1 generator active
+  - New fields present in response
+  - Multi-paragraph content generated
+  - Data structure correct
+
+✗ FRONTEND: Needs Update
+  - Using old field names
+  - Missing new sections
+  - Missing dominance display
+  - Not rendering expanded content
+
+ISSUE TYPE: Frontend rendering, not data/backend
+
+TIME TO FIX: ~15 minutes for full Phase 1 integration
+
+FILES TO CHANGE: MiniProfileReport.jsx (and possibly MiniProfileReport.css)
+
+NO BACKEND CHANGES NEEDED
+
+================================================================================
+READY FOR FRONTEND FIXES
+================================================================================

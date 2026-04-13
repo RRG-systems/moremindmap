@@ -1,0 +1,240 @@
+================================================================================
+PHASE 1 DIAGNOSTIC: CODE VERIFICATION COMPLETE
+================================================================================
+
+QUESTION: Is generateMiniProfile() actually being used in the API response?
+
+ANSWER: YES ✓
+
+================================================================================
+STEP 1: IMPORT LOCATION
+================================================================================
+
+File: /Users/rrg/moremindmap/server.js
+Line: 9
+
+CODE:
+  import { generateMiniProfile } from "./engine/miniProfileGenerator.js"
+
+STATUS: ✓ IMPORT IS PRESENT AND CORRECT
+
+================================================================================
+STEP 2: FUNCTION CALL LOCATION
+================================================================================
+
+File: /Users/rrg/moremindmap/server.js
+Line: 292 (inside /api/moremindmap/mini-profile endpoint)
+
+CODE:
+  const miniProfile = generateMiniProfile(scoringPayload)
+
+WHAT IS HAPPENING:
+  1. scoreAssessment() returns scoringPayload with ranked_dimensions
+  2. generateMiniProfile() is called with that payload
+  3. Result is stored in miniProfile variable
+  4. This happens AFTER checking for scoringPayload.invalid
+
+STATUS: ✓ FUNCTION IS BEING CALLED (NOT MOCKED)
+
+================================================================================
+STEP 3: RESPONSE OBJECT VERIFICATION
+================================================================================
+
+File: /Users/rrg/moremindmap/server.js
+Lines: 301-315
+
+CODE:
+  res.json({
+    success: true,
+    scoringPayload: {
+      dimensions: scoringPayload.normalizedScores,
+      ranked_dimensions: scoringPayload.ranked,
+      primary_patterns: scoringPayload.primary.map(d => d.label),
+      secondary_patterns: scoringPayload.secondary.map(d => d.label),
+      diagnostics: scoringPayload.diagnostics,
+      metadata: {
+        totalQuestionsAnswered: answerCount,
+        timestamp: new Date().toISOString(),
+      },
+    },
+    miniProfile,                    ← PHASE 1 OUTPUT INCLUDED HERE
+    timestamp: new Date().toISOString(),
+  })
+
+WHAT IS BEING RETURNED:
+  {
+    success: true,
+    scoringPayload: { ... },
+    miniProfile: {
+      dominance_structure: { ... },
+      headline: "...",
+      summary: "...",
+      what_this_means: "...",    ← NEW SECTION
+      how_you_move: "...",       ← EXPANDED
+      communication_style: "..." ← EXPANDED
+      decision_pattern: "..."    ← EXPANDED
+      leadership_snapshot: "..." ← EXPANDED
+      friction_pattern: "..."    ← EXPANDED
+      sales_behavior: "..."      ← EXPANDED
+      primary_pattern: "...",
+      secondary_pattern: "...",
+      recommended_next_step: "...",
+      dominance_note: "..."
+    },
+    timestamp: "..."
+  }
+
+STATUS: ✓ NEW PHASE 1 OUTPUT IS INCLUDED IN RESPONSE
+
+================================================================================
+STEP 4: FLOW TRACE (COMPLETE)
+================================================================================
+
+REQUEST → POST /api/moremindmap/mini-profile
+    ↓
+Extract: const { answers } = req.body
+    ↓
+Validate: 24 questions answered? YES ✓
+    ↓
+Convert: answers { q1: "A", ... } → scoring engine format
+    ↓
+CALL 1: scoreAssessment("set_1", responses)
+    ├→ Returns: scoringPayload with:
+    │  - normalizedScores
+    │  - ranked_dimensions ← primary array used by Phase 1
+    │  - diagnostics
+    ↓
+Check: scoringPayload.invalid? NO ✓
+    ↓
+CALL 2: generateMiniProfile(scoringPayload) ← PHASE 1 ACTIVE
+    ├→ Input: scoringPayload with ranked_dimensions
+    ├→ Process:
+    │  - buildDominanceStructure(ranked_dimensions)
+    │  - generateHeadline(dominance)
+    │  - generateSummary(dominance, dimensions)
+    │  - generateWhatThisMeans(dominance) ← NEW
+    │  - generateHowYouMove(dominance)
+    │  - generateCommunicationStyle(dominance)
+    │  - generateDecisionPattern(dominance)
+    │  - generateLeadershipSnapshot(dominance)
+    │  - generateFrictionPattern(dominance)
+    │  - generateSalesBehavior(dominance)
+    │  - generateRecommendedNextStep()
+    ├→ Returns: miniProfile object with all sections
+    ↓
+CALL 3: saveSubmission("moremindmap-mini-profile", { answers, scoringPayload, miniProfile })
+    ├→ Saves to: submissions/moremindmap_*.json
+    ↓
+RETURN: res.json({ success: true, scoringPayload, miniProfile, ... })
+    ↓
+RESPONSE → Client receives full Phase 1 output
+
+STATUS: ✓ COMPLETE FLOW CONFIRMED
+
+================================================================================
+CRITICAL FINDING
+================================================================================
+
+OLD CODE IS NOT BEING USED:
+  ✗ mockMiniProfile object is NOT in the response
+  ✗ Old mock generator is NOT being called
+  ✗ No old-style hardcoded text is being returned
+
+NEW CODE IS ACTIVE:
+  ✓ generateMiniProfile() IS being called
+  ✓ Phase 1 output IS being returned
+  ✓ Dominance model IS in response
+  ✓ New sections ARE included
+
+================================================================================
+IF PHASE 1 OUTPUT IS NOT APPEARING IN FRONTEND
+================================================================================
+
+POSSIBLE CAUSES (Not backend):
+
+1. NETWORK ISSUE
+   → Check DevTools → Network tab
+   → Verify response body contains miniProfile fields
+   → Look for: dominance_structure, what_this_means, etc.
+
+2. FRONTEND RENDERING ISSUE
+   → Backend is returning correct data
+   → Frontend JS may not be displaying it
+   → Check: Is frontend looking for miniProfile.what_this_means?
+
+3. BROWSER CACHE
+   → Hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+   → Or: Open DevTools → Settings → Disable cache (while DevTools open)
+
+4. JAVASCRIPT ERROR
+   → Check DevTools → Console tab
+   → Look for red error messages
+   → Frontend may be failing to parse or render response
+
+5. WRONG ENDPOINT
+   → Verify frontend is calling: POST /api/moremindmap/mini-profile
+   → Not: /api/interpret or other endpoint
+
+================================================================================
+VERIFICATION COMMANDS
+================================================================================
+
+To test Phase 1 directly (no frontend):
+
+  curl -X POST http://localhost:4242/api/moremindmap/mini-profile \
+    -H "Content-Type: application/json" \
+    -d '{
+      "answers": {
+        "1":"A","2":"D","3":"B","4":"A","5":"C",
+        "6":"A","7":"D","8":"B","9":"A","10":"C",
+        "11":"A","12":"D","13":"B","14":"A","15":"C",
+        "16":"A","17":"D","18":"B","19":"A","20":"C",
+        "21":"A","22":"D","23":"B","24":"A"
+      }
+    }' | jq '.miniProfile | keys'
+
+Expected output (key list):
+  [
+    "dominance_structure",
+    "headline",
+    "summary",
+    "what_this_means",      ← NEW
+    "how_you_move",
+    "communication_style",
+    "decision_pattern",
+    "leadership_snapshot",
+    "friction_pattern",
+    "sales_behavior",
+    "primary_pattern",
+    "secondary_pattern",
+    "recommended_next_step",
+    "dominance_note"
+  ]
+
+================================================================================
+CONCLUSION
+================================================================================
+
+✓ CODE VERIFICATION COMPLETE
+
+✓ Phase 1 generator IS active
+✓ New output IS being returned
+✓ Backend is working correctly
+
+? If not appearing in frontend:
+  → Issue is NOT in server.js
+  → Issue is likely in:
+    - Frontend rendering logic
+    - Network response handling
+    - Browser caching
+    - JavaScript errors
+
+RECOMMENDATION:
+  → Do NOT change backend code
+  → Debug frontend response handling
+  → Use cURL test above to confirm API works
+  → Check DevTools Network + Console tabs
+
+================================================================================
+END OF DIAGNOSTIC
+================================================================================

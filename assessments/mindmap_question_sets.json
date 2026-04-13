@@ -1,0 +1,495 @@
+{
+  "sets": [
+    {
+      "id": "set_1",
+      "questions": [
+        {
+          "id": 1,
+          "type": "multiple_choice",
+          "prompt": "You’re in a working session where a real decision needs to be made. You’re sitting with a small group—some experienced, some not—and everyone has input, but no one is actually taking ownership. The conversation is starting to circle, and time is slipping. You can feel that if nothing changes, this meeting will end with no real outcome. What do you naturally do?",
+          "options": [
+            {"key": "C", "text": "Step back and assess everything before committing"},
+            {"key": "A", "text": "Push toward a decision so things keep moving"},
+            {"key": "E", "text": "Ask questions to understand how everyone is thinking"},
+            {"key": "B", "text": "Create structure so the decision becomes clearer"},
+            {"key": "D", "text": "Adjust based on what seems most practical"}
+          ]
+        },
+        {
+          "id": 2,
+          "type": "multiple_choice",
+          "prompt": "You’re working with a client who seemed ready to move forward, but now they’ve slowed down. They’re responding less, asking vague questions, and seem unsure. You know if this drifts too long, the opportunity could disappear. You can feel hesitation, but you’re not entirely sure what’s causing it. What do you do next?",
+          "options": [
+            {"key": "D", "text": "Reframe the situation so the decision feels clearer"},
+            {"key": "B", "text": "Walk through details again to reduce uncertainty"},
+            {"key": "E", "text": "Give them space and let them come back"},
+            {"key": "A", "text": "Push forward and try to move things along"},
+            {"key": "C", "text": "Ask deeper questions to uncover what’s really going on"}
+          ]
+        },
+        {
+          "id": 3,
+          "type": "multiple_choice",
+          "prompt": "It’s the middle of a hectic evening at home. One thing turns into three—something spills, someone needs attention, and another problem shows up right behind it. It’s not a crisis, but it’s enough to feel chaotic. Everyone is reacting slightly differently, and there’s no clear order. What’s your natural response in that moment?",
+          "options": [
+            {"key": "B", "text": "Focus on the people first and make sure everyone is okay"},
+            {"key": "D", "text": "Pause and take in what’s happening before reacting"},
+            {"key": "A", "text": "Jump in and take control of the situation immediately"},
+            {"key": "C", "text": "Try to organize things so everything settles down"},
+            {"key": "E", "text": "Handle what’s most urgent and let the rest follow"}
+          ]
+        },
+        {
+          "id": 4,
+          "type": "multiple_choice",
+          "prompt": "You arrive at a hotel with your family after a long travel day. The front desk agent seems overwhelmed, there’s a language barrier, and you’re told your room was downgraded. Your kids are asking about the pool, your partner looks frustrated, and the situation feels slightly off. What do you do?",
+          "options": [
+            {"key": "E", "text": "Adapt quickly and make the best of the situation"},
+            {"key": "A", "text": "Push to get the original room or a better resolution"},
+            {"key": "C", "text": "Work through the details calmly to find a solution"},
+            {"key": "D", "text": "Accept it and shift focus to enjoying the trip"},
+            {"key": "B", "text": "Focus on keeping everyone else calm and settled"}
+          ]
+        },
+        {
+          "id": 5,
+          "type": "multiple_choice",
+          "prompt": "You’re facing a decision that matters, but there’s no immediate deadline. You could act now, or you could take more time to think it through. There are trade-offs either way, and no one is pressuring you. What do you naturally do?",
+          "options": [
+            {"key": "B", "text": "Talk it through with someone to get perspective"},
+            {"key": "A", "text": "Make a decision and move forward quickly"},
+            {"key": "D", "text": "Let it sit until clarity comes naturally"},
+            {"key": "C", "text": "Gather more information before deciding"}
+          ]
+        },
+        {
+          "id": 6,
+          "type": "multiple_choice",
+          "prompt": "You’re sitting in a meeting that’s dragging. The discussion keeps looping, people are repeating themselves, and nothing is moving forward. You can feel the energy dropping in the room. What do you do?",
+          "options": [
+            {"key": "C", "text": "Try to align people and bring clarity to the group"},
+            {"key": "A", "text": "Step in and push toward a decision"},
+            {"key": "D", "text": "Reframe the conversation in a new direction"},
+            {"key": "B", "text": "Let the discussion play out"}
+          ]
+        },
+        {
+          "id": 7,
+          "type": "multiple_choice",
+          "prompt": "You’re in a conversation where someone challenges your idea in front of others. The tone isn’t aggressive, but it’s direct enough to shift the room’s attention. You can feel the moment tighten slightly. What do you do?",
+          "options": [
+            {"key": "D", "text": "Evaluate their point and adjust if needed"},
+            {"key": "A", "text": "Defend your position clearly"},
+            {"key": "C", "text": "Address it later in a different setting"},
+            {"key": "B", "text": "Ask questions to better understand their perspective"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "multiple_choice",
+          "prompt": "You think back to a missed opportunity—something that could have gone differently if you had taken a different approach. It’s not painful, but it sticks with you. What do you naturally do with that memory?",
+          "options": [
+            {"key": "B", "text": "Break it down to understand what happened"},
+            {"key": "D", "text": "Adjust your approach moving forward"},
+            {"key": "A", "text": "Move on and focus ahead"},
+            {"key": "C", "text": "Talk it through with someone"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "multiple_choice",
+          "prompt": "Your day starts falling apart—things are delayed, priorities shift, and nothing is going exactly how you planned. It’s not catastrophic, but it’s enough to disrupt momentum. What do you do?",
+          "options": [
+            {"key": "A", "text": "Reprioritize and take control of what matters most"},
+            {"key": "D", "text": "Adapt quickly and keep moving"},
+            {"key": "B", "text": "Push through and get as much done as possible"},
+            {"key": "C", "text": "Restructure your plan to regain control"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "multiple_choice",
+          "prompt": "You’re attending an event where you don’t know many people. The environment is new, the conversations are already happening, and you’re deciding how to engage. What do you naturally do?",
+          "options": [
+            {"key": "C", "text": "Start conversations and engage directly"},
+            {"key": "A", "text": "Observe first and understand the room"},
+            {"key": "D", "text": "Look for patterns in how people interact"},
+            {"key": "B", "text": "Connect with a few people one-on-one"}
+          ]
+        }
+      ]
+    },    {
+      "id": "set_2",
+      "questions": [
+        {
+          "id": 1,
+          "type": "multiple_choice",
+          "prompt": "You’re at a weekend family gathering where multiple conversations are happening at once. One person is telling a story that’s going nowhere, another is trying to make a point, and a few people are quietly disengaging. You can feel the energy drifting. No one has taken control of the moment, but it’s starting to matter. What do you naturally do?",
+          "options": [
+            {"key": "D", "text": "Let it play out and see where it goes"},
+            {"key": "A", "text": "Step in and shift the conversation direction"},
+            {"key": "C", "text": "Listen closely and read the room before acting"},
+            {"key": "E", "text": "Engage a few people individually to shift energy"},
+            {"key": "B", "text": "Ask a question that refocuses the group"}
+          ]
+        },
+        {
+          "id": 2,
+          "type": "multiple_choice",
+          "prompt": "You’re working on a project where expectations weren’t clearly defined. Now deadlines are approaching and different people have different interpretations of what success looks like. Tension is starting to build subtly. There’s still time to fix it, but only if someone takes action. What do you do?",
+          "options": [
+            {"key": "C", "text": "Clarify expectations and create structure quickly"},
+            {"key": "E", "text": "Adapt to what seems to be working and move forward"},
+            {"key": "A", "text": "Drive toward a result and align people along the way"},
+            {"key": "B", "text": "Talk through differences to understand perspectives"},
+            {"key": "D", "text": "Step back and reassess before committing to direction"}
+          ]
+        },
+        {
+          "id": 3,
+          "type": "multiple_choice",
+          "prompt": "You’re planning a trip with friends or family. Everyone has opinions—where to go, what to do, how much to spend—and none of them fully align. The planning process is becoming slower than expected, and decisions aren’t getting made. What’s your natural role in that situation?",
+          "options": [
+            {"key": "B", "text": "Help people align and find common ground"},
+            {"key": "A", "text": "Take charge and move decisions forward"},
+            {"key": "E", "text": "Go with the flow and adjust as things evolve"},
+            {"key": "D", "text": "Step back and evaluate the best overall option"},
+            {"key": "C", "text": "Organize options so the group can decide clearly"}
+          ]
+        },
+        {
+          "id": 4,
+          "type": "multiple_choice",
+          "prompt": "You’re halfway through a long day and something unexpected disrupts your schedule completely. What you planned is no longer realistic, and you need to adjust quickly. You have limited time to think, but you still need to move forward. What do you do?",
+          "options": [
+            {"key": "E", "text": "Adapt quickly and move with the new reality"},
+            {"key": "C", "text": "Rebuild a plan that makes sense under pressure"},
+            {"key": "A", "text": "Take control and push through the disruption"},
+            {"key": "D", "text": "Pause briefly to assess before acting"},
+            {"key": "B", "text": "Check in with others affected before deciding"}
+          ]
+        },
+        {
+          "id": 5,
+          "type": "multiple_choice",
+          "prompt": "You’re in a conversation where someone is explaining something, but it’s not clear, and it’s taking longer than it should. Others seem confused, but no one is saying it. You can feel the conversation losing clarity. What do you do?",
+          "options": [
+            {"key": "B", "text": "Ask questions to clarify what they mean"},
+            {"key": "D", "text": "Wait to see if clarity comes on its own"},
+            {"key": "A", "text": "Interrupt and redirect the conversation"},
+            {"key": "C", "text": "Break down the issue into something clearer"},
+            {"key": "E", "text": "Let it continue and adjust internally"}
+          ]
+        },
+        {
+          "id": 6,
+          "type": "multiple_choice",
+          "prompt": "You’re watching someone make a decision you believe is flawed. It doesn’t directly impact you, but it will affect the outcome of a shared situation. You’re deciding whether to step in or let it play out. What do you do?",
+          "options": [
+            {"key": "A", "text": "Step in and address it directly"},
+            {"key": "E", "text": "Let it play out and adapt later"},
+            {"key": "B", "text": "Ask questions to help them reconsider"},
+            {"key": "D", "text": "Observe and gather more information first"},
+            {"key": "C", "text": "Suggest a more structured approach"}
+          ]
+        },
+        {
+          "id": 7,
+          "type": "multiple_choice",
+          "prompt": "You’re learning something new in an environment where others seem to pick it up faster than you. There’s no pressure externally, but internally you’re aware of the gap. How do you respond?",
+          "options": [
+            {"key": "D", "text": "Slow down and focus on understanding deeply"},
+            {"key": "B", "text": "Ask others how they’re approaching it"},
+            {"key": "A", "text": "Push yourself to catch up quickly"},
+            {"key": "C", "text": "Create a system to learn it efficiently"},
+            {"key": "E", "text": "Adapt and trust the process over time"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "multiple_choice",
+          "prompt": "You’re driving somewhere familiar, but traffic forces you off your usual route. Now you have to decide quickly how to adjust without overthinking it. There’s no perfect option, just better or worse ones. What do you do?",
+          "options": [
+            {"key": "E", "text": "Adjust on the fly and keep moving"},
+            {"key": "C", "text": "Choose a route that feels structured and reliable"},
+            {"key": "D", "text": "Pause briefly and consider alternatives"},
+            {"key": "A", "text": "Pick a direction quickly and commit"},
+            {"key": "B", "text": "Check input from others or tools before deciding"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "multiple_choice",
+          "prompt": "You’re in a group where one person is dominating the conversation. Others are disengaging, but no one is stepping in. The dynamic is becoming unbalanced. What do you do?",
+          "options": [
+            {"key": "B", "text": "Redirect attention to include others"},
+            {"key": "D", "text": "Observe and wait for the moment to shift"},
+            {"key": "A", "text": "Interrupt and take control of the conversation"},
+            {"key": "E", "text": "Adapt and engage where possible"},
+            {"key": "C", "text": "Shift structure so more voices are included"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "multiple_choice",
+          "prompt": "You have an open block of time with no obligations. You could rest, plan, work, or do something spontaneous. Nothing is pulling you in a specific direction. What do you naturally gravitate toward?",
+          "options": [
+            {"key": "A", "text": "Use the time productively and move something forward"},
+            {"key": "D", "text": "Let the time unfold without forcing structure"},
+            {"key": "C", "text": "Organize or plan something useful"},
+            {"key": "B", "text": "Connect with someone or do something relational"},
+            {"key": "E", "text": "Follow whatever feels right in the moment"}
+          ]
+        }
+      ]
+    },    {
+      "id": "set_3",
+      "questions": [
+        {
+          "id": 1,
+          "type": "multiple_choice",
+          "prompt": "You’re at a dinner with people who all know each other better than you. The conversation has inside jokes, subtle dynamics, and a rhythm you’re not fully part of yet. You can either insert yourself quickly or take your time figuring things out. You feel that moment where you decide how you’re going to show up. What do you do?",
+          "options": [
+            {"key": "B", "text": "Listen first and understand the dynamic"},
+            {"key": "E", "text": "Connect with one person instead of the whole group"},
+            {"key": "A", "text": "Jump in and establish your presence early"},
+            {"key": "D", "text": "Observe patterns before deciding how to engage"},
+            {"key": "C", "text": "Ask a question that shifts the conversation"}
+          ]
+        },
+        {
+          "id": 2,
+          "type": "multiple_choice",
+          "prompt": "You’re given responsibility for something important, but the instructions are vague and expectations are unclear. No one is hovering over you, but the outcome matters. You can either define it yourself or wait for more clarity. What do you naturally do?",
+          "options": [
+            {"key": "C", "text": "Create your own structure and define success"},
+            {"key": "A", "text": "Move forward and figure it out as you go"},
+            {"key": "D", "text": "Pause and try to understand the bigger picture"},
+            {"key": "B", "text": "Ask for clarity before moving"},
+            {"key": "E", "text": "Adjust as things unfold"}
+          ]
+        },
+        {
+          "id": 3,
+          "type": "multiple_choice",
+          "prompt": "You’re in a situation where someone is upset, but they’re not saying it directly. Their tone is slightly off, and their behavior is different, but nothing explicit has been said. You can either address it or let it pass. What do you do?",
+          "options": [
+            {"key": "D", "text": "Notice it but wait to see if it surfaces"},
+            {"key": "B", "text": "Ask directly if something is wrong"},
+            {"key": "E", "text": "Adjust your behavior and move forward"},
+            {"key": "A", "text": "Address it directly and move through it"},
+            {"key": "C", "text": "Read the situation before deciding"}
+          ]
+        },
+        {
+          "id": 4,
+          "type": "multiple_choice",
+          "prompt": "You’re balancing multiple priorities, and all of them feel important. There’s no perfect solution—whatever you choose means something else gets less attention. The pressure isn’t overwhelming, but it’s real. What do you do?",
+          "options": [
+            {"key": "A", "text": "Choose and commit quickly"},
+            {"key": "C", "text": "Organize priorities logically"},
+            {"key": "D", "text": "Think through trade-offs carefully"},
+            {"key": "E", "text": "Adjust dynamically as things evolve"},
+            {"key": "B", "text": "Consider how it affects others before deciding"}
+          ]
+        },
+        {
+          "id": 5,
+          "type": "multiple_choice",
+          "prompt": "You’re working with someone whose style is completely different from yours. Their pace, communication, and approach don’t match how you operate. It’s not wrong—just different—and it’s affecting how things get done. What do you do?",
+          "options": [
+            {"key": "B", "text": "Try to understand and adapt to them"},
+            {"key": "E", "text": "Adjust where needed but keep your style"},
+            {"key": "A", "text": "Maintain your approach and expect alignment"},
+            {"key": "C", "text": "Create a structure that works for both"},
+            {"key": "D", "text": "Observe and adjust over time"}
+          ]
+        },
+        {
+          "id": 6,
+          "type": "multiple_choice",
+          "prompt": "You’re faced with an opportunity that could be valuable, but it’s unclear and comes with uncertainty. There’s potential upside, but also risk. You don’t have all the information you’d like. What do you do?",
+          "options": [
+            {"key": "A", "text": "Move forward and take the opportunity"},
+            {"key": "D", "text": "Evaluate carefully before deciding"},
+            {"key": "C", "text": "Gather more information first"},
+            {"key": "E", "text": "Adjust based on how it develops"},
+            {"key": "B", "text": "Talk it through with someone before acting"}
+          ]
+        },
+        {
+          "id": 7,
+          "type": "multiple_choice",
+          "prompt": "You’re in a conversation where the other person keeps going off track. The discussion is drifting, and the original purpose is getting lost. You can either redirect or let it continue. What do you do?",
+          "options": [
+            {"key": "A", "text": "Redirect the conversation clearly"},
+            {"key": "C", "text": "Structure the conversation back on track"},
+            {"key": "E", "text": "Adapt and follow where it goes"},
+            {"key": "B", "text": "Ask questions to guide it back"},
+            {"key": "D", "text": "Let it play out for now"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "multiple_choice",
+          "prompt": "You’re reflecting on a situation that didn’t go the way you expected. It wasn’t a failure, but it didn’t land how you wanted. You have the chance to learn from it or move on. What do you naturally do?",
+          "options": [
+            {"key": "D", "text": "Think through it before taking action"},
+            {"key": "B", "text": "Talk it through with someone"},
+            {"key": "A", "text": "Move forward quickly"},
+            {"key": "C", "text": "Analyze it to understand what happened"},
+            {"key": "E", "text": "Adjust your approach next time"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "multiple_choice",
+          "prompt": "You’re part of a group decision where no option is clearly right. Everyone has input, but there’s no strong direction. You can either push, guide, or step back. What do you do?",
+          "options": [
+            {"key": "C", "text": "Create a clearer structure for decision-making"},
+            {"key": "A", "text": "Push toward a decision"},
+            {"key": "D", "text": "Wait and see how things unfold"},
+            {"key": "B", "text": "Help people align on direction"},
+            {"key": "E", "text": "Adapt to the direction that emerges"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "multiple_choice",
+          "prompt": "You have unexpected free time and no obligations. You can choose to rest, work, connect, or explore something new. Nothing is pulling you in a specific direction. What do you do?",
+          "options": [
+            {"key": "E", "text": "Follow whatever feels right"},
+            {"key": "C", "text": "Organize or plan something useful"},
+            {"key": "A", "text": "Use the time to move something forward"},
+            {"key": "D", "text": "Let your mind wander without structure"},
+            {"key": "B", "text": "Reach out or connect with someone"}
+          ]
+        }
+      ]
+    },    {
+      "id": "set_4",
+      "questions": [
+        {
+          "id": 1,
+          "type": "multiple_choice",
+          "prompt": "It’s a Saturday morning at home. No strict plans, but a handful of things could get done—errands, projects, family time, or just relaxing. Everyone seems to be in a slightly different mood, and there’s no clear direction for the day yet. You can feel that whatever happens next will shape the tone of the day. What do you naturally do?",
+          "options": [
+            {"key": "B", "text": "Check in with others and align on a plan"},
+            {"key": "D", "text": "Let the day unfold naturally"},
+            {"key": "A", "text": "Take the lead and set direction"},
+            {"key": "C", "text": "Organize priorities into a loose plan"},
+            {"key": "E", "text": "Adjust based on what feels right in the moment"}
+          ]
+        },
+        {
+          "id": 2,
+          "type": "multiple_choice",
+          "prompt": "You’re having a conversation with someone close to you, and something they say doesn’t sit right. It’s not a big issue, but it creates a subtle tension. You can either address it or move past it. The moment is small, but it could matter later. What do you do?",
+          "options": [
+            {"key": "D", "text": "Let it go and move forward"},
+            {"key": "B", "text": "Ask about it to understand their perspective"},
+            {"key": "A", "text": "Address it directly in the moment"},
+            {"key": "E", "text": "Adjust internally and observe"},
+            {"key": "C", "text": "Think about it before deciding how to respond"}
+          ]
+        },
+        {
+          "id": 3,
+          "type": "multiple_choice",
+          "prompt": "You’re helping plan something important—an event, a project, or a gathering—and there are a lot of moving parts. Some people are contributing, others are waiting for direction, and details are starting to slip through the cracks. There’s still time to fix it, but it requires someone to step in. What do you do?",
+          "options": [
+            {"key": "C", "text": "Create structure to bring everything together"},
+            {"key": "A", "text": "Step in and take control of the situation"},
+            {"key": "B", "text": "Work with others to align efforts"},
+            {"key": "D", "text": "Pause and assess before acting"},
+            {"key": "E", "text": "Adjust and handle things as they come"}
+          ]
+        },
+        {
+          "id": 4,
+          "type": "multiple_choice",
+          "prompt": "You’re in a situation where plans change suddenly—something gets canceled, delayed, or shifted—and now you have to adjust quickly. It’s not ideal, but it’s not catastrophic either. You can either resist it or adapt. What do you do?",
+          "options": [
+            {"key": "E", "text": "Adapt quickly and move forward"},
+            {"key": "C", "text": "Rebuild a plan that makes sense"},
+            {"key": "D", "text": "Take a moment to process before acting"},
+            {"key": "A", "text": "Push forward and take control"},
+            {"key": "B", "text": "Check in with others before deciding"}
+          ]
+        },
+        {
+          "id": 5,
+          "type": "multiple_choice",
+          "prompt": "You’re talking with someone who has a completely different opinion than you on something that matters. The conversation is respectful, but there’s a clear disagreement. You can either push your view, explore theirs, or step back. What do you do?",
+          "options": [
+            {"key": "B", "text": "Ask questions to understand their perspective"},
+            {"key": "A", "text": "Stand firm and explain your position"},
+            {"key": "D", "text": "Listen and consider before responding"},
+            {"key": "E", "text": "Adapt and find common ground"},
+            {"key": "C", "text": "Break down the issue logically"}
+          ]
+        },
+        {
+          "id": 6,
+          "type": "multiple_choice",
+          "prompt": "You’re faced with a decision where the outcome affects more than just you—family, team, or others around you. There’s no perfect answer, just different trade-offs. You feel the weight of the decision. What do you do?",
+          "options": [
+            {"key": "A", "text": "Make the decision and move forward"},
+            {"key": "C", "text": "Evaluate details carefully before deciding"},
+            {"key": "B", "text": "Consider how it impacts others first"},
+            {"key": "D", "text": "Take time to think it through"},
+            {"key": "E", "text": "Adjust based on how things evolve"}
+          ]
+        },
+        {
+          "id": 7,
+          "type": "multiple_choice",
+          "prompt": "You’re working on something where progress is slower than expected. It’s not failing, but it’s not moving at the pace you’d like. You can either push harder, adjust your approach, or step back. What do you do?",
+          "options": [
+            {"key": "A", "text": "Push forward and increase momentum"},
+            {"key": "D", "text": "Pause and reassess your approach"},
+            {"key": "C", "text": "Create a better structure for progress"},
+            {"key": "E", "text": "Adjust and keep moving"},
+            {"key": "B", "text": "Talk it through with someone"}
+          ]
+        },
+        {
+          "id": 8,
+          "type": "multiple_choice",
+          "prompt": "You’re spending time with people in a relaxed setting—maybe a dinner, a small gathering, or time at home. There’s no pressure, but the way you engage still shapes the experience. What do you naturally do?",
+          "options": [
+            {"key": "B", "text": "Focus on connection and interaction"},
+            {"key": "D", "text": "Observe and engage naturally"},
+            {"key": "E", "text": "Go with the flow of the moment"},
+            {"key": "A", "text": "Drive the energy and direction"},
+            {"key": "C", "text": "Keep things structured and smooth"}
+          ]
+        },
+        {
+          "id": 9,
+          "type": "multiple_choice",
+          "prompt": "You’re reflecting on your own behavior in a recent situation—something where you could have handled things differently. You’re deciding what to do with that realization. What do you do?",
+          "options": [
+            {"key": "D", "text": "Think about it before acting"},
+            {"key": "C", "text": "Analyze what happened in detail"},
+            {"key": "A", "text": "Move forward and adjust quickly"},
+            {"key": "B", "text": "Talk it through with someone"},
+            {"key": "E", "text": "Let it inform how you adapt going forward"}
+          ]
+        },
+        {
+          "id": 10,
+          "type": "multiple_choice",
+          "prompt": "You have a moment alone—no distractions, no immediate tasks, nothing demanding your attention. Your mind starts to move. What naturally happens?",
+          "options": [
+            {"key": "A", "text": "Start thinking about what needs to get done"},
+            {"key": "D", "text": "Let your thoughts wander freely"},
+            {"key": "C", "text": "Organize or plan something mentally"},
+            {"key": "B", "text": "Think about people or conversations"},
+            {"key": "E", "text": "Shift between thoughts without forcing direction"}
+          ]
+        }
+      ]
+    }
+  ]
+}

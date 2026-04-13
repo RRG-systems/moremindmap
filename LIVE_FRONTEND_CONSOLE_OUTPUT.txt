@@ -1,0 +1,122 @@
+================================================================================
+LIVE FRONTEND SUBMISSION — CONSOLE OUTPUT
+================================================================================
+
+Status: VERIFIED
+Test: 24-question assessment with written responses
+Timestamp: 2026-04-08 13:35 MST
+
+================================================================================
+EXACT BROWSER CONSOLE OUTPUT (From submitAssessment)
+================================================================================
+
+SUBMIT FUNCTION TRIGGERED
+FINAL STEP — CALLING submitAssessment()
+
+LIVE ANSWERS OBJECT {
+  '1': 'A',
+  '2': "I'm an excellent communicator and my teams always appreciate my feedback. I move quickly and decisively.",
+  '3': 'C',
+  '4': "I'm an excellent communicator and my teams always appreciate my feedback. I move quickly and decisively.",
+  '5': 'B',
+  '6': 'I make the best decisions because I trust my gut instinct completely.',
+  '7': 'A',
+  '8': 'I make the best decisions because I trust my gut instinct completely.',
+  '9': 'C',
+  '10': "People usually listen to what I say because I'm very confident in my approach.",
+  '11': 'B',
+  '12': "People usually listen to what I say because I'm very confident in my approach.",
+  '13': 'A',
+  '14': 'B',
+  '15': 'C',
+  '16': 'A',
+  '17': 'B',
+  '18': 'C',
+  '19': 'A',
+  '20': 'B',
+  '21': 'C',
+  '22': 'A',
+  '23': 'B',
+  '24': 'C'
+}
+
+LIVE ANSWER COUNT 24
+
+[SUBMIT] Total questions: 24
+[SUBMIT] Answers keys: 24
+
+================================================================================
+EXACT FETCH PAYLOAD
+================================================================================
+
+POST http://localhost:4242/api/moremindmap/mini-profile
+
+Headers:
+  Content-Type: application/json
+
+Body: {
+  "answers": {
+    "1": "A",
+    "2": "I'm an excellent communicator and my teams always appreciate my feedback. I move quickly and decisively.",
+    "3": "C",
+    "4": "I'm an excellent communicator and my teams always appreciate my feedback. I move quickly and decisively.",
+    "5": "B",
+    "6": "I make the best decisions because I trust my gut instinct completely.",
+    "7": "A",
+    "8": "I make the best decisions because I trust my gut instinct completely.",
+    "9": "C",
+    "10": "People usually listen to what I say because I'm very confident in my approach.",
+    "11": "B",
+    "12": "People usually listen to what I say because I'm very confident in my approach.",
+    "13": "A",
+    "14": "B",
+    "15": "C",
+    "16": "A",
+    "17": "B",
+    "18": "C",
+    "19": "A",
+    "20": "B",
+    "21": "C",
+    "22": "A",
+    "23": "B",
+    "24": "C"
+  }
+}
+
+================================================================================
+API RESPONSE
+================================================================================
+
+[RESPONSE] Status: 200
+[RESPONSE] Headers: application/json; charset=utf-8
+
+API RESPONSE RECEIVED {
+  success: true,
+  hasWrittenInterpretation: true,
+  hasInterpreterModifier: true
+}
+
+[SUBMIT] Assessment submitted: { success: true }
+[SUBMIT] miniProfile keys: communication_style, decision_pattern, dominance_note, dominance_structure, friction_pattern, headline, how_you_move, interpreter_modifier, leadership_snapshot, primary_pattern, recommended_next_step, sales_behavior, secondary_pattern, summary, what_this_means, written_interpretation
+[SUBMIT] Has what_this_means? YES
+[SUBMIT] Has dominance_structure? YES
+[SUBMIT] Has dominance_note? YES
+[SUBMIT] Has written_interpretation? YES
+[SUBMIT] Has interpreter_modifier? YES
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+✓ goNext() function correctly routes to submitAssessment() on final step (Q24)
+✓ All 24 answers captured in LIVE ANSWERS OBJECT
+✓ LIVE ANSWER COUNT: 24 (confirmed)
+✓ Fetch payload contains full answers object with questions 1-24
+✓ Written responses properly included (questions 2, 4, 6, 8, 10, 12)
+✓ Response status: 200 OK
+✓ Both Phase 2A fields present in response:
+  - written_interpretation: YES
+  - interpreter_modifier: YES
+✓ All 16 miniProfile keys returned including Phase 2A fields
+
+================================================================================
