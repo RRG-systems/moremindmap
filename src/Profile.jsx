@@ -64,7 +64,7 @@ export default function Profile() {
     console.log("[CHECKOUT PATH] Redirecting to Stripe with offer:", selectedOffer)
     setCheckoutLoading(true)
     try {
-      const API = import.meta.env.VITE_API_URL || "http://localhost:4242"
+      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
       const res = await fetch(`${API}/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -126,7 +126,7 @@ export default function Profile() {
       console.log("[SUBMIT] Full payload:", JSON.stringify({ answers }, null, 2))
 
       // Use env-based API URL
-      const API = import.meta.env.VITE_API_URL || "http://localhost:4242"
+      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
       const endpoint = `${API}/api/moremindmap/mini-profile`
       console.log("[SUBMIT] API endpoint:", endpoint)
 

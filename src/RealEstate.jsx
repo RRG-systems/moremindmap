@@ -46,7 +46,7 @@ export default function RealEstate() {
 
   async function submitAnswers() {
     try {
-      const API = import.meta.env.VITE_API_URL || "http://localhost:4242"
+      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
       const res = await fetch(`${API}/submit/real-estate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
