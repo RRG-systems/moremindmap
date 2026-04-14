@@ -73,7 +73,7 @@ export default function MiniProfileReport({ scoringPayload, miniProfile, userNam
         <div className="page-title">Your Behavioral Profile</div>
 
         <section className="dimensions-section">
-          {scoringPayload.ranked_dimensions.map((dimension, idx) => (
+          {(scoringPayload?.ranked_dimensions || scoringPayload?.ranked || []).map((dimension, idx) => (
             <DimensionBar
               key={idx}
               name={dimension.label}
