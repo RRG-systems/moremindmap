@@ -263,12 +263,12 @@ export default function Profile() {
               )}
 
               {/* NEW: 5-PAGE MINI PROFILE REPORT */}
-              {!processing && result?.success && result.scoringPayload && result.miniProfile && (
+              {!processing && result?.success && result?.miniProfile && (
                 <>
                   <div className="bg-white text-black rounded-[2rem] shadow-2xl overflow-hidden">
                     <MiniProfileReport 
-                      scoringPayload={result.scoringPayload}
-                      miniProfile={result.miniProfile}
+                      scoringPayload={result?.scoringPayload || {}}
+                      miniProfile={result?.miniProfile || {}}
                       userName={fullName}
                     />
                   </div>
@@ -279,6 +279,25 @@ export default function Profile() {
                     ← Back to Home
                   </a>
                 </>
+              )}
+
+              {/* FALLBACK: Missing profile data */}
+              {!processing && result?.success && !result?.miniProfile && (
+                <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30">
+                  <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/60">
+                    Processing
+                  </div>
+                  <h1 className="mt-6 text-3xl md:text-4xl font-semibold tracking-tight">
+                    Your profile is being generated…
+                  </h1>
+                  <p className="mt-4 text-white/60 text-lg">This may take a few moments. Please wait.</p>
+                  <a
+                    href="/"
+                    className="mt-8 inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-base font-medium text-white hover:bg-white/10 transition"
+                  >
+                    ← Back to Home
+                  </a>
+                </div>
               )}
 
               {/* ERROR RESULT */}
