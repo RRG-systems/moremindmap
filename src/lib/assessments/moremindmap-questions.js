@@ -23,17 +23,8 @@ What do you do first?`,
   },
   {
     id: 2,
-    type: "single_choice",
-    question: `You are sitting in a meeting that was supposed to be productive, but it has turned into a loop. People are repeating the same ideas, no one is making a decision, and energy is slowly dropping. You can tell the room is waiting for someone to shift it, but no one is stepping in.
-
-What do you naturally do?`,
-    answers: [
-      { key: "C", text: "Let it continue and see if it resolves on its own" },
-      { key: "A", text: "Step in and push toward a clear decision" },
-      { key: "E", text: "Ask a question that changes the direction of the conversation" },
-      { key: "B", text: "Try to align everyone so the group feels heard first" },
-      { key: "D", text: "Mentally disengage and wait it out" }
-    ]
+    type: "written_response",
+    question: `Describe a recent situation where someone misunderstood your intentions, tone, or communication style. What happened, how did you respond internally, and did it change how you approached future interactions?`
   },
   {
     id: 3,
