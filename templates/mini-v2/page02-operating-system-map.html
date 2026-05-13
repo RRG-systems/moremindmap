@@ -1,0 +1,138 @@
+
+{# page02-operating-system-map.html #}
+<div class="mmm-page page02 bos-map-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <section class="page-title-section">
+      <h1 class="page-title">Behavioral Operating System Map</h1>
+      <div class="subtitle">System architecture: how you prioritize, decide, and respond</div>
+      <div class="title-divider-container">
+        <div class="navy-divider"></div>
+        <div class="gold-divider-accent"></div>
+      </div>
+    </section>
+
+    <div class="bos-map-container">
+      <!-- Left side: System Tension Warning -->
+      <div class="bos-tension-warning-box">
+        <div class="warning-icon">⚠</div>
+        <div class="warning-content">
+          <div class="warning-label">SYSTEM TENSION WARNING</div>
+          <div class="warning-text">{{ system_tension_warning }}</div>
+        </div>
+      </div>
+
+      <!-- Left opposing pattern + description -->
+      <!-- Center: Core Engine + Orbit -->
+      <div class="bos-center-stage">
+        <div class="bos-orbit-ring"></div>
+        <div class="bos-core">
+          <div class="core-label">CORE ENGINE</div>
+          <div class="core-heading">{{ core_engine_heading }}</div>
+          <div class="core-summary">{{ core_engine_summary }}</div>
+        </div>
+
+        <!-- Top: Primary Driver -->
+        <div class="bos-node bos-primary bos-top-node">
+          <div class="node-label-small">PRIMARY DRIVER</div>
+          <div class="node-name">{{ primary_driver_name }}</div>
+          <div class="node-icon">{{ primary_driver_icon }}</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• {{ primary_driver_bullet_1 }}</div>
+            <div class="node-descriptor-line">• {{ primary_driver_bullet_2 }}</div>
+            <div class="node-descriptor-line">• {{ primary_driver_bullet_3 }}</div>
+            <div class="node-descriptor-line">• {{ primary_driver_bullet_4 }}</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-top"></div>
+
+        <!-- Right: Secondary Stabilizer -->
+        <div class="bos-node bos-secondary bos-right-node">
+          <div class="node-label-small">SECONDARY STABILIZER</div>
+          <div class="node-name">{{ secondary_stabilizer_name }}</div>
+          <div class="node-icon">{{ secondary_stabilizer_icon }}</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• {{ secondary_stabilizer_bullet_1 }}</div>
+            <div class="node-descriptor-line">• {{ secondary_stabilizer_bullet_2 }}</div>
+            <div class="node-descriptor-line">• {{ secondary_stabilizer_bullet_3 }}</div>
+            <div class="node-descriptor-line">• {{ secondary_stabilizer_bullet_4 }}</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-right"></div>
+
+        <!-- Left: Opposing Pattern -->
+        <div class="bos-node bos-opposing bos-left-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">{{ opposing_pattern_1_name }}</div>
+          <div class="node-icon">{{ opposing_pattern_1_icon }}</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• {{ opposing_pattern_1_bullet_1 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_1_bullet_2 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_1_bullet_3 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_1_bullet_4 }}</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-left"></div>
+
+        <!-- Bottom: Opposing Pattern 2 -->
+        <div class="bos-node bos-opposing bos-bottom-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">{{ opposing_pattern_2_name }}</div>
+          <div class="node-icon">{{ opposing_pattern_2_icon }}</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• {{ opposing_pattern_2_bullet_1 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_2_bullet_2 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_2_bullet_3 }}</div>
+            <div class="node-descriptor-line">• {{ opposing_pattern_2_bullet_4 }}</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-bottom"></div>
+      </div>
+
+
+    </div>
+
+    <!-- Bottom: System Tension Summary + Legend -->
+    <section class="bos-summary-section">
+      <div class="bos-summary-card">
+        <div class="summary-icon">⚠</div>
+        <div class="summary-content">
+          <div class="summary-heading">SYSTEM TENSION SUMMARY</div>
+          <div class="summary-body">{{ system_tension_summary }}</div>
+        </div>
+        <div class="bos-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-primary"></span>
+            <span class="legend-text">{{ legend_primary_driver_text }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-secondary"></span>
+            <span class="legend-text">{{ legend_secondary_stabilizer_text }}</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-opposing"></span>
+            <span class="legend-text">{{ legend_opposing_patterns_text }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer bos-footer">
+    <div class="footer-accent-line"></div>
+    <div class="footer-content">
+      <div class="footer-left">
+        <span class="m-icon">M+</span>
+        Assessment Date: {{ assessment_date }}
+      </div>
+      <div class="footer-right">
+        Confidence: {{ confidence_level }} | Profile Type: {{ profile_type }}
+        <span class="page-number-box">2</span>
+      </div>
+    </div>
+  </footer>
+</div>

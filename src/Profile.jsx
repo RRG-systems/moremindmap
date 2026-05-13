@@ -127,8 +127,15 @@ export default function Profile() {
 
       // Use env-based API URL
       const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const endpoint = `${API}/api/moremindmap/mini-profile`
+      
+      // CONTROLLED BETA: Route FATHOMFREE users to Mini V2 endpoint
+      const useV2 = promoValidated && promoCode.trim().toUpperCase() === "FATHOMFREE"
+      const endpoint = useV2 
+        ? `${API}/api/moremindmap/mini-profile-v2`
+        : `${API}/api/moremindmap/mini-profile`
+      
       console.log("[SUBMIT] API endpoint:", endpoint)
+      console.log("[SUBMIT] Using Mini V2:", useV2)
 
       console.log("ABOUT TO CALL API")
       const res = await fetch(endpoint, {
@@ -262,8 +269,30 @@ export default function Profile() {
                 <ProcessingScreen />
               )}
 
-              {/* NEW: 5-PAGE MINI PROFILE REPORT */}
-              {!processing && result?.success && result?.miniProfile && (
+              {/* MINI V2: 10-PAGE HTML REPORT (CONTROLLED BETA) */}
+              {!processing && result?.success && result?.version === "mini-v2" && result?.html && (
+                <>
+                  <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden">
+                    <div className="p-4 md:p-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+                      <div className="text-xs uppercase tracking-wider opacity-90">Mini Profile V2 Beta</div>
+                      <div className="text-sm mt-1">10-Page Behavioral Profile Report</div>
+                    </div>
+                    <div 
+                      className="mini-v2-report-container"
+                      dangerouslySetInnerHTML={{ __html: result.html }}
+                    />
+                  </div>
+                  <a
+                    href="/"
+                    className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-base font-medium text-white hover:bg-white/10 transition"
+                  >
+                    ← Back to Home
+                  </a>
+                </>
+              )}
+
+              {/* NEW: 5-PAGE MINI PROFILE REPORT (OLD VERSION) */}
+              {!processing && result?.success && result?.miniProfile && !result?.version && (
                 <>
                   <div className="bg-white text-black rounded-[2rem] shadow-2xl overflow-hidden">
                     <MiniProfileReport 

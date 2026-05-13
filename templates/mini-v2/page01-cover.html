@@ -1,0 +1,134 @@
+
+{# page01-cover.html #}
+<div class="mmm-page page01 cover-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <!-- Title Section with Background Arcs -->
+    <div class="cover-title-section">
+      <div class="cover-background-arcs"></div>
+      <h1 class="cover-main-title">Behavioral<br/>Operating<br/>Profile</h1>
+      <div class="gold-underline"></div>
+      <p class="cover-subtitle">A comprehensive assessment of how your behavioral system moves under uncertainty, makes decisions, communicates, and shows up in teams.</p>
+    </div>
+
+    <!-- Box 1: Your Profile Signature -->
+    <div class="profile-signature-box">
+      <div class="signature-accent-bar"></div>
+      <div class="signature-content">
+        <div class="signature-heading">YOUR PROFILE SIGNATURE</div>
+        <div class="signature-code">{{ profile_code_string }}</div>
+        <div class="signature-interpretation">{{ profile_signature_interpretation }}</div>
+      </div>
+    </div>
+
+    <!-- Box 2: Your Profile DNA (NEW DECODER SECTION) -->
+    <div class="profile-dna-box">
+      <h3 class="dna-heading">YOUR PROFILE DNA</h3>
+      <div class="gold-underline-small"></div>
+      
+      <div class="dna-decoder-grid">
+        <div class="dna-item">
+          <div class="dna-code">{{ vector_code }}</div>
+          <div class="dna-label">{{ vector_label }}</div>
+          <div class="dna-explanation">{{ vector_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ fidelity_code }}</div>
+          <div class="dna-label">{{ fidelity_label }}</div>
+          <div class="dna-explanation">{{ fidelity_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ framework_code }}</div>
+          <div class="dna-label">{{ framework_label }}</div>
+          <div class="dna-explanation">{{ framework_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ velocity_code }}</div>
+          <div class="dna-label">{{ velocity_label }}</div>
+          <div class="dna-explanation">{{ velocity_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ leverage_code }}</div>
+          <div class="dna-label">{{ leverage_label }}</div>
+          <div class="dna-explanation">{{ leverage_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ horizon_code }}</div>
+          <div class="dna-label">{{ horizon_label }}</div>
+          <div class="dna-explanation">{{ horizon_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ signal_code }}</div>
+          <div class="dna-label">{{ signal_label }}</div>
+          <div class="dna-explanation">{{ signal_explanation }}</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">{{ flex_code }}</div>
+          <div class="dna-label">{{ flex_label }}</div>
+          <div class="dna-explanation">{{ flex_explanation }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Box 3: Your Core Edge -->
+    <div class="core-edge-box">
+      <div class="core-edge-icon-container">
+        <div class="core-edge-icon">{{ core_edge_icon }}</div>
+      </div>
+      <div class="core-edge-content">
+        <h3 class="core-edge-heading">YOUR CORE EDGE</h3>
+        <div class="gold-underline-small"></div>
+        <p class="core-edge-text">{{ core_edge_narrative }}</p>
+      </div>
+    </div>
+
+    <!-- Bottom Metadata Boxes -->
+    <div class="cover-metadata-row">
+      <div class="metadata-box">
+        <div class="metadata-icon">📅</div>
+        <div class="metadata-content">
+          <div class="metadata-label">ASSESSMENT DATE</div>
+          <div class="metadata-value">{{ assessment_date }}</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">🛡</div>
+        <div class="metadata-content">
+          <div class="metadata-label">CONFIDENCE LEVEL</div>
+          <div class="metadata-value">{{ confidence_level }}</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">⏱</div>
+        <div class="metadata-content">
+          <div class="metadata-label">PROFILE TYPE</div>
+          <div class="metadata-value">{{ profile_type }}</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: {{ assessment_date }}
+    </div>
+    <div class="footer-right">
+      Confidence: {{ confidence_level }} | Profile Type: {{ profile_type }}
+      <span class="page-number-box">1</span>
+    </div>
+  </footer>
+</div>

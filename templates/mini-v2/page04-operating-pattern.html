@@ -1,0 +1,55 @@
+
+{# page04-operating-pattern.html #}
+<div class="mmm-page page04">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-pattern-page">
+    <section class="page-title-section" style="position: relative;">
+      <div style="position: absolute; left: -12px; top: 0; width: 5px; height: 100px; background-color: #D4AF37; border-radius: 2px;"></div>
+      <h1 class="page-title" style="padding-left: 12px;">Operating Pattern</h1>
+      <div class="subtitle" style="padding-left: 12px;">How you naturally show up and get things done</div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="body-narrative" style="max-width: 680px; margin: 0 auto 40px auto;">
+      <p style="font-size: 15px; margin-bottom: 18px;">{{ operating_pattern_body_1 }}</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">{{ operating_pattern_body_2 }}</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">{{ operating_pattern_body_3 }}</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">{{ operating_pattern_body_4 }}</p>
+    </section>
+
+    <section class="three-card-row">
+      <div class="mmm-card">
+        <div class="card-heading">{{ strongest_default_heading }}</div>
+        <div class="card-body">{{ strongest_default_body }}</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">{{ likely_blind_spot_heading }}</div>
+        <div class="card-body">{{ likely_blind_spot_body }}</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">{{ highest_value_adjustment_heading }}</div>
+        <div class="card-body">{{ highest_value_adjustment_body }}</div>
+      </div>
+    </section>
+
+    <section class="development-priority-banner">
+      <div class="card-heading">{{ development_priority_heading }}</div>
+      <div class="card-body">{{ development_priority_body }}</div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: {{ assessment_date }}
+    </div>
+    <div class="footer-right">
+      Confidence: {{ confidence_level }} | Profile Type: {{ profile_type }}
+      <span class="page-number-box">4</span>
+    </div>
+  </footer>
+</div>
