@@ -141,10 +141,21 @@ export default async function handler(req, res) {
       }
     }
 
+    // Final placeholder check after repair attempt
+    if (snapshot.placeholder_count > 0) {
+      console.warn(`[MINI-V2] INCOMPLETE: ${snapshot.placeholder_count} placeholders remain after repair`)
+      return res.status(500).json({
+        success: false,
+        error: `Report incomplete: ${snapshot.placeholder_count} placeholders remain`,
+        version: "mini-v2",
+        placeholders: snapshot.placeholders?.slice(0, 50),
+        repair_attempted: snapshot.placeholder_count < 88
+      })
+    }
+
     console.log("[MINI-V2] SUCCESS!")
     console.log(`[MINI-V2] HTML size: ${html.length} chars`)
     console.log(`[MINI-V2] Pages rendered: ${snapshot.pages_rendered}`)
-    console.log(`[MINI-V2] Placeholders remaining: ${snapshot.placeholder_count}`)
     console.log(`[MINI-V2] Quality score: ${qualityReport.overall_quality_score}/100`)
 
     // Return success with HTML report

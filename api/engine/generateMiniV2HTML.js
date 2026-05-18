@@ -859,8 +859,9 @@ ${pages.join('\n\n')}
  }
 
  const leftovers = html.match(/\{\{[^}]+\}\}/g) || [];
+ // Don't throw on placeholders - return them for repair pass
  if (leftovers.length) {
- throw new Error(`Mini V2 HTML generation failed: ${leftovers.length} placeholders left`);
+ console.warn(`[HTML] ${leftovers.length} placeholders remaining (will attempt repair)`);
  }
 
  console.log("HTML generation completed with explicit pages.length validation.");
