@@ -36,11 +36,17 @@ export default async function handler(req, res) {
     
     const profileInput = await buildProfileInput({ answers: formattedAnswers })
     
+    // Import and test generateReportContent
+    const { default: generateReportContent } = await import("./engine/generateReportContent.js")
+    const reportContent = await generateReportContent(profileInput)
+    
     res.status(200).json({
       ok: true,
-      step: "buildProfileInput",
+      step: "generateReportContent",
       profile_built: !!profileInput,
-      profile_keys: Object.keys(profileInput || {}),
+      report_generated: !!reportContent,
+      report_top_keys: Object.keys(reportContent || {}),
+      page03_exists: !!reportContent?.page03_executive_summary,
       timestamp: new Date().toISOString()
     })
     
