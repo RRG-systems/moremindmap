@@ -1,7 +1,4 @@
-import { buildProfileInput } from "../engine/buildProfileInput.js"
-import { generateReportContent } from "../engine/generateReportContent.js"
-import { validateReportContent } from "../engine/validateReportContent.js"
-import { injectReportContent } from "../engine/injectReportContent.js"
+// Imports moved to dynamic imports inside handler for better error capture
 
 export default async function handler(req, res) {
   // CORS headers
@@ -22,6 +19,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Dynamic imports to catch import errors
+    const { buildProfileInput } = await import("../engine/buildProfileInput.js")
+    const { generateReportContent } = await import("../engine/generateReportContent.js")
+    const { validateReportContent } = await import("../engine/validateReportContent.js")
+    const { injectReportContent } = await import("../engine/injectReportContent.js")
+
     const { answers } = req.body
 
     if (!answers || typeof answers !== "object") {
@@ -122,7 +125,9 @@ export default async function handler(req, res) {
       success: false,
       version: "mini-v2",
       error: error.message || "Mini V2 pipeline failed",
-      stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
+      stack: error.stack,
+      errorName: error.name,
+      errorCause: error.cause
     })
   }
 }
