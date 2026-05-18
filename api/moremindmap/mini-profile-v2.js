@@ -45,12 +45,19 @@ export default async function handler(req, res) {
       })
     }
 
+    // Convert numeric keys to q-prefixed keys for backend compatibility
+    const formattedAnswers = {}
+    Object.keys(answers).forEach(key => {
+      const qKey = key.startsWith('q') ? key : `q${key}`
+      formattedAnswers[qKey] = answers[key]
+    })
+
     console.log("[MINI-V2] Starting Mini V2 pipeline...")
     console.log(`[MINI-V2] Received ${answerCount} answers`)
 
     // STEP 1: Build profile input (convert answers to forensic intelligence)
     console.log("[MINI-V2] Step 1: buildProfileInput...")
-    const profileInput = await buildProfileInput(answers)
+    const profileInput = await buildProfileInput({ answers: formattedAnswers })
     
     if (!profileInput || profileInput.error) {
       return res.status(400).json({
