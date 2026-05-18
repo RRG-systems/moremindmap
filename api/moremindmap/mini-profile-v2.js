@@ -20,10 +20,15 @@ export default async function handler(req, res) {
 
   try {
     // Dynamic imports to catch import errors
-    const { buildProfileInput } = await import("../engine/buildProfileInput.js")
-    const { generateReportContent } = await import("../engine/generateReportContent.js")
-    const { validateReportContent } = await import("../engine/validateReportContent.js")
-    const { injectReportContent } = await import("../engine/injectReportContent.js")
+    const buildProfileInputModule = await import("../engine/buildProfileInput.js")
+    const generateReportContentModule = await import("../engine/generateReportContent.js")
+    const validateReportContentModule = await import("../engine/validateReportContent.js")
+    const injectReportContentModule = await import("../engine/injectReportContent.js")
+    
+    const buildProfileInput = buildProfileInputModule.default
+    const generateReportContent = generateReportContentModule.default
+    const validateReportContent = validateReportContentModule.default
+    const injectReportContent = injectReportContentModule.default
 
     const { answers } = req.body
 
