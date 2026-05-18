@@ -77,16 +77,23 @@ async function generateWithGPT(prompt) {
 }
 
 function validateAndProcessGPTOutput(output) {
-  const requiredPages = [
+  // Log actual keys received from GPT for debugging
+  console.log('[GPT OUTPUT] Top-level keys:', Object.keys(output).sort());
+  
+  const requiredKeys = [
+    'metadata',
     'page01_cover', 'page02_operating_system_map', 'page03_executive_summary',
     'page04_operating_pattern', 'page05_decision_architecture', 'page06_communication_style',
     'page07_system_under_strain', 'page08_operating_environment_fit', 'page09_facilitator_notes',
-    'page10_full_profile_unlocks'
+    'page10_full_profile_unlocks',
+    'generation_metadata'
   ];
 
-  const missingPages = requiredPages.filter(page => !output[page]);
-  if (missingPages.length > 0) {
-    throw new Error(`Missing required pages: ${missingPages.join(', ')}`);
+  const missingKeys = requiredKeys.filter(key => !output[key]);
+  if (missingKeys.length > 0) {
+    console.error('[GPT OUTPUT] Missing keys:', missingKeys);
+    console.error('[GPT OUTPUT] Received keys:', Object.keys(output));
+    throw new Error(`Missing required keys: ${missingKeys.join(', ')}`);
   }
 
   // Anti-genericity check

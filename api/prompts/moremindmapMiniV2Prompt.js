@@ -45,11 +45,25 @@ ${INTERPRETATION_ENGINE_RULES}
 
 ## REQUIRED OUTPUT STRUCTURE
 
-Must include ALL 10 page objects:
+Your JSON response MUST contain these exact top-level keys:
 
-"page01_cover": { ... }
-"page02_operating_system_map": { ... }
-[... all 10 pages]
+{
+  "metadata": { ... },
+  "page01_cover": { ... },
+  "page02_operating_system_map": { ... },
+  "page03_executive_summary": { ... },
+  "page04_operating_pattern": { ... },
+  "page05_decision_architecture": { ... },
+  "page06_communication_style": { ... },
+  "page07_system_under_strain": { ... },
+  "page08_operating_environment_fit": { ... },
+  "page09_facilitator_notes": { ... },
+  "page10_full_profile_unlocks": { ... },
+  "generation_metadata": { ... }
+}
+
+DO NOT omit any page object. ALL 12 top-level keys are REQUIRED.
+Each page object must contain all required nested fields per REPORT_CONTENT_SCHEMA_V1.md.
 
 ## INPUT DATA
 
