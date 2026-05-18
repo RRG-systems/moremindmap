@@ -30,6 +30,8 @@ async function injectReportContent(reportContent = null) {
   console.log(`  Pages rendered: ${snapshot.pages_rendered}`);
   console.log(`  Placeholder count: ${snapshot.placeholder_count}`);
   console.log(`  Coverage: ${snapshot.coverage_percent}%`);
+  
+  return { html, snapshot };
 }
 
 function flattenReportContent(reportContent) {
