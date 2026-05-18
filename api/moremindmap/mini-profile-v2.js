@@ -102,7 +102,7 @@ export default async function handler(req, res) {
 
     // STEP 4: Inject content into HTML templates
     console.log("[MINI-V2] Step 4: injectReportContent...")
-    const { html, snapshot } = await injectReportContent(reportContent)
+    let { html, snapshot } = await injectReportContent(reportContent)
     
     if (!html) {
       return res.status(500).json({
@@ -110,6 +110,35 @@ export default async function handler(req, res) {
         error: "Failed to generate HTML report",
         version: "mini-v2"
       })
+    }
+    
+    // STEP 4.5: Missing Field Repair Pass (if placeholders remain)
+    if (snapshot.placeholder_count > 0 && snapshot.placeholders) {
+      console.log(`[MINI-V2] Step 4.5: Repair pass for ${snapshot.placeholder_count} missing fields...`)
+      console.log(`[MINI-V2] Missing fields:`, snapshot.placeholders.slice(0, 10))
+      
+      try {
+        // Make targeted repair call
+        const repairedFields = await generateReportContent(profileInput, snapshot.placeholders)
+        
+        // Deep merge repaired fields into existing content
+        Object.keys(repairedFields).forEach(pageKey => {
+          if (reportContent[pageKey] && typeof repairedFields[pageKey] === 'object') {
+            reportContent[pageKey] = { ...reportContent[pageKey], ...repairedFields[pageKey] }
+          }
+        })
+        
+        // Re-inject with repaired content
+        console.log("[MINI-V2] Re-injecting with repaired fields...")
+        const repairResult = await injectReportContent(reportContent)
+        html = repairResult.html
+        snapshot = repairResult.snapshot
+        
+        console.log(`[MINI-V2] After repair: ${snapshot.placeholder_count} placeholders remaining`)
+      } catch (repairError) {
+        console.error("[MINI-V2] Repair pass failed:", repairError.message)
+        // Continue with first-pass output rather than failing completely
+      }
     }
 
     console.log("[MINI-V2] SUCCESS!")

@@ -11,20 +11,27 @@ import { BuildProfileInput } from './buildProfileInput.js';
 const MODEL = process.env.OPENAI_MODEL || 'gpt-5.5';
 const API_KEY = process.env.OPENAI_API_KEY;
 
-export async function generateReportContent(inputProfile = null) {
+export async function generateReportContent(inputProfile = null, missingFields = null) {
   const profileInput = inputProfile || loadProfileInputExample();
   
-  const prompt = buildMiniV2ReportPrompt(profileInput);
+  // If this is a repair pass, use targeted repair prompt
+  const prompt = missingFields 
+    ? buildMissingFieldRepairPrompt(profileInput, missingFields)
+    : buildMiniV2ReportPrompt(profileInput);
   
   const result = await generateWithGPT(prompt);
   
   if (result.generation_mode === 'gpt') {
-    const content = validateAndProcessGPTOutput(result.output);
-    writeReportContent(content);
+    const content = validateAndProcessGPTOutput(result.output, missingFields ? true : false);
+    if (!missingFields) {
+      writeReportContent(content);
+    }
     return content;
   } else {
     const mockContent = generateMockContent(profileInput);
-    writeReportContent(mockContent);
+    if (!missingFields) {
+      writeReportContent(mockContent);
+    }
     return mockContent;
   }
 }
@@ -76,24 +83,27 @@ async function generateWithGPT(prompt) {
   }
 }
 
-function validateAndProcessGPTOutput(output) {
+function validateAndProcessGPTOutput(output, isRepairPass = false) {
   // Log actual keys received from GPT for debugging
   console.log('[GPT OUTPUT] Top-level keys:', Object.keys(output).sort());
   
-  const requiredKeys = [
-    'metadata',
-    'page01_cover', 'page02_operating_system_map', 'page03_executive_summary',
-    'page04_operating_pattern', 'page05_decision_architecture', 'page06_communication_style',
-    'page07_system_under_strain', 'page08_operating_environment_fit', 'page09_facilitator_notes',
-    'page10_full_profile_unlocks',
-    'generation_metadata'
-  ];
+  // For repair pass, don't require all top-level keys (only what's being repaired)
+  if (!isRepairPass) {
+    const requiredKeys = [
+      'metadata',
+      'page01_cover', 'page02_operating_system_map', 'page03_executive_summary',
+      'page04_operating_pattern', 'page05_decision_architecture', 'page06_communication_style',
+      'page07_system_under_strain', 'page08_operating_environment_fit', 'page09_facilitator_notes',
+      'page10_full_profile_unlocks',
+      'generation_metadata'
+    ];
 
-  const missingKeys = requiredKeys.filter(key => !output[key]);
-  if (missingKeys.length > 0) {
-    console.error('[GPT OUTPUT] Missing keys:', missingKeys);
-    console.error('[GPT OUTPUT] Received keys:', Object.keys(output));
-    throw new Error(`Missing required keys: ${missingKeys.join(', ')}`);
+    const missingKeys = requiredKeys.filter(key => !output[key]);
+    if (missingKeys.length > 0) {
+      console.error('[GPT OUTPUT] Missing keys:', missingKeys);
+      console.error('[GPT OUTPUT] Received keys:', Object.keys(output));
+      throw new Error(`Missing required keys: ${missingKeys.join(', ')}`);
+    }
   }
 
   // Anti-genericity check
@@ -219,4 +229,54 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
+function buildMissingFieldRepairPrompt(profileInput, missingFields) {
+  const fieldList = missingFields.join('\n- ');
+  
+  return `
+You are completing a MORE MindMap behavioral profile. 
+
+The first-pass generation left some fields empty. Your job: populate ONLY the missing fields listed below.
+
+## PROFILE INPUT
+
+${JSON.stringify(profileInput, null, 2)}
+
+## MISSING FIELDS TO POPULATE
+
+Generate content for these exact fields:
+- ${fieldList}
+
+## RULES
+
+1. Return ONLY valid JSON matching the page structure
+2. Each field must reference specific evidence from profile_input
+3. Use behavioral systems language (NOT generic corporate fluff)
+4. Word counts:
+   - Narrative fields: 80-150 words
+   - Bullets: 8-15 words
+   - Labels/headings: 2-5 words
+5. Page 2 fields: keep compact (visual-first page)
+6. Pages 3-8 fields: robust interpretation (core content)
+7. NO markdown. NO explanations. ONLY JSON.
+
+## OUTPUT FORMAT
+
+Return JSON with only the page objects containing missing fields.
+
+Example if missing fields are in page03 and page07:
+{
+  "page03_executive_summary": {
+    "leadership_body": "...",
+    "development_body": "..."
+  },
+  "page07_system_under_strain": {
+    "pressure_response_explanation": "..."
+  }
+}
+
+Generate now.
+`;
+}
+
 export default generateReportContent;
+export { buildMissingFieldRepairPrompt };

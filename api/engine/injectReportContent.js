@@ -109,7 +109,11 @@ function flattenReportContent(reportContent) {
 
 function generateSnapshot(reportContent, injectionData, html) {
   const placeholderRegex = /\{\{[^}]+\}\}/g;
-  const placeholdersRemaining = (html.match(placeholderRegex) || []).length;
+  const placeholderMatches = html.match(placeholderRegex) || [];
+  const placeholdersRemaining = placeholderMatches.length;
+  
+  // Extract field names from placeholders (remove {{ }})
+  const placeholders = placeholderMatches.map(p => p.replace(/\{\{\s*|\s*\}\}/g, ''));
   
   const coveragePercent = placeholdersRemaining === 0 ? 100 : 80; // Estimate
   
@@ -122,6 +126,7 @@ function generateSnapshot(reportContent, injectionData, html) {
     pages_rendered: 10,
     total_pages_expected: 10,
     placeholder_count: placeholdersRemaining,
+    placeholders: placeholders,
     coverage_percent: coveragePercent,
     missing_fields: [],
     validation_status: placeholdersRemaining === 0 ? 'PASS' : 'WARN',
