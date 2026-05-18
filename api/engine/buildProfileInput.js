@@ -74,15 +74,25 @@ export class BuildProfileInput {
     // Check written response depth
     const writtenResponses = Object.entries(rawAssessment.answers || {})
       .filter(([key, val]) => key.startsWith('q') && [2, 6, 10, 15, 20, 24].includes(parseInt(key.slice(1))))
-      .map(([, val]) => val.text || '');
+      .map(([, val]) => {
+        // Safe text extraction
+        if (typeof val === 'string') return val;
+        if (val && typeof val === 'object' && val.text) return String(val.text);
+        if (val && typeof val === 'object' && val.answer) return String(val.answer);
+        if (val && typeof val === 'object' && val.value) return String(val.value);
+        return '';
+      });
 
     const avgWrittenLength = writtenResponses.reduce((sum, t) => sum + (t || '').length, 0) / writtenResponses.length;
     if (avgWrittenLength < 30) penalties += 1;
 
     // Check for defensive language (crude heuristic)
     const defensiveMarkers = ['shouldn\'t', 'wasn\'t', 'not my', 'miscommunication', 'they didn\'t'];
-    const defensiveCount = writtenResponses.reduce((sum, t) => 
-      sum + defensiveMarkers.filter(m => t.toLowerCase().includes(m)).length, 0);
+    const defensiveCount = writtenResponses.reduce((sum, t) => {
+      // Safe string operation
+      const text = typeof t === 'string' ? t : String(t || '');
+      return sum + defensiveMarkers.filter(m => text.toLowerCase().includes(m)).length;
+    }, 0);
     if (defensiveCount > 3) penalties += 1;
 
     // Assign quality based on penalties
