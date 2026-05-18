@@ -36,17 +36,23 @@ export default async function handler(req, res) {
     
     const profileInput = await buildProfileInput({ answers: formattedAnswers })
     
-    // Import and test generateReportContent
+    // Import and test full pipeline
     const { default: generateReportContent } = await import("./engine/generateReportContent.js")
+    const { default: injectReportContent } = await import("./engine/injectReportContent.js")
+    
     const reportContent = await generateReportContent(profileInput)
+    const firstPass = await injectReportContent(reportContent)
     
     res.status(200).json({
       ok: true,
-      step: "generateReportContent",
-      profile_built: !!profileInput,
-      report_generated: !!reportContent,
-      report_top_keys: Object.keys(reportContent || {}),
-      page03_exists: !!reportContent?.page03_executive_summary,
+      step: "full_pipeline",
+      first_pass: {
+        placeholder_count: firstPass.snapshot.placeholder_count,
+        placeholders_sample: (firstPass.snapshot.placeholders || []).slice(0, 30),
+        report_top_keys: Object.keys(reportContent),
+        page03_keys: Object.keys(reportContent.page03_executive_summary || {}),
+        page04_keys: Object.keys(reportContent.page04_operating_pattern || {})
+      },
       timestamp: new Date().toISOString()
     })
     
