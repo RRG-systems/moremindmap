@@ -1,7 +1,7 @@
-import { buildProfileInput } from "../../engine/buildProfileInput.js"
-import { generateReportContent } from "../../engine/generateReportContent.js"
-import { validateReportContent } from "../../engine/validateReportContent.js"
-import { injectReportContent } from "../../engine/injectReportContent.js"
+import { buildProfileInput } from "../engine/buildProfileInput.js"
+import { generateReportContent } from "../engine/generateReportContent.js"
+import { validateReportContent } from "../engine/validateReportContent.js"
+import { injectReportContent } from "../engine/injectReportContent.js"
 
 export default async function handler(req, res) {
   // CORS headers

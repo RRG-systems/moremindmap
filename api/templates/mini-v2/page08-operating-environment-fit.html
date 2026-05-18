@@ -1,0 +1,75 @@
+
+{# page08-operating-environment-fit.html #}
+<div class="mmm-page page08">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-environment-fit-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Operating Environment Fit</h1>
+      <div class="subtitle">Analysis of optimal operating environments and cultural fit</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="operating-environment-fit">
+      <div class="environment-columns">
+        <div class="environment-col">
+          <h3>High-Traction Environments</h3>
+          <p>{{ high_traction_environments_body }}</p>
+          <div class="mmm-card">
+            <div class="card-heading">{{ high_traction_card_heading }}</div>
+            <div class="card-body">{{ high_traction_card_body }}</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>Conditional-Fit Environments</h3>
+          <p>{{ conditional_fit_environments_body }}</p>
+          <div class="mmm-card">
+            <div class="card-heading">{{ conditional_fit_card_heading }}</div>
+            <div class="card-body">{{ conditional_fit_card_body }}</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>High-Friction Environments</h3>
+          <p>{{ high_friction_environments_body }}</p>
+          <div class="mmm-card">
+            <div class="card-heading">{{ high_friction_card_heading }}</div>
+            <div class="card-body">{{ high_friction_card_body }}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="development-shift-cards">
+      <h3>Primary Development Shifts</h3>
+      <div class="three-card-row">
+        <div class="mmm-card">
+          <div class="card-heading">{{ horizon_shift_heading }}</div>
+          <div class="card-body">{{ horizon_shift_body }}</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">{{ adapt_shift_heading }}</div>
+          <div class="card-body">{{ adapt_shift_body }}</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">{{ input_shift_heading }}</div>
+          <div class="card-body">{{ input_shift_body }}</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: {{ assessment_date }}
+    </div>
+    <div class="footer-right">
+      Confidence: {{ confidence_level }} | Profile Type: {{ profile_type }}
+      <span class="page-number-box">8</span>
+    </div>
+  </footer>
+</div>
