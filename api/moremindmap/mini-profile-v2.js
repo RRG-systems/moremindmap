@@ -45,11 +45,22 @@ export default async function handler(req, res) {
       })
     }
 
-    // Convert numeric keys to q-prefixed keys for backend compatibility
+    // Convert numeric keys to q-prefixed keys and normalize format for backend compatibility
+    // Backend expects: { qN: { choice: 'A' } } or { qN: { text: 'written response' } }
+    // Frontend sends: { N: 'A' } or { N: 'written response' }
     const formattedAnswers = {}
     Object.keys(answers).forEach(key => {
       const qKey = key.startsWith('q') ? key : `q${key}`
-      formattedAnswers[qKey] = answers[key]
+      const value = answers[key]
+      
+      // Detect if it's a written response (long text) or multiple choice (single letter)
+      if (typeof value === 'string' && value.length === 1 && /[A-E]/i.test(value)) {
+        // Multiple choice
+        formattedAnswers[qKey] = { choice: value.toUpperCase() }
+      } else {
+        // Written response
+        formattedAnswers[qKey] = { text: value }
+      }
     })
 
     console.log("[MINI-V2] Starting Mini V2 pipeline...")
