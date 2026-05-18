@@ -179,9 +179,10 @@ function generateMockContent(profileInput) {
 }
 
 function writeReportContent(content) {
-  const outputPath = path.join(process.cwd(), 'examples', 'report_content_example.json');
-  fs.writeFileSync(outputPath, JSON.stringify(content, null, 2));
-  console.log('Report content written to examples/report_content_example.json');
+  // Disabled in serverless environment - no filesystem write access
+  // const outputPath = path.join(process.cwd(), 'examples', 'report_content_example.json');
+  // fs.writeFileSync(outputPath, JSON.stringify(content, null, 2));
+  console.log(`[REPORT CONTENT] Content generated (${Object.keys(content).length} fields)`);
 }
 
 function generateMockRawAssessment() {

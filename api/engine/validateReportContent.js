@@ -136,8 +136,9 @@ export function validateReportContent() {
     total_pages_present: REQUIRED_PAGES.filter(page => report[page]).length
   };
 
-  const outputPath = path.join(process.cwd(), 'examples', 'report_quality_report.json');
-  fs.writeFileSync(outputPath, JSON.stringify(qualityReport, null, 2));
+  // Disabled in serverless environment - no filesystem write access
+  // const outputPath = path.join(process.cwd(), 'examples', 'report_quality_report.json');
+  // fs.writeFileSync(outputPath, JSON.stringify(qualityReport, null, 2));
   
   console.log(`Quality Report: ${status} (${qualityScore}/100)`);
   console.log(`Genericity: ${qualityReport.genericity_score}`);

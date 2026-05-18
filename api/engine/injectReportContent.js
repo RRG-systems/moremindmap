@@ -23,18 +23,10 @@ async function injectReportContent() {
   // Generate HTML with injected content
   const html = await generateMiniV2HTML(injectionData);
   
-  // Write final artifact
-  const htmlPath = path.join(GENERATED_DIR, 'mini_v2_full_report.html');
-  await fs.writeFile(htmlPath, html);
-  
-  // Generate snapshot
+  // Generate snapshot (file writing disabled in serverless)
   const snapshot = generateSnapshot(reportContent, injectionData, html);
-  const snapshotPath = path.join(GENERATED_DIR, 'mini_v2_full_report_snapshot.json');
-  await fs.writeFile(snapshotPath, JSON.stringify(snapshot, null, 2));
   
   console.log(`✅ Full report generated:`);
-  console.log(`  HTML: ${htmlPath}`);
-  console.log(`  Snapshot: ${snapshotPath}`);
   console.log(`  Pages rendered: ${snapshot.pages_rendered}`);
   console.log(`  Placeholder count: ${snapshot.placeholder_count}`);
   console.log(`  Coverage: ${snapshot.coverage_percent}%`);
