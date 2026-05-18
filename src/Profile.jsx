@@ -112,6 +112,8 @@ export default function Profile() {
   async function submitAssessment() {
     console.log("SUBMIT FUNCTION TRIGGERED")
     setSubmitting(true)
+    setProcessing(true)
+    
     try {
       // Transform responses to new format: { questionId: answer }
       const answers = {}
@@ -138,61 +140,84 @@ export default function Profile() {
       console.log("[SUBMIT] Using Mini V2:", useV2)
 
       console.log("ABOUT TO CALL API")
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          answers,
-        }),
-      })
-
-      console.log("[RESPONSE] Status:", res.status)
-      console.log("[RESPONSE] Headers:", res.headers.get("content-type"))
-
-      // Handle non-JSON responses
-      if (!res.ok) {
-        const text = await res.text()
-        console.error("[RESPONSE] Error text:", text)
-        return setResult({
-          success: false,
-          error: `Server error (${res.status}): ${text}`,
-        })
-      }
-
-      // Safely parse JSON
-      let data
-      try {
-        data = await res.json()
-      } catch (jsonError) {
-        console.error("[JSON ERROR] Failed to parse:", jsonError)
-        const text = await res.text()
-        console.error("[JSON ERROR] Response was:", text)
-        return setResult({
-          success: false,
-          error: `Invalid response format: ${jsonError.message}`,
-        })
-      }
-
-      console.log("API RESPONSE RECEIVED", data)
-      console.log("[SUBMIT] Assessment submitted:", data)
-      console.log("[SUBMIT] miniProfile keys:", data.miniProfile ? Object.keys(data.miniProfile) : "NO miniProfile")
-      console.log("[SUBMIT] Has what_this_means?", data.miniProfile?.what_this_means ? "YES" : "NO")
-      console.log("[SUBMIT] Has dominance_structure?", data.miniProfile?.dominance_structure ? "YES" : "NO")
-      console.log("[SUBMIT] Has dominance_note?", data.miniProfile?.dominance_note ? "YES" : "NO")
       
-      // Show processing screen for 2 seconds before displaying report
-      setProcessing(true)
-      setTimeout(() => {
-        setProcessing(false)
-        setResult(data)
-      }, 2000)
+      // Add 60-second timeout protection
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 60000)
+      
+      try {
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers }),
+          signal: controller.signal,
+        })
+        
+        clearTimeout(timeoutId)
+
+        console.log("[RESPONSE] Status:", res.status)
+        console.log("[RESPONSE] Headers:", res.headers.get("content-type"))
+
+        // Handle non-JSON responses
+        if (!res.ok) {
+          const text = await res.text()
+          console.error("[RESPONSE] Error text:", text)
+          setProcessing(false)
+          return setResult({
+            success: false,
+            error: `Server error (${res.status}): ${text}`,
+          })
+        }
+
+        // Safely parse JSON
+        let data
+        try {
+          data = await res.json()
+        } catch (jsonError) {
+          console.error("[JSON ERROR] Failed to parse:", jsonError)
+          const text = await res.text()
+          console.error("[JSON ERROR] Response was:", text)
+          setProcessing(false)
+          return setResult({
+            success: false,
+            error: `Invalid response format: ${jsonError.message}`,
+          })
+        }
+
+        console.log("API RESPONSE RECEIVED", data)
+        console.log("[SUBMIT] Assessment submitted:", data)
+        console.log("[SUBMIT] miniProfile keys:", data.miniProfile ? Object.keys(data.miniProfile) : "NO miniProfile")
+        console.log("[SUBMIT] Has what_this_means?", data.miniProfile?.what_this_means ? "YES" : "NO")
+        console.log("[SUBMIT] Has dominance_structure?", data.miniProfile?.dominance_structure ? "YES" : "NO")
+        console.log("[SUBMIT] Has dominance_note?", data.miniProfile?.dominance_note ? "YES" : "NO")
+        
+        // Show processing screen for 2 seconds before displaying report
+        setTimeout(() => {
+          setProcessing(false)
+          setResult(data)
+        }, 2000)
+      } catch (fetchError) {
+        clearTimeout(timeoutId)
+        if (fetchError.name === 'AbortError') {
+          console.error("[TIMEOUT] Request timed out after 60 seconds")
+          setProcessing(false)
+          setResult({ 
+            success: false, 
+            error: "Report generation timed out. Please try again." 
+          })
+        } else {
+          throw fetchError
+        }
+      }
     } catch (error) {
       console.error("[SUBMIT] Assessment submission error:", error)
       console.error("[SUBMIT] Error stack:", error.stack)
+      setProcessing(false)
       setResult({ success: false, error: error.message || "Connection failed. Please try again." })
+    } finally {
+      setSubmitting(false)
+      setSubmitted(true)
     }
-    setSubmitting(false)
-    setSubmitted(true)
   }
 
   return (
