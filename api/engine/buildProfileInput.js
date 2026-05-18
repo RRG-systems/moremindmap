@@ -495,3 +495,9 @@ export class BuildProfileInput {
 }
 
 export default BuildProfileInput;
+
+// Wrapper function for serverless compatibility
+export async function buildProfileInput(answers) {
+  const builder = new BuildProfileInput();
+  return await builder.build(answers);
+}
