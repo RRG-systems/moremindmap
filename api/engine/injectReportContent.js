@@ -8,14 +8,14 @@ import { generateMiniV2HTML } from './generateMiniV2HTML.js';
 
 const TEMPLATE_DIR = path.resolve(process.cwd(), 'templates/mini-v2');
 const GENERATED_DIR = path.resolve(process.cwd(), 'generated');
-const CONTENT_EXAMPLE = path.resolve(process.cwd(), 'examples/report_content_example.json');
 
-async function injectReportContent() {
-  // Ensure generated dir exists
-  await fs.mkdir(GENERATED_DIR, { recursive: true });
-
-  // Load report content
-  const reportContent = JSON.parse(await fs.readFile(CONTENT_EXAMPLE, 'utf8'));
+async function injectReportContent(reportContent = null) {
+  // Accept report content as parameter (serverless) or read from file (local dev)
+  if (!reportContent) {
+    const CONTENT_EXAMPLE = path.resolve(process.cwd(), 'examples/report_content_example.json');
+    await fs.mkdir(GENERATED_DIR, { recursive: true });
+    reportContent = JSON.parse(await fs.readFile(CONTENT_EXAMPLE, 'utf8'));
+  }
   
   // Flatten content for template injection
   const injectionData = flattenReportContent(reportContent);

@@ -47,14 +47,19 @@ const BEHAVIORAL_PHRASES = [
   'under time pressure', 'when stressed', 'team experiences as', 'discovers late'
 ];
 
-export function validateReportContent() {
-  const reportPath = path.join(process.cwd(), 'examples', 'report_content_example.json');
+export function validateReportContent(reportContent = null) {
+  // Accept report content as parameter (serverless) or read from file (local dev)
+  let report;
   
-  if (!fs.existsSync(reportPath)) {
-    throw new Error('report_content_example.json not found');
+  if (reportContent) {
+    report = reportContent;
+  } else {
+    const reportPath = path.join(process.cwd(), 'examples', 'report_content_example.json');
+    if (!fs.existsSync(reportPath)) {
+      throw new Error('report_content_example.json not found');
+    }
+    report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
   }
-
-  const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
   const allText = JSON.stringify(report).toLowerCase();
   
   // 1. Required page keys
