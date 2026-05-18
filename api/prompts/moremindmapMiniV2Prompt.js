@@ -69,6 +69,28 @@ Each page object must contain all required nested fields per REPORT_CONTENT_SCHE
 
 ${JSON.stringify(profileInput, null, 2)}
 
+## FIELD COMPLETION REQUIREMENTS
+
+You MUST populate ALL 173 template fields. Do not leave any field empty or undefined.
+
+### Word Count Targets:
+- Long narrative fields (summary_text, operating_pattern_body, etc.): 100-200 words each
+- Medium fields (explanations, analyses): 50-100 words each
+- Short fields (bullets, headings): 8-20 words each
+- Labels/codes: 2-5 words each
+
+### Critical Fields (MUST NOT BE EMPTY):
+**Page 01:** profile_signature_interpretation, profile_code_string, core_edge_narrative, all 8 dimension codes/labels/explanations
+**Page 02:** All driver bullets (4 each × 4 circles = 16 bullets), system_tension_warning, system_tension_summary
+**Page 03:** summary_text, leadership_body, development_body, priority_body
+**Page 04:** All 4 operating_pattern_body fields, strongest_default_body, blind_spot_body, development_priority_body
+**Page 05:** All decision_architecture_narrative fields, advantage_body, friction_body
+**Page 06:** All communication_narrative fields, signal_matrix_explanation
+**Page 07:** pressure_response_explanation, under_strain_body
+**Page 08:** All environment fit bodies (high_traction, low_traction, warning_signs)
+**Page 09:** facilitator_interpretation_body, recommended_next_step_body
+**Page 10:** core_force_body, hidden_cost_body, growth_edge_body, full_profile_unlocks_body
+
 ## GENERATION RULES
 
 1. EVERY field must reference specific evidence from profile_input
@@ -78,7 +100,7 @@ ${JSON.stringify(profileInput, null, 2)}
 5. For written responses: extract behavioral leaks, not summarize
 6. For pressure analysis: explain mechanism, not symptom
 7. Tone: diagnostic, executive, behavioral systems language
-8. Length: respect MAX_LENGTH from AI_CONTENT_SCHEMA_V1.md
+8. Generate COMPLETE content for all fields - do not truncate or abbreviate
 9. Output ONLY JSON. No explanations. No markdown.
 
 ## VALID JSON REQUIRED
