@@ -294,12 +294,13 @@ export function mergeRepairedFields(reportContent, normalizedRepairs) {
       const newValue = pageFields[fieldName];
       const oldValue = reportContent[pageKey][fieldName];
       
-      // Check if should overwrite
-      const isEmpty = !oldValue || oldValue.trim() === '';
-      const isPlaceholder = oldValue && (
-        oldValue.includes('{{') || 
-        oldValue.includes('[MOCK]') ||
-        oldValue.toLowerCase().includes('placeholder')
+      // Check if should overwrite (safe string operations)
+      const oldValueText = typeof oldValue === 'string' ? oldValue : '';
+      const isEmpty = oldValue == null || oldValueText.trim() === '';
+      const isPlaceholder = oldValueText && (
+        oldValueText.includes('{{') || 
+        oldValueText.includes('[MOCK]') ||
+        oldValueText.toLowerCase().includes('placeholder')
       );
       
       if (isEmpty || isPlaceholder) {
