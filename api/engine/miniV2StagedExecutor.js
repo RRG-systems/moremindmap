@@ -7,6 +7,29 @@
 import { updateJob, lockJob, unlockJob, JOB_STAGE, JOB_STATUS } from './miniV2JobManager.js'
 
 /**
+ * Extract placeholder field names from HTML
+ */
+function extractPlaceholdersFromHtml(html) {
+  if (!html || typeof html !== 'string') {
+    return []
+  }
+  
+  const placeholderRegex = /\{\{([^}]+)\}\}/g
+  const matches = []
+  let match
+  
+  while ((match = placeholderRegex.exec(html)) !== null) {
+    // Extract field name and clean whitespace
+    const fieldName = match[1].trim()
+    if (fieldName && !matches.includes(fieldName)) {
+      matches.push(fieldName)
+    }
+  }
+  
+  return matches
+}
+
+/**
  * Stage 1: First-pass generation
  * Builds profile input and calls OpenAI for initial report content
  */
@@ -93,43 +116,46 @@ export async function executeFirstInjection(job) {
   
   // Check if repair needed
   if (placeholderCount > 0) {
-    // Ensure missingFields is always an array, never null
+    // Get missingFields from snapshot or extract from HTML
     let missingFields = snapshot.placeholders
-    if (!missingFields || !Array.isArray(missingFields)) {
-      console.warn('[FIRST-INJECTION] snapshot.placeholders is null/invalid, using empty array')
-      missingFields = []
-    }
     
-    // If no actual fields to repair, complete immediately
-    if (missingFields.length === 0) {
-      await updateJob(job.job_id, {
-        status: JOB_STATUS.COMPLETE,
-        stage: JOB_STAGE.COMPLETE,
-        progress_message: 'Report ready (no repairs needed)',
-        result_html: html,
-        result_metadata: {
-          placeholder_count: 0,
-          pages_rendered: snapshot.pages_rendered,
-          coverage_percent: snapshot.coverage_percent,
-          generation_mode: 'gpt'
-        },
-        diagnostics: {
-          ...job.diagnostics,
-          final_placeholder_count: 0,
-          repair_attempted: false,
-          repair_skipped_reason: 'placeholderCount > 0 but placeholders array empty/null'
-        }
-      })
-      return { success: true, nextStage: JOB_STAGE.COMPLETE, placeholderCount: 0 }
+    if (!missingFields || !Array.isArray(missingFields) || missingFields.length === 0) {
+      console.warn('[FIRST-INJECTION] snapshot.placeholders invalid, extracting from HTML')
+      missingFields = extractPlaceholdersFromHtml(html)
+      
+      if (missingFields.length === 0) {
+        console.error('[FIRST-INJECTION] placeholder_count > 0 but no placeholders found in HTML')
+        // Complete anyway since we can't repair without field names
+        await updateJob(job.job_id, {
+          status: JOB_STATUS.COMPLETE,
+          stage: JOB_STAGE.COMPLETE,
+          progress_message: 'Report complete (placeholder count mismatch)',
+          result_html: html,
+          result_metadata: {
+            placeholder_count: placeholderCount,
+            pages_rendered: snapshot.pages_rendered,
+            coverage_percent: snapshot.coverage_percent,
+            generation_mode: 'gpt'
+          },
+          diagnostics: {
+            ...job.diagnostics,
+            final_placeholder_count: placeholderCount,
+            repair_attempted: false,
+            repair_skip_reason: 'Could not extract placeholder field names'
+          }
+        })
+        return { success: true, nextStage: JOB_STAGE.COMPLETE, placeholderCount }
+      }
     }
-    
-    // Force missingFields to be array (defensive)
-    const safeMissingFields = Array.isArray(missingFields) ? missingFields : []
     
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
       progress_message: 'Refining missing sections',
-      missingFields: safeMissingFields
+      missingFields: missingFields,
+      diagnostics: {
+        ...job.diagnostics,
+        missing_fields_count: missingFields.length
+      }
     })
     
     return { success: true, nextStage: JOB_STAGE.REPAIR_PASS, placeholderCount }
