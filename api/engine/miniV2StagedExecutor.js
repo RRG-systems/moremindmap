@@ -47,8 +47,13 @@ export async function executeFirstPassGeneration(job) {
   trace.push('after_buildProfileInput')
   
   trace.push('before_generateReportContent')
-  const reportContent = await generateReportContent(profileInput)
+  let reportContent = await generateReportContent(profileInput)
   trace.push('after_generateReportContent')
+  
+  // Normalize dimension_N fields to canonical names
+  const { mapDimensionFields } = await import('./mapDimensionFields.js')
+  reportContent = mapDimensionFields(reportContent)
+  trace.push('after_mapDimensionFields')
   
   // Validate reportContent structure
   const contentKeys = reportContent ? Object.keys(reportContent) : []
@@ -302,7 +307,12 @@ export async function executeRepairPass(job) {
   const groupedFields = groupMissingFieldsByPage(missingFields)
   
   // Generate repair content
-  const repairResponse = await generateReportContent(profileInput, groupedFields)
+  let repairResponse = await generateReportContent(profileInput, groupedFields)
+  
+  // Map dimension_N fields to canonical names before normalization
+  const { mapDimensionFieldsInRepair } = await import('./mapDimensionFields.js')
+  repairResponse = mapDimensionFieldsInRepair(repairResponse)
+  
   const normalizedRepairs = normalizeRepairResponse(repairResponse, missingFields)
   
   // Merge repairs into report content
