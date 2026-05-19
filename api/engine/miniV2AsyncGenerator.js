@@ -4,19 +4,21 @@
  * Preserves all existing logic, adds stage tracking and Redis updates
  */
 
-import { buildProfileInput } from './buildProfileInput.js'
-import { generateReportContent } from './generateReportContent.js'
-import { injectReportContent } from './injectReportContent.js'
-import { normalizeRepairResponse } from './miniV2FieldMap.js'
-import { mergeRepairedFields, groupMissingFieldsByPage } from './miniV2FieldMap.js'
 import { setJobStage, completeJob, failJob, JOB_STAGE } from './miniV2JobManager.js'
 
 /**
  * Execute full Mini V2 generation pipeline
  * Updates job state at each stage
+ * Uses dynamic imports to avoid circular dependency issues at module load time
  */
 export async function executeGeneration(jobId, payload) {
   try {
+    // Lazy import heavy dependencies to avoid module loading conflicts
+    const { buildProfileInput } = await import('./buildProfileInput.js')
+    const { generateReportContent } = await import('./generateReportContent.js')
+    const { injectReportContent } = await import('./injectReportContent.js')
+    const { normalizeRepairResponse, mergeRepairedFields, groupMissingFieldsByPage } = await import('./miniV2FieldMap.js')
+    
     const { answers } = payload
     
     // Stage 1: First-pass generation
