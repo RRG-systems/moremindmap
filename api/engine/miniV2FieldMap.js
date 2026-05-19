@@ -179,6 +179,14 @@ export const PLACEHOLDER_TO_PATH = {
  * @returns {Object} - Object with page keys and field arrays
  */
 export function groupMissingFieldsByPage(missingFields) {
+  // DIAGNOSTIC: Check missingFields type
+  if (!missingFields) {
+    throw new Error(`[GROUP] missingFields is ${missingFields === null ? 'null' : 'undefined'}`)
+  }
+  if (!Array.isArray(missingFields)) {
+    throw new Error(`[GROUP] missingFields is ${typeof missingFields}, not array`)
+  }
+  
   const grouped = {};
   const unmapped = [];
   

@@ -36,6 +36,12 @@ async function injectReportContent(reportContent = null) {
 
 function flattenReportContent(reportContent) {
   // Use deterministic mapping from miniV2FieldMap to flatten all fields
+  
+  // DIAGNOSTIC: Check reportContent type
+  if (!reportContent || typeof reportContent !== 'object') {
+    throw new Error(`[FLATTEN] reportContent is ${reportContent === null ? 'null' : typeof reportContent}`)
+  }
+  
   const data = {
     // Global metadata
     assessment_date: 'May 12, 2026',
@@ -45,10 +51,22 @@ function flattenReportContent(reportContent) {
   
   // Flatten all page fields using deterministic paths
   // This ensures repaired fields are included in injection
-  Object.keys(reportContent).forEach(pageKey => {
+  const contentKeys = Object.keys(reportContent)
+  if (!contentKeys) {
+    throw new Error('[FLATTEN] Object.keys(reportContent) returned null')
+  }
+  
+  contentKeys.forEach(pageKey => {
     if (pageKey.startsWith('page') && reportContent[pageKey] && typeof reportContent[pageKey] === 'object') {
-      Object.keys(reportContent[pageKey]).forEach(fieldName => {
-        data[fieldName] = reportContent[pageKey][fieldName];
+      const pageObj = reportContent[pageKey]
+      const pageFieldKeys = Object.keys(pageObj)
+      
+      if (!pageFieldKeys) {
+        throw new Error(`[FLATTEN] Object.keys(${pageKey}) returned null`)
+      }
+      
+      pageFieldKeys.forEach(fieldName => {
+        data[fieldName] = pageObj[fieldName];
       });
     }
   });
@@ -58,11 +76,20 @@ function flattenReportContent(reportContent) {
 }
 
 function generateSnapshot(reportContent, injectionData, html) {
+  // DIAGNOSTIC: Check html type
+  if (typeof html !== 'string') {
+    throw new Error(`[SNAPSHOT] html is ${html === null ? 'null' : typeof html}`)
+  }
+  
   const placeholderRegex = /\{\{[^}]+\}\}/g;
   const placeholderMatches = html.match(placeholderRegex) || [];
   const placeholdersRemaining = placeholderMatches.length;
   
   // Extract field names from placeholders (remove {{ }})
+  if (!placeholderMatches) {
+    throw new Error('[SNAPSHOT] placeholderMatches is null despite || []')
+  }
+  
   const placeholders = placeholderMatches.map(p => p.replace(/\{\{\s*|\s*\}\}/g, ''));
   
   const coveragePercent = placeholdersRemaining === 0 ? 100 : 80; // Estimate
