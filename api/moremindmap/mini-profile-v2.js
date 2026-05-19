@@ -114,12 +114,16 @@ export default async function handler(req, res) {
     
     // STEP 4.5: Missing Field Repair Pass (if placeholders remain)
     let repairAttempted = false
+    let repairError = null
+    let repairFieldsRequested = 0
+    let repairFieldsWritten = 0
     let firstPassPlaceholderCount = snapshot.placeholder_count
     
     if (snapshot.placeholder_count > 0 && snapshot.placeholders) {
       console.log(`[MINI-V2] Step 4.5: Repair pass for ${snapshot.placeholder_count} missing fields...`)
       console.log(`[MINI-V2] Missing fields:`, snapshot.placeholders.slice(0, 10))
       repairAttempted = true
+      repairFieldsRequested = snapshot.placeholders.length
       
       try {
         // Import field mapping utilities
@@ -133,6 +137,7 @@ export default async function handler(req, res) {
         
         // Merge repaired fields into existing content (smart overwrite)
         const mergeStats = mergeRepairedFields(reportContent, normalizedRepairs)
+        repairFieldsWritten = mergeStats.written
         console.log(`[MINI-V2] Merge: ${mergeStats.written} written, ${mergeStats.skipped} skipped`)
         
         // Re-inject with repaired content
@@ -142,9 +147,10 @@ export default async function handler(req, res) {
         snapshot = repairResult.snapshot
         
         console.log(`[MINI-V2] After repair: ${snapshot.placeholder_count} placeholders remaining`)
-      } catch (repairError) {
-        console.error("[MINI-V2] Repair pass failed:", repairError.message)
-        console.error("[MINI-V2] Repair error stack:", repairError.stack)
+      } catch (error) {
+        repairError = error.message || String(error)
+        console.error("[MINI-V2] Repair pass failed:", error.message)
+        console.error("[MINI-V2] Repair error stack:", error.stack)
         // Continue with first-pass output rather than failing completely
       }
     }
@@ -156,10 +162,13 @@ export default async function handler(req, res) {
         success: false,
         error: `Report incomplete: ${snapshot.placeholder_count} placeholders remain`,
         version: "mini-v2",
-        first_pass_placeholder_count: firstPassPlaceholderCount,
-        final_placeholder_count: snapshot.placeholder_count,
+        placeholder_count_before_repair: firstPassPlaceholderCount,
+        placeholder_count_after_repair: snapshot.placeholder_count,
         placeholders: snapshot.placeholders?.slice(0, 50),
-        repair_attempted: repairAttempted
+        repair_attempted: repairAttempted,
+        repair_error: repairError,
+        repair_fields_requested: repairFieldsRequested,
+        repair_fields_written: repairFieldsWritten
       })
     }
 
