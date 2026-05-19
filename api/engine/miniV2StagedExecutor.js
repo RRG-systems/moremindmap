@@ -330,13 +330,13 @@ export async function executeNextStage(job) {
       case JOB_STAGE.RECEIVED:
         return await executeFirstPassGeneration(job)
       
-      case JOB_STAGE.FIRST_PASS_GENERATION:
+      case JOB_STAGE.FIRST_INJECTION:
         return await executeFirstInjection(job)
       
-      case JOB_STAGE.FIRST_INJECTION:
+      case JOB_STAGE.REPAIR_PASS:
         return await executeRepairPass(job)
       
-      case JOB_STAGE.REPAIR_PASS:
+      case JOB_STAGE.FINAL_INJECTION:
         return await executeFinalInjection(job)
       
       default:
