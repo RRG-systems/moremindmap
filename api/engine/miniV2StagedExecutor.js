@@ -141,6 +141,11 @@ export async function executeFirstInjection(job) {
     // Get missingFields from snapshot or extract from HTML
     let missingFields = snapshot.placeholders
     
+    // Convert object to array if needed (Redis deserialization quirk)
+    if (missingFields && typeof missingFields === 'object' && !Array.isArray(missingFields)) {
+      missingFields = Object.values(missingFields)
+    }
+    
     if (!missingFields || !Array.isArray(missingFields) || missingFields.length === 0) {
       console.warn('[FIRST-INJECTION] snapshot.placeholders invalid, extracting from HTML')
       missingFields = extractPlaceholdersFromHtml(html)
