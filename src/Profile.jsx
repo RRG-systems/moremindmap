@@ -130,35 +130,100 @@ export default function Profile() {
       // Use env-based API URL
       const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
       
-      // CONTROLLED BETA: Route FATHOMFREE users to Mini V2 endpoint
+      // CONTROLLED BETA: Route FATHOMFREE users to Mini V2 async endpoint
       const useV2 = promoValidated && promoCode.trim().toUpperCase() === "FATHOMFREE"
-      const endpoint = useV2 
-        ? `${API}/api/moremindmap/mini-profile-v2`
-        : `${API}/api/moremindmap/mini-profile`
       
-      console.log("[SUBMIT] API endpoint:", endpoint)
       console.log("[SUBMIT] Using Mini V2:", useV2)
 
-      console.log("ABOUT TO CALL API")
-      
-      // Add 180-second timeout protection (allows first-pass + repair pass)
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 180000)
-      
-      try {
+      if (useV2) {
+        // ASYNC JOB FLOW for Mini V2
+        console.log("[MINI-V2] Starting async job flow")
+        
+        // Step 1: Start job
+        const startRes = await fetch(`${API}/api/moremindmap/mini-profile-v2-start`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ answers }),
+        })
+        
+        if (!startRes.ok) {
+          const text = await startRes.text()
+          console.error("[MINI-V2] Start failed:", text)
+          setProcessing(false)
+          return setResult({
+            success: false,
+            error: `Failed to start generation: ${text}`,
+          })
+        }
+        
+        const startData = await startRes.json()
+        const jobId = startData.job_id
+        console.log("[MINI-V2] Job started:", jobId)
+        
+        // Step 2: Poll for completion
+        const startTime = Date.now()
+        const maxWaitTime = 8 * 60 * 1000 // 8 minutes
+        const pollInterval = 3000 // 3 seconds
+        
+        let complete = false
+        let pollCount = 0
+        
+        while (!complete && (Date.now() - startTime) < maxWaitTime) {
+          pollCount++
+          console.log(`[MINI-V2] Poll #${pollCount} for job ${jobId}`)
+          
+          await new Promise(resolve => setTimeout(resolve, pollInterval))
+          
+          const statusRes = await fetch(`${API}/api/moremindmap/mini-profile-v2-status?job_id=${jobId}`)
+          
+          if (!statusRes.ok) {
+            console.error("[MINI-V2] Status check failed:", statusRes.status)
+            continue
+          }
+          
+          const statusData = await statusRes.json()
+          console.log(`[MINI-V2] Status:`, statusData.status, statusData.stage, statusData.progress_message)
+          
+          if (statusData.status === 'complete') {
+            console.log("[MINI-V2] Generation complete!")
+            complete = true
+            setProcessing(false)
+            setResult({
+              success: true,
+              html: statusData.html,
+              snapshot: statusData.metadata,
+              generation_mode: 'gpt'
+            })
+          } else if (statusData.status === 'failed') {
+            console.error("[MINI-V2] Generation failed:", statusData.error)
+            complete = true
+            setProcessing(false)
+            setResult({
+              success: false,
+              error: statusData.error || 'Generation failed'
+            })
+          }
+        }
+        
+        if (!complete) {
+          console.error("[MINI-V2] Generation timed out after 8 minutes")
+          setProcessing(false)
+          setResult({
+            success: false,
+            error: "Report generation timed out. Your job may still be processing. Job ID: " + jobId
+          })
+        }
+      } else {
+        // SYNCHRONOUS FLOW for Mini V1 (non-FATHOMFREE users)
+        console.log("[MINI-V1] Using synchronous endpoint")
+        const endpoint = `${API}/api/moremindmap/mini-profile`
+        
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answers }),
-          signal: controller.signal,
         })
-        
-        clearTimeout(timeoutId)
 
-        console.log("[RESPONSE] Status:", res.status)
-        console.log("[RESPONSE] Headers:", res.headers.get("content-type"))
-
-        // Handle non-JSON responses
         if (!res.ok) {
           const text = await res.text()
           console.error("[RESPONSE] Error text:", text)
@@ -169,45 +234,14 @@ export default function Profile() {
           })
         }
 
-        // Safely parse JSON
-        let data
-        try {
-          data = await res.json()
-        } catch (jsonError) {
-          console.error("[JSON ERROR] Failed to parse:", jsonError)
-          const text = await res.text()
-          console.error("[JSON ERROR] Response was:", text)
-          setProcessing(false)
-          return setResult({
-            success: false,
-            error: `Invalid response format: ${jsonError.message}`,
-          })
-        }
-
-        console.log("API RESPONSE RECEIVED", data)
-        console.log("[SUBMIT] Assessment submitted:", data)
-        console.log("[SUBMIT] miniProfile keys:", data.miniProfile ? Object.keys(data.miniProfile) : "NO miniProfile")
-        console.log("[SUBMIT] Has what_this_means?", data.miniProfile?.what_this_means ? "YES" : "NO")
-        console.log("[SUBMIT] Has dominance_structure?", data.miniProfile?.dominance_structure ? "YES" : "NO")
-        console.log("[SUBMIT] Has dominance_note?", data.miniProfile?.dominance_note ? "YES" : "NO")
+        const data = await res.json()
+        console.log("[MINI-V1] Response received:", data)
         
         // Show processing screen for 2 seconds before displaying report
         setTimeout(() => {
           setProcessing(false)
           setResult(data)
         }, 2000)
-      } catch (fetchError) {
-        clearTimeout(timeoutId)
-        if (fetchError.name === 'AbortError') {
-          console.error("[TIMEOUT] Request timed out after 180 seconds")
-          setProcessing(false)
-          setResult({ 
-            success: false, 
-            error: "Report generation timed out after 3 minutes. Please try again or contact support." 
-          })
-        } else {
-          throw fetchError
-        }
       }
     } catch (error) {
       console.error("[SUBMIT] Assessment submission error:", error)
