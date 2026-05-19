@@ -179,18 +179,26 @@ export const PLACEHOLDER_TO_PATH = {
  * @returns {Object} - Object with page keys and field arrays
  */
 export function groupMissingFieldsByPage(missingFields) {
-  // DIAGNOSTIC: Check missingFields type
-  if (!missingFields) {
-    throw new Error(`[GROUP] missingFields is ${missingFields === null ? 'null' : 'undefined'}`)
-  }
-  if (!Array.isArray(missingFields)) {
-    throw new Error(`[GROUP] missingFields is ${typeof missingFields}, not array`)
+  // Normalize missingFields to array (boundary enforcement)
+  let fields
+  
+  if (Array.isArray(missingFields)) {
+    fields = missingFields
+  } else if (missingFields && typeof missingFields === "object") {
+    // Object (possibly {"0": "field", "1": "field2"} or nested) → flatten
+    fields = Object.values(missingFields).flat().filter(Boolean)
+    console.warn('[GROUP] Converted object to array:', fields.length, 'fields')
+  } else if (missingFields == null) {
+    fields = []
+    console.warn('[GROUP] missingFields is null/undefined, using empty array')
+  } else {
+    throw new Error("[GROUP] missingFields invalid type: " + typeof missingFields)
   }
   
   const grouped = {};
   const unmapped = [];
   
-  missingFields.forEach(field => {
+  fields.forEach(field => {
     const path = PLACEHOLDER_TO_PATH[field];
     if (!path) {
       unmapped.push(field);
