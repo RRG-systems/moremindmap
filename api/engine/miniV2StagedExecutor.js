@@ -4,7 +4,7 @@
  * Prevents serverless timeout by breaking pipeline into small chunks
  */
 
-import { updateJob, lockJob, unlockJob, JOB_STAGE, JOB_STATUS } from './miniV2JobManager.js'
+import { getJob, updateJob, lockJob, unlockJob, JOB_STAGE, JOB_STATUS } from './miniV2JobManager.js'
 
 /**
  * Extract placeholder field names from HTML
@@ -34,16 +34,21 @@ function extractPlaceholdersFromHtml(html) {
  * Builds profile input and calls OpenAI for initial report content
  */
 export async function executeFirstPassGeneration(job) {
+  const trace = job.diagnostics?.stage_trace || []
+  trace.push('ENTER_first_pass_generation')
+  
   const { buildProfileInput } = await import('./buildProfileInput.js')
   const { generateReportContent } = await import('./generateReportContent.js')
   
   const { answers } = job.payload
   
-  // Build profile input (must wrap answers in object)
+  trace.push('before_buildProfileInput')
   const profileInput = await buildProfileInput({ answers })
+  trace.push('after_buildProfileInput')
   
-  // Generate report content (OpenAI call)
+  trace.push('before_generateReportContent')
   const reportContent = await generateReportContent(profileInput)
+  trace.push('after_generateReportContent')
   
   // Validate reportContent structure
   const contentKeys = reportContent ? Object.keys(reportContent) : []
@@ -54,7 +59,8 @@ export async function executeFirstPassGeneration(job) {
     console.warn('[STAGED-EXECUTOR] Null pages detected:', nullPages)
   }
   
-  // Store intermediate state and advance stage
+  trace.push('BEFORE_UPDATE_to_first_injection')
+  
   await updateJob(job.job_id, {
     status: JOB_STATUS.PROCESSING,
     stage: JOB_STAGE.FIRST_INJECTION,
@@ -65,10 +71,14 @@ export async function executeFirstPassGeneration(job) {
       ...job.diagnostics,
       content_keys: contentKeys.length,
       page_keys: pageKeys.length,
-      null_pages: nullPages.length > 0 ? nullPages : undefined
+      null_pages: nullPages.length > 0 ? nullPages : undefined,
+      stage_trace: [...trace, 'AFTER_UPDATE_to_first_injection'],
+      last_stage_completed: 'first_pass_generation',
+      transition_to: 'first_injection'
     }
   })
   
+  trace.push('EXIT_first_pass_generation')
   return { success: true, nextStage: JOB_STAGE.FIRST_INJECTION }
 }
 
@@ -77,19 +87,26 @@ export async function executeFirstPassGeneration(job) {
  * Injects report content into templates and scans for placeholders
  */
 export async function executeFirstInjection(job) {
+  const trace = job.diagnostics?.stage_trace || []
+  trace.push('ENTER_first_injection')
+  
   const { injectReportContent } = await import('./injectReportContent.js')
   
   const { reportContent } = job
+  trace.push('got_reportContent_from_job')
   
   if (!reportContent) {
     throw new Error('reportContent is null or undefined')
   }
   
-  // Inject content and get snapshot
+  trace.push('before_injectReportContent')
+  
   let result
   try {
     result = await injectReportContent(reportContent)
+    trace.push('after_injectReportContent_success')
   } catch (error) {
+    trace.push('CATCH_injectReportContent: ' + error.message)
     throw new Error(`injectReportContent failed: ${error.message}`)
   }
   
@@ -104,15 +121,19 @@ export async function executeFirstInjection(job) {
   }
   
   const placeholderCount = snapshot.placeholder_count
+  trace.push('got_placeholder_count: ' + placeholderCount)
   
   // Store snapshot
+  trace.push('BEFORE_UPDATE_firstSnapshot')
   await updateJob(job.job_id, {
     firstSnapshot: snapshot,
     diagnostics: {
       ...job.diagnostics,
-      first_pass_placeholder_count: placeholderCount
+      first_pass_placeholder_count: placeholderCount,
+      stage_trace: [...trace, 'AFTER_UPDATE_firstSnapshot']
     }
   })
+  trace.push('stored_firstSnapshot')
   
   // Check if repair needed
   if (placeholderCount > 0) {
@@ -148,18 +169,8 @@ export async function executeFirstInjection(job) {
       }
     }
     
-    // FINAL DIAGNOSTIC: Log exactly what we're storing
-    const writeTrace = {
-      missingFields_type: typeof missingFields,
-      missingFields_is_null: missingFields === null,
-      missingFields_is_array: Array.isArray(missingFields),
-      missingFields_length: Array.isArray(missingFields) ? missingFields.length : 'not-array',
-      snapshot_placeholder_count: snapshot.placeholder_count,
-      snapshot_placeholders_type: typeof snapshot.placeholders,
-      snapshot_placeholders_is_null: snapshot.placeholders === null
-    }
-    
-    console.log('[FIRST-INJECTION] About to store missingFields:', JSON.stringify(writeTrace))
+    trace.push('missingFields_length: ' + missingFields.length)
+    trace.push('BEFORE_UPDATE_to_repair_pass')
     
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
@@ -167,14 +178,19 @@ export async function executeFirstInjection(job) {
       missingFields: missingFields,
       diagnostics: {
         ...job.diagnostics,
-        missing_fields_count: missingFields ? missingFields.length : null,
-        write_trace: writeTrace
+        missing_fields_count: missingFields.length,
+        stage_trace: [...trace, 'AFTER_UPDATE_to_repair_pass'],
+        last_stage_completed: 'first_injection',
+        transition_to: 'repair_pass'
       }
     })
+    trace.push('EXIT_first_injection_to_repair')
     
     return { success: true, nextStage: JOB_STAGE.REPAIR_PASS, placeholderCount }
   } else {
-    // No repair needed, complete immediately
+    trace.push('no_placeholders_completing')
+    trace.push('BEFORE_UPDATE_to_complete')
+    
     await updateJob(job.job_id, {
       status: JOB_STATUS.COMPLETE,
       stage: JOB_STAGE.COMPLETE,
@@ -189,9 +205,12 @@ export async function executeFirstInjection(job) {
       diagnostics: {
         ...job.diagnostics,
         final_placeholder_count: 0,
-        repair_attempted: false
+        repair_attempted: false,
+        stage_trace: [...trace, 'AFTER_UPDATE_to_complete'],
+        last_stage_completed: 'first_injection'
       }
     })
+    trace.push('EXIT_first_injection_complete')
     
     return { success: true, nextStage: JOB_STAGE.COMPLETE, placeholderCount: 0 }
   }
@@ -327,14 +346,21 @@ export async function executeNextStage(job) {
     console.error(`[STAGED-EXECUTOR] Error in stage ${stage}:`, error)
     console.error(`[STAGED-EXECUTOR] Stack:`, error.stack)
     
-    // Log error to job with stack trace
+    // Get current trace from job
+    const currentJob = await getJob(job.job_id)
+    const errorTrace = currentJob?.diagnostics?.stage_trace || []
+    errorTrace.push(`CATCH_executeNextStage_in_${stage}: ${error.message}`)
+    
+    // Log error to job with stack trace AND preserve stage trace
     await updateJob(job.job_id, {
       status: JOB_STATUS.FAILED,
       stage: JOB_STAGE.FAILED,
       error: error.message || String(error),
       diagnostics: {
-        ...job.diagnostics,
+        ...currentJob?.diagnostics,
         error_stage: stage,
+        error_before_stage_update: true,
+        stage_trace: [...errorTrace, 'ERROR_HANDLER_updated_to_failed'],
         error_stack: error.stack ? error.stack.split('\n').slice(0, 5).join('\n') : null
       }
     })
