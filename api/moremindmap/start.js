@@ -6,7 +6,6 @@
  */
 
 import { createJob } from '../engine/miniV2JobManager.js'
-import { executeGeneration } from '../engine/miniV2AsyncGenerator.js'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -44,22 +43,15 @@ export default async function handler(req, res) {
       })
     }
 
-    // Create job in Redis
+    // Create job in Redis (queued, no execution yet)
     const jobId = await createJob({ answers, metadata })
 
-    // Start async generation (fire and forget)
-    // Vercel serverless may not reliably continue after response
-    // So we start it but status endpoint will also advance if needed
-    executeGeneration(jobId, { answers }).catch(err => {
-      console.error(`[MINI-V2-START] Background generation error:`, err)
-    })
-
-    // Return immediately
+    // Return immediately - status endpoint will drive execution
     return res.status(200).json({
       success: true,
       job_id: jobId,
       status: 'queued',
-      message: 'Report generation started. Poll /api/moremindmap/mini-profile-v2-status?job_id=' + jobId
+      message: 'Report generation queued. Poll /api/moremindmap/status?job_id=' + jobId
     })
   } catch (error) {
     console.error('[MINI-V2-START] Error:', error)

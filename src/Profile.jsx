@@ -162,7 +162,7 @@ export default function Profile() {
         
         // Step 2: Poll for completion
         const startTime = Date.now()
-        const maxWaitTime = 8 * 60 * 1000 // 8 minutes
+        const maxWaitTime = 12 * 60 * 1000 // 12 minutes
         const pollInterval = 3000 // 3 seconds
         
         let complete = false
@@ -206,11 +206,11 @@ export default function Profile() {
         }
         
         if (!complete) {
-          console.error("[MINI-V2] Generation timed out after 8 minutes")
+          console.error("[MINI-V2] Generation timed out after 12 minutes")
           setProcessing(false)
           setResult({
             success: false,
-            error: "Report generation timed out. Your job may still be processing. Job ID: " + jobId
+            error: "Report generation is taking longer than expected. Most reports complete in 3-6 minutes. Your job may still be processing. Job ID: " + jobId
           })
         }
       } else {

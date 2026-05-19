@@ -20,15 +20,14 @@ export const JOB_STATUS = {
 }
 
 /**
- * Job stages
+ * Job stages (poll-driven)
  */
 export const JOB_STAGE = {
   RECEIVED: 'received',
   FIRST_PASS_GENERATION: 'first_pass_generation',
-  PLACEHOLDER_SCAN: 'placeholder_scan',
+  FIRST_INJECTION: 'first_injection',
   REPAIR_PASS: 'repair_pass',
-  REINJECTION: 'reinjection',
-  VALIDATION: 'validation',
+  FINAL_INJECTION: 'final_injection',
   COMPLETE: 'complete',
   FAILED: 'failed'
 }
@@ -47,7 +46,14 @@ export async function createJob(payload) {
     progress_message: 'Job queued',
     created_at: now,
     updated_at: now,
+    locked: false,
+    locked_at: null,
     payload,
+    profileInput: null,
+    reportContent: null,
+    firstSnapshot: null,
+    missingFields: null,
+    repairContent: null,
     result_html: null,
     result_metadata: {},
     error: null,
@@ -129,16 +135,46 @@ export async function setJobStage(jobId, stage, progressMessage = null) {
 }
 
 /**
+ * Lock job for execution
+ */
+export async function lockJob(jobId) {
+  return await updateJob(jobId, {
+    locked: true,
+    locked_at: new Date().toISOString()
+  })
+}
+
+/**
+ * Unlock job
+ */
+export async function unlockJob(jobId) {
+  return await updateJob(jobId, {
+    locked: false,
+    locked_at: null
+  })
+}
+
+/**
+ * Check if job is stale locked (locked > 5 minutes)
+ */
+export function isStaleLock(job) {
+  if (!job.locked || !job.locked_at) return false
+  const lockedTime = new Date(job.locked_at)
+  const now = new Date()
+  const elapsedMs = now - lockedTime
+  return elapsedMs > 300000 // 5 minutes
+}
+
+/**
  * Convert stage to user-friendly message
  */
 function stageToMessage(stage) {
   const messages = {
-    [JOB_STAGE.RECEIVED]: 'Job received',
+    [JOB_STAGE.RECEIVED]: 'Starting generation...',
     [JOB_STAGE.FIRST_PASS_GENERATION]: 'Analyzing response patterns',
-    [JOB_STAGE.PLACEHOLDER_SCAN]: 'Building behavioral profile',
+    [JOB_STAGE.FIRST_INJECTION]: 'Building behavioral profile',
     [JOB_STAGE.REPAIR_PASS]: 'Refining missing sections',
-    [JOB_STAGE.REINJECTION]: 'Checking profile completeness',
-    [JOB_STAGE.VALIDATION]: 'Preparing final report',
+    [JOB_STAGE.FINAL_INJECTION]: 'Preparing final report',
     [JOB_STAGE.COMPLETE]: 'Report ready',
     [JOB_STAGE.FAILED]: 'Generation failed'
   }

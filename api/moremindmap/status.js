@@ -6,8 +6,8 @@
  * This handles cases where background execution didn't continue after start response.
  */
 
-import { getJob, formatJobResponse, JOB_STATUS } from '../engine/miniV2JobManager.js'
-import { executeGeneration } from '../engine/miniV2AsyncGenerator.js'
+import { getJob, formatJobResponse, lockJob, unlockJob, isStaleLock, JOB_STATUS, JOB_STAGE } from '../engine/miniV2JobManager.js'
+import { executeNextStage } from '../engine/miniV2StagedExecutor.js'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -45,22 +45,54 @@ export default async function handler(req, res) {
       })
     }
 
-    // If job is queued and hasn't started processing, start it now
-    // This handles serverless environments where background execution may not persist
-    if (job.status === JOB_STATUS.QUEUED) {
-      // Start generation (fire and forget, don't block response)
-      executeGeneration(job_id, job.payload).catch(err => {
-        console.error(`[MINI-V2-STATUS] Generation error:`, err)
-      })
-      
-      // Return current queued status
-      // Next poll will show processing
-      return res.status(200).json(formatJobResponse(job))
+    // If already complete or failed, return final result
+    if (job.status === JOB_STATUS.COMPLETE || job.status === JOB_STATUS.FAILED) {
+      const response = formatJobResponse(job)
+      return res.status(response.success ? 200 : 500).json(response)
     }
 
-    // Return formatted response
-    const response = formatJobResponse(job)
-    return res.status(response.success ? 200 : 500).json(response)
+    // Check if job is locked by another poll
+    if (job.locked) {
+      if (isStaleLock(job)) {
+        // Stale lock, unlock and proceed
+        console.log(`[MINI-V2-STATUS] Releasing stale lock for job ${job_id}`)
+        await unlockJob(job_id)
+        job = await getJob(job_id)
+      } else {
+        // Recently locked, another poll is processing
+        return res.status(200).json(formatJobResponse(job))
+      }
+    }
+
+    // Job is ready to advance - lock it
+    await lockJob(job_id)
+    job = await getJob(job_id)
+
+    try {
+      // Execute next stage
+      const stageResult = await executeNextStage(job)
+      
+      // Unlock job
+      await unlockJob(job_id)
+      
+      // Reload job to get updated state
+      job = await getJob(job_id)
+      
+      // Return current status
+      const response = formatJobResponse(job)
+      return res.status(response.success ? 200 : 500).json(response)
+    } catch (error) {
+      // Unlock on error
+      await unlockJob(job_id)
+      
+      console.error(`[MINI-V2-STATUS] Stage execution error:`, error)
+      
+      // Reload job (may have error state)
+      job = await getJob(job_id)
+      
+      const response = formatJobResponse(job)
+      return res.status(500).json(response)
+    }
   } catch (error) {
     console.error('[MINI-V2-STATUS] Error:', error)
     return res.status(500).json({
