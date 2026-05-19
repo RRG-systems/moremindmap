@@ -148,13 +148,27 @@ export async function executeFirstInjection(job) {
       }
     }
     
+    // FINAL DIAGNOSTIC: Log exactly what we're storing
+    const writeTrace = {
+      missingFields_type: typeof missingFields,
+      missingFields_is_null: missingFields === null,
+      missingFields_is_array: Array.isArray(missingFields),
+      missingFields_length: Array.isArray(missingFields) ? missingFields.length : 'not-array',
+      snapshot_placeholder_count: snapshot.placeholder_count,
+      snapshot_placeholders_type: typeof snapshot.placeholders,
+      snapshot_placeholders_is_null: snapshot.placeholders === null
+    }
+    
+    console.log('[FIRST-INJECTION] About to store missingFields:', JSON.stringify(writeTrace))
+    
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
       progress_message: 'Refining missing sections',
       missingFields: missingFields,
       diagnostics: {
         ...job.diagnostics,
-        missing_fields_count: missingFields.length
+        missing_fields_count: missingFields ? missingFields.length : null,
+        write_trace: writeTrace
       }
     })
     
