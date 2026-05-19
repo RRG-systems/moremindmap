@@ -317,7 +317,11 @@ export async function executeRepairPass(job) {
       ...job.diagnostics,
       repair_attempted: true,
       repair_fields_requested: missingFields.length,
-      repair_fields_written: mergeStats.written
+      repair_fields_written: mergeStats.written,
+      repair_fields_skipped: mergeStats.skipped,
+      repair_skip_reasons: mergeStats.skipReasons,
+      repair_written_sample: mergeStats.writtenFields,
+      repair_skipped_sample: mergeStats.skippedFields
     }
   })
   

@@ -299,6 +299,8 @@ export function mergeRepairedFields(reportContent, normalizedRepairs) {
   let written = 0;
   let skipped = 0;
   const skipReasons = {};
+  const detailedSkips = [];
+  const writtenFields = [];
   
   Object.keys(normalizedRepairs).forEach(pageKey => {
     if (!reportContent[pageKey]) {
@@ -322,10 +324,12 @@ export function mergeRepairedFields(reportContent, normalizedRepairs) {
       if (isEmpty || isPlaceholder) {
         reportContent[pageKey][fieldName] = newValue;
         written++;
+        writtenFields.push(`${pageKey}.${fieldName}`);
       } else {
         skipped++;
         const reason = 'has_content';
         skipReasons[reason] = (skipReasons[reason] || 0) + 1;
+        detailedSkips.push({ page: pageKey, field: fieldName, reason, oldValue: oldValueText.substring(0, 50) });
       }
     });
   });
@@ -335,5 +339,11 @@ export function mergeRepairedFields(reportContent, normalizedRepairs) {
     console.log('[FIELD MAP] Skip reasons:', skipReasons);
   }
   
-  return { written, skipped, skipReasons };
+  return { 
+    written, 
+    skipped, 
+    skipReasons,
+    writtenFields: writtenFields.slice(0, 30),
+    skippedFields: detailedSkips.slice(0, 30)
+  };
 }
