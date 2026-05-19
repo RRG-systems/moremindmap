@@ -113,9 +113,13 @@ export default async function handler(req, res) {
     }
     
     // STEP 4.5: Missing Field Repair Pass (if placeholders remain)
+    let repairAttempted = false
+    let firstPassPlaceholderCount = snapshot.placeholder_count
+    
     if (snapshot.placeholder_count > 0 && snapshot.placeholders) {
       console.log(`[MINI-V2] Step 4.5: Repair pass for ${snapshot.placeholder_count} missing fields...`)
       console.log(`[MINI-V2] Missing fields:`, snapshot.placeholders.slice(0, 10))
+      repairAttempted = true
       
       try {
         // Import field mapping utilities
@@ -152,8 +156,10 @@ export default async function handler(req, res) {
         success: false,
         error: `Report incomplete: ${snapshot.placeholder_count} placeholders remain`,
         version: "mini-v2",
+        first_pass_placeholder_count: firstPassPlaceholderCount,
+        final_placeholder_count: snapshot.placeholder_count,
         placeholders: snapshot.placeholders?.slice(0, 50),
-        repair_attempted: snapshot.placeholder_count < 88
+        repair_attempted: repairAttempted
       })
     }
 
