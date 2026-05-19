@@ -232,6 +232,51 @@ export async function executeFirstInjection(job) {
 }
 
 /**
+ * Normalize missingFields to array format
+ * Repair pass boundary enforcement - handles all input formats
+ */
+function normalizeMissingFields(input) {
+  // null/undefined → empty array
+  if (input == null) {
+    console.warn('[NORMALIZE] missingFields is null/undefined, returning []')
+    return []
+  }
+  
+  // Already array → return as-is
+  if (Array.isArray(input)) {
+    return input
+  }
+  
+  // Object → convert to array
+  if (typeof input === 'object') {
+    // Check if object has numeric keys (like {"0": "field1", "1": "field2"})
+    const keys = Object.keys(input)
+    const isNumericKeys = keys.every(k => !isNaN(parseInt(k)))
+    
+    if (isNumericKeys) {
+      // Numeric keys → Object.values() gives array
+      console.warn('[NORMALIZE] Converting numeric-keyed object to array')
+      return Object.values(input)
+    }
+    
+    // Check if object has page keys (nested structure)
+    const hasPageKeys = keys.some(k => k.startsWith('page'))
+    if (hasPageKeys) {
+      // Nested pages → flatten all values
+      console.warn('[NORMALIZE] Flattening nested page object')
+      return Object.values(input).flat()
+    }
+    
+    // Generic object → values
+    console.warn('[NORMALIZE] Converting generic object to array')
+    return Object.values(input)
+  }
+  
+  // Unexpected type
+  throw new Error(`[NORMALIZE] Unexpected missingFields type: ${typeof input}`)
+}
+
+/**
  * Stage 3: Repair pass
  * Generates missing content for placeholders
  */
@@ -241,22 +286,16 @@ export async function executeRepairPass(job) {
   
   const { profileInput, reportContent } = job
   
-  // Get and convert missingFields (defensive)
-  let missingFields = job.missingFields
+  // Normalize missingFields at repair pass boundary (enforce array)
+  const missingFields = normalizeMissingFields(job.missingFields)
   
-  if (missingFields && typeof missingFields === 'object' && !Array.isArray(missingFields)) {
-    console.warn('[REPAIR-PASS] Converting missingFields object to array')
-    missingFields = Object.values(missingFields)
-    console.log('[REPAIR-PASS] Converted type:', typeof missingFields, 'isArray:', Array.isArray(missingFields))
-  }
-  
-  // Validate missingFields
-  if (!missingFields || !Array.isArray(missingFields)) {
-    throw new Error(`executeRepairPass: missingFields is ${missingFields === null ? 'null' : typeof missingFields}, expected array. Job keys: ${Object.keys(job).join(', ')}`)
+  // Validate normalized result
+  if (!Array.isArray(missingFields)) {
+    throw new Error(`[REPAIR-PASS] normalizeMissingFields returned ${typeof missingFields}, expected array`)
   }
   
   if (missingFields.length === 0) {
-    throw new Error('executeRepairPass: missingFields is empty array')
+    throw new Error('[REPAIR-PASS] missingFields is empty array after normalization')
   }
   
   // Group fields by page
