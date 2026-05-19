@@ -90,7 +90,8 @@ export async function executeFirstInjection(job) {
   const trace = job.diagnostics?.stage_trace || []
   trace.push('ENTER_first_injection')
   
-  const { injectReportContent } = await import('./injectReportContent.js')
+  const injectModule = await import('./injectReportContent.js')
+  const injectReportContent = injectModule.default
   
   const { reportContent } = job
   trace.push('got_reportContent_from_job')
@@ -270,7 +271,8 @@ export async function executeRepairPass(job) {
  * Re-injects repaired content and validates completion
  */
 export async function executeFinalInjection(job) {
-  const { injectReportContent } = await import('./injectReportContent.js')
+  const injectModule = await import('./injectReportContent.js')
+  const injectReportContent = injectModule.default
   
   const { reportContent } = job
   
