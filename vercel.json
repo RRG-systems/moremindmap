@@ -9,7 +9,7 @@
     }
   ],
   "functions": {
-    "api/moremindmap/mini-profile-v2.js": {
+    "api/**/*.js": {
       "maxDuration": 180
     }
   }
