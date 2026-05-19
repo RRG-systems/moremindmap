@@ -1,78 +1,89 @@
 /**
- * Test Redis connectivity with REDIS_URL
+ * Redis Connectivity Test Endpoint
+ * Verifies REDIS_URL configuration and ioredis client functionality
  */
+
+import { redisGet, redisSet, redisDel, redisHealthCheck } from './engine/redisClient.js'
 
 export default async function handler(req, res) {
   try {
-    // Lazy import to avoid initialization errors
-    const { Redis } = await import('@upstash/redis')
-    // Check what env vars are available
-    const envCheck = {
-      REDIS_URL: process.env.REDIS_URL ? 'present' : 'missing',
-      UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL ? 'present' : 'missing',
-      UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN ? 'present' : 'missing',
-      KV_REST_API_URL: process.env.KV_REST_API_URL ? 'present' : 'missing',
-      KV_REST_API_TOKEN: process.env.KV_REST_API_TOKEN ? 'present' : 'missing'
-    }
+    // Check environment
+    const hasRedisUrl = !!process.env.REDIS_URL
     
-    // Initialize Redis client
-    // If REDIS_URL is standard format (redis://...), parse it
-    let redis
-    if (process.env.REDIS_URL && process.env.REDIS_URL.startsWith('redis')) {
-      // Standard Redis URL - need to convert or use different client
+    if (!hasRedisUrl) {
       return res.status(500).json({
         success: false,
-        error: 'REDIS_URL is standard format, not REST API format',
-        env_check: envCheck,
-        redis_url_prefix: process.env.REDIS_URL?.substring(0, 20)
-      })
-    } else if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
-      redis = new Redis({
-        url: process.env.UPSTASH_REDIS_REST_URL,
-        token: process.env.UPSTASH_REDIS_REST_TOKEN
-      })
-    } else {
-      return res.status(500).json({
-        success: false,
-        error: 'No compatible Redis env vars found',
-        env_check: envCheck
+        error: 'REDIS_URL environment variable not configured',
+        client: 'ioredis',
+        env_check: {
+          REDIS_URL: 'missing'
+        }
       })
     }
-    
+
+    // Health check
+    const pingSuccess = await redisHealthCheck()
+    if (!pingSuccess) {
+      return res.status(500).json({
+        success: false,
+        error: 'Redis PING failed',
+        client: 'ioredis',
+        env_check: {
+          REDIS_URL: 'present'
+        }
+      })
+    }
+
+    // Test key operations
     const testKey = 'test:connectivity:' + Date.now()
-    const testValue = { status: 'connected', timestamp: new Date().toISOString() }
-    
-    // Write test key
-    await redis.set(testKey, JSON.stringify(testValue), { ex: 60 })
+    const testValue = {
+      status: 'testing',
+      timestamp: new Date().toISOString(),
+      random: Math.random()
+    }
+
+    // Write test
+    await redisSet(testKey, testValue, { ex: 60 })
     console.log('[REDIS-TEST] Write successful:', testKey)
-    
-    // Read test key
-    const retrieved = await redis.get(testKey)
+
+    // Read test
+    const retrieved = await redisGet(testKey)
+    const readMatched = retrieved && retrieved.status === testValue.status && retrieved.random === testValue.random
     console.log('[REDIS-TEST] Read successful:', retrieved)
-    
-    // Delete test key
-    await redis.del(testKey)
-    console.log('[REDIS-TEST] Delete successful:', testKey)
-    
+
+    // Delete test
+    const deleted = await redisDel(testKey)
+    console.log('[REDIS-TEST] Delete successful:', deleted)
+
     // Verify deletion
-    const deleted = await redis.get(testKey)
-    
-    return res.status(200).json({
-      success: true,
-      message: 'Redis connectivity verified',
+    const afterDelete = await redisGet(testKey)
+    const deleteVerified = afterDelete === null
+
+    // Final result
+    const allTestsPassed = readMatched && deleted && deleteVerified
+
+    return res.status(allTestsPassed ? 200 : 500).json({
+      success: allTestsPassed,
+      message: allTestsPassed ? 'Redis connectivity verified' : 'Some tests failed',
+      client: 'ioredis',
       test: {
+        ping: pingSuccess ? 'OK' : 'FAILED',
         write: 'OK',
-        read: retrieved ? 'OK' : 'FAILED',
-        delete: deleted === null ? 'OK' : 'FAILED'
+        read: readMatched ? 'OK' : 'FAILED',
+        delete: deleted ? 'OK' : 'FAILED',
+        delete_verified: deleteVerified ? 'OK' : 'FAILED'
       },
-      env_check: envCheck
+      env_check: {
+        REDIS_URL: 'present (not exposed)'
+      }
     })
   } catch (error) {
     console.error('[REDIS-TEST] Error:', error)
     return res.status(500).json({
       success: false,
+      client: 'ioredis',
       error: error.message,
-      stack: error.stack
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     })
   }
 }
