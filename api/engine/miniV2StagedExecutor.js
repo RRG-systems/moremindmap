@@ -123,10 +123,13 @@ export async function executeFirstInjection(job) {
       return { success: true, nextStage: JOB_STAGE.COMPLETE, placeholderCount: 0 }
     }
     
+    // Force missingFields to be array (defensive)
+    const safeMissingFields = Array.isArray(missingFields) ? missingFields : []
+    
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
       progress_message: 'Refining missing sections',
-      missingFields
+      missingFields: safeMissingFields
     })
     
     return { success: true, nextStage: JOB_STAGE.REPAIR_PASS, placeholderCount }
