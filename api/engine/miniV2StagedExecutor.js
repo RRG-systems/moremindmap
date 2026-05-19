@@ -136,6 +136,15 @@ export async function executeRepairPass(job) {
   
   const { profileInput, reportContent, missingFields } = job
   
+  // Validate missingFields
+  if (!missingFields || !Array.isArray(missingFields)) {
+    throw new Error(`executeRepairPass: missingFields is ${missingFields === null ? 'null' : typeof missingFields}, expected array. Job keys: ${Object.keys(job).join(', ')}`)
+  }
+  
+  if (missingFields.length === 0) {
+    throw new Error('executeRepairPass: missingFields is empty array')
+  }
+  
   // Group fields by page
   const groupedFields = groupMissingFieldsByPage(missingFields)
   
