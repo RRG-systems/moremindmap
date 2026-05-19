@@ -239,12 +239,15 @@ export async function executeRepairPass(job) {
   const { generateReportContent } = await import('./generateReportContent.js')
   const { normalizeRepairResponse, mergeRepairedFields, groupMissingFieldsByPage } = await import('./miniV2FieldMap.js')
   
-  let { profileInput, reportContent, missingFields } = job
+  const { profileInput, reportContent } = job
   
-  // Convert object to array if needed (defensive)
+  // Get and convert missingFields (defensive)
+  let missingFields = job.missingFields
+  
   if (missingFields && typeof missingFields === 'object' && !Array.isArray(missingFields)) {
     console.warn('[REPAIR-PASS] Converting missingFields object to array')
     missingFields = Object.values(missingFields)
+    console.log('[REPAIR-PASS] Converted type:', typeof missingFields, 'isArray:', Array.isArray(missingFields))
   }
   
   // Validate missingFields
