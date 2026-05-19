@@ -118,15 +118,18 @@ export default async function handler(req, res) {
       console.log(`[MINI-V2] Missing fields:`, snapshot.placeholders.slice(0, 10))
       
       try {
-        // Make targeted repair call
-        const repairedFields = await generateReportContent(profileInput, snapshot.placeholders)
+        // Import field mapping utilities
+        const { normalizeRepairResponse, mergeRepairedFields } = await import("../engine/miniV2FieldMap.js")
         
-        // Deep merge repaired fields into existing content
-        Object.keys(repairedFields).forEach(pageKey => {
-          if (reportContent[pageKey] && typeof repairedFields[pageKey] === 'object') {
-            reportContent[pageKey] = { ...reportContent[pageKey], ...repairedFields[pageKey] }
-          }
-        })
+        // Make targeted repair call (will group fields by page internally)
+        const repairedFieldsRaw = await generateReportContent(profileInput, snapshot.placeholders)
+        
+        // Normalize repair response (handles flat/nested/wrapped formats)
+        const normalizedRepairs = normalizeRepairResponse(repairedFieldsRaw, snapshot.placeholders)
+        
+        // Merge repaired fields into existing content (smart overwrite)
+        const mergeStats = mergeRepairedFields(reportContent, normalizedRepairs)
+        console.log(`[MINI-V2] Merge: ${mergeStats.written} written, ${mergeStats.skipped} skipped`)
         
         // Re-inject with repaired content
         console.log("[MINI-V2] Re-injecting with repaired fields...")
@@ -137,6 +140,7 @@ export default async function handler(req, res) {
         console.log(`[MINI-V2] After repair: ${snapshot.placeholder_count} placeholders remaining`)
       } catch (repairError) {
         console.error("[MINI-V2] Repair pass failed:", repairError.message)
+        console.error("[MINI-V2] Repair error stack:", repairError.stack)
         // Continue with first-pass output rather than failing completely
       }
     }

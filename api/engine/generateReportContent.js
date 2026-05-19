@@ -14,10 +14,20 @@ const API_KEY = process.env.OPENAI_API_KEY;
 export async function generateReportContent(inputProfile = null, missingFields = null) {
   const profileInput = inputProfile || loadProfileInputExample();
   
-  // If this is a repair pass, use targeted repair prompt
-  const prompt = missingFields 
-    ? buildMissingFieldRepairPrompt(profileInput, missingFields)
-    : buildMiniV2ReportPrompt(profileInput);
+  // If this is a repair pass, group fields by page and use targeted repair prompt
+  let prompt;
+  if (missingFields) {
+    const { groupMissingFieldsByPage } = await import('./miniV2FieldMap.js');
+    const { grouped, unmapped } = groupMissingFieldsByPage(missingFields);
+    
+    if (unmapped.length > 0) {
+      console.warn(`[REPAIR] ${unmapped.length} fields cannot be mapped, skipping:`, unmapped.slice(0, 10));
+    }
+    
+    prompt = buildMissingFieldRepairPrompt(profileInput, grouped);
+  } else {
+    prompt = buildMiniV2ReportPrompt(profileInput);
+  }
   
   const result = await generateWithGPT(prompt);
   
@@ -229,8 +239,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-function buildMissingFieldRepairPrompt(profileInput, missingFields) {
-  const fieldList = missingFields.join('\n- ');
+function buildMissingFieldRepairPrompt(profileInput, missingFieldsGrouped) {
+  // missingFieldsGrouped is { pageKey: [field1, field2, ...] }
+  let fieldListByPage = '';
+  Object.keys(missingFieldsGrouped).forEach(pageKey => {
+    const fields = missingFieldsGrouped[pageKey];
+    fieldListByPage += `\n\n### ${pageKey}\n- ` + fields.join('\n- ');
+  });
   
   return `
 You are completing a MORE MindMap behavioral profile. 
@@ -241,36 +256,35 @@ The first-pass generation left some fields empty. Your job: populate ONLY the mi
 
 ${JSON.stringify(profileInput, null, 2)}
 
-## MISSING FIELDS TO POPULATE
-
-Generate content for these exact fields:
-- ${fieldList}
+## MISSING FIELDS TO POPULATE (BY PAGE)
+${fieldListByPage}
 
 ## RULES
 
-1. Return ONLY valid JSON matching the page structure
+1. Return ONLY valid JSON with nested page objects
 2. Each field must reference specific evidence from profile_input
 3. Use behavioral systems language (NOT generic corporate fluff)
 4. Word counts:
    - Narrative fields: 80-150 words
    - Bullets: 8-15 words
    - Labels/headings: 2-5 words
+   - Icons: single emoji character
 5. Page 2 fields: keep compact (visual-first page)
 6. Pages 3-8 fields: robust interpretation (core content)
 7. NO markdown. NO explanations. ONLY JSON.
 
 ## OUTPUT FORMAT
 
-Return JSON with only the page objects containing missing fields.
+Return JSON with ONLY the page objects containing missing fields.
 
-Example if missing fields are in page03 and page07:
+Example:
 {
   "page03_executive_summary": {
-    "leadership_body": "...",
+    "leadership_heading": "...",
     "development_body": "..."
   },
-  "page07_system_under_strain": {
-    "pressure_response_explanation": "..."
+  "page05_decision_architecture": {
+    "decision_architecture_narrative_1": "..."
   }
 }
 
