@@ -82,15 +82,26 @@ function generateSnapshot(reportContent, injectionData, html) {
   }
   
   const placeholderRegex = /\{\{[^}]+\}\}/g;
-  const placeholderMatches = html.match(placeholderRegex) || [];
-  const placeholdersRemaining = placeholderMatches.length;
+  let placeholderMatches = html.match(placeholderRegex)
   
-  // Extract field names from placeholders (remove {{ }})
+  // Ensure placeholderMatches is always array
   if (!placeholderMatches) {
-    throw new Error('[SNAPSHOT] placeholderMatches is null despite || []')
+    placeholderMatches = []
+  } else if (!Array.isArray(placeholderMatches)) {
+    // Shouldn't happen, but enforce array
+    placeholderMatches = Array.isArray(placeholderMatches) ? placeholderMatches : Object.values(placeholderMatches)
   }
   
-  const placeholders = placeholderMatches.map(p => p.replace(/\{\{\s*|\s*\}\}/g, ''));
+  const placeholdersRemaining = placeholderMatches.length
+  
+  // Extract field names from placeholders (remove {{ }}) - MUST be array
+  let placeholders = placeholderMatches.map(p => p.replace(/\{\{\s*|\s*\}\}/g, ''))
+  
+  // Final enforcement: ensure placeholders is plain array
+  if (!Array.isArray(placeholders)) {
+    console.warn('[SNAPSHOT] placeholders not array after map, forcing:', typeof placeholders)
+    placeholders = Array.isArray(placeholders) ? placeholders : (placeholders ? Object.values(placeholders) : [])
+  }
   
   const coveragePercent = placeholdersRemaining === 0 ? 100 : 80; // Estimate
   
@@ -98,7 +109,10 @@ function generateSnapshot(reportContent, injectionData, html) {
     metadata: {
       generated_at: new Date().toISOString(),
       source_report_content: 'examples/report_content_example.json',
-      injection_engine_version: 'V1'
+      injection_engine_version: 'V1',
+      snapshot_placeholders_type: typeof placeholders,
+      snapshot_placeholders_is_array: Array.isArray(placeholders),
+      snapshot_placeholders_length: Array.isArray(placeholders) ? placeholders.length : 'not-array'
     },
     pages_rendered: 10,
     total_pages_expected: 10,

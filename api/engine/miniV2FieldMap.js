@@ -179,18 +179,18 @@ export const PLACEHOLDER_TO_PATH = {
  * @returns {Object} - Object with page keys and field arrays
  */
 export function groupMissingFieldsByPage(missingFields) {
-  // Normalize missingFields to array (boundary enforcement)
+  // Normalize missingFields to array (boundary enforcement - do not rely on callers)
   let fields
   
   if (Array.isArray(missingFields)) {
     fields = missingFields
   } else if (missingFields && typeof missingFields === "object") {
     // Object (possibly {"0": "field", "1": "field2"} or nested) → flatten
+    console.warn('[GROUP] Converting object to array')
     fields = Object.values(missingFields).flat().filter(Boolean)
-    console.warn('[GROUP] Converted object to array:', fields.length, 'fields')
   } else if (missingFields == null) {
-    fields = []
     console.warn('[GROUP] missingFields is null/undefined, using empty array')
+    fields = []
   } else {
     throw new Error("[GROUP] missingFields invalid type: " + typeof missingFields)
   }
