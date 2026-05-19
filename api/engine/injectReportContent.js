@@ -46,7 +46,7 @@ function flattenReportContent(reportContent) {
   // Flatten all page fields using deterministic paths
   // This ensures repaired fields are included in injection
   Object.keys(reportContent).forEach(pageKey => {
-    if (pageKey.startsWith('page') && typeof reportContent[pageKey] === 'object') {
+    if (pageKey.startsWith('page') && reportContent[pageKey] && typeof reportContent[pageKey] === 'object') {
       Object.keys(reportContent[pageKey]).forEach(fieldName => {
         data[fieldName] = reportContent[pageKey][fieldName];
       });

@@ -22,13 +22,28 @@ export async function executeFirstPassGeneration(job) {
   // Generate report content (OpenAI call)
   const reportContent = await generateReportContent(profileInput)
   
+  // Validate reportContent structure
+  const contentKeys = reportContent ? Object.keys(reportContent) : []
+  const pageKeys = contentKeys.filter(k => k.startsWith('page'))
+  const nullPages = pageKeys.filter(k => reportContent[k] === null)
+  
+  if (nullPages.length > 0) {
+    console.warn('[STAGED-EXECUTOR] Null pages detected:', nullPages)
+  }
+  
   // Store intermediate state and advance stage
   await updateJob(job.job_id, {
     status: JOB_STATUS.PROCESSING,
     stage: JOB_STAGE.FIRST_INJECTION,
     progress_message: 'Building behavioral profile',
     profileInput,
-    reportContent
+    reportContent,
+    diagnostics: {
+      ...job.diagnostics,
+      content_keys: contentKeys.length,
+      page_keys: pageKeys.length,
+      null_pages: nullPages.length > 0 ? nullPages : undefined
+    }
   })
   
   return { success: true, nextStage: JOB_STAGE.FIRST_INJECTION }
