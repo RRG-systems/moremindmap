@@ -245,12 +245,18 @@ export async function executeNextStage(job) {
     }
   } catch (error) {
     console.error(`[STAGED-EXECUTOR] Error in stage ${stage}:`, error)
+    console.error(`[STAGED-EXECUTOR] Stack:`, error.stack)
     
-    // Log error to job
+    // Log error to job with stack trace
     await updateJob(job.job_id, {
       status: JOB_STATUS.FAILED,
       stage: JOB_STAGE.FAILED,
-      error: error.message || String(error)
+      error: error.message || String(error),
+      diagnostics: {
+        ...job.diagnostics,
+        error_stage: stage,
+        error_stack: error.stack ? error.stack.split('\n').slice(0, 5).join('\n') : null
+      }
     })
     
     throw error
