@@ -93,7 +93,35 @@ export async function executeFirstInjection(job) {
   
   // Check if repair needed
   if (placeholderCount > 0) {
-    const missingFields = snapshot.placeholders || []
+    // Ensure missingFields is always an array, never null
+    let missingFields = snapshot.placeholders
+    if (!missingFields || !Array.isArray(missingFields)) {
+      console.warn('[FIRST-INJECTION] snapshot.placeholders is null/invalid, using empty array')
+      missingFields = []
+    }
+    
+    // If no actual fields to repair, complete immediately
+    if (missingFields.length === 0) {
+      await updateJob(job.job_id, {
+        status: JOB_STATUS.COMPLETE,
+        stage: JOB_STAGE.COMPLETE,
+        progress_message: 'Report ready (no repairs needed)',
+        result_html: html,
+        result_metadata: {
+          placeholder_count: 0,
+          pages_rendered: snapshot.pages_rendered,
+          coverage_percent: snapshot.coverage_percent,
+          generation_mode: 'gpt'
+        },
+        diagnostics: {
+          ...job.diagnostics,
+          final_placeholder_count: 0,
+          repair_attempted: false,
+          repair_skipped_reason: 'placeholderCount > 0 but placeholders array empty/null'
+        }
+      })
+      return { success: true, nextStage: JOB_STAGE.COMPLETE, placeholderCount: 0 }
+    }
     
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
