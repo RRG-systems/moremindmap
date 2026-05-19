@@ -2,10 +2,10 @@
  * Test Redis connectivity with REDIS_URL
  */
 
-import { Redis } from '@upstash/redis'
-
 export default async function handler(req, res) {
   try {
+    // Lazy import to avoid initialization errors
+    const { Redis } = await import('@upstash/redis')
     // Check what env vars are available
     const envCheck = {
       REDIS_URL: process.env.REDIS_URL ? 'present' : 'missing',
