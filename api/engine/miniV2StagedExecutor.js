@@ -143,11 +143,20 @@ export async function executeFirstInjection(job) {
     
     // Convert object to array if needed (Redis deserialization quirk)
     if (missingFields && typeof missingFields === 'object' && !Array.isArray(missingFields)) {
-      missingFields = Object.values(missingFields)
+      console.warn('[FIRST-INJECTION] Converting placeholders object to array')
+      const converted = Object.values(missingFields)
+      console.log('[FIRST-INJECTION] Converted:', { original_type: typeof missingFields, converted_type: typeof converted, is_array: Array.isArray(converted) })
+      missingFields = converted
     }
     
-    if (!missingFields || !Array.isArray(missingFields) || missingFields.length === 0) {
-      console.warn('[FIRST-INJECTION] snapshot.placeholders invalid, extracting from HTML')
+    // Final validation
+    if (!Array.isArray(missingFields)) {
+      console.warn('[FIRST-INJECTION] missingFields still not array after conversion, extracting from HTML')
+      missingFields = extractPlaceholdersFromHtml(html)
+    }
+    
+    if (!missingFields || missingFields.length === 0) {
+      console.warn('[FIRST-INJECTION] No placeholders found despite count > 0, extracting from HTML')
       missingFields = extractPlaceholdersFromHtml(html)
       
       if (missingFields.length === 0) {
