@@ -43,8 +43,29 @@ export default async function handler(req, res) {
       })
     }
 
+    // Format answers for backend compatibility
+    // Backend expects: { qN: { choice: 'A' } } or { qN: { text: 'written response' } }
+    // Frontend may send: { N: 'A' } or { N: 'written response' }
+    const formattedAnswers = {}
+    Object.keys(answers).forEach(key => {
+      const qKey = key.startsWith('q') ? key : `q${key}`
+      const value = answers[key]
+      
+      // Detect if it's a written response (long text) or multiple choice (single letter)
+      if (typeof value === 'string' && value.length === 1 && /[A-E]/i.test(value)) {
+        // Multiple choice
+        formattedAnswers[qKey] = { choice: value.toUpperCase() }
+      } else if (typeof value === 'object' && (value.choice || value.text)) {
+        // Already formatted
+        formattedAnswers[qKey] = value
+      } else {
+        // Written response
+        formattedAnswers[qKey] = { text: String(value) }
+      }
+    })
+
     // Create job in Redis (queued, no execution yet)
-    const jobId = await createJob({ answers, metadata })
+    const jobId = await createJob({ answers: formattedAnswers, metadata })
 
     // Return immediately - status endpoint will drive execution
     return res.status(200).json({
