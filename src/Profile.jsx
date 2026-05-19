@@ -140,7 +140,7 @@ export default function Profile() {
         console.log("[MINI-V2] Starting async job flow")
         
         // Step 1: Start job
-        const startRes = await fetch(`${API}/api/moremindmap/mini-profile-v2-start`, {
+        const startRes = await fetch(`${API}/api/moremindmap/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ answers }),
@@ -174,7 +174,7 @@ export default function Profile() {
           
           await new Promise(resolve => setTimeout(resolve, pollInterval))
           
-          const statusRes = await fetch(`${API}/api/moremindmap/mini-profile-v2-status?job_id=${jobId}`)
+          const statusRes = await fetch(`${API}/api/moremindmap/status?job_id=${jobId}`)
           
           if (!statusRes.ok) {
             console.error("[MINI-V2] Status check failed:", statusRes.status)
