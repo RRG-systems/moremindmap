@@ -58,9 +58,27 @@ export async function executeFirstInjection(job) {
   
   const { reportContent } = job
   
+  if (!reportContent) {
+    throw new Error('reportContent is null or undefined')
+  }
+  
   // Inject content and get snapshot
-  const result = await injectReportContent(reportContent)
+  let result
+  try {
+    result = await injectReportContent(reportContent)
+  } catch (error) {
+    throw new Error(`injectReportContent failed: ${error.message}`)
+  }
+  
+  if (!result) {
+    throw new Error('injectReportContent returned null')
+  }
+  
   const { html, snapshot } = result
+  
+  if (!snapshot) {
+    throw new Error('snapshot is null')
+  }
   
   const placeholderCount = snapshot.placeholder_count
   
@@ -75,7 +93,7 @@ export async function executeFirstInjection(job) {
   
   // Check if repair needed
   if (placeholderCount > 0) {
-    const missingFields = snapshot.placeholders
+    const missingFields = snapshot.placeholders || []
     
     await updateJob(job.job_id, {
       stage: JOB_STAGE.REPAIR_PASS,
