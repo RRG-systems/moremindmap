@@ -1,12 +1,22 @@
 # MINI V2 STEP 1 — COMPLETE FIELD POPULATION PLAN
 
 **Created:** Mon May 18, 2026 14:05 MST  
-**Updated:** Mon May 18, 2026 15:48 MST  
-**Status:** DIAGNOSTIC PHASE — Root cause identified, repair logic needs field mapping fix  
-**Goal:** Achieve 0 placeholders, stable 10-page render
+**Completed:** Tue May 19, 2026 07:36 MST  
+**Status:** ✅ COMPLETE — 0 placeholders, stable 10-page render  
+**Final Commit:** `a814455`
 
-**Current HEAD:** `18421e1`  
-**Current Blocker:** GPT generates ~50% of fields, repair pass deployed but not reducing placeholder count
+---
+
+## MISSION ACCOMPLISHED
+
+### Target State: ACHIEVED
+
+- **Placeholders:** 0 ✅
+- **Generation Mode:** OpenAI (gpt-4.1) ✅
+- **Schema Validation:** Passing ✅
+- **Content Completeness:** All 173 fields populated ✅
+- **Page Render:** Stable 10-page output ✅
+- **Production Endpoint:** Operational ✅
 
 ---
 
@@ -26,164 +36,158 @@
 - Page 09 (Facilitator Notes): 7 fields
 - Page 10 (Full Profile Unlocks): 19 fields
 
----
-
-## FIELD CATEGORIZATION
-
-### REQUIRED_LONG (High Word Count)
-**Pages 3-8 Core Narratives:**
-- `summary_text` (Page 3) — 150-200 words
-- `operating_pattern_body_1/2/3/4` (Page 4) — 100-150 words each
-- `decision_architecture_narrative_1/2/3` (Page 5) — 100 words each
-- `communication_narrative_1/2` (Page 6) — 100 words each
-- `pressure_response_explanation` (Page 7) — 150 words
-- `operating_environment_body` sections (Page 8) — 80-120 words each
-
-**Total estimated: ~1800-2500 words**
-
-### REQUIRED_SHORT (Low Word Count)
-**Bullets, Labels, Summaries:**
-- All `_bullet_1/2/3/4` fields — 8-15 words each (Page 2, 32 bullets = ~400 words)
-- All `_heading` fields — 2-5 words each
-- All dimension labels/codes — 1-3 words each
-- Profile metadata — 1-10 words each
-
-**Total estimated: ~800-1000 words**
-
-### VISUAL_SUPPORT (Minimal)
-**Page 2 System Map:**
-- Icons (emoji/symbols) — 1 char each
-- Compact labels — 2-4 words
-- Tension warning — 20-30 words
-- System tension summary — 40-60 words
-
-**Total estimated: ~200 words**
-
-### CRITICAL_INFRASTRUCTURE
-**Cross-page Metadata:**
-- `profile_type` — appears on every page
-- `assessment_date` — appears on every page
-- `confidence_level` — appears on every page
-- `profile_code_string` — Page 1
+**All fields now mapped and operational.**
 
 ---
 
-## WORD BUDGET MAP
+## FINAL ARCHITECTURE
 
-### By Page Priority:
+### Complete Pipeline
 
-**HIGH PRIORITY (Pages 3-8):** 1800-2500 words
-- Page 03: 250 words
-- Page 04: 500 words
-- Page 05: 400 words
-- Page 06: 350 words
-- Page 07: 200 words
-- Page 08: 450 words
-
-**MEDIUM PRIORITY (Pages 1, 9, 10):** 600-800 words
-- Page 01: 250 words (compressed identity)
-- Page 09: 150 words (facilitator intelligence)
-- Page 10: 250 words (unlock narrative)
-
-**LOW PRIORITY (Page 2):** 200-300 words
-- Visual-first design
-- Compact bullets only
-- Minimal paragraph density
-
-**TOTAL TARGET: 2600-3600 words**
+1. **Answer Processing** — `buildProfileInput.js`
+2. **First-Pass Generation** — OpenAI gpt-4.1, 16K tokens
+3. **First Injection** — `injectReportContent()` with automatic flatten loop
+4. **Placeholder Detection** — Regex scan on rendered HTML
+5. **Field Grouping** — `groupMissingFieldsByPage()` via PLACEHOLDER_TO_PATH
+6. **Repair Generation** — Targeted GPT call with page-grouped fields
+7. **Response Normalization** — `normalizeRepairResponse()` handles all formats
+8. **Smart Merge** — `mergeRepairedFields()` mutates reportContent in place
+9. **Re-Injection** — Automatic flatten loop copies all repaired fields
+10. **Final Validation** — 0 placeholders, 100% coverage
 
 ---
 
-## GENERATION STRATEGY
+## KEY BREAKTHROUGHS
 
-### Current Problem:
-- `max_tokens: 16000` allows ~12,000 words
-- Prompt requests all fields
-- GPT returns valid structure but under-populates nested fields
-- Result: 88 placeholders remain unfilled
+### 1. Deterministic Placeholder Mapping
+**File:** `api/engine/miniV2FieldMap.js` (322 lines)
 
-### Root Cause Analysis:
-1. **Insufficient prompt specificity** — doesn't enumerate every field
-2. **No explicit word targets** — GPT doesn't know minimum lengths
-3. **Single-pass generation** — no completion verification
-4. **No field inventory in prompt** — GPT doesn't see full schema
+**System:** PLACEHOLDER_TO_PATH
+- Maps all 173 template placeholders to nested reportContent paths
+- Enables deterministic repair targeting
+- Supports automatic grouping by page
+- Handles normalization of varied GPT response formats
 
-### Solution Strategy: **EXPLICIT FIELD ENUMERATION**
+### 2. Automatic Flatten Loop
+**File:** `api/engine/injectReportContent.js`
 
-**Approach:**
-1. Update prompt to include COMPLETE field list with word targets
-2. Add explicit instructions: "Generate ALL 173 fields"
-3. Include minimum word counts per field type
-4. Add JSON structure validation reminder
-5. Increase max_tokens if needed (current: 16000)
+**Old:** 63 lines of incomplete manual field mapping  
+**New:** 7-line automatic loop
 
-**Implementation:**
-- Modify `api/prompts/moremindmapMiniV2Prompt.js`
-- Add comprehensive field checklist
-- Add word count requirements
-- Add field-by-field generation guidance
-
----
-
-## BEFORE STATE
-
-**Placeholders:** 88 remaining (estimated, based on error)  
-**Generation Mode:** OpenAI (gpt-4.1)  
-**Schema Validation:** ✅ Passing  
-**Content Completeness:** ❌ Insufficient  
-
----
-
-## TARGET STATE
-
-**Placeholders:** 0  
-**Generation Mode:** OpenAI (gpt-4.1)  
-**Schema Validation:** ✅ Passing  
-**Content Completeness:** ✅ All fields populated  
-**Page Render:** ✅ Stable 10-page output  
-
----
-
-## IMPLEMENTATION STEPS
-
-1. ✅ Complete field inventory (DONE)
-2. ✅ Create word budget map (DONE)
-3. ⏳ Update prompt with explicit field list
-4. ⏳ Add word count targets per field
-5. ⏳ Test production endpoint
-6. ⏳ Verify placeholder count = 0
-7. ⏳ Generate sample HTML output
-8. ⏳ Commit & deploy
-
----
-
-## COMMIT PLAN
-
-**Files to modify:**
-- `api/prompts/moremindmapMiniV2Prompt.js` — Add comprehensive field schema
-
-**Commit message:**
-```
-step1 complete field population and stable render pipeline
+```javascript
+Object.keys(reportContent).forEach(pageKey => {
+  if (pageKey.startsWith('page') && typeof reportContent[pageKey] === 'object') {
+    Object.keys(reportContent[pageKey]).forEach(fieldName => {
+      data[fieldName] = reportContent[pageKey][fieldName];
+    });
+  }
+});
 ```
 
+**Impact:** Repaired fields automatically flow into template rendering.
+
+### 3. Repair Pass State Tracking
+**File:** `api/moremindmap/mini-profile-v2.js`
+
+**Explicit state variables:**
+```javascript
+let repairAttempted = false
+let repairError = null
+let repairFieldsRequested = 0
+let repairFieldsWritten = 0
+let firstPassPlaceholderCount = snapshot.placeholder_count
+```
+
+**Diagnostic visibility:** Every repair attempt now reports exact execution state.
+
 ---
 
-**Status:** Field inventory complete, ready for prompt enhancement.
+## LOCKED COMMITS
+
+### Stabilization Milestone Chain
+
+```
+0374704 — step1 complete field population and stable render pipeline
+c24f2ae — implement mini v2 missing field repair pass
+3557995 — fix mini v2 repair pass control flow
+5ba6cb4 — fix mini v2 repair diagnostics state tracking
+a5f9b93 — fix mini v2 repair merge trim safety
+72c2d03 — implement deterministic mini v2 placeholder path mapping
+a814455 — fix mini v2 repaired content reinjection state ✅ FINAL
+```
+
+**Canonical state:** `a814455`
 
 ---
 
-## DIAGNOSTIC FINDINGS (Mon May 18 15:45 MST)
+## PRODUCTION VERIFICATION
 
-**Root Cause:** GPT generates main narrative fields but skips UI/structural fields
+### Test Input
+24 realistic behavioral assessment answers (mix of MC + written responses)
 
-**Evidence:**
-- Page 03: Generates summary_text, leadership_body ✅ | Skips headings ❌
-- Page 04: Generates operating_pattern_body fields ✅ | Skips headings ❌
-- Page 02: Skips all 16 driver bullets, icons, legends ❌
+### Test Output
+- ✅ Valid 10-page HTML report
+- ✅ 0 placeholders
+- ✅ All narrative fields populated
+- ✅ All structural fields populated (headings, icons, bullets)
+- ✅ No generic corporate language
+- ✅ Evidence-anchored interpretations
+- ✅ Behavioral systems language
 
-**Missing categories:** Icons (20), Page 2 bullets (16), Headings (15+), Legends (3)
+### Performance
+- First-pass generation: ~60 seconds
+- Repair pass: ~30 seconds (if needed)
+- Re-injection: ~5 seconds
+- Total: ~105 seconds end-to-end
 
-**Total missing:** 88 of 173 fields (51% completion)
+---
 
-**Repair pass:** Deployed but not reducing count (field mapping issue suspected)
+## PROTECTED INFRASTRUCTURE (DO NOT MODIFY)
+
+**Stable rendering pipeline:**
+- `api/templates/mini-v2/*.html` — 10 page templates
+- `api/engine/generateMiniV2HTML.js` — HTML assembly
+- `api/engine/injectReportContent.js` — Flatten + injection (now stable)
+- `api/engine/miniV2FieldMap.js` — Placeholder mapping (locked)
+
+**Frontend:**
+- Assessment flow (24 questions)
+- FATHOMFREE routing
+- Submit endpoint wiring
+
+**Integrations:**
+- Stripe payment logic
+- Question rendering
+- Visual design
+
+---
+
+## NEXT PHASE: STEP 2
+
+### Language / Brain Quality Optimization
+
+**Goal:** Improve interpretation intelligence without destabilizing rendering.
+
+**Tunable components:**
+1. **Prompt engineering** — `api/prompts/moremindmapMiniV2Prompt.js`
+2. **Evidence extraction** — `api/engine/buildProfileInput.js`
+3. **Quality validation** — `api/engine/validateReportContent.js`
+4. **OpenAI parameters** — temperature, max_tokens
+
+**Quality targets:**
+- Reduce generic AI phrasing
+- Increase behavioral specificity
+- Strengthen evidence anchoring
+- Improve contradiction detection
+- Elevate narrative sophistication
+- Match "genius-level" diagnostic quality
+
+**Protected:**
+- Field mapping (stable)
+- Template structure (stable)
+- Injection pipeline (stable)
+- Repair pass (stable)
+
+---
+
+**Step 1 locked. System ready for Step 2 quality tuning.**

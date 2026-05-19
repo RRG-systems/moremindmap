@@ -141,9 +141,9 @@ export default function Profile() {
 
       console.log("ABOUT TO CALL API")
       
-      // Add 60-second timeout protection
+      // Add 180-second timeout protection (allows first-pass + repair pass)
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 60000)
+      const timeoutId = setTimeout(() => controller.abort(), 180000)
       
       try {
         const res = await fetch(endpoint, {
@@ -199,11 +199,11 @@ export default function Profile() {
       } catch (fetchError) {
         clearTimeout(timeoutId)
         if (fetchError.name === 'AbortError') {
-          console.error("[TIMEOUT] Request timed out after 60 seconds")
+          console.error("[TIMEOUT] Request timed out after 180 seconds")
           setProcessing(false)
           setResult({ 
             success: false, 
-            error: "Report generation timed out. Please try again." 
+            error: "Report generation timed out after 3 minutes. Please try again or contact support." 
           })
         } else {
           throw fetchError
