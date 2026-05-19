@@ -16,8 +16,8 @@ export async function executeFirstPassGeneration(job) {
   
   const { answers } = job.payload
   
-  // Build profile input
-  const profileInput = buildProfileInput(answers)
+  // Build profile input (must wrap answers in object)
+  const profileInput = await buildProfileInput({ answers })
   
   // Generate report content (OpenAI call)
   const reportContent = await generateReportContent(profileInput)
