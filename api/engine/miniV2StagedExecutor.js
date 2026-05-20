@@ -318,6 +318,10 @@ export async function executeRepairPass(job) {
   // Merge repairs into report content
   const mergeStats = mergeRepairedFields(reportContent, normalizedRepairs)
   
+  // Fill structural fields that GPT doesn't reliably generate
+  const { fillStructuralFields } = await import('./fillStructuralFields.js')
+  fillStructuralFields(reportContent)
+  
   // Store updated content and advance
   await updateJob(job.job_id, {
     stage: JOB_STAGE.FINAL_INJECTION,
