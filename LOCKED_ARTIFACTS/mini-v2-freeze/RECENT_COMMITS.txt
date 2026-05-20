@@ -1,0 +1,10 @@
+0255e32 polish mini v2 deterministic fallback content quality
+9c4cf95 fix mini v2 frontend completion render transition
+41add78 fix mini v2 fallback completion es module export
+4c9cca5 add mini v2 deterministic fallback field completion
+3b798da add rocky wakeup and save state doctrine
+6effdcf document mini v2 step 2 content completion status
+747836d fix mini v2 remaining placeholder completion - add structural field fallbacks
+8c2ae67 fix mini v2 repair field completion - add dimension name translation layer
+ebc8ee8 add detailed merge skip diagnostics to repair pass
+c3d9720 add raw job query endpoint
