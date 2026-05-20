@@ -68,12 +68,46 @@
  * @property {Array<string>} environment_fit.struggles_in - Environments that create friction
  * @property {Array<string>} environment_fit.requires - Non-negotiable environmental needs
  * 
+ * @property {Object} life_direction - Values, priorities, and future orientation (Q2)
+ * @property {Array<string>} life_direction.stated_priorities - What they claim matters
+ * @property {string} life_direction.future_vision - Where they want to go (5-10 years)
+ * @property {string} life_direction.meaning_definition - What meaningful life looks like
+ * @property {Object} life_direction.inference - Values vs operational reality gap
+ * 
+ * @property {Object} business_operating_reality - Actual business/leadership state (Q26)
+ * @property {Object} business_operating_reality.sales_metrics - Production, database, goals
+ * @property {Object} business_operating_reality.leadership_scope - Who they lead, performance level
+ * @property {string} business_operating_reality.biggest_gap - Primary constraint identified
+ * @property {number} business_operating_reality.numerical_grounding - Specificity level (1-5)
+ * 
+ * @property {Object} growth_tension - Scaling response and capacity (Q27)
+ * @property {string} growth_tension.emotional_scaling_response - Reaction to 3x growth scenario
+ * @property {string} growth_tension.vision_articulation - Mission/vision clarity
+ * @property {string} growth_tension.adaptive_ceiling - Where resistance appears
+ * @property {Array<string>} growth_tension.priority_hierarchy - Time/money/freedom/impact ranking
+ * 
+ * @property {Object} systems_accountability - Operational maturity (Q28)
+ * @property {string} systems_accountability.systems_description - Current systems/habits
+ * @property {string} systems_accountability.system_confidence - Belief in current systems
+ * @property {string} systems_accountability.accountability_structure - Who holds them accountable
+ * @property {string} systems_accountability.coachability_claim - Self-assessment
+ * @property {string} systems_accountability.meta_reflection - Thoughts after assessment
+ * 
+ * @property {Object} stall_patterns - Professional friction and bottlenecks (Q24)
+ * @property {string} stall_patterns.attention_direction - Where focus goes when stalled
+ * @property {Array<string>} stall_patterns.professional_frustrations - What drains energy
+ * @property {Array<string>} stall_patterns.relational_friction - People dynamics
+ * @property {Array<string>} stall_patterns.avoidance_patterns - What gets delayed
+ * @property {string} stall_patterns.performance_gap_awareness - Self-assessment of shortfalls
+ * 
  * @property {Object} narrative_profile - Human-readable strategic framing
  * @property {string} narrative_profile.executive_summary - 2-3 sentence profile essence
  * @property {string} narrative_profile.leadership_narrative - How they lead (paragraph)
  * @property {string} narrative_profile.decision_narrative - How they decide (paragraph)
  * @property {string} narrative_profile.communication_narrative - How they communicate (paragraph)
  * @property {string} narrative_profile.development_narrative - Growth path (paragraph)
+ * @property {string} narrative_profile.business_manifestation - How profile shows up in business/sales
+ * @property {string} narrative_profile.contradiction_analysis - Internal tensions synthesis
  */
 
 export const CANONICAL_PROFILE_SCHEMA = {

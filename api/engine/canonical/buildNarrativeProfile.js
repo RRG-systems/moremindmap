@@ -26,6 +26,7 @@
  * @param {Object} stressPatterns - Pressure response
  * @param {Object} communicationStyle - Communication mechanics
  * @param {Object} leadershipArchitecture - Leadership dynamics
+ * @param {Object} analyzedResponses - Long-form answer analysis (Step 2D)
  * @returns {Object} narrative_profile
  */
 export function buildNarrativeProfile(
@@ -33,7 +34,8 @@ export function buildNarrativeProfile(
   contradictions,
   stressPatterns,
   communicationStyle,
-  leadershipArchitecture
+  leadershipArchitecture,
+  analyzedResponses = {}
 ) {
   const { profile_type, operating_signature } = inferredPatterns;
   
@@ -81,11 +83,107 @@ export function buildNarrativeProfile(
     `${stressPatterns.blind_spot_emergence}. ` +
     `Recovery path: ${stressPatterns.recovery_paths[0] || 'Re-engage dropped dimensions after stress passes'}.`;
   
+  // Business manifestation narrative (Step 2D)
+  const business_manifestation = buildBusinessManifestationNarrative(
+    analyzedResponses,
+    inferredPatterns,
+    contradictions
+  );
+  
+  // Contradiction analysis narrative (Step 2D)
+  const contradiction_analysis = buildContradictionAnalysisNarrative(contradictions);
+  
   return {
     executive_summary,
     leadership_narrative,
     decision_narrative,
     communication_narrative,
-    development_narrative
+    development_narrative,
+    business_manifestation,
+    contradiction_analysis
   };
+}
+
+/**
+ * Build business manifestation narrative from analyzed responses
+ */
+function buildBusinessManifestationNarrative(analyzedResponses, inferredPatterns, contradictions) {
+  const { business_reality, stall_patterns, growth_tension } = analyzedResponses;
+  
+  if (!business_reality && !stall_patterns) {
+    return 'Business context not provided in assessment.';
+  }
+  
+  let narrative = '';
+  
+  // Stall pattern analysis
+  if (stall_patterns) {
+    const blameDirection = stall_patterns.blame_direction === 'external' 
+      ? 'externalizes bottlenecks to market, people, or circumstances'
+      : stall_patterns.blame_direction === 'internal'
+      ? 'internalizes friction and looks inward for solutions'
+      : 'balances external constraints with internal accountability';
+    
+    narrative += `When performance stalls, ${blameDirection}. `;
+    
+    if (stall_patterns.frustrations.includes('relational')) {
+      narrative += 'Relational friction surfaces as primary frustration point. ';
+    }
+    if (stall_patterns.avoidance_admitted) {
+      narrative += 'Acknowledges avoidance patterns — awareness present but execution gap remains. ';
+    }
+  }
+  
+  // Growth ceiling
+  if (growth_tension) {
+    if (growth_tension.scaling_response === 'resistance' || growth_tension.scaling_response === 'ceiling') {
+      narrative += 'Growth ceiling tension: emotional resistance to 3x scale suggests capacity limit below stated ambition. ';
+    } else if (growth_tension.scaling_response === 'positive') {
+      narrative += 'Emotionally positive about scale — ambition elasticity present. ';
+    }
+  }
+  
+  // Systems maturity
+  if (business_reality) {
+    if (business_reality.numerical_grounding === 'high') {
+      narrative += 'High numerical grounding — operationally specific about metrics and scale. ';
+    } else if (business_reality.numerical_grounding === 'low') {
+      narrative += 'Low numerical grounding — operates more conceptually than metrically. ';
+    }
+  }
+  
+  return narrative || 'Business manifestation patterns require more detailed responses for full analysis.';
+}
+
+/**
+ * Build contradiction analysis narrative
+ */
+function buildContradictionAnalysisNarrative(contradictions) {
+  if (contradictions.length === 0) {
+    return 'No significant internal contradictions detected. Operating system shows dimensional coherence.';
+  }
+  
+  const highSeverity = contradictions.filter(c => c.severity === 'high');
+  const moderateSeverity = contradictions.filter(c => c.severity === 'moderate');
+  
+  let narrative = '';
+  
+  if (highSeverity.length > 0) {
+    narrative += `Critical tension: ${highSeverity[0].manifestation}. `;
+  }
+  
+  if (moderateSeverity.length > 0) {
+    narrative += `Internal contradiction: ${moderateSeverity[0].manifestation}. `;
+    if (moderateSeverity.length > 1) {
+      narrative += `Additional tension: ${moderateSeverity[1].manifestation}. `;
+    }
+  }
+  
+  // Resolution framing
+  if (contradictions.length > 0) {
+    narrative += `Resolution path: ${contradictions[0].resolution_path || 'Build conscious integration between conflicting dimensions'}.`;
+  }
+  
+  return narrative;
+}
 }

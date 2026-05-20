@@ -31,6 +31,8 @@ import { inferStressPatterns } from './inferStressPatterns.js';
 import { inferCommunicationStyle } from './inferCommunicationStyle.js';
 import { inferLeadershipArchitecture } from './inferLeadershipArchitecture.js';
 import { buildNarrativeProfile } from './buildNarrativeProfile.js';
+import { analyzeLongFormAnswers } from './analyzeLongFormAnswers.js';
+import { synthesizeCrossQuestionPatterns } from './synthesizeCrossQuestionPatterns.js';
 
 /**
  * Generate canonical behavioral profile
@@ -54,11 +56,20 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   // STEP 2: Infer vector scores and rankings
   const { vector_scores, ranked_dimensions, top_systems } = inferVectorScores(profileInput);
   
+  // STEP 2.5: Analyze long-form answers (NEW - Step 2D)
+  const analyzed_responses = analyzeLongFormAnswers(profileInput);
+  
   // STEP 3: Infer behavioral patterns (CORE INTELLIGENCE)
   const inferred_patterns = inferBehavioralPatterns(vector_scores, ranked_dimensions, profileInput);
   
-  // STEP 4: Infer contradictions
-  const contradictions = inferContradictions(vector_scores, ranked_dimensions, profileInput);
+  // STEP 4: Infer contradictions (dimension-based)
+  const dimension_contradictions = inferContradictions(vector_scores, ranked_dimensions, profileInput);
+  
+  // STEP 4.5: Synthesize cross-question tensions (NEW - Step 2D)
+  const cross_question_tensions = synthesizeCrossQuestionPatterns(analyzed_responses, vector_scores);
+  
+  // Merge all contradictions
+  const contradictions = [...dimension_contradictions, ...cross_question_tensions];
   
   // STEP 5: Infer stress patterns
   const stress_patterns = inferStressPatterns(vector_scores, ranked_dimensions);
@@ -81,13 +92,14 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   // STEP 9: Infer environment fit
   const environment_fit = inferEnvironmentFit(vector_scores, ranked_dimensions);
   
-  // STEP 10: Build narrative profile
+  // STEP 10: Build narrative profile (with Step 2D analyzed responses)
   const narrative_profile = buildNarrativeProfile(
     inferred_patterns,
     contradictions,
     stress_patterns,
     communication_style,
-    leadership_architecture
+    leadership_architecture,
+    analyzed_responses
   );
   
   // STEP 11: Assemble canonical artifact
@@ -97,8 +109,16 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     vector_scores,
     ranked_dimensions,
     top_systems,
+    
+    // Step 2D additions: expanded intake analysis
+    life_direction: analyzed_responses.life_direction,
+    business_operating_reality: analyzed_responses.business_reality,
+    growth_tension: analyzed_responses.growth_tension,
+    systems_accountability: analyzed_responses.systems_accountability,
+    stall_patterns: analyzed_responses.stall_patterns,
+    
     inferred_patterns,
-    contradictions,
+    contradictions, // now includes cross-question tensions
     stress_patterns,
     communication_style,
     leadership_architecture,

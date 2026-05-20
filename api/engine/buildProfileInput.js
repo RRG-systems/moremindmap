@@ -58,7 +58,7 @@ export class BuildProfileInput {
       profile_version: 'mini-v2',
       question_set_version: 'set_1_v1',
       question_count: 24,
-      written_response_count: 6,
+      written_response_count: 10,
       multiple_choice_count: 18,
       confidence_score: 0.75, // Will be refined by confidence engine
       assessment_duration_seconds: rawAssessment.duration_seconds || 0,
@@ -303,7 +303,10 @@ export class BuildProfileInput {
   }
 
   buildWrittenResponses(rawAnswers) {
-    const writtenIds = [2, 6, 10, 15, 20, 24];
+    // Step 2C Expansion: Now 10 written questions (Q2, Q19, Q20, Q21, Q22, Q23, Q24, Q25, Q26, Q27, Q28)
+    // Q19-Q23 are from original set
+    // Q24-Q28 are Step 2C additions (business/leadership/systems)
+    const writtenIds = [2, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
     const responses = {};
 
     writtenIds.forEach(id => {
