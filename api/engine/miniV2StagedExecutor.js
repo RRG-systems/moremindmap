@@ -322,6 +322,11 @@ export async function executeRepairPass(job) {
   const { fillStructuralFields } = await import('./fillStructuralFields.js')
   fillStructuralFields(reportContent)
   
+  // Deterministic fallback completion for remaining placeholders
+  const completeMissingMiniV2Fields = (await import('./completeMissingMiniV2Fields.js')).default
+  const fallbackResult = completeMissingMiniV2Fields(reportContent, profileInput, missingFields)
+  const fallbackDiagnostics = fallbackResult.diagnostics
+  
   // Store updated content and advance
   await updateJob(job.job_id, {
     stage: JOB_STAGE.FINAL_INJECTION,
@@ -335,7 +340,11 @@ export async function executeRepairPass(job) {
       repair_fields_skipped: mergeStats.skipped,
       repair_skip_reasons: mergeStats.skipReasons,
       repair_written_sample: mergeStats.writtenFields,
-      repair_skipped_sample: mergeStats.skippedFields
+      repair_skipped_sample: mergeStats.skippedFields,
+      fallback_fields_attempted: fallbackDiagnostics.fallback_fields_attempted,
+      fallback_fields_written: fallbackDiagnostics.fallback_fields_written,
+      fallback_fields_remaining: fallbackDiagnostics.fallback_fields_remaining,
+      fallback_field_types: fallbackDiagnostics.field_types
     }
   })
   
