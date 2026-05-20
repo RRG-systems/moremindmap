@@ -1,9 +1,14 @@
 /**
- * LOCKED 24-QUESTION ASSESSMENT FOR MORE MINDMAP
+ * MORE MINDMAP ASSESSMENT — 28 QUESTIONS
  * 
- * Exact wording, order, and answer formats preserved.
- * Anti-gaming variation is intentional.
- * Do not rewrite, reorder, simplify, or standardize.
+ * Step 2C Expansion: Added business/leadership reality questions (Q26-Q28)
+ * Replaced Q2 (values/priorities) and Q24 (stall patterns)
+ * Moved original Q2 to Q25
+ * 
+ * 18 multiple-choice dimension scoring questions
+ * 10 written-response behavioral trace questions
+ * 
+ * Exact wording preserved. Anti-gaming variation intentional.
  */
 
 const MOREMINDMAP_QUESTIONS = [
@@ -24,7 +29,27 @@ What do you do first?`,
   {
     id: 2,
     type: "written_response",
-    question: `Describe a recent situation where someone misunderstood your intentions, tone, or communication style. What happened, how did you respond internally, and did it change how you approached future interactions?`
+    question: `What matters most to you in life right now?
+
+Describe in detail:
+- family
+- relationships
+- children
+- career
+- freedom
+- money
+- stability
+- legacy
+- purpose
+- health
+- impact
+- personal growth
+
+What are you ultimately trying to build, protect, or become?
+
+Where do you want your personal life and work to go over the next 5–10 years?
+
+What would a meaningful life actually look like for you if things worked?`
   },
   {
     id: 3,
@@ -299,17 +324,106 @@ What do you do?`,
   {
     id: 24,
     type: "written_response",
-    question: `Think about how people who interact with you regularly would describe you — not in a formal setting, but in real conversations when you're not in the room.
+    question: `If you are in sales, leadership, business ownership, or operate independently, answer the following in as much detail as possible.
 
-Describe what they would likely say in four areas:
-- what they rely on you for
-- what they get frustrated with
-- what they tend to expect from you in stressful situations
-- what tends to trigger tension, pushback, or conflict with you
+Be as honest and specific as possible. There are no right answers.
 
-Be specific. Use real patterns, not general traits.
+When your business, team, career, or performance begins to stall, where does your attention instinctively go first, and why?
 
-Do not describe how you want to be seen. Describe how you are actually experienced by others.`,
+Describe:
+- what frustrates you most professionally
+- where you believe your biggest bottlenecks are
+- what kinds of people energize you
+- what kinds of people drain you
+- how you react when people repeatedly resist your direction
+- what you avoid dealing with longer than you should
+- what you know you need to improve but struggle to change
+- where you believe you are underperforming relative to your potential
+- what kind of business, career, or life you are ultimately trying to create
+
+If you lead people:
+How do you typically respond when someone repeatedly disagrees with your direction or execution style?
+
+If you work independently:
+What patterns do you notice in yourself when momentum slows down or discipline starts slipping?
+
+If you are in sales:
+What do you believe truly separates high performers from average performers, and where do you think you personally fall short most often?`,
+    answers: []
+  },
+  {
+    id: 25,
+    type: "written_response",
+    question: `Describe a recent situation where someone misunderstood your intentions, tone, or communication style. What happened, how did you respond internally, and did it change how you approached future interactions?`,
+    answers: []
+  },
+  {
+    id: 26,
+    type: "written_response",
+    question: `Sales, Leadership, and Current Business Reality
+
+Answer the sections that apply to you. If more than one applies, answer all relevant sections in as much detail as possible.
+
+If you are in sales or production:
+- Do you currently have enough leads, opportunities, or active prospects to achieve your goals? Why or why not?
+- What is your current yearly production? Include units, volume, revenue, gross commission, closed commission, or any numbers that best describe your business.
+- What is your goal for the next 12 months?
+- How large is your actual database of clients, prospects, referral sources, or relationships? If you do not know exactly, give your best estimate.
+- How many of those people would realistically recognize your name, take your call, refer you, or do business with you?
+
+If you are in leadership:
+- Who are you responsible for leading, managing, coaching, or influencing?
+- What is the current performance level of your team, group, or organization?
+- What are the most important numbers you use to judge whether the group is growing, stalled, or underperforming?
+- Do you believe your team has enough opportunity, talent, structure, and accountability to reach its goals? Why or why not?
+- Where is the biggest gap right now: people, leads, systems, leadership, accountability, skill, culture, or execution?
+
+If you are both in sales and leadership:
+Explain how you split your attention between personal production and leading others. Where does the tension show up most?`,
+    answers: []
+  },
+  {
+    id: 27,
+    type: "written_response",
+    question: `Initiative, Vision, and Growth Capacity
+
+Answer the sections that apply to you. If more than one applies, answer all relevant sections in as much detail as possible.
+
+If you are in sales or business development:
+- If I asked you to lead generate today and intentionally meet three new people, what would you actually do?
+- Where do you naturally feel strongest: prospecting, relationship building, follow-up, conversion, negotiation, marketing, or closing? Why?
+- If I took the goals you described in the previous question and tripled them, what would your honest emotional reaction be? Excitement, pressure, disbelief, resistance, motivation, exhaustion, something else? Explain why.
+
+If you are in leadership:
+- Describe the mission, vision, values, beliefs, and overall perspective of the team, business, or organization you lead.
+- Do you believe the people around you truly understand and buy into that mission? Why or why not?
+- If the size, growth, responsibility, or expectations of your organization suddenly tripled, what part of you would feel most energized, and what part would feel most strained or resistant?
+
+For everyone:
+- What is more important to you right now: time, money, freedom, stability, impact, growth, or something else entirely? Explain your reasoning in detail.`,
+    answers: []
+  },
+  {
+    id: 28,
+    type: "written_response",
+    question: `Systems, Accountability, and Self-Awareness
+
+Answer the sections that apply to you. If more than one applies, answer all relevant sections in as much detail as possible.
+
+If you are in sales or business development:
+- What systems, habits, tools, or processes do you currently use to follow up, stay organized, and build long-term relationships with your database, clients, or prospects?
+- Do you believe your current systems are strong enough to support the goals you described earlier? Why or why not?
+- Who, if anyone, is helping hold you accountable to your goals, standards, or business plan?
+- Do you consider yourself coachable? Explain honestly.
+
+If you are in leadership:
+- What systems, structures, or operational habits are currently working well inside your team, company, or organization?
+- What systems concern you most right now?
+- Where do you believe the organization is most fragile, inconsistent, or dependent on specific people?
+- How do you personally handle accountability, both for yourself and for others?
+
+For everyone:
+- After answering all of these questions, what thoughts, emotions, realizations, concerns, or observations are coming up for you right now?`,
     answers: []
   }
 ];
