@@ -186,14 +186,18 @@ export default function Profile() {
           
           if (statusData.status === 'complete') {
             console.log("[MINI-V2] Generation complete!")
+            console.log("[MINI-V2] Setting result HTML length:", statusData.html?.length || 0)
             complete = true
             setProcessing(false)
+            console.log("[MINI-V2] Processing false after complete")
             setResult({
               success: true,
+              version: "mini-v2",
               html: statusData.html,
               snapshot: statusData.metadata,
               generation_mode: 'gpt'
             })
+            console.log("[MINI-V2] Render result branch active")
           } else if (statusData.status === 'failed') {
             console.error("[MINI-V2] Generation failed:", statusData.error)
             complete = true
