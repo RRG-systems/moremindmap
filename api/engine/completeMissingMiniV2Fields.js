@@ -223,4 +223,4 @@ function completeMissingMiniV2Fields(reportContent, profileInput, missingFields)
   return { reportContent, diagnostics };
 }
 
-module.exports = completeMissingMiniV2Fields;
+export default completeMissingMiniV2Fields;
