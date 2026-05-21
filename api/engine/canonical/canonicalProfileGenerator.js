@@ -42,6 +42,11 @@ import { inferExecutionIdentity } from './inferExecutionIdentity.js';
 import { inferStrategicCeiling } from './inferStrategicCeiling.js';
 import { inferScalingReadiness } from './inferScalingReadiness.js';
 import { inferTeamInteraction } from './inferTeamInteraction.js';
+import { inferBehavioralConsequences } from './inferBehavioralConsequences.js';
+import { inferOrganizationalEffects } from './inferOrganizationalEffects.js';
+import { inferHiddenCosts } from './inferHiddenCosts.js';
+import { inferSelfDeceptionPatterns } from './inferSelfDeceptionPatterns.js';
+import { inferFutureTrajectory } from './inferFutureTrajectory.js';
 
 /**
  * Generate canonical behavioral profile
@@ -167,7 +172,53 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     communication_style
   );
   
-  // STEP 19: Build narrative profile (with all new domains)
+  // STEP 19: Infer behavioral consequences (STEP 2E-E)
+  const behavioral_consequences = inferBehavioralConsequences(
+    vector_scores,
+    leadership_architecture,
+    stress_patterns,
+    future_growth_constraints,
+    hidden_risk_patterns,
+    analyzed_responses,
+    contradictions
+  );
+  
+  // STEP 20: Infer organizational effects (STEP 2E-E)
+  const organizational_effects = inferOrganizationalEffects(
+    vector_scores,
+    leadership_readiness,
+    analyzed_responses,
+    hidden_risk_patterns
+  );
+  
+  // STEP 21: Infer hidden costs (STEP 2E-E)
+  const hidden_costs = inferHiddenCosts(
+    vector_scores,
+    analyzed_responses,
+    behavioral_consequences,
+    organizational_effects
+  );
+  
+  // STEP 22: Infer self-deception patterns (STEP 2E-E)
+  const self_deception_patterns = inferSelfDeceptionPatterns(
+    vector_scores,
+    analyzed_responses,
+    contradictions,
+    behavioral_consequences
+  );
+  
+  // STEP 23: Infer future trajectory (STEP 2E-E)
+  const future_trajectory = inferFutureTrajectory(
+    vector_scores,
+    contradictions,
+    future_growth_constraints,
+    hidden_risk_patterns,
+    scaling_readiness,
+    analyzed_responses,
+    behavioral_consequences
+  );
+  
+  // STEP 24: Build narrative profile (with all new domains + consequences)
   const narrative_profile = buildNarrativeProfile(
     inferred_patterns,
     contradictions,
@@ -216,6 +267,13 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     strategic_ceiling_analysis,
     scaling_readiness,
     team_interaction_patterns,
+    
+    // Step 2E-E: consequence modeling
+    behavioral_consequences,
+    organizational_effects,
+    hidden_costs,
+    self_deception_patterns,
+    future_trajectory,
     
     // Narrative synthesis
     narrative_profile
