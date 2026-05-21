@@ -68,8 +68,8 @@ export async function executeFirstPassGeneration(job) {
   
   await updateJob(job.job_id, {
     status: JOB_STATUS.PROCESSING,
-    stage: JOB_STAGE.FIRST_INJECTION,
-    progress_message: 'Building behavioral profile',
+    stage: JOB_STAGE.CANONICAL_GENERATION,
+    progress_message: 'Building canonical dossier',
     profileInput,
     reportContent,
     diagnostics: {
@@ -77,14 +77,14 @@ export async function executeFirstPassGeneration(job) {
       content_keys: contentKeys.length,
       page_keys: pageKeys.length,
       null_pages: nullPages.length > 0 ? nullPages : undefined,
-      stage_trace: [...trace, 'AFTER_UPDATE_to_first_injection'],
+      stage_trace: [...trace, 'AFTER_UPDATE_to_canonical_generation'],
       last_stage_completed: 'first_pass_generation',
-      transition_to: 'first_injection'
+      transition_to: 'canonical_generation'
     }
   })
   
   trace.push('EXIT_first_pass_generation')
-  return { success: true, nextStage: JOB_STAGE.FIRST_INJECTION }
+  return { success: true, nextStage: JOB_STAGE.CANONICAL_GENERATION }
 }
 
 /**
@@ -420,6 +420,10 @@ export async function executeNextStage(job) {
     switch (stage) {
       case JOB_STAGE.RECEIVED:
         return await executeFirstPassGeneration(job)
+      
+      case JOB_STAGE.CANONICAL_GENERATION:
+        const { executeCanonicalGeneration } = await import('./canonical/executeCanonicalGeneration.js')
+        return await executeCanonicalGeneration(job)
       
       case JOB_STAGE.FIRST_INJECTION:
         return await executeFirstInjection(job)

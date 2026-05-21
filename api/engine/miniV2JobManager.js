@@ -25,6 +25,7 @@ export const JOB_STATUS = {
 export const JOB_STAGE = {
   RECEIVED: 'received',
   FIRST_PASS_GENERATION: 'first_pass_generation',
+  CANONICAL_GENERATION: 'canonical_generation',
   FIRST_INJECTION: 'first_injection',
   REPAIR_PASS: 'repair_pass',
   FINAL_INJECTION: 'final_injection',
@@ -172,6 +173,7 @@ function stageToMessage(stage) {
   const messages = {
     [JOB_STAGE.RECEIVED]: 'Starting generation...',
     [JOB_STAGE.FIRST_PASS_GENERATION]: 'Analyzing response patterns',
+    [JOB_STAGE.CANONICAL_GENERATION]: 'Building canonical dossier',
     [JOB_STAGE.FIRST_INJECTION]: 'Building behavioral profile',
     [JOB_STAGE.REPAIR_PASS]: 'Refining missing sections',
     [JOB_STAGE.FINAL_INJECTION]: 'Preparing final report',
@@ -201,7 +203,9 @@ export function formatJobResponse(job) {
       metadata: job.result_metadata,
       diagnostics: job.diagnostics,
       created_at: job.created_at,
-      updated_at: job.updated_at
+      updated_at: job.updated_at,
+      canonical_profile_id: job.canonical_profile_id || null,
+      canonical_diagnostics: job.canonical_diagnostics || null
     }
   }
   
