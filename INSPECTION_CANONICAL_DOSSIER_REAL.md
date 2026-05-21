@@ -1,6 +1,6 @@
 # INSPECTION: CANONICAL DOSSIER (REAL GENERATION)
 
-**Generated:** 2026-05-21T18:43:22.310Z
+**Generated:** 2026-05-21T21:43:17.495Z
 **Profile ID:** MM-20260521-test01
 **Model:** canonical-v1-test
 **Assessment Version:** mini-v2
@@ -12,7 +12,7 @@
 ```json
 {
   "assessment_version": "mini-v2",
-  "generated_at": "2026-05-21T18:43:22.308Z",
+  "generated_at": "2026-05-21T21:43:17.493Z",
   "model": "canonical-v1-test",
   "person_name": null,
   "email": null
@@ -146,6 +146,21 @@ When performance stalls, balances external constraints with internal accountabil
 ### contradiction_analysis
 Internal contradiction: High awareness, low execution — knows what to do but doesn't do it. Additional tension: Intellectually open to coaching but operationally defaults back to own approach. Resolution path: Build conscious integration between conflicting dimensions.
 
+### leadership_readiness_narrative
+Leadership readiness: Low - Direction-setting becomes bottleneck as complexity increases. Low - Direction and process both unclear, team operates in fog. Followership: Moderate - Followership depends on alignment and context. Control tendency: Low - May under-direct; control too loose for accountability. Low - Limited bandwidth for reading individual development needs.
+
+### future_bottlenecks_narrative
+At 2x scale: Systems infrastructure - Current processes insufficient for 2x complexity; Relational bandwidth - Limited capacity for relationship management at scale. At 5x scale: Operational chaos - Ad-hoc systems collapse under 5x load; Team fragmentation - Relationship gaps create organizational silos. Scaling resistance moderate, addressable with systems.
+
+### coaching_leverage_narrative
+Highest ROI: Relational timing awareness - pause before directing to read room dynamics. Resistance likelihood: High - Intellectually open but operationally resistant to framework changes. Quick wins: Pre-directive pause - count to 3 before issuing direction, read room first. Invisible drag: Avoidance patterns compound - delayed action creates larger problems later.
+
+### hidden_risks_narrative
+Risk severity: 65%. Moderate-High - Under stress, relational awareness disappears; damage done without awareness. Moderate - Relational friction drains energy; isolation increases over time. Strength liability: Strengths remain assets at current scale.
+
+### strategic_ceiling_narrative
+Current ceiling: No immediate ceiling visible. Cause: Standard growth challenges. Breakthrough requirement: Continue current trajectory. Ceiling proximity: 65%.
+
 ## DEVELOPMENT TARGETS
 
 1. **unknown** (Priority 1, Severity: mild)
@@ -184,36 +199,3 @@ Internal contradiction: High awareness, low execution — knows what to do but d
 - [To be assessed]
 
 **Eerily Accurate Threshold:** [YES/NO] — [Reasoning]
-
----
-
-## CANONICAL QUALITY REVIEW (STEP 2E-C COMPLETION)
-
-### 28-Question Intake: COMPLETE ✅
-- Q26-Q28 added to questionMap.js
-- buildProfileInput updated for 28 questions
-- business_operating_reality: POPULATED
-- growth_tension: POPULATED
-- systems_accountability: POPULATED
-
-### Contradictions: 3 DETECTED (was 0)
-1. **knowledge_execution_gap** (moderate) - "Identifies gaps but doesn't fix them"
-2. **coachability_resistance_pattern** (moderate) - "Claims coachable but qualifies heavily"
-3. **freedom_vs_growth_ambition** (mild) - "Values freedom but positive about constraining growth"
-
-### Quality Assessment: MATERIALLY IMPROVED
-**Strengths:**
-- Real contradictions detected from behavioral traces
-- Business reality properly analyzed
-- Specific operational tensions identified
-- Development targets generated
-
-**Still Generic:**
-- Some narrative phrases remain vague
-- Environment fit mostly empty
-- Could detect 1-2 more contradictions
-
-**Eerily Accurate:** CLOSER, NOT YET
-- User would recognize some patterns
-- Not yet "how did you know that?" level
-- Functional for validation, needs tuning for production

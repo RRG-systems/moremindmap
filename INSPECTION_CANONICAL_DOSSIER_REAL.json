@@ -2,7 +2,7 @@
   "profile_id": "MM-20260521-test01",
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-21T18:43:22.308Z",
+    "generated_at": "2026-05-21T21:43:17.493Z",
     "model": "canonical-v1-test",
     "person_name": null,
     "email": null
@@ -261,9 +261,111 @@
   "environment_fit": {
     "thrives_in": [],
     "struggles_in": [
-      "Environments that over-index on influence without supporting precision"
+      "High-touch client relationships",
+      "Consensus-required team cultures"
     ],
-    "requires": []
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  },
+  "leadership_readiness": {
+    "scale_capacity": "Low - Direction-setting becomes bottleneck as complexity increases",
+    "clarity_generation": "Low - Direction and process both unclear, team operates in fog",
+    "followership_quality": "Moderate - Followership depends on alignment and context",
+    "relational_collapse_risk": "High - Under pressure, relational awareness disappears; repairs relationships after damage done",
+    "control_tendency": "Low - May under-direct; control too loose for accountability",
+    "development_capability": "Low - Limited bandwidth for reading individual development needs",
+    "confidence": 0.7
+  },
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "future_growth_constraints": {
+    "at_2x_scale": [
+      "Systems infrastructure - Current processes insufficient for 2x complexity",
+      "Relational bandwidth - Limited capacity for relationship management at scale"
+    ],
+    "at_5x_scale": [
+      "Operational chaos - Ad-hoc systems collapse under 5x load",
+      "Team fragmentation - Relationship gaps create organizational silos"
+    ],
+    "stress_amplification": "High - Multiple internal contradictions will amplify under scaling pressure",
+    "operational_fragility": "Moderate - Some operational dependencies exist",
+    "relational_fragility": "High - Relational friction already present, will compound at scale",
+    "decision_overload_risk": "Moderate - Some decision distribution exists",
+    "scaling_resistance_pattern": "Scaling resistance moderate, addressable with systems"
+  },
+  "coaching_leverage_points": {
+    "highest_roi_adjustment": "Relational timing awareness - pause before directing to read room dynamics",
+    "invisible_drag_habits": [
+      "Avoidance patterns compound - delayed action creates larger problems later"
+    ],
+    "resistance_likelihood": "High - Intellectually open but operationally resistant to framework changes",
+    "accountability_dependency": "Moderate - Benefits from external structure but can self-regulate",
+    "quick_wins": [
+      "Pre-directive pause - count to 3 before issuing direction, read room first"
+    ],
+    "long_term_work": [
+      "Relational awareness development - sustained practice in reading team dynamics",
+      "Framework flexibility - learning when to adapt vs enforce standards"
+    ]
+  },
+  "hidden_risk_patterns": {
+    "strengths_as_liabilities": [
+      "Strengths remain assets at current scale"
+    ],
+    "relational_erosion_risk": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
+    "strategic_drift_risk": "Low - Direction stable",
+    "execution_inconsistency": "Moderate-High - Knows what to do but does not do it consistently",
+    "burnout_trajectory": "Moderate - Relational friction drains energy; isolation increases over time",
+    "isolation_pattern": "Low - Operates collaboratively",
+    "severity": 0.65
+  },
+  "execution_identity": {
+    "true_default": "Execution-focused operator",
+    "claimed_identity": "Claims to value balance, family, and freedom",
+    "identity_gap": "High - Self-aware of gaps but behavior does not change (knows vs does)",
+    "operational_truth": "Standard operational baseline"
+  },
+  "strategic_ceiling_analysis": {
+    "current_ceiling": "No immediate ceiling visible",
+    "ceiling_cause": "Standard growth challenges",
+    "breakthrough_requirement": "Continue current trajectory",
+    "ceiling_proximity": 0.65
+  },
+  "scaling_readiness": {
+    "systems_maturity": "Emerging - Basic systems exist but inconsistent",
+    "delegation_capacity": "High - Delegates effectively and maintains accountability",
+    "talent_development": "Weak - Limited capacity for developing others",
+    "process_thinking": "Weak - Ad-hoc executor, process-averse",
+    "readiness_score": 0.45000000000000007
+  },
+  "team_interaction_patterns": {
+    "conflict_mode": "Avoidant until escalation - Ignores relational tension until forced to address",
+    "collaboration_style": "Standard team player",
+    "feedback_reception": "Defensive/Qualified - Intellectually receives but operationally resists",
+    "trust_building": "Standard relationship development",
+    "friction_triggers": [
+      "Standard team friction"
+    ],
+    "team_value_add": [
+      "Balanced team contribution"
+    ]
   },
   "narrative_profile": {
     "executive_summary": "This is a Precision/Tempo profile — precision-driven with tempo stabilization. Precision-driven leadership. Precision dominance can suppress Influence — creates blind spot.",
@@ -272,6 +374,11 @@
     "communication_narrative": "Communication style: Precision-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
     "development_narrative": "Primary development opportunity: undefined. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.",
     "business_manifestation": "When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. Emotionally positive about scale — ambition elasticity present. High numerical grounding — operationally specific about metrics and scale. ",
-    "contradiction_analysis": "Internal contradiction: High awareness, low execution — knows what to do but doesn't do it. Additional tension: Intellectually open to coaching but operationally defaults back to own approach. Resolution path: Build conscious integration between conflicting dimensions."
+    "contradiction_analysis": "Internal contradiction: High awareness, low execution — knows what to do but doesn't do it. Additional tension: Intellectually open to coaching but operationally defaults back to own approach. Resolution path: Build conscious integration between conflicting dimensions.",
+    "leadership_readiness_narrative": "Leadership readiness: Low - Direction-setting becomes bottleneck as complexity increases. Low - Direction and process both unclear, team operates in fog. Followership: Moderate - Followership depends on alignment and context. Control tendency: Low - May under-direct; control too loose for accountability. Low - Limited bandwidth for reading individual development needs.",
+    "future_bottlenecks_narrative": "At 2x scale: Systems infrastructure - Current processes insufficient for 2x complexity; Relational bandwidth - Limited capacity for relationship management at scale. At 5x scale: Operational chaos - Ad-hoc systems collapse under 5x load; Team fragmentation - Relationship gaps create organizational silos. Scaling resistance moderate, addressable with systems.",
+    "coaching_leverage_narrative": "Highest ROI: Relational timing awareness - pause before directing to read room dynamics. Resistance likelihood: High - Intellectually open but operationally resistant to framework changes. Quick wins: Pre-directive pause - count to 3 before issuing direction, read room first. Invisible drag: Avoidance patterns compound - delayed action creates larger problems later.",
+    "hidden_risks_narrative": "Risk severity: 65%. Moderate-High - Under stress, relational awareness disappears; damage done without awareness. Moderate - Relational friction drains energy; isolation increases over time. Strength liability: Strengths remain assets at current scale.",
+    "strategic_ceiling_narrative": "Current ceiling: No immediate ceiling visible. Cause: Standard growth challenges. Breakthrough requirement: Continue current trajectory. Ceiling proximity: 65%."
   }
 }

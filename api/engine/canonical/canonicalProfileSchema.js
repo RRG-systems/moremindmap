@@ -108,6 +108,78 @@
  * @property {string} narrative_profile.development_narrative - Growth path (paragraph)
  * @property {string} narrative_profile.business_manifestation - How profile shows up in business/sales
  * @property {string} narrative_profile.contradiction_analysis - Internal tensions synthesis
+ * 
+ * @property {Object} leadership_readiness - Executive/leadership capacity assessment
+ * @property {string} leadership_readiness.scale_capacity - Can they lead at 2x/5x/10x scale?
+ * @property {string} leadership_readiness.clarity_generation - Do they create clarity or confusion?
+ * @property {string} leadership_readiness.followership_quality - Willing followers vs compliance?
+ * @property {string} leadership_readiness.relational_collapse_risk - Collapse under resistance?
+ * @property {string} leadership_readiness.control_tendency - Over-control vs appropriate delegation
+ * @property {string} leadership_readiness.development_capability - Can they develop others?
+ * @property {number} leadership_readiness.confidence - 0.0-1.0 confidence score
+ * 
+ * @property {Object} role_fit_analysis - Natural role alignment
+ * @property {string} role_fit_analysis.builder_vs_optimizer - Create new vs improve existing
+ * @property {string} role_fit_analysis.operator_vs_visionary - Execute vs imagine
+ * @property {string} role_fit_analysis.manager_vs_producer - Lead others vs produce directly
+ * @property {string} role_fit_analysis.explorer_vs_stabilizer - New territory vs consolidation
+ * @property {string} role_fit_analysis.executor_vs_strategist - Do vs plan
+ * @property {string} role_fit_analysis.ambiguity_tolerance - High chaos vs low chaos fit
+ * @property {Array<string>} role_fit_analysis.natural_roles - Best-fit role archetypes
+ * @property {Array<string>} role_fit_analysis.friction_roles - High-friction role archetypes
+ * 
+ * @property {Object} future_growth_constraints - Scaling bottlenecks
+ * @property {Array<string>} future_growth_constraints.at_2x_scale - Likely constraints at 2x
+ * @property {Array<string>} future_growth_constraints.at_5x_scale - Likely constraints at 5x
+ * @property {string} future_growth_constraints.stress_amplification - How stress compounds
+ * @property {string} future_growth_constraints.operational_fragility - System weakness points
+ * @property {string} future_growth_constraints.relational_fragility - Relationship strain points
+ * @property {string} future_growth_constraints.decision_overload_risk - Bottleneck likelihood
+ * @property {string} future_growth_constraints.scaling_resistance_pattern - Where resistance emerges
+ * 
+ * @property {Object} coaching_leverage_points - Highest-ROI development areas
+ * @property {string} coaching_leverage_points.highest_roi_adjustment - Smallest change, biggest impact
+ * @property {Array<string>} coaching_leverage_points.invisible_drag_habits - Unseen friction sources
+ * @property {string} coaching_leverage_points.resistance_likelihood - How coachable actually?
+ * @property {string} coaching_leverage_points.accountability_dependency - External structure need
+ * @property {Array<string>} coaching_leverage_points.quick_wins - 30-90 day improvements
+ * @property {Array<string>} coaching_leverage_points.long_term_work - 6-24 month development
+ * 
+ * @property {Object} hidden_risk_patterns - Non-obvious failure modes
+ * @property {Array<string>} hidden_risk_patterns.strengths_as_liabilities - When strengths hurt
+ * @property {string} hidden_risk_patterns.relational_erosion_risk - Relationship damage trajectory
+ * @property {string} hidden_risk_patterns.strategic_drift_risk - Loss of direction likelihood
+ * @property {string} hidden_risk_patterns.execution_inconsistency - Follow-through reliability
+ * @property {string} hidden_risk_patterns.burnout_trajectory - Sustainability assessment
+ * @property {string} hidden_risk_patterns.isolation_pattern - Tendency to operate alone
+ * @property {number} hidden_risk_patterns.severity - 0.0-1.0 aggregate risk score
+ * 
+ * @property {Object} execution_identity - How they actually operate (not how they think)
+ * @property {string} execution_identity.true_default - Real operating mode under pressure
+ * @property {string} execution_identity.claimed_identity - How they describe themselves
+ * @property {string} execution_identity.identity_gap - Difference between claim and reality
+ * @property {string} execution_identity.operational_truth - What actually happens
+ * 
+ * @property {Object} strategic_ceiling_analysis - Long-term growth limits
+ * @property {string} strategic_ceiling_analysis.current_ceiling - Where they'll hit wall
+ * @property {string} strategic_ceiling_analysis.ceiling_cause - Why the ceiling exists
+ * @property {string} strategic_ceiling_analysis.breakthrough_requirement - What it takes to break through
+ * @property {number} strategic_ceiling_analysis.ceiling_proximity - How close? (0.0-1.0)
+ * 
+ * @property {Object} scaling_readiness - Infrastructure and capacity for growth
+ * @property {string} scaling_readiness.systems_maturity - Operational infrastructure level
+ * @property {string} scaling_readiness.delegation_capacity - Can they let go?
+ * @property {string} scaling_readiness.talent_development - Can they build a team?
+ * @property {string} scaling_readiness.process_thinking - Systems vs ad-hoc
+ * @property {number} scaling_readiness.readiness_score - 0.0-1.0 aggregate score
+ * 
+ * @property {Object} team_interaction_patterns - How they show up in groups
+ * @property {string} team_interaction_patterns.conflict_mode - How they handle disagreement
+ * @property {string} team_interaction_patterns.collaboration_style - How they work with others
+ * @property {string} team_interaction_patterns.feedback_reception - How they receive input
+ * @property {string} team_interaction_patterns.trust_building - How they build relationships
+ * @property {Array<string>} team_interaction_patterns.friction_triggers - What creates tension
+ * @property {Array<string>} team_interaction_patterns.team_value_add - What they bring to groups
  */
 
 export const CANONICAL_PROFILE_SCHEMA = {

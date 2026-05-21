@@ -33,6 +33,15 @@ import { inferLeadershipArchitecture } from './inferLeadershipArchitecture.js';
 import { buildNarrativeProfile } from './buildNarrativeProfile.js';
 import { analyzeLongFormAnswers } from './analyzeLongFormAnswers.js';
 import { synthesizeCrossQuestionPatterns } from './synthesizeCrossQuestionPatterns.js';
+import { inferLeadershipReadiness } from './inferLeadershipReadiness.js';
+import { inferRoleFit } from './inferRoleFit.js';
+import { inferFutureConstraints } from './inferFutureConstraints.js';
+import { inferCoachingLeverage } from './inferCoachingLeverage.js';
+import { inferHiddenRisks } from './inferHiddenRisks.js';
+import { inferExecutionIdentity } from './inferExecutionIdentity.js';
+import { inferStrategicCeiling } from './inferStrategicCeiling.js';
+import { inferScalingReadiness } from './inferScalingReadiness.js';
+import { inferTeamInteraction } from './inferTeamInteraction.js';
 
 /**
  * Generate canonical behavioral profile
@@ -91,20 +100,89 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
       }))
     : [];
   
-  // STEP 9: Infer environment fit
-  const environment_fit = inferEnvironmentFit(vector_scores, ranked_dimensions);
+  // STEP 9: Infer enhanced environment fit (with analyzed responses)
+  const environment_fit = inferEnvironmentFit(vector_scores, ranked_dimensions, analyzed_responses);
   
-  // STEP 10: Build narrative profile (with Step 2D analyzed responses)
+  // STEP 10: Infer leadership readiness (STEP 2E-D)
+  const leadership_readiness = inferLeadershipReadiness(
+    vector_scores,
+    leadership_architecture,
+    communication_style,
+    stress_patterns,
+    analyzed_responses
+  );
+  
+  // STEP 11: Infer role fit (STEP 2E-D)
+  const role_fit_analysis = inferRoleFit(vector_scores, analyzed_responses);
+  
+  // STEP 12: Infer future constraints (STEP 2E-D)
+  const future_growth_constraints = inferFutureConstraints(
+    vector_scores,
+    analyzed_responses,
+    contradictions
+  );
+  
+  // STEP 13: Infer coaching leverage (STEP 2E-D)
+  const coaching_leverage_points = inferCoachingLeverage(
+    vector_scores,
+    contradictions,
+    analyzed_responses,
+    leadership_architecture
+  );
+  
+  // STEP 14: Infer hidden risks (STEP 2E-D)
+  const hidden_risk_patterns = inferHiddenRisks(
+    vector_scores,
+    stress_patterns,
+    analyzed_responses,
+    contradictions
+  );
+  
+  // STEP 15: Infer execution identity (STEP 2E-D)
+  const execution_identity = inferExecutionIdentity(
+    vector_scores,
+    analyzed_responses,
+    contradictions
+  );
+  
+  // STEP 16: Infer strategic ceiling (STEP 2E-D)
+  const strategic_ceiling_analysis = inferStrategicCeiling(
+    vector_scores,
+    analyzed_responses,
+    contradictions,
+    future_growth_constraints
+  );
+  
+  // STEP 17: Infer scaling readiness (STEP 2E-D)
+  const scaling_readiness = inferScalingReadiness(
+    vector_scores,
+    analyzed_responses,
+    leadership_readiness
+  );
+  
+  // STEP 18: Infer team interaction patterns (STEP 2E-D)
+  const team_interaction_patterns = inferTeamInteraction(
+    vector_scores,
+    analyzed_responses,
+    communication_style
+  );
+  
+  // STEP 19: Build narrative profile (with all new domains)
   const narrative_profile = buildNarrativeProfile(
     inferred_patterns,
     contradictions,
     stress_patterns,
     communication_style,
     leadership_architecture,
-    analyzed_responses
+    analyzed_responses,
+    leadership_readiness,
+    future_growth_constraints,
+    coaching_leverage_points,
+    hidden_risk_patterns,
+    strategic_ceiling_analysis
   );
   
-  // STEP 11: Assemble canonical artifact
+  // STEP 20: Assemble canonical artifact
   const canonicalProfile = {
     profile_id,
     metadata,
@@ -112,20 +190,34 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     ranked_dimensions,
     top_systems,
     
-    // Step 2D additions: expanded intake analysis
+    // Step 2D: expanded intake analysis
     life_direction: analyzed_responses.life_direction,
     business_operating_reality: analyzed_responses.business_reality,
     growth_tension: analyzed_responses.growth_tension,
     systems_accountability: analyzed_responses.systems_accountability,
     stall_patterns: analyzed_responses.stall_patterns,
     
+    // Core inference (original)
     inferred_patterns,
-    contradictions, // now includes cross-question tensions
+    contradictions,
     stress_patterns,
     communication_style,
     leadership_architecture,
     development_targets,
     environment_fit,
+    
+    // Step 2E-D: organizational intelligence domains
+    leadership_readiness,
+    role_fit_analysis,
+    future_growth_constraints,
+    coaching_leverage_points,
+    hidden_risk_patterns,
+    execution_identity,
+    strategic_ceiling_analysis,
+    scaling_readiness,
+    team_interaction_patterns,
+    
+    // Narrative synthesis
     narrative_profile
   };
   
@@ -135,55 +227,82 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
 /**
  * Infer environment fit from dimension profile
  */
-function inferEnvironmentFit(vectorScores, rankedDimensions) {
-  const primary = rankedDimensions[0]?.dimension || 'vector';
-  const opposing1 = rankedDimensions[6]?.dimension || 'flex';
+function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses = {}) {
+  const { stall_patterns, growth_tension } = analyzedResponses;
   
   const thrives_in = [];
   const struggles_in = [];
   const requires = [];
   
-  const DIMENSION_LABELS = {
-    vector: 'command',
-    signal: 'relational awareness',
-    fidelity: 'precision',
-    velocity: 'tempo',
-    leverage: 'influence',
-    flex: 'adaptability',
-    framework: 'structure',
-    horizon: 'perspective'
-  };
-  
   // High vector thrives in fast-execution cultures
   if (vectorScores.vector > 6.5) {
-    thrives_in.push("Fast-moving organizations that reward decisive action");
-    struggles_in.push("Consensus-heavy cultures that require extensive alignment before moving");
-    requires.push("Autonomy to establish direction without constant approval");
+    thrives_in.push("Fast-moving organizations with clear decision authority");
+    thrives_in.push("Entrepreneurial/startup environments that reward speed");
+    struggles_in.push("Consensus-heavy cultures requiring extensive buy-in");
+    struggles_in.push("Matrix organizations with diffuse authority");
+    requires.push("Autonomy to establish direction and execute quickly");
   }
   
   // High framework thrives in structured environments
   if (vectorScores.framework > 6.5) {
-    thrives_in.push("Process-driven organizations with clear structure");
-    struggles_in.push("High-chaos environments that require constant pivoting");
-    requires.push("Defined processes and clear role expectations");
+    thrives_in.push("Process-mature organizations (enterprise, regulated industries)");
+    thrives_in.push("Operations-heavy roles with defined workflows");
+    struggles_in.push("High-chaos startup environments");
+    struggles_in.push("Frequent pivots and strategic shifts");
+    requires.push("Clear process documentation and role definition");
   }
   
   // High signal thrives in relational cultures
   if (vectorScores.signal > 6.5) {
-    thrives_in.push("Cultures that value relational intelligence and team dynamics");
-    struggles_in.push("Purely execution-focused environments that deprioritize relationships");
-    requires.push("Permission to invest in relational calibration");
+    thrives_in.push("Relationship-driven organizations (sales, customer success, HR)");
+    thrives_in.push("Collaborative team cultures");
+    struggles_in.push("Purely metrics-driven environments ignoring people dynamics");
+    requires.push("Time and permission to build relationships");
+  }
+  
+  // High velocity thrives in fast-paced environments
+  if (vectorScores.velocity > 6.5) {
+    thrives_in.push("High-tempo organizations (trading, emergency response, rapid deployment)");
+    struggles_in.push("Slow, deliberative cultures");
+    requires.push("Freedom to move fast without excessive process");
   }
   
   // High horizon thrives in strategic environments
   if (vectorScores.horizon > 6.5) {
-    thrives_in.push("Organizations that reward long-term strategic thinking");
-    struggles_in.push("Purely tactical environments focused only on short-term execution");
-    requires.push("Space to think multi-move ahead");
+    thrives_in.push("Strategy-focused organizations valuing long-range planning");
+    thrives_in.push("Product/R&D environments with long development cycles");
+    struggles_in.push("Purely tactical execution environments");
+    requires.push("Strategic planning time and future-state framing");
   }
   
-  // Add opposing dimension struggle
-  struggles_in.push(`Environments that over-index on ${DIMENSION_LABELS[opposing1]} without supporting ${DIMENSION_LABELS[primary]}`);
+  // High fidelity thrives in precision environments
+  if (vectorScores.fidelity > 6.5) {
+    thrives_in.push("Quality-focused organizations (healthcare, finance, engineering)");
+    struggles_in.push("Move-fast-break-things cultures");
+    requires.push("Standards and verification time");
+  }
+  
+  // Low signal struggles in relational environments
+  if (vectorScores.signal < 3.5) {
+    struggles_in.push("High-touch client relationships");
+    struggles_in.push("Consensus-required team cultures");
+    requires.push("Direct communication culture, tolerance for bluntness");
+  }
+  
+  // Low framework struggles in structured environments
+  if (vectorScores.framework < 3.5 && vectorScores.flex > 6.0) {
+    thrives_in.push("Startups and high-ambiguity environments");
+    struggles_in.push("Bureaucratic or heavily-procedural organizations");
+  }
+  
+  // Business reality adjustments
+  if (stall_patterns?.frustrations?.includes('bureaucracy')) {
+    struggles_in.push("Bureaucratic environments with excessive approvals");
+  }
+  
+  if (growth_tension?.priority_stated === 'autonomy' || growth_tension?.priority_stated === 'freedom') {
+    requires.push("High autonomy and minimal oversight");
+  }
   
   return {
     thrives_in,

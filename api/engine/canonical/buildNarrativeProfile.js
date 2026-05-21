@@ -35,7 +35,12 @@ export function buildNarrativeProfile(
   stressPatterns,
   communicationStyle,
   leadershipArchitecture,
-  analyzedResponses = {}
+  analyzedResponses = {},
+  leadershipReadiness = null,
+  futureConstraints = null,
+  coachingLeverage = null,
+  hiddenRisks = null,
+  strategicCeiling = null
 ) {
   const { profile_type, operating_signature } = inferredPatterns;
   
@@ -93,6 +98,48 @@ export function buildNarrativeProfile(
   // Contradiction analysis narrative (Step 2D)
   const contradiction_analysis = buildContradictionAnalysisNarrative(contradictions);
   
+  // Leadership readiness narrative (Step 2E-D)
+  const leadership_readiness_narrative = leadershipReadiness
+    ? `Leadership readiness: ${leadershipReadiness.scale_capacity}. ` +
+      `${leadershipReadiness.clarity_generation}. ` +
+      `Followership: ${leadershipReadiness.followership_quality}. ` +
+      `Control tendency: ${leadershipReadiness.control_tendency}. ` +
+      `${leadershipReadiness.development_capability}.`
+    : 'Leadership readiness assessment unavailable.';
+  
+  // Future bottlenecks narrative (Step 2E-D)
+  const future_bottlenecks_narrative = futureConstraints
+    ? `At 2x scale: ${futureConstraints.at_2x_scale.slice(0, 2).join('; ')}. ` +
+      `At 5x scale: ${futureConstraints.at_5x_scale.slice(0, 2).join('; ')}. ` +
+      `${futureConstraints.scaling_resistance_pattern}.`
+    : 'Future constraint analysis unavailable.';
+  
+  // Coaching leverage narrative (Step 2E-D)
+  const coaching_leverage_narrative = coachingLeverage
+    ? `Highest ROI: ${coachingLeverage.highest_roi_adjustment}. ` +
+      `Resistance likelihood: ${coachingLeverage.resistance_likelihood}. ` +
+      `Quick wins: ${coachingLeverage.quick_wins[0] || 'None identified'}. ` +
+      `Invisible drag: ${coachingLeverage.invisible_drag_habits[0] || 'Minimal'}.`
+    : 'Coaching leverage assessment unavailable.';
+  
+  // Hidden risks narrative (Step 2E-D)
+  const hidden_risks_narrative = hiddenRisks
+    ? `Risk severity: ${(hiddenRisks.severity * 100).toFixed(0)}%. ` +
+      `${hiddenRisks.relational_erosion_risk}. ` +
+      `${hiddenRisks.burnout_trajectory}. ` +
+      (hiddenRisks.strengths_as_liabilities.length > 0
+        ? `Strength liability: ${hiddenRisks.strengths_as_liabilities[0]}.`
+        : '')
+    : 'Risk assessment unavailable.';
+  
+  // Strategic ceiling narrative (Step 2E-D)
+  const strategic_ceiling_narrative = strategicCeiling
+    ? `Current ceiling: ${strategicCeiling.current_ceiling}. ` +
+      `Cause: ${strategicCeiling.ceiling_cause}. ` +
+      `Breakthrough requirement: ${strategicCeiling.breakthrough_requirement}. ` +
+      `Ceiling proximity: ${(strategicCeiling.ceiling_proximity * 100).toFixed(0)}%.`
+    : 'Strategic ceiling assessment unavailable.';
+  
   return {
     executive_summary,
     leadership_narrative,
@@ -100,7 +147,12 @@ export function buildNarrativeProfile(
     communication_narrative,
     development_narrative,
     business_manifestation,
-    contradiction_analysis
+    contradiction_analysis,
+    leadership_readiness_narrative,
+    future_bottlenecks_narrative,
+    coaching_leverage_narrative,
+    hidden_risks_narrative,
+    strategic_ceiling_narrative
   };
 }
 

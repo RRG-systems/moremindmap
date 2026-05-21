@@ -203,6 +203,57 @@ function detectSystemsMaturityGap(systemsAccountability, stallPatterns, business
  * @param {Object} vectorScores - Dimension scores
  * @returns {Array} cross_question_tensions
  */
+/**
+ * Detect delegation resistance patterns
+ */
+function detectDelegationTension(stallPatterns, businessReality, vectorScores) {
+  const tensions = [];
+  
+  const delegationGap = stallPatterns?.avoidance_patterns?.includes('delegation') ||
+                        stallPatterns?.attention_direction === 'execution_gaps';
+  const hasTeam = businessReality?.leadership_scope !== null;
+  const highControl = vectorScores.vector > 6.5;
+  
+  if (delegationGap && hasTeam && highControl) {
+    tensions.push({
+      type: 'delegation_control_paradox',
+      tension: 'Wants to scale but struggles to delegate; becomes bottleneck',
+      manifestation: 'Control tendency limits organizational capacity; tries to do too much personally',
+      severity: 'high',
+      dimensions_in_conflict: ['vector', 'leverage'],
+      resolution_path: 'Define explicit delegation standards; build trust through systems not oversight'
+    });
+  }
+  
+  return tensions;
+}
+
+/**
+ * Detect relationship vs execution priority tension
+ */
+function detectRelationalExecutionTension(stallPatterns, vectorScores, lifeDirection) {
+  const tensions = [];
+  
+  const relationalFrustration = stallPatterns?.frustrations?.includes('relational');
+  const lowSignal = vectorScores.signal < 3.5;
+  const highVector = vectorScores.vector > 6.5;
+  const claimsRelationships = lifeDirection?.stated_priorities?.includes('family') ||
+                               lifeDirection?.stated_priorities?.includes('relationships');
+  
+  if (relationalFrustration && lowSignal && highVector) {
+    tensions.push({
+      type: 'execution_speed_relational_damage',
+      tension: 'High execution speed creates relational friction as collateral damage',
+      manifestation: 'Moves fast, repairs relationships later; team experiences whiplash',
+      severity: claimsRelationships ? 'high' : 'moderate',
+      dimensions_in_conflict: ['vector', 'signal'],
+      resolution_path: 'Build relational awareness check-ins before directive action'
+    });
+  }
+  
+  return tensions;
+}
+
 export function synthesizeCrossQuestionPatterns(analyzedResponses, vectorScores) {
   const {
     life_direction,
@@ -229,6 +280,14 @@ export function synthesizeCrossQuestionPatterns(analyzedResponses, vectorScores)
   // Detect systems maturity gaps
   const systemsGaps = detectSystemsMaturityGap(systems_accountability, stall_patterns, business_reality);
   tensions.push(...systemsGaps);
+  
+  // Detect delegation tensions
+  const delegationTensions = detectDelegationTension(stall_patterns, business_reality, vectorScores);
+  tensions.push(...delegationTensions);
+  
+  // Detect relational-execution tensions
+  const relationalTensions = detectRelationalExecutionTension(stall_patterns, vectorScores, life_direction);
+  tensions.push(...relationalTensions);
   
   return tensions;
 }
