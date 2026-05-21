@@ -1,0 +1,204 @@
+{
+  "profile_id": "MM-20260521-test01",
+  "metadata": {
+    "assessment_version": "mini-v2",
+    "generated_at": "2026-05-21T18:17:47.099Z",
+    "model": "canonical-v1-test",
+    "person_name": null,
+    "email": null
+  },
+  "vector_scores": {
+    "vector": 1.33,
+    "signal": 0,
+    "fidelity": 2,
+    "velocity": 2,
+    "leverage": 1,
+    "flex": 2,
+    "framework": 2,
+    "horizon": 2
+  },
+  "ranked_dimensions": [
+    {
+      "dimension": "fidelity",
+      "score": 2,
+      "rank": 1
+    },
+    {
+      "dimension": "velocity",
+      "score": 2,
+      "rank": 2
+    },
+    {
+      "dimension": "flex",
+      "score": 2,
+      "rank": 3
+    },
+    {
+      "dimension": "framework",
+      "score": 2,
+      "rank": 4
+    },
+    {
+      "dimension": "horizon",
+      "score": 2,
+      "rank": 5
+    },
+    {
+      "dimension": "vector",
+      "score": 1.33,
+      "rank": 6
+    },
+    {
+      "dimension": "leverage",
+      "score": 1,
+      "rank": 7
+    },
+    {
+      "dimension": "signal",
+      "score": 0,
+      "rank": 8
+    }
+  ],
+  "top_systems": {
+    "primary_driver": {
+      "dimension": "fidelity",
+      "score": 2,
+      "rank": 1,
+      "description": "moderate Precision (Fidelity)",
+      "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
+      "pressure_manifestation": "Under strain, precision preference increases; can create delays"
+    },
+    "secondary_stabilizer": {
+      "dimension": "velocity",
+      "score": 2,
+      "rank": 2,
+      "description": "moderate Tempo (Velocity)",
+      "operating_manifestation": "Prefers speed; moves to action quickly; impatient with deliberation",
+      "pressure_manifestation": "Under strain, speed preference increases; detail drops"
+    },
+    "opposing_pattern_1": {
+      "dimension": "leverage",
+      "score": 1,
+      "rank": 7,
+      "description": "low Influence (Leverage)",
+      "operating_manifestation": "Positions influence strategically; thinks about who needs to agree",
+      "pressure_manifestation": "Under strain, leverage-focus increases; relationship-focus drops"
+    },
+    "opposing_pattern_2": {
+      "dimension": "signal",
+      "score": 0,
+      "rank": 8,
+      "description": "low Relational Awareness (Signal)",
+      "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+      "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
+    },
+    "dimension_tradeoffs": [],
+    "dimension_synergies": []
+  },
+  "life_direction": {
+    "stated_priorities": [
+      "family",
+      "career",
+      "freedom",
+      "money",
+      "impact",
+      "growth"
+    ],
+    "priority_count": 6,
+    "future_orientation": "moderate",
+    "meaning_clarity": "moderate",
+    "identity_focused": false,
+    "word_count": 105
+  },
+  "business_operating_reality": null,
+  "growth_tension": null,
+  "systems_accountability": null,
+  "stall_patterns": {
+    "blame_direction": "mixed",
+    "frustrations": [
+      "relational",
+      "structural"
+    ],
+    "avoidance_admitted": true,
+    "self_awareness": "low",
+    "word_count": 175
+  },
+  "inferred_patterns": {
+    "profile_type": "Precision/Tempo",
+    "operating_signature": "Precision-driven with Tempo stabilization",
+    "leadership_approach": {
+      "primary_mode": "Verifies assumptions before moving",
+      "stabilizing_force": "Tempo provides structural support",
+      "team_experience": "High precision and error-catching",
+      "challenge_surface": "Verification can slow momentum"
+    },
+    "decision_architecture": {
+      "formation_pattern": "Precision drives decision formation",
+      "validation_method": "Tempo validates approach",
+      "speed_driver": "Moderate decision velocity",
+      "blind_spot": "Low Influence means leverage signals get missed"
+    },
+    "communication_style": {
+      "message_structure": "Precision-first communication",
+      "effectiveness_peak": "When operating environment values this dimension",
+      "friction_point": "When environment prioritizes opposing dimensions"
+    },
+    "pressure_response": {
+      "primary_shift": "Precision amplifies under pressure",
+      "secondary_shift": "Tempo becomes compensating mechanism",
+      "blind_spot_emergence": "Influence disappears — leverage signals get missed"
+    }
+  },
+  "contradictions": [],
+  "stress_patterns": {
+    "primary_stress_response": "Increases verification intensity — may get stuck in validation loops",
+    "secondary_stress_shift": "Tempo becomes compensating mechanism — holds system together as Precision amplifies",
+    "blind_spot_emergence": "Influence and Relational Awareness disappear — these signals don't register until crisis escalates",
+    "escalation_chain": [
+      "Mild pressure: Precision increases slightly, Influence signals start getting missed",
+      "Moderate pressure: Precision dominates operating system, Tempo compensates to maintain function",
+      "Severe pressure: Pure Precision execution, blind to Influence and Relational Awareness — repairs relationships/process after conflict resolves"
+    ],
+    "recovery_paths": [
+      "Build explicit Influence check-ins BEFORE pressure escalates",
+      "Recognize when Precision is amplifying — create circuit breakers",
+      "Post-conflict repair: consciously re-engage Influence and Relational Awareness after stress passes"
+    ],
+    "pattern_type": "narrowing"
+  },
+  "communication_style": {
+    "message_structure": "Precision-first communication structure",
+    "directness": "moderate",
+    "abstraction_level": "moderate",
+    "emotional_calibration": "Low emotional smoothing — message delivery prioritizes clarity over reception management",
+    "effectiveness_peaks": [],
+    "friction_points": [],
+    "calibrations": []
+  },
+  "leadership_architecture": {
+    "primary_mode": "Precision-driven leadership",
+    "stabilizing_force": "Tempo provides structural support when Precision creates tension",
+    "team_experience": "Team experiences Precision as primary organizing force",
+    "challenge_surface": "Precision dominance can suppress Influence — creates blind spot",
+    "dissent_tolerance": "moderate",
+    "development_orientation": "Development approach reflects Precision priority",
+    "calibrations": []
+  },
+  "development_targets": [],
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "Environments that over-index on influence without supporting precision"
+    ],
+    "requires": []
+  },
+  "narrative_profile": {
+    "executive_summary": "This is a Precision/Tempo profile — precision-driven with tempo stabilization. Precision-driven leadership. Precision dominance can suppress Influence — creates blind spot.",
+    "leadership_narrative": "Precision-driven leadership. Team experiences Precision as primary organizing force. Tempo provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress influence — creates blind spot. Development path: Build capacity in underutilized dimensions.",
+    "decision_narrative": "Precision drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Influence means leverage signals get missed. ",
+    "communication_narrative": "Communication style: Precision-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
+    "development_narrative": "Development focuses on building capacity in underutilized dimensions. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.",
+    "business_manifestation": "When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. ",
+    "contradiction_analysis": "No significant internal contradictions detected. Operating system shows dimensional coherence."
+  }
+}

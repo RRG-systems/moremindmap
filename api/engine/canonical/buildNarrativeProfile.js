@@ -186,4 +186,3 @@ function buildContradictionAnalysisNarrative(contradictions) {
   
   return narrative;
 }
-}

@@ -1,0 +1,279 @@
+# INSPECTION: CANONICAL ENGINE WIRING STATUS
+
+**Generated:** Thu May 21, 2026 10:58 MST  
+**Purpose:** Determine whether canonical engine is connected to production pipeline
+
+---
+
+## CRITICAL FINDING
+
+**CANONICAL ENGINE BUILT BUT NOT WIRED TO PRODUCTION**
+
+---
+
+## ARCHITECTURE ANALYSIS
+
+### What Exists
+
+**1. Canonical Engine (Complete)**
+- Location: `api/engine/canonical/`
+- Modules: 11 inference modules (~2,500 lines)
+- Status: ✅ BUILT (Steps 2A-2D complete)
+- Export: `generateCanonicalProfile(profileInput, options)`
+
+**2. Production Pipeline (Separate)**
+- Flow: `miniV2StagedExecutor.js` → `generateReportContent.js` → GPT prompt → Template injection
+- Status: ✅ OPERATIONAL (serving production traffic)
+- Model: Uses GPT via `generateReportContent()`
+
+**3. The Gap**
+- Canonical engine EXISTS but is NOT CALLED by production pipeline
+- Production still uses direct GPT generation (no canonical layer)
+- No job stores `canonical_profile` field
+- No profile_id generation in current flow
+
+---
+
+## CURRENT PRODUCTION FLOW
+
+```
+Assessment submission
+  ↓
+createJob() → Redis job:{uuid}
+  ↓
+executeFirstPassGeneration()
+  ├─ buildProfileInput(answers)
+  ├─ generateReportContent(profileInput)  ← CALLS GPT DIRECTLY
+  └─ Store: job.reportContent
+  ↓
+executeFirstInjection()
+  └─ injectReportContent(templates, reportContent)
+  ↓
+executeRepairPass() (if placeholders remain)
+  └─ generateReportContent(profileInput, missingFields)
+  ↓
+executeFinalInjection()
+  └─ Store: job.result_html
+```
+
+**NO CANONICAL STEP IN THIS FLOW**
+
+---
+
+## INTENDED CANONICAL FLOW
+
+```
+Assessment submission
+  ↓
+createJob() → Redis job:{uuid}
+  ↓
+executeCanonicalGeneration()  ← NEW STAGE
+  ├─ buildProfileInput(answers)
+  ├─ generateCanonicalProfile(profileInput)  ← CANONICAL ENGINE
+  └─ Store: job.canonical_profile + profile_id
+  ↓
+executeContentGeneration()
+  ├─ Read: job.canonical_profile
+  ├─ buildPromptFromCanonical(canonical)  ← PROMPT FROM CANONICAL
+  └─ Store: job.reportContent
+  ↓
+executeFirstInjection()
+  └─ injectReportContent(templates, reportContent)
+  ↓
+[Repair/Final as before]
+```
+
+---
+
+## MISSING COMPONENTS
+
+### 1. Stage: Canonical Generation
+**File:** `miniV2StagedExecutor.js`  
+**Need:** New function `executeCanonicalGeneration(job)`
+
+```javascript
+export async function executeCanonicalGeneration(job) {
+  const { buildProfileInput } = await import('./buildProfileInput.js')
+  const { generateCanonicalProfile } = await import('./canonical/canonicalProfileGenerator.js')
+  
+  const { answers } = job.payload
+  const profileInput = await buildProfileInput({ answers })
+  
+  const canonical = await generateCanonicalProfile(profileInput, {
+    profile_id: generateProfileId(),
+    model: 'canonical-v1'
+  })
+  
+  await updateJob(job.job_id, {
+    stage: JOB_STAGE.CONTENT_GENERATION,
+    profileInput,
+    canonical_profile: canonical,
+    profile_id: canonical.profile_id
+  })
+  
+  return { success: true, nextStage: JOB_STAGE.CONTENT_GENERATION }
+}
+```
+
+### 2. Job Schema: canonical_profile Field
+**File:** `miniV2JobManager.js` → `createJob()`
+
+Add fields:
+```javascript
+profile_id: null,
+canonical_profile: null,
+```
+
+### 3. Prompt Builder: Canonical → GPT Prompt
+**New file:** `api/prompts/canonicalToPrompt.js`
+
+Convert canonical artifact → GPT prompt that respects canonical intelligence.
+
+### 4. Stage Order Update
+**File:** `miniV2StagedExecutor.js` → `executeNextStage()`
+
+New sequence:
+1. `RECEIVED` → `executeCanonicalGeneration()`
+2. `CANONICAL_GENERATION` → `executeContentGeneration()` (renamed from first_pass)
+3. `CONTENT_GENERATION` → `executeFirstInjection()`
+4. [Rest unchanged]
+
+### 5. Profile ID Generator
+**File:** `canonical/canonicalProfileGenerator.js`
+
+```javascript
+function generateProfileId() {
+  const date = new Date().toISOString().split('T')[0].replace(/-/g, '')
+  const shortId = Math.random().toString(36).substring(2, 8)
+  return `MM-${date}-${shortId}`
+}
+```
+
+---
+
+## REDIS STORAGE REALITY
+
+**Current State:**
+- Redis URL configured for Vercel deployment
+- Local Redis NOT running (ECONNREFUSED when tested)
+- Jobs stored as: `job:{uuid}` with 24h TTL
+- No separate profile storage
+- No durable canonical artifact storage
+
+**Implication:**
+- Cannot inspect live jobs locally (Redis on Vercel only)
+- No local test jobs exist
+- Canonical profiles (when generated) will expire after 24h
+- No "Vault" storage exists yet
+
+---
+
+## TEST DOSSIER STATUS
+
+**Files found:**
+- `TEST_CANONICAL_DOSSIER_V2.md` — Example canonical output (documentation)
+- `TEST_CANONICAL_PROFILE.md` — Example canonical structure (documentation)
+
+**What they are:**
+- Documentation examples showing intended canonical output structure
+- NOT actual generated profiles from real assessments
+- Written by hand to spec out canonical schema
+
+**What they are NOT:**
+- Live test results
+- Generated by canonical engine
+- Stored canonical artifacts
+
+---
+
+## CANONICAL ENGINE VERIFICATION
+
+**Has it been tested?**
+- ✅ Modules exist and export functions
+- ✅ Schema defined
+- ❌ No test harness found
+- ❌ No local execution logs
+- ❌ generateCanonicalProfile() never called by production code
+- ❌ No proof of successful execution
+
+**Next validation step:**
+Create isolated test script that:
+1. Loads test assessment answers
+2. Calls `buildProfileInput()`
+3. Calls `generateCanonicalProfile()`
+4. Writes output to `INSPECTION_CANONICAL_TEST_OUTPUT.json`
+5. Verifies structure matches schema
+
+---
+
+## RENDERER MAPPING STATUS
+
+**Question:** Does renderer expect canonical fields that don't exist?
+
+**Answer:** NO — Renderer expects `reportContent` (GPT output), not canonical
+
+**Current injection flow:**
+```javascript
+injectReportContent(templates, reportContent)
+```
+
+Where `reportContent` = GPT-generated page content (page01_cover, page02_..., etc.)
+
+**Canonical does not feed renderer yet.**
+
+**Future intended flow:**
+```javascript
+reportContent = generateReportContent(canonical_profile)  // Canonical → Content
+injectReportContent(templates, reportContent)
+```
+
+---
+
+## SUMMARY
+
+### Current Reality
+1. **Canonical engine:** Built, documented, modular, complete
+2. **Production pipeline:** Operational, serves live traffic, uses GPT directly
+3. **Connection:** NONE — They don't talk to each other yet
+4. **Storage:** Jobs stored in Redis (Vercel), 24h TTL, no profile_id, no canonical storage
+5. **Testing:** No live canonical profiles exist, only documentation examples
+
+### What Works
+- Assessment → Job creation → GPT generation → Template injection → HTML delivery
+- Zero placeholders, deterministic fallback, async architecture stable
+
+### What Doesn't Work
+- Canonical intelligence is not used
+- No profile_id generation
+- No durable canonical storage
+- No "eerily accurate" quality validation
+- STEP 2E blocked: Cannot inspect canonical output because it's never generated
+
+### Why This Matters
+**You cannot inspect a canonical dossier that has never been created.**
+
+The canonical engine exists as code, but has never been executed in production or test.
+
+---
+
+## EXACT NEXT TASK
+
+**STEP 2E-B: Generate First Real Canonical Dossier (Isolated Test)**
+
+1. Create standalone test script: `test_canonical_generation.js`
+2. Load or create realistic 28-question assessment payload
+3. Run `buildProfileInput()` → `generateCanonicalProfile()`
+4. Write output to `INSPECTION_CANONICAL_DOSSIER_REAL.json`
+5. Inspect quality against CANONICAL_PROMPT_DOCTRINE
+6. Validate schema compliance
+7. Assess "eerily accurate" vs "generic summary"
+
+**After validation:**
+- Wire canonical into production (Steps 2F-2G)
+- Add canonical stage to miniV2StagedExecutor
+- Modify prompt builder to consume canonical
+- Test end-to-end with real assessment
+
+---
+
+**STATUS: CANONICAL ENGINE EXISTS BUT IS DISCONNECTED FROM PRODUCTION PIPELINE**
