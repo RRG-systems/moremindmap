@@ -135,6 +135,68 @@ function detectGrowthCeilingTension(growthTension, businessReality) {
 }
 
 /**
+ * Detect systems maturity gap
+ * 
+ * User wants growth
+ * BUT follow-up/accountability systems weak
+ * → execution gap
+ */
+function detectSystemsMaturityGap(systemsAccountability, stallPatterns, businessReality) {
+  const gaps = [];
+  
+  if (!systemsAccountability) return gaps;
+  
+  // Low system confidence but high growth goals
+  const weakSystems = systemsAccountability.system_confidence === 'low' || 
+                      systemsAccountability.systems_thinking === 'low';
+  const hasGrowthGoals = businessReality?.has_specific_metrics === true;
+  
+  if (weakSystems && hasGrowthGoals) {
+    gaps.push({
+      type: 'growth_goals_vs_systems_maturity',
+      tension: 'Ambitious growth targets but operational systems weak or inconsistent',
+      manifestation: 'Infrastructure gap — current systems cannot support stated goals',
+      severity: 'high',
+      dimensions_in_conflict: ['horizon', 'framework'],
+      resolution_path: 'Build systematic infrastructure before scaling further'
+    });
+  }
+  
+  // Acknowledged avoidance patterns + gap awareness
+  const avoidanceAdmitted = stallPatterns?.avoidance_admitted === true;
+  const gapAwareness = businessReality?.gap_awareness === true;
+  
+  if (avoidanceAdmitted && gapAwareness) {
+    gaps.push({
+      type: 'knowledge_execution_gap',
+      tension: 'Clearly identifies gaps and avoidance patterns but continues same behavior',
+      manifestation: 'High awareness, low execution — knows what to do but doesn\'t do it',
+      severity: 'moderate',
+      dimensions_in_conflict: ['fidelity', 'velocity'],
+      resolution_path: 'Implement accountability structures that force action on known gaps'
+    });
+  }
+  
+  // Coachability claim with resistance signals
+  const claimsCoachable = systemsAccountability.coachability !== 'no';
+  const qualifiedCoachability = systemsAccountability.coachability === 'qualified';
+  const metaAwarenessLow = systemsAccountability.meta_awareness === 'low';
+  
+  if (claimsCoachable && qualifiedCoachability && metaAwarenessLow) {
+    gaps.push({
+      type: 'coachability_resistance_pattern',
+      tension: 'Claims coachability but qualifies it heavily and shows resistance signals',
+      manifestation: 'Intellectually open to coaching but operationally defaults back to own approach',
+      severity: 'moderate',
+      dimensions_in_conflict: ['framework', 'flex'],
+      resolution_path: 'Recognize when advice is resisted due to framework preference, not merit'
+    });
+  }
+  
+  return gaps;
+}
+
+/**
  * Synthesize all cross-question patterns
  * 
  * @param {Object} analyzedResponses - Output from analyzeLongFormAnswers
@@ -163,6 +225,10 @@ export function synthesizeCrossQuestionPatterns(analyzedResponses, vectorScores)
   // Detect growth ceiling tensions
   const growthCeilings = detectGrowthCeilingTension(growth_tension, business_reality);
   tensions.push(...growthCeilings);
+  
+  // Detect systems maturity gaps
+  const systemsGaps = detectSystemsMaturityGap(systems_accountability, stall_patterns, business_reality);
+  tensions.push(...systemsGaps);
   
   return tensions;
 }

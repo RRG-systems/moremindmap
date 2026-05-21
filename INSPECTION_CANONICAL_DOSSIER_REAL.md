@@ -1,6 +1,6 @@
 # INSPECTION: CANONICAL DOSSIER (REAL GENERATION)
 
-**Generated:** 2026-05-21T18:17:47.101Z
+**Generated:** 2026-05-21T18:43:22.310Z
 **Profile ID:** MM-20260521-test01
 **Model:** canonical-v1-test
 **Assessment Version:** mini-v2
@@ -12,7 +12,7 @@
 ```json
 {
   "assessment_version": "mini-v2",
-  "generated_at": "2026-05-21T18:17:47.099Z",
+  "generated_at": "2026-05-21T18:43:22.308Z",
   "model": "canonical-v1-test",
   "person_name": null,
   "email": null
@@ -56,6 +56,26 @@
 **Meaning Clarity:** moderate
 **Identity Focus:** N/A
 
+## BUSINESS OPERATING REALITY
+
+**Role:** N/A
+**Scale:** N/A
+**Numerical Grounding:** high
+**Self-Awareness:** N/A
+
+## GROWTH TENSION
+
+**Scaling Reaction:** N/A
+**Execution Confidence:** N/A
+**Adaptive Ceiling:** N/A
+
+## SYSTEMS & ACCOUNTABILITY
+
+**Systems Quality:** N/A
+**Accountability Mechanism:** N/A
+**Coachability:** qualified
+**Meta-Cognitive Awareness:** N/A
+
 ## INFERRED BEHAVIORAL PATTERNS
 
 **profile_type:** Precision/Tempo
@@ -67,7 +87,23 @@
 
 ## CONTRADICTIONS
 
-No contradictions detected.
+### 1. freedom_vs_growth_ambition
+**Tension:** Values freedom but emotionally positive about 3x growth (which constrains freedom)
+**Dimensions in Conflict:** N/A
+**Resolution Path:** undefined
+**Severity:** mild
+
+### 2. knowledge_execution_gap
+**Tension:** Clearly identifies gaps and avoidance patterns but continues same behavior
+**Dimensions in Conflict:** fidelity vs velocity
+**Resolution Path:** Implement accountability structures that force action on known gaps
+**Severity:** moderate
+
+### 3. coachability_resistance_pattern
+**Tension:** Claims coachability but qualifies it heavily and shows resistance signals
+**Dimensions in Conflict:** framework vs flex
+**Resolution Path:** Recognize when advice is resisted due to framework preference, not merit
+**Severity:** moderate
 
 ## STRESS PATTERNS
 
@@ -93,24 +129,36 @@ No contradictions detected.
 This is a Precision/Tempo profile — precision-driven with tempo stabilization. Precision-driven leadership. Precision dominance can suppress Influence — creates blind spot.
 
 ### leadership_narrative
-Precision-driven leadership. Team experiences Precision as primary organizing force. Tempo provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress influence — creates blind spot. Development path: Build capacity in underutilized dimensions.
+Precision-driven leadership. Team experiences Precision as primary organizing force. Tempo provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress influence — creates blind spot. Internal tension: Unresolved tension between autonomy and scale ambition. Development path: Build capacity in underutilized dimensions.
 
 ### decision_narrative
-Precision drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Influence means leverage signals get missed. 
+Precision drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Influence means leverage signals get missed. This creates tension — High awareness, low execution — knows what to do but doesn't do it.
 
 ### communication_narrative
 Communication style: Precision-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.
 
 ### development_narrative
-Development focuses on building capacity in underutilized dimensions. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.
+Primary development opportunity: undefined. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.
 
 ### business_manifestation
-When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. 
+When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. Emotionally positive about scale — ambition elasticity present. High numerical grounding — operationally specific about metrics and scale. 
 
 ### contradiction_analysis
-No significant internal contradictions detected. Operating system shows dimensional coherence.
+Internal contradiction: High awareness, low execution — knows what to do but doesn't do it. Additional tension: Intellectually open to coaching but operationally defaults back to own approach. Resolution path: Build conscious integration between conflicting dimensions.
 
 ## DEVELOPMENT TARGETS
+
+1. **unknown** (Priority 1, Severity: mild)
+   - Rationale: Values freedom but emotionally positive about 3x growth (which constrains freedom)
+   - Approach: Develop awareness
+
+2. **velocity** (Priority 2, Severity: moderate)
+   - Rationale: Clearly identifies gaps and avoidance patterns but continues same behavior
+   - Approach: Implement accountability structures that force action on known gaps
+
+3. **flex** (Priority 3, Severity: moderate)
+   - Rationale: Claims coachability but qualifies it heavily and shows resistance signals
+   - Approach: Recognize when advice is resisted due to framework preference, not merit
 
 ## ENVIRONMENT FIT
 
@@ -121,76 +169,18 @@ No significant internal contradictions detected. Operating system shows dimensio
 
 ## CANONICAL QUALITY REVIEW
 
-### CRITICAL DISCOVERY
-
-**Test payload includes 28 questions (Q1-Q28), but questionMap.js only defines 24 questions.**
-
-Q25-Q28 (expanded intake from STEP 2C spec) were **designed but never added to question map**.
-
-Result:
-- buildProfileInput only processed Q1-Q24
-- Written responses limited to Q2, Q11, Q17, Q19, Q21, Q23 (6 questions)
-- Q24, Q26, Q27, Q28 (business reality, growth tension, systems) **not processed**
-- business_operating_reality: null
-- growth_tension: null
-- systems_accountability: null
-
-**STEP 2C STATUS: INCOMPLETE**
-- Spec written ✅
-- Questions designed ✅
-- Added to questionMap.js ❌
-- Wired to buildProfileInput ❌
-
-### QUALITY ASSESSMENT (LIMITED BY MISSING QUESTIONS)
+*(To be completed after manual inspection against CANONICAL_PROMPT_DOCTRINE)*
 
 **Strengths:**
-- ✅ Canonical engine executes without errors
-- ✅ Generates profile_id correctly (MM-20260521-test01)
-- ✅ Dimension scoring works
-- ✅ Ranked dimensions correct
-- ✅ Top systems identified (Primary: Precision, Secondary: Tempo)
-- ✅ Narrative profile generates coherent text
-- ✅ Stress pattern inference logical
-- ✅ Life direction analysis extracts stated priorities correctly
+- [To be assessed]
 
 **Weak Sections:**
-- ❌ No contradictions detected (expected 2-4 from test answers)
-- ❌ No development targets generated (depends on contradictions)
-- ❌ Environment fit mostly empty (thrives_in: [], requires: [])
-- ❌ Communication style missing effectiveness_peaks and friction_points arrays
-- ❌ Leadership architecture missing calibrations array
-- ⚠️ Dimension labels showing "undefined" instead of actual labels
-- ⚠️ business_operating_reality: null (Q26-Q28 not in question map)
-- ⚠️ growth_tension: null (Q27 not processed)
-- ⚠️ systems_accountability: null (Q28 not processed)
+- [To be assessed]
 
 **Generic Sections:**
-- ⚠️ "Works best in aligned environments" — vague
-- ⚠️ "Friction point: when style mismatches culture" — generic
-- ⚠️ "Development focuses on building capacity in underutilized dimensions" — placeholder language
-- ⚠️ "No significant internal contradictions detected" — likely wrong (test answers show clear tensions)
+- [To be assessed]
 
 **Missing Inference Depth:**
-- inferContradictions() returning empty array (logic may need tuning)
-- Cross-question synthesis not detecting tensions in written responses
-- Business reality gap analysis not running (questions missing)
-- Meta-cognitive awareness not assessed (Q28 missing)
-- Coachability signals not extracted (Q28 missing)
+- [To be assessed]
 
-**Eerily Accurate Threshold:** **NO**
-
-**Reasoning:**
-- Output is structurally sound but semantically thin
-- No contradictions detected despite test subject showing clear self-awareness gaps
-- Generic language dominates ("works best in aligned environments")
-- Missing 4 critical business/leadership questions that would provide richest inference material
-- Feels like dimensional scoring report, not behavioral intelligence
-- Would not trigger "how did you know that?" reaction
-
-**Next Steps:**
-1. Complete STEP 2C implementation (add Q25-Q28 to questionMap.js)
-2. Re-run test with full 28 questions
-3. Debug inferContradictions() — should detect tensions from written answers
-4. Tune synthesizeCrossQuestionPatterns() — not producing contradictions
-5. Improve narrative quality (remove generic phrases)
-6. Add dimension label mapping (showing "undefined" currently)
+**Eerily Accurate Threshold:** [YES/NO] — [Reasoning]

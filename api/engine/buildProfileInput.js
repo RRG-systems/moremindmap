@@ -57,7 +57,7 @@ export class BuildProfileInput {
       generated_at: new Date().toISOString(),
       profile_version: 'mini-v2',
       question_set_version: 'set_1_v1',
-      question_count: 24,
+      question_count: 28,
       written_response_count: 10,
       multiple_choice_count: 18,
       confidence_score: 0.75, // Will be refined by confidence engine
@@ -71,9 +71,9 @@ export class BuildProfileInput {
     let quality = 'high';
     let penalties = 0;
 
-    // Check written response depth
+    // Check written response depth (updated for 28-question intake)
     const writtenResponses = Object.entries(rawAssessment.answers || {})
-      .filter(([key, val]) => key.startsWith('q') && [2, 6, 10, 15, 20, 24].includes(parseInt(key.slice(1))))
+      .filter(([key, val]) => key.startsWith('q') && [2, 19, 20, 21, 22, 23, 24, 26, 27, 28].includes(parseInt(key.slice(1))))
       .map(([, val]) => {
         // Safe text extraction
         if (typeof val === 'string') return val;

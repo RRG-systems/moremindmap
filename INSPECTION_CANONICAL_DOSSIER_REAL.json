@@ -2,7 +2,7 @@
   "profile_id": "MM-20260521-test01",
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-21T18:17:47.099Z",
+    "generated_at": "2026-05-21T18:43:22.308Z",
     "model": "canonical-v1-test",
     "person_name": null,
     "email": null
@@ -110,9 +110,31 @@
     "identity_focused": false,
     "word_count": 105
   },
-  "business_operating_reality": null,
-  "growth_tension": null,
-  "systems_accountability": null,
+  "business_operating_reality": {
+    "numerical_grounding": "high",
+    "has_specific_metrics": true,
+    "gap_awareness": true,
+    "scale_indicators": {
+      "database_mentioned": true,
+      "production_mentioned": true
+    },
+    "vague_vs_specific_ratio": 7,
+    "word_count": 142
+  },
+  "growth_tension": {
+    "scaling_response": "positive",
+    "vision_clarity": "absent",
+    "priority_stated": false,
+    "word_count": 132
+  },
+  "systems_accountability": {
+    "systems_thinking": "moderate",
+    "system_confidence": "high",
+    "has_accountability_structure": true,
+    "coachability": "qualified",
+    "meta_awareness": "low",
+    "word_count": 157
+  },
   "stall_patterns": {
     "blame_direction": "mixed",
     "frustrations": [
@@ -149,7 +171,36 @@
       "blind_spot_emergence": "Influence disappears — leverage signals get missed"
     }
   },
-  "contradictions": [],
+  "contradictions": [
+    {
+      "type": "freedom_vs_growth_ambition",
+      "tension": "Values freedom but emotionally positive about 3x growth (which constrains freedom)",
+      "manifestation": "Unresolved tension between autonomy and scale ambition",
+      "severity": "mild"
+    },
+    {
+      "type": "knowledge_execution_gap",
+      "tension": "Clearly identifies gaps and avoidance patterns but continues same behavior",
+      "manifestation": "High awareness, low execution — knows what to do but doesn't do it",
+      "severity": "moderate",
+      "dimensions_in_conflict": [
+        "fidelity",
+        "velocity"
+      ],
+      "resolution_path": "Implement accountability structures that force action on known gaps"
+    },
+    {
+      "type": "coachability_resistance_pattern",
+      "tension": "Claims coachability but qualifies it heavily and shows resistance signals",
+      "manifestation": "Intellectually open to coaching but operationally defaults back to own approach",
+      "severity": "moderate",
+      "dimensions_in_conflict": [
+        "framework",
+        "flex"
+      ],
+      "resolution_path": "Recognize when advice is resisted due to framework preference, not merit"
+    }
+  ],
   "stress_patterns": {
     "primary_stress_response": "Increases verification intensity — may get stuck in validation loops",
     "secondary_stress_shift": "Tempo becomes compensating mechanism — holds system together as Precision amplifies",
@@ -184,7 +235,29 @@
     "development_orientation": "Development approach reflects Precision priority",
     "calibrations": []
   },
-  "development_targets": [],
+  "development_targets": [
+    {
+      "dimension": "unknown",
+      "rationale": "Values freedom but emotionally positive about 3x growth (which constrains freedom)",
+      "approach": "Develop awareness",
+      "priority": 1,
+      "severity": "mild"
+    },
+    {
+      "dimension": "velocity",
+      "rationale": "Clearly identifies gaps and avoidance patterns but continues same behavior",
+      "approach": "Implement accountability structures that force action on known gaps",
+      "priority": 2,
+      "severity": "moderate"
+    },
+    {
+      "dimension": "flex",
+      "rationale": "Claims coachability but qualifies it heavily and shows resistance signals",
+      "approach": "Recognize when advice is resisted due to framework preference, not merit",
+      "priority": 3,
+      "severity": "moderate"
+    }
+  ],
   "environment_fit": {
     "thrives_in": [],
     "struggles_in": [
@@ -194,11 +267,11 @@
   },
   "narrative_profile": {
     "executive_summary": "This is a Precision/Tempo profile — precision-driven with tempo stabilization. Precision-driven leadership. Precision dominance can suppress Influence — creates blind spot.",
-    "leadership_narrative": "Precision-driven leadership. Team experiences Precision as primary organizing force. Tempo provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress influence — creates blind spot. Development path: Build capacity in underutilized dimensions.",
-    "decision_narrative": "Precision drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Influence means leverage signals get missed. ",
+    "leadership_narrative": "Precision-driven leadership. Team experiences Precision as primary organizing force. Tempo provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress influence — creates blind spot. Internal tension: Unresolved tension between autonomy and scale ambition. Development path: Build capacity in underutilized dimensions.",
+    "decision_narrative": "Precision drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Influence means leverage signals get missed. This creates tension — High awareness, low execution — knows what to do but doesn't do it.",
     "communication_narrative": "Communication style: Precision-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
-    "development_narrative": "Development focuses on building capacity in underutilized dimensions. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.",
-    "business_manifestation": "When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. ",
-    "contradiction_analysis": "No significant internal contradictions detected. Operating system shows dimensional coherence."
+    "development_narrative": "Primary development opportunity: undefined. Under pressure, increases verification intensity — may get stuck in validation loops. Influence and Relational Awareness disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Influence check-ins BEFORE pressure escalates.",
+    "business_manifestation": "When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns — awareness present but execution gap remains. Emotionally positive about scale — ambition elasticity present. High numerical grounding — operationally specific about metrics and scale. ",
+    "contradiction_analysis": "Internal contradiction: High awareness, low execution — knows what to do but doesn't do it. Additional tension: Intellectually open to coaching but operationally defaults back to own approach. Resolution path: Build conscious integration between conflicting dimensions."
   }
 }

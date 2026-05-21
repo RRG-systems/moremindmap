@@ -1,9 +1,10 @@
 // questionMap.js - MoreMindMap Set 1 v1
-// 24 scenario-based questions, anti-gaming
+// 28 scenario-based questions, anti-gaming + business reality
 // Created: May 9, 2026 by Rocky
+// Updated: May 21, 2026 - Added Q26-Q28 (Step 2C completion)
 // version: 'set_1_v1'
-// questionCount: 24
-// writtenQuestionCount: 6
+// questionCount: 28
+// writtenQuestionCount: 10
 
 export const QUESTION_MAP = {
   set_1: {
@@ -87,20 +88,55 @@ export const QUESTION_MAP = {
       {
         id: 24,
         type: 'written',
-        text: 'Looking back over the last 2–3 years, describe one situation that best represents how you operate under pressure, ambiguity, and complexity. What did you learn about yourself?',
+        text: 'If you are in sales, leadership, business ownership, or operate independently, answer the following in as much detail as possible. When your business, team, career, or performance begins to stall, where does your attention instinctively go first, and why? Describe: what frustrates you most professionally, where you believe your biggest bottlenecks are, what kinds of people energize you, what kinds of people drain you, how you react when people repeatedly resist your direction, what you avoid dealing with longer than you should, what you know you need to improve but struggle to change, where you believe you are underperforming relative to your potential, and what kind of business, career, or life you are ultimately trying to create.',
         writtenTargets: [
-          'pressure_behavior',
-          'ambiguity_tolerance',
-          'control_orientation',
-          'emotional_calibration',
-          'systems_thinking',
-          'learning_posture',
-          'accountability',
+          'stress_response',
+          'relational_dynamics',
           'self_awareness',
-          'abstraction_level',
-          'narrative_complexity',
-          'rigidity_vs_adaptability',
-          'relational_awareness'
+          'avoidance_patterns',
+          'performance_gaps',
+          'bottleneck_attribution',
+          'frustration_sources',
+          'energy_dynamics'
+        ]
+      },
+      {
+        id: 26,
+        type: 'written',
+        text: 'Sales, Leadership, and Current Business Reality. Answer the sections that apply to you. If you are in sales or production: Do you currently have enough leads, opportunities, or active prospects to achieve your goals? Why or why not? What is your current yearly production? Include units, volume, revenue, gross commission, closed commission, or any numbers that best describe your business. What is your goal for the next 12 months? How large is your actual database of clients, prospects, referral sources, or relationships? If you do not know exactly, give your best estimate. How many of those people would realistically recognize your name, take your call, refer you, or do business with you? If you are in leadership: Who are you responsible for leading, managing, coaching, or influencing? What is the current performance level of your team, group, or organization? What are the most important numbers you use to judge whether the group is growing, stalled, or underperforming? Do you believe your team has enough opportunity, talent, structure, and accountability to reach its goals? Why or why not? Where is the biggest gap right now: people, leads, systems, leadership, accountability, skill, culture, or execution? If you are both in sales and leadership: Explain how you split your attention between personal production and leading others. Where does the tension show up most?',
+        writtenTargets: [
+          'numerical_grounding',
+          'reality_vs_aspiration',
+          'scale_awareness',
+          'gap_recognition',
+          'systems_maturity',
+          'leadership_capacity'
+        ]
+      },
+      {
+        id: 27,
+        type: 'written',
+        text: 'Initiative, Vision, and Growth Capacity. Answer the sections that apply to you. If you are in sales or business development: If I asked you to lead generate today and intentionally meet three new people, what would you actually do? Where do you naturally feel strongest: prospecting, relationship building, follow-up, conversion, negotiation, marketing, or closing? Why? If I took the goals you described in the previous question and tripled them, what would your honest emotional reaction be? Excitement, pressure, disbelief, resistance, motivation, exhaustion, something else? Explain why. If you are in leadership: Describe the mission, vision, values, beliefs, and overall perspective of the team, business, or organization you lead. Do you believe the people around you truly understand and buy into that mission? Why or why not? If the size, growth, responsibility, or expectations of your organization suddenly tripled, what part of you would feel most energized, and what part would feel most strained or resistant? For everyone: What is more important to you right now: time, money, freedom, stability, impact, growth, or something else entirely? Explain your reasoning in detail.',
+        writtenTargets: [
+          'execution_capability',
+          'vision_articulation',
+          'scaling_reaction',
+          'adaptive_ceiling',
+          'growth_capacity',
+          'emotional_response_to_scale'
+        ]
+      },
+      {
+        id: 28,
+        type: 'written',
+        text: 'Systems, Accountability, and Self-Awareness. Answer the sections that apply to you. If you are in sales or business development: What systems, habits, tools, or processes do you currently use to follow up, stay organized, and build long-term relationships with your database, clients, or prospects? Do you believe your current systems are strong enough to support the goals you described earlier? Why or why not? Who, if anyone, is helping hold you accountable to your goals, standards, or business plan? Do you consider yourself coachable? Explain honestly. If you are in leadership: What systems, structures, or operational habits are currently working well inside your team, company, or organization? What systems concern you most right now? Where do you believe the organization is most fragile, inconsistent, or dependent on specific people? How do you personally handle accountability, both for yourself and for others? For everyone: After answering all of these questions, what thoughts, emotions, realizations, concerns, or observations are coming up for you right now?',
+        writtenTargets: [
+          'systems_thinking',
+          'accountability_patterns',
+          'coachability',
+          'meta_cognitive_awareness',
+          'self_assessment',
+          'infrastructure_maturity'
         ]
       }
     ]
@@ -111,8 +147,9 @@ export const QUESTION_MAP = {
 export const VALIDATION = {
   version: 'set_1_v1',
   createdAt: '2026-05-09',
-  questionCount: 24,
-  writtenQuestionCount: 6,
+  updatedAt: '2026-05-21',
+  questionCount: 28,
+  writtenQuestionCount: 10,
   mcQuestionCount: 18
 };
 

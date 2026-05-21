@@ -81,13 +81,15 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   const leadership_architecture = inferLeadershipArchitecture(vector_scores, ranked_dimensions);
   
   // STEP 8: Determine development targets from contradictions
-  const development_targets = contradictions.map((contradiction, index) => ({
-    dimension: contradiction.dimensions_in_conflict[1] || 'unknown',
-    rationale: contradiction.tension,
-    approach: contradiction.resolution_path,
-    priority: index + 1,
-    severity: contradiction.severity
-  }));
+  const development_targets = (contradictions && contradictions.length > 0)
+    ? contradictions.map((contradiction, index) => ({
+        dimension: (contradiction.dimensions_in_conflict && contradiction.dimensions_in_conflict[1]) || 'unknown',
+        rationale: contradiction.tension || 'Unknown tension',
+        approach: contradiction.resolution_path || 'Develop awareness',
+        priority: index + 1,
+        severity: contradiction.severity || 'moderate'
+      }))
+    : [];
   
   // STEP 9: Infer environment fit
   const environment_fit = inferEnvironmentFit(vector_scores, ranked_dimensions);
