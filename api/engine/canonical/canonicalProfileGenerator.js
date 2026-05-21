@@ -47,6 +47,8 @@ import { inferOrganizationalEffects } from './inferOrganizationalEffects.js';
 import { inferHiddenCosts } from './inferHiddenCosts.js';
 import { inferSelfDeceptionPatterns } from './inferSelfDeceptionPatterns.js';
 import { inferFutureTrajectory } from './inferFutureTrajectory.js';
+import { inferEvidenceMap } from './inferEvidenceMap.js';
+import { inferCausalChains } from './inferCausalChains.js';
 
 /**
  * Generate canonical behavioral profile
@@ -218,6 +220,22 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     behavioral_consequences
   );
   
+  // STEP 24: Generate evidence map (STEP 2E-F)
+  const evidence_map = inferEvidenceMap(
+    vector_scores,
+    analyzed_responses,
+    contradictions,
+    {} // all inferences available
+  );
+  
+  // STEP 25: Generate causal chains (STEP 2E-F)
+  const causal_chains = inferCausalChains(
+    vector_scores,
+    analyzed_responses,
+    contradictions,
+    future_trajectory
+  );
+  
   // STEP 24: Build narrative profile (with all new domains + consequences)
   const narrative_profile = buildNarrativeProfile(
     inferred_patterns,
@@ -274,6 +292,10 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     hidden_costs,
     self_deception_patterns,
     future_trajectory,
+    
+    // Step 2E-F: frontier intelligence
+    evidence_map,
+    causal_chains,
     
     // Narrative synthesis
     narrative_profile

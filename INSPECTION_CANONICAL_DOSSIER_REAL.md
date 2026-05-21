@@ -1,6 +1,6 @@
 # INSPECTION: CANONICAL DOSSIER (REAL GENERATION)
 
-**Generated:** 2026-05-21T21:58:27.270Z
+**Generated:** 2026-05-21T22:10:09.202Z
 **Profile ID:** MM-20260521-test01
 **Model:** canonical-v1-test
 **Assessment Version:** mini-v2
@@ -12,7 +12,7 @@
 ```json
 {
   "assessment_version": "mini-v2",
-  "generated_at": "2026-05-21T21:58:27.267Z",
+  "generated_at": "2026-05-21T22:10:09.199Z",
   "model": "canonical-v1-test",
   "person_name": null,
   "email": null
