@@ -7,10 +7,13 @@
  * - vault:profile:{profile_id} → full profile JSON
  * - vault:index:date:{YYYY-MM-DD} → set of profile_ids created that day
  * - vault:index:email:{email} → set of profile_ids for that email
+ * - vault:index:company:{company_slug} → set of profile_ids for that company
  * - vault:metadata:count → total profile count
  */
 
 import Redis from 'ioredis';
+import { generateProfileId, isValidProfileId } from './generateProfileId.js';
+import { createHash } from 'crypto';
 
 // Get Redis client (inline initialization)
 function getRedis() {
@@ -20,8 +23,6 @@ function getRedis() {
   }
   return new Redis(redisUrl);
 }
-import { generateProfileId, isValidProfileId } from './generateProfileId.js';
-import { createHash } from 'crypto';
 
 /**
  * Generate profile signature (SHA-256 hash of vector scores)
@@ -29,6 +30,21 @@ import { createHash } from 'crypto';
 function generateProfileSignature(vectorScores) {
   const sig = JSON.stringify(vectorScores, Object.keys(vectorScores).sort());
   return createHash('sha256').update(sig).digest('hex').substring(0, 16);
+}
+
+/**
+ * Generate company slug from company name
+ * Lowercase, replace spaces/special chars with hyphens
+ */
+function generateCompanySlug(companyName) {
+  if (!companyName || typeof companyName !== 'string') return null;
+  
+  return companyName
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphens
+    .replace(/^-+|-+$/g, '')      // Trim leading/trailing hyphens
+    .substring(0, 64);             // Max 64 chars
 }
 
 /**
@@ -40,6 +56,7 @@ export async function saveCanonicalProfile(options) {
     job_id = null,
     person_name = null,
     email = null,
+    company_name = null,
     assessment_version = 'mini-v2',
     model = 'canonical-v1-frontier',
     intake_answers = null,
@@ -59,6 +76,7 @@ export async function saveCanonicalProfile(options) {
   const profile_signature = generateProfileSignature(vector_scores);
   const created_at = new Date().toISOString();
   const date_key = created_at.substring(0, 10); // YYYY-MM-DD
+  const company_slug = generateCompanySlug(company_name);
   
   // Build vault record
   const vault_record = {
@@ -66,6 +84,8 @@ export async function saveCanonicalProfile(options) {
     job_id,
     person_name,
     email,
+    company_name,
+    company_slug,
     created_at,
     assessment_version,
     model,
@@ -98,6 +118,12 @@ export async function saveCanonicalProfile(options) {
     await redis.sadd(email_index_key, profile_id);
   }
   
+  // Add to company index if company provided
+  if (company_slug) {
+    const company_index_key = `vault:index:company:${company_slug}`;
+    await redis.sadd(company_index_key, profile_id);
+  }
+  
   // Increment total count
   await redis.incr('vault:metadata:count');
   
@@ -106,6 +132,7 @@ export async function saveCanonicalProfile(options) {
     profile_signature,
     created_at,
     vault_key: profile_key,
+    company_slug,
     success: true
   };
 }
@@ -118,7 +145,7 @@ export async function saveCanonicalMarkdown(profile_id, markdown_content) {
     throw new Error('Invalid profile_id format');
   }
   
-  const redis = await redisClient();
+  const redis = getRedis();
   const markdown_key = `vault:markdown:${profile_id}`;
   
   await redis.set(markdown_key, markdown_content);

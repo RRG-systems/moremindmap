@@ -58,6 +58,26 @@ export async function listProfilesByEmail(email) {
 }
 
 /**
+ * List profiles for specific company
+ */
+export async function listProfilesByCompany(company_slug) {
+  if (!company_slug) {
+    throw new Error('Company slug required');
+  }
+  
+  const redis = getRedis();
+  const company_index_key = `vault:index:company:${company_slug.toLowerCase()}`;
+  
+  const profile_ids = await redis.smembers(company_index_key);
+  
+  return {
+    company_slug,
+    count: profile_ids.length,
+    profile_ids: profile_ids.sort()
+  };
+}
+
+/**
  * Get total profile count
  */
 export async function getVaultStats() {

@@ -65,6 +65,7 @@ export async function executeCanonicalGeneration(job) {
     const { metadata = {} } = job.payload
     const person_name = metadata.person_name || metadata.name || null
     const email = metadata.email || null
+    const company_name = metadata.company_name || metadata.company || null
     
     // Calculate quality score (if available from canonical profile)
     const quality_score = canonical_profile.evidence_map?.aggregate_confidence 
@@ -91,6 +92,7 @@ export async function executeCanonicalGeneration(job) {
       job_id: job.job_id,
       person_name,
       email,
+      company_name,
       assessment_version: 'mini-v2',
       model: 'canonical-v1-frontier',
       intake_answers: job.payload.answers,
@@ -123,6 +125,7 @@ export async function executeCanonicalGeneration(job) {
       stage: JOB_STAGE.FIRST_INJECTION,
       progress_message: 'Building behavioral profile',
       canonical_profile_id: profile_id,
+      canonical_company_name: company_name,
       canonical_profile,
       canonical_profile_markdown: canonical_markdown,
       canonical_diagnostics,

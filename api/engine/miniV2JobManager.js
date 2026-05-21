@@ -205,6 +205,7 @@ export function formatJobResponse(job) {
       created_at: job.created_at,
       updated_at: job.updated_at,
       canonical_profile_id: job.canonical_profile_id || null,
+      canonical_company_name: job.canonical_company_name || null,
       canonical_diagnostics: job.canonical_diagnostics || null
     }
   }
