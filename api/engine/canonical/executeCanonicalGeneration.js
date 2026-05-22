@@ -149,8 +149,13 @@ export async function executeCanonicalGeneration(job) {
     // Log error but DO NOT fail job
     console.error('[CANONICAL-GENERATION] Error:', error)
     
+    // Extract stack trace info for debugging
+    const stackLines = error.stack ? error.stack.split('\n').slice(1, 4) : []
+    const stackSummary = stackLines.join(' | ').substring(0, 200)
+    
     canonical_diagnostics.error = error.message
     canonical_diagnostics.generation_error = error.message
+    canonical_diagnostics.generation_error_stack = stackSummary
     if (canonical_diagnostics.vault_save_attempted && !canonical_diagnostics.vault_save_success) {
       canonical_diagnostics.vault_save_error = error.message
     }

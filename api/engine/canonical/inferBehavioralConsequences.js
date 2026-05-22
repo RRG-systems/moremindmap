@@ -152,7 +152,7 @@ function inferEmergentCosts(vectorScores, futureConstraints, hiddenRisks, analyz
   const costs = [];
   
   // Delegation gap cost
-  if (futureConstraints?.at_2x_scale?.some(c => c.includes('Delegation'))) {
+  if (futureConstraints?.at_2x_scale?.some(c => typeof c === 'string' && c.includes('Delegation'))) {
     costs.push({
       cost_type: 'Growth ceiling from trust concentration',
       mechanism: 'Organization learns to wait for direct involvement rather than developing distributed ownership',
@@ -221,7 +221,7 @@ function inferUnchangedTrajectory(vectorScores, contradictions, futureConstraint
   }
   
   // If systems weakness persists
-  if (futureConstraints?.operational_fragility?.includes('High')) {
+  if (typeof futureConstraints?.operational_fragility === 'string' && futureConstraints.operational_fragility.includes('High')) {
     outcomes.push({
       pattern: 'Ad-hoc operations without systematic improvement',
       outcome_2yr: 'Firefighting becomes permanent; growth plateaus despite market opportunity',
