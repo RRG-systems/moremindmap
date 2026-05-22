@@ -1,8 +1,11 @@
 import { useState, useMemo, useEffect } from "react"
 import MiniProfileReport from "./components/reports/MiniProfileReport.jsx";
+import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 
 export default function Profile() {
+  const [page0AComplete, setPage0AComplete] = useState(false)
+  const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
   const [fullName, setFullName] = useState("")
@@ -147,7 +150,8 @@ export default function Profile() {
             answers,
             metadata: {
               person_name: fullName.trim() || null,
-              email: email.trim() || null
+              email: email.trim() || null,
+              ...organizationalMetadata
             }
           }),
         })
@@ -231,7 +235,14 @@ export default function Profile() {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers }),
+          body: JSON.stringify({
+            answers,
+            metadata: {
+              person_name: fullName.trim() || null,
+              email: email.trim() || null,
+              ...organizationalMetadata
+            }
+          }),
         })
 
         if (!res.ok) {
@@ -264,6 +275,13 @@ export default function Profile() {
     }
   }
 
+  const handlePage0AComplete = (metadata) => {
+    setOrganizationalMetadata(metadata)
+    setFullName(metadata.identity.full_name)
+    setEmail(metadata.identity.email)
+    setPage0AComplete(true)
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <ProfileBackground />
@@ -271,8 +289,13 @@ export default function Profile() {
       <div className="relative z-10 px-6 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
 
+          {/* PAGE 0A: ORGANIZATIONAL CONTEXT */}
+          {!page0AComplete && !submitted && (
+            <Page0A_OrganizationalContext onComplete={handlePage0AComplete} />
+          )}
+
           {/* INTRO SCREEN */}
-          {!started && !submitted && (
+          {page0AComplete && !started && !submitted && (
             <IntroScreen
               fullName={fullName}
               setFullName={setFullName}

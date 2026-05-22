@@ -77,7 +77,8 @@ export async function executeCanonicalGeneration(job) {
     const { metadata = {} } = job.payload
     const person_name = metadata.person_name || metadata.name || null
     const email = metadata.email || null
-    const company_name = metadata.company_name || metadata.company || null
+    const company_name = metadata.organization?.company || metadata.company_name || metadata.company || null
+    const organizational_context = metadata.organization || null
     
     // Calculate quality score (if available from canonical profile)
     const quality_score = canonical_profile.evidence_map?.aggregate_confidence 
@@ -118,6 +119,7 @@ export async function executeCanonicalGeneration(job) {
       quality_score,
       metadata: {
         ...metadata,
+        organizational_context,
         generation_time_ms: canonical_diagnostics.generation_time_ms,
         job_created_at: job.created_at
       }
