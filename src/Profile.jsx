@@ -143,7 +143,13 @@ export default function Profile() {
         const startRes = await fetch(`${API}/api/moremindmap/start`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ answers }),
+          body: JSON.stringify({ 
+            answers,
+            metadata: {
+              person_name: fullName.trim() || null,
+              email: email.trim() || null
+            }
+          }),
         })
         
         if (!startRes.ok) {
