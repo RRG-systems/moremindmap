@@ -1,11 +1,14 @@
 import { useState, useMemo, useEffect } from "react"
 import MiniProfileReport from "./components/reports/MiniProfileReport.jsx";
 import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
+import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 
 export default function Profile() {
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
+  const [page0BComplete, setPage0BComplete] = useState(false)
+  const [contextualSignals, setContextualSignals] = useState(null)
   const [paymentPassed, setPaymentPassed] = useState(false)
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
@@ -168,7 +171,8 @@ export default function Profile() {
             metadata: {
               person_name: fullName.trim() || null,
               email: email.trim() || null,
-              ...organizationalMetadata
+              ...organizationalMetadata,
+              contextual_signals: contextualSignals
             }
           }),
         })
@@ -257,7 +261,8 @@ export default function Profile() {
             metadata: {
               person_name: fullName.trim() || null,
               email: email.trim() || null,
-              ...organizationalMetadata
+              ...organizationalMetadata,
+              contextual_signals: contextualSignals
             }
           }),
         })
@@ -299,6 +304,11 @@ export default function Profile() {
     setPage0AComplete(true)
   }
 
+  const handlePage0BComplete = (signals) => {
+    setContextualSignals(signals)
+    setPage0BComplete(true)
+  }
+
   return (
     <div className="min-h-screen bg-black text-white relative overflow-hidden">
       <ProfileBackground />
@@ -329,15 +339,20 @@ export default function Profile() {
             <Page0A_OrganizationalContext onComplete={handlePage0AComplete} />
           )}
 
-          {/* START BUTTON — After Page 0A complete, before questions */}
-          {page0AComplete && !started && !submitted && (
+          {/* PAGE 0B: CONTEXTUAL SIGNALS — Shows AFTER Page 0A complete */}
+          {page0AComplete && !page0BComplete && !submitted && (
+            <Page0B_ContextualSignals onComplete={handlePage0BComplete} />
+          )}
+
+          {/* START BUTTON — After Page 0B complete, before questions */}
+          {page0BComplete && !started && !submitted && (
             <div className="max-w-2xl mx-auto space-y-8">
               <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30 text-center">
                 <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
                   Ready to begin.
                 </h1>
                 <p className="mt-4 text-white/72 text-lg">
-                  You've completed your organizational context. Let's dive into your behavioral assessment.
+                  You've completed the context layer. Let's dive into your behavioral assessment.
                 </p>
                 <button
                   onClick={() => setStarted(true)}
