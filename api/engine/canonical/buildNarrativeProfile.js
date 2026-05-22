@@ -42,6 +42,38 @@ export function buildNarrativeProfile(
   hiddenRisks = null,
   strategicCeiling = null
 ) {
+  // Defensive normalization for semantic objects
+  if (!leadershipArchitecture) {
+    leadershipArchitecture = {
+      primary_mode: 'leadership approach undefined',
+      team_experience: 'team dynamics not assessed',
+      stabilizing_force: 'stabilizing mechanism undefined',
+      challenge_surface: 'challenges not fully mapped',
+      calibrations: []
+    };
+  }
+  
+  if (!inferredPatterns) {
+    inferredPatterns = {
+      profile_type: 'Profile',
+      operating_signature: 'signature undefined',
+      decision_architecture: {
+        formation_pattern: 'formation undefined',
+        validation_method: 'validation method undefined',
+        speed_driver: 'speed driver undefined',
+        blind_spot: 'blind spot undefined'
+      }
+    };
+  }
+  
+  if (!stressPatterns) {
+    stressPatterns = {
+      primary_stress_response: 'stress response undefined',
+      blind_spot_emergence: 'blind spot emergence undefined',
+      recovery_paths: []
+    };
+  }
+  
   const { profile_type, operating_signature } = inferredPatterns;
   
   // Executive summary (2-3 sentences)
@@ -53,21 +85,21 @@ export function buildNarrativeProfile(
   
   // Leadership narrative
   const leadership_narrative = 
-    `${leadershipArchitecture.primary_mode}. ` +
-    `${leadershipArchitecture.team_experience}. ` +
-    `${leadershipArchitecture.stabilizing_force}. ` +
+    `${leadershipArchitecture?.primary_mode || 'leadership approach undefined'}. ` +
+    `${leadershipArchitecture?.team_experience || 'team experience undefined'}. ` +
+    `${leadershipArchitecture?.stabilizing_force || 'stabilizing force undefined'}. ` +
     `The challenge surface appears when ${challengeSurface}. ` +
     (contradictions.length > 0 
       ? `Internal tension: ${contradictions[0].manifestation}. ` 
       : '') +
-    `Development path: ${leadershipArchitecture.calibrations[0] || 'Build capacity in underutilized dimensions'}.`;
+    `Development path: ${leadershipArchitecture?.calibrations?.[0] || 'Build capacity in underutilized dimensions'}.`;
   
   // Decision narrative
   const decision_narrative =
-    `${inferredPatterns.decision_architecture.formation_pattern}. ` +
-    `${inferredPatterns.decision_architecture.validation_method}. ` +
-    `${inferredPatterns.decision_architecture.speed_driver}. ` +
-    `Blind spot: ${inferredPatterns.decision_architecture.blind_spot}. ` +
+    `${inferredPatterns?.decision_architecture?.formation_pattern || 'formation pattern undefined'}. ` +
+    `${inferredPatterns?.decision_architecture?.validation_method || 'validation method undefined'}. ` +
+    `${inferredPatterns?.decision_architecture?.speed_driver || 'speed driver undefined'}. ` +
+    `Blind spot: ${inferredPatterns?.decision_architecture?.blind_spot || 'blind spot undefined'}. ` +
     (contradictions.length > 1
       ? `This creates tension — ${contradictions[1]?.manifestation || 'speed vs thoroughness tradeoff'}.`
       : '');
