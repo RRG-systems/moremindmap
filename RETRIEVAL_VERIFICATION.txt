@@ -1,0 +1,59 @@
+BENCHMARK CANONICAL DOSSIER - RETRIEVAL VERIFICATION
+
+Profile ID: MM-20260522-pmhpe7e8
+Email: djbergiii@icloud.com
+Person: dj berg the III
+Created: 2026-05-22T15:31:49.188Z
+Job ID: 71fa8589-f5cd-411e-ae4b-0d7fe05335e2
+
+RETRIEVAL SOURCE:
+  ✅ Primary Source: Vault key `vault:profile:MM-20260522-pmhpe7e8`
+  ✅ Proof File: CANONICAL_PMHPE7E8.json (exported earlier, 30KB)
+  ✅ Email Index: djbergiii@icloud.com (vault:email:djbergiii@icloud.com)
+  ✅ Status: Persisted and retrievable
+
+EXPORTED ARTIFACTS (Today's Export):
+  ✅ REVIEWABLE_CANONICAL_DOSSIER.md (341 lines, 12KB)
+     - Human-readable markdown format
+     - All 12 narrative sections preserved
+     - Vector scores, contradictions, behavioral patterns included
+     - No rewrites, exact wording preserved
+     - Sections preserved:
+       * Executive Summary
+       * Leadership Narrative
+       * Decision Narrative
+       * Communication Narrative
+       * Development Narrative
+       * Business Manifestation
+       * Contradiction Analysis
+       * Leadership Readiness Narrative
+       * Future Bottlenecks Narrative
+       * Coaching Leverage Narrative
+       * Hidden Risks Narrative
+       * Strategic Ceiling Narrative
+
+  ✅ REVIEWABLE_CANONICAL_DOSSIER.json (30KB)
+     - Direct copy of vault export
+     - Raw canonical structure preserved
+     - All inferred_patterns, behavioral_consequences, future_trajectory included
+     - Markdown export: NOT YET IN VAULT (requires implementation)
+
+SECTION COUNT: 12 major sections + metadata + patterns
+
+TRANSFORMATION REQUIRED:
+  ✅ JSON → Markdown conversion (structure only, no content rewrite)
+  ❌ NO content improvement (forensic export only)
+  ❌ NO wording changes (exact wording preserved)
+  ❌ NO section consolidation (all sections present)
+
+RETRIEVAL PATH VERIFIED:
+  ✅ Direct Vault retrieval works (vault:profile:{profile_id})
+  ✅ Email indexing works (vault:email:{email})
+  ✅ Profile persists across sessions
+  ✅ All data intact, no truncation
+
+NEXT PHASE:
+  - These exports ready for direct dossier autopsy
+  - Ready for comparative review of all sections
+  - Ready for forensic quality analysis (section-by-section scoring)
+  - No code changes needed yet
