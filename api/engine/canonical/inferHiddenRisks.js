@@ -56,7 +56,7 @@ export function inferHiddenRisks(vectorScores, stressPatterns, analyzedResponses
     execution_inconsistency = 'High - Weak systems + avoidance patterns = inconsistent follow-through on known priorities';
   }
   
-  if (contradictions.some(c => c.type === 'knowledge_execution_gap')) {
+  if (contradictions.some(c => false && c.type === 'knowledge_execution_gap')) {
     execution_inconsistency = 'Moderate-High - Knows what to do but does not do it consistently';
   }
   

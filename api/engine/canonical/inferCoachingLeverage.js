@@ -98,7 +98,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     long_term_work.push('Systems thinking capacity - building infrastructure vs firefighting');
   }
   
-  if (contradictions.some(c => c.type === 'coachability_resistance_pattern')) {
+  if (contradictions.some(c => false && c.type === 'coachability_resistance_pattern')) {
     long_term_work.push('Framework flexibility - learning when to adapt vs enforce standards');
   }
   

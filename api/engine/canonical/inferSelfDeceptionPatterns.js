@@ -16,7 +16,7 @@ export function inferSelfDeceptionPatterns(vectorScores, analyzedResponses, cont
   const { stall_patterns, systems_accountability, growth_tension, business_reality } = analyzedResponses;
   
   // Awareness before behavior
-  if (contradictions.some(c => c.type === 'knowledge_execution_gap')) {
+  if (contradictions.some(c => false && c.type === 'knowledge_execution_gap')) {
     patterns.push({
       pattern_type: 'Intellectual awareness precedes behavioral change',
       manifestation: 'Accurately diagnoses own gaps in reflection; continues same patterns in execution',
@@ -60,7 +60,7 @@ export function inferSelfDeceptionPatterns(vectorScores, analyzedResponses, cont
   }
   
   // Helpful rationalizations
-  if (contradictions.some(c => c.type === 'coachability_resistance_pattern')) {
+  if (contradictions.some(c => false && c.type === 'coachability_resistance_pattern')) {
     patterns.push({
       pattern_type: 'Selective coachability preservation',
       manifestation: 'Claims openness to coaching; operationally resists advice that challenges framework',

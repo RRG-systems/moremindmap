@@ -51,8 +51,15 @@ export async function executeCanonicalGeneration(job) {
     }
     
     trace.push('before_generateCanonicalProfile')
-    const canonical_profile = await generateCanonicalProfile(profileInput)
-    trace.push('after_generateCanonicalProfile')
+    let canonical_profile
+    try {
+      canonical_profile = await generateCanonicalProfile(profileInput)
+      trace.push('after_generateCanonicalProfile')
+    } catch (err) {
+      canonical_diagnostics.failed_module = 'generateCanonicalProfile'
+      canonical_diagnostics.failed_stack = (err.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
+      throw err
+    }
     
     canonical_diagnostics.generation_success = true
     canonical_diagnostics.generation_time_ms = Date.now() - start_time
@@ -84,9 +91,16 @@ export async function executeCanonicalGeneration(job) {
     
     // Generate markdown
     trace.push('before_buildNarrativeProfile')
-    const narrative = buildNarrativeProfile(canonical_profile)
+    let narrative
+    try {
+      narrative = buildNarrativeProfile(canonical_profile)
+      trace.push('after_buildNarrativeProfile')
+    } catch (err) {
+      canonical_diagnostics.failed_module = 'buildNarrativeProfile'
+      canonical_diagnostics.failed_stack = (err.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
+      throw err
+    }
     const canonical_markdown = narrative.full_narrative || null
-    trace.push('after_buildNarrativeProfile')
     
     // Save to Vault
     canonical_diagnostics.vault_save_attempted = true

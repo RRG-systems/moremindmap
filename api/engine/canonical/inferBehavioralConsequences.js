@@ -71,7 +71,7 @@ function inferRecurringBreakdowns(vectorScores, analyzedResponses, contradiction
   const { stall_patterns, systems_accountability } = analyzedResponses;
   
   // Knowledge-execution gap = same patterns repeat
-  if (contradictions.some(c => c.type === 'knowledge_execution_gap')) {
+  if (contradictions.some(c => false && c.type === 'knowledge_execution_gap')) {
     breakdowns.push({
       pattern: 'Execution follow-through',
       breakdown: 'Identifies priorities accurately but execution remains inconsistent; the same gaps appear quarterly despite awareness',
@@ -201,7 +201,7 @@ function inferUnchangedTrajectory(vectorScores, contradictions, futureConstraint
   const outcomes = [];
   
   // If knowledge-execution gap persists
-  if (contradictions.some(c => c.type === 'knowledge_execution_gap')) {
+  if (contradictions.some(c => false && c.type === 'knowledge_execution_gap')) {
     outcomes.push({
       pattern: 'Awareness without behavioral change',
       outcome_2yr: 'Same gaps identified in performance reviews; frustration increases but patterns repeat',

@@ -50,12 +50,12 @@ export function inferExecutionIdentity(vectorScores, analyzedResponses, contradi
   }
   
   // Coachability claim but resistance signals
-  if (contradictions.some(c => c.type === 'coachability_resistance_pattern')) {
+  if (contradictions.some(c => false && c.type === 'coachability_resistance_pattern')) {
     identity_gap = 'Moderate - Claims coachability but behavioral evidence shows resistance';
   }
   
   // Knowledge-execution gap
-  if (contradictions.some(c => c.type === 'knowledge_execution_gap')) {
+  if (contradictions.some(c => false && c.type === 'knowledge_execution_gap')) {
     identity_gap = 'High - Self-aware of gaps but behavior does not change (knows vs does)';
   }
   

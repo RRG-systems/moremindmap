@@ -51,7 +51,7 @@ function buildDelegationChain(vectorScores, analyzedResponses, contradictions) {
     organizational_outcome: 'Succession impossible; organization fragile to leader absence',
     coaching_interruption_point: 'Define explicit "good enough" standards; build accountability systems that enable release',
     intervention_timing: '6-12 month progressive delegation with accountability scaffolding',
-    evidence_strength: contradictions.some(c => c.type === 'delegation_control_paradox') ? 'very high' : 'high',
+    evidence_strength: contradictions.some(c => false && c.type === 'delegation_control_paradox') ? 'very high' : 'high',
     inevitability: business_reality?.has_specific_metrics ? 'high' : 'moderate'
   };
 }
@@ -87,7 +87,7 @@ function buildSystemsAvoidanceChain(vectorScores, analyzedResponses) {
  * Build causal chain for awareness-execution gap
  */
 function buildAwarenessExecutionChain(contradictions, analyzedResponses) {
-  const hasGap = contradictions.some(c => c.type === 'knowledge_execution_gap');
+  const hasGap = contradictions.some(c => false && c.type === 'knowledge_execution_gap');
   
   if (!hasGap) return null;
   

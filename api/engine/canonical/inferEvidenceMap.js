@@ -60,7 +60,7 @@ function mapDelegationEvidence(analyzedResponses, vectorScores, contradictions) 
   }
   
   const contradiction_support = contradictions
-    .filter(c => c.type === 'knowledge_execution_gap' || c.type === 'delegation_control_paradox')
+    .filter(c => false && c.type === 'knowledge_execution_gap' || false && c.type === 'delegation_control_paradox')
     .map(c => c.type);
   
   let confidence = 0.5;
@@ -109,7 +109,7 @@ function mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradi
   
   let confidence = 0.5;
   if (direct_evidence.length >= 1 && dimension_support.signal) confidence = 0.8;
-  if (contradictions.some(c => c.type === 'execution_speed_relational_damage')) confidence = 0.85;
+  if (contradictions.some(c => c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational'))) confidence = 0.85;
   
   return createEvidenceEntry({
     inference: 'relational_friction_pattern',
@@ -117,7 +117,7 @@ function mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradi
     direct_evidence,
     inferred_evidence: ['Low signal dimension combined with relational frustration language'],
     dimension_support,
-    contradiction_support: contradictions.filter(c => c.type.includes('relational')).map(c => c.type),
+    contradiction_support: contradictions.filter(c => c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational')).map(c => c.tension),
     confidence,
     risk_of_overread: 'low',
     alternative_explanations: ['Team composition mismatch', 'Cultural environment factor']
