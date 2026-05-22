@@ -6,6 +6,7 @@ import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 export default function Profile() {
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
+  const [paymentPassed, setPaymentPassed] = useState(false)
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
   const [fullName, setFullName] = useState("")
@@ -27,6 +28,17 @@ export default function Profile() {
   }), [])
   const [responses, setResponses] = useState({})
 
+  // Check for payment success query param on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.has('payment_success')) {
+      console.log('[PAYMENT SUCCESS] Detected from query param')
+      setPaymentPassed(true)
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname)
+    }
+  }, [])
+
   const progress = Math.round(((step + 1) / questions.length) * 100)
   const currentAnswer = responses[questions[step].id] || null
 
@@ -37,8 +49,12 @@ export default function Profile() {
   function validatePromoCode() {
     const code = promoCode.trim().toUpperCase()
     if (code === "FATHOMFREE") {
+      console.log("[PROMO VALIDATION] FATHOMFREE code accepted")
       setPromoValidated(true)
+      setPaymentPassed(true)
       setSelectedOffer("full_profile")
+    } else {
+      console.log("[PROMO VALIDATION] Invalid code:", code)
     }
   }
 
@@ -51,10 +67,11 @@ export default function Profile() {
       email: email.trim(),
     })
 
-    // If promo is active, skip checkout and start assessment
+    // If promo is active, skip checkout and enter Page 0A
     if (promoValidated) {
-      console.log("[PROMO PATH] Starting assessment with FATHOMFREE")
-      setStarted(true)
+      console.log("[PROMO PATH] Promo validated, entering Page 0A")
+      // Page 0A will show because page0AComplete is false
+      // User must complete Page 0A before assessment starts
       return
     }
 
@@ -289,13 +306,8 @@ export default function Profile() {
       <div className="relative z-10 px-6 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
 
-          {/* PAGE 0A: ORGANIZATIONAL CONTEXT */}
-          {!page0AComplete && !submitted && (
-            <Page0A_OrganizationalContext onComplete={handlePage0AComplete} />
-          )}
-
-          {/* INTRO SCREEN */}
-          {page0AComplete && !started && !submitted && (
+          {/* INTRO SCREEN (Payment Page) — Shows FIRST, before payment */}
+          {!paymentPassed && !promoValidated && !submitted && (
             <IntroScreen
               fullName={fullName}
               setFullName={setFullName}
@@ -310,6 +322,31 @@ export default function Profile() {
               onStart={handleStartAssessment}
               checkoutLoading={checkoutLoading}
             />
+          )}
+
+          {/* PAGE 0A: ORGANIZATIONAL CONTEXT — Shows AFTER payment or promo validation */}
+          {(paymentPassed || promoValidated) && !page0AComplete && !submitted && (
+            <Page0A_OrganizationalContext onComplete={handlePage0AComplete} />
+          )}
+
+          {/* START BUTTON — After Page 0A complete, before questions */}
+          {page0AComplete && !started && !submitted && (
+            <div className="max-w-2xl mx-auto space-y-8">
+              <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30 text-center">
+                <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+                  Ready to begin.
+                </h1>
+                <p className="mt-4 text-white/72 text-lg">
+                  You've completed your organizational context. Let's dive into your behavioral assessment.
+                </p>
+                <button
+                  onClick={() => setStarted(true)}
+                  className="mt-8 inline-flex items-center justify-center rounded-2xl bg-white text-black px-8 py-4 text-base font-medium hover:bg-white/90 transition shadow-[0_0_40px_rgba(255,255,255,0.1)]"
+                >
+                  Start Assessment
+                </button>
+              </div>
+            </div>
           )}
 
           {/* QUESTION FLOW */}
