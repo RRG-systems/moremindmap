@@ -15,13 +15,18 @@ export async function executeCanonicalGeneration(job) {
   trace.push('ENTER_canonical_generation')
   
   const canonical_diagnostics = {
+    attempted: true,
+    success: false,
+    error: null,
+    profile_id: null,
+    vault_save_attempted: false,
+    vault_save_success: false,
+    vault_save_error: null,
+    timestamp: new Date().toISOString(),
     generation_attempted: true,
     generation_success: false,
     generation_error: null,
     generation_time_ms: 0,
-    vault_save_attempted: false,
-    vault_save_success: false,
-    vault_save_error: null,
     vault_keys_created: [],
     profile_signature: null,
     quality_score: null
@@ -107,6 +112,8 @@ export async function executeCanonicalGeneration(job) {
     trace.push('after_saveCanonicalProfile')
     
     canonical_diagnostics.vault_save_success = vault_result.success
+    canonical_diagnostics.success = true
+    canonical_diagnostics.profile_id = profile_id
     canonical_diagnostics.vault_keys_created.push(vault_result.vault_key)
     
     // Save markdown
@@ -142,6 +149,7 @@ export async function executeCanonicalGeneration(job) {
     // Log error but DO NOT fail job
     console.error('[CANONICAL-GENERATION] Error:', error)
     
+    canonical_diagnostics.error = error.message
     canonical_diagnostics.generation_error = error.message
     if (canonical_diagnostics.vault_save_attempted && !canonical_diagnostics.vault_save_success) {
       canonical_diagnostics.vault_save_error = error.message

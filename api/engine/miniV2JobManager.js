@@ -4,7 +4,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
-import { redisGet, redisSet, redisDel } from './redisClient.js'
+import { redisGet, redisSet, redisDel, redis as getRedis } from './redisClient.js'
 
 // Job TTL: 24 hours (86400 seconds)
 const JOB_TTL = 86400
@@ -58,10 +58,30 @@ export async function createJob(payload) {
     result_html: null,
     result_metadata: {},
     error: null,
-    diagnostics: {}
+    diagnostics: {},
+    canonical_diagnostics: {
+      attempted: false,
+      success: false,
+      error: null,
+      profile_id: null,
+      vault_save_attempted: false,
+      vault_save_success: false,
+      vault_save_error: null,
+      timestamp: null
+    }
   }
   
   await redisSet(`job:${jobId}`, job, { ex: JOB_TTL })
+  
+  // Add to recent jobs list for diagnostics
+  try {
+    const rc = getRedis()
+    await rc.lpush('jobs:recent', jobId)
+    await rc.ltrim('jobs:recent', 0, 49) // Keep last 50 jobs
+  } catch (e) {
+    // Fail silently - index is optional for diagnostics only
+  }
+  
   return jobId
 }
 

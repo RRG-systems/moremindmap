@@ -118,3 +118,11 @@ export async function redisHealthCheck() {
     return false
   }
 }
+
+/**
+ * Export raw Redis client for direct access when needed
+ * Use with caution - prefer typed functions above
+ */
+export function redis() {
+  return getClient()
+}
