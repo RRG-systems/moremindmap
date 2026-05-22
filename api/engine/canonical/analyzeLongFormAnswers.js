@@ -19,9 +19,9 @@
  * Analyze Q2 (What matters most / life direction)
  */
 export function analyzeLifeDirection(answerText) {
-  if (!answerText) return null;
+  if (!answerText || typeof answerText !== 'string') return null;
   
-  const text = answerText.toLowerCase();
+  const text = String(answerText).toLowerCase();
   const length = answerText.split(/\s+/).length;
   
   // Extract stated priorities from content
@@ -60,9 +60,9 @@ export function analyzeLifeDirection(answerText) {
  * Analyze Q24 (Stall patterns / professional frustrations)
  */
 export function analyzeStallPatterns(answerText) {
-  if (!answerText) return null;
+  if (!answerText || typeof answerText !== 'string') return null;
   
-  const text = answerText.toLowerCase();
+  const text = String(answerText).toLowerCase();
   
   // Detect blame direction
   const externalBlame = (text.match(/\b(they|them|their|others|people|market|economy)\b/g) || []).length;
@@ -96,9 +96,9 @@ export function analyzeStallPatterns(answerText) {
  * Analyze Q26 (Business reality / numerical grounding)
  */
 export function analyzeBusinessReality(answerText) {
-  if (!answerText) return null;
+  if (!answerText || typeof answerText !== 'string') return null;
   
-  const text = answerText;
+  const text = String(answerText).toLowerCase();
   
   // Detect numerical specificity
   const numbers = (text.match(/\d+/g) || []).length;
@@ -106,14 +106,14 @@ export function analyzeBusinessReality(answerText) {
   const numerical_grounding = hasSpecificMetrics ? 'high' : numbers > 0 ? 'moderate' : 'low';
   
   // Detect vague vs specific language
-  const vagueMarkers = (text.toLowerCase().match(/\b(some|many|several|various|few)\b/g) || []).length;
-  const specificMarkers = numbers + (text.toLowerCase().match(/\b(exactly|specifically|precisely)\b/g) || []).length;
+  const vagueMarkers = (text.match(/\b(some|many|several|various|few)\b/g) || []).length;
+  const specificMarkers = numbers + (text.match(/\b(exactly|specifically|precisely)\b/g) || []).length;
   
   // Detect gap awareness
-  const gap_awareness = text.toLowerCase().includes('not enough') || 
-                        text.toLowerCase().includes('need more') ||
-                        text.toLowerCase().includes('gap') ||
-                        text.toLowerCase().includes('shortfall');
+  const gap_awareness = text.includes('not enough') || 
+                        text.includes('need more') ||
+                        text.includes('gap') ||
+                        text.includes('shortfall');
   
   // Detect scale indicators
   const has_database_size = /database|clients|prospects|relationships/i.test(text) && numbers > 0;
@@ -136,9 +136,9 @@ export function analyzeBusinessReality(answerText) {
  * Analyze Q27 (Growth capacity / emotional scaling response)
  */
 export function analyzeGrowthTension(answerText) {
-  if (!answerText) return null;
+  if (!answerText || typeof answerText !== 'string') return null;
   
-  const text = answerText.toLowerCase();
+  const text = String(answerText).toLowerCase();
   
   // Detect emotional response to 3x scale
   let scaling_response = 'not_answered';
@@ -171,9 +171,9 @@ export function analyzeGrowthTension(answerText) {
  * Analyze Q28 (Systems, accountability, self-awareness)
  */
 export function analyzeSystemsAccountability(answerText) {
-  if (!answerText) return null;
+  if (!answerText || typeof answerText !== 'string') return null;
   
-  const text = answerText.toLowerCase();
+  const text = String(answerText).toLowerCase();
   
   // Detect systems thinking
   const system_words = (text.match(/\b(system|process|habit|tool|crm|follow|organize)\b/g) || []).length;

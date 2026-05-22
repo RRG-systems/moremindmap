@@ -45,16 +45,18 @@ export function buildNarrativeProfile(
   const { profile_type, operating_signature } = inferredPatterns;
   
   // Executive summary (2-3 sentences)
-  const executive_summary = `This is a ${profile_type} profile — ${operating_signature.toLowerCase()}. ` +
-    `${leadershipArchitecture.primary_mode}. ` +
-    `${leadershipArchitecture.challenge_surface}.`;
+  const opSig = String(operating_signature || 'profile').toLowerCase();
+  const challengeSurface = String((leadershipArchitecture && leadershipArchitecture.challenge_surface) || 'challenge').toLowerCase();
+  const executive_summary = `This is a ${profile_type} profile — ${opSig}. ` +
+    `${leadershipArchitecture && leadershipArchitecture.primary_mode || 'operates'}. ` +
+    `${leadershipArchitecture && leadershipArchitecture.challenge_surface || 'surfaces in complex situations'}.`;
   
   // Leadership narrative
   const leadership_narrative = 
     `${leadershipArchitecture.primary_mode}. ` +
     `${leadershipArchitecture.team_experience}. ` +
     `${leadershipArchitecture.stabilizing_force}. ` +
-    `The challenge surface appears when ${leadershipArchitecture.challenge_surface.toLowerCase()}. ` +
+    `The challenge surface appears when ${challengeSurface}. ` +
     (contradictions.length > 0 
       ? `Internal tension: ${contradictions[0].manifestation}. ` 
       : '') +
@@ -84,7 +86,7 @@ export function buildNarrativeProfile(
     (contradictions.length > 0
       ? `Primary development opportunity: ${contradictions[0].resolution_path}. `
       : 'Development focuses on building capacity in underutilized dimensions. ') +
-    `Under pressure, ${stressPatterns.primary_stress_response.toLowerCase()}. ` +
+    `Under pressure, ${String((stressPatterns && stressPatterns.primary_stress_response) || 'stress intensifies').toLowerCase()}. ` +
     `${stressPatterns.blind_spot_emergence}. ` +
     `Recovery path: ${stressPatterns.recovery_paths[0] || 'Re-engage dropped dimensions after stress passes'}.`;
   
