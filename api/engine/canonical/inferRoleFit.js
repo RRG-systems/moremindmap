@@ -80,7 +80,7 @@ export function inferRoleFit(vectorScores, analyzedResponses) {
     explorer_vs_stabilizer,
     executor_vs_strategist,
     ambiguity_tolerance,
-    natural_roles: natural_roles.length > 0 ? natural_roles : ['Needs dimension refinement for specific role fit'],
-    friction_roles: friction_roles.length > 0 ? friction_roles : ['Broad role flexibility']
+    natural_roles: (Array.isArray(natural_roles) && natural_roles.length > 0) ? natural_roles : ['Needs dimension refinement for specific role fit'],
+    friction_roles: (Array.isArray(friction_roles) && friction_roles.length > 0) ? friction_roles : ['Broad role flexibility']
   };
 }

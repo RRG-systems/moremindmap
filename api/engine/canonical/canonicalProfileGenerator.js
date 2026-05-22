@@ -84,8 +84,11 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   // STEP 4.5: Synthesize cross-question tensions (NEW - Step 2D)
   const cross_question_tensions = synthesizeCrossQuestionPatterns(analyzed_responses, vector_scores);
   
-  // Merge all contradictions
-  const contradictions = [...dimension_contradictions, ...cross_question_tensions];
+  // Merge all contradictions (with defensive normalization)
+  const contradictions = [
+    ...(Array.isArray(dimension_contradictions) ? dimension_contradictions : []),
+    ...(Array.isArray(cross_question_tensions) ? cross_question_tensions : [])
+  ];
   
   // STEP 5: Infer stress patterns
   const stress_patterns = inferStressPatterns(vector_scores, ranked_dimensions);
@@ -97,13 +100,13 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   const leadership_architecture = inferLeadershipArchitecture(vector_scores, ranked_dimensions);
   
   // STEP 8: Determine development targets from contradictions
-  const development_targets = (contradictions && contradictions.length > 0)
+  const development_targets = (Array.isArray(contradictions) && contradictions.length > 0)
     ? contradictions.map((contradiction, index) => ({
-        dimension: (contradiction.dimensions_in_conflict && contradiction.dimensions_in_conflict[1]) || 'unknown',
-        rationale: contradiction.tension || 'Unknown tension',
-        approach: contradiction.resolution_path || 'Develop awareness',
+        dimension: (contradiction?.dimensions_in_conflict && contradiction.dimensions_in_conflict[1]) || 'unknown',
+        rationale: contradiction?.tension || 'Unknown tension',
+        approach: contradiction?.resolution_path || 'Develop awareness',
         priority: index + 1,
-        severity: contradiction.severity || 'moderate'
+        severity: contradiction?.severity || 'moderate'
       }))
     : [];
   

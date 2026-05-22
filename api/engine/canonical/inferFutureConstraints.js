@@ -5,6 +5,10 @@
  */
 
 export function inferFutureConstraints(vectorScores, analyzedResponses, contradictions) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
   const { business_reality, growth_tension, systems_accountability, stall_patterns } = analyzedResponses;
   
   const at_2x_scale = [];
@@ -37,7 +41,7 @@ export function inferFutureConstraints(vectorScores, analyzedResponses, contradi
     at_5x_scale.push('Strategic drift - High execution speed without long-range thinking loses direction');
   }
   
-  const stress_amplification = contradictions.length > 2
+  const stress_amplification = (Array.isArray(contradictions) && contradictions.length > 2)
     ? 'High - Multiple internal contradictions will amplify under scaling pressure'
     : 'Moderate - Some tensions will surface but manageable with awareness';
   
@@ -60,8 +64,8 @@ export function inferFutureConstraints(vectorScores, analyzedResponses, contradi
     : 'Scaling resistance moderate, addressable with systems';
   
   return {
-    at_2x_scale: at_2x_scale.length > 0 ? at_2x_scale : ['Minimal immediate constraints'],
-    at_5x_scale: at_5x_scale.length > 0 ? at_5x_scale : ['Standard scaling challenges'],
+    at_2x_scale: (Array.isArray(at_2x_scale) && at_2x_scale.length > 0) ? at_2x_scale : ['Minimal immediate constraints'],
+    at_5x_scale: (Array.isArray(at_5x_scale) && at_5x_scale.length > 0) ? at_5x_scale : ['Standard scaling challenges'],
     stress_amplification,
     operational_fragility,
     relational_fragility,

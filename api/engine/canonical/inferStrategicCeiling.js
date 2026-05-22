@@ -6,6 +6,10 @@
  */
 
 export function inferStrategicCeiling(vectorScores, analyzedResponses, contradictions, futureConstraints) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
   const { business_reality, growth_tension, systems_accountability, stall_patterns } = analyzedResponses;
   
   // Current ceiling assessment
@@ -72,10 +76,10 @@ export function inferStrategicCeiling(vectorScores, analyzedResponses, contradic
   // Ceiling proximity (0.0 = far, 1.0 = at ceiling now)
   let ceiling_proximity = 0.3;
   
-  if (contradictions.length > 2) ceiling_proximity += 0.2;
+  if (Array.isArray(contradictions) && contradictions.length > 2) ceiling_proximity += 0.2;
   if (systems_accountability?.system_confidence === 'low') ceiling_proximity += 0.2;
   if (stall_patterns?.avoidance_admitted) ceiling_proximity += 0.15;
-  if (futureConstraints?.at_2x_scale?.length > 2) ceiling_proximity += 0.15;
+  if (Array.isArray(futureConstraints?.at_2x_scale) && futureConstraints.at_2x_scale.length > 2) ceiling_proximity += 0.15;
   
   ceiling_proximity = Math.min(1.0, ceiling_proximity);
   

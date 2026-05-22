@@ -123,7 +123,7 @@ export function inferTeamInteraction(vectorScores, analyzedResponses, communicat
     collaboration_style,
     feedback_reception,
     trust_building,
-    friction_triggers: friction_triggers.length > 0 ? friction_triggers : ['Standard team friction'],
-    team_value_add: team_value_add.length > 0 ? team_value_add : ['Balanced team contribution']
+    friction_triggers: (Array.isArray(friction_triggers) && friction_triggers.length > 0) ? friction_triggers : ['Standard team friction'],
+    team_value_add: (Array.isArray(team_value_add) && team_value_add.length > 0) ? team_value_add : ['Balanced team contribution']
   };
 }

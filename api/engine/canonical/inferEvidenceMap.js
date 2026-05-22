@@ -59,13 +59,15 @@ function mapDelegationEvidence(analyzedResponses, vectorScores, contradictions) 
     dimension_support.vector = `High (${vectorScores.vector.toFixed(1)}) - Control tendency from command preference`;
   }
   
-  const contradiction_support = contradictions
-    .filter(c => false && c.type === 'knowledge_execution_gap' || false && c.type === 'delegation_control_paradox')
-    .map(c => c.type);
+  const contradiction_support = Array.isArray(contradictions)
+    ? contradictions
+        .filter(c => c && (c.type === 'knowledge_execution_gap' || c.type === 'delegation_control_paradox'))
+        .map(c => c.type)
+    : [];
   
   let confidence = 0.5;
-  if (direct_evidence.length >= 2) confidence = 0.8;
-  if (direct_evidence.length >= 3 && dimension_support.vector) confidence = 0.9;
+  if (Array.isArray(direct_evidence) && direct_evidence.length >= 2) confidence = 0.8;
+  if (Array.isArray(direct_evidence) && direct_evidence.length >= 3 && dimension_support.vector) confidence = 0.9;
   
   return createEvidenceEntry({
     inference: 'delegation_resistance',
@@ -108,8 +110,8 @@ function mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradi
   }
   
   let confidence = 0.5;
-  if (direct_evidence.length >= 1 && dimension_support.signal) confidence = 0.8;
-  if (contradictions.some(c => c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational'))) confidence = 0.85;
+  if (Array.isArray(direct_evidence) && direct_evidence.length >= 1 && dimension_support.signal) confidence = 0.8;
+  if (Array.isArray(contradictions) && contradictions.some(c => c && c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational'))) confidence = 0.85;
   
   return createEvidenceEntry({
     inference: 'relational_friction_pattern',
@@ -117,7 +119,7 @@ function mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradi
     direct_evidence,
     inferred_evidence: ['Low signal dimension combined with relational frustration language'],
     dimension_support,
-    contradiction_support: contradictions.filter(c => c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational')).map(c => c.tension),
+    contradiction_support: (Array.isArray(contradictions) ? contradictions.filter(c => c && c.tension && typeof c.tension === 'string' && c.tension.toLowerCase().includes('relational')).map(c => c.tension) : []),
     confidence,
     risk_of_overread: 'low',
     alternative_explanations: ['Team composition mismatch', 'Cultural environment factor']
@@ -179,6 +181,16 @@ export function inferEvidenceMap(
   contradictions,
   inferences
 ) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
+  if (!vectorScores) {
+    vectorScores = { vector: 0, signal: 0, scope: 0 };
+  }
+  if (!analyzedResponses) {
+    analyzedResponses = {};
+  }
   const evidence_map = {
     delegation_resistance: mapDelegationEvidence(analyzedResponses, vectorScores, contradictions),
     relational_friction: mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradictions),
@@ -186,8 +198,8 @@ export function inferEvidenceMap(
   };
   
   // Calculate aggregate confidence
-  const confidences = Object.values(evidence_map).map(e => e.confidence);
-  const aggregate_confidence = confidences.length > 0
+  const confidences = Object.values(evidence_map).map(e => e?.confidence || 0.5);
+  const aggregate_confidence = Array.isArray(confidences) && confidences.length > 0
     ? confidences.reduce((sum, c) => sum + c, 0) / confidences.length
     : 0.5;
   

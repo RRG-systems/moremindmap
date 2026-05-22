@@ -131,8 +131,8 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
   return {
     unintentional_culture,
     communication_atmosphere,
-    subordinates_stop_saying: subordinates_stop_saying.length > 0 ? subordinates_stop_saying : ['Standard communication openness'],
-    teams_become_afraid_to: teams_become_afraid_to.length > 0 ? teams_become_afraid_to : ['No unusual fear patterns detected'],
+    subordinates_stop_saying: (Array.isArray(subordinates_stop_saying) && subordinates_stop_saying.length > 0) ? subordinates_stop_saying : ['Standard communication openness'],
+    teams_become_afraid_to: (Array.isArray(teams_become_afraid_to) && teams_become_afraid_to.length > 0) ? teams_become_afraid_to : ['No unusual fear patterns detected'],
     bottleneck_formation,
     hidden_resentment,
     short_term_effects,

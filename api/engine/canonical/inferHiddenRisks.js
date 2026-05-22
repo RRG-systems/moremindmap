@@ -6,6 +6,10 @@
  */
 
 export function inferHiddenRisks(vectorScores, stressPatterns, analyzedResponses, contradictions) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
   const { stall_patterns, business_reality, systems_accountability } = analyzedResponses;
   
   // Strengths as liabilities
@@ -93,7 +97,7 @@ export function inferHiddenRisks(vectorScores, stressPatterns, analyzedResponses
   severity = Math.min(1.0, severity);
   
   return {
-    strengths_as_liabilities: strengths_as_liabilities.length > 0 ? strengths_as_liabilities : ['Strengths remain assets at current scale'],
+    strengths_as_liabilities: (Array.isArray(strengths_as_liabilities) && strengths_as_liabilities.length > 0) ? strengths_as_liabilities : ['Strengths remain assets at current scale'],
     relational_erosion_risk,
     strategic_drift_risk,
     execution_inconsistency,

@@ -116,6 +116,10 @@ export function inferCausalChains(
   contradictions,
   futureTrajectory
 ) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
   const chains = [];
   
   const vectorSignalChain = buildVectorSignalChain(vectorScores, analyzedResponses, futureTrajectory);
@@ -132,7 +136,7 @@ export function inferCausalChains(
   
   return {
     causal_chains: chains,
-    chain_count: chains.length,
-    high_inevitability_chains: chains.filter(c => c.inevitability === 'very high' || c.inevitability === 'high').length
+    chain_count: (Array.isArray(chains) ? chains.length : 0),
+    high_inevitability_chains: (Array.isArray(chains) ? chains.filter(c => c?.inevitability === 'very high' || c?.inevitability === 'high').length : 0)
   };
 }

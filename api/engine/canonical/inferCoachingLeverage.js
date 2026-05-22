@@ -6,6 +6,10 @@
  */
 
 export function inferCoachingLeverage(vectorScores, contradictions, analyzedResponses, leadershipArchitecture) {
+  // Defensive normalization
+  if (!Array.isArray(contradictions)) {
+    contradictions = [];
+  }
   const { systems_accountability, stall_patterns, growth_tension } = analyzedResponses;
   
   // Highest ROI adjustment - identify the single biggest lever
@@ -53,7 +57,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     resistance_likelihood = 'High - Intellectually open but operationally resistant to framework changes';
   }
   
-  if (coachability === 'claimed_yes' && contradictions.length > 2) {
+  if (coachability === 'claimed_yes' && Array.isArray(contradictions) && contradictions.length > 2) {
     resistance_likelihood = 'Moderate-High - Claims coachability but multiple contradictions suggest behavioral inertia';
   }
   
@@ -98,7 +102,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     long_term_work.push('Systems thinking capacity - building infrastructure vs firefighting');
   }
   
-  if (contradictions.some(c => false && c.type === 'coachability_resistance_pattern')) {
+  if (Array.isArray(contradictions) && contradictions.some(c => c && c.type === 'coachability_resistance_pattern')) {
     long_term_work.push('Framework flexibility - learning when to adapt vs enforce standards');
   }
   
@@ -108,10 +112,10 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
   
   return {
     highest_roi_adjustment,
-    invisible_drag_habits: invisible_drag_habits.length > 0 ? invisible_drag_habits : ['No major invisible drag detected'],
+    invisible_drag_habits: (Array.isArray(invisible_drag_habits) && invisible_drag_habits.length > 0) ? invisible_drag_habits : ['No major invisible drag detected'],
     resistance_likelihood,
     accountability_dependency,
-    quick_wins: quick_wins.length > 0 ? quick_wins : ['Baseline performance stable, focus on long-term'],
-    long_term_work: long_term_work.length > 0 ? long_term_work : ['Maintain current trajectory']
+    quick_wins: (Array.isArray(quick_wins) && quick_wins.length > 0) ? quick_wins : ['Baseline performance stable, focus on long-term'],
+    long_term_work: (Array.isArray(long_term_work) && long_term_work.length > 0) ? long_term_work : ['Maintain current trajectory']
   };
 }
