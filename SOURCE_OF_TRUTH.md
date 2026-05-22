@@ -1,227 +1,260 @@
-# SOURCE OF TRUTH — MORE MINDMAP CANONICAL ENGINE
+# SOURCE_OF_TRUTH.md
 
-**Last Updated:** Wed May 20, 2026 15:18 MST  
-**Current HEAD:** `44e7c09`  
-**Phase:** Step 2D Complete — Canonical Inference Engine V1 Operational
-
----
-
-## CURRENT PROJECT STATE
-
-### STEP 1: Renderer/PDF System ✅ FROZEN
-**Status:** Partially working but intentionally paused  
-**Freeze point:** Git tag `mini-v2-pre-canonical-pivot`  
-**Reason:** Canonical intelligence layer must be built first
-
-**What works:**
-- Async timeout architecture
-- Redis job queue
-- Staged execution pipeline
-- Zero placeholder completion
-- Frontend delivery
-
-**What's paused:**
-- PDF quality optimization
-- Template refinement
-- Content generation improvements
+**Updated:** Fri May 22, 2026 14:05 MST  
+**Status:** POST-FIRST-SUCCESS CANONICAL DOCTRINE  
 
 ---
 
-### STEP 2A: Canonical Architecture ✅ COMPLETE
-**Commit:** `98239aa`
+## CANONICAL DOSSIER IS THE PRIMARY PRODUCT
 
-**Created:**
-- `/api/engine/canonical/` directory
-- 9 core inference modules (skeletons)
-- `CANONICAL_ENGINE_ARCHITECTURE.md`
-- Architectural separation established
+### Architecture Declaration
 
----
+The **canonical semantic dossier** (JSON structure stored in Vault) is the authoritative source of truth for behavioral intelligence.
 
-### STEP 2B: Core Inference Mechanics V1 ✅ COMPLETE
-**Commit:** `aec855e`
+**NOT:**
+- PDFs (downstream renders)
+- HTML reports (visual presentations)
+- Email summaries (convenience formats)
+- Markdown exports (document format)
 
-**Implemented:**
-- `inferVectorScores.js` — Score extraction/ranking
-- `inferBehavioralPatterns.js` — Core intelligence (9.5KB)
-- `inferContradictions.js` — Tension detection (6.9KB)
-- `inferStressPatterns.js` — Pressure mechanics (4.0KB)
-- `inferCommunicationStyle.js` — Communication inference (4.6KB)
-- `inferLeadershipArchitecture.js` — Leadership patterns (5.1KB)
-- `buildNarrativeProfile.js` — Narrative synthesis (3.5KB)
-
-**Doctrine:**
-- `CANONICAL_PROMPT_DOCTRINE.md` (1,473 words)
+**YES:**
+- Canonical JSON in Vault (semantic structure)
+- Indexed by email (retrieval key)
+- Persisted long-term (source of record)
+- Query-able by profile ID (primary identifier)
 
 ---
 
-### STEP 2C: Intake Expansion ✅ COMPLETE
-**Commit:** `31e6e4e`
-
-**Expanded intake:** 24 → 28 questions
-
-**Changes:**
-- Replaced Q2: "What matters most in life" (values/priorities)
-- Replaced Q24: "When performance stalls" (professional frustrations)
-- Moved original Q2 to Q25
-- Added Q26: Sales/leadership business reality
-- Added Q27: Initiative, vision, growth capacity
-- Added Q28: Systems, accountability, self-awareness
-
-**Written response questions:** 6 → 10
-
-**Spec:** `INTAKE_EXPANSION_STEP_2C_SPEC.md`
-
----
-
-### STEP 2D: Expanded Intake Wired ✅ COMPLETE
-**Commit:** `44e7c09` ← **CURRENT HEAD**
-
-**Created:**
-- `analyzeLongFormAnswers.js` (9.8KB) — Behavioral trace analysis
-- `synthesizeCrossQuestionPatterns.js` (5.8KB) — Cross-question contradiction detection
-- `TEST_CANONICAL_DOSSIER_V2.md` (7.2KB) — Example output
-
-**Modified:**
-- `buildProfileInput.js` — Now processes 10 written questions
-- `canonicalProfileSchema.js` — Added 5 new domains
-- `canonicalProfileGenerator.js` — Wired analysis layers
-- `buildNarrativeProfile.js` — Added business/contradiction narratives
-
-**Capabilities added:**
-- Values vs reality gap detection
-- Growth ceiling analysis
-- Self-perception mismatch detection
-- Blame pattern analysis
-- Numerical grounding assessment
-- Systems thinking evaluation
-- Coachability vs rigidity contradiction
-- Meta-cognitive awareness measurement
-
----
-
-## NEXT PHASE: STEP 2E
-
-**NOT STARTED**
-
-**Objective:**
-Generate real canonical dossier from full 28-question assessment.
-
-**Goal:**
-Verify canonical output feels "eerily accurate" rather than "generic summary."
-
-**Success criteria:**
-- Detects contradictions user recognizes
-- Identifies operational patterns user experiences
-- Names blind spots user privately suspects
-- Describes pressure mechanics user lives
-- Avoids horoscope/therapy/motivational language
-
-**DO NOT:**
-- Reconnect PDF renderer yet
-- Build The Vault yet
-- Optimize content quality yet
-
-**First prove:** Canonical intelligence quality at foundation level.
-
----
-
-## KEY ARCHITECTURAL DECISIONS LOCKED
-
-### 1. Canonical Artifact = Source of Truth
-PDFs are presentation layers only.  
-Behavioral intelligence generated once, rendered many times.
-
-### 2. Answers = Behavioral Traces
-System infers operating mechanics from communication patterns.  
-Self-description is evidence, not truth.
-
-### 3. Inference > Summarization
-Detect contradictions, growth ceilings, values gaps.  
-Don't just repeat what user said.
-
-### 4. Renderer Never Thinks
-All intelligence happens in canonical engine.  
-Renderers consume canonical data only.
-
-### 5. Cross-Question Synthesis
-Patterns across answers reveal deeper truth than isolated responses.
-
----
-
-## PROTECTED COMPONENTS (DO NOT MODIFY)
-
-- ✅ Mini V2 templates (all 10 HTML files)
-- ✅ Async architecture (Redis, polling, staging)
-- ✅ Frontend rendering logic
-- ✅ Field injection mechanics
-- ✅ CSS/visual design
-- ✅ Stripe integration
-- ✅ FATHOMFREE routing
-- ✅ MOLTmarket (separate project)
-
----
-
-## ACTIVE DEVELOPMENT AREAS
-
-**Current:** Canonical behavioral intelligence engine
-
-**Files actively developed:**
-- `/api/engine/canonical/*.js` (11 modules)
-- Canonical documentation
-- Test dossiers
-
-**Next:** Prove canonical quality before reconnecting to renderer
-
----
-
-## REPOSITORY STRUCTURE
+## DOCTRINE: ASSESSMENT → CANONICAL → VAULT → RENDERS
 
 ```
-api/engine/
-├── canonical/ ← CANONICAL INTELLIGENCE LAYER
-│   ├── canonicalProfileGenerator.js (master orchestrator)
-│   ├── canonicalProfileSchema.js (schema + labels)
-│   ├── inferVectorScores.js (score extraction)
-│   ├── inferBehavioralPatterns.js (core intelligence)
-│   ├── inferContradictions.js (tension detection)
-│   ├── inferStressPatterns.js (pressure mechanics)
-│   ├── inferCommunicationStyle.js (communication inference)
-│   ├── inferLeadershipArchitecture.js (leadership patterns)
-│   ├── buildNarrativeProfile.js (narrative synthesis)
-│   ├── analyzeLongFormAnswers.js (NEW - behavioral trace analysis)
-│   └── synthesizeCrossQuestionPatterns.js (NEW - cross-question synthesis)
-├── buildProfileInput.js (intake processing)
-├── generateReportContent.js (GPT generation)
-└── injectReportContent.js ← RENDER LAYER (frozen)
+User Assessment (28 questions)
+         ↓
+    Async Job Executor
+         ↓
+Canonical Dossier Generator (12 narratives, contradictions, evidence)
+         ↓
+    Vault Storage
+    (JSON persisted, email-indexed, retrievable)
+         ↓
+    Render Layers (downstream, generated from canonical):
+    - PDF reports (visual formatting)
+    - HTML presentations (interactive display)
+    - Markdown exports (document portability)
+    - Email summaries (convenience)
 ```
+
+The canonical dossier is stable. Renders can change. The source never does.
 
 ---
 
-## COMMITS (CANONICAL ENGINE BUILD)
+## BENCHMARK PROFILE
+
+**First successful production canonical dossier:**
 
 ```
-44e7c09 wire expanded intake into canonical inference engine ← CURRENT
-31e6e4e expand intake assessment for canonical intelligence system
-aec855e implement core behavioral inference engine v1
-de13bbd add canonical prompt doctrine v1
-98239aa begin canonical behavioral intelligence engine architecture
-7c4f4ae freeze mini v2 pre-canonical-pivot checkpoint
+Profile ID:    MM-20260522-pmhpe7e8
+Status:        ✅ COMPLETE PRODUCTION CYCLE
+Email:         djbergiii@icloud.com
+Person:        dj berg the III
+Created:       2026-05-22T15:31:49 UTC
+Quality:       83/100 (Commercial Ready)
+
+Success Path:
+  Assessment submitted
+  → Async job executed (18 seconds)
+  → Canonical generation succeeded (no crashes)
+  → Vault persisted
+  → Email indexed
+  → Profile retrieved and verified
+  → Forensic inspection completed
+  → Artifacts exported and committed
 ```
 
-**Total:** 6 commits, ~2,500 lines of canonical intelligence code
+This profile proves the entire pipeline works end-to-end.
 
 ---
 
-## RECOVERY INSTRUCTIONS FOR NEXT SESSION
+## VAULT: CENTER OF GRAVITY
 
-1. Read this file: `SOURCE_OF_TRUTH.md`
-2. Current HEAD: `44e7c09`
-3. Current phase: Step 2D complete
-4. Next task: Step 2E (generate real canonical dossier)
-5. Protected: Renderer, async, templates, Stripe, MOLTmarket
-6. Active work: Canonical engine quality validation
+### Why Vault is the System Core
+
+1. **Single source of truth**
+   - All assessment data → Vault
+   - All canonical dossiers → Vault
+   - All metadata → Vault
+   - Immutable once stored
+
+2. **Email indexing for discovery**
+   - Profile queryable by email
+   - Non-repudiation (email proves access)
+   - Privacy-preserving (only by email)
+
+3. **Long-term persistence**
+   - TTL-free storage (no expiration)
+   - Recoverable history (if archival added)
+   - Audit trail (if logging added)
+
+4. **Render independence**
+   - Renders are generated, not stored
+   - Canonical generates renders on-demand
+   - PDF failures don't corrupt data
+
+### Vault as Microservice Contract
+
+```
+VAULT API:
+  PUT /profiles/{profile_id}
+    Body: Canonical dossier JSON
+    Returns: Saved timestamp, email index key
+
+  GET /profiles/{profile_id}
+    Returns: Complete canonical structure
+
+  GET /profiles/email/{email}
+    Returns: List of profile IDs for that email
+
+  GET /profiles/{profile_id}/markdown
+    Returns: Markdown export (generated from canonical)
+```
+
+All integrations use Vault as the contract.
 
 ---
 
-**CANONICAL ENGINE V1 OPERATIONAL — READY FOR STEP 2E QUALITY VALIDATION**
+## PRODUCTION LOCKED DECISIONS
+
+### Do Not Change
+
+- ❌ Canonical schema (backward compat required)
+- ❌ Vault storage model (source of truth anchor)
+- ❌ Email indexing mechanism (discovery contract)
+- ❌ Profile ID generation (stable identifier)
+
+### Safe to Enhance
+
+- ✅ Render templates (downstream only)
+- ✅ Narrative modules (improve quality, not structure)
+- ✅ Evidence weighting (tune inference, not schema)
+- ✅ Quality metrics (add scoring, preserve existing)
+
+---
+
+## QUALITY BASELINE
+
+First benchmark profile shows what production quality looks like:
+
+```
+Infrastructure Stability:     90/100  (All systems working, no crashes)
+Narrative Quality:            82/100  (12 sections, 3.6K chars, some generic)
+Inference Quality:            67/100  (2 contradictions, 0.72 confidence)
+Operator Specificity:         79/100  (Command/infrastructure focused)
+Executive Usefulness:         89/100  (Actionable ceiling identified)
+"Feels Real" Factor:          90/100  (Contradictions authentic, grounded)
+─────────────────────────────
+Commercial Readiness:         83/100  (✅ VIABLE, approaching "holy shit" 85+)
+```
+
+This is the production baseline. All future profiles compared against this.
+
+---
+
+## MIGRATION PATHWAY
+
+### Phase 1 (Complete)
+- ✅ Canonical generation engine built
+- ✅ Vault persistence proven
+- ✅ Email indexing works
+- ✅ Profile retrieval validated
+
+### Phase 2 (In Progress)
+- [ ] Generic language elimination
+- [ ] Contradiction analysis deepening
+- [ ] Evidence weighting optimization
+- [ ] Target: 85+ quality score
+
+### Phase 3 (Planned)
+- [ ] Markdown export implementation
+- [ ] Canonical-to-PDF renderer
+- [ ] Batch profile generation
+- [ ] Quality dashboard
+
+### Phase 4 (Future)
+- [ ] Operator playbook generation
+- [ ] Historical profile tracking
+- [ ] Comparative dossier analysis
+- [ ] Long-term outcome tracking
+
+---
+
+## CANONICAL DOSSIER STRUCTURE
+
+### Required Fields
+
+```json
+{
+  "profile_id": "MM-YYYYMMDD-xxxxxxxx",
+  "metadata": {
+    "assessment_version": "mini-v2",
+    "generated_at": "ISO-8601",
+    "email": "person@domain.com",
+    "person_name": "Name",
+    "profile_id": "MM-YYYYMMDD-xxxxxxxx"
+  },
+  "vector_scores": { ... },
+  "ranked_dimensions": [ ... ],
+  "contradictions": [ ... ],
+  "narrative_profile": {
+    "executive_summary": "...",
+    "leadership_narrative": "...",
+    "decision_narrative": "...",
+    "communication_narrative": "...",
+    "development_narrative": "...",
+    "business_manifestation": "...",
+    "contradiction_analysis": "...",
+    "leadership_readiness_narrative": "...",
+    "future_bottlenecks_narrative": "...",
+    "coaching_leverage_narrative": "...",
+    "hidden_risks_narrative": "...",
+    "strategic_ceiling_narrative": "..."
+  },
+  "evidence_map": { ... },
+  "behavioral_patterns": { ... },
+  "stress_patterns": { ... },
+  "communication_style": { ... },
+  "leadership_architecture": { ... },
+  "causal_chains": [ ... ]
+}
+```
+
+All fields populated. No nulls. No fallbacks in persisted structure (normalized at generation time).
+
+---
+
+## DO NOT TOUCH DURING QUALITY WORK
+
+- ❌ `api/renderer/` — Frozen template system
+- ❌ `api/templates/` — Locked HTML templates
+- ❌ `frontend/src/styles/` — Frozen CSS
+- ❌ `moltmarket/` — Separate system
+
+These are immutable during quality ascension phase.
+
+---
+
+## NEXT ACTION
+
+**Do NOT redesign renders yet.**
+
+Build quality of canonical dossier first.
+
+Once canonical is production-grade (85+), THEN design renders that match the intelligence level.
+
+Current pathline: **Quality → Renders → Scale**
+
+Not: **Renders → Quality → Scale**
+
+---
+
+**Last Updated:** 2026-05-22 14:05 MST  
+**Doctrine Status:** LOCKED FOR PRODUCTION
