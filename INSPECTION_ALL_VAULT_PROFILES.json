@@ -1,0 +1,55 @@
+{
+    "success": true,
+    "stats": {
+        "total_profiles": 3,
+        "dates_with_profiles": 1,
+        "unique_emails": 1,
+        "earliest_date": "2026-05-22",
+        "latest_date": "2026-05-22"
+    },
+    "total_profiles": 1,
+    "retrieved_count": 1,
+    "diagnostic_count": 1,
+    "real_count": 0,
+    "diagnostic_profiles": [
+        {
+            "profile_id": "MM-20260522-rbeggfac",
+            "person_name": "Diagnostic Test",
+            "email": "diagnostic@moremindmap.com",
+            "company_name": "Diagnostic Test Co",
+            "company_slug": "diagnostic-test-co",
+            "created_at": "2026-05-22T02:17:56.301Z",
+            "job_id": "diagnostic_test",
+            "assessment_version": "diagnostic",
+            "model": "diagnostic-test",
+            "quality_score": 100,
+            "profile_signature": "b45b16a829f77ca0",
+            "has_canonical_json": true,
+            "has_evidence_map": false,
+            "has_causal_chains": false,
+            "has_contradictions": false,
+            "is_diagnostic": true
+        }
+    ],
+    "real_profiles": [],
+    "all_profiles": [
+        {
+            "profile_id": "MM-20260522-rbeggfac",
+            "person_name": "Diagnostic Test",
+            "email": "diagnostic@moremindmap.com",
+            "company_name": "Diagnostic Test Co",
+            "company_slug": "diagnostic-test-co",
+            "created_at": "2026-05-22T02:17:56.301Z",
+            "job_id": "diagnostic_test",
+            "assessment_version": "diagnostic",
+            "model": "diagnostic-test",
+            "quality_score": 100,
+            "profile_signature": "b45b16a829f77ca0",
+            "has_canonical_json": true,
+            "has_evidence_map": false,
+            "has_causal_chains": false,
+            "has_contradictions": false,
+            "is_diagnostic": true
+        }
+    ]
+}
