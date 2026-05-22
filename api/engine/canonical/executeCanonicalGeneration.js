@@ -51,7 +51,7 @@ export async function executeCanonicalGeneration(job) {
     }
     
     trace.push('before_generateCanonicalProfile')
-    const canonical_profile = generateCanonicalProfile(profileInput)
+    const canonical_profile = await generateCanonicalProfile(profileInput)
     trace.push('after_generateCanonicalProfile')
     
     canonical_diagnostics.generation_success = true
