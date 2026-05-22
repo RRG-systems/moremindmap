@@ -85,10 +85,7 @@ export default async function handler(req, res) {
     }
     
     // CHECK 4: Vault save test profile
-    const test_profile_id = generateProfileId();
-    
     const test_canonical = {
-      profile_id: test_profile_id,
       metadata: {
         generated_at: new Date().toISOString(),
         test: true,
@@ -106,6 +103,8 @@ export default async function handler(req, res) {
       }
     };
     
+    let saved_profile_id = null;
+    
     try {
       const save_result = await saveCanonicalProfile({
         canonical_profile: test_canonical,
@@ -118,6 +117,8 @@ export default async function handler(req, res) {
         quality_score: 100,
         metadata: { diagnostic: true }
       });
+      
+      saved_profile_id = save_result.profile_id;
       
       diagnostics.checks.vault_save = {
         status: save_result.success ? 'PASS' : 'FAIL',
@@ -133,9 +134,9 @@ export default async function handler(req, res) {
       return res.status(200).json(diagnostics);
     }
     
-    // CHECK 5: Vault retrieve
+    // CHECK 5: Vault retrieve (use saved_profile_id from save_result)
     try {
-      const retrieved = await getCanonicalProfile(test_profile_id);
+      const retrieved = await getCanonicalProfile(saved_profile_id);
       
       diagnostics.checks.vault_retrieve = {
         status: retrieved.found ? 'PASS' : 'FAIL',
@@ -171,8 +172,8 @@ export default async function handler(req, res) {
     
     // CHECK 7: Cleanup test profile
     try {
-      await redis.del(`vault:profile:${test_profile_id}`);
-      await redis.del(`vault:markdown:${test_profile_id}`);
+      await redis.del(`vault:profile:${saved_profile_id}`);
+      await redis.del(`vault:markdown:${saved_profile_id}`);
       
       diagnostics.checks.cleanup = {
         status: 'PASS',
