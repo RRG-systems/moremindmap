@@ -6,7 +6,15 @@
  */
 
 export function inferScalingReadiness(vectorScores, analyzedResponses, leadershipReadiness) {
-  const { systems_accountability, business_reality, growth_tension, stall_patterns } = analyzedResponses;
+  // Defensive checks for undefined inputs
+  if (!leadershipReadiness) {
+    leadershipReadiness = {
+      control_tendency: 'Moderate - Insufficient data',
+      development_capability: 'Moderate - Insufficient data'
+    };
+  }
+  
+  const { systems_accountability, business_reality, growth_tension, stall_patterns } = analyzedResponses || {};
   
   // Systems maturity
   let systems_maturity = 'Emerging - Basic systems exist but inconsistent';
@@ -20,16 +28,18 @@ export function inferScalingReadiness(vectorScores, analyzedResponses, leadershi
   }
   
   // Delegation capacity
-  let delegation_capacity = leadershipReadiness.control_tendency.includes('High')
+  const controlTendency = leadershipReadiness.control_tendency || '';
+  let delegation_capacity = (typeof controlTendency === 'string' && controlTendency.includes('High'))
     ? 'Low - Over-control limits delegation; trust gaps prevent release'
-    : leadershipReadiness.control_tendency.includes('Moderate')
+    : (typeof controlTendency === 'string' && controlTendency.includes('Moderate'))
     ? 'Moderate - Can delegate but inconsistent; reverts to control under pressure'
     : 'High - Delegates effectively and maintains accountability';
   
   // Talent development
-  let talent_development = leadershipReadiness.development_capability.includes('High')
+  const devCapability = leadershipReadiness.development_capability || '';
+  let talent_development = (typeof devCapability === 'string' && devCapability.includes('High'))
     ? 'Strong - Invests in people development systematically'
-    : leadershipReadiness.development_capability.includes('Low')
+    : (typeof devCapability === 'string' && devCapability.includes('Low'))
     ? 'Weak - Limited capacity for developing others'
     : 'Moderate - Supports people but inconsistent development investment';
   
@@ -43,17 +53,17 @@ export function inferScalingReadiness(vectorScores, analyzedResponses, leadershi
   // Readiness score
   let readiness_score = 0.5;
   
-  if (systems_maturity.includes('Mature')) readiness_score += 0.15;
-  if (systems_maturity.includes('Weak')) readiness_score -= 0.15;
+  if (typeof systems_maturity === 'string' && systems_maturity.includes('Mature')) readiness_score += 0.15;
+  if (typeof systems_maturity === 'string' && systems_maturity.includes('Weak')) readiness_score -= 0.15;
   
-  if (delegation_capacity.includes('High')) readiness_score += 0.15;
-  if (delegation_capacity.includes('Low')) readiness_score -= 0.2;
+  if (typeof delegation_capacity === 'string' && delegation_capacity.includes('High')) readiness_score += 0.15;
+  if (typeof delegation_capacity === 'string' && delegation_capacity.includes('Low')) readiness_score -= 0.2;
   
-  if (talent_development.includes('Strong')) readiness_score += 0.1;
-  if (talent_development.includes('Weak')) readiness_score -= 0.1;
+  if (typeof talent_development === 'string' && talent_development.includes('Strong')) readiness_score += 0.1;
+  if (typeof talent_development === 'string' && talent_development.includes('Weak')) readiness_score -= 0.1;
   
-  if (process_thinking.includes('Strong')) readiness_score += 0.1;
-  if (process_thinking.includes('Weak')) readiness_score -= 0.1;
+  if (typeof process_thinking === 'string' && process_thinking.includes('Strong')) readiness_score += 0.1;
+  if (typeof process_thinking === 'string' && process_thinking.includes('Weak')) readiness_score -= 0.1;
   
   readiness_score = Math.max(0.0, Math.min(1.0, readiness_score));
   

@@ -178,7 +178,7 @@ function buildBusinessManifestationNarrative(analyzedResponses, inferredPatterns
     
     narrative += `When performance stalls, ${blameDirection}. `;
     
-    if (stall_patterns.frustrations.includes('relational')) {
+    if (Array.isArray(stall_patterns.frustrations) && stall_patterns.frustrations.includes('relational')) {
       narrative += 'Relational friction surfaces as primary frustration point. ';
     }
     if (stall_patterns.avoidance_admitted) {

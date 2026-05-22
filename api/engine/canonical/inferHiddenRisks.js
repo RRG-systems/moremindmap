@@ -85,10 +85,10 @@ export function inferHiddenRisks(vectorScores, stressPatterns, analyzedResponses
   // Calculate severity score
   let severity = 0.3;
   
-  if (relational_erosion_risk.includes('High')) severity += 0.2;
-  if (burnout_trajectory.includes('High')) severity += 0.2;
-  if (execution_inconsistency.includes('High')) severity += 0.15;
-  if (strategic_drift_risk.includes('High')) severity += 0.15;
+  if (typeof relational_erosion_risk === 'string' && relational_erosion_risk.includes('High')) severity += 0.2;
+  if (typeof burnout_trajectory === 'string' && burnout_trajectory.includes('High')) severity += 0.2;
+  if (typeof execution_inconsistency === 'string' && execution_inconsistency.includes('High')) severity += 0.15;
+  if (typeof strategic_drift_risk === 'string' && strategic_drift_risk.includes('High')) severity += 0.15;
   
   severity = Math.min(1.0, severity);
   
