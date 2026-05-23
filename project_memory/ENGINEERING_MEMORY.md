@@ -457,7 +457,32 @@ executeCanonicalGeneration.js
 
 ---
 
-**Last verified:** 2026-05-23 01:43 MST  
-**Production status:** ✅ STABLE  
-**Critical lessons:** 5 major bug fixes documented  
+## Bug 4: Profile ID Case Mismatch (Commit ca288aa, 48b3aa8)
+
+**Symptom:** Frontend sends lowercase profile ID (mm-*), retrieval fails with 404 "Profile not found"
+
+**Root Cause:** 
+- Save side stored keys with uppercase MM- prefix (MM-YYYYMMDD-XXXXXXXX)
+- Retrieval side normalized IDs to lowercase before lookup
+- Redis keys case-sensitive → Mismatch (vault:profile:MM-* ≠ vault:profile:mm-*)
+
+**Example:**
+- Frontend sends: mm-20260523-mqlev9c9
+- Vault key stored: vault:profile:MM-20260523-mqlev9c9 (uppercase MM)
+- Retrieval queries: vault:profile:mm-20260523-mqlev9c9 (lowercase mm)
+- Result: NOT FOUND
+
+**Fix:**
+- generateProfileId() now returns lowercase: mm-YYYYMMDD-XXXXXXXX
+- isValidProfileId() pattern updated: /^mm-\d{8}-[a-z0-9]{8}$/
+- saveCanonicalProfile() normalizes provided IDs to lowercase
+- retrieve-profile.js pattern aligned: /^mm-\d{8}-[a-z0-9]{8}$/i
+
+**Status:** Fixed and deployed (commits ca288aa, 48b3aa8)
+
+---
+
+**Last verified:** 2026-05-23 10:42 MST  
+**Production status:** ✅ STABLE (case fix deployed)  
+**Critical lessons:** 6 major bug fixes documented  
 **Next engineer:** Read this file before touching anything
