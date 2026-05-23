@@ -171,20 +171,37 @@ export default function WebProfileReport({ canonical, profileId }) {
 
       <style jsx>{`
         .web-profile-report-v2 {
-          background: #0a0e27;
+          background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
           color: #e0e0e0;
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
           line-height: 1.65;
           min-height: 100vh;
           padding: 0;
+          position: relative;
+        }
+        
+        .web-profile-report-v2::before {
+          content: '';
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: radial-gradient(ellipse at bottom, rgba(212, 175, 55, 0.03) 0%, transparent 70%);
+          pointer-events: none;
+          z-index: 0;
         }
 
         /* HEADER */
         .dashboard-header {
-          background: linear-gradient(180deg, #1a1f3a 0%, #0a0e27 100%);
-          border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-          padding: 2.5rem 2rem;
+          background: linear-gradient(135deg, #1a1f3a 0%, #0f1530 100%);
+          border-bottom: 2px solid rgba(212, 175, 55, 0.4);
+          border-radius: 0 0 16px 16px;
+          padding: 3rem 2.5rem 2rem 2.5rem;
           max-width: none;
+          position: relative;
+          z-index: 1;
+          box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(212, 175, 55, 0.1);
         }
 
         .header-top {
@@ -290,11 +307,19 @@ export default function WebProfileReport({ canonical, profileId }) {
         .narrative-section,
         .data-section {
           margin-bottom: 2.5rem;
-          padding: 1.75rem;
-          background: rgba(15, 20, 40, 0.6);
-          border: 1px solid rgba(212, 175, 55, 0.15);
-          border-radius: 6px;
-          backdrop-filter: blur(4px);
+          padding: 2rem;
+          background: linear-gradient(135deg, rgba(15, 20, 40, 0.8) 0%, rgba(10, 14, 35, 0.6) 100%);
+          border: 1px solid rgba(212, 175, 55, 0.2);
+          border-radius: 8px;
+          backdrop-filter: blur(8px);
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(212, 175, 55, 0.08);
+          transition: all 0.3s ease;
+        }
+        
+        .narrative-section:hover,
+        .data-section:hover {
+          border-color: rgba(212, 175, 55, 0.35);
+          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(212, 175, 55, 0.12);
         }
 
         .narrative-section.featured {
