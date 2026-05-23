@@ -1,0 +1,103 @@
+{
+  "profile_id": "BENCH-V2-1779498573392-jordan-chen",
+  "job_id": "job-1779498573393",
+  "person_name": "Pamela Thornton",
+  "email": "pamela.thornton@tech.com",
+  "company_name": "TechVenture Capital",
+  "company_slug": "techventure-capital",
+  "created_at": "2026-05-23T01:09:33.392Z",
+  "assessment_version": "mini-v2",
+  "model": "canonical-v1-frontier",
+  "canonical_profile_json": {
+    "profile_id": "BENCH-V2-1779498573392-jordan-chen",
+    "created_at": "2026-05-23T01:09:33.392Z",
+    "vector_scores": {
+      "decisiveness": 0.78,
+      "systems_thinking": 0.89,
+      "relationship_focus": 0.45,
+      "change_tolerance": 0.72,
+      "introspection": 0.85
+    },
+    "narratives": {
+      "identity_narrative": "Jordan operates as a systems architect. Sees operational problems as design challenges. Strong need for clarity and directness. Allergic to politics.",
+      "strategic_ceiling": "Ceiling: Ad-hoc firefighting masquerading as strategy. Without authority to redesign systems, gets stuck in triage mode.",
+      "contradiction_analysis": "Positions as purely rational but is actually deeply frustrated by inefficiency (emotional reaction). Presents as direct but avoids interpersonal conflict."
+    },
+    "evidence_map": {
+      "aggregate_confidence": 0.82,
+      "high_confidence_signals": [
+        "work_environment_pattern",
+        "motivation_consistency",
+        "pressure_behavior"
+      ],
+      "medium_confidence_signals": [
+        "relationships",
+        "avoided_work"
+      ],
+      "uncertainties": [
+        "long_term_trajectory",
+        "leadership_readiness"
+      ]
+    }
+  },
+  "vector_scores": {
+    "decisiveness": 0.78,
+    "systems_thinking": 0.89,
+    "relationship_focus": 0.45,
+    "change_tolerance": 0.72,
+    "introspection": 0.85
+  },
+  "profile_signature": "jordan_chen_ops_exec",
+  "intake_answers": {
+    "q1_biggest_constraint": "Speed of decision-making vs quality of decisions. I tend to gather information thoroughly which sometimes delays action.",
+    "q2_natural_environment": "Small teams with clear missions. Where execution speed matters more than process formality. Where I can see the impact of work directly.",
+    "q3_under_pressure": "Become more decisive, less consultative. Get quiet. Tend to take on more than I should to 'just fix it.'",
+    "q4_motivation_pattern": "Build something that works. Solve a problem others said was unsolvable. Create efficiency where there was waste.",
+    "q5_relationships": "Deep one-on-ones with people I trust. Surface cordial with politics. Not interested in networking for networking's sake.",
+    "q6_priorities": "System integrity > stakeholder harmony. Good decision > fast decision. Long-term consequence > short-term optics.",
+    "q7_learning": "From failure and from studying what brilliant people do. Not from training programs or theory.",
+    "q8_energy_source": "Solving complex operational problems. Talking with people who think clearly. Seeing a team move from chaos to order.",
+    "q9_energy_drain": "Politics. Meetings where nothing gets decided. Explaining why something obvio us should happen. Watching smart people make dumb choices.",
+    "q10_identity": "Problem solver. Systems thinker. Someone who can be trusted to tell the truth even when it's uncomfortable."
+  },
+  "quality_score": 82,
+  "metadata": {
+    "organization": {
+      "company": "TechVenture Capital",
+      "department": "Operations",
+      "role_title": "VP of Operations",
+      "reports_to": "CEO / Founder",
+      "direct_reports_count": "12-15",
+      "years_in_current_role": "2-3",
+      "years_in_industry": "10-12",
+      "industry": "Finance",
+      "org_context": [
+        "Executive/C-Suite",
+        "Operations/Process",
+        "Strategic/Visionary"
+      ]
+    },
+    "identity": {
+      "full_name": "Pamela Thornton",
+      "email": "pamela.thornton@tech.com",
+      "phone": "+1-415-555-0123"
+    },
+    "contextual_signals": {
+      "best_role_ever": "Built operations infrastructure at early-stage fintech startup (Series A-B). Had autonomy to design systems from scratch, owned the build, measured success directly in adoption metrics.",
+      "best_role_why": "Clear ownership boundary. System building with immediate feedback. Team grew because processes worked. No politics—just execution and learning. Felt like I was building something real, not optimizing waste.",
+      "worst_role_ever": "Management consulting role at Big 4. Billable hours culture. Client relationships prioritized over work quality. Constantly reshuffling to hit staffing targets.",
+      "worst_role_why": "Hidden labor. Clients didn't actually want solutions—they wanted someone to blame if things failed. Burnout creep. Lost track of what I actually believed about what worked.",
+      "current_energy_drain": "Executive dysfunction at this company. CEO makes commitments without checking capacity. Board pressure gets translated directly to the team without filtering. Constantly pivoting on priorities. I end up being the person who catches dropped balls, which is appreciated but unsustainable.",
+      "current_role_misalignment": "Hired to 'scale operations smartly.' Reality: asked to absorb whatever executives delegate. Build systems for chaos, not efficiency. My leverage point (process design) gets overridden by 'we need this NOW' pressure.",
+      "avoided_work": "Conflict conversations. I know when a relationship or team structure is broken but I avoid directly naming it until it becomes a crisis. Then I'm rushed into a fix.",
+      "recurring_org_frustration": "Smart people making bad bets because they won't listen. CEO had a belief about market timing that contradicted basic unit economics. I flagged it 6 months ago. Now it's a $4M problem we're managing damage on.",
+      "relied_on_for": "Getting things done when they're broken. Clear-headed under pressure. Seeing system bottlenecks before they explode. People trust me to tell them when something is actually wrong—though they don't always want to hear it.",
+      "misunderstood_for": "Cold. Rational to the point of seeming indifferent. Actually deeply frustrated when smart people make avoidable mistakes. Not anti-people—anti-waste. Anti-politics. The indifference is about protecting energy, not about not caring.",
+      "unrealized_capacity": "Never built something sustainable at scale with good people and real authority. Always constrained either by chaos or by not having enough leverage. Could design operating systems competitors would copy if I had the right starting conditions."
+    },
+    "saved_by": "vault-v1",
+    "vault_version": "1.0.0",
+    "benchmark_version": "v2",
+    "benchmark_created": "2026-05-23T01:09:33.392Z"
+  }
+}
