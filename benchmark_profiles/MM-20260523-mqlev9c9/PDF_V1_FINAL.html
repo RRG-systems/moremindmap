@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Behavioral Operating Profile - david berg</title>
+  <style>
+    /* Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+      color: #1a1a1a;
+      background: #ffffff;
+      line-height: 1.6;
+    }
+
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    /* Page Container */
+    .mmm-page {
+      page-break-after: always;
+      width: 8.5in;
+      height: 11in;
+      padding: 0.75in;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #ffffff;
+      page-break-inside: avoid;
+      break-inside: avoid;
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+    }
+
+    @page {
+      size: letter;
+      margin: 0;
+      padding: 0;
+    }
+
+    @media print {
+      .mmm-page {
+        page-break-after: always;
+        margin: 0;
+        border: none;
+      }
+    }
+
+    /* Page Structure */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      margin-bottom: 0.5in;
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 0.25in;
+    }
+
+    .page-main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .page-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: #999;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 0.25in;
+      margin-top: 0.5in;
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5in;
+    }
+
+    .page-number-box {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 0.15in 0.25in;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    /* Cover Page Specific */
+    .cover-page {
+      background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+    }
+
+    .cover-title-section {
+      text-align: center;
+      margin-bottom: 0.5in;
+      position: relative;
+    }
+
+    .cover-main-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 0.25in;
+      color: #1a1a1a;
+    }
+
+    .cover-subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      max-width: 90%;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .gold-underline {
+      width: 80px;
+      height: 3px;
+      background: #d4af37;
+      margin: 0.25in auto 0.5in;
+    }
+
+    .gold-underline-small {
+      width: 40px;
+      height: 2px;
+      background: #d4af37;
+      margin: 0.1in 0 0.2in;
+    }
+
+    /* Profile Signature Box */
+    .profile-signature-box {
+      background: #f8f8f8;
+      border-left: 4px solid #d4af37;
+      padding: 0.25in 0.3in;
+      margin-bottom: 0.3in;
+      border-radius: 3px;
+    }
+
+    .signature-heading {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #999;
+      margin-bottom: 0.1in;
+    }
+
+    .signature-code {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 0.1in;
+      font-family: 'Monaco', 'Courier', monospace;
+    }
+
+    .signature-interpretation {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* DNA Decoder Grid */
+    .dna-decoder-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.2in;
+      margin-top: 0.15in;
+    }
+
+    .dna-item {
+      background: #f8f8f8;
+      padding: 0.15in;
+      border-radius: 3px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .dna-code {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #d4af37;
+      font-family: 'Monaco', monospace;
+    }
+
+    .dna-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 0.05in;
+    }
+
+    .dna-explanation {
+      font-size: 0.75rem;
+      color: #666;
+      margin-top: 0.05in;
+      line-height: 1.3;
+    }
+
+    /* Core Edge Box */
+    .core-edge-box {
+      background: #f8f8f8;
+      border-left: 4px solid #d4af37;
+      padding: 0.25in 0.3in;
+      margin-bottom: 0.3in;
+      border-radius: 3px;
+      display: flex;
+      gap: 0.2in;
+    }
+
+    .core-edge-heading {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #999;
+      margin-bottom: 0.1in;
+    }
+
+    .core-edge-text {
+      font-size: 0.85rem;
+      color: #555;
+      line-height: 1.4;
+    }
+
+    /* Metadata Row */
+    .cover-metadata-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.15in;
+      margin-top: 0.25in;
+    }
+
+    .metadata-box {
+      background: #f8f8f8;
+      border-radius: 3px;
+      padding: 0.15in;
+      display: flex;
+      gap: 0.1in;
+      border: 1px solid #e0e0e0;
+    }
+
+    .metadata-icon {
+      font-size: 1.2rem;
+    }
+
+    .metadata-content {
+      flex: 1;
+    }
+
+    .metadata-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #999;
+    }
+
+    .metadata-value {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-top: 0.05in;
+    }
+
+    /* Content Sections */
+    h2 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.2in;
+      color: #1a1a1a;
+      border-bottom: 2px solid #d4af37;
+      padding-bottom: 0.1in;
+    }
+
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 0.2in;
+      margin-bottom: 0.15in;
+      color: #1a1a1a;
+    }
+
+    p {
+      font-size: 0.9rem;
+      margin-bottom: 0.15in;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    ul, ol {
+      margin-left: 0.25in;
+      margin-bottom: 0.15in;
+      font-size: 0.9rem;
+    }
+
+    li {
+      margin-bottom: 0.1in;
+      line-height: 1.4;
+    }
+
+    /* Narrative Content */
+    .narrative-section {
+      margin-bottom: 0.2in;
+    }
+
+    .narrative-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #d4af37;
+      margin-bottom: 0.1in;
+    }
+
+    .narrative-content {
+      font-size: 0.85rem;
+      color: #444;
+      line-height: 1.5;
+      margin-bottom: 0.15in;
+    }
+
+    /* Highlight Box */
+    .highlight-box {
+      background: #f8f8f8;
+      border-left: 4px solid #d4af37;
+      padding: 0.2in 0.25in;
+      margin: 0.15in 0;
+      border-radius: 3px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    /* Dimension Display */
+    .dimension-badge {
+      display: inline-block;
+      background: #d4af37;
+      color: #1a1a1a;
+      padding: 0.08in 0.15in;
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-right: 0.1in;
+      margin-bottom: 0.05in;
+    }
+
+    /* Print Styles */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .mmm-page {
+        margin: 0;
+        padding: 0.75in;
+        border: none;
+        box-shadow: none;
+        page-break-after: always;
+      }
+
+      .page-break {
+        page-break-after: always;
+      }
+    }
+
+    /* M+ Icon */
+    .m-icon {
+      font-weight: 700;
+      color: #d4af37;
+      font-size: 0.9rem;
+    }
+  </style>
+  
+</head>
+<body>
+  <div class="report-container">
+    
+{# page01-cover.html #}
+<div class="mmm-page page01 cover-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <!-- Title Section with Background Arcs -->
+    <div class="cover-title-section">
+      <div class="cover-background-arcs"></div>
+      <h1 class="cover-main-title">Behavioral<br/>Operating<br/>Profile</h1>
+      <div class="gold-underline"></div>
+      <p class="cover-subtitle">A comprehensive assessment of how your behavioral system moves under uncertainty, makes decisions, communicates, and shows up in teams.</p>
+    </div>
+
+    <!-- Box 1: Your Profile Signature -->
+    <div class="profile-signature-box">
+      <div class="signature-accent-bar"></div>
+      <div class="signature-content">
+        <div class="signature-heading">YOUR PROFILE SIGNATURE</div>
+        <div class="signature-code">vector+ / horizon+ / velocity+</div>
+        <div class="signature-interpretation">Command/Perspective: Decisive directive with long-range framing</div>
+      </div>
+    </div>
+
+    <!-- Box 2: Your Profile DNA (NEW DECODER SECTION) -->
+    <div class="profile-dna-box">
+      <h3 class="dna-heading">YOUR PROFILE DNA</h3>
+      <div class="gold-underline-small"></div>
+      
+      <div class="dna-decoder-grid">
+        <div class="dna-item">
+          <div class="dna-code">VECTOR</div>
+          <div class="dna-label">Command (High)</div>
+          <div class="dna-explanation">Enters situations with direction already forming; pulls team toward action</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">FIDELITY</div>
+          <div class="dna-label">Precision (Moderate Low)</div>
+          <div class="dna-explanation">Catches errors others miss; verifies assumptions before moving</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">FRAMEWORK</div>
+          <div class="dna-label">Structure (Moderate Low)</div>
+          <div class="dna-explanation">Prefers clear process and structure; comfortable with defined roles</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">VELOCITY</div>
+          <div class="dna-label">Speed (High)</div>
+          <div class="dna-explanation">Decision speed and execution pace</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">LEVERAGE</div>
+          <div class="dna-label">Systems Thinking (High)</div>
+          <div class="dna-explanation">Systems thinking and architectural vision</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">HORIZON</div>
+          <div class="dna-label">Perspective (High)</div>
+          <div class="dna-explanation">Thinks multi-move ahead; connects current decisions to future states</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">SIGNAL</div>
+          <div class="dna-label">Relational Awareness (Moderate)</div>
+          <div class="dna-explanation">Relational awareness and team attunement</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">FLEX</div>
+          <div class="dna-label">Adaptability (Moderate)</div>
+          <div class="dna-explanation">Adaptability and willingness to pivot</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Box 3: Your Core Edge -->
+    <div class="core-edge-box">
+      <div class="core-edge-icon-container">
+        <div class="core-edge-icon">🎯</div>
+      </div>
+      <div class="core-edge-content">
+        <h3 class="core-edge-heading">YOUR CORE EDGE</h3>
+        <div class="gold-underline-small"></div>
+        <p class="core-edge-text">high Command (Vector) combined with high Perspective (Horizon)</p>
+      </div>
+    </div>
+
+    <!-- Bottom Metadata Boxes -->
+    <div class="cover-metadata-row">
+      <div class="metadata-box">
+        <div class="metadata-icon">📅</div>
+        <div class="metadata-content">
+          <div class="metadata-label">ASSESSMENT DATE</div>
+          <div class="metadata-value">23/05/2026</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">🛡</div>
+        <div class="metadata-content">
+          <div class="metadata-label">CONFIDENCE LEVEL</div>
+          <div class="metadata-value">Moderate-High</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">⏱</div>
+        <div class="metadata-content">
+          <div class="metadata-label">PROFILE TYPE</div>
+          <div class="metadata-value">Command/Perspective</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">1</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page02-operating-system-map.html #}
+<div class="mmm-page page02 bos-map-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <section class="page-title-section">
+      <h1 class="page-title">Behavioral Operating System Map</h1>
+      <div class="subtitle">System architecture: how you prioritize, decide, and respond</div>
+      <div class="title-divider-container">
+        <div class="navy-divider"></div>
+        <div class="gold-divider-accent"></div>
+      </div>
+    </section>
+
+    <div class="bos-map-container">
+      <!-- Left side: System Tension Warning -->
+      <div class="bos-tension-warning-box">
+        <div class="warning-icon">⚠</div>
+        <div class="warning-content">
+          <div class="warning-label">SYSTEM TENSION WARNING</div>
+          <div class="warning-text">Values flexibility but defaults to directional consistency</div>
+        </div>
+      </div>
+
+      <!-- Left opposing pattern + description -->
+      <!-- Center: Core Engine + Orbit -->
+      <div class="bos-center-stage">
+        <div class="bos-orbit-ring"></div>
+        <div class="bos-core">
+          <div class="core-label">CORE ENGINE</div>
+          <div class="core-heading">Command/Perspective</div>
+          <div class="core-summary">Decisive directive with long-range framing</div>
+        </div>
+
+        <!-- Top: Primary Driver -->
+        <div class="bos-node bos-primary bos-top-node">
+          <div class="node-label-small">PRIMARY DRIVER</div>
+          <div class="node-name">vector</div>
+          <div class="node-icon">🎯</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Enters situations with direction already forming; </div>
+            <div class="node-descriptor-line">• Sets direction</div>
+            <div class="node-descriptor-line">• Accelerates decisions</div>
+            <div class="node-descriptor-line">• Focuses energy</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-top"></div>
+
+        <!-- Right: Secondary Stabilizer -->
+        <div class="bos-node bos-secondary bos-right-node">
+          <div class="node-label-small">SECONDARY STABILIZER</div>
+          <div class="node-name">horizon</div>
+          <div class="node-icon">🛡</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Thinks multi-move ahead; connects current decision</div>
+            <div class="node-descriptor-line">• Balances driver</div>
+            <div class="node-descriptor-line">• Enables sustainability</div>
+            <div class="node-descriptor-line">• Reduces blind spots</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-right"></div>
+
+        <!-- Left: Opposing Pattern -->
+        <div class="bos-node bos-opposing bos-left-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">fidelity</div>
+          <div class="node-icon">⚡</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Catches errors others miss; verifies assumptions b</div>
+            <div class="node-descriptor-line">• Challenges defaults</div>
+            <div class="node-descriptor-line">• Surfaces blind spots</div>
+            <div class="node-descriptor-line">• Creates tension</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-left"></div>
+
+        <!-- Bottom: Opposing Pattern 2 -->
+        <div class="bos-node bos-opposing bos-bottom-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">framework</div>
+          <div class="node-icon">🔄</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Prefers clear process and structure; comfortable w</div>
+            <div class="node-descriptor-line">• Adds nuance</div>
+            <div class="node-descriptor-line">• Complicates efficiency</div>
+            <div class="node-descriptor-line">• Enables wisdom</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-bottom"></div>
+      </div>
+
+
+    </div>
+
+    <!-- Bottom: System Tension Summary + Legend -->
+    <section class="bos-summary-section">
+      <div class="bos-summary-card">
+        <div class="summary-icon">⚠</div>
+        <div class="summary-content">
+          <div class="summary-heading">SYSTEM TENSION SUMMARY</div>
+          <div class="summary-body">Describes being adaptable but behavioral traces show maintained direction once set</div>
+        </div>
+        <div class="bos-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-primary"></span>
+            <span class="legend-text">Primary Driver</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-secondary"></span>
+            <span class="legend-text">Secondary Stabilizer</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-opposing"></span>
+            <span class="legend-text">Opposing Patterns</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer bos-footer">
+    <div class="footer-accent-line"></div>
+    <div class="footer-content">
+      <div class="footer-left">
+        <span class="m-icon">M+</span>
+        Assessment Date: 23/05/2026
+      </div>
+      <div class="footer-right">
+        Confidence: Moderate-High | Profile Type: Command/Perspective
+        <span class="page-number-box">2</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+{# page03-executive-summary.html #}
+<div class="mmm-page page03">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main executive-summary-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Executive Summary</h1>
+      <div class="subtitle">Key insights and strategic implications</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="executive-summary">
+      <p>This is a Command/Perspective profile - decisive directive with long-range framing. Command-driven leadership. Command dominance can suppress Precision — creates blind spot.</p>
+    </section>
+
+    <!-- Placeholder for 3-card leadership/development/priority section -->
+    <section class="leadership-development-priority">
+      <div class="card">
+        <div class="card-heading">Leadership Approach</div>
+        <div class="card-body">Command-driven leadership</div>
+      </div>
+      <div class="card">
+        <div class="card-heading">Development Priority</div>
+        <div class="card-body">Recognize flex as capability you&#039;ve built, not natural default — pivots cost energy</div>
+      </div>
+      <div class="card">
+        <div class="card-heading">Strategic Priority</div>
+        <div class="card-body">Pause growth to build systems; accept short-term speed loss for long-term capacity</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">3</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page04-operating-pattern.html #}
+<div class="mmm-page page04">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-pattern-page">
+    <section class="page-title-section" style="position: relative;">
+      <div style="position: absolute; left: -12px; top: 0; width: 5px; height: 100px; background-color: #D4AF37; border-radius: 2px;"></div>
+      <h1 class="page-title" style="padding-left: 12px;">Operating Pattern</h1>
+      <div class="subtitle" style="padding-left: 12px;">How you naturally show up and get things done</div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="body-narrative" style="max-width: 680px; margin: 0 auto 40px auto;">
+      <p style="font-size: 15px; margin-bottom: 18px;">Command-driven leadership. Team experiences Command as primary organizing force. Perspective provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress precision — creates blind spot. Internal tension: Describes being adaptable but behavioral traces show maintained direction once set. Development path: Build capacity in underutilized dimensions.</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">Command drives decision formation. Perspective validates approach. Moderate decision velocity. Blind spot: Low Precision means fidelity signals get missed. This creates tension — Infrastructure gap — current systems cannot support stated goals.</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">Command drives decision formation</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">Accelerates to directive action — decisions form faster, input window narrows</p>
+    </section>
+
+    <section class="three-card-row">
+      <div class="mmm-card">
+        <div class="card-heading">Strongest Default</div>
+        <div class="card-body">Enters situations with direction already forming; pulls team toward action</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Likely Blind Spot</div>
+        <div class="card-body">Catches errors others miss; verifies assumptions before moving</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Highest Value Adjustment</div>
+        <div class="card-body">Relational timing awareness - pause before directing to read room dynamics</div>
+      </div>
+    </section>
+
+    <section class="development-priority-banner">
+      <div class="card-heading">Development Priority</div>
+      <div class="card-body">Values flexibility but defaults to directional consistency</div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">4</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page05-decision-architecture.html #}
+<div class="mmm-page page05">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main decision-architecture-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Decision Architecture</h1>
+      <div class="subtitle">Your approach to making choices and managing complexity</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="decision-architecture">
+      <div class="two-column-layout">
+        <div class="narrative-area">
+          <p>Command drives decision formation. Perspective validates approach. Moderate decision velocity. Blind spot: Low Precision means fidelity signals get missed. This creates tension — Infrastructure gap — current systems cannot support stated goals.</p>
+          <p>Decision speed: Moderate decision velocity</p>
+        </div>
+        <div class="metrics-area">
+          <div class="mmm-card">
+            <div class="card-heading">Speed</div>
+            <div class="card-body">80%</div>
+          </div>
+          <div class="mmm-card">
+            <div class="card-heading">Precision</div>
+            <div class="card-body">20%</div>
+          </div>
+          <!-- Add more decision traits as needed -->
+        </div>
+      </div>
+    </section>
+
+    <section class="card-row">
+      <div class="mmm-card">
+        <div class="card-heading">Advantage</div>
+        <div class="card-body">high Command (Vector)</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Failure Mode</div>
+        <div class="card-body">Precision and Structure disappear — these signals don&#039;t register until crisis escalates</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Upgrade Path</div>
+        <div class="card-body">Relational awareness development - sustained practice in reading team dynamics</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">5</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page06-communication-style.html #}
+<div class="mmm-page page06">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main communication-style-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Communication Style</h1>
+      <div class="subtitle">How you convey information and interact with others</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="communication-style">
+      <div class="dense-sections">
+        <div class="section">
+          <h3>Signal Matrix</h3>
+          <p>Communication style: Command-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.</p>
+          <!-- Placeholder for signal matrix visualization -->
+          <div class="signal-matrix-placeholder"></div>
+        </div>
+        
+        <div class="section">
+          <h3>Others' Experience</h3>
+          <div class="three-card-row">
+            <div class="mmm-card">
+              <div class="card-heading">Clarity</div>
+              <div class="card-body">Direction-first, context-later</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Impact</div>
+              <div class="card-body">When team already shares urgency</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Friction</div>
+              <div class="card-body">Can feel too directive in consensus cultures</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h3>Advantage / Friction / Upgrade</h3>
+          <div class="three-card-row">
+            <div class="mmm-card">
+              <div class="card-heading">Advantage</div>
+              <div class="card-body">Direction-first, context-later</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Friction Point</div>
+              <div class="card-body">Can feel too directive in consensus cultures</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Upgrade</div>
+              <div class="card-body">Calibrate communication for context and reception.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">6</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page07-system-under-strain.html #}
+<div class="mmm-page page07">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main system-under-strain-page">
+    <section class="page-title-section">
+      <h1 class="page-title">System Under Strain</h1>
+      <div class="subtitle">How you perform under pressure, ambiguity, and constraints</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="system-under-strain">
+      <div class="pressure-response-grid">
+        <h3>Pressure Response Grid</h3>
+        <p>Accelerates to directive action — decisions form faster, input window narrows</p>
+        <!-- Placeholder for grid visualization -->
+        <div class="grid-placeholder"></div>
+      </div>
+
+      <div class="escalation-chain">
+        <h3>Escalation Chain</h3>
+        <p>Mild pressure: Command increases slightly, Precision signals start getting missed → Moderate pressure: Command dominates operating system, Perspective compensates to maintain function → Severe pressure: Pure Command execution, blind to Precision and Structure — repairs relationships/process after conflict resolves</p>
+      </div>
+
+      <div class="blind-spot-field">
+        <h3>Blind Spot Field</h3>
+        <p>Precision and Structure disappear — these signals don&#039;t register until crisis escalates</p>
+      </div>
+
+      <div class="friction-patterns">
+        <h3>Friction Patterns</h3>
+        <p>Build explicit Precision check-ins BEFORE pressure escalates / Recognize when Command is amplifying — create circuit breakers / Post-conflict repair: consciously re-engage Precision and Structure after stress passes</p>
+      </div>
+
+      <div class="recalibration-priorities">
+        <h3>Recalibration Priorities</h3>
+        <p>Conscious recalibration enables better decisions under stress.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">7</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page08-operating-environment-fit.html #}
+<div class="mmm-page page08">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-environment-fit-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Operating Environment Fit</h1>
+      <div class="subtitle">Analysis of optimal operating environments and cultural fit</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="operating-environment-fit">
+      <div class="environment-columns">
+        <div class="environment-col">
+          <h3>High-Traction Environments</h3>
+          <p>You thrive in environments aligned with your operating patterns.</p>
+          <div class="mmm-card">
+            <div class="card-heading">Examples</div>
+            <div class="card-body">Environments aligned with patterns.</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>Conditional-Fit Environments</h3>
+          <p>These environments work IF specific conditions are met.</p>
+          <div class="mmm-card">
+            <div class="card-heading">Conditions</div>
+            <div class="card-body">Direct communication culture, tolerance for bluntness</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>High-Friction Environments</h3>
+          <p>These environments create friction.</p>
+          <div class="mmm-card">
+            <div class="card-heading">Friction</div>
+            <div class="card-body">High-touch client relationships, Consensus-required team cultures</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="development-shift-cards">
+      <h3>Primary Development Shifts</h3>
+      <div class="three-card-row">
+        <div class="mmm-card">
+          <div class="card-heading">Perspective Shift</div>
+          <div class="card-body">Expand time horizon and strategic perspective.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Adaptability</div>
+          <div class="card-body">Build flexibility into operating defaults.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Input Shift</div>
+          <div class="card-body">Actively seek diverse perspectives.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">8</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page09-facilitator-notes.html #}
+<div class="mmm-page page09">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main facilitator-notes-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Facilitator Notes</h1>
+      <div class="subtitle">Coaching interpretation and development guidance</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="facilitator-notes">
+      <div class="dense-interpretation-layer">
+        <h3>Facilitator Interpretation Layer</h3>
+        <p>This profile reveals strategic operator with clear strengths and specific growth edges.</p>
+      </div>
+
+      <div class="coaching-interventions">
+        <h3>Coaching Interventions</h3>
+        <p>Focus on expanding awareness of automatic defaults and building deliberate flexibility.</p>
+      </div>
+
+      <div class="development-edges">
+        <h3>Development Edges</h3>
+        <p>Recognize flex as capability you&#039;ve built, not natural default — pivots cost energy / Build systematic infrastructure before scaling further</p>
+      </div>
+
+      <div class="coaching-questions">
+        <h3>Coaching Questions</h3>
+        <p>What patterns repeat under pressure? When do strengths become liabilities? What would change if you shifted?</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">9</span>
+    </div>
+  </footer>
+</div>
+
+
+{# page10-full-profile-unlocks-dna.html #}
+<div class="mmm-page page10">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-dna-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Full Profile Unlocks & Operating DNA</h1>
+      <div class="subtitle">Advanced systems, strategic expansion, and long-term optimization</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="strategic-expansion-grid">
+      <h2>Strategic Expansion Opportunities</h2>
+      <div class="mmm-grid">
+        <div class="mmm-card">
+          <div class="card-heading">Strategic Expansion</div>
+          <div class="card-body">Systems infrastructure - Current processes insufficient for 2x complexity</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Scaling Edge</div>
+          <div class="card-body">Operational chaos - Ad-hoc systems collapse under 5x load</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="advanced-systems-grid">
+      <h2>Advanced Systems Engagement</h2>
+      <div class="mmm-grid">
+        <div class="mmm-card">
+          <div class="card-heading">Advanced Leadership</div>
+          <div class="card-body">Leadership patterns evolve with complexity.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Organizational Architecture</div>
+          <div class="card-body">System design impacts effectiveness at scale.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="operating-dna-close">
+      <h2>Operating DNA Close</h2>
+      <div class="three-card-row">
+        <div class="card">
+          <div class="card-heading">Core Operating Force</div>
+          <div class="card-body">high Command (Vector)</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Hidden Cost</div>
+          <div class="card-body">Relational awareness erosion under stress.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Next Evolution</div>
+          <div class="card-body">Conscious evolution beyond current defaults creates advantage.</div>
+        </div>
+      </div>
+      <div class="why-this-matters-band">
+        <h3>Why This Matters</h3>
+        <p>Understanding your operating DNA enables deliberate evolution. Your behavioral patterns are learnable leverage points.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: 23/05/2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate-High | Profile Type: Command/Perspective
+      <span class="page-number-box">10</span>
+    </div>
+  </footer>
+</div>
+
+  </div>
+</body>
+</html>
