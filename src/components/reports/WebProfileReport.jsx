@@ -10,6 +10,33 @@
  */
 
 export default function WebProfileReport({ canonical, profileId }) {
+
+  // Safe renderer: converts any value to displayable string
+  const renderText = (value) => {
+    if (!value && value !== 0) return '';
+    if (typeof value === 'string' || typeof value === 'number') return String(value);
+    if (Array.isArray(value)) {
+      return value
+        .map(item => renderText(item))
+        .filter(s => s && s.length > 0)
+        .join(', ');
+    }
+    if (typeof value === 'object') {
+      return (
+        value.description ||
+        value.dimension ||
+        value.tension ||
+        value.pattern ||
+        value.pattern_name ||
+        value.manifestation ||
+        value.text ||
+        value.label ||
+        ''
+      );
+    }
+    return '';
+  };
+
   if (!canonical) {
     return <div className="web-report-error">Unable to load profile data</div>;
   }
@@ -57,10 +84,10 @@ export default function WebProfileReport({ canonical, profileId }) {
           <div className="info-card">
             <div className="card-label">Core Engine</div>
             <div className="card-value">
-              {topSystems.primary_driver?.description || 'N/A'}
+              {renderText(topSystems.primary_driver?.description) || 'N/A'}
             </div>
             <div className="card-detail">
-              {topSystems.primary_driver?.operating_manifestation || ''}
+              {renderText(topSystems.primary_driver?.operating_manifestation) || ''}
             </div>
           </div>
 
@@ -104,10 +131,10 @@ export default function WebProfileReport({ canonical, profileId }) {
       <section className="report-section">
         <h2 className="section-title">Executive Summary</h2>
         <div className="narrative-block">
-          {narratives.executive_summary || 
-            `${personName} operates with ${topSystems.primary_driver?.description || 'distinctive patterns'}. ` +
-            `Their primary operating mode emphasizes ${topSystems.primary_driver?.operating_manifestation || 'core strengths'}. ` +
-            `Under pressure, this manifests as: ${topSystems.primary_driver?.pressure_manifestation || 'adaptive response'}.`
+          {renderText(narratives.executive_summary) || 
+            `${personName} operates with ${renderText(topSystems.primary_driver?.description) || 'distinctive patterns'}. ` +
+            `Their primary operating mode emphasizes ${renderText(topSystems.primary_driver?.operating_manifestation) || 'core strengths'}. ` +
+            `Under pressure, this manifests as: ${renderText(topSystems.primary_driver?.pressure_manifestation) || 'adaptive response'}.`
           }
         </div>
       </section>
@@ -118,11 +145,11 @@ export default function WebProfileReport({ canonical, profileId }) {
         <div className="two-column-grid">
           <div className="narrative-card">
             <h3 className="card-heading">Default Mode</h3>
-            <p>{topSystems.primary_driver?.operating_manifestation || 'Core operating pattern'}</p>
+            <p>{renderText(topSystems.primary_driver?.operating_manifestation) || 'Core operating pattern'}</p>
           </div>
           <div className="narrative-card">
             <h3 className="card-heading">Under Pressure</h3>
-            <p>{topSystems.primary_driver?.pressure_manifestation || 'Response under strain'}</p>
+            <p>{renderText(topSystems.primary_driver?.pressure_manifestation) || 'Response under strain'}</p>
           </div>
         </div>
       </section>
@@ -131,7 +158,7 @@ export default function WebProfileReport({ canonical, profileId }) {
       <section className="report-section">
         <h2 className="section-title">Decision Architecture</h2>
         <div className="narrative-block">
-          {narratives.decision_architecture || 
+          {renderText(narratives.decision_architecture) || 
             `Decisions are driven by ${topSystems.primary_driver?.dimension}. ` +
             `They integrate ${topSystems.secondary_stabilizer?.dimension} for balance. ` +
             `Key tensions: ${data.contradictions?.[0]?.tension || 'multiple system trade-offs'}.`
@@ -143,7 +170,7 @@ export default function WebProfileReport({ canonical, profileId }) {
       <section className="report-section">
         <h2 className="section-title">Communication Style</h2>
         <div className="narrative-block">
-          {narratives.communication_signals || 
+          {renderText(narratives.communication_signals) || 
             `Communication pattern reflects ${topSystems.primary_driver?.dimension}. ` +
             `Tends to ${topSystems.primary_driver?.operating_manifestation?.toLowerCase() || 'direct engagement'}. ` +
             `Receives feedback through: results, directness, clarity.`
@@ -170,8 +197,8 @@ export default function WebProfileReport({ canonical, profileId }) {
         <h2 className="section-title">Hidden Contradictions</h2>
         {data.contradictions?.slice(0, 3).map((contradiction, idx) => (
           <div key={idx} className="contradiction-card">
-            <div className="contradiction-tension">{contradiction.tension}</div>
-            <div className="contradiction-detail">{contradiction.manifestation}</div>
+            <div className="contradiction-tension">{renderText(contradiction.tension)}</div>
+            <div className="contradiction-detail">{renderText(contradiction.manifestation)}</div>
           </div>
         ))}
       </section>
@@ -180,7 +207,7 @@ export default function WebProfileReport({ canonical, profileId }) {
       <section className="report-section">
         <h2 className="section-title">Strategic Ceiling Analysis</h2>
         <div className="narrative-block">
-          {narratives.strategic_ceiling || 
+          {renderText(narratives.strategic_ceiling) || 
             `Growth ceiling determined by: ${topSystems.opposing_pattern_1?.dimension || 'limiting factors'}. ` +
             `Current constraints: ${data.stress_patterns?.length > 0 ? 'stress-induced patterns limit expansion' : 'system tension boundaries'}. ` +
             `Next evolution requires conscious development of ${topSystems.secondary_stabilizer?.dimension || 'complementary patterns'}.`
@@ -194,13 +221,13 @@ export default function WebProfileReport({ canonical, profileId }) {
         {data.self_deception_patterns && data.self_deception_patterns.length > 0 ? (
           data.self_deception_patterns.map((pattern, idx) => (
             <div key={idx} className="risk-item">
-              <div className="risk-pattern">{pattern.pattern}</div>
-              <div className="risk-consequence">{pattern.consequence}</div>
+              <div className="risk-pattern">{renderText(pattern.pattern)}</div>
+              <div className="risk-consequence">{renderText(pattern.consequence)}</div>
             </div>
           ))
         ) : (
           <div className="narrative-block">
-            {narratives.hidden_risks || 'Blind spots develop in high-pressure environments where primary driver accelerates.'}
+            {renderText(narratives.hidden_risks) || 'Blind spots develop in high-pressure environments where primary driver accelerates.'}
           </div>
         )}
       </section>
@@ -212,7 +239,7 @@ export default function WebProfileReport({ canonical, profileId }) {
           {data.coaching_leverage_points && data.coaching_leverage_points.length > 0 ? (
             data.coaching_leverage_points.map((point, idx) => (
               <div key={idx} className="leverage-item">
-                <div className="leverage-point">{point}</div>
+                <div className="leverage-point">{renderText(point)}</div>
               </div>
             ))
           ) : (
@@ -244,19 +271,19 @@ export default function WebProfileReport({ canonical, profileId }) {
           <div className="context-item">
             <div className="context-label">Role Fit</div>
             <div className="context-value">
-              {data.role_fit_analysis || 'High fit for directive, strategic roles'}
+              {renderText(data.role_fit_analysis) || 'High fit for directive, strategic roles'}
             </div>
           </div>
           <div className="context-item">
             <div className="context-label">Environment Fit</div>
             <div className="context-value">
-              {data.environment_fit || 'Thrives in high-agency environments'}
+              {renderText(data.environment_fit) || 'Thrives in high-agency environments'}
             </div>
           </div>
           <div className="context-item">
             <div className="context-label">Leadership Readiness</div>
             <div className="context-value">
-              {data.leadership_readiness || 'Ready for next level with conscious development'}
+              {renderText(data.leadership_readiness) || 'Ready for next level with conscious development'}
             </div>
           </div>
         </div>
@@ -267,7 +294,7 @@ export default function WebProfileReport({ canonical, profileId }) {
         <h2 className="section-title">Recommended Next Step</h2>
         <div className="next-step-box">
           <div className="next-step-text">
-            {narratives.future_trajectory || 
+            {renderText(narratives.future_trajectory) || 
               `Focus on integrating ${topSystems.secondary_stabilizer?.dimension} ` +
               `while maintaining ${topSystems.primary_driver?.dimension} advantage. ` +
               `This creates sustainable high performance.`
