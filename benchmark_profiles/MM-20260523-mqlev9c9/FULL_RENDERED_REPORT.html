@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>MORE MindMap Mini Profile V2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+/* Shared CSS System for Mini V2 - Polished for Anchor Pages */
+
+/* Typography */
+body {
+  font-family: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  line-height: 1.7;
+  color: #2c2c2c;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+h1, h2, h3 {
+  margin-top: 0;
+  letter-spacing: -0.03em;
+  color: #0b2a4a;
+  font-weight: 700;
+}
+
+.page-title {
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 16px;
+  color: #0b2a4a;
+}
+
+.subtitle {
+  font-size: 20px;
+  font-weight: 400;
+  color: #666;
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #777;
+  margin-bottom: 12px;
+}
+
+.card-heading {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.card-body {
+  font-size: 14px;
+  font-weight: 400;
+  color: #444;
+}
+
+/* Page Shell */
+.mmm-page {
+  width: 8.5in;
+  min-height: 11in;
+  margin: 30px auto;
+  background-color: #fff;
+  padding: 0.85in 0.75in;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.12);
+  position: relative;
+  box-sizing: border-box;
+  page-break-after: always;
+  break-after: page;
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 48px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.header-left, .header-right {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #555;
+}
+
+/* Dividers and Accents */
+.gold-accent-bar {
+  width: 60px;
+  height: 5px;
+  background-color: #D4AF37;
+  margin-top: 8px;
+  margin-bottom: 24px;
+  border-radius: 2px;
+}
+
+.navy-divider {
+  height: 2px;
+  background-color: #0b2a4a;
+  margin: 32px 0;
+}
+
+/* Card System Enhancements */
+.mmm-card {
+  border: 1.5px solid #d0d0d0;
+  border-radius: 10px;
+  padding: 26px;
+  background: #fafafa;
+  margin-bottom: 24px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+}
+
+.three-card-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.development-priority-banner {
+  background-color: #f7f7f7;
+  padding: 24px 28px;
+  border-radius: 10px;
+  border-left: 6px solid #D4AF37;
+  margin-top: 40px;
+}
+
+.development-priority-banner .card-heading {
+  color: #0b2a4a;
+  font-size: 18px;
+}
+
+/* Grid System */
+.mmm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+/* Footer */
+.page-footer {
+  position: absolute;
+  left: 0.6in;
+  right: 0.6in;
+  bottom: 0.35in;
+  font-size: 10px;
+  color: #777;
+  border-top: 1px solid #ddd;
+  padding-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.m-icon {
+  font-weight: bold;
+  color: #D4AF37; /* Gold accent */
+  margin-right: 5px;
+}
+
+.page-number-box {
+  background-color: #eee;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Specific Page Enhancements */
+
+/* Page 1 Cover Enhancements */
+.cover-page .page-main {
+  position: relative;
+}
+
+.cover-title-section {
+  position: relative;
+  text-align: left;
+  margin-bottom: 50px;
+  padding-top: 30px;
+}
+
+.cover-background-arcs {
+  position: absolute;
+  top: 0;
+  right: -60px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, transparent 30%, rgba(220,220,220,0.15) 35%, transparent 40%, rgba(220,220,220,0.12) 45%, transparent 50%, rgba(220,220,220,0.08) 55%, transparent 60%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cover-main-title {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #2c2c2c;
+  margin-bottom: 20px;
+  letter-spacing: -0.04em;
+  position: relative;
+  z-index: 1;
+}
+
+.gold-underline {
+  width: 100px;
+  height: 4px;
+  background: #D4AF37;
+  margin-bottom: 20px;
+}
+
+.gold-underline-small {
+  width: 60px;
+  height: 3px;
+  background: #D4AF37;
+  margin-bottom: 18px;
+}
+
+.cover-subtitle {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #666;
+  max-width: 480px;
+  margin: 0;
+}
+
+.profile-signature-box {
+  background: #2c2c2c;
+  border-radius: 12px;
+  padding: 32px 38px;
+  margin-bottom: 32px;
+  display: flex;
+  gap: 20px;
+}
+
+.signature-accent-bar {
+  width: 5px;
+  background: #D4AF37;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.signature-content {
+  flex: 1;
+}
+
+.signature-heading {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #D4AF37;
+  margin-bottom: 12px;
+}
+
+.signature-code {
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 14px;
+  letter-spacing: 0.02em;
+}
+
+.signature-interpretation {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #ddd;
+}
+
+.profile-dna-box {
+  background: #fafafa;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 32px 36px;
+  margin-bottom: 32px;
+}
+
+.dna-heading {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2c2c2c;
+  margin-bottom: 8px;
+}
+
+.dna-decoder-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 28px;
+  margin-top: 20px;
+}
+
+.dna-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.dna-code {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b2a4a;
+  margin-bottom: 4px;
+}
+
+.dna-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.dna-explanation {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #666;
+}
+
+.core-edge-box {
+  background: #f5f5f5;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 28px 32px;
+  margin-bottom: 40px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.core-edge-icon-container {
+  flex-shrink: 0;
+}
+
+.core-edge-icon {
+  width: 100px;
+  height: 100px;
+  border: 2px solid #c0c0c0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  color: #999;
+  background: #fff;
+}
+
+.core-edge-content {
+  flex: 1;
+}
+
+.core-edge-heading {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #2c2c2c;
+  margin-bottom: 6px;
+}
+
+.core-edge-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #444;
+  margin: 0;
+}
+
+.cover-metadata-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 40px;
+}
+
+.metadata-box {
+  background: #fafafa;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 18px;
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.metadata-icon {
+  font-size: 32px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.metadata-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #777;
+  margin-bottom: 4px;
+}
+
+.metadata-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c2c2c;
+}
+
+/* Page 2: Behavioral Operating System Map */
+.bos-map-page .title-divider-container {
+  position: relative;
+  margin: 24px 0 48px 0;
+}
+
+.bos-map-page .navy-divider {
+  height: 2px;
+  background: #0b2a4a;
+  width: 100%;
+  margin: 0;
+}
+
+.bos-map-page .gold-divider-accent {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 80px;
+  height: 4px;
+  background: #D4AF37;
+  border-radius: 2px;
+}
+
+.bos-map-container {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  margin-bottom: 40px;
+}
+
+.bos-tension-warning-box {
+  position: absolute;
+  top: 10px;
+  left: -30px;
+  width: 240px;
+  padding: 16px;
+  background: #fff8f0;
+  border: 1.5px solid #ffe0b2;
+  border-radius: 8px;
+  display: flex;
+  gap: 12px;
+}
+
+.warning-icon {
+  font-size: 24px;
+  color: #D4AF37;
+  flex-shrink: 0;
+}
+
+.warning-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #D4AF37;
+  margin-bottom: 6px;
+}
+
+.warning-text {
+  font-size: 11px;
+  line-height: 1.5;
+  color: #666;
+}
+
+.bos-center-stage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+}
+
+.bos-orbit-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 340px;
+  height: 340px;
+  border: 1px dotted rgba(192, 192, 192, 0.4);
+  border-radius: 50%;
+}
+
+.bos-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 220px;
+  height: 220px;
+  border: 2px solid #d0d0d0;
+  border-radius: 50%;
+  background: #fafafa;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 24px;
+}
+
+.core-label {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #D4AF37;
+  margin-bottom: 10px;
+}
+
+.core-heading {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0b2a4a;
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.core-summary {
+  font-size: 10px;
+  line-height: 1.5;
+  color: #666;
+}
+
+.bos-node {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.bos-node.bos-primary {
+  background: #0b2a4a;
+  border: 3px solid #D4AF37;
+  color: white;
+}
+
+.bos-node.bos-secondary {
+  background: #2c5aa0;
+  border: 2px solid #5580c0;
+  color: white;
+}
+
+.bos-node.bos-opposing {
+  background: #e8e8e8;
+  border: 2px solid #b8b8b8;
+  color: #555;
+}
+
+.bos-top-node { 
+  top: 0; 
+  left: 50%; 
+  transform: translate(-50%, -50%);
+}
+.bos-right-node { 
+  top: 50%; 
+  right: 0; 
+  transform: translate(50%, -50%);
+}
+.bos-bottom-node { 
+  bottom: 0; 
+  left: 50%; 
+  transform: translate(-50%, 50%);
+}
+.bos-left-node { 
+  top: 50%; 
+  left: 0; 
+  transform: translate(-50%, -50%);
+}
+
+.node-label, .node-label-small {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+  opacity: 0.9;
+}
+
+.node-name {
+  font-size: 11px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.node-icon {
+  font-size: 18px;
+  opacity: 0.85;
+  margin-bottom: 5px;
+}
+
+.node-descriptor {
+  font-size: 7.5px;
+  line-height: 1.3;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+
+.node-descriptor-line {
+  margin-bottom: 2px;
+}
+
+.bos-connector {
+  position: absolute;
+  background: none;
+  border-top: 2px dotted #999;
+}
+
+.bos-conn-top { 
+  top: 110px; 
+  left: 50%; 
+  width: 1px; 
+  height: 85px; 
+  border-left: 1px dotted #aaa; 
+  transform: translateX(-50%); 
+}
+.bos-conn-right { 
+  top: 50%; 
+  right: 140px; 
+  width: 85px; 
+  height: 1px; 
+  border-top: 1px dotted #aaa; 
+  transform: translateY(-50%); 
+}
+.bos-conn-left { 
+  top: 50%; 
+  left: 140px; 
+  width: 85px; 
+  height: 1px; 
+  border-top: 1px dotted #aaa; 
+  transform: translateY(-50%); 
+}
+.bos-conn-bottom { 
+  bottom: 140px; 
+  left: 50%; 
+  width: 1px; 
+  height: 85px; 
+  border-left: 1px dotted #aaa; 
+  transform: translateX(-50%); 
+}
+
+.bos-tension-label {
+  position: absolute;
+  font-size: 8px;
+  font-weight: 600;
+  color: #888;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.bos-tension-top { top: 40px; left: 50%; transform: translateX(-50%); }
+.bos-tension-right { top: 50%; right: 30px; transform: translateY(-50%); }
+.bos-tension-bottom { bottom: 40px; left: 50%; transform: translateX(-50%); }
+
+
+
+.bos-summary-section {
+  margin-top: 20px;
+}
+
+.bos-summary-card {
+  display: flex;
+  gap: 20px;
+  padding: 20px 24px;
+  background: #f9f9f9;
+  border: 1.5px solid #e0e0e0;
+  border-left: 4px solid #D4AF37;
+  border-radius: 8px;
+  align-items: flex-start;
+}
+
+.summary-icon {
+  font-size: 32px;
+  color: #0b2a4a;
+  flex-shrink: 0;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-heading {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0b2a4a;
+  margin-bottom: 10px;
+}
+
+.summary-body {
+  font-size: 11.5px;
+  line-height: 1.65;
+  color: #444;
+  max-width: 800px;
+}
+
+.bos-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 20px;
+  border-left: 1px solid #ddd;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: #555;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.legend-primary { background: #0b2a4a; border: 2px solid #D4AF37; }
+.legend-dot.legend-secondary { background: #2c5aa0; }
+.legend-dot.legend-opposing { background: #c0c0c0; }
+
+.legend-text {
+  line-height: 1.3;
+}
+
+.bos-footer .footer-accent-line {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 60px;
+  height: 3px;
+  background: #D4AF37;
+  border-radius: 2px;
+}
+
+.bos-footer .footer-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* Page 4 Operating Pattern Refinements */
+.operating-pattern-page .three-card-row {
+  grid-template-columns: repeat(3, 1fr); /* Ensure 3 columns */
+  gap: 20px;
+}
+
+/* Print Styles - Ensure consistency */
+@media print {
+  body {
+    background: #fff;
+  }
+  .mmm-page {
+    margin: 0;
+    box-shadow: none;
+    border: none;
+    padding: 0.6in;
+  }
+  .page-footer {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    margin-top: 20px;
+  }
+  /* Ensure header/footer don't break page flow unexpectedly */
+  header, footer {
+    position: relative;
+  }
+}
+</style>
+</head>
+<body>
+
+
+<div class="mmm-page page01 cover-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <!-- Title Section with Background Arcs -->
+    <div class="cover-title-section">
+      <div class="cover-background-arcs"></div>
+      <h1 class="cover-main-title">Behavioral<br/>Operating<br/>Profile</h1>
+      <div class="gold-underline"></div>
+      <p class="cover-subtitle">A comprehensive assessment of how your behavioral system moves under uncertainty, makes decisions, communicates, and shows up in teams.</p>
+    </div>
+
+    <!-- Box 1: Your Profile Signature -->
+    <div class="profile-signature-box">
+      <div class="signature-accent-bar"></div>
+      <div class="signature-content">
+        <div class="signature-heading">YOUR PROFILE SIGNATURE</div>
+        <div class="signature-code">V35F28L12H23S18X24</div>
+        <div class="signature-interpretation">[MOCK] Command-speed operator with relational blind spots. Moves fast, misses resistance.</div>
+      </div>
+    </div>
+
+    <!-- Box 2: Your Profile DNA (NEW DECODER SECTION) -->
+    <div class="profile-dna-box">
+      <h3 class="dna-heading">YOUR PROFILE DNA</h3>
+      <div class="gold-underline-small"></div>
+      
+      <div class="dna-decoder-grid">
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        
+        <div class="dna-item">
+          <div class="dna-code">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-label">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          <div class="dna-explanation">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Box 3: Your Core Edge -->
+    <div class="core-edge-box">
+      <div class="core-edge-icon-container">
+        <div class="core-edge-icon">⚡</div>
+      </div>
+      <div class="core-edge-content">
+        <h3 class="core-edge-heading">YOUR CORE EDGE</h3>
+        <div class="gold-underline-small"></div>
+        <p class="core-edge-text">[MOCK] Core edge: fast clarity in execution phases. Hidden cost: late discovery of stakeholder misalignment.</p>
+      </div>
+    </div>
+
+    <!-- Bottom Metadata Boxes -->
+    <div class="cover-metadata-row">
+      <div class="metadata-box">
+        <div class="metadata-icon">📅</div>
+        <div class="metadata-content">
+          <div class="metadata-label">ASSESSMENT DATE</div>
+          <div class="metadata-value">May 12, 2026</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">🛡</div>
+        <div class="metadata-content">
+          <div class="metadata-label">CONFIDENCE LEVEL</div>
+          <div class="metadata-value">Moderate</div>
+        </div>
+      </div>
+      
+      <div class="metadata-box">
+        <div class="metadata-icon">⏱</div>
+        <div class="metadata-content">
+          <div class="metadata-label">PROFILE TYPE</div>
+          <div class="metadata-value">Command-Precision</div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">1</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page02 bos-map-page">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main">
+    <section class="page-title-section">
+      <h1 class="page-title">Behavioral Operating System Map</h1>
+      <div class="subtitle">System architecture: how you prioritize, decide, and respond</div>
+      <div class="title-divider-container">
+        <div class="navy-divider"></div>
+        <div class="gold-divider-accent"></div>
+      </div>
+    </section>
+
+    <div class="bos-map-container">
+      <!-- Left side: System Tension Warning -->
+      <div class="bos-tension-warning-box">
+        <div class="warning-icon">⚠</div>
+        <div class="warning-content">
+          <div class="warning-label">SYSTEM TENSION WARNING</div>
+          <div class="warning-text">[MOCK] Vector preference creates unread relational resistance.</div>
+        </div>
+      </div>
+
+      <!-- Left opposing pattern + description -->
+      <!-- Center: Core Engine + Orbit -->
+      <div class="bos-center-stage">
+        <div class="bos-orbit-ring"></div>
+        <div class="bos-core">
+          <div class="core-label">CORE ENGINE</div>
+          <div class="core-heading">Command-Speed Engine</div>
+          <div class="core-summary">Core operating system runs on command as primary driver, stabilized by perspective. This combination creates speed and clarity while requiring conscious attention to precision to avoid strategic blind spots.</div>
+        </div>
+
+        <!-- Top: Primary Driver -->
+        <div class="bos-node bos-primary bos-top-node">
+          <div class="node-label-small">PRIMARY DRIVER</div>
+          <div class="node-name">Vector (Command)</div>
+          <div class="node-icon">🎯</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• [MOCK] Enters with direction forming</div>
+            <div class="node-descriptor-line">• Maintains momentum through perspective</div>
+            <div class="node-descriptor-line">• May move faster than team can follow</div>
+            <div class="node-descriptor-line">• Requires explicit permission to slow down</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-top"></div>
+
+        <!-- Right: Secondary Stabilizer -->
+        <div class="bos-node bos-secondary bos-right-node">
+          <div class="node-label-small">SECONDARY STABILIZER</div>
+          <div class="node-name">Perspective</div>
+          <div class="node-icon">●</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Establishes command before consensus</div>
+            <div class="node-descriptor-line">• Maintains momentum through perspective</div>
+            <div class="node-descriptor-line">• May move faster than team can follow</div>
+            <div class="node-descriptor-line">• Requires explicit permission to slow down</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-right"></div>
+
+        <!-- Left: Opposing Pattern -->
+        <div class="bos-node bos-opposing bos-left-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">Precision</div>
+          <div class="node-icon">🔄</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Establishes command before consensus</div>
+            <div class="node-descriptor-line">• Maintains momentum through perspective</div>
+            <div class="node-descriptor-line">• May move faster than team can follow</div>
+            <div class="node-descriptor-line">• Requires explicit permission to slow down</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-left"></div>
+
+        <!-- Bottom: Opposing Pattern 2 -->
+        <div class="bos-node bos-opposing bos-bottom-node">
+          <div class="node-label-small">OPPOSING PATTERN</div>
+          <div class="node-name">Structure</div>
+          <div class="node-icon">🔄</div>
+          <div class="node-descriptor">
+            <div class="node-descriptor-line">• Establishes command before consensus</div>
+            <div class="node-descriptor-line">• Maintains momentum through perspective</div>
+            <div class="node-descriptor-line">• May move faster than team can follow</div>
+            <div class="node-descriptor-line">• Requires explicit permission to slow down</div>
+          </div>
+        </div>
+        <div class="bos-connector bos-conn-bottom"></div>
+      </div>
+
+
+    </div>
+
+    <!-- Bottom: System Tension Summary + Legend -->
+    <section class="bos-summary-section">
+      <div class="bos-summary-card">
+        <div class="summary-icon">⚠</div>
+        <div class="summary-content">
+          <div class="summary-heading">SYSTEM TENSION SUMMARY</div>
+          <div class="summary-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="bos-legend">
+          <div class="legend-item">
+            <span class="legend-dot legend-primary"></span>
+            <span class="legend-text">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-secondary"></span>
+            <span class="legend-text">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-dot legend-opposing"></span>
+            <span class="legend-text">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer bos-footer">
+    <div class="footer-accent-line"></div>
+    <div class="footer-content">
+      <div class="footer-left">
+        <span class="m-icon">M+</span>
+        Assessment Date: May 12, 2026
+      </div>
+      <div class="footer-right">
+        Confidence: Moderate | Profile Type: Command-Precision
+        <span class="page-number-box">2</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page03">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main executive-summary-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Executive Summary</h1>
+      <div class="subtitle">Key insights and strategic implications</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="executive-summary">
+      <p>[MOCK] High command + moderate precision creates execution strength with relational cost. Primary tension: speed vs stakeholder alignment.</p>
+    </section>
+
+    <!-- Placeholder for 3-card leadership/development/priority section -->
+    <section class="leadership-development-priority">
+      <div class="card">
+        <div class="card-heading">Leads Through Command</div>
+        <div class="card-body">This profile leads by establishing command early and maintaining momentum through perspective. Team members experience clear direction but may need explicit permission to challenge assumptions.</div>
+      </div>
+      <div class="card">
+        <div class="card-heading">Growth Requires Precision Development</div>
+        <div class="card-body">Growth opportunities center on developing precision as a complement to natural command. Building capacity in underused dimensions strengthens strategic range without abandoning core strengths.</div>
+      </div>
+      <div class="card">
+        <div class="card-heading">Build Perspective Before Speed</div>
+        <div class="card-body">Effectiveness increases when perspective is established before accelerating through command. Investing early in foundational clarity prevents costly course corrections later.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">3</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page04">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-pattern-page">
+    <section class="page-title-section" style="position: relative;">
+      <div style="position: absolute; left: -12px; top: 0; width: 5px; height: 100px; background-color: #D4AF37; border-radius: 2px;"></div>
+      <h1 class="page-title" style="padding-left: 12px;">Operating Pattern</h1>
+      <div class="subtitle" style="padding-left: 12px;">How you naturally show up and get things done</div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="body-narrative" style="max-width: 680px; margin: 0 auto 40px auto;">
+      <p style="font-size: 15px; margin-bottom: 18px;">[MOCK] Natural operating pattern: identify problem → decide → explain → execute.</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      <p style="font-size: 15px; margin-bottom: 18px;">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+    </section>
+
+    <section class="three-card-row">
+      <div class="mmm-card">
+        <div class="card-heading">Strongest Default</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Likely Blind Spot</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Highest Value Adjustment</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+    </section>
+
+    <section class="development-priority-banner">
+      <div class="card-heading">Growth Requires Precision Development</div>
+      <div class="card-body">Growth opportunities center on developing precision as a complement to natural command. Building capacity in underused dimensions strengthens strategic range without abandoning core strengths.</div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">4</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page05">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main decision-architecture-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Decision Architecture</h1>
+      <div class="subtitle">Your approach to making choices and managing complexity</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="decision-architecture">
+      <div class="two-column-layout">
+        <div class="narrative-area">
+          <p>[MOCK] Decision style: clarity-seeking. Prefers clear answer over multiple valid options.</p>
+          <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+        </div>
+        <div class="metrics-area">
+          <div class="mmm-card">
+            <div class="card-heading">Decisive Through Command</div>
+            <div class="card-body">Decisions form through command first, with perspective providing validation framework. This pattern creates speed but requires conscious integration of precision to avoid blind spots.%</div>
+          </div>
+          <div class="mmm-card">
+            <div class="card-heading">Perspective-Oriented Framing</div>
+            <div class="card-body">Decisions form through command first, with perspective providing validation framework. This pattern creates speed but requires conscious integration of precision to avoid blind spots.%</div>
+          </div>
+          <!-- Add more decision traits as needed -->
+        </div>
+      </div>
+    </section>
+
+    <section class="card-row">
+      <div class="mmm-card">
+        <div class="card-heading">Advantage</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Failure</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+      <div class="mmm-card">
+        <div class="card-heading">Upgrade</div>
+        <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">5</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page06">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main communication-style-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Communication Style</h1>
+      <div class="subtitle">How you convey information and interact with others</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="communication-style">
+      <div class="dense-sections">
+        <div class="section">
+          <h3>Signal Matrix</h3>
+          <p>[MOCK] Moderate signal means you catch major dynamics but miss subtle resistance.</p>
+          <!-- Placeholder for signal matrix visualization -->
+          <div class="signal-matrix-placeholder"></div>
+        </div>
+        
+        <div class="section">
+          <h3>Others' Experience</h3>
+          <div class="three-card-row">
+            <div class="mmm-card">
+              <div class="card-heading">Clear Command</div>
+              <div class="card-body">Others experience strong command and clear direction. The challenge surface appears when speed outpaces shared context or when precision signals are missed during execution.</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Low Patience for Drift</div>
+              <div class="card-body">Others experience strong command and clear direction. The challenge surface appears when speed outpaces shared context or when precision signals are missed during execution.</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">May Feel Hard to Interrupt</div>
+              <div class="card-body">Others experience strong command and clear direction. The challenge surface appears when speed outpaces shared context or when precision signals are missed during execution.</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="section">
+          <h3>Advantage / Friction / Upgrade</h3>
+          <div class="three-card-row">
+            <div class="mmm-card">
+              <div class="card-heading">Command-First Communication</div>
+              <div class="card-body">Communication style reflects command-first processing, emphasizing clarity and momentum. Messages land best when perspective context is provided upfront to align team understanding.</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Command-First Communication</div>
+              <div class="card-body">Communication style reflects command-first processing, emphasizing clarity and momentum. Messages land best when perspective context is provided upfront to align team understanding.</div>
+            </div>
+            <div class="mmm-card">
+              <div class="card-heading">Command-First Communication</div>
+              <div class="card-body">Communication style reflects command-first processing, emphasizing clarity and momentum. Messages land best when perspective context is provided upfront to align team understanding.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">6</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page07">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main system-under-strain-page">
+    <section class="page-title-section">
+      <h1 class="page-title">System Under Strain</h1>
+      <div class="subtitle">How you perform under pressure, ambiguity, and constraints</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="system-under-strain">
+      <div class="pressure-response-grid">
+        <h3>Pressure Response Grid</h3>
+        <p>[MOCK] Under strain: tighter structure, faster decisions. Teams feel shutdown.</p>
+        <!-- Placeholder for grid visualization -->
+        <div class="grid-placeholder"></div>
+      </div>
+
+      <div class="escalation-chain">
+        <h3>Escalation Chain</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+
+      <div class="blind-spot-field">
+        <h3>Blind Spot Field</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+
+      <div class="friction-patterns">
+        <h3>Friction Patterns</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+
+      <div class="recalibration-priorities">
+        <h3>Recalibration Priorities</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">7</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page08">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-environment-fit-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Operating Environment Fit</h1>
+      <div class="subtitle">Analysis of optimal operating environments and cultural fit</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="operating-environment-fit">
+      <div class="environment-columns">
+        <div class="environment-col">
+          <h3>High-Traction Environments</h3>
+          <p>[MOCK] Thrives in execution-focused, clear-goal environments.</p>
+          <div class="mmm-card">
+            <div class="card-heading">High Traction Card</div>
+            <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>Conditional-Fit Environments</h3>
+          <p>This profile performs best in environments that reward command and provide infrastructure for perspective. Organizational cultures that over-index on precision without supporting command create unnecessary friction.</p>
+          <div class="mmm-card">
+            <div class="card-heading">Conditional Fit Card</div>
+            <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          </div>
+        </div>
+        <div class="environment-col">
+          <h3>High-Friction Environments</h3>
+          <p>This profile performs best in environments that reward command and provide infrastructure for perspective. Organizational cultures that over-index on precision without supporting command create unnecessary friction.</p>
+          <div class="mmm-card">
+            <div class="card-heading">High Friction Card</div>
+            <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="development-shift-cards">
+      <h3>Primary Development Shifts</h3>
+      <div class="three-card-row">
+        <div class="mmm-card">
+          <div class="card-heading">Horizon Shift</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Adapt Shift</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Input Shift</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">8</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page09">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main facilitator-notes-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Facilitator Notes</h1>
+      <div class="subtitle">Coaching interpretation and development guidance</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="facilitator-notes">
+      <div class="dense-interpretation-layer">
+        <h3>Facilitator Interpretation Layer</h3>
+        <p>[MOCK] Coaching note: Frame input-gathering as decision-making, not hesitation.</p>
+      </div>
+
+      <div class="coaching-interventions">
+        <h3>Coaching Interventions</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+
+      <div class="development-edges">
+        <h3>Development Edges</h3>
+        <p>Growth opportunities center on developing precision as a complement to natural command. Building capacity in underused dimensions strengthens strategic range without abandoning core strengths.</p>
+      </div>
+
+      <div class="coaching-questions">
+        <h3>Coaching Questions</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">9</span>
+    </div>
+  </footer>
+</div>
+
+
+
+
+<div class="mmm-page page10">
+  <header class="page-header">
+    <div class="header-left">MORE MINDMAP</div>
+    <div class="header-right">BEHAVIORAL OPERATING PROFILE</div>
+  </header>
+
+  <main class="page-main operating-dna-page">
+    <section class="page-title-section">
+      <h1 class="page-title">Full Profile Unlocks & Operating DNA</h1>
+      <div class="subtitle">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+      <div class="gold-accent-bar"></div>
+      <div class="navy-divider"></div>
+    </section>
+
+    <section class="strategic-expansion-grid">
+      <h2>Strategic Expansion Opportunities</h2>
+      <div class="mmm-grid">
+        <div class="mmm-card">
+          <div class="card-heading">Unlock Area 1</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Unlock Area 2</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="advanced-systems-grid">
+      <h2>Advanced Systems Engagement</h2>
+      <div class="mmm-grid">
+        <div class="mmm-card">
+          <div class="card-heading">Advanced System 1</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Advanced System 2</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="operating-dna-close">
+      <h2>Operating DNA Close</h2>
+      <div class="three-card-row">
+        <div class="card">
+          <div class="card-heading">Command Clarity</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Unread Resistance</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+        <div class="mmm-card">
+          <div class="card-heading">Next Evolution</div>
+          <div class="card-body">This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</div>
+        </div>
+      </div>
+      <div class="why-this-matters-band">
+        <h3>Why This Matters</h3>
+        <p>This profile dimension reflects behavioral patterns shaped by command as primary driver and perspective as stabilizing force. Development opportunities emerge at the intersection with precision.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="footer-left">
+      <span class="m-icon">M+</span>
+      Assessment Date: May 12, 2026
+    </div>
+    <div class="footer-right">
+      Confidence: Moderate | Profile Type: Command-Precision
+      <span class="page-number-box">10</span>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>
