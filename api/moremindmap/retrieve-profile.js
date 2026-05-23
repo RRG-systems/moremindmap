@@ -27,9 +27,11 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Profile ID required' });
   }
 
-  const profileIdPattern = /^MM-\d{8}-[a-z0-9]{6,12}$/i;
+  // Profile IDs format: mm-YYYYMMDD-XXXXXXXX (8 lowercase alphanumeric chars)
+  // Note: Input accepted case-insensitive; normalized to lowercase for Redis key
+  const profileIdPattern = /^mm-\d{8}-[a-z0-9]{8}$/i;
   if (!profileIdPattern.test(id)) {
-    return res.status(400).json({ error: 'Invalid Profile ID format' });
+    return res.status(400).json({ error: 'Invalid Profile ID format. Expected: mm-YYYYMMDD-xxxxxxxx' });
   }
 
   // Profile IDs are always lowercase; normalize for safety

@@ -2,9 +2,9 @@
  * generateProfileId.js
  * 
  * Generate permanent profile_id for canonical dossiers
- * Format: MM-YYYYMMDD-SHORTUUID
+ * Format: mm-YYYYMMDD-SHORTUUID (lowercase for Redis key consistency)
  * 
- * Example: MM-20260521-a3f9k2x7
+ * Example: mm-20260521-a3f9k2x7
  */
 
 import { randomBytes } from 'crypto';
