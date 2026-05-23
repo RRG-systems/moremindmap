@@ -110,6 +110,7 @@ export async function executeCanonicalGeneration(job) {
     
     const vault_result = await saveCanonicalProfile({
       canonical_profile,
+      profile_id,  // Pass the profile_id generated above to avoid duplicate generation
       job_id: job.job_id,
       person_name,
       email,

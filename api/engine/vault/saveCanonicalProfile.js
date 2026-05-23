@@ -3,17 +3,11 @@
  * 
  * Save canonical profile to Redis Vault
  * 
- * Storage structure:
- * - vault:profile:{profile_id} → full profile JSON
- * - vault:index:date:{YYYY-MM-DD} → set of profile_ids created that day
- * - vault:index:email:{email} → set of profile_ids for that email
- * - vault:index:company:{company_slug} → set of profile_ids for that company
- * - vault:index:department:{dept_slug} → set of profile_ids by department
- * - vault:index:role:{role_slug} → set of profile_ids by role
- * - vault:index:manager:{manager_slug} → set of profile_ids by reports_to
- * - vault:index:industry:{industry_slug} → set of profile_ids by industry
- * - vault:index:org_context:{context_slug} → set of profile_ids by org context
- * - vault:metadata:count → total profile count
+ * FIXED (2026-05-23 08:15): Accept optional profile_id parameter
+ * The profile_id should be generated ONCE in executeCanonicalGeneration and passed here,
+ * not generated again inside this function. This prevents ID mismatch where:
+ * - executeCanonicalGeneration reports profile_id X
+ * - But saveCanonicalProfile saves under profile_id Y
  */
 
 import Redis from 'ioredis';
@@ -62,15 +56,13 @@ function generateCompanySlug(companyName) {
 /**
  * Save canonical profile to Vault
  * 
- * Instrumented with detailed diagnostic fields to track:
- * - Whether writes actually execute
- * - Whether verification read succeeds
- * - Redis provider/client info
- * - Timestamps
+ * Accepts optional profile_id to prevent duplicate generation.
+ * If profile_id not provided, generates one.
  */
 export async function saveCanonicalProfile(options) {
   const {
     canonical_profile,     // Full canonical profile object
+    profile_id = null,     // OPTIONAL: Use this ID instead of generating one
     job_id = null,
     person_name = null,
     email = null,
@@ -86,6 +78,7 @@ export async function saveCanonicalProfile(options) {
     save_timestamp: new Date().toISOString(),
     redis_provider: 'ioredis',
     redis_url_present: !!process.env.REDIS_URL,
+    profile_id_provided: !!profile_id,
     vault_key_written: false,
     verification_read_attempted: false,
     verification_read_success: false,
@@ -98,8 +91,19 @@ export async function saveCanonicalProfile(options) {
     throw new Error('canonical_profile required');
   }
   
-  // Generate permanent profile_id
-  const profile_id = generateProfileId();
+  // Use provided profile_id or generate new one
+  // If profile_id provided, validate it
+  let final_profile_id;
+  if (profile_id) {
+    if (!isValidProfileId(profile_id)) {
+      throw new Error(`Invalid profile_id format: ${profile_id}`);
+    }
+    final_profile_id = profile_id;
+    console.log(`[VAULT-SAVE] Using provided profile_id: ${final_profile_id}`);
+  } else {
+    final_profile_id = generateProfileId();
+    console.log(`[VAULT-SAVE] Generated new profile_id: ${final_profile_id}`);
+  }
   
   // Extract core data
   const vector_scores = canonical_profile.vector_scores || {};
@@ -110,7 +114,7 @@ export async function saveCanonicalProfile(options) {
   
   // Build vault record
   const vault_record = {
-    profile_id,
+    profile_id: final_profile_id,
     job_id,
     person_name,
     email,
@@ -136,7 +140,7 @@ export async function saveCanonicalProfile(options) {
   
   try {
     // Save main profile
-    const profile_key = `vault:profile:${profile_id}`;
+    const profile_key = `vault:profile:${final_profile_id}`;
     console.log(`[VAULT-SAVE] Writing key: ${profile_key} (${JSON.stringify(vault_record).length} bytes)`);
     
     const setResult = await redis.set(profile_key, JSON.stringify(vault_record));
@@ -145,18 +149,18 @@ export async function saveCanonicalProfile(options) {
     
     // Add to date index
     const date_index_key = `vault:index:date:${date_key}`;
-    await redis.sadd(date_index_key, profile_id);
+    await redis.sadd(date_index_key, final_profile_id);
     
     // Add to email index if email provided
     if (email) {
       const email_index_key = `vault:index:email:${email.toLowerCase()}`;
-      await redis.sadd(email_index_key, profile_id);
+      await redis.sadd(email_index_key, final_profile_id);
     }
     
     // Add to company index if company provided
     if (company_slug) {
       const company_index_key = `vault:index:company:${company_slug}`;
-      await redis.sadd(company_index_key, profile_id);
+      await redis.sadd(company_index_key, final_profile_id);
     }
     
     // Add organizational context indexes
@@ -167,7 +171,7 @@ export async function saveCanonicalProfile(options) {
       if (org.department && org.department !== 'Other') {
         const dept_slug = generateSlug(org.department);
         if (dept_slug) {
-          await redis.sadd(`vault:index:department:${dept_slug}`, profile_id);
+          await redis.sadd(`vault:index:department:${dept_slug}`, final_profile_id);
         }
       }
       
@@ -175,7 +179,7 @@ export async function saveCanonicalProfile(options) {
       if (org.role_title) {
         const role_slug = generateSlug(org.role_title);
         if (role_slug) {
-          await redis.sadd(`vault:index:role:${role_slug}`, profile_id);
+          await redis.sadd(`vault:index:role:${role_slug}`, final_profile_id);
         }
       }
       
@@ -183,7 +187,7 @@ export async function saveCanonicalProfile(options) {
       if (org.reports_to) {
         const manager_slug = generateSlug(org.reports_to);
         if (manager_slug) {
-          await redis.sadd(`vault:index:manager:${manager_slug}`, profile_id);
+          await redis.sadd(`vault:index:manager:${manager_slug}`, final_profile_id);
         }
       }
       
@@ -191,7 +195,7 @@ export async function saveCanonicalProfile(options) {
       if (org.industry && org.industry !== 'Other') {
         const industry_slug = generateSlug(org.industry);
         if (industry_slug) {
-          await redis.sadd(`vault:index:industry:${industry_slug}`, profile_id);
+          await redis.sadd(`vault:index:industry:${industry_slug}`, final_profile_id);
         }
       }
       
@@ -200,7 +204,7 @@ export async function saveCanonicalProfile(options) {
         for (const context of org.org_context) {
           const ctx_slug = generateSlug(context);
           if (ctx_slug) {
-            await redis.sadd(`vault:index:org_context:${ctx_slug}`, profile_id);
+            await redis.sadd(`vault:index:org_context:${ctx_slug}`, final_profile_id);
           }
         }
       }
@@ -226,7 +230,7 @@ export async function saveCanonicalProfile(options) {
     }
     
     return {
-      profile_id,
+      profile_id: final_profile_id,
       profile_signature,
       created_at,
       vault_key: profile_key,
@@ -252,10 +256,15 @@ export async function saveCanonicalProfile(options) {
 
 /**
  * Save canonical profile markdown separately (optional, for quick access)
+ * 
+ * profile_id: The EXACT profile_id to use (must match the profile's vault:profile:{profile_id})
  */
 export async function saveCanonicalMarkdown(profile_id, markdown_content) {
+  if (!profile_id || typeof profile_id !== 'string') {
+    throw new Error('profile_id required and must be string');
+  }
   if (!isValidProfileId(profile_id)) {
-    throw new Error('Invalid profile_id format');
+    throw new Error(`Invalid profile_id format: ${profile_id}`);
   }
   
   const redis = getRedis();
