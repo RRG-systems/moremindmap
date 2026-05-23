@@ -8,7 +8,7 @@
  * 
  * STRATEGY:
  * 1. Try lowercase key first (new format: mm-YYYYMMDD-XXXXXXXX)
- * 2. Fallback to original input format (legacy: MM-YYYYMMDD-XXXXXXXX)
+ * 2. Fallback to uppercase key (legacy: MM-YYYYMMDD-XXXXXXXX)
  * This ensures existing profiles (stored uppercase) are still accessible
  * while new profiles use lowercase for consistency
  * 
@@ -35,13 +35,15 @@ export default async function handler(req, res) {
 
   // Profile IDs format: mm-YYYYMMDD-XXXXXXXX (8 lowercase alphanumeric chars)
   // Note: Input accepted case-insensitive; normalized to lowercase for Redis key
-  const profileIdPattern = /^mm-\d{8}-[a-z0-9]{8}$/i;
+  const profileIdPattern = /^m{2}-\d{8}-[a-z0-9]{8}$/i;
   if (!profileIdPattern.test(id)) {
     return res.status(400).json({ error: 'Invalid Profile ID format. Expected: mm-YYYYMMDD-xxxxxxxx' });
   }
 
-  // Profile IDs are always lowercase; normalize for safety
-  const normalizedId = id.toLowerCase();
+  // Extract date and random parts (case-insensitive)
+  const match = id.match(/^m{2}-(\d{8})-([a-z0-9]{8})$/i);
+  const datepart = match[1];
+  const randompart = match[2].toLowerCase();
 
   try {
     // Connect to Redis
@@ -49,15 +51,15 @@ export default async function handler(req, res) {
 
     // FALLBACK STRATEGY:
     // 1. Try lowercase key first (new format for all new profiles)
-    // 2. Fallback to original input format (legacy support for existing profiles)
+    // 2. Fallback to uppercase key (legacy support for existing profiles)
     let profileData;
     let retrievedKey;
     let keyAttempts = [];
     
     // Try 1: Lowercase key (new standard)
-    const lowercaseKey = `vault:profile:${normalizedId}`;
+    const lowercaseKey = `vault:profile:mm-${datepart}-${randompart}`;
     console.log(`[RETRIEVE] Attempt 1: GET ${lowercaseKey}`);
-    keyAttempts.push({ attempt: 1, key: lowercaseKey, strategy: 'lowercase_normalized' });
+    keyAttempts.push({ attempt: 1, key: lowercaseKey, strategy: 'lowercase' });
     
     profileData = await redis.get(lowercaseKey);
     
@@ -66,20 +68,20 @@ export default async function handler(req, res) {
       keyAttempts.push({ attempt: 1, result: 'found', bytes: Buffer.byteLength(profileData, 'utf8') });
       console.log(`[RETRIEVE] ✓ Found at attempt 1: ${lowercaseKey}`);
     } else {
-      // Try 2: Original input format (fallback for legacy/uppercase keys like MM-*)
-      const originalKey = `vault:profile:${id}`;
-      console.log(`[RETRIEVE] Attempt 2: GET ${originalKey}`);
-      keyAttempts.push({ attempt: 2, key: originalKey, strategy: 'original_input_format' });
+      // Try 2: Uppercase key (fallback for legacy MM-* keys)
+      const uppercaseKey = `vault:profile:MM-${datepart}-${randompart}`;
+      console.log(`[RETRIEVE] Attempt 2: GET ${uppercaseKey}`);
+      keyAttempts.push({ attempt: 2, key: uppercaseKey, strategy: 'uppercase_legacy' });
       
-      profileData = await redis.get(originalKey);
+      profileData = await redis.get(uppercaseKey);
       
       if (profileData) {
-        retrievedKey = originalKey;
+        retrievedKey = uppercaseKey;
         keyAttempts.push({ attempt: 2, result: 'found', bytes: Buffer.byteLength(profileData, 'utf8') });
-        console.log(`[RETRIEVE] ✓ Found at attempt 2: ${originalKey}`);
+        console.log(`[RETRIEVE] ✓ Found at attempt 2: ${uppercaseKey}`);
       } else {
         keyAttempts.push({ attempt: 2, result: 'not_found' });
-        console.log(`[RETRIEVE] ✗ Not found at attempt 2: ${originalKey}`);
+        console.log(`[RETRIEVE] ✗ Not found at attempt 2: ${uppercaseKey}`);
       }
     }
 
@@ -90,7 +92,7 @@ export default async function handler(req, res) {
       console.log(`[RETRIEVE] Final result: Profile not found after ${keyAttempts.length} attempts`);
       return res.status(404).json({ 
         error: 'Profile not found',
-        profile_id: normalizedId,
+        profile_id: id,
         _debug_key_attempts: keyAttempts
       });
     }
@@ -107,7 +109,7 @@ export default async function handler(req, res) {
     // Return canonical dossier (safe for client rendering)
     return res.status(200).json({
       success: true,
-      profile_id: normalizedId,
+      profile_id: id,
       canonical_dossier: canonicalDossier,
       retrieved_at: new Date().toISOString(),
       _debug_key_attempts: keyAttempts

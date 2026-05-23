@@ -8,7 +8,7 @@
  * STRATEGY:
  * 1. Accept both MM- (uppercase) and mm- (lowercase) formats
  * 2. Try lowercase normalized key first
- * 3. Fallback to original input format (legacy uppercase keys)
+ * 3. Fallback to uppercase key (legacy support)
  */
 
 import Redis from 'ioredis';
@@ -63,7 +63,10 @@ export default async function handler(req, res) {
       });
     }
 
-    const normalizedId = id.toLowerCase();
+    // Extract date and random parts (case-insensitive)
+    const match = id.match(/^m{2}-(\d{8})-([a-z0-9]{8})$/i);
+    const datepart = match[1];
+    const randompart = match[2].toLowerCase();
 
     const redis_diagnostics = {
       redis_module: 'ioredis',
@@ -77,12 +80,12 @@ export default async function handler(req, res) {
     try {
       // FALLBACK STRATEGY:
       // 1. Try lowercase key first (new standard)
-      // 2. Fallback to original input format (legacy support)
+      // 2. Fallback to uppercase key (legacy support)
       let profile_json;
       let profile_key_used;
       
       // Try 1: Lowercase normalized key
-      const lowercase_key = `vault:profile:${normalizedId}`;
+      const lowercase_key = `vault:profile:mm-${datepart}-${randompart}`;
       console.log(`[RETRIEVAL] Attempt 1: GET ${lowercase_key}`);
       redis_diagnostics.operations.push({ step: 'get_attempt_1_lowercase', key: lowercase_key });
       
@@ -96,40 +99,41 @@ export default async function handler(req, res) {
         });
         console.log(`[RETRIEVAL] ✓ Found at lowercase key: ${lowercase_key}`);
       } else {
-        // Try 2: Original input format (fallback for MM-* keys)
-        const original_key = `vault:profile:${id}`;
-        console.log(`[RETRIEVAL] Attempt 2: GET ${original_key}`);
-        redis_diagnostics.operations.push({ step: 'get_attempt_2_original', key: original_key });
+        // Try 2: Uppercase key (fallback for MM-* keys)
+        const uppercase_key = `vault:profile:MM-${datepart}-${randompart}`;
+        console.log(`[RETRIEVAL] Attempt 2: GET ${uppercase_key}`);
+        redis_diagnostics.operations.push({ step: 'get_attempt_2_uppercase', key: uppercase_key });
         
-        profile_json = await redis.get(original_key);
+        profile_json = await redis.get(uppercase_key);
         
         if (profile_json) {
-          profile_key_used = original_key;
+          profile_key_used = uppercase_key;
           redis_diagnostics.operations.push({ 
             step: 'get_attempt_2_success',
             returned_bytes: Buffer.byteLength(profile_json, 'utf8')
           });
-          console.log(`[RETRIEVAL] ✓ Found at original key: ${original_key}`);
+          console.log(`[RETRIEVAL] ✓ Found at uppercase key: ${uppercase_key}`);
         } else {
-          redis_diagnostics.operations.push({ step: 'get_attempt_2_failed', key: original_key });
+          redis_diagnostics.operations.push({ step: 'get_attempt_2_failed', key: uppercase_key });
         }
       }
 
       if (!profile_json) {
         // Debug: check if key exists at all
-        let keyExists = false;
+        let lowercaseExists = false;
+        let uppercaseExists = false;
         try {
-          const existsResult = await redis.exists(lowercase_key);
-          keyExists = existsResult === 1;
-          redis_diagnostics.operations.push({ step: 'exists_check_lowercase', key: lowercase_key, exists: keyExists });
-          console.log(`[RETRIEVAL] EXISTS ${lowercase_key}: ${existsResult}`);
+          const lowercase_check = `vault:profile:mm-${datepart}-${randompart}`;
+          const lc_exists = await redis.exists(lowercase_check);
+          lowercaseExists = lc_exists === 1;
+          redis_diagnostics.operations.push({ step: 'exists_check_lowercase', key: lowercase_check, exists: lowercaseExists });
+          console.log(`[RETRIEVAL] EXISTS ${lowercase_check}: ${lc_exists}`);
           
-          if (!keyExists) {
-            const existsResult2 = await redis.exists(id);
-            const exists2 = existsResult2 === 1;
-            redis_diagnostics.operations.push({ step: 'exists_check_original', key: id, exists: exists2 });
-            console.log(`[RETRIEVAL] EXISTS ${id}: ${existsResult2}`);
-          }
+          const uppercase_check = `vault:profile:MM-${datepart}-${randompart}`;
+          const uc_exists = await redis.exists(uppercase_check);
+          uppercaseExists = uc_exists === 1;
+          redis_diagnostics.operations.push({ step: 'exists_check_uppercase', key: uppercase_check, exists: uppercaseExists });
+          console.log(`[RETRIEVAL] EXISTS ${uppercase_check}: ${uc_exists}`);
         } catch (existsErr) {
           redis_diagnostics.operations.push({ step: 'exists_error', error: existsErr.message });
         }
@@ -138,9 +142,14 @@ export default async function handler(req, res) {
           success: false,
           error: 'Profile not found',
           profile_id: id,
-          profile_key_attempted_lowercase: lowercase_key,
-          profile_key_attempted_original: id,
-          key_exists: keyExists,
+          keys_checked: {
+            lowercase: `vault:profile:mm-${datepart}-${randompart}`,
+            uppercase: `vault:profile:MM-${datepart}-${randompart}`
+          },
+          keys_exist: {
+            lowercase: lowercaseExists,
+            uppercase: uppercaseExists
+          },
           redis_diagnostics
         });
       }
@@ -160,7 +169,7 @@ export default async function handler(req, res) {
       }
 
       // Try to retrieve markdown
-      const markdown_key = `vault:markdown:${normalizedId}`;
+      const markdown_key = `vault:markdown:mm-${datepart}-${randompart}`;
       let markdown_content = null;
       let markdown_found = false;
       let markdown_error = null;
