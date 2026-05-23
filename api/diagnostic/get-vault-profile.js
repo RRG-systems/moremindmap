@@ -59,13 +59,28 @@ export default async function handler(req, res) {
     try {
       // Retrieve profile
       const profile_key = `vault:profile:${id}`;
-      const profile_json = await redis.get(profile_key);
+      let profile_json;
+      try {
+        profile_json = await redis.get(profile_key);
+      } catch (redisErr) {
+        console.error('[GET-VAULT-PROFILE] Redis GET error:', redisErr.message);
+        return res.status(500).json({
+          success: false,
+          error: 'Redis connection failed',
+          redis_error: redisErr.message,
+          profile_id: id
+        });
+      }
 
       if (!profile_json) {
+        // Debug: check if key exists at all
+        const keyExists = await redis.exists(profile_key);
         return res.status(404).json({
           success: false,
           error: 'Profile not found',
-          profile_id: id
+          profile_id: id,
+          profile_key: profile_key,
+          key_exists: keyExists === 1
         });
       }
 
