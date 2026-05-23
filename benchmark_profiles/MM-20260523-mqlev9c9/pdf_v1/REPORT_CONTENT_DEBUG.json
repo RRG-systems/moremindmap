@@ -1,0 +1,305 @@
+{
+  "profile_id": "MM-20260523-mqlev9c9",
+  "person_name": "david berg",
+  "email": "djbergiii@icloud.com",
+  "company_name": "the more companies",
+  "company_slug": "the-more-companies",
+  "assessment_date": "23/05/2026",
+  "assessment_version": "mini-v2",
+  "model": "canonical-v1-frontier",
+  "profile_code_string": "vector+ / horizon+ / velocity+",
+  "profile_signature_interpretation": "Command/Perspective: Decisive directive with long-range framing",
+  "vector_code": "VECTOR",
+  "vector_label": "Command (High)",
+  "vector_explanation": "Enters situations with direction already forming; pulls team toward action",
+  "signal_code": "SIGNAL",
+  "signal_label": "Relational Awareness (Moderate)",
+  "signal_explanation": "Relational awareness and team attunement",
+  "fidelity_code": "FIDELITY",
+  "fidelity_label": "Precision (Moderate Low)",
+  "fidelity_explanation": "Catches errors others miss; verifies assumptions before moving",
+  "velocity_code": "VELOCITY",
+  "velocity_label": "Speed (High)",
+  "velocity_explanation": "Decision speed and execution pace",
+  "leverage_code": "LEVERAGE",
+  "leverage_label": "Systems Thinking (High)",
+  "leverage_explanation": "Systems thinking and architectural vision",
+  "flex_code": "FLEX",
+  "flex_label": "Adaptability (Moderate)",
+  "flex_explanation": "Adaptability and willingness to pivot",
+  "framework_code": "FRAMEWORK",
+  "framework_label": "Structure (Moderate Low)",
+  "framework_explanation": "Prefers clear process and structure; comfortable with defined roles",
+  "horizon_code": "HORIZON",
+  "horizon_label": "Perspective (High)",
+  "horizon_explanation": "Thinks multi-move ahead; connects current decisions to future states",
+  "core_edge_icon": "🎯",
+  "core_edge_narrative": "high Command (Vector) combined with high Perspective (Horizon)",
+  "confidence_level": "Moderate-High",
+  "profile_type": "Command/Perspective",
+  "executive_summary": "This is a Command/Perspective profile - decisive directive with long-range framing. Command-driven leadership. Command dominance can suppress Precision — creates blind spot.",
+  "leadership_narrative": "Command-driven leadership. Team experiences Command as primary organizing force. Perspective provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress precision — creates blind spot. Internal tension: Describes being adaptable but behavioral traces show maintained direction once set. Development path: Build capacity in underutilized dimensions.",
+  "decision_narrative": "Command drives decision formation. Perspective validates approach. Moderate decision velocity. Blind spot: Low Precision means fidelity signals get missed. This creates tension — Infrastructure gap — current systems cannot support stated goals.",
+  "communication_narrative": "Communication style: Command-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
+  "development_narrative": "Primary development opportunity: Recognize flex as capability you've built, not natural default — pivots cost energy. Under pressure, accelerates to directive action — decisions form faster, input window narrows. Precision and Structure disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Precision check-ins BEFORE pressure escalates.",
+  "contradiction_analysis": "Critical tension: Infrastructure gap — current systems cannot support stated goals. Resolution path: Recognize flex as capability you've built, not natural default — pivots cost energy.",
+  "hidden_risks_narrative": "Risk severity: 50%. Moderate-High - Under stress, relational awareness disappears; damage done without awareness. Moderate - Relational friction drains energy; isolation increases over time. Strength liability: Strengths remain assets at current scale.",
+  "strategic_ceiling_narrative": "Current ceiling: Infrastructure maturity - Goals exceed operational systems; hitting execution ceiling now. Cause: Ad-hoc execution + avoidance of systems building = operational fragility. Breakthrough requirement: Pause growth to build systems; accept short-term speed loss for long-term capacity. Ceiling proximity: 50%.",
+  "coaching_leverage_narrative": "Highest ROI: Relational timing awareness - pause before directing to read room dynamics. Resistance likelihood: Moderate - Will engage but may revert to defaults under pressure. Quick wins: Weekly pipeline review ritual - immediate execution consistency improvement. Invisible drag: Ad-hoc execution at scale - lack of systems creates invisible time drain.",
+  "business_manifestation": "When performance stalls, externalizes bottlenecks to market, people, or circumstances. Relational friction surfaces as primary frustration point. Emotionally positive about scale - ambition elasticity present. High numerical grounding - operationally specific about metrics and scale. ",
+  "primary_driver": {
+    "dimension": "vector",
+    "score": 3,
+    "rank": 1,
+    "description": "high Command (Vector)",
+    "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
+    "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
+  },
+  "secondary_stabilizer": {
+    "dimension": "horizon",
+    "score": 3,
+    "rank": 2,
+    "description": "high Perspective (Horizon)",
+    "operating_manifestation": "Thinks multi-move ahead; connects current decisions to future states",
+    "pressure_manifestation": "Under strain, strategic perspective may narrow; near-term focus only"
+  },
+  "opposing_patterns": [
+    {
+      "dimension": "fidelity",
+      "score": -1,
+      "rank": 7,
+      "description": "low Precision (Fidelity)",
+      "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
+      "pressure_manifestation": "Under strain, precision preference increases; can create delays"
+    },
+    {
+      "dimension": "framework",
+      "score": -1,
+      "rank": 8,
+      "description": "low Structure (Framework)",
+      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
+      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
+    }
+  ],
+  "stress_patterns": "Accelerates to directive action — decisions form faster, input window narrows",
+  "escalation_chain": [
+    "Mild pressure: Command increases slightly, Precision signals start getting missed",
+    "Moderate pressure: Command dominates operating system, Perspective compensates to maintain function",
+    "Severe pressure: Pure Command execution, blind to Precision and Structure — repairs relationships/process after conflict resolves"
+  ],
+  "recovery_paths": [
+    "Build explicit Precision check-ins BEFORE pressure escalates",
+    "Recognize when Command is amplifying — create circuit breakers",
+    "Post-conflict repair: consciously re-engage Precision and Structure after stress passes"
+  ],
+  "leadership_primary_mode": "Command-driven leadership",
+  "leadership_challenge_surface": "Command dominance can suppress Precision — creates blind spot",
+  "team_experience": "Team experiences Command as primary organizing force",
+  "thrives_in": [],
+  "struggles_in": [
+    "High-touch client relationships",
+    "Consensus-required team cultures"
+  ],
+  "requires": [
+    "Direct communication culture, tolerance for bluntness"
+  ],
+  "constraints_2x": [
+    "Systems infrastructure - Current processes insufficient for 2x complexity",
+    "Relational bandwidth - Limited capacity for relationship management at scale"
+  ],
+  "constraints_5x": [
+    "Operational chaos - Ad-hoc systems collapse under 5x load",
+    "Team fragmentation - Relationship gaps create organizational silos"
+  ],
+  "scaling_readiness_score": 0.30000000000000004,
+  "highest_roi_adjustment": "Relational timing awareness - pause before directing to read room dynamics",
+  "quick_wins": [
+    "Weekly pipeline review ritual - immediate execution consistency improvement",
+    "Pre-directive pause - count to 3 before issuing direction, read room first"
+  ],
+  "long_term_work": [
+    "Relational awareness development - sustained practice in reading team dynamics",
+    "Systems thinking capacity - building infrastructure vs firefighting"
+  ],
+  "development_targets": [
+    {
+      "dimension": "flex",
+      "rationale": "Values flexibility but defaults to directional consistency",
+      "approach": "Recognize flex as capability you've built, not natural default — pivots cost energy",
+      "priority": 1,
+      "severity": "mild"
+    },
+    {
+      "dimension": "framework",
+      "rationale": "Ambitious growth targets but operational systems weak or inconsistent",
+      "approach": "Build systematic infrastructure before scaling further",
+      "priority": 2,
+      "severity": "high"
+    }
+  ],
+  "contradictions": [
+    {
+      "tension": "Values flexibility but defaults to directional consistency",
+      "dimensions_in_conflict": [
+        "vector",
+        "flex"
+      ],
+      "manifestation": "Describes being adaptable but behavioral traces show maintained direction once set",
+      "resolution_path": "Recognize flex as capability you've built, not natural default — pivots cost energy",
+      "severity": "mild"
+    },
+    {
+      "type": "growth_goals_vs_systems_maturity",
+      "tension": "Ambitious growth targets but operational systems weak or inconsistent",
+      "manifestation": "Infrastructure gap — current systems cannot support stated goals",
+      "severity": "high",
+      "dimensions_in_conflict": [
+        "horizon",
+        "framework"
+      ],
+      "resolution_path": "Build systematic infrastructure before scaling further"
+    }
+  ],
+  "hidden_costs": [
+    {
+      "cost_category": "Relational maintenance tax",
+      "description": "Relationships require active repair rather than natural maintenance; time spent fixing what speed/directness damaged",
+      "visibility": "Quarterly when turnover or conflict surfaces",
+      "compounding": "Compounds with each relationship lost; replacement quality decreases"
+    },
+    {
+      "cost_category": "Systems debt at scale",
+      "description": "Every scaling step without infrastructure creates technical debt; refactoring becomes more expensive than building correctly initially",
+      "visibility": "Invisible early, catastrophic later",
+      "compounding": "Exponential - 2x harder at each doubling"
+    }
+  ],
+  "org_company": "the more companies",
+  "org_role": "founder",
+  "org_department": "Leadership",
+  "org_reports_to": "Founder",
+  "org_years_in_role": "3–5 years",
+  "org_industry": "Real Estate",
+  "org_context": [
+    "Strategic / Visionary",
+    "Founder / Owner"
+  ],
+  "best_role_ever": "best job is current job....as founder of the more companies I'm free to dream and create.  the opportunity is unlimited and it is something I've always been searching for.  but if I'm being nastalgic then working for my dad when I was a kid at the car dealership was fun.",
+  "worst_role_ever": "Worst job was working in the car business in Los Angeles in my 20's.  I was trying to become and actor and worked in the car business.  Basically, I felt like, \"ugh why am I doing this?\"  this is horrible, these people are mean and frankly brainless.  I pushed through because it was not my main focus, but I learned then that I really don't like having a boss. \n",
+  "current_role_misalignment": "My current role doesn't feel misaligned, except the thing that's misaligned is the present vs the future, I'm creating futuristic business ideas, and sometimes living in the now, and debugging, or cranking along to get things going in the right direction , the time that it takes is something that wears on patience. ",
+  "unrealized_capacity": "I am capable of creating a billion dollar plus company that positively impacts and improves the lives of others....I believe that we are on the road to creating it....so it's not so much that my role isn't using it...it's that we aren't quite there yet. ",
+  "quality_score": 72,
+  "job_id": "5c2e71d3-44f6-40dd-932b-9fd598907464",
+  "generation_time_ms": 46,
+  "stated_priorities": [
+    "family",
+    "career",
+    "impact"
+  ],
+  "future_orientation": "high",
+  "meaning_clarity": "detailed",
+  "numerical_grounding": "high",
+  "has_specific_metrics": true,
+  "gap_awareness": true,
+  "strategic_ceiling_current": "Infrastructure maturity - Goals exceed operational systems; hitting execution ceiling now",
+  "strategic_ceiling_cause": "Ad-hoc execution + avoidance of systems building = operational fragility",
+  "strategic_ceiling_requirement": "Pause growth to build systems; accept short-term speed loss for long-term capacity",
+  "strategic_ceiling_proximity": 0.5,
+  "unchanged_trajectory_year2": [
+    "2-3 key relationship departures; A-player talent filtered out by relational friction",
+    "Firefighting becomes permanent state; same operational problems recur quarterly"
+  ],
+  "unchanged_trajectory_year5": [
+    "Team quality degrades to relational-friction-tolerant baseline; excellence replaced by compliance",
+    "Organizational debt compounds; systems rebuild required but identity resistance prevents investment; stuck at current scale"
+  ],
+  "developed_trajectory_year2": [
+    "Core operational systems in place; firefighting decreases 60%; capacity for growth created",
+    "Relational timing improves; relationship damage decreases; A-player retention increases"
+  ],
+  "developed_trajectory_year5": [
+    "Infrastructure supports 5x scale; operational leverage compounds; time freed for strategic work",
+    "Culture shifts from compliance to contribution; talent quality improves; execution multiplies through willing followership"
+  ],
+  "natural_roles": [
+    "Needs dimension refinement for specific role fit"
+  ],
+  "friction_roles": [
+    "Executive Leadership",
+    "Client-Facing/Relationship Management",
+    "Process Management",
+    "Strategy/Long-Term Planning",
+    "Startup/High Ambiguity Roles"
+  ],
+  "evidence_entries": {
+    "delegation_resistance": {
+      "inference": "delegation_resistance",
+      "source_questions": [
+        "Q26"
+      ],
+      "direct_evidence": [
+        "Q26: \"I still try to do too much myself\" or similar language"
+      ],
+      "inferred_evidence": [
+        "High vector score combined with trust gap language"
+      ],
+      "dimension_support": {},
+      "contradiction_support": [],
+      "confidence": 0.5,
+      "risk_of_overread": "moderate-high",
+      "alternative_explanations": [
+        "Could be environmental (bad prior delegation experiences)",
+        "Could be temporary phase during scaling"
+      ]
+    },
+    "relational_friction": {
+      "inference": "relational_friction_pattern",
+      "source_questions": [
+        "Q24"
+      ],
+      "direct_evidence": [
+        "Q24: Relational friction explicitly mentioned as frustration"
+      ],
+      "inferred_evidence": [
+        "Low signal dimension combined with relational frustration language"
+      ],
+      "dimension_support": {
+        "signal": "Low (1.0) - Limited relational awareness capacity"
+      },
+      "contradiction_support": [],
+      "confidence": 0.8,
+      "risk_of_overread": "low",
+      "alternative_explanations": [
+        "Team composition mismatch",
+        "Cultural environment factor"
+      ]
+    },
+    "systems_weakness": {
+      "inference": "systems_infrastructure_weakness",
+      "source_questions": [
+        "Q28",
+        "Q28",
+        "Q26"
+      ],
+      "direct_evidence": [
+        "Q28: Explicitly states systems are not strong enough",
+        "Q28: Limited systems language or ad-hoc execution described",
+        "Q26: Acknowledges infrastructure gaps or execution inconsistency"
+      ],
+      "inferred_evidence": [
+        "Low framework dimension + high velocity = systems deprioritized"
+      ],
+      "dimension_support": {
+        "framework": "Low-Moderate (-1.0) - Limited process orientation"
+      },
+      "contradiction_support": [],
+      "confidence": 0.85,
+      "risk_of_overread": "low",
+      "alternative_explanations": [
+        "Rapid growth phase legitimately delays infrastructure",
+        "Systems exist but not articulated in answers"
+      ]
+    }
+  },
+  "aggregate_confidence": 0.7166666666666667
+}
