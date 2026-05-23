@@ -15,6 +15,7 @@ export function expandNarrative(canonical) {
   const data = canonical.canonical_profile_json || canonical;
   const topSystems = data.top_systems || {};
   const vectorScores = data.vector_scores || {};
+  const tradeoffs = (topSystems.dimension_tradeoffs || []);
   const contradictions = data.contradictions || [];
   const narratives = canonical.narratives || data.narratives || {};
 
@@ -25,24 +26,31 @@ export function expandNarrative(canonical) {
   const opposing2 = topSystems.opposing_pattern_2 || {};
 
   const driverDim = primaryDriver.dimension || 'primary pattern';
+  const driverDesc = primaryDriver.description || driverDim;
   const stabilizerDim = stabilizer.dimension || 'stabilizer';
+  const stabilizerDesc = stabilizer.description || stabilizerDim;
   const profileType = data.inferred_patterns?.profile_type || 'behavioral profile';
+  
+  // Extract first tradeoff for richer tension description
+  const primaryTradeoff = tradeoffs[0] || {};
 
   return {
     // 1. PROFILE DNA
     profileDNA:
       narratives.profile_dna ||
-      `${driverDim} combined with ${stabilizerDim} creates a distinctive operating signature. ` +
+      `${driverDesc} combined with ${stabilizerDesc} creates a distinctive operating signature. ` +
       `${primaryDriver.operating_manifestation || `This combination drives ${driverDim}-based decision making.`} ` +
-      `The counterbalance of ${opposing1.dimension || 'opposing patterns'} provides important friction that often goes underutilized.`,
+      `The counterbalance of ${opposing1.description || opposing1.dimension || 'opposing patterns'} ` +
+      `provides important structural tension that, when understood, can become a hidden advantage.`,
 
     // 2. EXECUTIVE SUMMARY
     executiveSummary:
       narratives.executive_summary ||
-      `This person operates with ${primaryDriver.description || driverDim}. ` +
-      `Their strength lies in ${primaryDriver.operating_manifestation || 'decisive action and forward momentum'}. ` +
-      `Under pressure, this manifests as ${primaryDriver.pressure_manifestation || 'increased intensity and directiveness'}. ` +
-      `The core tension: their drive for speed can override precision signals that often contain valuable information.`,
+      `This person operates with ${driverDesc}. Their strength is directional conviction—` +
+      `${primaryDriver.operating_manifestation || 'they enter situations with direction already forming, pulling toward action'}. ` +
+      `Coupled with ${stabilizerDesc}, they maintain strategic perspective across decisions. ` +
+      `Under pressure: ${primaryDriver.pressure_manifestation || 'decisiveness intensifies; they move faster and read less'}. ` +
+      `The core dynamic: conviction accelerates faster than information flow, creating both speed and blind spots.`,
 
     // 3. OPERATING PATTERN (Default + Pressure)
     operatingPattern:
@@ -57,18 +65,20 @@ export function expandNarrative(canonical) {
     // 4. DECISION ARCHITECTURE
     decisionArchitecture:
       narratives.decision_architecture ||
-      `Decisions are made through ${driverDim}—${primaryDriver.operating_manifestation || 'rapid pattern formation'}. ` +
-      `Then refined by ${stabilizerDim}—${stabilizer.operating_manifestation || 'long-range validation'}. ` +
-      `The friction point: ${contradictions[0]?.tension || 'tension between speed and precision'} ` +
-      `means decisions often lock in before all information surfaces. ` +
-      `This is both strength (commitment, speed) and limitation (revised truth missed).`,
+      `Decisions form through ${driverDesc}—${primaryDriver.operating_manifestation || 'rapid directional pattern recognition'}. ` +
+      `Then validated against ${stabilizerDesc}—${stabilizer.operating_manifestation || 'multi-move strategic perspective'}. ` +
+      `Critical friction: ${primaryTradeoff.tradeoff || 'command creates friction with relational awareness and adaptability'}. ` +
+      `Cost: ${primaryTradeoff.cost || 'under time pressure, conviction overrides feedback'}. ` +
+      `Result: Decisions lock in with 70% information, executed with 100% conviction. This creates speed and ownership, but misses course corrections hiding in the last 30%.`,
 
     // 5. COMMUNICATION STYLE
     communicationStyle:
       narratives.communication_style ||
-      `Communicates with clarity and directness. Prefers outcome-focused conversation over process exploration. ` +
-      `Often establishes the destination before discussing the path, which creates efficiency but can feel like override to detail-oriented listeners. ` +
-      `Most receptive to feedback that frames new information as tactical advantage, not course correction.`,
+      `Communicates with directional clarity—names the destination first, then the path. ` +
+      `This creates efficiency but can feel like override to listeners still mapping the terrain. ` +
+      `Prefers outcome-focused dialogue over extended process exploration. ` +
+      `Most receptive to feedback framed as tactical advantage or strategic correction, not as polite suggestions. ` +
+      `Under pressure, directness increases; nuance decreases. Relationships can feel secondary to momentum.`,
 
     // 6. SYSTEM UNDER STRAIN
     systemUnderStrain:
@@ -81,34 +91,67 @@ export function expandNarrative(canonical) {
     // 7. HIDDEN CONTRADICTIONS
     hiddenContradictions:
       narratives.hidden_contradictions ||
-      `The self-deception: believes they read people well because they read situations fast. ` +
-      `Reality: signal reception bandwidth is narrow. They catch environment patterns but miss relationship texture. ` +
-      `This creates a credibility gap—high conviction, lower-than-realized calibration. ` +
-      `Second contradiction: values precision but structures decisions to avoid needing it.`,
+      `Contradiction 1 (Self vs. Reality): Believes they read people well because they read situations fast. ` +
+      `Reality: relational signal bandwidth is narrow. Catches environment patterns but misses relationship texture. ` +
+      `This creates a credibility gap: high conviction about direction, lower-than-realized calibration about people.
+
+` +
+      `Contradiction 2 (Values vs. Behavior): Can articulate the value of precision and deliberation. ` +
+      `But structures decisions to avoid needing them—commits before precision becomes option. ` +
+      `Contradiction 3 (Strength vs. Limitation): The same directional conviction that drives execution ` +
+      `also blinds them to contrary data arriving too late to shift course.`,
 
     // 8. STRATEGIC CEILING
     strategicCeiling:
       narratives.strategic_ceiling ||
-      `Growth ceiling: current system works until complexity exceeds ${driverDim} pattern recognition capacity. ` +
-      `At 2x scale, ad-hoc decision velocity becomes liability. At 5x, the system fragments entirely. ` +
-      `Evolution path: integrate ${opposing1.dimension || 'precision'} not as constraint but as detection system. ` +
-      `This requires delegating speed decisions to instinct while surfacing edge cases for deliberation.`,
+      `Current system works until complexity exceeds ${driverDim} pattern recognition capacity.
+` +
+      `At 2x scale: Ad-hoc decision velocity (strength at 1x) becomes a liability. More moves being made than can be tracked.
+` +
+      `At 5x scale: The system fragments. High-conviction decisions contradict each other; no integrated strategy.
+
+` +
+      `Evolution path: Integrate ${opposing1.description || 'precision'} not as constraint, but as detection system. ` +
+      `Requires delegating routine decisions to instinct while reserving deliberation for high-stakes edge cases. ` +
+      `This is uncomfortable—it means consciously moving slower on purpose. But it's the unlock for 10x scale.`,
 
     // 9. HIDDEN RISKS
     hiddenRisks:
       narratives.hidden_risks ||
-      `Blind spot 1: Assumes pattern recognition = pattern mastery. Often wrong. ` +
-      `Blind spot 2: Relationships decay during high-intensity execution phases. ` +
-      `Blind spot 3: Organizational systems they build mirror their own operating mode—fast, conviction-based, brittle under chaos. ` +
-      `Risk trajectory: confidence → overconfidence → miscalibration → crisis.`,
+      `Risk 1 (Pattern Mastery Illusion): Reads patterns so fast that pattern recognition feels like pattern mastery. ` +
+      `Confidence is often calibrated one move ahead of reality. When market/environment shifts, the gap becomes catastrophic.
+
+` +
+      `Risk 2 (Relationship Debt): Relationships decay during high-intensity execution phases. ` +
+      `Team members experience this as: fast commitments, low follow-through, emotional distance under pressure.
+
+` +
+      `Risk 3 (Organizational Brittleness): Systems built mirror their operating mode: fast, conviction-based, brittle under chaos. ` +
+      `When conviction-driven systems meet uncertainty, they either over-correct or collapse entirely.
+
+` +
+      `Risk Trajectory: Confidence → Overconfidence → Miscalibration → Crisis → Recalibration (rinse/repeat). ` +
+      `The question: can the recalibration cycle compress in time?`,
 
     // 10. COACHING LEVERAGE
     coachingLeverage:
       narratives.coaching_leverage ||
-      `Leverage point 1: Reframe ${opposing1.dimension || 'precision/friction'} as pattern amplification, not delay. ` +
-      `They'll lean in if you show precision as decision advantage, not bottleneck. ` +
-      `Leverage point 2: Make the blind spots visible through real-time feedback loops, not retrospectives. ` +
-      `Leverage point 3: Help them delegate their own role—biggest growth comes from building teams that slow them down in useful ways.`,
+      `Leverage 1: Reframe ${opposing1.description || 'precision'} as pattern amplification, not delay.
+` +
+      `Frame: 'Precision isn't slowing you down. It's sharpening your target.' They'll lean in if precision becomes advantage, not bottleneck.
+
+` +
+      `Leverage 2: Make blind spots visible through real-time feedback loops, not retrospectives.
+` +
+      `Retrospectives feel like blame. Real-time signals feel like intelligence gathering.
+
+` +
+      `Leverage 3: Help them delegate their own role. Biggest growth = building teams that slow them down in useful ways.
+` +
+      `This is uncomfortable because it means loss of control, but it's the only path to 10x without burning out the team.
+
+` +
+      `Leverage 4: Gamify precision. If you can turn deliberation into a strategic game with skin in the game, they'll engage.`,
 
     // 11. RECOMMENDED NEXT STEP
     recommendedNextStep:
