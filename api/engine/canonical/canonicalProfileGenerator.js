@@ -60,13 +60,16 @@ import { inferCausalChains } from './inferCausalChains.js';
 export async function generateCanonicalProfile(profileInput, options = {}) {
   const profile_id = options.profile_id || generateProfileId();
   
-  // STEP 1: Extract metadata
+  // STEP 1: Extract metadata (including organizational context)
   const metadata = {
     assessment_version: 'mini-v2',
     generated_at: new Date().toISOString(),
     model: options.model || 'canonical-v1',
     person_name: profileInput.person_name || null,
-    email: profileInput.email || null
+    email: profileInput.email || null,
+    identity: profileInput.organizationalMetadata?.identity || null,
+    organization: profileInput.organizationalMetadata?.organization || null,
+    contextual_signals: profileInput.organizationalMetadata?.contextual_signals || null
   };
   
   // STEP 2: Infer vector scores and rankings
@@ -251,7 +254,9 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     future_growth_constraints,
     coaching_leverage_points,
     hidden_risk_patterns,
-    strategic_ceiling_analysis
+    strategic_ceiling_analysis,
+    vector_scores,
+    profileInput.organizationalMetadata || {}
   );
   
   // STEP 20: Assemble canonical artifact

@@ -16,7 +16,19 @@
  * - Generic positivity
  * - "You're a natural leader"
  * - Motivational fluff
+ *
+ * Phase 3A Integration:
+ * - Executive Summary (causal specificity + operational realism)
+ * - Leadership Narrative (directness-as-efficiency mechanism)
+ * - Decision Narrative (certainty-seeking + pressure response)
  */
+
+import {
+  generateExecutiveSummary,
+  generateLeadershipNarrative,
+  generateDecisionNarrative,
+  shouldUsePhase3AUpgrades
+} from './phase3a-narrative-upgrades.js';
 
 /**
  * Build narrative profile from inferred patterns
@@ -40,7 +52,9 @@ export function buildNarrativeProfile(
   futureConstraints = null,
   coachingLeverage = null,
   hiddenRisks = null,
-  strategicCeiling = null
+  strategicCeiling = null,
+  vectorScores = {},
+  organizationalMetadata = {}
 ) {
   // Defensive normalization for semantic objects
   if (!leadershipArchitecture) {
@@ -90,34 +104,65 @@ export function buildNarrativeProfile(
   }
   
   const { profile_type, operating_signature } = inferredPatterns;
-
-  // Executive summary (2-3 sentences)
-  const opSig = String(operating_signature || 'profile').toLowerCase();
   const challengeSurface = String((leadershipArchitecture && leadershipArchitecture.challenge_surface) || 'challenge').toLowerCase();
-  const executive_summary = `This is a ${profile_type} profile - ${opSig}. ` +
-    `${leadershipArchitecture && leadershipArchitecture.primary_mode || 'operates'}. ` +
-    `${leadershipArchitecture && leadershipArchitecture.challenge_surface || 'surfaces in complex situations'}.`;
 
-  // Leadership narrative
-  const leadership_narrative = 
-    `${leadershipArchitecture?.primary_mode || 'leadership approach undefined'}. ` +
-    `${leadershipArchitecture?.team_experience || 'team experience undefined'}. ` +
-    `${leadershipArchitecture?.stabilizing_force || 'stabilizing force undefined'}. ` +
-    `The challenge surface appears when ${challengeSurface}. ` +
-    (Array.isArray(contradictions) && contradictions.length > 0 
-      ? `Internal tension: ${contradictions[0]?.manifestation || 'tension undefined'}. ` 
-      : '') +
-    `Development path: ${leadershipArchitecture?.calibrations?.[0] || 'Build capacity in underutilized dimensions'}.`;
+  // Phase 3A Executive summary with operational specificity
+  let executive_summary;
+  if (shouldUsePhase3AUpgrades(vectorScores, stressPatterns, analyzedResponses.stall_patterns)) {
+    executive_summary = generateExecutiveSummary(
+      vectorScores,
+      inferredPatterns,
+      leadershipArchitecture,
+      organizationalMetadata
+    );
+  } else {
+    const opSig = String(operating_signature || 'profile').toLowerCase();
+    executive_summary = `This is a ${profile_type} profile - ${opSig}. ` +
+      `${leadershipArchitecture && leadershipArchitecture.primary_mode || 'operates'}. ` +
+      `${leadershipArchitecture && leadershipArchitecture.challenge_surface || 'surfaces in complex situations'}.`;
+  }
 
-  // Decision narrative
-  const decision_narrative =
-    `${inferredPatterns?.decision_architecture?.formation_pattern || 'formation pattern undefined'}. ` +
-    `${inferredPatterns?.decision_architecture?.validation_method || 'validation method undefined'}. ` +
-    `${inferredPatterns?.decision_architecture?.speed_driver || 'speed driver undefined'}. ` +
-    `Blind spot: ${inferredPatterns?.decision_architecture?.blind_spot || 'blind spot undefined'}. ` +
-    (Array.isArray(contradictions) && contradictions.length > 1
-      ? `This creates tension — ${contradictions[1]?.manifestation || 'speed vs thoroughness tradeoff'}.`
-      : '');
+  // Phase 3A Leadership narrative with mechanism explanation
+  let leadership_narrative;
+  if (shouldUsePhase3AUpgrades(vectorScores, stressPatterns, analyzedResponses.stall_patterns)) {
+    leadership_narrative = generateLeadershipNarrative(
+      vectorScores,
+      stressPatterns,
+      communicationStyle,
+      contradictions,
+      organizationalMetadata
+    );
+  } else {
+    leadership_narrative = 
+      `${leadershipArchitecture?.primary_mode || 'leadership approach undefined'}. ` +
+      `${leadershipArchitecture?.team_experience || 'team experience undefined'}. ` +
+      `${leadershipArchitecture?.stabilizing_force || 'stabilizing force undefined'}. ` +
+      `The challenge surface appears when ${challengeSurface}. ` +
+      (Array.isArray(contradictions) && contradictions.length > 0 
+        ? `Internal tension: ${contradictions[0]?.manifestation || 'tension undefined'}. ` 
+        : '') +
+      `Development path: ${leadershipArchitecture?.calibrations?.[0] || 'Build capacity in underutilized dimensions'}.`;
+  }
+
+  // Phase 3A Decision narrative with pressure response analysis
+  let decision_narrative;
+  if (shouldUsePhase3AUpgrades(vectorScores, stressPatterns, analyzedResponses.stall_patterns)) {
+    decision_narrative = generateDecisionNarrative(
+      vectorScores,
+      stressPatterns,
+      inferredPatterns,
+      organizationalMetadata
+    );
+  } else {
+    decision_narrative =
+      `${inferredPatterns?.decision_architecture?.formation_pattern || 'formation pattern undefined'}. ` +
+      `${inferredPatterns?.decision_architecture?.validation_method || 'validation method undefined'}. ` +
+      `${inferredPatterns?.decision_architecture?.speed_driver || 'speed driver undefined'}. ` +
+      `Blind spot: ${inferredPatterns?.decision_architecture?.blind_spot || 'blind spot undefined'}. ` +
+      (Array.isArray(contradictions) && contradictions.length > 1
+        ? `This creates tension — ${contradictions[1]?.manifestation || 'speed vs thoroughness tradeoff'}.`
+        : '');
+  }
 
   // Communication narrative
   const communication_narrative =
