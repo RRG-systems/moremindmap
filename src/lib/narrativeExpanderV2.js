@@ -15,7 +15,7 @@
  * - Varied cadence and sentence structure
  */
 
-export function expandNarrative(canonical) {
+export function expandNarrativeV2(canonical) {
   if (!canonical) return getDefaultNarrative();
 
   const data = canonical.canonical_profile_json || canonical;
