@@ -466,15 +466,16 @@ function buildHTMLDocument(pages, reportContent, cssContent) {
 }
 
 /**
- * Simple template renderer: replace {{variable}} with values
+ * Simple template renderer: replace {{ variable }} with values
+ * Handles both {{ variable }} (with spaces) and {{variable}} (no spaces)
  */
 function renderTemplate(template, data) {
   if (!template) return '';
 
   let rendered = template;
 
-  // Replace all {{variable}} placeholders
-  rendered = rendered.replace(/\{\{(\w+)\}\}/g, (match, key) => {
+  // Replace all {{ variable }} placeholders (with optional spaces)
+  rendered = rendered.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) => {
     const value = data[key];
 
     if (value === undefined || value === null) {
