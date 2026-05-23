@@ -11,6 +11,7 @@
  */
 
 import Redis from 'ioredis';
+import { isValidProfileId } from '../engine/vault/generateProfileId.js';
 
 function getRedis() {
   const redisUrl = process.env.REDIS_URL;
@@ -46,11 +47,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Validate profile ID format (safety check)
-    if (!id.match(/^[A-Za-z0-9\-_]{10,50}$/)) {
+    // Validate profile ID format: MM-YYYYMMDD-[a-z0-9]{8}
+    if (!isValidProfileId(id)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid profile_id format'
+        error: 'Invalid profile_id format. Expected: MM-YYYYMMDD-[a-z0-9]{8}',
+        provided: id,
+        example: 'MM-20260523-cf93lov7'
       });
     }
 
