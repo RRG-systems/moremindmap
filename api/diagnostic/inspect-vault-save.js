@@ -85,8 +85,11 @@ export default async function handler(req, res) {
 
             // Detailed vault save diagnostics
             vault_save_diagnostics: canonicalDiag.vault_save_diagnostics || {
-              _missing: 'No detailed diagnostics captured'
-            }
+              _status: 'No detailed diagnostics captured'
+            },
+            
+            // Show full canonical diagnostics for comparison
+            full_canonical_diagnostics: canonicalDiag
           });
         }
       } catch (e) {
