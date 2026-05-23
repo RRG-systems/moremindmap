@@ -4,10 +4,14 @@
  * GET /api/diagnostic/get-vault-profile?id={profile_id}
  * 
  * INSTRUMENTED: Logs Redis provider, host, and retrieval operations
+ * 
+ * STRATEGY:
+ * 1. Accept both MM- (uppercase) and mm- (lowercase) formats
+ * 2. Try lowercase normalized key first
+ * 3. Fallback to original input format (legacy uppercase keys)
  */
 
 import Redis from 'ioredis';
-import { isValidProfileId } from '../engine/vault/generateProfileId.js';
 
 function getRedis() {
   const redisUrl = process.env.REDIS_URL;
@@ -47,15 +51,19 @@ export default async function handler(req, res) {
       });
     }
 
-    // Validate profile ID format: MM-YYYYMMDD-[a-z0-9]{8}
-    if (!isValidProfileId(id)) {
+    // Accept both MM- (legacy) and mm- (new) formats, case-insensitive
+    // Pattern allows either uppercase or lowercase prefix
+    const profileIdPattern = /^m{2}-\d{8}-[a-z0-9]{8}$/i;
+    if (!profileIdPattern.test(id)) {
       return res.status(400).json({
         success: false,
-        error: 'Invalid profile_id format. Expected: MM-YYYYMMDD-[a-z0-9]{8}',
+        error: 'Invalid profile_id format. Expected: MM-YYYYMMDD-[a-z0-9]{8} or mm-YYYYMMDD-[a-z0-9]{8}',
         provided: id,
-        example: 'MM-20260523-cf93lov7'
+        example: 'MM-20260523-cf93lov7 or mm-20260523-cf93lov7'
       });
     }
+
+    const normalizedId = id.toLowerCase();
 
     const redis_diagnostics = {
       redis_module: 'ioredis',
@@ -67,42 +75,61 @@ export default async function handler(req, res) {
     const redis = getRedis();
 
     try {
-      // Retrieve profile
-      const profile_key = `vault:profile:${id}`;
-      console.log(`[RETRIEVAL] GET ${profile_key}`);
-      
-      redis_diagnostics.operations.push({ step: 'get_initiated', key: profile_key });
-
+      // FALLBACK STRATEGY:
+      // 1. Try lowercase key first (new standard)
+      // 2. Fallback to original input format (legacy support)
       let profile_json;
-      try {
-        profile_json = await redis.get(profile_key);
+      let profile_key_used;
+      
+      // Try 1: Lowercase normalized key
+      const lowercase_key = `vault:profile:${normalizedId}`;
+      console.log(`[RETRIEVAL] Attempt 1: GET ${lowercase_key}`);
+      redis_diagnostics.operations.push({ step: 'get_attempt_1_lowercase', key: lowercase_key });
+      
+      profile_json = await redis.get(lowercase_key);
+      
+      if (profile_json) {
+        profile_key_used = lowercase_key;
         redis_diagnostics.operations.push({ 
-          step: 'get_completed',
-          returned_null: profile_json === null,
-          returned_undefined: profile_json === undefined,
-          returned_bytes: profile_json ? Buffer.byteLength(profile_json, 'utf8') : 0
+          step: 'get_attempt_1_success',
+          returned_bytes: Buffer.byteLength(profile_json, 'utf8')
         });
-        console.log(`[RETRIEVAL] GET result: ${profile_json ? profile_json.length + ' bytes' : 'null'}`);
-      } catch (redisErr) {
-        redis_diagnostics.operations.push({ step: 'get_error', error: redisErr.message });
-        console.error('[RETRIEVAL-REDIS] GET error:', redisErr.message);
-        return res.status(500).json({
-          success: false,
-          error: 'Redis connection failed',
-          redis_error: redisErr.message,
-          profile_id: id,
-          redis_diagnostics
-        });
+        console.log(`[RETRIEVAL] ✓ Found at lowercase key: ${lowercase_key}`);
+      } else {
+        // Try 2: Original input format (fallback for MM-* keys)
+        const original_key = `vault:profile:${id}`;
+        console.log(`[RETRIEVAL] Attempt 2: GET ${original_key}`);
+        redis_diagnostics.operations.push({ step: 'get_attempt_2_original', key: original_key });
+        
+        profile_json = await redis.get(original_key);
+        
+        if (profile_json) {
+          profile_key_used = original_key;
+          redis_diagnostics.operations.push({ 
+            step: 'get_attempt_2_success',
+            returned_bytes: Buffer.byteLength(profile_json, 'utf8')
+          });
+          console.log(`[RETRIEVAL] ✓ Found at original key: ${original_key}`);
+        } else {
+          redis_diagnostics.operations.push({ step: 'get_attempt_2_failed', key: original_key });
+        }
       }
 
       if (!profile_json) {
         // Debug: check if key exists at all
         let keyExists = false;
         try {
-          const existsResult = await redis.exists(profile_key);
+          const existsResult = await redis.exists(lowercase_key);
           keyExists = existsResult === 1;
-          redis_diagnostics.operations.push({ step: 'exists_check', key: profile_key, exists: keyExists });
-          console.log(`[RETRIEVAL] EXISTS ${profile_key}: ${existsResult}`);
+          redis_diagnostics.operations.push({ step: 'exists_check_lowercase', key: lowercase_key, exists: keyExists });
+          console.log(`[RETRIEVAL] EXISTS ${lowercase_key}: ${existsResult}`);
+          
+          if (!keyExists) {
+            const existsResult2 = await redis.exists(id);
+            const exists2 = existsResult2 === 1;
+            redis_diagnostics.operations.push({ step: 'exists_check_original', key: id, exists: exists2 });
+            console.log(`[RETRIEVAL] EXISTS ${id}: ${existsResult2}`);
+          }
         } catch (existsErr) {
           redis_diagnostics.operations.push({ step: 'exists_error', error: existsErr.message });
         }
@@ -111,7 +138,8 @@ export default async function handler(req, res) {
           success: false,
           error: 'Profile not found',
           profile_id: id,
-          profile_key: profile_key,
+          profile_key_attempted_lowercase: lowercase_key,
+          profile_key_attempted_original: id,
           key_exists: keyExists,
           redis_diagnostics
         });
@@ -132,7 +160,7 @@ export default async function handler(req, res) {
       }
 
       // Try to retrieve markdown
-      const markdown_key = `vault:markdown:${id}`;
+      const markdown_key = `vault:markdown:${normalizedId}`;
       let markdown_content = null;
       let markdown_found = false;
       let markdown_error = null;
@@ -151,12 +179,13 @@ export default async function handler(req, res) {
         redis_diagnostics.operations.push({ step: 'markdown_error', error: mdErr.message });
       }
 
-      redis_diagnostics.operations.push({ step: 'retrieval_success' });
+      redis_diagnostics.operations.push({ step: 'retrieval_success', key_used: profile_key_used });
 
       // Success response
       return res.status(200).json({
         success: true,
         profile_id: id,
+        profile_key_used: profile_key_used,
         profile: canonical_profile,
         markdown: {
           found: markdown_found,
