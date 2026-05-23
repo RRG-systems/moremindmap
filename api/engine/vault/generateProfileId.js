@@ -26,7 +26,7 @@ function generateShortUUID() {
 
 /**
  * Generate profile ID
- * Format: MM-YYYYMMDD-SHORTUUID
+ * Format: mm-YYYYMMDD-SHORTUUID (lowercase for Redis key consistency)
  */
 export function generateProfileId() {
   const now = new Date();
@@ -35,7 +35,7 @@ export function generateProfileId() {
   const day = String(now.getDate()).padStart(2, '0');
   const shortUUID = generateShortUUID();
   
-  return `MM-${year}${month}${day}-${shortUUID}`;
+  return `mm-${year}${month}${day}-${shortUUID}`;
 }
 
 /**
@@ -44,8 +44,9 @@ export function generateProfileId() {
 export function isValidProfileId(profileId) {
   if (typeof profileId !== 'string') return false;
   
-  // Match: MM-YYYYMMDD-XXXXXXXX (8 lowercase alphanumeric chars)
-  const pattern = /^MM-\d{8}-[a-z0-9]{8}$/;
+  // Match: mm-YYYYMMDD-XXXXXXXX (8 lowercase alphanumeric chars)
+  // Always lowercase for consistency (Redis keys are case-sensitive)
+  const pattern = /^mm-\d{8}-[a-z0-9]{8}$/;
   return pattern.test(profileId);
 }
 

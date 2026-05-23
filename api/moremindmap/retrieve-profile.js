@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid Profile ID format' });
   }
 
-  // Normalize ID to lowercase
+  // Profile IDs are always lowercase; normalize for safety
   const normalizedId = id.toLowerCase();
 
   try {

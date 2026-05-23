@@ -93,8 +93,9 @@ export async function saveCanonicalProfile(options) {
     if (!isValidProfileId(profile_id)) {
       throw new Error(`Invalid profile_id format: ${profile_id}`);
     }
-    final_profile_id = profile_id;
-    diagnostics.operations.push({ step: 'profile_id_provided', value: final_profile_id });
+    // Normalize to lowercase for consistency (Redis keys are case-sensitive)
+    final_profile_id = profile_id.toLowerCase();
+    diagnostics.operations.push({ step: 'profile_id_provided', value: final_profile_id, original: profile_id });
   } else {
     final_profile_id = generateProfileId();
     diagnostics.operations.push({ step: 'profile_id_generated', value: final_profile_id });
