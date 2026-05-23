@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from "react"
 import MiniProfileReport from "./components/reports/MiniProfileReport.jsx";
+import WebProfileReport from "./components/reports/WebProfileReport.jsx";
 import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
-
 export default function Profile() {
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
@@ -106,40 +106,17 @@ export default function Profile() {
         return
       }
       
-      // Generate HTML from canonical dossier
-      try {
-        const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-        const htmlRes = await fetch(`${API}/api/moremindmap/generate-report-html`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ canonical_dossier: data.canonical_dossier })
-        })
-        
-        if (!htmlRes.ok) {
-          console.error("[HTML GENERATION] Failed:", htmlRes.status)
-          setProfileIdError("Failed to generate report. Please try again.")
-          setProfileIdLoading(false)
-          return
-        }
-        
-        const htmlData = await htmlRes.json()
-        
-        setResult({
-          success: true,
-          version: "retrieved",
-          html: htmlData.html,
-          canonical_dossier: data.canonical_dossier,
-          profile_id: data.profile_id,
-          retrieved_at: data.retrieved_at
-        })
-        
-        setSubmitted(true)
-        setProcessing(false)
-      } catch (htmlError) {
-        console.error("[HTML GENERATION ERROR]", htmlError)
-        setProfileIdError("Failed to generate report. Please try again.")
-        setProfileIdLoading(false)
-      }
+      // For web-first report, use canonical dossier directly (no HTML generation)
+      setResult({
+        success: true,
+        version: "web",
+        canonical_dossier: data.canonical_dossier,
+        profile_id: data.profile_id,
+        retrieved_at: data.retrieved_at
+      })
+      
+      setSubmitted(true)
+      setProcessing(false)
     } catch (error) {
       console.error("[PROFILE RETRIEVAL ERROR]", error)
       setProfileIdError("Failed to retrieve profile. Please try again.")
@@ -549,7 +526,23 @@ export default function Profile() {
                 </>
               )}
 
-              {/* NEW: 5-PAGE MINI PROFILE REPORT (OLD VERSION) */}
+              {/* WEB-FIRST: PREMIUM PROFILE REPORT */}
+              {!processing && result?.success && result?.version === "web" && result?.canonical_dossier && (
+                <>
+                  <WebProfileReport 
+                    canonical={result.canonical_dossier}
+                    profileId={result.profile_id}
+                  />
+                  <a
+                    href="/"
+                    className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-base font-medium text-white hover:bg-white/10 transition mt-6"
+                  >
+                    ← Back to Home
+                  </a>
+                </>
+              )}
+
+                            {/* NEW: 5-PAGE MINI PROFILE REPORT (OLD VERSION) */}
               {!processing && result?.success && result?.miniProfile && !result?.version && (
                 <>
                   <div className="bg-white text-black rounded-[2rem] shadow-2xl overflow-hidden">

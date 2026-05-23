@@ -474,6 +474,9 @@ function renderTemplate(template, data) {
 
   let rendered = template;
 
+  // Strip Jinja2 comments {# ... #}
+  rendered = rendered.replace(/\{#.*?#\}/gs, '');
+
   // Replace all {{ variable }} placeholders (with optional spaces)
   rendered = rendered.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) => {
     const value = data[key];
