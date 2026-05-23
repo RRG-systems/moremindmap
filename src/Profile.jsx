@@ -22,6 +22,11 @@ export default function Profile() {
   const [promoCode, setPromoCode] = useState("")
   const [promoValidated, setPromoValidated] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
+  
+  // Profile ID retrieval (recovery/testing path)
+  const [profileId, setProfileId] = useState("")
+  const [profileIdError, setProfileIdError] = useState(null)
+  const [profileIdLoading, setProfileIdLoading] = useState(false)
 
   // Use the locked 24-question set
   const questions = MOREMINDMAP_QUESTIONS
@@ -58,6 +63,88 @@ export default function Profile() {
       setSelectedOffer("full_profile")
     } else {
       console.log("[PROMO VALIDATION] Invalid code:", code)
+    }
+  }
+
+  async function validateProfileId() {
+    setProfileIdError(null)
+    const id = profileId.trim()
+    
+    if (!id) {
+      setProfileIdError("Please enter a profile ID")
+      return
+    }
+    
+    const profileIdPattern = /^MM-\d{8}-[a-z0-9]{6,12}$/i
+    if (!profileIdPattern.test(id)) {
+      setProfileIdError("Please enter a valid Profile ID.")
+      return
+    }
+    
+    setProfileIdLoading(true)
+    try {
+      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
+      const res = await fetch(`${API}/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`)
+      
+      if (!res.ok) {
+        if (res.status === 404) {
+          setProfileIdError("We couldn't find that profile. Please check the ID and try again.")
+        } else {
+          const error = await res.json()
+          setProfileIdError(error.error || "Failed to retrieve profile")
+        }
+        setProfileIdLoading(false)
+        return
+      }
+      
+      const data = await res.json()
+      console.log("[PROFILE RETRIEVED]", data.profile_id)
+      
+      if (!data.canonical_dossier) {
+        setProfileIdError("Invalid profile data")
+        setProfileIdLoading(false)
+        return
+      }
+      
+      // Generate HTML from canonical dossier
+      try {
+        const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
+        const htmlRes = await fetch(`${API}/api/moremindmap/generate-report-html`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ canonical_dossier: data.canonical_dossier })
+        })
+        
+        if (!htmlRes.ok) {
+          console.error("[HTML GENERATION] Failed:", htmlRes.status)
+          setProfileIdError("Failed to generate report. Please try again.")
+          setProfileIdLoading(false)
+          return
+        }
+        
+        const htmlData = await htmlRes.json()
+        
+        setResult({
+          success: true,
+          version: "retrieved",
+          html: htmlData.html,
+          canonical_dossier: data.canonical_dossier,
+          profile_id: data.profile_id,
+          retrieved_at: data.retrieved_at
+        })
+        
+        setSubmitted(true)
+        setProcessing(false)
+      } catch (htmlError) {
+        console.error("[HTML GENERATION ERROR]", htmlError)
+        setProfileIdError("Failed to generate report. Please try again.")
+        setProfileIdLoading(false)
+      }
+    } catch (error) {
+      console.error("[PROFILE RETRIEVAL ERROR]", error)
+      setProfileIdError("Failed to retrieve profile. Please try again.")
+    } finally {
+      setProfileIdLoading(false)
     }
   }
 
@@ -329,6 +416,11 @@ export default function Profile() {
               setPromoCode={setPromoCode}
               promoValidated={promoValidated}
               validatePromoCode={validatePromoCode}
+              profileId={profileId}
+              setProfileId={setProfileId}
+              profileIdError={profileIdError}
+              profileIdLoading={profileIdLoading}
+              validateProfileId={validateProfileId}
               onStart={handleStartAssessment}
               checkoutLoading={checkoutLoading}
             />
@@ -435,6 +527,28 @@ export default function Profile() {
                 </>
               )}
 
+              {/* RETRIEVED: PROFILE REGENERATION FROM VAULT */}
+              {!processing && result?.success && result?.version === "retrieved" && result?.html && (
+                <>
+                  <div className="bg-white rounded-[2rem] shadow-2xl overflow-hidden">
+                    <div className="p-4 md:p-6 bg-gradient-to-r from-amber-600 to-orange-600 text-white">
+                      <div className="text-xs uppercase tracking-wider opacity-90">Profile Report</div>
+                      <div className="text-sm mt-1">Regenerated from Profile ID: {result.profile_id}</div>
+                    </div>
+                    <div 
+                      className="mini-v2-report-container"
+                      dangerouslySetInnerHTML={{ __html: result.html }}
+                    />
+                  </div>
+                  <a
+                    href="/"
+                    className="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/5 px-6 py-4 text-base font-medium text-white hover:bg-white/10 transition"
+                  >
+                    ← Back to Home
+                  </a>
+                </>
+              )}
+
               {/* NEW: 5-PAGE MINI PROFILE REPORT (OLD VERSION) */}
               {!processing && result?.success && result?.miniProfile && !result?.version && (
                 <>
@@ -507,7 +621,7 @@ export default function Profile() {
 
 /* ── Intro Screen ── */
 
-function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, onStart, checkoutLoading }) {
+function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading }) {
   // DEBUG: Immediate render log
   const isButtonDisabled = !fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading
   console.log("[INTROSCREEN RENDER]", {
@@ -619,6 +733,35 @@ function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, se
           </div>
         </div>
       )}
+
+      {/* Profile ID Retrieval Section */}
+      <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
+        <div className="text-xs uppercase tracking-[0.22em] text-white/45">Already have a profile?</div>
+        <p className="mt-2 text-sm text-white/60">Enter your Profile ID to regenerate your report without retaking the assessment.</p>
+        
+        <div className="mt-4 flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={profileId}
+            onChange={(e) => setProfileId(e.target.value)}
+            placeholder="MM-20260523-xxxxxxx"
+            className="flex-1 rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-white placeholder:text-white/30 outline-none focus:border-white/25 font-mono text-sm"
+          />
+          <button
+            onClick={validateProfileId}
+            disabled={!profileId.trim() || profileIdLoading}
+            className="rounded-2xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            {profileIdLoading ? "Loading..." : "Validate"}
+          </button>
+        </div>
+        
+        {profileIdError && (
+          <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
+            <p className="text-sm text-red-400">{profileIdError}</p>
+          </div>
+        )}
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
         <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
