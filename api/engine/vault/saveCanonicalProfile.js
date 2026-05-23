@@ -8,6 +8,11 @@
  * - vault:index:date:{YYYY-MM-DD} → set of profile_ids created that day
  * - vault:index:email:{email} → set of profile_ids for that email
  * - vault:index:company:{company_slug} → set of profile_ids for that company
+ * - vault:index:department:{dept_slug} → set of profile_ids by department
+ * - vault:index:role:{role_slug} → set of profile_ids by role
+ * - vault:index:manager:{manager_slug} → set of profile_ids by reports_to
+ * - vault:index:industry:{industry_slug} → set of profile_ids by industry
+ * - vault:index:org_context:{context_slug} → set of profile_ids by org context
  * - vault:metadata:count → total profile count
  */
 
@@ -33,18 +38,25 @@ function generateProfileSignature(vectorScores) {
 }
 
 /**
- * Generate company slug from company name
+ * Generate slug from text (generic)
  * Lowercase, replace spaces/special chars with hyphens
  */
-function generateCompanySlug(companyName) {
-  if (!companyName || typeof companyName !== 'string') return null;
+function generateSlug(text) {
+  if (!text || typeof text !== 'string') return null;
   
-  return companyName
+  return text
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric with hyphens
     .replace(/^-+|-+$/g, '')      // Trim leading/trailing hyphens
     .substring(0, 64);             // Max 64 chars
+}
+
+/**
+ * Generate company slug from company name
+ */
+function generateCompanySlug(companyName) {
+  return generateSlug(companyName);
 }
 
 /**
@@ -122,6 +134,53 @@ export async function saveCanonicalProfile(options) {
   if (company_slug) {
     const company_index_key = `vault:index:company:${company_slug}`;
     await redis.sadd(company_index_key, profile_id);
+  }
+  
+  // Add organizational context indexes
+  if (metadata?.organization) {
+    const org = metadata.organization;
+    
+    // Department index
+    if (org.department && org.department !== 'Other') {
+      const dept_slug = generateSlug(org.department);
+      if (dept_slug) {
+        await redis.sadd(`vault:index:department:${dept_slug}`, profile_id);
+      }
+    }
+    
+    // Role index
+    if (org.role_title) {
+      const role_slug = generateSlug(org.role_title);
+      if (role_slug) {
+        await redis.sadd(`vault:index:role:${role_slug}`, profile_id);
+      }
+    }
+    
+    // Manager index
+    if (org.reports_to) {
+      const manager_slug = generateSlug(org.reports_to);
+      if (manager_slug) {
+        await redis.sadd(`vault:index:manager:${manager_slug}`, profile_id);
+      }
+    }
+    
+    // Industry index
+    if (org.industry && org.industry !== 'Other') {
+      const industry_slug = generateSlug(org.industry);
+      if (industry_slug) {
+        await redis.sadd(`vault:index:industry:${industry_slug}`, profile_id);
+      }
+    }
+    
+    // Org context multi-select index
+    if (Array.isArray(org.org_context) && org.org_context.length > 0) {
+      for (const context of org.org_context) {
+        const ctx_slug = generateSlug(context);
+        if (ctx_slug) {
+          await redis.sadd(`vault:index:org_context:${ctx_slug}`, profile_id);
+        }
+      }
+    }
   }
   
   // Increment total count
