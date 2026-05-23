@@ -562,7 +562,7 @@ export default function Profile() {
               )}
 
               {/* FALLBACK: Missing profile data */}
-              {!processing && result?.success && !result?.miniProfile && (
+              {!processing && result?.success && !result?.miniProfile && result?.version !== "web" && (
                 <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30">
                   <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/60">
                     Processing
