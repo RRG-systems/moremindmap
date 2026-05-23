@@ -62,9 +62,11 @@ function generateCompanySlug(companyName) {
 /**
  * Save canonical profile to Vault
  * 
- * FIX (2026-05-23): Added Redis disconnect in finally block to ensure
- * writes are flushed before returning success. Added verification read
- * to confirm profile actually persisted.
+ * Instrumented with detailed diagnostic fields to track:
+ * - Whether writes actually execute
+ * - Whether verification read succeeds
+ * - Redis provider/client info
+ * - Timestamps
  */
 export async function saveCanonicalProfile(options) {
   const {
@@ -79,6 +81,18 @@ export async function saveCanonicalProfile(options) {
     quality_score = null,
     metadata = {}
   } = options;
+  
+  const diagnostics = {
+    save_timestamp: new Date().toISOString(),
+    redis_provider: 'ioredis',
+    redis_url_present: !!process.env.REDIS_URL,
+    vault_key_written: false,
+    verification_read_attempted: false,
+    verification_read_success: false,
+    verification_value_length: null,
+    redis_disconnect_called: false,
+    error_during_save: null
+  };
   
   if (!canonical_profile) {
     throw new Error('canonical_profile required');
@@ -123,7 +137,11 @@ export async function saveCanonicalProfile(options) {
   try {
     // Save main profile
     const profile_key = `vault:profile:${profile_id}`;
-    await redis.set(profile_key, JSON.stringify(vault_record));
+    console.log(`[VAULT-SAVE] Writing key: ${profile_key} (${JSON.stringify(vault_record).length} bytes)`);
+    
+    const setResult = await redis.set(profile_key, JSON.stringify(vault_record));
+    diagnostics.vault_key_written = true;
+    console.log(`[VAULT-SAVE] Set result: ${setResult}`);
     
     // Add to date index
     const date_index_key = `vault:index:date:${date_key}`;
@@ -192,9 +210,19 @@ export async function saveCanonicalProfile(options) {
     await redis.incr('vault:metadata:count');
     
     // Verify the profile was actually saved by reading it back
+    diagnostics.verification_read_attempted = true;
+    console.log(`[VAULT-SAVE] Attempting verification read on same Redis client: ${profile_key}`);
+    
     const verifyRead = await redis.get(profile_key);
-    if (!verifyRead) {
-      throw new Error(`Profile save verification failed: ${profile_key} not found after write`);
+    
+    if (verifyRead) {
+      diagnostics.verification_read_success = true;
+      diagnostics.verification_value_length = verifyRead.length;
+      console.log(`[VAULT-SAVE] ✓ Verification read SUCCESS: ${verifyRead.length} bytes`);
+    } else {
+      diagnostics.verification_read_success = false;
+      console.log(`[VAULT-SAVE] ✗ Verification read FAILED: Key returned null/undefined`);
+      throw new Error(`Profile save verification failed: ${profile_key} not found after write on same client`);
     }
     
     return {
@@ -203,11 +231,22 @@ export async function saveCanonicalProfile(options) {
       created_at,
       vault_key: profile_key,
       company_slug,
-      success: true
+      success: true,
+      diagnostics  // ← Return diagnostic data
     };
+  } catch (error) {
+    diagnostics.error_during_save = error.message;
+    console.error(`[VAULT-SAVE] Error: ${error.message}`);
+    throw error;
   } finally {
     // Always disconnect Redis to ensure writes are flushed to Redis
-    redis.disconnect();
+    try {
+      redis.disconnect();
+      diagnostics.redis_disconnect_called = true;
+      console.log(`[VAULT-SAVE] Redis disconnected`);
+    } catch (disconnectErr) {
+      console.error(`[VAULT-SAVE] Error during disconnect: ${disconnectErr.message}`);
+    }
   }
 }
 
@@ -224,13 +263,18 @@ export async function saveCanonicalMarkdown(profile_id, markdown_content) {
   try {
     const markdown_key = `vault:markdown:${profile_id}`;
     
+    console.log(`[VAULT-MARKDOWN] Writing key: ${markdown_key} (${markdown_content.length} bytes)`);
+    
     await redis.set(markdown_key, markdown_content);
     
     // Verify markdown was saved
     const verifyRead = await redis.get(markdown_key);
     if (!verifyRead) {
+      console.log(`[VAULT-MARKDOWN] ✗ Verification read FAILED`);
       throw new Error(`Markdown save verification failed: ${markdown_key} not found after write`);
     }
+    
+    console.log(`[VAULT-MARKDOWN] ✓ Verification read SUCCESS: ${verifyRead.length} bytes`);
     
     return {
       profile_id,
@@ -240,5 +284,6 @@ export async function saveCanonicalMarkdown(profile_id, markdown_content) {
     };
   } finally {
     redis.disconnect();
+    console.log(`[VAULT-MARKDOWN] Redis disconnected`);
   }
 }

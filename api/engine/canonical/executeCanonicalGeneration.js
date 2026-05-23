@@ -134,6 +134,11 @@ export async function executeCanonicalGeneration(job) {
     canonical_diagnostics.profile_id = profile_id
     canonical_diagnostics.vault_keys_created.push(vault_result.vault_key)
     
+    // Capture detailed vault save diagnostics from vault_result
+    if (vault_result.diagnostics) {
+      canonical_diagnostics.vault_save_diagnostics = vault_result.diagnostics
+    }
+    
     // Save markdown
     if (canonical_markdown) {
       trace.push('before_saveCanonicalMarkdown')
