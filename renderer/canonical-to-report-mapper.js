@@ -3,11 +3,12 @@
  * 
  * Maps canonical dossier JSON → report content structure
  * 
+ * CRITICAL: This mapper provides ALL template variables.
+ * Missing variables → raw {{ }} placeholders in output
+ * 
  * Generic mapper: works with ANY canonical dossier, not tied to specific profiles
  * Input: canonical dossier object
- * Output: reportContent object with all template variables
- * 
- * IMPORTANT: This mapper is reusable. Use MM-20260523-mqlev9c9 for testing only.
+ * Output: reportContent object with 150+ template variables
  */
 
 const canonicalToReportMapper = (canonicalDossier) => {
@@ -89,7 +90,7 @@ const canonicalToReportMapper = (canonicalDossier) => {
     confidence_level: extractConfidenceLevel(canonical),
     profile_type: canonical.inferred_patterns?.profile_type || 'Behavioral Profile',
 
-    // ===== SECTION NARRATIVES (directly from canonical.narrative_profile) =====
+    // ===== SECTION NARRATIVES =====
     executive_summary: canonical.narrative_profile?.executive_summary || '',
     leadership_narrative: canonical.narrative_profile?.leadership_narrative || '',
     decision_narrative: canonical.narrative_profile?.decision_narrative || '',
@@ -100,6 +101,137 @@ const canonicalToReportMapper = (canonicalDossier) => {
     strategic_ceiling_narrative: canonical.narrative_profile?.strategic_ceiling_narrative || '',
     coaching_leverage_narrative: canonical.narrative_profile?.coaching_leverage_narrative || '',
     business_manifestation: canonical.narrative_profile?.business_manifestation || '',
+
+    // ===== EXECUTIVE SUMMARY SECTION =====
+    summary_text: canonical.narrative_profile?.executive_summary || 'Executive summary analyzing behavioral patterns and strategic implications.',
+    leadership_heading: 'Leadership Approach',
+    leadership_body: canonical.leadership_architecture?.primary_mode || 'Leadership emerges from core operating patterns.',
+    development_heading: 'Development Priority',
+    development_body: canonical.development_targets?.[0]?.approach || 'Growth through deliberate capability expansion.',
+    priority_heading: 'Strategic Priority',
+    priority_body: canonical.strategic_ceiling_analysis?.breakthrough_requirement || 'Breakthrough requires addressing current ceiling.',
+
+    // ===== OPERATING PATTERN SECTION =====
+    operating_pattern_body_1: canonical.narrative_profile?.leadership_narrative?.split('\n')?.[0] || 'Operating pattern reflects core behavioral drivers.',
+    operating_pattern_body_2: canonical.narrative_profile?.decision_narrative?.split('\n')?.[0] || 'Decision architecture shapes approach and outcomes.',
+    operating_pattern_body_3: canonical.inferred_patterns?.decision_architecture?.formation_pattern || 'Pattern formation driven by core operating system.',
+    operating_pattern_body_4: canonical.stress_patterns?.primary_stress_response || 'Under stress, behavioral patterns accelerate.',
+    strongest_default_heading: 'Strongest Default',
+    strongest_default_body: canonical.top_systems?.primary_driver?.operating_manifestation || 'Primary driver creates natural advantage.',
+    likely_blind_spot_heading: 'Likely Blind Spot',
+    likely_blind_spot_body: canonical.top_systems?.opposing_pattern_1?.operating_manifestation || 'Blind spots emerge from opposing patterns.',
+    highest_value_adjustment_heading: 'Highest Value Adjustment',
+    highest_value_adjustment_body: canonical.coaching_leverage_points?.highest_roi_adjustment || 'Strategic adjustment creates sustainable impact.',
+    development_priority_heading: 'Development Priority',
+    development_priority_body: canonical.development_targets?.[0]?.rationale || 'Growth opportunity identified for focus.',
+
+    // ===== DECISION ARCHITECTURE SECTION =====
+    decision_architecture_narrative_1: canonical.narrative_profile?.decision_narrative || 'Decision architecture synthesized from behavioral patterns and operating model.',
+    decision_architecture_narrative_2: canonical.inferred_patterns?.decision_architecture?.speed_driver ? `Decision speed: ${canonical.inferred_patterns.decision_architecture.speed_driver}` : 'Moderate decision velocity.',
+    decision_trait_1_heading: 'Speed',
+    decision_trait_1_value: canonical.vector_scores?.velocity ? Math.round(Math.max(0, Math.min(100, (canonical.vector_scores.velocity + 2) * 20))) : 50,
+    decision_trait_2_heading: 'Precision',
+    decision_trait_2_value: canonical.vector_scores?.fidelity ? Math.round(Math.max(0, Math.min(100, (canonical.vector_scores.fidelity + 2) * 20))) : 50,
+    advantage_heading: 'Advantage',
+    advantage_body: canonical.top_systems?.primary_driver?.description || 'Primary operating advantage.',
+    failure_heading: 'Failure Mode',
+    failure_body: canonical.stress_patterns?.blind_spot_emergence || 'Blind spot emergence under stress.',
+    upgrade_heading: 'Upgrade Path',
+    upgrade_body: canonical.coaching_leverage_points?.long_term_work?.[0] || 'Long-term development creates sustainable advantage.',
+
+    // ===== COMMUNICATION STYLE SECTION =====
+    signal_matrix_explanation: canonical.narrative_profile?.communication_narrative || 'Communication style analysis from behavioral patterns.',
+    others_experience_1_heading: 'Clarity',
+    others_experience_1_body: canonical.inferred_patterns?.communication_style?.message_structure || 'Message structure shapes reception.',
+    others_experience_2_heading: 'Impact',
+    others_experience_2_body: canonical.inferred_patterns?.communication_style?.effectiveness_peak || 'Peak effectiveness in aligned contexts.',
+    others_experience_3_heading: 'Friction',
+    others_experience_3_body: canonical.inferred_patterns?.communication_style?.friction_point || 'Potential friction point exists.',
+    communication_advantage_heading: 'Advantage',
+    communication_advantage_body: canonical.inferred_patterns?.communication_style?.message_structure || 'Direct communication creates clarity.',
+    communication_friction_heading: 'Friction Point',
+    communication_friction_body: canonical.inferred_patterns?.communication_style?.friction_point || 'Specific communication friction identified.',
+    communication_upgrade_heading: 'Upgrade',
+    communication_upgrade_body: 'Calibrate communication for context and reception.',
+
+    // ===== SYSTEM UNDER STRAIN SECTION =====
+    system_tension_warning: canonical.contradictions?.[0]?.tension || 'Multiple system tensions exist.',
+    system_tension_summary: canonical.contradictions?.[0]?.manifestation || 'System tensions manifest under pressure.',
+    primary_driver_name: canonical.top_systems?.primary_driver?.dimension || 'Primary Driver',
+    primary_driver_icon: '🎯',
+    primary_driver_bullet_1: truncate(canonical.top_systems?.primary_driver?.operating_manifestation, 50) || 'Primary driver',
+    primary_driver_bullet_2: 'Sets direction',
+    primary_driver_bullet_3: 'Accelerates decisions',
+    primary_driver_bullet_4: 'Focuses energy',
+    secondary_stabilizer_name: canonical.top_systems?.secondary_stabilizer?.dimension || 'Secondary Stabilizer',
+    secondary_stabilizer_icon: '🛡',
+    secondary_stabilizer_bullet_1: truncate(canonical.top_systems?.secondary_stabilizer?.operating_manifestation, 50) || 'Provides stability',
+    secondary_stabilizer_bullet_2: 'Balances driver',
+    secondary_stabilizer_bullet_3: 'Enables sustainability',
+    secondary_stabilizer_bullet_4: 'Reduces blind spots',
+    opposing_pattern_1_name: canonical.top_systems?.opposing_pattern_1?.dimension || 'Opposing Pattern 1',
+    opposing_pattern_1_icon: '⚡',
+    opposing_pattern_1_bullet_1: truncate(canonical.top_systems?.opposing_pattern_1?.operating_manifestation, 50) || 'Alternative perspective',
+    opposing_pattern_1_bullet_2: 'Challenges defaults',
+    opposing_pattern_1_bullet_3: 'Surfaces blind spots',
+    opposing_pattern_1_bullet_4: 'Creates tension',
+    opposing_pattern_2_name: canonical.top_systems?.opposing_pattern_2?.dimension || 'Opposing Pattern 2',
+    opposing_pattern_2_icon: '🔄',
+    opposing_pattern_2_bullet_1: truncate(canonical.top_systems?.opposing_pattern_2?.operating_manifestation, 50) || 'Counter-balance',
+    opposing_pattern_2_bullet_2: 'Adds nuance',
+    opposing_pattern_2_bullet_3: 'Complicates efficiency',
+    opposing_pattern_2_bullet_4: 'Enables wisdom',
+    core_engine_heading: canonical.inferred_patterns?.profile_type || 'Core Operating Engine',
+    core_engine_summary: canonical.inferred_patterns?.operating_signature || 'Your behavioral system synthesized.',
+    legend_primary_driver_text: 'Primary Driver',
+    legend_secondary_stabilizer_text: 'Secondary Stabilizer',
+    legend_opposing_patterns_text: 'Opposing Patterns',
+    pressure_response_explanation: canonical.stress_patterns?.primary_stress_response || 'Under pressure, patterns intensify and blind spots emerge.',
+    escalation_chain_explanation: canonical.stress_patterns?.escalation_chain?.join(' → ') || 'Stress escalation follows predictable path.',
+    blind_spot_field_explanation: canonical.stress_patterns?.blind_spot_emergence || 'Blind spots emerge under stress.',
+    friction_patterns_explanation: canonical.stress_patterns?.recovery_paths?.join(' / ') || 'Friction patterns activate under strain.',
+    recalibration_priorities_explanation: 'Conscious recalibration enables better decisions under stress.',
+
+    // ===== ENVIRONMENT FIT SECTION =====
+    high_traction_environments_body: 'You thrive in environments aligned with your operating patterns.',
+    high_traction_card_heading: 'Examples',
+    high_traction_card_body: canonical.environment_fit?.thrives_in?.join(', ') || 'Environments aligned with patterns.',
+    conditional_fit_environments_body: 'These environments work IF specific conditions are met.',
+    conditional_fit_card_heading: 'Conditions',
+    conditional_fit_card_body: canonical.environment_fit?.requires?.join(', ') || 'Specific conditions enable effectiveness.',
+    high_friction_environments_body: 'These environments create friction.',
+    high_friction_card_heading: 'Friction',
+    high_friction_card_body: canonical.environment_fit?.struggles_in?.join(', ') || 'Specific environment friction points.',
+    horizon_shift_heading: 'Perspective Shift',
+    horizon_shift_body: 'Expand time horizon and strategic perspective.',
+    adapt_shift_heading: 'Adaptability',
+    adapt_shift_body: 'Build flexibility into operating defaults.',
+    input_shift_heading: 'Input Shift',
+    input_shift_body: 'Actively seek diverse perspectives.',
+
+    // ===== FACILITATOR NOTES SECTION =====
+    facilitator_interpretation_body: 'This profile reveals strategic operator with clear strengths and specific growth edges.',
+    coaching_intervention_body: 'Focus on expanding awareness of automatic defaults and building deliberate flexibility.',
+    development_edges_body: canonical.development_targets?.map(t => t.approach).join(' / ') || 'Multiple development edges available.',
+    coaching_questions_body: 'What patterns repeat under pressure? When do strengths become liabilities? What would change if you shifted?',
+
+    // ===== FULL PROFILE UNLOCKS SECTION =====
+    operating_dna_subtitle: 'Advanced systems, strategic expansion, and long-term optimization',
+    unlock_area_1_heading: 'Strategic Expansion',
+    unlock_area_1_body: canonical.future_growth_constraints?.at_2x_scale?.[0] || 'Growth opportunity identified.',
+    unlock_area_2_heading: 'Scaling Edge',
+    unlock_area_2_body: canonical.future_growth_constraints?.at_5x_scale?.[0] || 'Scaling challenge identified.',
+    advanced_system_1_heading: 'Advanced Leadership',
+    advanced_system_1_body: 'Leadership patterns evolve with complexity.',
+    advanced_system_2_heading: 'Organizational Architecture',
+    advanced_system_2_body: 'System design impacts effectiveness at scale.',
+    core_force_heading: 'Core Operating Force',
+    core_force_body: canonical.top_systems?.primary_driver?.description || 'Your primary behavioral force.',
+    hidden_cost_heading: 'Hidden Cost',
+    hidden_cost_body: canonical.hidden_risk_patterns?.relational_erosion_risk ? 'Relational awareness erosion under stress.' : 'Strength-related costs identified.',
+    next_evolution_heading: 'Next Evolution',
+    next_evolution_body: 'Conscious evolution beyond current defaults creates advantage.',
+    why_this_matters_body: 'Understanding your operating DNA enables deliberate evolution. Your behavioral patterns are learnable leverage points.',
 
     // ===== OPERATING PATTERNS =====
     primary_driver: extractPrimaryDriver(canonical),
@@ -194,9 +326,11 @@ const canonicalToReportMapper = (canonicalDossier) => {
   return reportContent;
 };
 
-/**
- * Helper: Generate profile signature (e.g., "High Command + Perspective")
- */
+function truncate(text, length = 50) {
+  if (!text) return '';
+  return String(text).split('\n')[0]?.substring(0, length) || '';
+}
+
 function generateProfileSignature(canonical) {
   const top = canonical.ranked_dimensions
     ?.slice(0, 3)
@@ -205,9 +339,6 @@ function generateProfileSignature(canonical) {
   return top;
 }
 
-/**
- * Helper: Interpret profile signature
- */
 function interpretProfileSignature(canonical) {
   const profile_type = canonical.inferred_patterns?.profile_type || 'Behavioral Profile';
   const operating_signature =
@@ -215,9 +346,6 @@ function interpretProfileSignature(canonical) {
   return `${profile_type}: ${operating_signature}`;
 }
 
-/**
- * Helper: Format dimension label with score
- */
 function formatDimensionLabel(label, score) {
   if (score === undefined || score === null) return label;
   if (score > 1) return `${label} (High)`;
@@ -227,34 +355,21 @@ function formatDimensionLabel(label, score) {
   return label;
 }
 
-/**
- * Helper: Extract dimension explanation from narrative
- */
 function extractDimensionExplanation(canonical, dimension) {
-  // Try to find in top_systems first
   if (canonical.top_systems) {
     const primary = canonical.top_systems.primary_driver;
-    if (primary?.dimension === dimension) {
-      return primary.operating_manifestation || '';
-    }
+    if (primary?.dimension === dimension) return primary.operating_manifestation || '';
 
     const secondary = canonical.top_systems.secondary_stabilizer;
-    if (secondary?.dimension === dimension) {
-      return secondary.operating_manifestation || '';
-    }
+    if (secondary?.dimension === dimension) return secondary.operating_manifestation || '';
 
     const opposing = canonical.top_systems.opposing_pattern_1;
-    if (opposing?.dimension === dimension) {
-      return opposing.operating_manifestation || '';
-    }
+    if (opposing?.dimension === dimension) return opposing.operating_manifestation || '';
 
     const opposing2 = canonical.top_systems.opposing_pattern_2;
-    if (opposing2?.dimension === dimension) {
-      return opposing2.operating_manifestation || '';
-    }
+    if (opposing2?.dimension === dimension) return opposing2.operating_manifestation || '';
   }
 
-  // Fallback to generic dimension explanation
   const dimensionDescriptions = {
     vector: 'Ability to set direction and command',
     signal: 'Relational awareness and team attunement',
@@ -269,9 +384,6 @@ function extractDimensionExplanation(canonical, dimension) {
   return dimensionDescriptions[dimension] || 'Behavioral dimension';
 }
 
-/**
- * Helper: Extract core edge narrative
- */
 function extractCoreEdge(canonical) {
   const primary = canonical.top_systems?.primary_driver?.description || '';
   const secondary = canonical.top_systems?.secondary_stabilizer?.description || '';
@@ -286,9 +398,6 @@ function extractCoreEdge(canonical) {
   return canonical.inferred_patterns?.operating_signature || 'Core operating pattern';
 }
 
-/**
- * Helper: Extract confidence level
- */
 function extractConfidenceLevel(canonical) {
   const confidence = canonical.evidence_map?.aggregate_confidence;
   if (!confidence) return 'Moderate';
@@ -300,9 +409,6 @@ function extractConfidenceLevel(canonical) {
   return 'Low';
 }
 
-/**
- * Helper: Extract primary driver details
- */
 function extractPrimaryDriver(canonical) {
   return (
     canonical.top_systems?.primary_driver || {
@@ -314,9 +420,6 @@ function extractPrimaryDriver(canonical) {
   );
 }
 
-/**
- * Helper: Extract secondary stabilizer details
- */
 function extractSecondaryStabilizer(canonical) {
   return (
     canonical.top_systems?.secondary_stabilizer || {
@@ -328,9 +431,6 @@ function extractSecondaryStabilizer(canonical) {
   );
 }
 
-/**
- * Helper: Extract opposing patterns
- */
 function extractOpposingPatterns(canonical) {
   const patterns = [];
 
