@@ -23,12 +23,10 @@
  * - Decision Narrative (certainty-seeking + pressure response)
  */
 
-import {
-  generateExecutiveSummary,
-  generateLeadershipNarrative,
-  generateDecisionNarrative,
-  shouldUsePhase3AUpgrades
-} from './phase3a-narrative-upgrades.js';
+// TEMPORARY: Phase3A import disabled due to Vercel module load issue
+// Fallback to baseline narrative generation
+// TODO: Investigate and re-enable phase3a when Vercel environment issue resolved
+const shouldUsePhase3AUpgrades = () => false;
 
 /**
  * Build narrative profile from inferred patterns
