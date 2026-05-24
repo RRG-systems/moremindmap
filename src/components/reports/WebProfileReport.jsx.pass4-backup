@@ -579,20 +579,10 @@ export default function WebProfileReport({ canonical, profileId }) {
 
         .page-body {
           display: grid;
-          grid-template-columns: 1fr 1fr;
-          grid-template-rows: auto auto auto auto;
-          gap: 2rem;
-          padding: 3rem;
-          max-width: 1800px;
-          grid-template-areas:
-            "hero hero"
-            "triad triad"
-            "dna summary"
-            "pressure pressure"
-            "diagnostics diagnostics"
-            "strategic strategic"
-            "actions actions"
-            "insight insight";
+          grid-template-columns: 1fr;
+          gap: 3rem;
+          padding: 2.5rem 3rem;
+          max-width: 1600px;
         }
 
         .page-footer {
@@ -654,14 +644,8 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
         
         /* Section-specific styling */
-        .narrative-section.featured.operating-model-section {
-          grid-area: hero;
-          background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(103, 58, 183, 0.08) 100%);
-          border: 1.5px solid rgba(138, 43, 226, 0.4);
-          padding: 3rem;
-          box-shadow: 0 24px 96px rgba(0, 0, 0, 0.7), inset 0 2px 8px rgba(138, 43, 226, 0.15);
-          border-radius: 16px;
-          position: relative;
+        .operating-model-section {
+          border-color: rgba(138, 43, 226, 0.35);
         }
         
         .operating-model-section::before {
@@ -1065,201 +1049,6 @@ export default function WebProfileReport({ canonical, profileId }) {
           background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
           pointer-events: none;
         }
-.diagnostic-section {
-          grid-area: diagnostics;
-          grid-column: 1;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(244, 67, 54, 0.08) 0%, rgba(244, 67, 54, 0.03) 100%);
-          border: 1.5px solid rgba(244, 67, 54, 0.3);
-          border-radius: 14px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
-        }
-        
-        .page-2 .dashboard-page {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2rem;
-          grid-template-areas:
-            "diagnostics diagnostics"
-            "contradictions pressure"
-            "strategic strategic"
-            "coaching actions"
-            "insight insight";
-        }
-        
-        .page-2 .diagnostic-section {
-          grid-area: contradictions;
-        }
-        
-        .page-2 .pressure-section {
-          grid-area: pressure;
-        }
-        
-        .page-2 .scaling-section {
-          grid-area: strategic;
-          grid-column: 1 / -1;
-          padding: 3rem;
-          background: linear-gradient(135deg, rgba(103, 58, 183, 0.1) 0%, rgba(103, 58, 183, 0.04) 100%);
-          border: 1.5px solid rgba(103, 58, 183, 0.35);
-          border-radius: 14px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
-          display: grid;
-          grid-template-columns: repeat(5, 1fr);
-          gap: 1.5rem;
-        }
-        
-        .strategic-item {
-          text-align: center;
-          padding: 1.5rem;
-          background: rgba(103, 58, 183, 0.08);
-          border: 1px solid rgba(103, 58, 183, 0.2);
-          border-radius: 10px;
-        }
-        
-        .page-2 .coaching-action-section {
-          grid-area: coaching;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.04) 100%);
-          border: 1.5px solid rgba(76, 175, 80, 0.35);
-          border-radius: 14px;
-        }
-        
-        .page-2 .premium-action-section {
-          grid-area: actions;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(255, 193, 7, 0.12) 0%, rgba(255, 193, 7, 0.05) 100%);
-          border: 2px solid rgba(255, 193, 7, 0.5);
-          border-radius: 14px;
-          box-shadow: 0 20px 80px rgba(255, 193, 7, 0.15);
-        }
-
-.pressure-section {
-          grid-area: pressure;
-          padding: 3rem;
-          background: linear-gradient(135deg, rgba(233, 30, 99, 0.08) 0%, rgba(233, 30, 99, 0.03) 100%);
-          border: 1.5px solid rgba(233, 30, 99, 0.3);
-          border-radius: 14px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 2rem;
-          align-items: start;
-        }
-        
-        .pressure-mode {
-          text-align: center;
-        }
-        
-        .pressure-mode-title {
-          font-size: 1.1rem;
-          font-weight: 800;
-          color: #fff;
-          margin-bottom: 0.75rem;
-        }
-        
-        .pressure-mode-subtitle {
-          font-size: 0.9rem;
-          color: #aaa;
-          margin-bottom: 1.5rem;
-        }
-        
-        .pressure-mode-items {
-          font-size: 0.85rem;
-          color: #bbb;
-          text-align: left;
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-        
-        .pressure-mode-items li {
-          margin-bottom: 0.5rem;
-        }
-        
-        .pressure-mode-items li::before {
-          content: "• ";
-          color: #66d;
-          margin-right: 0.5rem;
-        }
-
-.analytics-section {
-          grid-area: dna;
-          margin-bottom: 0;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(33, 150, 243, 0.03) 100%);
-          border: 1.5px solid rgba(33, 150, 243, 0.35);
-          border-radius: 14px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(33, 150, 243, 0.1);
-          backdrop-filter: blur(14px);
-        }
-        
-        .narrative-section.briefing-section {
-          grid-area: summary;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.03) 100%);
-          border: 1.5px solid rgba(76, 175, 80, 0.35);
-          border-radius: 14px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(76, 175, 80, 0.1);
-        }
-
-.narrative-section.featured.briefing-section {
-          grid-area: triad;
-          padding: 3rem 0;
-          background: transparent;
-          border: none;
-          box-shadow: none;
-          display: grid;
-          grid-template-columns: 1fr 1fr 1fr;
-          gap: 2.5rem;
-        }
-        
-        .triad-card {
-          background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.04) 100%);
-          border: 1.5px solid rgba(33, 150, 243, 0.35);
-          padding: 2.5rem;
-          border-radius: 14px;
-          text-align: center;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(33, 150, 243, 0.1);
-          position: relative;
-          overflow: hidden;
-        }
-        
-        .triad-icon {
-          font-size: 4rem;
-          margin-bottom: 1.5rem;
-          opacity: 0.9;
-        }
-        
-        .triad-title {
-          font-size: 1.3rem;
-          font-weight: 800;
-          color: #fff;
-          margin-bottom: 1rem;
-        }
-        
-        .triad-description {
-          font-size: 0.95rem;
-          color: #bbb;
-          line-height: 1.6;
-          margin-bottom: 1.5rem;
-        }
-        
-        .triad-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          justify-content: center;
-        }
-        
-        .triad-tag {
-          font-size: 0.75rem;
-          color: #88d;
-          padding: 0.4rem 0.8rem;
-          background: rgba(33, 150, 243, 0.15);
-          border: 1px solid rgba(33, 150, 243, 0.3);
-          border-radius: 4px;
-        }
-
         @media (max-width: 1024px) {
           .page-2 .coaching-action-section,
           .page-2 .premium-action-section {
