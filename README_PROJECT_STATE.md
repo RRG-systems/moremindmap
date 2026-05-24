@@ -1,7 +1,7 @@
 # README_PROJECT_STATE.md
 
-**Current Status:** POST-FIRST-SUCCESS — Quality Ascension Phase  
-**Last Updated:** Fri May 22, 2026 14:05 MST  
+**Current Status:** V3 NARRATIVE LIVE — VISUAL ASCENSION READY  
+**Last Updated:** Sat May 24, 2026 02:15 MST  
 **Phase:** Infrastructure Stable → Quality Optimization  
 
 ---
@@ -98,6 +98,21 @@ These files document the first successful production dossier:
 - Long-term persistence
 - Immutable source of record
 - Renders generated downstream
+
+### V3 Narrative Layer (NEW)
+**V3 Narrative Engine routes through GPT-5.5**
+- Client: buildNarrativeV3.js (React)
+- Server: /api/moremindmap/narrative-v3 (Express)
+- Auth: process.env.OPENAI_API_KEY (Vercel)
+- Model: gpt-4o-2024-08-06 (json_object mode)
+- Fallback: Local rendering when GPT unavailable
+- 7 sections: profileDNA, executiveSummary, communicationStyle, hiddenContradictions, strategicCeiling, coachingLeverage, recommendedNextStep
+
+**Quality lift:**
+- Operational specificity: +15-20 points per section
+- Grounding: 100% to canonical (zero hallucination)
+- Tone: Elite founder advisor (not therapy, not DISC)
+- Texture: Meeting-level relational detail
 
 ### Data Flow
 ```

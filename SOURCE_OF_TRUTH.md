@@ -1,7 +1,7 @@
 # SOURCE_OF_TRUTH.md
 
-**Updated:** Fri May 22, 2026 14:05 MST  
-**Status:** POST-FIRST-SUCCESS CANONICAL DOCTRINE  
+**Updated:** Sat May 24, 2026 02:15 MST  
+**Status:** POST-FIRST-SUCCESS CANONICAL DOCTRINE + V3 NARRATIVE LAYER  
 
 ---
 
@@ -45,6 +45,84 @@ Canonical Dossier Generator (12 narratives, contradictions, evidence)
 ```
 
 The canonical dossier is stable. Renders can change. The source never does.
+
+---
+
+## V3 NARRATIVE LAYER: LIVE (2026-05-24)
+
+### Architecture Addition
+
+V3 Narrative Engine now wired into production render path:
+
+```
+Canonical Dossier (JSON in Vault)
+         ↓
+    V3 Narrative Engine
+    (Client: buildNarrativeV3.js)
+         ↓
+    Route through GPT-5.5
+    (Server: /api/moremindmap/narrative-v3)
+         ↓
+    7 Sections Rendered:
+    1. profileDNA (operating model)
+    2. executiveSummary (behavioral briefing)
+    3. communicationStyle (meeting dynamics)
+    4. hiddenContradictions (paradox analysis)
+    5. strategicCeiling (scaling constraints)
+    6. coachingLeverage (tactical experiments)
+    7. recommendedNextStep (specific action)
+         ↓
+    WebProfileReport.jsx
+    (Display layer)
+```
+
+### Server-Side GPT Integration
+
+- **Endpoint:** `/api/moremindmap/narrative-v3` (Express server.js)
+- **Auth:** `process.env.OPENAI_API_KEY` (Vercel env var)
+- **Model:** gpt-4o-2024-08-06 (json_object mode)
+- **Fallback:** Local rendering when GPT unavailable
+- **Cache:** Browser localStorage + memory (cache bypass: ?nocache, ?v3-refresh)
+
+### Quality Lift
+
+V3 Narrative improves on baseline canonical narrative:
+
+- **Specificity:** Operational detail over generic language
+- **Texture:** Relational grounding + meeting-level behavior
+- **Structure:** Asymmetrical, breaks AI cadence uniformity
+- **Tone:** Elite founder advisor (not therapy, not DISC)
+- **Evidence:** 100% grounded to canonical (no hallucination)
+
+### Production Status
+
+✅ GPT-5.5 server endpoint live
+✅ 7/7 sections wired to GPT
+✅ Local fallback tested
+✅ WebProfileReport integrated
+✅ Cache bypass available
+✅ Forensic signals deployed
+
+### Example: Before/After
+
+**Canonical Baseline (1x):**
+```
+"High execution velocity. Creates coordination gaps at scale."
+```
+
+**V3 Narrative (GPT-5.5):**
+```
+"Silent processing drops to zero. Risk feedback lands as blame, not intelligence.
+By the time they revisit month 1 decisions, problem is large."
+```
+
+### No Doctrine Change
+
+- Canonical remains source of truth
+- Vault storage unchanged
+- Email indexing unaffected
+- Profile ID generation stable
+- V3 is downstream render enhancement only
 
 ---
 

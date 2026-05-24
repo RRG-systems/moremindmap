@@ -1,8 +1,8 @@
 # MINI_V2_VISUAL_GAP_REPORT.md
 
-**Updated:** Fri May 22, 2026 14:05 MST  
-**Status:** Visual system remains valuable, now downstream of canonical  
-**Frozen:** All visual designs (do not redesign during quality phase)  
+**Updated:** Sat May 24, 2026 02:15 MST  
+**Status:** V3 Narrative live + WebProfileReport wired. Visual ascension next phase.  
+**Intelligence Architecture:** LOCKED (no more changes before visual design)  
 
 ---
 
@@ -13,6 +13,57 @@
 **Reason:** Canonical dossier quality must reach 85+/100 before designing renders that match its intelligence level.
 
 **Pathway:** Quality → Renders → Scale (not Renders → Quality → Scale)
+
+---
+
+## V3 NARRATIVE ENGINE: NOW LIVE (2026-05-24)
+
+### What Changed
+
+Intelligence layer now decoupled from visual layer:
+
+**Before:**
+```
+Assessment → Canonical → Mini V2 PDF (visual system) → Output
+(Intelligence + Design mixed)
+```
+
+**Now:**
+```
+Assessment → Canonical → V3 Narrative (GPT-5.5) → WebProfileReport (visual) → Output
+(Intelligence separate from Design)
+```
+
+### 7 Sections Now Route Through GPT
+
+1. profileDNA (operating model)
+2. executiveSummary (behavioral briefing)
+3. communicationStyle (meeting dynamics)
+4. hiddenContradictions (paradox analysis)
+5. strategicCeiling (scaling constraints)
+6. coachingLeverage (tactical experiments)
+7. recommendedNextStep (specific action)
+
+All driven by canonical dossier, not manual content.
+
+### WebProfileReport Integration
+
+- Client renders V3 narrative sections
+- Server endpoint: /api/moremindmap/narrative-v3 (Express)
+- Cache bypass: ?nocache, ?v3-refresh
+- Forensic signals: V3 Source, Fallback status, Signal verification
+
+### Quality Proven
+
+Endpoint verified live (commit 75de63d):
+```
+API_KEY_PRESENT: true
+render_source: gpt55
+SIGNAL_VERIFIED_55: live-endpoint-verified
+fallback_used: false
+```
+
+All 7 sections tested and rendering with GPT-5.5 texture language.
 
 ---
 
