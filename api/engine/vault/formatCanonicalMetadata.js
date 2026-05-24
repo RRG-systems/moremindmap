@@ -114,7 +114,7 @@ export function formatMetadataSection(vault_record) {
     
     // Strengths & perception
     if (signals.relied_on_for || signals.misunderstood_for) {
-      output += '### How You're Perceived\n\n';
+      output += "### How You're Perceived\n\n";
       if (signals.relied_on_for) {
         output += `**What do people consistently rely on you for?**\n\n${signals.relied_on_for}\n\n`;
       }

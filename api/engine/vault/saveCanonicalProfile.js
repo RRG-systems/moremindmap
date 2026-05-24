@@ -277,7 +277,7 @@ export async function saveCanonicalProfile(options) {
     };
   } catch (error) {
     diagnostics.success = false;
-    diagnostics.error: error.message;
+    diagnostics.error = error.message;
     diagnostics.operations.push({ step: 'error_thrown', error: error.message });
     console.error(`[VAULT-SAVE] Error: ${error.message}`);
     throw error;
