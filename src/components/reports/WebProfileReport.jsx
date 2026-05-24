@@ -402,13 +402,13 @@ export default function WebProfileReport({ canonical, profileId }) {
 
         .page-body {
           flex: 1;
-          max-width: 1100px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding: 2rem;
+          padding: 2.5rem 3rem;
           width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 2rem;
+          gap: 2.25rem;
         }
 
         .page-footer {
@@ -424,66 +424,106 @@ export default function WebProfileReport({ canonical, profileId }) {
 
         /* BODY */
         .dashboard-body {
-          max-width: 1100px;
+          max-width: 1200px;
           margin: 0 auto;
-          padding: 2rem;
+          padding: 2.5rem 3rem;
         }
 
-        /* SECTIONS */
+        /* SECTIONS - Dashboard Modules */
         .narrative-section,
         .data-section {
-          margin-bottom: 2.5rem;
-          padding: 2rem;
-          background: linear-gradient(135deg, rgba(15, 20, 40, 0.8) 0%, rgba(10, 14, 35, 0.6) 100%);
-          border: 1px solid rgba(212, 175, 55, 0.2);
-          border-radius: 8px;
-          backdrop-filter: blur(8px);
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(212, 175, 55, 0.08);
-          transition: all 0.3s ease;
+          margin-bottom: 0;
+          padding: 1.75rem;
+          background: linear-gradient(135deg, rgba(15, 20, 40, 0.9) 0%, rgba(10, 14, 35, 0.7) 100%);
+          border: 1px solid rgba(212, 175, 55, 0.25);
+          border-radius: 10px;
+          backdrop-filter: blur(12px);
+          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(212, 175, 55, 0.1), inset 0 -1px 2px rgba(212, 175, 55, 0.04);
+          transition: all 0.25s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        
+        .narrative-section::before,
+        .data-section::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.3) 50%, rgba(212, 175, 55, 0) 100%);
         }
         
         .narrative-section:hover,
         .data-section:hover {
-          border-color: rgba(212, 175, 55, 0.35);
-          box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(212, 175, 55, 0.12);
+          border-color: rgba(212, 175, 55, 0.4);
+          box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(212, 175, 55, 0.15);
+          transform: translateY(-2px);
         }
 
         .narrative-section.featured {
-          background: rgba(212, 175, 55, 0.08);
-          border: 1px solid rgba(212, 175, 55, 0.3);
+          background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.05) 100%);
+          border: 1px solid rgba(212, 175, 55, 0.35);
+          padding: 2rem;
         }
 
         .narrative-section.alert-section {
           background: rgba(255, 152, 0, 0.08);
-          border: 1px solid rgba(255, 152, 0, 0.3);
+          border: 1px solid rgba(255, 152, 0, 0.35);
         }
 
         .narrative-section.risk-section {
           background: rgba(244, 67, 54, 0.08);
-          border: 1px solid rgba(244, 67, 54, 0.25);
+          border: 1px solid rgba(244, 67, 54, 0.3);
         }
 
         .narrative-section.action-section {
-          background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.04) 100%);
-          border: 1px solid rgba(76, 175, 80, 0.3);
+          background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, rgba(76, 175, 80, 0.06) 100%);
+          border: 2px solid rgba(76, 175, 80, 0.35);
+          padding: 2rem;
+          box-shadow: 0 8px 32px rgba(76, 175, 80, 0.1), inset 0 1px 0 rgba(76, 175, 80, 0.15);
+        }
+
+        .narrative-section.action-section:hover {
+          border-color: rgba(76, 175, 80, 0.5);
+          box-shadow: 0 12px 48px rgba(76, 175, 80, 0.15), inset 0 1px 0 rgba(76, 175, 80, 0.2);
         }
 
         .section-title {
-          font-size: 1.2rem;
-          font-weight: 700;
+          font-size: 1.15rem;
+          font-weight: 800;
           color: #ffffff;
-          margin: 0 0 1rem 0;
+          margin: 0 0 0.95rem 0;
           text-transform: uppercase;
-          letter-spacing: 0.05em;
-          border-bottom: 2px solid rgba(212, 175, 55, 0.4);
-          padding-bottom: 0.5rem;
+          letter-spacing: 0.08em;
+          border-bottom: 2px solid rgba(212, 175, 55, 0.5);
+          padding-bottom: 0.6rem;
+          word-spacing: 0.05em;
+        }
+        
+        .action-section .section-title {
+          color: #4caf50;
+          text-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
         }
 
         .narrative-text {
-          font-size: 0.95rem;
-          line-height: 1.75;
-          color: #d0d0d0;
+          font-size: 0.93rem;
+          line-height: 1.68;
+          color: #d8d8d8;
           margin: 0;
+        }
+        
+        .featured .narrative-text {
+          font-size: 0.96rem;
+          line-height: 1.72;
+          color: #e8e8e8;
+        }
+        
+        .action-section .narrative-text {
+          font-size: 0.95rem;
+          line-height: 1.7;
+          color: #e0e0e0;
         }
 
         .narrative-text.pre-format {
@@ -496,46 +536,63 @@ export default function WebProfileReport({ canonical, profileId }) {
           font-weight: 600;
         }
 
-        /* DIMENSIONS GRID */
+        /* DIMENSIONS GRID - Analytical Dashboard */
         .dimensions-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-          gap: 1rem;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.75rem;
           margin-top: 1rem;
         }
 
         .dimension-card {
-          background: rgba(212, 175, 55, 0.08);
-          border: 1px solid rgba(212, 175, 55, 0.25);
-          border-radius: 6px;
-          padding: 1rem;
+          background: linear-gradient(180deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.05) 100%);
+          border: 1px solid rgba(212, 175, 55, 0.3);
+          border-radius: 8px;
+          padding: 1rem 0.85rem;
           text-align: center;
-          transition: all 0.2s;
+          transition: all 0.25s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .dimension-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.4) 50%, rgba(212, 175, 55, 0) 100%);
         }
 
         .dimension-card:hover {
-          border-color: rgba(212, 175, 55, 0.4);
-          background: rgba(212, 175, 55, 0.12);
+          border-color: rgba(212, 175, 55, 0.5);
+          background: linear-gradient(180deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.08) 100%);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 16px rgba(212, 175, 55, 0.15);
         }
 
         .dim-name {
-          font-size: 0.75rem;
+          font-size: 0.7rem;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #888;
-          margin-bottom: 0.4rem;
+          letter-spacing: 0.1em;
+          color: #aaa;
+          margin-bottom: 0.35rem;
+          font-weight: 700;
         }
 
         .dim-score {
-          font-size: 1.6rem;
-          font-weight: 700;
+          font-size: 1.8rem;
+          font-weight: 800;
           color: #d4af37;
-          margin-bottom: 0.25rem;
+          margin-bottom: 0.2rem;
+          letter-spacing: -0.02em;
         }
 
         .dim-rank {
-          font-size: 0.8rem;
-          color: #666;
+          font-size: 0.75rem;
+          color: #888;
+          font-weight: 600;
         }
 
         /* FOOTER */
@@ -589,18 +646,30 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
 
         /* RESPONSIVE */
+        @media (max-width: 1024px) {
+          .page-body {
+            padding: 2rem 2rem;
+            gap: 2rem;
+          }
+          
+          .dimensions-grid {
+            grid-template-columns: repeat(3, 1fr);
+          }
+        }
+
         @media (max-width: 768px) {
           .dashboard-page {
             min-height: auto;
           }
           
           .page-body {
-            padding: 1rem;
+            padding: 1.5rem 1rem;
             gap: 1.5rem;
           }
           
           .dashboard-header {
             padding: 1.5rem;
+            border-radius: 0;
           }
 
           .header-top {
@@ -609,26 +678,28 @@ export default function WebProfileReport({ canonical, profileId }) {
           }
 
           .header-identity h1 {
-            font-size: 2rem;
+            font-size: 1.75rem;
           }
 
           .profile-id-box {
             align-self: stretch;
             text-align: left;
+            padding: 0.75rem 1rem;
           }
 
           .dashboard-body {
-            padding: 1rem;
+            padding: 1.5rem 1rem;
           }
 
           .narrative-section,
           .data-section {
             padding: 1.25rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
           }
 
           .dimensions-grid {
             grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
           }
 
           .dna-signature {
@@ -637,8 +708,8 @@ export default function WebProfileReport({ canonical, profileId }) {
           }
 
           .footer-meta {
-            gap: 1rem;
-            font-size: 0.75rem;
+            gap: 0.75rem;
+            font-size: 0.7rem;
           }
         }
       `}</style>
