@@ -11,6 +11,9 @@
 // In-memory cache
 const memoryCache = new Map();
 
+// Version tracking: invalidate old cache when schema changes
+const CACHE_VERSION = 2;  // Bumped to 2 when coachingLeverage/recommendedNextStep added
+
 /**
  * Generate cache key from profile ID.
  * Format: v3_narrative_PROFILEID
@@ -39,8 +42,26 @@ export function getCachedNarrative(profileId) {
       const stored = localStorage.getItem(cacheKey);
       if (stored) {
         const wrapped = JSON.parse(stored);
+        
+        // Check cache version to invalidate old schemas
+        if (wrapped.cacheVersion && wrapped.cacheVersion !== CACHE_VERSION) {
+          console.log(`[V3 CACHE INVALIDATED] ${profileId} - version mismatch (${wrapped.cacheVersion} vs ${CACHE_VERSION})`);
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
         // Unwrap if stored with metadata (old format had: { data: {...}, cachedAt, ttlHours })
         const cached = wrapped.data || wrapped;
+        
+        // Validate that cached narrative has all required sections
+        const requiredSections = ['coachingLeverage', 'recommendedNextStep'];
+        const missingSection = requiredSections.find(s => !(s in cached));
+        if (missingSection) {
+          console.log(`[V3 CACHE INVALIDATED] ${profileId} - missing section: ${missingSection}`);
+          localStorage.removeItem(cacheKey);
+          return null;
+        }
+        
         memoryCache.set(cacheKey, cached); // Reload into memory
         console.log(`[V3 CACHE HIT] Storage: ${profileId}`);
         return cached;
@@ -65,11 +86,12 @@ export function cacheNarrative(profileId, narrativeObj) {
   // Store in memory
   memoryCache.set(cacheKey, narrativeObj);
 
-  // Store in localStorage (with TTL metadata)
+  // Store in localStorage (with version + TTL metadata)
   if (typeof localStorage !== 'undefined') {
     try {
       const cacheEntry = {
         data: narrativeObj,
+        cacheVersion: CACHE_VERSION,
         cachedAt: new Date().toISOString(),
         ttlHours: 24,
       };
