@@ -24,16 +24,24 @@ import { getCachedNarrative, cacheNarrative } from './cache.js';
  * Main entry point for V3 narrative expansion.
  * Renders 4 target sections: executive summary, communication, contradictions, ceiling.
  */
-export async function buildNarrativeV3(canonical, useGPT = true, profileId = null) {
+export async function buildNarrativeV3(canonical, useGPT = true, profileId = null, disableCache = false, disableCompression = false) {
   if (!canonical) return getDefaultNarrative();
 
-  // Check cache first
-  if (profileId) {
+  // [FORENSIC] Environment check
+  const apiKeyPresent = !!( import.meta?.env?.VITE_OPENAI_API_KEY);
+  console.log('[V3 ENV CHECK] API_KEY_PRESENT:', apiKeyPresent);
+
+  // Check cache first (unless disabled for forensic test)
+  let cacheHit = false;
+  if (profileId && !disableCache) {
     const cached = getCachedNarrative(profileId);
     if (cached) {
-      console.log('[V3] Using cached narrative for', profileId);
+      cacheHit = true;
+      console.log('[V3 CACHE HIT]', profileId, '| render_source:', cached.render_source);
       return cached;
     }
+  } else if (disableCache) {
+    console.log('[V3 FORENSIC] Cache disabled for testing');
   }
 
   const interpreted = interpretCanonical(canonical);
@@ -46,33 +54,73 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'strategicCeiling',
   ];
 
-  const narrative = {};
+  const narrative = {
+    render_source: null,
+    cache_hit: cacheHit,
+    gpt_call_success: false,
+    fallback_used: false,
+    openai_error_message: null,
+    generation_time_ms: 0,
+  };
+
+  const startTime = performance.now();
+
+  let firstGptCall = true;
+  let fallbackActivated = false;
+  let gptSuccess = false;
+  let gptError = null;
 
   for (const section of sections) {
     const prompt = getPromptBuilder(section)(interpreted, previousSections);
 
     let rendering;
+    let sectionRenderSource = 'fallback_local';
+
     if (useGPT) {
-      // Try GPT-5.5 first
-      console.log('[V3] Calling GPT-5.5 for', section);
+      // [FORENSIC] GPT call attempt
+      console.log(`[V3 GPT START] section: ${section} | prompt_length: ${JSON.stringify(prompt).length}`);
+      
       const gptResponse = await callGPT55(prompt, section);
       
       if (gptResponse && validateGrounding(gptResponse, interpreted)) {
+        console.log(`[V3 GPT SUCCESS] section: ${section} | response_length: ${gptResponse.body?.length || 0} | model_used: gpt-4o-2024-08-06`);
         rendering = gptResponse;
-        console.log('[V3] GPT-5.5 success:', section);
+        sectionRenderSource = 'gpt55';
+        gptSuccess = true;
+        if (firstGptCall) {
+          narrative.gpt_call_success = true;
+          narrative.render_source = 'gpt55';
+        }
       } else {
-        // Fallback to local rendering
-        console.log('[V3] GPT-5.5 failed or invalid, using local fallback:', section);
+        // [FORENSIC] GPT failed, fallback activated
+        console.log(`[V3 GPT FAILURE] section: ${section} | exact_error: ${gptResponse ? 'validation_failed' : 'null_response'}`);
         rendering = await localRendering(prompt, section, interpreted);
+        sectionRenderSource = 'fallback_local';
+        fallbackActivated = true;
+        if (firstGptCall) {
+          narrative.fallback_used = true;
+          narrative.render_source = 'fallback_local';
+        }
       }
+      firstGptCall = false;
     } else {
       // Local rendering only
+      console.log(`[V3 LOCAL ONLY] section: ${section}`);
       rendering = await localRendering(prompt, section, interpreted);
+      sectionRenderSource = 'fallback_local';
+      narrative.render_source = 'fallback_local';
     }
 
-    // Post-processing
+    // [FORENSIC] Add render source to section
+    rendering.render_source = sectionRenderSource;
+
+    // Post-processing (with forensic option to disable)
     rendering.body = suppressBannedPhrases(rendering.body);
-    rendering.body = compressionPass(rendering.body);
+    if (!disableCompression) {
+      rendering.body = compressionPass(rendering.body);
+    } else {
+      console.log(`[V3 FORENSIC] Compression disabled for section: ${section}`);
+    }
 
     // Validate grounding
     const violations = scanForBannedPhrases(rendering.body, section);
@@ -83,8 +131,20 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     previousSections[section] = rendering.body;
   }
 
-  // Cache the result
-  if (profileId) {
+  // [FORENSIC] Calculate generation time
+  narrative.generation_time_ms = Math.round(performance.now() - startTime);
+
+  // [FORENSIC] Log summary
+  console.log('[V3 RENDER COMPLETE]', {
+    render_source: narrative.render_source,
+    gpt_success: narrative.gpt_call_success,
+    fallback_used: narrative.fallback_used,
+    cache_hit: narrative.cache_hit,
+    generation_time_ms: narrative.generation_time_ms,
+  });
+
+  // Cache the result (unless disabled for forensic test)
+  if (profileId && !disableCache) {
     cacheNarrative(profileId, narrative);
     console.log('[V3] Cached narrative for', profileId);
   }

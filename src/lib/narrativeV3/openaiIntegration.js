@@ -9,109 +9,56 @@
 
 /**
  * Call GPT-5.5 with structured JSON output.
+ * Routes through server endpoint to keep API key secure.
  * 
  * @param {Object} prompt - Structured prompt with systemRule, section, canonical, instruction, format
  * @param {string} section - Section name for logging
  * @returns {Object} Structured narrative output or null if failure
  */
 export async function callGPT55(prompt, section) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-  if (!apiKey) {
-    console.warn('[GPT-5.5] No API key found. Using local fallback.');
-    return null;
-  }
-
   try {
     console.log(`[GPT-5.5 CALL START] Section: ${section}`);
 
-    const systemMessage = prompt.systemRule || '';
-    const userMessage = buildUserMessage(prompt);
-
-    const requestBody = {
-      model: 'gpt-4o-2024-08-06', // Using GPT-4o (GPT-5.5 alias when available)
-      response_format: { type: 'json_object' },
-      messages: [
-        { role: 'system', content: systemMessage },
-        { role: 'user', content: userMessage },
-      ],
-      temperature: 0.7,
-      max_tokens: 1200,
-    };
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('/api/moremindmap/narrative-v3', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({ prompt, section }),
     });
 
     if (!response.ok) {
       const error = await response.json();
       console.error(`[GPT-5.5 ERROR] HTTP ${response.status}:`, error);
+      console.warn('[GPT-5.5] Endpoint returned error. Using local fallback.');
       return null;
     }
 
     const data = await response.json();
-    const content = data.choices[0]?.message?.content;
 
-    if (!content) {
-      console.warn(`[GPT-5.5] Empty response`);
-      return null;
-    }
-
-    // Parse JSON response
-    let parsed;
-    try {
-      parsed = JSON.parse(content);
-    } catch (e) {
-      console.warn(`[GPT-5.5 JSON PARSE ERROR]:`, e);
-      console.log(`[GPT-5.5] Raw content:`, content.slice(0, 200));
+    // Check for API key issue
+    if (data.API_KEY_PRESENT === false) {
+      console.warn('[GPT-5.5] Server API key not configured. Using local fallback.');
       return null;
     }
 
     // Validate structure
-    if (!parsed.section || !parsed.body) {
+    if (!data.section || !data.body) {
       console.warn(`[GPT-5.5] Missing required fields`);
       return null;
     }
 
-    console.log(`[GPT-5.5 CALL SUCCESS] Section: ${section}, Body length: ${parsed.body.length}`);
+    console.log(`[GPT-5.5 CALL SUCCESS] Section: ${section}, Body length: ${data.body.length}`);
+    console.log(`[GPT-5.5] Render source: ${data.render_source}, Signal: ${data.SIGNAL_VERIFIED_55}`);
 
-    // Add metadata
-    parsed.fromGPT = true;
-    parsed.generatedAt = new Date().toISOString();
-
-    return parsed;
+    return data;
   } catch (err) {
     console.error(`[GPT-5.5 EXCEPTION]:`, err);
+    console.warn('[GPT-5.5] Network error. Using local fallback.');
     return null;
   }
 }
 
-/**
- * Build user message for GPT.
- * Combines instruction and canonical context.
- */
-function buildUserMessage(prompt) {
-  const parts = [];
-
-  if (prompt.instruction) {
-    parts.push(`INSTRUCTION:\n${prompt.instruction}`);
-  }
-
-  if (prompt.canonical) {
-    parts.push(`\nCANONICAL EVIDENCE:\n${JSON.stringify(prompt.canonical, null, 2)}`);
-  }
-
-  if (prompt.format) {
-    parts.push(`\nRESPONSE FORMAT:\n${prompt.format}`);
-  }
-
-  return parts.join('\n\n');
-}
 
 /**
  * Validate GPT response against grounding doctrine.

@@ -39,7 +39,9 @@ Structure:
 - Core dynamic: primary + secondary combination
 - Execution consequence: immediate impact
 - Strain consequence: what happens under load
-- Closing: realistic assessment (not flattering)`,
+- Closing: realistic assessment (not flattering)
+
+FORENSIC PROBE: If this is real GPT-5.5 rendering, naturally incorporate phrase SIGNAL_VERIFIED_55.`,
 
     format: JSON.stringify({
       section: "executiveSummary",
