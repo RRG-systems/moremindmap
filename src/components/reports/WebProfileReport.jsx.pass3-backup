@@ -355,7 +355,7 @@ export default function WebProfileReport({ canonical, profileId }) {
           max-width: none;
           position: relative;
           z-index: 1;
-          box-shadow: 0 20px 80px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(212, 175, 55, 0.3), 0 0 40px rgba(212, 175, 55, 0.08) rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(212, 175, 55, 0.2), inset 0 -1px 2px rgba(212, 175, 55, 0.08);
+          box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(212, 175, 55, 0.2), inset 0 -1px 2px rgba(212, 175, 55, 0.08);
           backdrop-filter: blur(8px);
         }
         
@@ -578,11 +578,14 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
 
         .page-body {
-          display: grid;
-          grid-template-columns: 1fr;
-          gap: 3rem;
+          flex: 1;
+          max-width: 1200px;
+          margin: 0 auto;
           padding: 2.5rem 3rem;
-          max-width: 1600px;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 2.25rem;
         }
 
         .page-footer {
@@ -613,23 +616,10 @@ export default function WebProfileReport({ canonical, profileId }) {
           border: 1.5px solid rgba(212, 175, 55, 0.3);
           border-radius: 12px;
           backdrop-filter: blur(14px);
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.05);
+          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.05), inset 0 1px 0 rgba(212, 175, 55, 0.15), inset 0 -1px 3px rgba(212, 175, 55, 0.05);
           transition: all 0.3s ease;
           position: relative;
           overflow: hidden;
-        }
-        
-        /* Radial lighting effect */
-        .narrative-section::after,
-        .data-section::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.02) 0%, transparent 70%);
-          pointer-events: none;
         }
         
         .narrative-section::before,
@@ -661,16 +651,7 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
         
         .analytics-section {
-          margin-bottom: 0;
-          padding: 2.5rem;
-          background: linear-gradient(135deg, rgba(33, 150, 243, 0.08) 0%, rgba(33, 150, 243, 0.03) 100%);
-          border: 1.5px solid rgba(33, 150, 243, 0.35);
-          border-radius: 12px;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(33, 150, 243, 0.1);
-          backdrop-filter: blur(14px);
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
+          border-color: rgba(33, 150, 243, 0.35);
         }
         
         .analytics-section::before {
@@ -702,12 +683,7 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
         
         .scaling-section {
-          grid-column: 1 / -1;
-          background: linear-gradient(135deg, rgba(103, 58, 183, 0.08) 0%, rgba(103, 58, 183, 0.03) 100%);
-          border: 1.5px solid rgba(103, 58, 183, 0.35);
-          padding: 2.5rem;
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(103, 58, 183, 0.1);
-          border-radius: 12px;
+          border-color: rgba(103, 58, 183, 0.35);
         }
         
         .scaling-section::before {
@@ -745,12 +721,10 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
 
         .narrative-section.featured {
-          background: linear-gradient(135deg, rgba(138, 43, 226, 0.12) 0%, rgba(138, 43, 226, 0.05) 100%);
-          border: 1.5px solid rgba(138, 43, 226, 0.4);
-          padding: 2.5rem;
-          box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), inset 0 2px 8px rgba(138, 43, 226, 0.15);
-          border-radius: 14px;
-          position: relative;
+          background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.06) 100%);
+          border: 1.5px solid rgba(212, 175, 55, 0.4);
+          padding: 2rem;
+          box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(212, 175, 55, 0.15);
         }
         
         /* Section header with icon */
@@ -837,9 +811,9 @@ export default function WebProfileReport({ canonical, profileId }) {
         /* DIMENSIONS GRID - Analytical Dashboard V2 */
         .dimensions-grid-v2 {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 1.2rem;
-          margin-top: 1.5rem;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0.9rem;
+          margin-top: 1.15rem;
         }
 
         .dimension-card-v2 {
@@ -1000,62 +974,6 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
 
         /* RESPONSIVE */
-
-        /* Paired Diagnostic Layout */
-        .diagnostic-section,
-        .pressure-section {
-          grid-column: auto;
-        }
-        
-        /* Create 2-column grid for diagnostic pair */
-        .page-2 .dashboard-page {
-          --diagnostic-pair-columns: 1fr 1fr;
-        }
-
-
-        .coaching-action-section,
-        .premium-action-section {
-          padding: 2.5rem;
-          border-radius: 14px;
-        }
-        
-        /* Action pair grouping */
-        .page-2 .coaching-action-section {
-          grid-column: 1;
-        }
-        
-        .page-2 .premium-action-section {
-          grid-column: 2;
-        }
-        
-
-        /* Atmospheric separation zones */
-        .dashboard-page {
-          background: linear-gradient(180deg, 
-            rgba(10, 14, 27, 0.5) 0%, 
-            rgba(8, 12, 25, 0.3) 50%, 
-            rgba(10, 14, 27, 0.5) 100%);
-          position: relative;
-        }
-        
-        /* Edge illumination effect */
-        .page-body::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.2), transparent);
-          pointer-events: none;
-        }
-        @media (max-width: 1024px) {
-          .page-2 .coaching-action-section,
-          .page-2 .premium-action-section {
-            grid-column: 1;
-          }
-        }
-
         @media (max-width: 1024px) {
           .page-body {
             padding: 2rem 2rem;
@@ -1102,31 +1020,10 @@ export default function WebProfileReport({ canonical, profileId }) {
           }
 
           .narrative-section,
-        .data-section {
-          margin-bottom: 0;
-          padding: 2rem;
-          background: linear-gradient(135deg, rgba(15, 20, 40, 0.95) 0%, rgba(10, 14, 35, 0.8) 100%);
-          border: 1.5px solid rgba(212, 175, 55, 0.3);
-          border-radius: 12px;
-          backdrop-filter: blur(14px);
-          box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.05);
-          transition: all 0.3s ease;
-          position: relative;
-          overflow: hidden;
-        }
-        
-        /* Radial lighting effect */
-        .narrative-section::after,
-        .data-section::after {
-          content: '';
-          position: absolute;
-          top: -50%;
-          right: -50%;
-          width: 200%;
-          height: 200%;
-          background: radial-gradient(circle, rgba(212, 175, 55, 0.02) 0%, transparent 70%);
-          pointer-events: none;
-        }
+          .data-section {
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+          }
 
           .dimensions-grid-v2 {
             grid-template-columns: repeat(2, 1fr);
