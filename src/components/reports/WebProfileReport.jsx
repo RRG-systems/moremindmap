@@ -7,7 +7,8 @@
  * Dense, modular, executive-level behavioral analysis
  */
 
-import { expandNarrative } from '../../lib/narrativeExpander.js';
+import { useState, useEffect } from 'react';
+import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
 
 export default function WebProfileReport({ canonical, profileId }) {
   if (!canonical) {
@@ -22,8 +23,37 @@ export default function WebProfileReport({ canonical, profileId }) {
   const topSystems = data.top_systems || {};
   const ranked = data.ranked_dimensions || [];
 
-  // Expand narratives from canonical fields
-  const narrative = expandNarrative(canonical);
+  // V3 narrative rendering (with GPT-5.5 texture layer when API key available)
+  const [narrative, setNarrative] = useState(null);
+  const [narrativeLoading, setNarrativeLoading] = useState(true);
+  const [narrativeError, setNarrativeError] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        setNarrativeLoading(true);
+        const v3Narrative = await buildNarrativeV3(canonical, true, profileId);
+        setNarrative(v3Narrative);
+        setNarrativeError(null);
+        console.log('[WebProfileReport] V3 narrative rendered for', profileId);
+      } catch (err) {
+        console.error('[WebProfileReport] V3 rendering failed:', err);
+        setNarrativeError(err.message);
+        setNarrative(null);
+      } finally {
+        setNarrativeLoading(false);
+      }
+    })();
+  }, [canonical, profileId]);
+
+  // Handle loading/error states
+  if (narrativeLoading) {
+    return <div className="web-report-loading">Rendering behavioral analysis...</div>;
+  }
+
+  if (narrativeError || !narrative) {
+    return <div className="web-report-error">Failed to render profile narrative: {narrativeError}</div>;
+  }
 
   // Helper to safely render text
   const renderText = (value) => {
@@ -85,11 +115,16 @@ export default function WebProfileReport({ canonical, profileId }) {
           <div className="narrative-text">{narrative.profileDNA}</div>
         </section>
 
-        {/* Section 2: Executive Summary */}
-        <section className="narrative-section featured">
-          <h2 className="section-title">Executive Summary</h2>
-          <div className="narrative-text">{narrative.executiveSummary}</div>
-        </section>
+        {/* Section 2: Executive Summary (V3) */}
+        {narrative.executiveSummary && (
+          <section className="narrative-section featured">
+            <h2 className="section-title">Executive Summary</h2>
+            <div className="narrative-text">{narrative.executiveSummary.body || narrative.executiveSummary}</div>
+            {narrative.executiveSummary.key_warning && (
+              <div className="key-warning">⚠️ {narrative.executiveSummary.key_warning}</div>
+            )}
+          </section>
+        )}
 
         {/* Section 3: Vector Scores Grid */}
         <section className="data-section">
@@ -105,47 +140,50 @@ export default function WebProfileReport({ canonical, profileId }) {
           </div>
         </section>
 
-        {/* Section 4: Operating Pattern */}
-        <section className="narrative-section">
-          <h2 className="section-title">Operating Pattern</h2>
-          <div className="narrative-text pre-format">{narrative.operatingPattern}</div>
-        </section>
+        {/* Section 4: Operating Pattern (Hidden - V3 integrated above) */}
+        {/* Moved to V3 rendering */}
 
-        {/* Section 5: Decision Architecture */}
-        <section className="narrative-section">
-          <h2 className="section-title">Decision Architecture</h2>
-          <div className="narrative-text">{narrative.decisionArchitecture}</div>
-        </section>
+        {/* Section 5: Decision Architecture (Hidden - V3 integrated above) */}
+        {/* Moved to V3 rendering */}
 
-        {/* Section 6: Communication Style */}
-        <section className="narrative-section">
-          <h2 className="section-title">Communication Style</h2>
-          <div className="narrative-text">{narrative.communicationStyle}</div>
-        </section>
+        {/* Section 6: Communication Style (V3) */}
+        {narrative.communicationStyle && (
+          <section className="narrative-section">
+            <h2 className="section-title">Communication Style</h2>
+            <div className="narrative-text">{narrative.communicationStyle.body || narrative.communicationStyle}</div>
+            {narrative.communicationStyle.key_warning && (
+              <div className="key-warning">⚠️ {narrative.communicationStyle.key_warning}</div>
+            )}
+          </section>
+        )}
 
-        {/* Section 7: System Under Strain */}
-        <section className="narrative-section alert-section">
-          <h2 className="section-title">⚠ System Under Strain</h2>
-          <div className="narrative-text">{narrative.systemUnderStrain}</div>
-        </section>
+        {/* Section 7: System Under Strain (Hidden - V3 integrated above) */}
+        {/* Moved to V3 rendering */}
 
-        {/* Section 8: Hidden Contradictions */}
-        <section className="narrative-section">
-          <h2 className="section-title">Hidden Contradictions</h2>
-          <div className="narrative-text">{narrative.hiddenContradictions}</div>
-        </section>
+        {/* Section 8: Hidden Contradictions (V3) */}
+        {narrative.hiddenContradictions && (
+          <section className="narrative-section">
+            <h2 className="section-title">Hidden Contradictions</h2>
+            <div className="narrative-text">{narrative.hiddenContradictions.body || narrative.hiddenContradictions}</div>
+            {narrative.hiddenContradictions.key_warning && (
+              <div className="key-warning">⚠️ {narrative.hiddenContradictions.key_warning}</div>
+            )}
+          </section>
+        )}
 
-        {/* Section 9: Strategic Ceiling */}
-        <section className="narrative-section">
-          <h2 className="section-title">Strategic Ceiling</h2>
-          <div className="narrative-text">{narrative.strategicCeiling}</div>
-        </section>
+        {/* Section 9: Strategic Ceiling (V3) */}
+        {narrative.strategicCeiling && (
+          <section className="narrative-section">
+            <h2 className="section-title">Strategic Ceiling</h2>
+            <div className="narrative-text">{narrative.strategicCeiling.body || narrative.strategicCeiling}</div>
+            {narrative.strategicCeiling.key_warning && (
+              <div className="key-warning">⚠️ {narrative.strategicCeiling.key_warning}</div>
+            )}
+          </section>
+        )}
 
-        {/* Section 10: Hidden Risks */}
-        <section className="narrative-section risk-section">
-          <h2 className="section-title">Hidden Risk Patterns</h2>
-          <div className="narrative-text">{narrative.hiddenRisks}</div>
-        </section>
+        {/* Section 10: Hidden Risks (Hidden - V3 integrated above) */}
+        {/* Moved to V3 rendering */}
 
         {/* Section 11: Coaching Leverage */}
         <section className="narrative-section">
