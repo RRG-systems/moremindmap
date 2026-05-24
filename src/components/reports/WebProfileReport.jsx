@@ -27,12 +27,15 @@ export default function WebProfileReport({ canonical, profileId }) {
   const [narrative, setNarrative] = useState(null);
   const [narrativeLoading, setNarrativeLoading] = useState(true);
   const [narrativeError, setNarrativeError] = useState(null);
+  // Check for cache bypass (for testing/refresh)
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const disableCache = searchParams.has('nocache') || searchParams.has('v3-refresh');
 
   useEffect(() => {
     (async () => {
       try {
         setNarrativeLoading(true);
-        const v3Narrative = await buildNarrativeV3(canonical, true, profileId);
+        const v3Narrative = await buildNarrativeV3(canonical, true, profileId, disableCache);
         setNarrative(v3Narrative);
         setNarrativeError(null);
         console.log('[WebProfileReport] V3 narrative rendered for', profileId);
@@ -44,7 +47,7 @@ export default function WebProfileReport({ canonical, profileId }) {
         setNarrativeLoading(false);
       }
     })();
-  }, [canonical, profileId]);
+  }, [canonical, profileId, disableCache]);
 
   // Handle loading/error states
   if (narrativeLoading) {
@@ -204,6 +207,13 @@ export default function WebProfileReport({ canonical, profileId }) {
           <span>Assessment Date: {canonical.created_at?.split('T')[0] || 'N/A'}</span>
           <span>Profile Type: {profileType}</span>
           <span>Confidence: High</span>
+          {narrative && (
+            <>
+              <span>V3 Source: {narrative.render_source || 'unknown'}</span>
+              <span>Fallback: {narrative.fallback_used ? 'true' : 'false'}</span>
+              {narrative.SIGNAL_VERIFIED_55 && <span>Signal: {narrative.SIGNAL_VERIFIED_55}</span>}
+            </>
+          )}
         </div>
       </footer>
 
