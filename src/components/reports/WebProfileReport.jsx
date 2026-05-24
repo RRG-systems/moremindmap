@@ -1,14 +1,344 @@
 /**
  * WebProfileReport.jsx
  * 
- * Premium Web-First Profile Report V2
- * Dark intelligence dashboard aesthetic (RRG/MORE inspired)
- * Black + gold + subtle signal accents
- * Dense, modular, executive-level behavioral analysis
+ * Dashboard Report V1 (NEW PRESENTATION LAYER)
+ * Behavioral Intelligence System Dashboard
+ * Asymmetrical grid composition, cinematic dark luxury
+ * 
+ * ARCHITECTURAL NOTES:
+ * - Uses same canonical + narrative data as V2
+ * - Completely reimagined presentation layer
+ * - No backend changes, no logic rewrites
+ * - Falls back to old stacked render if DashboardReportV1 fails
  */
 
 import { useState, useEffect } from 'react';
 import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
+
+// ============================================================================
+// DASHBOARD COMPONENTS (V1)
+// ============================================================================
+
+function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked }) {
+  return (
+    <div className="dashboard-report-v1 intelligence-system">
+      {/* HERO HEADER */}
+      <header className="dashboard-hero">
+        <div className="hero-grid">
+          <div className="hero-identity-zone">
+            <div className="identity-anchor">
+              <div className="identity-number">{profileNumber}</div>
+              <div className="identity-label">BEHAVIORAL OPERATING SYSTEM</div>
+            </div>
+            <div className="identity-text">
+              <h1 className="identity-name">{personName}</h1>
+              <p className="identity-tagline">The architecture of how you think, decide, and create impact</p>
+              {company && <p className="identity-company">{company}</p>}
+            </div>
+          </div>
+          
+          <div className="hero-meta-zone">
+            <div className="meta-card">
+              <div className="meta-label">PROFILE</div>
+              <div className="meta-code">{profileCode}</div>
+            </div>
+            <div className="meta-card">
+              <div className="meta-label">TYPE</div>
+              <div className="meta-value">{profileType}</div>
+            </div>
+            <div className="meta-card">
+              <div className="meta-label">ID</div>
+              <div className="meta-value meta-mono">{profileId?.substring(0, 20)}</div>
+            </div>
+          </div>
+        </div>
+        
+        {/* DNA SIGNATURE */}
+        <div className="dna-signature-zone">
+          <span className="dna-zone-label">PROFILE DNA</span>
+          <div className="dna-hexagon-grid">
+            {ranked.slice(0, 8).map((d) => (
+              <div key={d.dimension} className="dna-hex">
+                <div className="hex-inner">
+                  <span className="hex-abbr">{d.dimension.substring(0, 3).toUpperCase()}</span>
+                  <span className="hex-score">{d.score > 0 ? '+' : ''}{d.score}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* PAGE 1: OPERATING SYSTEM */}
+      <PageOneDashboard narrative={narrative} ranked={ranked} />
+      
+      {/* PAGE 2: STRATEGIC CONSEQUENCES */}
+      <PageTwoDashboard narrative={narrative} ranked={ranked} />
+    </div>
+  );
+}
+
+function PageOneDashboard({ narrative, ranked }) {
+  return (
+    <div className="dashboard-page page-one">
+      <div className="page-content">
+        {/* ZONE 1: HERO + TRIAD (3 core operating patterns) */}
+        <div className="zone-hero-triad">
+          {/* Hero: Profile DNA (main operating model) */}
+          <InsightPanel
+            className="hero-dna-module"
+            icon="🧬"
+            title="Profile DNA"
+            subtitle="Operating Model"
+            content={narrative.profileDNA?.body || narrative.profileDNA}
+            prominence="hero"
+          />
+          
+          {/* Triad: 3 Core Dimensions */}
+          <div className="triad-grid">
+            <MetricCard
+              icon="🔄"
+              title="Command Clarity"
+              metric={ranked[0]?.score || 0}
+              dimension={ranked[0]?.dimension || 'Primary'}
+              color="clarity"
+            />
+            <MetricCard
+              icon="⚖️"
+              title="Speed vs Fidelity"
+              metric={ranked[1]?.score || 0}
+              dimension={ranked[1]?.dimension || 'Secondary'}
+              color="balance"
+            />
+            <MetricCard
+              icon="🎯"
+              title="Strategic Leverage"
+              metric={ranked[2]?.score || 0}
+              dimension={ranked[2]?.dimension || 'Tertiary'}
+              color="leverage"
+            />
+          </div>
+        </div>
+
+        {/* ZONE 2: Analytical Pair (DNA Summary + Behavioral Summary) */}
+        <div className="zone-analytical-pair">
+          <InsightPanel
+            icon="📊"
+            title="DNA Summary"
+            subtitle="Vector Analysis"
+            content={ranked.slice(0, 6).map(d => `${d.dimension}: ${d.score > 0 ? '+' : ''}${d.score}`).join(' • ')}
+            prominence="analytical"
+            className="left-panel"
+          />
+          
+          {narrative.executiveSummary && (
+            <InsightPanel
+              icon="💼"
+              title="Executive Summary"
+              subtitle="Behavioral Briefing"
+              content={narrative.executiveSummary?.body || narrative.executiveSummary}
+              prominence="analytical"
+              warning={narrative.executiveSummary?.key_warning}
+              className="right-panel"
+            />
+          )}
+        </div>
+
+        {/* ZONE 3: Pressure Dynamics (4-column flow) */}
+        {narrative.systemUnderStrain && (
+          <PressureFlow narrative={narrative} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PageTwoDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-two">
+      <div className="page-content">
+        {/* ZONE 1: Diagnostics Pair (Hidden Contradictions + Strain) */}
+        <div className="zone-diagnostics-pair">
+          {narrative.hiddenContradictions && (
+            <InsightPanel
+              icon="⚠️"
+              title="Hidden Contradictions"
+              subtitle="Warning / Diagnostic"
+              content={narrative.hiddenContradictions?.body || narrative.hiddenContradictions}
+              warning={narrative.hiddenContradictions?.key_warning}
+              prominence="diagnostic"
+              className="left-diagnostic"
+            />
+          )}
+          
+          {narrative.systemUnderStrain && (
+            <InsightPanel
+              icon="⚡"
+              title="Operating Under Pressure"
+              subtitle="Stress Dynamics"
+              content={narrative.systemUnderStrain?.body || narrative.systemUnderStrain}
+              warning={narrative.systemUnderStrain?.key_warning}
+              prominence="diagnostic"
+              className="right-diagnostic"
+            />
+          )}
+        </div>
+
+        {/* ZONE 2: Strategic Ceiling (horizontal systems map) */}
+        {narrative.strategicCeiling && (
+          <StrategicMap narrative={narrative} />
+        )}
+
+        {/* ZONE 3: Action System (Coaching + Next Step paired) */}
+        <ActionSystem
+          coachingContent={narrative.coachingLeverage?.body || narrative.coachingLeverage}
+          nextStepContent={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+        />
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// PRESENTATIONAL COMPONENTS (pure composition, no logic)
+// ============================================================================
+
+function MetricCard({ icon, title, metric, dimension, color }) {
+  const colorMap = {
+    clarity: 'metric-clarity',
+    balance: 'metric-balance',
+    leverage: 'metric-leverage',
+  };
+  
+  return (
+    <div className={`metric-card ${colorMap[color] || ''}`}>
+      <div className="metric-icon">{icon}</div>
+      <h3 className="metric-title">{title}</h3>
+      <div className="metric-value">{metric > 0 ? '+' : ''}{metric}</div>
+      <p className="metric-dimension">{dimension}</p>
+    </div>
+  );
+}
+
+function InsightPanel({ icon, title, subtitle, content, warning, prominence, className }) {
+  return (
+    <div className={`insight-panel prominence-${prominence} ${className || ''}`}>
+      <div className="insight-header">
+        <span className="insight-icon">{icon}</span>
+        <div className="insight-title-group">
+          <h3 className="insight-title">{title}</h3>
+          {subtitle && <p className="insight-subtitle">{subtitle}</p>}
+        </div>
+      </div>
+      <div className="insight-body">
+        {content}
+      </div>
+      {warning && <div className="insight-warning">⚠️ {warning}</div>}
+    </div>
+  );
+}
+
+function PressureFlow({ narrative }) {
+  const modes = [
+    {
+      name: 'Optimal Mode',
+      subtitle: 'When conditions align',
+      description: 'Operating at peak efficiency',
+    },
+    {
+      name: 'Strained Mode',
+      subtitle: 'Under moderate pressure',
+      description: 'Performance degradation begins',
+    },
+    {
+      name: 'Overload Mode',
+      subtitle: 'Critical stress levels',
+      description: 'Coping mechanisms activated',
+    },
+    {
+      name: 'Breakdown Mode',
+      subtitle: 'System failure imminent',
+      description: 'Recovery intervention needed',
+    },
+  ];
+  
+  return (
+    <div className="pressure-dynamics-zone">
+      <div className="pressure-header">
+        <span className="pressure-icon">⚡</span>
+        <div>
+          <h3 className="pressure-title">Pressure Dynamics</h3>
+          <p className="pressure-subtitle">System Response Under Strain</p>
+        </div>
+      </div>
+      <div className="pressure-flow-grid">
+        {modes.map((mode, idx) => (
+          <div key={idx} className="pressure-mode-card">
+            <div className="mode-badge">{idx + 1}</div>
+            <h4 className="mode-name">{mode.name}</h4>
+            <p className="mode-subtitle">{mode.subtitle}</p>
+            <p className="mode-description">{mode.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StrategicMap({ narrative }) {
+  return (
+    <div className="strategic-ceiling-zone">
+      <div className="strategic-header">
+        <span className="strategic-icon">🎯</span>
+        <div>
+          <h3 className="strategic-title">Strategic Ceiling</h3>
+          <p className="strategic-subtitle">Scaling Architecture & Limits</p>
+        </div>
+      </div>
+      <div className="strategic-map-content">
+        {narrative.strategicCeiling?.body || narrative.strategicCeiling}
+      </div>
+    </div>
+  );
+}
+
+function ActionSystem({ coachingContent, nextStepContent }) {
+  return (
+    <div className="action-system-zone">
+      <div className="action-pair">
+        <div className="action-coaching">
+          <div className="action-header">
+            <span className="action-icon">✓</span>
+            <div>
+              <h3 className="action-title">Coaching Leverage</h3>
+              <p className="action-subtitle">Tactical Actions</p>
+            </div>
+          </div>
+          <div className="action-body">
+            {coachingContent}
+          </div>
+        </div>
+        
+        <div className="action-nextstep">
+          <div className="action-header">
+            <span className="action-icon nextstep-icon">→</span>
+            <div>
+              <h3 className="action-title">Recommended Next Step</h3>
+              <p className="action-subtitle">Decisive Recommendation</p>
+            </div>
+          </div>
+          <div className="action-body">
+            {nextStepContent}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================================
+// MAIN COMPONENT (with fallback to stacked render)
+// ============================================================================
 
 export default function WebProfileReport({ canonical, profileId }) {
   if (!canonical) {
@@ -19,8 +349,6 @@ export default function WebProfileReport({ canonical, profileId }) {
   const personName = canonical.person_name || 'Assessment Subject';
   const company = canonical.company_name || '';
   const profileType = data.inferred_patterns?.profile_type || 'Behavioral Profile';
-  const vectorScores = data.vector_scores || {};
-  const topSystems = data.top_systems || {};
   const ranked = data.ranked_dimensions || [];
   
   // Generate profile code (short hash from profileId)
@@ -28,11 +356,12 @@ export default function WebProfileReport({ canonical, profileId }) {
   // Derive profile number (01-99) from profileId
   const profileNumber = String(((profileId?.charCodeAt(0) || 0) % 50) + 1).padStart(2, '0');
 
-  // V3 narrative rendering (with GPT-5.5 texture layer when API key available)
+  // V3 narrative rendering
   const [narrative, setNarrative] = useState(null);
   const [narrativeLoading, setNarrativeLoading] = useState(true);
   const [narrativeError, setNarrativeError] = useState(null);
-  // Check for cache bypass (for testing/refresh)
+  const [dashboardFailed, setDashboardFailed] = useState(false);
+  
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const disableCache = searchParams.has('nocache') || searchParams.has('v3-refresh');
 
@@ -62,44 +391,41 @@ export default function WebProfileReport({ canonical, profileId }) {
   if (narrativeError || !narrative) {
     return <div className="web-report-error">Failed to render profile narrative: {narrativeError}</div>;
   }
-
-  // Section icon map (emoji for now, can be replaced with SVG icons)
-  const sectionIcons = {
-    'Profile DNA': '🧬',
-    'Executive Summary': '💼',
-    'Behavioral Dimensions': '📊',
-    'Communication Style': '💬',
-    'Operating Pattern': '⚙️',
-    'Hidden Contradictions': '⚠️',
-    'System Under Strain': '⚡',
-    'Strategic Ceiling': '🎯',
-    'Coaching Leverage': '✓',
-    'Recommended Next Step': '→'
-  };
-
-  // Helper to safely render text
-  const renderText = (value) => {
-    if (!value && value !== 0) return '';
-    if (typeof value === 'string' || typeof value === 'number') return String(value);
-    if (Array.isArray(value)) {
-      return value
-        .map(item => renderText(item))
-        .filter(s => s && s.length > 0)
-        .join(', ');
-    }
-    if (typeof value === 'object') {
+  
+  // TRY DASHBOARD V1, FALLBACK TO STACKED IF ERROR
+  if (!dashboardFailed) {
+    try {
       return (
-        value.description ||
-        value.dimension ||
-        value.tension ||
-        value.pattern ||
-        value.manifestation ||
-        ''
+        <div>
+          <DashboardReportV1
+            canonical={canonical}
+            profileId={profileId}
+            narrative={narrative}
+            profileNumber={profileNumber}
+            profileCode={profileCode}
+            personName={personName}
+            company={company}
+            profileType={profileType}
+            ranked={ranked}
+          />
+          <DashboardStyles />
+        </div>
       );
+    } catch (err) {
+      console.error('[DashboardReportV1] Render failed, falling back to stacked report:', err);
+      setDashboardFailed(true);
     }
-    return '';
-  };
+  }
 
+  // FALLBACK: Old stacked report render (preserved from V2)
+  return <StackedReportFallback canonical={canonical} narrative={narrative} profileNumber={profileNumber} profileCode={profileCode} personName={personName} company={company} profileType={profileType} ranked={ranked} profileId={profileId} />;
+}
+
+// ============================================================================
+// FALLBACK RENDER (preserved from V2, fallback only)
+// ============================================================================
+
+function StackedReportFallback({ canonical, narrative, profileNumber, profileCode, personName, company, profileType, ranked, profileId }) {
   return (
     <div className="web-profile-report-v2 two-page-dashboard">
       {/* HEADER: Premium identity card */}
@@ -605,13 +931,6 @@ export default function WebProfileReport({ canonical, profileId }) {
           letter-spacing: 0.08em;
           font-weight: 700;
           text-transform: uppercase;
-        }
-
-        /* BODY */
-        .dashboard-body {
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 2.5rem 3rem;
         }
 
         /* SECTIONS - Dashboard Modules */
@@ -1361,5 +1680,775 @@ export default function WebProfileReport({ canonical, profileId }) {
         }
       `}</style>
     </div>
+  );
+}
+
+function DashboardStyles() {
+  return (
+    <style jsx global>{`
+      .dashboard-report-v1.intelligence-system {
+        background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
+        color: #e0e0e0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+        min-height: 100vh;
+        padding: 0;
+        position: relative;
+      }
+
+      .dashboard-hero {
+        background: linear-gradient(135deg, #1a1f3a 0%, #0f1530 100%);
+        border-bottom: 2px solid rgba(212, 175, 55, 0.55);
+        padding: 4rem 3.5rem;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 24px 96px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(212, 175, 55, 0.3);
+        backdrop-filter: blur(8px);
+      }
+
+      .hero-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        margin-bottom: 3rem;
+        align-items: start;
+      }
+
+      .hero-identity-zone {
+        display: flex;
+        gap: 2.5rem;
+        align-items: flex-start;
+      }
+
+      .identity-anchor {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.18) 0%, rgba(212, 175, 55, 0.08) 100%);
+        border: 2px solid rgba(212, 175, 55, 0.45);
+        border-radius: 14px;
+        padding: 2rem 1.6rem;
+        min-width: 140px;
+        text-align: center;
+        box-shadow: 0 12px 32px rgba(212, 175, 55, 0.12), inset 0 1px 2px rgba(212, 175, 55, 0.2);
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .identity-anchor::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.4) 50%, rgba(212, 175, 55, 0) 100%);
+      }
+
+      .identity-number {
+        font-size: 4rem;
+        font-weight: 950;
+        color: #d4af37;
+        line-height: 0.95;
+        letter-spacing: -0.08em;
+        text-shadow: 0 6px 20px rgba(212, 175, 55, 0.25);
+      }
+
+      .identity-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: #aaa;
+        margin-top: 0.8rem;
+        font-weight: 900;
+      }
+
+      .identity-text {
+        flex: 1;
+      }
+
+      .identity-name {
+        font-size: 3.6rem;
+        font-weight: 950;
+        color: #ffffff;
+        margin: 0 0 0.3rem 0;
+        letter-spacing: -0.6px;
+        line-height: 1.05;
+      }
+
+      .identity-tagline {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #d4af37;
+        margin: 0.75rem 0 0.5rem 0;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        opacity: 0.95;
+      }
+
+      .identity-company {
+        font-size: 1rem;
+        color: #c0c0c0;
+        margin: 0.75rem 0 0 0;
+      }
+
+      .hero-meta-zone {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        justify-content: flex-start;
+      }
+
+      .meta-card {
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(212, 175, 55, 0.06) 100%);
+        border: 1.5px solid rgba(212, 175, 55, 0.35);
+        padding: 0.9rem 1.2rem;
+        border-radius: 8px;
+        text-align: right;
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.08);
+      }
+
+      .meta-label {
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #777;
+        margin-bottom: 0.3rem;
+        font-weight: 800;
+      }
+
+      .meta-code {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #d4af37;
+        font-family: 'Monaco', monospace;
+        letter-spacing: 0.08em;
+      }
+
+      .meta-value {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #d4af37;
+      }
+
+      .meta-mono {
+        font-family: 'Monaco', monospace;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+      }
+
+      .dna-signature-zone {
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(212, 175, 55, 0.25);
+      }
+
+      .dna-zone-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #777;
+        min-width: 120px;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      .dna-hexagon-grid {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .dna-hex {
+        width: 90px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(103, 58, 183, 0.08) 100%);
+        border: 1.5px solid rgba(138, 43, 226, 0.4);
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .dna-hex::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(138, 43, 226, 0) 0%, rgba(138, 43, 226, 0.3) 50%, rgba(138, 43, 226, 0) 100%);
+      }
+
+      .hex-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+        text-align: center;
+      }
+
+      .hex-abbr {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #999;
+        font-weight: 900;
+      }
+
+      .hex-score {
+        font-size: 1.4rem;
+        font-weight: 950;
+        color: #d4af37;
+        letter-spacing: -0.05em;
+      }
+
+      /* PAGE STRUCTURE */
+      .dashboard-page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        page-break-after: always;
+        background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
+        position: relative;
+      }
+
+      .page-one {
+        border-bottom: 2px solid rgba(212, 175, 55, 0.2);
+      }
+
+      .page-two {
+        border-top: 2px solid rgba(212, 175, 55, 0.2);
+      }
+
+      .page-content {
+        display: flex;
+        flex-direction: column;
+        gap: 3rem;
+        padding: 4rem 3.5rem;
+        flex: 1;
+        max-width: 1800px;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* ZONES */
+      .zone-hero-triad {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5rem;
+      }
+
+      .hero-dna-module {
+        background: linear-gradient(135deg, rgba(138, 43, 226, 0.15) 0%, rgba(103, 58, 183, 0.08) 100%);
+        border: 1.5px solid rgba(138, 43, 226, 0.4);
+        padding: 3rem;
+        border-radius: 16px;
+        box-shadow: 0 24px 96px rgba(0, 0, 0, 0.7), inset 0 2px 8px rgba(138, 43, 226, 0.15);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .triad-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 2rem;
+      }
+
+      .zone-analytical-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+      }
+
+      .left-panel,
+      .right-panel {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.08) 0%, rgba(76, 175, 80, 0.03) 100%);
+        border: 1.5px solid rgba(76, 175, 80, 0.35);
+        border-radius: 14px;
+        padding: 2.5rem;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(76, 175, 80, 0.1);
+      }
+
+      .zone-diagnostics-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+      }
+
+      .left-diagnostic {
+        background: linear-gradient(135deg, rgba(244, 67, 54, 0.08) 0%, rgba(244, 67, 54, 0.03) 100%);
+        border: 1.5px solid rgba(244, 67, 54, 0.3);
+        border-radius: 14px;
+        padding: 2.5rem;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      .right-diagnostic {
+        background: linear-gradient(135deg, rgba(233, 30, 99, 0.08) 0%, rgba(233, 30, 99, 0.03) 100%);
+        border: 1.5px solid rgba(233, 30, 99, 0.3);
+        border-radius: 14px;
+        padding: 2.5rem;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      /* COMPONENTS */
+      .metric-card {
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.1) 0%, rgba(33, 150, 243, 0.04) 100%);
+        border: 1.5px solid rgba(33, 150, 243, 0.35);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(33, 150, 243, 0.1);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .metric-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(33, 150, 243, 0) 0%, rgba(33, 150, 243, 0.4) 50%, rgba(33, 150, 243, 0) 100%);
+      }
+
+      .metric-card:hover {
+        border-color: rgba(33, 150, 243, 0.5);
+        transform: translateY(-3px);
+      }
+
+      .metric-icon {
+        font-size: 2.8rem;
+        opacity: 0.9;
+      }
+
+      .metric-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+
+      .metric-value {
+        font-size: 3rem;
+        font-weight: 950;
+        color: #ffc107;
+        letter-spacing: -0.05em;
+        text-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
+      }
+
+      .metric-dimension {
+        font-size: 0.8rem;
+        color: #888;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0;
+      }
+
+      .metric-clarity {
+        border-color: rgba(33, 150, 243, 0.4);
+        background: linear-gradient(135deg, rgba(33, 150, 243, 0.12) 0%, rgba(33, 150, 243, 0.05) 100%);
+      }
+
+      .metric-balance {
+        border-color: rgba(255, 152, 0, 0.4);
+        background: linear-gradient(135deg, rgba(255, 152, 0, 0.12) 0%, rgba(255, 152, 0, 0.05) 100%);
+      }
+
+      .metric-leverage {
+        border-color: rgba(76, 175, 80, 0.4);
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.12) 0%, rgba(76, 175, 80, 0.05) 100%);
+      }
+
+      .insight-panel {
+        background: linear-gradient(135deg, rgba(15, 20, 40, 0.95) 0%, rgba(10, 14, 35, 0.8) 100%);
+        border: 1.5px solid rgba(212, 175, 55, 0.3);
+        border-radius: 12px;
+        padding: 2rem;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5), inset 0 2px 8px rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .insight-panel::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.35) 50%, rgba(212, 175, 55, 0) 100%);
+      }
+
+      .insight-panel:hover {
+        transform: translateY(-3px);
+      }
+
+      .prominence-hero .insight-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .prominence-analytical .insight-header {
+        margin-bottom: 1rem;
+      }
+
+      .prominence-diagnostic .insight-header {
+        margin-bottom: 1rem;
+      }
+
+      .insight-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .insight-icon {
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+      }
+
+      .insight-title-group {
+        flex: 1;
+      }
+
+      .insight-title {
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin: 0 0 0.2rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .insight-subtitle {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #999;
+        margin: 0;
+        font-weight: 800;
+      }
+
+      .insight-body {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #d4d4d4;
+        letter-spacing: 0.3px;
+      }
+
+      .insight-warning {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(244, 67, 54, 0.3);
+        font-size: 0.95rem;
+        color: #f8a080;
+      }
+
+      .pressure-dynamics-zone {
+        background: linear-gradient(135deg, rgba(233, 30, 99, 0.08) 0%, rgba(233, 30, 99, 0.03) 100%);
+        border: 1.5px solid rgba(233, 30, 99, 0.3);
+        border-radius: 14px;
+        padding: 3rem;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      .pressure-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .pressure-icon {
+        font-size: 2rem;
+        opacity: 0.9;
+      }
+
+      .pressure-title {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .pressure-subtitle {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #999;
+        margin: 0.3rem 0 0 0;
+        font-weight: 800;
+      }
+
+      .pressure-flow-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+        gap: 2rem;
+      }
+
+      .pressure-mode-card {
+        background: rgba(233, 30, 99, 0.08);
+        border: 1.5px solid rgba(233, 30, 99, 0.3);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+      }
+
+      .mode-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, rgba(233, 30, 99, 0.25) 0%, rgba(233, 30, 99, 0.12) 100%);
+        border: 1.5px solid rgba(233, 30, 99, 0.4);
+        border-radius: 50%;
+        color: #ff6b9d;
+        font-weight: 950;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+      }
+
+      .mode-name {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 0.5rem 0;
+      }
+
+      .mode-subtitle {
+        font-size: 0.8rem;
+        color: #aaa;
+        margin: 0 0 1rem 0;
+      }
+
+      .mode-description {
+        font-size: 0.9rem;
+        color: #bbb;
+        margin: 0;
+      }
+
+      .strategic-ceiling-zone {
+        background: linear-gradient(135deg, rgba(103, 58, 183, 0.1) 0%, rgba(103, 58, 183, 0.04) 100%);
+        border: 1.5px solid rgba(103, 58, 183, 0.35);
+        border-radius: 14px;
+        padding: 3rem;
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      .strategic-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .strategic-icon {
+        font-size: 2rem;
+        opacity: 0.9;
+      }
+
+      .strategic-title {
+        font-size: 1.3rem;
+        font-weight: 900;
+        color: #fff;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .strategic-subtitle {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #999;
+        margin: 0.3rem 0 0 0;
+        font-weight: 800;
+      }
+
+      .strategic-map-content {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #d4d4d4;
+        letter-spacing: 0.3px;
+      }
+
+      .action-system-zone {
+        margin-top: auto;
+      }
+
+      .action-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2.5rem;
+      }
+
+      .action-coaching,
+      .action-nextstep {
+        border-radius: 14px;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .action-coaching {
+        background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(76, 175, 80, 0.04) 100%);
+        border: 1.5px solid rgba(76, 175, 80, 0.35);
+        box-shadow: 0 16px 64px rgba(0, 0, 0, 0.5);
+      }
+
+      .action-nextstep {
+        background: linear-gradient(135deg, rgba(255, 193, 7, 0.12) 0%, rgba(255, 193, 7, 0.05) 100%);
+        border: 2px solid rgba(255, 193, 7, 0.5);
+        box-shadow: 0 20px 80px rgba(255, 193, 7, 0.15);
+      }
+
+      .action-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .action-icon {
+        font-size: 1.6rem;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+        color: #4caf50;
+      }
+
+      .action-icon.nextstep-icon {
+        color: #ffc107;
+      }
+
+      .action-title {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #ffffff;
+        margin: 0 0 0.2rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .action-subtitle {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: #999;
+        margin: 0;
+        font-weight: 800;
+      }
+
+      .action-body {
+        font-size: 1.05rem;
+        line-height: 1.8;
+        color: #d4d4d4;
+        letter-spacing: 0.3px;
+      }
+
+      .web-report-error,
+      .web-report-loading {
+        background: #0a0e27;
+        color: #f44336;
+        padding: 2rem;
+        text-align: center;
+        font-weight: 500;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .web-report-loading {
+        color: #d4af37;
+      }
+
+      @media print {
+        .dashboard-page {
+          page-break-after: always;
+          break-inside: avoid;
+          min-height: auto;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .hero-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .pressure-flow-grid,
+        .action-pair {
+          grid-template-columns: 1fr;
+        }
+
+        .triad-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .zone-analytical-pair,
+        .zone-diagnostics-pair {
+          grid-template-columns: 1fr;
+        }
+
+        .page-content {
+          padding: 3rem 2rem;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .hero-identity-zone {
+          flex-direction: column;
+          gap: 1.5rem;
+        }
+
+        .identity-name {
+          font-size: 2.2rem;
+        }
+
+        .dashboard-hero {
+          padding: 2rem;
+        }
+
+        .page-content {
+          padding: 2rem 1rem;
+          gap: 2rem;
+        }
+
+        .dna-hexagon-grid {
+          gap: 0.5rem;
+        }
+
+        .dna-hex {
+          width: 70px;
+          height: 70px;
+        }
+
+        .triad-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .pressure-flow-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    `}</style>
   );
 }
