@@ -281,18 +281,53 @@ export default function Profile() {
           
           if (statusData.status === 'complete') {
             console.log("[MINI-V2] Generation complete!")
-            console.log("[MINI-V2] Setting result HTML length:", statusData.html?.length || 0)
+            console.log("[MINI-V2] canonical_profile_id:", statusData.canonical_profile_id)
             complete = true
             setProcessing(false)
-            console.log("[MINI-V2] Processing false after complete")
-            setResult({
-              success: true,
-              version: "mini-v2",
-              html: statusData.html,
-              snapshot: statusData.metadata,
-              generation_mode: 'gpt'
-            })
-            console.log("[MINI-V2] Render result branch active")
+            
+            // Fetch canonical dossier to use web profile render (PATH B equivalent)
+            if (statusData.canonical_profile_id) {
+              try {
+                console.log("[PIPELINE-EQUIVALENCE] Fetching canonical for web profile render...")
+                const canonicalRes = await fetch(`${API}/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
+                if (canonicalRes.ok) {
+                  const canonicalData = await canonicalRes.json()
+                  console.log("[PIPELINE-EQUIVALENCE] Using web render path (same as manual retrieval)")
+                  setResult({
+                    success: true,
+                    version: "web",
+                    canonical_dossier: canonicalData.canonical_dossier,
+                    profile_id: statusData.canonical_profile_id,
+                    generation_mode: 'gpt'
+                  })
+                } else {
+                  console.warn("[PIPELINE-EQUIVALENCE] Canonical fetch failed, fallback to HTML")
+                  setResult({
+                    success: true,
+                    version: "mini-v2",
+                    html: statusData.html,
+                    snapshot: statusData.metadata,
+                    profile_id: statusData.canonical_profile_id
+                  })
+                }
+              } catch (err) {
+                console.error("[PIPELINE-EQUIVALENCE] Canonical fetch error:", err)
+                setResult({
+                  success: true,
+                  version: "mini-v2",
+                  html: statusData.html,
+                  snapshot: statusData.metadata,
+                  profile_id: statusData.canonical_profile_id
+                })
+              }
+            } else {
+              setResult({
+                success: true,
+                version: "mini-v2",
+                html: statusData.html,
+                snapshot: statusData.metadata
+              })
+            }
           } else if (statusData.status === 'failed') {
             console.error("[MINI-V2] Generation failed:", statusData.error)
             complete = true
