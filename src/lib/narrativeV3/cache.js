@@ -38,7 +38,9 @@ export function getCachedNarrative(profileId) {
     try {
       const stored = localStorage.getItem(cacheKey);
       if (stored) {
-        const cached = JSON.parse(stored);
+        const wrapped = JSON.parse(stored);
+        // Unwrap if stored with metadata (old format had: { data: {...}, cachedAt, ttlHours })
+        const cached = wrapped.data || wrapped;
         memoryCache.set(cacheKey, cached); // Reload into memory
         console.log(`[V3 CACHE HIT] Storage: ${profileId}`);
         return cached;
