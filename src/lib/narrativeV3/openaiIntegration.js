@@ -45,6 +45,9 @@ export async function callGPT55(prompt, section) {
     // Validate structure
     if (!data.section || !data.body) {
       console.warn(`[GPT-5.5] Missing required fields`);
+      console.warn(`[GPT-5.5] Response keys: ${Object.keys(data).join(', ')}`);
+      console.warn(`[GPT-5.5] data.section: ${data.section}`);
+      console.warn(`[GPT-5.5] data.body length: ${data.body?.length || 0}`);
       return null;
     }
 
@@ -100,6 +103,7 @@ export function validateGrounding(gptResponse, interpreted) {
 
   if (violations.length > 0) {
     console.warn(`[GROUNDING VIOLATIONS]:`, violations);
+    console.warn(`[GROUNDING] Response keys: ${Object.keys(gptResponse).join(', ')}`);
     return false;
   }
 

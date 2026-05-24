@@ -96,7 +96,18 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
         }
       } else {
         // [FORENSIC] GPT failed, fallback activated
-        console.log(`[V3 GPT FAILURE] section: ${section} | exact_error: ${gptResponse ? 'validation_failed' : 'null_response'}`);
+        const triggerReason = !gptResponse ? 'null_response' : 'validation_failed';
+        console.log(`[V3 FALLBACK TRIGGER]`);
+        console.log(`  section: ${section}`);
+        console.log(`  reason: ${triggerReason}`);
+        if (gptResponse) {
+          console.log(`  gptResponse.section: ${gptResponse.section}`);
+          console.log(`  gptResponse.body length: ${gptResponse.body?.length || 0}`);
+          console.log(`  gptResponse.grounding_used: ${JSON.stringify(gptResponse.grounding_used)}`);
+          console.log(`  full response keys: ${Object.keys(gptResponse).join(', ')}`);
+        }
+        console.log(`  prompt keys in request: ${Object.keys(prompt).join(', ')}`);
+        
         rendering = await localRendering(prompt, section, interpreted);
         sectionRenderSource = 'fallback_local';
         fallbackActivated = true;

@@ -32,6 +32,8 @@ export default async function handler(req, res) {
     }
 
     console.log(`[NARRATIVE-V3 CALL START] Section: ${section}`);
+    console.log(`[NARRATIVE-V3] Prompt keys: ${Object.keys(prompt).join(', ')}`);
+    console.log(`[NARRATIVE-V3] Prompt.canonical keys: ${Object.keys(prompt.canonical || {}).join(', ')}`);
 
     const systemMessage = prompt.systemRule || '';
     const userMessage = buildUserMessage(prompt);
@@ -85,6 +87,9 @@ export default async function handler(req, res) {
     // Validate structure
     if (!parsed.section || !parsed.body) {
       console.warn(`[NARRATIVE-V3] Missing required fields`);
+      console.warn(`[NARRATIVE-V3] Parsed object keys: ${Object.keys(parsed).join(', ')}`);
+      console.warn(`[NARRATIVE-V3] Parsed.section: ${parsed.section}`);
+      console.warn(`[NARRATIVE-V3] Parsed.body length: ${parsed.body?.length || 0}`);
       return res.status(500).json({ error: 'Invalid response structure' });
     }
 
