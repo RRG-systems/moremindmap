@@ -1,14 +1,18 @@
 /**
- * executeCanonicalGeneration.js
+ * executeCanonicalGeneration.js - WITH RESILIENCE FALLBACK
  * 
  * Stage 1.5: Canonical generation and Vault storage
  * Generates frontier canonical dossier and saves to Vault
+ * 
+ * RESILIENCE: If fancy canonical generation fails for ANY reason,
+ * falls back to deterministic fallback canonical using available data.
  * 
  * CRITICAL: This stage MUST NOT crash the job pipeline
  * All errors are caught and logged; job continues to FIRST_INJECTION
  */
 
 import { updateJob, JOB_STAGE } from '../miniV2JobManager.js'
+import { generateFallbackCanonical } from './canonicalFallback.js'
 
 export async function executeCanonicalGeneration(job) {
   const trace = job.diagnostics?.stage_trace || []
@@ -26,6 +30,8 @@ export async function executeCanonicalGeneration(job) {
     generation_attempted: true,
     generation_success: false,
     generation_error: null,
+    generation_mode: null,
+    original_generation_error: null,
     generation_time_ms: 0,
     vault_keys_created: [],
     profile_signature: null,
@@ -35,33 +41,48 @@ export async function executeCanonicalGeneration(job) {
   try {
     const start_time = Date.now()
     
-    // Import canonical engine
-    const { generateCanonicalProfile } = await import('./canonicalProfileGenerator.js')
     const { generateProfileId } = await import('../vault/generateProfileId.js')
     const { saveCanonicalProfile, saveCanonicalMarkdown } = await import('../vault/saveCanonicalProfile.js')
-    const { buildNarrativeProfile } = await import('./buildNarrativeProfile.js')
     
-    trace.push('imported_canonical_modules')
+    trace.push('imported_vault_modules')
     
-    // Generate canonical profile
-    const { profileInput } = job
+    // Generate canonical profile - with fallback on failure
+    const { profileInput, reportContent } = job
     
     if (!profileInput) {
       throw new Error('profileInput not available')
     }
     
-    trace.push('before_generateCanonicalProfile')
     let canonical_profile
+    let generation_mode = 'fancy'
+    let original_generation_error = null
+    
+    trace.push('before_generateCanonicalProfile')
     try {
+      // Try fancy canonical generation
+      const { generateCanonicalProfile } = await import('./canonicalProfileGenerator.js')
       canonical_profile = await generateCanonicalProfile(profileInput)
-      trace.push('after_generateCanonicalProfile')
+      trace.push('fancy_canonical_generated')
     } catch (err) {
-      canonical_diagnostics.failed_module = 'generateCanonicalProfile'
-      canonical_diagnostics.failed_stack = (err.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
-      throw err
+      // Fallback to deterministic canonical on any error
+      console.error('[CANONICAL FALLBACK] Fancy generation failed:', err.message)
+      original_generation_error = err.message
+      generation_mode = 'deterministic_fallback'
+      trace.push('canonical_fancy_failed_using_fallback')
+      
+      try {
+        canonical_profile = generateFallbackCanonical(profileInput, reportContent)
+        trace.push('fallback_canonical_generated')
+      } catch (fallbackErr) {
+        canonical_diagnostics.failed_module = 'canonicalFallback'
+        canonical_diagnostics.failed_stack = (fallbackErr.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
+        throw fallbackErr
+      }
     }
     
     canonical_diagnostics.generation_success = true
+    canonical_diagnostics.generation_mode = generation_mode
+    canonical_diagnostics.original_generation_error = original_generation_error
     canonical_diagnostics.generation_time_ms = Date.now() - start_time
     
     // Generate profile_id
@@ -72,6 +93,10 @@ export async function executeCanonicalGeneration(job) {
     canonical_profile.profile_id = profile_id
     canonical_profile.metadata.profile_id = profile_id
     canonical_profile.metadata.job_id = job.job_id
+    canonical_profile.metadata.generation_mode = generation_mode
+    if (original_generation_error) {
+      canonical_profile.metadata.original_generation_error = original_generation_error
+    }
     
     // Extract metadata from job payload
     const { metadata = {} } = job.payload
@@ -91,18 +116,8 @@ export async function executeCanonicalGeneration(job) {
       ? `${canonical_profile.vector_scores.vector}_${canonical_profile.vector_scores.signal}`
       : null
     
-    // Generate markdown
-    trace.push('before_buildNarrativeProfile')
-    let narrative
-    try {
-      narrative = buildNarrativeProfile(canonical_profile)
-      trace.push('after_buildNarrativeProfile')
-    } catch (err) {
-      canonical_diagnostics.failed_module = 'buildNarrativeProfile'
-      canonical_diagnostics.failed_stack = (err.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
-      throw err
-    }
-    const canonical_markdown = narrative.full_narrative || null
+    // Build narrative profile markdown
+    const canonical_markdown = canonical_profile.narrative_profile?.full_narrative || 'Profile generated in fallback mode'
     
     // Save to Vault
     canonical_diagnostics.vault_save_attempted = true
@@ -110,19 +125,21 @@ export async function executeCanonicalGeneration(job) {
     
     const vault_result = await saveCanonicalProfile({
       canonical_profile,
-      profile_id,  // Pass the profile_id generated above to avoid duplicate generation
+      profile_id,  // Pass the profile_id generated above
       job_id: job.job_id,
       person_name,
       email,
       company_name,
       assessment_version: 'mini-v2',
-      model: 'canonical-v1-frontier',
+      model: generation_mode === 'deterministic_fallback' ? 'canonical-v1-fallback' : 'canonical-v1-frontier',
       intake_answers: job.payload.answers,
       quality_score,
       metadata: {
         ...metadata,
         organizational_context,
         contextual_signals,
+        generation_mode,
+        original_generation_error,
         generation_time_ms: canonical_diagnostics.generation_time_ms,
         job_created_at: job.created_at
       }
@@ -196,7 +213,7 @@ export async function executeCanonicalGeneration(job) {
       }
     })
     
-    // Return success to continue pipeline
+    // Return success to continue pipeline (html generation may still work)
     return { success: true, nextStage: JOB_STAGE.FIRST_INJECTION }
   }
 }
