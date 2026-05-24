@@ -115,7 +115,7 @@ export default function WebProfileReport({ canonical, profileId }) {
         {/* Section 1: Profile DNA Intro */}
         <section className="narrative-section featured">
           <h2 className="section-title">Profile DNA</h2>
-          <div className="narrative-text">{narrative.profileDNA}</div>
+          <div className="narrative-text">{narrative.profileDNA?.body || narrative.profileDNA}</div>
         </section>
 
         {/* Section 2: Executive Summary (V3) */}
@@ -191,13 +191,13 @@ export default function WebProfileReport({ canonical, profileId }) {
         {/* Section 11: Coaching Leverage */}
         <section className="narrative-section">
           <h2 className="section-title">Coaching Leverage</h2>
-          <div className="narrative-text">{narrative.coachingLeverage}</div>
+          <div className="narrative-text">{narrative.coachingLeverage?.body || narrative.coachingLeverage}</div>
         </section>
 
         {/* Section 12: Recommended Next Step */}
         <section className="narrative-section action-section">
           <h2 className="section-title">Recommended Next Step</h2>
-          <div className="narrative-text">{narrative.recommendedNextStep}</div>
+          <div className="narrative-text">{narrative.recommendedNextStep?.body || narrative.recommendedNextStep}</div>
         </section>
       </div>
 
