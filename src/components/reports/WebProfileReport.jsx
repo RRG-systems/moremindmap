@@ -82,7 +82,7 @@ export default function WebProfileReport({ canonical, profileId }) {
   };
 
   return (
-    <div className="web-profile-report-v2">
+    <div className="web-profile-report-v2 two-page-dashboard">
       {/* HEADER: Dark intelligence dashboard style */}
       <header className="dashboard-header">
         <div className="header-top">
@@ -110,99 +110,126 @@ export default function WebProfileReport({ canonical, profileId }) {
         </div>
       </header>
 
-      {/* MAIN NARRATIVE SECTIONS */}
-      <div className="dashboard-body">
-        {/* Section 1: Profile DNA Intro */}
-        <section className="narrative-section featured">
-          <h2 className="section-title">Profile DNA</h2>
-          <div className="narrative-text">{narrative.profileDNA?.body || narrative.profileDNA}</div>
-        </section>
+      {/* PAGE CONTAINER */}
+      <div className="pages-container">
+        {/* PAGE 1: Foundation */}
+        <div className="dashboard-page page-1">
+          <div className="page-body">
+            {/* Section 1: Profile DNA Intro */}
+            <section className="narrative-section featured">
+              <h2 className="section-title">Profile DNA</h2>
+              <div className="narrative-text">{narrative.profileDNA?.body || narrative.profileDNA}</div>
+            </section>
 
-        {/* Section 2: Executive Summary (V3) */}
-        {narrative.executiveSummary && (
-          <section className="narrative-section featured">
-            <h2 className="section-title">Executive Summary</h2>
-            <div className="narrative-text">{narrative.executiveSummary.body || narrative.executiveSummary}</div>
-            {narrative.executiveSummary.key_warning && (
-              <div className="key-warning">⚠️ {narrative.executiveSummary.key_warning}</div>
+            {/* Section 2: Executive Summary (V3) */}
+            {narrative.executiveSummary && (
+              <section className="narrative-section featured">
+                <h2 className="section-title">Executive Summary</h2>
+                <div className="narrative-text">{narrative.executiveSummary.body || narrative.executiveSummary}</div>
+                {narrative.executiveSummary.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.executiveSummary.key_warning}</div>
+                )}
+              </section>
             )}
-          </section>
-        )}
 
-        {/* Section 3: Vector Scores Grid */}
-        <section className="data-section">
-          <h2 className="section-title">Behavioral Dimensions</h2>
-          <div className="dimensions-grid">
-            {ranked.map((dim) => (
-              <div key={dim.dimension} className="dimension-card">
-                <div className="dim-name">{dim.dimension.toUpperCase()}</div>
-                <div className="dim-score">{dim.score > 0 ? '+' : ''}{dim.score}</div>
-                <div className="dim-rank">Rank {dim.rank}</div>
+            {/* Section 3: Vector Scores Grid */}
+            <section className="data-section">
+              <h2 className="section-title">Behavioral Dimensions</h2>
+              <div className="dimensions-grid">
+                {ranked.map((dim) => (
+                  <div key={dim.dimension} className="dimension-card">
+                    <div className="dim-name">{dim.dimension.toUpperCase()}</div>
+                    <div className="dim-score">{dim.score > 0 ? '+' : ''}{dim.score}</div>
+                    <div className="dim-rank">Rank {dim.rank}</div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </section>
+
+            {/* Section 4: Communication Style or Operating Pattern */}
+            {narrative.communicationStyle && (
+              <section className="narrative-section">
+                <h2 className="section-title">Communication Style</h2>
+                <div className="narrative-text">{narrative.communicationStyle.body || narrative.communicationStyle}</div>
+                {narrative.communicationStyle.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.communicationStyle.key_warning}</div>
+                )}
+              </section>
+            )}
+            
+            {narrative.operatingPattern && !narrative.communicationStyle && (
+              <section className="narrative-section">
+                <h2 className="section-title">Operating Pattern</h2>
+                <div className="narrative-text">{narrative.operatingPattern.body || narrative.operatingPattern}</div>
+                {narrative.operatingPattern.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.operatingPattern.key_warning}</div>
+                )}
+              </section>
+            )}
+
+            <div className="page-footer page-1-footer">PAGE 1 OF 2</div>
           </div>
-        </section>
+        </div>
 
-        {/* Section 4: Operating Pattern (Hidden - V3 integrated above) */}
-        {/* Moved to V3 rendering */}
-
-        {/* Section 5: Decision Architecture (Hidden - V3 integrated above) */}
-        {/* Moved to V3 rendering */}
-
-        {/* Section 6: Communication Style (V3) */}
-        {narrative.communicationStyle && (
-          <section className="narrative-section">
-            <h2 className="section-title">Communication Style</h2>
-            <div className="narrative-text">{narrative.communicationStyle.body || narrative.communicationStyle}</div>
-            {narrative.communicationStyle.key_warning && (
-              <div className="key-warning">⚠️ {narrative.communicationStyle.key_warning}</div>
+        {/* PAGE 2: Deep Patterns & Leverage */}
+        <div className="dashboard-page page-2">
+          <div className="page-body">
+            {/* Section 5: Hidden Contradictions (V3) */}
+            {narrative.hiddenContradictions && (
+              <section className="narrative-section">
+                <h2 className="section-title">Hidden Contradictions</h2>
+                <div className="narrative-text">{narrative.hiddenContradictions.body || narrative.hiddenContradictions}</div>
+                {narrative.hiddenContradictions.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.hiddenContradictions.key_warning}</div>
+                )}
+              </section>
             )}
-          </section>
-        )}
 
-        {/* Section 7: System Under Strain (Hidden - V3 integrated above) */}
-        {/* Moved to V3 rendering */}
-
-        {/* Section 8: Hidden Contradictions (V3) */}
-        {narrative.hiddenContradictions && (
-          <section className="narrative-section">
-            <h2 className="section-title">Hidden Contradictions</h2>
-            <div className="narrative-text">{narrative.hiddenContradictions.body || narrative.hiddenContradictions}</div>
-            {narrative.hiddenContradictions.key_warning && (
-              <div className="key-warning">⚠️ {narrative.hiddenContradictions.key_warning}</div>
+            {/* Section 6: System Under Strain (V3) */}
+            {narrative.systemUnderStrain && (
+              <section className="narrative-section">
+                <h2 className="section-title">System Under Strain</h2>
+                <div className="narrative-text">{narrative.systemUnderStrain.body || narrative.systemUnderStrain}</div>
+                {narrative.systemUnderStrain.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.systemUnderStrain.key_warning}</div>
+                )}
+              </section>
             )}
-          </section>
-        )}
 
-        {/* Section 9: Strategic Ceiling (V3) */}
-        {narrative.strategicCeiling && (
-          <section className="narrative-section">
-            <h2 className="section-title">Strategic Ceiling</h2>
-            <div className="narrative-text">{narrative.strategicCeiling.body || narrative.strategicCeiling}</div>
-            {narrative.strategicCeiling.key_warning && (
-              <div className="key-warning">⚠️ {narrative.strategicCeiling.key_warning}</div>
+            {/* Section 7: Strategic Ceiling (V3) */}
+            {narrative.strategicCeiling && (
+              <section className="narrative-section">
+                <h2 className="section-title">Strategic Ceiling</h2>
+                <div className="narrative-text">{narrative.strategicCeiling.body || narrative.strategicCeiling}</div>
+                {narrative.strategicCeiling.key_warning && (
+                  <div className="key-warning">⚠️ {narrative.strategicCeiling.key_warning}</div>
+                )}
+              </section>
             )}
-          </section>
-        )}
 
-        {/* Section 10: Hidden Risks (Hidden - V3 integrated above) */}
-        {/* Moved to V3 rendering */}
+            {/* Section 8: Coaching Leverage */}
+            {narrative.coachingLeverage && (
+              <section className="narrative-section">
+                <h2 className="section-title">Coaching Leverage</h2>
+                <div className="narrative-text">{narrative.coachingLeverage?.body || narrative.coachingLeverage}</div>
+              </section>
+            )}
 
-        {/* Section 11: Coaching Leverage */}
-        <section className="narrative-section">
-          <h2 className="section-title">Coaching Leverage</h2>
-          <div className="narrative-text">{narrative.coachingLeverage?.body || narrative.coachingLeverage}</div>
-        </section>
+            {/* Section 9: Recommended Next Step */}
+            {narrative.recommendedNextStep && (
+              <section className="narrative-section action-section">
+                <h2 className="section-title">Recommended Next Step</h2>
+                <div className="narrative-text">{narrative.recommendedNextStep?.body || narrative.recommendedNextStep}</div>
+              </section>
+            )}
 
-        {/* Section 12: Recommended Next Step */}
-        <section className="narrative-section action-section">
-          <h2 className="section-title">Recommended Next Step</h2>
-          <div className="narrative-text">{narrative.recommendedNextStep?.body || narrative.recommendedNextStep}</div>
-        </section>
+            <div className="page-footer page-2-footer">PAGE 2 OF 2</div>
+          </div>
+        </div>
       </div>
 
-      {/* FOOTER */}
-      <footer className="dashboard-footer">
+      {/* GLOBAL FOOTER (after pages) */}
+      <footer className="dashboard-footer global-footer">
         <div className="footer-meta">
           <span>Assessment Date: {canonical.created_at?.split('T')[0] || 'N/A'}</span>
           <span>Profile Type: {profileType}</span>
@@ -218,6 +245,11 @@ export default function WebProfileReport({ canonical, profileId }) {
       </footer>
 
       <style jsx>{`
+        .web-profile-report-v2.two-page-dashboard {
+          display: flex;
+          flex-direction: column;
+        }
+
         .web-profile-report-v2 {
           background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
           color: #e0e0e0;
@@ -344,6 +376,52 @@ export default function WebProfileReport({ canonical, profileId }) {
           letter-spacing: 0.05em;
         }
 
+        /* PAGES CONTAINER */
+        .pages-container {
+          display: flex;
+          flex-direction: column;
+          flex: 1;
+        }
+
+        .dashboard-page {
+          flex: 1;
+          min-height: 100vh;
+          page-break-after: always;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .dashboard-page.page-1 {
+          background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
+        }
+
+        .dashboard-page.page-2 {
+          background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
+          border-top: 2px solid rgba(212, 175, 55, 0.2);
+        }
+
+        .page-body {
+          flex: 1;
+          max-width: 1100px;
+          margin: 0 auto;
+          padding: 2rem;
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+        }
+
+        .page-footer {
+          text-align: right;
+          font-size: 0.75rem;
+          color: #666;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          padding-top: 2rem;
+          border-top: 1px solid rgba(212, 175, 55, 0.15);
+          margin-top: auto;
+        }
+
         /* BODY */
         .dashboard-body {
           max-width: 1100px;
@@ -468,6 +546,10 @@ export default function WebProfileReport({ canonical, profileId }) {
           background: rgba(10, 14, 39, 0.8);
         }
 
+        .dashboard-footer.global-footer {
+          margin-top: 2rem;
+        }
+
         .footer-meta {
           display: flex;
           justify-content: center;
@@ -489,8 +571,34 @@ export default function WebProfileReport({ canonical, profileId }) {
           justify-content: center;
         }
 
+        /* PRINT STYLES */
+        @media print {
+          .web-profile-report-v2 {
+            background: #fff;
+          }
+          
+          .dashboard-page {
+            break-inside: avoid;
+            page-break-after: always;
+            min-height: auto;
+          }
+          
+          .dashboard-page:last-child {
+            page-break-after: avoid;
+          }
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
+          .dashboard-page {
+            min-height: auto;
+          }
+          
+          .page-body {
+            padding: 1rem;
+            gap: 1.5rem;
+          }
+          
           .dashboard-header {
             padding: 1.5rem;
           }
