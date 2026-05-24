@@ -48,10 +48,13 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   const previousSections = {};
 
   const sections = [
+    'profileDNA',
     'executiveSummary',
     'communicationStyle',
     'hiddenContradictions',
     'strategicCeiling',
+    'coachingLeverage',
+    'recommendedNextStep',
   ];
 
   const narrative = {
@@ -157,10 +160,13 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
  */
 function getPromptBuilder(section) {
   const builders = {
+    profileDNA: prompts.buildProfileDNAPrompt,
     executiveSummary: prompts.buildExecutiveSummaryPrompt,
     communicationStyle: prompts.buildCommunicationStylePrompt,
     hiddenContradictions: prompts.buildHiddenContradictionsPrompt,
     strategicCeiling: prompts.buildStrategicCeilingPrompt,
+    coachingLeverage: prompts.buildCoachingLeveragePrompt,
+    recommendedNextStep: prompts.buildRecommendedNextStepPrompt,
   };
   return builders[section] || prompts.buildExecutiveSummaryPrompt;
 }
@@ -241,6 +247,31 @@ async function localRendering(prompt, section, interpreted) {
     keyWarning = "5x scale is the breaking point. Most don't adapt. System collapses.";
   }
 
+  if (section === 'profileDNA') {
+    body = 
+      `Operating Model: Moves with directional conviction. Pattern-reading drives decision velocity. ` +
+      `Paired with ${interpreted.secondarySystem.dimension || 'secondary system'}, creates execution speed advantage that dominates coordination friction. ` +
+      `Builds competitive edge through rapid pattern convergence and direct execution.`;
+  }
+
+  if (section === 'coachingLeverage') {
+    body =
+      `1. Pace as signal: explicit awareness that meeting velocity = decision certainty. Slow decisions down when wrong choices cost more than speed saves.\n\n` +
+      `2. Process friction is intelligence: "Why did we need 6 meetings?" should prompt system redesign, not dismissal of process advocates.\n\n` +
+      `3. Delegate conviction, not execution: build teams where others own the 95%, you own the edge 5%. Requires trusting pattern-reading in others.\n\n` +
+      `4. Course correction has windows: waiting until month 4 to revisit month 1 decisions costs 3x what month 2 revision would. Speed includes strategic pivots.`;
+    
+    keyWarning = "Coaching works when framed as competitive advantage, not personal development. Position corrections as system optimization.";
+  }
+
+  if (section === 'recommendedNextStep') {
+    body =
+      `Conduct a "decision velocity audit": map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? ` +
+      `Pattern reveals whether speed is advantage or constraint in your current context.\n\n` +
+      `Then: establish feedback lag metrics. Treat feedback speed as design problem, not people problem. ` +
+      `That shift moves system from 1x to 2x operating efficiency.`;
+  }
+
   return {
     section,
     headline: section.replace(/([A-Z])/g, ' $1').trim(),
@@ -276,6 +307,31 @@ function compressionPass(text) {
 }
 
 function getDefaultNarrative() {
+  if (section === 'profileDNA') {
+    body = 
+      `Operating Model: Moves with directional conviction. Pattern-reading drives decision velocity. ` +
+      `Paired with ${interpreted.secondarySystem.dimension || 'secondary system'}, creates execution speed advantage that dominates coordination friction. ` +
+      `Builds competitive edge through rapid pattern convergence and direct execution.`;
+  }
+
+  if (section === 'coachingLeverage') {
+    body =
+      `1. Pace as signal: explicit awareness that meeting velocity = decision certainty. Slow decisions down when wrong choices cost more than speed saves.\n\n` +
+      `2. Process friction is intelligence: "Why did we need 6 meetings?" should prompt system redesign, not dismissal of process advocates.\n\n` +
+      `3. Delegate conviction, not execution: build teams where others own the 95%, you own the edge 5%. Requires trusting pattern-reading in others.\n\n` +
+      `4. Course correction has windows: waiting until month 4 to revisit month 1 decisions costs 3x what month 2 revision would. Speed includes strategic pivots.`;
+    
+    keyWarning = "Coaching works when framed as competitive advantage, not personal development. Position corrections as system optimization.";
+  }
+
+  if (section === 'recommendedNextStep') {
+    body =
+      `Conduct a "decision velocity audit": map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? ` +
+      `Pattern reveals whether speed is advantage or constraint in your current context.\n\n` +
+      `Then: establish feedback lag metrics. Treat feedback speed as design problem, not people problem. ` +
+      `That shift moves system from 1x to 2x operating efficiency.`;
+  }
+
   return {
     executiveSummary: {
       section: 'executiveSummary',

@@ -196,9 +196,132 @@ Ground each transition to PRIMARY + SECONDARY interaction.`,
   };
 }
 
+// ============================================================
+// NEW SECTIONS: Profile DNA, Coaching Leverage, Next Step
+// ============================================================
+
+export function buildProfileDNAPrompt(interpreted, previousSections) {
+  return {
+    systemRule: `You are rendering verified behavioral operating model based on assessment data.
+DO NOT invent traits or philosophical language.
+Describe how this person operates, not who they are.
+Concise, specific, grounded.`,
+
+    section: "profileDNA",
+    voiceMode: "systems-observer",
+    emotionalTemperature: "neutral-factual",
+
+    canonical: {
+      primaryDimension: interpreted.primarySystem.dimension,
+      primaryScore: interpreted.primarySystem.score,
+      primaryOperating: interpreted.primarySystem.operating,
+      secondaryDimension: interpreted.secondarySystem.dimension,
+      secondaryScore: interpreted.secondarySystem.score,
+    },
+
+    instruction: `Generate a concise operating model description (max 100 words).
+Frame: how this person processes information and makes decisions, not personality traits.
+Tone: technical, systems-focused, observational.
+
+DO NOT: use "strength", "trait", "tendency", "person who", therapy language
+DO: describe the actual operating mechanics
+
+Example: "Direction-driven pattern recognition. Recognizes edges before centers. Fast convergence, low process friction. Moves to action while others are still gathering. Paired with [secondary], creates velocity advantage in execution-velocity environments."`,
+
+    format: JSON.stringify({
+      section: "profileDNA",
+      body: "(operating model, max 100 words)",
+      grounding_used: "(list evidence fields)",
+    }),
+  };
+}
+
+export function buildCoachingLeveragePrompt(interpreted, previousSections) {
+  return {
+    systemRule: `You are a behavioral systems coach.
+Generate actionable leverage points, NOT therapy or motivation.
+Focus: concrete behavioral experiments and system-level shifts.
+Ground in the person's actual operating model (from previous sections).`,
+
+    section: "coachingLeverage",
+    voiceMode: "operator-coach",
+    emotionalTemperature: "direct-practical",
+
+    canonical: {
+      communicationStyle: previousSections.communicationStyle?.body,
+      hiddenContradictions: previousSections.hiddenContradictions?.body,
+      strategicCeiling: previousSections.strategicCeiling?.body,
+      primaryDimension: interpreted.primarySystem.dimension,
+    },
+
+    instruction: `Generate 3-4 coaching leverage points (max 200 words).
+Format: numbered list, each point is 1-2 sentences.
+Focus: behavioral experiments, NOT inspiration or generic advice.
+Tone: tactical, systems-focused, slightly irreverent.
+
+Each leverage point should:
+- Identify a specific behavioral pattern
+- Propose a concrete experiment or shift
+- Explain the system-level consequence
+
+Example good leverage: "Pace as signal: explicit awareness that meeting velocity=decision certainty. Slow decisions down when wrong choices cost more than speed saves."
+Example bad leverage: "Improve your communication skills" or "Work on being more collaborative"
+
+DO NOT use: "try to", "should", "could", "might", "practice"
+DO use: "when [condition], [action] shifts [system consequence]"`,
+
+    format: JSON.stringify({
+      section: "coachingLeverage",
+      body: "(3-4 leverage points, numbered, tactical)",
+      grounding_used: "(what from previous sections informed this)",
+    }),
+  };
+}
+
+export function buildRecommendedNextStepPrompt(interpreted, previousSections) {
+  return {
+    systemRule: `You are recommending a behavioral intelligence experiment.
+ONE concrete next step.
+Not generic, not coaching platitude.
+Specific, grounded, testable.`,
+
+    section: "recommendedNextStep",
+    voiceMode: "intelligence-advisor",
+    emotionalTemperature: "direct-practical",
+
+    canonical: {
+      strategicCeiling: previousSections.strategicCeiling?.body,
+      coachingLeverage: previousSections.coachingLeverage?.body,
+      hiddenContradictions: previousSections.hiddenContradictions?.body,
+    },
+
+    instruction: `Generate ONE specific recommended next step (max 150 words).
+Format: 2-3 sentences max.
+Tone: intelligent, specific, operator-level.
+
+The recommendation should:
+- Be testable/measurable
+- Address a scaling or coordination constraint
+- Be based on the person's actual operating model
+- Feel like it came from an executive advisor, not a coach
+
+Example good: "Conduct a 'decision velocity audit': map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? Pattern reveals whether speed is advantage or constraint in your context."
+Example bad: "Work on listening more" or "Try to be more collaborative"`,
+
+    format: JSON.stringify({
+      section: "recommendedNextStep",
+      body: "(one specific experiment or observation, max 150 words)",
+      grounding_used: "(which sections informed this)",
+    }),
+  };
+}
+
 export default {
   buildExecutiveSummaryPrompt,
   buildCommunicationStylePrompt,
   buildHiddenContradictionsPrompt,
   buildStrategicCeilingPrompt,
+  buildProfileDNAPrompt,
+  buildCoachingLeveragePrompt,
+  buildRecommendedNextStepPrompt,
 };
