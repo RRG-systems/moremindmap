@@ -1,11 +1,11 @@
 /**
- * executeCanonicalGeneration.js - WITH RESILIENCE FALLBACK
+ * executeCanonicalGeneration.js - DETERMINISTIC FALLBACK MODE
+ * 
+ * TEMPORARY: Using deterministic fallback canonical generation exclusively.
+ * Fancy canonical generation has module import issues on Vercel.
  * 
  * Stage 1.5: Canonical generation and Vault storage
- * Generates frontier canonical dossier and saves to Vault
- * 
- * RESILIENCE: If fancy canonical generation fails for ANY reason,
- * falls back to deterministic fallback canonical using available data.
+ * Generates canonical dossier and saves to Vault
  * 
  * CRITICAL: This stage MUST NOT crash the job pipeline
  * All errors are caught and logged; job continues to FIRST_INJECTION
@@ -30,8 +30,7 @@ export async function executeCanonicalGeneration(job) {
     generation_attempted: true,
     generation_success: false,
     generation_error: null,
-    generation_mode: null,
-    original_generation_error: null,
+    generation_mode: 'deterministic_fallback',
     generation_time_ms: 0,
     vault_keys_created: [],
     profile_signature: null,
@@ -46,43 +45,26 @@ export async function executeCanonicalGeneration(job) {
     
     trace.push('imported_vault_modules')
     
-    // Generate canonical profile - with fallback on failure
+    // Generate canonical profile using deterministic fallback
     const { profileInput, reportContent } = job
     
     if (!profileInput) {
       throw new Error('profileInput not available')
     }
     
-    let canonical_profile
-    let generation_mode = 'fancy'
-    let original_generation_error = null
-    
     trace.push('before_generateCanonicalProfile')
+    let canonical_profile
+    
     try {
-      // Try fancy canonical generation
-      const { generateCanonicalProfile } = await import('./canonicalProfileGenerator.js')
-      canonical_profile = await generateCanonicalProfile(profileInput)
-      trace.push('fancy_canonical_generated')
+      canonical_profile = generateFallbackCanonical(profileInput, reportContent)
+      trace.push('deterministic_fallback_canonical_generated')
     } catch (err) {
-      // Fallback to deterministic canonical on any error
-      console.error('[CANONICAL FALLBACK] Fancy generation failed:', err.message)
-      original_generation_error = err.message
-      generation_mode = 'deterministic_fallback'
-      trace.push('canonical_fancy_failed_using_fallback')
-      
-      try {
-        canonical_profile = generateFallbackCanonical(profileInput, reportContent)
-        trace.push('fallback_canonical_generated')
-      } catch (fallbackErr) {
-        canonical_diagnostics.failed_module = 'canonicalFallback'
-        canonical_diagnostics.failed_stack = (fallbackErr.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
-        throw fallbackErr
-      }
+      canonical_diagnostics.failed_module = 'canonicalFallback'
+      canonical_diagnostics.failed_stack = (err.stack || '').split('\n').slice(0, 10).join(' | ').substring(0, 500)
+      throw err
     }
     
     canonical_diagnostics.generation_success = true
-    canonical_diagnostics.generation_mode = generation_mode
-    canonical_diagnostics.original_generation_error = original_generation_error
     canonical_diagnostics.generation_time_ms = Date.now() - start_time
     
     // Generate profile_id
@@ -93,10 +75,7 @@ export async function executeCanonicalGeneration(job) {
     canonical_profile.profile_id = profile_id
     canonical_profile.metadata.profile_id = profile_id
     canonical_profile.metadata.job_id = job.job_id
-    canonical_profile.metadata.generation_mode = generation_mode
-    if (original_generation_error) {
-      canonical_profile.metadata.original_generation_error = original_generation_error
-    }
+    canonical_profile.metadata.generation_mode = 'deterministic_fallback'
     
     // Extract metadata from job payload
     const { metadata = {} } = job.payload
@@ -106,10 +85,10 @@ export async function executeCanonicalGeneration(job) {
     const organizational_context = metadata.organization || null
     const contextual_signals = metadata.contextual_signals || null
     
-    // Calculate quality score (if available from canonical profile)
+    // Calculate quality score
     const quality_score = canonical_profile.evidence_map?.aggregate_confidence 
       ? Math.round(canonical_profile.evidence_map.aggregate_confidence * 100)
-      : null
+      : 50
     
     canonical_diagnostics.quality_score = quality_score
     canonical_diagnostics.profile_signature = canonical_profile.vector_scores 
@@ -117,7 +96,7 @@ export async function executeCanonicalGeneration(job) {
       : null
     
     // Build narrative profile markdown
-    const canonical_markdown = canonical_profile.narrative_profile?.full_narrative || 'Profile generated in fallback mode'
+    const canonical_markdown = canonical_profile.narrative_profile?.full_narrative || 'Profile generated'
     
     // Save to Vault
     canonical_diagnostics.vault_save_attempted = true
@@ -125,21 +104,20 @@ export async function executeCanonicalGeneration(job) {
     
     const vault_result = await saveCanonicalProfile({
       canonical_profile,
-      profile_id,  // Pass the profile_id generated above
+      profile_id,
       job_id: job.job_id,
       person_name,
       email,
       company_name,
       assessment_version: 'mini-v2',
-      model: generation_mode === 'deterministic_fallback' ? 'canonical-v1-fallback' : 'canonical-v1-frontier',
+      model: 'canonical-v1-fallback',
       intake_answers: job.payload.answers,
       quality_score,
       metadata: {
         ...metadata,
         organizational_context,
         contextual_signals,
-        generation_mode,
-        original_generation_error,
+        generation_mode: 'deterministic_fallback',
         generation_time_ms: canonical_diagnostics.generation_time_ms,
         job_created_at: job.created_at
       }
@@ -152,7 +130,7 @@ export async function executeCanonicalGeneration(job) {
     canonical_diagnostics.profile_id = profile_id
     canonical_diagnostics.vault_keys_created.push(vault_result.vault_key)
     
-    // Capture detailed vault save diagnostics from vault_result
+    // Capture detailed vault save diagnostics
     if (vault_result.diagnostics) {
       canonical_diagnostics.vault_save_diagnostics = vault_result.diagnostics
     }
