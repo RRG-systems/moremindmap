@@ -17,13 +17,24 @@ import {
   scanForBannedPhrases,
 } from './phraseGraveyard.js';
 import * as prompts from './sectionPrompts.js';
+import { callGPT55, validateGrounding } from './openaiIntegration.js';
+import { getCachedNarrative, cacheNarrative } from './cache.js';
 
 /**
  * Main entry point for V3 narrative expansion.
  * Renders 4 target sections: executive summary, communication, contradictions, ceiling.
  */
-export async function buildNarrativeV3(canonical, useGPT = false) {
+export async function buildNarrativeV3(canonical, useGPT = true, profileId = null) {
   if (!canonical) return getDefaultNarrative();
+
+  // Check cache first
+  if (profileId) {
+    const cached = getCachedNarrative(profileId);
+    if (cached) {
+      console.log('[V3] Using cached narrative for', profileId);
+      return cached;
+    }
+  }
 
   const interpreted = interpretCanonical(canonical);
   const previousSections = {};
@@ -41,11 +52,21 @@ export async function buildNarrativeV3(canonical, useGPT = false) {
     const prompt = getPromptBuilder(section)(interpreted, previousSections);
 
     let rendering;
-    if (useGPT && typeof window === 'undefined') {
-      // Server-side: call actual GPT-5.5
-      rendering = await callGPT55(prompt, section);
+    if (useGPT) {
+      // Try GPT-5.5 first
+      console.log('[V3] Calling GPT-5.5 for', section);
+      const gptResponse = await callGPT55(prompt, section);
+      
+      if (gptResponse && validateGrounding(gptResponse, interpreted)) {
+        rendering = gptResponse;
+        console.log('[V3] GPT-5.5 success:', section);
+      } else {
+        // Fallback to local rendering
+        console.log('[V3] GPT-5.5 failed or invalid, using local fallback:', section);
+        rendering = await localRendering(prompt, section, interpreted);
+      }
     } else {
-      // Client-side or fallback: use local rendering
+      // Local rendering only
       rendering = await localRendering(prompt, section, interpreted);
     }
 
@@ -60,6 +81,12 @@ export async function buildNarrativeV3(canonical, useGPT = false) {
 
     narrative[section] = rendering;
     previousSections[section] = rendering.body;
+  }
+
+  // Cache the result
+  if (profileId) {
+    cacheNarrative(profileId, narrative);
+    console.log('[V3] Cached narrative for', profileId);
   }
 
   return narrative;
@@ -78,33 +105,9 @@ function getPromptBuilder(section) {
   return builders[section] || prompts.buildExecutiveSummaryPrompt;
 }
 
-/**
- * PRODUCTION: Call actual GPT-5.5.
- * 
- * Requires:
- * - process.env.OPENAI_API_KEY
- * - OpenAI client initialized
- * 
- * Returns structured JSON response from model.
- */
-async function callGPT55(prompt, section) {
-  // This is the INTEGRATION POINT.
-  // In production, this calls OpenAI's GPT-5.5.
-  
-  // Placeholder for now (would be implemented with openai package)
-  console.log(`[GPT-5.5 CALL STUB] Section: ${section}`);
-  console.log(`Prompt length: ${JSON.stringify(prompt).length} chars`);
-  
-  // Return stub structure for testing
-  return {
-    section,
-    headline: `[GPT-5.5 would render: ${section}]`,
-    body: "[Production GPT-5.5 response would appear here]",
-    micro_scenario: "[Concrete workplace behavior would be injected]",
-    key_warning: "[Grounded risk assessment would appear]",
-    grounding_used: prompt.canonical ? Object.keys(prompt.canonical) : [],
-  };
-}
+// callGPT55 is imported from openaiIntegration.js
+// It provides REAL OpenAI API integration when VITE_OPENAI_API_KEY is available.
+// When unavailable, it returns null and triggers local fallback.
 
 /**
  * LOCAL FALLBACK: Render using deterministic logic.

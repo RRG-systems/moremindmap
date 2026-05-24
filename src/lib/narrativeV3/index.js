@@ -19,3 +19,10 @@ export {
   buildHiddenContradictionsPrompt,
   buildStrategicCeilingPrompt,
 } from './sectionPrompts.js';
+
+export {
+  getCachedNarrative,
+  cacheNarrative,
+  clearCache,
+} from './cache.js';
+export { callGPT55, validateGrounding } from './openaiIntegration.js';
