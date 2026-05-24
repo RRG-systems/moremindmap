@@ -1015,7 +1015,7 @@ export default function WebProfileReport({ canonical, profileId }) {
             gap: 0.5rem;
           }
 
-          .dna-signature-enhanced {
+          .dna-signature {
             flex-wrap: wrap;
             gap: 0.5rem;
           }
