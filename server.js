@@ -571,6 +571,9 @@ app.post("/api/moremindmap/narrative-v3", async (req, res) => {
 function buildNarrativeUserMessage(prompt) {
   const parts = [];
 
+  // CRITICAL: response_format json_object requires 'json' in the user message
+  parts.push('Respond with valid JSON.');
+
   if (prompt.instruction) {
     parts.push(`INSTRUCTION:\n${prompt.instruction}`);
   }
