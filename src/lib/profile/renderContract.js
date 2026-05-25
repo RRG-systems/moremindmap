@@ -79,8 +79,10 @@ export const RENDER_CONTRACT = [
     sourceFields: [
       'summary',
       'contradictions',
-      'organizational_cost',
-      'key_signals'
+      'contradiction_count',
+      'core_tradeoff',
+      'key_signals',
+      'causal_interpretation'
     ],
     
     // Fallback: canonical contradictions
@@ -124,8 +126,8 @@ export const RENDER_CONTRACT = [
     sourceFields: [
       'summary',
       'consequence_matrix',
-      'primary_friction_points',
-      'operating_bandwidth_status'
+      'consequence_count',
+      'key_signals'
     ],
     
     // Fallback: hidden risks + pressure dynamics
@@ -168,8 +170,9 @@ export const RENDER_CONTRACT = [
     sourceDomain: 'facilitatorNotes',
     sourceFields: [
       'summary',
+      'primary_guidance',
       'notes',
-      'primary_guidance'
+      'caution'
     ],
     
     // Fallback: none (new domain, no legacy)
@@ -213,8 +216,8 @@ export const RENDER_CONTRACT = [
       'summary',
       'the_move',
       'reasoning',
-      'expected_impact',
-      'timeline'
+      'timeline',
+      'caution'
     ],
     
     // Fallback: none (new domain, no legacy)
@@ -253,7 +256,7 @@ export const RENDER_CONTRACT = [
     order: 6,
     sourceType: 'behavioral_intelligence',
     sourceDomain: 'pressureMechanics',
-    sourceFields: ['summary', 'escalation_chain', 'breaking_point', 'pressure_response_pattern'],
+    sourceFields: ['summary', 'primary_under_load', 'secondary_override', 'key_signals', 'causal_interpretation'],
     fallbackType: 'canonical',
     fallbackField: 'pressure_dynamics',
     fallbackAlternative: 'top_systems.pressure_response',
@@ -278,7 +281,7 @@ export const RENDER_CONTRACT = [
     order: 7,
     sourceType: 'behavioral_intelligence',
     sourceDomain: 'worldExperience',
-    sourceFields: ['summary', 'environment_reading', 'information_gathering', 'opportunity_recognition'],
+    sourceFields: ['summary', 'perception_filter', 'information_processing', 'decision_formation', 'time_horizon', 'risk_calibration', 'key_signals', 'causal_interpretation'],
     fallbackType: 'canonical',
     fallbackField: 'contextual_signals',
     fallbackAlternative: 'inferred_patterns.decision_architecture',
@@ -303,7 +306,7 @@ export const RENDER_CONTRACT = [
     order: 8,
     sourceType: 'behavioral_intelligence',
     sourceDomain: 'othersExperience',
-    sourceFields: ['summary', 'team_experience', 'relational_consequence', 'adaptation_pattern'],
+    sourceFields: ['summary', 'first_impression', 'communication_pattern', 'listening_pattern', 'relational_friction', 'key_signals', 'causal_interpretation'],
     fallbackType: 'canonical',
     fallbackField: 'organizational_effects',
     fallbackAlternative: 'inferred_patterns.communication_style.team_experience',
@@ -354,7 +357,7 @@ export const RENDER_CONTRACT = [
     order: 10,
     sourceType: 'behavioral_intelligence',
     sourceDomain: 'scalingConstraint',
-    sourceFields: ['summary', 'constraint_point', 'coordination_math', 'infrastructure_required'],
+    sourceFields: ['summary', 'ceiling_mechanics', 'current_systems_capacity', 'stated_vs_supported', 'implications', 'key_signals'],
     fallbackType: 'canonical',
     fallbackField: 'strategic_ceiling',
     fallbackAlternative: 'inferred_patterns.constraint_at_scale',
@@ -379,7 +382,7 @@ export const RENDER_CONTRACT = [
     order: 11,
     sourceType: 'behavioral_intelligence',
     sourceDomain: 'fiveFuturesStarter',
-    sourceFields: ['summary', 'future_1_unchanged', 'future_2_constrained', 'future_3_breakpoint', 'future_4_adapted', 'future_5_transformed'],
+    sourceFields: ['summary', 'futures', 'most_likely'],
     fallbackType: 'canonical',
     fallbackField: 'future_trajectory',
     fallbackAlternative: 'inferred_patterns.future_trajectory',

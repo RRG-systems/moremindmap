@@ -592,27 +592,46 @@ function renderBIContent(domain, content) {
     
     // Scaling Constraint structure
     if (domain === 'scalingConstraint') {
-      if (content.ceiling) {
+      if (content.ceiling_mechanics) {
+        const cm = content.ceiling_mechanics;
         parts.push(
           <div key="ceiling" className="bi-subsection">
             <h4>Ceiling Mechanism</h4>
-            <p>{content.ceiling.interpretation || content.ceiling}</p>
+            {cm.primary_constraint && <p><strong>Constraint:</strong> {cm.primary_constraint}</p>}
+            {cm.ceiling_description && <p><strong>Description:</strong> {cm.ceiling_description}</p>}
+            {cm.interpretation && <p>{cm.interpretation}</p>}
           </div>
         );
       }
-      if (content.coordination_math) {
+      if (content.current_systems_capacity) {
+        const csc = content.current_systems_capacity;
         parts.push(
-          <div key="coord" className="bi-subsection">
-            <h4>Coordination Math</h4>
-            <p>{content.coordination_math.interpretation || content.coordination_math}</p>
+          <div key="capacity" className="bi-subsection">
+            <h4>Current Capacity</h4>
+            {csc.capacity_description && <p><strong>Description:</strong> {csc.capacity_description}</p>}
+            {csc.readiness_level && <p><strong>Readiness:</strong> {csc.readiness_level}</p>}
+            {csc.interpretation && <p>{csc.interpretation}</p>}
           </div>
         );
       }
-      if (content.infrastructure_required) {
+      if (content.stated_vs_supported) {
+        const svs = content.stated_vs_supported;
         parts.push(
-          <div key="infra" className="bi-subsection">
-            <h4>Infrastructure Required</h4>
-            <p>{content.infrastructure_required.interpretation || content.infrastructure_required}</p>
+          <div key="alignment" className="bi-subsection">
+            <h4>Goal + Infrastructure Alignment</h4>
+            {svs.stated_growth_target && <p><strong>Growth Target:</strong> {svs.stated_growth_target}</p>}
+            {svs.infrastructure_readiness && <p><strong>Infrastructure Readiness:</strong> {svs.infrastructure_readiness}</p>}
+            {svs.interpretation && <p>{svs.interpretation}</p>}
+          </div>
+        );
+      }
+      if (content.implications) {
+        const imp = content.implications;
+        parts.push(
+          <div key="implications" className="bi-subsection">
+            <h4>Implications</h4>
+            {imp.without_infrastructure && <p><strong>Without infrastructure:</strong> {imp.without_infrastructure}</p>}
+            {imp.with_infrastructure && <p><strong>With infrastructure:</strong> {imp.with_infrastructure}</p>}
           </div>
         );
       }
@@ -628,19 +647,25 @@ function renderBIContent(domain, content) {
           </div>
         );
       }
-      if (content.structural_notes) {
+      if (Array.isArray(content.notes) && content.notes.length > 0) {
         parts.push(
-          <div key="struct" className="bi-subsection">
-            <h4>Structural Notes</h4>
-            <p>{content.structural_notes}</p>
+          <div key="notes" className="bi-subsection">
+            <h4>Notes</h4>
+            <ul>
+              {content.notes.map((note, idx) => (
+                <li key={idx}>
+                  {note.note || note}
+                </li>
+              ))}
+            </ul>
           </div>
         );
       }
-      if (content.context) {
+      if (content.caution) {
         parts.push(
-          <div key="context" className="bi-subsection">
-            <h4>Context</h4>
-            <p>{content.context}</p>
+          <div key="caution" className="bi-subsection">
+            <h4>Caution</h4>
+            <p><em>{content.caution}</em></p>
           </div>
         );
       }
@@ -663,11 +688,54 @@ function renderBIContent(domain, content) {
           </div>
         );
       }
-      if (content.expected_impact) {
+      if (content.timeline) {
         parts.push(
-          <div key="impact" className="bi-subsection">
-            <h4>Expected Impact</h4>
-            <p>{content.expected_impact}</p>
+          <div key="timeline" className="bi-subsection">
+            <h4>Timeline</h4>
+            <p>{content.timeline}</p>
+          </div>
+        );
+      }
+      if (content.caution) {
+        parts.push(
+          <div key="caution" className="bi-subsection">
+            <h4>Caution</h4>
+            <p><em>{content.caution}</em></p>
+          </div>
+        );
+      }
+    }
+    
+    // Contradictions domain (special handling)
+    if (domain === 'contradictions') {
+      if (Array.isArray(content.contradictions) && content.contradictions.length > 0) {
+        content.contradictions.forEach((contra, idx) => {
+          parts.push(
+            <div key={`contra-${idx}`} className="bi-subsection">
+              <h4>{contra.type || `Contradiction ${idx + 1}`}</h4>
+              {contra.tension && <p><strong>Tension:</strong> {contra.tension}</p>}
+              {contra.manifestation && <p><strong>Manifestation:</strong> {contra.manifestation}</p>}
+              {contra.resolution_path && <p><strong>Resolution:</strong> {contra.resolution_path}</p>}
+              {contra.interpretation && <p><em>{contra.interpretation}</em></p>}
+            </div>
+          );
+        });
+      }
+    }
+    
+    // Organizational Consequences domain
+    if (domain === 'organizationalConsequences') {
+      if (Array.isArray(content.consequence_matrix) && content.consequence_matrix.length > 0) {
+        parts.push(
+          <div key="consequences" className="bi-subsection">
+            <h4>Consequence Matrix</h4>
+            <ul>
+              {content.consequence_matrix.map((consequence, idx) => (
+                <li key={idx}>
+                  <strong>{consequence.domain}:</strong> {consequence.cost}
+                </li>
+              ))}
+            </ul>
           </div>
         );
       }
