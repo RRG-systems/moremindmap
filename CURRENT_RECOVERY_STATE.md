@@ -1,7 +1,7 @@
 # CURRENT_RECOVERY_STATE.md
 
-**Last Checkpoint:** Mon May 26, 2026 16:30 MST  
-**Status:** STEP 3.5 COMPLETE — All Systems Functional
+**Last Checkpoint:** Mon May 26, 2026 16:45 MST  
+**Status:** STEP 3.5 RENDER DEPTH BUG FIXED — Content Now Renders at Full Depth
 
 ---
 
@@ -103,9 +103,32 @@
 
 ---
 
-## KNOWN ISSUES
+## BUG FIXED: RENDER DEPTH (Mon 16:45)
 
-None critical. All STEP 3.5 tasks complete.
+**Root Cause:** Content extraction was returning empty fields
+- renderContract.js listed wrong `sourceFields` names (e.g., 'environment_reading' vs actual 'perception_filter')
+- extractSectionContent extracted only those non-existent fields, returning mostly empty objects
+- renderBIContent had nothing to render except summary
+- Result: All sections showed single-line content despite backend generating rich structures
+
+**Solution Applied:**
+1. Corrected all `sourceFields` to match actual BI domain structure from backend
+2. Enhanced `renderBIContent` renderer to unpack nested objects and arrays
+3. Added specific handling for array fields (futures, contradictions, notes, consequence_matrix)
+
+**Depth Achieved:**
+- **worldExperience:** 8 sections (summary + 5 subsections + key signals + causal)
+- **pressureMechanics:** 5+ sections (summary + primary + secondary + key signals + causal)
+- **othersExperience:** 7 sections (summary + 4 patterns + key signals + causal)
+- **scalingConstraint:** 6 sections (summary + ceiling + capacity + alignment + implications)
+- **facilitatorNotes:** guidance + notes list + caution
+- **theOneMove:** move + reasoning + timeline + caution
+- **contradictions:** Full array - each with type, tension, manifestation, resolution
+- **organizationalConsequences:** Full matrix with domain+cost pairs
+- **fiveFuturesStarter:** 5 distinct future cards
+
+**Build:** ✓ Pass (122.86 kB gzip)  
+**All STEP 3.5 tasks complete. Content now renders at full depth.**
 
 ---
 

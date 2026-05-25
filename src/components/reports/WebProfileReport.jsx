@@ -238,6 +238,13 @@ function PageThreeDashboard({ narrative, behavioralIntelligence, canonical }) {
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const worldExperienceBI = renderPlan ? extractSectionContent('section-world-experience', behavioralIntelligence, canonical) : null;
 
+  // DEBUG: Log what we're receiving
+  if (worldExperienceBI?.found && worldExperienceBI?.content) {
+    console.log('=== PAGE 3: WORLD EXPERIENCE DEBUG ===');
+    console.log('worldExperienceBI.content keys:', Object.keys(worldExperienceBI.content));
+    console.log('Full content object:', JSON.stringify(worldExperienceBI.content, null, 2).substring(0, 1000));
+  }
+
   return (
     <div className="dashboard-page page-three" id="section-2-how-system-moves">
       <div className="page-content">
@@ -277,6 +284,8 @@ function PageFourDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract Pressure Mechanics from BI
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const pressureMechanicsBI = renderPlan ? extractSectionContent('section-pressure-mechanics', behavioralIntelligence, canonical) : null;
+
+
 
   return (
     <div className="dashboard-page page-four">

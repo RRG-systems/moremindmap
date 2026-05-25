@@ -452,12 +452,13 @@ export function extractSectionContent(sectionId, behavioralIntelligence, canonic
     const domain = behavioralIntelligence.domains?.[contract.sourceDomain];
     
     if (domain) {
+      const extracted = extractFieldsFromDomain(domain, contract.sourceFields);
       return {
         sectionId,
         found: true,
         source: 'behavioral_intelligence',
         domain: contract.sourceDomain,
-        content: extractFieldsFromDomain(domain, contract.sourceFields),
+        content: extracted,
         confidence: contract.confidence,
         fallbackUsed: false
       };
