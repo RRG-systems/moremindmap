@@ -111,6 +111,7 @@ export default function Profile() {
         success: true,
         version: "web",
         canonical_dossier: data.canonical_dossier,
+        behavioral_intelligence_v1: data.behavioral_intelligence_v1,
         profile_id: data.profile_id,
         retrieved_at: data.retrieved_at
       })
@@ -567,6 +568,7 @@ export default function Profile() {
                   <WebProfileReport 
                     canonical={result.canonical_dossier}
                     profileId={result.profile_id}
+                    behavioralIntelligence={result.behavioral_intelligence_v1}
                   />
                   <a
                     href="/"

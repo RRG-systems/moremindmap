@@ -77,13 +77,13 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       <PageTwoDashboard narrative={narrative} ranked={ranked} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 3: HOW THIS SYSTEM MOVES */}
-      <PageThreeDashboard narrative={narrative} />
+      <PageThreeDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 4: WHAT PRESSURE CHANGES */}
-      <PageFourDashboard narrative={narrative} />
+      <PageFourDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 5: HOW OTHER PEOPLE ADAPT */}
-      <PageFiveDashboard narrative={narrative} />
+      <PageFiveDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 6: WHY SCALE BREAKS */}
       <PageSixDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
@@ -233,7 +233,11 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
   );
 }
 
-function PageThreeDashboard({ narrative }) {
+function PageThreeDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract World Experience from BI
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const worldExperienceBI = renderPlan ? extractSectionContent('section-world-experience', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-three" id="section-2-how-system-moves">
       <div className="page-content">
@@ -244,7 +248,16 @@ function PageThreeDashboard({ narrative }) {
         </div>
         
         <div className="zone-progression">
-          {narrative.communicationStyle && (
+          {worldExperienceBI?.found && worldExperienceBI?.content ? (
+            <InsightPanel
+              icon="🗣️"
+              title="World Experience"
+              subtitle="How You Experience Your Operating Environment"
+              content={formatBIContent(worldExperienceBI.content)}
+              prominence="analytical"
+              className="world-experience-panel"
+            />
+          ) : narrative.communicationStyle ? (
             <InsightPanel
               icon="🗣️"
               title="World Experience"
@@ -253,14 +266,18 @@ function PageThreeDashboard({ narrative }) {
               prominence="analytical"
               className="world-experience-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-function PageFourDashboard({ narrative }) {
+function PageFourDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract Pressure Mechanics from BI
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const pressureMechanicsBI = renderPlan ? extractSectionContent('section-pressure-mechanics', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-four">
       <div className="page-content">
@@ -271,7 +288,16 @@ function PageFourDashboard({ narrative }) {
         </div>
         
         <div className="zone-progression">
-          {narrative.systemUnderStrain && (
+          {pressureMechanicsBI?.found && pressureMechanicsBI?.content ? (
+            <InsightPanel
+              icon="⚡"
+              title="Pressure Mechanics"
+              subtitle="Behavior Escalation Under Load"
+              content={formatBIContent(pressureMechanicsBI.content)}
+              prominence="analytical"
+              className="pressure-mechanics-panel"
+            />
+          ) : narrative.systemUnderStrain ? (
             <InsightPanel
               icon="⚡"
               title="Pressure Mechanics"
@@ -280,14 +306,18 @@ function PageFourDashboard({ narrative }) {
               prominence="analytical"
               className="pressure-mechanics-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-function PageFiveDashboard({ narrative }) {
+function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract Others Experience from BI
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const othersExperienceBI = renderPlan ? extractSectionContent('section-how-others-experience', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-five">
       <div className="page-content">
@@ -298,7 +328,16 @@ function PageFiveDashboard({ narrative }) {
         </div>
         
         <div className="zone-progression">
-          {narrative.communicationStyle && (
+          {othersExperienceBI?.found && othersExperienceBI?.content ? (
+            <InsightPanel
+              icon="🤝"
+              title="Team Experience"
+              subtitle="How Your Operating Pattern Lands on Others"
+              content={formatBIContent(othersExperienceBI.content)}
+              prominence="analytical"
+              className="team-experience-panel"
+            />
+          ) : narrative.communicationStyle ? (
             <InsightPanel
               icon="🤝"
               title="Team Experience"
@@ -307,7 +346,7 @@ function PageFiveDashboard({ narrative }) {
               prominence="analytical"
               className="team-experience-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -459,17 +498,34 @@ function formatBIContent(content) {
 function FiveFuturesRenderer({ content }) {
   if (!content) return null;
   
-  // Extract individual futures from content object
-  const futures = [];
+  // Handle futures array from extractFiveFuturesStarter
+  if (Array.isArray(content.futures) && content.futures.length > 0) {
+    return (
+      <div className="five-futures-grid">
+        {content.futures.map((future, idx) => (
+          <div key={idx} className="future-card">
+            <div className="future-badge">{idx + 1}</div>
+            <h4 className="future-title">{future.title || 'Future'}</h4>
+            <div className="future-likelihood">{future.likelihood}</div>
+            <div className="future-content">
+              <p className="future-trajectory">{future.trajectory}</p>
+              <p className="future-org-experience">{future.organization_experiences}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
   
-  // Try standard field names
+  // Fallback: Try individual field names (for compatibility)
+  const futures = [];
   if (content.future_1_unchanged) futures.push({ title: 'Unchanged', content: content.future_1_unchanged });
   if (content.future_2_constrained) futures.push({ title: 'Constrained', content: content.future_2_constrained });
   if (content.future_3_breakpoint) futures.push({ title: 'Breakpoint', content: content.future_3_breakpoint });
   if (content.future_4_adapted) futures.push({ title: 'Adapted', content: content.future_4_adapted });
   if (content.future_5_transformed) futures.push({ title: 'Transformed', content: content.future_5_transformed });
   
-  // If no individual futures found, try summary + treat as single narrative
+  // If still no futures, try summary as fallback
   if (futures.length === 0 && (content.summary || content.body)) {
     return (
       <InsightPanel
@@ -483,7 +539,7 @@ function FiveFuturesRenderer({ content }) {
     );
   }
   
-  // Render as distinct futures
+  // Render individual field names as cards
   if (futures.length > 0) {
     return (
       <div className="five-futures-grid">
@@ -655,7 +711,7 @@ function ActionSystem({ facilitatorContent, nextStepContent, organizationalConse
 // MAIN COMPONENT (with fallback to stacked render)
 // ============================================================================
 
-export default function WebProfileReport({ canonical, profileId }) {
+export default function WebProfileReport({ canonical, profileId, behavioralIntelligence: behavioralIntelligenceProp }) {
   if (!canonical) {
     return <div className="web-report-error">Unable to load profile data</div>;
   }
@@ -710,8 +766,8 @@ export default function WebProfileReport({ canonical, profileId }) {
   // TRY DASHBOARD V1, FALLBACK TO STACKED IF ERROR
   if (!dashboardFailed) {
     try {
-      // Extract behavioral intelligence if available
-      const behavioralIntelligence = canonical?.behavioral_intelligence_v1 || null;
+      // Use behavioral intelligence from prop (from backend) OR extract from canonical (fallback)
+      const behavioralIntelligence = behavioralIntelligenceProp || canonical?.behavioral_intelligence_v1 || null;
       
       return (
         <div>
