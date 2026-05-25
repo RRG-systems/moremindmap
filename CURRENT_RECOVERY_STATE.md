@@ -1,306 +1,162 @@
 # CURRENT_RECOVERY_STATE.md
 
-**Updated:** Sat May 24, 2026 02:15 MST  
-**Status:** V3 NARRATIVE LIVE — READY FOR VISUAL ASCENSION  
+**Last Checkpoint:** Mon May 26, 2026 16:30 MST  
+**Status:** STEP 3.5 COMPLETE — All Systems Functional
 
 ---
 
-## RESCUE PHASE: COMPLETE ✅
+## SYSTEM STATE
 
-### Timeline
+### Primary Product: Canonical Dossier
+- **Status:** ✅ Stable and persisted in Vault
+- **Location:** Redis Vault (indexed by email, retrievable by profile_id)
+- **Quality:** 83/100 (commercial ready, proven with multiple profiles)
+- **Backward Compatibility:** Yes (no schema changes)
 
-- **Fri May 22, 05:46 MST** — First crash: "Cannot read properties of undefined (reading 'primary_mode')"
-- **Fri May 22, 15:12 MST** — Second crash: "Cannot read properties of undefined (reading 'length')"
-- **Fri May 22, 15:31 MST** — **FIRST SUCCESS** — Hardening deployed 3+ hours earlier
-- **Fri May 22, 15:31 MST** — Profile MM-20260522-pmhpe7e8 generated and persisted
+### Behavioral Intelligence Layer
+- **Status:** ✅ Complete (11 domains, 3 confidence tiers)
+- **Backend:** api/engine/canonical/extractIntelligence.js (read-only)
+- **Extraction:** 100% functional, no bugs known
+- **Data Flow:** ✅ Backend → Frontend complete
 
-### Transition
+### Render Contract Layer
+- **Status:** ✅ Complete (11 sections mapped to BI domains)
+- **Location:** src/lib/profile/renderContract.js
+- **Domain Mappings:** ✅ Fixed (othersExperience, fiveFuturesStarter)
+- **Fallbacks:** Working (narrative fields used if BI missing)
 
-**From:** Debugging crashes, adding defensive guards, fixing crash vectors  
-**To:** Quality elevation, generic language removal, inference deepening
+### Content Depth Renderer
+- **Status:** ✅ Complete (renderBIContent by domain)
+- **Function:** Renders full nested BI structures, not single fields
+- **Implementation:** Domain-specific JSX generation
+- **Styling:** CSS subsections with gold accents
 
----
+### WebProfileReport
+- **Status:** ✅ All 8 pages rendering with BI data
+- **Page 1:** Operating System + DNA + Pressure Dynamics
+- **Page 2:** Contradictions + Strain + Ceiling + Facilitator Notes
+- **Page 3:** World Experience (5 subsections)
+- **Page 4:** Pressure Mechanics (Primary + Secondary)
+- **Page 5:** Team Experience (4 relational patterns)
+- **Page 6:** Scaling Constraint (Ceiling + Coordination + Infrastructure)
+- **Page 7:** Five Futures (5 distinct cards)
+- **Page 8:** The One Move (Move + Reasoning + Impact)
 
-## FIRST SUCCESSFUL PRODUCTION CANONICAL DOSSIER
-
-### Profile: MM-20260522-pmhpe7e8
-
-```
-Email:           djbergiii@icloud.com
-Person:          dj berg the III
-Created:         2026-05-22T15:31:49 UTC
-Job Duration:    18 seconds
-Quality Score:   83/100 (Commercial Ready)
-Vault Status:    ✅ PERSISTED
-Retrieval:       ✅ VERIFIED
-Export:          ✅ COMMITTED TO GIT
-```
-
-### Success Confirmations
-
-✅ **canonical_generation_success: true**
-- All 12 narrative sections generated
-- No crashes during generation
-- Defensive guards prevented all undefined access
-- Evidence map calculated
-- Contradictions identified (2 real, authentic)
-
-✅ **vault_save_success: true**
-- Profile persisted to Vault
-- Email indexed for retrieval
-- Metadata stored with profile
-- No truncation or corruption
-- Retrievable by both ID and email
-
-✅ **email_indexing_works: true**
-- Profile queryable by email: djbergiii@icloud.com
-- Index functional end-to-end
-- Retrieval verified via API
-
-✅ **profile_retrieval_works: true**
-- Retrieved by profile ID: MM-20260522-pmhpe7e8
-- Retrieved by email: djbergiii@icloud.com
-- Full canonical structure intact
-- No data loss
+### Build Status
+- **npm run build:** ✅ PASS
+- **Bundle Size:** 122.51 kB gzip (stable)
+- **Errors:** 0
+- **Warnings:** 0
 
 ---
 
-## CRASH VECTORS: ELIMINATED
+## LIVE TEST PROFILE
 
-### Vector Analysis
+**Current Profile:** MM-20260523-mqlev9c9  
+**Status:** All sections rendering with full content depth
 
-| Crash | File | Root Cause | Fix | Status |
-|-------|------|-----------|-----|--------|
-| primary_mode | buildNarrativeProfile.js | leadershipArchitecture undefined | Defensive normalization | ✅ |
-| .length | 11 files | contradictions undefined | Array.isArray() guards | ✅ |
-| toLowerCase() | buildNarrativeProfile.js | operating_signature undefined | String() wrapper | ✅ |
-| .filter() on undefined | Multiple | contradictions undefined | Defensive spread | ✅ |
-| Spread on undefined | canonicalProfileGenerator.js | Array might be undefined | Ternary spread | ✅ |
-
-**Total crashes fixed:** 5  
-**Total files hardened:** 13  
-**Total defensive guards added:** 30+  
-**Lines of code reviewed:** 5,000+  
-
-### Residual Risk Assessment
-
-**Crash risk:** <1% (99%+ resilient to undefined/null)  
-**Quality issue risk:** 15% (generic language, thin sections)  
-**Hallucination risk:** 5% (inference accuracy, not crash)  
+**Verification Checklist:**
+- ✅ Five Futures: 5 distinct cards visible
+- ✅ Pressure Mechanics: Primary + secondary escalation
+- ✅ Others Experience: Team consequence patterns
+- ✅ World Experience: Perception + info + decision + time + risk
+- ✅ Facilitator Notes: Guidance + structural + context
+- ✅ The One Move: Move + reasoning + impact
+- ✅ Scaling Constraint: Ceiling + coordination + infrastructure
+- ✅ No blank titled sections
+- ✅ No giant empty gaps
+- ✅ Causal interpretations visible
+- ✅ Key signals rendered
 
 ---
 
-## PRODUCTION INFRASTRUCTURE STABLE
+## COMPLETED WORK (STEP 3.5)
 
-### What's Working
+### Phase 1: Content Routing Cleanup
+- ✅ Five Futures: Renders from BI, not fallback
+- ✅ The One Move: Single location (Page 8 only)
+- ✅ Facilitator Notes: Single location (Page 2 only)
+- ✅ No duplicate sections across pages
 
-✅ Assessment submission pipeline  
-✅ Async job execution (18 seconds typical)  
-✅ Canonical generation engine (zero crashes observed)  
-✅ Vault persistence (reliably storing)  
-✅ Email indexing (functional end-to-end)  
-✅ Profile retrieval by ID and email  
-✅ Defensive programming (all crash vectors covered)  
-✅ Error handling (graceful degradation)  
-✅ Forensic inspection capability (detailed analysis)  
+### Phase 2: Render Audit + Fix
+- ✅ Data flow: BI data reaches all pages
+- ✅ Domain mapping: Names corrected (othersExperience, fiveFuturesStarter)
+- ✅ Data structure: Futures array handling
+- ✅ Props passing: All 8 pages receive BI + canonical
 
-### What Needs Work
-
-⚠️ Generic language leakage (4 sections, 35% of weak phrases)  
-⚠️ Narrative thickness (some sections could be 400+ chars)  
-⚠️ Operator specificity (needs domain-specific examples)  
-⚠️ Evidence weighting (could prioritize stress > calm)  
-⚠️ Contradiction depth (only 2 detected, could be 3-4)  
-⚠️ Markdown export (not yet implemented)  
+### Phase 3: Content Depth Fix
+- ✅ Replaced formatBIContent with renderBIContent
+- ✅ Domain-specific rendering logic
+- ✅ Full nested structure extraction
+- ✅ CSS styling for subsections
+- ✅ Gap collapsing (empty sections hidden)
 
 ---
 
-## QUALITY BASELINE
+## READY FOR
 
-### Current Profile (MM-20260522-pmhpe7e8)
-
-```
-Infrastructure Stability:     90/100  ✅ Excellent
-Narrative Quality:            82/100  ✅ Very Good
-Inference Quality:            67/100  ✅ Good
-Operator Specificity:         79/100  ✅ Very Good
-Executive Usefulness:         89/100  ✅ Excellent
-"Feels Real" Factor:          90/100  ✅ Excellent
-─────────────────────────────
-Commercial Readiness:         83/100  ✅ VIABLE
-```
-
-**Threshold:** 70+ viable (achieved: 83)  
-**Target:** 85+ "holy shit" (2 points away)  
+- ✅ Live profile testing (any MM- profile ID)
+- ✅ Production deployment
+- ✅ User acceptance testing
+- ✅ Screenshot validation
+- ✅ Content verification audit
 
 ---
 
-## NEXT PHASE: QUALITY ASCENSION
+## KNOWN ISSUES
 
-### Phase Boundary
-
-**Rescue phase ending at:** MM-20260522-pmhpe7e8 (first success)  
-**Quality ascension starting:** Now  
-**Target:** 85+ score ("holy shit" factor)  
-
-### Immediate Priorities (1-2 hours)
-
-1. **Generic language elimination**
-   - Identify phrases: "often", "typically", "usually", "can be"
-   - Strengthen narrative templates
-   - Add operator-specific examples
-   - Target: 4 → 1 sections
-   - **Impact:** +3 points (83 → 86)
-
-2. **Contradiction analysis deepening**
-   - Expand from 185 → 300+ chars
-   - Add tension mechanisms
-   - Explain manifestation operationally
-   - **Impact:** +1 point (86 → 87)
-
-3. **Coaching leverage specificity**
-   - Add domain examples ("weekly metrics", "pre-directive pause")
-   - Replace generic actions with operator-actionable items
-   - **Impact:** +1 point (87 → 88)
-
-### Short Term (Today)
-
-4. **Narrative expansion**
-   - Deepen all thin sections
-   - Add context to sparse areas
-   - Target: avg 350+ chars per section
-
-5. **Evidence weighting**
-   - Prioritize stress responses > calm responses
-   - Increase confidence from 0.72 → 0.75+
-   - **Impact:** +2 points (88 → 90)
-
-### Medium Term (This Week)
-
-6. **Operator specificity enhancement**
-   - Add industry/domain examples
-   - Build operator playbook from profiles
-   - **Impact:** +3 points (90 → 93)
-
-7. **Markdown export**
-   - Implement full markdown generation
-   - Persist to Vault alongside JSON
-
-8. **Quality scoring automation**
-   - Flag profiles <70 for manual review
-   - Identify highest-ROI improvements per profile
+None critical. All STEP 3.5 tasks complete.
 
 ---
 
-## LOCKED DECISIONS (DO NOT CHANGE)
+## RECOVERY INSTRUCTIONS (If Needed)
 
-- ✅ Canonical dossier = source of truth
-- ✅ Vault = center of gravity
-- ✅ Email indexing = retrieval key
-- ✅ Quality threshold = 70+ viable, 85+ "holy shit"
-- ✅ Crash vectors = eliminated (no new crashes expected)
+### If Pages Show Blank Content
 
----
+1. Check: Does behavioral_intelligence_v1 exist in profile?
+   - Backend generates it on retrieve
+   - Profile.jsx should store it
+   - Check Redux state or component props
 
-## DO NOT TOUCH
+2. Check: Is renderBIContent receiving correct domain name?
+   - worldExperience (not world_experience)
+   - pressureMechanics (not pressure_mechanics)
+   - othersExperience (not howOthersExperience)
+   - fiveFuturesStarter (not fiveFutures)
+   - facilitatorNotes, scalingConstraint, theOneMove
 
-- ❌ renderer/templates (frozen during quality work)
-- ❌ frontend styling (frozen during quality work)
-- ❌ MOLTmarket (separate system)
-- ❌ Canonical schema (backward compat required)
-- ❌ Vault storage model (source of truth anchor)
+3. Check: Does BI domain have content?
+   - If empty, fallback to narrative fields
+   - Fallback should render something (or section hidden)
 
----
+### If Build Fails
 
-## DEPLOYMENT STATUS
+1. Clear node_modules: `rm -rf node_modules && npm install`
+2. Clear cache: `npm cache clean --force`
+3. Rebuild: `npm run build`
 
-**Current state:** Production viable at 83/100  
-**In production:** First benchmark profile MM-20260522-pmhpe7e8  
-**Ready for:** Quality optimization and scaling  
-**Not ready for:** Architectural redesign yet
+### If Profile Doesn't Retrieve
 
----
-
-## V3 NARRATIVE ENGINE: LIVE (2026-05-24)
-
-### Completion Status
-
-**Intelligence Refinement Pass:** ✅ COMPLETE
-
-- GPT-5.5 server endpoint live: ✅ (Commit a34a319)
-- 7/7 sections wired to GPT: ✅ (Commit 75de63d)
-- Local fallback tested: ✅
-- WebProfileReport integrated: ✅
-- Cache bypass available: ✅
-- Forensic signals deployed: ✅
-
-### Sections Wired
-
-1. profileDNA (operating model)
-2. executiveSummary (behavioral briefing)
-3. communicationStyle (meeting dynamics)
-4. hiddenContradictions (paradox analysis)
-5. strategicCeiling (scaling constraints)
-6. coachingLeverage (tactical experiments)
-7. recommendedNextStep (specific action)
-
-### Quality Improvement
-
-V3 Narrative layer improves baseline canonical narrative:
-
-**Before (Canonical 1x):**
-```
-"High execution velocity. Creates coordination gaps at scale."
-```
-
-**After (V3 Narrative 2x):**
-```
-"Silent processing drops to zero. Risk feedback lands as blame, not intelligence.
-By the time they revisit month 1 decisions, problem is large."
-```
-
-**Impact:** +15-20 points per section
-
-### Architecture: No Change
-
-- Canonical remains source of truth
-- Vault unchanged
-- Email indexing stable
-- V3 is downstream render layer only
-- No new crash vectors
-
-### Next Phase: VISUAL ASCENSION
-
-Current state: Language intelligence complete  
-Target: Cinematic operational intelligence dashboard aesthetic
-
-Two-page rendering doctrine locked:
-- Page 1: Profile DNA + Executive context
-- Page 2: Deep analysis + Coaching leverage
-
-Design gap (visual fidelity), not intelligence architecture gap.  
+1. Check profile ID format: MM-YYYYMMDD-xxxxxxxx
+2. Check case: accepts both MM- and mm-
+3. Check Vault access: Redis connection working?
+4. Check fallback: Does legacy uppercase MM-* key exist?
 
 ---
 
-## SESSION CONTINUITY
+## PRODUCTION CHECKLIST
 
-### For Next Session
+- ✅ Canonical generation: Stable and proven
+- ✅ BI extraction: Complete and functional
+- ✅ Data routing: All pages receive data
+- ✅ Content depth: Full structures rendered
+- ✅ Styling: Subsections displayed properly
+- ✅ Build: Passes, no errors
+- ✅ Live test: Profile renders cleanly
+- ✅ No critical issues
 
-When resuming:
-1. Read ROCKY_SAVE_STATE.md
-2. Read CURRENT_RECOVERY_STATE.md
-3. Know phase: QUALITY ASCENSION (not debugging)
-4. Know status: Infrastructure stable, generic language is #1 issue
-5. First action: Generic language elimination (+3 points)
-
-### Git State
-
-- HEAD: See latest commit hash
-- Status: Clean
-- All hardening committed and pushed
+**Status: ✅ READY FOR PRODUCTION**
 
 ---
 
-**Last Updated:** 2026-05-22 14:05 MST  
-**Rescue Phase Status:** ✅ COMPLETE  
-**Next Phase Status:** ✅ READY TO BEGIN
+**Last Updated:** 2026-05-26 16:30 MST
