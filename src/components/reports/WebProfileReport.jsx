@@ -76,14 +76,23 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       {/* PAGE 2: STRATEGIC CONSEQUENCES */}
       <PageTwoDashboard narrative={narrative} ranked={ranked} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
-      {/* PAGE 3: PRESSURE & EXPERIENCE */}
+      {/* PAGE 3: HOW THIS SYSTEM MOVES */}
       <PageThreeDashboard narrative={narrative} />
       
-      {/* PAGE 4: SCALE & FUTURE */}
+      {/* PAGE 4: WHAT PRESSURE CHANGES */}
       <PageFourDashboard narrative={narrative} />
       
-      {/* PAGE 5: TRAJECTORY */}
+      {/* PAGE 5: HOW OTHER PEOPLE ADAPT */}
       <PageFiveDashboard narrative={narrative} />
+      
+      {/* PAGE 6: WHY SCALE BREAKS */}
+      <PageSixDashboard narrative={narrative} />
+      
+      {/* PAGE 7: FUTURE TRAJECTORIES (FEATURED) */}
+      <PageSevenDashboard narrative={narrative} />
+      
+      {/* PAGE 8: INTERVENTION */}
+      <PageEightDashboard narrative={narrative} />
     </div>
   );
 }
@@ -206,13 +215,6 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
         {narrative.strategicCeiling && (
           <StrategicMap narrative={narrative} />
         )}
-
-        {/* ZONE 3: Action System (Facilitator Notes + The One Move) */}
-        <ActionSystem
-          facilitatorContent={facilitatorNotesBI?.found ? facilitatorNotesBI.content : (narrative.coachingLeverage?.body || narrative.coachingLeverage)}
-          nextStepContent={theOneMoveBI?.found ? theOneMoveBI.content : (narrative.recommendedNextStep?.body || narrative.recommendedNextStep)}
-          organizationalConsequences={organizationalConsequencesBI?.found ? organizationalConsequencesBI.content : null}
-        />
       </div>
     </div>
   );
@@ -220,36 +222,23 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
 
 function PageThreeDashboard({ narrative }) {
   return (
-    <div className="dashboard-page page-three">
+    <div className="dashboard-page page-three" id="section-2-how-system-moves">
       <div className="page-content">
-        {/* PAGE 3: Pressure & Experience */}
+        {/* SECTION 2: HOW THIS SYSTEM MOVES */}
         <div className="page-section-header">
-          <h2 className="page-section-title">Pressure & Experience</h2>
-          <p className="page-section-subtitle">How you escalate under load and how others experience you</p>
+          <h2 className="page-section-title">How This System Moves</h2>
+          <p className="page-section-subtitle">Pure mechanism: operating patterns without yet showing consequences</p>
         </div>
         
         <div className="zone-progression">
-          {narrative.systemUnderStrain && (
-            <InsightPanel
-              icon="⚡"
-              title="Pressure Mechanics"
-              subtitle="Behavior Escalation Under Load"
-              content={narrative.systemUnderStrain?.body || narrative.systemUnderStrain}
-              warning={narrative.systemUnderStrain?.key_warning}
-              prominence="diagnostic"
-              className="pressure-mechanics-panel"
-            />
-          )}
-          
           {narrative.communicationStyle && (
             <InsightPanel
               icon="🗣️"
-              title="How Others Experience You"
-              subtitle="Your Operating Pattern From Team Perspective"
+              title="World Experience"
+              subtitle="How You Experience Your Operating Environment"
               content={narrative.communicationStyle?.body || narrative.communicationStyle}
-              warning={narrative.communicationStyle?.key_warning}
               prominence="analytical"
-              className="others-experience-panel"
+              className="world-experience-panel"
             />
           )}
         </div>
