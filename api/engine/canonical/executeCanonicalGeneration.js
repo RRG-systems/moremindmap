@@ -12,6 +12,7 @@
  */
 
 import { updateJob, JOB_STAGE as MANAGER_JOB_STAGE } from '../miniV2JobManager.js'
+import { extractBehavioralIntelligence } from './extractIntelligence.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -181,6 +182,32 @@ export async function executeCanonicalGeneration(job) {
     
     canonical_diagnostics.job_persisted = true
     trace.push('after_job_update_success')
+    
+    // EXTRACT: Behavioral intelligence from canonical (read-only sibling)
+    trace.push('before_behavioral_extraction')
+    let behavioral_intelligence = null
+    try {
+      behavioral_intelligence = extractBehavioralIntelligence(canonical_profile)
+      trace.push('behavioral_extraction_success')
+      canonical_diagnostics.behavioral_extraction_success = true
+    } catch (extractErr) {
+      console.error('[CANONICAL-GENERATION] Behavioral extraction failed:', extractErr.message)
+      trace.push(`behavioral_extraction_error: ${extractErr.message}`)
+      canonical_diagnostics.behavioral_extraction_success = false
+      canonical_diagnostics.behavioral_extraction_error = extractErr.message
+    }
+    
+    // Persist behavioral intelligence alongside canonical (not mutating canonical)
+    if (behavioral_intelligence) {
+      await updateJob(job.job_id, {
+        behavioral_intelligence_v1: behavioral_intelligence,
+        diagnostics: {
+          ...job.diagnostics,
+          stage_trace: [...trace]
+        }
+      })
+      trace.push('behavioral_intelligence_persisted_to_job')
+    }
     
     // ATTEMPT: Save canonical to vault for retrieve-profile endpoint
     trace.push('before_vault_save')

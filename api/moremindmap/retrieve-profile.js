@@ -19,6 +19,7 @@
  */
 
 import Redis from 'ioredis';
+import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
 
 export default async function handler(req, res) {
   // Only GET allowed
@@ -106,11 +107,21 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Invalid profile data' });
     }
 
-    // Return canonical dossier (safe for client rendering)
+    // Extract behavioral intelligence (read-only sibling, not mutating canonical)
+    let behavioral_intelligence_v1 = null;
+    try {
+      behavioral_intelligence_v1 = extractBehavioralIntelligence(canonicalDossier);
+    } catch (extractErr) {
+      console.error('[RETRIEVE] Behavioral extraction failed:', extractErr.message);
+      // Non-blocking: return canonical even if extraction fails
+    }
+
+    // Return canonical dossier + behavioral intelligence (safe for client rendering)
     return res.status(200).json({
       success: true,
       profile_id: id,
       canonical_dossier: canonicalDossier,
+      behavioral_intelligence_v1: behavioral_intelligence_v1,
       retrieved_at: new Date().toISOString(),
       _debug_key_attempts: keyAttempts
     });
