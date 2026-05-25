@@ -1,15 +1,18 @@
 /**
  * extractIntelligence.js
  * 
- * Behavioral Intelligence Extraction Layer (Phase 1: Tier 1)
+ * Behavioral Intelligence Extraction Layer (Phase 3: Tiers 1-2 + Organizational Consequences)
  * Pure read-only transformation: canonical_profile_json → behavioral_intelligence_v1
  * 
  * CONSTRAINTS:
  * - Pure function (no mutations, no side effects)
  * - No GPT calls
  * - No rendering
- * - Uses existing dossier fields only
+ * - Uses entire dossier as evidence artifact
  * - Downstream only (does not modify canonical)
+ * - Doctrine: describe consequences, not traits
+ * - No motivational/therapy language
+ * - All evidence grounded in canonical fields
  */
 
 /**
@@ -37,13 +40,19 @@ export function extractBehavioralIntelligence(canonical_profile) {
       profile_id: canonical_profile.profile_id || canonical.profile_id || null,
       extraction_time_ms: 0,
       
-      // Tier 1 extractions
+      // Tier 1-2 extractions + organizational consequences
       domains: {
         operatingSystem: extractOperatingSystem(canonical),
         worldExperience: extractWorldExperience(canonical),
         othersExperience: extractOthersExperience(canonical),
         pressureMechanics: extractPressureMechanicsStarter(canonical),
-        contradictions: extractContradictionsStarter(canonical)
+        contradictions: extractContradictionsStarter(canonical),
+        scalingConstraint: extractScalingConstraint(canonical),
+        decisionArchitecture: extractDecisionArchitecture(canonical),
+        organizationalConsequences: extractOrganizationalConsequences(canonical),
+        facilitatorNotes: extractFacilitatorNotes(canonical),
+        fiveFuturesStarter: extractFiveFuturesStarter(canonical),
+        theOneMove: extractTheOneMove(canonical)
       },
       
       confidence_tiers: {
@@ -696,3 +705,385 @@ function extractOrganizationalCost(contradictions, hidden_risks) {
   return costs.join('; ');
 }
 
+
+// ============================================================================
+// PHASE 3: SCALING + DECISION + CONSEQUENCES + FACILITATOR DOMAINS
+// ============================================================================
+
+/**
+ * Domain 7: Scaling Constraint (Tier 2-3)
+ * Evidence from: infrastructure_maturity, future_ceiling, growth_trajectory
+ */
+function extractScalingConstraint(canonical) {
+  const infrastructure = canonical.infrastructure_maturity || {};
+  const ceiling = canonical.future_ceiling || {};
+  const growth = canonical.growth_trajectory || {};
+  const goals = canonical.stated_goals || {};
+  
+  const current_systems = infrastructure.current_systems_capacity || 'unknown';
+  const systems_readiness = infrastructure.systems_readiness || 'unknown';
+  const ceiling_desc = ceiling.ceiling_description || '';
+  const primary_constraint = ceiling.primary_constraint || '';
+  const growth_pattern = growth.pattern || '';
+  const stated_scale = goals.scale_target || '';
+  const stated_timeline = goals.timeline || '';
+  
+  return {
+    title: 'Scaling Constraint',
+    confidence: 'tier_2_medium',
+    source_fields: ['infrastructure_maturity', 'future_ceiling', 'growth_trajectory', 'stated_goals'],
+    summary: buildScalingConstraintSummary(current_systems, primary_constraint, stated_scale),
+    current_systems_capacity: {
+      capacity_description: current_systems,
+      readiness_level: systems_readiness,
+      interpretation: `Current infrastructure: ${current_systems}. Readiness: ${systems_readiness}.`
+    },
+    stated_vs_supported: {
+      stated_growth_target: stated_scale,
+      infrastructure_readiness: systems_readiness,
+      gap_exists: systems_readiness !== 'high' && stated_scale !== 'unknown',
+      interpretation: buildStatedVsSupportedInterpretation(stated_scale, systems_readiness, ceiling_desc)
+    },
+    ceiling_mechanics: {
+      primary_constraint: primary_constraint,
+      ceiling_description: ceiling_desc,
+      growth_pattern: growth_pattern,
+      interpretation: primary_constraint
+        ? `Ceiling formed by: ${primary_constraint}. Growth pattern: ${growth_pattern}.`
+        : 'Ceiling not yet identified.'
+    },
+    implications: {
+      without_infrastructure: extractWithoutInfrastructureImplications(primary_constraint, stated_scale),
+      with_infrastructure: extractWithInfrastructureImplications(primary_constraint, systems_readiness)
+    },
+    key_signals: [
+      primary_constraint ? `Primary constraint: ${primary_constraint.substring(0, 50)}...` : 'No constraint identified',
+      systems_readiness !== 'high' ? `Systems readiness: ${systems_readiness}` : 'Systems ready'
+    ]
+  };
+}
+
+/**
+ * Domain 8: Decision Architecture (Tier 2-3)
+ * Evidence from: decision_making_patterns, execution_identity, delegation_resistance
+ */
+function extractDecisionArchitecture(canonical) {
+  const decisions = canonical.decision_making_patterns || {};
+  const execution = canonical.execution_identity || {};
+  const delegation = canonical.delegation_resistance || {};
+  const vectors = canonical.vector_scores || {};
+  
+  const decision_speed = decisions.decision_velocity || 'unknown';
+  const data_requirements = decisions.data_requirements || '';
+  const claimed_model = execution.claimed_model || '';
+  const actual_model = execution.actual_model || '';
+  const model_gap = execution.claim_vs_actual_gap || '';
+  const what_resists = delegation.what_resists || [];
+  const why_resists = delegation.why || '';
+  const vector_score = vectors.vector || 0;
+  
+  return {
+    title: 'Decision Architecture',
+    confidence: 'tier_2_medium',
+    source_fields: ['decision_making_patterns', 'execution_identity', 'delegation_resistance'],
+    summary: buildDecisionArchitectureSummary(decision_speed, claimed_model, model_gap),
+    decision_velocity: {
+      speed: decision_speed,
+      data_requirements: data_requirements,
+      vector_score: vector_score,
+      interpretation: buildDecisionVelocityInterpretation(decision_speed, data_requirements, vector_score)
+    },
+    execution_model: {
+      claimed: claimed_model,
+      actual: actual_model,
+      gap_description: model_gap,
+      gap_exists: claimed_model !== actual_model && model_gap !== '',
+      interpretation: model_gap
+        ? `Claims: ${claimed_model}. Reality: ${actual_model}. Gap: ${model_gap}`
+        : `Execution model: ${actual_model || claimed_model}`
+    },
+    delegation_resistance: {
+      what_resists_delegation: what_resists,
+      resistance_reason: why_resists,
+      interpretation: buildDelegationResistanceInterpretation(what_resists, why_resists)
+    },
+    organizational_consequences: {
+      decision_bottleneck: decision_speed === 'slow' ? 'Slow decisions. Org waits.' : 'Decision velocity sufficient',
+      delegation_ceiling: what_resists.length > 0 ? `Cannot delegate: ${what_resists.join(', ')}` : 'Delegation open'
+    },
+    key_signals: [
+      `Decision velocity: ${decision_speed}`,
+      model_gap ? `Gap: ${model_gap.substring(0, 40)}...` : 'Model aligned',
+      what_resists.length > 0 ? `Resists: ${what_resists.join(', ')}` : 'Open'
+    ]
+  };
+}
+
+/**
+ * Domain 9: Organizational Consequences (Tier 3)
+ * Synthesizes all pressure + contradiction + scaling evidence
+ */
+function extractOrganizationalConsequences(canonical) {
+  const contradictions = canonical.contradictions || [];
+  const hidden_risks = canonical.hidden_risk_patterns || {};
+  const infrastructure = canonical.infrastructure_maturity || {};
+  const stall_patterns = canonical.stall_patterns || {};
+  
+  const relational_cost = hidden_risks.relational_erosion_risk || '';
+  const burnout_risk = hidden_risks.burnout_trajectory || '';
+  const systems_readiness = infrastructure.systems_readiness || 'unknown';
+  const stall_triggers = stall_patterns.triggers || [];
+  
+  const consequences = [];
+  if (relational_cost && relational_cost !== 'Low') {
+    consequences.push({ domain: 'relational', cost: relational_cost });
+  }
+  if (systems_readiness !== 'high') {
+    consequences.push({ domain: 'infrastructure', cost: 'Systems weak' });
+  }
+  if (burnout_risk && burnout_risk !== 'Low') {
+    consequences.push({ domain: 'energy', cost: burnout_risk });
+  }
+  if (stall_triggers.length > 0) {
+    consequences.push({ domain: 'momentum', cost: `Stalls: ${stall_triggers.join(', ')}` });
+  }
+  
+  return {
+    title: 'Organizational Consequences',
+    confidence: 'tier_3_medium',
+    source_fields: ['contradictions', 'hidden_risk_patterns', 'infrastructure_maturity', 'stall_patterns'],
+    summary: buildOrganizationalConsequencesSummary(consequences),
+    consequence_matrix: consequences,
+    consequence_count: consequences.length,
+    key_signals: consequences.map(c => `${c.domain}: ${c.cost}`)
+  };
+}
+
+/**
+ * Domain 10: Facilitator Notes (Tier 3)
+ * Environment design + structural guidance. NOT therapy.
+ */
+function extractFacilitatorNotes(canonical) {
+  const execution = canonical.execution_identity || {};
+  const decision = canonical.decision_making_patterns || {};
+  const delegation = canonical.delegation_resistance || {};
+  const infrastructure = canonical.infrastructure_maturity || {};
+  const contradictions = canonical.contradictions || [];
+  const ceiling = canonical.future_ceiling || {};
+  
+  const actual_model = execution.actual_model || '';
+  const decision_velocity = decision.decision_velocity || '';
+  const what_resists = delegation.what_resists || [];
+  const systems_readiness = infrastructure.systems_readiness || '';
+  const primary_constraint = ceiling.primary_constraint || '';
+  
+  const notes = [];
+  
+  if (systems_readiness !== 'high' && primary_constraint) {
+    notes.push({
+      category: 'structure',
+      note: `Architecture must change before scale. ${primary_constraint}. Build or restructure.`,
+      applies_to: 'organizational_design'
+    });
+  }
+  
+  if (what_resists.length > 0) {
+    notes.push({
+      category: 'role_design',
+      note: `Cannot delegate: ${what_resists.join(', ')}. Design role around this. Operator becomes specialist role.`,
+      applies_to: 'team_structure'
+    });
+  }
+  
+  if (decision_velocity === 'slow') {
+    notes.push({
+      category: 'communication',
+      note: 'Assemble data packages before requesting decisions. Build process, not faster thinking.',
+      applies_to: 'operational_process'
+    });
+  }
+  
+  if (contradictions.length > 1) {
+    notes.push({
+      category: 'environment_fit',
+      note: `Multiple contradictions. Structural misalignment likely.`,
+      applies_to: 'organizational_alignment'
+    });
+  }
+  
+  return {
+    title: 'Facilitator Notes',
+    confidence: 'tier_3_medium',
+    source_fields: ['execution_identity', 'decision_making_patterns', 'delegation_resistance', 'infrastructure_maturity', 'contradictions'],
+    summary: `${notes.length} structural guidance notes.`,
+    note_count: notes.length,
+    notes: notes,
+    primary_guidance: notes.length > 0 ? notes[0].note : 'Insufficient evidence.',
+    caution: 'Environment design notes, not behavior coaching. Operator function is fixed; organization design is flexible.'
+  };
+}
+
+/**
+ * Domain 11: Five Possible Futures (Starter - Tier 3)
+ * Trajectory simulations, not predictions.
+ */
+function extractFiveFuturesStarter(canonical) {
+  const contradictions = canonical.contradictions || [];
+  const hidden_risks = canonical.hidden_risk_patterns || {};
+  const ceiling = canonical.future_ceiling || {};
+  
+  const relational_erosion = hidden_risks.relational_erosion_risk || 'Low';
+  const burnout_risk = hidden_risks.burnout_trajectory || 'Low';
+  const high_severity = contradictions.filter(c => c.severity === 'high' || c.severity === 'severe').length;
+  
+  const futures = [
+    {
+      title: 'Scaled Success',
+      likelihood: 'possible',
+      trajectory: 'Operator builds infrastructure. Organization becomes leverage-multiplied.',
+      organization_experiences: 'Sustainable growth. Operator not rate-limiting.'
+    },
+    {
+      title: 'Optimized Specialty',
+      likelihood: 'likely',
+      trajectory: 'Operator becomes irreplaceable specialist. Organization structures around them.',
+      organization_experiences: 'Stable at current scale. High operator dependency.'
+    },
+    {
+      title: 'Increasing Friction',
+      likelihood: relational_erosion !== 'Low' ? 'likely' : 'possible',
+      trajectory: 'Contradictions compound. Relational erosion accelerates.',
+      organization_experiences: 'Team isolation. Information degraded. Talent erosion.'
+    },
+    {
+      title: 'Infrastructure Crisis',
+      likelihood: high_severity > 1 ? 'likely' : 'possible',
+      trajectory: 'Systems cannot support goals. Scale attempt fails.',
+      organization_experiences: 'Project failures. Organizational paralysis.'
+    },
+    {
+      title: 'Successful Transition',
+      likelihood: 'possible',
+      trajectory: 'Operator transitions to strategy. Operational structure built.',
+      organization_experiences: 'Scalable structure emerges. Operator elevated.'
+    }
+  ];
+  
+  return {
+    title: 'Five Possible Futures (Starter)',
+    confidence: 'tier_3_low',
+    source_fields: ['contradictions', 'hidden_risk_patterns', 'future_ceiling'],
+    summary: 'Trajectory simulations. Not predictions—indicate which futures become likely if patterns continue.',
+    futures: futures,
+    most_likely: buildMostLikelyFuture(relational_erosion, burnout_risk, high_severity),
+    caution: 'Structural changes alter trajectory.'
+  };
+}
+
+/**
+ * Domain 12: The One Move (Starter - Tier 3)
+ * Highest-leverage intervention to shift trajectory.
+ */
+function extractTheOneMove(canonical) {
+  const infrastructure = canonical.infrastructure_maturity || {};
+  const delegation = canonical.delegation_resistance || {};
+  const contradictions = canonical.contradictions || [];
+  const hidden_risks = canonical.hidden_risk_patterns || {};
+  
+  const systems_readiness = infrastructure.systems_readiness || 'unknown';
+  const what_resists = delegation.what_resists || [];
+  const high_severity = contradictions.filter(c => c.severity === 'high' || c.severity === 'severe');
+  const burnout_risk = hidden_risks.burnout_trajectory || 'Low';
+  
+  let the_move = null;
+  let move_reasoning = '';
+  
+  if (systems_readiness === 'low' || systems_readiness === 'weak') {
+    the_move = 'Build systems + hire operations lead before next growth';
+    move_reasoning = 'Infrastructure gap is rate-limiting. Operator bandwidth cannot be scaling lever.';
+  } else if (what_resists.length > 2) {
+    the_move = `Design role: ${what_resists.slice(0, 2).join(', ')} stay embedded; delegate everything else`;
+    move_reasoning = `Accept high specialization. Build team around core ${what_resists.slice(0, 1)[0]}.`;
+  } else if (high_severity.length > 0) {
+    const first = high_severity[0];
+    the_move = first.resolution_path || 'Address structural tension';
+    move_reasoning = `High-severity: ${first.tension}. This drives relational erosion + ceiling.`;
+  } else if (burnout_risk !== 'Low') {
+    the_move = 'Reduce load through structure, not faster thinking';
+    move_reasoning = 'Energy depletion indicated. Load reduction more sustainable than speed.';
+  } else {
+    the_move = 'Define operational clarity: decision criteria, delegation boundaries, role scope';
+    move_reasoning = 'Without structure, operator becomes omnipresent default.';
+  }
+  
+  return {
+    title: 'The One Move',
+    confidence: 'tier_3_low',
+    source_fields: ['infrastructure_maturity', 'delegation_resistance', 'contradictions', 'hidden_risk_patterns'],
+    summary: 'Highest-leverage intervention.',
+    the_move: the_move,
+    reasoning: move_reasoning,
+    timeline: '90 days to shift trajectory. 6-9 months for full organizational shift.',
+    caution: 'Not advice. Highest-leverage intervention based on evidence.'
+  };
+}
+
+// ============================================================================
+// PHASE 3 HELPER FUNCTIONS
+// ============================================================================
+
+function buildScalingConstraintSummary(current_systems, constraint, stated_scale) {
+  if (!constraint && !stated_scale) return 'Scaling constraint not identified.';
+  if (constraint) return `Constraint: ${constraint}. Systems: ${current_systems}.`;
+  return `Scale target: ${stated_scale}. Systems: ${current_systems}.`;
+}
+
+function buildStatedVsSupportedInterpretation(stated_scale, readiness, ceiling_desc) {
+  if (!stated_scale || readiness === 'high') return 'Growth + infrastructure aligned.';
+  if (readiness === 'low' || readiness === 'weak') {
+    return `Infrastructure NOT ready. Gap: stated ${stated_scale} vs. readiness ${readiness}.`;
+  }
+  return `Gap: stated vs. readiness.`;
+}
+
+function extractWithoutInfrastructureImplications(constraint, stated_scale) {
+  if (!constraint) return 'Constraint not identified.';
+  if (!stated_scale) return `Growth without addressing: ${constraint}`;
+  return `Attempting scale without addressing ${constraint} = failure + burnout.`;
+}
+
+function extractWithInfrastructureImplications(constraint, readiness) {
+  if (readiness === 'high') return 'Infrastructure ready. Scale supported.';
+  if (readiness === 'low' || readiness === 'weak') return `Build ${constraint}. Removes ceiling.`;
+  return `Address ${constraint}. Highest-leverage investment.`;
+}
+
+function buildDecisionArchitectureSummary(speed, claimed_model, gap) {
+  if (gap) return `Gap: claims ${claimed_model}, operates differently. Speed: ${speed}.`;
+  return `Model: ${claimed_model}. Speed: ${speed}.`;
+}
+
+function buildDecisionVelocityInterpretation(speed, data_reqs, vector_score) {
+  if (speed === 'fast') return `Quick decisions. Data: ${data_reqs || 'minimal'}. Vector ${vector_score > 6 ? 'high' : 'variable'}.`;
+  if (speed === 'slow') return `Deliberate. Data: ${data_reqs || 'thorough'}. Org must assemble context.`;
+  return `Speed: ${speed}. Data: ${data_reqs || 'context-dependent'}.`;
+}
+
+function buildDelegationResistanceInterpretation(what_resists, why) {
+  if (what_resists.length === 0) return 'No delegation resistance. Open.';
+  if (what_resists.length === 1) return `Cannot delegate: ${what_resists[0]}. Stays embedded.`;
+  return `Cannot delegate: ${what_resists.join(', ')}. Ceiling at operator bandwidth.`;
+}
+
+function buildOrganizationalConsequencesSummary(consequences) {
+  if (consequences.length === 0) return 'No major consequences identified.';
+  const domains = consequences.map(c => c.domain).join(', ');
+  return `${consequences.length} domains: ${domains}. Primary: ${consequences[0].cost}.`;
+}
+
+function buildMostLikelyFuture(relational_erosion, burnout_risk, high_severity_count) {
+  if (relational_erosion !== 'Low' && burnout_risk !== 'Low') return 'Increasing Friction';
+  if (high_severity_count > 1) return 'Infrastructure Crisis';
+  if (relational_erosion === 'Low' && high_severity_count === 0) return 'Optimized Specialty';
+  return 'Multiple futures possible';
+}
