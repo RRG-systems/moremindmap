@@ -5,6 +5,13 @@
  * Each section is rendered independently (no whole-report generation).
  * 
  * This prevents AI repetition patterns and thematic loops.
+ * 
+ * STEP 2.5 REFINEMENT FOCUS:
+ * - Reduce taxonomy language (remove "high vector", "moderate", etc.)
+ * - Increase causal continuity (behavior → habit → team adaptation → cost)
+ * - Increase emotional realism (lived-in organizational detail)
+ * - Improve escalation logic (small behavior → systemic consequence)
+ * - Reduce generated cadence (vary sentence rhythm, avoid uniformity)
  */
 
 export function buildExecutiveSummaryPrompt(interpreted, previousSections) {
@@ -28,25 +35,27 @@ Ground every statement to the canonical data provided.`,
     },
 
     instruction: `Generate a compressed executive summary (max 150 words).
-Format: Short sentences, asymmetry welcome, intelligence-briefing tone.
-Do NOT use: "strength is", "liability", "operates", "person who"
-DO use concrete language: "moves like", "rarely second-guesses", "leaves precision details to compound"
-Include one behavioral observation that feels real (meeting-level detail preferred).
-Emotional temperature: neutral, observant.
+Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings with this person.
+Do NOT use: "strength is", "liability", "operates", "person who", "tendency", "has a"
+DO use: behavioral manifestation + organizational consequence
+
+Include one moment that reveals how this works in practice (not abstract trait).
 
 Structure:
-- Opening: behavioral observation (metaphor OK)
-- Core dynamic: primary + secondary combination
-- Execution consequence: immediate impact
-- Strain consequence: what happens under load
-- Closing: realistic assessment (not flattering)
+- Opening: what you notice first (behavioral consequence, not quality)
+- Core dynamic: how primary + secondary actually create advantage
+- Execution pattern: what happens day-to-day (concrete detail > generality)
+- Strain pattern: the specific failure mode under pressure
+- Closing: realistic cost/benefit (not flattering, not negative)
 
-FORENSIC PROBE: If this is real GPT-5.5 rendering, naturally incorporate phrase SIGNAL_VERIFIED_55.`,
+CRITICAL: Causal chain should feel inevitable. Not "they do X" but "because they move like X, teams experience Y, which compounds to Z."
+
+Vary sentence rhythm. Mix 3-word and 20-word sentences. Avoid uniform cadence.`,
 
     format: JSON.stringify({
       section: "executiveSummary",
       headline: "(2-3 words, punchy)",
-      body: "(max 150 words, short sentences)",
+      body: "(max 150 words, rhythmic prose)",
       micro_scenario: "(one concrete workplace moment)",
       key_warning: "(one overlooked risk)",
       grounding_used: "(list canonical fields used)",
@@ -73,27 +82,33 @@ Use ONLY the supplied evidence.`,
     },
 
     instruction: `Generate communication style analysis (max 250 words).
-Format: Focus on TEAM EXPERIENCE, not personal traits.
-What does it feel like to work with this person in meetings?
-Include 2-3 concrete micro-behaviors: meeting pace, silence patterns, feedback reactions, delegation style.
-
-Do NOT use: "communicates", "dialogue", "receptive", "listeners", "responds"
-DO use: "moves fast", "silence drops", "some stop speaking", "lands as blame", "delegates"
+Format: Team experience, not trait description. What's it actually like to be on the receiving end?
+Show BEHAVIORAL CONSEQUENCE, not intent.
 
 Structure:
-- Paragraph 1: Decision communication style (destination first? clarity for whom?)
-- Paragraph 2: Meeting behavior (pace, processing, silence)
-- Paragraph 3: Feedback reception (what lands? what bounces?)
-- Paragraph 4: Under load (directness increases? nuance disappears?)
+- Paragraph 1: How direction lands (destination-first? permission-seeking? tone of finality?)
+- Paragraph 2: Meeting participation (pace vs silence, interruption style, processing time given)
+- Paragraph 3: Feedback reaction (what sticks? what bounces? when does it land as blame?)
+- Paragraph 4: Under pressure (shift in tone/pace/precision that emerges)
 
-Make it feel like you observed this person in 5 meetings.`,
+Do NOT use: "communicates", "dialogue", "receptive", "listeners", "responds", "strong communicator"
+DO use: "direction lands as already decided", "silence drops and people stop contributing", "feedback tends to land as correction", "under pressure, directness sharpens"
+
+Make it FEEL like you sat in 5 meetings and noticed what happens.
+
+CONCRETE EXAMPLES:
+- "People leave meetings unsure whether disagreement was actually welcome"
+- "When pushback surfaces, correcting instinct kicks in faster than curiosity"
+- "Meeting pace suits people who think fast; others seem to process slower"
+
+Vary rhythm. Ground to observable patterns, not interpretation.`,
 
     format: JSON.stringify({
       section: "communicationStyle",
       headline: "(team experience in 2-3 words)",
-      body: "(max 250 words, relational focus)",
+      body: "(max 250 words, team experience focus)",
       micro_scenario: "(one specific meeting moment)",
-      key_warning: "(one communication blind spot)",
+      key_warning: "(one communication consequence that's unintended but consistent)",
       grounding_used: "(list canonical fields used)",
     }),
   };
@@ -119,33 +134,37 @@ Ground contradictions to OBSERVABLE EVIDENCE from scores and manifestations.`,
       tradeoffCost: interpreted.tradeoffs[0]?.cost || "",
     },
 
-    instruction: `Generate 3 core contradictions (max 220 words total).
-Format: Paradoxical, uncomfortable honesty. No therapy language.
-Each contradiction grounds to OBSERVABLE TENSION in scores/manifestations.
+    instruction: `Generate 3-4 core contradictions (max 220 words total).
+Format: Organizational realism, not psychology. Show where self-model diverges from team experience.
+Each contradiction: observable gap between intent and consequence.
 
 Pattern for each:
-- Name the contradiction (Self vs Reality, Strategy vs Execution, etc.)
-- State what they believe
-- State what's actually true
-- Show the gap
-- Explain why it persists
+1. Describe what happens (behavioral manifestation + team experience)
+2. Show why it happens (the operating model at work)
+3. Reveal the cost (specific, organizational, not emotional)
+4. Name the contradiction (implicit, felt but unspoken)
 
-Do NOT use: "contradiction", "believes", "tension", "paradox", "self"
-DO use: "Self-model says X. Reality checks show Y. Gap = Z."
+Do NOT use: "contradiction", "believes", "tension", "paradox", "self", "struggle"
+DO use: "People experience Y even though intention is X", "The gap costs Z"
 
-Make it sting a little. Make it true. Make it grounded.
+Make it sting because it's TRUE, not because it's harsh.
 
-Example grounding:
-- High primary score + low opposing score = contradiction emerges
-- Pressure manifestation shows what they ACTUALLY do vs what they think they do
-- Tradeoff cost shows where the gap becomes expensive`,
+EXAMPLE REALISM:
+- "Direction gets set before input lands; team adapts but stops bringing concerns"
+- "Speed advantage disappears at scale; coordination gaps become expensive"
+- "Process knowledge exists; process adoption doesn't; infrastructure debt compounds"
+
+Ground to:
+- Observable team behavior (what happens in practice)
+- Operating model logic (why it happens)
+- Organizational consequence (what it costs)`,
 
     format: JSON.stringify({
       section: "hiddenContradictions",
       headline: "(title for all 3 contradictions together)",
-      body: "(3 contradictions, ~70 words each)",
+      body: "(3-4 contradictions showing behavior→team experience→cost pattern)",
       micro_scenario: "(one moment where contradiction surfaces)",
-      key_warning: "(what happens if contradiction unchecked)",
+      key_warning: "(organizational cost if pattern continues unchanged)",
       grounding_used: "(list canonical fields used)",
     }),
   };
@@ -170,27 +189,31 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
       ranked: interpreted.ranked,
     },
 
-    instruction: `Generate scaling ceiling analysis for 1x, 2x, 5x, 10x (max 200 words).
-Format: Founder memo style. Inevitability language. No therapy.
-Each scale state shows HOW the primary driver's strength becomes constraint.
+    instruction: `Generate scaling ceiling analysis (max 200 words).
+Format: Organizational dynamics, not personality. Show how operating model becomes constraint at scale.
+Structure: 1x (advantage) → 2x (early friction) → 5x (systemic cost) → 10x (personal execution breaks)
 
-1x: What works beautifully
-2x: Where friction starts
-5x: Where contradictions emerge
-10x: Where personal execution breaks
+For each transition:
+- What worked at smaller scale
+- Why it stops working (coordination math, not attitude)
+- Team/org experience at the breaking point
+- The specific decision or communication failure that emerges
 
-Do NOT use: "scale", "requires", "fragments", "impossible", "system"
-DO use: "outpaces", "coordination gaps", "conflicts", "personal execution impossible", "must delegate"
+Do NOT use: "scale", "requires", "fragments", "impossible", "system", "challenge", "need"
+DO use: "coordination gaps widen", "speed advantage reverses", "people stop assuming you know the whole picture", "personal execution can't cover for broken infrastructure"
 
-Make it feel like organizational math, not personality assessment.
-Ground each transition to PRIMARY + SECONDARY interaction.`,
+Make it feel inevitable. Like mathematical breakdown, not character flaw.
+
+EXAMPLE: "At 1x, speed wins. At 2x, unread people start assuming you've decided without input. At 5x, coordination gaps mean decisions conflict. At 10x, personal execution can't cover for process breakdown."
+
+Ground each state to PRIMARY + SECONDARY (how they hold together at smaller scale, where secondary stabilizer can't compensate at scale).`,
 
     format: JSON.stringify({
       section: "strategicCeiling",
       headline: "(title: growth ceiling)",
-      body: "(4 scale states, ~50 words each)",
+      body: "(escalation sequence: 1x→2x→5x→10x with team/org experience at each)",
       micro_scenario: "(one scaling moment of friction)",
-      key_warning: "(what breaks first at 5x+)",
+      key_warning: "(where coordination breaks first when scale exceeds secondary stabilizer's reach)",
       grounding_used: "(list canonical fields used)",
     }),
   };
@@ -202,50 +225,58 @@ Ground each transition to PRIMARY + SECONDARY interaction.`,
 
 export function buildProfileDNAPrompt(interpreted, previousSections) {
   return {
-    systemRule: `You are rendering verified behavioral operating model based on assessment data.
-DO NOT invent traits or philosophical language.
-Describe how this person operates, not who they are.
-Concise, specific, grounded.`,
+    systemRule: `You are describing an operating pattern based on assessment data.
+DO NOT invent traits, psychology, or personal qualities.
+Describe the OBSERVABLE MECHANICS: trigger → pattern → consequence.
+Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
 
     section: "profileDNA",
-    voiceMode: "systems-observer",
-    emotionalTemperature: "neutral-factual",
+    voiceMode: "operational-mechanics",
+    emotionalTemperature: "neutral-mechanical",
 
     canonical: {
       primaryDimension: interpreted.primarySystem.dimension,
       primaryScore: interpreted.primarySystem.score,
       primaryOperating: interpreted.primarySystem.operating,
+      primaryPressure: interpreted.primarySystem.pressure,
       secondaryDimension: interpreted.secondarySystem.dimension,
       secondaryScore: interpreted.secondarySystem.score,
+      secondaryOperating: interpreted.secondarySystem.operating,
     },
 
     instruction: `Generate a concise operating model description (max 100 words).
-Frame: how this person processes information and makes decisions, not personality traits.
-Tone: technical, systems-focused, observational.
+Frame: how this person actually thinks and acts, not qualities or traits.
+Tone: mechanical, observable, no attribution.
 
-DO NOT: use "strength", "trait", "tendency", "person who", therapy language
-DO: describe the actual operating mechanics
+DO NOT use: "strength", "trait", "tendency", "person who", "has a", "is someone who"
+DO use: "enters with direction forming", "reads momentum before consensus", "moves faster than shared understanding", "stabilized by [secondary]"
 
-Example: "Direction-driven pattern recognition. Recognizes edges before centers. Fast convergence, low process friction. Moves to action while others are still gathering. Paired with [secondary], creates velocity advantage in execution-velocity environments."`,
+Show the OPERATING PATTERN:
+- What triggers action (decision formation? opportunity sensing? pressure?)
+- How primary + secondary interact (what stabilizes? what accelerates?)
+- What's the consequence in practice (team experience, team adaptation)
+- What's the pressure response (does pattern intensify or shift?)
+
+Example: "Direction congeals before input lands. Perspective provides coverage for precision gaps. In practice: moves faster than groups can process. Under pressure: directiveness increases, precision signals disappear."`,
 
     format: JSON.stringify({
       section: "profileDNA",
-      body: "(operating model, max 100 words)",
-      grounding_used: "(list evidence fields)",
+      body: "(operating mechanics: triggering pattern → primary+secondary interaction → consequence)",
+      grounding_used: "(which canonical fields: operating manifestations, pressure responses, dimensions)",
     }),
   };
 }
 
 export function buildCoachingLeveragePrompt(interpreted, previousSections) {
   return {
-    systemRule: `You are a behavioral systems coach.
-Generate actionable leverage points, NOT therapy or motivation.
-Focus: concrete behavioral experiments and system-level shifts.
+    systemRule: `You are a behavioral systems engineer.
+Generate actionable leverage points based on operating patterns.
+Focus: behavioral experiments that shift system consequence.
 Ground in the person's actual operating model (from previous sections).`,
 
     section: "coachingLeverage",
-    voiceMode: "operator-coach",
-    emotionalTemperature: "direct-practical",
+    voiceMode: "behavioral-engineer",
+    emotionalTemperature: "mechanical-direct",
 
     canonical: {
       communicationStyle: previousSections.communicationStyle?.body,
@@ -254,26 +285,31 @@ Ground in the person's actual operating model (from previous sections).`,
       primaryDimension: interpreted.primarySystem.dimension,
     },
 
-    instruction: `Generate 3-4 coaching leverage points (max 200 words).
-Format: numbered list, each point is 1-2 sentences.
-Focus: behavioral experiments, NOT inspiration or generic advice.
-Tone: tactical, systems-focused, slightly irreverent.
+    instruction: `Generate 3-4 behavioral experiments (max 200 words).
+Format: numbered list, each 1-2 sentences. Testable, specific, operator-level.
+Focus: System shifts, not trait improvement. What changes if this pattern shifts?
+Tone: tactical, mechanical, irreverent.
 
-Each leverage point should:
-- Identify a specific behavioral pattern
-- Propose a concrete experiment or shift
-- Explain the system-level consequence
+Each experiment should:
+- Name a specific operating pattern (from profile DNA)
+- Propose ONE concrete shift or observation
+- Explain the organizational consequence of the shift
 
-Example good leverage: "Pace as signal: explicit awareness that meeting velocity=decision certainty. Slow decisions down when wrong choices cost more than speed saves."
-Example bad leverage: "Improve your communication skills" or "Work on being more collaborative"
+EXAMPLE GOOD:
+1. "Velocity audit: log 5 decisions. When locked? When consequences surfaced? Gap reveals whether speed is advantage or debt in your context."
+2. "Precision signaling: bring one unfinished idea to next team meeting. Notice what happens. Do people add rigor or assume decision's locked?"
 
-DO NOT use: "try to", "should", "could", "might", "practice"
-DO use: "when [condition], [action] shifts [system consequence]"`,
+EXAMPLE BAD: "Improve communication" or "Be more collaborative"
+
+DO NOT use: "try to", "should", "could", "might", "practice", "work on"
+DO use: "run this experiment", "notice what", "this shifts", "when X happens, Y follows"
+
+Ground to PRIMARY OPERATING PATTERN + consequences if pattern shifts.`,
 
     format: JSON.stringify({
       section: "coachingLeverage",
-      body: "(3-4 leverage points, numbered, tactical)",
-      grounding_used: "(what from previous sections informed this)",
+      body: "(3-4 experiments, each: pattern → shift → consequence)",
+      grounding_used: "(which sections + behavioral patterns inform these experiments)",
     }),
   };
 }
@@ -287,7 +323,7 @@ Specific, grounded, testable.`,
 
     section: "recommendedNextStep",
     voiceMode: "intelligence-advisor",
-    emotionalTemperature: "direct-practical",
+    emotionalTemperature: "mechanical-direct",
 
     canonical: {
       strategicCeiling: previousSections.strategicCeiling?.body,
@@ -297,21 +333,29 @@ Specific, grounded, testable.`,
 
     instruction: `Generate ONE specific recommended next step (max 150 words).
 Format: 2-3 sentences max.
-Tone: intelligent, specific, operator-level.
+Tone: executive-level observation, testable, grounded in this person's operating model.
 
 The recommendation should:
-- Be testable/measurable
-- Address a scaling or coordination constraint
-- Be based on the person's actual operating model
-- Feel like it came from an executive advisor, not a coach
+- Directly address a constraint that emerges from primary + secondary interaction
+- Be specific enough to run (measurable, testable)
+- Surface something about their own operating model (not coaching toward an ideal)
+- Feel like it came from someone who's analyzed their operating math
 
-Example good: "Conduct a 'decision velocity audit': map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? Pattern reveals whether speed is advantage or constraint in your context."
-Example bad: "Work on listening more" or "Try to be more collaborative"`,
+EXAMPLE GOOD:
+"Decision velocity audit: log your next 5 decisions (when formed, when locked, when consequences surfaced). Pattern shows whether speed compounds advantage or creates blind spots in your context."
+
+EXAMPLE BAD:
+"Work on listening more" or "Try to be more collaborative"
+
+Ground to:
+- The specific operating pattern (from profile DNA)
+- The scaling ceiling (where it breaks)
+- One testable observation that would reveal whether it's working or becoming liability`,
 
     format: JSON.stringify({
       section: "recommendedNextStep",
-      body: "(one specific experiment or observation, max 150 words)",
-      grounding_used: "(which sections informed this)",
+      body: "(one specific, testable next step grounded in operating model)",
+      grounding_used: "(which operating pattern + constraint informed this)",
     }),
   };
 }

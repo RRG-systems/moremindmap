@@ -20,6 +20,7 @@
 
 import Redis from 'ioredis';
 import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
+import { refineExtraction } from '../engine/canonical/extractIntelligenceRefinement.js';
 
 export default async function handler(req, res) {
   // Only GET allowed
@@ -111,6 +112,8 @@ export default async function handler(req, res) {
     let behavioral_intelligence_v1 = null;
     try {
       behavioral_intelligence_v1 = extractBehavioralIntelligence(canonicalDossier);
+      // Apply refinement for emotional realism and causal continuity
+      behavioral_intelligence_v1 = refineExtraction(behavioral_intelligence_v1, canonicalDossier);
     } catch (extractErr) {
       console.error('[RETRIEVE] Behavioral extraction failed:', extractErr.message);
       // Non-blocking: return canonical even if extraction fails

@@ -13,6 +13,7 @@
 
 import { updateJob, JOB_STAGE as MANAGER_JOB_STAGE } from '../miniV2JobManager.js'
 import { extractBehavioralIntelligence } from './extractIntelligence.js'
+import { refineExtraction } from './extractIntelligenceRefinement.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -190,6 +191,11 @@ export async function executeCanonicalGeneration(job) {
       behavioral_intelligence = extractBehavioralIntelligence(canonical_profile)
       trace.push('behavioral_extraction_success')
       canonical_diagnostics.behavioral_extraction_success = true
+      
+      // REFINE: Apply quality ascension (emotional realism, causal continuity)
+      trace.push('before_behavioral_refinement')
+      behavioral_intelligence = refineExtraction(behavioral_intelligence, canonical_profile)
+      trace.push('behavioral_refinement_success')
     } catch (extractErr) {
       console.error('[CANONICAL-GENERATION] Behavioral extraction failed:', extractErr.message)
       trace.push(`behavioral_extraction_error: ${extractErr.message}`)
