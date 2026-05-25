@@ -75,6 +75,15 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       
       {/* PAGE 2: STRATEGIC CONSEQUENCES */}
       <PageTwoDashboard narrative={narrative} ranked={ranked} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
+      
+      {/* PAGE 3: PRESSURE & EXPERIENCE */}
+      <PageThreeDashboard narrative={narrative} />
+      
+      {/* PAGE 4: SCALE & FUTURE */}
+      <PageFourDashboard narrative={narrative} />
+      
+      {/* PAGE 5: TRAJECTORY */}
+      <PageFiveDashboard narrative={narrative} />
     </div>
   );
 }
@@ -204,6 +213,123 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
           nextStepContent={theOneMoveBI?.found ? theOneMoveBI.content : (narrative.recommendedNextStep?.body || narrative.recommendedNextStep)}
           organizationalConsequences={organizationalConsequencesBI?.found ? organizationalConsequencesBI.content : null}
         />
+      </div>
+    </div>
+  );
+}
+
+function PageThreeDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-three">
+      <div className="page-content">
+        {/* PAGE 3: Pressure & Experience */}
+        <div className="page-section-header">
+          <h2 className="page-section-title">Pressure & Experience</h2>
+          <p className="page-section-subtitle">How you escalate under load and how others experience you</p>
+        </div>
+        
+        <div className="zone-progression">
+          {narrative.systemUnderStrain && (
+            <InsightPanel
+              icon="⚡"
+              title="Pressure Mechanics"
+              subtitle="Behavior Escalation Under Load"
+              content={narrative.systemUnderStrain?.body || narrative.systemUnderStrain}
+              warning={narrative.systemUnderStrain?.key_warning}
+              prominence="diagnostic"
+              className="pressure-mechanics-panel"
+            />
+          )}
+          
+          {narrative.communicationStyle && (
+            <InsightPanel
+              icon="🗣️"
+              title="How Others Experience You"
+              subtitle="Your Operating Pattern From Team Perspective"
+              content={narrative.communicationStyle?.body || narrative.communicationStyle}
+              warning={narrative.communicationStyle?.key_warning}
+              prominence="analytical"
+              className="others-experience-panel"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PageFourDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-four">
+      <div className="page-content">
+        {/* PAGE 4: Scale & Futures */}
+        <div className="page-section-header">
+          <h2 className="page-section-title">Scale & Futures</h2>
+          <p className="page-section-subtitle">Where your operating model hits its ceiling and what trajectories emerge</p>
+        </div>
+        
+        <div className="zone-progression">
+          {narrative.strategicCeiling && (
+            <InsightPanel
+              icon="📈"
+              title="Scaling Constraint"
+              subtitle="Where Your Operating Model Hits Its Ceiling"
+              content={narrative.strategicCeiling?.body || narrative.strategicCeiling}
+              warning={narrative.strategicCeiling?.key_warning}
+              prominence="analytical"
+              className="scaling-constraint-panel"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PageFiveDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-five">
+      <div className="page-content">
+        {/* PAGE 5: Decision Architecture & Facilitation */}
+        <div className="page-section-header">
+          <h2 className="page-section-title">Decision Architecture & Intervention</h2>
+          <p className="page-section-subtitle">How decisions form and highest-leverage shifts</p>
+        </div>
+        
+        <div className="zone-progression">
+          {narrative.profileDNA && (
+            <InsightPanel
+              icon="🧬"
+              title="Decision Architecture"
+              subtitle="How Decisions Form and Validate"
+              content={narrative.profileDNA?.body || narrative.profileDNA}
+              prominence="analytical"
+              className="decision-architecture-panel"
+            />
+          )}
+          
+          {narrative.coachingLeverage && (
+            <InsightPanel
+              icon="⚙️"
+              title="Facilitator Notes"
+              subtitle="Environment Design Guidance"
+              content={narrative.coachingLeverage?.body || narrative.coachingLeverage}
+              prominence="analytical"
+              className="facilitator-notes-panel"
+            />
+          )}
+          
+          {narrative.recommendedNextStep && (
+            <InsightPanel
+              icon="⚡"
+              title="The One Move"
+              subtitle="Highest-Leverage Intervention"
+              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+              prominence="premium"
+              className="one-move-panel"
+            />
+          )}
+        </div>
       </div>
     </div>
   );
