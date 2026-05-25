@@ -14,12 +14,13 @@
 
 import { useState, useEffect } from 'react';
 import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
+import { buildRenderPlan, extractSectionContent } from '../../lib/profile/renderContract.js';
 
 // ============================================================================
 // DASHBOARD COMPONENTS (V1)
 // ============================================================================
 
-function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked }) {
+function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence }) {
   return (
     <div className="dashboard-report-v1 intelligence-system">
       {/* HERO HEADER */}
@@ -73,7 +74,7 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       <PageOneDashboard narrative={narrative} ranked={ranked} />
       
       {/* PAGE 2: STRATEGIC CONSEQUENCES */}
-      <PageTwoDashboard narrative={narrative} ranked={ranked} />
+      <PageTwoDashboard narrative={narrative} ranked={ranked} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
     </div>
   );
 }
@@ -153,7 +154,15 @@ function PageOneDashboard({ narrative, ranked }) {
   );
 }
 
-function PageTwoDashboard({ narrative }) {
+function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Build render plan if behavioral intelligence available
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  
+  // Extract behavioral intelligence content for new sections
+  const organizationalConsequencesBI = renderPlan ? extractSectionContent('section-organizational-consequences', behavioralIntelligence, canonical) : null;
+  const facilitatorNotesBI = renderPlan ? extractSectionContent('section-facilitator-notes', behavioralIntelligence, canonical) : null;
+  const theOneMoveBI = renderPlan ? extractSectionContent('section-the-one-move', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-two">
       <div className="page-content">
@@ -189,10 +198,11 @@ function PageTwoDashboard({ narrative }) {
           <StrategicMap narrative={narrative} />
         )}
 
-        {/* ZONE 3: Action System (Coaching + Next Step paired) */}
+        {/* ZONE 3: Action System (Facilitator Notes + The One Move) */}
         <ActionSystem
-          coachingContent={narrative.coachingLeverage?.body || narrative.coachingLeverage}
-          nextStepContent={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+          facilitatorContent={facilitatorNotesBI?.found ? facilitatorNotesBI.content : (narrative.coachingLeverage?.body || narrative.coachingLeverage)}
+          nextStepContent={theOneMoveBI?.found ? theOneMoveBI.content : (narrative.recommendedNextStep?.body || narrative.recommendedNextStep)}
+          organizationalConsequences={organizationalConsequencesBI?.found ? organizationalConsequencesBI.content : null}
         />
       </div>
     </div>
@@ -302,29 +312,40 @@ function StrategicMap({ narrative }) {
   );
 }
 
-function ActionSystem({ coachingContent, nextStepContent }) {
+function ActionSystem({ facilitatorContent, nextStepContent, organizationalConsequences }) {
   return (
     <div className="action-system-zone">
+      {organizationalConsequences && (
+        <InsightPanel
+          icon="🏢"
+          title="Organizational Consequences"
+          subtitle="What Your Organization Experiences"
+          content={typeof organizationalConsequences === 'object' ? organizationalConsequences.summary || 'Organizational consequences identified' : organizationalConsequences}
+          prominence="diagnostic"
+          className="organizational-consequences-panel"
+        />
+      )}
+      
       <div className="action-pair">
         <div className="action-coaching">
           <div className="action-header">
-            <span className="action-icon">✓</span>
+            <span className="action-icon">⚙️</span>
             <div>
-              <h3 className="action-title">Coaching Leverage</h3>
-              <p className="action-subtitle">Tactical Actions</p>
+              <h3 className="action-title">Facilitator Notes</h3>
+              <p className="action-subtitle">Environment Design</p>
             </div>
           </div>
           <div className="action-body">
-            {coachingContent}
+            {facilitatorContent}
           </div>
         </div>
         
         <div className="action-nextstep">
           <div className="action-header">
-            <span className="action-icon nextstep-icon">→</span>
+            <span className="action-icon nextstep-icon">⚡</span>
             <div>
-              <h3 className="action-title">Recommended Next Step</h3>
-              <p className="action-subtitle">Decisive Recommendation</p>
+              <h3 className="action-title">The One Move</h3>
+              <p className="action-subtitle">Highest-Leverage Intervention</p>
             </div>
           </div>
           <div className="action-body">
@@ -395,6 +416,9 @@ export default function WebProfileReport({ canonical, profileId }) {
   // TRY DASHBOARD V1, FALLBACK TO STACKED IF ERROR
   if (!dashboardFailed) {
     try {
+      // Extract behavioral intelligence if available
+      const behavioralIntelligence = canonical?.behavioral_intelligence_v1 || null;
+      
       return (
         <div>
           <DashboardReportV1
@@ -407,6 +431,7 @@ export default function WebProfileReport({ canonical, profileId }) {
             company={company}
             profileType={profileType}
             ranked={ranked}
+            behavioralIntelligence={behavioralIntelligence}
           />
           <DashboardStyles />
         </div>
