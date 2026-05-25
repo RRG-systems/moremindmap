@@ -222,7 +222,7 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="⚙️"
               title="Facilitator Notes"
               subtitle="Environment Design Guidance"
-              content={formatBIContent(facilitatorNotesBI.content)}
+              content={renderBIContent("facilitatorNotes", facilitatorNotesBI.content)}
               prominence="analytical"
               className="facilitator-notes-panel"
             />
@@ -253,7 +253,7 @@ function PageThreeDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="🗣️"
               title="World Experience"
               subtitle="How You Experience Your Operating Environment"
-              content={formatBIContent(worldExperienceBI.content)}
+              content={renderBIContent("worldExperience", worldExperienceBI.content)}
               prominence="analytical"
               className="world-experience-panel"
             />
@@ -293,7 +293,7 @@ function PageFourDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="⚡"
               title="Pressure Mechanics"
               subtitle="Behavior Escalation Under Load"
-              content={formatBIContent(pressureMechanicsBI.content)}
+              content={renderBIContent("pressureMechanics", pressureMechanicsBI.content)}
               prominence="analytical"
               className="pressure-mechanics-panel"
             />
@@ -333,7 +333,7 @@ function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="🤝"
               title="Team Experience"
               subtitle="How Your Operating Pattern Lands on Others"
-              content={formatBIContent(othersExperienceBI.content)}
+              content={renderBIContent("othersExperience", othersExperienceBI.content)}
               prominence="analytical"
               className="team-experience-panel"
             />
@@ -371,7 +371,7 @@ function PageSixDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="📊"
               title="Scaling Constraint"
               subtitle="The Specific Ceiling You'll Hit"
-              content={formatBIContent(scalingConstraintBI.content)}
+              content={renderBIContent("scalingConstraint", scalingConstraintBI.content)}
               prominence="analytical"
               className="scaling-constraint-panel"
             />
@@ -443,7 +443,7 @@ function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="⚡"
               title="The One Move"
               subtitle="Highest-Leverage Intervention"
-              content={formatBIContent(theOneMoveBI.content)}
+              content={renderBIContent("theOneMove", theOneMoveBI.content)}
               prominence="premium"
               className="one-move-panel"
             />
@@ -471,7 +471,7 @@ function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
  * Format behavioral intelligence content for display
  * Handles both string and object structures
  */
-function formatBIContent(content) {
+function renderBIContent(domain, content) {
   if (!content) return null;
   
   if (typeof content === 'string') {
@@ -479,13 +479,232 @@ function formatBIContent(content) {
   }
   
   if (typeof content === 'object') {
-    // Extract key fields in order of preference
-    return content.summary || 
-           content.body || 
-           content.the_move || 
-           content.notes || 
-           content.primary_guidance || 
-           JSON.stringify(content);
+    // Render summary first
+    const parts = [];
+    
+    if (content.summary) {
+      parts.push(<p key="summary" className="bi-summary">{content.summary}</p>);
+    }
+    
+    // World Experience structure
+    if (domain === 'worldExperience') {
+      if (content.perception_filter) {
+        parts.push(
+          <div key="perc" className="bi-subsection">
+            <h4>Perception</h4>
+            <p>{content.perception_filter.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.information_processing) {
+        parts.push(
+          <div key="info" className="bi-subsection">
+            <h4>Information Processing</h4>
+            <p>{content.information_processing.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.decision_formation) {
+        parts.push(
+          <div key="dec" className="bi-subsection">
+            <h4>Decision Formation</h4>
+            <p>{content.decision_formation.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.time_horizon) {
+        parts.push(
+          <div key="time" className="bi-subsection">
+            <h4>Time Horizon</h4>
+            <p>{content.time_horizon.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.risk_calibration) {
+        parts.push(
+          <div key="risk" className="bi-subsection">
+            <h4>Risk Calibration</h4>
+            <p>{content.risk_calibration.interpretation}</p>
+          </div>
+        );
+      }
+    }
+    
+    // Pressure Mechanics structure
+    if (domain === 'pressureMechanics') {
+      if (content.primary_under_load) {
+        parts.push(
+          <div key="primary" className="bi-subsection">
+            <h4>{content.primary_under_load.dimension} Under Load</h4>
+            <p><strong>Normal:</strong> {content.primary_under_load.normal_state}</p>
+            <p><strong>Under Pressure:</strong> {content.primary_under_load.pressure_state}</p>
+            <p>{content.primary_under_load.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.secondary_override) {
+        parts.push(
+          <div key="secondary" className="bi-subsection">
+            <h4>{content.secondary_override.dimension} Override</h4>
+            <p><strong>Normal:</strong> {content.secondary_override.normal_state}</p>
+            <p><strong>Under Pressure:</strong> {content.secondary_override.override_pattern}</p>
+            <p>{content.secondary_override.interpretation}</p>
+          </div>
+        );
+      }
+    }
+    
+    // Others Experience structure
+    if (domain === 'othersExperience') {
+      if (content.first_impression) {
+        parts.push(
+          <div key="first" className="bi-subsection">
+            <h4>First Impression</h4>
+            <p>{content.first_impression.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.communication_pattern) {
+        parts.push(
+          <div key="comm" className="bi-subsection">
+            <h4>Communication Pattern</h4>
+            <p>{content.communication_pattern.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.listening_pattern) {
+        parts.push(
+          <div key="listen" className="bi-subsection">
+            <h4>Listening Pattern</h4>
+            <p>{content.listening_pattern.interpretation}</p>
+          </div>
+        );
+      }
+      if (content.relational_friction) {
+        parts.push(
+          <div key="relational" className="bi-subsection">
+            <h4>Relational Dynamics</h4>
+            <p>{content.relational_friction.interpretation}</p>
+          </div>
+        );
+      }
+    }
+    
+    // Scaling Constraint structure
+    if (domain === 'scalingConstraint') {
+      if (content.ceiling) {
+        parts.push(
+          <div key="ceiling" className="bi-subsection">
+            <h4>Ceiling Mechanism</h4>
+            <p>{content.ceiling.interpretation || content.ceiling}</p>
+          </div>
+        );
+      }
+      if (content.coordination_math) {
+        parts.push(
+          <div key="coord" className="bi-subsection">
+            <h4>Coordination Math</h4>
+            <p>{content.coordination_math.interpretation || content.coordination_math}</p>
+          </div>
+        );
+      }
+      if (content.infrastructure_required) {
+        parts.push(
+          <div key="infra" className="bi-subsection">
+            <h4>Infrastructure Required</h4>
+            <p>{content.infrastructure_required.interpretation || content.infrastructure_required}</p>
+          </div>
+        );
+      }
+    }
+    
+    // Facilitator Notes structure
+    if (domain === 'facilitatorNotes') {
+      if (content.primary_guidance) {
+        parts.push(
+          <div key="guidance" className="bi-subsection">
+            <h4>Primary Guidance</h4>
+            <p>{content.primary_guidance}</p>
+          </div>
+        );
+      }
+      if (content.structural_notes) {
+        parts.push(
+          <div key="struct" className="bi-subsection">
+            <h4>Structural Notes</h4>
+            <p>{content.structural_notes}</p>
+          </div>
+        );
+      }
+      if (content.context) {
+        parts.push(
+          <div key="context" className="bi-subsection">
+            <h4>Context</h4>
+            <p>{content.context}</p>
+          </div>
+        );
+      }
+    }
+    
+    // The One Move structure
+    if (domain === 'theOneMove') {
+      if (content.the_move) {
+        parts.push(
+          <div key="move" className="bi-subsection">
+            <p className="bi-move-highlight"><strong>{content.the_move}</strong></p>
+          </div>
+        );
+      }
+      if (content.reasoning) {
+        parts.push(
+          <div key="reasoning" className="bi-subsection">
+            <h4>Reasoning</h4>
+            <p>{content.reasoning}</p>
+          </div>
+        );
+      }
+      if (content.expected_impact) {
+        parts.push(
+          <div key="impact" className="bi-subsection">
+            <h4>Expected Impact</h4>
+            <p>{content.expected_impact}</p>
+          </div>
+        );
+      }
+    }
+    
+    // Key Signals (render for all domains)
+    if (Array.isArray(content.key_signals) && content.key_signals.length > 0 && !parts.some(p => p.key === 'signals')) {
+      parts.push(
+        <div key="signals" className="bi-subsection">
+          <h4>Key Signals</h4>
+          <ul>
+            {content.key_signals.map((signal, idx) => (
+              <li key={idx}>{signal}</li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
+    
+    // Causal Interpretation (render for all domains)
+    if (content.causal_interpretation && !parts.some(p => p.key === 'causal')) {
+      parts.push(
+        <div key="causal" className="bi-subsection causal">
+          <p><em>{content.causal_interpretation}</em></p>
+        </div>
+      );
+    }
+    
+    // If we rendered nothing, fall back to generic string extraction
+    if (parts.length === 0) {
+      const strings = Object.entries(content)
+        .filter(([k, v]) => typeof v === 'string' && v.length > 0)
+        .map(([k, v]) => <p key={k}>{v}</p>);
+      return strings.length > 0 ? <div>{strings}</div> : null;
+    }
+    
+    return <div className="bi-content-structured">{parts}</div>;
   }
   
   return String(content);
