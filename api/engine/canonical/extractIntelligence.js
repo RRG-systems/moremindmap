@@ -23,22 +23,27 @@ export function extractBehavioralIntelligence(canonical_profile) {
     return getEmptyIntelligence('canonical_profile is null or undefined');
   }
 
+  // Handle both vault format (wrapped) and direct canonical format
+  // Vault format: { profile_id, canonical_profile_json: { ... }, vector_scores, ... }
+  // Direct format: { profile_id, top_systems, vector_scores, ... }
+  const canonical = canonical_profile.canonical_profile_json || canonical_profile;
+
   const extraction_start = Date.now();
 
   try {
     const intelligence = {
       extraction_version: 'v1.0.0-tier1',
       extraction_timestamp: new Date().toISOString(),
-      profile_id: canonical_profile.profile_id || null,
+      profile_id: canonical_profile.profile_id || canonical.profile_id || null,
       extraction_time_ms: 0,
       
       // Tier 1 extractions
       domains: {
-        operatingSystem: extractOperatingSystem(canonical_profile),
-        worldExperience: extractWorldExperience(canonical_profile),
-        othersExperience: extractOthersExperience(canonical_profile),
-        pressureMechanics: extractPressureMechanicsStarter(canonical_profile),
-        contradictions: extractContradictionsStarter(canonical_profile)
+        operatingSystem: extractOperatingSystem(canonical),
+        worldExperience: extractWorldExperience(canonical),
+        othersExperience: extractOthersExperience(canonical),
+        pressureMechanics: extractPressureMechanicsStarter(canonical),
+        contradictions: extractContradictionsStarter(canonical)
       },
       
       confidence_tiers: {
