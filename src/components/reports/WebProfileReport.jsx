@@ -86,13 +86,13 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       <PageFiveDashboard narrative={narrative} />
       
       {/* PAGE 6: WHY SCALE BREAKS */}
-      <PageSixDashboard narrative={narrative} />
+      <PageSixDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 7: FUTURE TRAJECTORIES (FEATURED) */}
-      <PageSevenDashboard narrative={narrative} />
+      <PageSevenDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
       
       {/* PAGE 8: INTERVENTION */}
-      <PageEightDashboard narrative={narrative} />
+      <PageEightDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
     </div>
   );
 }
@@ -179,7 +179,6 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract behavioral intelligence content for new sections
   const organizationalConsequencesBI = renderPlan ? extractSectionContent('section-organizational-consequences', behavioralIntelligence, canonical) : null;
   const facilitatorNotesBI = renderPlan ? extractSectionContent('section-facilitator-notes', behavioralIntelligence, canonical) : null;
-  const theOneMoveBI = renderPlan ? extractSectionContent('section-the-one-move', behavioralIntelligence, canonical) : null;
 
   return (
     <div className="dashboard-page page-two">
@@ -214,6 +213,20 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
         {/* ZONE 2: Strategic Ceiling (horizontal systems map) */}
         {narrative.strategicCeiling && (
           <StrategicMap narrative={narrative} />
+        )}
+
+        {/* ZONE 3: Facilitator Notes (from Behavioral Intelligence) */}
+        {facilitatorNotesBI?.found && facilitatorNotesBI?.content && (
+          <div className="zone-facilitator-notes">
+            <InsightPanel
+              icon="⚙️"
+              title="Facilitator Notes"
+              subtitle="Environment Design Guidance"
+              content={formatBIContent(facilitatorNotesBI.content)}
+              prominence="analytical"
+              className="facilitator-notes-panel"
+            />
+          </div>
         )}
       </div>
     </div>
@@ -251,22 +264,21 @@ function PageFourDashboard({ narrative }) {
   return (
     <div className="dashboard-page page-four">
       <div className="page-content">
-        {/* PAGE 4: Scale & Futures */}
+        {/* PAGE 4: Pressure Mechanics */}
         <div className="page-section-header">
-          <h2 className="page-section-title">Scale & Futures</h2>
-          <p className="page-section-subtitle">Where your operating model hits its ceiling and what trajectories emerge</p>
+          <h2 className="page-section-title">What Pressure Changes</h2>
+          <p className="page-section-subtitle">Behavioral escalation under operational load</p>
         </div>
         
         <div className="zone-progression">
-          {narrative.strategicCeiling && (
+          {narrative.systemUnderStrain && (
             <InsightPanel
-              icon="📈"
-              title="Scaling Constraint"
-              subtitle="Where Your Operating Model Hits Its Ceiling"
-              content={narrative.strategicCeiling?.body || narrative.strategicCeiling}
-              warning={narrative.strategicCeiling?.key_warning}
+              icon="⚡"
+              title="Pressure Mechanics"
+              subtitle="Behavior Escalation Under Load"
+              content={narrative.systemUnderStrain?.body || narrative.systemUnderStrain}
               prominence="analytical"
-              className="scaling-constraint-panel"
+              className="pressure-mechanics-panel"
             />
           )}
         </div>
@@ -279,43 +291,21 @@ function PageFiveDashboard({ narrative }) {
   return (
     <div className="dashboard-page page-five">
       <div className="page-content">
-        {/* PAGE 5: Decision Architecture & Facilitation */}
+        {/* PAGE 5: How Other People Adapt */}
         <div className="page-section-header">
-          <h2 className="page-section-title">Decision Architecture & Intervention</h2>
-          <p className="page-section-subtitle">How decisions form and highest-leverage shifts</p>
+          <h2 className="page-section-title">How Others Experience You</h2>
+          <p className="page-section-subtitle">Your operating pattern from team perspective</p>
         </div>
         
         <div className="zone-progression">
-          {narrative.profileDNA && (
+          {narrative.communicationStyle && (
             <InsightPanel
-              icon="🧬"
-              title="Decision Architecture"
-              subtitle="How Decisions Form and Validate"
-              content={narrative.profileDNA?.body || narrative.profileDNA}
+              icon="🤝"
+              title="Team Experience"
+              subtitle="How Your Operating Pattern Lands on Others"
+              content={narrative.communicationStyle?.body || narrative.communicationStyle}
               prominence="analytical"
-              className="decision-architecture-panel"
-            />
-          )}
-          
-          {narrative.coachingLeverage && (
-            <InsightPanel
-              icon="⚙️"
-              title="Facilitator Notes"
-              subtitle="Environment Design Guidance"
-              content={narrative.coachingLeverage?.body || narrative.coachingLeverage}
-              prominence="analytical"
-              className="facilitator-notes-panel"
-            />
-          )}
-          
-          {narrative.recommendedNextStep && (
-            <InsightPanel
-              icon="⚡"
-              title="The One Move"
-              subtitle="Highest-Leverage Intervention"
-              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
-              prominence="premium"
-              className="one-move-panel"
+              className="team-experience-panel"
             />
           )}
         </div>
@@ -324,42 +314,63 @@ function PageFiveDashboard({ narrative }) {
   );
 }
 
-function PageSixDashboard({ narrative }) {
+function PageSixDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract Scaling Constraint from BI (primary source)
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const scalingConstraintBI = renderPlan ? extractSectionContent('section-scaling-constraint', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-six">
       <div className="page-content">
         <div className="page-section-header">
           <h2 className="page-section-title">Why Scale Breaks</h2>
-          <p className="page-section-subtitle">Structural collision between operator and organizational complexity</p>
+          <p className="page-section-subtitle">Where personal execution becomes insufficient</p>
         </div>
         <div className="zone-progression">
-          {narrative.strategicCeiling && (
+          {scalingConstraintBI?.found && scalingConstraintBI?.content ? (
             <InsightPanel
-              icon="📈"
+              icon="📊"
               title="Scaling Constraint"
-              subtitle="Where Personal Execution Becomes Insufficient"
+              subtitle="The Specific Ceiling You'll Hit"
+              content={formatBIContent(scalingConstraintBI.content)}
+              prominence="analytical"
+              className="scaling-constraint-panel"
+            />
+          ) : narrative.strategicCeiling ? (
+            <InsightPanel
+              icon="📊"
+              title="Scaling Constraint"
+              subtitle="The Specific Ceiling You'll Hit"
               content={narrative.strategicCeiling?.body || narrative.strategicCeiling}
               warning={narrative.strategicCeiling?.key_warning}
               prominence="analytical"
               className="scaling-constraint-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-function PageSevenDashboard({ narrative }) {
+function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract Five Futures from BI
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const fiveFuturesBI = renderPlan ? extractSectionContent('section-five-futures', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-seven">
       <div className="page-content">
         <div className="page-section-header">
-          <h2 className="page-section-title">Future Trajectories</h2>
-          <p className="page-section-subtitle">Five behavioral scenarios emerging from current operating pattern</p>
+          <h2 className="page-section-title">Five Futures</h2>
+          <p className="page-section-subtitle">Five trajectory scenarios emerging from your current operating pattern</p>
         </div>
+        
+        {/* Render Five Futures as distinct items */}
         <div className="zone-progression five-futures-featured">
-          {narrative.profileDNA && (
+          {fiveFuturesBI?.found && fiveFuturesBI?.content ? (
+            <FiveFuturesRenderer content={fiveFuturesBI.content} />
+          ) : narrative.profileDNA ? (
             <InsightPanel
               icon="🌌"
               title="Five Futures"
@@ -368,33 +379,36 @@ function PageSevenDashboard({ narrative }) {
               prominence="premium"
               className="five-futures-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
   );
 }
 
-function PageEightDashboard({ narrative }) {
+function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
+  // Extract The One Move from BI (primary source)
+  const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
+  const theOneMoveBI = renderPlan ? extractSectionContent('section-the-one-move', behavioralIntelligence, canonical) : null;
+
   return (
     <div className="dashboard-page page-eight">
       <div className="page-content">
         <div className="page-section-header">
-          <h2 className="page-section-title">Intervention</h2>
-          <p className="page-section-subtitle">Highest-leverage interruption earned by evidence</p>
+          <h2 className="page-section-title">The One Move</h2>
+          <p className="page-section-subtitle">Highest-leverage intervention earned by evidence</p>
         </div>
         <div className="zone-progression">
-          {narrative.coachingLeverage && (
+          {theOneMoveBI?.found && theOneMoveBI?.content ? (
             <InsightPanel
-              icon="⚙️"
-              title="Facilitator Notes"
-              subtitle="Environment Design Guidance"
-              content={narrative.coachingLeverage?.body || narrative.coachingLeverage}
-              prominence="analytical"
-              className="facilitator-notes-panel"
+              icon="⚡"
+              title="The One Move"
+              subtitle="Highest-Leverage Intervention"
+              content={formatBIContent(theOneMoveBI.content)}
+              prominence="premium"
+              className="one-move-panel"
             />
-          )}
-          {narrative.recommendedNextStep && (
+          ) : narrative.recommendedNextStep ? (
             <InsightPanel
               icon="⚡"
               title="The One Move"
@@ -403,11 +417,90 @@ function PageEightDashboard({ narrative }) {
               prominence="premium"
               className="one-move-panel"
             />
-          )}
+          ) : null}
         </div>
       </div>
     </div>
   );
+}
+
+// ============================================================================
+// HELPER FUNCTIONS FOR CONTENT RENDERING
+// ============================================================================
+
+/**
+ * Format behavioral intelligence content for display
+ * Handles both string and object structures
+ */
+function formatBIContent(content) {
+  if (!content) return null;
+  
+  if (typeof content === 'string') {
+    return content;
+  }
+  
+  if (typeof content === 'object') {
+    // Extract key fields in order of preference
+    return content.summary || 
+           content.body || 
+           content.the_move || 
+           content.notes || 
+           content.primary_guidance || 
+           JSON.stringify(content);
+  }
+  
+  return String(content);
+}
+
+/**
+ * Render Five Futures as distinct future items
+ * Each future is rendered separately with title, trajectory, and details
+ */
+function FiveFuturesRenderer({ content }) {
+  if (!content) return null;
+  
+  // Extract individual futures from content object
+  const futures = [];
+  
+  // Try standard field names
+  if (content.future_1_unchanged) futures.push({ title: 'Unchanged', content: content.future_1_unchanged });
+  if (content.future_2_constrained) futures.push({ title: 'Constrained', content: content.future_2_constrained });
+  if (content.future_3_breakpoint) futures.push({ title: 'Breakpoint', content: content.future_3_breakpoint });
+  if (content.future_4_adapted) futures.push({ title: 'Adapted', content: content.future_4_adapted });
+  if (content.future_5_transformed) futures.push({ title: 'Transformed', content: content.future_5_transformed });
+  
+  // If no individual futures found, try summary + treat as single narrative
+  if (futures.length === 0 && (content.summary || content.body)) {
+    return (
+      <InsightPanel
+        icon="🌌"
+        title="Five Futures"
+        subtitle="Trajectory Simulations Based on Current Pattern"
+        content={content.summary || content.body}
+        prominence="premium"
+        className="five-futures-panel"
+      />
+    );
+  }
+  
+  // Render as distinct futures
+  if (futures.length > 0) {
+    return (
+      <div className="five-futures-grid">
+        {futures.map((future, idx) => (
+          <div key={idx} className="future-card">
+            <div className="future-badge">{idx + 1}</div>
+            <h4 className="future-title">{future.title}</h4>
+            <div className="future-content">
+              {typeof future.content === 'string' ? future.content : formatBIContent(future.content)}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  
+  return null;
 }
 
 // ============================================================================
