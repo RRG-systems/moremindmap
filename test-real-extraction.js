@@ -86,7 +86,9 @@ function runRealExtractionTest() {
     console.log(`First Impression: ${domains.othersExperience.first_impression.interpretation}`);
     console.log(`Communication: ${domains.othersExperience.communication_pattern.interpretation}`);
     console.log(`Listening: ${domains.othersExperience.listening_pattern.interpretation}`);
-    console.log(`Trust Speed: ${domains.othersExperience.trust_building_speed.interpretation}`);
+    if (domains.othersExperience.relational_friction) {
+      console.log(`Relational Friction: ${domains.othersExperience.relational_friction.interpretation}`);
+    }
     console.log('');
 
     // Domain 5: Pressure Mechanics
@@ -106,7 +108,12 @@ function runRealExtractionTest() {
     if (domains.contradictions.contradictions.length > 0) {
       domains.contradictions.contradictions.forEach((c, i) => {
         console.log(`  ${i + 1}. ${c.interpretation}`);
+        console.log(`     Cost: ${c.cost}`);
+        console.log(`     Severity: ${c.severity}`);
       });
+    }
+    if (domains.contradictions.organizational_cost) {
+      console.log(`Organizational Cost: ${domains.contradictions.organizational_cost}`);
     }
     console.log('');
 

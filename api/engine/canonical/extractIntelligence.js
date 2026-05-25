@@ -224,11 +224,16 @@ function extractWorldExperience(canonical) {
 
 /**
  * Domain 3: How Others Experience You (Tier 2-3)
+ * ENHANCED: Uses communication_style, leadership_architecture, stall_patterns, hidden_risk_patterns
  */
 function extractOthersExperience(canonical) {
   const top_systems = canonical.top_systems || {};
   const vector_scores = canonical.vector_scores || {};
   const primary = top_systems.primary_driver || {};
+  const communication_style = canonical.communication_style || {};
+  const leadership_arch = canonical.leadership_architecture || {};
+  const stall_patterns = canonical.stall_patterns || {};
+  const hidden_risks = canonical.hidden_risk_patterns || {};
   
   const signal_score = vector_scores.signal || 0;
   const vector_score = vector_scores.vector || 0;
@@ -236,56 +241,77 @@ function extractOthersExperience(canonical) {
   const velocity_score = vector_scores.velocity || 0;
   const flex_score = vector_scores.flex || 0;
 
+  // Extract communication evidence
+  const message_structure = communication_style.message_structure || '';
+  const directness = communication_style.directness || 'moderate';
+  const emotional_calibration = communication_style.emotional_calibration || '';
+  
+  // Extract leadership evidence
+  const team_experience = leadership_arch.team_experience || '';
+  const primary_mode = leadership_arch.primary_mode || '';
+  
+  // Extract relational friction evidence
+  const relational_frustration = stall_patterns.frustrations?.includes('relational');
+  const relational_erosion_risk = hidden_risks.relational_erosion_risk || '';
+
   return {
     title: 'How Others Experience You',
     confidence: 'tier_3_medium',
-    source_fields: ['primary_driver', 'vector_scores.signal', 'vector_scores.vector', 'vector_scores.flex'],
+    source_fields: [
+      'primary_driver',
+      'vector_scores',
+      'communication_style',
+      'leadership_architecture',
+      'stall_patterns.frustrations',
+      'hidden_risk_patterns.relational_erosion_risk'
+    ],
     
-    summary: buildOthersExperienceSummary(primary, vector_scores),
+    summary: buildOthersExperienceSummaryEnhanced(primary, communication_style, team_experience),
     
     first_impression: {
       primary_signal: primary.dimension || 'unknown',
-      interpretation: buildFirstImpressionInterpretation(primary.dimension, vector_score, signal_score)
+      team_evidence: team_experience || null,
+      interpretation: team_experience 
+        ? `${team_experience}. ${buildFirstImpressionInterpretation(primary.dimension, vector_score, signal_score)}`
+        : buildFirstImpressionInterpretation(primary.dimension, vector_score, signal_score)
     },
     
     communication_pattern: {
-      clarity_vs_brevity: fidelity_score > velocity_score ? 'clarity-oriented' : 'brevity-oriented',
+      structure: message_structure,
+      directness: directness,
+      emotional_calibration: emotional_calibration,
       fidelity_score: fidelity_score,
       velocity_score: velocity_score,
-      interpretation: fidelity_score > 6.5
-        ? 'Communication prioritizes precision and completeness—detailed, thorough.'
-        : velocity_score > 6.5
-        ? 'Communication prioritizes speed and direction—concise, action-oriented.'
-        : 'Communication balances detail and speed contextually.'
+      interpretation: emotional_calibration
+        ? `${message_structure}. ${emotional_calibration}`
+        : buildCommunicationInterpretation(fidelity_score, velocity_score, directness)
     },
     
     listening_pattern: {
       signal_score: signal_score,
       vector_dominance: vector_score,
-      interpretation: signal_score > 6.5
-        ? 'Attentive listener—tracks unspoken dynamics, tone, context.'
-        : vector_score > 6.5 && signal_score < 5
-        ? 'Goal-oriented listening—focuses on actionable information, may miss relational cues.'
-        : 'Balanced listening—adjusts attention by situation.'
+      under_pressure: relational_erosion_risk,
+      interpretation: relational_erosion_risk
+        ? `Normal state: ${buildListeningInterpretation(signal_score, vector_score)}. Under pressure: ${relational_erosion_risk}`
+        : buildListeningInterpretation(signal_score, vector_score)
     },
     
-    trust_building_speed: {
-      signal_score: signal_score,
-      flex_score: flex_score,
-      composite: (signal_score * flex_score) / 10,
-      interpretation: (signal_score * flex_score) / 10 > 5
-        ? 'Builds trust relatively quickly—perceptive + adaptable creates relational ease.'
-        : 'Trust builds more gradually—others may experience initial reserve or directness.'
+    relational_friction: {
+      friction_admitted: relational_frustration,
+      erosion_risk: relational_erosion_risk,
+      interpretation: relational_frustration && relational_erosion_risk
+        ? `Relational friction acknowledged in stall patterns. Risk: ${relational_erosion_risk}`
+        : relational_erosion_risk || 'Relational dynamics stable.'
     },
     
     key_signals: [
-      `First impression: ${primary.dimension}-driven`,
-      `Communication: ${fidelity_score > velocity_score ? 'clarity-oriented' : 'brevity-oriented'}`,
-      `Listening: Signal ${signal_score.toFixed(1)} vs Vector ${vector_score.toFixed(1)}`,
-      `Trust speed: ${((signal_score * flex_score) / 10).toFixed(1)}/10`
+      message_structure ? `Structure: ${message_structure}` : `Communication: ${fidelity_score > velocity_score ? 'clarity' : 'brevity'}-oriented`,
+      emotional_calibration ? `Calibration: ${emotional_calibration.substring(0, 50)}...` : `Directness: ${directness}`,
+      relational_erosion_risk ? `Relational risk: ${relational_erosion_risk.substring(0, 60)}...` : `Listening: Signal ${signal_score.toFixed(1)} vs Vector ${vector_score.toFixed(1)}`,
+      team_experience ? `Team sees: ${team_experience.substring(0, 50)}...` : `Primary mode: ${primary_mode || primary.dimension}`
     ],
     
-    causal_interpretation: 'Operating system → external behavior → how others perceive → relationship formation patterns.'
+    causal_interpretation: 'Operating system → communication structure → relational patterns → friction points under pressure → organizational consequences.'
   };
 }
 
@@ -339,41 +365,46 @@ function extractPressureMechanicsStarter(canonical) {
 }
 
 /**
- * Domain 6: Hidden Contradictions (Tier 2-3 - Starter)
+ * Domain 6: Hidden Contradictions (Tier 2-3)
+ * ENHANCED: Full unpacking with tension, manifestation, resolution path, severity
  */
 function extractContradictionsStarter(canonical) {
   const contradictions_array = canonical.contradictions || [];
   const dimension_tradeoffs = canonical.top_systems?.dimension_tradeoffs || [];
+  const hidden_risks = canonical.hidden_risk_patterns || {};
 
   return {
-    title: 'Hidden Contradictions (Starter)',
+    title: 'Hidden Contradictions',
     confidence: 'tier_3_medium',
-    source_fields: ['contradictions', 'dimension_tradeoffs'],
+    source_fields: ['contradictions', 'dimension_tradeoffs', 'hidden_risk_patterns'],
     
-    summary: buildContradictionsSummary(contradictions_array),
+    summary: buildContradictionsSummaryEnhanced(contradictions_array, hidden_risks),
     
     contradiction_count: contradictions_array.length,
     
-    contradictions: contradictions_array.slice(0, 3).map(c => ({
-      type: c.type || 'unknown',
-      primary_dimension: c.primary_dimension || null,
-      secondary_dimension: c.secondary_dimension || null,
-      cost: c.cost || '',
-      resolution_attempted: c.resolution_attempted || false,
-      interpretation: buildContradictionInterpretation(c)
+    contradictions: contradictions_array.map(c => ({
+      type: c.type || 'structural_tension',
+      tension: c.tension || '',
+      manifestation: c.manifestation || '',
+      dimensions_in_conflict: c.dimensions_in_conflict || [c.primary_dimension, c.secondary_dimension].filter(Boolean),
+      resolution_path: c.resolution_path || 'Unaddressed',
+      severity: c.severity || 'unknown',
+      cost: buildContradictionCost(c, hidden_risks),
+      interpretation: buildContradictionInterpretationEnhanced(c)
     })),
     
     core_tradeoff: dimension_tradeoffs[0] || null,
     
+    organizational_cost: extractOrganizationalCost(contradictions_array, hidden_risks),
+    
     key_signals: [
       `${contradictions_array.length} contradictions identified`,
-      contradictions_array[0]?.type ? `Primary: ${contradictions_array[0].type}` : 'No contradictions mapped yet',
-      dimension_tradeoffs[0]?.tradeoff ? `Core friction: ${dimension_tradeoffs[0].tradeoff}` : 'Tradeoff not identified'
+      contradictions_array[0]?.severity ? `Primary severity: ${contradictions_array[0].severity}` : 'Severity not assessed',
+      contradictions_array[0]?.tension ? `Tension: ${contradictions_array[0].tension.substring(0, 60)}...` : 'Core friction not mapped',
+      hidden_risks.relational_erosion_risk ? `Relational cost: ${hidden_risks.relational_erosion_risk.substring(0, 50)}...` : 'No relational risk identified'
     ],
     
-    causal_interpretation: 'Belief system → behavioral pattern → contradiction emerges → organizational cost.',
-    
-    note: 'Full contradiction unpacking (know vs apply gaps, evidence chains) in Phase 2.'
+    causal_interpretation: 'Structural tension (what you value vs what you default to) → behavioral manifestation (what others see) → organizational cost (friction, erosion, ceiling) → resolution path (what needs to shift).'
   };
 }
 
@@ -499,3 +530,169 @@ function getEmptyIntelligence(reason) {
     confidence_tiers: {}
   };
 }
+
+// ============================================================================
+// ENHANCED HELPER FUNCTIONS (Phase 2)
+// ============================================================================
+
+function buildOthersExperienceSummaryEnhanced(primary, communication_style, team_experience) {
+  if (team_experience) {
+    return `${team_experience}. ${communication_style.message_structure || 'Communication patterns'} shapes relational dynamics.`;
+  }
+  
+  const dimension = primary.dimension || 'unknown';
+  const structure = communication_style.message_structure || '';
+  
+  if (structure) {
+    return `${structure}. Others experience ${dimension}-driven approach in relational interactions.`;
+  }
+  
+  return `Others experience ${dimension}-driven approach first. Communication and listening patterns shaped by dimension balance.`;
+}
+
+function buildCommunicationInterpretation(fidelity, velocity, directness) {
+  if (fidelity > 6.5) {
+    return `Communication prioritizes precision and completeness—detailed, thorough. Directness: ${directness}.`;
+  }
+  
+  if (velocity > 6.5) {
+    return `Communication prioritizes speed and direction—concise, action-oriented. Directness: ${directness}.`;
+  }
+  
+  if (velocity > fidelity + 2) {
+    return `Communication leans brevity over detail—moves quickly, may skip context. Directness: ${directness}.`;
+  }
+  
+  return `Communication balances detail and speed contextually. Directness: ${directness}.`;
+}
+
+function buildListeningInterpretation(signal, vector) {
+  if (signal > 6.5) {
+    return 'Attentive listener—tracks unspoken dynamics, tone, relational context.';
+  }
+  
+  if (vector > 6.5 && signal < 3) {
+    return 'Goal-oriented listening—focuses on actionable information, filters relational cues.';
+  }
+  
+  if (vector > signal + 2) {
+    return 'Listening prioritizes direction and outcome—relational signals secondary to task.';
+  }
+  
+  if (signal > 4) {
+    return 'Balanced listening—adjusts attention between task and relational dynamics.';
+  }
+  
+  return 'Listening filters for action—relational awareness exists but not primary focus.';
+}
+
+function buildContradictionsSummaryEnhanced(contradictions, hidden_risks) {
+  if (contradictions.length === 0) {
+    return 'No structural contradictions currently identified in dossier.';
+  }
+  
+  const high_severity = contradictions.filter(c => c.severity === 'high' || c.severity === 'severe').length;
+  const relational_risk = hidden_risks.relational_erosion_risk;
+  
+  if (high_severity > 0 && relational_risk) {
+    return `${contradictions.length} contradictions identified (${high_severity} high-severity). ${relational_risk}`;
+  }
+  
+  if (high_severity > 0) {
+    return `${contradictions.length} contradictions identified (${high_severity} high-severity). Organizational cost: systems gaps, friction under pressure.`;
+  }
+  
+  if (contradictions.length === 1) {
+    const c = contradictions[0];
+    return `1 contradiction identified: ${c.tension || c.type || 'structural tension'}. Severity: ${c.severity || 'unknown'}.`;
+  }
+  
+  return `${contradictions.length} contradictions identified. Primary: ${contradictions[0].tension || contradictions[0].type || 'structural tension'}.`;
+}
+
+function buildContradictionCost(contradiction, hidden_risks) {
+  // If explicit cost field exists, use it
+  if (contradiction.cost && contradiction.cost.length > 0) {
+    return contradiction.cost;
+  }
+  
+  // Infer cost from severity + manifestation
+  const severity = contradiction.severity || 'unknown';
+  const manifestation = contradiction.manifestation || '';
+  const tension = contradiction.tension || '';
+  
+  if (severity === 'high' || severity === 'severe') {
+    if (manifestation.includes('infrastructure') || manifestation.includes('systems')) {
+      return 'Systems cannot support stated goals—ceiling hit without infrastructure build.';
+    }
+    
+    if (manifestation.includes('relational') || hidden_risks.relational_erosion_risk) {
+      return `${manifestation}. ${hidden_risks.relational_erosion_risk || 'Relational erosion under pressure.'}`;
+    }
+    
+    return manifestation || 'High organizational cost—friction compounds under growth.';
+  }
+  
+  if (severity === 'mild' || severity === 'low') {
+    return manifestation || 'Mild friction—manageable at current scale, may amplify under pressure.';
+  }
+  
+  // Fallback: use manifestation or tension
+  return manifestation || tension || 'Organizational friction—cost not yet quantified.';
+}
+
+function buildContradictionInterpretationEnhanced(contradiction) {
+  const parts = [];
+  
+  if (contradiction.tension) {
+    parts.push(`Tension: ${contradiction.tension}`);
+  } else if (contradiction.type) {
+    parts.push(`Type: ${contradiction.type}`);
+  }
+  
+  if (contradiction.manifestation) {
+    parts.push(`Manifests as: ${contradiction.manifestation}`);
+  }
+  
+  if (contradiction.dimensions_in_conflict && contradiction.dimensions_in_conflict.length > 0) {
+    parts.push(`Dimensions in conflict: ${contradiction.dimensions_in_conflict.join(' ↔ ')}`);
+  }
+  
+  if (contradiction.resolution_path) {
+    parts.push(`Resolution: ${contradiction.resolution_path}`);
+  }
+  
+  if (contradiction.severity) {
+    parts.push(`Severity: ${contradiction.severity}`);
+  }
+  
+  return parts.length > 0 ? parts.join('. ') + '.' : 'Structural tension identified but not fully unpacked.';
+}
+
+function extractOrganizationalCost(contradictions, hidden_risks) {
+  const costs = [];
+  
+  // Extract from contradictions
+  contradictions.forEach(c => {
+    if (c.severity === 'high' || c.severity === 'severe') {
+      const manifestation = c.manifestation || c.tension || 'High-severity contradiction';
+      costs.push(manifestation);
+    }
+  });
+  
+  // Extract from hidden risks
+  if (hidden_risks.relational_erosion_risk && hidden_risks.relational_erosion_risk !== 'Low') {
+    costs.push(hidden_risks.relational_erosion_risk);
+  }
+  
+  if (hidden_risks.burnout_trajectory && hidden_risks.burnout_trajectory !== 'Low') {
+    costs.push(`Burnout risk: ${hidden_risks.burnout_trajectory}`);
+  }
+  
+  if (costs.length === 0) {
+    return 'Organizational costs not yet quantified at current scale.';
+  }
+  
+  return costs.join('; ');
+}
+
