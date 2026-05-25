@@ -324,6 +324,92 @@ function PageFiveDashboard({ narrative }) {
   );
 }
 
+function PageSixDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-six">
+      <div className="page-content">
+        <div className="page-section-header">
+          <h2 className="page-section-title">Why Scale Breaks</h2>
+          <p className="page-section-subtitle">Structural collision between operator and organizational complexity</p>
+        </div>
+        <div className="zone-progression">
+          {narrative.strategicCeiling && (
+            <InsightPanel
+              icon="📈"
+              title="Scaling Constraint"
+              subtitle="Where Personal Execution Becomes Insufficient"
+              content={narrative.strategicCeiling?.body || narrative.strategicCeiling}
+              warning={narrative.strategicCeiling?.key_warning}
+              prominence="analytical"
+              className="scaling-constraint-panel"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PageSevenDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-seven">
+      <div className="page-content">
+        <div className="page-section-header">
+          <h2 className="page-section-title">Future Trajectories</h2>
+          <p className="page-section-subtitle">Five behavioral scenarios emerging from current operating pattern</p>
+        </div>
+        <div className="zone-progression five-futures-featured">
+          {narrative.profileDNA && (
+            <InsightPanel
+              icon="🌌"
+              title="Five Futures"
+              subtitle="Trajectory Simulations Based on Current Pattern"
+              content={narrative.profileDNA?.body || 'Five scenarios emerge from current operating pattern.'}
+              prominence="premium"
+              className="five-futures-panel"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PageEightDashboard({ narrative }) {
+  return (
+    <div className="dashboard-page page-eight">
+      <div className="page-content">
+        <div className="page-section-header">
+          <h2 className="page-section-title">Intervention</h2>
+          <p className="page-section-subtitle">Highest-leverage interruption earned by evidence</p>
+        </div>
+        <div className="zone-progression">
+          {narrative.coachingLeverage && (
+            <InsightPanel
+              icon="⚙️"
+              title="Facilitator Notes"
+              subtitle="Environment Design Guidance"
+              content={narrative.coachingLeverage?.body || narrative.coachingLeverage}
+              prominence="analytical"
+              className="facilitator-notes-panel"
+            />
+          )}
+          {narrative.recommendedNextStep && (
+            <InsightPanel
+              icon="⚡"
+              title="The One Move"
+              subtitle="Highest-Leverage Intervention"
+              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+              prominence="premium"
+              className="one-move-panel"
+            />
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ============================================================================
 // PRESENTATIONAL COMPONENTS (pure composition, no logic)
 // ============================================================================
