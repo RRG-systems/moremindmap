@@ -35,7 +35,7 @@ Ground every statement to the canonical data provided.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate a compressed executive summary (max 150 words).
+    instruction: `Generate a compressed executive summary (max 150 words) as JSON.
 Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings with this person.
 Do NOT use: "strength is", "liability", "operates", "person who", "tendency", "has a"
 DO use: behavioral manifestation + organizational consequence
@@ -83,7 +83,7 @@ Use ONLY the supplied evidence.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate communication style analysis (max 250 words).
+    instruction: `Generate communication style analysis (max 250 words) as JSON.
 Format: Team experience, not trait description. What's it actually like to be on the receiving end?
 Show BEHAVIORAL CONSEQUENCE, not intent.
 
@@ -137,7 +137,7 @@ Ground contradictions to OBSERVABLE EVIDENCE from scores and manifestations.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate 3-4 core contradictions (max 220 words total).
+    instruction: `Generate 3-4 core contradictions (max 220 words total) as JSON.
 Format: Organizational realism, not psychology. Show where self-model diverges from team experience.
 Each contradiction: observable gap between intent and consequence.
 
@@ -193,7 +193,7 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate scaling ceiling analysis (max 200 words).
+    instruction: `Generate scaling ceiling analysis (max 200 words) as JSON.
 Format: Organizational dynamics, not personality. Show how operating model becomes constraint at scale.
 Structure: 1x (advantage) → 2x (early friction) → 5x (systemic cost) → 10x (personal execution breaks)
 
@@ -249,7 +249,7 @@ Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate a concise operating model description (max 100 words).
+    instruction: `Generate a concise operating model description (max 100 words) as JSON.
 Frame: how this person actually thinks and acts, not qualities or traits.
 Tone: mechanical, observable, no attribution.
 
@@ -291,7 +291,7 @@ Ground in the person's actual operating model (from previous sections).`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate 3-4 behavioral experiments (max 200 words).
+    instruction: `Generate 3-4 behavioral experiments (max 200 words) as JSON.
 Format: numbered list, each 1-2 sentences. Testable, specific, operator-level.
 Focus: System shifts, not trait improvement. What changes if this pattern shifts?
 Tone: tactical, mechanical, irreverent.
@@ -338,7 +338,7 @@ Specific, grounded, testable.`,
       intake_answers: interpreted.intake_answers,
     },
 
-    instruction: `Generate ONE specific recommended next step (max 150 words).
+    instruction: `Generate ONE specific recommended next step (max 150 words) as JSON.
 Format: 2-3 sentences max.
 Tone: executive-level observation, testable, grounded in this person's operating model.
 
