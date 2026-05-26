@@ -488,181 +488,203 @@ function renderBIContent(domain, content) {
   }
   
   if (typeof content === 'object') {
-    // Render summary first
     const parts = [];
     
+    // Summary at top (narrative hook)
     if (content.summary) {
       parts.push(<p key="summary" className="bi-summary">{content.summary}</p>);
     }
     
-    // World Experience structure
+    // World Experience - render as flowing narrative blocks
     if (domain === 'worldExperience') {
-      if (content.perception_filter) {
+      const perceptions = [
+        content.perception_filter && { title: 'Perception', content: content.perception_filter.interpretation },
+        content.information_processing && { title: 'Information Processing', content: content.information_processing.interpretation },
+        content.decision_formation && { title: 'Decision Formation', content: content.decision_formation.interpretation },
+        content.time_horizon && { title: 'Time Horizon', content: content.time_horizon.interpretation },
+        content.risk_calibration && { title: 'Risk Calibration', content: content.risk_calibration.interpretation },
+      ].filter(Boolean);
+      
+      perceptions.forEach((item, idx) => {
         parts.push(
-          <div key="perc" className="bi-subsection">
-            <h4>Perception</h4>
-            <p>{content.perception_filter.interpretation}</p>
+          <div key={`perc-${idx}`} className="bi-subsection">
+            <h4 className="bi-subsection-title">{item.title}</h4>
+            <p className="bi-subsection-text">{item.content}</p>
           </div>
         );
-      }
-      if (content.information_processing) {
+      });
+      
+      // Key signals - cleaner presentation
+      if (content.key_signals && Array.isArray(content.key_signals)) {
         parts.push(
-          <div key="info" className="bi-subsection">
-            <h4>Information Processing</h4>
-            <p>{content.information_processing.interpretation}</p>
-          </div>
-        );
-      }
-      if (content.decision_formation) {
-        parts.push(
-          <div key="dec" className="bi-subsection">
-            <h4>Decision Formation</h4>
-            <p>{content.decision_formation.interpretation}</p>
-          </div>
-        );
-      }
-      if (content.time_horizon) {
-        parts.push(
-          <div key="time" className="bi-subsection">
-            <h4>Time Horizon</h4>
-            <p>{content.time_horizon.interpretation}</p>
-          </div>
-        );
-      }
-      if (content.risk_calibration) {
-        parts.push(
-          <div key="risk" className="bi-subsection">
-            <h4>Risk Calibration</h4>
-            <p>{content.risk_calibration.interpretation}</p>
+          <div key="signals" className="bi-key-signals">
+            <h4 className="bi-subsection-title">Key Signals</h4>
+            <ul className="bi-signal-list">
+              {content.key_signals.map((signal, idx) => (
+                <li key={idx}>{signal}</li>
+              ))}
+            </ul>
           </div>
         );
       }
     }
     
-    // Pressure Mechanics structure
+    // Pressure Mechanics - narrative + state changes
     if (domain === 'pressureMechanics') {
-      if (content.primary_under_load) {
+      const mechanics = [
+        content.primary_under_load && { 
+          type: 'primary',
+          data: content.primary_under_load 
+        },
+        content.secondary_override && { 
+          type: 'secondary',
+          data: content.secondary_override 
+        },
+      ].filter(Boolean);
+      
+      mechanics.forEach((mech, idx) => {
+        const data = mech.data;
+        const title = mech.type === 'primary' 
+          ? `${data.dimension} Under Load` 
+          : `${data.dimension} Override Pattern`;
+        
         parts.push(
-          <div key="primary" className="bi-subsection">
-            <h4>{content.primary_under_load.dimension} Under Load</h4>
-            <p><strong>Normal:</strong> {content.primary_under_load.normal_state}</p>
-            <p><strong>Under Pressure:</strong> {content.primary_under_load.pressure_state}</p>
-            <p>{content.primary_under_load.interpretation}</p>
+          <div key={`mech-${idx}`} className="bi-subsection">
+            <h4 className="bi-subsection-title">{title}</h4>
+            <div className="bi-state-pair">
+              <div className="bi-state">
+                <p className="bi-state-label">Normal State</p>
+                <p className="bi-state-text">{data.normal_state || data.normal}</p>
+              </div>
+              <div className="bi-state">
+                <p className="bi-state-label">Under Pressure</p>
+                <p className="bi-state-text">{data.pressure_state || data.override_pattern || data.pressure}</p>
+              </div>
+            </div>
+            {data.interpretation && <p className="bi-interpretation">{data.interpretation}</p>}
           </div>
         );
-      }
-      if (content.secondary_override) {
+      });
+      
+      // Key signals
+      if (content.key_signals && Array.isArray(content.key_signals)) {
         parts.push(
-          <div key="secondary" className="bi-subsection">
-            <h4>{content.secondary_override.dimension} Override</h4>
-            <p><strong>Normal:</strong> {content.secondary_override.normal_state}</p>
-            <p><strong>Under Pressure:</strong> {content.secondary_override.override_pattern}</p>
-            <p>{content.secondary_override.interpretation}</p>
+          <div key="signals" className="bi-key-signals">
+            <h4 className="bi-subsection-title">Key Signals</h4>
+            <ul className="bi-signal-list">
+              {content.key_signals.map((signal, idx) => (
+                <li key={idx}>{signal}</li>
+              ))}
+            </ul>
           </div>
         );
       }
     }
     
-    // Others Experience structure
+    // Others Experience - how they perceive you
     if (domain === 'othersExperience') {
-      if (content.first_impression) {
+      const experiences = [
+        content.first_impression && { title: 'First Impression', content: content.first_impression.interpretation },
+        content.communication_pattern && { title: 'Communication Pattern', content: content.communication_pattern.interpretation },
+        content.listening_pattern && { title: 'Listening Pattern', content: content.listening_pattern.interpretation },
+        content.relational_friction && { title: 'Relational Dynamics', content: content.relational_friction.interpretation },
+      ].filter(Boolean);
+      
+      experiences.forEach((item, idx) => {
         parts.push(
-          <div key="first" className="bi-subsection">
-            <h4>First Impression</h4>
-            <p>{content.first_impression.interpretation}</p>
+          <div key={`exp-${idx}`} className="bi-subsection">
+            <h4 className="bi-subsection-title">{item.title}</h4>
+            <p className="bi-subsection-text">{item.content}</p>
           </div>
         );
-      }
-      if (content.communication_pattern) {
+      });
+      
+      // Key signals
+      if (content.key_signals && Array.isArray(content.key_signals)) {
         parts.push(
-          <div key="comm" className="bi-subsection">
-            <h4>Communication Pattern</h4>
-            <p>{content.communication_pattern.interpretation}</p>
-          </div>
-        );
-      }
-      if (content.listening_pattern) {
-        parts.push(
-          <div key="listen" className="bi-subsection">
-            <h4>Listening Pattern</h4>
-            <p>{content.listening_pattern.interpretation}</p>
-          </div>
-        );
-      }
-      if (content.relational_friction) {
-        parts.push(
-          <div key="relational" className="bi-subsection">
-            <h4>Relational Dynamics</h4>
-            <p>{content.relational_friction.interpretation}</p>
+          <div key="signals" className="bi-key-signals">
+            <h4 className="bi-subsection-title">Key Signals</h4>
+            <ul className="bi-signal-list">
+              {content.key_signals.map((signal, idx) => (
+                <li key={idx}>{signal}</li>
+              ))}
+            </ul>
           </div>
         );
       }
     }
     
-    // Scaling Constraint structure
+    // Scaling Constraint - three parts
     if (domain === 'scalingConstraint') {
-      if (content.ceiling_mechanics) {
-        const cm = content.ceiling_mechanics;
+      const constraints = [
+        content.ceiling_mechanics && { 
+          title: 'Ceiling Mechanism', 
+          data: content.ceiling_mechanics 
+        },
+        content.current_systems_capacity && { 
+          title: 'Current Capacity', 
+          data: content.current_systems_capacity 
+        },
+        content.stated_vs_supported && { 
+          title: 'Goal + Infrastructure Alignment', 
+          data: content.stated_vs_supported 
+        },
+        content.implications && { 
+          title: 'Implications', 
+          data: content.implications 
+        },
+      ].filter(Boolean);
+      
+      constraints.forEach((constraint, idx) => {
         parts.push(
-          <div key="ceiling" className="bi-subsection">
-            <h4>Ceiling Mechanism</h4>
-            {cm.primary_constraint && <p><strong>Constraint:</strong> {cm.primary_constraint}</p>}
-            {cm.ceiling_description && <p><strong>Description:</strong> {cm.ceiling_description}</p>}
-            {cm.interpretation && <p>{cm.interpretation}</p>}
+          <div key={`constraint-${idx}`} className="bi-subsection">
+            <h4 className="bi-subsection-title">{constraint.title}</h4>
+            {typeof constraint.data === 'string' ? (
+              <p className="bi-subsection-text">{constraint.data}</p>
+            ) : (
+              <div className="bi-subsection-content">
+                {constraint.data.interpretation && <p>{constraint.data.interpretation}</p>}
+                {constraint.data.description && <p>{constraint.data.description}</p>}
+                {constraint.data.capacity_description && <p>{constraint.data.capacity_description}</p>}
+                {constraint.data.primary_constraint && <p><em>{constraint.data.primary_constraint}</em></p>}
+              </div>
+            )}
           </div>
         );
-      }
-      if (content.current_systems_capacity) {
-        const csc = content.current_systems_capacity;
+      });
+      
+      // Key signals
+      if (content.key_signals && Array.isArray(content.key_signals)) {
         parts.push(
-          <div key="capacity" className="bi-subsection">
-            <h4>Current Capacity</h4>
-            {csc.capacity_description && <p><strong>Description:</strong> {csc.capacity_description}</p>}
-            {csc.readiness_level && <p><strong>Readiness:</strong> {csc.readiness_level}</p>}
-            {csc.interpretation && <p>{csc.interpretation}</p>}
-          </div>
-        );
-      }
-      if (content.stated_vs_supported) {
-        const svs = content.stated_vs_supported;
-        parts.push(
-          <div key="alignment" className="bi-subsection">
-            <h4>Goal + Infrastructure Alignment</h4>
-            {svs.stated_growth_target && <p><strong>Growth Target:</strong> {svs.stated_growth_target}</p>}
-            {svs.infrastructure_readiness && <p><strong>Infrastructure Readiness:</strong> {svs.infrastructure_readiness}</p>}
-            {svs.interpretation && <p>{svs.interpretation}</p>}
-          </div>
-        );
-      }
-      if (content.implications) {
-        const imp = content.implications;
-        parts.push(
-          <div key="implications" className="bi-subsection">
-            <h4>Implications</h4>
-            {imp.without_infrastructure && <p><strong>Without infrastructure:</strong> {imp.without_infrastructure}</p>}
-            {imp.with_infrastructure && <p><strong>With infrastructure:</strong> {imp.with_infrastructure}</p>}
+          <div key="signals" className="bi-key-signals">
+            <h4 className="bi-subsection-title">Key Signals</h4>
+            <ul className="bi-signal-list">
+              {content.key_signals.map((signal, idx) => (
+                <li key={idx}>{signal}</li>
+              ))}
+            </ul>
           </div>
         );
       }
     }
     
-    // Facilitator Notes structure
+    // Facilitator Notes - primary guidance + structured notes
     if (domain === 'facilitatorNotes') {
       if (content.primary_guidance) {
         parts.push(
           <div key="guidance" className="bi-subsection">
-            <h4>Primary Guidance</h4>
-            <p>{content.primary_guidance}</p>
+            <p className="bi-subsection-highlight">{content.primary_guidance}</p>
           </div>
         );
       }
+      
       if (Array.isArray(content.notes) && content.notes.length > 0) {
         parts.push(
           <div key="notes" className="bi-subsection">
-            <h4>Notes</h4>
-            <ul>
+            <h4 className="bi-subsection-title">Structural Notes</h4>
+            <ul className="bi-notes-list">
               {content.notes.map((note, idx) => (
-                <li key={idx}>
+                <li key={idx} className="bi-note-item">
                   {note.note || note}
                 </li>
               ))}
@@ -670,145 +692,93 @@ function renderBIContent(domain, content) {
           </div>
         );
       }
+      
       if (content.caution) {
         parts.push(
-          <div key="caution" className="bi-subsection">
-            <h4>Caution</h4>
-            <p><em>{content.caution}</em></p>
+          <div key="caution" className="bi-subsection bi-caution">
+            <p className="bi-caution-text">{content.caution}</p>
           </div>
         );
       }
     }
     
-    // The One Move structure
+    // The One Move - highlight the move, then reasoning
     if (domain === 'theOneMove') {
       if (content.the_move) {
         parts.push(
           <div key="move" className="bi-subsection">
-            <p className="bi-move-highlight"><strong>{content.the_move}</strong></p>
+            <p className="bi-move-highlight">⭐ {content.the_move}</p>
           </div>
         );
       }
+      
       if (content.reasoning) {
         parts.push(
           <div key="reasoning" className="bi-subsection">
-            <h4>Reasoning</h4>
-            <p>{content.reasoning}</p>
+            <h4 className="bi-subsection-title">Why</h4>
+            <p className="bi-subsection-text">{content.reasoning}</p>
           </div>
         );
       }
+      
       if (content.timeline) {
         parts.push(
           <div key="timeline" className="bi-subsection">
-            <h4>Timeline</h4>
-            <p>{content.timeline}</p>
+            <h4 className="bi-subsection-title">Timeline</h4>
+            <p className="bi-subsection-text">{content.timeline}</p>
           </div>
         );
       }
+      
       if (content.caution) {
         parts.push(
-          <div key="caution" className="bi-subsection">
-            <h4>Caution</h4>
-            <p><em>{content.caution}</em></p>
+          <div key="caution" className="bi-subsection bi-caution">
+            <p className="bi-caution-text">{content.caution}</p>
           </div>
         );
       }
     }
     
-    // Contradictions domain (special handling)
-    if (domain === 'contradictions') {
-      if (Array.isArray(content.contradictions) && content.contradictions.length > 0) {
-        content.contradictions.forEach((contra, idx) => {
-          parts.push(
-            <div key={`contra-${idx}`} className="bi-subsection">
-              <h4>{contra.type || `Contradiction ${idx + 1}`}</h4>
-              {contra.tension && <p><strong>Tension:</strong> {contra.tension}</p>}
-              {contra.manifestation && <p><strong>Manifestation:</strong> {contra.manifestation}</p>}
-              {contra.resolution_path && <p><strong>Resolution:</strong> {contra.resolution_path}</p>}
-              {contra.interpretation && <p><em>{contra.interpretation}</em></p>}
-            </div>
-          );
-        });
-      }
-    }
-    
-    // Organizational Consequences domain
-    if (domain === 'organizationalConsequences') {
-      if (Array.isArray(content.consequence_matrix) && content.consequence_matrix.length > 0) {
-        parts.push(
-          <div key="consequences" className="bi-subsection">
-            <h4>Consequence Matrix</h4>
-            <ul>
-              {content.consequence_matrix.map((consequence, idx) => (
-                <li key={idx}>
-                  <strong>{consequence.domain}:</strong> {consequence.cost}
-                </li>
-              ))}
-            </ul>
-          </div>
-        );
-      }
-    }
-    
-    // Key Signals (render for all domains)
-    if (Array.isArray(content.key_signals) && content.key_signals.length > 0 && !parts.some(p => p.key === 'signals')) {
-      parts.push(
-        <div key="signals" className="bi-subsection">
-          <h4>Key Signals</h4>
-          <ul>
-            {content.key_signals.map((signal, idx) => (
-              <li key={idx}>{signal}</li>
-            ))}
-          </ul>
-        </div>
-      );
-    }
-    
-    // Causal Interpretation (render for all domains)
-    if (content.causal_interpretation && !parts.some(p => p.key === 'causal')) {
-      parts.push(
-        <div key="causal" className="bi-subsection causal">
-          <p><em>{content.causal_interpretation}</em></p>
-        </div>
-      );
-    }
-    
-    // If we rendered nothing, fall back to generic string extraction
-    if (parts.length === 0) {
-      const strings = Object.entries(content)
-        .filter(([k, v]) => typeof v === 'string' && v.length > 0)
-        .map(([k, v]) => <p key={k}>{v}</p>);
-      return strings.length > 0 ? <div>{strings}</div> : null;
-    }
-    
-    return <div className="bi-content-structured">{parts}</div>;
+    return <>{parts}</>;
   }
   
-  return String(content);
+  return null;
 }
-
-/**
- * Render Five Futures as distinct future items
- * Each future is rendered separately with title, trajectory, and details
- */
 function FiveFuturesRenderer({ content }) {
   if (!content) return null;
   
   // Handle futures array from extractFiveFuturesStarter
   if (Array.isArray(content.futures) && content.futures.length > 0) {
     return (
-      <div className="five-futures-grid">
-        {content.futures.map((future, idx) => (
-          <div key={idx} className="future-card">
-            <div className="future-badge">{idx + 1}</div>
-            <h4 className="future-title">{future.title || 'Future'}</h4>
-            <div className="future-likelihood">{future.likelihood}</div>
-            <div className="future-content">
-              <p className="future-trajectory">{future.trajectory}</p>
-              <p className="future-org-experience">{future.organization_experiences}</p>
+      <div className="five-futures-section">
+        <div className="five-futures-grid">
+          {content.futures.map((future, idx) => (
+            <div key={idx} className="future-card-container">
+              <div className="future-card">
+                <div className="future-header">
+                  <span className="future-badge">{idx + 1}</span>
+                  <h3 className="future-title">{future.title || 'Future'}</h3>
+                </div>
+                <div className="future-meta">
+                  <span className="future-likelihood-label">Likelihood:</span>
+                  <span className="future-likelihood">{future.likelihood}</span>
+                </div>
+                <div className="future-body">
+                  {future.trajectory && (
+                    <div className="future-trajectory">
+                      <p className="future-trajectory-text">{future.trajectory}</p>
+                    </div>
+                  )}
+                  {future.organization_experiences && (
+                    <div className="future-org-impact">
+                      <p className="future-org-text">{future.organization_experiences}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -838,16 +808,28 @@ function FiveFuturesRenderer({ content }) {
   // Render individual field names as cards
   if (futures.length > 0) {
     return (
-      <div className="five-futures-grid">
-        {futures.map((future, idx) => (
-          <div key={idx} className="future-card">
-            <div className="future-badge">{idx + 1}</div>
-            <h4 className="future-title">{future.title}</h4>
-            <div className="future-content">
-              {typeof future.content === 'string' ? future.content : formatBIContent(future.content)}
+      <div className="five-futures-section">
+        <div className="five-futures-grid">
+          {futures.map((future, idx) => (
+            <div key={idx} className="future-card-container">
+              <div className="future-card">
+                <div className="future-header">
+                  <span className="future-badge">{idx + 1}</span>
+                  <h3 className="future-title">{future.title}</h3>
+                </div>
+                <div className="future-body">
+                  <div className="future-content">
+                    {typeof future.content === 'string' ? (
+                      <p>{future.content}</p>
+                    ) : (
+                      formatBIContent(future.content)
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     );
   }
@@ -3120,6 +3102,302 @@ function DashboardStyles() {
           grid-template-columns: 1fr 1fr;
         }
       }
-    `}</style>
+
+      /* ===== BEHAVIORAL INTELLIGENCE CONTENT STYLING ===== */
+      
+      .bi-summary {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #d4d4d4;
+        margin: 0 0 1.5rem 0;
+        font-style: italic;
+        border-left: 3px solid rgba(212, 175, 55, 0.4);
+        padding-left: 1rem;
+      }
+      
+      .bi-subsection {
+        margin: 1.5rem 0;
+        padding: 0;
+      }
+      
+      .bi-subsection-title {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #d4af37;
+        margin: 0 0 0.8rem 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      
+      .bi-subsection-text {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #d4d4d4;
+        margin: 0;
+      }
+      
+      .bi-subsection-highlight {
+        font-size: 1.05rem;
+        line-height: 1.7;
+        color: #d4af37;
+        margin: 0;
+        font-weight: 600;
+      }
+      
+      .bi-subsection-content {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: #d4d4d4;
+      }
+      
+      .bi-subsection-content p {
+        margin: 0.5rem 0;
+      }
+      
+      .bi-state-pair {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1rem 0;
+      }
+      
+      .bi-state {
+        padding: 1rem;
+        border-radius: 8px;
+        background: rgba(212, 175, 55, 0.08);
+        border: 1px solid rgba(212, 175, 55, 0.2);
+      }
+      
+      .bi-state-label {
+        font-size: 0.85rem;
+        color: #d4af37;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin: 0 0 0.5rem 0;
+      }
+      
+      .bi-state-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+        margin: 0;
+      }
+      
+      .bi-interpretation {
+        font-size: 0.95rem;
+        line-height: 1.7;
+        color: #b0b0b0;
+        margin: 1rem 0 0 0;
+        font-style: italic;
+      }
+      
+      .bi-key-signals {
+        margin: 2rem 0 0 0;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(212, 175, 55, 0.2);
+      }
+      
+      .bi-signal-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .bi-signal-list li {
+        padding: 0.5rem 0 0.5rem 1.5rem;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+      }
+      
+      .bi-signal-list li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: #d4af37;
+        font-weight: 600;
+      }
+      
+      .bi-notes-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .bi-notes-list .bi-note-item {
+        padding: 0.6rem 0 0.6rem 1.5rem;
+        position: relative;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+      }
+      
+      .bi-notes-list .bi-note-item::before {
+        content: '■';
+        position: absolute;
+        left: 0.3rem;
+        color: #d4af37;
+        font-size: 0.6rem;
+      }
+      
+      .bi-move-highlight {
+        font-size: 1.15rem;
+        line-height: 1.8;
+        color: #d4af37;
+        margin: 0;
+        font-weight: 600;
+      }
+      
+      .bi-caution {
+        background: rgba(255, 152, 0, 0.08);
+        border-left: 3px solid rgba(255, 152, 0, 0.4);
+        padding: 1rem;
+        border-radius: 6px;
+      }
+      
+      .bi-caution-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #ffb74d;
+        margin: 0;
+        font-style: italic;
+      }
+      
+      /* ===== FIVE FUTURES STYLING ===== */
+      
+      .five-futures-section {
+        width: 100%;
+      }
+      
+      .five-futures-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin: 0;
+        padding: 0;
+      }
+      
+      .future-card-container {
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .future-card {
+        background: linear-gradient(135deg, rgba(15, 20, 40, 0.7) 0%, rgba(10, 14, 35, 0.6) 100%);
+        border: 1.5px solid rgba(212, 175, 55, 0.25);
+        border-radius: 12px;
+        padding: 1.8rem;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .future-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, rgba(212, 175, 55, 0) 0%, rgba(212, 175, 55, 0.3) 50%, rgba(212, 175, 55, 0) 100%);
+      }
+      
+      .future-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(212, 175, 55, 0.45);
+        box-shadow: 0 12px 48px rgba(212, 175, 55, 0.15);
+      }
+      
+      .future-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .future-badge {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, rgba(212, 175, 55, 0.8) 0%, rgba(212, 175, 55, 0.5) 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #1a1a1a;
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      
+      .future-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        flex: 1;
+      }
+      
+      .future-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+      }
+      
+      .future-likelihood-label {
+        color: #999;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+      }
+      
+      .future-likelihood {
+        color: #d4af37;
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      
+      .future-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .future-trajectory,
+      .future-org-impact {
+        margin: 0;
+      }
+      
+      .future-trajectory-text,
+      .future-org-text {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+        margin: 0;
+      }
+      
+      .future-org-impact {
+        padding-top: 0.8rem;
+        border-top: 1px solid rgba(212, 175, 55, 0.15);
+      }
+      
+      .future-content {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: #d4d4d4;
+      }
+
+          `}</style>
   );
 }

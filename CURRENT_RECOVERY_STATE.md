@@ -1,185 +1,171 @@
 # CURRENT_RECOVERY_STATE.md
 
-**Last Checkpoint:** Mon May 26, 2026 16:45 MST  
-**Status:** STEP 3.5 RENDER DEPTH BUG FIXED — Content Now Renders at Full Depth
+**Last Update:** Mon May 26, 2026 20:49 MST  
+**Status:** STEP 3.5 ARCHITECTURE COMPLETE - FIELD MAPPING FIXES DEPLOYED - BLOCKER: LOCAL RETRIEVAL FAILURE
 
 ---
 
-## SYSTEM STATE
+## System State Summary
 
-### Primary Product: Canonical Dossier
-- **Status:** ✅ Stable and persisted in Vault
-- **Location:** Redis Vault (indexed by email, retrievable by profile_id)
-- **Quality:** 83/100 (commercial ready, proven with multiple profiles)
-- **Backward Compatibility:** Yes (no schema changes)
+### What's Complete ✅
 
-### Behavioral Intelligence Layer
-- **Status:** ✅ Complete (11 domains, 3 confidence tiers)
-- **Backend:** api/engine/canonical/extractIntelligence.js (read-only)
-- **Extraction:** 100% functional, no bugs known
-- **Data Flow:** ✅ Backend → Frontend complete
+**1. Backend BI Extraction** ✅
+- 11 domains extracting correctly
+- All fields present and structured properly
+- Production API verified working
 
-### Render Contract Layer
-- **Status:** ✅ Complete (11 sections mapped to BI domains)
-- **Location:** src/lib/profile/renderContract.js
-- **Domain Mappings:** ✅ Fixed (othersExperience, fiveFuturesStarter)
-- **Fallbacks:** Working (narrative fields used if BI missing)
+**2. Field Mapping Corrections** ✅
+- renderContract.js sourceFields updated for all domains
+- Matches exact backend field names
+- extractSectionContent retrieves complete nested structures
 
-### Content Depth Renderer
-- **Status:** ✅ Complete (renderBIContent by domain)
-- **Function:** Renders full nested BI structures, not single fields
-- **Implementation:** Domain-specific JSX generation
-- **Styling:** CSS subsections with gold accents
+**3. Rendering Enhancement** ✅
+- renderBIContent unpacks nested objects
+- Arrays (contradictions, futures, consequences) render fully
+- All subsections, key signals, causal interpretations included
+- Build passes: 122.95 kB gzip
 
-### WebProfileReport
-- **Status:** ✅ All 8 pages rendering with BI data
-- **Page 1:** Operating System + DNA + Pressure Dynamics
-- **Page 2:** Contradictions + Strain + Ceiling + Facilitator Notes
-- **Page 3:** World Experience (5 subsections)
-- **Page 4:** Pressure Mechanics (Primary + Secondary)
-- **Page 5:** Team Experience (4 relational patterns)
-- **Page 6:** Scaling Constraint (Ceiling + Coordination + Infrastructure)
-- **Page 7:** Five Futures (5 distinct cards)
-- **Page 8:** The One Move (Move + Reasoning + Impact)
+### What's Blocked ❌
 
-### Build Status
-- **npm run build:** ✅ PASS
-- **Bundle Size:** 122.51 kB gzip (stable)
-- **Errors:** 0
-- **Warnings:** 0
+**Localhost Profile Retrieval Failure**
+- Error: "Failed to retrieve profile"
+- Affects: MM-20260523-mqlev9c9 and presumably all profiles
+- Scope: Only localhost; production API works
+- Duration: Discovered after field mapping fixes deployed
+- Status: Under investigation
 
----
+### Evidence
 
-## LIVE TEST PROFILE
+**Production API Working:**
+```bash
+$ curl 'https://moremindmap.com/api/moremindmap/retrieve-profile?id=MM-20260523-mqlev9c9'
+→ HTTP 200 OK with full profile + behavioral_intelligence_v1
+```
 
-**Current Profile:** MM-20260523-mqlev9c9  
-**Status:** All sections rendering with full content depth
+**Localhost Vite Proxy:**
+```
+/api/* → https://moremindmap.com (via vite.config.js)
+.env.development → VITE_API_URL=https://moremindmap.com
+```
 
-**Verification Checklist:**
-- ✅ Five Futures: 5 distinct cards visible
-- ✅ Pressure Mechanics: Primary + secondary escalation
-- ✅ Others Experience: Team consequence patterns
-- ✅ World Experience: Perception + info + decision + time + risk
-- ✅ Facilitator Notes: Guidance + structural + context
-- ✅ The One Move: Move + reasoning + impact
-- ✅ Scaling Constraint: Ceiling + coordination + infrastructure
-- ✅ No blank titled sections
-- ✅ No giant empty gaps
-- ✅ Causal interpretations visible
-- ✅ Key signals rendered
+**Localhost Browser:**
+- Attempts retrieval
+- Gets error: "Failed to retrieve profile"
+- Root cause: Unknown - pending console log inspection
 
 ---
 
-## COMPLETED WORK (STEP 3.5)
+## Investigation Log
 
-### Phase 1: Content Routing Cleanup
-- ✅ Five Futures: Renders from BI, not fallback
-- ✅ The One Move: Single location (Page 8 only)
-- ✅ Facilitator Notes: Single location (Page 2 only)
-- ✅ No duplicate sections across pages
+### Timeline
+1. **16:30** - Field mapping fixes deployed, build succeeds
+2. **20:00** - Attempted localhost retrieval
+3. **20:15** - Discovered retrieval failing despite correct env
+4. **20:30** - Restarted Vite dev server (was stale from Saturday)
+5. **20:45** - Added Profile.jsx console logging
+6. **20:49** - Documented blocker, awaiting browser console logs
 
-### Phase 2: Render Audit + Fix
-- ✅ Data flow: BI data reaches all pages
-- ✅ Domain mapping: Names corrected (othersExperience, fiveFuturesStarter)
-- ✅ Data structure: Futures array handling
-- ✅ Props passing: All 8 pages receive BI + canonical
+### Actions Taken
+- ✅ Verified .env.development has correct API URL
+- ✅ Restarted Vite dev server
+- ✅ Confirmed production API endpoint works
+- ✅ Added Profile.jsx debug logging (Profile.jsx updated with [VALIDATE] logs)
+- 📋 Pending: Browser console inspection
 
-### Phase 3: Content Depth Fix
-- ✅ Replaced formatBIContent with renderBIContent
-- ✅ Domain-specific rendering logic
-- ✅ Full nested structure extraction
-- ✅ CSS styling for subsections
-- ✅ Gap collapsing (empty sections hidden)
-
----
-
-## READY FOR
-
-- ✅ Live profile testing (any MM- profile ID)
-- ✅ Production deployment
-- ✅ User acceptance testing
-- ✅ Screenshot validation
-- ✅ Content verification audit
-
----
-
-## BUG FIXED: RENDER DEPTH (Mon 16:45)
-
-**Root Cause:** Content extraction was returning empty fields
-- renderContract.js listed wrong `sourceFields` names (e.g., 'environment_reading' vs actual 'perception_filter')
-- extractSectionContent extracted only those non-existent fields, returning mostly empty objects
-- renderBIContent had nothing to render except summary
-- Result: All sections showed single-line content despite backend generating rich structures
-
-**Solution Applied:**
-1. Corrected all `sourceFields` to match actual BI domain structure from backend
-2. Enhanced `renderBIContent` renderer to unpack nested objects and arrays
-3. Added specific handling for array fields (futures, contradictions, notes, consequence_matrix)
-
-**Depth Achieved:**
-- **worldExperience:** 8 sections (summary + 5 subsections + key signals + causal)
-- **pressureMechanics:** 5+ sections (summary + primary + secondary + key signals + causal)
-- **othersExperience:** 7 sections (summary + 4 patterns + key signals + causal)
-- **scalingConstraint:** 6 sections (summary + ceiling + capacity + alignment + implications)
-- **facilitatorNotes:** guidance + notes list + caution
-- **theOneMove:** move + reasoning + timeline + caution
-- **contradictions:** Full array - each with type, tension, manifestation, resolution
-- **organizationalConsequences:** Full matrix with domain+cost pairs
-- **fiveFuturesStarter:** 5 distinct future cards
-
-**Build:** ✓ Pass (122.86 kB gzip)  
-**All STEP 3.5 tasks complete. Content now renders at full depth.**
+### Next Steps (Ordered)
+1. Open browser devtools → Console tab
+2. Load localhost:5173
+3. Enter profile ID: MM-20260523-mqlev9c9
+4. Click Validate
+5. Review console logs for:
+   - `[VALIDATE] VITE_API_URL:` value
+   - `[VALIDATE] Full URL:` being called
+   - `[VALIDATE] Response status:` HTTP code
+   - `[VALIDATE] Error response:` details
+6. Based on logs, fix root cause
+7. Once retrieval works, resume render depth testing
 
 ---
 
-## RECOVERY INSTRUCTIONS (If Needed)
+## Architecture Components
 
-### If Pages Show Blank Content
+### Data Pipeline
+```
+Backend BI Extraction (11 domains)
+         ↓
+API /retrieve-profile returns behavioral_intelligence_v1
+         ↓
+Profile.jsx calls API (NOW FAILING)
+         ↓
+[BLOCKER] Profile not retrieved
+         ↓
+WebProfileReport never receives BI data
+         ↓
+Render pipeline cannot proceed
+```
 
-1. Check: Does behavioral_intelligence_v1 exist in profile?
-   - Backend generates it on retrieve
-   - Profile.jsx should store it
-   - Check Redux state or component props
-
-2. Check: Is renderBIContent receiving correct domain name?
-   - worldExperience (not world_experience)
-   - pressureMechanics (not pressure_mechanics)
-   - othersExperience (not howOthersExperience)
-   - fiveFuturesStarter (not fiveFutures)
-   - facilitatorNotes, scalingConstraint, theOneMove
-
-3. Check: Does BI domain have content?
-   - If empty, fallback to narrative fields
-   - Fallback should render something (or section hidden)
-
-### If Build Fails
-
-1. Clear node_modules: `rm -rf node_modules && npm install`
-2. Clear cache: `npm cache clean --force`
-3. Rebuild: `npm run build`
-
-### If Profile Doesn't Retrieve
-
-1. Check profile ID format: MM-YYYYMMDD-xxxxxxxx
-2. Check case: accepts both MM- and mm-
-3. Check Vault access: Redis connection working?
-4. Check fallback: Does legacy uppercase MM-* key exist?
+### Render Pipeline (Ready but unused)
+```
+renderContract.js: Maps domains to sections with correct sourceFields
+         ↓
+extractSectionContent: Extracts fields from BI domains (ready)
+         ↓
+renderBIContent: Renders nested structures (ready)
+         ↓
+Page components: Display content (ready)
+```
 
 ---
 
-## PRODUCTION CHECKLIST
+## Files Modified
 
-- ✅ Canonical generation: Stable and proven
-- ✅ BI extraction: Complete and functional
-- ✅ Data routing: All pages receive data
-- ✅ Content depth: Full structures rendered
-- ✅ Styling: Subsections displayed properly
-- ✅ Build: Passes, no errors
-- ✅ Live test: Profile renders cleanly
-- ✅ No critical issues
+### Production Code
+- `src/lib/profile/renderContract.js` - ✅ Field mappings corrected
+- `src/components/reports/WebProfileReport.jsx` - ✅ Render logic enhanced
+- `.env.development` - ✅ API URL configured
+- `vite.config.js` - ✅ Proxy configured
 
-**Status: ✅ READY FOR PRODUCTION**
+### Debug Code (Temporary)
+- `src/Profile.jsx` - Added console logging to validateProfileId
+  - Logs: VITE_API_URL, API base, full URL, response status
+  - Purpose: Diagnose retrieval failure
+  - Status: Active - awaiting console inspection
 
 ---
 
-**Last Updated:** 2026-05-26 16:30 MST
+## Build Status
+- ✅ npm run build: PASS
+- ✅ No compilation errors
+- ✅ 41 modules transformed
+- ✅ 122.95 kB gzip
+
+---
+
+## Blocking Issue Details
+
+**Error Message:** "Failed to retrieve profile"
+**Endpoint:** /api/moremindmap/retrieve-profile?id=MM-20260523-mqlev9c9
+**Environment:** localhost:5173
+**Expected:** HTTP 200 with profile data
+**Actual:** Error state with no clear reason
+
+**Hypothesis:**
+- VITE_API_URL not interpolated into build
+- OR proxy not forwarding correctly
+- OR CORS blocking request
+- OR response parsing failure
+- OR stale browser state
+
+**To Resolve:**
+1. Inspect browser console logs from Profile.jsx
+2. Identify which hypothesis is correct
+3. Fix root cause
+4. Retry retrieval
+5. Resume render depth work
+
+---
+
+**Status:** PAUSED - LOCAL RETRIEVAL DEBUGGING  
+**Next Session:** Begin with browser devtools console inspection
+**Do Not:** Proceed with renderer work until API retrieval succeeds
+

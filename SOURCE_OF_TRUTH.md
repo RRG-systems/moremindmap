@@ -1,7 +1,7 @@
 # SOURCE_OF_TRUTH.md
 
-**Updated:** Mon May 26, 2026 16:30 MST  
-**Status:** STEP 3.5 COMPLETE - BEHAVIORAL INTELLIGENCE RENDER LAYER OPERATIONAL
+**Updated:** Mon May 26, 2026 20:49 MST  
+**Status:** STEP 3.5 ARCHITECTURE COMPLETE - FIELD MAPPING FIXES DEPLOYED - LOCAL RETRIEVAL BLOCKER ACTIVE
 
 ---
 
@@ -197,3 +197,79 @@ This profile proves STEP 3.5 content injection and depth rendering complete.
 
 **Last Updated:** 2026-05-26 16:30 MST  
 **Doctrine Status:** STEP 3.5 COMPLETE, READY FOR LIVE PRODUCTION TESTING
+
+---
+
+## STEP 3.5 FINAL CHECKPOINT (Mon May 26, 20:49 MST)
+
+### Completed Architecture Work
+
+**Phase 1: Field Mapping Corrections** ✅
+- Corrected renderContract.js sourceFields for all 11 BI domains
+- Each domain now extracts exact field names matching backend structure
+- extractSectionContent properly retrieves all nested fields
+
+**Phase 2: Rendering Enhancement** ✅
+- Enhanced renderBIContent to unpack nested objects
+- Added array iteration for contradictions, consequences, futures
+- All domains structured to render subsections + key signals + causal chains
+
+**Field Mappings Applied:**
+```
+worldExperience: perception_filter, information_processing, decision_formation, 
+                 time_horizon, risk_calibration, key_signals, causal_interpretation
+pressureMechanics: primary_under_load, secondary_override, key_signals, causal_interpretation
+othersExperience: first_impression, communication_pattern, listening_pattern, 
+                  relational_friction, key_signals, causal_interpretation
+scalingConstraint: ceiling_mechanics, current_systems_capacity, stated_vs_supported, 
+                   implications, key_signals
+facilitatorNotes: primary_guidance, notes[], caution, key_signals
+theOneMove: the_move, reasoning, timeline, caution, key_signals
+contradictions: contradictions[], core_tradeoff, key_signals, causal_interpretation
+organizationalConsequences: consequence_matrix[], key_signals
+fiveFuturesStarter: futures[], most_likely, key_signals
+```
+
+### ACTIVE BLOCKER: Localhost Profile Retrieval Failure
+
+**Current Status:** ❌ BLOCKED
+- Localhost shows "Failed to retrieve profile" error
+- Render debugging PAUSED - cannot proceed without API retrieval working
+- Production API endpoint works (verified: moremindmap.com returns profile successfully)
+
+**Investigation Conducted:**
+1. ✅ Production API verified working for MM-20260523-mqlev9c9
+2. ✅ .env.development correctly set to VITE_API_URL=https://moremindmap.com
+3. ✅ Vite dev server restarted to load fresh env
+4. ❌ Localhost still fails despite correct env config
+5. ✅ Added console logging to Profile.jsx validateProfileId function
+
+**Next Required Action:**
+1. Open browser devtools (F12 → Console tab)
+2. Enter profile ID: MM-20260523-mqlev9c9
+3. Click Validate
+4. Capture console logs showing:
+   - [VALIDATE] VITE_API_URL: (what value?)
+   - [VALIDATE] API base: (what URL?)
+   - [VALIDATE] Full URL: (exact fetch target?)
+   - [VALIDATE] Response status: (HTTP code?)
+   - [VALIDATE] Error response: (why failing?)
+
+**Possible Causes to Investigate:**
+- VITE_API_URL not being passed to browser build
+- Proxy configuration not working as expected
+- CORS issue from localhost to moremindmap.com
+- Response parsing error despite successful HTTP status
+- Stale browser cache or service worker
+
+### Build Status
+- ✅ npm run build: PASS (122.95 kB gzip)
+- ✅ No compilation errors
+- ✅ All render logic in place
+
+### Production Readiness
+- ⏸️ ON HOLD pending localhost retrieval fix
+- ⚠️ Do NOT proceed with render depth testing until API retrieval works
+- 📋 Once retrieval confirmed working, resume render depth validation
+
+---

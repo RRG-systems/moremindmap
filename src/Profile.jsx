@@ -4,6 +4,30 @@ import WebProfileReport from "./components/reports/WebProfileReport.jsx";
 import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
+
+/**
+ * buildApiUrl - Safely join API base URL with endpoint path
+ * Handles both absolute URLs (production) and relative paths (local dev with proxy)
+ * 
+ * Examples:
+ * - buildApiUrl('https://example.com', '/api/endpoint') → 'https://example.com/api/endpoint'
+ * - buildApiUrl('/', '/api/endpoint') → '/api/endpoint'
+ * - buildApiUrl('', '/api/endpoint') → '/api/endpoint'
+ */
+function buildApiUrl(baseUrl, endpoint) {
+  // Handle relative/proxy case: / or empty string
+  if (baseUrl === '/' || baseUrl === '' || !baseUrl) {
+    // For relative paths, just return the endpoint as-is
+    return endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  }
+  
+  // Handle absolute URL case (production)
+  // Remove trailing slash from baseUrl, remove leading slash from endpoint, join with /
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
+  return `${base}${path}`
+}
+
 export default function Profile() {
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
@@ -84,14 +108,29 @@ export default function Profile() {
     setProfileIdLoading(true)
     try {
       const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const res = await fetch(`${API}/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`)
+      const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`)
+      console.log('[VALIDATE] VITE_API_URL:', import.meta.env.VITE_API_URL)
+      console.log('[VALIDATE] API base:', API)
+      console.log('[VALIDATE] Full URL:', fullUrl)
+      const res = await fetch(fullUrl)
+      console.log('[VALIDATE] Response status:', res.status)
+      console.log('[VALIDATE] Response ok?', res.ok)
       
       if (!res.ok) {
+        console.log('[VALIDATE] Response NOT ok')
+        console.log('[VALIDATE] Response status:', res.status)
         if (res.status === 404) {
+          console.log('[VALIDATE] 404 not found')
           setProfileIdError("We couldn't find that profile. Please check the ID and try again.")
         } else {
-          const error = await res.json()
-          setProfileIdError(error.error || "Failed to retrieve profile")
+          try {
+            const error = await res.json()
+            console.log('[VALIDATE] Error response:', error)
+            setProfileIdError(error.error || "Failed to retrieve profile")
+          } catch (e) {
+            console.log('[VALIDATE] Could not parse error JSON:', e.message)
+            setProfileIdError("Failed to retrieve profile")
+          }
         }
         setProfileIdLoading(false)
         return
@@ -119,7 +158,9 @@ export default function Profile() {
       setSubmitted(true)
       setProcessing(false)
     } catch (error) {
-      console.error("[PROFILE RETRIEVAL ERROR]", error)
+      console.error("[VALIDATE] EXCEPTION:", error)
+      console.log('[VALIDATE] Error message:', error.message)
+      console.log('[VALIDATE] Error type:', error.name)
       setProfileIdError("Failed to retrieve profile. Please try again.")
     } finally {
       setProfileIdLoading(false)
@@ -153,7 +194,7 @@ export default function Profile() {
     setCheckoutLoading(true)
     try {
       const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const res = await fetch(`${API}/create-checkout-session`, {
+      const res = await fetch(buildApiUrl(API, `/create-checkout-session`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ selectedOffer }),
@@ -228,7 +269,7 @@ export default function Profile() {
         console.log("[MINI-V2] Starting async job flow")
         
         // Step 1: Start job
-        const startRes = await fetch(`${API}/api/moremindmap/start`, {
+        const startRes = await fetch(buildApiUrl(API, `/api/moremindmap/start`), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ 
@@ -270,7 +311,7 @@ export default function Profile() {
           
           await new Promise(resolve => setTimeout(resolve, pollInterval))
           
-          const statusRes = await fetch(`${API}/api/moremindmap/status?job_id=${jobId}`)
+          const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`))
           
           if (!statusRes.ok) {
             console.error("[MINI-V2] Status check failed:", statusRes.status)
@@ -290,7 +331,7 @@ export default function Profile() {
             if (statusData.canonical_profile_id) {
               try {
                 console.log("[PIPELINE-EQUIVALENCE] Fetching canonical for web profile render...")
-                const canonicalRes = await fetch(`${API}/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
+                const canonicalRes = await fetch(buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`))
                 if (canonicalRes.ok) {
                   const canonicalData = await canonicalRes.json()
                   console.log("[PIPELINE-EQUIVALENCE] Using web render path (same as manual retrieval)")
