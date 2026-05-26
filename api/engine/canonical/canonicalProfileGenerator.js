@@ -264,6 +264,7 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   // STEP 20: Assemble canonical artifact
   const canonicalProfile = {
     profile_id,
+    intake_answers: profileInput.raw_answers || {},
     metadata,
     vector_scores,
     ranked_dimensions,
