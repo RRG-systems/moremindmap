@@ -14,7 +14,7 @@
  * - Reduce generated cadence (vary sentence rhythm, avoid uniformity)
  */
 
-export function buildExecutiveSummaryPrompt(interpreted, previousSections) {
+export function buildExecutiveSummaryPrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent traits, diagnoses, or personal conclusions.
@@ -25,14 +25,15 @@ Ground every statement to the canonical data provided.`,
     voiceMode: "intelligence-briefing",
     emotionalTemperature: "neutral-observant",
 
-    canonical: {
-      primaryDimension: interpreted.primarySystem.description,
-      primaryScore: interpreted.primarySystem.score,
-      primaryOp: interpreted.primarySystem.operating,
-      secondaryDimension: interpreted.secondarySystem.description,
-      secondaryOp: interpreted.secondarySystem.operating,
-      coreSignature: interpreted.coreSignature,
-      intake_answers: interpreted.intake_answers,
+    canonical: { unified, // Use unified interpretation as primary
+      coreOperatingRead: unified.core_operating_read,
+      emotionalState: unified.emotional_state,
+      pressurePattern: unified.pressure_pattern,
+      actionPattern: unified.action_or_avoidance_pattern,
+      teamExperience: unified.team_experience,
+      contradictions: unified.contradiction_map,
+      scalingConstraint: unified.scaling_constraint,
+      intake_answers: unified._raw.intake_answers,
     },
 
     instruction: `Generate a compressed executive summary (max 150 words) as JSON.
@@ -64,7 +65,7 @@ Vary sentence rhythm. Mix 3-word and 20-word sentences. Avoid uniform cadence.`,
   };
 }
 
-export function buildCommunicationStylePrompt(interpreted, previousSections) {
+export function buildCommunicationStylePrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent traits, diagnoses, or personal conclusions.
@@ -74,7 +75,7 @@ Use ONLY the supplied evidence.`,
     voiceMode: "relational-observation",
     emotionalTemperature: "social-aware",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       primaryOp: interpreted.primarySystem.operating,
       primaryPressure: interpreted.primarySystem.pressure,
       secondaryOp: interpreted.secondarySystem.operating,
@@ -116,7 +117,7 @@ Vary rhythm. Ground to observable patterns, not interpretation.`,
   };
 }
 
-export function buildHiddenContradictionsPrompt(interpreted, previousSections) {
+export function buildHiddenContradictionsPrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent psychological diagnoses.
@@ -126,7 +127,7 @@ Ground contradictions to OBSERVABLE EVIDENCE from scores and manifestations.`,
     voiceMode: "paradoxical-honest",
     emotionalTemperature: "uncomfortable",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       primaryScore: interpreted.primarySystem.score,
       primaryOp: interpreted.primarySystem.operating,
       primaryPressure: interpreted.primarySystem.pressure,
@@ -173,7 +174,7 @@ Ground to:
   };
 }
 
-export function buildStrategicCeilingPrompt(interpreted, previousSections) {
+export function buildStrategicCeilingPrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent scaling dynamics.
@@ -183,7 +184,7 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
     voiceMode: "founder-memo",
     emotionalTemperature: "pragmatic-inevitable",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       primaryScore: interpreted.primarySystem.score,
       primaryDimension: interpreted.primarySystem.dimension,
       secondaryScore: interpreted.secondarySystem.score,
@@ -227,7 +228,7 @@ Ground each state to PRIMARY + SECONDARY (how they hold together at smaller scal
 // NEW SECTIONS: Profile DNA, Coaching Leverage, Next Step
 // ============================================================
 
-export function buildProfileDNAPrompt(interpreted, previousSections) {
+export function buildProfileDNAPrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are describing an operating pattern based on assessment data.
 DO NOT invent traits, psychology, or personal qualities.
@@ -238,7 +239,7 @@ Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
     voiceMode: "operational-mechanics",
     emotionalTemperature: "neutral-mechanical",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       primaryDimension: interpreted.primarySystem.dimension,
       primaryScore: interpreted.primarySystem.score,
       primaryOperating: interpreted.primarySystem.operating,
@@ -272,7 +273,7 @@ Example: "Direction congeals before input lands. Perspective provides coverage f
   };
 }
 
-export function buildCoachingLeveragePrompt(interpreted, previousSections) {
+export function buildCoachingLeveragePrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are a behavioral systems engineer.
 Generate actionable leverage points based on operating patterns.
@@ -283,7 +284,7 @@ Ground in the person's actual operating model (from previous sections).`,
     voiceMode: "behavioral-engineer",
     emotionalTemperature: "mechanical-direct",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       communicationStyle: previousSections.communicationStyle?.body,
       hiddenContradictions: previousSections.hiddenContradictions?.body,
       strategicCeiling: previousSections.strategicCeiling?.body,
@@ -320,7 +321,7 @@ Ground to PRIMARY OPERATING PATTERN + consequences if pattern shifts.`,
   };
 }
 
-export function buildRecommendedNextStepPrompt(interpreted, previousSections) {
+export function buildRecommendedNextStepPrompt(unified, interpreted, previousSections) {
   return {
     systemRule: `You are recommending a behavioral intelligence experiment.
 ONE concrete next step.
@@ -331,7 +332,7 @@ Specific, grounded, testable.`,
     voiceMode: "intelligence-advisor",
     emotionalTemperature: "mechanical-direct",
 
-    canonical: {
+    canonical: { unified, // Use unified interpretation as primary
       strategicCeiling: previousSections.strategicCeiling?.body,
       coachingLeverage: previousSections.coachingLeverage?.body,
       hiddenContradictions: previousSections.hiddenContradictions?.body,

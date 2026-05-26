@@ -8,6 +8,7 @@
  * Currently using LOCAL FALLBACK for testing/demo.
  */
 
+import buildUnifiedInterpretation from './unifiedInterpreter.js';
 import interpretCanonical, { buildMicroScenario, extractGroundingUsed }
   from './structuredInterpreter.js';
 import {
@@ -44,6 +45,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     console.log('[V3 FORENSIC] Cache disabled for testing');
   }
 
+  // UNIFIED INTERPRETER: Produces ONE shared interpretation artifact
+  // All 7 sections render FROM this shared interpretation (not independent reinvention)
+  const unified = buildUnifiedInterpretation(canonical);
+  
+  // Keep old structured interpreter for backward compat with buildMicroScenario
   const interpreted = interpretCanonical(canonical);
   const previousSections = {};
 
@@ -74,7 +80,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let gptError = null;
 
   for (const section of sections) {
-    const prompt = getPromptBuilder(section)(interpreted, previousSections);
+    const prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
 
     let rendering;
     let sectionRenderSource = 'fallback_local';
