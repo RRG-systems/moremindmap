@@ -88,7 +88,7 @@ export const QUESTION_MAP = {
       {
         id: 24,
         type: 'written',
-        text: 'If you are in sales, leadership, business ownership, or operate independently, answer the following in as much detail as possible. When your business, team, career, or performance begins to stall, where does your attention instinctively go first, and why? Describe: what frustrates you most professionally, where you believe your biggest bottlenecks are, what kinds of people energize you, what kinds of people drain you, how you react when people repeatedly resist your direction, what you avoid dealing with longer than you should, what you know you need to improve but struggle to change, where you believe you are underperforming relative to your potential, and what kind of business, career, or life you are ultimately trying to create.',
+        text: 'When momentum stalls, pressure rises, or people resist your direction, what do you usually do first? Describe what frustrates you most, what kinds of people energize or drain you, what you avoid dealing with longer than you should, and what pattern you keep repeating even though you know it slows you down. Do not worry about sounding impressive, strategic, or self-aware. Write naturally and answer the way you actually think about these situations in real life.',
         writtenTargets: [
           'stress_response',
           'relational_dynamics',

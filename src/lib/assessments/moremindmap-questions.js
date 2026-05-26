@@ -324,31 +324,11 @@ What do you do?`,
   {
     id: 24,
     type: "written_response",
-    question: `If you are in sales, leadership, business ownership, or operate independently, answer the following in as much detail as possible.
+    question: `When momentum stalls, pressure rises, or people resist your direction, what do you usually do first?
 
-Be as honest and specific as possible. There are no right answers.
+Describe what frustrates you most, what kinds of people energize or drain you, what you avoid dealing with longer than you should, and what pattern you keep repeating even though you know it slows you down.
 
-When your business, team, career, or performance begins to stall, where does your attention instinctively go first, and why?
-
-Describe:
-- what frustrates you most professionally
-- where you believe your biggest bottlenecks are
-- what kinds of people energize you
-- what kinds of people drain you
-- how you react when people repeatedly resist your direction
-- what you avoid dealing with longer than you should
-- what you know you need to improve but struggle to change
-- where you believe you are underperforming relative to your potential
-- what kind of business, career, or life you are ultimately trying to create
-
-If you lead people:
-How do you typically respond when someone repeatedly disagrees with your direction or execution style?
-
-If you work independently:
-What patterns do you notice in yourself when momentum slows down or discipline starts slipping?
-
-If you are in sales:
-What do you believe truly separates high performers from average performers, and where do you think you personally fall short most often?`,
+Do not worry about sounding impressive, strategic, or self-aware. Write naturally and answer the way you actually think about these situations in real life.`,
     answers: []
   },
   {
