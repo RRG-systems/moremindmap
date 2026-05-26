@@ -77,19 +77,7 @@ export function analyzeStallPatterns(answerText) {
   if (text.includes('lead') || text.includes('prospect') || text.includes('opportunity')) frustrations.push('pipeline');
   
   // Detect avoidance admission
-  const avoidance_admitted = 
-    text.includes('avoid') || 
-    text.includes('put off') || 
-    text.includes('delay') || 
-    text.includes('stuck') || 
-    text.includes('paralysis') ||
-    text.includes('stop') ||
-    text.includes('freeze') ||
-    text.includes('stall') ||
-    text.includes('overanalyze') ||
-    text.includes('perfection') ||
-    text.includes("can't move") ||
-    text.includes("can't proceed")
+  const avoidance_admitted = text.includes('avoid') || text.includes('put off') || text.includes('delay');
   
   // Detect self-awareness
   const self_awareness_markers = (text.match(/\b(I know|I realize|I need to|I struggle|I should)\b/g) || []).length;
