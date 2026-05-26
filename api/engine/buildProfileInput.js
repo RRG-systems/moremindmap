@@ -125,19 +125,27 @@ export class BuildProfileInput {
         return; // Continue loop
       }
       
-      if (question.type === 'mc') {
-        // GUARD: MC answer must have choice property
+      if (question.type === 'mc' || question.type === 'ranking') {
+        // GUARD: MC/ranking answer must have choice property
         if (!answer.choice) {
-          console.warn(`[buildRawAnswers] GUARD: MC q${question.id} missing choice`);
+          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} missing choice`);
           return; // Skip this answer
         }
+        
+        // Find the answer option text from question.answers array (new structure)
+        const answerOption = question.answers?.find(opt => opt.key === answer.choice);
+        const answerText = answerOption?.text || 'Unknown';
+        
+        // Get normalized_dimensions from question (new structure)
+        const normalizedDims = question.normalized_dimensions?.[answer.choice] || {};
+        
         rawAnswers[`q${question.id}`] = {
           question_id: question.id,
-          question_type: 'mc',
+          question_type: question.type,
           question_text: question.text,
           answer_choice: answer.choice,
-          answer_text: (question.options[answer.choice.charCodeAt(0) - 65] || 'Unknown'),
-          normalized_dimensions: question.scores[answer.choice] || {}
+          answer_text: answerText,
+          normalized_dimensions: normalizedDims
         };
       } else if (question.type === 'written') {
         rawAnswers[`q${question.id}`] = {
