@@ -14,6 +14,7 @@
 import { updateJob, JOB_STAGE as MANAGER_JOB_STAGE } from '../miniV2JobManager.js'
 import { extractBehavioralIntelligence } from './extractIntelligence.js'
 import { refineExtraction } from './extractIntelligenceRefinement.js'
+import { generateCanonicalProfile } from './canonicalProfileGenerator.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -223,12 +224,43 @@ export async function executeCanonicalGeneration(job) {
       throw new Error(errorMsg)
     }
     
-    trace.push('profileInput_validated_building_full_canonical')
+    trace.push('profileInput_validated_attempting_frontier_orchestrator')
     
-    // Build FULL canonical (not emergency_inline)
-    const canonical_profile = buildFullCanonical(job.profileInput, job.job_id)
-    canonical_profile.profile_id = profile_id
-    canonical_profile.metadata.profile_id = profile_id
+    // FRONTIER RESTORATION: Call full 25-step inference orchestrator
+    // with graceful fallback to template generation if orchestrator fails
+    let canonical_profile = null
+    let frontier_orchestration_attempted = false
+    
+    try {
+      frontier_orchestration_attempted = true
+      trace.push('frontier_orchestrator_attempting')
+      
+      canonical_profile = await generateCanonicalProfile(job.profileInput, {
+        profile_id,
+        model: 'canonical-v2-frontier-restored'
+      })
+      
+      trace.push('frontier_orchestrator_success')
+      canonical_diagnostics.frontier_orchestration_attempted = true
+      canonical_diagnostics.frontier_orchestration_success = true
+      
+    } catch (frontierErr) {
+      // GUARDED FALLBACK: If frontier orchestration fails, fall back to template generation
+      console.error('[CANONICAL-GENERATION] Frontier orchestration failed:', frontierErr.message)
+      trace.push(`frontier_orchestrator_error: ${frontierErr.message}`)
+      trace.push('falling_back_to_guarded_template_generation')
+      
+      canonical_diagnostics.frontier_orchestration_attempted = true
+      canonical_diagnostics.frontier_orchestration_success = false
+      canonical_diagnostics.frontier_orchestration_error = frontierErr.message
+      
+      // FALLBACK: Use guarded template generation (preserves stability)
+      canonical_profile = buildFullCanonical(job.profileInput, job.job_id)
+      canonical_profile.profile_id = profile_id
+      canonical_profile.metadata.profile_id = profile_id
+      
+      trace.push('fallback_template_generation_complete')
+    }
     
     // Validate generation_mode is NOT emergency_inline
     if (canonical_profile.metadata.generation_mode === 'emergency_inline') {
