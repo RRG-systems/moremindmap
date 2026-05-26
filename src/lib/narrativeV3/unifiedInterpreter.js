@@ -210,7 +210,7 @@ export function buildUnifiedInterpretation(canonical) {
       futureIfMomentumStalls: deriveFutureIfMomentumStalls(operatingMode, actionPattern, pressurePattern),
       futureIfScalingRequired: deriveFutureIfScalingRequired(scalingConstraint, operatingMode),
       futureIfPressureIncreases: deriveFutureIfPressureIncreases(pressurePattern),
-      futureIfSupportStructureAdded: deriveFutureIfSupportAdded(actionPattern, scalingConstraint),
+      futureIfSupportStructureAdded: deriveFutureIfSupportStructureAdded(actionPattern, scalingConstraint),
     },
 
     // ONE MOVE SEED (raw material for One Move section)
