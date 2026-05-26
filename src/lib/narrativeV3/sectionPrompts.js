@@ -37,22 +37,24 @@ Ground every statement to the canonical data provided.`,
     },
 
     instruction: `Generate a compressed executive summary (max 150 words) as JSON.
-Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings with this person.
-Do NOT use: "strength is", "liability", "operates", "person who", "tendency", "has a"
-DO use: behavioral manifestation + organizational consequence
 
-Include one moment that reveals how this works in practice (not abstract trait).
+PRIORITY: Emotional state and action pattern from unified interpretation DOMINATE.
+When unified says stuck/fearful/avoidant/frozen, that IS the reality. Build narrative FROM that truth.
+
+Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings.
+Do NOT use: "strength", "operates", "tendency", "has a", "outpaces", "conviction"
+DO use: emotional truth + behavioral consequence
 
 Structure:
-- Opening: what you notice first (behavioral consequence, not quality)
-- Core dynamic: how primary + secondary actually create advantage
-- Execution pattern: what happens day-to-day (concrete detail > generality)
-- Strain pattern: the specific failure mode under pressure
-- Closing: realistic cost/benefit (not flattering, not negative)
+- Opening: what's actually happening (emotional state first, not quality)
+- Internal reality: what's true internally per unified (anxiety despite calm, stuck despite intelligence)
+- Behavioral pattern: action or avoidance pattern from unified (paralysis, withdrawal, etc)
+- Team impact: how this affects others
+- Honest assessment: no advantage narrative if evidence says stuck/fearful
 
-CRITICAL: Causal chain should feel inevitable. Not "they do X" but "because they move like X, teams experience Y, which compounds to Z."
-
-Vary sentence rhythm. Mix 3-word and 20-word sentences. Avoid uniform cadence.`,
+READ unified.emotional_state, unified.action_or_avoidance_pattern, unified.contradiction_map FIRST.
+Let THOSE dominate section output.
+Dimensions are structure only. Evidence is truth.`,
 
     format: JSON.stringify({
       section: "executiveSummary",
@@ -85,19 +87,22 @@ Use ONLY the supplied evidence.`,
     },
 
     instruction: `Generate communication style analysis (max 250 words) as JSON.
-Format: Team experience, not trait description. What's it actually like to be on the receiving end?
-Show BEHAVIORAL CONSEQUENCE, not intent.
+
+PRIORITY: unified.team_experience + unified.emotional_state DOMINATE.
+When unified says "internal turmoil creates uncertainty" or "emotionalCongruence=false", that shapes communication reality.
+
+What's it actually like to be around this person?
 
 Structure:
-- Paragraph 1: How direction lands (destination-first? permission-seeking? tone of finality?)
-- Paragraph 2: Meeting participation (pace vs silence, interruption style, processing time given)
-- Paragraph 3: Feedback reaction (what sticks? what bounces? when does it land as blame?)
-- Paragraph 4: Under pressure (shift in tone/pace/precision that emerges)
+- Paragraph 1: First impression vs internal reality (calm exterior/anxious interior?)
+- Paragraph 2: Meeting dynamic (how does their emotional state show up? hesitation? withdrawal?)
+- Paragraph 3: Under pressure (does pressure accelerate them or freeze them per unified?)
+- Paragraph 4: Team consequence (does their state clarify or confuse teammates?)
 
-Do NOT use: "communicates", "dialogue", "receptive", "listeners", "responds", "strong communicator"
-DO use: "direction lands as already decided", "silence drops and people stop contributing", "feedback tends to land as correction", "under pressure, directness sharpens"
+Do NOT use: "strong communicator", "communicates", "receptive", "responds"
+DO use actual team experience from unified: trust_curve, friction_points, net_effect
 
-Make it FEEL like you sat in 5 meetings and noticed what happens.
+Grounding: Show exactly how unified.emotional_state and unified.team_experience map to actual communication patterns.
 
 CONCRETE EXAMPLES:
 - "People leave meetings unsure whether disagreement was actually welcome"
