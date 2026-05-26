@@ -335,7 +335,7 @@ export async function executeCanonicalGeneration(job) {
         email: job.payload?.metadata?.email || null,
         company_name: job.payload?.metadata?.organization?.company || job.payload?.metadata?.company_name || null,
         assessment_version: 'mini-v2',
-        model: 'canonical-v2-guarded'
+        model: canonical_profile.metadata?.model || 'canonical-v2-guarded'
       })
       trace.push('after_vault_save_success')
       canonical_diagnostics.vault_save_attempted = true
