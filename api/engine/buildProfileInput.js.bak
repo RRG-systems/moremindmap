@@ -106,37 +106,16 @@ export class BuildProfileInput {
     const rawAnswers = {};
     const questions = QUESTION_MAP.set_1.v1;
 
-    // GUARD: Ensure rawAssessment has answers object (prevent undefined access crash)
-    if (!rawAssessment || !rawAssessment.answers || typeof rawAssessment.answers !== 'object') {
-      console.warn('[buildRawAnswers] GUARD: rawAssessment.answers is missing or invalid', {
-        has_rawAssessment: !!rawAssessment,
-        has_answers: !!rawAssessment?.answers,
-        answers_type: typeof rawAssessment?.answers
-      });
-      return rawAnswers; // Return empty answers (safe fallback - triggers neutral scores)
-    }
-
     questions.forEach(question => {
       const answer = rawAssessment.answers[`q${question.id}`];
       
-      // GUARD: Skip if answer is missing (don't crash on undefined.property)
-      if (!answer) {
-        console.warn(`[buildRawAnswers] GUARD: Missing answer for q${question.id}`);
-        return; // Continue loop
-      }
-      
       if (question.type === 'mc') {
-        // GUARD: MC answer must have choice property
-        if (!answer.choice) {
-          console.warn(`[buildRawAnswers] GUARD: MC q${question.id} missing choice`);
-          return; // Skip this answer
-        }
         rawAnswers[`q${question.id}`] = {
           question_id: question.id,
           question_type: 'mc',
           question_text: question.text,
           answer_choice: answer.choice,
-          answer_text: (question.options[answer.choice.charCodeAt(0) - 65] || 'Unknown'),
+          answer_text: question.options[answer.choice.charCodeAt(0) - 65],
           normalized_dimensions: question.scores[answer.choice] || {}
         };
       } else if (question.type === 'written') {

@@ -155,10 +155,28 @@ export async function executeCanonicalGeneration(job) {
     trace.push(`profile_id_generated: ${profile_id}`)
     
     trace.push('building_canonical_object')
+    
+    // DIAGNOSTIC: Warn if profileInput is empty (indicates data loss)
+    if (!job.profileInput || Object.keys(job.profileInput).length === 0) {
+      console.warn('[CANONICAL-GENERATION] ⚠️ WARNING: profileInput is empty/missing - will generate skeleton canonical', {
+        profile_id: profile_id,
+        job_id: job.job_id,
+        has_profileInput: !!job.profileInput,
+        profileInput_keys: job.profileInput ? Object.keys(job.profileInput) : [],
+        generation_mode: 'emergency_inline_fallback'
+      });
+      trace.push('DIAGNOSTIC_empty_profileInput_detected');
+    } else {
+      trace.push(`DIAGNOSTIC_profileInput_valid_keys=${Object.keys(job.profileInput).join(',')}`);
+    }
+    
     // Build minimal canonical dossier
     const canonical_profile = buildMinimalCanonical(job.profileInput || {}, job.job_id)
     canonical_profile.profile_id = profile_id
     canonical_profile.metadata.profile_id = profile_id
+    
+    // Track if we generated in fallback mode
+    canonical_diagnostics.empty_profileInput_triggered_fallback = !job.profileInput || Object.keys(job.profileInput || {}).length === 0
     
     canonical_diagnostics.generation_success = true
     canonical_diagnostics.generation_time_ms = Date.now() - startTime

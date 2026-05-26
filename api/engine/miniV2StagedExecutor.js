@@ -42,9 +42,42 @@ export async function executeFirstPassGeneration(job) {
   
   const { answers } = job.payload
   
+  // GUARD: Validate answers exist and are formatted
+  if (!answers || typeof answers !== 'object' || Object.keys(answers).length === 0) {
+    const errorMsg = 'No answers provided to buildProfileInput: answers missing/empty/invalid';
+    console.error('[STAGED-EXECUTOR] ERROR:', errorMsg, {
+      has_answers: !!answers,
+      answers_type: typeof answers,
+      answer_count: answers ? Object.keys(answers).length : 0
+    });
+    trace.push('GUARD_answers_validation_failed: ' + errorMsg);
+    throw new Error(errorMsg);
+  }
+  trace.push('answers_validated');
+  
   trace.push('before_buildProfileInput')
-  const profileInput = await buildProfileInput({ answers })
+  let profileInput;
+  try {
+    profileInput = await buildProfileInput({ answers })
+  } catch (buildErr) {
+    console.error('[STAGED-EXECUTOR] ERROR: buildProfileInput threw exception:', buildErr.message);
+    trace.push('CATCH_buildProfileInput_error: ' + buildErr.message);
+    throw buildErr; // Re-throw to fail job properly
+  }
   trace.push('after_buildProfileInput')
+  
+  // GUARD: Verify profileInput has dimension_scores (indicates successful generation)
+  if (!profileInput || !profileInput.dimension_scores) {
+    const errorMsg = 'buildProfileInput produced invalid output: missing dimension_scores (data loss!)';
+    console.error('[STAGED-EXECUTOR] CRITICAL ERROR:', errorMsg, {
+      has_profileInput: !!profileInput,
+      has_dimension_scores: !!profileInput?.dimension_scores,
+      profileInput_keys: profileInput ? Object.keys(profileInput).length : 0
+    });
+    trace.push('GUARD_profileInput_validation_failed: ' + errorMsg);
+    throw new Error(errorMsg);
+  }
+  trace.push('profileInput_validated_dimension_scores_present')
   
   trace.push('before_generateReportContent')
   let reportContent = await generateReportContent(profileInput)
