@@ -38,6 +38,8 @@ Ground every statement to the canonical data provided.`,
 
     instruction: `Generate a compressed executive summary (max 150 words) as JSON.
 
+Generate a compressed executive summary (max 150 words) as JSON.
+
 PRIORITY: Emotional state and action pattern from unified interpretation DOMINATE.
 When unified says stuck/fearful/avoidant/frozen, that IS the reality. Build narrative FROM that truth.
 
@@ -87,6 +89,8 @@ Use ONLY the supplied evidence.`,
     },
 
     instruction: `Generate communication style analysis (max 250 words) as JSON.
+
+Generate communication style analysis (max 250 words) as JSON.
 
 PRIORITY: unified.team_experience + unified.emotional_state DOMINATE.
 When unified says "internal turmoil creates uncertainty" or "emotionalCongruence=false", that shapes communication reality.
