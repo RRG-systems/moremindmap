@@ -16,6 +16,9 @@ export function interpretCanonical(canonical) {
   const vectorScores = data.vector_scores || {};
   const ranked = data.ranked_dimensions || [];
   const tradeoffs = topSystems.dimension_tradeoffs || [];
+  
+  // Extract intake answers (preserved from vault record)
+  const intake_answers = canonical.intake_answers || {};
 
   const primaryDriver = topSystems.primary_driver || {};
   const stabilizer = topSystems.secondary_stabilizer || {};
@@ -102,6 +105,9 @@ export function interpretCanonical(canonical) {
     constraintAtScale:
       `Primary driver: ${primaryDriver.description || "high velocity"}. ` +
       `At 1x: advantage. At 5x+: becomes coordination challenge when scaled without deliberation layers.`,
+
+    // Preserve raw intake answers for GPT to read actual written responses
+    intake_answers: intake_answers,
   };
 }
 

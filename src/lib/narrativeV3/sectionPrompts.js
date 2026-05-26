@@ -32,6 +32,7 @@ Ground every statement to the canonical data provided.`,
       secondaryDimension: interpreted.secondarySystem.description,
       secondaryOp: interpreted.secondarySystem.operating,
       coreSignature: interpreted.coreSignature,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate a compressed executive summary (max 150 words).
@@ -79,6 +80,7 @@ Use ONLY the supplied evidence.`,
       secondaryOp: interpreted.secondarySystem.operating,
       tradeoff: interpreted.tradeoffs[0]?.tradeoff || "",
       decisionProfile: interpreted.decisionProfile,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate communication style analysis (max 250 words).
@@ -132,6 +134,7 @@ Ground contradictions to OBSERVABLE EVIDENCE from scores and manifestations.`,
       secondaryPressure: interpreted.secondarySystem.pressure,
       opposingScore: interpreted.opposingPatterns[0].score,
       tradeoffCost: interpreted.tradeoffs[0]?.cost || "",
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate 3-4 core contradictions (max 220 words total).
@@ -187,6 +190,7 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
       secondaryDimension: interpreted.secondarySystem.dimension,
       constraintAtScale: interpreted.constraintAtScale,
       ranked: interpreted.ranked,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate scaling ceiling analysis (max 200 words).
@@ -242,6 +246,7 @@ Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
       secondaryDimension: interpreted.secondarySystem.dimension,
       secondaryScore: interpreted.secondarySystem.score,
       secondaryOperating: interpreted.secondarySystem.operating,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate a concise operating model description (max 100 words).
@@ -283,6 +288,7 @@ Ground in the person's actual operating model (from previous sections).`,
       hiddenContradictions: previousSections.hiddenContradictions?.body,
       strategicCeiling: previousSections.strategicCeiling?.body,
       primaryDimension: interpreted.primarySystem.dimension,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate 3-4 behavioral experiments (max 200 words).
@@ -329,6 +335,7 @@ Specific, grounded, testable.`,
       strategicCeiling: previousSections.strategicCeiling?.body,
       coachingLeverage: previousSections.coachingLeverage?.body,
       hiddenContradictions: previousSections.hiddenContradictions?.body,
+      intake_answers: interpreted.intake_answers,
     },
 
     instruction: `Generate ONE specific recommended next step (max 150 words).
