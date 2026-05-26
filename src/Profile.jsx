@@ -328,32 +328,48 @@ export default function Profile() {
             setProcessing(false)
             
             // Fetch canonical dossier to use web profile render (PATH B equivalent)
+            // SURGICAL FIX: Retry canonical fetch to ensure profile is available in vault
             if (statusData.canonical_profile_id) {
-              try {
-                console.log("[PIPELINE-EQUIVALENCE] Fetching canonical for web profile render...")
-                const canonicalRes = await fetch(buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`))
-                if (canonicalRes.ok) {
-                  const canonicalData = await canonicalRes.json()
-                  console.log("[PIPELINE-EQUIVALENCE] Using web render path (same as manual retrieval)")
-                  setResult({
-                    success: true,
-                    version: "web",
-                    canonical_dossier: canonicalData.canonical_dossier,
-                    profile_id: statusData.canonical_profile_id,
-                    generation_mode: 'gpt'
-                  })
-                } else {
-                  console.warn("[PIPELINE-EQUIVALENCE] Canonical fetch failed, fallback to HTML")
-                  setResult({
-                    success: true,
-                    version: "mini-v2",
-                    html: statusData.html,
-                    snapshot: statusData.metadata,
-                    profile_id: statusData.canonical_profile_id
-                  })
+              let canonicalFetchSuccess = false
+              let canonicalData = null
+              const maxRetries = 3
+              const retryDelayMs = 500
+              
+              for (let retryAttempt = 1; retryAttempt <= maxRetries && !canonicalFetchSuccess; retryAttempt++) {
+                try {
+                  console.log(`[PIPELINE-EQUIVALENCE] Canonical fetch attempt ${retryAttempt}/${maxRetries}...`)
+                  const canonicalRes = await fetch(buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`))
+                  
+                  if (canonicalRes.ok) {
+                    canonicalData = await canonicalRes.json()
+                    console.log("[PIPELINE-EQUIVALENCE] ✓ Canonical fetch succeeded, using web render path")
+                    canonicalFetchSuccess = true
+                    setResult({
+                      success: true,
+                      version: "web",
+                      canonical_dossier: canonicalData.canonical_dossier,
+                      profile_id: statusData.canonical_profile_id,
+                      generation_mode: 'gpt'
+                    })
+                  } else {
+                    console.warn(`[PIPELINE-EQUIVALENCE] Canonical fetch failed with status ${canonicalRes.status}`)
+                    if (retryAttempt < maxRetries) {
+                      console.log(`[PIPELINE-EQUIVALENCE] Retrying in ${retryDelayMs}ms...`)
+                      await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+                    }
+                  }
+                } catch (err) {
+                  console.error(`[PIPELINE-EQUIVALENCE] Canonical fetch attempt ${retryAttempt} error:`, err.message)
+                  if (retryAttempt < maxRetries) {
+                    console.log(`[PIPELINE-EQUIVALENCE] Retrying in ${retryDelayMs}ms...`)
+                    await new Promise(resolve => setTimeout(resolve, retryDelayMs))
+                  }
                 }
-              } catch (err) {
-                console.error("[PIPELINE-EQUIVALENCE] Canonical fetch error:", err)
+              }
+              
+              // If all retries failed, fallback to HTML rendering (maintain existing behavior as last resort)
+              if (!canonicalFetchSuccess) {
+                console.warn("[PIPELINE-EQUIVALENCE] All canonical fetch attempts failed, falling back to HTML")
                 setResult({
                   success: true,
                   version: "mini-v2",
