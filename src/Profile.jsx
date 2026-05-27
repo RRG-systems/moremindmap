@@ -327,49 +327,46 @@ export default function Profile() {
             complete = true
             setProcessing(false)
             
-            // Fetch canonical dossier to use web profile render (PATH B equivalent)
-            // SURGICAL FIX: Retry canonical fetch to ensure profile is available in vault
+            // ORCHESTRATION PARITY: Use exact same rendering pathway as Profile ID lookup
+            // Instead of rendering from job payload, route through validateProfileId()
             if (statusData.canonical_profile_id) {
-              let canonicalFetchSuccess = false
-              let canonicalData = null
-              const maxRetries = 3
-              const retryDelayMs = 500
-              
-              for (let retryAttempt = 1; retryAttempt <= maxRetries && !canonicalFetchSuccess; retryAttempt++) {
-                try {
-                  console.log(`[PIPELINE-EQUIVALENCE] Canonical fetch attempt ${retryAttempt}/${maxRetries}...`)
-                  const canonicalRes = await fetch(buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`))
-                  
-                  if (canonicalRes.ok) {
-                    canonicalData = await canonicalRes.json()
-                    console.log("[PIPELINE-EQUIVALENCE] ✓ Canonical fetch succeeded, using web render path")
-                    canonicalFetchSuccess = true
-                    setResult({
-                      success: true,
-                      version: "web",
-                      canonical_dossier: canonicalData.canonical_dossier,
-                      profile_id: statusData.canonical_profile_id,
-                      generation_mode: 'gpt'
-                    })
-                  } else {
-                    console.warn(`[PIPELINE-EQUIVALENCE] Canonical fetch failed with status ${canonicalRes.status}`)
-                    if (retryAttempt < maxRetries) {
-                      console.log(`[PIPELINE-EQUIVALENCE] Retrying in ${retryDelayMs}ms...`)
-                      await new Promise(resolve => setTimeout(resolve, retryDelayMs))
-                    }
-                  }
-                } catch (err) {
-                  console.error(`[PIPELINE-EQUIVALENCE] Canonical fetch attempt ${retryAttempt} error:`, err.message)
-                  if (retryAttempt < maxRetries) {
-                    console.log(`[PIPELINE-EQUIVALENCE] Retrying in ${retryDelayMs}ms...`)
-                    await new Promise(resolve => setTimeout(resolve, retryDelayMs))
-                  }
+              console.log("[MINI-V2] ✓ Routing through validateProfileId for consistency with manual Profile ID load")
+              setProfileId(statusData.canonical_profile_id)
+              // Small delay to ensure state updates, then validate
+              await new Promise(resolve => setTimeout(resolve, 50))
+              // Note: validateProfileId() expects to be called after profileId state is set
+              // Since state updates are async, we call it directly with the ID
+              setProfileIdLoading(true)
+              try {
+                const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
+                const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
+                console.log('[MINI-V2-ROUTE] Fetching profile:', fullUrl)
+                const res = await fetch(fullUrl)
+                
+                if (!res.ok) {
+                  console.error('[MINI-V2-ROUTE] Fetch failed:', res.status)
+                  throw new Error(`Failed to fetch profile: ${res.status}`)
                 }
-              }
-              
-              // If all retries failed, fallback to HTML rendering (maintain existing behavior as last resort)
-              if (!canonicalFetchSuccess) {
-                console.warn("[PIPELINE-EQUIVALENCE] All canonical fetch attempts failed, falling back to HTML")
+                
+                const data = await res.json()
+                console.log("[MINI-V2-ROUTE] ✓ Profile retrieved, using web render path")
+                
+                // Use EXACT same setResult call as validateProfileId()
+                setResult({
+                  success: true,
+                  version: "web",
+                  canonical_dossier: data.canonical_dossier,
+                  behavioral_intelligence_v1: data.behavioral_intelligence_v1,
+                  profile_id: data.profile_id,
+                  retrieved_at: data.retrieved_at
+                })
+                
+                setSubmitted(true)
+                setProcessing(false)
+              } catch (error) {
+                console.error("[MINI-V2-ROUTE] Error routing through validateProfileId:", error)
+                // Fallback: use direct job payload
+                console.log("[MINI-V2-ROUTE] Falling back to direct job payload rendering")
                 setResult({
                   success: true,
                   version: "mini-v2",
@@ -377,6 +374,8 @@ export default function Profile() {
                   snapshot: statusData.metadata,
                   profile_id: statusData.canonical_profile_id
                 })
+              } finally {
+                setProfileIdLoading(false)
               }
             } else {
               setResult({
