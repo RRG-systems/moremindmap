@@ -1,22 +1,26 @@
 /**
- * rescoreDimensions.js
+ * rescoreDimensions.js - PHASE 2: THRESHOLD + DOMINANCE REFINEMENT
  * 
- * RESCORING ENGINE: Behavioral Dominance Inference
+ * RESCORING ENGINE: Psychologically Believable Dominance Topology
  * 
- * Reads ENTIRE canonical dossier to detect and amplify true behavioral hierarchies.
- * Does NOT modify baseline. Produces rescored_v1 as downstream intelligence layer.
+ * Reads ENTIRE canonical dossier to infer behavioral dominance with:
+ * - Threshold-aware gravity (near-threshold systems feel disproportionately influential)
+ * - Compensatory suppression (strong systems suppress weak ones behaviorally)
+ * - Flatness detection refinement (blended operators remain balanced)
+ * - Tension amplification (dimension relationships reshape topology)
+ * - Extremity differentiation (spread + intensity matter as much as order)
+ * - Render-ready intelligence (prepare meaningful override values)
  * 
  * Core principle:
- * Humans are hierarchical, not balanced.
- * One dominant system bends the rest of the profile.
- * Rescoring reveals that hierarchy more clearly.
+ * Humans are hierarchical. One or two systems dominate. The profile should FEEL that dominance.
+ * Without fake drama. Without cartoon extremity. Without horoscope nonsense.
  */
 
 /**
- * Main rescoring entry point
+ * Main rescoring entry point - PHASE 2
  * 
  * @param {Object} canonical - Complete canonical dossier
- * @returns {Object} rescoring_v1 object with scored dimensions + analysis
+ * @returns {Object} rescoring_v1 object with threshold-refined dominance topology
  */
 export function rescoreDimensions(canonical) {
   if (!canonical || !canonical.ranked_dimensions) {
@@ -28,68 +32,114 @@ export function rescoreDimensions(canonical) {
   // Step 1: Extract evidence from entire canonical
   const evidence = extractEvidence(canonical);
   
-  // Step 2: Detect dominance patterns
-  const dominance = detectDominance(baseline, evidence);
+  // Step 2: Classify profile flatness/dominance confidence
+  const profileShape = classifyProfileShape(baseline);
   
-  // Step 3: Calculate rescored dimensions with dominance adjustment
-  const rescored = calculateRescoredDimensions(baseline, dominance, evidence);
+  // Step 3: Detect dominance patterns with threshold awareness
+  const dominance = detectDominanceWithThreshold(baseline, evidence, profileShape);
   
-  // Step 4: Analyze spread characteristics
-  const spread = analyzeSpread(rescored);
+  // Step 4: Calculate compensatory suppression effects
+  const suppressionMap = calculateSuppressionEffects(baseline, dominance);
   
-  // Step 5: Calculate gravity (which dimension drives others)
-  const gravity = calculateGravity(rescored, dominance, evidence);
+  // Step 5: Calculate rescored dimensions (threshold-aware)
+  const rescored = calculateRescoredDimensionsV2(baseline, dominance, suppressionMap, evidence, profileShape);
   
-  // Step 6: Analyze tension pairs
-  const tensions = analyzeTensionPairs(rescored, dominance);
+  // Step 6: Analyze spread characteristics with tension sensitivity
+  const spread = analyzeSpreadV2(rescored, dominance);
   
-  // Step 7: Calculate amplitude metrics
+  // Step 7: Calculate tension-aware gravity
+  const gravity = calculateGravityV2(rescored, dominance, suppressionMap);
+  
+  // Step 8: Analyze tension pairs with dominance context
+  const tensions = analyzeTensionPairsV2(rescored, dominance, suppressionMap);
+  
+  // Step 9: Calculate amplitude metrics
   const amplitude = calculateAmplitudeMetrics(rescored);
   
-  // Step 8: Assemble rescoring_v1 structure
-  return assembleRescoring(rescored, dominance, spread, gravity, tensions, amplitude);
+  // Step 10: Build render-ready intelligence
+  const renderReady = buildRenderReadyV2(rescored, dominance, tensions, suppressionMap);
+  
+  // Step 11: Assemble final rescoring_v1 structure
+  return assembleRescoringV2(rescored, dominance, spread, gravity, tensions, amplitude, renderReady, profileShape);
 }
 
 /**
- * Extract all evidence from canonical dossier
+ * PHASE 2 NEW: Classify profile shape (flat vs concentrated vs extreme)
+ */
+function classifyProfileShape(baseline) {
+  if (!baseline || baseline.length < 2) {
+    return { shape: 'unknown', flatness: 0, concentration: 0, confidence: 0 };
+  }
+
+  const scores = baseline.map(d => d.score);
+  const sorted = [...scores].sort((a, b) => b - a);
+  
+  const highest = sorted[0];
+  const secondHighest = sorted[1];
+  const lowestAbsScore = Math.min(...scores.map(s => Math.abs(s)));
+  
+  const spread = highest - Math.min(...scores);
+  const variance = calculateVariance(scores);
+  const topTwoGap = highest - secondHighest;
+  
+  // Flatness: how compressed is the profile?
+  const flatness = 1 - Math.min(variance / 2.5, 1);
+  
+  // Concentration: how much does top dimension dominate?
+  const concentration = topTwoGap > 0.5 ? Math.min(topTwoGap / 2, 1) : 0;
+  
+  // Determine shape type
+  let shape = 'balanced';
+  let confidence = 0.7;
+  
+  if (flatness > 0.7) {
+    shape = 'flat';
+    confidence = Math.min(flatness + 0.1, 0.95);
+  } else if (topTwoGap > 0.8 && spread > 1.2) {
+    shape = 'extreme_concentrated';
+    confidence = 0.9;
+  } else if (topTwoGap > 0.5) {
+    shape = 'concentrated';
+    confidence = 0.85;
+  } else if (topTwoGap > 0.2) {
+    shape = 'moderate_dominance';
+    confidence = 0.75;
+  }
+  
+  return {
+    shape,
+    flatness,
+    concentration,
+    spread,
+    variance,
+    topTwoGap,
+    confidence
+  };
+}
+
+/**
+ * Extract all evidence from canonical (unchanged from V1, for reference)
  */
 function extractEvidence(canonical) {
   return {
-    // Baseline scores
     baseline_scores: canonical.ranked_dimensions || [],
-    
-    // Intake answers
     intake_answers: canonical.intake_answers || {},
-    
-    // Contradictions
     contradictions: canonical.contradictions || {},
     dimension_contradictions: canonical.dimension_contradictions || {},
-    
-    // Pressure/stress patterns
     stress_patterns: canonical.stress_patterns || {},
     hidden_costs: canonical.hidden_costs || {},
-    
-    // Behavioral patterns
     inferred_patterns: canonical.inferred_patterns || {},
     communication_style: canonical.communication_style || {},
-    
-    // Operating model
     life_direction: canonical.life_direction || {},
     business_operating_reality: canonical.business_operating_reality || {},
-    
-    // Written responses
     written_signals: extractWrittenSignals(canonical.intake_answers || {}),
-    
-    // Top systems
     top_systems: canonical.top_systems || {},
-    
-    // Metadata
     vector_scores: canonical.vector_scores || {}
   };
 }
 
 /**
- * Extract signals from written answers
+ * Extract written signals (unchanged from V1)
  */
 function extractWrittenSignals(answers) {
   const signals = {
@@ -100,7 +150,6 @@ function extractWrittenSignals(answers) {
     contradiction_count: 0
   };
 
-  // Q2, Q14, Q17, Q20, Q22, Q24, Q25, Q26, Q27, Q28 are written responses
   const writtenQuestions = [2, 14, 17, 20, 22, 24, 25, 26, 27, 28];
   
   writtenQuestions.forEach(q => {
@@ -108,20 +157,10 @@ function extractWrittenSignals(answers) {
     if (!answer) return;
     
     const text = String(answer).toLowerCase();
-    
-    // Directiveness signals
     if (/move|go|now|decide|act|push|drive|command/i.test(text)) signals.directiveness_words++;
-    
-    // Precision signals
     if (/precise|exact|right|careful|detail|check|verify|consider/i.test(text)) signals.precision_words++;
-    
-    // Momentum signals
     if (/fast|quick|speed|energy|momentum|pace|accelerate/i.test(text)) signals.momentum_words++;
-    
-    // Relational signals
     if (/people|team|together|collaborate|listen|understand|empathy/i.test(text)) signals.relational_words++;
-    
-    // Contradictions (conflicting signals in same answer)
     if (/but|however|though|yet|conflict|tension|struggle/i.test(text)) signals.contradiction_count++;
   });
 
@@ -129,34 +168,53 @@ function extractWrittenSignals(answers) {
 }
 
 /**
- * Detect dominance patterns from evidence
+ * PHASE 2: Detect dominance with threshold awareness
  */
-function detectDominance(baseline, evidence) {
+function detectDominanceWithThreshold(baseline, evidence, profileShape) {
   if (!baseline || baseline.length === 0) {
-    return { primary_dimension: null, dominance_score: 0, patterns: {} };
+    return { primary_dimension: null, dominance_score: 0, patterns: {}, threshold_band: 'none' };
   }
 
   const primary = baseline[0];
   const secondary = baseline[1];
-  const tertiary = baseline[2];
   
-  // Dominance amplitude
-  const dominance_score = primary.score;
   const gap_to_secondary = (primary.score - (secondary?.score || 0));
   const gap_to_average = primary.score - (baseline.reduce((s, d) => s + d.score, 0) / baseline.length);
   
-  // Is dominance clear or contested?
+  // THRESHOLD ANALYSIS: Which band is the dominant system in?
+  const dominance_score = primary.score;
+  let threshold_band = 'moderate';
+  let threshold_weight = 1.0;
+  
+  if (dominance_score > 0.85) {
+    threshold_band = 'extreme';
+    threshold_weight = 1.4; // Extreme systems disproportionately influence
+  } else if (dominance_score > 0.60) {
+    threshold_band = 'strong';
+    threshold_weight = 1.2;
+  } else if (dominance_score > 0.30) {
+    threshold_band = 'moderate';
+    threshold_weight = 1.0;
+  } else {
+    threshold_band = 'mild';
+    threshold_weight = 0.7;
+  }
+  
+  // Dominance clarity (how clear is the hierarchy?)
   const dominance_clarity = gap_to_secondary > 0.5 ? 'clear' : gap_to_secondary > 0.2 ? 'moderate' : 'contested';
   
-  // Does written evidence support baseline ordering?
+  // Written alignment
   const written_alignment = checkWrittenAlignment(primary.dimension, evidence.written_signals);
   
-  // Do contradictions reduce dominance perception?
+  // Contradiction dampening (but less so for extreme systems)
   const contradiction_count = Object.values(evidence.contradictions || {}).length;
-  const contradiction_dampening = Math.min(contradiction_count * 0.05, 0.3);
+  const contradiction_dampening = Math.min(contradiction_count * 0.05 * (threshold_band === 'extreme' ? 0.5 : 1.0), 0.2);
   
-  // Do pressure patterns reveal true dominance?
+  // Pressure harmony
   const pressure_harmony = checkPressureHarmony(primary.dimension, evidence.stress_patterns);
+  
+  // Profile shape awareness (flat profiles = lower confidence in dominance)
+  const shape_adjustment = profileShape.shape === 'flat' ? 0.5 : 1.0;
   
   return {
     primary_dimension: primary.dimension,
@@ -167,15 +225,178 @@ function detectDominance(baseline, evidence) {
     gap_to_secondary: gap_to_secondary,
     gap_to_average: gap_to_average,
     dominance_clarity: dominance_clarity,
+    threshold_band: threshold_band,
+    threshold_weight: threshold_weight,
     written_alignment: written_alignment,
     contradiction_dampening: contradiction_dampening,
     pressure_harmony: pressure_harmony,
-    final_dominance_amplitude: Math.max(primary.score + (pressure_harmony * 0.15), primary.score)
+    shape_adjustment: shape_adjustment,
+    final_dominance_amplitude: Math.max(
+      primary.score + (pressure_harmony * 0.15) * threshold_weight,
+      primary.score
+    )
   };
 }
 
 /**
- * Check if written signals align with primary dimension
+ * PHASE 2 NEW: Calculate compensatory suppression effects
+ * 
+ * Strong systems suppress weak ones (behavioral suppression, not absolute)
+ */
+function calculateSuppressionEffects(baseline, dominance) {
+  const suppressionMap = {};
+  
+  // Define suppression relationships
+  const suppressionRules = {
+    vector: ['signal', 'flex'],        // High vector suppresses precision + adaptation
+    horizon: ['velocity', 'leverage'], // High horizon suppresses speed + focus
+    velocity: ['fidelity', 'signal'],  // High velocity suppresses precision
+    signal: ['flex', 'horizon'],       // High signal suppresses adaptation
+    fidelity: ['vector', 'flex'],      // High fidelity suppresses directiveness + adaptation
+    leverage: ['flex', 'horizon'],     // High leverage suppresses adaptation + relationships
+    flex: [],                          // Flex doesn't suppress (absorbs)
+    framework: ['velocity']            // Framework suppresses speed
+  };
+  
+  const primary = baseline[0];
+  const primaryScore = primary.score;
+  
+  // How strong is the suppression?
+  let suppressionStrength = 0;
+  if (primaryScore > 0.85) suppressionStrength = 0.25; // Extreme = 25% suppression
+  else if (primaryScore > 0.60) suppressionStrength = 0.15; // Strong = 15% suppression
+  else if (primaryScore > 0.30) suppressionStrength = 0.05; // Moderate = 5% suppression
+  
+  const suppressed = suppressionRules[primary.dimension] || [];
+  
+  suppressed.forEach(dim => {
+    suppressionMap[dim] = {
+      suppressed_by: primary.dimension,
+      suppression_strength: suppressionStrength,
+      suppressed_score_delta: 0 // Will be calculated per dimension
+    };
+  });
+  
+  return suppressionMap;
+}
+
+/**
+ * PHASE 2: Calculate rescored dimensions with threshold + suppression
+ */
+function calculateRescoredDimensionsV2(baseline, dominance, suppressionMap, evidence, profileShape) {
+  return baseline.map((dim, idx) => {
+    let rescored_score = dim.score;
+    
+    // THRESHOLD AMPLIFICATION: Dominant systems get stronger based on threshold
+    if (idx === 0 && dominance.dominance_clarity === 'clear') {
+      const amplification = (
+        dominance.written_alignment * 0.12 +
+        dominance.pressure_harmony * 0.10
+      ) * dominance.threshold_weight;
+      
+      rescored_score = Math.min(rescored_score + amplification, 10);
+    }
+    
+    // SECONDARY REDUCTION: Clarify the gap (but respect flat profiles)
+    if (idx === 1 && dominance.gap_to_secondary > 0.5 && profileShape.shape !== 'flat') {
+      const reduction = Math.abs(dominance.gap_to_secondary) * 0.12;
+      rescored_score = Math.max(rescored_score - reduction, -10);
+    }
+    
+    // COMPENSATORY SUPPRESSION: Apply behavioral suppression
+    if (suppressionMap[dim.dimension]) {
+      const suppression = suppressionMap[dim.dimension];
+      suppressionMap[dim.dimension].suppressed_score_delta = -suppression.suppression_strength * 0.5;
+      rescored_score = rescored_score + suppressionMap[dim.dimension].suppressed_score_delta;
+    }
+    
+    // FLAT PROFILE PRESERVATION: Keep flat profiles flatter
+    if (profileShape.shape === 'flat' && idx > 0) {
+      // Compress secondary dimensions more
+      rescored_score *= 0.97;
+    }
+    
+    // CONTRADICTION DAMPENING: Less for extreme systems
+    if (dominance.contradiction_dampening > 0 && idx < 2) {
+      rescored_score *= (1 - dominance.contradiction_dampening * 0.3);
+    }
+    
+    // TENSION SENSITIVITY: Amplify conflicting dimension pairs
+    const tensions = getConflictingTensions(dim.dimension, baseline);
+    if (tensions && tensions.amplify) {
+      rescored_score = rescored_score * (1 + tensions.amplification_factor);
+    }
+    
+    return {
+      dimension: dim.dimension,
+      baseline_score: dim.score,
+      rescored_score: Math.round(rescored_score * 100) / 100,
+      rank: idx + 1,
+      delta: Math.round((rescored_score - dim.score) * 100) / 100,
+      confidence: calculateConfidenceV2(dim.dimension, evidence, dominance, profileShape)
+    };
+  });
+}
+
+/**
+ * PHASE 2 NEW: Identify tension-sensitive dimension pairs
+ */
+function getConflictingTensions(dimension, baseline) {
+  const scoreMap = {};
+  baseline.forEach(d => { scoreMap[d.dimension] = d.score; });
+  
+  const tensions = {
+    vector: {
+      opponent: 'signal',
+      amplify: scoreMap.vector > 0.6 && scoreMap.signal < 0.3,
+      amplification_factor: 0.08
+    },
+    velocity: {
+      opponent: 'fidelity',
+      amplify: scoreMap.velocity > 0.6 && scoreMap.fidelity < 0.2,
+      amplification_factor: 0.10
+    },
+    horizon: {
+      opponent: 'flex',
+      amplify: scoreMap.horizon > 0.5 && scoreMap.flex < 0.2,
+      amplification_factor: 0.07
+    },
+    leverage: {
+      opponent: 'framework',
+      amplify: scoreMap.leverage > 0.6 && scoreMap.framework < 0.1,
+      amplification_factor: 0.08
+    }
+  };
+  
+  return tensions[dimension] || null;
+}
+
+/**
+ * PHASE 2: Calculate confidence with profile shape awareness
+ */
+function calculateConfidenceV2(dimension, evidence, dominance, profileShape) {
+  let confidence = 0.75;
+  
+  // Flat profiles: lower confidence in any rescoring
+  if (profileShape.shape === 'flat') confidence -= 0.15;
+  
+  // Written signals alignment
+  const written_signals = evidence.written_signals || {};
+  const signal_strength = checkWrittenAlignment(dimension, written_signals);
+  confidence += signal_strength * 0.12;
+  
+  // Contradictions reduce confidence
+  const contradictions = evidence.dimension_contradictions || {};
+  if (contradictions[dimension]) confidence -= 0.12;
+  
+  // Extreme systems get higher confidence
+  if (dominance.threshold_band === 'extreme') confidence += 0.05;
+  
+  return Math.min(Math.max(confidence, 0.45), 1.0);
+}
+
+/**
+ * Check written alignment (unchanged from V1)
  */
 function checkWrittenAlignment(primary_dimension, written_signals) {
   const dimension_signal_map = {
@@ -190,13 +411,11 @@ function checkWrittenAlignment(primary_dimension, written_signals) {
   };
   
   const signal_count = dimension_signal_map[primary_dimension] || 0;
-  const alignment_strength = Math.min(signal_count / 5, 1.0); // 0-1 scale
-  
-  return alignment_strength;
+  return Math.min(signal_count / 5, 1.0);
 }
 
 /**
- * Check if pressure patterns harmonize with primary dimension
+ * Check pressure harmony (unchanged from V1)
  */
 function checkPressureHarmony(primary_dimension, stress_patterns) {
   if (!stress_patterns || typeof stress_patterns !== 'object') return 0;
@@ -223,73 +442,19 @@ function checkPressureHarmony(primary_dimension, stress_patterns) {
 }
 
 /**
- * Calculate rescored dimensions with dominance amplification
+ * PHASE 2: Analyze spread with tension sensitivity
  */
-function calculateRescoredDimensions(baseline, dominance, evidence) {
-  return baseline.map((dim, idx) => {
-    let rescored_score = dim.score;
-    
-    // If this is the primary dimension, potentially amplify
-    if (idx === 0 && dominance.dominance_clarity === 'clear') {
-      // Amplify if dominance is clear and supports actual behavior
-      const amplification = dominance.written_alignment * 0.15 + dominance.pressure_harmony * 0.1;
-      rescored_score = Math.min(rescored_score + amplification, 10); // Cap at 10
-    }
-    
-    // If this is secondary and far from primary, potentially reduce
-    if (idx === 1 && dominance.gap_to_secondary > 0.5) {
-      // Make distance clearer (but only if primary is truly dominant)
-      const reduction = Math.abs(dominance.gap_to_secondary) * 0.1;
-      rescored_score = Math.max(rescored_score - reduction, -10); // Floor at -10
-    }
-    
-    // If profile is flat (low variance), keep it flatter
-    const baseline_variance = calculateVariance(baseline);
-    if (baseline_variance < 0.5 && idx > 0) {
-      // Compress secondary dimensions more (they're already close)
-      rescored_score *= 0.95;
-    }
-    
-    // Contradiction dampening (if written evidence contradicts score)
-    if (dominance.contradiction_dampening > 0 && idx < 2) {
-      rescored_score *= (1 - dominance.contradiction_dampening * 0.5);
-    }
-
-    return {
-      dimension: dim.dimension,
-      baseline_score: dim.score,
-      rescored_score: Math.round(rescored_score * 100) / 100, // 2 decimals
-      rank: idx + 1,
-      delta: Math.round((rescored_score - dim.score) * 100) / 100,
-      confidence: calculateConfidence(dim.dimension, evidence)
-    };
-  });
-}
-
-/**
- * Calculate confidence in rescored dimension
- */
-function calculateConfidence(dimension, evidence) {
-  let confidence = 0.8; // Base
-
-  // Higher if written signals align
-  const written_signals = evidence.written_signals || {};
-  const signal_strength = checkWrittenAlignment(dimension, written_signals);
-  confidence += signal_strength * 0.1;
-
-  // Lower if contradictions exist for this dimension
-  const contradictions = evidence.dimension_contradictions || {};
-  if (contradictions[dimension]) confidence -= 0.1;
-
-  return Math.min(Math.max(confidence, 0.5), 1.0);
-}
-
-/**
- * Analyze spread characteristics
- */
-function analyzeSpread(rescored) {
+function analyzeSpreadV2(rescored, dominance) {
   if (!rescored || rescored.length < 2) {
-    return { flatness_score: 0, polarization_score: 0, dominance_gap: 0, balanced_vs_extreme: 'balanced' };
+    return {
+      flatness_score: 0,
+      polarization_score: 0,
+      dominance_gap: 0,
+      total_spread: 0,
+      variance: 0,
+      balanced_vs_extreme: 'balanced',
+      tension_distribution: 'balanced'
+    };
   }
 
   const scores = rescored.map(d => d.rescored_score);
@@ -300,7 +465,7 @@ function analyzeSpread(rescored) {
   const total_spread = highest - lowest;
   const variance = calculateVariance(scores);
   
-  // Flatness: how close are all scores? (0=flat, 1=extreme)
+  // Flatness
   const flatness_score = 1 - Math.min(variance / 2, 1);
   
   // Polarization: do scores cluster at extremes?
@@ -315,63 +480,85 @@ function analyzeSpread(rescored) {
   if (total_spread > 1.5) balanced_vs_extreme = 'extreme';
   if (total_spread < 0.5) balanced_vs_extreme = 'flat';
   
+  // PHASE 2: Tension distribution (how evenly are tensions spread?)
+  const positive_count = scores.filter(s => s > 0.3).length;
+  const negative_count = scores.filter(s => s < -0.3).length;
+  const tension_distribution = (positive_count > 5 || negative_count > 2) ? 'tensioned' : 'balanced';
+  
   return {
     flatness_score: Math.round(flatness_score * 100) / 100,
     polarization_score: Math.round(polarization_score * 100) / 100,
     dominance_gap: Math.round(dominance_gap * 100) / 100,
     total_spread: Math.round(total_spread * 100) / 100,
     variance: Math.round(variance * 100) / 100,
-    balanced_vs_extreme: balanced_vs_extreme
+    balanced_vs_extreme: balanced_vs_extreme,
+    tension_distribution: tension_distribution
   };
 }
 
 /**
- * Calculate dominance gravity (which dimension drives others)
+ * PHASE 2: Calculate gravity with suppression context
  */
-function calculateGravity(rescored, dominance, evidence) {
+function calculateGravityV2(rescored, dominance, suppressionMap) {
   const primary = rescored[0];
-  
-  // Which other dimensions move with primary?
   const downstream_influence = [];
   
-  // If vector is dominant, horizon/leverage typically follow
+  // Define influence patterns with suppression awareness
   if (primary.dimension === 'vector') {
     const horizon_dim = rescored.find(d => d.dimension === 'horizon');
     const leverage_dim = rescored.find(d => d.dimension === 'leverage');
-    if (horizon_dim) downstream_influence.push({ dimension: 'horizon', correlation: 0.65 });
-    if (leverage_dim) downstream_influence.push({ dimension: 'leverage', correlation: 0.72 });
+    if (horizon_dim) downstream_influence.push({
+      dimension: 'horizon',
+      correlation: 0.65,
+      influenced_by_suppression: !!suppressionMap['horizon']
+    });
+    if (leverage_dim) downstream_influence.push({
+      dimension: 'leverage',
+      correlation: 0.72,
+      influenced_by_suppression: !!suppressionMap['leverage']
+    });
   }
   
-  // If signal is dominant, fidelity/framework typically follow
   if (primary.dimension === 'signal') {
     const fidelity_dim = rescored.find(d => d.dimension === 'fidelity');
     const framework_dim = rescored.find(d => d.dimension === 'framework');
-    if (fidelity_dim) downstream_influence.push({ dimension: 'fidelity', correlation: 0.68 });
-    if (framework_dim) downstream_influence.push({ dimension: 'framework', correlation: 0.55 });
+    if (fidelity_dim) downstream_influence.push({
+      dimension: 'fidelity',
+      correlation: 0.68,
+      influenced_by_suppression: !!suppressionMap['fidelity']
+    });
+    if (framework_dim) downstream_influence.push({
+      dimension: 'framework',
+      correlation: 0.55,
+      influenced_by_suppression: !!suppressionMap['framework']
+    });
   }
   
-  // If velocity is dominant, flex typically follows
   if (primary.dimension === 'velocity') {
     const flex_dim = rescored.find(d => d.dimension === 'flex');
-    if (flex_dim) downstream_influence.push({ dimension: 'flex', correlation: 0.75 });
+    if (flex_dim) downstream_influence.push({
+      dimension: 'flex',
+      correlation: 0.75,
+      influenced_by_suppression: !!suppressionMap['flex']
+    });
   }
   
   return {
     strongest_system: primary.dimension,
     gravity_strength: Math.round(Math.abs(primary.rescored_score) * 100) / 100,
     downstream_influence: downstream_influence,
-    drives_entire_profile: primary.rescored_score > 0.7
+    drives_entire_profile: primary.rescored_score > 0.7,
+    suppression_effects_active: Object.keys(suppressionMap).length > 0
   };
 }
 
 /**
- * Analyze tension pairs
+ * PHASE 2: Analyze tensions with dominance context
  */
-function analyzeTensionPairs(rescored) {
+function analyzeTensionPairsV2(rescored, dominance, suppressionMap) {
   const scoreMap = {};
   rescored.forEach(d => { scoreMap[d.dimension] = d.rescored_score; });
   
-  // Calculate tension (delta) for key pairs
   const tension_pairs = {
     velocity_vs_fidelity: Math.round((scoreMap.velocity - scoreMap.fidelity) * 100) / 100,
     vector_vs_signal: Math.round((scoreMap.vector - scoreMap.signal) * 100) / 100,
@@ -379,7 +566,16 @@ function analyzeTensionPairs(rescored) {
     leverage_vs_flex: Math.round((scoreMap.leverage - scoreMap.flex) * 100) / 100
   };
   
-  return tension_pairs;
+  // Mark which tensions are active (>0.4 delta)
+  const active_tensions = Object.entries(tension_pairs)
+    .filter(([_, delta]) => Math.abs(delta) > 0.4)
+    .map(([name, _]) => name);
+  
+  return {
+    ...tension_pairs,
+    active_tensions: active_tensions,
+    tension_count: active_tensions.length
+  };
 }
 
 /**
@@ -399,7 +595,50 @@ function calculateAmplitudeMetrics(rescored) {
 }
 
 /**
- * Helper: Calculate variance
+ * PHASE 2 NEW: Build render-ready intelligence
+ */
+function buildRenderReadyV2(rescored, dominance, tensions, suppressionMap) {
+  const scoreMap = {};
+  rescored.forEach(d => { scoreMap[d.dimension] = d.rescored_score; });
+  
+  // Command clarity: primary dimension score
+  const command_clarity = rescored[0]?.rescored_score || 0;
+  
+  // Speed vs fidelity: velocity - fidelity
+  const speed_vs_fidelity = tensions.velocity_vs_fidelity || 0;
+  
+  // Strategic leverage: leverage dimension score
+  const strategic_leverage = scoreMap.leverage || 0;
+  
+  // DNA summary will be generated by renderer, but we can prepare dominance-aware summary
+  // This would be expanded in Phase 3
+  
+  return {
+    dna_summary: null, // Generated by renderer
+    command_clarity: Math.round(command_clarity * 100) / 100,
+    speed_vs_fidelity: Math.round(speed_vs_fidelity * 100) / 100,
+    strategic_leverage: Math.round(strategic_leverage * 100) / 100,
+    dominance_flavor: dominance.threshold_band,
+    active_suppression: Object.keys(suppressionMap).length > 0,
+    profile_intensity: determinateIntensity(dominance, rescored)
+  };
+}
+
+/**
+ * Determine profile intensity level
+ */
+function determinateIntensity(dominance, rescored) {
+  const spread = Math.max(...rescored.map(d => d.rescored_score)) - Math.min(...rescored.map(d => d.rescored_score));
+  
+  if (dominance.threshold_band === 'extreme' && spread > 1.2) return 'extreme';
+  if (dominance.threshold_band === 'strong' && spread > 0.8) return 'high';
+  if (dominance.gap_to_average > 0.5) return 'high';
+  if (dominance.gap_to_average > 0) return 'medium';
+  return 'low';
+}
+
+/**
+ * Calculate variance (unchanged)
  */
 function calculateVariance(scores) {
   if (!scores || scores.length === 0) return 0;
@@ -408,13 +647,14 @@ function calculateVariance(scores) {
 }
 
 /**
- * Assemble final rescoring_v1 object
+ * Assemble final rescoring_v1 object - PHASE 2
  */
-function assembleRescoring(rescored, dominance, spread, gravity, tensions, amplitude) {
+function assembleRescoringV2(rescored, dominance, spread, gravity, tensions, amplitude, renderReady, profileShape) {
   return {
-    version: 'v1',
+    version: 'v2',
+    phase: 'threshold_dominance_refinement',
     generated_at: new Date().toISOString(),
-    generation_source: 'rescoring_engine_v1',
+    generation_source: 'rescoring_engine_v2',
     
     ranked_dimensions: rescored.map((d, idx) => ({
       dimension: d.dimension,
@@ -430,10 +670,16 @@ function assembleRescoring(rescored, dominance, spread, gravity, tensions, ampli
       secondary_dimension: dominance.secondary_dimension,
       dominance_amplitude: Math.round(dominance.final_dominance_amplitude * 100) / 100,
       spread_type: spread.balanced_vs_extreme,
-      profile_intensity: dominance.gap_to_average > 0.5 ? 'high' : dominance.gap_to_average > 0 ? 'medium' : 'low'
+      profile_intensity: renderReady.profile_intensity,
+      threshold_band: dominance.threshold_band,
+      threshold_weight: Math.round(dominance.threshold_weight * 100) / 100
     },
     
-    spread_profile: spread,
+    spread_profile: {
+      ...spread,
+      profile_shape: profileShape.shape,
+      profile_shape_confidence: Math.round(profileShape.confidence * 100) / 100
+    },
     
     tension_pairs: tensions,
     
@@ -441,18 +687,21 @@ function assembleRescoring(rescored, dominance, spread, gravity, tensions, ampli
     
     amplitude_metrics: amplitude,
     
-    render_ready: {
-      dna_summary: null, // Will be built by renderer
-      command_clarity: rescored[0]?.rescored_score || 0,
-      speed_vs_fidelity: tensions.velocity_vs_fidelity,
-      strategic_leverage: rescored.find(d => d.dimension === 'leverage')?.rescored_score || 0
-    },
+    render_ready: renderReady,
     
     metadata: {
       baseline_hash: hashDimensions(rescored),
       rescoring_timestamp: new Date().toISOString(),
-      rescoring_engine_version: 'v1.0.0',
-      input_canonical_keys: '(full canonical)'
+      rescoring_engine_version: 'v2.0.0',
+      input_canonical_keys: '(full canonical)',
+      phase_features: [
+        'threshold_gravity',
+        'compensatory_suppression',
+        'flatness_preservation',
+        'tension_amplification',
+        'extremity_differentiation',
+        'render_ready_intelligence'
+      ]
     }
   };
 }
@@ -471,7 +720,8 @@ function hashDimensions(dimensions) {
  */
 function getEmptyRescoring() {
   return {
-    version: 'v1',
+    version: 'v2',
+    phase: 'threshold_dominance_refinement',
     generated_at: new Date().toISOString(),
     generation_source: null,
     ranked_dimensions: [],
@@ -480,7 +730,9 @@ function getEmptyRescoring() {
       secondary_dimension: null,
       dominance_amplitude: 0,
       spread_type: null,
-      profile_intensity: null
+      profile_intensity: null,
+      threshold_band: 'none',
+      threshold_weight: 1.0
     },
     spread_profile: {
       flatness_score: 0,
@@ -488,19 +740,25 @@ function getEmptyRescoring() {
       dominance_gap: 0,
       total_spread: 0,
       variance: 0,
-      balanced_vs_extreme: 'balanced'
+      balanced_vs_extreme: 'balanced',
+      tension_distribution: 'balanced',
+      profile_shape: 'unknown',
+      profile_shape_confidence: 0
     },
     tension_pairs: {
       velocity_vs_fidelity: 0,
       vector_vs_signal: 0,
       horizon_vs_flex: 0,
-      leverage_vs_flex: 0
+      leverage_vs_flex: 0,
+      active_tensions: [],
+      tension_count: 0
     },
     dominance_gravity: {
       strongest_system: null,
       gravity_strength: 0,
       downstream_influence: [],
-      drives_entire_profile: false
+      drives_entire_profile: false,
+      suppression_effects_active: false
     },
     amplitude_metrics: {
       highest_score: 0,
@@ -512,13 +770,17 @@ function getEmptyRescoring() {
       dna_summary: null,
       command_clarity: 0,
       speed_vs_fidelity: 0,
-      strategic_leverage: 0
+      strategic_leverage: 0,
+      dominance_flavor: 'none',
+      active_suppression: false,
+      profile_intensity: 'low'
     },
     metadata: {
       baseline_hash: null,
       rescoring_timestamp: new Date().toISOString(),
-      rescoring_engine_version: 'v1.0.0',
-      input_canonical_keys: null
+      rescoring_engine_version: 'v2.0.0',
+      input_canonical_keys: null,
+      phase_features: []
     }
   };
 }
