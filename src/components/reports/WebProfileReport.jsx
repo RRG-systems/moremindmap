@@ -422,9 +422,25 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
         
         {/* Render Five Futures as distinct items */}
         <div className="zone-progression five-futures-featured">
-          {fiveFuturesBI?.found && fiveFuturesBI?.content ? (
-            <FiveFuturesRenderer content={fiveFuturesBI.content} />
-          ) : narrative.profileDNA ? (
+          {(() => {
+            // TEMP DEBUG: Trace handoff to renderer
+            console.log('[HANDOFF] fiveFuturesBI?.found:', fiveFuturesBI?.found);
+            console.log('[HANDOFF] fiveFuturesBI?.content:', fiveFuturesBI?.content);
+            console.log('[HANDOFF] fiveFuturesBI?.content?.futures:', fiveFuturesBI?.content?.futures);
+            if (fiveFuturesBI?.found && fiveFuturesBI?.content) {
+              console.log('[HANDOFF] PASSING TO RENDERER:', {
+                content: fiveFuturesBI.content,
+                futures_present: !!fiveFuturesBI.content.futures,
+                futures_length: fiveFuturesBI.content.futures?.length
+              });
+            } else {
+              console.log('[HANDOFF] CONDITION FAILED - checking fallback');
+              console.log('[HANDOFF] narrative.profileDNA:', !!narrative.profileDNA);
+            }
+            
+            if (fiveFuturesBI?.found && fiveFuturesBI?.content) {
+              return <FiveFuturesRenderer content={fiveFuturesBI.content} />;
+            } else if (narrative.profileDNA) {
             <InsightPanel
               icon="🌌"
               title="Five Futures"
