@@ -71,7 +71,7 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       </header>
 
       {/* PAGE 1: OPERATING SYSTEM */}
-      <PageOneDashboard narrative={narrative} ranked={ranked} />
+      <PageOneDashboard narrative={narrative} ranked={ranked} canonical={canonical} />
       
       {/* PAGE 2: STRATEGIC CONSEQUENCES */}
       <PageTwoDashboard narrative={narrative} ranked={ranked} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
@@ -97,7 +97,15 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
   );
 }
 
-function PageOneDashboard({ narrative, ranked }) {
+function PageOneDashboard({ narrative, ranked, canonical }) {
+  const renderReady = canonical?.rescoring_v1?.render_ready || {};
+  const getInsight = (type) => {
+    if (type === 'clarity') return 'Directional certainty in decision-making';
+    if (type === 'balance') return 'Speed-accuracy tradeoff in execution';
+    if (type === 'leverage') return 'Pattern recognition and scaling potential';
+    return '';
+  };
+  
   return (
     <div className="dashboard-page page-one">
       <div className="page-content">
@@ -109,7 +117,20 @@ function PageOneDashboard({ narrative, ranked }) {
             icon="🧬"
             title="Profile DNA"
             subtitle="Operating Model"
-            content={narrative.profileDNA?.body || narrative.profileDNA}
+            content={(() => {
+              const renderReady = canonical?.rescoring_v1?.render_ready || {};
+              const dominance = canonical?.rescoring_v1?.dominance_profile || {};
+              let topologyLine = '';
+              
+              if (renderReady.dominance_flavor === 'extreme') {
+                topologyLine = `${dominance.primary_dimension?.charAt(0).toUpperCase() + dominance.primary_dimension?.slice(1)} system dominates behavioral expression. `;
+              } else if (renderReady.dominance_flavor === 'strong') {
+                topologyLine = `${dominance.primary_dimension?.charAt(0).toUpperCase() + dominance.primary_dimension?.slice(1)} leadership with ${dominance.secondary_dimension} stabilization. `;
+              }
+              
+              const baseContent = narrative.profileDNA?.body || narrative.profileDNA || '';
+              return topologyLine ? topologyLine + baseContent : baseContent;
+            })()}
             prominence="hero"
           />
           
@@ -121,6 +142,7 @@ function PageOneDashboard({ narrative, ranked }) {
               metric={ranked[0]?.score || 0}
               dimension={ranked[0]?.dimension || 'Primary'}
               color="clarity"
+              insight={getInsight('clarity')}
             />
             <MetricCard
               icon="⚖️"
@@ -128,6 +150,7 @@ function PageOneDashboard({ narrative, ranked }) {
               metric={ranked[1]?.score || 0}
               dimension={ranked[1]?.dimension || 'Secondary'}
               color="balance"
+              insight={getInsight('balance')}
             />
             <MetricCard
               icon="🎯"
@@ -135,6 +158,7 @@ function PageOneDashboard({ narrative, ranked }) {
               metric={ranked[2]?.score || 0}
               dimension={ranked[2]?.dimension || 'Tertiary'}
               color="leverage"
+              insight={getInsight('leverage')}
             />
           </div>
         </div>
@@ -145,7 +169,24 @@ function PageOneDashboard({ narrative, ranked }) {
             icon="📊"
             title="DNA Summary"
             subtitle="Vector Analysis"
-            content={ranked.slice(0, 6).map(d => `${d.dimension}: ${d.score > 0 ? '+' : ''}${d.score}`).join(' • ')}
+            content={(() => {
+              const topology = (() => {
+                const renderReady = canonical?.rescoring_v1?.render_ready || {};
+                const dominance = canonical?.rescoring_v1?.dominance_profile || {};
+                if (renderReady.profile_intensity === 'extreme') {
+                  return 'Concentrated directional topology with suppressed verification systems.';
+                }
+                if (renderReady.profile_intensity === 'high') {
+                  return 'Strong domain topology with moderate stabilization.';
+                }
+                if (dominance.spread_type === 'flat' || ranked.length > 0 && (Math.max(...ranked.map(d => d.score)) - Math.min(...ranked.map(d => d.score))) < 0.5) {
+                  return 'Blended distributed topology with adaptive processing.';
+                }
+                return 'Balanced multi-system topology with flexible dynamics.';
+              })();
+              const scores = ranked.slice(0, 6).map(d => `${d.dimension}: ${d.score > 0 ? '+' : ''}${d.score}`).join(' • ');
+              return `${topology}\n\n${scores}`;
+            })()}
             prominence="analytical"
             className="left-panel"
           />
@@ -886,7 +927,7 @@ function FiveFuturesRenderer({ content }) {
 // PRESENTATIONAL COMPONENTS (pure composition, no logic)
 // ============================================================================
 
-function MetricCard({ icon, title, metric, dimension, color }) {
+function MetricCard({ icon, title, metric, dimension, color, insight }) {
   const colorMap = {
     clarity: 'metric-clarity',
     balance: 'metric-balance',
@@ -899,6 +940,7 @@ function MetricCard({ icon, title, metric, dimension, color }) {
       <h3 className="metric-title">{title}</h3>
       <div className="metric-value">{metric > 0 ? '+' : ''}{metric}</div>
       <p className="metric-dimension">{dimension}</p>
+      {insight && <p className="metric-insight">{insight}</p>}
     </div>
   );
 }
@@ -1208,16 +1250,32 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
               </div>
               <div className="section-descriptor">Analytical Profile</div>
               <div className="dimensions-grid-v2">
-                {ranked.map((dim) => (
-                  <div key={dim.dimension} className="dimension-card-v2">
-                    <div className="dim-header">
-                      <div className="dim-rank-badge">#{dim.rank}</div>
-                      <div className="dim-name">{dim.dimension.toUpperCase()}</div>
+                {ranked.map((dim, idx) => {
+                  const getTopologyLabel = () => {
+                    const { dominance_gravity, render_ready } = canonical.rescoring_v1 || {};
+                    if (idx === 0) {
+                      if (render_ready?.dominance_flavor === 'extreme') return 'PRIMARY DRIVER';
+                      if (render_ready?.dominance_flavor === 'strong') return 'DOMINANT SYSTEM';
+                      return 'LEADING FORCE';
+                    }
+                    if (idx === 1) return 'STABILIZER';
+                    if (idx === 2) return 'SECONDARY';
+                    if (dim.score > 0.3) return 'CONTRIBUTOR';
+                    if (dim.score < -0.3) return 'COMPENSATING';
+                    return 'MODULATOR';
+                  };
+                  return (
+                    <div key={dim.dimension} className="dimension-card-v2">
+                      <div className="dim-header">
+                        <div className="dim-rank-badge">#{dim.rank}</div>
+                        <div className="dim-name">{dim.dimension.toUpperCase()}</div>
+                      </div>
+                      <div className="dim-score-large">{dim.score > 0 ? '+' : ''}{dim.score}</div>
+                      <div className="dim-label-secondary">{dim.score > 0 ? 'Amplifier' : 'Constraint'}</div>
+                      <div className="dim-topology-label">{getTopologyLabel()}</div>
                     </div>
-                    <div className="dim-score-large">{dim.score > 0 ? '+' : ''}{dim.score}</div>
-                    <div className="dim-label-secondary">{dim.score > 0 ? 'Amplifier' : 'Constraint'}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
@@ -1984,6 +2042,17 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
           position: relative;
           z-index: 1;
           margin-top: 0.35rem;
+        }
+
+        .dim-topology-label {
+          font-size: 0.65rem;
+          color: rgba(212, 175, 55, 0.7);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin-top: 0.5rem;
+          padding-top: 0.4rem;
+          border-top: 1px solid rgba(212, 175, 55, 0.2);
         }
 
         /* FOOTER */
@@ -2759,6 +2828,16 @@ function DashboardStyles() {
         letter-spacing: 0.08em;
         margin: 0;
       }
+
+        .metric-insight {
+          font-size: 0.75rem;
+          color: rgba(212, 175, 55, 0.8);
+          font-weight: 500;
+          margin-top: 0.5rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid rgba(212, 175, 55, 0.15);
+          line-height: 1.4;
+        }
 
       .metric-clarity {
         border-color: rgba(33, 150, 243, 0.4);
