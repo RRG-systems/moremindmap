@@ -27,6 +27,7 @@
  */
 
 import { inferVectorScores } from './inferVectorScores.js';
+import { rescoreDimensions } from '../rescoring/rescoreDimensions.js';
 import { inferBehavioralPatterns } from './inferBehavioralPatterns.js';
 import { inferContradictions } from './inferContradictions.js';
 import { inferStressPatterns } from './inferStressPatterns.js';
@@ -381,6 +382,14 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
       input_canonical_hash: null
     }
   };
+  
+  // RESCORING ENGINE: Populate rescoring_v1 with behavioral dominance inference
+  try {
+    canonicalProfile.rescoring_v1 = rescoreDimensions(canonicalProfile);
+  } catch (rescoreErr) {
+    console.error('[CANONICAL] Rescoring failed:', rescoreErr.message);
+    // rescoring_v1 remains as empty schema (safe fallback)
+  }
 
   return canonicalProfile;
 }
