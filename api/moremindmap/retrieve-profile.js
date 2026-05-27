@@ -113,6 +113,13 @@ export default async function handler(req, res) {
       behavioral_intelligence_v1 = extractBehavioralIntelligence(canonicalDossier);
     } catch (extractErr) {
       console.error('[RETRIEVE] Behavioral extraction failed:', extractErr.message);
+      console.error('[RETRIEVE] Full error details:', {
+        message: extractErr.message,
+        stack_sample: extractErr.stack?.split('\n').slice(0, 3).join(' | '),
+        canonical_keys: canonicalDossier ? Object.keys(canonicalDossier).slice(0, 12) : 'N/A',
+        has_top_systems: !!canonicalDossier?.top_systems,
+        has_intake_answers: !!canonicalDossier?.intake_answers
+      });
       // Non-blocking: return canonical even if extraction fails
     }
 
