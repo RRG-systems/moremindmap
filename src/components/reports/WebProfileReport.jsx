@@ -768,6 +768,19 @@ function renderBIContent(domain, content) {
 }
 function FiveFuturesRenderer({ content }) {
   // TEMP DEBUG: Trace exact content shape
+  console.log('[RENDERER ENTRY] Renderer called');
+  console.log('[RENDERER ENTRY] Received content:', content);
+  console.log('[RENDERER ENTRY] content type:', typeof content);
+  console.log('[RENDERER ENTRY] content keys:', Object.keys(content || {}));
+  console.log('[RENDERER ENTRY] content?.futures:', content?.futures);
+  console.log('[RENDERER ENTRY] Array.isArray(content?.futures):', Array.isArray(content?.futures));
+  console.log('[RENDERER ENTRY] content?.futures?.length:', content?.futures?.length);
+  if (content?.futures?.[0]) {
+    console.log('[RENDERER ENTRY] First future:', content.futures[0]);
+    console.log('[RENDERER ENTRY] First future keys:', Object.keys(content.futures[0]));
+  }
+  
+  // Trace original debug logs for backwards compatibility
   console.log('[FUTURES RENDERER] content:', content);
   console.log('[FUTURES RENDERER] content?.futures:', content?.futures);
   console.log('[FUTURES RENDERER] Array.isArray(content?.futures):', Array.isArray(content?.futures));
