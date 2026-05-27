@@ -451,8 +451,16 @@ export function extractSectionContent(sectionId, behavioralIntelligence, canonic
   if (contract.sourceType === 'behavioral_intelligence' && behavioralIntelligence) {
     const domain = behavioralIntelligence.domains?.[contract.sourceDomain];
     
+    // TEMP DEBUG
+    console.log('[EXTRACT SECTION CONTENT]', sectionId, 'sourceDomain:', contract.sourceDomain);
+    console.log('[EXTRACT SECTION CONTENT] domain exists:', !!domain);
+    if (domain) {
+      console.log('[EXTRACT SECTION CONTENT] domain keys:', Object.keys(domain));
+    }
+    
     if (domain) {
       const extracted = extractFieldsFromDomain(domain, contract.sourceFields);
+      console.log('[EXTRACT SECTION CONTENT] extracted content keys:', Object.keys(extracted));
       return {
         sectionId,
         found: true,
