@@ -76,21 +76,46 @@ export function extractBehavioralIntelligence(canonical_profile) {
       extraction_timestamp: new Date().toISOString(),
       profile_id: canonical_profile.profile_id || canonical.profile_id || null,
       extraction_time_ms: 0,
-      
-      // Tier 1-2 extractions + organizational consequences
-      domains: {
-        operatingSystem: extractOperatingSystem(canonical),
-        worldExperience: extractWorldExperience(canonical),
-        othersExperience: extractOthersExperience(canonical),
-        pressureMechanics: extractPressureMechanicsStarter(canonical),
-        contradictions: extractContradictionsStarter(canonical),
-        scalingConstraint: extractScalingConstraint(canonical),
-        decisionArchitecture: extractDecisionArchitecture(canonical),
-        organizationalConsequences: extractOrganizationalConsequences(canonical),
-        facilitatorNotes: extractFacilitatorNotes(canonical),
-        fiveFutures: normalizeFiveFuturesOutput(generateProfileSpecificFutures(canonical)),
-        theOneMove: extractTheOneMove(canonical)
-      },
+      domains: {}
+    };
+    
+    // Extract domains with per-domain error isolation and logging
+    console.log('[EXTRACT] Starting domain extraction...');
+    
+    console.log('[EXTRACT] Domain 1/11: operatingSystem');
+    intelligence.domains.operatingSystem = extractOperatingSystem(canonical);
+    
+    console.log('[EXTRACT] Domain 2/11: worldExperience');
+    intelligence.domains.worldExperience = extractWorldExperience(canonical);
+    
+    console.log('[EXTRACT] Domain 3/11: othersExperience');
+    intelligence.domains.othersExperience = extractOthersExperience(canonical);
+    
+    console.log('[EXTRACT] Domain 4/11: pressureMechanics');
+    intelligence.domains.pressureMechanics = extractPressureMechanicsStarter(canonical);
+    
+    console.log('[EXTRACT] Domain 5/11: contradictions');
+    intelligence.domains.contradictions = extractContradictionsStarter(canonical);
+    
+    console.log('[EXTRACT] Domain 6/11: scalingConstraint');
+    intelligence.domains.scalingConstraint = extractScalingConstraint(canonical);
+    
+    console.log('[EXTRACT] Domain 7/11: decisionArchitecture');
+    intelligence.domains.decisionArchitecture = extractDecisionArchitecture(canonical);
+    
+    console.log('[EXTRACT] Domain 8/11: organizationalConsequences');
+    intelligence.domains.organizationalConsequences = extractOrganizationalConsequences(canonical);
+    
+    console.log('[EXTRACT] Domain 9/11: facilitatorNotes');
+    intelligence.domains.facilitatorNotes = extractFacilitatorNotes(canonical);
+    
+    console.log('[EXTRACT] Domain 10/11: fiveFutures');
+    intelligence.domains.fiveFutures = normalizeFiveFuturesOutput(generateProfileSpecificFutures(canonical));
+    
+    console.log('[EXTRACT] Domain 11/11: theOneMove');
+    intelligence.domains.theOneMove = extractTheOneMove(canonical);
+    
+    const confidence_tiers = {
       
       confidence_tiers: {
         operatingSystem: 'tier_1_high',
