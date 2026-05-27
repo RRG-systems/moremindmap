@@ -13,7 +13,14 @@
  * - Doctrine: describe consequences, not traits
  * - No motivational/therapy language
  * - All evidence grounded in canonical fields
+ * 
+ * FUTURES ENGINE:
+ * - Replaced generic static futures with profile-specific trajectory simulation
+ * - Each profile receives 5 psychologically specific futures
+ * - Imported from generateProfileSpecificFutures.js
  */
+
+import { generateProfileSpecificFutures } from './generateProfileSpecificFutures.js';
 
 /**
  * Main entry point for behavioral intelligence extraction.
@@ -51,7 +58,7 @@ export function extractBehavioralIntelligence(canonical_profile) {
         decisionArchitecture: extractDecisionArchitecture(canonical),
         organizationalConsequences: extractOrganizationalConsequences(canonical),
         facilitatorNotes: extractFacilitatorNotes(canonical),
-        fiveFuturesStarter: extractFiveFuturesStarter(canonical),
+        fiveFutures: generateProfileSpecificFutures(canonical),
         theOneMove: extractTheOneMove(canonical)
       },
       
@@ -923,66 +930,13 @@ function extractFacilitatorNotes(canonical) {
   };
 }
 
-/**
- * Domain 11: Five Possible Futures (Starter - Tier 3)
- * Trajectory simulations, not predictions.
- */
-function extractFiveFuturesStarter(canonical) {
-  const contradictions = canonical.contradictions || [];
-  const hidden_risks = canonical.hidden_risk_patterns || {};
-  const ceiling = canonical.future_ceiling || {};
-  
-  const relational_erosion = hidden_risks.relational_erosion_risk || 'Low';
-  const burnout_risk = hidden_risks.burnout_trajectory || 'Low';
-  const high_severity = contradictions.filter(c => c.severity === 'high' || c.severity === 'severe').length;
-  
-  const futures = [
-    {
-      title: 'Scaled Success',
-      likelihood: 'possible',
-      trajectory: 'Operator builds infrastructure. Organization becomes leverage-multiplied.',
-      organization_experiences: 'Sustainable growth. Operator not rate-limiting.'
-    },
-    {
-      title: 'Optimized Specialty',
-      likelihood: 'likely',
-      trajectory: 'Operator becomes irreplaceable specialist. Organization structures around them.',
-      organization_experiences: 'Stable at current scale. High operator dependency.'
-    },
-    {
-      title: 'Increasing Friction',
-      likelihood: relational_erosion !== 'Low' ? 'likely' : 'possible',
-      trajectory: 'Contradictions compound. Relational erosion accelerates.',
-      organization_experiences: 'Team isolation. Information degraded. Talent erosion.'
-    },
-    {
-      title: 'Infrastructure Crisis',
-      likelihood: high_severity > 1 ? 'likely' : 'possible',
-      trajectory: 'Systems cannot support goals. Scale attempt fails.',
-      organization_experiences: 'Project failures. Organizational paralysis.'
-    },
-    {
-      title: 'Successful Transition',
-      likelihood: 'possible',
-      trajectory: 'Operator transitions to strategy. Operational structure built.',
-      organization_experiences: 'Scalable structure emerges. Operator elevated.'
-    }
-  ];
-  
-  return {
-    title: 'Five Possible Futures (Starter)',
-    confidence: 'tier_3_low',
-    source_fields: ['contradictions', 'hidden_risk_patterns', 'future_ceiling'],
-    summary: 'Trajectory simulations. Not predictions—indicate which futures become likely if patterns continue.',
-    futures: futures,
-    most_likely: buildMostLikelyFuture(relational_erosion, burnout_risk, high_severity),
-    caution: 'Structural changes alter trajectory.'
-  };
-}
+// FUTURES ENGINE MOVED TO generateProfileSpecificFutures.js
+// Profile-specific trajectory simulation replaces generic static futures
 
 /**
- * Domain 12: The One Move (Starter - Tier 3)
+ * Domain 12: The One Move (Tier 3)
  * Highest-leverage intervention to shift trajectory.
+ * UPGRADED: Now uses profile-specific futures trajectory data.
  */
 function extractTheOneMove(canonical) {
   const infrastructure = canonical.infrastructure_maturity || {};
@@ -1081,9 +1035,4 @@ function buildOrganizationalConsequencesSummary(consequences) {
   return `${consequences.length} domains: ${domains}. Primary: ${consequences[0].cost}.`;
 }
 
-function buildMostLikelyFuture(relational_erosion, burnout_risk, high_severity_count) {
-  if (relational_erosion !== 'Low' && burnout_risk !== 'Low') return 'Increasing Friction';
-  if (high_severity_count > 1) return 'Infrastructure Crisis';
-  if (relational_erosion === 'Low' && high_severity_count === 0) return 'Optimized Specialty';
-  return 'Multiple futures possible';
-}
+// buildMostLikelyFuture moved to generateProfileSpecificFutures.js
