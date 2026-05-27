@@ -381,7 +381,7 @@ export const RENDER_CONTRACT = [
     priority: 11,
     order: 11,
     sourceType: 'behavioral_intelligence',
-    sourceDomain: 'fiveFuturesStarter',
+    sourceDomain: 'fiveFutures',
     sourceFields: ['summary', 'futures', 'most_likely'],
     fallbackType: 'canonical',
     fallbackField: 'future_trajectory',
