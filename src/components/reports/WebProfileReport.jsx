@@ -405,6 +405,12 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract Five Futures from BI
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const fiveFuturesBI = renderPlan ? extractSectionContent('section-five-futures', behavioralIntelligence, canonical) : null;
+  // TEMP DEBUG
+  console.log('[EXTRACT SECTION] fiveFuturesBI:', fiveFuturesBI);
+  if (fiveFuturesBI?.content) {
+    console.log('[EXTRACT SECTION] fiveFuturesBI.content keys:', Object.keys(fiveFuturesBI.content));
+    console.log('[EXTRACT SECTION] fiveFuturesBI.content.futures:', fiveFuturesBI.content.futures);
+  }
 
   return (
     <div className="dashboard-page page-seven">
@@ -745,6 +751,16 @@ function renderBIContent(domain, content) {
   return null;
 }
 function FiveFuturesRenderer({ content }) {
+  // TEMP DEBUG: Trace exact content shape
+  console.log('[FUTURES RENDERER] content:', content);
+  console.log('[FUTURES RENDERER] content?.futures:', content?.futures);
+  console.log('[FUTURES RENDERER] Array.isArray(content?.futures):', Array.isArray(content?.futures));
+  console.log('[FUTURES RENDERER] content?.futures?.length:', content?.futures?.length);
+  if (content?.futures?.[0]) {
+    console.log('[FUTURES RENDERER] First future:', content.futures[0]);
+    console.log('[FUTURES RENDERER] First future keys:', Object.keys(content.futures[0]));
+  }
+  
   if (!content) return null;
   
   // Handle futures array from extractFiveFuturesStarter
