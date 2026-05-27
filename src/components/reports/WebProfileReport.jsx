@@ -122,10 +122,12 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
               const dominance = canonical?.rescoring_v1?.dominance_profile || {};
               let topologyLine = '';
               
-              if (renderReady.dominance_flavor === 'extreme') {
-                topologyLine = `${dominance.primary_dimension?.charAt(0).toUpperCase() + dominance.primary_dimension?.slice(1)} system dominates behavioral expression. `;
-              } else if (renderReady.dominance_flavor === 'strong') {
-                topologyLine = `${dominance.primary_dimension?.charAt(0).toUpperCase() + dominance.primary_dimension?.slice(1)} leadership with ${dominance.secondary_dimension} stabilization. `;
+              if (renderReady.dominance_flavor === 'extreme' && dominance.primary_dimension) {
+                const dim = dominance.primary_dimension.charAt(0).toUpperCase() + dominance.primary_dimension.slice(1);
+                topologyLine = `${dim} system dominates behavioral expression. `;
+              } else if (renderReady.dominance_flavor === 'strong' && dominance.primary_dimension) {
+                const dim = dominance.primary_dimension.charAt(0).toUpperCase() + dominance.primary_dimension.slice(1);
+                topologyLine = `${dim} leadership with ${dominance.secondary_dimension} stabilization. `;
               }
               
               const baseContent = narrative.profileDNA?.body || narrative.profileDNA || '';
