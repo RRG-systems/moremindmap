@@ -46,11 +46,22 @@ function normalizeFiveFuturesOutput(futuresArray) {
     profile_specific: future.profile_specific
   }));
   
-  return {
+  const result = {
     futures: normalized,
     summary: 'Five trajectory scenarios emerge from your current operating pattern.',
     most_likely: normalized[0] || null
   };
+  
+  console.log('[NORMALIZE FUTURES] Returning:', {
+    futures_type: typeof result.futures,
+    futures_isArray: Array.isArray(result.futures),
+    futures_length: result.futures?.length,
+    has_summary: !!result.summary,
+    has_most_likely: !!result.most_likely,
+    keys: Object.keys(result)
+  });
+  
+  return result;
 }
 /**
  * Main entry point for behavioral intelligence extraction.
