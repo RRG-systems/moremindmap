@@ -1043,7 +1043,12 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
   const personName = canonical.person_name || 'Assessment Subject';
   const company = canonical.company_name || '';
   const profileType = data.inferred_patterns?.profile_type || 'Behavioral Profile';
-  const ranked = data.ranked_dimensions || [];
+  
+  // RESCORING FALLBACK: Use rescored dimensions if available, else baseline
+  const ranked = data.rescoring_v1?.ranked_dimensions?.length > 0
+    ? data.rescoring_v1.ranked_dimensions
+    : data.ranked_dimensions 
+    || [];
   
   // Generate profile code (short hash from profileId)
   const profileCode = profileId ? profileId.split('-').pop().substring(0, 6).toUpperCase() : 'XXXX';

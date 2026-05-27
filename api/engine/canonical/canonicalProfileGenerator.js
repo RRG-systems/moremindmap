@@ -312,6 +312,76 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     narrative_profile
   };
 
+  // Add rescoring_v1 schema (downstream intelligence layer)
+  // Preserved baseline scores for audit trail
+  canonicalProfile.baseline_ranked_dimensions = ranked_dimensions;
+  
+  // Initialize rescoring_v1 structure (will be populated by downstream rescoring engine)
+  canonicalProfile.rescoring_v1 = {
+    version: "v1",
+    generated_at: null,
+    generation_source: null,
+    
+    // Rescored dimension rankings
+    ranked_dimensions: [],
+    
+    // Dominance analysis
+    dominance_profile: {
+      primary_dimension: null,
+      secondary_dimension: null,
+      dominance_amplitude: 0,
+      spread_type: null,
+      profile_intensity: null
+    },
+    
+    // Spread characteristics
+    spread_profile: {
+      flatness_score: 0,
+      polarization_score: 0,
+      dominance_gap: 0,
+      balanced_vs_extreme: null
+    },
+    
+    // Dimension tensions
+    tension_pairs: {
+      velocity_vs_fidelity: null,
+      vector_vs_signal: null,
+      horizon_vs_flex: null,
+      leverage_vs_flex: null
+    },
+    
+    // Gravity (which dimension drives others)
+    dominance_gravity: {
+      strongest_system: null,
+      gravity_strength: 0,
+      downstream_influence: []
+    },
+    
+    // Amplitude metrics
+    amplitude_metrics: {
+      highest_score: 0,
+      lowest_score: 0,
+      total_spread: 0,
+      score_variance: 0
+    },
+    
+    // Render-ready overrides (safe for fallback)
+    render_ready: {
+      dna_summary: null,
+      command_clarity: null,
+      speed_vs_fidelity: null,
+      strategic_leverage: null
+    },
+    
+    // Audit trail
+    metadata: {
+      baseline_hash: null,
+      rescoring_timestamp: null,
+      rescoring_engine_version: null,
+      input_canonical_hash: null
+    }
+  };
+
   return canonicalProfile;
 }
 
