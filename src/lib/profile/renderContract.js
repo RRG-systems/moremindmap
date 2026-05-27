@@ -538,11 +538,20 @@ function extractFieldsFromDomain(domain, fieldNames) {
   
   if (!domain || !fieldNames) return extracted;
   
+  // TEMP DEBUG
+  console.log('[EXTRACT FIELDS] domain keys:', Object.keys(domain));
+  console.log('[EXTRACT FIELDS] requested fields:', fieldNames);
+  
   fieldNames.forEach(fieldName => {
     if (domain[fieldName] !== undefined) {
       extracted[fieldName] = domain[fieldName];
+      console.log('[EXTRACT FIELDS] extracted:', fieldName, '=', typeof domain[fieldName], Array.isArray(domain[fieldName]) ? `[Array ${domain[fieldName].length}]` : '');
+    } else {
+      console.log('[EXTRACT FIELDS] MISSING:', fieldName);
     }
   });
+  
+  console.log('[EXTRACT FIELDS] final extracted keys:', Object.keys(extracted));
   
   return extracted;
 }
