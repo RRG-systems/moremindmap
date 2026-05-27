@@ -484,15 +484,19 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
             if (fiveFuturesBI?.found && fiveFuturesBI?.content) {
               return <FiveFuturesRenderer content={fiveFuturesBI.content} />;
             } else if (narrative.profileDNA) {
-            <InsightPanel
-              icon="🌌"
-              title="Five Futures"
-              subtitle="Trajectory Simulations Based on Current Pattern"
-              content={narrative.profileDNA?.body || 'Five scenarios emerge from current operating pattern.'}
-              prominence="premium"
-              className="five-futures-panel"
-            />
-          ) : null}
+              return (
+                <InsightPanel
+                  icon="🌌"
+                  title="Five Futures"
+                  subtitle="Trajectory Simulations Based on Current Pattern"
+                  content={narrative.profileDNA?.body || 'Five scenarios emerge from current operating pattern.'}
+                  prominence="premium"
+                  className="five-futures-panel"
+                />
+              );
+            }
+            return null;
+          })}
         </div>
       </div>
     </div>
