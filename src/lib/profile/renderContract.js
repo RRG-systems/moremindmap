@@ -437,6 +437,19 @@ export function getOptionalSections() {
  * Safe extraction with fallback behavior
  */
 export function extractSectionContent(sectionId, behavioralIntelligence, canonicalDossier) {
+  // TEMP DEBUG for five-futures
+  if (sectionId === 'section-five-futures') {
+    console.log('[EXTRACT SECTION] >>> FIVE FUTURES EXTRACTION START');
+    console.log('[EXTRACT SECTION] behavioralIntelligence exists:', !!behavioralIntelligence);
+    if (behavioralIntelligence) {
+      console.log('[EXTRACT SECTION] BI.domains keys:', Object.keys(behavioralIntelligence.domains || {}));
+      console.log('[EXTRACT SECTION] BI.domains.fiveFutures exists:', !!behavioralIntelligence.domains?.fiveFutures);
+      if (behavioralIntelligence.domains?.fiveFutures) {
+        console.log('[EXTRACT SECTION] BI.domains.fiveFutures keys:', Object.keys(behavioralIntelligence.domains.fiveFutures));
+      }
+    }
+  }
+  
   const contract = getSectionContract(sectionId);
   
   if (!contract) {
