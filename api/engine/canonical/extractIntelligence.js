@@ -22,6 +22,36 @@
 
 import { generateProfileSpecificFutures } from './generateProfileSpecificFutures.js';
 
+
+/**
+ * Normalizes futures engine output to match renderer schema.
+ * Engine returns: array of futures
+ * Renderer expects: { futures: [...], summary: '...', most_likely: '...' }
+ */
+function normalizeFiveFuturesOutput(futuresArray) {
+  if (!Array.isArray(futuresArray) || futuresArray.length === 0) {
+    return {
+      futures: [],
+      summary: 'Future trajectory analysis not available.',
+      most_likely: null
+    };
+  }
+  
+  // Map engine fields to renderer schema
+  const normalized = futuresArray.map(future => ({
+    title: future.title,
+    likelihood: future.likelihood,
+    trajectory: future.description,  // Engine uses 'description', renderer expects 'trajectory'
+    organization_experiences: future.consequence,  // Engine uses 'consequence', renderer expects 'organization_experiences'
+    profile_specific: future.profile_specific
+  }));
+  
+  return {
+    futures: normalized,
+    summary: 'Five trajectory scenarios emerge from your current operating pattern.',
+    most_likely: normalized[0] || null
+  };
+}
 /**
  * Main entry point for behavioral intelligence extraction.
  * 
@@ -58,7 +88,7 @@ export function extractBehavioralIntelligence(canonical_profile) {
         decisionArchitecture: extractDecisionArchitecture(canonical),
         organizationalConsequences: extractOrganizationalConsequences(canonical),
         facilitatorNotes: extractFacilitatorNotes(canonical),
-        fiveFutures: generateProfileSpecificFutures(canonical),
+        fiveFutures: normalizeFiveFuturesOutput(generateProfileSpecificFutures(canonical)),
         theOneMove: extractTheOneMove(canonical)
       },
       
