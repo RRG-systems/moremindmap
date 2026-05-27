@@ -291,12 +291,29 @@ function buildScalingCostFuture(primary_dim, relational_risk, constraint, canoni
     trajectory = 'Operator becomes lone authority. Team stops challenging. Information stops flowing. Organization becomes fragile.';
     likelihood = 'likely';
   } else if (constraint) {
-    title = 'Infrastructure Crisis';
+    // Make constraint-specific, not generic
+    if (constraint.includes('infrastructure') || constraint.includes('systems')) {
+      title = 'Systems Scaling Bottleneck';
+    } else if (constraint.includes('process') || constraint.includes('workflow')) {
+      title = 'Process Ceiling Reached';
+    } else if (constraint.includes('decision')) {
+      title = 'Decision Velocity Limit';
+    } else {
+      title = `${primary_dim} Ceiling Constraint`;
+    }
     trajectory = `Organization hits ceiling. ${constraint} becomes permanent blocker. Growth stalls. Team frustrated.`;
     likelihood = contradictions.length > 1 ? 'likely' : 'possible';
   } else if (hidden_risks.burnout_trajectory !== 'Low') {
-    title = 'Operator Exhaustion Limit';
-    trajectory = 'Operator carrying too much. Energy depletes. Decision quality drops. Performance erodes.';
+    if (primary_dim === 'vector') {
+      title = 'Momentum Exhaustion';
+      trajectory = 'Operator carrying speed load. Energy depletes. Decision quality drops. Performance erodes.';
+    } else if (primary_dim === 'fidelity') {
+      title = 'Quality Fatigue Spiral';
+      trajectory = 'Perfectionism demands deplete operator. Energy gone. Standards drop. Quality erodes.';
+    } else {
+      title = 'Operator Exhaustion Limit';
+      trajectory = 'Operator carrying too much. Energy depletes. Decision quality drops. Performance erodes.';
+    }
   } else {
     title = 'Scaling Friction Accumulates';
     trajectory = 'Each growth phase reveals infrastructure gaps. Fixes become patchwork. System becomes unstable.';
