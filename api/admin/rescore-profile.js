@@ -16,7 +16,7 @@
 
 import Redis from 'ioredis';
 import gptBehavioralRescore from '../engine/rescoring/gptBehavioralRescore.js';
-import rescoreDimensions from '../engine/rescoring/rescoreDimensions.js';
+import { rescoreDimensions } from '../engine/rescoring/rescoreDimensions.js';
 
 export default async function handler(req, res) {
   // Only POST allowed
