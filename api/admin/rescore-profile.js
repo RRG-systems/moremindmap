@@ -62,6 +62,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'profile_id required' });
     }
 
+    const profileIdPattern = /^m{2}-\d{8}-[a-z0-9]{8}$/i;
+    if (!profileIdPattern.test(profile_id)) {
+      return res.status(400).json({ error: 'Invalid Profile ID format. Expected: mm-YYYYMMDD-xxxxxxxx' });
+    }
+
+    const match = profile_id.match(/^m{2}-(\d{8})-([a-z0-9]{8})$/i);
+    const datepart = match[1];
+    const randompart = match[2].toLowerCase();
+
     console.log(`[ADMIN RESCORE] START - Profile: ${profile_id}, force: ${force}, debug: ${debug}`);
     // Step 4: Connect to Redis
     const redis = new Redis(process.env.REDIS_URL || {
@@ -73,11 +82,18 @@ export default async function handler(req, res) {
     // Step 5: Retrieve existing canonical
     console.log(`[ADMIN RESCORE] Retrieving canonical for ${profile_id}`);
     
-    const profileKey = `vault:profile:${profile_id.toLowerCase()}`;
-    const profileJson = await redis.get(profileKey);
+    const lowercaseKey = `vault:profile:mm-${datepart}-${randompart}`;
+    const uppercaseKey = `vault:profile:MM-${datepart}-${randompart}`;
+    let retrievedKey = lowercaseKey;
+    let profileJson = await redis.get(lowercaseKey);
 
     if (!profileJson) {
-      console.warn(`[ADMIN RESCORE] Profile not found: ${profileKey}`);
+      retrievedKey = uppercaseKey;
+      profileJson = await redis.get(uppercaseKey);
+    }
+
+    if (!profileJson) {
+      console.warn(`[ADMIN RESCORE] Profile not found: ${lowercaseKey} or ${uppercaseKey}`);
       redis.disconnect();
       return res.status(404).json({ error: `Profile not found: ${profile_id}` });
     }
@@ -184,7 +200,7 @@ export default async function handler(req, res) {
       };
     }
     const savedJson = JSON.stringify(originalWrapper);
-    await redis.set(profileKey, savedJson);
+    await redis.set(retrievedKey, savedJson);
     console.log(`[ADMIN RESCORE] Saved to Redis ✅`);
 
     redis.disconnect();
