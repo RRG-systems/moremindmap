@@ -249,14 +249,17 @@ Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
     emotionalTemperature: "neutral-mechanical",
 
     canonical: { unified, // Use unified interpretation as primary
-      primaryDimension: interpreted.primarySystem.dimension,
-      primaryScore: interpreted.primarySystem.score,
+      cognitionSource: cognitionContext?.source || 'structured',
+      primaryDimension: cognitionContext?.ranked_dimensions?.[0]?.dimension || interpreted.primarySystem.dimension,
+      primaryScore: cognitionContext?.ranked_dimensions?.[0]?.score || cognitionContext?.ranked_dimensions?.[0]?.gpt_rescored_score || interpreted.primarySystem.score,
       primaryOperating: interpreted.primarySystem.operating,
       primaryPressure: interpreted.primarySystem.pressure,
-      secondaryDimension: interpreted.secondarySystem.dimension,
-      secondaryScore: interpreted.secondarySystem.score,
+      secondaryDimension: cognitionContext?.ranked_dimensions?.[1]?.dimension || interpreted.secondarySystem.dimension,
+      secondaryScore: cognitionContext?.ranked_dimensions?.[1]?.score || cognitionContext?.ranked_dimensions?.[1]?.gpt_rescored_score || interpreted.secondarySystem.score,
       secondaryOperating: interpreted.secondarySystem.operating,
       intake_answers: interpreted.intake_answers,
+      dominance_profile: cognitionContext?.dominance_profile,
+      render_ready: cognitionContext?.render_ready,
     },
 
     instruction: `Generate a concise operating model description (max 100 words) as JSON.
