@@ -89,7 +89,9 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let gptError = null;
 
   for (const section of sections) {
-    const prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
+    const prompt = section === 'profileDNA'
+      ? getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext)
+      : getPromptBuilder(section)(unified, interpreted, previousSections);
 
     let rendering;
     let sectionRenderSource = 'fallback_local';
