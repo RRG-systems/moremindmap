@@ -143,7 +143,7 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             <MetricCard
               icon="🔄"
               title="Command Clarity"
-              metric={ranked[0]?.score || 0}
+              metric={ranked[0]?.display_score ?? ranked[0]?.gpt_rescored_score ?? ranked[0]?.score ?? 0}
               dimension={ranked[0]?.dimension || 'Primary'}
               color="clarity"
               insight={getInsight('clarity')}
@@ -151,7 +151,7 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             <MetricCard
               icon="⚖️"
               title="Speed vs Fidelity"
-              metric={ranked[1]?.score || 0}
+              metric={ranked[1]?.display_score ?? ranked[1]?.gpt_rescored_score ?? ranked[1]?.score ?? 0}
               dimension={ranked[1]?.dimension || 'Secondary'}
               color="balance"
               insight={getInsight('balance')}
@@ -159,7 +159,7 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             <MetricCard
               icon="🎯"
               title="Strategic Leverage"
-              metric={ranked[2]?.score || 0}
+              metric={ranked[2]?.display_score ?? ranked[2]?.gpt_rescored_score ?? ranked[2]?.score ?? 0}
               dimension={ranked[2]?.dimension || 'Tertiary'}
               color="leverage"
               insight={getInsight('leverage')}
