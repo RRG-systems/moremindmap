@@ -394,7 +394,7 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
   // GPT-5.5 BEHAVIORAL RESCORING: Apply behavioral cognition layer (async, await if enabled)
   if (process.env.GPT_RESCORING_ENABLED === 'true') {
     try {
-      const { gptBehavioralRescore } = await import('../rescoring/gptBehavioralRescore.js');
+      const gptBehavioralRescore = (await import('../rescoring/gptBehavioralRescore.js')).default;
       console.log('[CANONICAL] GPT behavioral rescoring enabled, running...');
       const gptRescore = await gptBehavioralRescore(canonicalProfile);
       if (gptRescore) {

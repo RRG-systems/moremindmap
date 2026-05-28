@@ -15,7 +15,7 @@
  */
 
 import Redis from 'ioredis';
-import { gptBehavioralRescore } from '../engine/rescoring/gptBehavioralRescore.js';
+import gptBehavioralRescore from '../engine/rescoring/gptBehavioralRescore.js';
 
 export default async function handler(req, res) {
   // Only POST allowed
