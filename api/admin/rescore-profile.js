@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     // Step 5: Retrieve existing canonical
     console.log(`[ADMIN RESCORE] Retrieving canonical for ${profile_id}`);
     
-    const profileKey = profile_id.toLowerCase();
+    const profileKey = `vault:profile:${profile_id.toLowerCase()}`;
     const profileJson = await redis.get(profileKey);
 
     if (!profileJson) {
@@ -82,7 +82,13 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: `Profile not found: ${profile_id}` });
     }
 
-    const canonical = JSON.parse(profileJson);
+    let canonical = JSON.parse(profileJson);
+    // Unwrap if wrapped in canonical_dossier
+    if (canonical.canonical_dossier && canonical.canonical_dossier.canonical_profile_json) {
+      canonical = canonical.canonical_dossier.canonical_profile_json;
+    } else if (canonical.canonical_profile_json) {
+      canonical = canonical.canonical_profile_json;
+    }
     console.log(`[ADMIN RESCORE] Canonical found - has rescoring_gpt: ${!!canonical.rescoring_gpt}`);
 
     // Step 6: Save previous state (if exists)
@@ -149,7 +155,7 @@ export default async function handler(req, res) {
 
     console.log(`[ADMIN RESCORE] Validation passed ✅`);
 
-    // Step 10: Update canonical
+    // Step 10: Update canonical nested structure
     canonical.rescoring_gpt = gptRescore;
     canonical.rescoring_gpt_metadata = {
       refreshed_at: new Date().toISOString(),
@@ -163,9 +169,14 @@ export default async function handler(req, res) {
       canonical.rescoring_gpt_previous = previousRescore;
     }
 
-    // Step 11: Save back to Redis
+    // Step 11: Reconstruct full document wrapper and save back to Redis
     console.log(`[ADMIN RESCORE] Saving updated canonical...`);
-    const savedJson = JSON.stringify(canonical);
+    const fullDoc = {
+      canonical_dossier: {
+        canonical_profile_json: canonical
+      }
+    };
+    const savedJson = JSON.stringify(fullDoc);
     await redis.set(profileKey, savedJson);
     console.log(`[ADMIN RESCORE] Saved to Redis ✅`);
 

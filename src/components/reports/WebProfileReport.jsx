@@ -62,7 +62,7 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
               <div key={d.dimension} className="dna-hex">
                 <div className="hex-inner">
                   <span className="hex-abbr">{d.dimension.substring(0, 3).toUpperCase()}</span>
-                  <span className="hex-score">{d.score > 0 ? '+' : ''}{d.score}</span>
+                  <span className="hex-score">{(d.display_score ?? d.gpt_rescored_score ?? d.score) > 0 ? '+' : ''}{d.display_score ?? d.gpt_rescored_score ?? d.score}</span>
                 </div>
               </div>
             ))}
@@ -174,11 +174,12 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             title="DNA Summary"
             subtitle="Vector Analysis"
             content={(() => {
-              const topology = (() => {
-                // Note: canonical is wrapped as canonical_dossier from retrieve-profile
-                // Rescoring data lives in canonical.canonical_profile_json.rescoring_gpt
-                const canonicalProfile = canonical?.canonical_profile_json || canonical;
-                const renderReady = canonicalProfile?.rescoring_gpt?.render_ready || canonicalProfile?.rescoring_v1?.render_ready || {};
+              const canonicalProfile = canonical?.canonical_profile_json || canonical;
+              const gptRenderReady = canonicalProfile?.rescoring_gpt?.render_ready;
+              const v1RenderReady = canonicalProfile?.rescoring_v1?.render_ready;
+              
+              const dnaSummary = gptRenderReady?.dna_summary || v1RenderReady?.dna_summary || (() => {
+                const renderReady = gptRenderReady || v1RenderReady || {};
                 const dominance = canonicalProfile?.rescoring_gpt?.dominance_profile || canonicalProfile?.rescoring_v1?.dominance_profile || {};
                 if (renderReady.profile_intensity === 'extreme') {
                   return 'Concentrated directional topology with suppressed verification systems.';
@@ -191,8 +192,8 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
                 }
                 return 'Balanced multi-system topology with flexible dynamics.';
               })();
-              const scores = ranked.slice(0, 6).map(d => `${d.dimension}: ${d.score > 0 ? '+' : ''}${d.score}`).join(' • ');
-              return `${topology}\n\n${scores}`;
+              const scores = ranked.slice(0, 6).map(d => `${d.dimension}: ${(d.display_score ?? d.gpt_rescored_score ?? d.score) > 0 ? '+' : ''}${d.display_score ?? d.gpt_rescored_score ?? d.score}`).join(' • ');
+              return `${dnaSummary}\n\n${scores}`;
             })()}
             prominence="analytical"
             className="left-panel"
@@ -949,7 +950,7 @@ function MetricCard({ icon, title, metric, dimension, color, insight }) {
     <div className={`metric-card ${colorMap[color] || ''}`}>
       <div className="metric-icon">{icon}</div>
       <h3 className="metric-title">{title}</h3>
-      <div className="metric-value">{metric > 0 ? '+' : ''}{metric}</div>
+      <div className="metric-value">{metric > 0 ? '+' : ''}{metric.display_score ?? metric.gpt_rescored_score ?? metric}</div>
       <p className="metric-dimension">{dimension}</p>
       {insight && <p className="metric-insight">{insight}</p>}
     </div>
@@ -1218,7 +1219,7 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
             {ranked.slice(0, 6).map((d) => (
               <div key={d.dimension} className="dna-item-v2">
                 <span className="dna-dimension">{d.dimension.toUpperCase().substring(0, 2)}</span>
-                <span className="dna-score">{d.score > 0 ? '+' : ''}{d.score}</span>
+                <span className="dna-score">{(d.display_score ?? d.gpt_rescored_score ?? d.score) > 0 ? '+' : ''}{d.display_score ?? d.gpt_rescored_score ?? d.score}</span>
               </div>
             ))}
           </div>
@@ -1283,7 +1284,7 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
                         <div className="dim-rank-badge">#{dim.rank}</div>
                         <div className="dim-name">{dim.dimension.toUpperCase()}</div>
                       </div>
-                      <div className="dim-score-large">{dim.score > 0 ? '+' : ''}{dim.score}</div>
+                      <div className="dim-score-large">{(dim.display_score ?? dim.gpt_rescored_score ?? dim.score) > 0 ? '+' : ''}{dim.display_score ?? dim.gpt_rescored_score ?? dim.score}</div>
                       <div className="dim-label-secondary">{dim.score > 0 ? 'Amplifier' : 'Constraint'}</div>
                       <div className="dim-topology-label">{getTopologyLabel()}</div>
                     </div>
