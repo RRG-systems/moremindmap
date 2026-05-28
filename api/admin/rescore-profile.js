@@ -54,9 +54,12 @@ export default async function handler(req, res) {
     return res.status(403).json({ error: 'GPT rescoring is disabled (GPT_RESCORING_ENABLED=false)' });
   }
 
+  let profile_id;
+
   try {
     // Step 3: Parse request (inside try)
-    const { profile_id, force = false, debug = false } = req.body || {};
+    const { profile_id: requestProfileId, force = false, debug = false } = req.body || {};
+    profile_id = requestProfileId;
 
     if (!profile_id) {
       return res.status(400).json({ error: 'profile_id required' });
@@ -188,18 +191,22 @@ export default async function handler(req, res) {
 
     // Step 11: Save back to Redis (preserve original wrapper)
     console.log(`[ADMIN RESCORE] Saving updated canonical...`);
+    let outputWrapper = originalWrapper;
+
     // Keep original wrapper structure (mutate existing)
-    if (originalWrapper && originalWrapper.canonical_dossier) {
+    if (originalWrapper?.canonical_dossier?.canonical_profile_json) {
       originalWrapper.canonical_dossier.canonical_profile_json = canonical;
+    } else if (originalWrapper?.canonical_profile_json) {
+      originalWrapper.canonical_profile_json = canonical;
     } else {
       // Fallback if wrapper doesn't exist
-      originalWrapper = {
+      outputWrapper = {
         canonical_dossier: {
           canonical_profile_json: canonical
         }
       };
     }
-    const savedJson = JSON.stringify(originalWrapper);
+    const savedJson = JSON.stringify(outputWrapper);
     await redis.set(retrievedKey, savedJson);
     console.log(`[ADMIN RESCORE] Saved to Redis ✅`);
 
