@@ -136,6 +136,8 @@ export async function gptBehavioralRescore(canonical) {
       return null;
     }
 
+    normalizeProfileIntensity(rescoring_gpt);
+
     // Validate GPT output structure
     const validation = validateGPTRescoreOutput(rescoring_gpt, canonical);
     if (!validation.valid) {
@@ -192,9 +194,16 @@ function buildGPTRescoringPrompt(canonical) {
   }));
 
   // Compile deterministic topology
+  const dominanceProfile = {
+    ...(rescoring_v1.dominance_profile || {})
+  };
+  if (dominanceProfile.profile_intensity) {
+    dominanceProfile.profile_intensity = normalizeProfileIntensityValue(dominanceProfile.profile_intensity);
+  }
+
   const deterministic = {
     version: rescoring_v1.version,
-    dominance_profile: rescoring_v1.dominance_profile || {},
+    dominance_profile: dominanceProfile,
     spread_profile: rescoring_v1.spread_profile || {},
     profile_shape: rescoring_v1.spread_profile?.profile_shape || null,
     profile_shape_confidence: rescoring_v1.spread_profile?.profile_shape_confidence || null,
@@ -234,6 +243,7 @@ SCORING CALIBRATION:
 - Balanced, flat, or distributed profiles must remain balanced/distributed unless full canonical evidence proves hidden concentration.
 - Preserve rank order unless full canonical evidence directly contradicts it.
 - Do not give suppressed dimensions high positive display scores just because the person has the capability. Scores represent operating weight, not ability.
+- If deterministic V1 says profile_intensity is "medium", output "moderate". Never output "medium".
 
 DIMENSION INTERPRETATION GUIDE:
 - Vector: Decision velocity, directional clarity, agency in ambiguity
@@ -353,6 +363,20 @@ Return JSON matching this exact structure:
     instruction,
     format: 'json_strict'
   };
+}
+
+function normalizeProfileIntensityValue(value) {
+  return value === 'medium' ? 'moderate' : value;
+}
+
+function normalizeProfileIntensity(rescoring_gpt) {
+  if (rescoring_gpt?.render_ready?.profile_intensity) {
+    rescoring_gpt.render_ready.profile_intensity = normalizeProfileIntensityValue(rescoring_gpt.render_ready.profile_intensity);
+  }
+
+  if (rescoring_gpt?.dominance_profile?.profile_intensity) {
+    rescoring_gpt.dominance_profile.profile_intensity = normalizeProfileIntensityValue(rescoring_gpt.dominance_profile.profile_intensity);
+  }
 }
 
 /**
