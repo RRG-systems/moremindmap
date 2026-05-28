@@ -251,10 +251,13 @@ Return JSON matching this exact structure:
   },
   
   "render_ready": {
+    "profile_dna": "2-3 sentences on operating model (from full canonical interpretation)",
     "dna_summary": "1 line behavioral summary (15-20 words)",
-    "command_clarity": "1 line on decision certainty",
-    "speed_vs_fidelity": "1 line on speed-accuracy tradeoff",
-    "strategic_leverage": "1 line on pattern scaling"
+    "command_clarity": "1 line on decision certainty (insight for metric card)",
+    "speed_vs_fidelity": "1 line on speed-accuracy tradeoff (insight for metric card)",
+    "strategic_leverage": "1 line on pattern scaling (insight for metric card)",
+    "profile_intensity": "extreme | high | moderate | low",
+    "dominance_flavor": "concentrated | strong | distributed | balanced"
   },
   
   "audit": {
@@ -344,12 +347,26 @@ function validateGPTRescoreOutput(output, canonical) {
     }
   }
 
-  // Check render_ready
+  // Check render_ready - all five text fields required
   if (!output.render_ready) {
     errors.push('Missing render_ready');
   } else {
-    if (!output.render_ready.dna_summary || typeof output.render_ready.dna_summary !== 'string') {
-      errors.push('render_ready missing or invalid dna_summary');
+    const requiredFields = ['profile_dna', 'dna_summary', 'command_clarity', 'speed_vs_fidelity', 'strategic_leverage'];
+    requiredFields.forEach(field => {
+      if (!output.render_ready[field] || typeof output.render_ready[field] !== 'string') {
+        errors.push('render_ready missing or invalid ' + field + ' (string required)');
+      }
+    });
+    
+    // Verify intensity and flavor fields
+    const validIntensities = ['extreme', 'high', 'moderate', 'low'];
+    if (!validIntensities.includes(output.render_ready.profile_intensity)) {
+      errors.push('render_ready profile_intensity must be one of: extreme, high, moderate, low');
+    }
+    
+    const validFlavors = ['concentrated', 'strong', 'distributed', 'balanced'];
+    if (!validFlavors.includes(output.render_ready.dominance_flavor)) {
+      errors.push('render_ready dominance_flavor must be one of: concentrated, strong, distributed, balanced');
     }
   }
 

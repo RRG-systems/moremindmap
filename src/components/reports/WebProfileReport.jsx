@@ -101,9 +101,18 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
                 const canonicalProfile = canonical?.canonical_profile_json || canonical;
   const renderReady = canonicalProfile?.rescoring_gpt?.render_ready || canonicalProfile?.rescoring_v1?.render_ready || {};
   const getInsight = (type) => {
-    if (type === 'clarity') return 'Directional certainty in decision-making';
-    if (type === 'balance') return 'Speed-accuracy tradeoff in execution';
-    if (type === 'leverage') return 'Pattern recognition and scaling potential';
+    const gptRenderReady = canonicalProfile?.rescoring_gpt?.render_ready;
+    const v1RenderReady = canonicalProfile?.rescoring_v1?.render_ready;
+    
+    if (type === 'clarity') {
+      return gptRenderReady?.command_clarity || v1RenderReady?.command_clarity || 'Directional certainty in decision-making';
+    }
+    if (type === 'balance') {
+      return gptRenderReady?.speed_vs_fidelity || v1RenderReady?.speed_vs_fidelity || 'Speed-accuracy tradeoff in execution';
+    }
+    if (type === 'leverage') {
+      return gptRenderReady?.strategic_leverage || v1RenderReady?.strategic_leverage || 'Pattern recognition and scaling potential';
+    }
     return '';
   };
   
@@ -119,21 +128,12 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             title="Profile DNA"
             subtitle="Operating Model"
             content={(() => {
-                const canonicalProfile = canonical?.canonical_profile_json || canonical;
-              const renderReady = canonicalProfile?.rescoring_gpt?.render_ready || canonicalProfile?.rescoring_v1?.render_ready || {};
-              const dominance = canonicalProfile?.rescoring_gpt?.dominance_profile || canonicalProfile?.rescoring_v1?.dominance_profile || {};
-              let topologyLine = '';
+              const gptRenderReady = canonicalProfile?.rescoring_gpt?.render_ready;
+              const v1RenderReady = canonicalProfile?.rescoring_v1?.render_ready;
               
-              if (renderReady.dominance_flavor === 'extreme' && dominance.primary_dimension) {
-                const dim = dominance.primary_dimension.charAt(0).toUpperCase() + dominance.primary_dimension.slice(1);
-                topologyLine = `${dim} system dominates behavioral expression. `;
-              } else if (renderReady.dominance_flavor === 'strong' && dominance.primary_dimension) {
-                const dim = dominance.primary_dimension.charAt(0).toUpperCase() + dominance.primary_dimension.slice(1);
-                topologyLine = `${dim} leadership with ${dominance.secondary_dimension} stabilization. `;
-              }
-              
-              const baseContent = narrative.profileDNA?.body || narrative.profileDNA || '';
-              return topologyLine ? topologyLine + baseContent : baseContent;
+              // Prefer render_ready.profile_dna (GPT) → v1 → narrative fallback
+              const profileDnaText = gptRenderReady?.profile_dna || v1RenderReady?.profile_dna || narrative.profileDNA?.body || narrative.profileDNA || '';
+              return profileDnaText;
             })()}
             prominence="hero"
           />
