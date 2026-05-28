@@ -47,24 +47,24 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized - invalid token' });
   }
 
-  // Step 2: Feature flag check
+
+  // Step 2: Feature flag check (moved up)
   if (process.env.GPT_RESCORING_ENABLED !== 'true') {
     console.warn('[ADMIN RESCORE] GPT rescoring disabled globally');
     return res.status(403).json({ error: 'GPT rescoring is disabled (GPT_RESCORING_ENABLED=false)' });
   }
 
-  // Step 3: Parse request
-  const { profile_id, force, debug } = req.body;
-
-  if (!profile_id) {
-    return res.status(400).json({ error: 'profile_id required' });
-  }
-
-  console.log(`[ADMIN RESCORE] START - Profile: ${profile_id}, force: ${force}, debug: ${debug}`);
-
   try {
+    // Step 3: Parse request (inside try)
+    const { profile_id, force = false, debug = false } = req.body || {};
+
+    if (!profile_id) {
+      return res.status(400).json({ error: 'profile_id required' });
+    }
+
+    console.log(`[ADMIN RESCORE] START - Profile: ${profile_id}, force: ${force}, debug: ${debug}`);
     // Step 4: Connect to Redis
-    const redis = new Redis({
+    const redis = new Redis(process.env.REDIS_URL || {
       host: process.env.REDIS_HOST || 'localhost',
       port: process.env.REDIS_PORT || 6379,
       password: process.env.REDIS_PASSWORD || undefined
@@ -82,7 +82,8 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: `Profile not found: ${profile_id}` });
     }
 
-    let canonical = JSON.parse(profileJson);
+    const originalWrapper = JSON.parse(profileJson);
+    let canonical = originalWrapper;
     // Unwrap if wrapped in canonical_dossier
     if (canonical.canonical_dossier && canonical.canonical_dossier.canonical_profile_json) {
       canonical = canonical.canonical_dossier.canonical_profile_json;
@@ -169,14 +170,20 @@ export default async function handler(req, res) {
       canonical.rescoring_gpt_previous = previousRescore;
     }
 
-    // Step 11: Reconstruct full document wrapper and save back to Redis
+    // Step 11: Save back to Redis (preserve original wrapper)
     console.log(`[ADMIN RESCORE] Saving updated canonical...`);
-    const fullDoc = {
-      canonical_dossier: {
-        canonical_profile_json: canonical
-      }
-    };
-    const savedJson = JSON.stringify(fullDoc);
+    // Keep original wrapper structure (mutate existing)
+    if (originalWrapper && originalWrapper.canonical_dossier) {
+      originalWrapper.canonical_dossier.canonical_profile_json = canonical;
+    } else {
+      // Fallback if wrapper doesn't exist
+      originalWrapper = {
+        canonical_dossier: {
+          canonical_profile_json: canonical
+        }
+      };
+    }
+    const savedJson = JSON.stringify(originalWrapper);
     await redis.set(profileKey, savedJson);
     console.log(`[ADMIN RESCORE] Saved to Redis ✅`);
 

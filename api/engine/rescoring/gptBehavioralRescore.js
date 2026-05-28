@@ -14,7 +14,66 @@
  * Honest behavioral interpretation grounded in canonical evidence.
  */
 
-import { callGPT55 } from '../../src/lib/narrativeV3/openaiIntegration.js';
+
+
+
+/**
+ * Call OpenAI GPT-5.5 directly from server (not frontend fetch)
+ */
+async function callGPT55Serverside(systemRule, instruction) {
+  const openaiApiKey = process.env.OPENAI_API_KEY;
+  if (!openaiApiKey) {
+    console.error('[GPT-RESCORE] OPENAI_API_KEY not configured');
+    return null;
+  }
+
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${openaiApiKey}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: systemRule
+          },
+          {
+            role: 'user',
+            content: instruction
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+        response_format: { type: 'json_object' }
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[GPT-RESCORE] OpenAI API error:', response.status, errorText);
+      return null;
+    }
+
+    const data = await response.json();
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('[GPT-RESCORE] Invalid OpenAI response structure');
+      return null;
+    }
+
+    return {
+      body: data.choices[0].message.content,
+      model: 'gpt-4o'
+    };
+  } catch (err) {
+    console.error('[GPT-RESCORE] OpenAI call failed:', err.message);
+    return null;
+  }
+}
+
 
 /**
  * Main entry point: Apply GPT behavioral rescoring to canonical profile
@@ -40,7 +99,7 @@ export async function gptBehavioralRescore(canonical) {
 
     // Call GPT-5.5 with structured behavioral prompt
     console.log('[GPT-RESCORE] Calling GPT-5.5 with full canonical context...');
-    const gptResponse = await callGPT55(prompt, 'behavioral_rescoring');
+    const gptResponse = await callGPT55Serverside(prompt.systemRule, prompt.instruction);
 
     if (!gptResponse) {
       console.warn('[GPT-RESCORE] GPT call failed, falling back to deterministic');
