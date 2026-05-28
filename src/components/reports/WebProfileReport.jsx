@@ -173,8 +173,11 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             subtitle="Vector Analysis"
             content={(() => {
               const topology = (() => {
-                const renderReady = canonical?.rescoring_gpt?.render_ready || canonical?.rescoring_v1?.render_ready || {};
-                const dominance = canonical?.rescoring_gpt?.dominance_profile || canonical?.rescoring_v1?.dominance_profile || {};
+                // Note: canonical is wrapped as canonical_dossier from retrieve-profile
+                // Rescoring data lives in canonical.canonical_profile_json.rescoring_gpt
+                const canonicalProfile = canonical?.canonical_profile_json || canonical;
+                const renderReady = canonicalProfile?.rescoring_gpt?.render_ready || canonicalProfile?.rescoring_v1?.render_ready || {};
+                const dominance = canonicalProfile?.rescoring_gpt?.dominance_profile || canonicalProfile?.rescoring_v1?.dominance_profile || {};
                 if (renderReady.profile_intensity === 'extreme') {
                   return 'Concentrated directional topology with suppressed verification systems.';
                 }
