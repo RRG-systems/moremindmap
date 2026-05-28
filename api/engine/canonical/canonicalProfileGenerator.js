@@ -391,6 +391,24 @@ export async function generateCanonicalProfile(profileInput, options = {}) {
     // rescoring_v1 remains as empty schema (safe fallback)
   }
 
+  // GPT-5.5 BEHAVIORAL RESCORING: Apply behavioral cognition layer (async, await if enabled)
+  if (process.env.GPT_RESCORING_ENABLED === 'true') {
+    try {
+      const { gptBehavioralRescore } = await import('../rescoring/gptBehavioralRescore.js');
+      console.log('[CANONICAL] GPT behavioral rescoring enabled, running...');
+      const gptRescore = await gptBehavioralRescore(canonicalProfile);
+      if (gptRescore) {
+        canonicalProfile.rescoring_gpt = gptRescore;
+        console.log('[CANONICAL] GPT behavioral rescoring complete ✅');
+      } else {
+        console.warn('[CANONICAL] GPT behavioral rescoring returned null, using deterministic only');
+      }
+    } catch (gptErr) {
+      console.error('[CANONICAL] GPT behavioral rescoring error:', gptErr.message);
+      // rescoring_gpt remains null (safe fallback to rescoring_v1)
+    }
+  }
+
   return canonicalProfile;
 }
 
