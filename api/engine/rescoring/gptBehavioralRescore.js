@@ -146,6 +146,9 @@ export async function gptBehavioralRescore(canonical) {
     // Normalize scores to ensure they're comparable
     normalizeGPTScores(rescoring_gpt, canonical);
 
+    // Guard against GPT treating topology scores as capability ratings
+    applyCalibrationGuardrails(rescoring_gpt, canonical);
+
     // Enrich with audit trail
     enrichAuditTrail(rescoring_gpt, canonical);
 
@@ -193,6 +196,9 @@ function buildGPTRescoringPrompt(canonical) {
     version: rescoring_v1.version,
     dominance_profile: rescoring_v1.dominance_profile || {},
     spread_profile: rescoring_v1.spread_profile || {},
+    profile_shape: rescoring_v1.spread_profile?.profile_shape || null,
+    profile_shape_confidence: rescoring_v1.spread_profile?.profile_shape_confidence || null,
+    amplitude_metrics: rescoring_v1.amplitude_metrics || {},
     tension_pairs: rescoring_v1.tension_pairs || {},
     suppressions: rescoring_v1.suppressions || []
   };
@@ -216,6 +222,18 @@ CORE PRINCIPLES:
 4. HONOR DETERMINISTIC LAYER: It's correct geometry; add meaning to it
 5. GROUND ALL CLAIMS: Every reinterpretation must trace to evidence
 6. BEHAVIORAL TRUTH: What this person actually does under pressure
+
+SCORING CALIBRATION:
+- Scores are behavioral topology coordinates, NOT talent, competence, leadership quality, intelligence, or capability ratings.
+- Default to preserving baseline and deterministic V1 numeric scores unless strong dossier evidence proves the topology is misweighted.
+- Numeric changes over 0.3 require explicit evidence in the rationale.
+- Numeric changes over 0.75 require multiple independent evidence sources.
+- Numeric changes over 1.0 should be rare and must be justified in audit.reason_for_changes or audit.warning_flags.
+- Do not raise all or most dimensions. Total upward movement should be near zero unless exceptional evidence is present.
+- If one dimension is amplified, another should usually be compressed or preserved.
+- Balanced, flat, or distributed profiles must remain balanced/distributed unless full canonical evidence proves hidden concentration.
+- Preserve rank order unless full canonical evidence directly contradicts it.
+- Do not give suppressed dimensions high positive display scores just because the person has the capability. Scores represent operating weight, not ability.
 
 DIMENSION INTERPRETATION GUIDE:
 - Vector: Decision velocity, directional clarity, agency in ambiguity
@@ -256,12 +274,13 @@ BEHAVIORAL EVIDENCE (canonical dossier):
 - Org effects: ${JSON.stringify(evidence.organizational_effects).substring(0, 300)}...
 
 TASK:
-1. Reinterpret each dimension with behavioral depth (keep rankings, adjust scores if psychology demands it)
+1. Reinterpret each dimension with behavioral depth (preserve rankings and scores by default; adjust only if topology evidence demands it)
 2. Identify primary/secondary system with confidence
 3. Analyze spread type (flat, concentrated, extreme)
 4. Detect tension patterns and suppression effects
 5. Prepare "aha!" insights for rendering (command clarity, speed vs fidelity, strategic leverage)
 6. Flag any discrepancies between deterministic topology and behavioral evidence
+7. Treat all example numbers below as placeholders only. Do not copy them.
 
 Return JSON matching this exact structure:
 {
@@ -272,10 +291,10 @@ Return JSON matching this exact structure:
     {
       "dimension": "vector",
       "code": "VEC",
-      "baseline_score": 3.0,
-      "deterministic_score": 3.2,
-      "gpt_rescored_score": 3.1,
-      "display_score": 3.1,
+      "baseline_score": 0.0,
+      "deterministic_score": 0.0,
+      "gpt_rescored_score": 0.0,
+      "display_score": 0.0,
       "role": "PRIMARY DRIVER | SECONDARY | STABILIZER | SUPPRESSED | DISTRIBUTED",
       "confidence": 0.88,
       "rationale": "2-3 sentence explanation grounded in evidence"
@@ -466,6 +485,90 @@ function normalizeGPTScores(rescoring_gpt, canonical) {
       }
     }
   });
+}
+
+/**
+ * Clamp broad upward score inflation back toward deterministic topology.
+ */
+function applyCalibrationGuardrails(rescoring_gpt, canonical) {
+  const baseline = canonical.ranked_dimensions || [];
+  const deterministic = canonical.rescoring_v1?.ranked_dimensions || [];
+  const v1Spread = canonical.rescoring_v1?.spread_profile || {};
+  const v1Dominance = canonical.rescoring_v1?.dominance_profile || {};
+  const audit = rescoring_gpt.audit || { changed_dimensions: [], preserved_dimensions: [], reason_for_changes: [], warning_flags: [] };
+  audit.changed_dimensions = Array.isArray(audit.changed_dimensions) ? audit.changed_dimensions : [];
+  audit.preserved_dimensions = Array.isArray(audit.preserved_dimensions) ? audit.preserved_dimensions : [];
+  audit.reason_for_changes = Array.isArray(audit.reason_for_changes) ? audit.reason_for_changes : [];
+  audit.warning_flags = Array.isArray(audit.warning_flags) ? audit.warning_flags : [];
+
+  if (!Array.isArray(rescoring_gpt.ranked_dimensions) || rescoring_gpt.ranked_dimensions.length === 0) {
+    return;
+  }
+
+  const referenceFor = (dim) => {
+    const v1Dim = deterministic.find(v => v.dimension === dim.dimension);
+    const baselineDim = baseline.find(b => b.dimension === dim.dimension);
+    return v1Dim?.score ?? baselineDim?.score ?? dim.gpt_rescored_score ?? 0;
+  };
+
+  const deltas = rescoring_gpt.ranked_dimensions.map(dim => {
+    const reference = referenceFor(dim);
+    return {
+      dim,
+      reference,
+      delta: dim.gpt_rescored_score - reference
+    };
+  });
+
+  const upward = deltas.filter(d => d.delta > 0.05);
+  const totalUpward = deltas.reduce((sum, d) => sum + Math.max(0, d.delta), 0);
+  const totalDownward = deltas.reduce((sum, d) => sum + Math.abs(Math.min(0, d.delta)), 0);
+  const spreadType = String(v1Spread.balanced_vs_extreme || v1Dominance.spread_type || '').toLowerCase();
+  const profileShape = String(v1Spread.profile_shape || '').toLowerCase();
+  const preservesBalance = ['flat', 'balanced', 'distributed'].some(label => spreadType.includes(label) || profileShape.includes(label));
+  const broadInflation = upward.length >= 6 || upward.length === rescoring_gpt.ranked_dimensions.length;
+  const excessiveUpward = totalUpward > 2.4 && totalUpward > totalDownward + 1;
+  const shouldClampBroadly = broadInflation && (excessiveUpward || preservesBalance);
+
+  if (shouldClampBroadly) {
+    audit.warning_flags.push({
+      type: 'score_inflation_guardrail',
+      message: 'Broad upward GPT score movement was clamped toward deterministic topology.',
+      upward_dimensions: upward.length,
+      total_upward_delta: Math.round(totalUpward * 100) / 100,
+      v1_spread_type: v1Dominance.spread_type || v1Spread.balanced_vs_extreme || null,
+      v1_profile_shape: v1Spread.profile_shape || null
+    });
+  }
+
+  deltas.forEach(({ dim, reference, delta }) => {
+    let maxPositiveDelta = shouldClampBroadly ? 0.3 : 0.75;
+    let maxNegativeDelta = 0.75;
+
+    if (preservesBalance) {
+      maxPositiveDelta = Math.min(maxPositiveDelta, 0.3);
+      maxNegativeDelta = Math.min(maxNegativeDelta, 0.5);
+    }
+
+    if (Math.abs(delta) > 1.0) {
+      audit.warning_flags.push({
+        type: 'large_score_delta',
+        dimension: dim.dimension,
+        original_delta: Math.round(delta * 100) / 100,
+        message: 'Score movement over 1.0 requires exceptional independent evidence.'
+      });
+    }
+
+    if (delta > maxPositiveDelta) {
+      dim.gpt_rescored_score = Math.round((reference + maxPositiveDelta) * 100) / 100;
+      dim.display_score = dim.gpt_rescored_score;
+    } else if (delta < -maxNegativeDelta) {
+      dim.gpt_rescored_score = Math.round((reference - maxNegativeDelta) * 100) / 100;
+      dim.display_score = dim.gpt_rescored_score;
+    }
+  });
+
+  rescoring_gpt.audit = audit;
 }
 
 /**
