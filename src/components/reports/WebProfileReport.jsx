@@ -98,7 +98,7 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
 }
 
 function PageOneDashboard({ narrative, ranked, canonical }) {
-  const renderReady = canonical?.rescoring_v1?.render_ready || {};
+  const renderReady = canonical?.rescoring_gpt?.render_ready || canonical?.rescoring_v1?.render_ready || {};
   const getInsight = (type) => {
     if (type === 'clarity') return 'Directional certainty in decision-making';
     if (type === 'balance') return 'Speed-accuracy tradeoff in execution';
@@ -118,8 +118,8 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             title="Profile DNA"
             subtitle="Operating Model"
             content={(() => {
-              const renderReady = canonical?.rescoring_v1?.render_ready || {};
-              const dominance = canonical?.rescoring_v1?.dominance_profile || {};
+              const renderReady = canonical?.rescoring_gpt?.render_ready || canonical?.rescoring_v1?.render_ready || {};
+              const dominance = canonical?.rescoring_gpt?.dominance_profile || canonical?.rescoring_v1?.dominance_profile || {};
               let topologyLine = '';
               
               if (renderReady.dominance_flavor === 'extreme' && dominance.primary_dimension) {
@@ -173,8 +173,8 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
             subtitle="Vector Analysis"
             content={(() => {
               const topology = (() => {
-                const renderReady = canonical?.rescoring_v1?.render_ready || {};
-                const dominance = canonical?.rescoring_v1?.dominance_profile || {};
+                const renderReady = canonical?.rescoring_gpt?.render_ready || canonical?.rescoring_v1?.render_ready || {};
+                const dominance = canonical?.rescoring_gpt?.dominance_profile || canonical?.rescoring_v1?.dominance_profile || {};
                 if (renderReady.profile_intensity === 'extreme') {
                   return 'Concentrated directional topology with suppressed verification systems.';
                 }

@@ -237,7 +237,7 @@ Ground each state to PRIMARY + SECONDARY (how they hold together at smaller scal
 // NEW SECTIONS: Profile DNA, Coaching Leverage, Next Step
 // ============================================================
 
-export function buildProfileDNAPrompt(unified, interpreted, previousSections) {
+export function buildProfileDNAPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are describing an operating pattern based on assessment data.
 DO NOT invent traits, psychology, or personal qualities.

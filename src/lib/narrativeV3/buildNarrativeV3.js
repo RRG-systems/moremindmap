@@ -20,6 +20,7 @@ import {
 import * as prompts from './sectionPrompts.js';
 import { callGPT55, validateGrounding } from './openaiIntegration.js';
 import { getCachedNarrative, cacheNarrative } from './cache.js';
+import { getCognitionContext } from './getCognitionContext.js';
 
 /**
  * Main entry point for V3 narrative expansion.
@@ -51,6 +52,14 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   
   // Keep old structured interpreter for backward compat with buildMicroScenario
   const interpreted = interpretCanonical(canonical);
+  
+  // COGNITION CONTEXT: Extract GPT/V1 behavioral layer if available
+  const cognitionContext = getCognitionContext(canonical);
+  console.log('[COGNITION CONTEXT]', {
+    source: cognitionContext?.source,
+    hasDominance: !!cognitionContext?.dominance_profile,
+    rankedCount: cognitionContext?.ranked_dimensions?.length,
+  });
   const previousSections = {};
 
   const sections = [
