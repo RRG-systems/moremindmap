@@ -16,6 +16,7 @@
 
 import Redis from 'ioredis';
 import gptBehavioralRescore from '../engine/rescoring/gptBehavioralRescore.js';
+import rescoreDimensions from '../engine/rescoring/rescoreDimensions.js';
 
 export default async function handler(req, res) {
   // Only POST allowed
@@ -100,6 +101,23 @@ export default async function handler(req, res) {
         refreshed_at: canonical.rescoring_gpt?.generated_at,
         primary_dimension: canonical.rescoring_gpt?.dominance_profile?.primary_dimension
       });
+    }
+
+    // Step 7b: Ensure rescoring_v1 exists (for old profiles)
+    if (!canonical.rescoring_v1) {
+      console.log(`[ADMIN RESCORE] rescoring_v1 missing - generating V1 deterministic layer first...`);
+      try {
+        canonical.rescoring_v1 = rescoreDimensions(canonical);
+        console.log(`[ADMIN RESCORE] rescoring_v1 created ✅`);
+      } catch (v1Error) {
+        console.error(`[ADMIN RESCORE] Failed to create rescoring_v1:`, v1Error.message);
+        redis.disconnect();
+        return res.status(500).json({
+          error: 'Failed to create deterministic rescoring layer (rescoring_v1)',
+          profile_id,
+          details: v1Error.message
+        });
+      }
     }
 
     // Step 8: Run GPT behavioral rescoring
