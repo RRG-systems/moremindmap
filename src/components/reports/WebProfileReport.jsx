@@ -378,6 +378,7 @@ function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract Others Experience from BI
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const othersExperienceBI = renderPlan ? extractSectionContent('section-how-others-experience', behavioralIntelligence, canonical) : null;
+  const useNarrativeTeamExperience = isValidTeamExperience(narrative.teamExperience);
 
   return (
     <div className="dashboard-page page-five">
@@ -389,7 +390,16 @@ function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
         </div>
         
         <div className="zone-progression">
-          {othersExperienceBI?.found && othersExperienceBI?.content ? (
+          {useNarrativeTeamExperience ? (
+            <InsightPanel
+              icon="🤝"
+              title="Team Experience"
+              subtitle="How Your Operating Pattern Lands on Others"
+              content={renderBIContent("othersExperience", narrative.teamExperience)}
+              prominence="analytical"
+              className="team-experience-panel"
+            />
+          ) : othersExperienceBI?.found && othersExperienceBI?.content ? (
             <InsightPanel
               icon="🤝"
               title="Team Experience"
@@ -437,6 +447,21 @@ function isWeakBIContent(content) {
     : JSON.stringify(content);
 
   return /not identified|not available|unknown/i.test(text);
+}
+
+function isValidTeamExperience(content) {
+  if (!content?.summary) return false;
+
+  const validSignals = [
+    content.first_impression?.interpretation,
+    content.communication_pattern?.interpretation,
+    content.listening_pattern?.interpretation,
+    content.relational_friction?.interpretation,
+    Array.isArray(content.key_signals) && content.key_signals.length >= 2,
+    content.causal_interpretation,
+  ].filter(Boolean).length;
+
+  return validSignals >= 2;
 }
 
 function isWeakFacilitatorNotes(content) {

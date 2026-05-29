@@ -87,7 +87,8 @@ export default async function handler(req, res) {
     // Validate structure
     const hasStructuredSection =
       (section === 'fiveFutures' && Array.isArray(parsed.futures)) ||
-      (section === 'facilitatorNotes' && Array.isArray(parsed.notes));
+      (section === 'facilitatorNotes' && Array.isArray(parsed.notes)) ||
+      (section === 'teamExperience' && isStructuredTeamExperience(parsed));
 
     if (!parsed.section || (!parsed.body && !hasStructuredSection)) {
       console.warn(`[NARRATIVE-V3] Missing required fields`);
@@ -114,6 +115,21 @@ export default async function handler(req, res) {
       message: err.message 
     });
   }
+}
+
+function isStructuredTeamExperience(value) {
+  if (!value?.summary) return false;
+
+  const validSignals = [
+    value.first_impression?.interpretation,
+    value.communication_pattern?.interpretation,
+    value.listening_pattern?.interpretation,
+    value.relational_friction?.interpretation,
+    Array.isArray(value.key_signals) && value.key_signals.length >= 2,
+    value.causal_interpretation,
+  ].filter(Boolean).length;
+
+  return validSignals >= 2;
 }
 
 /**

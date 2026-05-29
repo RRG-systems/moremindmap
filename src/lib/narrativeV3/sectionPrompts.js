@@ -494,6 +494,73 @@ The notes must describe environment requirements around this operator, not self-
   };
 }
 
+export function buildTeamExperiencePrompt(unified, interpreted, previousSections, cognitionContext = null) {
+  return {
+    systemRule: `You are generating team-experience intelligence from verified behavioral evidence.
+DO NOT write generic leadership observations, personality praise, or archetype language.
+Use ONLY supplied canonical evidence, prior sections, and cognition context.
+Every claim must explain how this specific operator lands on other people.`,
+
+    section: "teamExperience",
+    voiceMode: "team-impact-analyst",
+    emotionalTemperature: "specific-observed",
+
+    canonical: { unified,
+      profileDNA: previousSections.profileDNA?.body,
+      executiveSummary: previousSections.executiveSummary?.body,
+      hiddenContradictions: previousSections.hiddenContradictions?.body,
+      strategicCeiling: previousSections.strategicCeiling?.body,
+      facilitatorNotes: previousSections.facilitatorNotes,
+      recommendedNextStep: previousSections.recommendedNextStep?.body,
+      pressurePattern: unified.pressure_pattern,
+      communicationRead: unified.communication_read,
+      teamExperience: unified.team_experience,
+      contradictions: unified.contradiction_map,
+      leadershipArchitecture: interpreted.leadershipArchitecture,
+      decisionProfile: interpreted.decisionProfile,
+      intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
+    },
+
+    instruction: `Generate Team Experience as JSON.
+
+This section must answer:
+- how this person lands on others
+- what others initially trust
+- what others misread
+- what becomes frustrating under load
+- what team members must learn to do around this operator
+- what is unique to this profile, not generic Command/vector language
+
+Anti-convergence requirements:
+- Include at least 2 dossier-specific facts from canonical evidence, intake answers, cognition rationales, or prior sections.
+- Include 1 profile-exclusive causal mechanism explaining why this team experience belongs to this person.
+- Include 1 team consequence that would NOT apply equally to another Command/vector profile.
+
+Do NOT use these generic phrases unless directly grounded and rewritten uniquely:
+- "Command-first communication structure"
+- "Team experiences Command as primary organizing force"
+- "Relational awareness disappears under stress"
+- "people need structure"
+- "team needs alignment"
+
+Use cognition ranked dimensions, primary/secondary/tertiary/lowest dimensions, pressure mechanics, tension pairs, communication style, leadership architecture, hidden contradictions, facilitator notes, strategic ceiling, one move, and written intake answers when available.
+
+Write as organizational observation, not coaching advice. The output must be renderer-compatible with the existing othersExperience schema.`,
+
+    format: JSON.stringify({
+      section: "teamExperience",
+      summary: "string",
+      first_impression: { interpretation: "string" },
+      communication_pattern: { interpretation: "string" },
+      listening_pattern: { interpretation: "string" },
+      relational_friction: { interpretation: "string" },
+      key_signals: ["string", "string", "string"],
+      causal_interpretation: "string"
+    }),
+  };
+}
+
 export function buildFiveFuturesPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are generating trajectory simulations from verified behavioral intelligence.
@@ -618,5 +685,6 @@ export default {
   buildCoachingLeveragePrompt,
   buildRecommendedNextStepPrompt,
   buildFacilitatorNotesPrompt,
+  buildTeamExperiencePrompt,
   buildFiveFuturesPrompt,
 };

@@ -45,7 +45,8 @@ export async function callGPT55(prompt, section) {
     // Validate structure
     const hasStructuredSection =
       (section === 'fiveFutures' && Array.isArray(data.futures)) ||
-      (section === 'facilitatorNotes' && Array.isArray(data.notes));
+      (section === 'facilitatorNotes' && Array.isArray(data.notes)) ||
+      (section === 'teamExperience' && isStructuredTeamExperience(data));
 
     if (!data.section || (!data.body && !hasStructuredSection)) {
       console.warn(`[GPT-5.5] Missing required fields`);
@@ -76,7 +77,8 @@ export function validateGrounding(gptResponse, interpreted) {
   const body = typeof gptResponse.body === 'string' ? gptResponse.body : '';
   const hasStructuredBody =
     (gptResponse.section === 'fiveFutures' && Array.isArray(gptResponse.futures) && gptResponse.futures.length >= 5) ||
-    (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes) && gptResponse.notes.length >= 1);
+    (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes) && gptResponse.notes.length >= 1) ||
+    (gptResponse.section === 'teamExperience' && isStructuredTeamExperience(gptResponse));
 
   // Check: section field exists
   if (!gptResponse.section) {
@@ -116,6 +118,21 @@ export function validateGrounding(gptResponse, interpreted) {
   }
 
   return true;
+}
+
+function isStructuredTeamExperience(value) {
+  if (!value?.summary) return false;
+
+  const validSignals = [
+    value.first_impression?.interpretation,
+    value.communication_pattern?.interpretation,
+    value.listening_pattern?.interpretation,
+    value.relational_friction?.interpretation,
+    Array.isArray(value.key_signals) && value.key_signals.length >= 2,
+    value.causal_interpretation,
+  ].filter(Boolean).length;
+
+  return validSignals >= 2;
 }
 
 export default { callGPT55, validateGrounding };

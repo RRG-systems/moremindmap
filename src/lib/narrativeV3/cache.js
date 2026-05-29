@@ -12,7 +12,7 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 3;  // Bumped to 3 when structured facilitatorNotes/fiveFutures added
+const CACHE_VERSION = 4;  // Bumped to 4 when structured teamExperience added
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {
@@ -21,6 +21,19 @@ function isValidCachedSection(section, value) {
 
   if (section === 'facilitatorNotes') {
     return Array.isArray(value?.notes) && value.notes.length >= 1;
+  }
+
+  if (section === 'teamExperience') {
+    const validSignals = [
+      value?.first_impression?.interpretation,
+      value?.communication_pattern?.interpretation,
+      value?.listening_pattern?.interpretation,
+      value?.relational_friction?.interpretation,
+      Array.isArray(value?.key_signals) && value.key_signals.length >= 2,
+      value?.causal_interpretation,
+    ].filter(Boolean).length;
+
+    return Boolean(value?.summary) && validSignals >= 2;
   }
 
   return value != null;
@@ -69,6 +82,7 @@ export function getCachedNarrative(profileId) {
         const requiredSections = [
           'coachingLeverage',
           'recommendedNextStep',
+          'teamExperience',
           'facilitatorNotes',
           'fiveFutures',
         ];

@@ -70,6 +70,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'strategicCeiling',
     'coachingLeverage',
     'recommendedNextStep',
+    'teamExperience',
     'facilitatorNotes',
     'fiveFutures',
   ];
@@ -79,6 +80,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'hiddenContradictions',
     'strategicCeiling',
     'recommendedNextStep',
+    'teamExperience',
     'facilitatorNotes',
     'fiveFutures',
   ]);
@@ -213,6 +215,7 @@ function getPromptBuilder(section) {
     strategicCeiling: prompts.buildStrategicCeilingPrompt,
     coachingLeverage: prompts.buildCoachingLeveragePrompt,
     recommendedNextStep: prompts.buildRecommendedNextStepPrompt,
+    teamExperience: prompts.buildTeamExperiencePrompt,
     facilitatorNotes: prompts.buildFacilitatorNotesPrompt,
     fiveFutures: prompts.buildFiveFuturesPrompt,
   };
@@ -359,6 +362,11 @@ async function localRendering(prompt, section, interpreted) {
       ],
       caution: "Do not treat this as personality coaching. The useful lever is environment design."
     };
+  }
+
+  if (section === 'teamExperience') {
+    const fallbackProfile = buildFallbackProfile(interpreted, prompt);
+    return buildTeamExperienceFallback(fallbackProfile);
   }
 
   if (section === 'fiveFutures') {
@@ -813,6 +821,34 @@ function buildOneMoveFallback(profile) {
       `It interrupts the active tension pair (${profile.tensionPair}) by turning ${profile.primaryName}'s advantage into something the organization can read before pressure escalates.\n\n` +
       `Evidence seed: ${stringifyFallbackSeed(profile.oneMoveSeed)}`,
     keyWarning: `Do not add generic structure. Build the one mechanism that resolves ${profile.bottleneck}.`,
+  };
+}
+
+function buildTeamExperienceFallback(profile) {
+  const pair = `${profile.primaryName} + ${profile.secondaryName}`;
+  const tieBreaker = `${profile.tertiaryName} tertiary / ${profile.lowestName} lowest`;
+
+  return {
+    section: 'teamExperience',
+    summary: `${pair} lands through ${profile.bottleneck}; the team initially trusts the visible ${profile.primaryName} signal, then has to adapt to the ${profile.lowestName} constraint under load.`,
+    first_impression: {
+      interpretation: `Others first read ${profile.primaryName} as the leading signal and ${profile.secondaryName} as the stabilizer, with ${tieBreaker} shaping whether trust holds. The trust point is ${profile.current}; the misread is assuming that ${profile.bottleneck} will explain itself without a translation layer.`
+    },
+    communication_pattern: {
+      interpretation: `Communication works best when the team can see the ${pair} mechanism: ${profile.scalingBreak}. Without that context, people may copy the pace or standard without understanding the decision rule behind it.`
+    },
+    listening_pattern: {
+      interpretation: `The team has to learn to surface information through the tie-breaker signal: ${tieBreaker}. Feedback needs to connect directly to ${profile.bottleneck}, not to generic preference or style.`
+    },
+    relational_friction: {
+      interpretation: `Under load, frustration forms around ${profile.overload} inside the ${pair} pattern. The consequence is specific: ${profile.constraint}; because the tie-breaker is ${tieBreaker}, team members must learn when to ask for the missing translation before execution hardens.`
+    },
+    key_signals: [
+      `Primary/secondary mechanism: ${pair}`,
+      `Tie-breaker profile: ${tieBreaker}`,
+      `Unique team consequence: ${profile.constraint}`
+    ],
+    causal_interpretation: `${pair} creates ${profile.bottleneck}; ${tieBreaker} determines what the team must name early so trust, friction, and follow-through do not become generic interpretation work.`
   };
 }
 
