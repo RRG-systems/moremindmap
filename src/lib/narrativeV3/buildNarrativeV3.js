@@ -75,6 +75,8 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'profileDNA',
     'executiveSummary',
     'hiddenContradictions',
+    'strategicCeiling',
+    'recommendedNextStep',
   ]);
 
   const narrative = {

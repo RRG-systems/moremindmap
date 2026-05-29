@@ -22,21 +22,23 @@ export function getCognitionContext(canonical) {
     return null;
   }
 
+  const data = canonical?.canonical_profile_json || canonical;
+
   // PRIORITY 1: rescoring_gpt (GPT behavioral cognition)
-  if (canonical.rescoring_gpt && canonical.rescoring_gpt.ranked_dimensions) {
+  if (data.rescoring_gpt && data.rescoring_gpt.ranked_dimensions) {
     console.log('[COGNITION] Using rescoring_gpt layer');
     return {
       source: 'gpt',
-      version: canonical.rescoring_gpt.model || 'gpt-5.5',
-      ranked_dimensions: canonical.rescoring_gpt.ranked_dimensions,
-      dominance_profile: canonical.rescoring_gpt.dominance_profile || {},
-      spread_profile: canonical.rescoring_gpt.spread_profile || {},
-      tension_pairs: canonical.rescoring_gpt.tension_pairs || {},
-      render_ready: canonical.rescoring_gpt.render_ready || {},
-      audit: canonical.rescoring_gpt.audit || {},
-      confidence: canonical.rescoring_gpt.dominance_profile?.confidence || 0.9,
-      generated_at: canonical.rescoring_gpt.generated_at,
-      rationales: canonical.rescoring_gpt.ranked_dimensions.map(d => ({
+      version: data.rescoring_gpt.model || 'gpt-5.5',
+      ranked_dimensions: data.rescoring_gpt.ranked_dimensions,
+      dominance_profile: data.rescoring_gpt.dominance_profile || {},
+      spread_profile: data.rescoring_gpt.spread_profile || {},
+      tension_pairs: data.rescoring_gpt.tension_pairs || {},
+      render_ready: data.rescoring_gpt.render_ready || {},
+      audit: data.rescoring_gpt.audit || {},
+      confidence: data.rescoring_gpt.dominance_profile?.confidence || 0.9,
+      generated_at: data.rescoring_gpt.generated_at,
+      rationales: data.rescoring_gpt.ranked_dimensions.map(d => ({
         dimension: d.dimension,
         rationale: d.rationale
       }))
@@ -44,31 +46,31 @@ export function getCognitionContext(canonical) {
   }
 
   // PRIORITY 2: rescoring_v1 (Deterministic behavioral topology)
-  if (canonical.rescoring_v1 && canonical.rescoring_v1.ranked_dimensions) {
+  if (data.rescoring_v1 && data.rescoring_v1.ranked_dimensions) {
     console.log('[COGNITION] Using rescoring_v1 layer (deterministic fallback)');
     return {
       source: 'v1',
-      version: canonical.rescoring_v1.version || 'v2-deterministic',
-      ranked_dimensions: canonical.rescoring_v1.ranked_dimensions,
-      dominance_profile: canonical.rescoring_v1.dominance_profile || {},
-      spread_profile: canonical.rescoring_v1.spread_profile || {},
-      tension_pairs: canonical.rescoring_v1.tension_pairs || {},
-      render_ready: canonical.rescoring_v1.render_ready || {},
-      amplitude_metrics: canonical.rescoring_v1.amplitude_metrics || {},
-      confidence: canonical.rescoring_v1.dominance_profile?.confidence || 0.85
+      version: data.rescoring_v1.version || 'v2-deterministic',
+      ranked_dimensions: data.rescoring_v1.ranked_dimensions,
+      dominance_profile: data.rescoring_v1.dominance_profile || {},
+      spread_profile: data.rescoring_v1.spread_profile || {},
+      tension_pairs: data.rescoring_v1.tension_pairs || {},
+      render_ready: data.rescoring_v1.render_ready || {},
+      amplitude_metrics: data.rescoring_v1.amplitude_metrics || {},
+      confidence: data.rescoring_v1.dominance_profile?.confidence || 0.85
     };
   }
 
   // PRIORITY 3: Fall back to baseline ranked_dimensions (last resort)
-  if (canonical.ranked_dimensions) {
+  if (data.ranked_dimensions) {
     console.log('[COGNITION] Using baseline layer (final fallback)');
     return {
       source: 'baseline',
       version: 'empirical',
-      ranked_dimensions: canonical.ranked_dimensions,
+      ranked_dimensions: data.ranked_dimensions,
       dominance_profile: {
-        primary_dimension: canonical.ranked_dimensions[0]?.dimension || 'unknown',
-        secondary_dimension: canonical.ranked_dimensions[1]?.dimension || 'unknown'
+        primary_dimension: data.ranked_dimensions[0]?.dimension || 'unknown',
+        secondary_dimension: data.ranked_dimensions[1]?.dimension || 'unknown'
       },
       spread_profile: {},
       confidence: 0.7

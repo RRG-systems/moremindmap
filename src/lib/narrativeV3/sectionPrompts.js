@@ -230,7 +230,7 @@ Use cognition ranked dimensions, dominance, spread, tension, suppressions, rende
   };
 }
 
-export function buildStrategicCeilingPrompt(unified, interpreted, previousSections) {
+export function buildStrategicCeilingPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent scaling dynamics.
@@ -248,6 +248,7 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
       constraintAtScale: interpreted.constraintAtScale,
       ranked: interpreted.ranked,
       intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
     },
 
     instruction: `Generate scaling ceiling analysis (max 200 words) as JSON.
@@ -267,7 +268,9 @@ Make it feel inevitable. Like mathematical breakdown, not character flaw.
 
 EXAMPLE: "At 1x, speed wins. At 2x, unread people start assuming you've decided without input. At 5x, coordination gaps mean decisions conflict. At 10x, personal execution can't cover for process breakdown."
 
-Ground each state to PRIMARY + SECONDARY (how they hold together at smaller scale, where secondary stabilizer can't compensate at scale).`,
+Ground each state to PRIMARY + SECONDARY (how they hold together at smaller scale, where secondary stabilizer can't compensate at scale).
+If canonical.cognition exists, use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to identify the actual operating bottleneck.
+Never say the scaling constraint is not identified when canonical.cognition, unified.scaling_constraint, or written evidence provide enough operating topology to infer one.`,
 
     format: JSON.stringify({
       section: "strategicCeiling",
@@ -380,7 +383,7 @@ Ground to PRIMARY OPERATING PATTERN + consequences if pattern shifts.`,
   };
 }
 
-export function buildRecommendedNextStepPrompt(unified, interpreted, previousSections) {
+export function buildRecommendedNextStepPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are recommending a behavioral intelligence experiment.
 ONE concrete next step.
@@ -396,6 +399,7 @@ Specific, grounded, testable.`,
       coachingLeverage: previousSections.coachingLeverage?.body,
       hiddenContradictions: previousSections.hiddenContradictions?.body,
       intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
     },
 
     instruction: `Generate ONE specific recommended next step (max 150 words) as JSON.
@@ -417,7 +421,10 @@ EXAMPLE BAD:
 Ground to:
 - The specific operating pattern (from profile DNA)
 - The scaling ceiling (where it breaks)
-- One testable observation that would reveal whether it's working or becoming liability`,
+- One testable observation that would reveal whether it's working or becoming liability
+
+If canonical.cognition exists, use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to choose the move.
+The move must address the actual operating bottleneck, not a generic improvement theme.`,
 
     format: JSON.stringify({
       section: "recommendedNextStep",

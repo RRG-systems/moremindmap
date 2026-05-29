@@ -411,10 +411,36 @@ function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
   );
 }
 
+function getCanonicalData(canonical) {
+  return canonical?.canonical_profile_json || canonical || {};
+}
+
+function hasCognitionLayer(canonical) {
+  const data = getCanonicalData(canonical);
+  return Boolean(
+    data.rescoring_gpt?.ranked_dimensions?.length ||
+    data.rescoring_v1?.ranked_dimensions?.length ||
+    data.ranked_dimensions?.length
+  );
+}
+
+function isWeakBIContent(content) {
+  if (!content || (typeof content === 'object' && Object.keys(content).length === 0)) {
+    return true;
+  }
+
+  const text = typeof content === 'string'
+    ? content
+    : JSON.stringify(content);
+
+  return /not identified|not available|unknown/i.test(text);
+}
+
 function PageSixDashboard({ narrative, behavioralIntelligence, canonical }) {
-  // Extract Scaling Constraint from BI (primary source)
+  // Extract Scaling Constraint from BI; prefer V3 when deterministic BI is weak.
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const scalingConstraintBI = renderPlan ? extractSectionContent('section-scaling-constraint', behavioralIntelligence, canonical) : null;
+  const useNarrativeScaling = narrative.strategicCeiling && isWeakBIContent(scalingConstraintBI?.content);
 
   return (
     <div className="dashboard-page page-six">
@@ -424,7 +450,17 @@ function PageSixDashboard({ narrative, behavioralIntelligence, canonical }) {
           <p className="page-section-subtitle">Where personal execution becomes insufficient</p>
         </div>
         <div className="zone-progression">
-          {scalingConstraintBI?.found && scalingConstraintBI?.content ? (
+          {useNarrativeScaling ? (
+            <InsightPanel
+              icon="📊"
+              title="Scaling Constraint"
+              subtitle="The Specific Ceiling You'll Hit"
+              content={narrative.strategicCeiling?.body || narrative.strategicCeiling}
+              warning={narrative.strategicCeiling?.key_warning}
+              prominence="analytical"
+              className="scaling-constraint-panel"
+            />
+          ) : scalingConstraintBI?.found && scalingConstraintBI?.content ? (
             <InsightPanel
               icon="📊"
               title="Scaling Constraint"
@@ -510,9 +546,10 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
 }
 
 function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
-  // Extract The One Move from BI (primary source)
+  // Extract The One Move from BI; cognition-aware V3 is preferred when available.
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const theOneMoveBI = renderPlan ? extractSectionContent('section-the-one-move', behavioralIntelligence, canonical) : null;
+  const useNarrativeOneMove = narrative.recommendedNextStep && hasCognitionLayer(canonical);
 
   return (
     <div className="dashboard-page page-eight">
@@ -522,7 +559,16 @@ function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
           <p className="page-section-subtitle">Highest-leverage intervention earned by evidence</p>
         </div>
         <div className="zone-progression">
-          {theOneMoveBI?.found && theOneMoveBI?.content ? (
+          {useNarrativeOneMove ? (
+            <InsightPanel
+              icon="⚡"
+              title="The One Move"
+              subtitle="Highest-Leverage Intervention"
+              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+              prominence="premium"
+              className="one-move-panel"
+            />
+          ) : theOneMoveBI?.found && theOneMoveBI?.content ? (
             <InsightPanel
               icon="⚡"
               title="The One Move"
