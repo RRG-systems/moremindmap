@@ -14,7 +14,47 @@
  * - Reduce generated cadence (vary sentence rhythm, avoid uniformity)
  */
 
-export function buildExecutiveSummaryPrompt(unified, interpreted, previousSections) {
+function buildCompactCognitionBlock(cognitionContext) {
+  if (!cognitionContext) return null;
+
+  const rankedDimensions = Array.isArray(cognitionContext.ranked_dimensions)
+    ? cognitionContext.ranked_dimensions.map((dimension, index) => ({
+        rank: dimension.rank ?? index + 1,
+        dimension: dimension.dimension,
+        score: dimension.display_score ?? dimension.gpt_rescored_score ?? dimension.score,
+        baseline_score: dimension.baseline_score ?? dimension.v1_score,
+        role: dimension.role,
+        confidence: dimension.confidence,
+        rationale: dimension.rationale,
+      }))
+    : [];
+
+  const audit = cognitionContext.audit || {};
+
+  return {
+    source: cognitionContext.source,
+    ranked_dimensions: rankedDimensions,
+    dominance_profile: cognitionContext.dominance_profile || null,
+    spread_profile: cognitionContext.spread_profile || null,
+    tension_pairs: cognitionContext.tension_pairs || [],
+    suppressions: cognitionContext.suppressions || cognitionContext.suppression_map || [],
+    render_ready: cognitionContext.render_ready || null,
+    audit: {
+      changed_dimensions: audit.changed_dimensions || [],
+      preserved_dimensions: audit.preserved_dimensions || [],
+      reason_for_changes: audit.reason_for_changes || [],
+      warning_flags: audit.warning_flags || [],
+    },
+    rationales: cognitionContext.rationales || rankedDimensions
+      .filter((dimension) => dimension.rationale)
+      .map((dimension) => ({
+        dimension: dimension.dimension,
+        rationale: dimension.rationale,
+      })),
+  };
+}
+
+export function buildExecutiveSummaryPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent traits, diagnoses, or personal conclusions.
@@ -34,6 +74,7 @@ Ground every statement to the canonical data provided.`,
       contradictions: unified.contradiction_map,
       scalingConstraint: unified.scaling_constraint,
       intake_answers: unified._raw.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
     },
 
     instruction: `Generate a compressed executive summary (max 150 words) as JSON.
@@ -56,6 +97,8 @@ Structure:
 
 READ unified.emotional_state, unified.action_or_avoidance_pattern, unified.contradiction_map FIRST.
 Let THOSE dominate section output.
+If canonical.cognition.source is "gpt", use cognition as the strongest behavioral topology layer.
+Use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to interpret operating weight.
 Dimensions are structure only. Evidence is truth.`,
 
     format: JSON.stringify({
@@ -126,7 +169,7 @@ Vary rhythm. Ground to observable patterns, not interpretation.`,
   };
 }
 
-export function buildHiddenContradictionsPrompt(unified, interpreted, previousSections) {
+export function buildHiddenContradictionsPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent psychological diagnoses.
@@ -145,6 +188,7 @@ Ground contradictions to OBSERVABLE EVIDENCE from scores and manifestations.`,
       opposingScore: interpreted.opposingPatterns[0].score,
       tradeoffCost: interpreted.tradeoffs[0]?.cost || "",
       intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
     },
 
     instruction: `Generate 3-4 core contradictions (max 220 words total) as JSON.
@@ -170,7 +214,10 @@ EXAMPLE REALISM:
 Ground to:
 - Observable team behavior (what happens in practice)
 - Operating model logic (why it happens)
-- Organizational consequence (what it costs)`,
+- Organizational consequence (what it costs)
+
+If canonical.cognition.source is "gpt", use cognition as the strongest behavioral topology layer.
+Use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to find gaps between operating weight, suppression, and team consequence.`,
 
     format: JSON.stringify({
       section: "hiddenContradictions",

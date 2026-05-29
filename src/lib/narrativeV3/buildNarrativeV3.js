@@ -71,6 +71,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'coachingLeverage',
     'recommendedNextStep',
   ];
+  const cognitionAwareSections = new Set([
+    'profileDNA',
+    'executiveSummary',
+    'hiddenContradictions',
+  ]);
 
   const narrative = {
     render_source: null,
@@ -89,7 +94,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let gptError = null;
 
   for (const section of sections) {
-    const prompt = section === 'profileDNA'
+    const prompt = cognitionAwareSections.has(section)
       ? getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext)
       : getPromptBuilder(section)(unified, interpreted, previousSections);
 
