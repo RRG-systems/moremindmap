@@ -12,7 +12,19 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 2;  // Bumped to 2 when coachingLeverage/recommendedNextStep added
+const CACHE_VERSION = 3;  // Bumped to 3 when structured facilitatorNotes/fiveFutures added
+
+function isValidCachedSection(section, value) {
+  if (section === 'fiveFutures') {
+    return Array.isArray(value?.futures) && value.futures.length >= 5;
+  }
+
+  if (section === 'facilitatorNotes') {
+    return Array.isArray(value?.notes) && value.notes.length >= 1;
+  }
+
+  return value != null;
+}
 
 /**
  * Generate cache key from profile ID.
@@ -54,10 +66,17 @@ export function getCachedNarrative(profileId) {
         const cached = wrapped.data || wrapped;
         
         // Validate that cached narrative has all required sections
-        const requiredSections = ['coachingLeverage', 'recommendedNextStep'];
-        const missingSection = requiredSections.find(s => !(s in cached));
-        if (missingSection) {
-          console.log(`[V3 CACHE INVALIDATED] ${profileId} - missing section: ${missingSection}`);
+        const requiredSections = [
+          'coachingLeverage',
+          'recommendedNextStep',
+          'facilitatorNotes',
+          'fiveFutures',
+        ];
+        const invalidSection = requiredSections.find((section) =>
+          !isValidCachedSection(section, cached[section])
+        );
+        if (invalidSection) {
+          console.log(`[V3 CACHE INVALIDATED] ${profileId} - invalid or missing section: ${invalidSection}`);
           localStorage.removeItem(cacheKey);
           return null;
         }

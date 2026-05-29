@@ -75,8 +75,8 @@ export function validateGrounding(gptResponse, interpreted) {
   const violations = [];
   const body = typeof gptResponse.body === 'string' ? gptResponse.body : '';
   const hasStructuredBody =
-    (gptResponse.section === 'fiveFutures' && Array.isArray(gptResponse.futures)) ||
-    (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes));
+    (gptResponse.section === 'fiveFutures' && Array.isArray(gptResponse.futures) && gptResponse.futures.length >= 5) ||
+    (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes) && gptResponse.notes.length >= 1);
 
   // Check: section field exists
   if (!gptResponse.section) {
@@ -89,7 +89,7 @@ export function validateGrounding(gptResponse, interpreted) {
   }
 
   // Check: grounding_used is populated
-  if (!gptResponse.grounding_used || gptResponse.grounding_used.length === 0) {
+  if (!hasStructuredBody && (!gptResponse.grounding_used || gptResponse.grounding_used.length === 0)) {
     violations.push('No grounding_used provided');
   }
 
