@@ -524,6 +524,25 @@ Use ONLY supplied canonical evidence, prior sections, and cognition context.`,
 Prompt intent:
 Generate five specific trajectory scenarios from full canonical evidence, cognitionContext, contradictions, pressure mechanics, scaling constraint, facilitator notes, and recommended next step.
 
+Anti-convergence requirement:
+Before writing, identify how this profile differs from another similar Command/vector profile. Use the secondary system, pressure mechanics, written answers, role/company context, contradictions, facilitator notes, scaling constraint, and recommended next step to differentiate.
+Every future must include:
+- At least 2 direct dossier-specific facts from the supplied canonical evidence or prior sections
+- At least 1 profile-exclusive causal mechanism explaining why this trajectory belongs to this person
+- At least 1 organizational consequence that would NOT apply equally to another Command/vector profile
+
+Do NOT use generic repeated conclusions unless directly evidenced by this profile:
+- "needs structure"
+- "decision frameworks"
+- "clear escalation paths"
+- "team alignment"
+- "scaling bottlenecks"
+- "burnout"
+- "family expectations"
+- "internal doubts"
+
+If one of those ideas is used, tie it to the exact evidence that makes it true for this dossier. Otherwise choose a different mechanism.
+
 Rules:
 - No generic self-help.
 - No vague futures.
@@ -534,7 +553,16 @@ Rules:
 - Leadership Trajectory = what happens if the operator matures into stronger leadership architecture.
 - Constraint Trajectory = what happens if the main scaling constraint remains unresolved.
 
-Use the exact titles shown in the schema. Do not add extra futures. Do not rename fields.`,
+Titles:
+Preserve renderer fields, but modify titles with the profile-specific bottleneck after the base category.
+Examples:
+- "Current Trajectory: Speed Outruns Interpretation"
+- "Optimized Trajectory: Decision Feedback Becomes Infrastructure"
+- "Burnout Trajectory: Pace Becomes Personal Load"
+- "Leadership Trajectory: Direction Becomes Transferable"
+- "Constraint Trajectory: Flex Cannot Substitute for Process"
+
+Do not add extra futures. Do not rename fields. Keep title, likelihood, trajectory, and organization_experiences exactly as fields.`,
 
     format: JSON.stringify({
       section: "fiveFutures",
@@ -547,31 +575,31 @@ Use the exact titles shown in the schema. Do not add extra futures. Do not renam
       },
       futures: [
         {
-          title: "Current Trajectory",
+          title: "Current Trajectory: profile-specific bottleneck",
           likelihood: "likely",
           trajectory: "string",
           organization_experiences: "string"
         },
         {
-          title: "Optimized Trajectory",
+          title: "Optimized Trajectory: profile-specific unlock",
           likelihood: "possible",
           trajectory: "string",
           organization_experiences: "string"
         },
         {
-          title: "Burnout Trajectory",
+          title: "Burnout Trajectory: profile-specific overload pattern",
           likelihood: "risk",
           trajectory: "string",
           organization_experiences: "string"
         },
         {
-          title: "Leadership Trajectory",
+          title: "Leadership Trajectory: profile-specific maturation path",
           likelihood: "possible",
           trajectory: "string",
           organization_experiences: "string"
         },
         {
-          title: "Constraint Trajectory",
+          title: "Constraint Trajectory: profile-specific unresolved constraint",
           likelihood: "likely",
           trajectory: "string",
           organization_experiences: "string"
