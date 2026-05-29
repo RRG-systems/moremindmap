@@ -387,6 +387,8 @@ function buildFallbackProfile(interpreted, prompt) {
   const primary = normalizeDimension(interpreted.primarySystem.dimension || 'primary');
   const secondary = normalizeDimension(interpreted.secondarySystem.dimension || 'secondary');
   const ranked = interpreted.ranked || [];
+  const tertiary = normalizeDimension(ranked[2]?.dimension || '');
+  const lowest = normalizeDimension(ranked[ranked.length - 1]?.dimension || '');
   const lowDimensions = ranked
     .filter((d) => Number(d.score) <= 0)
     .map((d) => normalizeDimension(d.dimension));
@@ -409,33 +411,44 @@ function buildFallbackProfile(interpreted, prompt) {
     interpreted.tradeoffs[0]?.dimensions?.map((d) => normalizeDimension(d).name).join(' + ') ||
     `${primary.name} + ${secondary.name}`;
   const pairProfile = getPairFallbackProfile(primary.key, secondary.key);
+  const tieBreakerProfile = getTieBreakerFallback(tertiary.key, lowest.key);
   const lowProfile = getLowDimensionFallback(lowDimensions);
-  const bottleneck = lowProfile
-    ? `${pairProfile.bottleneck} with ${lowProfile.bottleneck}`
-    : pairProfile.bottleneck;
+  const bottleneck = joinFallbackParts([
+    pairProfile.bottleneck,
+    tieBreakerProfile.bottleneck,
+    lowProfile?.bottleneck,
+  ]);
 
   return {
     primaryKey: primary.key,
     primaryName: primary.name,
     secondaryKey: secondary.key,
     secondaryName: secondary.name,
+    tertiaryKey: tertiary.key,
+    tertiaryName: tertiary.name,
+    lowestKey: lowest.key,
+    lowestName: lowest.name,
     rankedNames: ranked.slice(0, 4).map((d) => normalizeDimension(d.dimension).name).filter(Boolean),
     tensionPair,
     pressureMechanics,
     oneMoveSeed,
     strategicCeilingSeed,
     bottleneck,
-    oneMove: lowProfile
-      ? `${pairProfile.oneMove}; also ${lowProfile.oneMove}`
-      : pairProfile.oneMove,
-    scalingBreak: lowProfile
-      ? `${pairProfile.scalingBreak} ${lowProfile.scalingBreak}`
-      : pairProfile.scalingBreak,
+    oneMove: joinFallbackParts([
+      pairProfile.oneMove,
+      tieBreakerProfile.oneMove,
+      lowProfile?.oneMove,
+    ]),
+    scalingBreak: joinFallbackParts([
+      pairProfile.scalingBreak,
+      tieBreakerProfile.scalingBreak,
+      lowProfile?.scalingBreak,
+    ]),
     current: pairProfile.current,
-    optimized: lowProfile?.optimized || pairProfile.optimized,
-    overload: lowProfile?.overload || pairProfile.overload,
+    optimized: lowProfile?.optimized || tieBreakerProfile.optimized || pairProfile.optimized,
+    overload: lowProfile?.overload || tieBreakerProfile.overload || pairProfile.overload,
     leadership: pairProfile.leadership,
-    constraint: lowProfile?.constraint || pairProfile.constraint,
+    constraint: lowProfile?.constraint || tieBreakerProfile.constraint || pairProfile.constraint,
   };
 }
 
@@ -461,6 +474,72 @@ function normalizeDimension(dimension) {
 }
 
 function getPairFallbackProfile(primaryKey, secondaryKey) {
+  const pairProfiles = {
+    'signal:fidelity': {
+      bottleneck: 'calibrated checking before concern becomes hesitation',
+      oneMove: 'separate the relationship signal from the verification standard: name the concern, the evidence required, and the decision owner',
+      scalingBreak: 'Signal + Fidelity breaks when relational concern and verification both slow the same decision lane.',
+      current: 'people receive careful reading and quality attention, but decisions can wait for both relational confidence and proof',
+      optimized: 'concern gets translated into evidence requests, so care improves quality without freezing movement',
+      overload: 'calibration becomes hesitation; the organization waits for emotional and factual certainty at the same time',
+      leadership: 'the operator turns sensitivity and precision into a clear trust-and-evidence protocol',
+      constraint: 'hesitation persists when concern and verification are not separated into different operating steps',
+    },
+    'vector:fidelity': {
+      bottleneck: 'decision threshold before command outruns checking',
+      oneMove: 'define the command checkpoint: what must be verified before direction locks and what can move without review',
+      scalingBreak: 'Vector + Fidelity breaks when direction forms faster than the verification threshold is visible.',
+      current: 'direction creates momentum while precision tries to protect quality after the path is already forming',
+      optimized: 'verification happens at the decision threshold, not as late-stage drag',
+      overload: 'people either follow speed without enough checking or slow decisions because standards are implicit',
+      leadership: 'the operator turns command into standards-backed direction others can trust',
+      constraint: 'quality risk remains when command and checking do not share a visible threshold',
+    },
+    'vector:velocity': {
+      bottleneck: 'tempo translation before speed becomes rework',
+      oneMove: 'install a weekly alignment cadence that translates pace into shared sequence before work starts',
+      scalingBreak: 'Vector + Velocity breaks when command and pace accelerate faster than the team can sequence work.',
+      current: 'pace keeps producing momentum, but unfinished interpretation turns into rework',
+      optimized: 'cadence makes pace legible; fast decisions become repeatable tempo instead of surprise acceleration',
+      overload: 'tempo becomes personal load; the organization chases speed while quality repair grows behind it',
+      leadership: 'the operator turns speed into transferable rhythm, not personal urgency',
+      constraint: 'rework becomes the tax when pace outruns shared interpretation',
+    },
+    'fidelity:framework': {
+      bottleneck: 'standard capture before precision becomes process drag',
+      oneMove: 'convert one recurring quality judgment into a documented rule with owner, exception path, and completion test',
+      scalingBreak: 'Fidelity + Framework breaks when standards exist but are too slow or heavy to run at volume.',
+      current: 'quality and structure protect consistency, but the operating system can become heavier than the decision requires',
+      optimized: 'standards become lean enough to preserve quality while keeping work moving',
+      overload: 'process becomes the work; people optimize for compliance instead of useful completion',
+      leadership: 'the operator turns quality judgment into right-sized operating rules',
+      constraint: 'precision remains costly when standards are not sized to decision risk',
+    },
+    'vector:flex': {
+      bottleneck: 'ambiguity translation before adaptability becomes drift',
+      oneMove: 'create a decision feedback loop that names what is fixed, what is flexible, and when ambiguity gets resolved',
+      scalingBreak: 'Vector + Flex breaks when direction and adaptability coexist without a visible resolution rule.',
+      current: 'adaptability keeps options open, but interpretation fragments across the team',
+      optimized: 'ambiguity gets named early; pivots become intentional instead of socially expensive',
+      overload: 'flexibility becomes unresolved consensus pressure; people keep adjusting without knowing the real decision',
+      leadership: 'the operator turns adaptability into clear option architecture others can use',
+      constraint: 'interpretation drift persists when Flex cannot distinguish openness from undecided direction',
+    },
+    'vector:horizon': {
+      bottleneck: 'strategic sequencing before vision outruns grounding',
+      oneMove: 'convert the long-range thesis into a near-term sequence with visible decision gates',
+      scalingBreak: 'Vector + Horizon breaks when strategic reach outpaces present-tense sequencing.',
+      current: 'vision keeps expanding the map, while near-term sequencing carries the strain',
+      optimized: 'strategic compression becomes staged execution; the team knows what matters now and what waits',
+      overload: 'future pull creates impatience with present constraints; too many moves compete for the same attention',
+      leadership: 'the operator turns vision into sequence that others can inherit and execute',
+      constraint: 'delayed grounding keeps the future persuasive but hard to operationalize',
+    },
+  };
+
+  const pairKey = `${primaryKey}:${secondaryKey}`;
+  if (pairProfiles[pairKey]) return pairProfiles[pairKey];
+
   const bySecondary = {
     velocity: {
       bottleneck: 'tempo translation before speed becomes rework',
@@ -583,6 +662,134 @@ function getLowDimensionFallback(lowDimensions) {
   return null;
 }
 
+function getTieBreakerFallback(tertiaryKey, lowestKey) {
+  const tertiaryProfiles = {
+    framework: {
+      bottleneck: 'tertiary Framework makes speed depend on explicit operating rails',
+      oneMove: 'use the Framework signal to write the sequence rule before pace accelerates',
+      scalingBreak: 'Tertiary Framework can stabilize the pair if it becomes an operating rail instead of a remembered preference.',
+      optimized: 'operating rails turn the primary pair into repeatable team behavior',
+      overload: 'implicit process expectations create rework because the rails are felt but not written',
+      constraint: 'the pair stays person-dependent when Framework remains tertiary instead of explicit',
+    },
+    signal: {
+      bottleneck: 'tertiary Signal makes adoption depend on captured feedback',
+      oneMove: 'use the Signal layer to capture objections and adoption friction before the decision is treated as settled',
+      scalingBreak: 'Tertiary Signal can prevent silent misalignment if feedback is collected before execution hardens.',
+      optimized: 'feedback capture makes the primary pair easier for others to adopt',
+      overload: 'people comply outwardly while unstated concerns become late-cycle friction',
+      constraint: 'the pair loses leverage when Signal remains informal and feedback arrives after commitment',
+    },
+    fidelity: {
+      bottleneck: 'tertiary Fidelity makes scale depend on a lightweight proof point',
+      oneMove: 'use the Fidelity layer to define the smallest proof point required before handoff',
+      scalingBreak: 'Tertiary Fidelity prevents expensive misses when proof points are narrow and early.',
+      optimized: 'targeted checks catch the expensive miss without slowing every move',
+      overload: 'small errors compound because checking exists as instinct, not a designed threshold',
+      constraint: 'the pair stays fragile when Fidelity is present but not operationalized',
+    },
+    leverage: {
+      bottleneck: 'tertiary Leverage makes scale depend on choosing the compounding lane',
+      oneMove: 'use the Leverage layer to name which work compounds and which work should be refused',
+      scalingBreak: 'Tertiary Leverage improves scale when effort is routed toward compounding decisions.',
+      optimized: 'capacity concentrates around the work that multiplies the system',
+      overload: 'energy disperses across useful work that does not compound',
+      constraint: 'the pair stays busy instead of leveraged when the compounding lane is unnamed',
+    },
+    flex: {
+      bottleneck: 'tertiary Flex makes scale depend on a visible pivot rule',
+      oneMove: 'use the Flex layer to state what new evidence permits a pivot and what remains fixed',
+      scalingBreak: 'Tertiary Flex prevents rigidity when the pivot rule is named before pressure.',
+      optimized: 'adaptation becomes deliberate instead of reactive',
+      overload: 'people keep adjusting to moving targets without knowing the pivot standard',
+      constraint: 'the pair becomes brittle when Flex exists but the pivot rule is implicit',
+    },
+    horizon: {
+      bottleneck: 'tertiary Horizon makes scale depend on sequencing the future pull',
+      oneMove: 'use the Horizon layer to separate this week, this quarter, and later decisions',
+      scalingBreak: 'Tertiary Horizon helps scale when future pull is converted into time horizons.',
+      optimized: 'future orientation becomes sequence instead of distraction',
+      overload: 'long-range possibility competes with near-term execution',
+      constraint: 'the pair overreaches when Horizon stays inspirational instead of sequenced',
+    },
+    velocity: {
+      bottleneck: 'tertiary Velocity makes scale depend on tempo control',
+      oneMove: 'use the Velocity layer to set cadence and pause points before work starts',
+      scalingBreak: 'Tertiary Velocity helps only when tempo is designed rather than absorbed.',
+      optimized: 'tempo becomes predictable enough for others to match',
+      overload: 'pace becomes invisible pressure that others experience as urgency',
+      constraint: 'the pair creates fatigue when Velocity stays implicit',
+    },
+  };
+
+  const lowestProfiles = {
+    framework: {
+      bottleneck: 'lowest Framework leaves the repeatable process underbuilt',
+      oneMove: 'add one process capture step for the decision most likely to repeat',
+      scalingBreak: 'Lowest Framework makes repeatability the tie-breaker constraint.',
+      optimized: 'captured process keeps the same issue from being reinterpreted every cycle',
+      overload: 'people recreate the same operating logic from scratch',
+      constraint: 'repeatability stays weak when Framework is the lowest signal',
+    },
+    signal: {
+      bottleneck: 'lowest Signal leaves adoption risk hidden until people react late',
+      oneMove: 'add a named dissent check before execution begins',
+      scalingBreak: 'Lowest Signal makes adoption and feedback the tie-breaker constraint.',
+      optimized: 'objections surface early enough to shape the handoff',
+      overload: 'misalignment stays quiet until the cost is already embedded',
+      constraint: 'feedback remains late when Signal is the lowest signal',
+    },
+    fidelity: {
+      bottleneck: 'lowest Fidelity leaves error cost invisible until downstream',
+      oneMove: 'add one narrow verification point before the highest-cost handoff',
+      scalingBreak: 'Lowest Fidelity makes verification the tie-breaker constraint.',
+      optimized: 'the expensive miss gets caught without slowing the whole system',
+      overload: 'small misses travel downstream and become coordination debt',
+      constraint: 'quality risk stays latent when Fidelity is the lowest signal',
+    },
+    flex: {
+      bottleneck: 'lowest Flex leaves pivot rules brittle under pressure',
+      oneMove: 'define what evidence permits a change before the decision is locked',
+      scalingBreak: 'Lowest Flex makes adaptability the tie-breaker constraint.',
+      optimized: 'the team knows when adaptation is allowed and when direction is fixed',
+      overload: 'change feels like reversal because pivot criteria were never named',
+      constraint: 'adaptability stays costly when Flex is the lowest signal',
+    },
+    horizon: {
+      bottleneck: 'lowest Horizon leaves near-term action disconnected from longer timing',
+      oneMove: 'name the near-term decision and the future decision separately',
+      scalingBreak: 'Lowest Horizon makes timing the tie-breaker constraint.',
+      optimized: 'near-term work stops competing with vague future possibility',
+      overload: 'the system optimizes today while the larger timing picture stays underused',
+      constraint: 'sequencing stays weak when Horizon is the lowest signal',
+    },
+    velocity: {
+      bottleneck: 'lowest Velocity leaves movement waiting on certainty',
+      oneMove: 'define the smallest reversible next action and deadline it',
+      scalingBreak: 'Lowest Velocity makes movement cadence the tie-breaker constraint.',
+      optimized: 'progress starts before full certainty is available',
+      overload: 'the system stays careful but slow enough that opportunities decay',
+      constraint: 'pace stays underpowered when Velocity is the lowest signal',
+    },
+  };
+
+  const tertiary = tertiaryProfiles[tertiaryKey];
+  const lowest = lowestProfiles[lowestKey];
+
+  return {
+    bottleneck: joinFallbackParts([tertiary?.bottleneck, lowest?.bottleneck]),
+    oneMove: joinFallbackParts([tertiary?.oneMove, lowest?.oneMove]),
+    scalingBreak: joinFallbackParts([tertiary?.scalingBreak, lowest?.scalingBreak]),
+    optimized: tertiary?.optimized || lowest?.optimized,
+    overload: lowest?.overload || tertiary?.overload,
+    constraint: lowest?.constraint || tertiary?.constraint,
+  };
+}
+
+function joinFallbackParts(parts) {
+  return parts.filter(Boolean).join(' with ');
+}
+
 function buildScalingFallback(profile) {
   return {
     body:
@@ -590,7 +797,8 @@ function buildScalingFallback(profile) {
       `The unique bottleneck is ${profile.bottleneck}.\n\n` +
       `At current scale, ${profile.current}. Pressure mechanics: ${stringifyFallbackSeed(profile.pressureMechanics)}\n\n` +
       `At the next scale, ${profile.scalingBreak} Top operating signals: ${profile.rankedNames.join(', ') || profile.tensionPair}.\n\n` +
-      `At larger scale, ${profile.constraint}. The breakthrough is not generic structure; it is the specific translation layer between ${profile.primaryName} and ${profile.secondaryName}. ` +
+      `At larger scale, ${profile.constraint}. The tie-breaker is ${profile.tertiaryName} as tertiary signal and ${profile.lowestName} as lowest signal. ` +
+      `The breakthrough is not generic structure; it is the specific translation layer between ${profile.primaryName} and ${profile.secondaryName}. ` +
       `Seed evidence: ${stringifyFallbackSeed(profile.strategicCeilingSeed)}`,
     keyWarning: `${profile.primaryName} + ${profile.secondaryName} fails when ${profile.bottleneck} stays implicit.`,
   };
@@ -601,6 +809,7 @@ function buildOneMoveFallback(profile) {
     body:
       `One move: ${profile.oneMove}.\n\n` +
       `This is specific to ${profile.primaryName} + ${profile.secondaryName}: the bottleneck is ${profile.bottleneck}. ` +
+      `The tie-breaker signal is ${profile.tertiaryName}; the lowest signal is ${profile.lowestName}. ` +
       `It interrupts the active tension pair (${profile.tensionPair}) by turning ${profile.primaryName}'s advantage into something the organization can read before pressure escalates.\n\n` +
       `Evidence seed: ${stringifyFallbackSeed(profile.oneMoveSeed)}`,
     keyWarning: `Do not add generic structure. Build the one mechanism that resolves ${profile.bottleneck}.`,
