@@ -73,6 +73,10 @@ export async function callGPT55(prompt, section) {
  */
 export function validateGrounding(gptResponse, interpreted) {
   const violations = [];
+  const body = typeof gptResponse.body === 'string' ? gptResponse.body : '';
+  const hasStructuredBody =
+    (gptResponse.section === 'fiveFutures' && Array.isArray(gptResponse.futures)) ||
+    (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes));
 
   // Check: section field exists
   if (!gptResponse.section) {
@@ -80,7 +84,7 @@ export function validateGrounding(gptResponse, interpreted) {
   }
 
   // Check: body is not suspiciously short
-  if (!gptResponse.body || gptResponse.body.length < 50) {
+  if (!hasStructuredBody && body.length < 50) {
     violations.push('Body too short; possible empty response');
   }
 
@@ -100,7 +104,7 @@ export function validateGrounding(gptResponse, interpreted) {
   ];
 
   placeholders.forEach((ph) => {
-    if (gptResponse.body.includes(ph)) {
+    if (body.includes(ph)) {
       violations.push(`Contains placeholder: "${ph}"`);
     }
   });
