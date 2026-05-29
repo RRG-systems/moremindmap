@@ -559,7 +559,7 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
               );
             }
             return null;
-          })}
+          })()}
         </div>
       </div>
     </div>
