@@ -434,6 +434,66 @@ The move must address the actual operating bottleneck, not a generic improvement
   };
 }
 
+export function buildFacilitatorNotesPrompt(unified, interpreted, previousSections, cognitionContext = null) {
+  return {
+    systemRule: `You are generating environment design guidance from verified behavioral intelligence.
+DO NOT provide therapy, motivation, personality coaching, or generic leadership advice.
+Design the environment around the operator's actual mechanics.
+Use ONLY supplied canonical evidence and cognition context.`,
+
+    section: "facilitatorNotes",
+    voiceMode: "environment-architect",
+    emotionalTemperature: "practical-structural",
+
+    canonical: { unified,
+      profileDNA: previousSections.profileDNA?.body,
+      strategicCeiling: previousSections.strategicCeiling?.body,
+      coachingLeverage: previousSections.coachingLeverage?.body,
+      recommendedNextStep: previousSections.recommendedNextStep?.body,
+      communicationRead: unified.communication_read,
+      teamExperience: unified.team_experience,
+      scalingConstraint: unified.scaling_constraint,
+      oneMoveSeed: unified.one_move_seed,
+      environmentFit: interpreted.environmentFit,
+      decisionProfile: interpreted.decisionProfile,
+      intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
+    },
+
+    instruction: `Generate Facilitator Notes as JSON.
+Purpose: environment design guidance, not behavior coaching.
+
+Use full canonical + cognition context to infer:
+- reporting structure
+- delegation architecture
+- accountability design
+- meeting cadence
+- communication architecture
+- decision review structure
+- organizational fit
+- what the environment must provide so the operator functions well
+
+Do NOT output "insufficient evidence" if canonical contains usable behavioral signals.
+Be specific, structural, and operational. Each note should be usable by a facilitator, manager, coach, or organizational designer.
+
+The notes must describe environment requirements around this operator, not self-improvement assignments for the operator.`,
+
+    format: JSON.stringify({
+      section: "facilitatorNotes",
+      summary: "(one sentence describing the environmental design requirement)",
+      primary_guidance: "(single most important structural guidance)",
+      notes: [
+        {
+          label: "(short label: reporting, delegation, accountability, meetings, communication, decisions, fit)",
+          guidance: "(specific environment design instruction)",
+          rationale: "(why this fits the operating pattern and cognition context)"
+        }
+      ],
+      caution: "(one boundary: what the environment should not assume or force)"
+    }),
+  };
+}
+
 export default {
   buildExecutiveSummaryPrompt,
   buildCommunicationStylePrompt,
@@ -442,4 +502,5 @@ export default {
   buildProfileDNAPrompt,
   buildCoachingLeveragePrompt,
   buildRecommendedNextStepPrompt,
+  buildFacilitatorNotesPrompt,
 };

@@ -228,6 +228,9 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract behavioral intelligence content for new sections
   const organizationalConsequencesBI = renderPlan ? extractSectionContent('section-organizational-consequences', behavioralIntelligence, canonical) : null;
   const facilitatorNotesBI = renderPlan ? extractSectionContent('section-facilitator-notes', behavioralIntelligence, canonical) : null;
+  const facilitatorNotesContent = narrative.facilitatorNotes && isWeakFacilitatorNotes(facilitatorNotesBI?.content)
+    ? narrative.facilitatorNotes
+    : facilitatorNotesBI?.content;
 
   return (
     <div className="dashboard-page page-two">
@@ -264,14 +267,14 @@ function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
           <StrategicMap narrative={narrative} />
         )}
 
-        {/* ZONE 3: Facilitator Notes (from Behavioral Intelligence) */}
-        {facilitatorNotesBI?.found && facilitatorNotesBI?.content && (
+        {/* ZONE 3: Facilitator Notes */}
+        {facilitatorNotesContent && (
           <div className="zone-facilitator-notes">
             <InsightPanel
               icon="⚙️"
               title="Facilitator Notes"
               subtitle="Environment Design Guidance"
-              content={renderBIContent("facilitatorNotes", facilitatorNotesBI.content)}
+              content={renderBIContent("facilitatorNotes", facilitatorNotesContent)}
               prominence="analytical"
               className="facilitator-notes-panel"
             />
@@ -434,6 +437,20 @@ function isWeakBIContent(content) {
     : JSON.stringify(content);
 
   return /not identified|not available|unknown/i.test(text);
+}
+
+function isWeakFacilitatorNotes(content) {
+  if (!content || (typeof content === 'object' && Object.keys(content).length === 0)) {
+    return true;
+  }
+
+  const summary = String(content.summary || '');
+  const primaryGuidance = String(content.primary_guidance || '');
+  const notes = Array.isArray(content.notes) ? content.notes : [];
+
+  return /0 structural guidance notes/i.test(summary) ||
+    /insufficient evidence/i.test(primaryGuidance) ||
+    notes.length === 0;
 }
 
 function PageSixDashboard({ narrative, behavioralIntelligence, canonical }) {
@@ -801,15 +818,21 @@ function renderBIContent(domain, content) {
       
       if (Array.isArray(content.notes) && content.notes.length > 0) {
         parts.push(
-          <div key="notes" className="bi-subsection">
-            <h4 className="bi-subsection-title">Structural Notes</h4>
-            <ul className="bi-notes-list">
-              {content.notes.map((note, idx) => (
-                <li key={idx} className="bi-note-item">
-                  {note.note || note}
-                </li>
-              ))}
-            </ul>
+              <div key="notes" className="bi-subsection">
+                <h4 className="bi-subsection-title">Structural Notes</h4>
+                <ul className="bi-notes-list">
+                  {content.notes.map((note, idx) => (
+                    <li key={idx} className="bi-note-item">
+                      {typeof note === 'string' ? note : (
+                        <>
+                          {note.label && <strong>{note.label}: </strong>}
+                          {note.guidance || note.note}
+                          {note.rationale && <span> {note.rationale}</span>}
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
           </div>
         );
       }

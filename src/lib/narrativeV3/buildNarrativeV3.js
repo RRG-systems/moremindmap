@@ -70,6 +70,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'strategicCeiling',
     'coachingLeverage',
     'recommendedNextStep',
+    'facilitatorNotes',
   ];
   const cognitionAwareSections = new Set([
     'profileDNA',
@@ -77,6 +78,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'hiddenContradictions',
     'strategicCeiling',
     'recommendedNextStep',
+    'facilitatorNotes',
   ]);
 
   const narrative = {
@@ -153,20 +155,26 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     rendering.render_source = sectionRenderSource;
 
     // Post-processing (with forensic option to disable)
-    rendering.body = suppressBannedPhrases(rendering.body);
-    if (!disableCompression) {
-      rendering.body = compressionPass(rendering.body);
-    } else {
-      console.log(`[V3 FORENSIC] Compression disabled for section: ${section}`);
+    if (typeof rendering.body === 'string') {
+      rendering.body = suppressBannedPhrases(rendering.body);
+      if (!disableCompression) {
+        rendering.body = compressionPass(rendering.body);
+      } else {
+        console.log(`[V3 FORENSIC] Compression disabled for section: ${section}`);
+      }
+    } else if (disableCompression) {
+      console.log(`[V3 FORENSIC] Compression disabled for structured section: ${section}`);
     }
 
     // Validate grounding
-    const violations = scanForBannedPhrases(rendering.body, section);
+    const violations = typeof rendering.body === 'string'
+      ? scanForBannedPhrases(rendering.body, section)
+      : [];
     rendering.violations = violations;
     rendering.groundingUsed = extractGroundingUsed(section, interpreted);
 
     narrative[section] = rendering;
-    previousSections[section] = rendering.body;
+    previousSections[section] = rendering.body || rendering.primary_guidance || rendering.summary || '';
   }
 
   // [FORENSIC] Calculate generation time
@@ -202,6 +210,7 @@ function getPromptBuilder(section) {
     strategicCeiling: prompts.buildStrategicCeilingPrompt,
     coachingLeverage: prompts.buildCoachingLeveragePrompt,
     recommendedNextStep: prompts.buildRecommendedNextStepPrompt,
+    facilitatorNotes: prompts.buildFacilitatorNotesPrompt,
   };
   return builders[section] || prompts.buildExecutiveSummaryPrompt;
 }
@@ -305,6 +314,32 @@ async function localRendering(prompt, section, interpreted) {
       `Pattern reveals whether speed is advantage or constraint in your current context.\n\n` +
       `Then: establish feedback lag metrics. Treat feedback speed as design problem, not people problem. ` +
       `That shift moves system from 1x to 2x operating efficiency.`;
+  }
+
+  if (section === 'facilitatorNotes') {
+    return {
+      section,
+      summary: "Environment should turn the operating pattern into explicit structure instead of relying on personal translation.",
+      primary_guidance: "Create clear decision lanes, feedback timing, and delegation boundaries so speed does not outrun shared understanding.",
+      notes: [
+        {
+          label: "Decision review",
+          guidance: "Review major decisions after consequences surface, not only when the decision is made.",
+          rationale: "This keeps fast operating patterns connected to downstream evidence."
+        },
+        {
+          label: "Communication architecture",
+          guidance: "Separate direction-setting meetings from input-gathering meetings.",
+          rationale: "The environment must make room for slower processing before direction feels locked."
+        },
+        {
+          label: "Accountability",
+          guidance: "Track feedback lag, handoff clarity, and unresolved objections as operating metrics.",
+          rationale: "These signals show whether the system is scaling or becoming person-dependent."
+        }
+      ],
+      caution: "Do not treat this as personality coaching. The useful lever is environment design."
+    };
   }
 
   return {
