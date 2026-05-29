@@ -893,6 +893,15 @@ function renderBIContent(domain, content) {
   return null;
 }
 function FiveFuturesRenderer({ content }) {
+  const normalizedFutures =
+    Array.isArray(content?.futures) ? content.futures :
+    Array.isArray(content?.body?.futures) ? content.body.futures :
+    Array.isArray(content?.content?.futures) ? content.content.futures :
+    Array.isArray(content?.items) ? content.items :
+    Array.isArray(content?.scenarios) ? content.scenarios :
+    [];
+  const normalizedSummary = content?.summary || content?.body?.summary || content?.content?.summary;
+
   // TEMP DEBUG: Trace exact content shape
   console.log('[RENDERER ENTRY] Renderer called');
   console.log('[RENDERER ENTRY] Received content:', content);
@@ -901,6 +910,7 @@ function FiveFuturesRenderer({ content }) {
   console.log('[RENDERER ENTRY] content?.futures:', content?.futures);
   console.log('[RENDERER ENTRY] Array.isArray(content?.futures):', Array.isArray(content?.futures));
   console.log('[RENDERER ENTRY] content?.futures?.length:', content?.futures?.length);
+  console.log('[RENDERER ENTRY] normalizedFutures.length:', normalizedFutures.length);
   if (content?.futures?.[0]) {
     console.log('[RENDERER ENTRY] First future:', content.futures[0]);
     console.log('[RENDERER ENTRY] First future keys:', Object.keys(content.futures[0]));
@@ -911,6 +921,7 @@ function FiveFuturesRenderer({ content }) {
   console.log('[FUTURES RENDERER] content?.futures:', content?.futures);
   console.log('[FUTURES RENDERER] Array.isArray(content?.futures):', Array.isArray(content?.futures));
   console.log('[FUTURES RENDERER] content?.futures?.length:', content?.futures?.length);
+  console.log('[FUTURES RENDERER] normalizedFutures:', normalizedFutures);
   if (content?.futures?.[0]) {
     console.log('[FUTURES RENDERER] First future:', content.futures[0]);
     console.log('[FUTURES RENDERER] First future keys:', Object.keys(content.futures[0]));
@@ -919,11 +930,11 @@ function FiveFuturesRenderer({ content }) {
   if (!content) return null;
   
   // Handle futures array from extractFiveFuturesStarter
-  if (Array.isArray(content.futures) && content.futures.length > 0) {
+  if (normalizedFutures.length > 0) {
     return (
       <div className="five-futures-section">
         <div className="five-futures-grid">
-          {content.futures.map((future, idx) => (
+          {normalizedFutures.map((future, idx) => (
             <div key={idx} className="future-card-container">
               <div className="future-card">
                 <div className="future-header">
@@ -963,13 +974,13 @@ function FiveFuturesRenderer({ content }) {
   if (content.future_5_transformed) futures.push({ title: 'Transformed', content: content.future_5_transformed });
   
   // If still no futures, try summary as fallback
-  if (futures.length === 0 && (content.summary || content.body)) {
+  if (futures.length === 0 && (normalizedSummary || content.body)) {
     return (
       <InsightPanel
         icon="🌌"
         title="Five Futures"
         subtitle="Trajectory Simulations Based on Current Pattern"
-        content={content.summary || content.body}
+        content={normalizedSummary || content.body}
         prominence="premium"
         className="five-futures-panel"
       />
