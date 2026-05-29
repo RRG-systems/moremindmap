@@ -494,6 +494,93 @@ The notes must describe environment requirements around this operator, not self-
   };
 }
 
+export function buildFiveFuturesPrompt(unified, interpreted, previousSections, cognitionContext = null) {
+  return {
+    systemRule: `You are generating trajectory simulations from verified behavioral intelligence.
+DO NOT write generic self-help, vague futures, motivation, or personality advice.
+Each future must show what happens behaviorally and organizationally.
+Use ONLY supplied canonical evidence, prior sections, and cognition context.`,
+
+    section: "fiveFutures",
+    voiceMode: "trajectory-simulator",
+    emotionalTemperature: "specific-inevitable",
+
+    canonical: { unified,
+      profileDNA: previousSections.profileDNA?.body,
+      hiddenContradictions: previousSections.hiddenContradictions?.body,
+      pressurePattern: unified.pressure_pattern,
+      contradictionMap: unified.contradiction_map,
+      scalingConstraint: unified.scaling_constraint,
+      oneMoveSeed: unified.one_move_seed,
+      strategicCeiling: previousSections.strategicCeiling?.body,
+      recommendedNextStep: previousSections.recommendedNextStep?.body,
+      facilitatorNotes: previousSections.facilitatorNotes,
+      intake_answers: interpreted.intake_answers,
+      cognition: buildCompactCognitionBlock(cognitionContext),
+    },
+
+    instruction: `Generate exactly five future trajectory cards as JSON.
+
+Prompt intent:
+Generate five specific trajectory scenarios from full canonical evidence, cognitionContext, contradictions, pressure mechanics, scaling constraint, facilitator notes, and recommended next step.
+
+Rules:
+- No generic self-help.
+- No vague futures.
+- Each future must show what happens behaviorally and organizationally.
+- Current Trajectory = what happens if nothing changes.
+- Optimized Trajectory = what improves if the One Move and environment design are adopted.
+- Burnout Trajectory = what breaks under prolonged pressure.
+- Leadership Trajectory = what happens if the operator matures into stronger leadership architecture.
+- Constraint Trajectory = what happens if the main scaling constraint remains unresolved.
+
+Use the exact titles shown in the schema. Do not add extra futures. Do not rename fields.`,
+
+    format: JSON.stringify({
+      section: "fiveFutures",
+      summary: "string",
+      most_likely: {
+        title: "string",
+        likelihood: "string",
+        trajectory: "string",
+        organization_experiences: "string"
+      },
+      futures: [
+        {
+          title: "Current Trajectory",
+          likelihood: "likely",
+          trajectory: "string",
+          organization_experiences: "string"
+        },
+        {
+          title: "Optimized Trajectory",
+          likelihood: "possible",
+          trajectory: "string",
+          organization_experiences: "string"
+        },
+        {
+          title: "Burnout Trajectory",
+          likelihood: "risk",
+          trajectory: "string",
+          organization_experiences: "string"
+        },
+        {
+          title: "Leadership Trajectory",
+          likelihood: "possible",
+          trajectory: "string",
+          organization_experiences: "string"
+        },
+        {
+          title: "Constraint Trajectory",
+          likelihood: "likely",
+          trajectory: "string",
+          organization_experiences: "string"
+        }
+      ]
+    }),
+  };
+}
+
 export default {
   buildExecutiveSummaryPrompt,
   buildCommunicationStylePrompt,
@@ -503,4 +590,5 @@ export default {
   buildCoachingLeveragePrompt,
   buildRecommendedNextStepPrompt,
   buildFacilitatorNotesPrompt,
+  buildFiveFuturesPrompt,
 };

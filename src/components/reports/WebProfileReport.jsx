@@ -507,6 +507,8 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
   // Extract Five Futures from BI
   const renderPlan = behavioralIntelligence ? buildRenderPlan(behavioralIntelligence, canonical) : null;
   const fiveFuturesBI = renderPlan ? extractSectionContent('section-five-futures', behavioralIntelligence, canonical) : null;
+  const hasNarrativeFiveFutures = Array.isArray(narrative.fiveFutures?.futures) &&
+    narrative.fiveFutures.futures.length >= 5;
   // TEMP DEBUG
   console.log('[EXTRACT SECTION] fiveFuturesBI:', fiveFuturesBI);
   if (fiveFuturesBI?.content) {
@@ -540,7 +542,9 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
               console.log('[HANDOFF] narrative.profileDNA:', !!narrative.profileDNA);
             }
             
-            if (fiveFuturesBI?.found && fiveFuturesBI?.content) {
+            if (hasNarrativeFiveFutures) {
+              return <FiveFuturesRenderer content={narrative.fiveFutures} />;
+            } else if (fiveFuturesBI?.found && fiveFuturesBI?.content) {
               return <FiveFuturesRenderer content={fiveFuturesBI.content} />;
             } else if (narrative.profileDNA) {
               return (

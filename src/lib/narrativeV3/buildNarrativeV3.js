@@ -71,6 +71,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'coachingLeverage',
     'recommendedNextStep',
     'facilitatorNotes',
+    'fiveFutures',
   ];
   const cognitionAwareSections = new Set([
     'profileDNA',
@@ -79,6 +80,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'strategicCeiling',
     'recommendedNextStep',
     'facilitatorNotes',
+    'fiveFutures',
   ]);
 
   const narrative = {
@@ -211,6 +213,7 @@ function getPromptBuilder(section) {
     coachingLeverage: prompts.buildCoachingLeveragePrompt,
     recommendedNextStep: prompts.buildRecommendedNextStepPrompt,
     facilitatorNotes: prompts.buildFacilitatorNotesPrompt,
+    fiveFutures: prompts.buildFiveFuturesPrompt,
   };
   return builders[section] || prompts.buildExecutiveSummaryPrompt;
 }
@@ -339,6 +342,48 @@ async function localRendering(prompt, section, interpreted) {
         }
       ],
       caution: "Do not treat this as personality coaching. The useful lever is environment design."
+    };
+  }
+
+  if (section === 'fiveFutures') {
+    const futures = [
+      {
+        title: "Current Trajectory",
+        likelihood: "likely",
+        trajectory: "The current operating pattern continues. Speed and directness keep producing momentum, while slower signals arrive too late to shape decisions.",
+        organization_experiences: "The organization gets clarity and pace, but begins adapting around the person instead of building independent capacity."
+      },
+      {
+        title: "Optimized Trajectory",
+        likelihood: "possible",
+        trajectory: "Decision reviews, delegation boundaries, and feedback timing turn the operating pattern into a repeatable system.",
+        organization_experiences: "The team keeps the advantage of speed while gaining enough structure to challenge, refine, and carry decisions without bottlenecking."
+      },
+      {
+        title: "Burnout Trajectory",
+        likelihood: "risk",
+        trajectory: "Pressure keeps routing more decisions through the same person. Urgency becomes the default operating environment.",
+        organization_experiences: "Energy depletes, repair work increases, and the team learns to wait for direction rather than build judgment."
+      },
+      {
+        title: "Leadership Trajectory",
+        likelihood: "possible",
+        trajectory: "The operator matures from personal execution into leadership architecture: clear standards, visible decision logic, and delegated ownership.",
+        organization_experiences: "People understand how to make aligned decisions without needing constant intervention, which increases trust and scale capacity."
+      },
+      {
+        title: "Constraint Trajectory",
+        likelihood: "likely",
+        trajectory: "The main scaling constraint remains unresolved. What works at small scale becomes coordination debt at larger scale.",
+        organization_experiences: "Growth exposes gaps in communication, ownership, and feedback loops. The team experiences pace without enough shared architecture."
+      }
+    ];
+
+    return {
+      section,
+      summary: "Five trajectory scenarios emerge from the current operating pattern.",
+      most_likely: futures[0],
+      futures
     };
   }
 
