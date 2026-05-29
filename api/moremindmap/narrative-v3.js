@@ -85,7 +85,11 @@ export default async function handler(req, res) {
     }
 
     // Validate structure
-    if (!parsed.section || !parsed.body) {
+    const hasStructuredSection =
+      (section === 'fiveFutures' && Array.isArray(parsed.futures)) ||
+      (section === 'facilitatorNotes' && Array.isArray(parsed.notes));
+
+    if (!parsed.section || (!parsed.body && !hasStructuredSection)) {
       console.warn(`[NARRATIVE-V3] Missing required fields`);
       console.warn(`[NARRATIVE-V3] Parsed object keys: ${Object.keys(parsed).join(', ')}`);
       console.warn(`[NARRATIVE-V3] Parsed.section: ${parsed.section}`);
@@ -93,7 +97,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Invalid response structure' });
     }
 
-    console.log(`[NARRATIVE-V3 CALL SUCCESS] Section: ${section}, Body length: ${parsed.body.length}`);
+    console.log(`[NARRATIVE-V3 CALL SUCCESS] Section: ${section}, Body length: ${parsed.body?.length || 0}`);
 
     // Add metadata
     parsed.fromGPT = true;

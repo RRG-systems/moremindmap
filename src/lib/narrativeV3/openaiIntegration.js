@@ -43,7 +43,11 @@ export async function callGPT55(prompt, section) {
     }
 
     // Validate structure
-    if (!data.section || !data.body) {
+    const hasStructuredSection =
+      (section === 'fiveFutures' && Array.isArray(data.futures)) ||
+      (section === 'facilitatorNotes' && Array.isArray(data.notes));
+
+    if (!data.section || (!data.body && !hasStructuredSection)) {
       console.warn(`[GPT-5.5] Missing required fields`);
       console.warn(`[GPT-5.5] Response keys: ${Object.keys(data).join(', ')}`);
       console.warn(`[GPT-5.5] data.section: ${data.section}`);
@@ -51,7 +55,7 @@ export async function callGPT55(prompt, section) {
       return null;
     }
 
-    console.log(`[GPT-5.5 CALL SUCCESS] Section: ${section}, Body length: ${data.body.length}`);
+    console.log(`[GPT-5.5 CALL SUCCESS] Section: ${section}, Body length: ${data.body?.length || 0}`);
     console.log(`[GPT-5.5] Render source: ${data.render_source}, Signal: ${data.SIGNAL_VERIFIED_55}`);
 
     return data;

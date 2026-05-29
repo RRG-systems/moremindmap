@@ -174,6 +174,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
       : [];
     rendering.violations = violations;
     rendering.groundingUsed = extractGroundingUsed(section, interpreted);
+    rendering = normalizeStructuredSection(section, rendering);
 
     narrative[section] = rendering;
     previousSections[section] = rendering.body || rendering.primary_guidance || rendering.summary || '';
@@ -216,6 +217,30 @@ function getPromptBuilder(section) {
     fiveFutures: prompts.buildFiveFuturesPrompt,
   };
   return builders[section] || prompts.buildExecutiveSummaryPrompt;
+}
+
+function normalizeStructuredSection(section, rendering) {
+  if (!rendering) return rendering;
+
+  if (section === 'fiveFutures') {
+    if (rendering.body?.futures) {
+      return { ...rendering, ...rendering.body };
+    }
+    if (rendering.futures) {
+      return rendering;
+    }
+  }
+
+  if (section === 'facilitatorNotes') {
+    if (rendering.body?.notes) {
+      return { ...rendering, ...rendering.body };
+    }
+    if (rendering.notes) {
+      return rendering;
+    }
+  }
+
+  return rendering;
 }
 
 // callGPT55 is imported from openaiIntegration.js
