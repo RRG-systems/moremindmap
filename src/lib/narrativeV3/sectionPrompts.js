@@ -532,6 +532,25 @@ This section must answer:
 - what team members must learn to do around this operator
 - what is unique to this profile, not generic Command/vector language
 
+Evidence Dominance Rule:
+Every major Team Experience claim must be grounded in at least one of:
+- a score pattern
+- a dimension relationship
+- a pressure mechanic
+- a tension pair
+- a written answer
+- leadership or communication evidence
+- facilitator, one-move, or scaling evidence
+
+Before writing, identify internally:
+- what others trust first
+- what others misread first
+- what becomes frustrating under load
+- what team members must learn to do around this person
+- what behavioral debt accumulates if the pattern is unmanaged
+
+Then write evidence → mechanism → consequence. Do not write psychological explanation first.
+
 Anti-convergence requirements:
 - Include at least 2 dossier-specific facts from canonical evidence, intake answers, cognition rationales, or prior sections.
 - Include 1 profile-exclusive causal mechanism explaining why this team experience belongs to this person.
@@ -545,6 +564,17 @@ Do NOT use these generic phrases unless directly grounded and rewritten uniquely
 - "team needs alignment"
 
 Use cognition ranked dimensions, primary/secondary/tertiary/lowest dimensions, pressure mechanics, tension pairs, communication style, leadership architecture, hidden contradictions, facilitator notes, strategic ceiling, one move, and written intake answers when available.
+
+Mechanism distinction examples:
+- Vector + Velocity: trust first = movement, pace, execution; misread = speed as certainty; debt = translation debt, rework, alignment lag.
+- Vector + Flex: trust first = adaptability, situational adjustment; misread = flexibility as alignment; debt = ambiguity debt, consensus drift, unclear boundaries.
+- Vector + Fidelity: trust first = certainty checked by verification; misread = checking as hesitation or control; debt = verification bottleneck, precision drag.
+- Signal + Fidelity: trust first = reading, calibration, caution; misread = caution as reluctance; debt = quality threshold delay, over-checking.
+- Fidelity + Framework: trust first = steadiness, process care; misread = process as rigidity; debt = repeatability burden, procedural drag.
+
+Do not describe inner emotional state unless it directly changes how the team experiences the person.
+Do not use generic command/operator explanations unless tied to evidence.
+The output must answer: "Why does this person land this way on others?"
 
 Write as organizational observation, not coaching advice. The output must be renderer-compatible with the existing othersExperience schema.`,
 
