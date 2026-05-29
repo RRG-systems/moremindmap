@@ -303,20 +303,11 @@ async function localRendering(prompt, section, interpreted) {
   }
 
   if (section === 'strategicCeiling') {
-    const primaryDim = interpreted.primarySystem.dimension || "primary";
-    const secondaryDim = interpreted.secondarySystem.dimension || "secondary";
+    const fallbackProfile = buildFallbackProfile(interpreted, prompt);
+    const scaling = buildScalingFallback(fallbackProfile);
 
-    body =
-      `1x: Optimized. Speed advantage compounds. Execution outpaces peers.\n\n` +
-      `2x: Velocity advantage starts creating coordination gaps. ` +
-      `Structures built by this person begin conflicting with each other. Same speed, now cross-purpose.\n\n` +
-      `5x: Contradictions inevitable. High-conviction decisions made independently conflict. ` +
-      `Integration fails. Architecture needs re-thinking.\n\n` +
-      `10x: Personal execution becomes impossible. Must delegate. ` +
-      `Means building teams that deliberately slow velocity (uncomfortable). ` +
-      `Unlock: delegate conviction to instinct, reserve deliberation for non-obvious edge cases.`;
-
-    keyWarning = "5x scale is the breaking point. Most don't adapt. System collapses.";
+    body = scaling.body;
+    keyWarning = scaling.keyWarning;
   }
 
   if (section === 'profileDNA') {
@@ -337,11 +328,11 @@ async function localRendering(prompt, section, interpreted) {
   }
 
   if (section === 'recommendedNextStep') {
-    body =
-      `Conduct a "decision velocity audit": map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? ` +
-      `Pattern reveals whether speed is advantage or constraint in your current context.\n\n` +
-      `Then: establish feedback lag metrics. Treat feedback speed as design problem, not people problem. ` +
-      `That shift moves system from 1x to 2x operating efficiency.`;
+    const fallbackProfile = buildFallbackProfile(interpreted, prompt);
+    const oneMove = buildOneMoveFallback(fallbackProfile);
+
+    body = oneMove.body;
+    keyWarning = oneMove.keyWarning;
   }
 
   if (section === 'facilitatorNotes') {
@@ -371,42 +362,12 @@ async function localRendering(prompt, section, interpreted) {
   }
 
   if (section === 'fiveFutures') {
-    const futures = [
-      {
-        title: "Current Trajectory",
-        likelihood: "likely",
-        trajectory: "The current operating pattern continues. Speed and directness keep producing momentum, while slower signals arrive too late to shape decisions.",
-        organization_experiences: "The organization gets clarity and pace, but begins adapting around the person instead of building independent capacity."
-      },
-      {
-        title: "Optimized Trajectory",
-        likelihood: "possible",
-        trajectory: "Decision reviews, delegation boundaries, and feedback timing turn the operating pattern into a repeatable system.",
-        organization_experiences: "The team keeps the advantage of speed while gaining enough structure to challenge, refine, and carry decisions without bottlenecking."
-      },
-      {
-        title: "Burnout Trajectory",
-        likelihood: "risk",
-        trajectory: "Pressure keeps routing more decisions through the same person. Urgency becomes the default operating environment.",
-        organization_experiences: "Energy depletes, repair work increases, and the team learns to wait for direction rather than build judgment."
-      },
-      {
-        title: "Leadership Trajectory",
-        likelihood: "possible",
-        trajectory: "The operator matures from personal execution into leadership architecture: clear standards, visible decision logic, and delegated ownership.",
-        organization_experiences: "People understand how to make aligned decisions without needing constant intervention, which increases trust and scale capacity."
-      },
-      {
-        title: "Constraint Trajectory",
-        likelihood: "likely",
-        trajectory: "The main scaling constraint remains unresolved. What works at small scale becomes coordination debt at larger scale.",
-        organization_experiences: "Growth exposes gaps in communication, ownership, and feedback loops. The team experiences pace without enough shared architecture."
-      }
-    ];
+    const fallbackProfile = buildFallbackProfile(interpreted, prompt);
+    const futures = buildFiveFuturesFallback(fallbackProfile);
 
     return {
       section,
-      summary: "Five trajectory scenarios emerge from the current operating pattern.",
+      summary: `${fallbackProfile.primaryName} + ${fallbackProfile.secondaryName} creates ${fallbackProfile.bottleneck}. Five fallback trajectories model what happens if that pattern is preserved, developed, or overloaded.`,
       most_likely: futures[0],
       futures
     };
@@ -420,6 +381,287 @@ async function localRendering(prompt, section, interpreted) {
     key_warning: keyWarning,
     grounding_used: extractGroundingUsed(section, interpreted),
   };
+}
+
+function buildFallbackProfile(interpreted, prompt) {
+  const primary = normalizeDimension(interpreted.primarySystem.dimension || 'primary');
+  const secondary = normalizeDimension(interpreted.secondarySystem.dimension || 'secondary');
+  const ranked = interpreted.ranked || [];
+  const lowDimensions = ranked
+    .filter((d) => Number(d.score) <= 0)
+    .map((d) => normalizeDimension(d.dimension));
+  const pressureMechanics =
+    prompt?.canonical?.pressurePattern ||
+    interpreted.pressureResponse ||
+    interpreted.primarySystem.pressure ||
+    'pressure intensifies the primary operating pattern';
+  const oneMoveSeed =
+    prompt?.canonical?.oneMoveSeed ||
+    interpreted.tradeoffs[0]?.cost ||
+    interpreted.scalingTension ||
+    'make the hidden operating cost explicit';
+  const strategicCeilingSeed =
+    prompt?.canonical?.strategicCeiling ||
+    prompt?.canonical?.scalingConstraint ||
+    interpreted.constraintAtScale ||
+    'current advantage becomes harder to transfer at scale';
+  const tensionPair =
+    interpreted.tradeoffs[0]?.dimensions?.map((d) => normalizeDimension(d).name).join(' + ') ||
+    `${primary.name} + ${secondary.name}`;
+  const pairProfile = getPairFallbackProfile(primary.key, secondary.key);
+  const lowProfile = getLowDimensionFallback(lowDimensions);
+  const bottleneck = lowProfile
+    ? `${pairProfile.bottleneck} with ${lowProfile.bottleneck}`
+    : pairProfile.bottleneck;
+
+  return {
+    primaryKey: primary.key,
+    primaryName: primary.name,
+    secondaryKey: secondary.key,
+    secondaryName: secondary.name,
+    rankedNames: ranked.slice(0, 4).map((d) => normalizeDimension(d.dimension).name).filter(Boolean),
+    tensionPair,
+    pressureMechanics,
+    oneMoveSeed,
+    strategicCeilingSeed,
+    bottleneck,
+    oneMove: lowProfile
+      ? `${pairProfile.oneMove}; also ${lowProfile.oneMove}`
+      : pairProfile.oneMove,
+    scalingBreak: lowProfile
+      ? `${pairProfile.scalingBreak} ${lowProfile.scalingBreak}`
+      : pairProfile.scalingBreak,
+    current: pairProfile.current,
+    optimized: lowProfile?.optimized || pairProfile.optimized,
+    overload: lowProfile?.overload || pairProfile.overload,
+    leadership: pairProfile.leadership,
+    constraint: lowProfile?.constraint || pairProfile.constraint,
+  };
+}
+
+function normalizeDimension(dimension) {
+  const key = String(dimension || '').toLowerCase();
+  const names = {
+    vector: 'Vector',
+    velocity: 'Velocity',
+    flex: 'Flex',
+    horizon: 'Horizon',
+    fidelity: 'Fidelity',
+    framework: 'Framework',
+    signal: 'Signal',
+    leverage: 'Leverage',
+    primary: 'Primary',
+    secondary: 'Secondary',
+  };
+
+  return {
+    key,
+    name: names[key] || key.charAt(0).toUpperCase() + key.slice(1) || 'Unknown',
+  };
+}
+
+function getPairFallbackProfile(primaryKey, secondaryKey) {
+  const bySecondary = {
+    velocity: {
+      bottleneck: 'tempo translation before speed becomes rework',
+      oneMove: 'install a weekly alignment cadence that translates pace into shared sequence before work starts',
+      scalingBreak: 'Velocity breaks through rework: fast starts remain useful only if handoffs and acceptance criteria are explicit.',
+      current: 'pace keeps producing momentum, but unfinished interpretation turns into rework',
+      optimized: 'cadence makes pace legible; fast decisions become repeatable tempo instead of surprise acceleration',
+      overload: 'tempo becomes personal load; the organization chases speed while quality repair grows behind it',
+      leadership: 'the operator turns speed into transferable rhythm, not personal urgency',
+      constraint: 'rework becomes the tax when pace outruns shared interpretation',
+    },
+    flex: {
+      bottleneck: 'ambiguity translation before adaptability becomes drift',
+      oneMove: 'create a decision feedback loop that names what is fixed, what is flexible, and when ambiguity gets resolved',
+      scalingBreak: 'Flex breaks through ambiguity: adaptability helps until people cannot tell which choices are settled.',
+      current: 'adaptability keeps options open, but interpretation fragments across the team',
+      optimized: 'ambiguity gets named early; pivots become intentional instead of socially expensive',
+      overload: 'flexibility becomes unresolved consensus pressure; people keep adjusting without knowing the real decision',
+      leadership: 'the operator turns adaptability into clear option architecture others can use',
+      constraint: 'interpretation drift persists when Flex cannot distinguish openness from undecided direction',
+    },
+    horizon: {
+      bottleneck: 'strategic sequencing before vision outruns grounding',
+      oneMove: 'convert the long-range thesis into a near-term sequence with visible decision gates',
+      scalingBreak: 'Horizon breaks through over-extension: long-range vision must be staged before the present system absorbs it.',
+      current: 'vision keeps expanding the map, while near-term sequencing carries the strain',
+      optimized: 'strategic compression becomes staged execution; the team knows what matters now and what waits',
+      overload: 'future pull creates impatience with present constraints; too many moves compete for the same attention',
+      leadership: 'the operator turns vision into sequence that others can inherit and execute',
+      constraint: 'delayed grounding keeps the future persuasive but hard to operationalize',
+    },
+    fidelity: {
+      bottleneck: 'verification threshold before precision becomes drag',
+      oneMove: 'define the decision threshold: what must be checked, what can move, and who owns exceptions',
+      scalingBreak: 'Fidelity breaks through verification bottlenecks: checking protects quality only when thresholds are explicit.',
+      current: 'precision protects decisions, but unchecked verification loops slow ownership transfer',
+      optimized: 'verification standards become clear enough for others to apply without waiting',
+      overload: 'quality concern turns into decision congestion; people hesitate because the acceptable error band is unclear',
+      leadership: 'the operator turns precision into standards instead of personal review',
+      constraint: 'verification bottlenecks remain when Fidelity is capability but not system design',
+    },
+    framework: {
+      bottleneck: 'process capture before repeatability depends on memory',
+      oneMove: 'capture the next recurring decision as a repeatable process with owner, trigger, and done condition',
+      scalingBreak: 'Framework breaks through missing repeatable process: scale requires the pattern to survive without personal reconstruction.',
+      current: 'execution keeps moving, but repeatability depends on personal recall and informal transfer',
+      optimized: 'process capture turns working instincts into shared operating rails',
+      overload: 'the same decisions get rebuilt repeatedly; speed hides the cost until volume rises',
+      leadership: 'the operator turns judgment into process other people can run',
+      constraint: 'missing repeatable process keeps growth dependent on the same interpreter',
+    },
+    signal: {
+      bottleneck: 'feedback instrumentation before relational signals arrive late',
+      oneMove: 'instrument feedback with explicit objection checks, repair windows, and dissent capture after major decisions',
+      scalingBreak: 'Signal breaks through late feedback: relational information must be collected before pressure makes it expensive.',
+      current: 'direction moves first, while relational feedback arrives after commitment',
+      optimized: 'feedback instrumentation makes dissent visible early enough to improve decisions',
+      overload: 'relationship repair becomes operational drag because concerns surface after the work is already moving',
+      leadership: 'the operator turns feedback into a design input rather than a postmortem',
+      constraint: 'late relational data keeps the team adapting silently until cost becomes visible',
+    },
+    leverage: {
+      bottleneck: 'leverage selection before effort multiplies the wrong activity',
+      oneMove: 'name the highest-leverage decision lane and remove work that does not compound through it',
+      scalingBreak: 'Leverage breaks through misplaced effort: scale depends on choosing which work deserves multiplication.',
+      current: 'energy stays high, but leverage gets diluted across too many active fronts',
+      optimized: 'work concentrates around the few decisions that create compounding lift',
+      overload: 'more activity creates less lift because effort spreads across non-compounding work',
+      leadership: 'the operator teaches the organization how to select leverage, not just work harder',
+      constraint: 'misplaced leverage keeps capacity busy while strategic lift stays capped',
+    },
+  };
+
+  return bySecondary[secondaryKey] || bySecondary[primaryKey] || {
+    bottleneck: `${normalizeDimension(primaryKey).name} and ${normalizeDimension(secondaryKey).name} need explicit translation before scale`,
+    oneMove: 'name the primary operating advantage, then define the handoff rule that lets others use it without guessing',
+    scalingBreak: `${normalizeDimension(primaryKey).name} + ${normalizeDimension(secondaryKey).name} breaks when the operating logic stays implicit.`,
+    current: 'the operating advantage works through the person more than the system',
+    optimized: 'the operating logic becomes visible enough for others to copy',
+    overload: 'pressure routes interpretation back through the same person',
+    leadership: 'the operator turns instinct into shared operating architecture',
+    constraint: 'implicit logic stays useful but hard to scale',
+  };
+}
+
+function getLowDimensionFallback(lowDimensions) {
+  if (lowDimensions.some((d) => d.key === 'framework')) {
+    return {
+      bottleneck: 'missing repeatable process before scale depends on personal reconstruction',
+      oneMove: 'capture one recurring operating loop as a process with owner, trigger, decision rule, and done condition',
+      scalingBreak: 'Low Framework breaks through missing repeatable process: what works once must become runnable without personal reconstruction.',
+      optimized: 'repeatable process lets the team preserve speed without rebuilding the same answer each time',
+      overload: 'process gaps convert growth into repeated explanation and avoidable handoff repair',
+      constraint: 'missing repeatable process remains the ceiling even when the primary system is strong',
+    };
+  }
+
+  if (lowDimensions.some((d) => d.key === 'signal')) {
+    return {
+      bottleneck: 'late feedback before relational data becomes repair work',
+      oneMove: 'add a feedback instrumentation step after major decisions: dissent captured, objection owner named, repair window scheduled',
+      scalingBreak: 'Low Signal breaks through feedback instrumentation: the system needs relational data before pressure makes it expensive.',
+      optimized: 'feedback is surfaced early enough to steer execution instead of becoming cleanup',
+      overload: 'concerns arrive late, so repair work grows after momentum has already committed people',
+      constraint: 'late relational signals keep the team compliant before they are aligned',
+    };
+  }
+
+  if (lowDimensions.some((d) => d.key === 'fidelity')) {
+    return {
+      bottleneck: 'verification threshold before errors compound downstream',
+      oneMove: 'define a lightweight verification threshold for high-cost decisions: what gets checked, by whom, and before which handoff',
+      scalingBreak: 'Low Fidelity breaks through verification thresholds: speed needs a check layer where downstream error is expensive.',
+      optimized: 'verification becomes targeted enough to catch expensive misses without slowing every decision',
+      overload: 'small unchecked misses travel downstream and become larger coordination problems',
+      constraint: 'verification gaps remain hidden until volume makes them expensive',
+    };
+  }
+
+  return null;
+}
+
+function buildScalingFallback(profile) {
+  return {
+    body:
+      `Primary system: ${profile.primaryName}. Secondary system: ${profile.secondaryName}. ` +
+      `The unique bottleneck is ${profile.bottleneck}.\n\n` +
+      `At current scale, ${profile.current}. Pressure mechanics: ${stringifyFallbackSeed(profile.pressureMechanics)}\n\n` +
+      `At the next scale, ${profile.scalingBreak} Top operating signals: ${profile.rankedNames.join(', ') || profile.tensionPair}.\n\n` +
+      `At larger scale, ${profile.constraint}. The breakthrough is not generic structure; it is the specific translation layer between ${profile.primaryName} and ${profile.secondaryName}. ` +
+      `Seed evidence: ${stringifyFallbackSeed(profile.strategicCeilingSeed)}`,
+    keyWarning: `${profile.primaryName} + ${profile.secondaryName} fails when ${profile.bottleneck} stays implicit.`,
+  };
+}
+
+function buildOneMoveFallback(profile) {
+  return {
+    body:
+      `One move: ${profile.oneMove}.\n\n` +
+      `This is specific to ${profile.primaryName} + ${profile.secondaryName}: the bottleneck is ${profile.bottleneck}. ` +
+      `It interrupts the active tension pair (${profile.tensionPair}) by turning ${profile.primaryName}'s advantage into something the organization can read before pressure escalates.\n\n` +
+      `Evidence seed: ${stringifyFallbackSeed(profile.oneMoveSeed)}`,
+    keyWarning: `Do not add generic structure. Build the one mechanism that resolves ${profile.bottleneck}.`,
+  };
+}
+
+function buildFiveFuturesFallback(profile) {
+  return [
+    {
+      title: `Current Trajectory: ${toTitleSuffix(profile.bottleneck)}`,
+      likelihood: 'likely',
+      trajectory: `${profile.primaryName} remains the lead operating system while ${profile.secondaryName} stabilizes it. ${profile.current}.`,
+      organization_experiences: `The organization experiences ${profile.primaryName} clearly, but the unresolved bottleneck (${profile.bottleneck}) determines where friction repeats.`
+    },
+    {
+      title: `Optimized Trajectory: ${toTitleSuffix(profile.oneMove)}`,
+      likelihood: 'possible',
+      trajectory: `${profile.optimized}. The one move is to ${profile.oneMove}.`,
+      organization_experiences: `People gain a usable translation layer between ${profile.primaryName} and ${profile.secondaryName}, so the advantage becomes easier to repeat without guessing.`
+    },
+    {
+      title: `Burnout Trajectory: ${toTitleSuffix(profile.overload)}`,
+      likelihood: 'risk',
+      trajectory: `${profile.overload}. Pressure mechanics intensify the same bottleneck instead of distributing it.`,
+      organization_experiences: `The team absorbs the cost of ${profile.bottleneck}; repair, rework, or delayed interpretation becomes the hidden workload.`
+    },
+    {
+      title: `Leadership Trajectory: ${toTitleSuffix(profile.leadership)}`,
+      likelihood: 'possible',
+      trajectory: `${profile.leadership}. ${profile.primaryName} stops being only personal force and becomes transferable operating architecture.`,
+      organization_experiences: `Others can carry more of the ${profile.primaryName} + ${profile.secondaryName} logic because the bottleneck has been named and designed around.`
+    },
+    {
+      title: `Constraint Trajectory: ${toTitleSuffix(profile.constraint)}`,
+      likelihood: 'likely',
+      trajectory: `${profile.constraint}. ${profile.scalingBreak}`,
+      organization_experiences: `Growth exposes the same ${profile.bottleneck}; the organization keeps working around the operator instead of inheriting the operating system.`
+    }
+  ];
+}
+
+function stringifyFallbackSeed(seed) {
+  if (!seed) return 'No seed available.';
+  if (typeof seed === 'string') return seed.slice(0, 220);
+  if (Array.isArray(seed)) return seed.map(stringifyFallbackSeed).join(' ').slice(0, 220);
+  if (typeof seed === 'object') {
+    return Object.values(seed).map(stringifyFallbackSeed).join(' ').slice(0, 220);
+  }
+  return String(seed).slice(0, 220);
+}
+
+function toTitleSuffix(text) {
+  const words = String(text || '')
+    .replace(/[^a-zA-Z0-9\s]/g, ' ')
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 6);
+
+  return words
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ') || 'Profile Specific Constraint';
 }
 
 /**
