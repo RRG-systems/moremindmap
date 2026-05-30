@@ -9,6 +9,7 @@ import {
   VISUAL_DNA_VERSION,
   createRedisClient,
   hashObject,
+  isApprovedVisualDNA,
   isCurrentVisualDNA,
   isVisualDNAEnabled,
   readVisualDNAMetadata,
@@ -73,6 +74,21 @@ export default async function handler(req, res) {
     const profileHash = hashObject(contextPacket);
     const existing = await readVisualDNAMetadata(redis, normalizedProfileId);
 
+    if (!force && isApprovedVisualDNA(existing)) {
+      return res.status(200).json({
+        enabled: true,
+        status: 'reused_approved',
+        generated: false,
+        visual_dna: existing,
+        debug: debug ? {
+          profile_hash: profileHash,
+          prompt_hash: promptResult.prompt_hash,
+          retrieved_key: profileResult.retrievedKey,
+          approval_status: existing.status,
+        } : undefined,
+      });
+    }
+
     if (!force && isCurrentVisualDNA(existing, {
       prompt_hash: promptResult.prompt_hash,
       profile_hash: profileHash,
@@ -125,7 +141,8 @@ export default async function handler(req, res) {
       provider: VISUAL_DNA_PROVIDER,
       visual_dna_version: VISUAL_DNA_VERSION,
       design_reference_version: promptResult.design_reference_version,
-      status: 'ready',
+      status: 'draft',
+      approved: false,
     };
 
     await writeVisualDNAMetadata(redis, metadata);

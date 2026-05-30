@@ -1226,14 +1226,22 @@ function isVisualDNATestProfile(profileId) {
   return VISUAL_DNA_TEST_PROFILES.has(String(profileId || '').toLowerCase());
 }
 
+function isApprovedVisualDNAForDisplay(visualDNA) {
+  return Boolean(
+    visualDNA?.image_url
+    && (visualDNA.status === 'approved' || visualDNA.approved === true)
+  );
+}
+
 function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, ranked, profileId, personName, company, storedVisualDNA = null }) {
   if (!isVisualDNAVisible()) return null;
 
-  if (storedVisualDNA?.image_url) {
+  if (isApprovedVisualDNAForDisplay(storedVisualDNA)) {
     return {
       ...storedVisualDNA,
-      status: storedVisualDNA.status || 'ready',
-      image_mode: storedVisualDNA.image_mode || 'stored_asset',
+      status: 'approved',
+      approved: true,
+      image_mode: storedVisualDNA.image_mode || 'approved_stored_asset',
     };
   }
 

@@ -112,9 +112,17 @@ export async function writeVisualDNAMetadata(redis, metadata) {
   await redis.set(getVisualDNAKey(metadata.profile_id), JSON.stringify(metadata));
 }
 
+export function isApprovedVisualDNA(metadata) {
+  return Boolean(
+    metadata?.image_url
+    && (metadata?.status === 'approved' || metadata?.approved === true)
+    && metadata?.visual_dna_version === VISUAL_DNA_VERSION
+  );
+}
+
 export function isCurrentVisualDNA(metadata, { prompt_hash, profile_hash }) {
   return Boolean(
-    metadata?.status === 'ready'
+    ['approved', 'draft', 'ready'].includes(metadata?.status)
     && metadata?.image_url
     && metadata?.prompt_hash === prompt_hash
     && metadata?.profile_hash === profile_hash
