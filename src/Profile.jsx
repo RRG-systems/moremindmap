@@ -151,6 +151,7 @@ export default function Profile() {
         version: "web",
         canonical_dossier: data.canonical_dossier,
         behavioral_intelligence_v1: data.behavioral_intelligence_v1,
+        visual_dna: data.visual_dna,
         profile_id: data.profile_id,
         retrieved_at: data.retrieved_at
       })
@@ -357,6 +358,7 @@ export default function Profile() {
                   version: "web",
                   canonical_dossier: data.canonical_dossier,
                   behavioral_intelligence_v1: data.behavioral_intelligence_v1,
+                  visual_dna: data.visual_dna,
                   profile_id: data.profile_id,
                   retrieved_at: data.retrieved_at
                 })
@@ -625,6 +627,7 @@ export default function Profile() {
                     canonical={result.canonical_dossier}
                     profileId={result.profile_id}
                     behavioralIntelligence={result.behavioral_intelligence_v1}
+                    visualDNA={result.visual_dna}
                   />
                   <a
                     href="/"

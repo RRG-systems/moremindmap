@@ -1226,8 +1226,18 @@ function isVisualDNATestProfile(profileId) {
   return VISUAL_DNA_TEST_PROFILES.has(String(profileId || '').toLowerCase());
 }
 
-function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, ranked, profileId, personName, company }) {
-  if (!isVisualDNAVisible() || !isVisualDNATestProfile(profileId)) return null;
+function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, ranked, profileId, personName, company, storedVisualDNA = null }) {
+  if (!isVisualDNAVisible()) return null;
+
+  if (storedVisualDNA?.image_url) {
+    return {
+      ...storedVisualDNA,
+      status: storedVisualDNA.status || 'ready',
+      image_mode: storedVisualDNA.image_mode || 'stored_asset',
+    };
+  }
+
+  if (!isVisualDNATestProfile(profileId)) return null;
 
   const contextPacket = buildVisualDNAContextPacket({
     canonical,
@@ -1302,7 +1312,7 @@ function VisualDNASection({ visualDNA }) {
 // MAIN COMPONENT (with fallback to stacked render)
 // ============================================================================
 
-export default function WebProfileReport({ canonical, profileId, behavioralIntelligence: behavioralIntelligenceProp }) {
+export default function WebProfileReport({ canonical, profileId, behavioralIntelligence: behavioralIntelligenceProp, visualDNA: storedVisualDNA = null }) {
   if (!canonical) {
     return <div className="web-report-error">Unable to load profile data</div>;
   }
@@ -1374,6 +1384,7 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
         profileId,
         personName,
         company,
+        storedVisualDNA,
       });
       
       return (

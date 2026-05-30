@@ -20,6 +20,7 @@
 
 import Redis from 'ioredis';
 import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
+import { readVisualDNAMetadata } from './visual-dna/shared.js';
 
 export default async function handler(req, res) {
   // Only GET allowed
@@ -86,10 +87,9 @@ export default async function handler(req, res) {
       }
     }
 
-    await redis.disconnect();
-
     // Handle not found
     if (!profileData) {
+      await redis.disconnect();
       console.log(`[RETRIEVE] Final result: Profile not found after ${keyAttempts.length} attempts`);
       return res.status(404).json({ 
         error: 'Profile not found',
@@ -103,6 +103,7 @@ export default async function handler(req, res) {
     try {
       canonicalDossier = JSON.parse(profileData);
     } catch (e) {
+      await redis.disconnect();
       console.error('[RETRIEVE] JSON parse error:', e);
       return res.status(500).json({ error: 'Invalid profile data' });
     }
@@ -123,12 +124,22 @@ export default async function handler(req, res) {
       // Non-blocking: return canonical even if extraction fails
     }
 
+    let visual_dna = null;
+    try {
+      visual_dna = await readVisualDNAMetadata(redis, id);
+    } catch (visualDNAErr) {
+      console.error('[RETRIEVE] Visual DNA metadata lookup failed:', visualDNAErr.message);
+    }
+
+    await redis.disconnect();
+
     // Return canonical dossier + behavioral intelligence (safe for client rendering)
     return res.status(200).json({
       success: true,
       profile_id: id,
       canonical_dossier: canonicalDossier,
       behavioral_intelligence_v1: behavioral_intelligence_v1,
+      visual_dna,
       retrieved_at: new Date().toISOString(),
       _debug_key_attempts: keyAttempts
     });
