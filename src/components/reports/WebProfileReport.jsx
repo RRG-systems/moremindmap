@@ -98,8 +98,8 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
 }
 
 function PageOneDashboard({ narrative, ranked, canonical }) {
-                const canonicalProfile = canonical?.canonical_profile_json || canonical;
-  const renderReady = canonicalProfile?.rescoring_gpt?.render_ready || canonicalProfile?.rescoring_v1?.render_ready || {};
+  const canonicalProfile = canonical?.canonical_profile_json || canonical;
+  const behavioralDNA = buildBehavioralDNAInterpretation(canonicalProfile, ranked);
   const getInsight = (type) => {
     const gptRenderReady = canonicalProfile?.rescoring_gpt?.render_ready;
     const v1RenderReady = canonicalProfile?.rescoring_v1?.render_ready;
@@ -167,37 +167,9 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
           </div>
         </div>
 
-        {/* ZONE 2: Analytical Pair (DNA Summary + Behavioral Summary) */}
+        {/* ZONE 2: Analytical Pair (Behavioral DNA + Behavioral Summary) */}
         <div className="zone-analytical-pair">
-          <InsightPanel
-            icon="📊"
-            title="DNA Summary"
-            subtitle="Vector Analysis"
-            content={(() => {
-              const canonicalProfile = canonical?.canonical_profile_json || canonical;
-              const gptRenderReady = canonicalProfile?.rescoring_gpt?.render_ready;
-              const v1RenderReady = canonicalProfile?.rescoring_v1?.render_ready;
-              
-              const dnaSummary = gptRenderReady?.dna_summary || v1RenderReady?.dna_summary || (() => {
-                const renderReady = gptRenderReady || v1RenderReady || {};
-                const dominance = canonicalProfile?.rescoring_gpt?.dominance_profile || canonicalProfile?.rescoring_v1?.dominance_profile || {};
-                if (renderReady.profile_intensity === 'extreme') {
-                  return 'Concentrated directional topology with suppressed verification systems.';
-                }
-                if (renderReady.profile_intensity === 'high') {
-                  return 'Strong domain topology with moderate stabilization.';
-                }
-                if (dominance.spread_type === 'flat' || ranked.length > 0 && (Math.max(...ranked.map(d => d.score)) - Math.min(...ranked.map(d => d.score))) < 0.5) {
-                  return 'Blended distributed topology with adaptive processing.';
-                }
-                return 'Balanced multi-system topology with flexible dynamics.';
-              })();
-              const scores = ranked.slice(0, 6).map(d => `${d.dimension}: ${(d.display_score ?? d.gpt_rescored_score ?? d.score) > 0 ? '+' : ''}${d.display_score ?? d.gpt_rescored_score ?? d.score}`).join(' • ');
-              return `${dnaSummary}\n\n${scores}`;
-            })()}
-            prominence="analytical"
-            className="left-panel"
-          />
+          <BehavioralDNAInterpretationPanel interpretation={behavioralDNA} />
           
           {narrative.executiveSummary && (
             <InsightPanel
@@ -219,6 +191,302 @@ function PageOneDashboard({ narrative, ranked, canonical }) {
       </div>
     </div>
   );
+}
+
+const DIMENSION_LABELS = {
+  vector: 'Direction',
+  velocity: 'Speed',
+  fidelity: 'Precision',
+  framework: 'Repeatability',
+  signal: 'Human Calibration',
+  horizon: 'Future Orientation',
+  flex: 'Adaptation',
+  leverage: 'Scaling Judgment',
+};
+
+const DIMENSION_ENERGY = {
+  vector: 'clear direction and decisive movement',
+  velocity: 'visible progress and fast feedback',
+  fidelity: 'accuracy, verification, and clean closure',
+  framework: 'repeatable systems and explicit operating rules',
+  signal: 'human signal, trust cues, and interpersonal calibration',
+  horizon: 'strategic possibility and future positioning',
+  flex: 'variety, ambiguity, and situational adjustment',
+  leverage: 'patterns that turn effort into multiplied impact',
+};
+
+const DIMENSION_FATIGUE = {
+  vector: 'directionless consensus loops',
+  velocity: 'slow cycles with no visible movement',
+  fidelity: 'messy ambiguity with loose standards',
+  framework: 'constant exception handling without a stable process',
+  signal: 'transactional environments that ignore human context',
+  horizon: 'repetitive execution with no strategic line of sight',
+  flex: 'rigid scripts that leave no room for adjustment',
+  leverage: 'manual work that never becomes a scalable system',
+};
+
+const DIMENSION_ENVIRONMENTS = {
+  vector: {
+    best: 'decision rights are clear and movement is expected',
+    worst: 'authority is diffuse and every step requires renewed consensus',
+  },
+  velocity: {
+    best: 'fast cycles, short feedback loops, and visible progress markers',
+    worst: 'slow approvals, unclear next steps, and procedural drag',
+  },
+  fidelity: {
+    best: 'quality standards are explicit and accuracy is respected',
+    worst: 'speed is rewarded while preventable error is normalized',
+  },
+  framework: {
+    best: 'roles, handoffs, and operating rhythms are repeatable',
+    worst: 'every problem becomes a one-off improvisation',
+  },
+  signal: {
+    best: 'human context, trust signals, and audience reception matter',
+    worst: 'people dynamics are treated as noise instead of operating data',
+  },
+  horizon: {
+    best: 'near-term action connects to a visible strategic arc',
+    worst: 'work is trapped in short-cycle execution with no future context',
+  },
+  flex: {
+    best: 'adaptation is useful and boundaries are still named',
+    worst: 'ambiguity expands until ownership and decisions blur',
+  },
+  leverage: {
+    best: 'patterns can be converted into systems, delegation, or scale',
+    worst: 'high-value judgment is consumed by manual repetition',
+  },
+};
+
+const PAIR_MECHANICS = {
+  'vector:velocity': {
+    engine: 'Direction + Speed',
+    advantage: 'Creates momentum before the room loses nerve.',
+    risk: 'Can create translation debt when movement outruns shared interpretation.',
+  },
+  'fidelity:framework': {
+    engine: 'Precision + Repeatability',
+    advantage: 'Builds trust through accuracy, standards, and dependable execution.',
+    risk: 'Can become a verification bottleneck when uncertainty requires faster release.',
+  },
+  'signal:horizon': {
+    engine: 'Pattern Recognition + Future Orientation',
+    advantage: 'Detects early opportunity by reading human signal and future consequence together.',
+    risk: 'Can drift strategically when discovery keeps expanding beyond the current decision.',
+  },
+  'signal:flex': {
+    engine: 'Human Calibration + Adaptation',
+    advantage: 'Forms trust quickly by adjusting to the person, room, or moment.',
+    risk: 'Can create boundary ambiguity when adaptation substitutes for explicit agreement.',
+  },
+  'vector:fidelity': {
+    engine: 'Direction + Verification',
+    advantage: 'Moves with authority while checking the work that matters.',
+    risk: 'Can oscillate between decisive push and late-stage correction.',
+  },
+  'vector:horizon': {
+    engine: 'Direction + Strategic Range',
+    advantage: 'Converts future possibility into a clear direction of travel.',
+    risk: 'Can overextend the organization before sequencing catches up.',
+  },
+  'vector:flex': {
+    engine: 'Direction + Adaptation',
+    advantage: 'Keeps forward motion alive while adjusting to changing terrain.',
+    risk: 'Can make decisions feel settled before boundaries are fully clarified.',
+  },
+  'velocity:fidelity': {
+    engine: 'Speed + Precision',
+    advantage: 'Moves quickly without fully abandoning quality control.',
+    risk: 'Can create internal friction between release pressure and verification standards.',
+  },
+  'leverage:framework': {
+    engine: 'Scale Pattern + Operating System',
+    advantage: 'Turns repeated work into repeatable infrastructure.',
+    risk: 'Can over-systematize before the pattern has been proven.',
+  },
+  'framework:fidelity': {
+    engine: 'Repeatability + Precision',
+    advantage: 'Creates reliability through process discipline and quality control.',
+    risk: 'Can slow adaptation when the process becomes more protected than the outcome.',
+  },
+};
+
+function getDimensionLabel(dimension) {
+  return DIMENSION_LABELS[dimension] || titleCase(dimension || 'Unknown');
+}
+
+function titleCase(value) {
+  return String(value || '')
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, char => char.toUpperCase());
+}
+
+function getDimensionScore(dimension) {
+  return Number(
+    dimension?.display_score
+    ?? dimension?.gpt_rescored_score
+    ?? dimension?.support_adjusted_score
+    ?? dimension?.rescored_score
+    ?? dimension?.score
+    ?? 0
+  );
+}
+
+function getEvidenceCount(dimension) {
+  return Number(dimension?.evidence_count ?? dimension?.contributing_answer_count ?? 0);
+}
+
+function getBestRescoringLayer(canonicalProfile) {
+  return canonicalProfile?.rescoring_gpt || canonicalProfile?.rescoring_v1 || {};
+}
+
+function getDimensionMap(ranked) {
+  return (ranked || []).reduce((map, dimension) => {
+    if (dimension?.dimension) map[dimension.dimension] = dimension;
+    return map;
+  }, {});
+}
+
+function getPairMechanic(primary, secondary) {
+  const direct = PAIR_MECHANICS[`${primary}:${secondary}`];
+  const reverse = PAIR_MECHANICS[`${secondary}:${primary}`];
+  if (direct) return direct;
+  if (reverse) return reverse;
+
+  return {
+    engine: `${getDimensionLabel(primary)} + ${getDimensionLabel(secondary)}`,
+    advantage: `Combines ${getDimensionLabel(primary).toLowerCase()} with ${getDimensionLabel(secondary).toLowerCase()} to create the core operating pattern.`,
+    risk: `Can overuse ${getDimensionLabel(primary).toLowerCase()} when ${getDimensionLabel(secondary).toLowerCase()} is not supported by the environment.`,
+  };
+}
+
+function getTensionCount(tensionPairs) {
+  if (!tensionPairs) return 0;
+  if (Array.isArray(tensionPairs.active_tensions)) return tensionPairs.active_tensions.length;
+  if (typeof tensionPairs.tension_count === 'number') return tensionPairs.tension_count;
+
+  return Object.values(tensionPairs).filter(value => {
+    if (typeof value === 'number') return Math.abs(value) >= 0.75;
+    if (value && typeof value === 'object') return ['moderate', 'high'].includes(value.severity);
+    return false;
+  }).length;
+}
+
+function getDominantTension(tensionPairs) {
+  if (!tensionPairs || typeof tensionPairs !== 'object') return null;
+  if (Array.isArray(tensionPairs.active_tensions) && tensionPairs.active_tensions.length > 0) {
+    return titleCase(tensionPairs.active_tensions[0]);
+  }
+
+  const numericTensions = Object.entries(tensionPairs)
+    .filter(([, value]) => typeof value === 'number')
+    .sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+
+  return numericTensions[0] && Math.abs(numericTensions[0][1]) >= 0.75
+    ? titleCase(numericTensions[0][0])
+    : null;
+}
+
+function getWrongSeatRisk({ ranked, dominance, spread, tensionPairs }) {
+  const primary = ranked[0];
+  const primaryEvidence = getEvidenceCount(primary);
+  const primaryConfidence = Number(primary?.confidence ?? dominance?.confidence ?? 0.7);
+  const primaryScore = Math.abs(getDimensionScore(primary));
+  const tensionCount = getTensionCount(tensionPairs);
+  const totalSpread = Number(spread?.total_spread ?? dominance?.total_spread ?? 0);
+  const dominanceGap = Number(spread?.dominance_gap ?? dominance?.dominance_gap ?? 0);
+  const isExtreme = dominance?.profile_intensity === 'extreme' || dominance?.spread_type === 'extreme' || primary?.intensity_band === 'extreme';
+
+  if (
+    tensionCount >= 3
+    || totalSpread >= 1.4
+    || (isExtreme && dominanceGap >= 0.35)
+    || primaryEvidence < 2
+    || primaryConfidence < 0.45
+  ) {
+    return 'High';
+  }
+
+  if (tensionCount >= 1 || totalSpread >= 0.9 || primaryScore >= 0.8 || primaryConfidence < 0.6) {
+    return 'Moderate';
+  }
+
+  return 'Low';
+}
+
+function getRoleFitSignals(ranked) {
+  const dimensionMap = getDimensionMap(ranked);
+  const score = (dimension) => getDimensionScore(dimensionMap[dimension]);
+  const roleWeights = {
+    Founder: { vector: 0.5, velocity: 0.3, horizon: 0.25, leverage: 0.2 },
+    'Sales Leadership': { vector: 0.35, velocity: 0.25, signal: 0.25, leverage: 0.15 },
+    Operations: { framework: 0.35, leverage: 0.3, fidelity: 0.2, vector: 0.1 },
+    Accounting: { fidelity: 0.5, framework: 0.4, leverage: 0.1 },
+    Engineering: { fidelity: 0.35, framework: 0.25, horizon: 0.25, flex: 0.25 },
+    Recruiting: { signal: 0.5, flex: 0.25, horizon: 0.15, velocity: 0.1 },
+    Compliance: { fidelity: 0.4, framework: 0.35, signal: 0.12 },
+    Finance: { fidelity: 0.45, framework: 0.35, leverage: 0.1 },
+    'Customer Success': { signal: 0.35, flex: 0.3, fidelity: 0.15, velocity: 0.1 },
+    'Marketing Creative': { signal: 0.35, horizon: 0.25, flex: 0.25, velocity: 0.1 },
+    'Project Management': { framework: 0.3, vector: 0.2, fidelity: 0.2, leverage: 0.15, signal: 0.1 },
+  };
+
+  const scoredRoles = Object.entries(roleWeights).map(([role, weights]) => ({
+    role,
+    score: Object.entries(weights).reduce((total, [dimension, weight]) => {
+      return total + Math.max(0, score(dimension)) * weight;
+    }, 0),
+  }));
+
+  const roles = scoredRoles
+    .filter(role => role.score >= 0.25)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 5)
+    .map(role => role.role);
+
+  return roles.length > 0 ? roles : ['Role fit depends on environment design'];
+}
+
+function buildBehavioralDNAInterpretation(canonicalProfile, rankedInput = []) {
+  const rescoringLayer = getBestRescoringLayer(canonicalProfile);
+  const ranked = Array.isArray(rankedInput) && rankedInput.length > 0
+    ? rankedInput
+    : rescoringLayer.ranked_dimensions || canonicalProfile?.ranked_dimensions || [];
+
+  const primary = ranked[0] || {};
+  const secondary = ranked[1] || {};
+  const primaryName = primary.dimension || rescoringLayer.dominance_profile?.primary_dimension || 'unknown';
+  const secondaryName = secondary.dimension || rescoringLayer.dominance_profile?.secondary_dimension || 'unknown';
+  const mechanic = getPairMechanic(primaryName, secondaryName);
+  const dominance = rescoringLayer.dominance_profile || {};
+  const spread = rescoringLayer.spread_profile || {};
+  const tensionPairs = rescoringLayer.tension_pairs || {};
+  const dominantTension = getDominantTension(tensionPairs);
+  const primaryLabel = getDimensionLabel(primaryName);
+  const secondaryLabel = getDimensionLabel(secondaryName);
+  const tertiaryLabel = getDimensionLabel(ranked[2]?.dimension);
+  const primaryEvidence = getEvidenceCount(primary);
+  const secondaryEvidence = getEvidenceCount(secondary);
+  const supportPhrase = primaryEvidence || secondaryEvidence
+    ? `Evidence support: ${primaryEvidence || 0}/${secondaryEvidence || 0} contributing signals.`
+    : 'Evidence support: baseline scoring fallback.';
+  const tensionPhrase = dominantTension ? ` Main tension: ${dominantTension}.` : '';
+
+  return {
+    primary_engine: mechanic.engine,
+    natural_advantage: mechanic.advantage,
+    natural_risk: `${mechanic.risk}${tensionPhrase}`,
+    energy_source: `${primaryLabel} draws energy from ${DIMENSION_ENERGY[primaryName] || 'conditions that match the primary operating pattern'}; ${secondaryLabel} adds ${DIMENSION_ENERGY[secondaryName] || 'secondary support'}.`,
+    fatigue_source: `${DIMENSION_FATIGUE[primaryName] || 'misaligned work'}; fatigue rises faster when ${DIMENSION_FATIGUE[secondaryName] || 'the secondary system is unsupported'}.`,
+    best_environment: `${DIMENSION_ENVIRONMENTS[primaryName]?.best || 'the primary pattern is useful'} and ${DIMENSION_ENVIRONMENTS[secondaryName]?.best || 'the secondary pattern is supported'}.`,
+    worst_environment: `${DIMENSION_ENVIRONMENTS[primaryName]?.worst || 'the primary pattern is blocked'} while ${DIMENSION_ENVIRONMENTS[secondaryName]?.worst || 'the secondary pattern is also strained'}.`,
+    role_fit_signals: getRoleFitSignals(ranked),
+    wrong_seat_risk: getWrongSeatRisk({ ranked, dominance, spread, tensionPairs }),
+    evidence_note: `${primaryLabel} + ${secondaryLabel}${ranked[2] ? `, stabilized by ${tertiaryLabel}` : ''}. ${supportPhrase}`,
+  };
 }
 
 function PageTwoDashboard({ narrative, behavioralIntelligence, canonical }) {
@@ -1080,6 +1348,45 @@ function InsightPanel({ icon, title, subtitle, content, warning, prominence, cla
         {content}
       </div>
       {warning && <div className="insight-warning">⚠️ {warning}</div>}
+    </div>
+  );
+}
+
+function BehavioralDNAInterpretationPanel({ interpretation }) {
+  const rows = [
+    ['Primary Engine', interpretation.primary_engine],
+    ['Natural Advantage', interpretation.natural_advantage],
+    ['Natural Risk', interpretation.natural_risk],
+    ['Energy Source', interpretation.energy_source],
+    ['Fatigue Source', interpretation.fatigue_source],
+    ['Best Environment', interpretation.best_environment],
+    ['Worst Environment', interpretation.worst_environment],
+    ['Role Fit Signals', interpretation.role_fit_signals?.join(' • ')],
+    ['Wrong-Seat Risk', interpretation.wrong_seat_risk],
+  ];
+
+  return (
+    <div className="insight-panel prominence-analytical left-panel behavioral-dna-panel">
+      <div className="insight-header">
+        <span className="insight-icon">🧬</span>
+        <div className="insight-title-group">
+          <h3 className="insight-title">Behavioral DNA Interpretation</h3>
+          <p className="insight-subtitle">Renderer-Side Signal Read</p>
+        </div>
+      </div>
+      <div className="behavioral-dna-grid">
+        {rows.map(([label, value]) => (
+          <div key={label} className="behavioral-dna-row">
+            <div className="behavioral-dna-label">{label}</div>
+            <div className={`behavioral-dna-value ${label === 'Wrong-Seat Risk' ? `risk-${String(value).toLowerCase()}` : ''}`}>
+              {value || 'Not enough signal'}
+            </div>
+          </div>
+        ))}
+      </div>
+      {interpretation.evidence_note && (
+        <div className="behavioral-dna-evidence">{interpretation.evidence_note}</div>
+      )}
     </div>
   );
 }
@@ -3056,6 +3363,65 @@ function DashboardStyles() {
         letter-spacing: 0.3px;
       }
 
+      .behavioral-dna-panel {
+        overflow: visible;
+      }
+
+      .behavioral-dna-grid {
+        display: grid;
+        gap: 0.85rem;
+      }
+
+      .behavioral-dna-row {
+        display: grid;
+        grid-template-columns: minmax(8rem, 0.45fr) 1fr;
+        gap: 1rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .behavioral-dna-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+      }
+
+      .behavioral-dna-label {
+        font-size: 0.72rem;
+        line-height: 1.35;
+        color: rgba(212, 175, 55, 0.85);
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+      }
+
+      .behavioral-dna-value {
+        font-size: 0.93rem;
+        line-height: 1.45;
+        color: #e8e8e8;
+        font-weight: 500;
+      }
+
+      .behavioral-dna-value.risk-low {
+        color: #9de0b1;
+      }
+
+      .behavioral-dna-value.risk-moderate {
+        color: #ffd36a;
+      }
+
+      .behavioral-dna-value.risk-high {
+        color: #ff9b8f;
+      }
+
+      .behavioral-dna-evidence {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(212, 175, 55, 0.18);
+        font-size: 0.78rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.58);
+      }
+
       .insight-warning {
         margin-top: 1rem;
         padding-top: 1rem;
@@ -3330,6 +3696,11 @@ function DashboardStyles() {
 
         .dashboard-hero {
           padding: 2rem;
+        }
+
+        .behavioral-dna-row {
+          grid-template-columns: 1fr;
+          gap: 0.3rem;
         }
 
         .page-content {
