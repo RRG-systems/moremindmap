@@ -179,19 +179,27 @@ export class BuildProfileInput {
         }
       });
 
-      const rawScore = answerCount > 0 ? totalScore / answerCount : 2.0;
+      const rawScore = answerCount > 0 ? totalScore / answerCount : 0;
       scores[dim] = {
         raw_score: Math.round(rawScore * 100) / 100,
         normalized_percent: Math.round((rawScore / 4.0) * 100),
         confidence: this.calculateDimensionConfidence(rawAnswers, dim),
+        evidence_count: answerCount,
+        contributing_answer_count: answerCount,
         contributing_answers: contributingAnswers,
         label: DIMENSION_LABELS[dim],
         description: this.getDimensionDescription(dim)
       };
     });
 
-    // Assign ranks
-    const sortedDims = Object.entries(scores).sort((a, b) => b[1].raw_score - a[1].raw_score);
+    // Assign ranks; no-evidence dimensions should never outrank evidence-backed dimensions.
+    const sortedDims = Object.entries(scores).sort((a, b) => {
+      const aEvidence = a[1].evidence_count || 0;
+      const bEvidence = b[1].evidence_count || 0;
+      if (aEvidence === 0 && bEvidence > 0) return 1;
+      if (bEvidence === 0 && aEvidence > 0) return -1;
+      return b[1].raw_score - a[1].raw_score;
+    });
     sortedDims.forEach(([dim, data], index) => {
       scores[dim].rank = index + 1;
     });
@@ -200,13 +208,15 @@ export class BuildProfileInput {
   }
 
   calculateDimensionConfidence(rawAnswers, dimension) {
-    let confidence = 0.75; // Base
     const contributingAnswers = Object.values(rawAnswers).filter(a => a.normalized_dimensions && a.normalized_dimensions[dimension]);
+    let confidence = 0.75; // Base
     
-    if (contributingAnswers.length < 3) confidence -= 0.15;
+    if (contributingAnswers.length === 0) return 0.2;
+    if (contributingAnswers.length < 3) confidence = 0.45;
+    else if (contributingAnswers.length < 5) confidence = 0.65;
     if (contributingAnswers.some(a => a.question_type === 'written')) confidence += 0.1;
 
-    return Math.min(Math.max(confidence, 0.5), 1.0);
+    return Math.min(Math.max(confidence, 0.2), 1.0);
   }
 
   getDimensionDescription(dim) {

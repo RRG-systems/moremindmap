@@ -3,21 +3,25 @@
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:29:33.256Z",
+    "generated_at": "2026-05-30T00:51:49.624Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "velocity",
         "score": 0.83,
         "baseline_score": 0.83,
+        "evidence_count": 12,
+        "contributing_answer_count": 12,
         "delta": 0,
         "rank": 1,
-        "confidence": 0.6
+        "confidence": 0.696
       },
       {
         "dimension": "signal",
         "score": 0.69,
         "baseline_score": 0.79,
+        "evidence_count": 7,
+        "contributing_answer_count": 7,
         "delta": -0.1,
         "rank": 2,
         "confidence": 0.6
@@ -26,22 +30,28 @@
         "dimension": "vector",
         "score": 0.76,
         "baseline_score": 0.78,
+        "evidence_count": 10,
+        "contributing_answer_count": 10,
         "delta": -0.02,
         "rank": 3,
-        "confidence": 0.6
+        "confidence": 0.72
       },
       {
         "dimension": "flex",
         "score": 0.54,
         "baseline_score": 0.56,
+        "evidence_count": 9,
+        "contributing_answer_count": 9,
         "delta": -0.02,
         "rank": 4,
-        "confidence": 0.6
+        "confidence": 0.72
       },
       {
         "dimension": "fidelity",
         "score": 0.41,
         "baseline_score": 0.5,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
         "delta": -0.09,
         "rank": 5,
         "confidence": 0.6
@@ -50,22 +60,28 @@
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "evidence_count": 8,
+        "contributing_answer_count": 8,
         "delta": -0.02,
         "rank": 6,
-        "confidence": 0.6
+        "confidence": 0.72
       },
       {
         "dimension": "horizon",
         "score": 0.16,
         "baseline_score": 0.17,
+        "evidence_count": 3,
+        "contributing_answer_count": 3,
         "delta": -0.01,
         "rank": 7,
-        "confidence": 0.6
+        "confidence": 0.72
       },
       {
         "dimension": "framework",
         "score": -0.24,
         "baseline_score": -0.25,
+        "evidence_count": 4,
+        "contributing_answer_count": 4,
         "delta": 0.01,
         "rank": 8,
         "confidence": 0.6
@@ -131,7 +147,7 @@
     },
     "metadata": {
       "baseline_hash": "0.83:0.79:0.78:0",
-      "rescoring_timestamp": "2026-05-30T00:29:33.256Z",
+      "rescoring_timestamp": "2026-05-30T00:51:49.624Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [

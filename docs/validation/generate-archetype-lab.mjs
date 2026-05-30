@@ -449,6 +449,9 @@ function summarize(canonical, behavioral, archetype) {
   const environment = canonical.environment_fit || {};
   const rescoring = canonical.rescoring_v1 || {};
   const rescoreRanked = rescoring.ranked_dimensions || [];
+  const evidenceCounts = Object.fromEntries(
+    ranked.map(d => [d.dimension, d.evidence_count ?? d.contributing_answer_count ?? 0])
+  );
 
   return {
     archetype: archetype.archetype,
@@ -459,6 +462,8 @@ function summarize(canonical, behavioral, archetype) {
     bottom_2_dimensions: bottom2,
     primary_engine: dimensionLabels[primary] || primary,
     secondary_engine: dimensionLabels[secondary] || secondary,
+    primary_evidence_count: evidenceCounts[primary] ?? 0,
+    evidence_counts: evidenceCounts,
     natural_advantage: archetype.expected.advantage,
     natural_risk: archetype.expected.risk,
     energy_source: archetype.expected.energy,
@@ -501,12 +506,16 @@ function summarize(canonical, behavioral, archetype) {
 function buildScoringNotes(archetype, ranked, roleFit) {
   const topDims = ranked.slice(0, 3).map(d => d.dimension);
   const bottomDims = ranked.slice(-2).map(d => d.dimension);
+  const primary = ranked[0];
   const expectedTopSignals = Object.entries(archetype.target)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
     .map(([dimension]) => dimension);
   const matches = expectedTopSignals.filter(d => topDims.includes(d));
   const concerns = [];
+  if ((primary?.evidence_count ?? primary?.contributing_answer_count ?? 0) === 0) {
+    concerns.push(`${primary.dimension} ranked primary with zero evidence.`);
+  }
   if (matches.length < 2) {
     concerns.push(`Only ${matches.length}/3 intended top dimensions landed in top 3.`);
   }
@@ -536,6 +545,7 @@ function writeJson(file, value) {
 
 function markdown(results) {
   const rows = results.map(r => `| ${r.archetype} | ${r.synthetic_person_name} | ${r.profile_id} | ${r.top_3_dimensions.join('<br>')} | ${r.bottom_2_dimensions.join('<br>')} | ${r.primary_engine} | ${r.initial_role_fit_judgment} | ${r.scoring_notes} |`).join('\n');
+  const regressionChecks = buildRegressionChecks(results);
   const validation = [
     ['Does the Accountant score differently from the CEO?', comparePrimary(results, 'Accountant', 'Founder / CEO')],
     ['Does the Recruiter score differently from the Engineer?', comparePrimary(results, 'Recruiter', 'Engineer')],
@@ -593,6 +603,10 @@ ${results.map(r => `### ${r.archetype}: ${r.synthetic_person_name}
 
 ${validation.map(([q, a]) => `- ${q} ${a}`).join('\n')}
 
+## Regression Checks
+
+${regressionChecks.map(check => `- ${check.status}: ${check.label} - ${check.detail}`).join('\n')}
+
 ## Obvious Scoring Concerns
 
 ${buildConcerns(results).map(c => `- ${c}`).join('\n')}
@@ -605,6 +619,36 @@ ${buildConcerns(results).map(c => `- ${c}`).join('\n')}
 4. Add snapshot comparison for V3 narrative sections to detect generic Command/operator convergence across unrelated roles.
 5. Review question weighting for service and process-heavy roles if repeated MC optimization still over-rewards fast action choices.
 `;
+}
+
+function buildRegressionChecks(results) {
+  const checks = [];
+  for (const result of results) {
+    checks.push({
+      label: `${result.archetype} primary has evidence`,
+      status: result.primary_evidence_count > 0 ? 'PASS' : 'FAIL',
+      detail: `${result.primary_engine} evidence_count=${result.primary_evidence_count}`
+    });
+  }
+
+  const specificChecks = [
+    ['Accountant', 'Leverage'],
+    ['Engineer', 'Leverage'],
+    ['Compliance Officer', 'Leverage'],
+    ['Marketing Creative', 'Vector']
+  ];
+
+  for (const [archetype, dimension] of specificChecks) {
+    const result = results.find(r => r.archetype === archetype);
+    const evidenceCount = result?.evidence_counts?.[dimension.toLowerCase()] ?? 0;
+    checks.push({
+      label: `${archetype} does not rank zero-evidence ${dimension} primary`,
+      status: !(result?.primary_engine === dimension && evidenceCount === 0) ? 'PASS' : 'FAIL',
+      detail: `primary=${result?.primary_engine}; ${dimension}.evidence_count=${evidenceCount}`
+    });
+  }
+
+  return checks;
 }
 
 function comparePrimary(results, a, b) {

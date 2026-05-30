@@ -3,72 +3,88 @@
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:29:33.262Z",
+    "generated_at": "2026-05-30T00:51:49.630Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "signal",
         "score": 0.98,
         "baseline_score": 0.99,
+        "evidence_count": 16,
+        "contributing_answer_count": 16,
         "delta": -0.01,
         "rank": 1,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "fidelity",
         "score": 0.61,
         "baseline_score": 0.63,
+        "evidence_count": 12,
+        "contributing_answer_count": 12,
         "delta": -0.02,
         "rank": 2,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "framework",
         "score": 0.61,
         "baseline_score": 0.63,
+        "evidence_count": 4,
+        "contributing_answer_count": 4,
         "delta": -0.02,
         "rank": 3,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "flex",
         "score": 0.44,
         "baseline_score": 0.58,
+        "evidence_count": 12,
+        "contributing_answer_count": 12,
         "delta": -0.14,
         "rank": 4,
-        "confidence": 0.65
+        "confidence": 0.77
       },
       {
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "evidence_count": 5,
+        "contributing_answer_count": 5,
         "delta": -0.02,
         "rank": 5,
-        "confidence": 0.65
+        "confidence": 0.722
       },
       {
         "dimension": "horizon",
         "score": 0.2,
         "baseline_score": 0.33,
+        "evidence_count": 3,
+        "contributing_answer_count": 3,
         "delta": -0.13,
         "rank": 6,
-        "confidence": 0.65
+        "confidence": 0.77
       },
       {
         "dimension": "velocity",
         "score": 0,
         "baseline_score": 0,
+        "evidence_count": 2,
+        "contributing_answer_count": 2,
         "delta": 0,
         "rank": 7,
-        "confidence": 0.65
+        "confidence": 0.674
       },
       {
         "dimension": "vector",
         "score": -0.48,
         "baseline_score": -0.5,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
         "delta": 0.02,
         "rank": 8,
-        "confidence": 0.65
+        "confidence": 0.722
       }
     ],
     "dominance_profile": {
@@ -137,7 +153,7 @@
     },
     "metadata": {
       "baseline_hash": "0.99:0.63:0.63:0",
-      "rescoring_timestamp": "2026-05-30T00:29:33.262Z",
+      "rescoring_timestamp": "2026-05-30T00:51:49.630Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [

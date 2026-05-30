@@ -310,7 +310,7 @@
   },
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-30T00:29:33.247Z",
+    "generated_at": "2026-05-30T00:51:49.616Z",
     "model": "synthetic-archetype-validation-v1",
     "person_name": "Marcus Vale",
     "email": "marcus.vale.synthetic@example.com",
@@ -352,42 +352,136 @@
     {
       "dimension": "vector",
       "score": 0.89,
-      "rank": 1
+      "rank": 1,
+      "confidence": 0.75,
+      "evidence_count": 16,
+      "contributing_answer_count": 16,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        19,
+        21,
+        23
+      ]
     },
     {
       "dimension": "velocity",
       "score": 0.73,
-      "rank": 2
+      "rank": 2,
+      "confidence": 0.75,
+      "evidence_count": 13,
+      "contributing_answer_count": 13,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        23
+      ]
     },
     {
       "dimension": "fidelity",
       "score": 0.67,
-      "rank": 3
+      "rank": 3,
+      "confidence": 0.65,
+      "evidence_count": 3,
+      "contributing_answer_count": 3,
+      "contributing_answers": [
+        4,
+        9,
+        19
+      ]
     },
     {
       "dimension": "signal",
       "score": 0.5,
-      "rank": 4
+      "rank": 4,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "contributing_answers": [
+        19
+      ]
     },
     {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5
+      "rank": 5,
+      "confidence": 0.65,
+      "evidence_count": 4,
+      "contributing_answer_count": 4,
+      "contributing_answers": [
+        7,
+        11,
+        12,
+        13
+      ]
     },
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6
+      "rank": 6,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        4,
+        9,
+        15,
+        16,
+        21
+      ]
     },
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7
+      "rank": 7,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        1,
+        4,
+        6,
+        9,
+        10
+      ]
     },
     {
       "dimension": "flex",
       "score": -0.5,
-      "rank": 8
+      "rank": 8,
+      "confidence": 0.75,
+      "evidence_count": 7,
+      "contributing_answer_count": 7,
+      "contributing_answers": [
+        3,
+        5,
+        6,
+        8,
+        18,
+        21,
+        23
+      ]
     }
   ],
   "top_systems": {
@@ -864,113 +958,223 @@
     {
       "dimension": "vector",
       "score": 0.89,
-      "rank": 1
+      "rank": 1,
+      "confidence": 0.75,
+      "evidence_count": 16,
+      "contributing_answer_count": 16,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        19,
+        21,
+        23
+      ]
     },
     {
       "dimension": "velocity",
       "score": 0.73,
-      "rank": 2
+      "rank": 2,
+      "confidence": 0.75,
+      "evidence_count": 13,
+      "contributing_answer_count": 13,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        23
+      ]
     },
     {
       "dimension": "fidelity",
       "score": 0.67,
-      "rank": 3
+      "rank": 3,
+      "confidence": 0.65,
+      "evidence_count": 3,
+      "contributing_answer_count": 3,
+      "contributing_answers": [
+        4,
+        9,
+        19
+      ]
     },
     {
       "dimension": "signal",
       "score": 0.5,
-      "rank": 4
+      "rank": 4,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "contributing_answers": [
+        19
+      ]
     },
     {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5
+      "rank": 5,
+      "confidence": 0.65,
+      "evidence_count": 4,
+      "contributing_answer_count": 4,
+      "contributing_answers": [
+        7,
+        11,
+        12,
+        13
+      ]
     },
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6
+      "rank": 6,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        4,
+        9,
+        15,
+        16,
+        21
+      ]
     },
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7
+      "rank": 7,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        1,
+        4,
+        6,
+        9,
+        10
+      ]
     },
     {
       "dimension": "flex",
       "score": -0.5,
-      "rank": 8
+      "rank": 8,
+      "confidence": 0.75,
+      "evidence_count": 7,
+      "contributing_answer_count": 7,
+      "contributing_answers": [
+        3,
+        5,
+        6,
+        8,
+        18,
+        21,
+        23
+      ]
     }
   ],
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:29:33.250Z",
+    "generated_at": "2026-05-30T00:51:49.618Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "vector",
         "score": 0.89,
         "baseline_score": 0.89,
+        "evidence_count": 16,
+        "contributing_answer_count": 16,
         "delta": 0,
         "rank": 1,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "velocity",
         "score": 0.71,
         "baseline_score": 0.73,
+        "evidence_count": 13,
+        "contributing_answer_count": 13,
         "delta": -0.02,
         "rank": 2,
-        "confidence": 0.65
+        "confidence": 0.77
       },
       {
         "dimension": "fidelity",
         "score": 0.65,
         "baseline_score": 0.67,
+        "evidence_count": 3,
+        "contributing_answer_count": 3,
         "delta": -0.02,
         "rank": 3,
-        "confidence": 0.65
+        "confidence": 0.6980000000000001
       },
       {
         "dimension": "signal",
         "score": 0.36,
         "baseline_score": 0.5,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
         "delta": -0.14,
         "rank": 4,
-        "confidence": 0.65
+        "confidence": 0.6980000000000001
       },
       {
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "evidence_count": 4,
+        "contributing_answer_count": 4,
         "delta": -0.02,
         "rank": 5,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "horizon",
         "score": 0.49,
         "baseline_score": 0.5,
+        "evidence_count": 5,
+        "contributing_answer_count": 5,
         "delta": -0.02,
         "rank": 6,
-        "confidence": 0.65
+        "confidence": 0.77
       },
       {
         "dimension": "framework",
         "score": 0.29,
         "baseline_score": 0.3,
+        "evidence_count": 5,
+        "contributing_answer_count": 5,
         "delta": -0.01,
         "rank": 7,
-        "confidence": 0.65
+        "confidence": 0.6980000000000001
       },
       {
         "dimension": "flex",
         "score": -0.61,
         "baseline_score": -0.5,
+        "evidence_count": 7,
+        "contributing_answer_count": 7,
         "delta": -0.11,
         "rank": 8,
-        "confidence": 0.65
+        "confidence": 0.77
       }
     ],
     "dominance_profile": {
@@ -1040,7 +1244,7 @@
     },
     "metadata": {
       "baseline_hash": "0.89:0.73:0.67:0",
-      "rescoring_timestamp": "2026-05-30T00:29:33.250Z",
+      "rescoring_timestamp": "2026-05-30T00:51:49.619Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [
@@ -1061,9 +1265,9 @@
   },
   "behavioral_intelligence_v1": {
     "extraction_version": "v1.0.0-tier1",
-    "extraction_timestamp": "2026-05-30T00:29:33.250Z",
+    "extraction_timestamp": "2026-05-30T00:51:49.619Z",
     "profile_id": "mm-20260529-ceo8x7q2",
-    "extraction_time_ms": 5,
+    "extraction_time_ms": 3,
     "domains": {
       "operatingSystem": {
         "title": "Known Operating System",

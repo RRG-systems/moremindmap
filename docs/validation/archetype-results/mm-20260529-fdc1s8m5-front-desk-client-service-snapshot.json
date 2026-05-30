@@ -14,6 +14,17 @@
   ],
   "primary_engine": "Signal",
   "secondary_engine": "Fidelity",
+  "primary_evidence_count": 16,
+  "evidence_counts": {
+    "signal": 16,
+    "fidelity": 12,
+    "framework": 4,
+    "flex": 12,
+    "leverage": 5,
+    "horizon": 3,
+    "velocity": 2,
+    "vector": 1
+  },
   "natural_advantage": "Stabilizes clients quickly by reading tone and following reliable service steps.",
   "natural_risk": "May absorb frustration personally and defer boundary-setting too long.",
   "energy_source": "Helping people feel handled, clear routines, and visible service recovery.",

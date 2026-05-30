@@ -14,6 +14,17 @@
   ],
   "primary_engine": "Vector",
   "secondary_engine": "Velocity",
+  "primary_evidence_count": 16,
+  "evidence_counts": {
+    "vector": 16,
+    "velocity": 13,
+    "fidelity": 3,
+    "signal": 1,
+    "leverage": 4,
+    "horizon": 5,
+    "framework": 5,
+    "flex": 7
+  },
   "natural_advantage": "Sets direction quickly and connects near-term pressure to a larger company arc.",
   "natural_risk": "May outrun translation, leaving operators to infer the path from founder-level conviction.",
   "energy_source": "New territory, high-consequence decisions, and visible momentum.",

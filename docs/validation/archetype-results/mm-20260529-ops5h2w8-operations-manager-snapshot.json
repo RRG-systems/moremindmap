@@ -14,6 +14,17 @@
   ],
   "primary_engine": "Vector",
   "secondary_engine": "Fidelity",
+  "primary_evidence_count": 9,
+  "evidence_counts": {
+    "vector": 9,
+    "fidelity": 11,
+    "framework": 13,
+    "leverage": 2,
+    "signal": 5,
+    "velocity": 9,
+    "horizon": 2,
+    "flex": 3
+  },
   "natural_advantage": "Turns scattered execution into repeatable operating rhythm.",
   "natural_risk": "Can become controlling when local exceptions disrupt the process.",
   "energy_source": "Clear ownership, clean handoffs, and measurable operational improvement.",

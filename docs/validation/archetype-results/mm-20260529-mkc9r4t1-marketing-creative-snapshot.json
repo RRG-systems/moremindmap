@@ -4,16 +4,27 @@
   "intended_role": "Creative marketing lead for a consumer wellness brand",
   "profile_id": "mm-20260529-mkc9r4t1",
   "top_3_dimensions": [
-    "Vector 2.00",
     "Signal 0.88",
-    "Flex 0.78"
+    "Flex 0.78",
+    "Fidelity 0.63"
   ],
   "bottom_2_dimensions": [
-    "Velocity 0.33",
-    "Framework -0.50"
+    "Framework -0.50",
+    "Vector 0.00"
   ],
-  "primary_engine": "Vector",
-  "secondary_engine": "Signal",
+  "primary_engine": "Signal",
+  "secondary_engine": "Flex",
+  "primary_evidence_count": 14,
+  "evidence_counts": {
+    "signal": 14,
+    "flex": 18,
+    "fidelity": 4,
+    "leverage": 6,
+    "horizon": 5,
+    "velocity": 6,
+    "framework": 2,
+    "vector": 0
+  },
   "natural_advantage": "Connects audience signal, cultural timing, and campaign angle quickly.",
   "natural_risk": "Can resist fixed process until deadlines force compression.",
   "energy_source": "Concept development, audience insight, and room to iterate.",
@@ -52,16 +63,12 @@
   },
   "rescoring_summary": {
     "source": "rescoring_v1",
-    "primary_dimension": "vector",
-    "secondary_dimension": "signal",
+    "primary_dimension": "signal",
+    "secondary_dimension": "flex",
     "ranked_dimensions": [
       {
-        "dimension": "vector",
-        "score": 2
-      },
-      {
         "dimension": "signal",
-        "score": 0.73
+        "score": 0.88
       },
       {
         "dimension": "flex",
@@ -77,7 +84,7 @@
       },
       {
         "dimension": "horizon",
-        "score": 0.39
+        "score": 0.27
       },
       {
         "dimension": "velocity",
@@ -86,6 +93,10 @@
       {
         "dimension": "framework",
         "score": -0.48
+      },
+      {
+        "dimension": "vector",
+        "score": 0
       }
     ],
     "render_ready_keys": [
@@ -168,47 +179,47 @@
     "five_futures": {
       "futures": [
         {
-          "title": "Momentum Empire",
+          "title": "Perceptive Authority",
           "likelihood": "likely",
-          "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-          "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+          "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+          "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
           "profile_specific": true
         },
         {
-          "title": "vector Amplified",
+          "title": "signal Amplified",
           "likelihood": "possible",
-          "trajectory": "Strength fully deployed. vector becomes organizational competitive advantage.",
-          "organization_experiences": "Organization becomes advantage carrier. vector strength compounds into competitive edge.",
+          "trajectory": "Strength fully deployed. signal becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. signal strength compounds into competitive edge.",
           "profile_specific": true
         },
         {
-          "title": "Speed Spiral",
-          "likelihood": "likely",
-          "trajectory": "Vector becomes impatience. Quick decisions become reckless. Organization experiences whiplash. Course corrections break trust.",
-          "organization_experiences": "Organization experiences constant course corrections. Whiplash. Talent attrition increases.",
+          "title": "Information Gatekeeping",
+          "likelihood": "possible",
+          "trajectory": "Operator possesses all signals. Information asymmetry increases. Organization depends on operator interpretation.",
+          "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
           "profile_specific": true
         },
         {
-          "title": "Team Bottleneck Spiral",
+          "title": "Perception Asymmetry Crisis",
           "likelihood": "likely",
-          "trajectory": "Operator speed outpaces team capacity. Team feels left behind. Operator frustrated. Communication breaks down.",
+          "trajectory": "Operator sees patterns. Team doesn't. Operator decisions feel arbitrary. Trust erodes. Team stops advocating.",
           "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
           "profile_specific": true
         },
         {
-          "title": "Structured Velocity",
+          "title": "Sustainable Pace",
           "likelihood": "possible",
-          "trajectory": "Infrastructure built. Systems support speed. Operator can delegate. Organization scales without operator bottleneck.",
+          "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
           "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
           "profile_specific": true
         }
       ],
       "summary": "Five trajectory scenarios emerge from your current operating pattern.",
       "most_likely": {
-        "title": "Momentum Empire",
+        "title": "Perceptive Authority",
         "likelihood": "likely",
-        "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-        "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+        "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+        "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
         "profile_specific": true
       }
     },

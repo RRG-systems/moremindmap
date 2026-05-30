@@ -17,24 +17,38 @@ export function inferVectorScores(profileInput) {
   
   // Normalize scores to 0-10 scale (already in raw_score format)
   const vector_scores = {
-    vector: dimensionScores.vector?.raw_score || 0,
-    signal: dimensionScores.signal?.raw_score || 0,
-    fidelity: dimensionScores.fidelity?.raw_score || 0,
-    velocity: dimensionScores.velocity?.raw_score || 0,
-    leverage: dimensionScores.leverage?.raw_score || 0,
-    flex: dimensionScores.flex?.raw_score || 0,
-    framework: dimensionScores.framework?.raw_score || 0,
-    horizon: dimensionScores.horizon?.raw_score || 0
+    vector: dimensionScores.vector?.raw_score ?? 0,
+    signal: dimensionScores.signal?.raw_score ?? 0,
+    fidelity: dimensionScores.fidelity?.raw_score ?? 0,
+    velocity: dimensionScores.velocity?.raw_score ?? 0,
+    leverage: dimensionScores.leverage?.raw_score ?? 0,
+    flex: dimensionScores.flex?.raw_score ?? 0,
+    framework: dimensionScores.framework?.raw_score ?? 0,
+    horizon: dimensionScores.horizon?.raw_score ?? 0
   };
   
   // Build ranked dimensions array
   const ranked_dimensions = Object.entries(dimensionScores)
     .map(([dimension, data]) => ({
       dimension,
-      score: data.raw_score || 0,
-      rank: data.rank || 0
+      score: data.raw_score ?? 0,
+      rank: data.rank || 0,
+      confidence: data.confidence ?? null,
+      evidence_count: data.evidence_count ?? data.contributing_answer_count ?? data.contributing_answers?.length ?? 0,
+      contributing_answer_count: data.contributing_answer_count ?? data.evidence_count ?? data.contributing_answers?.length ?? 0,
+      contributing_answers: data.contributing_answers || []
     }))
-    .sort((a, b) => a.rank - b.rank);
+    .sort((a, b) => {
+      const aEvidence = a.evidence_count || 0;
+      const bEvidence = b.evidence_count || 0;
+      if (aEvidence === 0 && bEvidence > 0) return 1;
+      if (bEvidence === 0 && aEvidence > 0) return -1;
+      return a.rank - b.rank;
+    })
+    .map((dimension, index) => ({
+      ...dimension,
+      rank: index + 1
+    }));
   
   // Extract top systems from profileInput (already computed by buildProfileInput)
   const top_systems = profileInput.top_systems || {

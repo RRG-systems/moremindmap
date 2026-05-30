@@ -3,131 +3,157 @@
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:29:33.259Z",
+    "generated_at": "2026-05-30T00:51:49.627Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
-        "dimension": "leverage",
-        "score": 1.99,
-        "baseline_score": 2,
+        "dimension": "vector",
+        "score": 0.99,
+        "baseline_score": 1,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
         "delta": -0.01,
         "rank": 1,
-        "confidence": 0.65
-      },
-      {
-        "dimension": "vector",
-        "score": 0.96,
-        "baseline_score": 1,
-        "delta": -0.04,
-        "rank": 2,
-        "confidence": 0.65
+        "confidence": 0.746
       },
       {
         "dimension": "fidelity",
-        "score": 0.8,
+        "score": 0.79,
         "baseline_score": 0.82,
-        "delta": -0.02,
-        "rank": 3,
-        "confidence": 0.65
+        "evidence_count": 18,
+        "contributing_answer_count": 18,
+        "delta": -0.03,
+        "rank": 2,
+        "confidence": 0.77
       },
       {
         "dimension": "framework",
         "score": 0.75,
         "baseline_score": 0.77,
+        "evidence_count": 11,
+        "contributing_answer_count": 11,
         "delta": -0.02,
-        "rank": 4,
-        "confidence": 0.65
+        "rank": 3,
+        "confidence": 0.77
       },
       {
         "dimension": "signal",
-        "score": 0.49,
+        "score": 0.36,
         "baseline_score": 0.5,
-        "delta": -0.02,
-        "rank": 5,
-        "confidence": 0.65
+        "evidence_count": 8,
+        "contributing_answer_count": 8,
+        "delta": -0.14,
+        "rank": 4,
+        "confidence": 0.77
       },
       {
         "dimension": "horizon",
-        "score": 0.31,
+        "score": 0.43,
         "baseline_score": 0.44,
-        "delta": -0.13,
-        "rank": 6,
-        "confidence": 0.65
+        "evidence_count": 9,
+        "contributing_answer_count": 9,
+        "delta": -0.01,
+        "rank": 5,
+        "confidence": 0.746
       },
       {
         "dimension": "flex",
         "score": 0.29,
         "baseline_score": 0.42,
+        "evidence_count": 6,
+        "contributing_answer_count": 6,
         "delta": -0.13,
-        "rank": 7,
-        "confidence": 0.65
+        "rank": 6,
+        "confidence": 0.746
       },
       {
         "dimension": "velocity",
         "score": -0.48,
         "baseline_score": -0.5,
+        "evidence_count": 2,
+        "contributing_answer_count": 2,
         "delta": 0.02,
+        "rank": 7,
+        "confidence": 0.746
+      },
+      {
+        "dimension": "leverage",
+        "score": 0,
+        "baseline_score": 0,
+        "evidence_count": 0,
+        "contributing_answer_count": 0,
+        "delta": 0,
         "rank": 8,
-        "confidence": 0.65
+        "confidence": 0.2
       }
     ],
     "dominance_profile": {
-      "primary_dimension": "leverage",
-      "secondary_dimension": "vector",
-      "dominance_amplitude": 2,
-      "spread_type": "extreme",
+      "primary_dimension": "vector",
+      "secondary_dimension": "fidelity",
+      "dominance_amplitude": 1,
+      "spread_type": "balanced",
       "profile_intensity": "extreme",
       "threshold_band": "extreme",
       "threshold_weight": 1.4
     },
     "spread_profile": {
-      "flatness_score": 0.78,
-      "polarization_score": 0.5,
-      "dominance_gap": 1.03,
-      "total_spread": 2.47,
-      "variance": 0.43,
-      "balanced_vs_extreme": "extreme",
-      "tension_distribution": "tensioned",
+      "flatness_score": 0.9,
+      "polarization_score": 0.38,
+      "dominance_gap": 0.2,
+      "total_spread": 1.47,
+      "variance": 0.2,
+      "balanced_vs_extreme": "balanced",
+      "tension_distribution": "balanced",
       "profile_shape": "flat",
-      "profile_shape_confidence": 0.93
+      "profile_shape_confidence": 0.95
     },
     "tension_pairs": {
-      "velocity_vs_fidelity": -1.28,
-      "vector_vs_signal": 0.47,
-      "horizon_vs_flex": 0.02,
-      "leverage_vs_flex": 1.7,
+      "velocity_vs_fidelity": -1.27,
+      "vector_vs_signal": 0.63,
+      "horizon_vs_flex": 0.14,
+      "leverage_vs_flex": -0.29,
       "active_tensions": [
         "velocity_vs_fidelity",
-        "vector_vs_signal",
-        "leverage_vs_flex"
+        "vector_vs_signal"
       ],
-      "tension_count": 3
+      "tension_count": 2
     },
     "dominance_gravity": {
-      "strongest_system": "leverage",
-      "gravity_strength": 1.99,
-      "downstream_influence": [],
+      "strongest_system": "vector",
+      "gravity_strength": 0.99,
+      "downstream_influence": [
+        {
+          "dimension": "horizon",
+          "correlation": 0.65,
+          "influenced_by_suppression": false
+        },
+        {
+          "dimension": "leverage",
+          "correlation": 0.72,
+          "influenced_by_suppression": false
+        }
+      ],
       "drives_entire_profile": true,
       "suppression_effects_active": true
     },
     "amplitude_metrics": {
-      "highest_score": 1.99,
+      "highest_score": 0.99,
       "lowest_score": -0.48,
-      "total_spread": 2.47,
-      "score_variance": 0.43
+      "total_spread": 1.47,
+      "score_variance": 0.2
     },
     "render_ready": {
       "dna_summary": null,
-      "command_clarity": 1.99,
-      "speed_vs_fidelity": -1.28,
-      "strategic_leverage": 1.99,
+      "command_clarity": 0.99,
+      "speed_vs_fidelity": -1.27,
+      "strategic_leverage": 0,
       "dominance_flavor": "extreme",
       "active_suppression": true,
       "profile_intensity": "extreme"
     },
     "metadata": {
-      "baseline_hash": "2:1:0.82:0.77:0.",
-      "rescoring_timestamp": "2026-05-30T00:29:33.260Z",
+      "baseline_hash": "1:0.82:0.77:0.5:",
+      "rescoring_timestamp": "2026-05-30T00:51:49.627Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [

@@ -14,6 +14,17 @@
   ],
   "primary_engine": "Velocity",
   "secondary_engine": "Signal",
+  "primary_evidence_count": 12,
+  "evidence_counts": {
+    "velocity": 12,
+    "signal": 7,
+    "vector": 10,
+    "flex": 9,
+    "fidelity": 1,
+    "leverage": 8,
+    "horizon": 3,
+    "framework": 4
+  },
   "natural_advantage": "Turns human dynamics into forward commercial motion.",
   "natural_risk": "May over-trust momentum and relationship heat before qualification is fully verified.",
   "energy_source": "Live conversations, competitive targets, and visible wins.",

@@ -14,6 +14,17 @@
   ],
   "primary_engine": "Signal",
   "secondary_engine": "Velocity",
+  "primary_evidence_count": 17,
+  "evidence_counts": {
+    "signal": 17,
+    "velocity": 2,
+    "horizon": 3,
+    "fidelity": 8,
+    "flex": 15,
+    "leverage": 7,
+    "framework": 2,
+    "vector": 1
+  },
   "natural_advantage": "Reads candidate hesitation and hiring-manager subtext early.",
   "natural_risk": "Can over-adapt to keep both sides comfortable, delaying hard truth.",
   "energy_source": "Human nuance, matching people to context, and repairing misalignment.",

@@ -4,16 +4,27 @@
   "intended_role": "Compliance officer for a regulated financial services firm",
   "profile_id": "mm-20260529-cmp3j6z7",
   "top_3_dimensions": [
-    "Leverage 2.00",
     "Fidelity 0.81",
-    "Framework 0.77"
+    "Framework 0.77",
+    "Vector 0.50"
   ],
   "bottom_2_dimensions": [
-    "Flex 0.17",
-    "Velocity -0.50"
+    "Velocity -0.50",
+    "Leverage 0.00"
   ],
-  "primary_engine": "Leverage",
-  "secondary_engine": "Fidelity",
+  "primary_engine": "Fidelity",
+  "secondary_engine": "Framework",
+  "primary_evidence_count": 17,
+  "evidence_counts": {
+    "fidelity": 17,
+    "framework": 13,
+    "vector": 1,
+    "signal": 5,
+    "horizon": 8,
+    "flex": 6,
+    "velocity": 4,
+    "leverage": 0
+  },
   "natural_advantage": "Protects the organization by making risk visible before it becomes expensive.",
   "natural_risk": "Can become the bottleneck when business teams need faster risk-tiered guidance.",
   "energy_source": "Clear standards, audit trails, and preventing avoidable exposure.",
@@ -21,7 +32,7 @@
   "best_environment": "Regulated setting where compliance has authority and business partnership.",
   "worst_environment": "Growth culture that treats controls as a late-stage obstacle.",
   "initial_role_fit_judgment": "Strong compliance fit; best when policy guidance is tiered by risk severity.",
-  "scoring_notes": "Top dimensions leverage, fidelity, framework broadly match intended role signal; bottom dimensions flex, velocity create plausible fatigue/risk.",
+  "scoring_notes": "Top dimensions fidelity, framework, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.",
   "role_fit_analysis": {
     "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
     "operator_vs_visionary": "Balanced - Can operate and envision",
@@ -52,16 +63,12 @@
   },
   "rescoring_summary": {
     "source": "rescoring_v1",
-    "primary_dimension": "leverage",
-    "secondary_dimension": "fidelity",
+    "primary_dimension": "fidelity",
+    "secondary_dimension": "framework",
     "ranked_dimensions": [
       {
-        "dimension": "leverage",
-        "score": 2
-      },
-      {
         "dimension": "fidelity",
-        "score": 0.79
+        "score": 0.81
       },
       {
         "dimension": "framework",
@@ -69,7 +76,7 @@
       },
       {
         "dimension": "vector",
-        "score": 0.49
+        "score": 0.41
       },
       {
         "dimension": "signal",
@@ -77,15 +84,19 @@
       },
       {
         "dimension": "horizon",
-        "score": 0.25
+        "score": 0.37
       },
       {
         "dimension": "flex",
-        "score": 0.04
+        "score": 0.09
       },
       {
         "dimension": "velocity",
         "score": -0.48
+      },
+      {
+        "dimension": "leverage",
+        "score": 0
       }
     ],
     "render_ready_keys": [
@@ -168,30 +179,30 @@
     "five_futures": {
       "futures": [
         {
-          "title": "Continued leverage Dominance",
+          "title": "Precision Authority",
           "likelihood": "likely",
-          "trajectory": "Default pattern intensifies. Positions influence strategically; thinks about who needs to agree becomes more pronounced.",
-          "organization_experiences": "Organization becomes optimized around operator's primary dimension. Vulnerable to its blind spots.",
+          "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+          "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
           "profile_specific": true
         },
         {
-          "title": "leverage Amplified",
+          "title": "fidelity Amplified",
           "likelihood": "possible",
-          "trajectory": "Strength fully deployed. leverage becomes organizational competitive advantage.",
-          "organization_experiences": "Organization becomes advantage carrier. leverage strength compounds into competitive edge.",
+          "trajectory": "Strength fully deployed. fidelity becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. fidelity strength compounds into competitive edge.",
           "profile_specific": true
         },
         {
-          "title": "leverage Misapplied",
+          "title": "Detail Overwhelm",
           "likelihood": "possible",
-          "trajectory": "Strength becomes liability under pressure. Under strain, leverage-focus increases; relationship-focus drops creates organizational friction.",
+          "trajectory": "Fidelity applied to everything. Organization drowns in specs, processes, reviews. Velocity collapses.",
           "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
           "profile_specific": true
         },
         {
-          "title": "Operator Isolation",
+          "title": "Quality Standards Resentment",
           "likelihood": "likely",
-          "trajectory": "Operator becomes lone authority. Team stops challenging. Information stops flowing. Organization becomes fragile.",
+          "trajectory": "Fidelity expectations become unreasonable. Team feels constantly judged. Talent leaves. Morale drops.",
           "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
           "profile_specific": true
         },
@@ -205,10 +216,10 @@
       ],
       "summary": "Five trajectory scenarios emerge from your current operating pattern.",
       "most_likely": {
-        "title": "Continued leverage Dominance",
+        "title": "Precision Authority",
         "likelihood": "likely",
-        "trajectory": "Default pattern intensifies. Positions influence strategically; thinks about who needs to agree becomes more pronounced.",
-        "organization_experiences": "Organization becomes optimized around operator's primary dimension. Vulnerable to its blind spots.",
+        "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+        "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
         "profile_specific": true
       }
     },

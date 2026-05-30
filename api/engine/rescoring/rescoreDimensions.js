@@ -27,7 +27,7 @@ export function rescoreDimensions(canonical) {
     return getEmptyRescoring();
   }
 
-  const baseline = canonical.ranked_dimensions || [];
+  const baseline = normalizeBaselineEvidence(canonical.ranked_dimensions || []);
   
   // Step 1: Extract evidence from entire canonical
   const evidence = extractEvidence(canonical);
@@ -139,6 +139,35 @@ function extractEvidence(canonical) {
 }
 
 /**
+ * Prevent missing-evidence placeholders from becoming behavioral dominance.
+ */
+function normalizeBaselineEvidence(dimensions) {
+  return (dimensions || [])
+    .map((dim) => {
+      const evidenceCount = dim.evidence_count ?? dim.contributing_answer_count ?? dim.contributing_answers?.length ?? null;
+      const hasZeroEvidence = evidenceCount === 0;
+      const score = hasZeroEvidence ? 0 : (dim.score ?? 0);
+      return {
+        ...dim,
+        score,
+        evidence_count: evidenceCount ?? dim.evidence_count,
+        contributing_answer_count: evidenceCount ?? dim.contributing_answer_count
+      };
+    })
+    .sort((a, b) => {
+      const aEvidence = a.evidence_count ?? a.contributing_answer_count;
+      const bEvidence = b.evidence_count ?? b.contributing_answer_count;
+      if (aEvidence === 0 && bEvidence > 0) return 1;
+      if (bEvidence === 0 && aEvidence > 0) return -1;
+      return (b.score ?? 0) - (a.score ?? 0);
+    })
+    .map((dim, index) => ({
+      ...dim,
+      rank: index + 1
+    }));
+}
+
+/**
  * Extract written signals (unchanged from V1)
  */
 function extractWrittenSignals(answers) {
@@ -153,10 +182,14 @@ function extractWrittenSignals(answers) {
   const writtenQuestions = [2, 14, 17, 20, 22, 24, 25, 26, 27, 28];
   
   writtenQuestions.forEach(q => {
-    const answer = answers[`Q${q}`] || '';
+    const answer = answers[`Q${q}`] || answers[`q${q}`] || '';
     if (!answer) return;
     
-    const text = String(answer).toLowerCase();
+    const text = String(
+      typeof answer === 'object'
+        ? answer.answer_text || answer.text || answer.value || ''
+        : answer
+    ).toLowerCase();
     if (/move|go|now|decide|act|push|drive|command/i.test(text)) signals.directiveness_words++;
     if (/precise|exact|right|careful|detail|check|verify|consider/i.test(text)) signals.precision_words++;
     if (/fast|quick|speed|energy|momentum|pace|accelerate/i.test(text)) signals.momentum_words++;
@@ -330,6 +363,8 @@ function calculateRescoredDimensionsV2(baseline, dominance, suppressionMap, evid
     return {
       dimension: dim.dimension,
       baseline_score: dim.score,
+      evidence_count: dim.evidence_count ?? dim.contributing_answer_count ?? null,
+      contributing_answer_count: dim.contributing_answer_count ?? dim.evidence_count ?? null,
       rescored_score: Math.round(rescored_score * 100) / 100,
       rank: idx + 1,
       delta: Math.round((rescored_score - dim.score) * 100) / 100,
@@ -375,6 +410,10 @@ function getConflictingTensions(dimension, baseline) {
  * PHASE 2: Calculate confidence with profile shape awareness
  */
 function calculateConfidenceV2(dimension, evidence, dominance, profileShape) {
+  const baselineDimension = (evidence.baseline_scores || []).find(d => d.dimension === dimension);
+  const evidenceCount = baselineDimension?.evidence_count ?? baselineDimension?.contributing_answer_count;
+  if (evidenceCount === 0) return 0.2;
+
   let confidence = 0.75;
   
   // Flat profiles: lower confidence in any rescoring
@@ -660,6 +699,8 @@ function assembleRescoringV2(rescored, dominance, spread, gravity, tensions, amp
       dimension: d.dimension,
       score: d.rescored_score,
       baseline_score: d.baseline_score,
+      evidence_count: d.evidence_count,
+      contributing_answer_count: d.contributing_answer_count,
       delta: d.delta,
       rank: idx + 1,
       confidence: d.confidence

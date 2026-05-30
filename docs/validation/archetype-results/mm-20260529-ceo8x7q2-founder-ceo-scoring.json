@@ -14,42 +14,136 @@
     {
       "dimension": "vector",
       "score": 0.89,
-      "rank": 1
+      "rank": 1,
+      "confidence": 0.75,
+      "evidence_count": 16,
+      "contributing_answer_count": 16,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        19,
+        21,
+        23
+      ]
     },
     {
       "dimension": "velocity",
       "score": 0.73,
-      "rank": 2
+      "rank": 2,
+      "confidence": 0.75,
+      "evidence_count": 13,
+      "contributing_answer_count": 13,
+      "contributing_answers": [
+        1,
+        3,
+        5,
+        7,
+        8,
+        10,
+        11,
+        12,
+        13,
+        15,
+        16,
+        18,
+        23
+      ]
     },
     {
       "dimension": "fidelity",
       "score": 0.67,
-      "rank": 3
+      "rank": 3,
+      "confidence": 0.65,
+      "evidence_count": 3,
+      "contributing_answer_count": 3,
+      "contributing_answers": [
+        4,
+        9,
+        19
+      ]
     },
     {
       "dimension": "signal",
       "score": 0.5,
-      "rank": 4
+      "rank": 4,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "contributing_answers": [
+        19
+      ]
     },
     {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5
+      "rank": 5,
+      "confidence": 0.65,
+      "evidence_count": 4,
+      "contributing_answer_count": 4,
+      "contributing_answers": [
+        7,
+        11,
+        12,
+        13
+      ]
     },
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6
+      "rank": 6,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        4,
+        9,
+        15,
+        16,
+        21
+      ]
     },
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7
+      "rank": 7,
+      "confidence": 0.75,
+      "evidence_count": 5,
+      "contributing_answer_count": 5,
+      "contributing_answers": [
+        1,
+        4,
+        6,
+        9,
+        10
+      ]
     },
     {
       "dimension": "flex",
       "score": -0.5,
-      "rank": 8
+      "rank": 8,
+      "confidence": 0.75,
+      "evidence_count": 7,
+      "contributing_answer_count": 7,
+      "contributing_answers": [
+        3,
+        5,
+        6,
+        8,
+        18,
+        21,
+        23
+      ]
     }
   ],
   "top_systems": {
