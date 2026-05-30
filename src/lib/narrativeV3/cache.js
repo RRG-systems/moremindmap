@@ -12,7 +12,7 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 4;  // Bumped to 4 when structured teamExperience added
+const CACHE_VERSION = 5;  // Bumped to 5 when Executive Summary became packet-descended
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {

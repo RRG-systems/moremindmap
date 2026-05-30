@@ -21,6 +21,7 @@ import * as prompts from './sectionPrompts.js';
 import { callGPT55, validateGrounding } from './openaiIntegration.js';
 import { getCachedNarrative, cacheNarrative } from './cache.js';
 import { getCognitionContext } from './getCognitionContext.js';
+import { buildExecutiveIntelligencePacket } from '../behavioralDNAInterpretation.js';
 
 /**
  * Main entry point for V3 narrative expansion.
@@ -64,7 +65,6 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
 
   const sections = [
     'profileDNA',
-    'executiveSummary',
     'communicationStyle',
     'hiddenContradictions',
     'strategicCeiling',
@@ -73,6 +73,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'teamExperience',
     'facilitatorNotes',
     'fiveFutures',
+    'executiveSummary',
   ];
   const cognitionAwareSections = new Set([
     'profileDNA',
@@ -102,9 +103,21 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let gptError = null;
 
   for (const section of sections) {
-    const prompt = cognitionAwareSections.has(section)
-      ? getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext)
-      : getPromptBuilder(section)(unified, interpreted, previousSections);
+    let prompt;
+    if (section === 'executiveSummary') {
+      const executiveIntelligence = buildExecutiveIntelligencePacket(canonical, cognitionContext, previousSections);
+      prompt = getPromptBuilder(section)(
+        unified,
+        interpreted,
+        previousSections,
+        cognitionContext,
+        executiveIntelligence
+      );
+    } else if (cognitionAwareSections.has(section)) {
+      prompt = getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext);
+    } else {
+      prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
+    }
 
     let rendering;
     let sectionRenderSource = 'fallback_local';
@@ -259,20 +272,25 @@ async function localRendering(prompt, section, interpreted) {
   let body = '';
   let microScenario = buildMicroScenario(interpreted, section);
   let keyWarning = '';
+  const sentence = (value, fallback) => String(value || fallback || '')
+    .trim()
+    .replace(/[.!?]+$/g, '');
 
   if (section === 'executiveSummary') {
-    const primary = interpreted.primarySystem.description || "high on primary";
-    const secondary = interpreted.secondarySystem.description || "high on secondary";
-    const primaryOp = interpreted.primarySystem.operating || "enters with direction";
+    const packet = prompt.executiveIntelligence || prompt.canonical?.executive_intelligence || {};
+    const dna = packet.behavioral_dna || {};
 
     body =
-      `Moves with directional conviction. ${primaryOp}. ` +
-      `Coupled with ${secondary}, maintains strategic scope. ` +
-      `Immediate impact: executes faster than peers, builds momentum. ` +
-      `Medium-term: precision details compound into problems. ` +
-      `Under acute load: doubles down on speed. Works briefly. Then fails catastrophically.`;
+      `${sentence(packet.value_created, 'Creates value through the primary operating engine')}. ` +
+      `The limiting pattern: ${sentence(packet.limiting_pattern, 'the role asks for behavior outside the supported pattern')}. ` +
+      `Pressure pattern: ${sentence(packet.pressure_shift, 'the primary engine intensifies first')}. ` +
+      `Best fit: ${sentence(packet.natural_role_fit, 'roles aligned to the evidence-supported engine')}. ` +
+      `Exhausting fit: ${sentence(packet.exhausting_role_fit, 'environments that block the primary engine')}. ` +
+      `Highest leverage: ${sentence(packet.highest_leverage_insight, 'design the role around the supported operating weight, not the aspirational one')}.`;
 
-    keyWarning = "Missing the last 25% of information doesn't feel risky until month 4.";
+    keyWarning = dna.wrong_seat_risk
+      ? `Wrong-seat risk: ${dna.wrong_seat_risk}.`
+      : 'Role fit should follow evidence-supported operating weight, not title expectations.';
   }
 
   if (section === 'communicationStyle') {

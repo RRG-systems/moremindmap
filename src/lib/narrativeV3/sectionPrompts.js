@@ -23,6 +23,12 @@ function buildCompactCognitionBlock(cognitionContext) {
         dimension: dimension.dimension,
         score: dimension.display_score ?? dimension.gpt_rescored_score ?? dimension.score,
         baseline_score: dimension.baseline_score ?? dimension.v1_score,
+        support_adjusted_score: dimension.support_adjusted_score,
+        evidence_count: dimension.evidence_count ?? dimension.contributing_answer_count,
+        contributing_answer_count: dimension.contributing_answer_count ?? dimension.evidence_count,
+        evidence_band: dimension.evidence_band,
+        intensity_band: dimension.intensity_band,
+        distance_from_neutral: dimension.distance_from_neutral,
         role: dimension.role,
         confidence: dimension.confidence,
         rationale: dimension.rationale,
@@ -54,7 +60,7 @@ function buildCompactCognitionBlock(cognitionContext) {
   };
 }
 
-export function buildExecutiveSummaryPrompt(unified, interpreted, previousSections, cognitionContext = null) {
+export function buildExecutiveSummaryPrompt(unified, interpreted, previousSections, cognitionContext = null, executiveIntelligence = null) {
   return {
     systemRule: `You are rendering verified behavioral intelligence based on assessment data.
 DO NOT invent traits, diagnoses, or personal conclusions.
@@ -75,31 +81,47 @@ Ground every statement to the canonical data provided.`,
       scalingConstraint: unified.scaling_constraint,
       intake_answers: unified._raw.intake_answers,
       cognition: buildCompactCognitionBlock(cognitionContext),
+      executive_intelligence: executiveIntelligence,
+      downstream_synthesis: {
+        profileDNA: previousSections.profileDNA || null,
+        hiddenContradictions: previousSections.hiddenContradictions || null,
+        strategicCeiling: previousSections.strategicCeiling || null,
+        recommendedNextStep: previousSections.recommendedNextStep || null,
+        teamExperience: previousSections.teamExperience || null,
+        facilitatorNotes: previousSections.facilitatorNotes || null,
+        fiveFutures: previousSections.fiveFutures || null,
+      },
     },
 
     instruction: `Generate a compressed executive summary (max 150 words) as JSON.
 
-Generate a compressed executive summary (max 150 words) as JSON.
+This section must descend from canonical.executive_intelligence.
 
-PRIORITY: Emotional state and action pattern from unified interpretation DOMINATE.
-When unified says stuck/fearful/avoidant/frozen, that IS the reality. Build narrative FROM that truth.
+Answer these six questions in one integrated briefing:
+1. What value does this person create?
+2. What limits them?
+3. What happens under pressure?
+4. What role are they naturally built for?
+5. What role will exhaust them?
+6. What is the highest-leverage insight earned by evidence?
 
-Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings.
+Evidence hierarchy:
+1. Behavioral DNA / canonical.executive_intelligence
+2. Scoring and amplitude: support_adjusted_score, evidence_count, confidence, evidence_band, intensity_band, distance_from_neutral
+3. Written responses
+4. Role and company context
+5. Downstream synthesis from already-generated sections
+6. Emotion only if directly evidenced
+
+Do NOT make emotional state dominate unless the supplied evidence says it changes workplace behavior.
+Do NOT use generic Command/operator language.
 Do NOT use: "strength", "operates", "tendency", "has a", "outpaces", "conviction"
-DO use: emotional truth + behavioral consequence
 
-Structure:
-- Opening: what's actually happening (emotional state first, not quality)
-- Internal reality: what's true internally per unified (anxiety despite calm, stuck despite intelligence)
-- Behavioral pattern: action or avoidance pattern from unified (paralysis, withdrawal, etc)
-- Team impact: how this affects others
-- Honest assessment: no advantage narrative if evidence says stuck/fearful
-
-READ unified.emotional_state, unified.action_or_avoidance_pattern, unified.contradiction_map FIRST.
-Let THOSE dominate section output.
 If canonical.cognition.source is "gpt", use cognition as the strongest behavioral topology layer.
 Use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to interpret operating weight.
-Dimensions are structure only. Evidence is truth.`,
+Dimensions are structure only. Evidence is truth.
+
+Format: Asymmetrical prose. Mix short and longer sentences. Felt like you sat in meetings.`,
 
     format: JSON.stringify({
       section: "executiveSummary",
