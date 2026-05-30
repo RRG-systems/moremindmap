@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-accountant-20260529",
+  "profile_id": "mm-20260529-acc2f9d6",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Accountant",
+  "intended_role": "Senior accountant managing monthly close and audit support",
+  "person_name": "Nora Bell",
+  "email": "nora.bell.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Nora Bell",
+      "email": "nora.bell.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "Summit Ridge Holdings",
+      "role_title": "Senior accountant managing monthly close and audit support",
+      "department": "Accountant",
+      "industry": "Finance",
+      "direct_reports_count": 2,
+      "years_in_current_role": 3,
+      "years_in_industry": 7
+    },
+    "contextual_signals": {
+      "best_role_ever": "Stable finance environment with clear close calendar and respect for controls.",
+      "worst_role_ever": "Chaotic growth setting where precision is treated as obstruction.",
+      "current_energy_drain": "Last-minute changes, vague ownership, and pressure to approve weak numbers.",
+      "recurring_org_frustration": "May slow movement when imperfect inputs require a pragmatic cutoff.",
+      "relied_on_for": "Protects accuracy, repeatability, and audit readiness.",
+      "misunderstood_for": "May slow movement when imperfect inputs require a pragmatic cutoff.",
+      "unrealized_capacity": "Strong accountant fit; risk rises in roles demanding constant ambiguous tradeoffs."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I care most about stability, health, and being dependable to the people who count on me. In work I want to be trusted because the details hold up. A meaningful life would feel calm enough that I can do careful work and still have energy for family."
+    },
+    "q3": {
+      "choice": "A"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "C"
+    },
+    "q6": {
+      "choice": "3"
+    },
+    "q7": {
+      "choice": "E"
+    },
+    "q8": {
+      "choice": "C"
+    },
+    "q9": {
+      "choice": "A"
+    },
+    "q10": {
+      "choice": "D"
+    },
+    "q11": {
+      "choice": "D"
+    },
+    "q12": {
+      "choice": "3"
+    },
+    "q13": {
+      "choice": "E"
+    },
+    "q14": {
+      "text": "During close a department submitted expenses late and the first version did not tie out. I stopped the process, documented the mismatch, and asked for support before posting. The timeline was uncomfortable, but the correction prevented a larger audit issue."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "B"
+    },
+    "q17": {
+      "text": "People would say I get quieter and more exact when expectations rise. I check the source instead of guessing. Sometimes that can look like hesitation, but I am trying to prevent avoidable errors."
+    },
+    "q18": {
+      "choice": "3"
+    },
+    "q19": {
+      "choice": "A"
+    },
+    "q20": {
+      "text": "I had to approve an accrual with incomplete backup near deadline. I used the best historical comparison, marked the assumption, and followed up the next day. I did not love it, but I knew the decision trail was visible."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 6.5 as a leader. I am steady and reliable, but I do not always push people hard enough when their missing detail affects the whole close."
+    },
+    "q23": {
+      "choice": "C"
+    },
+    "q24": {
+      "text": "When momentum stalls I look for the missing fact or broken handoff. I get frustrated by vague requests and people treating controls as optional. I avoid confrontation longer than I should if I can solve the problem myself."
+    },
+    "q25": {
+      "text": "I restate the detail and show the source. I try not to make it personal; I want the record to be clear."
+    },
+    "q26": {
+      "text": "I naturally become the verifier and process keeper. Tension appears when others want speed but the numbers are not ready."
+    },
+    "q27": {
+      "text": "I am building financial independence and a reputation for being precise. I value reliability, fairness, and clean accountability."
+    },
+    "q28": {
+      "text": "Calendars, checklists, reconciliations, and documented controls organize my work. Future strain appears when growth adds transactions faster than the close process adapts."
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-project-manager-20260529",
+  "profile_id": "mm-20260529-pjm8d2x5",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Project Manager",
+  "intended_role": "Cross-functional project manager for implementation programs",
+  "person_name": "Caleb Ruiz",
+  "email": "caleb.ruiz.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Caleb Ruiz",
+      "email": "caleb.ruiz.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "BridgeWorks Implementation",
+      "role_title": "Cross-functional project manager for implementation programs",
+      "department": "Project Manager",
+      "industry": "Implementation services",
+      "direct_reports_count": 0,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Matrix environment where project authority is respected and decisions have owners.",
+      "worst_role_ever": "Ambiguous organization that expects coordination without authority.",
+      "current_energy_drain": "Stakeholders who agree in meetings and miss commitments afterward.",
+      "recurring_org_frustration": "Can get trapped carrying coordination debt instead of forcing ownership decisions.",
+      "relied_on_for": "Keeps cross-functional work moving by clarifying ownership and surfacing slippage early.",
+      "misunderstood_for": "Can get trapped carrying coordination debt instead of forcing ownership decisions.",
+      "unrealized_capacity": "Strong project manager fit; needs escalation rights to avoid becoming the buffer."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I want stability, progress, and a career where people trust me to make complicated work feel manageable. I care about relationships but also about commitments meaning something. Long term I want to lead bigger programs without becoming the person who absorbs every miss."
+    },
+    "q3": {
+      "choice": "D"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "A"
+    },
+    "q6": {
+      "choice": "3"
+    },
+    "q7": {
+      "choice": "D"
+    },
+    "q8": {
+      "choice": "D"
+    },
+    "q9": {
+      "choice": "A"
+    },
+    "q10": {
+      "choice": "D"
+    },
+    "q11": {
+      "choice": "A"
+    },
+    "q12": {
+      "choice": "3"
+    },
+    "q13": {
+      "choice": "C"
+    },
+    "q14": {
+      "text": "A launch milestone slipped because two teams assumed the other owned a dependency. I rebuilt the timeline, named the owner, and added a dependency review to the weekly meeting. The miss showed that agreement without ownership is not enough."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "B"
+    },
+    "q17": {
+      "text": "People would say I become organized and persistent under pressure. I follow up, clarify, and make the next step visible. The weakness is that I may carry too much coordination myself before escalating."
+    },
+    "q18": {
+      "choice": "2"
+    },
+    "q19": {
+      "choice": "A"
+    },
+    "q20": {
+      "text": "I had to make a schedule call before engineering had final estimates. I created a range, identified the risk, and communicated the decision to stakeholders. Afterward I was glad the uncertainty was explicit instead of hidden."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 7. I create clarity and keep people aligned, but I need to be firmer sooner when someone misses an owner commitment."
+    },
+    "q23": {
+      "choice": "C"
+    },
+    "q24": {
+      "text": "When momentum stalls I find the stuck dependency and ask who owns the next move. I get frustrated by vague agreement and quiet misses. I avoid escalating too early because I want teams to solve things collaboratively."
+    },
+    "q25": {
+      "text": "I restate the goal and the agreed next step. I try to clarify without making the person feel blamed."
+    },
+    "q26": {
+      "text": "I naturally become the coordinator, translator, and progress keeper. Tension appears when I am accountable for delivery but do not control the functional resources."
+    },
+    "q27": {
+      "text": "I am building a career around trusted execution and useful leadership. I value clarity, reliability, and respectful accountability."
+    },
+    "q28": {
+      "text": "Project plans, RAID logs, meeting notes, and dependency trackers keep work organized. Future strain appears if program complexity grows without stronger decision rights."
+    }
+  }
+}

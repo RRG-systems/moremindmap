@@ -1,0 +1,250 @@
+{
+  "archetype": "Compliance Officer",
+  "synthetic_person_name": "Evelyn Park",
+  "intended_role": "Compliance officer for a regulated financial services firm",
+  "profile_id": "mm-20260529-cmp3j6z7",
+  "top_3_dimensions": [
+    "Leverage 2.00",
+    "Fidelity 0.81",
+    "Framework 0.77"
+  ],
+  "bottom_2_dimensions": [
+    "Flex 0.17",
+    "Velocity -0.50"
+  ],
+  "primary_engine": "Leverage",
+  "secondary_engine": "Fidelity",
+  "natural_advantage": "Protects the organization by making risk visible before it becomes expensive.",
+  "natural_risk": "Can become the bottleneck when business teams need faster risk-tiered guidance.",
+  "energy_source": "Clear standards, audit trails, and preventing avoidable exposure.",
+  "fatigue_source": "Pressure to approve exceptions without evidence.",
+  "best_environment": "Regulated setting where compliance has authority and business partnership.",
+  "worst_environment": "Growth culture that treats controls as a late-stage obstacle.",
+  "initial_role_fit_judgment": "Strong compliance fit; best when policy guidance is tiered by risk severity.",
+  "scoring_notes": "Top dimensions leverage, fidelity, framework broadly match intended role signal; bottom dimensions flex, velocity create plausible fatigue/risk.",
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "High-touch client relationships",
+      "Consensus-required team cultures"
+    ],
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  },
+  "rescoring_summary": {
+    "source": "rescoring_v1",
+    "primary_dimension": "leverage",
+    "secondary_dimension": "fidelity",
+    "ranked_dimensions": [
+      {
+        "dimension": "leverage",
+        "score": 2
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.79
+      },
+      {
+        "dimension": "framework",
+        "score": 0.75
+      },
+      {
+        "dimension": "vector",
+        "score": 0.49
+      },
+      {
+        "dimension": "signal",
+        "score": 0.39
+      },
+      {
+        "dimension": "horizon",
+        "score": 0.25
+      },
+      {
+        "dimension": "flex",
+        "score": 0.04
+      },
+      {
+        "dimension": "velocity",
+        "score": -0.48
+      }
+    ],
+    "render_ready_keys": [
+      "dna_summary",
+      "command_clarity",
+      "speed_vs_fidelity",
+      "strategic_leverage",
+      "dominance_flavor",
+      "active_suppression",
+      "profile_intensity"
+    ]
+  },
+  "behavioral_intelligence_keys": [
+    "operatingSystem",
+    "worldExperience",
+    "othersExperience",
+    "pressureMechanics",
+    "contradictions",
+    "scalingConstraint",
+    "decisionArchitecture",
+    "organizationalConsequences",
+    "facilitatorNotes",
+    "fiveFutures",
+    "theOneMove"
+  ],
+  "rendered_profile_snapshot": {
+    "profile_dna": null,
+    "dna_summary": null,
+    "scaling_constraint": {
+      "title": "Scaling Constraint",
+      "confidence": "tier_2_medium",
+      "source_fields": [
+        "infrastructure_maturity",
+        "future_ceiling",
+        "growth_trajectory",
+        "stated_goals"
+      ],
+      "summary": "Scaling constraint not identified.",
+      "current_systems_capacity": {
+        "capacity_description": "unknown",
+        "readiness_level": "unknown",
+        "interpretation": "Current infrastructure: unknown. Readiness: unknown."
+      },
+      "stated_vs_supported": {
+        "stated_growth_target": "",
+        "infrastructure_readiness": "unknown",
+        "gap_exists": true,
+        "interpretation": "Growth + infrastructure aligned."
+      },
+      "ceiling_mechanics": {
+        "primary_constraint": "",
+        "ceiling_description": "",
+        "growth_pattern": "",
+        "interpretation": "Ceiling not yet identified."
+      },
+      "implications": {
+        "without_infrastructure": "Constraint not identified.",
+        "with_infrastructure": "Address . Highest-leverage investment."
+      },
+      "key_signals": [
+        "No constraint identified",
+        "Systems readiness: unknown"
+      ]
+    },
+    "one_move": {
+      "title": "The One Move",
+      "confidence": "tier_3_low",
+      "source_fields": [
+        "infrastructure_maturity",
+        "delegation_resistance",
+        "contradictions",
+        "hidden_risk_patterns"
+      ],
+      "summary": "Highest-leverage intervention.",
+      "the_move": "Reduce load through structure, not faster thinking",
+      "reasoning": "Energy depletion indicated. Load reduction more sustainable than speed.",
+      "timeline": "90 days to shift trajectory. 6-9 months for full organizational shift.",
+      "caution": "Not advice. Highest-leverage intervention based on evidence."
+    },
+    "five_futures": {
+      "futures": [
+        {
+          "title": "Continued leverage Dominance",
+          "likelihood": "likely",
+          "trajectory": "Default pattern intensifies. Positions influence strategically; thinks about who needs to agree becomes more pronounced.",
+          "organization_experiences": "Organization becomes optimized around operator's primary dimension. Vulnerable to its blind spots.",
+          "profile_specific": true
+        },
+        {
+          "title": "leverage Amplified",
+          "likelihood": "possible",
+          "trajectory": "Strength fully deployed. leverage becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. leverage strength compounds into competitive edge.",
+          "profile_specific": true
+        },
+        {
+          "title": "leverage Misapplied",
+          "likelihood": "possible",
+          "trajectory": "Strength becomes liability under pressure. Under strain, leverage-focus increases; relationship-focus drops creates organizational friction.",
+          "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
+          "profile_specific": true
+        },
+        {
+          "title": "Operator Isolation",
+          "likelihood": "likely",
+          "trajectory": "Operator becomes lone authority. Team stops challenging. Information stops flowing. Organization becomes fragile.",
+          "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
+          "profile_specific": true
+        },
+        {
+          "title": "Sustainable Pace",
+          "likelihood": "possible",
+          "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
+          "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
+          "profile_specific": true
+        }
+      ],
+      "summary": "Five trajectory scenarios emerge from your current operating pattern.",
+      "most_likely": {
+        "title": "Continued leverage Dominance",
+        "likelihood": "likely",
+        "trajectory": "Default pattern intensifies. Positions influence strategically; thinks about who needs to agree becomes more pronounced.",
+        "organization_experiences": "Organization becomes optimized around operator's primary dimension. Vulnerable to its blind spots.",
+        "profile_specific": true
+      }
+    },
+    "facilitator_notes": {
+      "title": "Facilitator Notes",
+      "confidence": "tier_3_medium",
+      "source_fields": [
+        "execution_identity",
+        "decision_making_patterns",
+        "delegation_resistance",
+        "infrastructure_maturity",
+        "contradictions"
+      ],
+      "summary": "0 structural guidance notes.",
+      "note_count": 0,
+      "notes": [],
+      "primary_guidance": "Insufficient evidence.",
+      "caution": "Environment design notes, not behavior coaching. Operator function is fixed; organization design is flexible."
+    },
+    "role_fit": {
+      "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+      "operator_vs_visionary": "Balanced - Can operate and envision",
+      "manager_vs_producer": "Producer - Personal production primary",
+      "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+      "executor_vs_strategist": "Balanced executor-strategist",
+      "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+      "natural_roles": [
+        "Needs dimension refinement for specific role fit"
+      ],
+      "friction_roles": [
+        "Executive Leadership",
+        "Client-Facing/Relationship Management",
+        "Process Management",
+        "Strategy/Long-Term Planning",
+        "Startup/High Ambiguity Roles"
+      ]
+    }
+  }
+}

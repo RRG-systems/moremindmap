@@ -1,0 +1,119 @@
+{
+  "profile_id": "mm-20260529-mkc9r4t1",
+  "vector_scores": {
+    "vector": 2,
+    "signal": 0.88,
+    "fidelity": 0.63,
+    "velocity": 0.33,
+    "leverage": 0.5,
+    "flex": 0.78,
+    "framework": -0.5,
+    "horizon": 0.4
+  },
+  "ranked_dimensions": [
+    {
+      "dimension": "vector",
+      "score": 2,
+      "rank": 1
+    },
+    {
+      "dimension": "signal",
+      "score": 0.88,
+      "rank": 2
+    },
+    {
+      "dimension": "flex",
+      "score": 0.78,
+      "rank": 3
+    },
+    {
+      "dimension": "fidelity",
+      "score": 0.63,
+      "rank": 4
+    },
+    {
+      "dimension": "leverage",
+      "score": 0.5,
+      "rank": 5
+    },
+    {
+      "dimension": "horizon",
+      "score": 0.4,
+      "rank": 6
+    },
+    {
+      "dimension": "velocity",
+      "score": 0.33,
+      "rank": 7
+    },
+    {
+      "dimension": "framework",
+      "score": -0.5,
+      "rank": 8
+    }
+  ],
+  "top_systems": {
+    "primary_driver": {
+      "dimension": "vector",
+      "score": 2,
+      "rank": 1,
+      "description": "moderate Command (Vector)",
+      "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
+      "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
+    },
+    "secondary_stabilizer": {
+      "dimension": "signal",
+      "score": 0.88,
+      "rank": 2,
+      "description": "low Relational Awareness (Signal)",
+      "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+      "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
+    },
+    "opposing_pattern_1": {
+      "dimension": "velocity",
+      "score": 0.33,
+      "rank": 7,
+      "description": "low Tempo (Velocity)",
+      "operating_manifestation": "Prefers speed; moves to action quickly; impatient with deliberation",
+      "pressure_manifestation": "Under strain, speed preference increases; detail drops"
+    },
+    "opposing_pattern_2": {
+      "dimension": "framework",
+      "score": -0.5,
+      "rank": 8,
+      "description": "low Structure (Framework)",
+      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
+      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
+    },
+    "dimension_tradeoffs": [],
+    "dimension_synergies": []
+  },
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "High-touch client relationships",
+      "Consensus-required team cultures"
+    ],
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  }
+}

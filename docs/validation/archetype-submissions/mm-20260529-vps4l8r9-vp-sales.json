@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-vp-sales-20260529",
+  "profile_id": "mm-20260529-vps4l8r9",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "VP Sales",
+  "intended_role": "VP Sales leading a regional enterprise sales team",
+  "person_name": "Tessa Grant",
+  "email": "tessa.grant.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Tessa Grant",
+      "email": "tessa.grant.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "Northline Revenue Group",
+      "role_title": "VP Sales leading a regional enterprise sales team",
+      "department": "VP Sales",
+      "industry": "Revenue operations",
+      "direct_reports_count": 12,
+      "years_in_current_role": 4,
+      "years_in_industry": 8
+    },
+    "contextual_signals": {
+      "best_role_ever": "Revenue culture with clear targets, fast feedback, and room to coach in the field.",
+      "worst_role_ever": "Over-processed sales environment where every move is mediated through internal approvals.",
+      "current_energy_drain": "Slow handoffs, excessive documentation, and non-commercial ambiguity.",
+      "recurring_org_frustration": "May over-trust momentum and relationship heat before qualification is fully verified.",
+      "relied_on_for": "Turns human dynamics into forward commercial motion.",
+      "misunderstood_for": "May over-trust momentum and relationship heat before qualification is fully verified.",
+      "unrealized_capacity": "Strong VP Sales fit, with pipeline inspection and deal-quality discipline needed."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "A"
+    },
+    "q2": {
+      "text": "I want my work to create freedom for my family and a team that knows winning can be disciplined, not frantic. I care about income, reputation, and proving that relationships can become real business value. In ten years I want a sales organization that grows leaders, not just quota performers."
+    },
+    "q3": {
+      "choice": "B"
+    },
+    "q4": {
+      "choice": "C"
+    },
+    "q5": {
+      "choice": "B"
+    },
+    "q6": {
+      "choice": "1"
+    },
+    "q7": {
+      "choice": "A"
+    },
+    "q8": {
+      "choice": "B"
+    },
+    "q9": {
+      "choice": "D"
+    },
+    "q10": {
+      "choice": "C"
+    },
+    "q11": {
+      "choice": "B"
+    },
+    "q12": {
+      "choice": "1"
+    },
+    "q13": {
+      "choice": "A"
+    },
+    "q14": {
+      "text": "A large prospect went quiet after a champion left the company. I called the new buyer too quickly and realized later I had not rebuilt trust first. I slowed down, mapped the stakeholders, and rebuilt the opportunity through a different entry point."
+    },
+    "q15": {
+      "choice": "D"
+    },
+    "q16": {
+      "choice": "C"
+    },
+    "q17": {
+      "text": "Under pressure I get direct, energetic, and very focused on the next move. People feel my urgency. The downside is I can make slower teammates feel like they are dragging the whole room."
+    },
+    "q18": {
+      "choice": "4"
+    },
+    "q19": {
+      "choice": "B"
+    },
+    "q20": {
+      "text": "I once advanced a deal stage with incomplete technical confirmation because the buyer energy was strong. It created a scramble later. I learned to separate buyer enthusiasm from deal truth."
+    },
+    "q21": {
+      "choice": "D"
+    },
+    "q22": {
+      "text": "I would rate myself a 7.5. I can motivate and redirect people quickly, but I still have to work on inspection discipline so coaching does not depend too much on instinct."
+    },
+    "q23": {
+      "choice": "D"
+    },
+    "q24": {
+      "text": "When momentum stalls I look for the person with influence and try to change the conversation. I get frustrated by vague ownership and weak follow-up. I avoid sitting with quiet pipeline risk longer than I should because I prefer action."
+    },
+    "q25": {
+      "text": "I usually get on the phone and reset the conversation. I want to hear the concern, but I also want to keep the relationship moving."
+    },
+    "q26": {
+      "text": "I naturally become the closer, coach, and pressure carrier. Tension appears when operations needs more precision than my field read initially provides."
+    },
+    "q27": {
+      "text": "I am trying to build a sales culture where people can win without becoming transactional. I value courage, consistency, and relational leverage."
+    },
+    "q28": {
+      "text": "Forecast calls, deal reviews, and one-on-ones keep work organized. The scaling strain will be quality control: making sure the team does not confuse activity with real progression."
+    }
+  }
+}

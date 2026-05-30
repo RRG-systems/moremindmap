@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-recruiter-20260529",
+  "profile_id": "mm-20260529-rec6n2p4",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Recruiter",
+  "intended_role": "Senior recruiter for healthcare operations roles",
+  "person_name": "Lena Ortiz",
+  "email": "lena.ortiz.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Lena Ortiz",
+      "email": "lena.ortiz.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "BrightPath Talent",
+      "role_title": "Senior recruiter for healthcare operations roles",
+      "department": "Recruiter",
+      "industry": "Talent acquisition",
+      "direct_reports_count": 2,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "People-centered recruiting culture with enough structure to close loops.",
+      "worst_role_ever": "Pure transaction environment measuring only volume and speed.",
+      "current_energy_drain": "Rigid processes that ignore candidate signal and manager reality.",
+      "recurring_org_frustration": "Can over-adapt to keep both sides comfortable, delaying hard truth.",
+      "relied_on_for": "Reads candidate hesitation and hiring-manager subtext early.",
+      "misunderstood_for": "Can over-adapt to keep both sides comfortable, delaying hard truth.",
+      "unrealized_capacity": "Strong recruiting fit, especially when paired with explicit decision thresholds."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I care about building stability for my family and doing work where people feel seen. Career matters because it gives me independence, but I do not want success to turn me into someone who ignores people. Long term I want a reputation for matching people well, not just filling roles."
+    },
+    "q3": {
+      "choice": "D"
+    },
+    "q4": {
+      "choice": "C"
+    },
+    "q5": {
+      "choice": "D"
+    },
+    "q6": {
+      "choice": "2"
+    },
+    "q7": {
+      "choice": "C"
+    },
+    "q8": {
+      "choice": "E"
+    },
+    "q9": {
+      "choice": "A"
+    },
+    "q10": {
+      "choice": "A"
+    },
+    "q11": {
+      "choice": "E"
+    },
+    "q12": {
+      "choice": "2"
+    },
+    "q13": {
+      "choice": "D"
+    },
+    "q14": {
+      "text": "A candidate accepted another offer after I sensed hesitation but did not press it directly. I had tried to keep the conversation comfortable. Afterward I changed my intake calls to ask candidates what would make them walk away."
+    },
+    "q15": {
+      "choice": "C"
+    },
+    "q16": {
+      "choice": "C"
+    },
+    "q17": {
+      "text": "People would say I become observant and careful when pressure rises. I notice tone changes and try to keep everyone steady. Sometimes I spend too much time managing the room instead of naming the decision."
+    },
+    "q18": {
+      "choice": "4"
+    },
+    "q19": {
+      "choice": "B"
+    },
+    "q20": {
+      "text": "I sent a shortlist before I had complete alignment from the hiring manager because the role had been open too long. I felt uneasy afterward and my concern was right: one candidate was misleveled. I now clarify must-haves earlier."
+    },
+    "q21": {
+      "choice": "D"
+    },
+    "q22": {
+      "text": "I would rate myself a 7. I lead through trust and calibration, but I can hesitate when a direct correction might disappoint someone."
+    },
+    "q23": {
+      "choice": "C"
+    },
+    "q24": {
+      "text": "When momentum stalls I usually talk to the person who seems least aligned. I get frustrated by people who say yes politely and then disappear. I avoid forcing a decision when I can still sense unresolved concerns."
+    },
+    "q25": {
+      "text": "I ask what landed differently than intended. I would rather repair the interpretation than defend my wording."
+    },
+    "q26": {
+      "text": "I naturally become the interpreter between candidate, manager, and process. Tension appears when the process needs a firm cutoff and I am still reading exceptions."
+    },
+    "q27": {
+      "text": "I want to build a career where people trust my judgment because it is careful and human. I value fairness, stability, and honest fit."
+    },
+    "q28": {
+      "text": "Candidate trackers, call notes, and manager calibration meetings keep me organized. Future strain appears when too many informal signals live in my head instead of the system."
+    }
+  }
+}

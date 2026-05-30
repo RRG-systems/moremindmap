@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-engineer-20260529",
+  "profile_id": "mm-20260529-eng7v5k3",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Engineer",
+  "intended_role": "Senior backend engineer owning infrastructure reliability",
+  "person_name": "Ishan Mehta",
+  "email": "ishan.mehta.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Ishan Mehta",
+      "email": "ishan.mehta.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "CircuitLake AI",
+      "role_title": "Senior backend engineer owning infrastructure reliability",
+      "department": "Engineer",
+      "industry": "Technology",
+      "direct_reports_count": 2,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Engineering culture that values reliability, design review, and explicit tradeoffs.",
+      "worst_role_ever": "Sales-driven fire drill culture with no respect for technical debt.",
+      "current_energy_drain": "Interrupt-driven urgency and vague product pivots without technical context.",
+      "recurring_org_frustration": "Can delay visible progress while protecting architecture from weak shortcuts.",
+      "relied_on_for": "Sees failure modes and designs systems to survive future load.",
+      "misunderstood_for": "Can delay visible progress while protecting architecture from weak shortcuts.",
+      "unrealized_capacity": "Strong engineer fit; leadership fit improves when translation cadence is explicit."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I want work that lets me build things that last and gives my family a stable life. I care less about being visible and more about knowing the system will not fall apart when usage increases. Long term I want technical depth without being trapped in constant firefighting."
+    },
+    "q3": {
+      "choice": "A"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "C"
+    },
+    "q6": {
+      "choice": "3"
+    },
+    "q7": {
+      "choice": "E"
+    },
+    "q8": {
+      "choice": "C"
+    },
+    "q9": {
+      "choice": "C"
+    },
+    "q10": {
+      "choice": "D"
+    },
+    "q11": {
+      "choice": "D"
+    },
+    "q12": {
+      "choice": "3"
+    },
+    "q13": {
+      "choice": "E"
+    },
+    "q14": {
+      "text": "A migration caused unexpected latency because an edge case was missed in planning. I rolled back, traced the failure, and wrote the missing load test. I was frustrated because the shortcut had been visible before launch."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "B"
+    },
+    "q17": {
+      "text": "Under pressure I become quiet, focused, and more skeptical of quick fixes. People may think I am resisting urgency, but I am checking the consequences. I can get blunt if the same risk keeps being ignored."
+    },
+    "q18": {
+      "choice": "3"
+    },
+    "q19": {
+      "choice": "A"
+    },
+    "q20": {
+      "text": "I had to choose a storage approach before every scaling assumption was known. I picked the option with the clearest rollback path and documented the tradeoff. Later I was glad we had not optimized prematurely."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 6 as a leader. I am good at technical judgment and mentoring through specifics, but I need to make my reasoning more accessible earlier."
+    },
+    "q23": {
+      "choice": "B"
+    },
+    "q24": {
+      "text": "When momentum stalls I inspect the constraint and try to separate symptoms from root cause. I get drained by meetings that skip technical reality. I avoid political conversations longer than I should because I would rather fix the system."
+    },
+    "q25": {
+      "text": "I explain the technical reason and show the tradeoff. If I am tired, I can over-explain instead of checking whether the person needs a shorter version."
+    },
+    "q26": {
+      "text": "I naturally become the system designer and risk detector. Tension appears when business urgency treats engineering verification as optional."
+    },
+    "q27": {
+      "text": "I want to build reliable infrastructure and enough career leverage to choose meaningful problems. I value clarity, durability, and intellectual honesty."
+    },
+    "q28": {
+      "text": "Issue trackers, design docs, alerts, and review rituals keep work organized. Future strain appears when product growth creates hidden operational load faster than architecture catches up."
+    }
+  }
+}

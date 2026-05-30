@@ -1,0 +1,154 @@
+{
+  "profile_id": "mm-20260529-rec6n2p4",
+  "rescoring_v1": {
+    "version": "v2",
+    "phase": "threshold_dominance_refinement",
+    "generated_at": "2026-05-30T00:29:33.258Z",
+    "generation_source": "rescoring_engine_v2",
+    "ranked_dimensions": [
+      {
+        "dimension": "signal",
+        "score": 0.96,
+        "baseline_score": 0.96,
+        "delta": 0,
+        "rank": 1,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "velocity",
+        "score": 0.73,
+        "baseline_score": 0.75,
+        "delta": -0.02,
+        "rank": 2,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "horizon",
+        "score": 0.53,
+        "baseline_score": 0.67,
+        "delta": -0.14,
+        "rank": 3,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.61,
+        "baseline_score": 0.63,
+        "delta": -0.02,
+        "rank": 4,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "flex",
+        "score": 0.46,
+        "baseline_score": 0.6,
+        "delta": -0.14,
+        "rank": 5,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "leverage",
+        "score": 0.49,
+        "baseline_score": 0.5,
+        "delta": -0.02,
+        "rank": 6,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "framework",
+        "score": 0,
+        "baseline_score": 0,
+        "delta": 0,
+        "rank": 7,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "vector",
+        "score": -0.48,
+        "baseline_score": -0.5,
+        "delta": 0.02,
+        "rank": 8,
+        "confidence": 0.65
+      }
+    ],
+    "dominance_profile": {
+      "primary_dimension": "signal",
+      "secondary_dimension": "velocity",
+      "dominance_amplitude": 0.96,
+      "spread_type": "balanced",
+      "profile_intensity": "extreme",
+      "threshold_band": "extreme",
+      "threshold_weight": 1.4
+    },
+    "spread_profile": {
+      "flatness_score": 0.91,
+      "polarization_score": 0.5,
+      "dominance_gap": 0.23,
+      "total_spread": 1.44,
+      "variance": 0.18,
+      "balanced_vs_extreme": "balanced",
+      "tension_distribution": "tensioned",
+      "profile_shape": "flat",
+      "profile_shape_confidence": 0.95
+    },
+    "tension_pairs": {
+      "velocity_vs_fidelity": 0.12,
+      "vector_vs_signal": -1.44,
+      "horizon_vs_flex": 0.07,
+      "leverage_vs_flex": 0.03,
+      "active_tensions": [
+        "vector_vs_signal"
+      ],
+      "tension_count": 1
+    },
+    "dominance_gravity": {
+      "strongest_system": "signal",
+      "gravity_strength": 0.96,
+      "downstream_influence": [
+        {
+          "dimension": "fidelity",
+          "correlation": 0.68,
+          "influenced_by_suppression": false
+        },
+        {
+          "dimension": "framework",
+          "correlation": 0.55,
+          "influenced_by_suppression": false
+        }
+      ],
+      "drives_entire_profile": true,
+      "suppression_effects_active": true
+    },
+    "amplitude_metrics": {
+      "highest_score": 0.96,
+      "lowest_score": -0.48,
+      "total_spread": 1.44,
+      "score_variance": 0.18
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.96,
+      "speed_vs_fidelity": 0.12,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "extreme",
+      "active_suppression": true,
+      "profile_intensity": "extreme"
+    },
+    "metadata": {
+      "baseline_hash": "0.96:0.75:0.67:0",
+      "rescoring_timestamp": "2026-05-30T00:29:33.258Z",
+      "rescoring_engine_version": "v2.0.0",
+      "input_canonical_keys": "(full canonical)",
+      "phase_features": [
+        "threshold_gravity",
+        "compensatory_suppression",
+        "flatness_preservation",
+        "tension_amplification",
+        "extremity_differentiation",
+        "render_ready_intelligence"
+      ]
+    }
+  },
+  "rescoring_gpt": null,
+  "gpt_rescoring_status": "skipped_not_enabled"
+}

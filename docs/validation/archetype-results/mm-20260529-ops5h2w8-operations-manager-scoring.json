@@ -1,0 +1,119 @@
+{
+  "profile_id": "mm-20260529-ops5h2w8",
+  "vector_scores": {
+    "vector": 1,
+    "signal": 0.3,
+    "fidelity": 0.73,
+    "velocity": 0.17,
+    "leverage": 0.5,
+    "flex": -0.5,
+    "framework": 0.69,
+    "horizon": 0
+  },
+  "ranked_dimensions": [
+    {
+      "dimension": "vector",
+      "score": 1,
+      "rank": 1
+    },
+    {
+      "dimension": "fidelity",
+      "score": 0.73,
+      "rank": 2
+    },
+    {
+      "dimension": "framework",
+      "score": 0.69,
+      "rank": 3
+    },
+    {
+      "dimension": "leverage",
+      "score": 0.5,
+      "rank": 4
+    },
+    {
+      "dimension": "signal",
+      "score": 0.3,
+      "rank": 5
+    },
+    {
+      "dimension": "velocity",
+      "score": 0.17,
+      "rank": 6
+    },
+    {
+      "dimension": "horizon",
+      "score": 0,
+      "rank": 7
+    },
+    {
+      "dimension": "flex",
+      "score": -0.5,
+      "rank": 8
+    }
+  ],
+  "top_systems": {
+    "primary_driver": {
+      "dimension": "vector",
+      "score": 1,
+      "rank": 1,
+      "description": "low Command (Vector)",
+      "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
+      "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
+    },
+    "secondary_stabilizer": {
+      "dimension": "fidelity",
+      "score": 0.73,
+      "rank": 2,
+      "description": "low Precision (Fidelity)",
+      "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
+      "pressure_manifestation": "Under strain, precision preference increases; can create delays"
+    },
+    "opposing_pattern_1": {
+      "dimension": "horizon",
+      "score": 0,
+      "rank": 7,
+      "description": "low Perspective (Horizon)",
+      "operating_manifestation": "Thinks multi-move ahead; connects current decisions to future states",
+      "pressure_manifestation": "Under strain, strategic perspective may narrow; near-term focus only"
+    },
+    "opposing_pattern_2": {
+      "dimension": "flex",
+      "score": -0.5,
+      "rank": 8,
+      "description": "low Adaptability (Flex)",
+      "operating_manifestation": "Adjusts approach based on context; comfortable with pivot and iteration",
+      "pressure_manifestation": "Under strain, flexibility decreases; retreats to familiar patterns"
+    },
+    "dimension_tradeoffs": [],
+    "dimension_synergies": []
+  },
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "High-touch client relationships",
+      "Consensus-required team cultures"
+    ],
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  }
+}

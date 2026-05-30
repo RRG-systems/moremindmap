@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-compliance-officer-20260529",
+  "profile_id": "mm-20260529-cmp3j6z7",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Compliance Officer",
+  "intended_role": "Compliance officer for a regulated financial services firm",
+  "person_name": "Evelyn Park",
+  "email": "evelyn.park.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Evelyn Park",
+      "email": "evelyn.park.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "HarborStone Capital",
+      "role_title": "Compliance officer for a regulated financial services firm",
+      "department": "Compliance Officer",
+      "industry": "Financial services",
+      "direct_reports_count": 2,
+      "years_in_current_role": 5,
+      "years_in_industry": 9
+    },
+    "contextual_signals": {
+      "best_role_ever": "Regulated setting where compliance has authority and business partnership.",
+      "worst_role_ever": "Growth culture that treats controls as a late-stage obstacle.",
+      "current_energy_drain": "Pressure to approve exceptions without evidence.",
+      "recurring_org_frustration": "Can become the bottleneck when business teams need faster risk-tiered guidance.",
+      "relied_on_for": "Protects the organization by making risk visible before it becomes expensive.",
+      "misunderstood_for": "Can become the bottleneck when business teams need faster risk-tiered guidance.",
+      "unrealized_capacity": "Strong compliance fit; best when policy guidance is tiered by risk severity."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "B"
+    },
+    "q2": {
+      "text": "I care about security, credibility, and doing work that prevents harm before anyone sees it. A meaningful life would have stability for my family and the knowledge that my judgment kept people out of trouble. I am not trying to be flashy; I want to be trustworthy."
+    },
+    "q3": {
+      "choice": "A"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "C"
+    },
+    "q6": {
+      "choice": "3"
+    },
+    "q7": {
+      "choice": "E"
+    },
+    "q8": {
+      "choice": "C"
+    },
+    "q9": {
+      "choice": "B"
+    },
+    "q10": {
+      "choice": "D"
+    },
+    "q11": {
+      "choice": "D"
+    },
+    "q12": {
+      "choice": "3"
+    },
+    "q13": {
+      "choice": "E"
+    },
+    "q14": {
+      "text": "A marketing team wanted to publish a claim that was technically possible but not supportable by documentation. I stopped the approval, explained the exposure, and helped rewrite it. They were annoyed at first, but the revised version passed review cleanly."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "B"
+    },
+    "q17": {
+      "text": "Under pressure I become more careful and more procedural. People may experience me as slowing things down, but I am checking whether the organization can defend the action later."
+    },
+    "q18": {
+      "choice": "3"
+    },
+    "q19": {
+      "choice": "E"
+    },
+    "q20": {
+      "text": "I had to decide whether to allow a client communication with incomplete review notes. I required a narrower version and documented the exception. I felt better knowing the risk had boundaries."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 7. I lead by creating clarity and reducing exposure, but I need to make my guidance easier for commercial teams to act on quickly."
+    },
+    "q23": {
+      "choice": "C"
+    },
+    "q24": {
+      "text": "When momentum stalls I look for the policy, evidence, or missing approval. I get frustrated when people treat risk as paperwork. I avoid softening the message if I think the exposure is real."
+    },
+    "q25": {
+      "text": "I point back to the standard and explain the reason behind it. I try to separate the person from the risk decision."
+    },
+    "q26": {
+      "text": "I naturally become the guardrail and evidence checker. Tension appears when business urgency wants an answer before the control record is ready."
+    },
+    "q27": {
+      "text": "I am building a career based on trust, judgment, and protection. I value accountability, accuracy, and institutional credibility."
+    },
+    "q28": {
+      "text": "Policies, review queues, audit logs, and escalation matrices keep work organized. Future strain appears when business volume creates too many exceptions for manual review."
+    }
+  }
+}

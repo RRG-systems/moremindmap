@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-marketing-creative-20260529",
+  "profile_id": "mm-20260529-mkc9r4t1",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Marketing Creative",
+  "intended_role": "Creative marketing lead for a consumer wellness brand",
+  "person_name": "Ari Vaughn",
+  "email": "ari.vaughn.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Ari Vaughn",
+      "email": "ari.vaughn.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "LumaKind Studio",
+      "role_title": "Creative marketing lead for a consumer wellness brand",
+      "department": "Marketing Creative",
+      "industry": "Consumer marketing",
+      "direct_reports_count": 2,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Creative environment with strategic guardrails and flexible exploration time.",
+      "worst_role_ever": "Process-heavy team that treats creative uncertainty as poor discipline.",
+      "current_energy_drain": "Rigid calendars, over-prescribed briefs, and repetitive approval loops.",
+      "recurring_org_frustration": "Can resist fixed process until deadlines force compression.",
+      "relied_on_for": "Connects audience signal, cultural timing, and campaign angle quickly.",
+      "misunderstood_for": "Can resist fixed process until deadlines force compression.",
+      "unrealized_capacity": "Strong marketing creative fit, with production structure needed near launch."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I want a life with creative freedom, close relationships, and work that feels alive. Money matters because it buys space, but I do not want to trade all originality for security. In the next decade I want to build a body of work people recognize as emotionally true."
+    },
+    "q3": {
+      "choice": "D"
+    },
+    "q4": {
+      "choice": "B"
+    },
+    "q5": {
+      "choice": "E"
+    },
+    "q6": {
+      "choice": "2"
+    },
+    "q7": {
+      "choice": "C"
+    },
+    "q8": {
+      "choice": "B"
+    },
+    "q9": {
+      "choice": "D"
+    },
+    "q10": {
+      "choice": "B"
+    },
+    "q11": {
+      "choice": "C"
+    },
+    "q12": {
+      "choice": "2"
+    },
+    "q13": {
+      "choice": "D"
+    },
+    "q14": {
+      "text": "A campaign concept I loved did not land with the client because the brief had shifted toward a safer audience. I stepped back, found the emotional point they were actually buying, and rebuilt the pitch around that. The final idea was less flashy but more useful."
+    },
+    "q15": {
+      "choice": "C"
+    },
+    "q16": {
+      "choice": "C"
+    },
+    "q17": {
+      "text": "People would say I become energized and scattered under pressure. I can generate options fast and see angles others miss. The downside is I need someone to help pin the strongest idea before time disappears."
+    },
+    "q18": {
+      "choice": "4"
+    },
+    "q19": {
+      "choice": "B"
+    },
+    "q20": {
+      "text": "I chose a creative direction before all audience testing came back because the launch date was fixed. I felt excited and nervous. Later the concept worked, but production had to absorb my late adjustments."
+    },
+    "q21": {
+      "choice": "D"
+    },
+    "q22": {
+      "text": "I would rate myself a 6.5. I can inspire a team around a direction, but I am still learning to turn creative momentum into a clean operating plan."
+    },
+    "q23": {
+      "choice": "D"
+    },
+    "q24": {
+      "text": "When momentum stalls I look for a new angle or a different emotional hook. I get drained by people who reduce the work to checklists too early. I avoid locking the plan until I can feel the idea has enough life."
+    },
+    "q25": {
+      "text": "I usually explain the intention behind the idea and ask what part felt off. Sometimes I keep reframing when the other person just needs a simpler answer."
+    },
+    "q26": {
+      "text": "I naturally become the concept shaper and audience interpreter. Tension appears when the team needs production certainty before the creative signal feels finished."
+    },
+    "q27": {
+      "text": "I am building work that combines taste, usefulness, and emotional intelligence. I value originality, resonance, and freedom."
+    },
+    "q28": {
+      "text": "Mood boards, campaign calendars, and creative reviews keep me loosely organized. Future strain appears when more campaigns run at once and informal taste judgment needs a repeatable system."
+    }
+  }
+}

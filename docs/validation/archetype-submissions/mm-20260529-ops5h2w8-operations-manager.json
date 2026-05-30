@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-operations-manager-20260529",
+  "profile_id": "mm-20260529-ops5h2w8",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Operations Manager",
+  "intended_role": "Operations manager for a multi-site services business",
+  "person_name": "Graham Pierce",
+  "email": "graham.pierce.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Graham Pierce",
+      "email": "graham.pierce.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "FieldStone Services",
+      "role_title": "Operations manager for a multi-site services business",
+      "department": "Operations Manager",
+      "industry": "Field services",
+      "direct_reports_count": 18,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Execution-heavy organization that gives operations authority to standardize.",
+      "worst_role_ever": "Founder-led chaos where every process can be overridden casually.",
+      "current_energy_drain": "Improvisation masquerading as urgency and teams bypassing process.",
+      "recurring_org_frustration": "Can become controlling when local exceptions disrupt the process.",
+      "relied_on_for": "Turns scattered execution into repeatable operating rhythm.",
+      "misunderstood_for": "Can become controlling when local exceptions disrupt the process.",
+      "unrealized_capacity": "Strong operations fit; needs exception-handling design to avoid rigidity."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "B"
+    },
+    "q2": {
+      "text": "I am trying to build a steady career and a team that can run without constant rescue. Family stability matters a lot, and I want work to feel organized enough that people know what good looks like. Long term I want responsibility without chaos."
+    },
+    "q3": {
+      "choice": "C"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "A"
+    },
+    "q6": {
+      "choice": "4"
+    },
+    "q7": {
+      "choice": "A"
+    },
+    "q8": {
+      "choice": "A"
+    },
+    "q9": {
+      "choice": "A"
+    },
+    "q10": {
+      "choice": "C"
+    },
+    "q11": {
+      "choice": "B"
+    },
+    "q12": {
+      "choice": "3"
+    },
+    "q13": {
+      "choice": "C"
+    },
+    "q14": {
+      "text": "A site missed a service window because dispatch changed the plan without updating the field lead. I mapped the breakdown, corrected the handoff, and added a morning exception check. The issue was not effort; it was missing process discipline."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "B"
+    },
+    "q17": {
+      "text": "Under pressure I get structured and direct. People know I will find the weak point in the process. The risk is that I can sound impatient when someone brings me another exception."
+    },
+    "q18": {
+      "choice": "3"
+    },
+    "q19": {
+      "choice": "A"
+    },
+    "q20": {
+      "text": "I had to reroute staff without full information during a weather issue. I made the call based on coverage risk and updated the schedule live. Afterward I documented the decision rules for the next event."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 7. I make work clearer and hold standards, but I need to leave more room for local judgment instead of correcting every deviation."
+    },
+    "q23": {
+      "choice": "A"
+    },
+    "q24": {
+      "text": "When momentum stalls I tighten the process and clarify ownership. I get frustrated by avoidable misses and people solving around the system instead of improving it. I avoid emotional conversations when I think the process answer is obvious."
+    },
+    "q25": {
+      "text": "I explain the process reason and where the handoff broke. I can miss that the other person may need reassurance before correction."
+    },
+    "q26": {
+      "text": "I naturally become the organizer, standard-setter, and execution checker. Tension appears when teams want flexibility but the business needs consistency."
+    },
+    "q27": {
+      "text": "I want to build an operation where people can do good work without guessing. I value reliability, ownership, and practical improvement."
+    },
+    "q28": {
+      "text": "Dashboards, schedules, SOPs, and weekly reviews keep the work organized. Future strain appears when exception volume grows faster than the system for handling it."
+    }
+  }
+}

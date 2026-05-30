@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-front-desk-client-service-20260529",
+  "profile_id": "mm-20260529-fdc1s8m5",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Front Desk / Client Service",
+  "intended_role": "Front desk and client service coordinator in a medical practice",
+  "person_name": "Maya Chen",
+  "email": "maya.chen.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Maya Chen",
+      "email": "maya.chen.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "Oakwell Family Clinic",
+      "role_title": "Front desk and client service coordinator in a medical practice",
+      "department": "Front Desk / Client Service",
+      "industry": "Healthcare",
+      "direct_reports_count": 0,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Service environment with clear escalation rules and humane scheduling.",
+      "worst_role_ever": "High-conflict desk role without authority or manager backup.",
+      "current_energy_drain": "Angry clients, unclear policies, and leaders who change rules midstream.",
+      "recurring_org_frustration": "May absorb frustration personally and defer boundary-setting too long.",
+      "relied_on_for": "Stabilizes clients quickly by reading tone and following reliable service steps.",
+      "misunderstood_for": "May absorb frustration personally and defer boundary-setting too long.",
+      "unrealized_capacity": "Strong client-service fit when escalation boundaries are explicit."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "D"
+    },
+    "q2": {
+      "text": "I care about keeping my family secure and being the kind of person people can rely on. At work I want clients to feel less stressed after interacting with me. A meaningful life would include steady income, good relationships, and not carrying everyone else’s anxiety home."
+    },
+    "q3": {
+      "choice": "D"
+    },
+    "q4": {
+      "choice": "C"
+    },
+    "q5": {
+      "choice": "D"
+    },
+    "q6": {
+      "choice": "2"
+    },
+    "q7": {
+      "choice": "D"
+    },
+    "q8": {
+      "choice": "E"
+    },
+    "q9": {
+      "choice": "A"
+    },
+    "q10": {
+      "choice": "A"
+    },
+    "q11": {
+      "choice": "E"
+    },
+    "q12": {
+      "choice": "2"
+    },
+    "q13": {
+      "choice": "F"
+    },
+    "q14": {
+      "text": "A patient arrived upset because their appointment time had been entered wrong. I listened, found the scheduling history, and worked with the provider to create a same-day option. I also noted where our confirmation script had created confusion."
+    },
+    "q15": {
+      "choice": "A"
+    },
+    "q16": {
+      "choice": "C"
+    },
+    "q17": {
+      "text": "People would say I stay calm and try to make the room feel safe. I notice when someone is about to escalate. The hard part is I sometimes take too much responsibility for problems I did not create."
+    },
+    "q18": {
+      "choice": "2"
+    },
+    "q19": {
+      "choice": "B"
+    },
+    "q20": {
+      "text": "I had to decide whether to interrupt a provider for an upset client without knowing all the clinical context. I chose to escalate because the client was close to leaving. Afterward I felt it was right, but I wanted clearer rules."
+    },
+    "q21": {
+      "choice": "B"
+    },
+    "q22": {
+      "text": "I would rate myself a 6.5. I lead by keeping people steady and informed, but I am still learning to be firmer when a boundary matters."
+    },
+    "q23": {
+      "choice": "C"
+    },
+    "q24": {
+      "text": "When momentum stalls I usually check who is upset or confused first. I get frustrated when policy changes are not communicated and clients blame the front desk. I avoid pushing back on rude people longer than I should."
+    },
+    "q25": {
+      "text": "I apologize for the confusion and then clarify the next step. I try to make the person feel heard before I correct the detail."
+    },
+    "q26": {
+      "text": "I naturally become the stabilizer and translator between clients and the team. Tension appears when I have responsibility for the client experience but not enough authority to fix the issue."
+    },
+    "q27": {
+      "text": "I am building a stable life and a reputation for calm service. I value respect, kindness, and clear expectations."
+    },
+    "q28": {
+      "text": "Checklists, schedules, scripts, and manager escalation keep work organized. Future strain will show up if volume rises without clearer boundaries and staffing."
+    }
+  }
+}

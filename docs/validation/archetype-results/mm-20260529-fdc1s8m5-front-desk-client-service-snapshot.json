@@ -1,0 +1,250 @@
+{
+  "archetype": "Front Desk / Client Service",
+  "synthetic_person_name": "Maya Chen",
+  "intended_role": "Front desk and client service coordinator in a medical practice",
+  "profile_id": "mm-20260529-fdc1s8m5",
+  "top_3_dimensions": [
+    "Signal 0.99",
+    "Fidelity 0.63",
+    "Framework 0.63"
+  ],
+  "bottom_2_dimensions": [
+    "Velocity 0.00",
+    "Vector -0.50"
+  ],
+  "primary_engine": "Signal",
+  "secondary_engine": "Fidelity",
+  "natural_advantage": "Stabilizes clients quickly by reading tone and following reliable service steps.",
+  "natural_risk": "May absorb frustration personally and defer boundary-setting too long.",
+  "energy_source": "Helping people feel handled, clear routines, and visible service recovery.",
+  "fatigue_source": "Angry clients, unclear policies, and leaders who change rules midstream.",
+  "best_environment": "Service environment with clear escalation rules and humane scheduling.",
+  "worst_environment": "High-conflict desk role without authority or manager backup.",
+  "initial_role_fit_judgment": "Strong client-service fit when escalation boundaries are explicit.",
+  "scoring_notes": "Top dimensions signal, fidelity, framework broadly match intended role signal; bottom dimensions velocity, vector create plausible fatigue/risk.",
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "High-touch client relationships",
+      "Consensus-required team cultures"
+    ],
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  },
+  "rescoring_summary": {
+    "source": "rescoring_v1",
+    "primary_dimension": "signal",
+    "secondary_dimension": "fidelity",
+    "ranked_dimensions": [
+      {
+        "dimension": "signal",
+        "score": 0.98
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.61
+      },
+      {
+        "dimension": "framework",
+        "score": 0.61
+      },
+      {
+        "dimension": "flex",
+        "score": 0.44
+      },
+      {
+        "dimension": "leverage",
+        "score": 0.49
+      },
+      {
+        "dimension": "horizon",
+        "score": 0.2
+      },
+      {
+        "dimension": "velocity",
+        "score": 0
+      },
+      {
+        "dimension": "vector",
+        "score": -0.48
+      }
+    ],
+    "render_ready_keys": [
+      "dna_summary",
+      "command_clarity",
+      "speed_vs_fidelity",
+      "strategic_leverage",
+      "dominance_flavor",
+      "active_suppression",
+      "profile_intensity"
+    ]
+  },
+  "behavioral_intelligence_keys": [
+    "operatingSystem",
+    "worldExperience",
+    "othersExperience",
+    "pressureMechanics",
+    "contradictions",
+    "scalingConstraint",
+    "decisionArchitecture",
+    "organizationalConsequences",
+    "facilitatorNotes",
+    "fiveFutures",
+    "theOneMove"
+  ],
+  "rendered_profile_snapshot": {
+    "profile_dna": null,
+    "dna_summary": null,
+    "scaling_constraint": {
+      "title": "Scaling Constraint",
+      "confidence": "tier_2_medium",
+      "source_fields": [
+        "infrastructure_maturity",
+        "future_ceiling",
+        "growth_trajectory",
+        "stated_goals"
+      ],
+      "summary": "Scaling constraint not identified.",
+      "current_systems_capacity": {
+        "capacity_description": "unknown",
+        "readiness_level": "unknown",
+        "interpretation": "Current infrastructure: unknown. Readiness: unknown."
+      },
+      "stated_vs_supported": {
+        "stated_growth_target": "",
+        "infrastructure_readiness": "unknown",
+        "gap_exists": true,
+        "interpretation": "Growth + infrastructure aligned."
+      },
+      "ceiling_mechanics": {
+        "primary_constraint": "",
+        "ceiling_description": "",
+        "growth_pattern": "",
+        "interpretation": "Ceiling not yet identified."
+      },
+      "implications": {
+        "without_infrastructure": "Constraint not identified.",
+        "with_infrastructure": "Address . Highest-leverage investment."
+      },
+      "key_signals": [
+        "No constraint identified",
+        "Systems readiness: unknown"
+      ]
+    },
+    "one_move": {
+      "title": "The One Move",
+      "confidence": "tier_3_low",
+      "source_fields": [
+        "infrastructure_maturity",
+        "delegation_resistance",
+        "contradictions",
+        "hidden_risk_patterns"
+      ],
+      "summary": "Highest-leverage intervention.",
+      "the_move": "Reduce load through structure, not faster thinking",
+      "reasoning": "Energy depletion indicated. Load reduction more sustainable than speed.",
+      "timeline": "90 days to shift trajectory. 6-9 months for full organizational shift.",
+      "caution": "Not advice. Highest-leverage intervention based on evidence."
+    },
+    "five_futures": {
+      "futures": [
+        {
+          "title": "Perceptive Authority",
+          "likelihood": "likely",
+          "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+          "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
+          "profile_specific": true
+        },
+        {
+          "title": "signal Amplified",
+          "likelihood": "possible",
+          "trajectory": "Strength fully deployed. signal becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. signal strength compounds into competitive edge.",
+          "profile_specific": true
+        },
+        {
+          "title": "Information Gatekeeping",
+          "likelihood": "possible",
+          "trajectory": "Operator possesses all signals. Information asymmetry increases. Organization depends on operator interpretation.",
+          "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
+          "profile_specific": true
+        },
+        {
+          "title": "Perception Asymmetry Crisis",
+          "likelihood": "likely",
+          "trajectory": "Operator sees patterns. Team doesn't. Operator decisions feel arbitrary. Trust erodes. Team stops advocating.",
+          "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
+          "profile_specific": true
+        },
+        {
+          "title": "Sustainable Pace",
+          "likelihood": "possible",
+          "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
+          "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
+          "profile_specific": true
+        }
+      ],
+      "summary": "Five trajectory scenarios emerge from your current operating pattern.",
+      "most_likely": {
+        "title": "Perceptive Authority",
+        "likelihood": "likely",
+        "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+        "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
+        "profile_specific": true
+      }
+    },
+    "facilitator_notes": {
+      "title": "Facilitator Notes",
+      "confidence": "tier_3_medium",
+      "source_fields": [
+        "execution_identity",
+        "decision_making_patterns",
+        "delegation_resistance",
+        "infrastructure_maturity",
+        "contradictions"
+      ],
+      "summary": "0 structural guidance notes.",
+      "note_count": 0,
+      "notes": [],
+      "primary_guidance": "Insufficient evidence.",
+      "caution": "Environment design notes, not behavior coaching. Operator function is fixed; organization design is flexible."
+    },
+    "role_fit": {
+      "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+      "operator_vs_visionary": "Balanced - Can operate and envision",
+      "manager_vs_producer": "Producer - Personal production primary",
+      "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+      "executor_vs_strategist": "Balanced executor-strategist",
+      "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+      "natural_roles": [
+        "Needs dimension refinement for specific role fit"
+      ],
+      "friction_roles": [
+        "Executive Leadership",
+        "Client-Facing/Relationship Management",
+        "Process Management",
+        "Strategy/Long-Term Planning",
+        "Startup/High Ambiguity Roles"
+      ]
+    }
+  }
+}

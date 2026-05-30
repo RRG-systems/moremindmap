@@ -1,0 +1,123 @@
+{
+  "assessment_id": "synthetic-founder-ceo-20260529",
+  "profile_id": "mm-20260529-ceo8x7q2",
+  "source": "synthetic_archetype_validation_lab",
+  "synthetic": true,
+  "duration_seconds": 1440,
+  "submitted_at": "2026-05-29T12:00:00.000Z",
+  "archetype": "Founder / CEO",
+  "intended_role": "Founder and CEO of a 42-person B2B software company",
+  "person_name": "Marcus Vale",
+  "email": "marcus.vale.synthetic@example.com",
+  "organizationalMetadata": {
+    "identity": {
+      "full_name": "Marcus Vale",
+      "email": "marcus.vale.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "ValeGrid Systems",
+      "role_title": "Founder and CEO of a 42-person B2B software company",
+      "department": "Founder / CEO",
+      "industry": "B2B software",
+      "direct_reports_count": 8,
+      "years_in_current_role": 6,
+      "years_in_industry": 10
+    },
+    "contextual_signals": {
+      "best_role_ever": "Fast-growth environment with clear authority and a strong operator translating decisions.",
+      "worst_role_ever": "Diffuse matrix setting where every move requires broad pre-approval.",
+      "current_energy_drain": "Consensus loops, unclear ownership, and repeated explanation of decisions.",
+      "recurring_org_frustration": "May outrun translation, leaving operators to infer the path from founder-level conviction.",
+      "relied_on_for": "Sets direction quickly and connects near-term pressure to a larger company arc.",
+      "misunderstood_for": "May outrun translation, leaving operators to infer the path from founder-level conviction.",
+      "unrealized_capacity": "Strong CEO/founder fit if paired with operating cadence and feedback instrumentation."
+    }
+  },
+  "answers": {
+    "q1": {
+      "choice": "A"
+    },
+    "q2": {
+      "text": "Right now I am trying to build a company that outlives my own daily effort. I care about my family having stability, but I also care about proving that the market we saw early is real. A meaningful life would let me create something durable without being the single point of force forever."
+    },
+    "q3": {
+      "choice": "B"
+    },
+    "q4": {
+      "choice": "D"
+    },
+    "q5": {
+      "choice": "B"
+    },
+    "q6": {
+      "choice": "4"
+    },
+    "q7": {
+      "choice": "A"
+    },
+    "q8": {
+      "choice": "A"
+    },
+    "q9": {
+      "choice": "C"
+    },
+    "q10": {
+      "choice": "C"
+    },
+    "q11": {
+      "choice": "B"
+    },
+    "q12": {
+      "choice": "1"
+    },
+    "q13": {
+      "choice": "A"
+    },
+    "q14": {
+      "text": "A strategic partner delayed a launch after we had already moved the team into execution. I pushed to preserve the date, then realized the implementation team did not have enough room to translate the change. I reset the launch into two phases and took responsibility for pushing pace before the dependency was stable."
+    },
+    "q15": {
+      "choice": "D"
+    },
+    "q16": {
+      "choice": "A"
+    },
+    "q17": {
+      "text": "People who know me would say I get sharper and faster when the stakes rise. I see the decision tree quickly and want everyone moving. The weakness is that my certainty can arrive before everyone else has caught up."
+    },
+    "q18": {
+      "choice": "1"
+    },
+    "q19": {
+      "choice": "A"
+    },
+    "q20": {
+      "text": "I made a pricing decision before every data point was clean because waiting would have cost us a market window. I felt right about moving, but afterward I saw the team needed a clearer rationale trail. The decision worked, the translation was weaker than it should have been."
+    },
+    "q21": {
+      "choice": "A"
+    },
+    "q22": {
+      "text": "I would rate myself an 8 as a leader because I can create direction and belief quickly. The gap is repeatability: some people still need my judgment in the room because the operating principles are not captured well enough."
+    },
+    "q23": {
+      "choice": "A"
+    },
+    "q24": {
+      "text": "When momentum stalls I usually cut through the ambiguity and name the decision. Resistance frustrates me when it feels like people are protecting comfort instead of outcome. I avoid slowing down to document the why, and that creates rework when the team has to reverse-engineer my intent."
+    },
+    "q25": {
+      "text": "I usually clarify the outcome I was aiming for and then explain the logic. If I am moving too fast, I can sound like I am defending instead of listening."
+    },
+    "q26": {
+      "text": "I naturally take the role of direction-setter and pressure translator. Tension appears when the organization needs slower sequencing or when multiple leaders need to own the path rather than wait for my call."
+    },
+    "q27": {
+      "text": "I am building a company with a clear market thesis and a culture that rewards ownership. I value speed, courage, and useful truth over comfort."
+    },
+    "q28": {
+      "text": "The business is organized by weekly leadership rhythm and a few strong people who know how I think. Future strain will show up if decision logic stays in my head instead of becoming shared operating architecture."
+    }
+  }
+}

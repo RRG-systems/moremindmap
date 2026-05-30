@@ -1,0 +1,155 @@
+{
+  "profile_id": "mm-20260529-fdc1s8m5",
+  "rescoring_v1": {
+    "version": "v2",
+    "phase": "threshold_dominance_refinement",
+    "generated_at": "2026-05-30T00:29:33.262Z",
+    "generation_source": "rescoring_engine_v2",
+    "ranked_dimensions": [
+      {
+        "dimension": "signal",
+        "score": 0.98,
+        "baseline_score": 0.99,
+        "delta": -0.01,
+        "rank": 1,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.61,
+        "baseline_score": 0.63,
+        "delta": -0.02,
+        "rank": 2,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "framework",
+        "score": 0.61,
+        "baseline_score": 0.63,
+        "delta": -0.02,
+        "rank": 3,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "flex",
+        "score": 0.44,
+        "baseline_score": 0.58,
+        "delta": -0.14,
+        "rank": 4,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "leverage",
+        "score": 0.49,
+        "baseline_score": 0.5,
+        "delta": -0.02,
+        "rank": 5,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "horizon",
+        "score": 0.2,
+        "baseline_score": 0.33,
+        "delta": -0.13,
+        "rank": 6,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "velocity",
+        "score": 0,
+        "baseline_score": 0,
+        "delta": 0,
+        "rank": 7,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "vector",
+        "score": -0.48,
+        "baseline_score": -0.5,
+        "delta": 0.02,
+        "rank": 8,
+        "confidence": 0.65
+      }
+    ],
+    "dominance_profile": {
+      "primary_dimension": "signal",
+      "secondary_dimension": "fidelity",
+      "dominance_amplitude": 0.99,
+      "spread_type": "balanced",
+      "profile_intensity": "extreme",
+      "threshold_band": "extreme",
+      "threshold_weight": 1.4
+    },
+    "spread_profile": {
+      "flatness_score": 0.91,
+      "polarization_score": 0.38,
+      "dominance_gap": 0.37,
+      "total_spread": 1.46,
+      "variance": 0.17,
+      "balanced_vs_extreme": "balanced",
+      "tension_distribution": "balanced",
+      "profile_shape": "flat",
+      "profile_shape_confidence": 0.95
+    },
+    "tension_pairs": {
+      "velocity_vs_fidelity": -0.61,
+      "vector_vs_signal": -1.46,
+      "horizon_vs_flex": -0.24,
+      "leverage_vs_flex": 0.05,
+      "active_tensions": [
+        "velocity_vs_fidelity",
+        "vector_vs_signal"
+      ],
+      "tension_count": 2
+    },
+    "dominance_gravity": {
+      "strongest_system": "signal",
+      "gravity_strength": 0.98,
+      "downstream_influence": [
+        {
+          "dimension": "fidelity",
+          "correlation": 0.68,
+          "influenced_by_suppression": false
+        },
+        {
+          "dimension": "framework",
+          "correlation": 0.55,
+          "influenced_by_suppression": false
+        }
+      ],
+      "drives_entire_profile": true,
+      "suppression_effects_active": true
+    },
+    "amplitude_metrics": {
+      "highest_score": 0.98,
+      "lowest_score": -0.48,
+      "total_spread": 1.46,
+      "score_variance": 0.17
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.98,
+      "speed_vs_fidelity": -0.61,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "extreme",
+      "active_suppression": true,
+      "profile_intensity": "extreme"
+    },
+    "metadata": {
+      "baseline_hash": "0.99:0.63:0.63:0",
+      "rescoring_timestamp": "2026-05-30T00:29:33.262Z",
+      "rescoring_engine_version": "v2.0.0",
+      "input_canonical_keys": "(full canonical)",
+      "phase_features": [
+        "threshold_gravity",
+        "compensatory_suppression",
+        "flatness_preservation",
+        "tension_amplification",
+        "extremity_differentiation",
+        "render_ready_intelligence"
+      ]
+    }
+  },
+  "rescoring_gpt": null,
+  "gpt_rescoring_status": "skipped_not_enabled"
+}

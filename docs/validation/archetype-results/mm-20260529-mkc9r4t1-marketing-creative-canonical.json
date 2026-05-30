@@ -1,0 +1,1453 @@
+{
+  "profile_id": "mm-20260529-mkc9r4t1",
+  "intake_answers": {
+    "q1": {
+      "question_id": 1,
+      "question_type": "mc",
+      "question_text": "You walk into your business earlier than usual, thinking you might get a quiet start to the day. Within minutes, three things collide. A message comes in about a deal that could affect revenue today. A team member pulls you aside and clearly needs attention. You also remember you are already late for a planning session you said you would lead. There is no clean way to do all three at once. What do you do first?",
+      "answer_choice": "D",
+      "answer_text": "Pause briefly, take in all three, then move based on what feels most urgent",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 1,
+        "fidelity": 1,
+        "horizon": 1
+      }
+    },
+    "q2": {
+      "question_id": 2,
+      "question_type": "written",
+      "question_text": "What matters most to you in life right now? Describe in detail: family, relationships, children, career, freedom, money, stability, legacy, purpose, health, impact, personal growth. What are you ultimately trying to build, protect, or become? Where do you want your personal life and work to go over the next 5–10 years? What would a meaningful life actually look like for you if things worked?",
+      "answer_text": "I want a life with creative freedom, close relationships, and work that feels alive. Money matters because it buys space, but I do not want to trade all originality for security. In the next decade I want to build a body of work people recognize as emotionally true.",
+      "character_count": 266,
+      "word_count": 48,
+      "sentence_count": 3
+    },
+    "q3": {
+      "question_id": 3,
+      "question_type": "mc",
+      "question_text": "You are in a group setting and someone challenges a decision you made. It is not aggressive, but it is direct enough that people notice. The room quiets slightly and attention shifts toward you. What do you do?",
+      "answer_choice": "D",
+      "answer_text": "Stay composed and ask them to explain their concern",
+      "normalized_dimensions": {
+        "signal": 1,
+        "fidelity": 0.5,
+        "flex": 0.5
+      }
+    },
+    "q4": {
+      "question_id": 4,
+      "question_type": "mc",
+      "question_text": "You wrap up a deal or project and later realize there was a better way to handle it. The outcome was fine, no one is complaining, but you know it could have been stronger. What do you do?",
+      "answer_choice": "B",
+      "answer_text": "Adjust your approach for next time",
+      "normalized_dimensions": {
+        "flex": 1,
+        "fidelity": 0.5,
+        "horizon": 0.5
+      }
+    },
+    "q5": {
+      "question_id": 5,
+      "question_type": "mc",
+      "question_text": "You start your day with a clear plan, but by midday everything shifts. New priorities show up, timelines compress, and the pressure increases. What looked structured now feels fluid and unpredictable. What do you naturally do?",
+      "answer_choice": "E",
+      "answer_text": "Adapt in real time and shift with what is happening",
+      "normalized_dimensions": {
+        "flex": 1,
+        "velocity": 0.5,
+        "framework": -0.5
+      }
+    },
+    "q6": {
+      "question_id": 6,
+      "question_type": "ranking",
+      "question_text": "You are stepping into a situation where multiple things matter at once. There is pressure, limited time, and people are looking to you for direction. There is no perfect answer, only trade-offs. Rank what matters MOST in that moment:",
+      "answer_choice": "2",
+      "answer_text": "Keeping people aligned and stable",
+      "normalized_dimensions": {
+        "signal": 1.5,
+        "flex": 0.5,
+        "horizon": 0.5
+      }
+    },
+    "q7": {
+      "question_id": 7,
+      "question_type": "mc",
+      "question_text": "You walk into a room where you do not know anyone. People are already in conversation, and you are not sure how the dynamics work yet. It is not uncomfortable, but it is unfamiliar. What do you do first?",
+      "answer_choice": "C",
+      "answer_text": "Start one conversation and build from there",
+      "normalized_dimensions": {
+        "signal": 1,
+        "leverage": 0.5,
+        "flex": 0.5
+      }
+    },
+    "q8": {
+      "question_id": 8,
+      "question_type": "mc",
+      "question_text": "You are midway through a conversation and can feel the other person is not fully aligned. They are polite, but something is off. There is a pause where either of you could shift direction. What do you do?",
+      "answer_choice": "B",
+      "answer_text": "Adjust your approach and try to bring them along",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "leverage": 0.5
+      }
+    },
+    "q9": {
+      "question_id": 9,
+      "question_type": "mc",
+      "question_text": "You are offered an opportunity that could be meaningful, but it is loosely defined. There is upside, but also uncertainty. No one is giving you a clear path forward. What do you do?",
+      "answer_choice": "D",
+      "answer_text": "Move toward it and figure it out as you go",
+      "normalized_dimensions": {
+        "velocity": 1,
+        "flex": 1,
+        "horizon": -0.5
+      }
+    },
+    "q10": {
+      "question_id": 10,
+      "question_type": "mc",
+      "question_text": "You are responsible for a result, and the people around you are not performing at the level you expect. You can feel the gap, and time matters more than comfort. What do you do?",
+      "answer_choice": "B",
+      "answer_text": "Adjust expectations and move forward anyway",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "velocity": -0.5
+      }
+    },
+    "q11": {
+      "question_id": 11,
+      "question_type": "mc",
+      "question_text": "You are on a family trip you have been looking forward to. When you arrive, the hotel room is not what you booked. The front desk is not helpful, and your kids are already asking to go to the pool. Everyone is looking to you for direction. What do you do first?",
+      "answer_choice": "C",
+      "answer_text": "Accept it for now and adjust expectations",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "velocity": -0.5
+      }
+    },
+    "q12": {
+      "question_id": 12,
+      "question_type": "ranking",
+      "question_text": "You are in a conversation with a potential client. The opportunity is real, but the path forward is not fully clear. You can feel that how you handle this moment matters. Rank what you prioritize MOST:",
+      "answer_choice": "2",
+      "answer_text": "Building trust and connection",
+      "normalized_dimensions": {
+        "signal": 1.5,
+        "leverage": 0.5,
+        "flex": 0.5
+      }
+    },
+    "q13": {
+      "question_id": 13,
+      "question_type": "mc",
+      "question_text": "You are at a private dinner with people you do not know well. The conversation is intelligent, but there is an underlying sense of positioning. People are listening, but also subtly competing. (Choose TWO)",
+      "answer_choice": "D",
+      "answer_text": "Focus on building one or two strong connections",
+      "normalized_dimensions": {
+        "signal": 0.8,
+        "leverage": 0.5,
+        "flex": 0.5
+      }
+    },
+    "q14": {
+      "question_id": 14,
+      "question_type": "written",
+      "question_text": "Think about a recent situation where something did not go your way. It could be a deal, a conversation, or a decision that did not land how you expected. Where were you, what happened, and what did you do next? (3–5 sentences)",
+      "answer_text": "A campaign concept I loved did not land with the client because the brief had shifted toward a safer audience. I stepped back, found the emotional point they were actually buying, and rebuilt the pitch around that. The final idea was less flashy but more useful.",
+      "character_count": 262,
+      "word_count": 46,
+      "sentence_count": 3
+    },
+    "q15": {
+      "question_id": 15,
+      "question_type": "mc",
+      "question_text": "You are in a situation where a decision needs to be made, but you do not have all the information you want. Waiting would help, but it would slow everything down. What do you do?",
+      "answer_choice": "C",
+      "answer_text": "Make the best decision you can and move forward",
+      "normalized_dimensions": {
+        "velocity": 1,
+        "flex": 0.5,
+        "fidelity": 0.5
+      }
+    },
+    "q16": {
+      "question_id": 16,
+      "question_type": "mc",
+      "question_text": "You wake up on a day where nothing is scheduled. No meetings, no obligations, no expectations. The time is completely yours. What do you naturally do?",
+      "answer_choice": "C",
+      "answer_text": "Reach out or spend time with people",
+      "normalized_dimensions": {
+        "signal": 1,
+        "leverage": 0.5,
+        "flex": 0.5
+      }
+    },
+    "q17": {
+      "question_id": 17,
+      "question_type": "written",
+      "question_text": "When things get intense, deadlines are tight, or expectations are high, how would someone who knows you well describe you? (Be honest. 3–5 sentences)",
+      "answer_text": "People would say I become energized and scattered under pressure. I can generate options fast and see angles others miss. The downside is I need someone to help pin the strongest idea before time disappears.",
+      "character_count": 207,
+      "word_count": 35,
+      "sentence_count": 3
+    },
+    "q18": {
+      "question_id": 18,
+      "question_type": "ranking",
+      "question_text": "You are leading a group and performance is not where it needs to be. Expectations are rising, and time is becoming a factor. You can feel pressure building. Rank what you focus on first:",
+      "answer_choice": "4",
+      "answer_text": "Maintaining morale and stability",
+      "normalized_dimensions": {
+        "signal": 1.5,
+        "flex": 0.5,
+        "horizon": 0.5
+      }
+    },
+    "q19": {
+      "question_id": 19,
+      "question_type": "mc",
+      "question_text": "You are working with someone whose pace and communication style feel very different from yours. It starts to affect progress, even if nothing is openly wrong. What do you do?",
+      "answer_choice": "B",
+      "answer_text": "Adjust your approach to work better with them",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "leverage": 0.5
+      }
+    },
+    "q20": {
+      "question_id": 20,
+      "question_type": "written",
+      "question_text": "Describe a time when you had to make a decision without having all the information you wanted. What did you do, and how did you feel about it after? (3–5 sentences)",
+      "answer_text": "I chose a creative direction before all audience testing came back because the launch date was fixed. I felt excited and nervous. Later the concept worked, but production had to absorb my late adjustments.",
+      "character_count": 205,
+      "word_count": 34,
+      "sentence_count": 3
+    },
+    "q21": {
+      "question_id": 21,
+      "question_type": "mc",
+      "question_text": "You are driving alone with no music, no calls, and nowhere urgent to be. Your attention is completely open. What naturally happens?",
+      "answer_choice": "D",
+      "answer_text": "Your mind wanders freely",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "framework": -0.5
+      }
+    },
+    "q22": {
+      "question_id": 22,
+      "question_type": "written",
+      "question_text": "You are leading people in some capacity. Think about how you actually show up, not how you would like to. On a scale from 1 to 10, how would you rate yourself as a leader, and why? (Be specific. 3–5 sentences)",
+      "answer_text": "I would rate myself a 6.5. I can inspire a team around a direction, but I am still learning to turn creative momentum into a clean operating plan.",
+      "character_count": 146,
+      "word_count": 28,
+      "sentence_count": 3
+    },
+    "q23": {
+      "question_id": 23,
+      "question_type": "mc",
+      "question_text": "You are in a conversation that is not going well. The other person is not responding how you expected, and the interaction feels slightly off. What do you do?",
+      "answer_choice": "D",
+      "answer_text": "Change your approach and try something different",
+      "normalized_dimensions": {
+        "flex": 1,
+        "signal": 0.5,
+        "velocity": 0.5
+      }
+    },
+    "q24": {
+      "question_id": 24,
+      "question_type": "written",
+      "question_text": "When momentum stalls, pressure rises, or people resist your direction, what do you usually do first? Describe what frustrates you most, what kinds of people energize or drain you, what you avoid dealing with longer than you should, and what pattern you keep repeating even though you know it slows you down. Do not worry about sounding impressive, strategic, or self-aware. Write naturally and answer the way you actually think about these situations in real life.",
+      "answer_text": "When momentum stalls I look for a new angle or a different emotional hook. I get drained by people who reduce the work to checklists too early. I avoid locking the plan until I can feel the idea has enough life.",
+      "character_count": 211,
+      "word_count": 41,
+      "sentence_count": 3
+    },
+    "q25": {
+      "question_id": 25,
+      "question_type": "written",
+      "question_text": "When someone misunderstands your intentions, how do you usually respond?",
+      "answer_text": "I usually explain the intention behind the idea and ask what part felt off. Sometimes I keep reframing when the other person just needs a simpler answer.",
+      "character_count": 153,
+      "word_count": 27,
+      "sentence_count": 2
+    },
+    "q26": {
+      "question_id": 26,
+      "question_type": "written",
+      "question_text": "When working on or inside your business, whether independently or with a team, what role do you naturally take on, and where does tension usually appear?",
+      "answer_text": "I naturally become the concept shaper and audience interpreter. Tension appears when the team needs production certainty before the creative signal feels finished.",
+      "character_count": 163,
+      "word_count": 23,
+      "sentence_count": 2
+    },
+    "q27": {
+      "question_id": 27,
+      "question_type": "written",
+      "question_text": "What are you trying to build long-term, and what values drive the way you operate?",
+      "answer_text": "I am building work that combines taste, usefulness, and emotional intelligence. I value originality, resonance, and freedom.",
+      "character_count": 124,
+      "word_count": 17,
+      "sentence_count": 2
+    },
+    "q28": {
+      "question_id": 28,
+      "question_type": "written",
+      "question_text": "What currently keeps your life or work organized, and where do you think future strain or scaling problems could appear?",
+      "answer_text": "Mood boards, campaign calendars, and creative reviews keep me loosely organized. Future strain appears when more campaigns run at once and informal taste judgment needs a repeatable system.",
+      "character_count": 189,
+      "word_count": 28,
+      "sentence_count": 2
+    }
+  },
+  "metadata": {
+    "assessment_version": "mini-v2",
+    "generated_at": "2026-05-30T00:29:33.265Z",
+    "model": "synthetic-archetype-validation-v1",
+    "person_name": "Ari Vaughn",
+    "email": "ari.vaughn.synthetic@example.com",
+    "identity": {
+      "full_name": "Ari Vaughn",
+      "email": "ari.vaughn.synthetic@example.com",
+      "phone": ""
+    },
+    "organization": {
+      "company_name": "LumaKind Studio",
+      "role_title": "Creative marketing lead for a consumer wellness brand",
+      "department": "Marketing Creative",
+      "industry": "Consumer marketing",
+      "direct_reports_count": 2,
+      "years_in_current_role": 2,
+      "years_in_industry": 6
+    },
+    "contextual_signals": {
+      "best_role_ever": "Creative environment with strategic guardrails and flexible exploration time.",
+      "worst_role_ever": "Process-heavy team that treats creative uncertainty as poor discipline.",
+      "current_energy_drain": "Rigid calendars, over-prescribed briefs, and repetitive approval loops.",
+      "recurring_org_frustration": "Can resist fixed process until deadlines force compression.",
+      "relied_on_for": "Connects audience signal, cultural timing, and campaign angle quickly.",
+      "misunderstood_for": "Can resist fixed process until deadlines force compression.",
+      "unrealized_capacity": "Strong marketing creative fit, with production structure needed near launch."
+    }
+  },
+  "vector_scores": {
+    "vector": 2,
+    "signal": 0.88,
+    "fidelity": 0.63,
+    "velocity": 0.33,
+    "leverage": 0.5,
+    "flex": 0.78,
+    "framework": -0.5,
+    "horizon": 0.4
+  },
+  "ranked_dimensions": [
+    {
+      "dimension": "vector",
+      "score": 2,
+      "rank": 1
+    },
+    {
+      "dimension": "signal",
+      "score": 0.88,
+      "rank": 2
+    },
+    {
+      "dimension": "flex",
+      "score": 0.78,
+      "rank": 3
+    },
+    {
+      "dimension": "fidelity",
+      "score": 0.63,
+      "rank": 4
+    },
+    {
+      "dimension": "leverage",
+      "score": 0.5,
+      "rank": 5
+    },
+    {
+      "dimension": "horizon",
+      "score": 0.4,
+      "rank": 6
+    },
+    {
+      "dimension": "velocity",
+      "score": 0.33,
+      "rank": 7
+    },
+    {
+      "dimension": "framework",
+      "score": -0.5,
+      "rank": 8
+    }
+  ],
+  "top_systems": {
+    "primary_driver": {
+      "dimension": "vector",
+      "score": 2,
+      "rank": 1,
+      "description": "moderate Command (Vector)",
+      "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
+      "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
+    },
+    "secondary_stabilizer": {
+      "dimension": "signal",
+      "score": 0.88,
+      "rank": 2,
+      "description": "low Relational Awareness (Signal)",
+      "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+      "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
+    },
+    "opposing_pattern_1": {
+      "dimension": "velocity",
+      "score": 0.33,
+      "rank": 7,
+      "description": "low Tempo (Velocity)",
+      "operating_manifestation": "Prefers speed; moves to action quickly; impatient with deliberation",
+      "pressure_manifestation": "Under strain, speed preference increases; detail drops"
+    },
+    "opposing_pattern_2": {
+      "dimension": "framework",
+      "score": -0.5,
+      "rank": 8,
+      "description": "low Structure (Framework)",
+      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
+      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
+    },
+    "dimension_tradeoffs": [],
+    "dimension_synergies": []
+  },
+  "life_direction": {
+    "stated_priorities": [
+      "career",
+      "freedom",
+      "money",
+      "stability"
+    ],
+    "priority_count": 4,
+    "future_orientation": "high",
+    "meaning_clarity": "brief",
+    "identity_focused": false,
+    "word_count": 48
+  },
+  "business_operating_reality": {
+    "numerical_grounding": "low",
+    "has_specific_metrics": false,
+    "gap_awareness": false,
+    "scale_indicators": {
+      "database_mentioned": false,
+      "production_mentioned": false
+    },
+    "vague_vs_specific_ratio": 0,
+    "word_count": 23
+  },
+  "growth_tension": {
+    "scaling_response": "not_answered",
+    "vision_clarity": "partial",
+    "priority_stated": true,
+    "word_count": 17
+  },
+  "systems_accountability": {
+    "systems_thinking": "low",
+    "system_confidence": "uncertain",
+    "has_accountability_structure": false,
+    "coachability": "not_answered",
+    "meta_awareness": "low",
+    "word_count": 28
+  },
+  "stall_patterns": {
+    "blame_direction": "external",
+    "frustrations": [
+      "relational"
+    ],
+    "avoidance_admitted": true,
+    "self_awareness": "low",
+    "word_count": 41
+  },
+  "inferred_patterns": {
+    "profile_type": "Command/Relational Awareness",
+    "operating_signature": "Command-driven with Relational Awareness stabilization",
+    "leadership_approach": {
+      "primary_mode": "Establishes direction before consensus forms",
+      "stabilizing_force": "Relational Awareness provides structural support",
+      "team_experience": "Clear where we're going, may feel hard to slow down",
+      "challenge_surface": "Speed can outpace shared understanding"
+    },
+    "decision_architecture": {
+      "formation_pattern": "Command drives decision formation",
+      "validation_method": "Relational Awareness validates approach",
+      "speed_driver": "Moderate decision velocity",
+      "blind_spot": "Low Tempo means velocity signals get missed"
+    },
+    "communication_style": {
+      "message_structure": "Direction-first, context-later",
+      "effectiveness_peak": "When team already shares urgency",
+      "friction_point": "Can feel too directive in consensus cultures"
+    },
+    "pressure_response": {
+      "primary_shift": "Accelerates to directive action",
+      "secondary_shift": "Relational Awareness becomes compensating mechanism",
+      "blind_spot_emergence": "Tempo disappears — velocity signals get missed"
+    }
+  },
+  "contradictions": [],
+  "stress_patterns": {
+    "primary_stress_response": "Accelerates to directive action — decisions form faster, input window narrows",
+    "secondary_stress_shift": "Relational Awareness becomes compensating mechanism — holds system together as Command amplifies",
+    "blind_spot_emergence": "Tempo and Structure disappear — these signals don't register until crisis escalates",
+    "escalation_chain": [
+      "Mild pressure: Command increases slightly, Tempo signals start getting missed",
+      "Moderate pressure: Command dominates operating system, Relational Awareness compensates to maintain function",
+      "Severe pressure: Pure Command execution, blind to Tempo and Structure — repairs relationships/process after conflict resolves"
+    ],
+    "recovery_paths": [
+      "Build explicit Tempo check-ins BEFORE pressure escalates",
+      "Recognize when Command is amplifying — create circuit breakers",
+      "Post-conflict repair: consciously re-engage Tempo and Structure after stress passes"
+    ],
+    "pattern_type": "narrowing"
+  },
+  "communication_style": {
+    "message_structure": "Command-first communication structure",
+    "directness": "moderate",
+    "abstraction_level": "moderate",
+    "emotional_calibration": "Low emotional smoothing — message delivery prioritizes clarity over reception management",
+    "effectiveness_peaks": [],
+    "friction_points": [],
+    "calibrations": []
+  },
+  "leadership_architecture": {
+    "primary_mode": "Command-driven leadership",
+    "stabilizing_force": "Relational Awareness provides structural support when Command creates tension",
+    "team_experience": "Team experiences Command as primary organizing force",
+    "challenge_surface": "Command dominance can suppress Tempo — creates blind spot",
+    "dissent_tolerance": "moderate",
+    "development_orientation": "Development approach reflects Command priority",
+    "calibrations": []
+  },
+  "development_targets": [],
+  "environment_fit": {
+    "thrives_in": [],
+    "struggles_in": [
+      "High-touch client relationships",
+      "Consensus-required team cultures"
+    ],
+    "requires": [
+      "Direct communication culture, tolerance for bluntness"
+    ]
+  },
+  "leadership_readiness": {
+    "scale_capacity": "Low - Direction-setting becomes bottleneck as complexity increases",
+    "clarity_generation": "Low - Direction and process both unclear, team operates in fog",
+    "followership_quality": "Moderate - Followership depends on alignment and context",
+    "relational_collapse_risk": "High - Under pressure, relational awareness disappears; repairs relationships after damage done",
+    "control_tendency": "Low - May under-direct; control too loose for accountability",
+    "development_capability": "Low - Limited bandwidth for reading individual development needs",
+    "confidence": 0.7
+  },
+  "role_fit_analysis": {
+    "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
+    "operator_vs_visionary": "Balanced - Can operate and envision",
+    "manager_vs_producer": "Producer - Personal production primary",
+    "explorer_vs_stabilizer": "Pragmatic - Explores when needed, stabilizes when required",
+    "executor_vs_strategist": "Balanced executor-strategist",
+    "ambiguity_tolerance": "Moderate - Can handle ambiguity with boundaries",
+    "natural_roles": [
+      "Needs dimension refinement for specific role fit"
+    ],
+    "friction_roles": [
+      "Executive Leadership",
+      "Client-Facing/Relationship Management",
+      "Process Management",
+      "Strategy/Long-Term Planning",
+      "Startup/High Ambiguity Roles"
+    ]
+  },
+  "future_growth_constraints": {
+    "at_2x_scale": [
+      "Systems infrastructure - Current processes insufficient for 2x complexity",
+      "Relational bandwidth - Limited capacity for relationship management at scale"
+    ],
+    "at_5x_scale": [
+      "Operational chaos - Ad-hoc systems collapse under 5x load",
+      "Team fragmentation - Relationship gaps create organizational silos"
+    ],
+    "stress_amplification": "Moderate - Some tensions will surface but manageable with awareness",
+    "operational_fragility": "Moderate - Some operational dependencies exist",
+    "relational_fragility": "High - Relational friction already present, will compound at scale",
+    "decision_overload_risk": "Moderate - Some decision distribution exists",
+    "scaling_resistance_pattern": "Scaling resistance moderate, addressable with systems"
+  },
+  "coaching_leverage_points": {
+    "highest_roi_adjustment": "Relational timing awareness - pause before directing to read room dynamics",
+    "invisible_drag_habits": [
+      "Avoidance patterns compound - delayed action creates larger problems later"
+    ],
+    "resistance_likelihood": "Moderate - Will engage but may revert to defaults under pressure",
+    "accountability_dependency": "Moderate - Benefits from external structure but can self-regulate",
+    "quick_wins": [
+      "Pre-directive pause - count to 3 before issuing direction, read room first"
+    ],
+    "long_term_work": [
+      "Relational awareness development - sustained practice in reading team dynamics",
+      "Systems thinking capacity - building infrastructure vs firefighting"
+    ]
+  },
+  "hidden_risk_patterns": {
+    "strengths_as_liabilities": [
+      "Strengths remain assets at current scale"
+    ],
+    "relational_erosion_risk": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
+    "strategic_drift_risk": "Low - Direction stable",
+    "execution_inconsistency": "Low - Execution reliable",
+    "burnout_trajectory": "Moderate - Relational friction drains energy; isolation increases over time",
+    "isolation_pattern": "Low - Operates collaboratively",
+    "severity": 0.5
+  },
+  "execution_identity": {
+    "true_default": "Execution-focused operator",
+    "claimed_identity": "Self-description unavailable from data",
+    "identity_gap": "Minimal - Self-perception aligned with behavior",
+    "operational_truth": "Standard operational baseline"
+  },
+  "strategic_ceiling_analysis": {
+    "current_ceiling": "No immediate ceiling visible",
+    "ceiling_cause": "Standard growth challenges",
+    "breakthrough_requirement": "Continue current trajectory",
+    "ceiling_proximity": 0.44999999999999996
+  },
+  "scaling_readiness": {
+    "systems_maturity": "Weak - Ad-hoc execution, limited systematic infrastructure",
+    "delegation_capacity": "High - Delegates effectively and maintains accountability",
+    "talent_development": "Weak - Limited capacity for developing others",
+    "process_thinking": "Weak - Ad-hoc executor, process-averse",
+    "readiness_score": 0.30000000000000004
+  },
+  "team_interaction_patterns": {
+    "conflict_mode": "Avoidant until escalation - Ignores relational tension until forced to address",
+    "collaboration_style": "Standard team player",
+    "feedback_reception": "Mixed - Depends on delivery and source",
+    "trust_building": "Standard relationship development",
+    "friction_triggers": [
+      "Standard team friction"
+    ],
+    "team_value_add": [
+      "Balanced team contribution"
+    ]
+  },
+  "behavioral_consequences": {
+    "strength_damages": [],
+    "recurring_breakdowns": [
+      {
+        "pattern": "Relationship repair cycles",
+        "breakdown": "Relational damage accumulates invisibly during execution sprints; repair becomes necessary every 4-6 months when turnover or conflict surfaces",
+        "root_cause": "Relational signals processed retrospectively, not in real-time",
+        "frequency": "Quarterly relationship crises"
+      }
+    ],
+    "team_experiences": [],
+    "emergent_costs": [
+      {
+        "cost_type": "Talent attrition from relational friction",
+        "mechanism": "High performers leave silently when relational damage accumulates past tolerance threshold",
+        "emergence_timeline": "18-24 months per high performer",
+        "consequence": "Institutional knowledge loss; recruiting costs compound; team quality degrades"
+      }
+    ],
+    "unchanged_trajectory": [
+      {
+        "pattern": "Relational damage accumulation",
+        "outcome_2yr": "2-3 key relationship departures; replacement quality lower than original talent",
+        "outcome_5yr": "Team composition shifts toward compliance over excellence; A-players filtered out by relational friction",
+        "inevitability": "High - Pattern invisible to operator until turnover forces recognition"
+      }
+    ]
+  },
+  "organizational_effects": {
+    "unintentional_culture": "Standard organizational dynamics",
+    "communication_atmosphere": "Standard professional communication",
+    "subordinates_stop_saying": [
+      "Standard communication openness"
+    ],
+    "teams_become_afraid_to": [
+      "No unusual fear patterns detected"
+    ],
+    "bottleneck_formation": [],
+    "hidden_resentment": [],
+    "short_term_effects": [],
+    "long_term_effects": []
+  },
+  "hidden_costs": [
+    {
+      "cost_category": "Relational maintenance tax",
+      "description": "Relationships require active repair rather than natural maintenance; time spent fixing what speed/directness damaged",
+      "visibility": "Quarterly when turnover or conflict surfaces",
+      "compounding": "Compounds with each relationship lost; replacement quality decreases"
+    }
+  ],
+  "self_deception_patterns": {
+    "patterns": [
+      {
+        "pattern_type": "Reflection strongest after consequences",
+        "manifestation": "Understands patterns clearly when looking backward; less clarity when looking forward in real-time",
+        "self_narrative": "Likely tells self: I will handle it differently next time",
+        "operational_reality": "Reflection appears strongest after consequences emerge, not before decisions form",
+        "preservation_mechanism": "Retrospective learning creates feeling of growth without interrupting prospective patterns"
+      }
+    ],
+    "meta_observation": "Multiple self-deception mechanisms present; awareness exists but behavioral inertia preserved through narrative protection"
+  },
+  "future_trajectory": {
+    "unchanged_trajectory": {
+      "year_2": [
+        "2-3 key relationship departures; A-player talent filtered out by relational friction"
+      ],
+      "year_5": [
+        "Team quality degrades to relational-friction-tolerant baseline; excellence replaced by compliance"
+      ],
+      "breakpoints": [
+        {
+          "trigger": "High performer exits citing culture fit",
+          "consequence": "Talent composition shifts; replacement quality lower; institutional knowledge lost",
+          "timing": "12-18 months per high performer"
+        }
+      ]
+    },
+    "developed_trajectory": {
+      "year_2": [
+        "Relational timing improves; relationship damage decreases; A-player retention increases"
+      ],
+      "year_5": [
+        "Culture shifts from compliance to contribution; talent quality improves; execution multiplies through willing followership"
+      ],
+      "requirements": [
+        "Sustained relational awareness practice - 90-day intensive coaching on reading room before directing"
+      ]
+    },
+    "critical_choice_points": [
+      {
+        "decision": "Invest in relational development vs maintain current approach",
+        "window": "Next 12 months before key talent departs",
+        "consequence_if_unchanged": "A-player talent exits; team quality degrades; recruiting costs compound",
+        "consequence_if_developed": "Retention improves; culture strengthens; execution multiplies"
+      }
+    ]
+  },
+  "evidence_map": {
+    "evidence_entries": {
+      "delegation_resistance": {
+        "inference": "delegation_resistance",
+        "source_questions": [],
+        "direct_evidence": [],
+        "inferred_evidence": [
+          "High vector score combined with trust gap language"
+        ],
+        "dimension_support": {},
+        "contradiction_support": [],
+        "confidence": 0.5,
+        "risk_of_overread": "moderate-high",
+        "alternative_explanations": [
+          "Could be environmental (bad prior delegation experiences)",
+          "Could be temporary phase during scaling"
+        ]
+      },
+      "relational_friction": {
+        "inference": "relational_friction_pattern",
+        "source_questions": [
+          "Q24"
+        ],
+        "direct_evidence": [
+          "Q24: Relational friction explicitly mentioned as frustration"
+        ],
+        "inferred_evidence": [
+          "Low signal dimension combined with relational frustration language"
+        ],
+        "dimension_support": {
+          "signal": "Low (0.9) - Limited relational awareness capacity"
+        },
+        "contradiction_support": [],
+        "confidence": 0.8,
+        "risk_of_overread": "low",
+        "alternative_explanations": [
+          "Team composition mismatch",
+          "Cultural environment factor"
+        ]
+      },
+      "systems_weakness": {
+        "inference": "systems_infrastructure_weakness",
+        "source_questions": [
+          "Q28"
+        ],
+        "direct_evidence": [
+          "Q28: Limited systems language or ad-hoc execution described"
+        ],
+        "inferred_evidence": [
+          "Low framework dimension + high velocity = systems deprioritized"
+        ],
+        "dimension_support": {
+          "framework": "Low-Moderate (-0.5) - Limited process orientation"
+        },
+        "contradiction_support": [],
+        "confidence": 0.6,
+        "risk_of_overread": "low",
+        "alternative_explanations": [
+          "Rapid growth phase legitimately delays infrastructure",
+          "Systems exist but not articulated in answers"
+        ]
+      }
+    },
+    "aggregate_confidence": 0.6333333333333333,
+    "total_evidence_sources": 2,
+    "high_confidence_inferences": [
+      "relational_friction"
+    ],
+    "low_confidence_inferences": [
+      "delegation_resistance"
+    ]
+  },
+  "causal_chains": {
+    "causal_chains": [
+      {
+        "pattern_name": "Control preservation through trust concentration",
+        "core_behavior": "High standards + trust gap = delegation resistance",
+        "trigger_condition": "Quality risk or execution stakes increase",
+        "immediate_benefit": "Personal involvement ensures quality and speed",
+        "hidden_cost": "Team stops developing autonomous capability; organizational capacity concentrates",
+        "repeated_consequence": "Growth plateaus at personal execution limit within 18-24 months",
+        "scaling_consequence": "Cannot scale past personal capacity; quality degrades or growth stalls",
+        "organizational_outcome": "Succession impossible; organization fragile to leader absence",
+        "coaching_interruption_point": "Define explicit \"good enough\" standards; build accountability systems that enable release",
+        "intervention_timing": "6-12 month progressive delegation with accountability scaffolding",
+        "evidence_strength": "high",
+        "inevitability": "moderate"
+      },
+      {
+        "pattern_name": "Tactical busyness prevents infrastructure building",
+        "core_behavior": "High velocity + low framework = ad-hoc execution",
+        "trigger_condition": "Operational urgency or firefighting mode",
+        "immediate_benefit": "Speed and flexibility; can pivot quickly without process constraints",
+        "hidden_cost": "Same problems recur quarterly; energy spent firefighting rather than preventing",
+        "repeated_consequence": "Organizational debt compounds; systems rebuild becomes harder each quarter",
+        "scaling_consequence": "At 2x: Firefighting increases. At 5x: Operational chaos; customer experience degrades",
+        "organizational_outcome": "Stuck at current scale; infrastructure rebuild required but identity resistance prevents investment",
+        "coaching_interruption_point": "Force 6-month infrastructure build sprint; accept short-term speed loss",
+        "intervention_timing": "Immediate - before next scaling attempt",
+        "evidence_strength": "moderate",
+        "inevitability": "very high"
+      }
+    ],
+    "chain_count": 2,
+    "high_inevitability_chains": 1
+  },
+  "narrative_profile": {
+    "executive_summary": "This is a Command/Relational Awareness profile - command-driven with relational awareness stabilization. Command-driven leadership. Command dominance can suppress Tempo — creates blind spot.",
+    "leadership_narrative": "Command-driven leadership. Team experiences Command as primary organizing force. Relational Awareness provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress tempo — creates blind spot. Development path: Build capacity in underutilized dimensions.",
+    "decision_narrative": "Command drives decision formation. Relational Awareness validates approach. Moderate decision velocity. Blind spot: Low Tempo means velocity signals get missed. ",
+    "communication_narrative": "Communication style: Command-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
+    "development_narrative": "Development focuses on building capacity in underutilized dimensions. Under pressure, accelerates to directive action — decisions form faster, input window narrows. Tempo and Structure disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Tempo check-ins BEFORE pressure escalates.",
+    "business_manifestation": "When performance stalls, externalizes bottlenecks to market, people, or circumstances. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns - awareness present but execution gap remains. Low numerical grounding - operates more conceptually than metrically. ",
+    "contradiction_analysis": "No significant internal contradictions detected. Operating system shows dimensional coherence.",
+    "leadership_readiness_narrative": "Leadership readiness: Low - Direction-setting becomes bottleneck as complexity increases. Low - Direction and process both unclear, team operates in fog. Followership: Moderate - Followership depends on alignment and context. Control tendency: Low - May under-direct; control too loose for accountability. Low - Limited bandwidth for reading individual development needs.",
+    "future_bottlenecks_narrative": "At 2x scale: Systems infrastructure - Current processes insufficient for 2x complexity; Relational bandwidth - Limited capacity for relationship management at scale. At 5x scale: Operational chaos - Ad-hoc systems collapse under 5x load; Team fragmentation - Relationship gaps create organizational silos. Scaling resistance moderate, addressable with systems.",
+    "coaching_leverage_narrative": "Highest ROI: Relational timing awareness - pause before directing to read room dynamics. Resistance likelihood: Moderate - Will engage but may revert to defaults under pressure. Quick wins: Pre-directive pause - count to 3 before issuing direction, read room first. Invisible drag: Avoidance patterns compound - delayed action creates larger problems later.",
+    "hidden_risks_narrative": "Risk severity: 50%. Moderate-High - Under stress, relational awareness disappears; damage done without awareness. Moderate - Relational friction drains energy; isolation increases over time. Strength liability: Strengths remain assets at current scale.",
+    "strategic_ceiling_narrative": "Current ceiling: No immediate ceiling visible. Cause: Standard growth challenges. Breakthrough requirement: Continue current trajectory. Ceiling proximity: 45%."
+  },
+  "baseline_ranked_dimensions": [
+    {
+      "dimension": "vector",
+      "score": 2,
+      "rank": 1
+    },
+    {
+      "dimension": "signal",
+      "score": 0.88,
+      "rank": 2
+    },
+    {
+      "dimension": "flex",
+      "score": 0.78,
+      "rank": 3
+    },
+    {
+      "dimension": "fidelity",
+      "score": 0.63,
+      "rank": 4
+    },
+    {
+      "dimension": "leverage",
+      "score": 0.5,
+      "rank": 5
+    },
+    {
+      "dimension": "horizon",
+      "score": 0.4,
+      "rank": 6
+    },
+    {
+      "dimension": "velocity",
+      "score": 0.33,
+      "rank": 7
+    },
+    {
+      "dimension": "framework",
+      "score": -0.5,
+      "rank": 8
+    }
+  ],
+  "rescoring_v1": {
+    "version": "v2",
+    "phase": "threshold_dominance_refinement",
+    "generated_at": "2026-05-30T00:29:33.265Z",
+    "generation_source": "rescoring_engine_v2",
+    "ranked_dimensions": [
+      {
+        "dimension": "vector",
+        "score": 2,
+        "baseline_score": 2,
+        "delta": 0,
+        "rank": 1,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "signal",
+        "score": 0.73,
+        "baseline_score": 0.88,
+        "delta": -0.15,
+        "rank": 2,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "flex",
+        "score": 0.64,
+        "baseline_score": 0.78,
+        "delta": -0.14,
+        "rank": 3,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.61,
+        "baseline_score": 0.63,
+        "delta": -0.02,
+        "rank": 4,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "leverage",
+        "score": 0.49,
+        "baseline_score": 0.5,
+        "delta": -0.02,
+        "rank": 5,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "horizon",
+        "score": 0.39,
+        "baseline_score": 0.4,
+        "delta": -0.01,
+        "rank": 6,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "velocity",
+        "score": 0.32,
+        "baseline_score": 0.33,
+        "delta": -0.01,
+        "rank": 7,
+        "confidence": 0.65
+      },
+      {
+        "dimension": "framework",
+        "score": -0.48,
+        "baseline_score": -0.5,
+        "delta": 0.02,
+        "rank": 8,
+        "confidence": 0.65
+      }
+    ],
+    "dominance_profile": {
+      "primary_dimension": "vector",
+      "secondary_dimension": "signal",
+      "dominance_amplitude": 2,
+      "spread_type": "extreme",
+      "profile_intensity": "extreme",
+      "threshold_band": "extreme",
+      "threshold_weight": 1.4
+    },
+    "spread_profile": {
+      "flatness_score": 0.8,
+      "polarization_score": 0.5,
+      "dominance_gap": 1.27,
+      "total_spread": 2.48,
+      "variance": 0.41,
+      "balanced_vs_extreme": "extreme",
+      "tension_distribution": "tensioned",
+      "profile_shape": "flat",
+      "profile_shape_confidence": 0.93
+    },
+    "tension_pairs": {
+      "velocity_vs_fidelity": -0.29,
+      "vector_vs_signal": 1.27,
+      "horizon_vs_flex": -0.25,
+      "leverage_vs_flex": -0.15,
+      "active_tensions": [
+        "vector_vs_signal"
+      ],
+      "tension_count": 1
+    },
+    "dominance_gravity": {
+      "strongest_system": "vector",
+      "gravity_strength": 2,
+      "downstream_influence": [
+        {
+          "dimension": "horizon",
+          "correlation": 0.65,
+          "influenced_by_suppression": false
+        },
+        {
+          "dimension": "leverage",
+          "correlation": 0.72,
+          "influenced_by_suppression": false
+        }
+      ],
+      "drives_entire_profile": true,
+      "suppression_effects_active": true
+    },
+    "amplitude_metrics": {
+      "highest_score": 2,
+      "lowest_score": -0.48,
+      "total_spread": 2.48,
+      "score_variance": 0.41
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 2,
+      "speed_vs_fidelity": -0.29,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "extreme",
+      "active_suppression": true,
+      "profile_intensity": "extreme"
+    },
+    "metadata": {
+      "baseline_hash": "2:0.88:0.78:0.63",
+      "rescoring_timestamp": "2026-05-30T00:29:33.265Z",
+      "rescoring_engine_version": "v2.0.0",
+      "input_canonical_keys": "(full canonical)",
+      "phase_features": [
+        "threshold_gravity",
+        "compensatory_suppression",
+        "flatness_preservation",
+        "tension_amplification",
+        "extremity_differentiation",
+        "render_ready_intelligence"
+      ]
+    }
+  },
+  "synthetic_validation": {
+    "archetype": "Marketing Creative",
+    "intended_role": "Creative marketing lead for a consumer wellness brand",
+    "generated_by": "docs/validation/generate-archetype-lab.mjs",
+    "gpt_rescoring_status": "skipped_not_enabled"
+  },
+  "behavioral_intelligence_v1": {
+    "extraction_version": "v1.0.0-tier1",
+    "extraction_timestamp": "2026-05-30T00:29:33.265Z",
+    "profile_id": "mm-20260529-mkc9r4t1",
+    "extraction_time_ms": 0,
+    "domains": {
+      "operatingSystem": {
+        "title": "Known Operating System",
+        "confidence": "tier_1_high",
+        "source_fields": [
+          "top_systems.primary_driver",
+          "top_systems.secondary_stabilizer",
+          "vector_scores",
+          "dimension_tradeoffs"
+        ],
+        "summary": "Enters situations with direction already forming; pulls team toward action. Stabilized by reads room tension before people speak; adjusts based on perceived dynamics.",
+        "primary_driver": {
+          "dimension": "vector",
+          "score": 2,
+          "rank": 1,
+          "description": "moderate Command (Vector)",
+          "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
+          "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
+        },
+        "secondary_stabilizer": {
+          "dimension": "signal",
+          "score": 0.88,
+          "rank": 2,
+          "description": "low Relational Awareness (Signal)",
+          "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+          "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
+        },
+        "opposing_patterns": [
+          {
+            "dimension": "velocity",
+            "score": 0.33,
+            "rank": 7,
+            "description": "low Tempo (Velocity)",
+            "operating_manifestation": "Prefers speed; moves to action quickly; impatient with deliberation"
+          },
+          {
+            "dimension": "framework",
+            "score": -0.5,
+            "rank": 8,
+            "description": "low Structure (Framework)",
+            "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles"
+          }
+        ],
+        "core_tradeoff": {
+          "dimensions": [],
+          "tradeoff": "",
+          "cost": "",
+          "manifestation": ""
+        },
+        "all_scores": {
+          "vector": 2,
+          "signal": 0.88,
+          "fidelity": 0.63,
+          "velocity": 0.33,
+          "leverage": 0.5,
+          "flex": 0.78,
+          "framework": -0.5,
+          "horizon": 0.4
+        },
+        "key_signals": [
+          "Primary: vector (2.0)",
+          "Secondary: signal (0.9)",
+          "Core tension: Not identified"
+        ],
+        "causal_interpretation": "Primary (vector) drives forward movement. Secondary (signal) provides stabilization. Friction emerges when systems conflict."
+      },
+      "worldExperience": {
+        "title": "How You Experience The World",
+        "confidence": "tier_2_medium_high",
+        "source_fields": [
+          "vector_scores",
+          "primary_driver.operating_manifestation"
+        ],
+        "summary": "Action-focused perception, thorough processing, near-term focus. World experienced through vector lens.",
+        "perception_filter": {
+          "signal": "What you notice first",
+          "score": 0.88,
+          "interpretation": "Action-focused perception—notices results, momentum, forward movement first."
+        },
+        "information_processing": {
+          "speed": 0.33,
+          "detail": 0.63,
+          "interpretation": "Processes thoroughly, prioritizes accuracy over speed."
+        },
+        "decision_formation": {
+          "primary_path": "Enters situations with direction already forming; pulls team toward action",
+          "structure_bias": -0.5,
+          "interpretation": "Decisions form through balanced assessment of options."
+        },
+        "time_horizon": {
+          "score": 0.4,
+          "interpretation": "Near-term time horizon—focuses on immediate next steps and short cycles."
+        },
+        "risk_calibration": {
+          "flex_score": 0.78,
+          "vector_score": 2,
+          "interpretation": "Moderate risk calibration—situational assessment drives risk decisions."
+        },
+        "key_signals": [
+          "Signal (perception): 0.9",
+          "Velocity vs Fidelity: 0.3 vs 0.6",
+          "Horizon (future): 0.4",
+          "Flex (adaptability): 0.8"
+        ],
+        "causal_interpretation": "Dimension scores shape perceptual filters → decision formation → behavioral patterns."
+      },
+      "othersExperience": {
+        "title": "How Others Experience You",
+        "confidence": "tier_3_medium",
+        "source_fields": [
+          "primary_driver",
+          "vector_scores",
+          "communication_style",
+          "leadership_architecture",
+          "stall_patterns.frustrations",
+          "hidden_risk_patterns.relational_erosion_risk"
+        ],
+        "summary": "Team experiences Command as primary organizing force. Command-first communication structure shapes relational dynamics.",
+        "first_impression": {
+          "primary_signal": "vector",
+          "team_evidence": "Team experiences Command as primary organizing force",
+          "interpretation": "Team experiences Command as primary organizing force. Others experience purposeful energy, though less intensely directive."
+        },
+        "communication_pattern": {
+          "structure": "Command-first communication structure",
+          "directness": "moderate",
+          "emotional_calibration": "Low emotional smoothing — message delivery prioritizes clarity over reception management",
+          "fidelity_score": 0.63,
+          "velocity_score": 0.33,
+          "interpretation": "Command-first communication structure. Low emotional smoothing — message delivery prioritizes clarity over reception management"
+        },
+        "listening_pattern": {
+          "signal_score": 0.88,
+          "vector_dominance": 2,
+          "under_pressure": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
+          "interpretation": "Normal state: Listening filters for action—relational awareness exists but not primary focus.. Under pressure: Moderate-High - Under stress, relational awareness disappears; damage done without awareness"
+        },
+        "relational_friction": {
+          "friction_admitted": true,
+          "erosion_risk": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
+          "interpretation": "Relational friction acknowledged in stall patterns. Risk: Moderate-High - Under stress, relational awareness disappears; damage done without awareness"
+        },
+        "key_signals": [
+          "Structure: Command-first communication structure",
+          "Calibration: Low emotional smoothing — message delivery priorit...",
+          "Relational risk: Moderate-High - Under stress, relational awareness disappear...",
+          "Team sees: Team experiences Command as primary organizing for..."
+        ],
+        "causal_interpretation": "Operating system → communication structure → relational patterns → friction points under pressure → organizational consequences."
+      },
+      "pressureMechanics": {
+        "title": "Pressure Mechanics (Starter)",
+        "confidence": "tier_2_medium_high",
+        "source_fields": [
+          "primary_driver.pressure_manifestation",
+          "secondary_stabilizer.pressure_manifestation",
+          "stress_patterns"
+        ],
+        "summary": "Under pressure: Under strain, decisiveness increases; moves faster, reads less. Secondary system: Under strain, relational awareness increases; can create hesitation.",
+        "primary_under_load": {
+          "dimension": "vector",
+          "normal_state": "Enters situations with direction already forming; pulls team toward action",
+          "pressure_state": "Under strain, decisiveness increases; moves faster, reads less",
+          "interpretation": "Under pressure: Under strain, decisiveness increases; moves faster, reads less"
+        },
+        "secondary_override": {
+          "dimension": "signal",
+          "normal_state": "Reads room tension before people speak; adjusts based on perceived dynamics",
+          "override_pattern": "Under strain, relational awareness increases; can create hesitation",
+          "interpretation": "Secondary system response: Under strain, relational awareness increases; can create hesitation"
+        },
+        "stress_patterns_available": true,
+        "key_signals": [
+          "Primary pressure: Under strain, decisiveness increases; moves faster, reads less",
+          "Secondary pressure: Under strain, relational awareness increases; can create hesitation",
+          "Stress patterns: 6 dimensions tracked"
+        ],
+        "causal_interpretation": "Normal operating → pressure applied → primary intensifies → secondary compensates or overrides.",
+        "note": "Full pressure mechanics (all 8 dimensions, breaking points, recovery) in Phase 2."
+      },
+      "contradictions": {
+        "title": "Hidden Contradictions",
+        "confidence": "tier_3_medium",
+        "source_fields": [
+          "contradictions",
+          "dimension_tradeoffs",
+          "hidden_risk_patterns"
+        ],
+        "summary": "No structural contradictions currently identified in dossier.",
+        "contradiction_count": 0,
+        "contradictions": [],
+        "core_tradeoff": null,
+        "organizational_cost": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness; Burnout risk: Moderate - Relational friction drains energy; isolation increases over time",
+        "key_signals": [
+          "0 contradictions identified",
+          "Severity not assessed",
+          "Core friction not mapped",
+          "Relational cost: Moderate-High - Under stress, relational awareness..."
+        ],
+        "causal_interpretation": "Structural tension (what you value vs what you default to) → behavioral manifestation (what others see) → organizational cost (friction, erosion, ceiling) → resolution path (what needs to shift)."
+      },
+      "scalingConstraint": {
+        "title": "Scaling Constraint",
+        "confidence": "tier_2_medium",
+        "source_fields": [
+          "infrastructure_maturity",
+          "future_ceiling",
+          "growth_trajectory",
+          "stated_goals"
+        ],
+        "summary": "Scaling constraint not identified.",
+        "current_systems_capacity": {
+          "capacity_description": "unknown",
+          "readiness_level": "unknown",
+          "interpretation": "Current infrastructure: unknown. Readiness: unknown."
+        },
+        "stated_vs_supported": {
+          "stated_growth_target": "",
+          "infrastructure_readiness": "unknown",
+          "gap_exists": true,
+          "interpretation": "Growth + infrastructure aligned."
+        },
+        "ceiling_mechanics": {
+          "primary_constraint": "",
+          "ceiling_description": "",
+          "growth_pattern": "",
+          "interpretation": "Ceiling not yet identified."
+        },
+        "implications": {
+          "without_infrastructure": "Constraint not identified.",
+          "with_infrastructure": "Address . Highest-leverage investment."
+        },
+        "key_signals": [
+          "No constraint identified",
+          "Systems readiness: unknown"
+        ]
+      },
+      "decisionArchitecture": {
+        "title": "Decision Architecture",
+        "confidence": "tier_2_medium",
+        "source_fields": [
+          "decision_making_patterns",
+          "execution_identity",
+          "delegation_resistance"
+        ],
+        "summary": "Model: . Speed: unknown.",
+        "decision_velocity": {
+          "speed": "unknown",
+          "data_requirements": "",
+          "vector_score": 2,
+          "interpretation": "Speed: unknown. Data: context-dependent."
+        },
+        "execution_model": {
+          "claimed": "",
+          "actual": "",
+          "gap_description": "",
+          "gap_exists": false,
+          "interpretation": "Execution model: "
+        },
+        "delegation_resistance": {
+          "what_resists_delegation": [],
+          "resistance_reason": "",
+          "interpretation": "No delegation resistance. Open."
+        },
+        "organizational_consequences": {
+          "decision_bottleneck": "Decision velocity sufficient",
+          "delegation_ceiling": "Delegation open"
+        },
+        "key_signals": [
+          "Decision velocity: unknown",
+          "Model aligned",
+          "Open"
+        ]
+      },
+      "organizationalConsequences": {
+        "title": "Organizational Consequences",
+        "confidence": "tier_3_medium",
+        "source_fields": [
+          "contradictions",
+          "hidden_risk_patterns",
+          "infrastructure_maturity",
+          "stall_patterns"
+        ],
+        "summary": "3 domains: relational, infrastructure, energy. Primary: Moderate-High - Under stress, relational awareness disappears; damage done without awareness.",
+        "consequence_matrix": [
+          {
+            "domain": "relational",
+            "cost": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness"
+          },
+          {
+            "domain": "infrastructure",
+            "cost": "Systems weak"
+          },
+          {
+            "domain": "energy",
+            "cost": "Moderate - Relational friction drains energy; isolation increases over time"
+          }
+        ],
+        "consequence_count": 3,
+        "key_signals": [
+          "relational: Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
+          "infrastructure: Systems weak",
+          "energy: Moderate - Relational friction drains energy; isolation increases over time"
+        ]
+      },
+      "facilitatorNotes": {
+        "title": "Facilitator Notes",
+        "confidence": "tier_3_medium",
+        "source_fields": [
+          "execution_identity",
+          "decision_making_patterns",
+          "delegation_resistance",
+          "infrastructure_maturity",
+          "contradictions"
+        ],
+        "summary": "0 structural guidance notes.",
+        "note_count": 0,
+        "notes": [],
+        "primary_guidance": "Insufficient evidence.",
+        "caution": "Environment design notes, not behavior coaching. Operator function is fixed; organization design is flexible."
+      },
+      "fiveFutures": {
+        "futures": [
+          {
+            "title": "Momentum Empire",
+            "likelihood": "likely",
+            "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
+            "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+            "profile_specific": true
+          },
+          {
+            "title": "vector Amplified",
+            "likelihood": "possible",
+            "trajectory": "Strength fully deployed. vector becomes organizational competitive advantage.",
+            "organization_experiences": "Organization becomes advantage carrier. vector strength compounds into competitive edge.",
+            "profile_specific": true
+          },
+          {
+            "title": "Speed Spiral",
+            "likelihood": "likely",
+            "trajectory": "Vector becomes impatience. Quick decisions become reckless. Organization experiences whiplash. Course corrections break trust.",
+            "organization_experiences": "Organization experiences constant course corrections. Whiplash. Talent attrition increases.",
+            "profile_specific": true
+          },
+          {
+            "title": "Team Bottleneck Spiral",
+            "likelihood": "likely",
+            "trajectory": "Operator speed outpaces team capacity. Team feels left behind. Operator frustrated. Communication breaks down.",
+            "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
+            "profile_specific": true
+          },
+          {
+            "title": "Structured Velocity",
+            "likelihood": "possible",
+            "trajectory": "Infrastructure built. Systems support speed. Operator can delegate. Organization scales without operator bottleneck.",
+            "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
+            "profile_specific": true
+          }
+        ],
+        "summary": "Five trajectory scenarios emerge from your current operating pattern.",
+        "most_likely": {
+          "title": "Momentum Empire",
+          "likelihood": "likely",
+          "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
+          "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+          "profile_specific": true
+        }
+      },
+      "theOneMove": {
+        "title": "The One Move",
+        "confidence": "tier_3_low",
+        "source_fields": [
+          "infrastructure_maturity",
+          "delegation_resistance",
+          "contradictions",
+          "hidden_risk_patterns"
+        ],
+        "summary": "Highest-leverage intervention.",
+        "the_move": "Reduce load through structure, not faster thinking",
+        "reasoning": "Energy depletion indicated. Load reduction more sustainable than speed.",
+        "timeline": "90 days to shift trajectory. 6-9 months for full organizational shift.",
+        "caution": "Not advice. Highest-leverage intervention based on evidence."
+      }
+    }
+  }
+}
