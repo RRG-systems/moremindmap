@@ -1259,41 +1259,30 @@ function VisualDNASection({ visualDNA }) {
       <div className="visual-dna-shell">
         <div className="visual-dna-copy">
           <div className="section-kicker">VISUAL DNA</div>
-          <h2>Behavioral Operating System Image</h2>
+          <h2>A visual representation of your Behavioral Operating System.</h2>
           <p>
-            Test-mode downstream visualization layer. Image generation remains outside
-            retrieval and storage; this card proves the full profile packet is ready.
+            Built from your scoring, Behavioral DNA, pressure mechanics, strengths,
+            constraints, and role-fit signals, this image compresses the most important
+            parts of your profile into a single visual model.
           </p>
-          <div className="visual-dna-meta">
-            <div>
-              <span>Profile ID</span>
-              <strong>{visualDNA.profile_id || 'pending'}</strong>
-            </div>
-            <div>
-              <span>Prompt Hash</span>
-              <strong>{visualDNA.prompt_hash}</strong>
-            </div>
-            <div>
-              <span>Status</span>
-              <strong>{visualDNA.status}</strong>
-            </div>
-            <div>
-              <span>Image Mode</span>
-              <strong>{visualDNA.image_mode}</strong>
-            </div>
-          </div>
+          <p>Think of it as a map of how you create value.</p>
+          <p>
+            Many people save this image as a desktop background, leadership reference,
+            coaching reminder, or decision-making guide because it captures the essence
+            of their operating system at a glance.
+          </p>
         </div>
 
-        <div className="visual-dna-preview-frame" role="img" aria-label="Visual DNA test image">
+        <div className="visual-dna-preview-frame" role="img" aria-label="Visual DNA image">
           {visualDNA.image_url ? (
-            <img src={visualDNA.image_url} alt="Visual DNA generated test output" />
+            <img src={visualDNA.image_url} alt="Visual DNA operating system map" />
           ) : (
             <div className="visual-dna-placeholder">
               <div className="visual-dna-orbit orbit-one" />
               <div className="visual-dna-orbit orbit-two" />
               <div className="visual-dna-core">
-                <span>Test Image</span>
-                <strong>Generated</strong>
+                <span>Visual DNA</span>
+                <strong>Ready</strong>
               </div>
               <div className="visual-dna-node node-a" />
               <div className="visual-dna-node node-b" />
@@ -1301,8 +1290,7 @@ function VisualDNASection({ visualDNA }) {
             </div>
           )}
           <div className="visual-dna-image-label">
-            <span>Visual DNA V1</span>
-            <strong>{visualDNA.prompt_hash}</strong>
+            <span>Behavioral Operating System</span>
           </div>
         </div>
       </div>
