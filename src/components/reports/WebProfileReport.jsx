@@ -1212,8 +1212,22 @@ function isVisualDNAVisible() {
   return import.meta.env.VITE_VISUAL_DNA_VISIBLE === 'true';
 }
 
+const VISUAL_DNA_TEST_PROFILES = new Set([
+  'mm-20260529-ceo8x7q2',
+  'mm-20260529-acc2f9d6',
+]);
+
+const VISUAL_DNA_TEST_IMAGES = {
+  'mm-20260529-ceo8x7q2': '/visual-dna-test/marcus-vale.png',
+  'mm-20260529-acc2f9d6': '/visual-dna-test/nora-bell.png',
+};
+
+function isVisualDNATestProfile(profileId) {
+  return VISUAL_DNA_TEST_PROFILES.has(String(profileId || '').toLowerCase());
+}
+
 function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, ranked, profileId, personName, company }) {
-  if (!isVisualDNAVisible()) return null;
+  if (!isVisualDNAVisible() || !isVisualDNATestProfile(profileId)) return null;
 
   const contextPacket = buildVisualDNAContextPacket({
     canonical,
@@ -1227,11 +1241,13 @@ function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, r
   const promptResult = buildVisualDNAPrompt(contextPacket);
 
   return {
-    status: 'prompt_ready',
+    status: 'generated_test_image',
     profile_id: profileId,
     prompt_hash: promptResult.prompt_hash,
     prompt: promptResult.prompt,
     context_packet: contextPacket,
+    image_mode: 'static_test_asset_no_persistence',
+    image_url: VISUAL_DNA_TEST_IMAGES[String(profileId || '').toLowerCase()] || null,
   };
 }
 
@@ -1245,8 +1261,8 @@ function VisualDNASection({ visualDNA }) {
           <div className="section-kicker">VISUAL DNA</div>
           <h2>Behavioral Operating System Image</h2>
           <p>
-            Downstream visualization layer. No image generation runs in the browser;
-            this card proves the prompt packet is ready.
+            Test-mode downstream visualization layer. Image generation remains outside
+            retrieval and storage; this card proves the full profile packet is ready.
           </p>
           <div className="visual-dna-meta">
             <div>
@@ -1261,19 +1277,33 @@ function VisualDNASection({ visualDNA }) {
               <span>Status</span>
               <strong>{visualDNA.status}</strong>
             </div>
+            <div>
+              <span>Image Mode</span>
+              <strong>{visualDNA.image_mode}</strong>
+            </div>
           </div>
         </div>
 
-        <div className="visual-dna-placeholder" role="img" aria-label="Visual DNA preview placeholder">
-          <div className="visual-dna-orbit orbit-one" />
-          <div className="visual-dna-orbit orbit-two" />
-          <div className="visual-dna-core">
-            <span>Prompt Ready</span>
-            <strong>Image Disabled</strong>
+        <div className="visual-dna-preview-frame" role="img" aria-label="Visual DNA test image">
+          {visualDNA.image_url ? (
+            <img src={visualDNA.image_url} alt="Visual DNA generated test output" />
+          ) : (
+            <div className="visual-dna-placeholder">
+              <div className="visual-dna-orbit orbit-one" />
+              <div className="visual-dna-orbit orbit-two" />
+              <div className="visual-dna-core">
+                <span>Test Image</span>
+                <strong>Generated</strong>
+              </div>
+              <div className="visual-dna-node node-a" />
+              <div className="visual-dna-node node-b" />
+              <div className="visual-dna-node node-c" />
+            </div>
+          )}
+          <div className="visual-dna-image-label">
+            <span>Visual DNA V1</span>
+            <strong>{visualDNA.prompt_hash}</strong>
           </div>
-          <div className="visual-dna-node node-a" />
-          <div className="visual-dna-node node-b" />
-          <div className="visual-dna-node node-c" />
         </div>
       </div>
     </section>
@@ -2086,10 +2116,54 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
           overflow-wrap: anywhere;
         }
 
-        .visual-dna-placeholder {
+        .visual-dna-preview-frame {
+          position: relative;
           min-height: 320px;
           border: 1px solid rgba(34, 211, 238, 0.25);
           border-radius: 16px;
+          background: rgba(2, 6, 23, 0.82);
+          overflow: hidden;
+        }
+
+        .visual-dna-preview-frame img {
+          display: block;
+          width: 100%;
+          height: 100%;
+          min-height: 320px;
+          object-fit: contain;
+        }
+
+        .visual-dna-image-label {
+          position: absolute;
+          left: 1rem;
+          bottom: 1rem;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.65rem 0.8rem;
+          border: 1px solid rgba(15, 23, 42, 0.35);
+          border-radius: 8px;
+          background: rgba(2, 6, 23, 0.72);
+          backdrop-filter: blur(12px);
+        }
+
+        .visual-dna-image-label span {
+          color: rgba(226, 232, 240, 0.7);
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .visual-dna-image-label strong {
+          color: #fb923c;
+          font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+          font-size: 0.8rem;
+        }
+
+        .visual-dna-placeholder {
+          position: absolute;
+          inset: 0;
+          min-height: 320px;
           background:
             radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.18), transparent 24%),
             radial-gradient(circle at 70% 35%, rgba(249, 115, 22, 0.14), transparent 18%),
