@@ -2,7 +2,7 @@
   "profile_id": "mm-20260529-ceo8x7q2",
   "vector_scores": {
     "vector": 0.89,
-    "signal": 0.5,
+    "signal": 0.17,
     "fidelity": 0.67,
     "velocity": 0.73,
     "leverage": 0.5,
@@ -14,10 +14,15 @@
     {
       "dimension": "vector",
       "score": 0.89,
+      "raw_score": 0.89,
+      "support_adjusted_score": 0.89,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 16,
       "contributing_answer_count": 16,
+      "distance_from_neutral": 0.89,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -40,10 +45,15 @@
     {
       "dimension": "velocity",
       "score": 0.73,
+      "raw_score": 0.73,
+      "support_adjusted_score": 0.73,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 13,
       "contributing_answer_count": 13,
+      "distance_from_neutral": 0.73,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -63,10 +73,15 @@
     {
       "dimension": "fidelity",
       "score": 0.67,
+      "raw_score": 0.67,
+      "support_adjusted_score": 0.67,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.67,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         9,
@@ -74,23 +89,17 @@
       ]
     },
     {
-      "dimension": "signal",
-      "score": 0.5,
-      "rank": 4,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 4,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         7,
         11,
@@ -101,10 +110,15 @@
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         9,
@@ -116,10 +130,15 @@
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7,
+      "raw_score": 0.3,
+      "support_adjusted_score": 0.3,
+      "rank": 6,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.3,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         4,
@@ -129,12 +148,33 @@
       ]
     },
     {
+      "dimension": "signal",
+      "score": 0.17,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "rank": 7,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "flex",
       "score": -0.5,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.5,
       "rank": 8,
       "confidence": 0.75,
       "evidence_count": 7,
       "contributing_answer_count": 7,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         5,
@@ -164,12 +204,12 @@
       "pressure_manifestation": "Under strain, speed preference increases; detail drops"
     },
     "opposing_pattern_1": {
-      "dimension": "framework",
-      "score": 0.3,
+      "dimension": "signal",
+      "score": 0.5,
       "rank": 7,
-      "description": "low Structure (Framework)",
-      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
-      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
+      "description": "low Relational Awareness (Signal)",
+      "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+      "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
     },
     "opposing_pattern_2": {
       "dimension": "flex",

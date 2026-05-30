@@ -5,25 +5,99 @@
   "profile_id": "mm-20260529-rec6n2p4",
   "top_3_dimensions": [
     "Signal 0.96",
-    "Velocity 0.75",
-    "Horizon 0.67"
+    "Horizon 0.67",
+    "Fidelity 0.63"
   ],
   "bottom_2_dimensions": [
     "Framework 0.00",
-    "Vector -0.50"
+    "Vector -0.17"
   ],
   "primary_engine": "Signal",
-  "secondary_engine": "Velocity",
+  "secondary_engine": "Horizon",
   "primary_evidence_count": 17,
   "evidence_counts": {
     "signal": 17,
-    "velocity": 2,
     "horizon": 3,
     "fidelity": 8,
     "flex": 15,
+    "velocity": 2,
     "leverage": 7,
     "framework": 2,
     "vector": 1
+  },
+  "amplitude_fields": {
+    "signal": {
+      "raw_score": 0.96,
+      "support_adjusted_score": 0.96,
+      "evidence_count": 17,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
+      "distance_from_neutral": 0.96
+    },
+    "horizon": {
+      "raw_score": 0.67,
+      "support_adjusted_score": 0.67,
+      "evidence_count": 3,
+      "confidence": 0.65,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.67
+    },
+    "fidelity": {
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
+      "evidence_count": 8,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.63
+    },
+    "flex": {
+      "raw_score": 0.6,
+      "support_adjusted_score": 0.6,
+      "evidence_count": 15,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.6
+    },
+    "velocity": {
+      "raw_score": 0.75,
+      "support_adjusted_score": 0.5,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.5
+    },
+    "leverage": {
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "evidence_count": 7,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.5
+    },
+    "framework": {
+      "raw_score": 0,
+      "support_adjusted_score": 0,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
+      "distance_from_neutral": 0
+    },
+    "vector": {
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.17,
+      "evidence_count": 1,
+      "confidence": 0.45,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.17
+    }
   },
   "natural_advantage": "Reads candidate hesitation and hiring-manager subtext early.",
   "natural_risk": "Can over-adapt to keep both sides comfortable, delaying hard truth.",
@@ -64,41 +138,107 @@
   "rescoring_summary": {
     "source": "rescoring_v1",
     "primary_dimension": "signal",
-    "secondary_dimension": "velocity",
+    "secondary_dimension": "horizon",
     "ranked_dimensions": [
       {
         "dimension": "signal",
-        "score": 0.96
-      },
-      {
-        "dimension": "velocity",
-        "score": 0.73
+        "score": 0.96,
+        "raw_score": 0.96,
+        "support_adjusted_score": 0.96,
+        "evidence_count": 17,
+        "confidence": 0.722,
+        "evidence_band": "strong",
+        "intensity_band": "extreme"
       },
       {
         "dimension": "horizon",
-        "score": 0.53
+        "score": 0.53,
+        "raw_score": 0.67,
+        "support_adjusted_score": 0.67,
+        "evidence_count": 3,
+        "confidence": 0.746,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "fidelity",
-        "score": 0.61
+        "score": 0.61,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
+        "evidence_count": 8,
+        "confidence": 0.722,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "flex",
-        "score": 0.46
+        "score": 0.46,
+        "raw_score": 0.6,
+        "support_adjusted_score": 0.6,
+        "evidence_count": 15,
+        "confidence": 0.746,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
+      },
+      {
+        "dimension": "velocity",
+        "score": 0.49,
+        "raw_score": 0.75,
+        "support_adjusted_score": 0.5,
+        "evidence_count": 2,
+        "confidence": 0.674,
+        "evidence_band": "moderate",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "leverage",
-        "score": 0.49
+        "score": 0.49,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
+        "evidence_count": 7,
+        "confidence": 0.674,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "framework",
-        "score": 0
+        "score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
+        "evidence_count": 2,
+        "confidence": 0.722,
+        "evidence_band": "moderate",
+        "intensity_band": "low"
       },
       {
         "dimension": "vector",
-        "score": -0.48
+        "score": -0.16,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.17,
+        "evidence_count": 1,
+        "confidence": 0.674,
+        "evidence_band": "thin",
+        "intensity_band": "low"
       }
     ],
+    "dominance_profile": {
+      "primary_dimension": "signal",
+      "secondary_dimension": "horizon",
+      "dominance_amplitude": 0.96,
+      "spread_type": "balanced",
+      "profile_intensity": "medium",
+      "threshold_band": "extreme",
+      "threshold_weight": 1.4
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.96,
+      "speed_vs_fidelity": -0.12,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "extreme",
+      "active_suppression": true,
+      "profile_intensity": "medium"
+    },
     "render_ready_keys": [
       "dna_summary",
       "command_clarity",

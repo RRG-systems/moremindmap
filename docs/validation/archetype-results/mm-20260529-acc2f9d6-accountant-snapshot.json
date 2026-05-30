@@ -4,26 +4,100 @@
   "intended_role": "Senior accountant managing monthly close and audit support",
   "profile_id": "mm-20260529-acc2f9d6",
   "top_3_dimensions": [
-    "Vector 1.00",
     "Fidelity 0.82",
-    "Framework 0.77"
+    "Framework 0.77",
+    "Signal 0.50"
   ],
   "bottom_2_dimensions": [
-    "Velocity -0.50",
+    "Velocity -0.33",
     "Leverage 0.00"
   ],
-  "primary_engine": "Vector",
-  "secondary_engine": "Fidelity",
-  "primary_evidence_count": 1,
+  "primary_engine": "Fidelity",
+  "secondary_engine": "Framework",
+  "primary_evidence_count": 18,
   "evidence_counts": {
-    "vector": 1,
     "fidelity": 18,
     "framework": 11,
     "signal": 8,
     "horizon": 9,
     "flex": 6,
+    "vector": 1,
     "velocity": 2,
     "leverage": 0
+  },
+  "amplitude_fields": {
+    "fidelity": {
+      "raw_score": 0.82,
+      "support_adjusted_score": 0.82,
+      "evidence_count": 18,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.82
+    },
+    "framework": {
+      "raw_score": 0.77,
+      "support_adjusted_score": 0.77,
+      "evidence_count": 11,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.77
+    },
+    "signal": {
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "evidence_count": 8,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.5
+    },
+    "horizon": {
+      "raw_score": 0.44,
+      "support_adjusted_score": 0.44,
+      "evidence_count": 9,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.44
+    },
+    "flex": {
+      "raw_score": 0.42,
+      "support_adjusted_score": 0.42,
+      "evidence_count": 6,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.42
+    },
+    "vector": {
+      "raw_score": 1,
+      "support_adjusted_score": 0.33,
+      "evidence_count": 1,
+      "confidence": 0.45,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.33
+    },
+    "velocity": {
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.33
+    },
+    "leverage": {
+      "raw_score": 0,
+      "support_adjusted_score": 0,
+      "evidence_count": 0,
+      "confidence": 0.2,
+      "evidence_band": "none",
+      "intensity_band": "low",
+      "distance_from_neutral": 0
+    }
   },
   "natural_advantage": "Protects accuracy, repeatability, and audit readiness.",
   "natural_risk": "May slow movement when imperfect inputs require a pragmatic cutoff.",
@@ -32,7 +106,7 @@
   "best_environment": "Stable finance environment with clear close calendar and respect for controls.",
   "worst_environment": "Chaotic growth setting where precision is treated as obstruction.",
   "initial_role_fit_judgment": "Strong accountant fit; risk rises in roles demanding constant ambiguous tradeoffs.",
-  "scoring_notes": "Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.",
+  "scoring_notes": "Top dimensions fidelity, framework, signal broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.",
   "role_fit_analysis": {
     "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
     "operator_vs_visionary": "Balanced - Can operate and envision",
@@ -63,42 +137,108 @@
   },
   "rescoring_summary": {
     "source": "rescoring_v1",
-    "primary_dimension": "vector",
-    "secondary_dimension": "fidelity",
+    "primary_dimension": "fidelity",
+    "secondary_dimension": "framework",
     "ranked_dimensions": [
       {
-        "dimension": "vector",
-        "score": 0.99
-      },
-      {
         "dimension": "fidelity",
-        "score": 0.79
+        "score": 0.81,
+        "raw_score": 0.82,
+        "support_adjusted_score": 0.82,
+        "evidence_count": 18,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "framework",
-        "score": 0.75
+        "score": 0.74,
+        "raw_score": 0.77,
+        "support_adjusted_score": 0.77,
+        "evidence_count": 11,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "signal",
-        "score": 0.36
+        "score": 0.49,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
+        "evidence_count": 8,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "horizon",
-        "score": 0.43
+        "score": 0.43,
+        "raw_score": 0.44,
+        "support_adjusted_score": 0.44,
+        "evidence_count": 9,
+        "confidence": 0.696,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "flex",
-        "score": 0.29
+        "score": 0.33,
+        "raw_score": 0.42,
+        "support_adjusted_score": 0.42,
+        "evidence_count": 6,
+        "confidence": 0.696,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
+      },
+      {
+        "dimension": "vector",
+        "score": 0.25,
+        "raw_score": 1,
+        "support_adjusted_score": 0.33,
+        "evidence_count": 1,
+        "confidence": 0.696,
+        "evidence_band": "thin",
+        "intensity_band": "low"
       },
       {
         "dimension": "velocity",
-        "score": -0.48
+        "score": -0.32,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.33,
+        "evidence_count": 2,
+        "confidence": 0.696,
+        "evidence_band": "moderate",
+        "intensity_band": "low"
       },
       {
         "dimension": "leverage",
-        "score": 0
+        "score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
+        "evidence_count": 0,
+        "confidence": 0.2,
+        "evidence_band": "none",
+        "intensity_band": "low"
       }
     ],
+    "dominance_profile": {
+      "primary_dimension": "fidelity",
+      "secondary_dimension": "framework",
+      "dominance_amplitude": 0.82,
+      "spread_type": "balanced",
+      "profile_intensity": "high",
+      "threshold_band": "strong",
+      "threshold_weight": 1.2
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.81,
+      "speed_vs_fidelity": -1.13,
+      "strategic_leverage": 0,
+      "dominance_flavor": "strong",
+      "active_suppression": true,
+      "profile_intensity": "high"
+    },
     "render_ready_keys": [
       "dna_summary",
       "command_clarity",
@@ -179,47 +319,47 @@
     "five_futures": {
       "futures": [
         {
-          "title": "Momentum Empire",
+          "title": "Precision Authority",
           "likelihood": "likely",
-          "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-          "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+          "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+          "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
           "profile_specific": true
         },
         {
-          "title": "vector Amplified",
+          "title": "fidelity Amplified",
           "likelihood": "possible",
-          "trajectory": "Strength fully deployed. vector becomes organizational competitive advantage.",
-          "organization_experiences": "Organization becomes advantage carrier. vector strength compounds into competitive edge.",
+          "trajectory": "Strength fully deployed. fidelity becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. fidelity strength compounds into competitive edge.",
           "profile_specific": true
         },
         {
-          "title": "Speed Spiral",
-          "likelihood": "likely",
-          "trajectory": "Vector becomes impatience. Quick decisions become reckless. Organization experiences whiplash. Course corrections break trust.",
-          "organization_experiences": "Organization experiences constant course corrections. Whiplash. Talent attrition increases.",
+          "title": "Detail Overwhelm",
+          "likelihood": "possible",
+          "trajectory": "Fidelity applied to everything. Organization drowns in specs, processes, reviews. Velocity collapses.",
+          "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
           "profile_specific": true
         },
         {
-          "title": "Team Bottleneck Spiral",
+          "title": "Quality Standards Resentment",
           "likelihood": "likely",
-          "trajectory": "Operator speed outpaces team capacity. Team feels left behind. Operator frustrated. Communication breaks down.",
+          "trajectory": "Fidelity expectations become unreasonable. Team feels constantly judged. Talent leaves. Morale drops.",
           "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
           "profile_specific": true
         },
         {
-          "title": "Structured Velocity",
+          "title": "Sustainable Pace",
           "likelihood": "possible",
-          "trajectory": "Infrastructure built. Systems support speed. Operator can delegate. Organization scales without operator bottleneck.",
+          "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
           "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
           "profile_specific": true
         }
       ],
       "summary": "Five trajectory scenarios emerge from your current operating pattern.",
       "most_likely": {
-        "title": "Momentum Empire",
+        "title": "Precision Authority",
         "likelihood": "likely",
-        "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-        "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+        "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+        "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
         "profile_specific": true
       }
     },

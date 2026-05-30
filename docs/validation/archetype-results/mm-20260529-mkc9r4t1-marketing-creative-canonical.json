@@ -311,7 +311,7 @@
   },
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-30T00:51:49.632Z",
+    "generated_at": "2026-05-30T04:02:15.614Z",
     "model": "synthetic-archetype-validation-v1",
     "person_name": "Ari Vaughn",
     "email": "ari.vaughn.synthetic@example.com",
@@ -346,17 +346,22 @@
     "velocity": 0.33,
     "leverage": 0.5,
     "flex": 0.78,
-    "framework": -0.5,
+    "framework": -0.33,
     "horizon": 0.4
   },
   "ranked_dimensions": [
     {
       "dimension": "signal",
       "score": 0.88,
+      "raw_score": 0.88,
+      "support_adjusted_score": 0.88,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 14,
       "contributing_answer_count": 14,
+      "distance_from_neutral": 0.88,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -377,10 +382,15 @@
     {
       "dimension": "flex",
       "score": 0.78,
+      "raw_score": 0.78,
+      "support_adjusted_score": 0.78,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 18,
       "contributing_answer_count": 18,
+      "distance_from_neutral": 0.78,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -405,10 +415,15 @@
     {
       "dimension": "fidelity",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -419,10 +434,15 @@
     {
       "dimension": "leverage",
       "score": 0.5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         7,
         8,
@@ -435,10 +455,15 @@
     {
       "dimension": "horizon",
       "score": 0.4,
+      "raw_score": 0.4,
+      "support_adjusted_score": 0.4,
       "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.4,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         4,
@@ -450,10 +475,15 @@
     {
       "dimension": "velocity",
       "score": 0.33,
+      "raw_score": 0.33,
+      "support_adjusted_score": 0.33,
       "rank": 6,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         9,
@@ -465,11 +495,16 @@
     },
     {
       "dimension": "framework",
-      "score": -0.5,
+      "score": -0.33,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         21
@@ -478,10 +513,15 @@
     {
       "dimension": "vector",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],
@@ -889,7 +929,7 @@
           "Low framework dimension + high velocity = systems deprioritized"
         ],
         "dimension_support": {
-          "framework": "Low-Moderate (-0.5) - Limited process orientation"
+          "framework": "Low-Moderate (-0.3) - Limited process orientation"
         },
         "contradiction_support": [],
         "confidence": 0.6,
@@ -961,10 +1001,15 @@
     {
       "dimension": "signal",
       "score": 0.88,
+      "raw_score": 0.88,
+      "support_adjusted_score": 0.88,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 14,
       "contributing_answer_count": 14,
+      "distance_from_neutral": 0.88,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -985,10 +1030,15 @@
     {
       "dimension": "flex",
       "score": 0.78,
+      "raw_score": 0.78,
+      "support_adjusted_score": 0.78,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 18,
       "contributing_answer_count": 18,
+      "distance_from_neutral": 0.78,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -1013,10 +1063,15 @@
     {
       "dimension": "fidelity",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -1027,10 +1082,15 @@
     {
       "dimension": "leverage",
       "score": 0.5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         7,
         8,
@@ -1043,10 +1103,15 @@
     {
       "dimension": "horizon",
       "score": 0.4,
+      "raw_score": 0.4,
+      "support_adjusted_score": 0.4,
       "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.4,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         4,
@@ -1058,10 +1123,15 @@
     {
       "dimension": "velocity",
       "score": 0.33,
+      "raw_score": 0.33,
+      "support_adjusted_score": 0.33,
       "rank": 6,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         9,
@@ -1073,11 +1143,16 @@
     },
     {
       "dimension": "framework",
-      "score": -0.5,
+      "score": -0.33,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         21
@@ -1086,25 +1161,35 @@
     {
       "dimension": "vector",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:51:49.632Z",
+    "generated_at": "2026-05-30T04:02:15.614Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "signal",
         "score": 0.88,
         "baseline_score": 0.88,
+        "raw_score": 0.88,
+        "support_adjusted_score": 0.88,
         "evidence_count": 14,
         "contributing_answer_count": 14,
+        "evidence_band": "strong",
+        "intensity_band": "extreme",
+        "distance_from_neutral": 0.88,
         "delta": 0,
         "rank": 1,
         "confidence": 0.674
@@ -1113,8 +1198,13 @@
         "dimension": "flex",
         "score": 0.64,
         "baseline_score": 0.78,
+        "raw_score": 0.78,
+        "support_adjusted_score": 0.78,
         "evidence_count": 18,
         "contributing_answer_count": 18,
+        "evidence_band": "strong",
+        "intensity_band": "high",
+        "distance_from_neutral": 0.78,
         "delta": -0.14,
         "rank": 2,
         "confidence": 0.77
@@ -1123,8 +1213,13 @@
         "dimension": "fidelity",
         "score": 0.61,
         "baseline_score": 0.63,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
         "evidence_count": 4,
         "contributing_answer_count": 4,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.63,
         "delta": -0.02,
         "rank": 3,
         "confidence": 0.674
@@ -1133,8 +1228,13 @@
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
         "evidence_count": 6,
         "contributing_answer_count": 6,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
         "delta": -0.02,
         "rank": 4,
         "confidence": 0.674
@@ -1143,8 +1243,13 @@
         "dimension": "horizon",
         "score": 0.27,
         "baseline_score": 0.4,
+        "raw_score": 0.4,
+        "support_adjusted_score": 0.4,
         "evidence_count": 5,
         "contributing_answer_count": 5,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.4,
         "delta": -0.13,
         "rank": 5,
         "confidence": 0.77
@@ -1153,19 +1258,29 @@
         "dimension": "velocity",
         "score": 0.32,
         "baseline_score": 0.33,
+        "raw_score": 0.33,
+        "support_adjusted_score": 0.33,
         "evidence_count": 6,
         "contributing_answer_count": 6,
+        "evidence_band": "strong",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.33,
         "delta": -0.01,
         "rank": 6,
         "confidence": 0.746
       },
       {
         "dimension": "framework",
-        "score": -0.48,
-        "baseline_score": -0.5,
+        "score": -0.32,
+        "baseline_score": -0.33,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.33,
         "evidence_count": 2,
         "contributing_answer_count": 2,
-        "delta": 0.02,
+        "evidence_band": "moderate",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.33,
+        "delta": 0.01,
         "rank": 7,
         "confidence": 0.674
       },
@@ -1173,8 +1288,13 @@
         "dimension": "vector",
         "score": 0,
         "baseline_score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
         "evidence_count": 0,
         "contributing_answer_count": 0,
+        "evidence_band": "none",
+        "intensity_band": "low",
+        "distance_from_neutral": 0,
         "delta": 0,
         "rank": 8,
         "confidence": 0.2
@@ -1185,16 +1305,16 @@
       "secondary_dimension": "flex",
       "dominance_amplitude": 0.88,
       "spread_type": "balanced",
-      "profile_intensity": "extreme",
+      "profile_intensity": "medium",
       "threshold_band": "extreme",
       "threshold_weight": 1.4
     },
     "spread_profile": {
-      "flatness_score": 0.92,
+      "flatness_score": 0.94,
       "polarization_score": 0.38,
       "dominance_gap": 0.24,
-      "total_spread": 1.36,
-      "variance": 0.16,
+      "total_spread": 1.2,
+      "variance": 0.13,
       "balanced_vs_extreme": "balanced",
       "tension_distribution": "balanced",
       "profile_shape": "flat",
@@ -1230,9 +1350,9 @@
     },
     "amplitude_metrics": {
       "highest_score": 0.88,
-      "lowest_score": -0.48,
-      "total_spread": 1.36,
-      "score_variance": 0.16
+      "lowest_score": -0.32,
+      "total_spread": 1.2,
+      "score_variance": 0.13
     },
     "render_ready": {
       "dna_summary": null,
@@ -1241,11 +1361,11 @@
       "strategic_leverage": 0.49,
       "dominance_flavor": "extreme",
       "active_suppression": true,
-      "profile_intensity": "extreme"
+      "profile_intensity": "medium"
     },
     "metadata": {
       "baseline_hash": "0.88:0.78:0.63:0",
-      "rescoring_timestamp": "2026-05-30T00:51:49.632Z",
+      "rescoring_timestamp": "2026-05-30T04:02:15.614Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [
@@ -1266,7 +1386,7 @@
   },
   "behavioral_intelligence_v1": {
     "extraction_version": "v1.0.0-tier1",
-    "extraction_timestamp": "2026-05-30T00:51:49.632Z",
+    "extraction_timestamp": "2026-05-30T04:02:15.614Z",
     "profile_id": "mm-20260529-mkc9r4t1",
     "extraction_time_ms": 1,
     "domains": {
@@ -1325,7 +1445,7 @@
           "velocity": 0.33,
           "leverage": 0.5,
           "flex": 0.78,
-          "framework": -0.5,
+          "framework": -0.33,
           "horizon": 0.4
         },
         "key_signals": [
@@ -1355,7 +1475,7 @@
         },
         "decision_formation": {
           "primary_path": "Reads room tension before people speak; adjusts based on perceived dynamics",
-          "structure_bias": -0.5,
+          "structure_bias": -0.33,
           "interpretation": "Decisions form through balanced assessment of options."
         },
         "time_horizon": {

@@ -311,7 +311,7 @@
   },
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-30T00:51:49.626Z",
+    "generated_at": "2026-05-30T04:02:15.608Z",
     "model": "synthetic-archetype-validation-v1",
     "person_name": "Nora Bell",
     "email": "nora.bell.synthetic@example.com",
@@ -340,10 +340,10 @@
     }
   },
   "vector_scores": {
-    "vector": 1,
+    "vector": 0.33,
     "signal": 0.5,
     "fidelity": 0.82,
-    "velocity": -0.5,
+    "velocity": -0.33,
     "leverage": 0,
     "flex": 0.42,
     "framework": 0.77,
@@ -351,23 +351,17 @@
   },
   "ranked_dimensions": [
     {
-      "dimension": "vector",
-      "score": 1,
-      "rank": 1,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "fidelity",
       "score": 0.82,
-      "rank": 2,
+      "raw_score": 0.82,
+      "support_adjusted_score": 0.82,
+      "rank": 1,
       "confidence": 0.75,
       "evidence_count": 18,
       "contributing_answer_count": 18,
+      "distance_from_neutral": 0.82,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -392,10 +386,15 @@
     {
       "dimension": "framework",
       "score": 0.77,
-      "rank": 3,
+      "raw_score": 0.77,
+      "support_adjusted_score": 0.77,
+      "rank": 2,
       "confidence": 0.75,
       "evidence_count": 11,
       "contributing_answer_count": 11,
+      "distance_from_neutral": 0.77,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         5,
@@ -413,10 +412,15 @@
     {
       "dimension": "signal",
       "score": 0.5,
-      "rank": 4,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 3,
       "confidence": 0.75,
       "evidence_count": 8,
       "contributing_answer_count": 8,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -431,10 +435,15 @@
     {
       "dimension": "horizon",
       "score": 0.44,
-      "rank": 5,
+      "raw_score": 0.44,
+      "support_adjusted_score": 0.44,
+      "rank": 4,
       "confidence": 0.75,
       "evidence_count": 9,
       "contributing_answer_count": 9,
+      "distance_from_neutral": 0.44,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -450,10 +459,15 @@
     {
       "dimension": "flex",
       "score": 0.42,
-      "rank": 6,
+      "raw_score": 0.42,
+      "support_adjusted_score": 0.42,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.42,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         5,
@@ -464,12 +478,33 @@
       ]
     },
     {
+      "dimension": "vector",
+      "score": 0.33,
+      "raw_score": 1,
+      "support_adjusted_score": 0.33,
+      "rank": 6,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "velocity",
-      "score": -0.5,
+      "score": -0.33,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         15,
         16
@@ -478,29 +513,34 @@
     {
       "dimension": "leverage",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],
   "top_systems": {
     "primary_driver": {
-      "dimension": "vector",
-      "score": 1,
-      "rank": 1,
-      "description": "low Command (Vector)",
-      "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
-      "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
-    },
-    "secondary_stabilizer": {
       "dimension": "fidelity",
       "score": 0.82,
-      "rank": 2,
+      "rank": 1,
       "description": "low Precision (Fidelity)",
       "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
       "pressure_manifestation": "Under strain, precision preference increases; can create delays"
+    },
+    "secondary_stabilizer": {
+      "dimension": "framework",
+      "score": 0.77,
+      "rank": 2,
+      "description": "low Structure (Framework)",
+      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
+      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
     },
     "opposing_pattern_1": {
       "dimension": "velocity",
@@ -569,28 +609,28 @@
     "word_count": 38
   },
   "inferred_patterns": {
-    "profile_type": "Command/Precision",
-    "operating_signature": "Command-driven with Precision stabilization",
+    "profile_type": "Precision/Structure",
+    "operating_signature": "Precision-driven with Structure stabilization",
     "leadership_approach": {
-      "primary_mode": "Establishes direction before consensus forms",
-      "stabilizing_force": "Precision provides structural support",
-      "team_experience": "Clear where we're going, may feel hard to slow down",
-      "challenge_surface": "Speed can outpace shared understanding"
+      "primary_mode": "Verifies assumptions before moving",
+      "stabilizing_force": "Structure provides structural support",
+      "team_experience": "High precision and error-catching",
+      "challenge_surface": "Verification can slow momentum"
     },
     "decision_architecture": {
-      "formation_pattern": "Command drives decision formation",
-      "validation_method": "Precision validates approach",
+      "formation_pattern": "Precision drives decision formation",
+      "validation_method": "Structure validates approach",
       "speed_driver": "Moderate decision velocity",
       "blind_spot": "Low Tempo means velocity signals get missed"
     },
     "communication_style": {
-      "message_structure": "Direction-first, context-later",
-      "effectiveness_peak": "When team already shares urgency",
-      "friction_point": "Can feel too directive in consensus cultures"
+      "message_structure": "Precision-first communication",
+      "effectiveness_peak": "When operating environment values this dimension",
+      "friction_point": "When environment prioritizes opposing dimensions"
     },
     "pressure_response": {
-      "primary_shift": "Accelerates to directive action",
-      "secondary_shift": "Precision becomes compensating mechanism",
+      "primary_shift": "Precision amplifies under pressure",
+      "secondary_shift": "Structure becomes compensating mechanism",
       "blind_spot_emergence": "Tempo disappears — velocity signals get missed"
     }
   },
@@ -607,23 +647,23 @@
     }
   ],
   "stress_patterns": {
-    "primary_stress_response": "Accelerates to directive action — decisions form faster, input window narrows",
-    "secondary_stress_shift": "Precision becomes compensating mechanism — holds system together as Command amplifies",
+    "primary_stress_response": "Increases verification intensity — may get stuck in validation loops",
+    "secondary_stress_shift": "Structure becomes compensating mechanism — holds system together as Precision amplifies",
     "blind_spot_emergence": "Tempo and Influence disappear — these signals don't register until crisis escalates",
     "escalation_chain": [
-      "Mild pressure: Command increases slightly, Tempo signals start getting missed",
-      "Moderate pressure: Command dominates operating system, Precision compensates to maintain function",
-      "Severe pressure: Pure Command execution, blind to Tempo and Influence — repairs relationships/process after conflict resolves"
+      "Mild pressure: Precision increases slightly, Tempo signals start getting missed",
+      "Moderate pressure: Precision dominates operating system, Structure compensates to maintain function",
+      "Severe pressure: Pure Precision execution, blind to Tempo and Influence — repairs relationships/process after conflict resolves"
     ],
     "recovery_paths": [
       "Build explicit Tempo check-ins BEFORE pressure escalates",
-      "Recognize when Command is amplifying — create circuit breakers",
+      "Recognize when Precision is amplifying — create circuit breakers",
       "Post-conflict repair: consciously re-engage Tempo and Influence after stress passes"
     ],
     "pattern_type": "narrowing"
   },
   "communication_style": {
-    "message_structure": "Command-first communication structure",
+    "message_structure": "Precision-first communication structure",
     "directness": "moderate",
     "abstraction_level": "moderate",
     "emotional_calibration": "Low emotional smoothing — message delivery prioritizes clarity over reception management",
@@ -632,12 +672,12 @@
     "calibrations": []
   },
   "leadership_architecture": {
-    "primary_mode": "Command-driven leadership",
-    "stabilizing_force": "Precision provides structural support when Command creates tension",
-    "team_experience": "Team experiences Command as primary organizing force",
-    "challenge_surface": "Command dominance can suppress Tempo — creates blind spot",
+    "primary_mode": "Precision-driven leadership",
+    "stabilizing_force": "Structure provides structural support when Precision creates tension",
+    "team_experience": "Team experiences Precision as primary organizing force",
+    "challenge_surface": "Precision dominance can suppress Tempo — creates blind spot",
     "dissent_tolerance": "moderate",
-    "development_orientation": "Development approach reflects Command priority",
+    "development_orientation": "Development approach reflects Precision priority",
     "calibrations": []
   },
   "development_targets": [
@@ -963,11 +1003,11 @@
     "high_inevitability_chains": 1
   },
   "narrative_profile": {
-    "executive_summary": "This is a Command/Precision profile - command-driven with precision stabilization. Command-driven leadership. Command dominance can suppress Tempo — creates blind spot.",
-    "leadership_narrative": "Command-driven leadership. Team experiences Command as primary organizing force. Precision provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress tempo — creates blind spot. Internal tension: Describes being adaptable but behavioral traces show maintained direction once set. Development path: Build capacity in underutilized dimensions.",
-    "decision_narrative": "Command drives decision formation. Precision validates approach. Moderate decision velocity. Blind spot: Low Tempo means velocity signals get missed. ",
-    "communication_narrative": "Communication style: Command-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
-    "development_narrative": "Primary development opportunity: Recognize flex as capability you've built, not natural default — pivots cost energy. Under pressure, accelerates to directive action — decisions form faster, input window narrows. Tempo and Influence disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Tempo check-ins BEFORE pressure escalates.",
+    "executive_summary": "This is a Precision/Structure profile - precision-driven with structure stabilization. Precision-driven leadership. Precision dominance can suppress Tempo — creates blind spot.",
+    "leadership_narrative": "Precision-driven leadership. Team experiences Precision as primary organizing force. Structure provides structural support when Precision creates tension. The challenge surface appears when precision dominance can suppress tempo — creates blind spot. Internal tension: Describes being adaptable but behavioral traces show maintained direction once set. Development path: Build capacity in underutilized dimensions.",
+    "decision_narrative": "Precision drives decision formation. Structure validates approach. Moderate decision velocity. Blind spot: Low Tempo means velocity signals get missed. ",
+    "communication_narrative": "Communication style: Precision-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
+    "development_narrative": "Primary development opportunity: Recognize flex as capability you've built, not natural default — pivots cost energy. Under pressure, increases verification intensity — may get stuck in validation loops. Tempo and Influence disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Tempo check-ins BEFORE pressure escalates.",
     "business_manifestation": "When performance stalls, balances external constraints with internal accountability. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns - awareness present but execution gap remains. Low numerical grounding - operates more conceptually than metrically. ",
     "contradiction_analysis": "Resolution path: Recognize flex as capability you've built, not natural default — pivots cost energy.",
     "leadership_readiness_narrative": "Leadership readiness: Low - Direction-setting becomes bottleneck as complexity increases. Low - Direction and process both unclear, team operates in fog. Followership: Moderate - Followership depends on alignment and context. Control tendency: Low - May under-direct; control too loose for accountability. Low - Limited bandwidth for reading individual development needs.",
@@ -978,23 +1018,17 @@
   },
   "baseline_ranked_dimensions": [
     {
-      "dimension": "vector",
-      "score": 1,
-      "rank": 1,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "fidelity",
       "score": 0.82,
-      "rank": 2,
+      "raw_score": 0.82,
+      "support_adjusted_score": 0.82,
+      "rank": 1,
       "confidence": 0.75,
       "evidence_count": 18,
       "contributing_answer_count": 18,
+      "distance_from_neutral": 0.82,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -1019,10 +1053,15 @@
     {
       "dimension": "framework",
       "score": 0.77,
-      "rank": 3,
+      "raw_score": 0.77,
+      "support_adjusted_score": 0.77,
+      "rank": 2,
       "confidence": 0.75,
       "evidence_count": 11,
       "contributing_answer_count": 11,
+      "distance_from_neutral": 0.77,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         5,
@@ -1040,10 +1079,15 @@
     {
       "dimension": "signal",
       "score": 0.5,
-      "rank": 4,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 3,
       "confidence": 0.75,
       "evidence_count": 8,
       "contributing_answer_count": 8,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -1058,10 +1102,15 @@
     {
       "dimension": "horizon",
       "score": 0.44,
-      "rank": 5,
+      "raw_score": 0.44,
+      "support_adjusted_score": 0.44,
+      "rank": 4,
       "confidence": 0.75,
       "evidence_count": 9,
       "contributing_answer_count": 9,
+      "distance_from_neutral": 0.44,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -1077,10 +1126,15 @@
     {
       "dimension": "flex",
       "score": 0.42,
-      "rank": 6,
+      "raw_score": 0.42,
+      "support_adjusted_score": 0.42,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.42,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         5,
@@ -1091,12 +1145,33 @@
       ]
     },
     {
+      "dimension": "vector",
+      "score": 0.33,
+      "raw_score": 1,
+      "support_adjusted_score": 0.33,
+      "rank": 6,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "velocity",
-      "score": -0.5,
+      "score": -0.33,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         15,
         16
@@ -1105,167 +1180,200 @@
     {
       "dimension": "leverage",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:51:49.627Z",
+    "generated_at": "2026-05-30T04:02:15.608Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
-        "dimension": "vector",
-        "score": 0.99,
-        "baseline_score": 1,
-        "evidence_count": 1,
-        "contributing_answer_count": 1,
-        "delta": -0.01,
-        "rank": 1,
-        "confidence": 0.746
-      },
-      {
         "dimension": "fidelity",
-        "score": 0.79,
+        "score": 0.81,
         "baseline_score": 0.82,
+        "raw_score": 0.82,
+        "support_adjusted_score": 0.82,
         "evidence_count": 18,
         "contributing_answer_count": 18,
-        "delta": -0.03,
-        "rank": 2,
-        "confidence": 0.77
+        "evidence_band": "strong",
+        "intensity_band": "high",
+        "distance_from_neutral": 0.82,
+        "delta": -0.01,
+        "rank": 1,
+        "confidence": 0.72
       },
       {
         "dimension": "framework",
-        "score": 0.75,
+        "score": 0.74,
         "baseline_score": 0.77,
+        "raw_score": 0.77,
+        "support_adjusted_score": 0.77,
         "evidence_count": 11,
         "contributing_answer_count": 11,
-        "delta": -0.02,
-        "rank": 3,
-        "confidence": 0.77
+        "evidence_band": "strong",
+        "intensity_band": "high",
+        "distance_from_neutral": 0.77,
+        "delta": -0.03,
+        "rank": 2,
+        "confidence": 0.72
       },
       {
         "dimension": "signal",
-        "score": 0.36,
+        "score": 0.49,
         "baseline_score": 0.5,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
         "evidence_count": 8,
         "contributing_answer_count": 8,
-        "delta": -0.14,
-        "rank": 4,
-        "confidence": 0.77
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
+        "delta": -0.02,
+        "rank": 3,
+        "confidence": 0.72
       },
       {
         "dimension": "horizon",
         "score": 0.43,
         "baseline_score": 0.44,
+        "raw_score": 0.44,
+        "support_adjusted_score": 0.44,
         "evidence_count": 9,
         "contributing_answer_count": 9,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.44,
         "delta": -0.01,
-        "rank": 5,
-        "confidence": 0.746
+        "rank": 4,
+        "confidence": 0.696
       },
       {
         "dimension": "flex",
-        "score": 0.29,
+        "score": 0.33,
         "baseline_score": 0.42,
+        "raw_score": 0.42,
+        "support_adjusted_score": 0.42,
         "evidence_count": 6,
         "contributing_answer_count": 6,
-        "delta": -0.13,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.42,
+        "delta": -0.09,
+        "rank": 5,
+        "confidence": 0.696
+      },
+      {
+        "dimension": "vector",
+        "score": 0.25,
+        "baseline_score": 0.33,
+        "raw_score": 1,
+        "support_adjusted_score": 0.33,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
+        "evidence_band": "thin",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.33,
+        "delta": -0.08,
         "rank": 6,
-        "confidence": 0.746
+        "confidence": 0.696
       },
       {
         "dimension": "velocity",
-        "score": -0.48,
-        "baseline_score": -0.5,
+        "score": -0.32,
+        "baseline_score": -0.33,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.33,
         "evidence_count": 2,
         "contributing_answer_count": 2,
-        "delta": 0.02,
+        "evidence_band": "moderate",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.33,
+        "delta": 0.01,
         "rank": 7,
-        "confidence": 0.746
+        "confidence": 0.696
       },
       {
         "dimension": "leverage",
         "score": 0,
         "baseline_score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
         "evidence_count": 0,
         "contributing_answer_count": 0,
+        "evidence_band": "none",
+        "intensity_band": "low",
+        "distance_from_neutral": 0,
         "delta": 0,
         "rank": 8,
         "confidence": 0.2
       }
     ],
     "dominance_profile": {
-      "primary_dimension": "vector",
-      "secondary_dimension": "fidelity",
-      "dominance_amplitude": 1,
+      "primary_dimension": "fidelity",
+      "secondary_dimension": "framework",
+      "dominance_amplitude": 0.82,
       "spread_type": "balanced",
-      "profile_intensity": "extreme",
-      "threshold_band": "extreme",
-      "threshold_weight": 1.4
+      "profile_intensity": "high",
+      "threshold_band": "strong",
+      "threshold_weight": 1.2
     },
     "spread_profile": {
-      "flatness_score": 0.9,
-      "polarization_score": 0.38,
-      "dominance_gap": 0.2,
-      "total_spread": 1.47,
-      "variance": 0.2,
+      "flatness_score": 0.94,
+      "polarization_score": 0.25,
+      "dominance_gap": 0.07,
+      "total_spread": 1.13,
+      "variance": 0.12,
       "balanced_vs_extreme": "balanced",
       "tension_distribution": "balanced",
       "profile_shape": "flat",
       "profile_shape_confidence": 0.95
     },
     "tension_pairs": {
-      "velocity_vs_fidelity": -1.27,
-      "vector_vs_signal": 0.63,
-      "horizon_vs_flex": 0.14,
-      "leverage_vs_flex": -0.29,
+      "velocity_vs_fidelity": -1.13,
+      "vector_vs_signal": -0.24,
+      "horizon_vs_flex": 0.1,
+      "leverage_vs_flex": -0.33,
       "active_tensions": [
-        "velocity_vs_fidelity",
-        "vector_vs_signal"
+        "velocity_vs_fidelity"
       ],
-      "tension_count": 2
+      "tension_count": 1
     },
     "dominance_gravity": {
-      "strongest_system": "vector",
-      "gravity_strength": 0.99,
-      "downstream_influence": [
-        {
-          "dimension": "horizon",
-          "correlation": 0.65,
-          "influenced_by_suppression": false
-        },
-        {
-          "dimension": "leverage",
-          "correlation": 0.72,
-          "influenced_by_suppression": false
-        }
-      ],
+      "strongest_system": "fidelity",
+      "gravity_strength": 0.81,
+      "downstream_influence": [],
       "drives_entire_profile": true,
       "suppression_effects_active": true
     },
     "amplitude_metrics": {
-      "highest_score": 0.99,
-      "lowest_score": -0.48,
-      "total_spread": 1.47,
-      "score_variance": 0.2
+      "highest_score": 0.81,
+      "lowest_score": -0.32,
+      "total_spread": 1.13,
+      "score_variance": 0.12
     },
     "render_ready": {
       "dna_summary": null,
-      "command_clarity": 0.99,
-      "speed_vs_fidelity": -1.27,
+      "command_clarity": 0.81,
+      "speed_vs_fidelity": -1.13,
       "strategic_leverage": 0,
-      "dominance_flavor": "extreme",
+      "dominance_flavor": "strong",
       "active_suppression": true,
-      "profile_intensity": "extreme"
+      "profile_intensity": "high"
     },
     "metadata": {
-      "baseline_hash": "1:0.82:0.77:0.5:",
-      "rescoring_timestamp": "2026-05-30T00:51:49.627Z",
+      "baseline_hash": "0.82:0.77:0.5:0.",
+      "rescoring_timestamp": "2026-05-30T04:02:15.608Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [
@@ -1286,7 +1394,7 @@
   },
   "behavioral_intelligence_v1": {
     "extraction_version": "v1.0.0-tier1",
-    "extraction_timestamp": "2026-05-30T00:51:49.627Z",
+    "extraction_timestamp": "2026-05-30T04:02:15.608Z",
     "profile_id": "mm-20260529-acc2f9d6",
     "extraction_time_ms": 0,
     "domains": {
@@ -1299,22 +1407,22 @@
           "vector_scores",
           "dimension_tradeoffs"
         ],
-        "summary": "Enters situations with direction already forming; pulls team toward action. Stabilized by catches errors others miss; verifies assumptions before moving.",
+        "summary": "Catches errors others miss; verifies assumptions before moving. Stabilized by prefers clear process and structure; comfortable with defined roles.",
         "primary_driver": {
-          "dimension": "vector",
-          "score": 1,
-          "rank": 1,
-          "description": "low Command (Vector)",
-          "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
-          "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
-        },
-        "secondary_stabilizer": {
           "dimension": "fidelity",
           "score": 0.82,
-          "rank": 2,
+          "rank": 1,
           "description": "low Precision (Fidelity)",
           "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
           "pressure_manifestation": "Under strain, precision preference increases; can create delays"
+        },
+        "secondary_stabilizer": {
+          "dimension": "framework",
+          "score": 0.77,
+          "rank": 2,
+          "description": "low Structure (Framework)",
+          "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
+          "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
         },
         "opposing_patterns": [
           {
@@ -1339,21 +1447,21 @@
           "manifestation": ""
         },
         "all_scores": {
-          "vector": 1,
+          "vector": 0.33,
           "signal": 0.5,
           "fidelity": 0.82,
-          "velocity": -0.5,
+          "velocity": -0.33,
           "leverage": 0,
           "flex": 0.42,
           "framework": 0.77,
           "horizon": 0.44
         },
         "key_signals": [
-          "Primary: vector (1.0)",
-          "Secondary: fidelity (0.8)",
+          "Primary: fidelity (0.8)",
+          "Secondary: framework (0.8)",
           "Core tension: Not identified"
         ],
-        "causal_interpretation": "Primary (vector) drives forward movement. Secondary (fidelity) provides stabilization. Friction emerges when systems conflict."
+        "causal_interpretation": "Primary (fidelity) drives forward movement. Secondary (framework) provides stabilization. Friction emerges when systems conflict."
       },
       "worldExperience": {
         "title": "How You Experience The World",
@@ -1362,19 +1470,19 @@
           "vector_scores",
           "primary_driver.operating_manifestation"
         ],
-        "summary": "Action-focused perception, thorough processing, near-term focus. World experienced through vector lens.",
+        "summary": "Action-focused perception, thorough processing, near-term focus. World experienced through fidelity lens.",
         "perception_filter": {
           "signal": "What you notice first",
           "score": 0.5,
           "interpretation": "Action-focused perception—notices results, momentum, forward movement first."
         },
         "information_processing": {
-          "speed": -0.5,
+          "speed": -0.33,
           "detail": 0.82,
           "interpretation": "Processes thoroughly, prioritizes accuracy over speed."
         },
         "decision_formation": {
-          "primary_path": "Enters situations with direction already forming; pulls team toward action",
+          "primary_path": "Catches errors others miss; verifies assumptions before moving",
           "structure_bias": 0.77,
           "interpretation": "Decisions form through balanced assessment of options."
         },
@@ -1384,12 +1492,12 @@
         },
         "risk_calibration": {
           "flex_score": 0.42,
-          "vector_score": 1,
+          "vector_score": 0.33,
           "interpretation": "Moderate risk calibration—situational assessment drives risk decisions."
         },
         "key_signals": [
           "Signal (perception): 0.5",
-          "Velocity vs Fidelity: -0.5 vs 0.8",
+          "Velocity vs Fidelity: -0.3 vs 0.8",
           "Horizon (future): 0.4",
           "Flex (adaptability): 0.4"
         ],
@@ -1406,23 +1514,23 @@
           "stall_patterns.frustrations",
           "hidden_risk_patterns.relational_erosion_risk"
         ],
-        "summary": "Team experiences Command as primary organizing force. Command-first communication structure shapes relational dynamics.",
+        "summary": "Team experiences Precision as primary organizing force. Precision-first communication structure shapes relational dynamics.",
         "first_impression": {
-          "primary_signal": "vector",
-          "team_evidence": "Team experiences Command as primary organizing force",
-          "interpretation": "Team experiences Command as primary organizing force. Others experience purposeful energy, though less intensely directive."
+          "primary_signal": "fidelity",
+          "team_evidence": "Team experiences Precision as primary organizing force",
+          "interpretation": "Team experiences Precision as primary organizing force. Others experience precision and thoroughness first—attention to detail is immediately apparent."
         },
         "communication_pattern": {
-          "structure": "Command-first communication structure",
+          "structure": "Precision-first communication structure",
           "directness": "moderate",
           "emotional_calibration": "Low emotional smoothing — message delivery prioritizes clarity over reception management",
           "fidelity_score": 0.82,
-          "velocity_score": -0.5,
-          "interpretation": "Command-first communication structure. Low emotional smoothing — message delivery prioritizes clarity over reception management"
+          "velocity_score": -0.33,
+          "interpretation": "Precision-first communication structure. Low emotional smoothing — message delivery prioritizes clarity over reception management"
         },
         "listening_pattern": {
           "signal_score": 0.5,
-          "vector_dominance": 1,
+          "vector_dominance": 0.33,
           "under_pressure": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
           "interpretation": "Normal state: Listening filters for action—relational awareness exists but not primary focus.. Under pressure: Moderate-High - Under stress, relational awareness disappears; damage done without awareness"
         },
@@ -1432,10 +1540,10 @@
           "interpretation": "Relational friction acknowledged in stall patterns. Risk: Moderate-High - Under stress, relational awareness disappears; damage done without awareness"
         },
         "key_signals": [
-          "Structure: Command-first communication structure",
+          "Structure: Precision-first communication structure",
           "Calibration: Low emotional smoothing — message delivery priorit...",
           "Relational risk: Moderate-High - Under stress, relational awareness disappear...",
-          "Team sees: Team experiences Command as primary organizing for..."
+          "Team sees: Team experiences Precision as primary organizing f..."
         ],
         "causal_interpretation": "Operating system → communication structure → relational patterns → friction points under pressure → organizational consequences."
       },
@@ -1447,23 +1555,23 @@
           "secondary_stabilizer.pressure_manifestation",
           "stress_patterns"
         ],
-        "summary": "Under pressure: Under strain, decisiveness increases; moves faster, reads less. Secondary system: Under strain, precision preference increases; can create delays.",
+        "summary": "Under pressure: Under strain, precision preference increases; can create delays. Secondary system: Under strain, structure-preference increases; rigidity increases.",
         "primary_under_load": {
-          "dimension": "vector",
-          "normal_state": "Enters situations with direction already forming; pulls team toward action",
-          "pressure_state": "Under strain, decisiveness increases; moves faster, reads less",
-          "interpretation": "Under pressure: Under strain, decisiveness increases; moves faster, reads less"
-        },
-        "secondary_override": {
           "dimension": "fidelity",
           "normal_state": "Catches errors others miss; verifies assumptions before moving",
-          "override_pattern": "Under strain, precision preference increases; can create delays",
-          "interpretation": "Secondary system response: Under strain, precision preference increases; can create delays"
+          "pressure_state": "Under strain, precision preference increases; can create delays",
+          "interpretation": "Under pressure: Under strain, precision preference increases; can create delays"
+        },
+        "secondary_override": {
+          "dimension": "framework",
+          "normal_state": "Prefers clear process and structure; comfortable with defined roles",
+          "override_pattern": "Under strain, structure-preference increases; rigidity increases",
+          "interpretation": "Secondary system response: Under strain, structure-preference increases; rigidity increases"
         },
         "stress_patterns_available": true,
         "key_signals": [
-          "Primary pressure: Under strain, decisiveness increases; moves faster, reads less",
-          "Secondary pressure: Under strain, precision preference increases; can create delays",
+          "Primary pressure: Under strain, precision preference increases; can create delays",
+          "Secondary pressure: Under strain, structure-preference increases; rigidity increases",
           "Stress patterns: 6 dimensions tracked"
         ],
         "causal_interpretation": "Normal operating → pressure applied → primary intensifies → secondary compensates or overrides.",
@@ -1552,7 +1660,7 @@
         "decision_velocity": {
           "speed": "unknown",
           "data_requirements": "",
-          "vector_score": 1,
+          "vector_score": 0.33,
           "interpretation": "Speed: unknown. Data: context-dependent."
         },
         "execution_model": {
@@ -1627,47 +1735,47 @@
       "fiveFutures": {
         "futures": [
           {
-            "title": "Momentum Empire",
+            "title": "Precision Authority",
             "likelihood": "likely",
-            "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-            "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+            "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+            "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
             "profile_specific": true
           },
           {
-            "title": "vector Amplified",
+            "title": "fidelity Amplified",
             "likelihood": "possible",
-            "trajectory": "Strength fully deployed. vector becomes organizational competitive advantage.",
-            "organization_experiences": "Organization becomes advantage carrier. vector strength compounds into competitive edge.",
+            "trajectory": "Strength fully deployed. fidelity becomes organizational competitive advantage.",
+            "organization_experiences": "Organization becomes advantage carrier. fidelity strength compounds into competitive edge.",
             "profile_specific": true
           },
           {
-            "title": "Speed Spiral",
-            "likelihood": "likely",
-            "trajectory": "Vector becomes impatience. Quick decisions become reckless. Organization experiences whiplash. Course corrections break trust.",
-            "organization_experiences": "Organization experiences constant course corrections. Whiplash. Talent attrition increases.",
+            "title": "Detail Overwhelm",
+            "likelihood": "possible",
+            "trajectory": "Fidelity applied to everything. Organization drowns in specs, processes, reviews. Velocity collapses.",
+            "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
             "profile_specific": true
           },
           {
-            "title": "Team Bottleneck Spiral",
+            "title": "Quality Standards Resentment",
             "likelihood": "likely",
-            "trajectory": "Operator speed outpaces team capacity. Team feels left behind. Operator frustrated. Communication breaks down.",
+            "trajectory": "Fidelity expectations become unreasonable. Team feels constantly judged. Talent leaves. Morale drops.",
             "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
             "profile_specific": true
           },
           {
-            "title": "Structured Velocity",
+            "title": "Sustainable Pace",
             "likelihood": "possible",
-            "trajectory": "Infrastructure built. Systems support speed. Operator can delegate. Organization scales without operator bottleneck.",
+            "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
             "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
             "profile_specific": true
           }
         ],
         "summary": "Five trajectory scenarios emerge from your current operating pattern.",
         "most_likely": {
-          "title": "Momentum Empire",
+          "title": "Precision Authority",
           "likelihood": "likely",
-          "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-          "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+          "trajectory": "Detail mastery deepens. Operator becomes quality gate. Org optimizes to this standard.",
+          "organization_experiences": "Organization becomes known for quality. But process becomes slower.",
           "profile_specific": true
         }
       },

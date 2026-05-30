@@ -1,10 +1,10 @@
 {
   "profile_id": "mm-20260529-pjm8d2x5",
   "vector_scores": {
-    "vector": 1,
+    "vector": 0.67,
     "signal": 0.82,
     "fidelity": 0.72,
-    "velocity": -0.5,
+    "velocity": -0.33,
     "leverage": 0,
     "flex": 0.58,
     "framework": 0.63,
@@ -12,24 +12,17 @@
   },
   "ranked_dimensions": [
     {
-      "dimension": "vector",
-      "score": 1,
-      "rank": 1,
-      "confidence": 0.45,
-      "evidence_count": 2,
-      "contributing_answer_count": 2,
-      "contributing_answers": [
-        5,
-        19
-      ]
-    },
-    {
       "dimension": "signal",
       "score": 0.82,
-      "rank": 2,
+      "raw_score": 0.82,
+      "support_adjusted_score": 0.82,
+      "rank": 1,
       "confidence": 0.75,
       "evidence_count": 11,
       "contributing_answer_count": 11,
+      "distance_from_neutral": 0.82,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -47,10 +40,15 @@
     {
       "dimension": "fidelity",
       "score": 0.72,
-      "rank": 3,
+      "raw_score": 0.72,
+      "support_adjusted_score": 0.72,
+      "rank": 2,
       "confidence": 0.75,
       "evidence_count": 18,
       "contributing_answer_count": 18,
+      "distance_from_neutral": 0.72,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -73,12 +71,34 @@
       ]
     },
     {
+      "dimension": "vector",
+      "score": 0.67,
+      "raw_score": 1,
+      "support_adjusted_score": 0.67,
+      "rank": 3,
+      "confidence": 0.45,
+      "evidence_count": 2,
+      "contributing_answer_count": 2,
+      "distance_from_neutral": 0.67,
+      "evidence_band": "moderate",
+      "intensity_band": "high",
+      "contributing_answers": [
+        5,
+        19
+      ]
+    },
+    {
       "dimension": "framework",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         5,
@@ -97,10 +117,15 @@
     {
       "dimension": "flex",
       "score": 0.58,
+      "raw_score": 0.58,
+      "support_adjusted_score": 0.58,
       "rank": 5,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.58,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -113,10 +138,15 @@
     {
       "dimension": "horizon",
       "score": 0.38,
+      "raw_score": 0.38,
+      "support_adjusted_score": 0.38,
       "rank": 6,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.38,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         4,
@@ -126,11 +156,16 @@
     },
     {
       "dimension": "velocity",
-      "score": -0.5,
+      "score": -0.33,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         15,
         16
@@ -139,29 +174,34 @@
     {
       "dimension": "leverage",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],
   "top_systems": {
     "primary_driver": {
-      "dimension": "vector",
-      "score": 1,
-      "rank": 1,
-      "description": "low Command (Vector)",
-      "operating_manifestation": "Enters situations with direction already forming; pulls team toward action",
-      "pressure_manifestation": "Under strain, decisiveness increases; moves faster, reads less"
-    },
-    "secondary_stabilizer": {
       "dimension": "signal",
       "score": 0.82,
-      "rank": 2,
+      "rank": 1,
       "description": "low Relational Awareness (Signal)",
       "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
       "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
+    },
+    "secondary_stabilizer": {
+      "dimension": "fidelity",
+      "score": 0.72,
+      "rank": 2,
+      "description": "low Precision (Fidelity)",
+      "operating_manifestation": "Catches errors others miss; verifies assumptions before moving",
+      "pressure_manifestation": "Under strain, precision preference increases; can create delays"
     },
     "opposing_pattern_1": {
       "dimension": "velocity",

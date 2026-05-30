@@ -19,16 +19,16 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 
 | Archetype | Synthetic Person | Profile ID | Top 3 Dimensions | Bottom 2 Dimensions | Primary Engine | Initial Role-Fit Judgment | Scoring Notes |
 |---|---|---|---|---|---|---|---|
-| Founder / CEO | Marcus Vale | mm-20260529-ceo8x7q2 | Vector 0.89<br>Velocity 0.73<br>Fidelity 0.67 | Framework 0.30<br>Flex -0.50 | Vector | Strong CEO/founder fit if paired with operating cadence and feedback instrumentation. | Top dimensions vector, velocity, fidelity broadly match intended role signal; bottom dimensions framework, flex create plausible fatigue/risk. |
+| Founder / CEO | Marcus Vale | mm-20260529-ceo8x7q2 | Vector 0.89<br>Velocity 0.73<br>Fidelity 0.67 | Signal 0.17<br>Flex -0.50 | Vector | Strong CEO/founder fit if paired with operating cadence and feedback instrumentation. | Top dimensions vector, velocity, fidelity broadly match intended role signal; bottom dimensions signal, flex create plausible fatigue/risk. |
 | VP Sales | Tessa Grant | mm-20260529-vps4l8r9 | Velocity 0.83<br>Signal 0.79<br>Vector 0.78 | Horizon 0.17<br>Framework -0.25 | Velocity | Strong VP Sales fit, with pipeline inspection and deal-quality discipline needed. | Top dimensions velocity, signal, vector broadly match intended role signal; bottom dimensions horizon, framework create plausible fatigue/risk. |
-| Recruiter | Lena Ortiz | mm-20260529-rec6n2p4 | Signal 0.96<br>Velocity 0.75<br>Horizon 0.67 | Framework 0.00<br>Vector -0.50 | Signal | Strong recruiting fit, especially when paired with explicit decision thresholds. | Only 1/3 intended top dimensions landed in top 3. |
-| Accountant | Nora Bell | mm-20260529-acc2f9d6 | Vector 1.00<br>Fidelity 0.82<br>Framework 0.77 | Velocity -0.50<br>Leverage 0.00 | Vector | Strong accountant fit; risk rises in roles demanding constant ambiguous tradeoffs. | Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
-| Engineer | Ishan Mehta | mm-20260529-eng7v5k3 | Vector 1.00<br>Fidelity 0.81<br>Framework 0.75 | Velocity -0.50<br>Leverage 0.00 | Vector | Strong engineer fit; leadership fit improves when translation cadence is explicit. | Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
-| Front Desk / Client Service | Maya Chen | mm-20260529-fdc1s8m5 | Signal 0.99<br>Fidelity 0.63<br>Framework 0.63 | Velocity 0.00<br>Vector -0.50 | Signal | Strong client-service fit when escalation boundaries are explicit. | Top dimensions signal, fidelity, framework broadly match intended role signal; bottom dimensions velocity, vector create plausible fatigue/risk. |
+| Recruiter | Lena Ortiz | mm-20260529-rec6n2p4 | Signal 0.96<br>Horizon 0.67<br>Fidelity 0.63 | Framework 0.00<br>Vector -0.17 | Signal | Strong recruiting fit, especially when paired with explicit decision thresholds. | Only 1/3 intended top dimensions landed in top 3. |
+| Accountant | Nora Bell | mm-20260529-acc2f9d6 | Fidelity 0.82<br>Framework 0.77<br>Signal 0.50 | Velocity -0.33<br>Leverage 0.00 | Fidelity | Strong accountant fit; risk rises in roles demanding constant ambiguous tradeoffs. | Top dimensions fidelity, framework, signal broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
+| Engineer | Ishan Mehta | mm-20260529-eng7v5k3 | Fidelity 0.81<br>Framework 0.75<br>Flex 0.50 | Velocity -0.33<br>Leverage 0.00 | Fidelity | Strong engineer fit; leadership fit improves when translation cadence is explicit. | Top dimensions fidelity, framework, flex broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
+| Front Desk / Client Service | Maya Chen | mm-20260529-fdc1s8m5 | Signal 0.99<br>Fidelity 0.63<br>Framework 0.63 | Velocity 0.00<br>Vector -0.17 | Signal | Strong client-service fit when escalation boundaries are explicit. | Top dimensions signal, fidelity, framework broadly match intended role signal; bottom dimensions velocity, vector create plausible fatigue/risk. |
 | Operations Manager | Graham Pierce | mm-20260529-ops5h2w8 | Vector 1.00<br>Fidelity 0.73<br>Framework 0.69 | Horizon 0.00<br>Flex -0.50 | Vector | Strong operations fit; needs exception-handling design to avoid rigidity. | Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions horizon, flex create plausible fatigue/risk. |
-| Marketing Creative | Ari Vaughn | mm-20260529-mkc9r4t1 | Signal 0.88<br>Flex 0.78<br>Fidelity 0.63 | Framework -0.50<br>Vector 0.00 | Signal | Strong marketing creative fit, with production structure needed near launch. | Only 1/3 intended top dimensions landed in top 3. |
-| Compliance Officer | Evelyn Park | mm-20260529-cmp3j6z7 | Fidelity 0.81<br>Framework 0.77<br>Vector 0.50 | Velocity -0.50<br>Leverage 0.00 | Fidelity | Strong compliance fit; best when policy guidance is tiered by risk severity. | Top dimensions fidelity, framework, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
-| Project Manager | Caleb Ruiz | mm-20260529-pjm8d2x5 | Vector 1.00<br>Signal 0.82<br>Fidelity 0.72 | Velocity -0.50<br>Leverage 0.00 | Vector | Strong project manager fit; needs escalation rights to avoid becoming the buffer. | Top dimensions vector, signal, fidelity broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
+| Marketing Creative | Ari Vaughn | mm-20260529-mkc9r4t1 | Signal 0.88<br>Flex 0.78<br>Fidelity 0.63 | Framework -0.33<br>Vector 0.00 | Signal | Strong marketing creative fit, with production structure needed near launch. | Only 1/3 intended top dimensions landed in top 3. |
+| Compliance Officer | Evelyn Park | mm-20260529-cmp3j6z7 | Fidelity 0.81<br>Framework 0.77<br>Signal 0.40 | Velocity -0.50<br>Leverage 0.00 | Fidelity | Strong compliance fit; best when policy guidance is tiered by risk severity. | Top dimensions fidelity, framework, signal broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
+| Project Manager | Caleb Ruiz | mm-20260529-pjm8d2x5 | Signal 0.82<br>Fidelity 0.72<br>Vector 0.67 | Velocity -0.33<br>Leverage 0.00 | Signal | Strong project manager fit; needs escalation rights to avoid becoming the buffer. | Top dimensions signal, fidelity, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk. |
 
 ## Detailed Records
 
@@ -37,7 +37,7 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Profile ID: `mm-20260529-ceo8x7q2`
 - Intended role: Founder and CEO of a 42-person B2B software company
 - Top 3 dimensions: Vector 0.89, Velocity 0.73, Fidelity 0.67
-- Bottom 2 dimensions: Framework 0.30, Flex -0.50
+- Bottom 2 dimensions: Signal 0.17, Flex -0.50
 - Primary engine: Vector
 - Natural advantage: Sets direction quickly and connects near-term pressure to a larger company arc.
 - Natural risk: May outrun translation, leaving operators to infer the path from founder-level conviction.
@@ -46,7 +46,7 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Best environment: Fast-growth environment with clear authority and a strong operator translating decisions.
 - Worst environment: Diffuse matrix setting where every move requires broad pre-approval.
 - Initial role-fit judgment: Strong CEO/founder fit if paired with operating cadence and feedback instrumentation.
-- Notes on whether scoring feels correct: Top dimensions vector, velocity, fidelity broadly match intended role signal; bottom dimensions framework, flex create plausible fatigue/risk.
+- Notes on whether scoring feels correct: Top dimensions vector, velocity, fidelity broadly match intended role signal; bottom dimensions signal, flex create plausible fatigue/risk.
 
 ### VP Sales: Tessa Grant
 
@@ -68,8 +68,8 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 
 - Profile ID: `mm-20260529-rec6n2p4`
 - Intended role: Senior recruiter for healthcare operations roles
-- Top 3 dimensions: Signal 0.96, Velocity 0.75, Horizon 0.67
-- Bottom 2 dimensions: Framework 0.00, Vector -0.50
+- Top 3 dimensions: Signal 0.96, Horizon 0.67, Fidelity 0.63
+- Bottom 2 dimensions: Framework 0.00, Vector -0.17
 - Primary engine: Signal
 - Natural advantage: Reads candidate hesitation and hiring-manager subtext early.
 - Natural risk: Can over-adapt to keep both sides comfortable, delaying hard truth.
@@ -84,9 +84,9 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 
 - Profile ID: `mm-20260529-acc2f9d6`
 - Intended role: Senior accountant managing monthly close and audit support
-- Top 3 dimensions: Vector 1.00, Fidelity 0.82, Framework 0.77
-- Bottom 2 dimensions: Velocity -0.50, Leverage 0.00
-- Primary engine: Vector
+- Top 3 dimensions: Fidelity 0.82, Framework 0.77, Signal 0.50
+- Bottom 2 dimensions: Velocity -0.33, Leverage 0.00
+- Primary engine: Fidelity
 - Natural advantage: Protects accuracy, repeatability, and audit readiness.
 - Natural risk: May slow movement when imperfect inputs require a pragmatic cutoff.
 - Energy source: Clean reconciliations, clear rules, and problems that can be verified.
@@ -94,15 +94,15 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Best environment: Stable finance environment with clear close calendar and respect for controls.
 - Worst environment: Chaotic growth setting where precision is treated as obstruction.
 - Initial role-fit judgment: Strong accountant fit; risk rises in roles demanding constant ambiguous tradeoffs.
-- Notes on whether scoring feels correct: Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
+- Notes on whether scoring feels correct: Top dimensions fidelity, framework, signal broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
 
 ### Engineer: Ishan Mehta
 
 - Profile ID: `mm-20260529-eng7v5k3`
 - Intended role: Senior backend engineer owning infrastructure reliability
-- Top 3 dimensions: Vector 1.00, Fidelity 0.81, Framework 0.75
-- Bottom 2 dimensions: Velocity -0.50, Leverage 0.00
-- Primary engine: Vector
+- Top 3 dimensions: Fidelity 0.81, Framework 0.75, Flex 0.50
+- Bottom 2 dimensions: Velocity -0.33, Leverage 0.00
+- Primary engine: Fidelity
 - Natural advantage: Sees failure modes and designs systems to survive future load.
 - Natural risk: Can delay visible progress while protecting architecture from weak shortcuts.
 - Energy source: Deep technical problems, durable design, and clean abstractions.
@@ -110,14 +110,14 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Best environment: Engineering culture that values reliability, design review, and explicit tradeoffs.
 - Worst environment: Sales-driven fire drill culture with no respect for technical debt.
 - Initial role-fit judgment: Strong engineer fit; leadership fit improves when translation cadence is explicit.
-- Notes on whether scoring feels correct: Top dimensions vector, fidelity, framework broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
+- Notes on whether scoring feels correct: Top dimensions fidelity, framework, flex broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
 
 ### Front Desk / Client Service: Maya Chen
 
 - Profile ID: `mm-20260529-fdc1s8m5`
 - Intended role: Front desk and client service coordinator in a medical practice
 - Top 3 dimensions: Signal 0.99, Fidelity 0.63, Framework 0.63
-- Bottom 2 dimensions: Velocity 0.00, Vector -0.50
+- Bottom 2 dimensions: Velocity 0.00, Vector -0.17
 - Primary engine: Signal
 - Natural advantage: Stabilizes clients quickly by reading tone and following reliable service steps.
 - Natural risk: May absorb frustration personally and defer boundary-setting too long.
@@ -149,7 +149,7 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Profile ID: `mm-20260529-mkc9r4t1`
 - Intended role: Creative marketing lead for a consumer wellness brand
 - Top 3 dimensions: Signal 0.88, Flex 0.78, Fidelity 0.63
-- Bottom 2 dimensions: Framework -0.50, Vector 0.00
+- Bottom 2 dimensions: Framework -0.33, Vector 0.00
 - Primary engine: Signal
 - Natural advantage: Connects audience signal, cultural timing, and campaign angle quickly.
 - Natural risk: Can resist fixed process until deadlines force compression.
@@ -164,7 +164,7 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 
 - Profile ID: `mm-20260529-cmp3j6z7`
 - Intended role: Compliance officer for a regulated financial services firm
-- Top 3 dimensions: Fidelity 0.81, Framework 0.77, Vector 0.50
+- Top 3 dimensions: Fidelity 0.81, Framework 0.77, Signal 0.40
 - Bottom 2 dimensions: Velocity -0.50, Leverage 0.00
 - Primary engine: Fidelity
 - Natural advantage: Protects the organization by making risk visible before it becomes expensive.
@@ -174,15 +174,15 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Best environment: Regulated setting where compliance has authority and business partnership.
 - Worst environment: Growth culture that treats controls as a late-stage obstacle.
 - Initial role-fit judgment: Strong compliance fit; best when policy guidance is tiered by risk severity.
-- Notes on whether scoring feels correct: Top dimensions fidelity, framework, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
+- Notes on whether scoring feels correct: Top dimensions fidelity, framework, signal broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
 
 ### Project Manager: Caleb Ruiz
 
 - Profile ID: `mm-20260529-pjm8d2x5`
 - Intended role: Cross-functional project manager for implementation programs
-- Top 3 dimensions: Vector 1.00, Signal 0.82, Fidelity 0.72
-- Bottom 2 dimensions: Velocity -0.50, Leverage 0.00
-- Primary engine: Vector
+- Top 3 dimensions: Signal 0.82, Fidelity 0.72, Vector 0.67
+- Bottom 2 dimensions: Velocity -0.33, Leverage 0.00
+- Primary engine: Signal
 - Natural advantage: Keeps cross-functional work moving by clarifying ownership and surfacing slippage early.
 - Natural risk: Can get trapped carrying coordination debt instead of forcing ownership decisions.
 - Energy source: Complex handoffs, visible progress, and teams becoming aligned.
@@ -190,18 +190,18 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - Best environment: Matrix environment where project authority is respected and decisions have owners.
 - Worst environment: Ambiguous organization that expects coordination without authority.
 - Initial role-fit judgment: Strong project manager fit; needs escalation rights to avoid becoming the buffer.
-- Notes on whether scoring feels correct: Top dimensions vector, signal, fidelity broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
+- Notes on whether scoring feels correct: Top dimensions signal, fidelity, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.
 
 
 ## Validation Questions
 
-- Does the Accountant score differently from the CEO? FAIL - both primary Vector.
-- Does the Recruiter score differently from the Engineer? PASS - Recruiter primary Signal; Engineer primary Vector.
+- Does the Accountant score differently from the CEO? PASS - Accountant primary Fidelity; Founder / CEO primary Vector.
+- Does the Recruiter score differently from the Engineer? PASS - Recruiter primary Signal; Engineer primary Fidelity.
 - Does the Compliance profile show high rule/process orientation? PASS - top dimensions include framework, fidelity.
 - Does the VP Sales show high influence/velocity/direction? PASS - top dimensions include one of leverage, velocity, vector (velocity, signal, vector).
 - Does the Front Desk profile show service/stability/relational awareness? PASS - top dimensions include signal.
 - Does the Marketing Creative show creative signal/adaptability? PASS - top dimensions include one of flex, signal, horizon (signal, flex, fidelity).
-- Does any archetype collapse into generic Command/operator language? WARN - repeated signatures: Vector/Fidelity/Framework: Accountant, Engineer, Operations Manager.
+- Does any archetype collapse into generic Command/operator language? WARN - repeated signatures: Fidelity/Framework/Signal: Accountant, Compliance Officer.
 - Are profiles differentiated by evidence, not forced creativity? PASS - artifacts preserve raw answers, canonical scoring, BI extraction, and role-fit context for audit.
 
 ## Regression Checks
@@ -209,17 +209,29 @@ GPT behavioral rescoring was not forced in this lab because it requires live Ope
 - PASS: Founder / CEO primary has evidence - Vector evidence_count=16
 - PASS: VP Sales primary has evidence - Velocity evidence_count=12
 - PASS: Recruiter primary has evidence - Signal evidence_count=17
-- PASS: Accountant primary has evidence - Vector evidence_count=1
-- PASS: Engineer primary has evidence - Vector evidence_count=1
+- PASS: Accountant primary has evidence - Fidelity evidence_count=18
+- PASS: Engineer primary has evidence - Fidelity evidence_count=17
 - PASS: Front Desk / Client Service primary has evidence - Signal evidence_count=16
 - PASS: Operations Manager primary has evidence - Vector evidence_count=9
 - PASS: Marketing Creative primary has evidence - Signal evidence_count=14
 - PASS: Compliance Officer primary has evidence - Fidelity evidence_count=17
-- PASS: Project Manager primary has evidence - Vector evidence_count=2
-- PASS: Accountant does not rank zero-evidence Leverage primary - primary=Vector; Leverage.evidence_count=0
-- PASS: Engineer does not rank zero-evidence Leverage primary - primary=Vector; Leverage.evidence_count=0
+- PASS: Project Manager primary has evidence - Signal evidence_count=11
+- PASS: Accountant does not rank zero-evidence Leverage primary - primary=Fidelity; Leverage.evidence_count=0
+- PASS: Engineer does not rank zero-evidence Leverage primary - primary=Fidelity; Leverage.evidence_count=0
 - PASS: Compliance Officer does not rank zero-evidence Leverage primary - primary=Fidelity; Leverage.evidence_count=0
 - PASS: Marketing Creative does not rank zero-evidence Vector primary - primary=Signal; Vector.evidence_count=0
+- PASS: Accountant is not Vector primary from one Q19 answer - primary=Fidelity; vector.evidence_count=1
+- PASS: Engineer is not Vector primary from one Q19 answer - primary=Fidelity; vector.evidence_count=1
+- PASS: Founder / CEO low-confidence primary is not extreme - primary=Vector; confidence=0.75; profile_intensity=extreme
+- PASS: VP Sales low-confidence primary is not extreme - primary=Velocity; confidence=0.75; profile_intensity=high
+- PASS: Recruiter low-confidence primary is not extreme - primary=Signal; confidence=0.75; profile_intensity=medium
+- PASS: Accountant low-confidence primary is not extreme - primary=Fidelity; confidence=0.75; profile_intensity=high
+- PASS: Engineer low-confidence primary is not extreme - primary=Fidelity; confidence=0.75; profile_intensity=high
+- PASS: Front Desk / Client Service low-confidence primary is not extreme - primary=Signal; confidence=0.75; profile_intensity=high
+- PASS: Operations Manager low-confidence primary is not extreme - primary=Vector; confidence=0.75; profile_intensity=extreme
+- PASS: Marketing Creative low-confidence primary is not extreme - primary=Signal; confidence=0.75; profile_intensity=medium
+- PASS: Compliance Officer low-confidence primary is not extreme - primary=Fidelity; confidence=0.75; profile_intensity=high
+- PASS: Project Manager low-confidence primary is not extreme - primary=Signal; confidence=0.75; profile_intensity=high
 
 ## Obvious Scoring Concerns
 

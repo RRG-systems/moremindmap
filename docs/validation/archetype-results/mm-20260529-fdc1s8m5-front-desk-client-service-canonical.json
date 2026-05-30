@@ -311,7 +311,7 @@
   },
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-30T00:51:49.629Z",
+    "generated_at": "2026-05-30T04:02:15.611Z",
     "model": "synthetic-archetype-validation-v1",
     "person_name": "Maya Chen",
     "email": "maya.chen.synthetic@example.com",
@@ -340,7 +340,7 @@
     }
   },
   "vector_scores": {
-    "vector": -0.5,
+    "vector": -0.17,
     "signal": 0.99,
     "fidelity": 0.63,
     "velocity": 0,
@@ -353,10 +353,15 @@
     {
       "dimension": "signal",
       "score": 0.99,
+      "raw_score": 0.99,
+      "support_adjusted_score": 0.99,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 16,
       "contributing_answer_count": 16,
+      "distance_from_neutral": 0.99,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -379,10 +384,15 @@
     {
       "dimension": "fidelity",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -401,10 +411,15 @@
     {
       "dimension": "framework",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         9,
         15,
@@ -415,10 +430,15 @@
     {
       "dimension": "flex",
       "score": 0.58,
+      "raw_score": 0.58,
+      "support_adjusted_score": 0.58,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.58,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -437,10 +457,15 @@
     {
       "dimension": "leverage",
       "score": 0.5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
       "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         10,
@@ -452,10 +477,15 @@
     {
       "dimension": "horizon",
       "score": 0.33,
+      "raw_score": 0.33,
+      "support_adjusted_score": 0.33,
       "rank": 6,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         6,
@@ -465,10 +495,15 @@
     {
       "dimension": "velocity",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         15
@@ -476,11 +511,16 @@
     },
     {
       "dimension": "vector",
-      "score": -0.5,
+      "score": -0.17,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.17,
       "rank": 8,
       "confidence": 0.45,
       "evidence_count": 1,
       "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
       "contributing_answers": [
         11
       ]
@@ -1002,10 +1042,15 @@
     {
       "dimension": "signal",
       "score": 0.99,
+      "raw_score": 0.99,
+      "support_adjusted_score": 0.99,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 16,
       "contributing_answer_count": 16,
+      "distance_from_neutral": 0.99,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -1028,10 +1073,15 @@
     {
       "dimension": "fidelity",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -1050,10 +1100,15 @@
     {
       "dimension": "framework",
       "score": 0.63,
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.63,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         9,
         15,
@@ -1064,10 +1119,15 @@
     {
       "dimension": "flex",
       "score": 0.58,
+      "raw_score": 0.58,
+      "support_adjusted_score": 0.58,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.58,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         3,
@@ -1086,10 +1146,15 @@
     {
       "dimension": "leverage",
       "score": 0.5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
       "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         10,
@@ -1101,10 +1166,15 @@
     {
       "dimension": "horizon",
       "score": 0.33,
+      "raw_score": 0.33,
+      "support_adjusted_score": 0.33,
       "rank": 6,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.33,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         6,
@@ -1114,10 +1184,15 @@
     {
       "dimension": "velocity",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 7,
       "confidence": 0.45,
       "evidence_count": 2,
       "contributing_answer_count": 2,
+      "distance_from_neutral": 0,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         15
@@ -1125,11 +1200,16 @@
     },
     {
       "dimension": "vector",
-      "score": -0.5,
+      "score": -0.17,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.17,
       "rank": 8,
       "confidence": 0.45,
       "evidence_count": 1,
       "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
       "contributing_answers": [
         11
       ]
@@ -1138,15 +1218,20 @@
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:51:49.630Z",
+    "generated_at": "2026-05-30T04:02:15.611Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "signal",
         "score": 0.98,
         "baseline_score": 0.99,
+        "raw_score": 0.99,
+        "support_adjusted_score": 0.99,
         "evidence_count": 16,
         "contributing_answer_count": 16,
+        "evidence_band": "strong",
+        "intensity_band": "extreme",
+        "distance_from_neutral": 0.99,
         "delta": -0.01,
         "rank": 1,
         "confidence": 0.746
@@ -1155,8 +1240,13 @@
         "dimension": "fidelity",
         "score": 0.61,
         "baseline_score": 0.63,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
         "evidence_count": 12,
         "contributing_answer_count": 12,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.63,
         "delta": -0.02,
         "rank": 2,
         "confidence": 0.746
@@ -1165,8 +1255,13 @@
         "dimension": "framework",
         "score": 0.61,
         "baseline_score": 0.63,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
         "evidence_count": 4,
         "contributing_answer_count": 4,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.63,
         "delta": -0.02,
         "rank": 3,
         "confidence": 0.746
@@ -1175,8 +1270,13 @@
         "dimension": "flex",
         "score": 0.44,
         "baseline_score": 0.58,
+        "raw_score": 0.58,
+        "support_adjusted_score": 0.58,
         "evidence_count": 12,
         "contributing_answer_count": 12,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.58,
         "delta": -0.14,
         "rank": 4,
         "confidence": 0.77
@@ -1185,8 +1285,13 @@
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
         "evidence_count": 5,
         "contributing_answer_count": 5,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
         "delta": -0.02,
         "rank": 5,
         "confidence": 0.722
@@ -1195,8 +1300,13 @@
         "dimension": "horizon",
         "score": 0.2,
         "baseline_score": 0.33,
+        "raw_score": 0.33,
+        "support_adjusted_score": 0.33,
         "evidence_count": 3,
         "contributing_answer_count": 3,
+        "evidence_band": "strong",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.33,
         "delta": -0.13,
         "rank": 6,
         "confidence": 0.77
@@ -1205,19 +1315,29 @@
         "dimension": "velocity",
         "score": 0,
         "baseline_score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
         "evidence_count": 2,
         "contributing_answer_count": 2,
+        "evidence_band": "moderate",
+        "intensity_band": "low",
+        "distance_from_neutral": 0,
         "delta": 0,
         "rank": 7,
         "confidence": 0.674
       },
       {
         "dimension": "vector",
-        "score": -0.48,
-        "baseline_score": -0.5,
+        "score": -0.16,
+        "baseline_score": -0.17,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.17,
         "evidence_count": 1,
         "contributing_answer_count": 1,
-        "delta": 0.02,
+        "evidence_band": "thin",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.17,
+        "delta": 0.01,
         "rank": 8,
         "confidence": 0.722
       }
@@ -1227,16 +1347,16 @@
       "secondary_dimension": "fidelity",
       "dominance_amplitude": 0.99,
       "spread_type": "balanced",
-      "profile_intensity": "extreme",
+      "profile_intensity": "high",
       "threshold_band": "extreme",
       "threshold_weight": 1.4
     },
     "spread_profile": {
-      "flatness_score": 0.91,
+      "flatness_score": 0.94,
       "polarization_score": 0.38,
       "dominance_gap": 0.37,
-      "total_spread": 1.46,
-      "variance": 0.17,
+      "total_spread": 1.14,
+      "variance": 0.12,
       "balanced_vs_extreme": "balanced",
       "tension_distribution": "balanced",
       "profile_shape": "flat",
@@ -1244,7 +1364,7 @@
     },
     "tension_pairs": {
       "velocity_vs_fidelity": -0.61,
-      "vector_vs_signal": -1.46,
+      "vector_vs_signal": -1.14,
       "horizon_vs_flex": -0.24,
       "leverage_vs_flex": 0.05,
       "active_tensions": [
@@ -1273,9 +1393,9 @@
     },
     "amplitude_metrics": {
       "highest_score": 0.98,
-      "lowest_score": -0.48,
-      "total_spread": 1.46,
-      "score_variance": 0.17
+      "lowest_score": -0.16,
+      "total_spread": 1.14,
+      "score_variance": 0.12
     },
     "render_ready": {
       "dna_summary": null,
@@ -1284,11 +1404,11 @@
       "strategic_leverage": 0.49,
       "dominance_flavor": "extreme",
       "active_suppression": true,
-      "profile_intensity": "extreme"
+      "profile_intensity": "high"
     },
     "metadata": {
       "baseline_hash": "0.99:0.63:0.63:0",
-      "rescoring_timestamp": "2026-05-30T00:51:49.630Z",
+      "rescoring_timestamp": "2026-05-30T04:02:15.611Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [
@@ -1309,7 +1429,7 @@
   },
   "behavioral_intelligence_v1": {
     "extraction_version": "v1.0.0-tier1",
-    "extraction_timestamp": "2026-05-30T00:51:49.630Z",
+    "extraction_timestamp": "2026-05-30T04:02:15.611Z",
     "profile_id": "mm-20260529-fdc1s8m5",
     "extraction_time_ms": 0,
     "domains": {
@@ -1362,7 +1482,7 @@
           "manifestation": ""
         },
         "all_scores": {
-          "vector": -0.5,
+          "vector": -0.17,
           "signal": 0.99,
           "fidelity": 0.63,
           "velocity": 0,
@@ -1407,7 +1527,7 @@
         },
         "risk_calibration": {
           "flex_score": 0.58,
-          "vector_score": -0.5,
+          "vector_score": -0.17,
           "interpretation": "Moderate risk calibration—situational assessment drives risk decisions."
         },
         "key_signals": [
@@ -1445,7 +1565,7 @@
         },
         "listening_pattern": {
           "signal_score": 0.99,
-          "vector_dominance": -0.5,
+          "vector_dominance": -0.17,
           "under_pressure": "High - Current relational friction will compound; relationship damage accumulates invisibly until sudden departure/conflict",
           "interpretation": "Normal state: Listening filters for action—relational awareness exists but not primary focus.. Under pressure: High - Current relational friction will compound; relationship damage accumulates invisibly until sudden departure/conflict"
         },
@@ -1575,7 +1695,7 @@
         "decision_velocity": {
           "speed": "unknown",
           "data_requirements": "",
-          "vector_score": -0.5,
+          "vector_score": -0.17,
           "interpretation": "Speed: unknown. Data: context-dependent."
         },
         "execution_model": {

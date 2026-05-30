@@ -4,26 +4,100 @@
   "intended_role": "Cross-functional project manager for implementation programs",
   "profile_id": "mm-20260529-pjm8d2x5",
   "top_3_dimensions": [
-    "Vector 1.00",
     "Signal 0.82",
-    "Fidelity 0.72"
+    "Fidelity 0.72",
+    "Vector 0.67"
   ],
   "bottom_2_dimensions": [
-    "Velocity -0.50",
+    "Velocity -0.33",
     "Leverage 0.00"
   ],
-  "primary_engine": "Vector",
-  "secondary_engine": "Signal",
-  "primary_evidence_count": 2,
+  "primary_engine": "Signal",
+  "secondary_engine": "Fidelity",
+  "primary_evidence_count": 11,
   "evidence_counts": {
-    "vector": 2,
     "signal": 11,
     "fidelity": 18,
+    "vector": 2,
     "framework": 12,
     "flex": 6,
     "horizon": 4,
     "velocity": 2,
     "leverage": 0
+  },
+  "amplitude_fields": {
+    "signal": {
+      "raw_score": 0.82,
+      "support_adjusted_score": 0.82,
+      "evidence_count": 11,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.82
+    },
+    "fidelity": {
+      "raw_score": 0.72,
+      "support_adjusted_score": 0.72,
+      "evidence_count": 18,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.72
+    },
+    "vector": {
+      "raw_score": 1,
+      "support_adjusted_score": 0.67,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.67
+    },
+    "framework": {
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
+      "evidence_count": 12,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.63
+    },
+    "flex": {
+      "raw_score": 0.58,
+      "support_adjusted_score": 0.58,
+      "evidence_count": 6,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.58
+    },
+    "horizon": {
+      "raw_score": 0.38,
+      "support_adjusted_score": 0.38,
+      "evidence_count": 4,
+      "confidence": 0.65,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.38
+    },
+    "velocity": {
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.33
+    },
+    "leverage": {
+      "raw_score": 0,
+      "support_adjusted_score": 0,
+      "evidence_count": 0,
+      "confidence": 0.2,
+      "evidence_band": "none",
+      "intensity_band": "low",
+      "distance_from_neutral": 0
+    }
   },
   "natural_advantage": "Keeps cross-functional work moving by clarifying ownership and surfacing slippage early.",
   "natural_risk": "Can get trapped carrying coordination debt instead of forcing ownership decisions.",
@@ -32,7 +106,7 @@
   "best_environment": "Matrix environment where project authority is respected and decisions have owners.",
   "worst_environment": "Ambiguous organization that expects coordination without authority.",
   "initial_role_fit_judgment": "Strong project manager fit; needs escalation rights to avoid becoming the buffer.",
-  "scoring_notes": "Top dimensions vector, signal, fidelity broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.",
+  "scoring_notes": "Top dimensions signal, fidelity, vector broadly match intended role signal; bottom dimensions velocity, leverage create plausible fatigue/risk.",
   "role_fit_analysis": {
     "builder_vs_optimizer": "Hybrid - Can build or optimize depending on context",
     "operator_vs_visionary": "Balanced - Can operate and envision",
@@ -63,42 +137,108 @@
   },
   "rescoring_summary": {
     "source": "rescoring_v1",
-    "primary_dimension": "vector",
-    "secondary_dimension": "signal",
+    "primary_dimension": "signal",
+    "secondary_dimension": "fidelity",
     "ranked_dimensions": [
       {
-        "dimension": "vector",
-        "score": 1
-      },
-      {
         "dimension": "signal",
-        "score": 0.67
+        "score": 0.82,
+        "raw_score": 0.82,
+        "support_adjusted_score": 0.82,
+        "evidence_count": 11,
+        "confidence": 0.624,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "fidelity",
-        "score": 0.7
+        "score": 0.7,
+        "raw_score": 0.72,
+        "support_adjusted_score": 0.72,
+        "evidence_count": 18,
+        "confidence": 0.624,
+        "evidence_band": "strong",
+        "intensity_band": "high"
+      },
+      {
+        "dimension": "vector",
+        "score": 0.65,
+        "raw_score": 1,
+        "support_adjusted_score": 0.67,
+        "evidence_count": 2,
+        "confidence": 0.648,
+        "evidence_band": "moderate",
+        "intensity_band": "high"
       },
       {
         "dimension": "framework",
-        "score": 0.61
+        "score": 0.61,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
+        "evidence_count": 12,
+        "confidence": 0.624,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "flex",
-        "score": 0.44
+        "score": 0.49,
+        "raw_score": 0.58,
+        "support_adjusted_score": 0.58,
+        "evidence_count": 6,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "horizon",
-        "score": 0.37
+        "score": 0.3,
+        "raw_score": 0.38,
+        "support_adjusted_score": 0.38,
+        "evidence_count": 4,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "velocity",
-        "score": -0.48
+        "score": -0.32,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.33,
+        "evidence_count": 2,
+        "confidence": 0.624,
+        "evidence_band": "moderate",
+        "intensity_band": "low"
       },
       {
         "dimension": "leverage",
-        "score": 0
+        "score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
+        "evidence_count": 0,
+        "confidence": 0.2,
+        "evidence_band": "none",
+        "intensity_band": "low"
       }
     ],
+    "dominance_profile": {
+      "primary_dimension": "signal",
+      "secondary_dimension": "fidelity",
+      "dominance_amplitude": 0.82,
+      "spread_type": "balanced",
+      "profile_intensity": "high",
+      "threshold_band": "strong",
+      "threshold_weight": 1.2
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.82,
+      "speed_vs_fidelity": -1.02,
+      "strategic_leverage": 0,
+      "dominance_flavor": "strong",
+      "active_suppression": true,
+      "profile_intensity": "high"
+    },
     "render_ready_keys": [
       "dna_summary",
       "command_clarity",
@@ -179,47 +319,47 @@
     "five_futures": {
       "futures": [
         {
-          "title": "Momentum Empire",
+          "title": "Perceptive Authority",
           "likelihood": "likely",
-          "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-          "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+          "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+          "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
           "profile_specific": true
         },
         {
-          "title": "vector Amplified",
+          "title": "signal Amplified",
           "likelihood": "possible",
-          "trajectory": "Strength fully deployed. vector becomes organizational competitive advantage.",
-          "organization_experiences": "Organization becomes advantage carrier. vector strength compounds into competitive edge.",
+          "trajectory": "Strength fully deployed. signal becomes organizational competitive advantage.",
+          "organization_experiences": "Organization becomes advantage carrier. signal strength compounds into competitive edge.",
           "profile_specific": true
         },
         {
-          "title": "Speed Spiral",
-          "likelihood": "likely",
-          "trajectory": "Vector becomes impatience. Quick decisions become reckless. Organization experiences whiplash. Course corrections break trust.",
-          "organization_experiences": "Organization experiences constant course corrections. Whiplash. Talent attrition increases.",
+          "title": "Information Gatekeeping",
+          "likelihood": "possible",
+          "trajectory": "Operator possesses all signals. Information asymmetry increases. Organization depends on operator interpretation.",
+          "organization_experiences": "Operator strength becomes organizational weakness. System breaks under pressure.",
           "profile_specific": true
         },
         {
-          "title": "Team Bottleneck Spiral",
+          "title": "Perception Asymmetry Crisis",
           "likelihood": "likely",
-          "trajectory": "Operator speed outpaces team capacity. Team feels left behind. Operator frustrated. Communication breaks down.",
+          "trajectory": "Operator sees patterns. Team doesn't. Operator decisions feel arbitrary. Trust erodes. Team stops advocating.",
           "organization_experiences": "Team fractionalizes. Information stops flowing. Organization loses resilience. Key talent leaves.",
           "profile_specific": true
         },
         {
-          "title": "Structured Velocity",
+          "title": "Sustainable Pace",
           "likelihood": "possible",
-          "trajectory": "Infrastructure built. Systems support speed. Operator can delegate. Organization scales without operator bottleneck.",
+          "trajectory": "Workload restructured. Operator energy stabilized. Decision quality improves. Team feels supported, not overwhelmed.",
           "organization_experiences": "Organization becomes sustainable. Operator + team capability both high. Scalable structure emerges. Growth accelerates.",
           "profile_specific": true
         }
       ],
       "summary": "Five trajectory scenarios emerge from your current operating pattern.",
       "most_likely": {
-        "title": "Momentum Empire",
+        "title": "Perceptive Authority",
         "likelihood": "likely",
-        "trajectory": "Speed compounds. Operator-led expansion accelerates. Organization becomes dependent on tempo.",
-        "organization_experiences": "Organization becomes operator-dependent momentum machine. Operator burnout inevitable.",
+        "trajectory": "Pattern recognition deepens. Operator becomes strategic voice. Team depends on insights.",
+        "organization_experiences": "Organization becomes reactive to operator's pattern interpretations. Real signals might be missed.",
         "profile_specific": true
       }
     },

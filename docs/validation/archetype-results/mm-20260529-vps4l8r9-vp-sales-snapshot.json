@@ -20,10 +20,84 @@
     "signal": 7,
     "vector": 10,
     "flex": 9,
-    "fidelity": 1,
     "leverage": 8,
+    "fidelity": 1,
     "horizon": 3,
     "framework": 4
+  },
+  "amplitude_fields": {
+    "velocity": {
+      "raw_score": 0.83,
+      "support_adjusted_score": 0.83,
+      "evidence_count": 12,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.83
+    },
+    "signal": {
+      "raw_score": 0.79,
+      "support_adjusted_score": 0.79,
+      "evidence_count": 7,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.79
+    },
+    "vector": {
+      "raw_score": 0.78,
+      "support_adjusted_score": 0.78,
+      "evidence_count": 10,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.78
+    },
+    "flex": {
+      "raw_score": 0.56,
+      "support_adjusted_score": 0.56,
+      "evidence_count": 9,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.56
+    },
+    "leverage": {
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "evidence_count": 8,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.5
+    },
+    "fidelity": {
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "evidence_count": 1,
+      "confidence": 0.45,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.17
+    },
+    "horizon": {
+      "raw_score": 0.17,
+      "support_adjusted_score": 0.17,
+      "evidence_count": 3,
+      "confidence": 0.65,
+      "evidence_band": "strong",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.17
+    },
+    "framework": {
+      "raw_score": -0.25,
+      "support_adjusted_score": -0.25,
+      "evidence_count": 4,
+      "confidence": 0.65,
+      "evidence_band": "strong",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.25
+    }
   },
   "natural_advantage": "Turns human dynamics into forward commercial motion.",
   "natural_risk": "May over-trust momentum and relationship heat before qualification is fully verified.",
@@ -68,37 +142,103 @@
     "ranked_dimensions": [
       {
         "dimension": "velocity",
-        "score": 0.83
+        "score": 0.91,
+        "raw_score": 0.83,
+        "support_adjusted_score": 0.83,
+        "evidence_count": 12,
+        "confidence": 0.696,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "signal",
-        "score": 0.69
+        "score": 0.69,
+        "raw_score": 0.79,
+        "support_adjusted_score": 0.79,
+        "evidence_count": 7,
+        "confidence": 0.6,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "vector",
-        "score": 0.76
+        "score": 0.76,
+        "raw_score": 0.78,
+        "support_adjusted_score": 0.78,
+        "evidence_count": 10,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "flex",
-        "score": 0.54
-      },
-      {
-        "dimension": "fidelity",
-        "score": 0.41
+        "score": 0.54,
+        "raw_score": 0.56,
+        "support_adjusted_score": 0.56,
+        "evidence_count": 9,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "leverage",
-        "score": 0.49
+        "score": 0.49,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
+        "evidence_count": 8,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
+      },
+      {
+        "dimension": "fidelity",
+        "score": 0.09,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.17,
+        "evidence_count": 1,
+        "confidence": 0.6,
+        "evidence_band": "thin",
+        "intensity_band": "low"
       },
       {
         "dimension": "horizon",
-        "score": 0.16
+        "score": 0.16,
+        "raw_score": 0.17,
+        "support_adjusted_score": 0.17,
+        "evidence_count": 3,
+        "confidence": 0.72,
+        "evidence_band": "strong",
+        "intensity_band": "low"
       },
       {
         "dimension": "framework",
-        "score": -0.24
+        "score": -0.24,
+        "raw_score": -0.25,
+        "support_adjusted_score": -0.25,
+        "evidence_count": 4,
+        "confidence": 0.6,
+        "evidence_band": "strong",
+        "intensity_band": "low"
       }
     ],
+    "dominance_profile": {
+      "primary_dimension": "velocity",
+      "secondary_dimension": "signal",
+      "dominance_amplitude": 0.83,
+      "spread_type": "balanced",
+      "profile_intensity": "high",
+      "threshold_band": "strong",
+      "threshold_weight": 1.2
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.91,
+      "speed_vs_fidelity": 0.82,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "strong",
+      "active_suppression": true,
+      "profile_intensity": "high"
+    },
     "render_ready_keys": [
       "dna_summary",
       "command_clarity",

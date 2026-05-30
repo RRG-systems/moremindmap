@@ -452,6 +452,17 @@ function summarize(canonical, behavioral, archetype) {
   const evidenceCounts = Object.fromEntries(
     ranked.map(d => [d.dimension, d.evidence_count ?? d.contributing_answer_count ?? 0])
   );
+  const amplitudeFields = Object.fromEntries(
+    ranked.map(d => [d.dimension, {
+      raw_score: d.raw_score ?? d.score,
+      support_adjusted_score: d.support_adjusted_score ?? d.score,
+      evidence_count: d.evidence_count ?? d.contributing_answer_count ?? 0,
+      confidence: d.confidence ?? null,
+      evidence_band: d.evidence_band || null,
+      intensity_band: d.intensity_band || null,
+      distance_from_neutral: d.distance_from_neutral ?? null
+    }])
+  );
 
   return {
     archetype: archetype.archetype,
@@ -464,6 +475,7 @@ function summarize(canonical, behavioral, archetype) {
     secondary_engine: dimensionLabels[secondary] || secondary,
     primary_evidence_count: evidenceCounts[primary] ?? 0,
     evidence_counts: evidenceCounts,
+    amplitude_fields: amplitudeFields,
     natural_advantage: archetype.expected.advantage,
     natural_risk: archetype.expected.risk,
     energy_source: archetype.expected.energy,
@@ -485,9 +497,17 @@ function summarize(canonical, behavioral, archetype) {
       ranked_dimensions: rescoreRanked.map(d => ({
         dimension: d.dimension,
         score: d.score,
+        raw_score: d.raw_score,
+        support_adjusted_score: d.support_adjusted_score,
+        evidence_count: d.evidence_count,
+        confidence: d.confidence,
+        evidence_band: d.evidence_band,
+        intensity_band: d.intensity_band,
         display_score: d.display_score,
         gpt_rescored_score: d.gpt_rescored_score
       })),
+      dominance_profile: rescoring.dominance_profile || null,
+      render_ready: rescoring.render_ready || null,
       render_ready_keys: Object.keys(rescoring.render_ready || {})
     },
     behavioral_intelligence_keys: Object.keys(behavioral?.domains || {}),
@@ -645,6 +665,26 @@ function buildRegressionChecks(results) {
       label: `${archetype} does not rank zero-evidence ${dimension} primary`,
       status: !(result?.primary_engine === dimension && evidenceCount === 0) ? 'PASS' : 'FAIL',
       detail: `primary=${result?.primary_engine}; ${dimension}.evidence_count=${evidenceCount}`
+    });
+  }
+
+  for (const archetype of ['Accountant', 'Engineer']) {
+    const result = results.find(r => r.archetype === archetype);
+    checks.push({
+      label: `${archetype} is not Vector primary from one Q19 answer`,
+      status: result?.primary_engine !== 'Vector' ? 'PASS' : 'FAIL',
+      detail: `primary=${result?.primary_engine}; vector.evidence_count=${result?.evidence_counts?.vector ?? 0}`
+    });
+  }
+
+  for (const result of results) {
+    const primaryKey = result.primary_engine?.toLowerCase();
+    const primaryAmplitude = result.amplitude_fields?.[primaryKey];
+    const profileIntensity = result.rescoring_summary?.render_ready?.profile_intensity || result.rescoring_summary?.dominance_profile?.profile_intensity;
+    checks.push({
+      label: `${result.archetype} low-confidence primary is not extreme`,
+      status: !(primaryAmplitude?.confidence < 0.65 && profileIntensity === 'extreme') ? 'PASS' : 'FAIL',
+      detail: `primary=${result.primary_engine}; confidence=${primaryAmplitude?.confidence}; profile_intensity=${profileIntensity}`
     });
   }
 

@@ -180,12 +180,19 @@ export class BuildProfileInput {
       });
 
       const rawScore = answerCount > 0 ? totalScore / answerCount : 0;
+      const evidenceBand = this.getEvidenceBand(answerCount);
+      const supportFactor = Math.min(1, answerCount / 3);
+      const supportAdjustedScore = rawScore * supportFactor;
       scores[dim] = {
         raw_score: Math.round(rawScore * 100) / 100,
+        support_adjusted_score: Math.round(supportAdjustedScore * 100) / 100,
         normalized_percent: Math.round((rawScore / 4.0) * 100),
         confidence: this.calculateDimensionConfidence(rawAnswers, dim),
         evidence_count: answerCount,
         contributing_answer_count: answerCount,
+        distance_from_neutral: Math.round(Math.abs(supportAdjustedScore) * 100) / 100,
+        evidence_band: evidenceBand,
+        intensity_band: this.getIntensityBand(supportAdjustedScore, answerCount),
         contributing_answers: contributingAnswers,
         label: DIMENSION_LABELS[dim],
         description: this.getDimensionDescription(dim)
@@ -198,7 +205,7 @@ export class BuildProfileInput {
       const bEvidence = b[1].evidence_count || 0;
       if (aEvidence === 0 && bEvidence > 0) return 1;
       if (bEvidence === 0 && aEvidence > 0) return -1;
-      return b[1].raw_score - a[1].raw_score;
+      return b[1].support_adjusted_score - a[1].support_adjusted_score;
     });
     sortedDims.forEach(([dim, data], index) => {
       scores[dim].rank = index + 1;
@@ -217,6 +224,21 @@ export class BuildProfileInput {
     if (contributingAnswers.some(a => a.question_type === 'written')) confidence += 0.1;
 
     return Math.min(Math.max(confidence, 0.2), 1.0);
+  }
+
+  getEvidenceBand(evidenceCount) {
+    if (evidenceCount === 0) return 'none';
+    if (evidenceCount === 1) return 'thin';
+    if (evidenceCount === 2) return 'moderate';
+    return 'strong';
+  }
+
+  getIntensityBand(score, evidenceCount) {
+    const absScore = Math.abs(score);
+    if (absScore >= 0.85 && evidenceCount >= 3) return 'extreme';
+    if (absScore >= 0.65 && evidenceCount >= 2) return 'high';
+    if (absScore >= 0.35) return 'moderate';
+    return 'low';
   }
 
   getDimensionDescription(dim) {

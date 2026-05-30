@@ -1,7 +1,7 @@
 {
   "profile_id": "mm-20260529-cmp3j6z7",
   "vector_scores": {
-    "vector": 0.5,
+    "vector": 0.17,
     "signal": 0.4,
     "fidelity": 0.81,
     "velocity": -0.5,
@@ -14,10 +14,15 @@
     {
       "dimension": "fidelity",
       "score": 0.81,
+      "raw_score": 0.81,
+      "support_adjusted_score": 0.81,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 17,
       "contributing_answer_count": 17,
+      "distance_from_neutral": 0.81,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -41,10 +46,15 @@
     {
       "dimension": "framework",
       "score": 0.77,
+      "raw_score": 0.77,
+      "support_adjusted_score": 0.77,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 13,
       "contributing_answer_count": 13,
+      "distance_from_neutral": 0.77,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         4,
@@ -62,23 +72,17 @@
       ]
     },
     {
-      "dimension": "vector",
-      "score": 0.5,
-      "rank": 3,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "signal",
       "score": 0.4,
-      "rank": 4,
+      "raw_score": 0.4,
+      "support_adjusted_score": 0.4,
+      "rank": 3,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.4,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         12,
@@ -90,10 +94,15 @@
     {
       "dimension": "horizon",
       "score": 0.38,
-      "rank": 5,
+      "raw_score": 0.38,
+      "support_adjusted_score": 0.38,
+      "rank": 4,
       "confidence": 0.75,
       "evidence_count": 8,
       "contributing_answer_count": 8,
+      "distance_from_neutral": 0.38,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         4,
@@ -106,12 +115,33 @@
       ]
     },
     {
+      "dimension": "vector",
+      "score": 0.17,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "rank": 5,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "flex",
       "score": 0.17,
+      "raw_score": 0.17,
+      "support_adjusted_score": 0.17,
       "rank": 6,
       "confidence": 0.75,
       "evidence_count": 6,
       "contributing_answer_count": 6,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         5,
         8,
@@ -124,10 +154,15 @@
     {
       "dimension": "velocity",
       "score": -0.5,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.5,
       "rank": 7,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         1,
         9,
@@ -138,10 +173,15 @@
     {
       "dimension": "leverage",
       "score": 0,
+      "raw_score": 0,
+      "support_adjusted_score": 0,
       "rank": 8,
       "confidence": 0.2,
       "evidence_count": 0,
       "contributing_answer_count": 0,
+      "distance_from_neutral": 0,
+      "evidence_band": "none",
+      "intensity_band": "low",
       "contributing_answers": []
     }
   ],

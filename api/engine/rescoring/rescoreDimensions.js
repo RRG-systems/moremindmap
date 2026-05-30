@@ -146,10 +146,16 @@ function normalizeBaselineEvidence(dimensions) {
     .map((dim) => {
       const evidenceCount = dim.evidence_count ?? dim.contributing_answer_count ?? dim.contributing_answers?.length ?? null;
       const hasZeroEvidence = evidenceCount === 0;
-      const score = hasZeroEvidence ? 0 : (dim.score ?? 0);
+      const score = hasZeroEvidence ? 0 : (dim.support_adjusted_score ?? dim.score ?? 0);
       return {
         ...dim,
         score,
+        support_adjusted_score: score,
+        raw_score: dim.raw_score ?? dim.score ?? 0,
+        confidence: dim.confidence ?? null,
+        evidence_band: dim.evidence_band || getEvidenceBand(evidenceCount),
+        intensity_band: dim.intensity_band || getIntensityBand(score, evidenceCount),
+        distance_from_neutral: dim.distance_from_neutral ?? Math.round(Math.abs(score) * 100) / 100,
         evidence_count: evidenceCount ?? dim.evidence_count,
         contributing_answer_count: evidenceCount ?? dim.contributing_answer_count
       };
@@ -165,6 +171,21 @@ function normalizeBaselineEvidence(dimensions) {
       ...dim,
       rank: index + 1
     }));
+}
+
+function getEvidenceBand(evidenceCount) {
+  if (evidenceCount === 0) return 'none';
+  if (evidenceCount === 1) return 'thin';
+  if (evidenceCount === 2) return 'moderate';
+  return 'strong';
+}
+
+function getIntensityBand(score, evidenceCount) {
+  const absScore = Math.abs(score || 0);
+  if (absScore >= 0.85 && evidenceCount >= 3) return 'extreme';
+  if (absScore >= 0.65 && evidenceCount >= 2) return 'high';
+  if (absScore >= 0.35) return 'moderate';
+  return 'low';
 }
 
 /**
@@ -210,6 +231,8 @@ function detectDominanceWithThreshold(baseline, evidence, profileShape) {
 
   const primary = baseline[0];
   const secondary = baseline[1];
+  const primaryEvidenceCount = primary.evidence_count ?? primary.contributing_answer_count ?? 0;
+  const primaryConfidence = primary.confidence ?? 0.75;
   
   const gap_to_secondary = (primary.score - (secondary?.score || 0));
   const gap_to_average = primary.score - (baseline.reduce((s, d) => s + d.score, 0) / baseline.length);
@@ -219,10 +242,10 @@ function detectDominanceWithThreshold(baseline, evidence, profileShape) {
   let threshold_band = 'moderate';
   let threshold_weight = 1.0;
   
-  if (dominance_score > 0.85) {
+  if (dominance_score > 0.85 && primaryEvidenceCount >= 3 && primaryConfidence >= 0.65) {
     threshold_band = 'extreme';
     threshold_weight = 1.4; // Extreme systems disproportionately influence
-  } else if (dominance_score > 0.60) {
+  } else if (dominance_score > 0.60 && primaryEvidenceCount >= 2 && primaryConfidence >= 0.45) {
     threshold_band = 'strong';
     threshold_weight = 1.2;
   } else if (dominance_score > 0.30) {
@@ -252,6 +275,8 @@ function detectDominanceWithThreshold(baseline, evidence, profileShape) {
   return {
     primary_dimension: primary.dimension,
     primary_score: primary.score,
+    primary_evidence_count: primaryEvidenceCount,
+    primary_confidence: primaryConfidence,
     secondary_dimension: secondary?.dimension,
     secondary_score: secondary?.score || 0,
     dominance_score: dominance_score,
@@ -363,8 +388,13 @@ function calculateRescoredDimensionsV2(baseline, dominance, suppressionMap, evid
     return {
       dimension: dim.dimension,
       baseline_score: dim.score,
+      raw_score: dim.raw_score ?? dim.score,
+      support_adjusted_score: dim.support_adjusted_score ?? dim.score,
       evidence_count: dim.evidence_count ?? dim.contributing_answer_count ?? null,
       contributing_answer_count: dim.contributing_answer_count ?? dim.evidence_count ?? null,
+      evidence_band: dim.evidence_band || getEvidenceBand(dim.evidence_count ?? dim.contributing_answer_count),
+      intensity_band: dim.intensity_band || getIntensityBand(dim.support_adjusted_score ?? dim.score, dim.evidence_count ?? dim.contributing_answer_count),
+      distance_from_neutral: dim.distance_from_neutral ?? Math.round(Math.abs(dim.support_adjusted_score ?? dim.score ?? 0) * 100) / 100,
       rescored_score: Math.round(rescored_score * 100) / 100,
       rank: idx + 1,
       delta: Math.round((rescored_score - dim.score) * 100) / 100,
@@ -668,8 +698,10 @@ function buildRenderReadyV2(rescored, dominance, tensions, suppressionMap) {
  */
 function determinateIntensity(dominance, rescored) {
   const spread = Math.max(...rescored.map(d => d.rescored_score)) - Math.min(...rescored.map(d => d.rescored_score));
+  const primaryEvidenceCount = dominance.primary_evidence_count ?? 0;
+  const primaryConfidence = dominance.primary_confidence ?? 0;
   
-  if (dominance.threshold_band === 'extreme' && spread > 1.2) return 'extreme';
+  if (dominance.threshold_band === 'extreme' && spread > 1.2 && primaryEvidenceCount >= 3 && primaryConfidence >= 0.65) return 'extreme';
   if (dominance.threshold_band === 'strong' && spread > 0.8) return 'high';
   if (dominance.gap_to_average > 0.5) return 'high';
   if (dominance.gap_to_average > 0) return 'medium';
@@ -699,8 +731,13 @@ function assembleRescoringV2(rescored, dominance, spread, gravity, tensions, amp
       dimension: d.dimension,
       score: d.rescored_score,
       baseline_score: d.baseline_score,
+      raw_score: d.raw_score,
+      support_adjusted_score: d.support_adjusted_score,
       evidence_count: d.evidence_count,
       contributing_answer_count: d.contributing_answer_count,
+      evidence_band: d.evidence_band,
+      intensity_band: d.intensity_band,
+      distance_from_neutral: d.distance_from_neutral,
       delta: d.delta,
       rank: idx + 1,
       confidence: d.confidence

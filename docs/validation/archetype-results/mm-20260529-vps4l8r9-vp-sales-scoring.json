@@ -3,7 +3,7 @@
   "vector_scores": {
     "vector": 0.78,
     "signal": 0.79,
-    "fidelity": 0.5,
+    "fidelity": 0.17,
     "velocity": 0.83,
     "leverage": 0.5,
     "flex": 0.56,
@@ -14,10 +14,15 @@
     {
       "dimension": "velocity",
       "score": 0.83,
+      "raw_score": 0.83,
+      "support_adjusted_score": 0.83,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 12,
       "contributing_answer_count": 12,
+      "distance_from_neutral": 0.83,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -36,10 +41,15 @@
     {
       "dimension": "signal",
       "score": 0.79,
+      "raw_score": 0.79,
+      "support_adjusted_score": 0.79,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 7,
       "contributing_answer_count": 7,
+      "distance_from_neutral": 0.79,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         8,
@@ -53,10 +63,15 @@
     {
       "dimension": "vector",
       "score": 0.78,
+      "raw_score": 0.78,
+      "support_adjusted_score": 0.78,
       "rank": 3,
       "confidence": 0.75,
       "evidence_count": 10,
       "contributing_answer_count": 10,
+      "distance_from_neutral": 0.78,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -73,10 +88,15 @@
     {
       "dimension": "flex",
       "score": 0.56,
+      "raw_score": 0.56,
+      "support_adjusted_score": 0.56,
       "rank": 4,
       "confidence": 0.75,
       "evidence_count": 9,
       "contributing_answer_count": 9,
+      "distance_from_neutral": 0.56,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         5,
@@ -90,23 +110,17 @@
       ]
     },
     {
-      "dimension": "fidelity",
-      "score": 0.5,
-      "rank": 5,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        4
-      ]
-    },
-    {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 6,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 8,
       "contributing_answer_count": 8,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         7,
@@ -119,12 +133,33 @@
       ]
     },
     {
+      "dimension": "fidelity",
+      "score": 0.17,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "rank": 6,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        4
+      ]
+    },
+    {
       "dimension": "horizon",
       "score": 0.17,
+      "raw_score": 0.17,
+      "support_adjusted_score": 0.17,
       "rank": 7,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         9,
         15,
@@ -134,10 +169,15 @@
     {
       "dimension": "framework",
       "score": -0.25,
+      "raw_score": -0.25,
+      "support_adjusted_score": -0.25,
       "rank": 8,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.25,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         6,

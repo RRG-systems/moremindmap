@@ -310,7 +310,7 @@
   },
   "metadata": {
     "assessment_version": "mini-v2",
-    "generated_at": "2026-05-30T00:51:49.616Z",
+    "generated_at": "2026-05-30T04:02:15.595Z",
     "model": "synthetic-archetype-validation-v1",
     "person_name": "Marcus Vale",
     "email": "marcus.vale.synthetic@example.com",
@@ -340,7 +340,7 @@
   },
   "vector_scores": {
     "vector": 0.89,
-    "signal": 0.5,
+    "signal": 0.17,
     "fidelity": 0.67,
     "velocity": 0.73,
     "leverage": 0.5,
@@ -352,10 +352,15 @@
     {
       "dimension": "vector",
       "score": 0.89,
+      "raw_score": 0.89,
+      "support_adjusted_score": 0.89,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 16,
       "contributing_answer_count": 16,
+      "distance_from_neutral": 0.89,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -378,10 +383,15 @@
     {
       "dimension": "velocity",
       "score": 0.73,
+      "raw_score": 0.73,
+      "support_adjusted_score": 0.73,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 13,
       "contributing_answer_count": 13,
+      "distance_from_neutral": 0.73,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -401,10 +411,15 @@
     {
       "dimension": "fidelity",
       "score": 0.67,
+      "raw_score": 0.67,
+      "support_adjusted_score": 0.67,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.67,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         9,
@@ -412,23 +427,17 @@
       ]
     },
     {
-      "dimension": "signal",
-      "score": 0.5,
-      "rank": 4,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 4,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         7,
         11,
@@ -439,10 +448,15 @@
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         9,
@@ -454,10 +468,15 @@
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7,
+      "raw_score": 0.3,
+      "support_adjusted_score": 0.3,
+      "rank": 6,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.3,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         4,
@@ -467,12 +486,33 @@
       ]
     },
     {
+      "dimension": "signal",
+      "score": 0.17,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "rank": 7,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "flex",
       "score": -0.5,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.5,
       "rank": 8,
       "confidence": 0.75,
       "evidence_count": 7,
       "contributing_answer_count": 7,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         5,
@@ -502,12 +542,12 @@
       "pressure_manifestation": "Under strain, speed preference increases; detail drops"
     },
     "opposing_pattern_1": {
-      "dimension": "framework",
-      "score": 0.3,
+      "dimension": "signal",
+      "score": 0.5,
       "rank": 7,
-      "description": "low Structure (Framework)",
-      "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles",
-      "pressure_manifestation": "Under strain, structure-preference increases; rigidity increases"
+      "description": "low Relational Awareness (Signal)",
+      "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics",
+      "pressure_manifestation": "Under strain, relational awareness increases; can create hesitation"
     },
     "opposing_pattern_2": {
       "dimension": "flex",
@@ -578,7 +618,7 @@
       "formation_pattern": "Command drives decision formation",
       "validation_method": "Tempo validates approach",
       "speed_driver": "Moderate decision velocity",
-      "blind_spot": "Low Structure means framework signals get missed"
+      "blind_spot": "Low Relational Awareness means signal signals get missed"
     },
     "communication_style": {
       "message_structure": "Direction-first, context-later",
@@ -588,23 +628,23 @@
     "pressure_response": {
       "primary_shift": "Accelerates to directive action",
       "secondary_shift": "Tempo becomes compensating mechanism",
-      "blind_spot_emergence": "Structure disappears — framework signals get missed"
+      "blind_spot_emergence": "Relational Awareness disappears — signal signals get missed"
     }
   },
   "contradictions": [],
   "stress_patterns": {
     "primary_stress_response": "Accelerates to directive action — decisions form faster, input window narrows",
     "secondary_stress_shift": "Tempo becomes compensating mechanism — holds system together as Command amplifies",
-    "blind_spot_emergence": "Structure and Adaptability disappear — these signals don't register until crisis escalates",
+    "blind_spot_emergence": "Relational Awareness and Adaptability disappear — these signals don't register until crisis escalates",
     "escalation_chain": [
-      "Mild pressure: Command increases slightly, Structure signals start getting missed",
+      "Mild pressure: Command increases slightly, Relational Awareness signals start getting missed",
       "Moderate pressure: Command dominates operating system, Tempo compensates to maintain function",
-      "Severe pressure: Pure Command execution, blind to Structure and Adaptability — repairs relationships/process after conflict resolves"
+      "Severe pressure: Pure Command execution, blind to Relational Awareness and Adaptability — repairs relationships/process after conflict resolves"
     ],
     "recovery_paths": [
-      "Build explicit Structure check-ins BEFORE pressure escalates",
+      "Build explicit Relational Awareness check-ins BEFORE pressure escalates",
       "Recognize when Command is amplifying — create circuit breakers",
-      "Post-conflict repair: consciously re-engage Structure and Adaptability after stress passes"
+      "Post-conflict repair: consciously re-engage Relational Awareness and Adaptability after stress passes"
     ],
     "pattern_type": "narrowing"
   },
@@ -621,7 +661,7 @@
     "primary_mode": "Command-driven leadership",
     "stabilizing_force": "Tempo provides structural support when Command creates tension",
     "team_experience": "Team experiences Command as primary organizing force",
-    "challenge_surface": "Command dominance can suppress Structure — creates blind spot",
+    "challenge_surface": "Command dominance can suppress Relational Awareness — creates blind spot",
     "dissent_tolerance": "moderate",
     "development_orientation": "Development approach reflects Command priority",
     "calibrations": []
@@ -864,7 +904,7 @@
           "Low signal dimension combined with relational frustration language"
         ],
         "dimension_support": {
-          "signal": "Low (0.5) - Limited relational awareness capacity"
+          "signal": "Low (0.2) - Limited relational awareness capacity"
         },
         "contradiction_support": [],
         "confidence": 0.8,
@@ -941,11 +981,11 @@
     "high_inevitability_chains": 1
   },
   "narrative_profile": {
-    "executive_summary": "This is a Command/Tempo profile - command-driven with tempo stabilization. Command-driven leadership. Command dominance can suppress Structure — creates blind spot.",
-    "leadership_narrative": "Command-driven leadership. Team experiences Command as primary organizing force. Tempo provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress structure — creates blind spot. Development path: Build capacity in underutilized dimensions.",
-    "decision_narrative": "Command drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Structure means framework signals get missed. ",
+    "executive_summary": "This is a Command/Tempo profile - command-driven with tempo stabilization. Command-driven leadership. Command dominance can suppress Relational Awareness — creates blind spot.",
+    "leadership_narrative": "Command-driven leadership. Team experiences Command as primary organizing force. Tempo provides structural support when Command creates tension. The challenge surface appears when command dominance can suppress relational awareness — creates blind spot. Development path: Build capacity in underutilized dimensions.",
+    "decision_narrative": "Command drives decision formation. Tempo validates approach. Moderate decision velocity. Blind spot: Low Relational Awareness means signal signals get missed. ",
     "communication_narrative": "Communication style: Command-first communication structure. Directness: moderate. Abstraction level: moderate. Low emotional smoothing — message delivery prioritizes clarity over reception management. Works best in aligned environments. Friction point: when style mismatches culture.",
-    "development_narrative": "Development focuses on building capacity in underutilized dimensions. Under pressure, accelerates to directive action — decisions form faster, input window narrows. Structure and Adaptability disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Structure check-ins BEFORE pressure escalates.",
+    "development_narrative": "Development focuses on building capacity in underutilized dimensions. Under pressure, accelerates to directive action — decisions form faster, input window narrows. Relational Awareness and Adaptability disappear — these signals don't register until crisis escalates. Recovery path: Build explicit Relational Awareness check-ins BEFORE pressure escalates.",
     "business_manifestation": "When performance stalls, internalizes friction and looks inward for solutions. Relational friction surfaces as primary frustration point. Acknowledges avoidance patterns - awareness present but execution gap remains. Low numerical grounding - operates more conceptually than metrically. ",
     "contradiction_analysis": "No significant internal contradictions detected. Operating system shows dimensional coherence.",
     "leadership_readiness_narrative": "Leadership readiness: Low - Direction-setting becomes bottleneck as complexity increases. Low - Direction and process both unclear, team operates in fog. Followership: Moderate - Followership depends on alignment and context. Control tendency: Low - May under-direct; control too loose for accountability. Low - Limited bandwidth for reading individual development needs.",
@@ -958,10 +998,15 @@
     {
       "dimension": "vector",
       "score": 0.89,
+      "raw_score": 0.89,
+      "support_adjusted_score": 0.89,
       "rank": 1,
       "confidence": 0.75,
       "evidence_count": 16,
       "contributing_answer_count": 16,
+      "distance_from_neutral": 0.89,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
       "contributing_answers": [
         1,
         3,
@@ -984,10 +1029,15 @@
     {
       "dimension": "velocity",
       "score": 0.73,
+      "raw_score": 0.73,
+      "support_adjusted_score": 0.73,
       "rank": 2,
       "confidence": 0.75,
       "evidence_count": 13,
       "contributing_answer_count": 13,
+      "distance_from_neutral": 0.73,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         1,
         3,
@@ -1007,10 +1057,15 @@
     {
       "dimension": "fidelity",
       "score": 0.67,
+      "raw_score": 0.67,
+      "support_adjusted_score": 0.67,
       "rank": 3,
       "confidence": 0.65,
       "evidence_count": 3,
       "contributing_answer_count": 3,
+      "distance_from_neutral": 0.67,
+      "evidence_band": "strong",
+      "intensity_band": "high",
       "contributing_answers": [
         4,
         9,
@@ -1018,23 +1073,17 @@
       ]
     },
     {
-      "dimension": "signal",
-      "score": 0.5,
-      "rank": 4,
-      "confidence": 0.45,
-      "evidence_count": 1,
-      "contributing_answer_count": 1,
-      "contributing_answers": [
-        19
-      ]
-    },
-    {
       "dimension": "leverage",
       "score": 0.5,
-      "rank": 5,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 4,
       "confidence": 0.65,
       "evidence_count": 4,
       "contributing_answer_count": 4,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         7,
         11,
@@ -1045,10 +1094,15 @@
     {
       "dimension": "horizon",
       "score": 0.5,
-      "rank": 6,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "rank": 5,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         4,
         9,
@@ -1060,10 +1114,15 @@
     {
       "dimension": "framework",
       "score": 0.3,
-      "rank": 7,
+      "raw_score": 0.3,
+      "support_adjusted_score": 0.3,
+      "rank": 6,
       "confidence": 0.75,
       "evidence_count": 5,
       "contributing_answer_count": 5,
+      "distance_from_neutral": 0.3,
+      "evidence_band": "strong",
+      "intensity_band": "low",
       "contributing_answers": [
         1,
         4,
@@ -1073,12 +1132,33 @@
       ]
     },
     {
+      "dimension": "signal",
+      "score": 0.17,
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.17,
+      "rank": 7,
+      "confidence": 0.45,
+      "evidence_count": 1,
+      "contributing_answer_count": 1,
+      "distance_from_neutral": 0.17,
+      "evidence_band": "thin",
+      "intensity_band": "low",
+      "contributing_answers": [
+        19
+      ]
+    },
+    {
       "dimension": "flex",
       "score": -0.5,
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.5,
       "rank": 8,
       "confidence": 0.75,
       "evidence_count": 7,
       "contributing_answer_count": 7,
+      "distance_from_neutral": 0.5,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
       "contributing_answers": [
         3,
         5,
@@ -1093,16 +1173,21 @@
   "rescoring_v1": {
     "version": "v2",
     "phase": "threshold_dominance_refinement",
-    "generated_at": "2026-05-30T00:51:49.618Z",
+    "generated_at": "2026-05-30T04:02:15.598Z",
     "generation_source": "rescoring_engine_v2",
     "ranked_dimensions": [
       {
         "dimension": "vector",
-        "score": 0.89,
+        "score": 0.96,
         "baseline_score": 0.89,
+        "raw_score": 0.89,
+        "support_adjusted_score": 0.89,
         "evidence_count": 16,
         "contributing_answer_count": 16,
-        "delta": 0,
+        "evidence_band": "strong",
+        "intensity_band": "extreme",
+        "distance_from_neutral": 0.89,
+        "delta": 0.07,
         "rank": 1,
         "confidence": 0.746
       },
@@ -1110,8 +1195,13 @@
         "dimension": "velocity",
         "score": 0.71,
         "baseline_score": 0.73,
+        "raw_score": 0.73,
+        "support_adjusted_score": 0.73,
         "evidence_count": 13,
         "contributing_answer_count": 13,
+        "evidence_band": "strong",
+        "intensity_band": "high",
+        "distance_from_neutral": 0.73,
         "delta": -0.02,
         "rank": 2,
         "confidence": 0.77
@@ -1120,49 +1210,74 @@
         "dimension": "fidelity",
         "score": 0.65,
         "baseline_score": 0.67,
+        "raw_score": 0.67,
+        "support_adjusted_score": 0.67,
         "evidence_count": 3,
         "contributing_answer_count": 3,
+        "evidence_band": "strong",
+        "intensity_band": "high",
+        "distance_from_neutral": 0.67,
         "delta": -0.02,
         "rank": 3,
-        "confidence": 0.6980000000000001
-      },
-      {
-        "dimension": "signal",
-        "score": 0.36,
-        "baseline_score": 0.5,
-        "evidence_count": 1,
-        "contributing_answer_count": 1,
-        "delta": -0.14,
-        "rank": 4,
         "confidence": 0.6980000000000001
       },
       {
         "dimension": "leverage",
         "score": 0.49,
         "baseline_score": 0.5,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
         "evidence_count": 4,
         "contributing_answer_count": 4,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
         "delta": -0.02,
-        "rank": 5,
+        "rank": 4,
         "confidence": 0.746
       },
       {
         "dimension": "horizon",
         "score": 0.49,
         "baseline_score": 0.5,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
         "evidence_count": 5,
         "contributing_answer_count": 5,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
         "delta": -0.02,
-        "rank": 6,
+        "rank": 5,
         "confidence": 0.77
       },
       {
         "dimension": "framework",
         "score": 0.29,
         "baseline_score": 0.3,
+        "raw_score": 0.3,
+        "support_adjusted_score": 0.3,
         "evidence_count": 5,
         "contributing_answer_count": 5,
+        "evidence_band": "strong",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.3,
         "delta": -0.01,
+        "rank": 6,
+        "confidence": 0.6980000000000001
+      },
+      {
+        "dimension": "signal",
+        "score": 0.04,
+        "baseline_score": 0.17,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.17,
+        "evidence_count": 1,
+        "contributing_answer_count": 1,
+        "evidence_band": "thin",
+        "intensity_band": "low",
+        "distance_from_neutral": 0.17,
+        "delta": -0.13,
         "rank": 7,
         "confidence": 0.6980000000000001
       },
@@ -1170,8 +1285,13 @@
         "dimension": "flex",
         "score": -0.61,
         "baseline_score": -0.5,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.5,
         "evidence_count": 7,
         "contributing_answer_count": 7,
+        "evidence_band": "strong",
+        "intensity_band": "moderate",
+        "distance_from_neutral": 0.5,
         "delta": -0.11,
         "rank": 8,
         "confidence": 0.77
@@ -1181,25 +1301,25 @@
       "primary_dimension": "vector",
       "secondary_dimension": "velocity",
       "dominance_amplitude": 0.89,
-      "spread_type": "balanced",
+      "spread_type": "extreme",
       "profile_intensity": "extreme",
       "threshold_band": "extreme",
       "threshold_weight": 1.4
     },
     "spread_profile": {
-      "flatness_score": 0.91,
+      "flatness_score": 0.9,
       "polarization_score": 0.5,
-      "dominance_gap": 0.18,
-      "total_spread": 1.5,
-      "variance": 0.18,
-      "balanced_vs_extreme": "balanced",
-      "tension_distribution": "tensioned",
+      "dominance_gap": 0.25,
+      "total_spread": 1.57,
+      "variance": 0.21,
+      "balanced_vs_extreme": "extreme",
+      "tension_distribution": "balanced",
       "profile_shape": "flat",
       "profile_shape_confidence": 0.95
     },
     "tension_pairs": {
       "velocity_vs_fidelity": 0.06,
-      "vector_vs_signal": 0.53,
+      "vector_vs_signal": 0.92,
       "horizon_vs_flex": 1.1,
       "leverage_vs_flex": 1.1,
       "active_tensions": [
@@ -1211,7 +1331,7 @@
     },
     "dominance_gravity": {
       "strongest_system": "vector",
-      "gravity_strength": 0.89,
+      "gravity_strength": 0.96,
       "downstream_influence": [
         {
           "dimension": "horizon",
@@ -1228,14 +1348,14 @@
       "suppression_effects_active": true
     },
     "amplitude_metrics": {
-      "highest_score": 0.89,
+      "highest_score": 0.96,
       "lowest_score": -0.61,
-      "total_spread": 1.5,
-      "score_variance": 0.18
+      "total_spread": 1.57,
+      "score_variance": 0.21
     },
     "render_ready": {
       "dna_summary": null,
-      "command_clarity": 0.89,
+      "command_clarity": 0.96,
       "speed_vs_fidelity": 0.06,
       "strategic_leverage": 0.49,
       "dominance_flavor": "extreme",
@@ -1244,7 +1364,7 @@
     },
     "metadata": {
       "baseline_hash": "0.89:0.73:0.67:0",
-      "rescoring_timestamp": "2026-05-30T00:51:49.619Z",
+      "rescoring_timestamp": "2026-05-30T04:02:15.598Z",
       "rescoring_engine_version": "v2.0.0",
       "input_canonical_keys": "(full canonical)",
       "phase_features": [
@@ -1265,9 +1385,9 @@
   },
   "behavioral_intelligence_v1": {
     "extraction_version": "v1.0.0-tier1",
-    "extraction_timestamp": "2026-05-30T00:51:49.619Z",
+    "extraction_timestamp": "2026-05-30T04:02:15.598Z",
     "profile_id": "mm-20260529-ceo8x7q2",
-    "extraction_time_ms": 3,
+    "extraction_time_ms": 5,
     "domains": {
       "operatingSystem": {
         "title": "Known Operating System",
@@ -1297,11 +1417,11 @@
         },
         "opposing_patterns": [
           {
-            "dimension": "framework",
-            "score": 0.3,
+            "dimension": "signal",
+            "score": 0.5,
             "rank": 7,
-            "description": "low Structure (Framework)",
-            "operating_manifestation": "Prefers clear process and structure; comfortable with defined roles"
+            "description": "low Relational Awareness (Signal)",
+            "operating_manifestation": "Reads room tension before people speak; adjusts based on perceived dynamics"
           },
           {
             "dimension": "flex",
@@ -1319,7 +1439,7 @@
         },
         "all_scores": {
           "vector": 0.89,
-          "signal": 0.5,
+          "signal": 0.17,
           "fidelity": 0.67,
           "velocity": 0.73,
           "leverage": 0.5,
@@ -1344,7 +1464,7 @@
         "summary": "Action-focused perception, thorough processing, near-term focus. World experienced through vector lens.",
         "perception_filter": {
           "signal": "What you notice first",
-          "score": 0.5,
+          "score": 0.17,
           "interpretation": "Action-focused perception—notices results, momentum, forward movement first."
         },
         "information_processing": {
@@ -1367,7 +1487,7 @@
           "interpretation": "Moderate risk calibration—situational assessment drives risk decisions."
         },
         "key_signals": [
-          "Signal (perception): 0.5",
+          "Signal (perception): 0.2",
           "Velocity vs Fidelity: 0.7 vs 0.7",
           "Horizon (future): 0.5",
           "Flex (adaptability): -0.5"
@@ -1400,7 +1520,7 @@
           "interpretation": "Command-first communication structure. Low emotional smoothing — message delivery prioritizes clarity over reception management"
         },
         "listening_pattern": {
-          "signal_score": 0.5,
+          "signal_score": 0.17,
           "vector_dominance": 0.89,
           "under_pressure": "Moderate-High - Under stress, relational awareness disappears; damage done without awareness",
           "interpretation": "Normal state: Listening filters for action—relational awareness exists but not primary focus.. Under pressure: Moderate-High - Under stress, relational awareness disappears; damage done without awareness"

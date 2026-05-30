@@ -9,7 +9,7 @@
     "Fidelity 0.63"
   ],
   "bottom_2_dimensions": [
-    "Framework -0.50",
+    "Framework -0.33",
     "Vector 0.00"
   ],
   "primary_engine": "Signal",
@@ -24,6 +24,80 @@
     "velocity": 6,
     "framework": 2,
     "vector": 0
+  },
+  "amplitude_fields": {
+    "signal": {
+      "raw_score": 0.88,
+      "support_adjusted_score": 0.88,
+      "evidence_count": 14,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "extreme",
+      "distance_from_neutral": 0.88
+    },
+    "flex": {
+      "raw_score": 0.78,
+      "support_adjusted_score": 0.78,
+      "evidence_count": 18,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "high",
+      "distance_from_neutral": 0.78
+    },
+    "fidelity": {
+      "raw_score": 0.63,
+      "support_adjusted_score": 0.63,
+      "evidence_count": 4,
+      "confidence": 0.65,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.63
+    },
+    "leverage": {
+      "raw_score": 0.5,
+      "support_adjusted_score": 0.5,
+      "evidence_count": 6,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.5
+    },
+    "horizon": {
+      "raw_score": 0.4,
+      "support_adjusted_score": 0.4,
+      "evidence_count": 5,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "moderate",
+      "distance_from_neutral": 0.4
+    },
+    "velocity": {
+      "raw_score": 0.33,
+      "support_adjusted_score": 0.33,
+      "evidence_count": 6,
+      "confidence": 0.75,
+      "evidence_band": "strong",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.33
+    },
+    "framework": {
+      "raw_score": -0.5,
+      "support_adjusted_score": -0.33,
+      "evidence_count": 2,
+      "confidence": 0.45,
+      "evidence_band": "moderate",
+      "intensity_band": "low",
+      "distance_from_neutral": 0.33
+    },
+    "vector": {
+      "raw_score": 0,
+      "support_adjusted_score": 0,
+      "evidence_count": 0,
+      "confidence": 0.2,
+      "evidence_band": "none",
+      "intensity_band": "low",
+      "distance_from_neutral": 0
+    }
   },
   "natural_advantage": "Connects audience signal, cultural timing, and campaign angle quickly.",
   "natural_risk": "Can resist fixed process until deadlines force compression.",
@@ -68,37 +142,103 @@
     "ranked_dimensions": [
       {
         "dimension": "signal",
-        "score": 0.88
+        "score": 0.88,
+        "raw_score": 0.88,
+        "support_adjusted_score": 0.88,
+        "evidence_count": 14,
+        "confidence": 0.674,
+        "evidence_band": "strong",
+        "intensity_band": "extreme"
       },
       {
         "dimension": "flex",
-        "score": 0.64
+        "score": 0.64,
+        "raw_score": 0.78,
+        "support_adjusted_score": 0.78,
+        "evidence_count": 18,
+        "confidence": 0.77,
+        "evidence_band": "strong",
+        "intensity_band": "high"
       },
       {
         "dimension": "fidelity",
-        "score": 0.61
+        "score": 0.61,
+        "raw_score": 0.63,
+        "support_adjusted_score": 0.63,
+        "evidence_count": 4,
+        "confidence": 0.674,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "leverage",
-        "score": 0.49
+        "score": 0.49,
+        "raw_score": 0.5,
+        "support_adjusted_score": 0.5,
+        "evidence_count": 6,
+        "confidence": 0.674,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "horizon",
-        "score": 0.27
+        "score": 0.27,
+        "raw_score": 0.4,
+        "support_adjusted_score": 0.4,
+        "evidence_count": 5,
+        "confidence": 0.77,
+        "evidence_band": "strong",
+        "intensity_band": "moderate"
       },
       {
         "dimension": "velocity",
-        "score": 0.32
+        "score": 0.32,
+        "raw_score": 0.33,
+        "support_adjusted_score": 0.33,
+        "evidence_count": 6,
+        "confidence": 0.746,
+        "evidence_band": "strong",
+        "intensity_band": "low"
       },
       {
         "dimension": "framework",
-        "score": -0.48
+        "score": -0.32,
+        "raw_score": -0.5,
+        "support_adjusted_score": -0.33,
+        "evidence_count": 2,
+        "confidence": 0.674,
+        "evidence_band": "moderate",
+        "intensity_band": "low"
       },
       {
         "dimension": "vector",
-        "score": 0
+        "score": 0,
+        "raw_score": 0,
+        "support_adjusted_score": 0,
+        "evidence_count": 0,
+        "confidence": 0.2,
+        "evidence_band": "none",
+        "intensity_band": "low"
       }
     ],
+    "dominance_profile": {
+      "primary_dimension": "signal",
+      "secondary_dimension": "flex",
+      "dominance_amplitude": 0.88,
+      "spread_type": "balanced",
+      "profile_intensity": "medium",
+      "threshold_band": "extreme",
+      "threshold_weight": 1.4
+    },
+    "render_ready": {
+      "dna_summary": null,
+      "command_clarity": 0.88,
+      "speed_vs_fidelity": -0.29,
+      "strategic_leverage": 0.49,
+      "dominance_flavor": "extreme",
+      "active_suppression": true,
+      "profile_intensity": "medium"
+    },
     "render_ready_keys": [
       "dna_summary",
       "command_clarity",
