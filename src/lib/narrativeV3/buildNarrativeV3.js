@@ -425,7 +425,7 @@ async function localRendering(prompt, section, interpreted) {
 
     return {
       section,
-      summary: `${fallbackProfile.primaryName} + ${fallbackProfile.secondaryName} creates ${fallbackProfile.bottleneck}. Five fallback trajectories model what happens if that pattern is preserved, developed, or overloaded.`,
+      summary: `${fallbackProfile.primaryName} + ${fallbackProfile.secondaryName} creates a specific leadership consequence. Five fallback trajectories model what happens if that consequence is preserved, designed around, or overloaded.`,
       most_likely: futures[0],
       futures
     };
@@ -576,7 +576,7 @@ function buildFallbackProfile(interpreted, prompt) {
     lowProfile?.bottleneck,
   ]);
 
-  return {
+  const profile = {
     primaryKey: primary.key,
     primaryName: primary.name,
     secondaryKey: secondary.key,
@@ -585,11 +585,23 @@ function buildFallbackProfile(interpreted, prompt) {
     tertiaryName: tertiary.name,
     lowestKey: lowest.key,
     lowestName: lowest.name,
-    rankedNames: ranked.slice(0, 4).map((d) => normalizeDimension(d.dimension).name).filter(Boolean),
+    rankedNames: ranked.slice(0, 4).map((d) => toCustomerDimensionName(normalizeDimension(d.dimension).name)).filter(Boolean),
     tensionPair,
     pressureMechanics,
     oneMoveSeed,
     strategicCeilingSeed,
+    mechanism: {
+      pair: `${primary.name} + ${secondary.name}`,
+      bottleneck,
+      tertiary: {
+        key: tertiary.key,
+        name: tertiary.name,
+      },
+      lowest: {
+        key: lowest.key,
+        name: lowest.name,
+      },
+    },
     bottleneck,
     oneMove: joinFallbackParts([
       pairProfile.oneMove,
@@ -607,10 +619,14 @@ function buildFallbackProfile(interpreted, prompt) {
     leadership: pairProfile.leadership,
     constraint: lowProfile?.constraint || tieBreakerProfile.constraint || pairProfile.constraint,
   };
+
+  profile.consequences = buildConsequenceTranslation(profile);
+  return profile;
 }
 
 function normalizeDimension(dimension) {
-  const key = String(dimension || '').toLowerCase();
+  const inputKey = String(dimension || '').trim().toLowerCase();
+  const key = inputKey.includes('speed') ? 'velocity' : inputKey;
   const names = {
     vector: 'Vector',
     velocity: 'Velocity',
@@ -947,91 +963,340 @@ function joinFallbackParts(parts) {
   return parts.filter(Boolean).join(' with ');
 }
 
-function buildScalingFallback(profile) {
+function buildConsequenceTranslation(profile) {
+  const pairKey = `${profile.primaryKey}:${profile.secondaryKey}`;
+  const pairConsequences = getPairConsequences(pairKey, profile.secondaryKey, profile.primaryKey);
+  const tertiaryConsequence = getTertiaryConsequence(profile.tertiaryKey);
+  const lowestConsequence = getLowestConsequence(profile.lowestKey);
+
   return {
-    body:
-      `Primary system: ${profile.primaryName}. Secondary system: ${profile.secondaryName}. ` +
-      `The unique bottleneck is ${profile.bottleneck}.\n\n` +
-      `At current scale, ${profile.current}. Pressure mechanics: ${stringifyFallbackSeed(profile.pressureMechanics)}\n\n` +
-      `At the next scale, ${profile.scalingBreak} Top operating signals: ${profile.rankedNames.join(', ') || profile.tensionPair}.\n\n` +
-      `At larger scale, ${profile.constraint}. The tie-breaker is ${profile.tertiaryName} as tertiary signal and ${profile.lowestName} as lowest signal. ` +
-      `The breakthrough is not generic structure; it is the specific translation layer between ${profile.primaryName} and ${profile.secondaryName}. ` +
-      `Seed evidence: ${stringifyFallbackSeed(profile.strategicCeilingSeed)}`,
-    keyWarning: `${profile.primaryName} + ${profile.secondaryName} fails when ${profile.bottleneck} stays implicit.`,
+    leadership: joinConsequenceParts([
+      pairConsequences.leadership,
+      tertiaryConsequence.leadership,
+    ]),
+    team: joinConsequenceParts([
+      pairConsequences.team,
+      lowestConsequence.team,
+    ]),
+    business: joinConsequenceParts([
+      pairConsequences.business,
+      tertiaryConsequence.business,
+    ]),
+    scaling: joinConsequenceParts([
+      pairConsequences.scaling,
+      lowestConsequence.scaling,
+    ]),
+    future: joinConsequenceParts([
+      pairConsequences.future,
+      lowestConsequence.future,
+    ]),
+    oneMove: joinConsequenceParts([
+      pairConsequences.oneMove,
+      tertiaryConsequence.oneMove,
+      lowestConsequence.oneMove,
+    ]),
+  };
+}
+
+function getPairConsequences(pairKey, secondaryKey, primaryKey) {
+  const pairMap = {
+    'vector:velocity': {
+      leadership: 'The leader creates momentum quickly, but must translate pace into shared sequence before execution starts.',
+      team: 'The team can trust the urgency, but they need clearer handoffs before speed turns into cleanup work.',
+      business: 'Growth starts depending on how well fast decisions become coordinated execution.',
+      scaling: 'At scale, progress becomes dependent on the leader turning speed into a rhythm others can follow.',
+      future: 'The organization either converts pace into operating cadence or keeps paying for rework behind visible momentum.',
+      oneMove: 'Install a short alignment cadence that turns fast decisions into owned sequence, acceptance criteria, and timing.',
+    },
+    'vector:flex': {
+      leadership: 'The leader changes direction with useful adaptability, but must make clear what is fixed and what is still open.',
+      team: 'The team increasingly waits for clarification because flexibility can feel like unresolved direction.',
+      business: 'Execution consistency drops when people cannot tell whether a decision is settled or still adapting.',
+      scaling: 'Growth becomes person-dependent when ambiguity resolution lives with the leader instead of the operating system.',
+      future: 'The organization either turns adaptability into clear option architecture or keeps drifting around unresolved decisions.',
+      oneMove: 'Create a decision feedback loop that names what is fixed, what is flexible, and when ambiguity gets resolved.',
+    },
+    'vector:fidelity': {
+      leadership: 'The leader sets direction decisively, but trust depends on making the verification threshold visible before commitment.',
+      team: 'The team needs to know which decisions require checking and which can move without review.',
+      business: 'Quality risk appears when direction locks before standards are clear.',
+      scaling: 'Scale requires visible decision thresholds so speed and trust can coexist.',
+      future: 'The organization either learns when to verify or splits between fast action and late correction.',
+      oneMove: 'Define the decision checkpoint: what must be verified before direction locks and what can move without review.',
+    },
+    'signal:fidelity': {
+      leadership: 'The leader protects trust through careful reading and verification, but must separate concern from decision ownership.',
+      team: 'The team trusts the caution but can wait too long for certainty.',
+      business: 'Opportunities slow when relational confidence and proof have to arrive at the same time.',
+      scaling: 'Scale requires different lanes for concern capture, evidence, and the final decision owner.',
+      future: 'The organization either turns caution into a clear trust protocol or loses time waiting for complete certainty.',
+      oneMove: 'Name the concern, the evidence required, and the decision owner before the lane slows down.',
+    },
+    'fidelity:framework': {
+      leadership: 'The leader creates trust through accuracy and process, but must size rules to the cost of the decision.',
+      team: 'The team trusts the standards until the process feels heavier than the work requires.',
+      business: 'Throughput slows when quality control becomes the work instead of protecting the work.',
+      scaling: 'Scale requires right-sized standards that preserve trust without turning every decision into procedure.',
+      future: 'The organization either converts precision into usable rules or lets process weight slow execution.',
+      oneMove: 'Convert one recurring quality judgment into a documented rule with owner, exception path, and completion test.',
+    },
+    'vector:horizon': {
+      leadership: 'The leader pulls the organization toward the future, but must sequence the vision into decisions people can execute now.',
+      team: 'The team can believe the destination while still needing clarity on what matters this week.',
+      business: 'Strategic reach loses force when near-term priorities compete for the same attention.',
+      scaling: 'Scale requires staged timing so vision becomes execution instead of competing possibility.',
+      future: 'The organization either inherits a sequence or keeps chasing a persuasive future that stays hard to operationalize.',
+      oneMove: 'Convert the long-range thesis into a near-term sequence with visible decision gates.',
+    },
+  };
+
+  const secondaryMap = {
+    velocity: pairMap['vector:velocity'],
+    flex: pairMap['vector:flex'],
+    fidelity: {
+      leadership: 'The leader protects quality by checking decisions, but must make the acceptable error band explicit.',
+      team: 'The team needs to know when precision is required and when ownership can move.',
+      business: 'Decision congestion grows when the standard is felt but not named.',
+      scaling: 'Scale requires verification thresholds that catch expensive misses without slowing every move.',
+      future: 'The organization either turns checking into standards or keeps routing decisions back through personal review.',
+      oneMove: 'Define what must be checked, what can move, and who owns exceptions.',
+    },
+    framework: {
+      leadership: 'The leader makes repeatability possible, but must keep process light enough to serve execution.',
+      team: 'The team needs operating rails they can run without asking the leader to reconstruct the answer.',
+      business: 'Capacity gets consumed by rebuilding decisions that should already be repeatable.',
+      scaling: 'Scale requires the working pattern to survive without personal memory or repeated explanation.',
+      future: 'The organization either captures process or keeps making growth dependent on the same interpreter.',
+      oneMove: 'Capture the next recurring decision as a repeatable process with owner, trigger, and done condition.',
+    },
+    signal: {
+      leadership: 'The leader reads people and context, but must collect feedback before commitment makes it expensive.',
+      team: 'The team needs earlier dissent capture so concerns do not become late repair work.',
+      business: 'Adoption risk rises when relational information appears after execution has already started.',
+      scaling: 'Scale requires feedback instrumentation before pressure turns quiet concerns into drag.',
+      future: 'The organization either makes feedback a design input or keeps paying for repair after momentum commits people.',
+      oneMove: 'Add explicit objection checks, repair windows, and dissent capture after major decisions.',
+    },
+    leverage: {
+      leadership: 'The leader looks for compounding lift, but must choose which work deserves multiplication.',
+      team: 'The team needs a clear lane for what compounds and what should be refused.',
+      business: 'Activity can stay high while strategic lift stays capped.',
+      scaling: 'Scale requires effort to concentrate around the few decisions that multiply the system.',
+      future: 'The organization either concentrates capacity or stays busy without enough lift.',
+      oneMove: 'Name the highest-leverage decision lane and remove work that does not compound through it.',
+    },
+    horizon: pairMap['vector:horizon'],
+  };
+
+  return pairMap[pairKey] || secondaryMap[secondaryKey] || secondaryMap[primaryKey] || {
+    leadership: 'The leader creates value through a clear operating pattern, but must make the handoff rule visible.',
+    team: 'The team needs to see how decisions move from instinct to shared execution.',
+    business: 'Execution becomes harder to repeat when the operating logic stays implicit.',
+    scaling: 'Growth depends on turning personal judgment into a system others can run.',
+    future: 'The organization either inherits the operating logic or keeps routing interpretation through the same person.',
+    oneMove: 'Name the primary operating advantage and define the handoff rule that lets others use it without guessing.',
+  };
+}
+
+function getTertiaryConsequence(key) {
+  const map = {
+    framework: {
+      leadership: 'Process is available as a stabilizer when the leader writes the rule before pace increases.',
+      business: 'Explicit operating rails reduce preventable rework.',
+      oneMove: 'Use the process signal to write the sequence rule before pace accelerates.',
+    },
+    signal: {
+      leadership: 'Feedback can stabilize the pattern when the leader captures objections before decisions harden.',
+      business: 'Earlier adoption data reduces late-cycle friction.',
+      oneMove: 'Use feedback capture before treating the decision as settled.',
+    },
+    fidelity: {
+      leadership: 'A narrow proof point can protect trust without slowing every move.',
+      business: 'Targeted checks catch expensive misses before handoff.',
+      oneMove: 'Define the smallest proof point required before handoff.',
+    },
+    leverage: {
+      leadership: 'Compounding work becomes easier to choose when the leader names the lane that matters most.',
+      business: 'Capacity concentrates around work that multiplies the system.',
+      oneMove: 'Name which work compounds and which work should be refused.',
+    },
+    flex: {
+      leadership: 'Adaptability improves when the leader names what evidence permits a pivot.',
+      business: 'Change stops feeling like reversal when pivot criteria are visible.',
+      oneMove: 'State what new evidence permits a pivot and what remains fixed.',
+    },
+    horizon: {
+      leadership: 'Future orientation helps when the leader separates this week, this quarter, and later decisions.',
+      business: 'Sequencing keeps long-range pull from competing with near-term execution.',
+      oneMove: 'Separate this week, this quarter, and later decisions.',
+    },
+    velocity: {
+      leadership: 'Tempo helps when the leader designs cadence instead of letting others absorb urgency.',
+      business: 'Predictable pace lowers invisible pressure on execution.',
+      oneMove: 'Set cadence and pause points before work starts.',
+    },
+  };
+
+  return map[key] || {};
+}
+
+function getLowestConsequence(key) {
+  const map = {
+    framework: {
+      team: 'People recreate the same logic unless repeatable process is captured.',
+      scaling: 'Repeatability remains the ceiling until the operating pattern is written down.',
+      future: 'Growth keeps depending on personal reconstruction instead of inherited process.',
+      oneMove: 'Add one process capture step for the decision most likely to repeat.',
+    },
+    signal: {
+      team: 'People may comply before they are aligned if dissent is not invited early.',
+      scaling: 'Feedback arrives too late unless adoption risk is captured before execution begins.',
+      future: 'Quiet misalignment becomes visible only after cost is already embedded.',
+      oneMove: 'Add a named dissent check before execution begins.',
+    },
+    fidelity: {
+      team: 'People move faster than the quality threshold unless checking is named.',
+      scaling: 'Quality risk stays hidden until volume makes misses expensive.',
+      future: 'Small misses travel downstream and become coordination debt.',
+      oneMove: 'Add one narrow verification point before the highest-cost handoff.',
+    },
+    flex: {
+      team: 'People experience change as reversal when pivot criteria are not named.',
+      scaling: 'Adaptability stays costly until the team knows when change is allowed.',
+      future: 'Growth exposes brittle pivot rules when pressure rises.',
+      oneMove: 'Define what evidence permits a change before the decision is locked.',
+    },
+    horizon: {
+      team: 'People optimize the immediate move without seeing the larger timing picture.',
+      scaling: 'Sequencing stays weak when near-term action and future timing are not separated.',
+      future: 'The system keeps solving today while the bigger timing question stays underused.',
+      oneMove: 'Name the near-term decision and the future decision separately.',
+    },
+    velocity: {
+      team: 'People wait too long for certainty unless the next move is made small enough to start.',
+      scaling: 'Pace stays underpowered when movement lacks a deadline.',
+      future: 'Opportunities decay while the system remains careful.',
+      oneMove: 'Define the smallest reversible next action and deadline it.',
+    },
+  };
+
+  return map[key] || {};
+}
+
+function joinConsequenceParts(parts) {
+  return parts.filter(Boolean).join(' ');
+}
+
+function buildScalingFallback(profile) {
+  const consequences = profile.consequences;
+  const body = sanitizeConsequenceText(
+    `The visible mechanism is the primary operating pair. ` +
+    `The leadership consequence is simpler: ${consequences.leadership}\n\n` +
+    `At current scale, ${profile.current}. Pressure mechanics: ${stringifyFallbackSeed(profile.pressureMechanics)}\n\n` +
+    `At the next scale, ${consequences.team} ${consequences.business} Top operating signals: ${profile.rankedNames.join(', ') || profile.tensionPair}.\n\n` +
+    `At larger scale, ${consequences.scaling} The breakthrough is converting the leader's operating speed into shared communication, accountability, and execution rules. ` +
+    `Seed evidence: ${stringifyFallbackSeed(profile.strategicCeilingSeed)}`
+  );
+
+  return {
+    body,
+    keyWarning: consequences.scaling,
   };
 }
 
 function buildOneMoveFallback(profile) {
+  const consequences = profile.consequences;
+  const body = sanitizeConsequenceText(
+    `One move: ${consequences.oneMove}\n\n` +
+    `This addresses the visible operating mechanism without making the team decode it. ` +
+    `${consequences.team} ${consequences.business}\n\n` +
+    `Evidence seed: ${stringifyFallbackSeed(profile.oneMoveSeed)}`
+  );
+
   return {
-    body:
-      `One move: ${profile.oneMove}.\n\n` +
-      `This is specific to ${profile.primaryName} + ${profile.secondaryName}: the bottleneck is ${profile.bottleneck}. ` +
-      `The tie-breaker signal is ${profile.tertiaryName}; the lowest signal is ${profile.lowestName}. ` +
-      `It interrupts the active tension pair (${profile.tensionPair}) by turning ${profile.primaryName}'s advantage into something the organization can read before pressure escalates.\n\n` +
-      `Evidence seed: ${stringifyFallbackSeed(profile.oneMoveSeed)}`,
-    keyWarning: `Do not add generic structure. Build the one mechanism that resolves ${profile.bottleneck}.`,
+    body,
+    keyWarning: consequences.scaling,
   };
 }
 
 function buildTeamExperienceFallback(profile) {
-  const pair = `${profile.primaryName} + ${profile.secondaryName}`;
-  const tieBreaker = `${profile.tertiaryName} tertiary / ${profile.lowestName} lowest`;
+  const pair = getDisplayPair(profile);
+  const consequences = profile.consequences;
 
   return {
     section: 'teamExperience',
-    summary: `${pair} lands through ${profile.bottleneck}; the team initially trusts the visible ${profile.primaryName} signal, then has to adapt to the ${profile.lowestName} constraint under load.`,
+    summary: `The ${pair} mechanism initially reads as confidence and momentum. Over time, the team feels the consequence: ${consequences.team}`,
     first_impression: {
-      interpretation: `Others first read ${profile.primaryName} as the leading signal and ${profile.secondaryName} as the stabilizer, with ${tieBreaker} shaping whether trust holds. The trust point is ${profile.current}; the misread is assuming that ${profile.bottleneck} will explain itself without a translation layer.`
+      interpretation: `Others first trust the leader's ability to create direction and keep movement alive. The early benefit is visible: ${profile.current}.`
     },
     communication_pattern: {
-      interpretation: `Communication works best when the team can see the ${pair} mechanism: ${profile.scalingBreak}. Without that context, people may copy the pace or standard without understanding the decision rule behind it.`
+      interpretation: `Communication works best when decisions include ownership, timing, and what is still open. Without that, people may copy the pace without understanding the decision rule.`
     },
     listening_pattern: {
-      interpretation: `The team has to learn to surface information through the tie-breaker signal: ${tieBreaker}. Feedback needs to connect directly to ${profile.bottleneck}, not to generic preference or style.`
+      interpretation: `The team has to surface objections before execution hardens. Feedback needs to connect to the decision and handoff, not to generic preference or style.`
     },
     relational_friction: {
-      interpretation: `Under load, frustration forms around ${profile.overload} inside the ${pair} pattern. The consequence is specific: ${profile.constraint}; because the tie-breaker is ${tieBreaker}, team members must learn when to ask for the missing translation before execution hardens.`
+      interpretation: `Under load, frustration shows up as coordination cost. ${consequences.business} ${consequences.scaling}`
     },
     key_signals: [
-      `Primary/secondary mechanism: ${pair}`,
-      `Tie-breaker profile: ${tieBreaker}`,
-      `Unique team consequence: ${profile.constraint}`
+      `Initial trust: decisive movement`,
+      `Team consequence: ${consequences.team}`,
+      `Scaling consequence: ${consequences.scaling}`
     ],
-    causal_interpretation: `${pair} creates ${profile.bottleneck}; ${tieBreaker} determines what the team must name early so trust, friction, and follow-through do not become generic interpretation work.`
+    causal_interpretation: `The internal mechanism is ${pair}. The customer-facing consequence is that trust depends on whether decisions become clear enough for other people to execute without waiting for the leader to translate them.`
   };
 }
 
+function getDisplayPair(profile) {
+  return `${toCustomerDimensionName(profile.primaryName)} + ${toCustomerDimensionName(profile.secondaryName)}`;
+}
+
+function toCustomerDimensionName(value) {
+  const text = String(value || '').trim();
+  if (/speed/i.test(text)) return 'Velocity';
+  return text;
+}
+
+function sanitizeConsequenceText(text) {
+  return String(text || '')
+    .split('Vector + speed').join('Vector + Velocity')
+    .split('Vector + Speed').join('Vector + Velocity')
+    .replace(/\bspeed, Fidelity\b/g, 'Velocity, Fidelity')
+    .replace(/\bspeed, /g, 'Velocity, ');
+}
+
 function buildFiveFuturesFallback(profile) {
+  const consequences = profile.consequences;
   return [
     {
-      title: `Current Trajectory: ${toTitleSuffix(profile.bottleneck)}`,
+      title: `Current Trajectory: ${toTitleSuffix(consequences.team)}`,
       likelihood: 'likely',
-      trajectory: `${profile.primaryName} remains the lead operating system while ${profile.secondaryName} stabilizes it. ${profile.current}.`,
-      organization_experiences: `The organization experiences ${profile.primaryName} clearly, but the unresolved bottleneck (${profile.bottleneck}) determines where friction repeats.`
+      trajectory: `${profile.current}. The leader keeps creating movement, but the team needs more explicit translation before execution begins.`,
+      organization_experiences: `${consequences.team} ${consequences.business}`
     },
     {
-      title: `Optimized Trajectory: ${toTitleSuffix(profile.oneMove)}`,
+      title: `Optimized Trajectory: ${toTitleSuffix(consequences.oneMove)}`,
       likelihood: 'possible',
-      trajectory: `${profile.optimized}. The one move is to ${profile.oneMove}.`,
-      organization_experiences: `People gain a usable translation layer between ${profile.primaryName} and ${profile.secondaryName}, so the advantage becomes easier to repeat without guessing.`
+      trajectory: `${profile.optimized}. The one move is to ${consequences.oneMove}`,
+      organization_experiences: `People gain a usable operating layer, so the leader's advantage becomes easier to repeat without guessing.`
     },
     {
       title: `Burnout Trajectory: ${toTitleSuffix(profile.overload)}`,
       likelihood: 'risk',
-      trajectory: `${profile.overload}. Pressure mechanics intensify the same bottleneck instead of distributing it.`,
-      organization_experiences: `The team absorbs the cost of ${profile.bottleneck}; repair, rework, or delayed interpretation becomes the hidden workload.`
+      trajectory: `${profile.overload}. Pressure mechanics intensify the same leadership burden instead of distributing it.`,
+      organization_experiences: `${consequences.business} Repair, rework, or delayed interpretation becomes the hidden workload.`
     },
     {
       title: `Leadership Trajectory: ${toTitleSuffix(profile.leadership)}`,
       likelihood: 'possible',
-      trajectory: `${profile.leadership}. ${profile.primaryName} stops being only personal force and becomes transferable operating architecture.`,
-      organization_experiences: `Others can carry more of the ${profile.primaryName} + ${profile.secondaryName} logic because the bottleneck has been named and designed around.`
+      trajectory: `${profile.leadership}. The leader turns personal judgment into transferable operating architecture.`,
+      organization_experiences: `Others can carry more of the work because decision rules, communication, and accountability become visible.`
     },
     {
-      title: `Constraint Trajectory: ${toTitleSuffix(profile.constraint)}`,
+      title: `Constraint Trajectory: ${toTitleSuffix(consequences.scaling)}`,
       likelihood: 'likely',
-      trajectory: `${profile.constraint}. ${profile.scalingBreak}`,
-      organization_experiences: `Growth exposes the same ${profile.bottleneck}; the organization keeps working around the operator instead of inheriting the operating system.`
+      trajectory: `${consequences.scaling}`,
+      organization_experiences: `Growth keeps routing interpretation through the leader instead of giving the organization a system it can inherit.`
     }
   ];
 }
