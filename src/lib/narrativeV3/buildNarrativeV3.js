@@ -840,18 +840,18 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
     framework: {
       bottleneck: 'tertiary Framework makes speed depend on explicit operating rails',
       oneMove: 'use the Framework signal to write the sequence rule before pace accelerates',
-      scalingBreak: 'Tertiary Framework can stabilize the pair if it becomes an operating rail instead of a remembered preference.',
-      optimized: 'operating rails turn the primary pair into repeatable team behavior',
+      scalingBreak: 'Tertiary Framework can stabilize the pattern if it becomes a decision rule instead of a remembered preference.',
+      optimized: 'decision rules turn the leadership pattern into repeatable team behavior',
       overload: 'implicit process expectations create rework because the rails are felt but not written',
-      constraint: 'the pair stays person-dependent when Framework remains tertiary instead of explicit',
+      constraint: 'the work stays person-dependent when process remains implied instead of explicit',
     },
     signal: {
       bottleneck: 'tertiary Signal makes adoption depend on captured feedback',
       oneMove: 'use the Signal layer to capture objections and adoption friction before the decision is treated as settled',
       scalingBreak: 'Tertiary Signal can prevent silent misalignment if feedback is collected before execution hardens.',
-      optimized: 'feedback capture makes the primary pair easier for others to adopt',
+      optimized: 'feedback capture makes the leadership pattern easier for others to adopt',
       overload: 'people comply outwardly while unstated concerns become problems that surface too late',
-      constraint: 'the pair loses leverage when Signal remains informal and feedback arrives after commitment',
+      constraint: 'the work loses leverage when feedback remains informal and arrives after commitment',
     },
     fidelity: {
       bottleneck: 'tertiary Fidelity makes scale depend on a lightweight proof point',
@@ -859,7 +859,7 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
       scalingBreak: 'Tertiary Fidelity prevents expensive misses when proof points are narrow and early.',
       optimized: 'a short review point before expensive handoffs catches the costly miss without slowing every move',
       overload: 'small errors compound because checking exists as instinct, not a designed threshold',
-      constraint: 'the pair stays fragile when Fidelity is present but not operationalized',
+      constraint: 'the work stays fragile when quality standards are present but not operationalized',
     },
     leverage: {
       bottleneck: 'tertiary Leverage makes scale depend on choosing the compounding lane',
@@ -867,7 +867,7 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
       scalingBreak: 'Tertiary Leverage improves scale when effort is routed toward compounding decisions.',
       optimized: 'capacity concentrates around the work that multiplies the system',
       overload: 'energy disperses across useful work that does not compound',
-      constraint: 'the pair stays busy instead of leveraged when the compounding lane is unnamed',
+      constraint: 'the work stays busy instead of leveraged when the compounding lane is unnamed',
     },
     flex: {
       bottleneck: 'tertiary Flex makes scale depend on a visible pivot rule',
@@ -875,7 +875,7 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
       scalingBreak: 'Tertiary Flex prevents rigidity when the pivot rule is named before pressure.',
       optimized: 'adaptation becomes deliberate instead of reactive',
       overload: 'people keep adjusting to moving targets without knowing the pivot standard',
-      constraint: 'the pair becomes brittle when Flex exists but the pivot rule is implicit',
+      constraint: 'the work becomes brittle when adaptability exists but the pivot rule is implicit',
     },
     horizon: {
       bottleneck: 'tertiary Horizon makes scale depend on sequencing the future pull',
@@ -883,7 +883,7 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
       scalingBreak: 'Tertiary Horizon helps scale when future pull is converted into time horizons.',
       optimized: 'future orientation becomes sequence instead of distraction',
       overload: 'long-range possibility competes with near-term execution',
-      constraint: 'the pair overreaches when Horizon stays inspirational instead of sequenced',
+      constraint: 'the work overreaches when future direction stays inspirational instead of sequenced',
     },
     velocity: {
       bottleneck: 'tertiary Velocity makes scale depend on tempo control',
@@ -891,7 +891,7 @@ function getTieBreakerFallback(tertiaryKey, lowestKey) {
       scalingBreak: 'Tertiary Velocity helps only when tempo is designed rather than absorbed.',
       optimized: 'tempo becomes predictable enough for others to match',
       overload: 'pace becomes invisible pressure that others experience as urgency',
-      constraint: 'the pair creates fatigue when Velocity stays implicit',
+      constraint: 'the work creates fatigue when pace stays implicit',
     },
   };
 
