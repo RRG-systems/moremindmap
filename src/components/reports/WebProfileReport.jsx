@@ -279,7 +279,7 @@ function PageThreeDashboard({ narrative, behavioralIntelligence, canonical }) {
         {/* SECTION 2: HOW THIS SYSTEM MOVES */}
         <div className="page-section-header">
           <h2 className="page-section-title">How This System Moves</h2>
-          <p className="page-section-subtitle">Pure mechanism: operating patterns without yet showing consequences</p>
+          <p className="page-section-subtitle">How your decision style shapes what you notice, prioritize, and act on.</p>
         </div>
         
         <div className="zone-progression">
@@ -362,7 +362,7 @@ function PageFiveDashboard({ narrative, behavioralIntelligence, canonical }) {
         {/* PAGE 5: How Other People Adapt */}
         <div className="page-section-header">
           <h2 className="page-section-title">How Others Experience You</h2>
-          <p className="page-section-subtitle">Your operating pattern from team perspective</p>
+          <p className="page-section-subtitle">How your leadership style lands on the people around you.</p>
         </div>
         
         <div className="zone-progression">
@@ -522,7 +522,7 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
       <div className="page-content">
         <div className="page-section-header">
           <h2 className="page-section-title">Five Futures</h2>
-          <p className="page-section-subtitle">Five trajectory scenarios emerging from your current operating pattern</p>
+          <p className="page-section-subtitle">Five possible futures if your current leadership pattern continues or changes.</p>
         </div>
         
         {/* Render Five Futures as distinct items */}
@@ -553,7 +553,7 @@ function PageSevenDashboard({ narrative, behavioralIntelligence, canonical }) {
                   icon="🌌"
                   title="Five Futures"
                   subtitle="Trajectory Simulations Based on Current Pattern"
-                  content={narrative.profileDNA?.body || 'Five scenarios emerge from current operating pattern.'}
+                  content={narrative.profileDNA?.body || 'Five scenarios emerge from the current leadership pattern.'}
                   prominence="premium"
                   className="five-futures-panel"
                 />
