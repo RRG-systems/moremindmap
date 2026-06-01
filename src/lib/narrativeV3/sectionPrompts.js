@@ -274,7 +274,7 @@ Ground predictions to PRIMARY DRIVER SCORE and SECONDARY SYSTEM ABILITY.`,
     },
 
     instruction: `Generate scaling ceiling analysis (max 200 words) as JSON.
-Format: Organizational dynamics, not personality. Show how operating model becomes constraint at scale.
+Format: executive leadership briefing, not personality and not lab mechanics. Use mechanism internally, but render consequence externally.
 Structure: 1x (advantage) → 2x (early friction) → 5x (systemic cost) → 10x (personal execution breaks)
 
 For each transition:
@@ -283,8 +283,9 @@ For each transition:
 - Team/org experience at the breaking point
 - The specific decision or communication failure that emerges
 
-Do NOT use: "scale", "requires", "fragments", "impossible", "system", "challenge", "need"
-DO use: "coordination gaps widen", "speed advantage reverses", "people stop assuming you know the whole picture", "personal execution can't cover for broken infrastructure"
+Do NOT use: "visible mechanism", "operating pair", "operating math", "late-cycle friction", "adoption data", "seed evidence", "scale", "requires", "fragments", "impossible", "system", "challenge", "need"
+DO use executive language: leader, team, decision, trust, clarity, execution, accountability, growth, feedback, ownership.
+Useful phrases: "coordination gaps widen", "problems surface too late", "people stop assuming you know the whole picture", "personal execution can't cover for broken infrastructure"
 
 Make it feel inevitable. Like mathematical breakdown, not character flaw.
 
@@ -335,13 +336,13 @@ Ground to primary + secondary interaction. Be mechanical, not evaluative.`,
     },
 
     instruction: `Generate a concise operating model description (max 100 words) as JSON.
-Frame: how this person actually thinks and acts, not qualities or traits.
-Tone: mechanical, observable, no attribution.
+Frame: how this person creates value and pressure for the organization, not qualities or traits.
+Tone: executive, observable, no attribution. Use mechanism internally, but render consequence externally.
 
 DO NOT use: "strength", "trait", "tendency", "person who", "has a", "is someone who"
 DO use: "enters with direction forming", "reads momentum before consensus", "moves faster than shared understanding", "stabilized by [secondary]"
 
-Show the OPERATING PATTERN:
+Show the decision pattern:
 - What triggers action (decision formation? opportunity sensing? pressure?)
 - How primary + secondary interact (what stabilizes? what accelerates?)
 - What's the consequence in practice (team experience, team adaptation)
@@ -351,7 +352,7 @@ Example: "Direction congeals before input lands. Perspective provides coverage f
 
     format: JSON.stringify({
       section: "profileDNA",
-      body: "(operating mechanics: triggering pattern → primary+secondary interaction → consequence)",
+      body: "(decision pattern: triggering pattern → primary+secondary interaction → consequence)",
       grounding_used: "(which canonical fields: operating manifestations, pressure responses, dimensions)",
     }),
   };
@@ -407,14 +408,14 @@ Ground to PRIMARY OPERATING PATTERN + consequences if pattern shifts.`,
 
 export function buildRecommendedNextStepPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
-    systemRule: `You are recommending a behavioral intelligence experiment.
+    systemRule: `You are recommending a concrete executive action.
 ONE concrete next step.
 Not generic, not coaching platitude.
 Specific, grounded, testable.`,
 
     section: "recommendedNextStep",
-    voiceMode: "intelligence-advisor",
-    emotionalTemperature: "mechanical-direct",
+    voiceMode: "executive-advisor",
+    emotionalTemperature: "practical-direct",
 
     canonical: { unified, // Use unified interpretation as primary
       strategicCeiling: previousSections.strategicCeiling?.body,
@@ -425,14 +426,14 @@ Specific, grounded, testable.`,
     },
 
     instruction: `Generate ONE specific recommended next step (max 150 words) as JSON.
-Format: 2-3 sentences max.
-Tone: executive-level observation, testable, grounded in this person's operating model.
+Format: one short action plan. It must read like something the person can start in the next 30 days.
+Tone: executive-level observation, testable, grounded in this person's leadership reality.
 
 The recommendation should:
 - Directly address a constraint that emerges from primary + secondary interaction
 - Be specific enough to run (measurable, testable)
-- Surface something about their own operating model (not coaching toward an ideal)
-- Feel like it came from someone who's analyzed their operating math
+- Surface something about their own decision pattern (not coaching toward an ideal)
+- Feel like it came from someone who understands how their decisions affect team execution
 
 EXAMPLE GOOD:
 "Decision velocity audit: log your next 5 decisions (when formed, when locked, when consequences surfaced). Pattern shows whether speed compounds advantage or creates blind spots in your context."
@@ -441,17 +442,20 @@ EXAMPLE BAD:
 "Work on listening more" or "Try to be more collaborative"
 
 Ground to:
-- The specific operating pattern (from profile DNA)
+- The specific decision pattern (from profile DNA)
 - The scaling ceiling (where it breaks)
 - One testable observation that would reveal whether it's working or becoming liability
+
+Do NOT use: "visible mechanism", "operating pair", "operating math", "seed evidence", "late-cycle friction", "adoption data".
+DO use: "for the next 30 days", "owner", "timeline", "what success looks like", "what would cause the decision to change".
 
 If canonical.cognition exists, use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to choose the move.
 The move must address the actual operating bottleneck, not a generic improvement theme.`,
 
     format: JSON.stringify({
       section: "recommendedNextStep",
-      body: "(one specific, testable next step grounded in operating model)",
-      grounding_used: "(which operating pattern + constraint informed this)",
+      body: "(one specific 30-day action grounded in decision pattern and constraint)",
+      grounding_used: "(which decision pattern + constraint informed this)",
     }),
   };
 }
@@ -571,11 +575,11 @@ Before writing, identify internally:
 - what team members must learn to do around this person
 - what behavioral debt accumulates if the pattern is unmanaged
 
-Then write evidence → mechanism → consequence. Do not write psychological explanation first.
+Think evidence → mechanism → consequence internally. Write the consequence in executive language.
 
 Anti-convergence requirements:
 - Include at least 2 dossier-specific facts from canonical evidence, intake answers, cognition rationales, or prior sections.
-- Include 1 profile-exclusive causal mechanism explaining why this team experience belongs to this person.
+- Include 1 profile-specific cause explaining why this team experience belongs to this person.
 - Include 1 team consequence that would NOT apply equally to another Command/vector profile.
 
 Do NOT use these generic phrases unless directly grounded and rewritten uniquely:
@@ -587,7 +591,7 @@ Do NOT use these generic phrases unless directly grounded and rewritten uniquely
 
 Use cognition ranked dimensions, primary/secondary/tertiary/lowest dimensions, pressure mechanics, tension pairs, communication style, leadership architecture, hidden contradictions, facilitator notes, strategic ceiling, one move, and written intake answers when available.
 
-Mechanism distinction examples:
+Executive distinction examples:
 - Vector + Velocity: trust first = movement, pace, execution; misread = speed as certainty; debt = translation debt, rework, alignment lag.
 - Vector + Flex: trust first = adaptability, situational adjustment; misread = flexibility as alignment; debt = ambiguity debt, consensus drift, unclear boundaries.
 - Vector + Fidelity: trust first = certainty checked by verification; misread = checking as hesitation or control; debt = verification bottleneck, precision drag.
@@ -597,6 +601,9 @@ Mechanism distinction examples:
 Do not describe inner emotional state unless it directly changes how the team experiences the person.
 Do not use generic command/operator explanations unless tied to evidence.
 The output must answer: "Why does this person land this way on others?"
+
+Do NOT use: "visible mechanism", "operating pair", "profile-exclusive causal mechanism", "late-cycle friction", "adoption data", "seed evidence", "operating math".
+Prefer executive language: leader, team, decision, trust, clarity, execution, accountability, growth, feedback, ownership.
 
 Write as organizational observation, not coaching advice. The output must be renderer-compatible with the existing othersExperience schema.`,
 
@@ -647,7 +654,7 @@ Anti-convergence requirement:
 Before writing, identify how this profile differs from another similar Command/vector profile. Use the secondary system, pressure mechanics, written answers, role/company context, contradictions, facilitator notes, scaling constraint, and recommended next step to differentiate.
 Every future must include:
 - At least 2 direct dossier-specific facts from the supplied canonical evidence or prior sections
-- At least 1 profile-exclusive causal mechanism explaining why this trajectory belongs to this person
+- At least 1 profile-specific cause explaining why this trajectory belongs to this person
 - At least 1 organizational consequence that would NOT apply equally to another Command/vector profile
 
 Do NOT use generic repeated conclusions unless directly evidenced by this profile:
@@ -660,7 +667,7 @@ Do NOT use generic repeated conclusions unless directly evidenced by this profil
 - "family expectations"
 - "internal doubts"
 
-If one of those ideas is used, tie it to the exact evidence that makes it true for this dossier. Otherwise choose a different mechanism.
+If one of those ideas is used, tie it to the exact evidence that makes it true for this dossier. Otherwise choose a different cause.
 
 Rules:
 - No generic self-help.
@@ -673,13 +680,16 @@ Rules:
 - Constraint Trajectory = what happens if the main scaling constraint remains unresolved.
 
 Titles:
-Preserve renderer fields, but modify titles with the profile-specific bottleneck after the base category.
+Preserve renderer fields, but make titles short, human, and boardroom-readable. Do not let a full consequence sentence become the title.
 Examples:
-- "Current Trajectory: Speed Outruns Interpretation"
-- "Optimized Trajectory: Decision Feedback Becomes Infrastructure"
-- "Burnout Trajectory: Pace Becomes Personal Load"
-- "Leadership Trajectory: Direction Becomes Transferable"
-- "Constraint Trajectory: Flex Cannot Substitute for Process"
+- "Current Trajectory: Momentum With Rising Coordination Cost"
+- "Optimized Trajectory: Decision Rules Become Transferable"
+- "Burnout Trajectory: Founder Dependency Increases"
+- "Leadership Trajectory: Judgment Becomes Transferable"
+- "Constraint Trajectory: Scale Exposes The Gap"
+
+Do NOT use: "visible mechanism", "operating pair", "profile-exclusive causal mechanism", "late-cycle friction", "adoption data", "seed evidence", "operating math".
+Prefer executive language: leader, team, decision, trust, clarity, execution, accountability, growth, feedback, ownership.
 
 Do not add extra futures. Do not rename fields. Keep title, likelihood, trajectory, and organization_experiences exactly as fields.`,
 
