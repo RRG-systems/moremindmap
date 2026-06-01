@@ -586,7 +586,7 @@ function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="⚡"
               title="The One Move"
               subtitle="Highest-Leverage Intervention"
-              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+              content={renderBIContent("theOneMove", narrative.recommendedNextStep)}
               prominence="premium"
               className="one-move-panel"
             />
@@ -604,7 +604,7 @@ function PageEightDashboard({ narrative, behavioralIntelligence, canonical }) {
               icon="⚡"
               title="The One Move"
               subtitle="Highest-Leverage Intervention"
-              content={narrative.recommendedNextStep?.body || narrative.recommendedNextStep}
+              content={renderBIContent("theOneMove", narrative.recommendedNextStep)}
               prominence="premium"
               className="one-move-panel"
             />
@@ -849,10 +849,94 @@ function renderBIContent(domain, content) {
           </div>
         );
       }
+
+      if (parts.length === 0 && content.body) {
+        parts.push(
+          <div key="body" className="bi-subsection">
+            <p className="bi-subsection-text">{content.body}</p>
+          </div>
+        );
+      }
     }
     
     // The One Move - highlight the move, then reasoning
     if (domain === 'theOneMove') {
+      if (content.headline || content.futureBottleneck || content.intervention) {
+        if (content.headline) {
+          parts.push(
+            <div key="headline" className="bi-subsection">
+              <p className="bi-move-highlight">{content.headline}</p>
+            </div>
+          );
+        }
+
+        const structuredRows = [
+          ['futureBottleneck', 'Future Bottleneck', content.futureBottleneck],
+          ['highestLeverageLever', 'Highest Leverage Lever', content.highestLeverageLever],
+          ['roleTruth', 'Role Truth', content.roleTruth],
+          ['intervention', 'The Move', content.intervention],
+          ['whatHappensIfIgnored', 'If Ignored', content.whatHappensIfIgnored],
+        ];
+
+        structuredRows.forEach(([key, title, value]) => {
+          if (!value) return;
+          parts.push(
+            <div key={key} className="bi-subsection">
+              <h4 className="bi-subsection-title">{title}</h4>
+              <p className="bi-subsection-text">{value}</p>
+            </div>
+          );
+        });
+
+        if (Array.isArray(content.first30Days) && content.first30Days.length > 0) {
+          parts.push(
+            <div key="first30Days" className="bi-subsection">
+              <h4 className="bi-subsection-title">First 30 Days</h4>
+              <ol className="bi-list">
+                {content.first30Days.map((step, index) => (
+                  <li key={index}>{step}</li>
+                ))}
+              </ol>
+            </div>
+          );
+        } else if (content.first30Days) {
+          parts.push(
+            <div key="first30Days" className="bi-subsection">
+              <h4 className="bi-subsection-title">First 30 Days</h4>
+              <p className="bi-subsection-text">{content.first30Days}</p>
+            </div>
+          );
+        }
+
+        const evidence = Array.isArray(content.proofSignals) && content.proofSignals.length > 0
+          ? content.proofSignals
+          : Array.isArray(content.evidenceUsed) ? content.evidenceUsed : [];
+        if (evidence.length > 0 || content.confidence || content.interventionType) {
+          parts.push(
+            <div key="evidence" className="bi-subsection">
+              <h4 className="bi-subsection-title">Evidence / Confidence</h4>
+              {content.interventionType && (
+                <p className="bi-subsection-text">
+                  Intervention type: {String(content.interventionType).replace(/_/g, ' ')}
+                </p>
+              )}
+              {content.confidence && (
+                <p className="bi-subsection-text">Confidence: {content.confidence}</p>
+              )}
+              {evidence.length > 0 && (
+                <ul className="bi-list">
+                  {evidence.slice(0, 5).map((signal, index) => (
+                    <li key={index}>{signal}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        }
+
+        return <>{parts}</>;
+      }
+
       if (content.the_move) {
         parts.push(
           <div key="move" className="bi-subsection">
@@ -1644,7 +1728,7 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
                   <h2 className="section-title">Recommended Next Step</h2>
                 </div>
                 <div className="section-descriptor">Decisive Recommendation</div>
-                <div className="narrative-text">{narrative.recommendedNextStep?.body || narrative.recommendedNextStep}</div>
+                <div className="narrative-text">{renderBIContent("theOneMove", narrative.recommendedNextStep)}</div>
               </section>
             )}
 

@@ -91,7 +91,8 @@ export default async function handler(req, res) {
     const hasStructuredSection =
       (section === 'fiveFutures' && Array.isArray(parsed.futures)) ||
       (section === 'facilitatorNotes' && Array.isArray(parsed.notes)) ||
-      (section === 'teamExperience' && isStructuredTeamExperience(parsed));
+      (section === 'teamExperience' && isStructuredTeamExperience(parsed)) ||
+      (section === 'recommendedNextStep' && isStructuredOneMove(parsed));
 
     if (!parsed.section || (!parsed.body && !hasStructuredSection)) {
       console.warn(`[NARRATIVE-V3] Missing required fields`);
@@ -133,6 +134,15 @@ function isStructuredTeamExperience(value) {
   ].filter(Boolean).length;
 
   return validSignals >= 2;
+}
+
+function isStructuredOneMove(value) {
+  return Boolean(
+    value?.headline &&
+    value?.futureBottleneck &&
+    value?.intervention &&
+    value?.roleTruth
+  );
 }
 
 /**

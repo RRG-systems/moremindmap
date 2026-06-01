@@ -408,10 +408,9 @@ Ground to PRIMARY OPERATING PATTERN + consequences if pattern shifts.`,
 
 export function buildRecommendedNextStepPrompt(unified, interpreted, previousSections, cognitionContext = null) {
   return {
-    systemRule: `You are recommending a concrete executive action.
-ONE concrete next step.
-Not generic, not coaching platitude.
-Specific, grounded, testable.`,
+    systemRule: `You are identifying The One Move: the future bottleneck plus the highest-leverage intervention.
+This is not productivity advice, a generic coaching tip, or a 30-day checklist.
+It must identify the strategic inflection point that changes the person's future trajectory.`,
 
     section: "recommendedNextStep",
     voiceMode: "executive-advisor",
@@ -421,41 +420,55 @@ Specific, grounded, testable.`,
       strategicCeiling: previousSections.strategicCeiling?.body,
       coachingLeverage: previousSections.coachingLeverage?.body,
       hiddenContradictions: previousSections.hiddenContradictions?.body,
+      teamExperience: previousSections.teamExperience?.summary || previousSections.teamExperience?.body || previousSections.teamExperience,
+      facilitatorNotes: previousSections.facilitatorNotes?.summary || previousSections.facilitatorNotes?.body || previousSections.facilitatorNotes,
+      fiveFutures: previousSections.fiveFutures?.summary || previousSections.fiveFutures?.body || previousSections.fiveFutures,
+      executiveSummary: previousSections.executiveSummary?.body || previousSections.executiveSummary,
       intake_answers: interpreted.intake_answers,
       cognition: buildCompactCognitionBlock(cognitionContext),
     },
 
-    instruction: `Generate ONE specific recommended next step (max 150 words) as JSON.
-Format: one short action plan. It must read like something the person can start in the next 30 days.
-Tone: executive-level observation, testable, grounded in this person's leadership reality.
+    instruction: `Generate The One Move as structured JSON.
+It must answer:
+- What future bottleneck is most likely to cap the next stage?
+- What highest-leverage lever would make everything else easier?
+- What lower-value work or function is consuming strategic capacity?
+- Is this person the right person to solve that bottleneck directly?
+- Should they do it, build it, hire it, delegate it, replace themselves in it, stop owning it, install accountability, transfer judgment, narrow focus, or change role?
 
-The recommendation should:
-- Directly address a constraint that emerges from primary + secondary interaction
-- Be specific enough to run (measurable, testable)
-- Surface something about their own decision pattern (not coaching toward an ideal)
-- Feel like it came from someone who understands how their decisions affect team execution
+Rules:
+- Use mechanism internally, but render consequence externally.
+- Evaluate role truth, not just behavior improvement.
+- The intervention must be hard to swap into another profile.
+- Do not default to generic 30-day productivity advice.
+- Do not use: "visible mechanism", "operating pair", "operating math", "profile-exclusive causal mechanism", "late-cycle friction", "adoption data", "seed evidence".
+- Use executive language: leader, team, decision, trust, clarity, execution, accountability, growth, scale, feedback, ownership.
+- first30Days must be concrete enough to start immediately, but the section's center of gravity is the future bottleneck, not task management.
 
-EXAMPLE GOOD:
-"Decision velocity audit: log your next 5 decisions (when formed, when locked, when consequences surfaced). Pattern shows whether speed compounds advantage or creates blind spots in your context."
+Allowed interventionType values:
+do_it_yourself, build_system, hire_operator, delegate_function, replace_self_in_function, change_role, stop_owning_function, install_accountability, transfer_judgment, narrow_focus.
 
-EXAMPLE BAD:
-"Work on listening more" or "Try to be more collaborative"
-
-Ground to:
-- The specific decision pattern (from profile DNA)
-- The scaling ceiling (where it breaks)
-- One testable observation that would reveal whether it's working or becoming liability
-
-Do NOT use: "visible mechanism", "operating pair", "operating math", "seed evidence", "late-cycle friction", "adoption data".
-DO use: "for the next 30 days", "owner", "timeline", "what success looks like", "what would cause the decision to change".
-
-If canonical.cognition exists, use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to choose the move.
-The move must address the actual operating bottleneck, not a generic improvement theme.`,
+If canonical.cognition exists, use cognition ranked dimensions, dominance, spread, tension, suppressions, render_ready, and audit rationales to identify the bottleneck.
+Use downstream sections when present: Strategic Ceiling, Hidden Contradictions, Team Experience, Facilitator Notes, Five Futures, and Executive Summary.`,
 
     format: JSON.stringify({
       section: "recommendedNextStep",
-      body: "(one specific 30-day action grounded in decision pattern and constraint)",
-      grounding_used: "(which decision pattern + constraint informed this)",
+      headline: "string",
+      futureBottleneck: "string",
+      coreConstraint: "string",
+      highestLeverageLever: "string",
+      lowestValueDrag: "string",
+      roleTruth: "string",
+      interventionType: "transfer_judgment",
+      intervention: "string",
+      whyThisMatters: "string",
+      whatHappensIfIgnored: "string",
+      first30Days: ["string", "string", "string"],
+      proofSignals: ["string", "string", "string"],
+      confidence: "High | Moderate-High | Moderate | Low",
+      evidenceUsed: ["string", "string", "string"],
+      body: "(plain text summary for backward compatibility)",
+      grounding_used: "(which decision pattern + future bottleneck informed this)",
     }),
   };
 }

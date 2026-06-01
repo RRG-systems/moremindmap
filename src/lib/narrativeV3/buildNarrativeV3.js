@@ -21,7 +21,10 @@ import * as prompts from './sectionPrompts.js';
 import { callGPT55, validateGrounding } from './openaiIntegration.js';
 import { getCachedNarrative, cacheNarrative } from './cache.js';
 import { getCognitionContext } from './getCognitionContext.js';
-import { buildExecutiveIntelligencePacket } from '../behavioralDNAInterpretation.js';
+import {
+  buildBehavioralDNAInterpretation,
+  buildExecutiveIntelligencePacket,
+} from '../behavioralDNAInterpretation.js';
 
 /**
  * Main entry point for V3 narrative expansion.
@@ -69,10 +72,10 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     'hiddenContradictions',
     'strategicCeiling',
     'coachingLeverage',
-    'recommendedNextStep',
     'teamExperience',
     'facilitatorNotes',
     'fiveFutures',
+    'recommendedNextStep',
     'executiveSummary',
   ];
   const cognitionAwareSections = new Set([
@@ -167,7 +170,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
           }
           console.log(`  prompt keys in request: ${Object.keys(prompt).join(', ')}`);
 
-          rendering = await safeLocalRendering(prompt, section, interpreted);
+          rendering = await safeLocalRendering(prompt, section, interpreted, canonical, cognitionContext, previousSections);
           sectionRenderSource = 'fallback_local';
           fallbackActivated = true;
           narrative.fallback_used = true;
@@ -179,7 +182,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
       } else {
         // Local rendering only
         console.log(`[V3 LOCAL ONLY] section: ${section}`);
-        rendering = await safeLocalRendering(prompt, section, interpreted);
+        rendering = await safeLocalRendering(prompt, section, interpreted, canonical, cognitionContext, previousSections);
         sectionRenderSource = 'fallback_local';
         narrative.render_source = narrative.render_source || 'fallback_local';
       }
@@ -288,6 +291,13 @@ function normalizeStructuredSection(section, rendering) {
     }
   }
 
+  if (section === 'recommendedNextStep') {
+    if (rendering.body?.futureBottleneck || rendering.body?.intervention) {
+      return { ...rendering, ...rendering.body };
+    }
+    return rendering;
+  }
+
   return rendering;
 }
 
@@ -300,7 +310,7 @@ function normalizeStructuredSection(section, rendering) {
  * This is what runs in the browser/during testing.
  * Keeps output consistent, grounded, and predictable.
  */
-async function localRendering(prompt, section, interpreted) {
+async function localRendering(prompt, section, interpreted, canonical = null, cognitionContext = null, previousSections = {}) {
   let body = '';
   let microScenario = buildMicroScenario(interpreted, section);
   let keyWarning = '';
@@ -382,10 +392,8 @@ async function localRendering(prompt, section, interpreted) {
 
   if (section === 'recommendedNextStep') {
     const fallbackProfile = buildFallbackProfile(interpreted, prompt);
-    const oneMove = buildOneMoveFallback(fallbackProfile);
-
-    body = oneMove.body;
-    keyWarning = oneMove.keyWarning;
+    const bottleneck = buildFutureBottleneck(fallbackProfile, interpreted, prompt, canonical, cognitionContext, previousSections);
+    return buildOneMoveDoctrine(bottleneck);
   }
 
   if (section === 'facilitatorNotes') {
@@ -441,9 +449,9 @@ async function localRendering(prompt, section, interpreted) {
   };
 }
 
-async function safeLocalRendering(prompt, section, interpreted) {
+async function safeLocalRendering(prompt, section, interpreted, canonical = null, cognitionContext = null, previousSections = {}) {
   try {
-    return await localRendering(prompt, section, interpreted);
+    return await localRendering(prompt, section, interpreted, canonical, cognitionContext, previousSections);
   } catch (error) {
     console.error(`[V3 LOCAL FALLBACK FAILURE] section: ${section}`, error);
     return getDefaultSection(section);
@@ -1202,6 +1210,247 @@ function buildScalingFallback(profile) {
   };
 }
 
+function buildFutureBottleneck(profile, interpreted, prompt, canonical, cognitionContext, previousSections = {}) {
+  const data = unwrapCanonicalProfile(canonical);
+  const ranked = getBottleneckRanked(profile, cognitionContext, data);
+  const behavioralDNA = buildBehavioralDNAInterpretation(data || {}, ranked);
+  const executivePacket = buildExecutiveIntelligencePacket(canonical || data || {}, cognitionContext, previousSections);
+  const org = extractOrganizationContext(data);
+  const roleFit = data?.role_fit_analysis || data?.roleFitAnalysis || prompt?.canonical?.roleFit || {};
+  const wrongSeatRisk = behavioralDNA?.wrong_seat_risk || executivePacket?.behavioral_dna?.wrong_seat_risk || null;
+  const consequences = profile.consequences || {};
+  const pairKey = `${profile.primaryKey}:${profile.secondaryKey}`;
+  const lowFramework = profile.lowestKey === 'framework' || ranked.some((d) =>
+    normalizeDimension(d.dimension).key === 'framework' && Number(getDimensionValue(d)) <= 0.2
+  );
+  const lowFlex = profile.lowestKey === 'flex';
+  const founderContext = /\b(founder|ceo|owner|broker|principal|president)\b/i.test(`${org.roleTitle} ${org.companyName}`);
+  const operatorContext = /\b(operations|operator|coo|manager|director)\b/i.test(org.roleTitle);
+  const hasOrgScale = Number(org.directReports || 0) >= 4 || /\b(company|brokerage|organization|team|firm)\b/i.test(`${org.companyName} ${org.roleTitle}`);
+
+  let interventionType = 'transfer_judgment';
+  let headline = 'Make Judgment Transferable';
+  let futureBottleneck = consequences.scaling || 'The next stage depends on making the strongest decision pattern easier for other people to execute.';
+  let coreConstraint = 'The leader remains too central to interpretation, decision transfer, or follow-through.';
+  let highestLeverageLever = executivePacket?.highest_leverage_insight || behavioralDNA?.natural_advantage || consequences.leadership || 'Turn the strongest value-creating pattern into a repeatable leadership system.';
+  let lowestValueDrag = behavioralDNA?.fatigue_source || 'Repeated explanation, handoff repair, and decision translation consume capacity that should go to higher-value work.';
+  let roleTruth = 'The leader should keep owning the highest-value judgment, but stop being the only place that judgment can live.';
+  let intervention = consequences.oneMove || 'Create a short decision-transfer layer that names ownership, timing, success criteria, and the rule for changing course.';
+  let ignored = consequences.future || 'The organization keeps routing interpretation back through the leader, which slows scale and raises coordination cost.';
+  let first30Days = [
+    'Pick the three recurring decisions that currently come back to the leader.',
+    'Write the decision rule for each one: owner, timing, evidence threshold, and what would change the decision.',
+    'Assign an owner to run the rule without waiting for personal clarification.',
+    'Review one cycle later and keep only the rules the team actually used.',
+  ];
+
+  if (pairKey === 'vector:velocity') {
+    headline = 'Turn Speed Into Transferable Judgment';
+    interventionType = founderContext || hasOrgScale ? 'transfer_judgment' : 'install_accountability';
+    futureBottleneck = 'The organization is unlikely to be capped by lack of momentum. It is more likely to be capped by how much decision translation still has to route through the leader.';
+    coreConstraint = 'Direction and pace create value, but the transfer layer is not strong enough for others to absorb the speed without rework.';
+    highestLeverageLever = 'Keep the leader in direction, timing, and judgment while making handoffs explicit enough for others to execute.';
+    lowestValueDrag = 'Repeatedly explaining intent, repairing handoffs, and resolving speed-created confusion.';
+    roleTruth = founderContext
+      ? 'The leader should not slow down into a consensus manager. The higher-value role is direction and speed, supported by operators and decision systems that let the company absorb that speed.'
+      : 'The leader should keep creating momentum, but should not personally translate every fast decision after the fact.';
+    intervention = 'Build a decision-transfer layer for major initiatives: decision owner, evidence threshold, handoff rule, and change rule before execution starts.';
+    ignored = 'Growth keeps looking fast while hidden rework rises behind it. The team learns the leader’s urgency, but not the decision logic behind it.';
+    first30Days = [
+      'Choose the three initiatives where speed most often creates follow-up questions or rework.',
+      'For each one, define owner, deadline, evidence threshold, handoff rule, and change rule before execution begins.',
+      'Assign an operator or decision owner to translate the rule to the team instead of routing every clarification back to the leader.',
+      'Review the next handoff for rework, missed assumptions, and decisions that still came back for translation.',
+    ];
+  } else if (pairKey === 'vector:flex' || (profile.primaryKey === 'vector' && lowFramework)) {
+    headline = 'Turn Adaptability Into Infrastructure';
+    interventionType = lowFramework ? 'build_system' : 'transfer_judgment';
+    futureBottleneck = 'The future bottleneck is not intelligence or effort. It is repeatability: the organization learns the leader instead of learning a system.';
+    coreConstraint = 'Adaptability creates movement, but recurring ambiguity still depends on the leader to resolve what is fixed, flexible, or ready to change.';
+    highestLeverageLever = 'Capture the recurring parts of adaptive judgment so people can move without waiting for personal clarification.';
+    lowestValueDrag = 'Personally resolving the same ambiguities, exceptions, and boundary questions after the pattern is already known.';
+    roleTruth = 'The leader can keep creating movement, but should stop being the person who resolves every recurring ambiguity. The high-value role is directional judgment and adaptive problem solving; the low-value drag is repeated clarification.';
+    intervention = 'Choose the three decisions that repeat most often, write the rule for each, assign ownership, and stop personally resolving those same ambiguities.';
+    ignored = 'People keep waiting for the leader to interpret the exception. Execution stays flexible, but not reliably transferable.';
+    first30Days = [
+      'List the three decisions or exceptions that most often return for clarification.',
+      'Write what is fixed, what can flex, who owns the call, and when the rule must be revisited.',
+      'Hand each recurring decision to an owner and require the owner to use the rule before escalating.',
+      'Track which ambiguities still return to the leader and convert those into the next rule.',
+    ];
+  } else if (pairKey === 'fidelity:framework' || profile.primaryKey === 'fidelity' || profile.secondaryKey === 'framework') {
+    headline = 'Turn Standards Into Throughput';
+    interventionType = operatorContext ? 'narrow_focus' : 'install_accountability';
+    futureBottleneck = 'The future bottleneck is not care or quality. It is whether standards become clear enough to accelerate work instead of slowing every handoff.';
+    coreConstraint = 'Quality control creates trust, but too much judgment remains embedded in review and verification moments.';
+    highestLeverageLever = 'Make the standard visible enough that others can meet it without repeated checking.';
+    lowestValueDrag = 'Review loops, clarification of standards, and preventable rework around handoffs.';
+    roleTruth = 'The leader should own the standard, not every instance of checking the standard.';
+    intervention = 'Convert the three most expensive quality judgments into short standards: what good looks like, what must be checked, who signs off, and when exceptions escalate.';
+    ignored = 'Throughput slows because quality keeps depending on personal review instead of shared standards.';
+  } else if (profile.primaryKey === 'signal' || profile.secondaryKey === 'signal') {
+    headline = 'Convert Read Into Decision Timing';
+    interventionType = 'install_accountability';
+    futureBottleneck = 'The future bottleneck is timing: insight arrives, but the organization needs a clearer rule for when a read becomes a decision.';
+    coreConstraint = 'Pattern reading and caution create value, but can delay commitment when ownership and evidence thresholds are unclear.';
+    highestLeverageLever = 'Turn early signal detection into a decision protocol people can trust.';
+    lowestValueDrag = 'Waiting for complete confidence when the next useful decision only requires enough evidence to move.';
+    roleTruth = 'The leader should keep reading the field, but should not let every decision wait for full certainty.';
+    intervention = 'Create a signal-to-decision rule: what evidence is enough, who owns the call, when to revisit, and what warning signal triggers a change.';
+    ignored = 'The team trusts the caution but loses timing advantage while waiting for the decision to become safe enough.';
+  }
+
+  if (wrongSeatRisk && /high/i.test(String(wrongSeatRisk))) {
+    interventionType = interventionType === 'do_it_yourself' ? 'change_role' : interventionType;
+    roleTruth = `${roleTruth} Wrong-seat risk is high enough that the role design matters as much as the action plan.`;
+  }
+
+  const proofSignals = buildProofSignals({ profile, ranked, org, behavioralDNA, consequences, previousSections });
+  const evidenceUsed = buildEvidenceUsed({ profile, org, behavioralDNA, executivePacket, roleFit, previousSections });
+  const confidence = getBottleneckConfidence({ ranked, org, previousSections, cognitionContext });
+
+  return {
+    section: 'recommendedNextStep',
+    headline: toExecutiveLanguage(headline),
+    futureBottleneck: toExecutiveLanguage(futureBottleneck),
+    coreConstraint: toExecutiveLanguage(coreConstraint),
+    highestLeverageLever: toExecutiveLanguage(highestLeverageLever),
+    lowestValueDrag: toExecutiveLanguage(lowestValueDrag),
+    roleTruth: toExecutiveLanguage(roleTruth),
+    interventionType,
+    intervention: toExecutiveLanguage(intervention),
+    whyThisMatters: toExecutiveLanguage(`If this move works, the leader's best judgment stops being trapped inside personal involvement and becomes usable by the organization.`),
+    whatHappensIfIgnored: toExecutiveLanguage(ignored),
+    first30Days: first30Days.map(toExecutiveLanguage),
+    proofSignals,
+    confidence,
+    evidenceUsed,
+  };
+}
+
+function buildOneMoveDoctrine(analysis) {
+  const body = toExecutiveLanguage(
+    `${analysis.headline}\n\n` +
+    `Future bottleneck: ${analysis.futureBottleneck}\n\n` +
+    `Role truth: ${analysis.roleTruth}\n\n` +
+    `The move: ${analysis.intervention}\n\n` +
+    `If ignored: ${analysis.whatHappensIfIgnored}`
+  );
+
+  return {
+    ...analysis,
+    body,
+    key_warning: analysis.whatHappensIfIgnored,
+    grounding_used: analysis.evidenceUsed,
+  };
+}
+
+function unwrapCanonicalProfile(canonical) {
+  if (!canonical) return {};
+  return canonical.canonical_profile_json || canonical.canonical_dossier?.canonical_profile_json || canonical;
+}
+
+function getBottleneckRanked(profile, cognitionContext, data) {
+  const ranked =
+    cognitionContext?.ranked_dimensions ||
+    data?.rescoring_gpt?.ranked_dimensions ||
+    data?.rescoring_v1?.ranked_dimensions ||
+    data?.ranked_dimensions ||
+    [];
+
+  if (Array.isArray(ranked) && ranked.length > 0) return ranked;
+
+  return [
+    { dimension: profile.primaryKey, score: 1, support_adjusted_score: 1, evidence_count: 1 },
+    { dimension: profile.secondaryKey, score: 0.75, support_adjusted_score: 0.75, evidence_count: 1 },
+    { dimension: profile.tertiaryKey, score: 0.4, support_adjusted_score: 0.4, evidence_count: 1 },
+    { dimension: profile.lowestKey, score: 0, support_adjusted_score: 0, evidence_count: 0 },
+  ].filter((dimension) => dimension.dimension);
+}
+
+function getDimensionValue(dimension) {
+  return Number(
+    dimension?.support_adjusted_score ??
+    dimension?.display_score ??
+    dimension?.gpt_rescored_score ??
+    dimension?.score ??
+    dimension?.raw_score ??
+    0
+  );
+}
+
+function extractOrganizationContext(data) {
+  const metadata = data?.metadata || data?.profile_metadata || {};
+  const organization = metadata.organization || data?.organization || data?.business_context || {};
+  const context = data?.contextual_signals || data?.context || {};
+
+  return {
+    companyName: organization.company_name || organization.company || data?.company_name || '',
+    roleTitle: organization.role_title || organization.role || data?.role_title || context.current_role || '',
+    industry: organization.industry || data?.industry || '',
+    directReports: organization.direct_reports_count || organization.direct_reports || '',
+    bestRole: context.best_role_ever || context.best_role || '',
+    energyDrain: context.current_energy_drain || context.energy_drain || '',
+    orgFrustration: context.recurring_org_frustration || '',
+    misunderstoodFor: context.misunderstood_for || '',
+    unrealizedCapacity: context.unrealized_capacity || '',
+  };
+}
+
+function buildProofSignals({ profile, ranked, org, behavioralDNA, consequences, previousSections }) {
+  const signals = [
+    `${toCustomerDimensionName(profile.primaryName)} leads, supported by ${toCustomerDimensionName(profile.secondaryName)}.`,
+    profile.lowestName ? `Lowest supported signal: ${toCustomerDimensionName(profile.lowestName)}.` : null,
+    org.roleTitle ? `Role context: ${org.roleTitle}.` : null,
+    org.energyDrain ? `Energy drain: ${org.energyDrain}.` : null,
+    behavioralDNA?.natural_risk ? `Risk pattern: ${behavioralDNA.natural_risk}.` : null,
+    consequences?.scaling ? `Scaling signal: ${consequences.scaling}.` : null,
+    previousSections?.fiveFutures ? 'Five Futures already points to the same trajectory risk.' : null,
+  ].filter(Boolean);
+
+  ranked.slice(0, 3).forEach((dimension) => {
+    const name = toCustomerDimensionName(normalizeDimension(dimension.dimension).name);
+    const evidence = dimension.evidence_count ?? dimension.contributing_answer_count;
+    const score = getDimensionValue(dimension);
+    signals.push(`${name}: ${Number.isFinite(score) ? score.toFixed(2) : 'supported'}${evidence != null ? ` with ${evidence} evidence signals` : ''}.`);
+  });
+
+  return [...new Set(signals)].slice(0, 7).map(toExecutiveLanguage);
+}
+
+function buildEvidenceUsed({ profile, org, behavioralDNA, executivePacket, roleFit, previousSections }) {
+  return [
+    `Primary/secondary pattern: ${toCustomerDimensionName(profile.primaryName)} + ${toCustomerDimensionName(profile.secondaryName)}.`,
+    profile.tertiaryName ? `Tertiary support: ${toCustomerDimensionName(profile.tertiaryName)}.` : null,
+    profile.lowestName ? `Lowest signal: ${toCustomerDimensionName(profile.lowestName)}.` : null,
+    org.roleTitle ? `Role context: ${org.roleTitle}.` : null,
+    org.bestRole ? `Best-role evidence: ${org.bestRole}.` : null,
+    org.energyDrain ? `Drain evidence: ${org.energyDrain}.` : null,
+    behavioralDNA?.natural_advantage ? `Behavioral DNA advantage: ${behavioralDNA.natural_advantage}.` : null,
+    executivePacket?.highest_leverage_insight ? `Executive insight: ${executivePacket.highest_leverage_insight}.` : null,
+    roleFit?.summary ? `Role fit analysis: ${roleFit.summary}.` : null,
+    previousSections?.strategicCeiling ? 'Strategic Ceiling section.' : null,
+    previousSections?.teamExperience ? 'Team Experience section.' : null,
+    previousSections?.fiveFutures ? 'Five Futures section.' : null,
+  ].filter(Boolean).map(toExecutiveLanguage).slice(0, 10);
+}
+
+function getBottleneckConfidence({ ranked, org, previousSections, cognitionContext }) {
+  const evidenceTotal = ranked.slice(0, 3).reduce((sum, dimension) =>
+    sum + Number(dimension.evidence_count ?? dimension.contributing_answer_count ?? 0), 0
+  );
+  const hasContext = Boolean(org.roleTitle || org.bestRole || org.energyDrain || org.orgFrustration);
+  const hasDownstream = Boolean(previousSections?.strategicCeiling && previousSections?.fiveFutures);
+  const hasCognition = Boolean(cognitionContext?.source);
+
+  if (evidenceTotal >= 12 && hasContext && hasDownstream && hasCognition) return 'High';
+  if (evidenceTotal >= 6 && (hasContext || hasDownstream || hasCognition)) return 'Moderate-High';
+  if (hasCognition && hasDownstream) return 'Moderate';
+  if (hasCognition && hasContext) return 'Moderate';
+  if (evidenceTotal >= 3) return 'Moderate';
+  return 'Low';
+}
+
 function buildOneMoveFallback(profile) {
   const consequences = profile.consequences;
   const body = toExecutiveLanguage(
@@ -1267,7 +1516,7 @@ function sanitizeConsequenceText(text) {
     .split('Vector + speed').join('Vector + Velocity')
     .split('Vector + Speed').join('Vector + Velocity')
     .replace(/\bspeed, Fidelity\b/g, 'Velocity, Fidelity')
-    .replace(/\bspeed, /g, 'Velocity, ');
+    .replace(/\bspeed, (Framework|Flex|Horizon|Leverage|Signal|Vector|Velocity)\b/g, 'Velocity, $1');
 }
 
 function toExecutiveLanguage(text) {

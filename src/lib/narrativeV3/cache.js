@@ -12,7 +12,7 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 7;  // Bumped to 7 after removing residual internal pair language
+const CACHE_VERSION = 8;  // Bumped to 8 for structured future-bottleneck One Move
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {
@@ -34,6 +34,11 @@ function isValidCachedSection(section, value) {
     ].filter(Boolean).length;
 
     return Boolean(value?.summary) && validSignals >= 2;
+  }
+
+  if (section === 'recommendedNextStep') {
+    if (typeof value === 'string') return value.trim().length > 0;
+    return Boolean(value?.futureBottleneck || value?.intervention || value?.body);
   }
 
   return value != null;

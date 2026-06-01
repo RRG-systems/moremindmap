@@ -58,7 +58,8 @@ export async function callGPT55(prompt, section) {
     const hasStructuredSection =
       (section === 'fiveFutures' && Array.isArray(data.futures)) ||
       (section === 'facilitatorNotes' && Array.isArray(data.notes)) ||
-      (section === 'teamExperience' && isStructuredTeamExperience(data));
+      (section === 'teamExperience' && isStructuredTeamExperience(data)) ||
+      (section === 'recommendedNextStep' && isStructuredOneMove(data));
 
     if (!data.section || (!data.body && !hasStructuredSection)) {
       console.warn(`[GPT-5.5] Missing required fields`);
@@ -90,7 +91,8 @@ export function validateGrounding(gptResponse, interpreted) {
   const hasStructuredBody =
     (gptResponse.section === 'fiveFutures' && Array.isArray(gptResponse.futures) && gptResponse.futures.length >= 5) ||
     (gptResponse.section === 'facilitatorNotes' && Array.isArray(gptResponse.notes) && gptResponse.notes.length >= 1) ||
-    (gptResponse.section === 'teamExperience' && isStructuredTeamExperience(gptResponse));
+    (gptResponse.section === 'teamExperience' && isStructuredTeamExperience(gptResponse)) ||
+    (gptResponse.section === 'recommendedNextStep' && isStructuredOneMove(gptResponse));
 
   // Check: section field exists
   if (!gptResponse.section) {
@@ -145,6 +147,15 @@ function isStructuredTeamExperience(value) {
   ].filter(Boolean).length;
 
   return validSignals >= 2;
+}
+
+function isStructuredOneMove(value) {
+  return Boolean(
+    value?.headline &&
+    value?.futureBottleneck &&
+    value?.intervention &&
+    value?.roleTruth
+  );
 }
 
 export default { callGPT55, validateGrounding };
