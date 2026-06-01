@@ -12,7 +12,7 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 5;  // Bumped to 5 when Executive Summary became packet-descended
+const CACHE_VERSION = 6;  // Bumped to 6 when fallback narrative moved to executive language
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {
