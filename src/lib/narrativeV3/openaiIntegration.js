@@ -28,10 +28,22 @@ export async function callGPT55(prompt, section) {
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      let error;
+      try {
+        error = await response.json();
+      } catch (_parseError) {
+        error = { error: `HTTP ${response.status}` };
+      }
       console.error(`[GPT-5.5 ERROR] HTTP ${response.status}:`, error);
       console.warn('[GPT-5.5] Endpoint returned error. Using local fallback.');
-      return null;
+      return {
+        __error: true,
+        section,
+        status: response.status,
+        rate_limited: response.status === 429 || error?.rate_limited === true,
+        message: error?.message || error?.error || error?.details?.error?.message || `HTTP ${response.status}`,
+        details: error,
+      };
     }
 
     const data = await response.json();

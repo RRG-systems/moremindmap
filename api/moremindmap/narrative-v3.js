@@ -63,6 +63,9 @@ export default async function handler(req, res) {
       console.error(`[NARRATIVE-V3 ERROR] HTTP ${response.status}:`, error);
       return res.status(response.status).json({ 
         error: 'OpenAI API error',
+        status: response.status,
+        rate_limited: response.status === 429 || error?.error?.code === 'rate_limit_exceeded',
+        message: error?.error?.message || `OpenAI HTTP ${response.status}`,
         details: error
       });
     }

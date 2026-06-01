@@ -100,96 +100,123 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let firstGptCall = true;
   let fallbackActivated = false;
   let gptSuccess = false;
-  let gptError = null;
+  let skipGptForRemainder = false;
 
   for (const section of sections) {
     let prompt;
-    if (section === 'executiveSummary') {
-      const executiveIntelligence = buildExecutiveIntelligencePacket(canonical, cognitionContext, previousSections);
-      prompt = getPromptBuilder(section)(
-        unified,
-        interpreted,
-        previousSections,
-        cognitionContext,
-        executiveIntelligence
-      );
-    } else if (cognitionAwareSections.has(section)) {
-      prompt = getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext);
-    } else {
-      prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
+    try {
+      if (section === 'executiveSummary') {
+        const executiveIntelligence = buildExecutiveIntelligencePacket(canonical, cognitionContext, previousSections);
+        prompt = getPromptBuilder(section)(
+          unified,
+          interpreted,
+          previousSections,
+          cognitionContext,
+          executiveIntelligence
+        );
+      } else if (cognitionAwareSections.has(section)) {
+        prompt = getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext);
+      } else {
+        prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
+      }
+    } catch (error) {
+      console.warn(`[V3 PROMPT FALLBACK] section: ${section}`, error);
+      prompt = { section, canonical: {}, instruction: 'Render deterministic fallback.', format: 'JSON' };
     }
 
     let rendering;
     let sectionRenderSource = 'fallback_local';
 
-    if (useGPT) {
-      // [FORENSIC] GPT call attempt
-      console.log(`[V3 GPT START] section: ${section} | prompt_length: ${JSON.stringify(prompt).length}`);
-      
-      const gptResponse = await callGPT55(prompt, section);
-      
-      if (gptResponse && validateGrounding(gptResponse, interpreted)) {
-        console.log(`[V3 GPT SUCCESS] section: ${section} | response_length: ${gptResponse.body?.length || 0} | model_used: gpt-4o-2024-08-06`);
-        rendering = gptResponse;
-        sectionRenderSource = 'gpt55';
-        gptSuccess = true;
-        if (firstGptCall) {
+    try {
+      if (useGPT && !skipGptForRemainder) {
+        // [FORENSIC] GPT call attempt
+        console.log(`[V3 GPT START] section: ${section} | prompt_length: ${JSON.stringify(prompt).length}`);
+
+        const gptResponse = await callGPT55(prompt, section);
+
+        if (gptResponse?.__error) {
+          narrative.openai_error_message = gptResponse.message || 'Narrative V3 GPT call failed';
+          if (gptResponse.rate_limited) {
+            skipGptForRemainder = true;
+            console.warn(`[V3 RATE LIMIT] section: ${section}. Using local fallback for remaining sections.`);
+          }
+        }
+
+        if (gptResponse && !gptResponse.__error && validateGrounding(gptResponse, interpreted)) {
+          console.log(`[V3 GPT SUCCESS] section: ${section} | response_length: ${gptResponse.body?.length || 0} | model_used: gpt-4o-2024-08-06`);
+          rendering = gptResponse;
+          sectionRenderSource = 'gpt55';
+          gptSuccess = true;
           narrative.gpt_call_success = true;
-          narrative.render_source = 'gpt55';
-        }
-      } else {
-        // [FORENSIC] GPT failed, fallback activated
-        const triggerReason = !gptResponse ? 'null_response' : 'validation_failed';
-        console.log(`[V3 FALLBACK TRIGGER]`);
-        console.log(`  section: ${section}`);
-        console.log(`  reason: ${triggerReason}`);
-        if (gptResponse) {
-          console.log(`  gptResponse.section: ${gptResponse.section}`);
-          console.log(`  gptResponse.body length: ${gptResponse.body?.length || 0}`);
-          console.log(`  gptResponse.grounding_used: ${JSON.stringify(gptResponse.grounding_used)}`);
-          console.log(`  full response keys: ${Object.keys(gptResponse).join(', ')}`);
-        }
-        console.log(`  prompt keys in request: ${Object.keys(prompt).join(', ')}`);
-        
-        rendering = await localRendering(prompt, section, interpreted);
-        sectionRenderSource = 'fallback_local';
-        fallbackActivated = true;
-        if (firstGptCall) {
+          if (!narrative.render_source || firstGptCall) {
+            narrative.render_source = 'gpt55';
+          }
+        } else {
+          // [FORENSIC] GPT failed, fallback activated
+          const triggerReason = gptResponse?.__error
+            ? (gptResponse.rate_limited ? 'rate_limited' : 'endpoint_error')
+            : !gptResponse ? 'null_response' : 'validation_failed';
+          console.log(`[V3 FALLBACK TRIGGER]`);
+          console.log(`  section: ${section}`);
+          console.log(`  reason: ${triggerReason}`);
+          if (gptResponse && !gptResponse.__error) {
+            console.log(`  gptResponse.section: ${gptResponse.section}`);
+            console.log(`  gptResponse.body length: ${gptResponse.body?.length || 0}`);
+            console.log(`  gptResponse.grounding_used: ${JSON.stringify(gptResponse.grounding_used)}`);
+            console.log(`  full response keys: ${Object.keys(gptResponse).join(', ')}`);
+          }
+          console.log(`  prompt keys in request: ${Object.keys(prompt).join(', ')}`);
+
+          rendering = await safeLocalRendering(prompt, section, interpreted);
+          sectionRenderSource = 'fallback_local';
+          fallbackActivated = true;
           narrative.fallback_used = true;
-          narrative.render_source = 'fallback_local';
+          if (!narrative.render_source || firstGptCall) {
+            narrative.render_source = 'fallback_local';
+          }
         }
-      }
-      firstGptCall = false;
-    } else {
-      // Local rendering only
-      console.log(`[V3 LOCAL ONLY] section: ${section}`);
-      rendering = await localRendering(prompt, section, interpreted);
-      sectionRenderSource = 'fallback_local';
-      narrative.render_source = 'fallback_local';
-    }
-
-    // [FORENSIC] Add render source to section
-    rendering.render_source = sectionRenderSource;
-
-    // Post-processing (with forensic option to disable)
-    if (typeof rendering.body === 'string') {
-      rendering.body = suppressBannedPhrases(rendering.body);
-      if (!disableCompression) {
-        rendering.body = compressionPass(rendering.body);
+        firstGptCall = false;
       } else {
-        console.log(`[V3 FORENSIC] Compression disabled for section: ${section}`);
+        // Local rendering only
+        console.log(`[V3 LOCAL ONLY] section: ${section}`);
+        rendering = await safeLocalRendering(prompt, section, interpreted);
+        sectionRenderSource = 'fallback_local';
+        narrative.render_source = narrative.render_source || 'fallback_local';
       }
-    } else if (disableCompression) {
-      console.log(`[V3 FORENSIC] Compression disabled for structured section: ${section}`);
-    }
 
-    // Validate grounding
-    const violations = typeof rendering.body === 'string'
-      ? scanForBannedPhrases(rendering.body, section)
-      : [];
-    rendering.violations = violations;
-    rendering.groundingUsed = extractGroundingUsed(section, interpreted);
-    rendering = normalizeStructuredSection(section, rendering);
+      rendering = rendering || getDefaultSection(section);
+      // [FORENSIC] Add render source to section
+      rendering.render_source = sectionRenderSource;
+
+      // Post-processing (with forensic option to disable)
+      if (typeof rendering.body === 'string') {
+        rendering.body = suppressBannedPhrases(rendering.body);
+        if (!disableCompression) {
+          rendering.body = compressionPass(rendering.body);
+        } else {
+          console.log(`[V3 FORENSIC] Compression disabled for section: ${section}`);
+        }
+      } else if (disableCompression) {
+        console.log(`[V3 FORENSIC] Compression disabled for structured section: ${section}`);
+      }
+
+      // Validate grounding
+      const violations = typeof rendering.body === 'string'
+        ? scanForBannedPhrases(rendering.body, section)
+        : [];
+      rendering.violations = violations;
+      rendering.groundingUsed = extractGroundingUsed(section, interpreted);
+      rendering = normalizeStructuredSection(section, rendering) || getDefaultSection(section);
+    } catch (error) {
+      console.error(`[V3 SECTION FAILURE] section: ${section}`, error);
+      rendering = getDefaultSection(section);
+      rendering.render_source = 'fallback_local';
+      rendering.violations = [];
+      rendering.groundingUsed = [];
+      fallbackActivated = true;
+      narrative.fallback_used = true;
+      narrative.openai_error_message = narrative.openai_error_message || error.message;
+    }
 
     narrative[section] = rendering;
     previousSections[section] = rendering.body || rendering.primary_guidance || rendering.summary || '';
@@ -197,6 +224,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
 
   // [FORENSIC] Calculate generation time
   narrative.generation_time_ms = Math.round(performance.now() - startTime);
+  if (gptSuccess && fallbackActivated) {
+    narrative.render_source = 'mixed_gpt_fallback';
+  } else if (!narrative.render_source) {
+    narrative.render_source = 'fallback_local';
+  }
 
   // [FORENSIC] Log summary
   console.log('[V3 RENDER COMPLETE]', {
@@ -406,6 +438,105 @@ async function localRendering(prompt, section, interpreted) {
     micro_scenario: microScenario || "[Scenario would be injected]",
     key_warning: keyWarning,
     grounding_used: extractGroundingUsed(section, interpreted),
+  };
+}
+
+async function safeLocalRendering(prompt, section, interpreted) {
+  try {
+    return await localRendering(prompt, section, interpreted);
+  } catch (error) {
+    console.error(`[V3 LOCAL FALLBACK FAILURE] section: ${section}`, error);
+    return getDefaultSection(section);
+  }
+}
+
+function getDefaultSection(section) {
+  if (section === 'fiveFutures') {
+    const futures = [
+      {
+        title: 'Current Trajectory',
+        likelihood: 'likely',
+        trajectory: 'The current operating pattern continues with its existing strengths and constraints.',
+        organization_experiences: 'The organization experiences the same value creation pattern and the same friction points.',
+      },
+      {
+        title: 'Optimized Trajectory',
+        likelihood: 'possible',
+        trajectory: 'The strongest operating pattern is supported by clearer environment design.',
+        organization_experiences: 'The organization receives more of the upside with less unmanaged drag.',
+      },
+      {
+        title: 'Burnout Trajectory',
+        likelihood: 'risk',
+        trajectory: 'The operating pattern is overused without enough structural support.',
+        organization_experiences: 'The organization begins depending on personal effort instead of transferable systems.',
+      },
+      {
+        title: 'Leadership Trajectory',
+        likelihood: 'possible',
+        trajectory: 'The operator turns instinctive strengths into repeatable leadership architecture.',
+        organization_experiences: 'The organization gains clearer decision rhythm and more predictable execution.',
+      },
+      {
+        title: 'Constraint Trajectory',
+        likelihood: 'likely',
+        trajectory: 'The main constraint remains unresolved and shows up more clearly as complexity rises.',
+        organization_experiences: 'The organization keeps paying the same operating cost at larger scale.',
+      },
+    ];
+
+    return {
+      section,
+      summary: 'Five trajectory scenarios are available from the local narrative fallback.',
+      most_likely: futures[0],
+      futures,
+      body: 'Five trajectory scenarios are available from the local narrative fallback.',
+      key_warning: null,
+      grounding_used: [],
+    };
+  }
+
+  if (section === 'facilitatorNotes') {
+    return {
+      section,
+      summary: 'Environment design should support the strongest operating pattern and reduce unmanaged friction.',
+      primary_guidance: 'Create explicit decision lanes, feedback timing, and accountability ownership around the profile pattern.',
+      notes: [
+        {
+          label: 'Operating support',
+          guidance: 'Make the profile strength easier to use without forcing it to carry the entire system.',
+          rationale: 'Strong patterns become constraints when the environment relies on personal force instead of design.',
+        },
+      ],
+      caution: 'Environment design notes, not behavior coaching.',
+      key_warning: null,
+      grounding_used: [],
+    };
+  }
+
+  if (section === 'teamExperience') {
+    return {
+      section,
+      summary: 'Others experience the profile through its strongest operating pattern first.',
+      first_impression: { interpretation: 'The clearest behavioral signal lands before the full context is visible.' },
+      communication_pattern: { interpretation: 'Communication follows the dominant operating pattern and can create friction when others need a different pace or sequence.' },
+      listening_pattern: { interpretation: 'Listening quality depends on whether the environment makes room for the lower-weighted systems.' },
+      relational_friction: { interpretation: 'Friction appears when the profile strength is overused under pressure.' },
+      key_signals: ['Dominant operating pattern', 'Pressure response', 'Lowest weighted systems'],
+      causal_interpretation: 'The team experiences the operating system through its dominant pattern, then feels the hidden cost when pressure rises.',
+      body: 'Others experience the profile through its strongest operating pattern first.',
+      key_warning: null,
+      grounding_used: [],
+    };
+  }
+
+  return {
+    section,
+    headline: section.replace(/([A-Z])/g, ' $1').trim(),
+    body: 'This section is available from the local narrative fallback.',
+    micro_scenario: null,
+    key_warning: null,
+    grounding_used: [],
   };
 }
 

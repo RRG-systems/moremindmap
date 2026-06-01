@@ -76,7 +76,7 @@ async function generateWithGPT(prompt) {
         }
       ],
       temperature: 0.3,
-      max_tokens: 16000,
+      max_completion_tokens: 16000,
       response_format: { type: 'json_object' }
     });
 

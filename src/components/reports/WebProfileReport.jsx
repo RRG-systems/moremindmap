@@ -1356,14 +1356,21 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
     (async () => {
       try {
         setNarrativeLoading(true);
-        const v3Narrative = await buildNarrativeV3(canonical, true, profileId, disableCache);
+        const v3Narrative = await buildNarrativeV3(canonical, false, profileId, disableCache);
         setNarrative(v3Narrative);
         setNarrativeError(null);
         console.log('[WebProfileReport] V3 narrative rendered for', profileId);
       } catch (err) {
         console.error('[WebProfileReport] V3 rendering failed:', err);
-        setNarrativeError(err.message);
-        setNarrative(null);
+        try {
+          const fallbackNarrative = await buildNarrativeV3(canonical, false, profileId, true);
+          setNarrative(fallbackNarrative);
+          setNarrativeError(null);
+        } catch (fallbackErr) {
+          console.error('[WebProfileReport] V3 fallback rendering failed:', fallbackErr);
+          setNarrativeError(fallbackErr.message || err.message);
+          setNarrative(null);
+        }
       } finally {
         setNarrativeLoading(false);
       }
