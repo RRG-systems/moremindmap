@@ -1274,6 +1274,7 @@ function toExecutiveLanguage(text) {
   return sanitizeConsequenceText(text)
     .replace(/\bvisible mechanism\b/gi, 'practical issue')
     .replace(/\bvisible operating mechanism\b/gi, 'practical issue')
+    .replace(/\bprimary pair\b/gi, 'leadership pattern')
     .replace(/\boperating pair\b/gi, 'leadership pattern')
     .replace(/\bleadership consequence is simpler:?\s*/gi, '')
     .replace(/\blate-cycle friction\b/gi, 'problems surface too late')

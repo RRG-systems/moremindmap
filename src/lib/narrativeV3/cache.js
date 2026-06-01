@@ -12,7 +12,7 @@
 const memoryCache = new Map();
 
 // Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 6;  // Bumped to 6 when fallback narrative moved to executive language
+const CACHE_VERSION = 7;  // Bumped to 7 after removing residual internal pair language
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {
