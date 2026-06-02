@@ -147,6 +147,7 @@ export default async function handler(req, res) {
       visual_dna_version: VISUAL_DNA_VERSION,
       design_reference_version: promptResult.design_reference_version,
       prompt_version: promptResult.prompt_version,
+      visual_narrative: promptResult.visual_narrative,
       generation_workflow: 'canonical_reference_edit_to_draft_to_approval',
       reference_standard: 'marcus-nora-v1',
       approval_required: true,
@@ -164,6 +165,7 @@ export default async function handler(req, res) {
       debug: debug ? {
         profile_hash: profileHash,
         prompt_hash: promptResult.prompt_hash,
+        visual_narrative: promptResult.visual_narrative,
         prompt: promptResult.prompt,
         retrieved_key: profileResult.retrievedKey,
         blob_pathname: blob.pathname,

@@ -1,4 +1,5 @@
 import { getVisualDNADesignReference } from './designReferences.js';
+import { buildVisualNarrative } from './buildVisualNarrative.js';
 
 function stableStringify(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
@@ -102,6 +103,7 @@ function buildVisualBrief(packet) {
 export function buildVisualDNAPrompt(contextPacket, designReference = getVisualDNADesignReference()) {
   const compactPacket = compactPacketForPrompt(contextPacket);
   const profileName = compactPacket.profile?.person_name || 'this profile';
+  const visualNarrative = buildVisualNarrative(compactPacket);
   const visualBrief = buildVisualBrief(compactPacket);
   const prompt = `Create a Visual DNA image that answers: "What does this mind look like?"
 
@@ -117,15 +119,29 @@ ${stableStringify(designReference.canonical_standard)}
 NEGATIVE CONSTRAINTS
 ${(designReference.negative_constraints || []).map((item) => `- ${item}`).join('\n')}
 
-FULL PROFILE INTELLIGENCE PACKET
+VISUAL NARRATIVE LAYER - BUILD FROM THIS FIRST
+The image must be conceptualized as Profile -> Meaning -> Metaphor -> Image.
+Use this narrative layer as the primary creative source. It defines what the operating system means before labels are added.
+${JSON.stringify(visualNarrative, null, 2)}
+
+IMAGE GENERATION PRIORITY
+1. Visual metaphor
+2. Primary engine
+3. Tension
+4. Future bottleneck
+5. One Move
+6. Labels
+
+FULL PROFILE INTELLIGENCE PACKET - SOURCE MATERIAL ONLY
+Use this as evidence for the narrative layer and visual choices. Do not render raw prose, JSON keys, or section text from this packet.
 ${JSON.stringify(compactPacket, null, 2)}
 
 CANONICAL VISUAL BRIEF
-Use this brief for visible image labels. Do not render raw JSON text from the full packet.
+Use this brief only for the small set of visible image labels. Labels are the final accent layer, not the explanation.
 ${JSON.stringify(visualBrief, null, 2)}
 
 IMAGE INTENT
-Visualize the behavioral operating system of ${profileName}. The image should represent the whole profile intelligence stack: Behavioral DNA, executive briefing, contradictions, pressure mechanics, scaling constraint, facilitator guidance, team experience, five futures, and one move.
+Visualize the behavioral operating system of ${profileName}. The image should represent the whole profile intelligence stack through metaphor, architecture, pathways, modules, pressure points, and transfer patterns. Do not try to explain the profile through paragraphs of text.
 
 APPROVED MARCUS/NORA QUALITY BAR
 - Finished executive intelligence dashboard, not concept art.
@@ -136,6 +152,16 @@ APPROVED MARCUS/NORA QUALITY BAR
 - No lone brain/shell/orb. The centerpiece must be a behavioral operating system map with connected modules.
 - Use only large readable labels for major concepts. If small text would be unreadable, replace it with bars, icons, ticks, or glyphs.
 - Visible text must come from CANONICAL VISUAL BRIEF.visible_labels_only. Do not invent other words. Do not paint JSON keys.
+
+VISUAL STORYTELLING RULES
+- First build the operating-system metaphor: what kind of system is this mind?
+- Show the primary engine as the main force, not merely as a label.
+- Show the secondary engine as the way the system moves, stabilizes, senses, adapts, or verifies.
+- Show the tension as visual pressure: bottleneck, gate, overloaded junction, missing stabilizer, drift zone, or transfer gap.
+- Show the future bottleneck as the place where the system would cap growth if unchanged.
+- Show the one move as the architectural intervention that changes the flow.
+- Use symbols, pathways, gates, grids, gauges, routing maps, rings, and decision networks more than text.
+- Keep labels sparse, large, and readable. Do not rely on text to carry meaning.
 
 COMPOSITION RULES
 - Do not depict the person physically.
@@ -151,10 +177,11 @@ COMPOSITION RULES
 - Avoid generic technology wallpaper; make the image feel like this specific mind has been diagrammed.`;
 
   return {
-    prompt_version: 'visual-dna-prompt-v4-visual-brief',
+    prompt_version: 'visual-dna-prompt-v5-narrative-engine',
     prompt,
     prompt_hash: hashVisualDNAPrompt(prompt),
-    design_reference_version: 'reference-a-b-marcus-nora-v4',
+    design_reference_version: 'reference-a-b-marcus-nora-v5',
+    visual_narrative: visualNarrative,
   };
 }
 
