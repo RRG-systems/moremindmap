@@ -63,6 +63,15 @@ ${JSON.stringify(compactPacket, null, 2)}
 IMAGE INTENT
 Visualize the behavioral operating system of ${profileName}. The image should represent the whole profile intelligence stack: Behavioral DNA, executive briefing, contradictions, pressure mechanics, scaling constraint, facilitator guidance, team experience, five futures, and one move.
 
+APPROVED MARCUS/NORA QUALITY BAR
+- Finished executive intelligence dashboard, not concept art.
+- High-contrast black background with bright neon orange/violet/green/blue signal accents.
+- Dense information architecture: profile panel, dimension bars, central operating-system map, risk/environment panels, pressure gauge, one-move panel, and operating-sequence strip.
+- Crisp panel boundaries, clean score bars, clear diagram hierarchy, luminous but controlled glow.
+- No smoky gray wash, no dim low-contrast overlay, no sparse center-only composition.
+- No lone brain/shell/orb. The centerpiece must be a behavioral operating system map with connected modules.
+- Use only large readable labels for major concepts. If small text would be unreadable, replace it with bars, icons, ticks, or glyphs.
+
 COMPOSITION RULES
 - Do not depict the person physically.
 - Build a dark enterprise intelligence system map, not a single symbolic object.
@@ -76,10 +85,10 @@ COMPOSITION RULES
 - Avoid generic technology wallpaper; make the image feel like this specific mind has been diagrammed.`;
 
   return {
-    prompt_version: 'visual-dna-prompt-v2-canonical-standard',
+    prompt_version: 'visual-dna-prompt-v3-canonical-dashboard',
     prompt,
     prompt_hash: hashVisualDNAPrompt(prompt),
-    design_reference_version: 'reference-a-b-marcus-nora-v2',
+    design_reference_version: 'reference-a-b-marcus-nora-v3',
   };
 }
 
