@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import OpenAI, { toFile } from 'openai';
 import { put } from '@vercel/blob';
 import { extractBehavioralIntelligence } from '../../engine/canonical/extractIntelligence.js';
 import { buildNarrativeV3 } from '../../../src/lib/narrativeV3/buildNarrativeV3.js';
@@ -20,6 +20,11 @@ import {
 export const config = {
   maxDuration: 60,
 };
+
+const CANONICAL_REFERENCE_IMAGES = [
+  '/visual-dna-test/marcus-vale.png',
+  '/visual-dna-test/nora-bell.png',
+];
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -122,7 +127,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const imageBuffer = await generateImageBuffer(promptResult.prompt);
+    const imageBuffer = await generateImageBuffer(promptResult.prompt, req);
     const pathname = `visual-dna/${normalizedProfileId}/${promptResult.prompt_hash}.png`;
     const blob = await put(pathname, imageBuffer, {
       access: 'public',
@@ -142,7 +147,7 @@ export default async function handler(req, res) {
       visual_dna_version: VISUAL_DNA_VERSION,
       design_reference_version: promptResult.design_reference_version,
       prompt_version: promptResult.prompt_version,
-      generation_workflow: 'canonical_prompt_to_draft_to_approval',
+      generation_workflow: 'canonical_reference_edit_to_draft_to_approval',
       reference_standard: 'marcus-nora-v1',
       approval_required: true,
       status: 'draft',
@@ -197,13 +202,17 @@ function getRankedDimensions(data) {
   return data?.ranked_dimensions || [];
 }
 
-async function generateImageBuffer(prompt) {
+async function generateImageBuffer(prompt, req) {
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-  const imageResponse = await openai.images.generate({
+  const referenceImages = await loadCanonicalReferenceImages(req);
+  const imageResponse = await openai.images.edit({
     model: VISUAL_DNA_MODEL,
+    image: referenceImages,
     prompt,
     size: '1536x1024',
     quality: 'high',
+    input_fidelity: 'high',
+    background: 'opaque',
     output_format: 'png',
     n: 1,
   });
@@ -214,4 +223,32 @@ async function generateImageBuffer(prompt) {
   }
 
   return Buffer.from(firstImage.b64_json, 'base64');
+}
+
+async function loadCanonicalReferenceImages(req) {
+  const baseUrl = getPublicBaseUrl(req);
+  const files = [];
+
+  for (const imagePath of CANONICAL_REFERENCE_IMAGES) {
+    const url = `${baseUrl}${imagePath}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`Unable to load canonical Visual DNA reference image: ${url}`);
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const filename = imagePath.split('/').pop() || 'visual-dna-reference.png';
+    files.push(await toFile(buffer, filename, { type: 'image/png' }));
+  }
+
+  return files;
+}
+
+function getPublicBaseUrl(req) {
+  const configured = process.env.SITE_URL || '';
+  if (configured) return configured.replace(/\/$/, '');
+
+  const host = req.headers['x-forwarded-host'] || req.headers.host || 'moremindmap.com';
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return `${proto}://${host}`.replace(/\/$/, '');
 }
