@@ -1258,6 +1258,299 @@ const styles = `
   font-size: 18px;
 }
 
+/* Phase 5.5 hierarchy layer: one hero, strategic right rail, quieter instrumentation. */
+.dvd-grid {
+  grid-template-columns: 400px minmax(0, 1.24fr) 400px;
+  grid-template-rows: 72px minmax(0, 1fr) 124px 52px;
+  gap: 8px;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 51% 44%, rgba(255, 138, 0, 0.24), transparent 23%),
+    radial-gradient(circle at 49% 45%, rgba(0, 212, 255, 0.17), transparent 34%),
+    radial-gradient(circle at 35% 62%, rgba(159, 107, 255, 0.15), transparent 38%),
+    linear-gradient(135deg, #030405 0%, #07090d 42%, #020203 100%);
+}
+
+.dvd-header {
+  grid-template-columns: 400px minmax(0, 1.24fr) 400px;
+  gap: 8px;
+}
+
+.dvd-title-block h2 {
+  font-size: 37px;
+  text-shadow: 0 0 24px rgba(255, 138, 0, 0.34);
+}
+
+.dvd-title-block::before,
+.dvd-title-block::after {
+  content: '';
+  display: inline-block;
+  width: 72px;
+  height: 1px;
+  margin: 0 18px 9px;
+  background: linear-gradient(90deg, transparent, rgba(255, 138, 0, 0.82));
+  box-shadow: 0 0 14px rgba(255, 138, 0, 0.44);
+}
+
+.dvd-title-block::after {
+  background: linear-gradient(90deg, rgba(255, 138, 0, 0.82), transparent);
+}
+
+.dvd-identity,
+.dvd-meta-strip > div,
+.dvd-left .dvd-panel,
+.dvd-footer {
+  background: linear-gradient(145deg, rgba(255,255,255,0.048), rgba(255,255,255,0.018));
+}
+
+.dvd-left,
+.dvd-footer,
+.dvd-futures {
+  opacity: 0.88;
+}
+
+.dvd-left .dvd-panel {
+  border-color: rgba(255, 255, 255, 0.105);
+  box-shadow: inset 0 0 22px rgba(255,255,255,0.015), 0 0 18px rgba(0,0,0,0.32);
+}
+
+.dvd-right .dvd-panel {
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 0 34px rgba(255,255,255,0.025), 0 0 34px rgba(0,0,0,0.46);
+}
+
+.dvd-right {
+  grid-template-rows: 118px 130px 100px 118px minmax(0, 1fr);
+  gap: 8px;
+}
+
+.dvd-core {
+  z-index: 3;
+  isolation: isolate;
+}
+
+.dvd-core::before {
+  content: '';
+  position: absolute;
+  width: 610px;
+  height: 610px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(255, 138, 0, 0.28), rgba(0, 212, 255, 0.08) 38%, transparent 68%);
+  filter: blur(1px);
+  opacity: 0.95;
+  z-index: -1;
+  box-shadow:
+    0 0 90px rgba(255, 138, 0, 0.22),
+    0 0 120px rgba(0, 212, 255, 0.12);
+}
+
+.dvd-core::after {
+  content: '';
+  position: absolute;
+  width: 760px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(159, 107, 255, 0.4), rgba(255, 138, 0, 0.72), rgba(0, 212, 255, 0.42), transparent);
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(255, 138, 0, 0.4);
+  z-index: -1;
+}
+
+.dvd-core-ring.outer {
+  width: 510px;
+  height: 510px;
+  border-width: 1.5px;
+  border-color: rgba(255, 138, 0, 0.74);
+  box-shadow: 0 0 62px rgba(255, 138, 0, 0.24), inset 0 0 42px rgba(255, 138, 0, 0.08);
+}
+
+.dvd-core-ring.middle {
+  width: 392px;
+  height: 392px;
+  border-color: rgba(0, 212, 255, 0.62);
+  box-shadow: 0 0 52px rgba(0, 212, 255, 0.17);
+}
+
+.dvd-core-ring.inner {
+  width: 268px;
+  height: 268px;
+  border-color: rgba(184, 255, 53, 0.58);
+}
+
+.dvd-core-label {
+  width: 390px;
+}
+
+.dvd-core-label strong {
+  font-size: 45px;
+  line-height: 0.98;
+  text-shadow: 0 0 30px rgba(255, 138, 0, 0.38);
+}
+
+.dvd-core-label span {
+  color: rgba(255,255,255,0.62);
+}
+
+.dvd-core-label em {
+  font-size: 17px;
+  color: rgba(255,255,255,0.86);
+}
+
+.dvd-core-node {
+  width: 205px;
+  background: rgba(0,0,0,0.68);
+  box-shadow: 0 0 34px rgba(0,0,0,0.52);
+}
+
+.dvd-core-node.primary {
+  top: 96px;
+}
+
+.dvd-core-node.secondary {
+  bottom: 142px;
+}
+
+.dvd-core-node strong {
+  font-size: 28px;
+}
+
+.dvd-engine-stack {
+  top: 4px;
+  left: 12px;
+  right: 12px;
+  gap: 92px;
+}
+
+.dvd-engine-badge {
+  min-height: 86px;
+  background: rgba(0,0,0,0.62);
+}
+
+.dvd-engine-badge strong,
+.dvd-engine-badge em {
+  font-size: 19px;
+}
+
+.dvd-loop-panel {
+  left: 9%;
+  right: 9%;
+  bottom: 6px;
+  border-color: rgba(33, 150, 243, 0.64);
+  background: linear-gradient(145deg, rgba(33, 150, 243, 0.16), rgba(255, 138, 0, 0.06));
+  box-shadow: 0 0 34px rgba(33, 150, 243, 0.18), inset 0 0 32px rgba(255,255,255,0.024);
+}
+
+.dvd-transfer-line {
+  opacity: 0.85;
+  width: 50%;
+}
+
+.line-a {
+  left: -4%;
+}
+
+.line-b {
+  right: -4%;
+}
+
+.line-c {
+  left: 5%;
+  width: 90%;
+}
+
+.dvd-tension,
+.dvd-bottleneck,
+.dvd-one-move {
+  border-color: rgba(255, 138, 0, 0.32);
+}
+
+.dvd-bottleneck {
+  background:
+    linear-gradient(145deg, rgba(255, 138, 0, 0.11), rgba(255,255,255,0.025)),
+    radial-gradient(circle at 18% 40%, rgba(159, 107, 255, 0.12), transparent 48%);
+}
+
+.dvd-one-move {
+  background:
+    linear-gradient(145deg, rgba(255, 138, 0, 0.15), rgba(255,255,255,0.025)),
+    radial-gradient(circle at 12% 40%, rgba(255, 138, 0, 0.18), transparent 42%);
+  box-shadow: inset 0 0 34px rgba(255,255,255,0.025), 0 0 44px rgba(255, 138, 0, 0.12);
+}
+
+.dvd-one-move h3 {
+  font-size: 21px;
+  line-height: 1.08;
+  text-shadow: 0 0 18px rgba(255, 138, 0, 0.28);
+}
+
+.dvd-bottleneck p {
+  font-size: 15.5px;
+  line-height: 1.22;
+  font-weight: 650;
+}
+
+.dvd-one-move p {
+  font-size: 12.5px;
+  line-height: 1.28;
+  -webkit-line-clamp: 2;
+}
+
+.dvd-tension p {
+  -webkit-line-clamp: 2;
+}
+
+.dvd-tension h3 {
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.1;
+}
+
+.dvd-tension {
+  padding: 14px 16px;
+}
+
+.dvd-dimensions {
+  background:
+    linear-gradient(145deg, rgba(159, 107, 255, 0.065), rgba(255,255,255,0.018));
+}
+
+.dvd-dim-score {
+  color: rgba(255, 138, 0, 0.9);
+}
+
+.dvd-evidence,
+.dvd-dual-list .dvd-panel,
+.dvd-environment-grid .dvd-panel,
+.dvd-key-signals {
+  background: linear-gradient(145deg, rgba(255,255,255,0.045), rgba(255,255,255,0.015));
+}
+
+.dvd-futures {
+  transform: translateY(-2px);
+}
+
+.dvd-future-card {
+  border-color: rgba(255,255,255,0.115);
+  background: linear-gradient(145deg, rgba(255,255,255,0.046), rgba(255,255,255,0.015));
+  padding: 13px 15px;
+}
+
+.dvd-future-card strong {
+  font-size: 11.5px;
+  line-height: 1.18;
+}
+
+.dvd-future-card p {
+  font-size: 10.5px;
+  line-height: 1.22;
+  -webkit-line-clamp: 3;
+}
+
+.dvd-footer {
+  border-color: rgba(255, 138, 0, 0.28);
+  opacity: 0.9;
+}
+
 @media (max-width: 900px) {
   .dvd-frame {
     min-width: 980px;
