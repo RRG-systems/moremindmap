@@ -40,9 +40,69 @@ function compactPacketForPrompt(packet) {
   };
 }
 
+function getDimensionLabel(dimension) {
+  const labels = {
+    vector: 'VECTOR',
+    velocity: 'VELOCITY',
+    flex: 'FLEX',
+    horizon: 'HORIZON',
+    fidelity: 'FIDELITY',
+    framework: 'FRAMEWORK',
+    signal: 'SIGNAL',
+    leverage: 'LEVERAGE',
+  };
+
+  return labels[String(dimension || '').toLowerCase()] || String(dimension || '').toUpperCase();
+}
+
+function formatScore(score) {
+  const numeric = Number(score);
+  if (!Number.isFinite(numeric)) return '';
+  return `${numeric > 0 ? '+' : ''}${numeric.toFixed(2)}`;
+}
+
+function buildVisualBrief(packet) {
+  const profile = packet.profile || {};
+  const scoring = packet.scoring || {};
+  const dna = packet.behavioral_dna || {};
+  const ranked = Array.isArray(scoring.ranked_dimensions) ? scoring.ranked_dimensions : [];
+  const top = ranked.slice(0, 5).map((dimension) => {
+    return `${getDimensionLabel(dimension.dimension)} ${formatScore(dimension.score)}`.trim();
+  });
+  const lowest = ranked[ranked.length - 1];
+  const tensionKey = Object.keys(scoring.tension_pairs || {})[0] || '';
+  const tension = tensionKey
+    ? tensionKey.split('_vs_').map(getDimensionLabel).join(' VS ')
+    : 'PRIMARY TENSION';
+  const oneMove = packet.one_move?.headline || packet.one_move?.body || 'ONE MOVE';
+
+  return {
+    visible_labels_only: [
+      String(profile.person_name || 'PROFILE SUBJECT').toUpperCase(),
+      String(profile.company || '').toUpperCase(),
+      String(profile.profile_type || '').toUpperCase(),
+      `PRIMARY ENGINE: ${String(dna.primary_engine || 'OPERATING SYSTEM').toUpperCase()}`,
+      `TOP DIMENSIONS: ${top.join(' / ')}`,
+      lowest?.dimension ? `LOWEST SIGNAL: ${getDimensionLabel(lowest.dimension)} ${formatScore(lowest.score)}` : null,
+      `TENSION: ${tension}`,
+      dna.wrong_seat_risk ? `WRONG-SEAT RISK: ${String(dna.wrong_seat_risk).toUpperCase()}` : null,
+      `ONE MOVE: ${String(oneMove).split('\n')[0].toUpperCase()}`,
+    ].filter(Boolean),
+    visual_story: [
+      dna.primary_engine,
+      dna.natural_advantage,
+      dna.natural_risk,
+      dna.best_environment,
+      dna.worst_environment,
+      oneMove,
+    ].filter(Boolean),
+  };
+}
+
 export function buildVisualDNAPrompt(contextPacket, designReference = getVisualDNADesignReference()) {
   const compactPacket = compactPacketForPrompt(contextPacket);
   const profileName = compactPacket.profile?.person_name || 'this profile';
+  const visualBrief = buildVisualBrief(compactPacket);
   const prompt = `Create a Visual DNA image that answers: "What does this mind look like?"
 
 DESIGN REFERENCE A - HOW IT SHOULD FEEL
@@ -60,6 +120,10 @@ ${(designReference.negative_constraints || []).map((item) => `- ${item}`).join('
 FULL PROFILE INTELLIGENCE PACKET
 ${JSON.stringify(compactPacket, null, 2)}
 
+CANONICAL VISUAL BRIEF
+Use this brief for visible image labels. Do not render raw JSON text from the full packet.
+${JSON.stringify(visualBrief, null, 2)}
+
 IMAGE INTENT
 Visualize the behavioral operating system of ${profileName}. The image should represent the whole profile intelligence stack: Behavioral DNA, executive briefing, contradictions, pressure mechanics, scaling constraint, facilitator guidance, team experience, five futures, and one move.
 
@@ -71,6 +135,7 @@ APPROVED MARCUS/NORA QUALITY BAR
 - No smoky gray wash, no dim low-contrast overlay, no sparse center-only composition.
 - No lone brain/shell/orb. The centerpiece must be a behavioral operating system map with connected modules.
 - Use only large readable labels for major concepts. If small text would be unreadable, replace it with bars, icons, ticks, or glyphs.
+- Visible text must come from CANONICAL VISUAL BRIEF.visible_labels_only. Do not invent other words. Do not paint JSON keys.
 
 COMPOSITION RULES
 - Do not depict the person physically.
@@ -80,15 +145,16 @@ COMPOSITION RULES
 - Include a bottom or side operating-sequence strip that shows how this person creates value.
 - Use neon accent lighting, precise circuit pathways, luminous nodes, and architectural diagram language.
 - Keep text minimal, label-like, and readable. Use real short labels only; do not render fake paragraphs or garbled pseudo-text.
+- Prefer abstract glyphs, icons, color bars, gauges, and node patterns over small text.
 - Preserve the Marcus/Nora quality bar: dense executive intelligence dashboard, crisp panel hierarchy, central operating system map, not simplified brain-shell imagery.
 - Every visible visual element must map to the supplied profile packet.
 - Avoid generic technology wallpaper; make the image feel like this specific mind has been diagrammed.`;
 
   return {
-    prompt_version: 'visual-dna-prompt-v3-canonical-dashboard',
+    prompt_version: 'visual-dna-prompt-v4-visual-brief',
     prompt,
     prompt_hash: hashVisualDNAPrompt(prompt),
-    design_reference_version: 'reference-a-b-marcus-nora-v3',
+    design_reference_version: 'reference-a-b-marcus-nora-v4',
   };
 }
 
