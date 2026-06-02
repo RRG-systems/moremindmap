@@ -6,6 +6,7 @@ import RealEstate from './RealEstate.jsx'
 import Profile from './Profile.jsx'
 import Recovery from './Recovery.jsx'
 import Success from './Success.jsx'
+import VisualDNAPreview from './VisualDNAPreview.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/profile" element={<Profile />} />
         <Route path="/recovery" element={<Recovery />} />
         <Route path="/success" element={<Success />} />
+        <Route path="/visual-dna-preview" element={<VisualDNAPreview />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,
