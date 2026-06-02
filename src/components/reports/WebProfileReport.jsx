@@ -16,7 +16,6 @@ import { useState, useEffect } from 'react';
 import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
 import { buildRenderPlan, extractSectionContent } from '../../lib/profile/renderContract.js';
 import { buildBehavioralDNAInterpretation } from '../../lib/behavioralDNAInterpretation.js';
-import { buildVisualDNAContextPacket, buildVisualDNAPrompt } from '../../lib/visualDNA/index.js';
 
 // ============================================================================
 // DASHBOARD COMPONENTS (V1)
@@ -1296,20 +1295,6 @@ function isVisualDNAVisible() {
   return import.meta.env.VITE_VISUAL_DNA_VISIBLE === 'true';
 }
 
-const VISUAL_DNA_TEST_PROFILES = new Set([
-  'mm-20260529-ceo8x7q2',
-  'mm-20260529-acc2f9d6',
-]);
-
-const VISUAL_DNA_TEST_IMAGES = {
-  'mm-20260529-ceo8x7q2': '/visual-dna-test/marcus-vale.png',
-  'mm-20260529-acc2f9d6': '/visual-dna-test/nora-bell.png',
-};
-
-function isVisualDNATestProfile(profileId) {
-  return VISUAL_DNA_TEST_PROFILES.has(String(profileId || '').toLowerCase());
-}
-
 function isApprovedVisualDNAForDisplay(visualDNA) {
   return Boolean(
     visualDNA?.image_url
@@ -1329,28 +1314,7 @@ function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, r
     };
   }
 
-  if (!isVisualDNATestProfile(profileId)) return null;
-
-  const contextPacket = buildVisualDNAContextPacket({
-    canonical,
-    narrative,
-    behavioralIntelligence,
-    ranked,
-    profileId,
-    personName,
-    company,
-  });
-  const promptResult = buildVisualDNAPrompt(contextPacket);
-
-  return {
-    status: 'generated_test_image',
-    profile_id: profileId,
-    prompt_hash: promptResult.prompt_hash,
-    prompt: promptResult.prompt,
-    context_packet: contextPacket,
-    image_mode: 'static_test_asset_no_persistence',
-    image_url: VISUAL_DNA_TEST_IMAGES[String(profileId || '').toLowerCase()] || null,
-  };
+  return null;
 }
 
 function VisualDNASection({ visualDNA }) {

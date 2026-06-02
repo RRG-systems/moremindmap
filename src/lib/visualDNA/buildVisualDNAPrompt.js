@@ -51,6 +51,9 @@ ${stableStringify(designReference.reference_a)}
 DESIGN REFERENCE B - WHY THE CONCEPT WORKS
 ${stableStringify(designReference.reference_b)}
 
+CANONICAL PRODUCTION STANDARD
+${stableStringify(designReference.canonical_standard)}
+
 NEGATIVE CONSTRAINTS
 ${(designReference.negative_constraints || []).map((item) => `- ${item}`).join('\n')}
 
@@ -62,19 +65,21 @@ Visualize the behavioral operating system of ${profileName}. The image should re
 
 COMPOSITION RULES
 - Do not depict the person physically.
-- Build a dark enterprise intelligence system map.
-- Use a central operating-system architecture as the focal point.
-- Surround it with evidence-derived widgets: primary engine, secondary engine, tension pair, pressure shift, role fit, wrong-seat risk, best environment, worst environment, one move, and future trajectory signals.
+- Build a dark enterprise intelligence system map, not a single symbolic object.
+- Use a central Behavioral Operating System architecture as the focal point: stacked engine rings, directional pathways, evidence nodes, and operating layers.
+- Surround it with evidence-derived widgets: profile identity, ranked dimension bars, primary engine, secondary engine, tension pair, pressure shift, role fit, wrong-seat risk, best environment, worst environment, one move, and future trajectory signals.
+- Include a bottom or side operating-sequence strip that shows how this person creates value.
 - Use neon accent lighting, precise circuit pathways, luminous nodes, and architectural diagram language.
-- Keep text minimal and label-like. Do not include paragraphs.
+- Keep text minimal, label-like, and readable. Use real short labels only; do not render fake paragraphs or garbled pseudo-text.
+- Preserve the Marcus/Nora quality bar: dense executive intelligence dashboard, crisp panel hierarchy, central operating system map, not simplified brain-shell imagery.
 - Every visible visual element must map to the supplied profile packet.
 - Avoid generic technology wallpaper; make the image feel like this specific mind has been diagrammed.`;
 
   return {
-    prompt_version: 'visual-dna-prompt-v1',
+    prompt_version: 'visual-dna-prompt-v2-canonical-standard',
     prompt,
     prompt_hash: hashVisualDNAPrompt(prompt),
-    design_reference_version: 'reference-a-b-v1',
+    design_reference_version: 'reference-a-b-marcus-nora-v2',
   };
 }
 

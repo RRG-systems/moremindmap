@@ -141,6 +141,10 @@ export default async function handler(req, res) {
       provider: VISUAL_DNA_PROVIDER,
       visual_dna_version: VISUAL_DNA_VERSION,
       design_reference_version: promptResult.design_reference_version,
+      prompt_version: promptResult.prompt_version,
+      generation_workflow: 'canonical_prompt_to_draft_to_approval',
+      reference_standard: 'marcus-nora-v1',
+      approval_required: true,
       status: 'draft',
       approved: false,
     };
@@ -199,7 +203,7 @@ async function generateImageBuffer(prompt) {
     model: VISUAL_DNA_MODEL,
     prompt,
     size: '1536x1024',
-    quality: 'medium',
+    quality: 'high',
     output_format: 'png',
     n: 1,
   });

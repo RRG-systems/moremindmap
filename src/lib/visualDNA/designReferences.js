@@ -24,14 +24,32 @@ export const VISUAL_DNA_DESIGN_REFERENCE_B = {
   ],
 };
 
+export const VISUAL_DNA_CANONICAL_STANDARD = {
+  name: 'Marcus Vale / Nora Bell approved Visual DNA standard',
+  role: 'Defines the approved production quality bar and composition family.',
+  principles: [
+    'wide 3:2 or 16:9 enterprise dashboard composition, not a poster or single-object illustration',
+    'central Behavioral Operating System map with stacked engine architecture',
+    'surrounding intelligence widgets for profile identity, ranked dimensions, pressure behavior, environment fit, wrong-seat risk, and one move',
+    'dense but organized information architecture with crisp labels and visual hierarchy',
+    'black technical background with neon orange, violet, green, and blue accents used as system signals',
+    'circuit pathways, luminous nodes, panel outlines, score bars, gauges, and operating-sequence diagrams',
+    'premium executive intelligence aesthetic; no simplified brain shell, generic AI brain, or abstract tech wallpaper',
+  ],
+};
+
 export function getVisualDNADesignReference() {
   return {
     reference_a: VISUAL_DNA_DESIGN_REFERENCE_A,
     reference_b: VISUAL_DNA_DESIGN_REFERENCE_B,
+    canonical_standard: VISUAL_DNA_CANONICAL_STANDARD,
     negative_constraints: [
       'do not copy either reference layout exactly',
       'do not depict the person, face, body, or avatar',
       'do not create a generic tech wallpaper',
+      'do not create a lone brain, shell, orb, head, face, avatar, or abstract neural object',
+      'do not use garbled pseudo-text; use short readable labels or abstract glyphs instead',
+      'do not simplify into a sparse image; maintain dashboard-level information density',
       'do not invent unsupported traits',
       'do not use medical, diagnostic, or mystical symbolism',
     ],

@@ -53,7 +53,11 @@ function buildApprovedMetadata(req, visual) {
     model: 'manual-approved',
     provider: 'curated_static',
     visual_dna_version: VISUAL_DNA_VERSION,
-    design_reference_version: 'reference-a-b-v1',
+    design_reference_version: 'reference-a-b-marcus-nora-v2',
+    prompt_version: 'visual-dna-prompt-v2-canonical-standard',
+    generation_workflow: 'curated_reference_static_to_approval',
+    reference_standard: 'marcus-nora-v1',
+    approval_required: false,
     status: 'approved',
     approved: true,
   };
