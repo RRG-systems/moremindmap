@@ -1,5 +1,6 @@
 import { getVisualDNADesignReference } from './designReferences.js';
 import { buildVisualNarrative } from './buildVisualNarrative.js';
+import { buildVisualOperatingSystem } from './buildVisualOperatingSystem.js';
 
 function stableStringify(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
@@ -104,6 +105,7 @@ export function buildVisualDNAPrompt(contextPacket, designReference = getVisualD
   const compactPacket = compactPacketForPrompt(contextPacket);
   const profileName = compactPacket.profile?.person_name || 'this profile';
   const visualNarrative = buildVisualNarrative(compactPacket);
+  const visualOperatingSystem = buildVisualOperatingSystem(compactPacket, visualNarrative);
   const visualBrief = buildVisualBrief(compactPacket);
   const prompt = `Create a Visual DNA image that answers: "What does this mind look like?"
 
@@ -119,17 +121,21 @@ ${stableStringify(designReference.canonical_standard)}
 NEGATIVE CONSTRAINTS
 ${(designReference.negative_constraints || []).map((item) => `- ${item}`).join('\n')}
 
-VISUAL NARRATIVE LAYER - BUILD FROM THIS FIRST
-The image must be conceptualized as Profile -> Meaning -> Metaphor -> Image.
-Use this narrative layer as the primary creative source. It defines what the operating system means before labels are added.
+VISUAL OPERATING SYSTEM MODEL - BUILD FROM THIS FIRST
+The image must be conceptualized as Profile -> Meaning -> Metaphor -> Operating System Model -> Image.
+This is the primary creative source. The final image should explain how the behavioral machine works, not just who the person is.
+${JSON.stringify(visualOperatingSystem, null, 2)}
+
+VISUAL NARRATIVE LAYER - USE AS MEANING AND SYMBOLISM
+Use this narrative layer to translate the operating system into metaphor, symbolism, and visual architecture.
 ${JSON.stringify(visualNarrative, null, 2)}
 
 IMAGE GENERATION PRIORITY
-1. Visual metaphor
-2. Primary engine
-3. Tension
-4. Future bottleneck
-5. One Move
+1. Operating system model
+2. Visual metaphor
+3. Primary engine
+4. Tension / bottleneck
+5. One Move as system evolution
 6. Labels
 
 FULL PROFILE INTELLIGENCE PACKET - SOURCE MATERIAL ONLY
@@ -143,6 +149,14 @@ ${JSON.stringify(visualBrief, null, 2)}
 IMAGE INTENT
 Visualize the behavioral operating system of ${profileName}. The image should represent the whole profile intelligence stack through metaphor, architecture, pathways, modules, pressure points, and transfer patterns. Do not try to explain the profile through paragraphs of text.
 
+OPERATING SYSTEM QUESTIONS THE IMAGE MUST ANSWER
+- What powers the system?
+- What constrains the system?
+- What outputs does the system create?
+- What loop keeps the system running?
+- What evolves the system if the One Move is executed?
+- Where does flow transfer from the central engine into the organization?
+
 APPROVED MARCUS/NORA QUALITY BAR
 - Finished executive intelligence dashboard, not concept art.
 - High-contrast black background with bright neon orange/violet/green/blue signal accents.
@@ -154,7 +168,7 @@ APPROVED MARCUS/NORA QUALITY BAR
 - Visible text must come from CANONICAL VISUAL BRIEF.visible_labels_only. Do not invent other words. Do not paint JSON keys.
 
 VISUAL STORYTELLING RULES
-- First build the operating-system metaphor: what kind of system is this mind?
+- First build the operating system: inputs -> engine -> loop -> outputs -> bottleneck -> evolution path.
 - Show the primary engine as the main force, not merely as a label.
 - Show the secondary engine as the way the system moves, stabilizes, senses, adapts, or verifies.
 - Show the tension as visual pressure: bottleneck, gate, overloaded junction, missing stabilizer, drift zone, or transfer gap.
@@ -162,6 +176,8 @@ VISUAL STORYTELLING RULES
 - Show the one move as the architectural intervention that changes the flow.
 - Use symbols, pathways, gates, grids, gauges, routing maps, rings, and decision networks more than text.
 - Keep labels sparse, large, and readable. Do not rely on text to carry meaning.
+- Avoid profile-card behavior: the image should not feel like a scoreboard, trait report, or personality chart.
+- Favor machine, network, engine, operating loop, transfer architecture, feedback systems, and evolution path.
 
 COMPOSITION RULES
 - Do not depict the person physically.
@@ -177,11 +193,12 @@ COMPOSITION RULES
 - Avoid generic technology wallpaper; make the image feel like this specific mind has been diagrammed.`;
 
   return {
-    prompt_version: 'visual-dna-prompt-v5-narrative-engine',
+    prompt_version: 'visual-dna-prompt-v6-operating-system',
     prompt,
     prompt_hash: hashVisualDNAPrompt(prompt),
-    design_reference_version: 'reference-a-b-marcus-nora-v5',
+    design_reference_version: 'reference-a-b-marcus-nora-v6',
     visual_narrative: visualNarrative,
+    visual_operating_system: visualOperatingSystem,
   };
 }
 
