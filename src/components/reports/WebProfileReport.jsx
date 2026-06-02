@@ -17,6 +17,7 @@ import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
 import { buildRenderPlan, extractSectionContent } from '../../lib/profile/renderContract.js';
 import { buildBehavioralDNAInterpretation } from '../../lib/behavioralDNAInterpretation.js';
 import DeterministicVisualDNA from '../visualDNA/DeterministicVisualDNA.jsx';
+import VisualDNAModal from '../visualDNA/VisualDNAModal.jsx';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 
 // ============================================================================
@@ -1356,15 +1357,31 @@ function buildDeterministicVisualDNAPreview({ canonical, narrative, ranked, prof
 }
 
 function DeterministicVisualDNAReportSection({ viewModel }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   if (!isDeterministicVisualDNAVisible() || !viewModel) return null;
 
   return (
     <section className="deterministic-visual-dna-report" aria-label="Deterministic Visual DNA preview">
       <div className="deterministic-visual-dna-label">
-        <span>Deterministic Visual DNA Preview</span>
-        <strong>Feature-flagged test render</strong>
+        <div>
+          <span>Deterministic Visual DNA Preview</span>
+          <strong>Feature-flagged test render</strong>
+        </div>
+        <button
+          type="button"
+          className="deterministic-visual-dna-open"
+          onClick={() => setIsModalOpen(true)}
+        >
+          Open Full Visual DNA
+        </button>
       </div>
       <DeterministicVisualDNA profile={viewModel} variant="report" />
+      <VisualDNAModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        profile={viewModel}
+      />
     </section>
   );
 }
@@ -1779,7 +1796,7 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
         </div>
       </footer>
 
-      <style jsx>{`
+      <style>{`
         .web-profile-report-v2.two-page-dashboard {
           display: flex;
           flex-direction: column;
@@ -2175,6 +2192,29 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
 
         .deterministic-visual-dna-label strong {
           color: #fb923c;
+        }
+
+        .deterministic-visual-dna-open {
+          flex: 0 0 auto;
+          border: 1px solid rgba(251, 146, 60, 0.42);
+          border-radius: 999px;
+          padding: 0.65rem 1rem;
+          background: rgba(251, 146, 60, 0.12);
+          color: #fed7aa;
+          font-size: 0.72rem;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+        }
+
+        .deterministic-visual-dna-open:hover,
+        .deterministic-visual-dna-open:focus-visible {
+          border-color: rgba(251, 146, 60, 0.8);
+          background: rgba(251, 146, 60, 0.2);
+          outline: none;
+          transform: translateY(-1px);
         }
 
         .visual-dna-section {
@@ -3104,7 +3144,7 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
 
 function DashboardStyles() {
   return (
-    <style jsx global>{`
+    <style>{`
       .dashboard-report-v1.intelligence-system {
         background: linear-gradient(180deg, #0a0e27 0%, #0d1830 50%, #0a0e27 100%);
         color: #e0e0e0;
