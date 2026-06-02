@@ -16,12 +16,14 @@ import { useState, useEffect } from 'react';
 import { buildNarrativeV3 } from '../../lib/narrativeV3/buildNarrativeV3.js';
 import { buildRenderPlan, extractSectionContent } from '../../lib/profile/renderContract.js';
 import { buildBehavioralDNAInterpretation } from '../../lib/behavioralDNAInterpretation.js';
+import DeterministicVisualDNA from '../visualDNA/DeterministicVisualDNA.jsx';
+import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 
 // ============================================================================
 // DASHBOARD COMPONENTS (V1)
 // ============================================================================
 
-function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence, visualDNA }) {
+function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence, visualDNA, deterministicVisualDNA }) {
   return (
     <div className="dashboard-report-v1 intelligence-system">
       {/* HERO HEADER */}
@@ -96,6 +98,7 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
       <PageEightDashboard narrative={narrative} behavioralIntelligence={behavioralIntelligence} canonical={canonical} />
 
       <VisualDNASection visualDNA={visualDNA} />
+      <DeterministicVisualDNAReportSection viewModel={deterministicVisualDNA} />
     </div>
   );
 }
@@ -1295,6 +1298,10 @@ function isVisualDNAVisible() {
   return import.meta.env.VITE_VISUAL_DNA_VISIBLE === 'true';
 }
 
+function isDeterministicVisualDNAVisible() {
+  return import.meta.env.VITE_DETERMINISTIC_VISUAL_DNA === 'true';
+}
+
 function isApprovedVisualDNAForDisplay(visualDNA) {
   return Boolean(
     visualDNA?.image_url
@@ -1315,6 +1322,51 @@ function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, r
   }
 
   return null;
+}
+
+function buildDeterministicVisualDNAPreview({ canonical, narrative, ranked, profileId, personName, company, profileType }) {
+  if (!isDeterministicVisualDNAVisible()) return null;
+
+  const canonicalProfile = canonical?.canonical_profile_json || canonical || {};
+  let behavioralDNA = null;
+
+  try {
+    behavioralDNA = buildBehavioralDNAInterpretation(canonicalProfile, ranked || []);
+  } catch (error) {
+    console.warn('[VisualDNA] Deterministic behavioral DNA fallback failed:', error.message);
+  }
+
+  const profileForViewModel = {
+    ...canonical,
+    profileId,
+    profile_id: profileId,
+    person_name: personName,
+    company_name: company,
+    profile_type: profileType,
+    behavioralDNA,
+    canonical_profile_json: {
+      ...canonicalProfile,
+      ranked_dimensions: ranked?.length ? ranked : canonicalProfile.ranked_dimensions,
+      behavioral_dna: behavioralDNA,
+      profile_type: profileType,
+    },
+  };
+
+  return buildVisualDNAViewModel(profileForViewModel, narrative || {});
+}
+
+function DeterministicVisualDNAReportSection({ viewModel }) {
+  if (!isDeterministicVisualDNAVisible() || !viewModel) return null;
+
+  return (
+    <section className="deterministic-visual-dna-report" aria-label="Deterministic Visual DNA preview">
+      <div className="deterministic-visual-dna-label">
+        <span>Deterministic Visual DNA Preview</span>
+        <strong>Feature-flagged test render</strong>
+      </div>
+      <DeterministicVisualDNA profile={viewModel} variant="report" />
+    </section>
+  );
 }
 
 function VisualDNASection({ visualDNA }) {
@@ -1449,6 +1501,15 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
         company,
         storedVisualDNA,
       });
+      const deterministicVisualDNA = buildDeterministicVisualDNAPreview({
+        canonical,
+        narrative,
+        ranked,
+        profileId,
+        personName,
+        company,
+        profileType,
+      });
       
       return (
         <div>
@@ -1464,6 +1525,7 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
             ranked={ranked}
             behavioralIntelligence={behavioralIntelligence}
             visualDNA={visualDNA}
+            deterministicVisualDNA={deterministicVisualDNA}
           />
           <DashboardStyles />
         </div>
@@ -2083,6 +2145,36 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
         
         .analytics-section::before {
           background: linear-gradient(90deg, rgba(33, 150, 243, 0) 0%, rgba(33, 150, 243, 0.3) 50%, rgba(33, 150, 243, 0) 100%);
+        }
+
+        .deterministic-visual-dna-report {
+          margin: 3rem auto 0;
+          max-width: 1500px;
+          padding: 0 2rem 4rem;
+        }
+
+        .deterministic-visual-dna-label {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+          margin-bottom: 1rem;
+          padding: 0.85rem 1rem;
+          border: 1px solid rgba(251, 146, 60, 0.28);
+          border-radius: 10px;
+          background: rgba(15, 23, 42, 0.68);
+        }
+
+        .deterministic-visual-dna-label span,
+        .deterministic-visual-dna-label strong {
+          color: rgba(226, 232, 240, 0.76);
+          font-size: 0.72rem;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+        }
+
+        .deterministic-visual-dna-label strong {
+          color: #fb923c;
         }
 
         .visual-dna-section {

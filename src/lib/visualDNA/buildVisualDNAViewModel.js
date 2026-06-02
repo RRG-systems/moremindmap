@@ -157,6 +157,34 @@ function getRanked(data) {
   return [];
 }
 
+function buildDimensionSet(ranked) {
+  if (!ranked.length) return [];
+
+  const top = ranked.slice(0, 5);
+  const lowest = ranked[ranked.length - 1];
+  const shouldAppendLowest = lowest?.dimension
+    && !top.some((item) => normalizeDimension(item.dimension) === normalizeDimension(lowest.dimension));
+
+  return shouldAppendLowest ? [...top, lowest] : ranked.slice(0, 6);
+}
+
+function getDominance(data) {
+  return data?.rescoring_gpt?.dominance_profile
+    || data?.rescoring_v1?.dominance_profile
+    || data?.dominance_profile
+    || {};
+}
+
+function getProfileType(profile, data, primaryKey, secondaryKey) {
+  return firstText(
+    profile?.profile_type,
+    data?.profile_type,
+    data?.inferred_patterns?.profile_type,
+    data?.rescoring_gpt?.dominance_profile?.profile_type,
+    `${ENGINE_LABELS[primaryKey] || 'Behavioral'} / ${ENGINE_LABELS[secondaryKey] || 'Operating'}`
+  );
+}
+
 function getPairDefaults(primaryKey, secondaryKey) {
   return PAIR_DEFAULTS[`${primaryKey}+${secondaryKey}`]
     || PAIR_DEFAULTS[`${secondaryKey}+${primaryKey}`]
@@ -176,34 +204,36 @@ export function buildVisualDNAViewModel(profile = {}, narrative = {}) {
 
   const data = getNestedData(profile);
   const ranked = getRanked(data);
-  const topDimensions = ranked.slice(0, 6).map(toDimensionItem);
-  const primaryKey = normalizeDimension(ranked[0]?.dimension);
-  const secondaryKey = normalizeDimension(ranked[1]?.dimension);
+  const topDimensions = buildDimensionSet(ranked).map(toDimensionItem);
+  const dominance = getDominance(data);
+  const primaryKey = normalizeDimension(dominance.primary_dimension || ranked[0]?.dimension);
+  const secondaryKey = normalizeDimension(dominance.secondary_dimension || ranked[1]?.dimension);
   const primaryEngine = ENGINE_LABELS[primaryKey] || 'Direction';
   const secondaryEngine = ENGINE_LABELS[secondaryKey] || 'Adaptation';
   const defaults = getPairDefaults(primaryKey, secondaryKey);
-  const oneMove = narrative?.recommendedNextStep || narrative?.theOneMove || narrative?.one_move || {};
+  const oneMove = narrative?.recommendedNextStep || narrative?.theOneMove || narrative?.oneMove || narrative?.one_move || {};
+  const behavioralDNA = profile?.behavioralDNA || data?.behavioral_dna || {};
 
   return {
-    profileId: profile?.profile_id || data?.profile_id || 'mm-xxxxxxxx-xxxxxxxx',
+    profileId: profile?.profileId || profile?.profile_id || data?.profile_id || 'mm-xxxxxxxx-xxxxxxxx',
     name: profile?.person_name || profile?.name || data?.metadata?.person_name || 'Profile Subject',
     company: profile?.company_name || profile?.company || data?.metadata?.company_name || 'Company',
-    type: profile?.profile_type || data?.profile_type || data?.rescoring_gpt?.dominance_profile?.profile_type || 'Behavioral Operating System',
+    type: getProfileType(profile, data, primaryKey, secondaryKey),
     primaryEngine,
     secondaryEngine,
     engineLabel: `${primaryEngine} + ${secondaryEngine}`,
     systemType: defaults.systemType,
     topDimensions: topDimensions.length ? topDimensions : WALLY_VISUAL_DNA_SAMPLE.topDimensions,
     lowestDimension: topDimensions[topDimensions.length - 1] || WALLY_VISUAL_DNA_SAMPLE.lowestDimension,
-    futureBottleneck: firstText(oneMove.futureBottleneck, oneMove.coreConstraint, narrative?.strategicCeiling?.key_warning, defaults.futureBottleneck),
+    futureBottleneck: firstText(oneMove.futureBottleneck, oneMove.coreConstraint, narrative?.strategicCeiling?.key_warning, narrative?.strategicCeiling?.summary, defaults.futureBottleneck),
     oneMove: firstText(oneMove.headline, oneMove.intervention, oneMove.body, defaults.oneMove),
-    roleTruth: firstText(oneMove.roleTruth, oneMove.lowestValueDrag, 'Make the strongest judgment pattern transferable.'),
-    wrongSeatRisk: firstText(data?.behavioral_dna?.wrong_seat_risk, narrative?.wrongSeatRisk, 'Moderate'),
+    roleTruth: firstText(oneMove.roleTruth, oneMove.role_truth, oneMove.lowestValueDrag, 'Make the strongest judgment pattern transferable.'),
+    wrongSeatRisk: firstText(behavioralDNA.wrong_seat_risk, data?.behavioral_dna?.wrong_seat_risk, narrative?.wrongSeatRisk, 'Moderate'),
     inputs: defaults.inputs,
     operatingLoop: defaults.operatingLoop,
     outputs: defaults.outputs,
     evolutionPath: firstText(oneMove.evolutionPath, defaults.evolutionPath),
-    confidence: firstText(data?.rescoring_gpt?.dominance_profile?.profile_intensity, 'Moderate'),
+    confidence: firstText(dominance.profile_intensity, dominance.confidence ? String(dominance.confidence) : '', 'Moderate'),
   };
 }
 
