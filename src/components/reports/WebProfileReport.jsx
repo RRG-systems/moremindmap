@@ -1361,22 +1361,27 @@ function DeterministicVisualDNAReportSection({ viewModel }) {
 
   if (!isDeterministicVisualDNAVisible() || !viewModel) return null;
 
+  const openVisualDNA = () => setIsModalOpen(true);
+
   return (
-    <section className="deterministic-visual-dna-report" aria-label="Deterministic Visual DNA preview">
-      <div className="deterministic-visual-dna-label">
-        <div>
-          <span>Deterministic Visual DNA Preview</span>
-          <strong>Feature-flagged test render</strong>
+    <section className="visual-dna-launch-section" aria-label="Visual DNA">
+      <button
+        type="button"
+        className="visual-dna-launch-module"
+        onClick={openVisualDNA}
+      >
+        <span className="visual-dna-launch-orbit" aria-hidden="true">
+          <span className="visual-dna-launch-ring ring-one" />
+          <span className="visual-dna-launch-ring ring-two" />
+          <span className="visual-dna-launch-ring ring-three" />
+          <span className="visual-dna-launch-core" />
+        </span>
+        <div className="visual-dna-launch-copy">
+          <span>Visual DNA</span>
+          <strong>Behavioral Operating System Detected</strong>
+          <em>Initiate Analysis</em>
         </div>
-        <button
-          type="button"
-          className="deterministic-visual-dna-open"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Open Full Visual DNA
-        </button>
-      </div>
-      <DeterministicVisualDNA profile={viewModel} variant="report" />
+      </button>
       <VisualDNAModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -2164,57 +2169,160 @@ function StackedReportFallback({ canonical, narrative, profileNumber, profileCod
           background: linear-gradient(90deg, rgba(33, 150, 243, 0) 0%, rgba(33, 150, 243, 0.3) 50%, rgba(33, 150, 243, 0) 100%);
         }
 
-        .deterministic-visual-dna-report {
-          margin: 3rem auto 0;
+        .visual-dna-launch-section {
+          display: flex;
+          justify-content: center;
+          margin: 3.25rem auto 0;
           max-width: 1500px;
           padding: 0 2rem 4rem;
         }
 
-        .deterministic-visual-dna-label {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 1rem;
-          margin-bottom: 1rem;
-          padding: 0.85rem 1rem;
-          border: 1px solid rgba(251, 146, 60, 0.28);
-          border-radius: 10px;
-          background: rgba(15, 23, 42, 0.68);
-        }
-
-        .deterministic-visual-dna-label span,
-        .deterministic-visual-dna-label strong {
-          color: rgba(226, 232, 240, 0.76);
-          font-size: 0.72rem;
-          text-transform: uppercase;
-          letter-spacing: 0.12em;
-        }
-
-        .deterministic-visual-dna-label strong {
-          color: #fb923c;
-        }
-
-        .deterministic-visual-dna-open {
-          flex: 0 0 auto;
-          border: 1px solid rgba(251, 146, 60, 0.42);
-          border-radius: 999px;
-          padding: 0.65rem 1rem;
-          background: rgba(251, 146, 60, 0.12);
-          color: #fed7aa;
-          font-size: 0.72rem;
-          font-weight: 800;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
+        .visual-dna-launch-module {
+          position: relative;
+          display: grid;
+          place-items: center;
+          width: min(100%, 520px);
+          min-height: 260px;
+          border: 1px solid rgba(251, 146, 60, 0.36);
+          border-radius: 18px;
+          background:
+            radial-gradient(circle at 50% 44%, rgba(251, 146, 60, 0.14), transparent 35%),
+            radial-gradient(circle at 28% 68%, rgba(147, 51, 234, 0.14), transparent 42%),
+            radial-gradient(circle at 72% 66%, rgba(14, 165, 233, 0.12), transparent 44%),
+            linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.92));
+          box-shadow:
+            0 24px 90px rgba(0, 0, 0, 0.48),
+            0 0 42px rgba(251, 146, 60, 0.1),
+            inset 0 0 42px rgba(255, 255, 255, 0.035);
+          color: #f8fafc;
           cursor: pointer;
-          transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+          overflow: hidden;
+          transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
         }
 
-        .deterministic-visual-dna-open:hover,
-        .deterministic-visual-dna-open:focus-visible {
-          border-color: rgba(251, 146, 60, 0.8);
-          background: rgba(251, 146, 60, 0.2);
+        .visual-dna-launch-module::before,
+        .visual-dna-launch-module::after {
+          content: '';
+          position: absolute;
+          pointer-events: none;
+        }
+
+        .visual-dna-launch-module::before {
+          inset: 18px;
+          border: 1px solid rgba(148, 163, 184, 0.12);
+          border-radius: 14px;
+          background:
+            linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.16), transparent),
+            linear-gradient(0deg, transparent, rgba(14, 165, 233, 0.12), transparent);
+          opacity: 0.75;
+        }
+
+        .visual-dna-launch-module::after {
+          left: 50%;
+          top: 50%;
+          width: 360px;
+          height: 360px;
+          border-radius: 999px;
+          transform: translate(-50%, -50%);
+          background:
+            conic-gradient(from 20deg, transparent 0 34deg, rgba(251, 146, 60, 0.28) 34deg 38deg, transparent 38deg 118deg, rgba(147, 51, 234, 0.24) 118deg 122deg, transparent 122deg 236deg, rgba(14, 165, 233, 0.24) 236deg 240deg, transparent 240deg 360deg);
+          opacity: 0.8;
+          mask-image: radial-gradient(circle, transparent 0 43%, black 44% 46%, transparent 47% 100%);
+        }
+
+        .visual-dna-launch-module:hover,
+        .visual-dna-launch-module:focus-visible {
+          border-color: rgba(251, 146, 60, 0.7);
+          box-shadow:
+            0 28px 110px rgba(0, 0, 0, 0.56),
+            0 0 58px rgba(251, 146, 60, 0.18),
+            0 0 40px rgba(14, 165, 233, 0.1),
+            inset 0 0 48px rgba(255, 255, 255, 0.045);
           outline: none;
-          transform: translateY(-1px);
+          transform: translateY(-2px);
+        }
+
+        .visual-dna-launch-orbit {
+          position: absolute;
+          inset: 34px;
+          display: grid;
+          place-items: center;
+          pointer-events: none;
+        }
+
+        .visual-dna-launch-ring {
+          position: absolute;
+          border-radius: 999px;
+          border: 1px solid rgba(251, 146, 60, 0.22);
+          box-shadow: 0 0 18px rgba(251, 146, 60, 0.12);
+        }
+
+        .visual-dna-launch-ring.ring-one {
+          width: 190px;
+          height: 190px;
+          border-color: rgba(251, 146, 60, 0.32);
+        }
+
+        .visual-dna-launch-ring.ring-two {
+          width: 138px;
+          height: 138px;
+          border-color: rgba(14, 165, 233, 0.24);
+        }
+
+        .visual-dna-launch-ring.ring-three {
+          width: 86px;
+          height: 86px;
+          border-color: rgba(147, 51, 234, 0.28);
+        }
+
+        .visual-dna-launch-core {
+          width: 18px;
+          height: 18px;
+          border-radius: 999px;
+          background: #fb923c;
+          box-shadow:
+            0 0 18px rgba(251, 146, 60, 0.75),
+            0 0 44px rgba(251, 146, 60, 0.24);
+        }
+
+        .visual-dna-launch-copy {
+          position: relative;
+          z-index: 2;
+          display: grid;
+          justify-items: center;
+          gap: 0.7rem;
+          text-align: center;
+          text-transform: uppercase;
+        }
+
+        .visual-dna-launch-copy span {
+          color: #fb923c;
+          font-size: 0.84rem;
+          font-weight: 900;
+          letter-spacing: 0.24em;
+        }
+
+        .visual-dna-launch-copy strong {
+          max-width: 330px;
+          color: rgba(248, 250, 252, 0.92);
+          font-size: 1.1rem;
+          line-height: 1.2;
+          letter-spacing: 0.08em;
+        }
+
+        .visual-dna-launch-copy em {
+          margin-top: 0.35rem;
+          border: 1px solid rgba(251, 146, 60, 0.52);
+          border-radius: 999px;
+          padding: 0.78rem 1.25rem;
+          background:
+            linear-gradient(90deg, rgba(251, 146, 60, 0.18), rgba(147, 51, 234, 0.1), rgba(14, 165, 233, 0.12));
+          color: #fed7aa;
+          font-size: 0.78rem;
+          font-style: normal;
+          font-weight: 900;
+          letter-spacing: 0.16em;
+          box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.035), 0 0 18px rgba(251, 146, 60, 0.12);
         }
 
         .visual-dna-section {
@@ -3152,6 +3260,163 @@ function DashboardStyles() {
         min-height: 100vh;
         padding: 0;
         position: relative;
+      }
+
+      .visual-dna-launch-section {
+        display: flex;
+        justify-content: center;
+        margin: 3.25rem auto 0;
+        max-width: 1500px;
+        padding: 0 2rem 4rem;
+      }
+
+      .visual-dna-launch-module {
+        appearance: none;
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: min(100%, 520px);
+        min-height: 260px;
+        border: 1px solid rgba(251, 146, 60, 0.36);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 50% 44%, rgba(251, 146, 60, 0.14), transparent 35%),
+          radial-gradient(circle at 28% 68%, rgba(147, 51, 234, 0.14), transparent 42%),
+          radial-gradient(circle at 72% 66%, rgba(14, 165, 233, 0.12), transparent 44%),
+          linear-gradient(145deg, rgba(15, 23, 42, 0.88), rgba(2, 6, 23, 0.92));
+        box-shadow:
+          0 24px 90px rgba(0, 0, 0, 0.48),
+          0 0 42px rgba(251, 146, 60, 0.1),
+          inset 0 0 42px rgba(255, 255, 255, 0.035);
+        color: #f8fafc;
+        cursor: pointer;
+        overflow: hidden;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+      }
+
+      .visual-dna-launch-module::before,
+      .visual-dna-launch-module::after {
+        content: '';
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .visual-dna-launch-module::before {
+        inset: 18px;
+        border: 1px solid rgba(148, 163, 184, 0.12);
+        border-radius: 14px;
+        background:
+          linear-gradient(90deg, transparent, rgba(251, 146, 60, 0.16), transparent),
+          linear-gradient(0deg, transparent, rgba(14, 165, 233, 0.12), transparent);
+        opacity: 0.75;
+      }
+
+      .visual-dna-launch-module::after {
+        left: 50%;
+        top: 50%;
+        width: 360px;
+        height: 360px;
+        border-radius: 999px;
+        transform: translate(-50%, -50%);
+        background:
+          conic-gradient(from 20deg, transparent 0 34deg, rgba(251, 146, 60, 0.28) 34deg 38deg, transparent 38deg 118deg, rgba(147, 51, 234, 0.24) 118deg 122deg, transparent 122deg 236deg, rgba(14, 165, 233, 0.24) 236deg 240deg, transparent 240deg 360deg);
+        opacity: 0.8;
+        mask-image: radial-gradient(circle, transparent 0 43%, black 44% 46%, transparent 47% 100%);
+      }
+
+      .visual-dna-launch-module:hover,
+      .visual-dna-launch-module:focus-visible {
+        border-color: rgba(251, 146, 60, 0.7);
+        box-shadow:
+          0 28px 110px rgba(0, 0, 0, 0.56),
+          0 0 58px rgba(251, 146, 60, 0.18),
+          0 0 40px rgba(14, 165, 233, 0.1),
+          inset 0 0 48px rgba(255, 255, 255, 0.045);
+        outline: none;
+        transform: translateY(-2px);
+      }
+
+      .visual-dna-launch-orbit {
+        position: absolute;
+        inset: 34px;
+        display: grid;
+        place-items: center;
+        pointer-events: none;
+      }
+
+      .visual-dna-launch-ring {
+        position: absolute;
+        border-radius: 999px;
+        border: 1px solid rgba(251, 146, 60, 0.22);
+        box-shadow: 0 0 18px rgba(251, 146, 60, 0.12);
+      }
+
+      .visual-dna-launch-ring.ring-one {
+        width: 190px;
+        height: 190px;
+        border-color: rgba(251, 146, 60, 0.32);
+      }
+
+      .visual-dna-launch-ring.ring-two {
+        width: 138px;
+        height: 138px;
+        border-color: rgba(14, 165, 233, 0.24);
+      }
+
+      .visual-dna-launch-ring.ring-three {
+        width: 86px;
+        height: 86px;
+        border-color: rgba(147, 51, 234, 0.28);
+      }
+
+      .visual-dna-launch-core {
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #fb923c;
+        box-shadow:
+          0 0 18px rgba(251, 146, 60, 0.75),
+          0 0 44px rgba(251, 146, 60, 0.24);
+      }
+
+      .visual-dna-launch-copy {
+        position: relative;
+        z-index: 2;
+        display: grid;
+        justify-items: center;
+        gap: 0.7rem;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .visual-dna-launch-copy span {
+        color: #fb923c;
+        font-size: 0.84rem;
+        font-weight: 900;
+        letter-spacing: 0.24em;
+      }
+
+      .visual-dna-launch-copy strong {
+        max-width: 330px;
+        color: rgba(248, 250, 252, 0.92);
+        font-size: 1.1rem;
+        line-height: 1.2;
+        letter-spacing: 0.08em;
+      }
+
+      .visual-dna-launch-copy em {
+        margin-top: 0.35rem;
+        border: 1px solid rgba(251, 146, 60, 0.52);
+        border-radius: 999px;
+        padding: 0.78rem 1.25rem;
+        background:
+          linear-gradient(90deg, rgba(251, 146, 60, 0.18), rgba(147, 51, 234, 0.1), rgba(14, 165, 233, 0.12));
+        color: #fed7aa;
+        font-size: 0.78rem;
+        font-style: normal;
+        font-weight: 900;
+        letter-spacing: 0.16em;
+        box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.035), 0 0 18px rgba(251, 146, 60, 0.12);
       }
 
       .dashboard-hero {
