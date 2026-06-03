@@ -7,6 +7,8 @@ import Profile from './Profile.jsx'
 import Recovery from './Recovery.jsx'
 import Success from './Success.jsx'
 import VisualDNAPreview from './VisualDNAPreview.jsx'
+import LeadershipPortal from './LeadershipPortal.jsx'
+import LeadershipDemo from './LeadershipDemo.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -19,6 +21,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/recovery" element={<Recovery />} />
         <Route path="/success" element={<Success />} />
         <Route path="/visual-dna-preview" element={<VisualDNAPreview />} />
+        <Route path="/leadership" element={<LeadershipPortal />} />
+        <Route path="/leadership-demo" element={<LeadershipDemo />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

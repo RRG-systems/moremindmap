@@ -12,6 +12,12 @@ export default function App() {
             <a href="#paths" className="hover:text-white transition">Start Here</a>
             <a href="#about" className="hover:text-white transition">About</a>
             <a href="#ecosystem" className="hover:text-white transition">Connected Systems</a>
+            <Link
+              to="/leadership"
+              className="rounded-full border border-orange-400/35 bg-orange-400/10 px-4 py-2 text-orange-100 shadow-[0_0_28px_rgba(251,146,60,0.12)] transition hover:border-orange-300/60 hover:bg-orange-400/18 hover:text-white"
+            >
+              Leadership Portal
+            </Link>
           </nav>
         </div>
       </header>
