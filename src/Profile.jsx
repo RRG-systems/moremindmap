@@ -834,97 +834,43 @@ function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, se
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
-          <div className="text-xs uppercase tracking-[0.22em] text-white/45">Pricing</div>
+        <div className="relative overflow-hidden rounded-[2rem] border border-orange-300/20 bg-white/5 p-8 shadow-[0_24px_90px_rgba(0,0,0,0.35)] backdrop-blur-md">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.18),transparent_32%),radial-gradient(circle_at_82%_78%,rgba(168,85,247,0.15),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.055),transparent_42%)]" />
+          <div className="relative">
+            <div className="text-xs uppercase tracking-[0.24em] text-orange-100/65">Pricing</div>
 
-          <div className="mt-6 grid gap-4">
             <button
               onClick={() => setSelectedOffer("mini_profile")}
               className={[
-                "text-left rounded-[1.25rem] border bg-white/[0.04] p-5 transition duration-200",
+                "mt-6 w-full text-left rounded-[1.75rem] border p-6 md:p-7 transition duration-200",
                 selectedOffer === "mini_profile"
-                  ? "border-white/40 bg-white/[0.12]"
-                  : "border-white/10 hover:bg-white/[0.06] hover:border-white/20",
+                  ? "border-orange-200/70 bg-orange-300/[0.13] shadow-[0_0_50px_rgba(251,146,60,0.16)]"
+                  : "border-white/12 bg-black/28 hover:border-orange-200/45 hover:bg-white/[0.055]",
               ].join(" ")}
             >
-              <div className="text-sm text-white/50">Mini Profile</div>
-              <div className="mt-2 text-3xl font-semibold">$9.99</div>
-              <p className="mt-3 text-white/65 leading-7">
-                A tight summary of your personality profile and communication map.
-              </p>
-            </button>
+              <div className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-100">
+                See the future you're creating.
+              </div>
 
-            <button
-              onClick={() => setSelectedOffer("mini_review")}
-              className={[
-                "text-left rounded-[1.25rem] border bg-white/[0.04] p-5 transition duration-200",
-                selectedOffer === "mini_review"
-                  ? "border-white/40 bg-white/[0.12]"
-                  : "border-white/10 hover:bg-white/[0.06] hover:border-white/20",
-              ].join(" ")}
-            >
-              <div className="text-sm text-white/50">Mini Profile + 30-min Assessment Review</div>
-              <div className="mt-2 text-3xl font-semibold">$58.99</div>
-              <p className="mt-3 text-white/65 leading-7">
-                Mini Profile with personalized 30-minute assessment review call.
-              </p>
-            </button>
+              <div className="mt-7 flex flex-col gap-4 border-y border-white/10 py-6 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <div className="text-sm uppercase tracking-[0.24em] text-white/50">
+                    Full MORE MindMap Profile
+                  </div>
+                  <div className="mt-3 text-5xl font-semibold tracking-tight text-white md:text-6xl">
+                    $149
+                  </div>
+                </div>
+                <div className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-xs uppercase tracking-[0.18em] text-cyan-100">
+                  One Profile
+                </div>
+              </div>
 
-            <button
-              onClick={() => setSelectedOffer("full_profile")}
-              className={[
-                "text-left rounded-[1.25rem] border bg-white/[0.04] p-5 transition duration-200",
-                selectedOffer === "full_profile"
-                  ? "border-white/40 bg-white/[0.12]"
-                  : "border-white/10 hover:bg-white/[0.06] hover:border-white/20",
-              ].join(" ")}
-            >
-              <div className="text-sm text-white/50">Full Profile</div>
-              <div className="mt-2 text-3xl font-semibold">$19.99</div>
-              <p className="mt-3 text-white/65 leading-7">
-                Full personality + leadership + communication map with detailed interpretation.
+              <p className="mt-6 text-white/72 leading-8">
+                MORE MindMap reveals how you think, decide, communicate, lead, and operate under pressure.
               </p>
-            </button>
-
-            <button
-              onClick={() => setSelectedOffer("full_review")}
-              className={[
-                "text-left rounded-[1.25rem] border bg-white/[0.04] p-5 transition duration-200",
-                selectedOffer === "full_review"
-                  ? "border-white/40 bg-white/[0.12]"
-                  : "border-white/10 hover:bg-white/[0.06] hover:border-white/20",
-              ].join(" ")}
-            >
-              <div className="text-sm text-white/50">Full Profile + 40-min Assessment Review</div>
-              <div className="mt-2 text-3xl font-semibold">$88.99</div>
-              <p className="mt-3 text-white/65 leading-7">
-                Full Profile with personalized 40-minute assessment review call.
-              </p>
-            </button>
-
-            <button
-              onClick={() => setSelectedOffer("full_coaching")}
-              className={[
-                "text-left rounded-[1.25rem] border bg-white/[0.04] p-5 transition duration-200",
-                selectedOffer === "full_coaching"
-                  ? "border-white/40 bg-white/[0.12]"
-                  : "border-white/10 hover:bg-white/[0.06] hover:border-white/20",
-              ].join(" ")}
-            >
-              <div className="text-sm text-white/50">Full Profile + Full Coaching Package</div>
-              <div className="mt-2 text-3xl font-semibold">Price Upon Request</div>
-              <p className="mt-3 text-white/65 leading-7">
-                Includes Full Profile and full-time coaching built around your profile and growth plan.{' '}
-                <a 
-                  href="https://calendly.com/darren" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="text-white hover:text-white/80 underline transition"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  Schedule a call with Darren
-                </a>
-                {' '}to discuss coaching options.
+              <p className="mt-4 text-white/72 leading-8">
+                Then it shows where those patterns are likely to lead and the One Move most likely to change the outcome.
               </p>
             </button>
           </div>
