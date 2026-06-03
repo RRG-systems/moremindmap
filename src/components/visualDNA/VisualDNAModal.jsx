@@ -1,7 +1,14 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import DeterministicVisualDNA from './DeterministicVisualDNA.jsx';
 
+const POSTER_WIDTH = 1672;
+const POSTER_HEIGHT = 941;
+const POSTER_RATIO = POSTER_WIDTH / POSTER_HEIGHT;
+
 export default function VisualDNAModal({ isOpen, onClose, profile }) {
+  const viewportRef = useRef(null);
+  const [posterScale, setPosterScale] = useState(1);
+
   useEffect(() => {
     if (!isOpen) return undefined;
 
@@ -22,7 +29,40 @@ export default function VisualDNAModal({ isOpen, onClose, profile }) {
     };
   }, [isOpen, onClose]);
 
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    function updateScale() {
+      const viewport = viewportRef.current;
+      if (!viewport) return;
+
+      const rect = viewport.getBoundingClientRect();
+      const availableWidth = Math.max(320, rect.width - 2);
+      const availableHeight = Math.max(320, rect.height - 2);
+      const nextScale = Math.min(1, availableWidth / POSTER_WIDTH, availableHeight / POSTER_HEIGHT);
+      setPosterScale(Number(nextScale.toFixed(4)));
+    }
+
+    updateScale();
+
+    let observer;
+    if (typeof ResizeObserver !== 'undefined' && viewportRef.current) {
+      observer = new ResizeObserver(updateScale);
+      observer.observe(viewportRef.current);
+    }
+
+    window.addEventListener('resize', updateScale);
+
+    return () => {
+      window.removeEventListener('resize', updateScale);
+      observer?.disconnect();
+    };
+  }, [isOpen]);
+
   if (!isOpen || !profile) return null;
+
+  const scaledPosterWidth = POSTER_WIDTH * posterScale;
+  const scaledPosterHeight = POSTER_HEIGHT * posterScale;
 
   return (
     <div className="visual-dna-modal" role="dialog" aria-modal="true" aria-label="Full Visual DNA">
@@ -43,8 +83,25 @@ export default function VisualDNAModal({ isOpen, onClose, profile }) {
             Close
           </button>
         </div>
-        <div className="visual-dna-modal-poster">
-          <DeterministicVisualDNA profile={profile} variant="fullscreen" />
+        <div className="visual-dna-modal-viewport" ref={viewportRef}>
+          <div
+            className="visual-dna-modal-poster-footprint"
+            style={{
+              width: `${scaledPosterWidth}px`,
+              height: `${scaledPosterHeight}px`,
+            }}
+          >
+            <div
+              className="visual-dna-modal-poster-scale"
+              style={{
+                width: `${POSTER_WIDTH}px`,
+                height: `${POSTER_HEIGHT}px`,
+                transform: `scale(${posterScale})`,
+              }}
+            >
+              <DeterministicVisualDNA profile={profile} variant="fullscreen" />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -56,12 +113,14 @@ const styles = `
   position: fixed;
   inset: 0;
   z-index: 9999;
-  display: grid;
-  place-items: center;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
   padding: 2.5vh 2vw;
   background:
     radial-gradient(circle at 50% 45%, rgba(251, 146, 60, 0.16), transparent 36%),
     rgba(2, 6, 23, 0.94);
+  overflow: hidden;
 }
 
 .visual-dna-modal-backdrop {
@@ -78,7 +137,9 @@ const styles = `
   display: flex;
   flex-direction: column;
   gap: 0.85rem;
-  width: min(96vw, calc(90vh * 1672 / 941));
+  width: min(96vw, calc((95vh - 4.4rem) * 1672 / 941));
+  max-width: 1672px;
+  min-width: 0;
   max-height: 95vh;
 }
 
@@ -131,27 +192,67 @@ const styles = `
   box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.18);
 }
 
-.visual-dna-modal-poster {
+.visual-dna-modal-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
-  aspect-ratio: 1672 / 941;
+  overflow: auto;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 10px;
+  overscroll-behavior: contain;
+  scrollbar-color: rgba(251, 146, 60, 0.45) rgba(15, 23, 42, 0.7);
+}
+
+.visual-dna-modal-poster-footprint {
+  position: relative;
+  flex: 0 0 auto;
   border-radius: 10px;
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.65);
 }
 
-.visual-dna-modal-poster .dvd-frame {
+.visual-dna-modal-poster-scale {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: top left;
+}
+
+.visual-dna-modal-poster-scale .dvd-frame {
+  width: 1672px !important;
+  height: 941px !important;
+  min-width: 1672px !important;
+  max-width: 1672px !important;
+  aspect-ratio: 1672 / 941 !important;
+}
+
+.visual-dna-modal-poster-scale .dvd-grid {
+  width: 1672px !important;
+  height: 941px !important;
+}
+
+.visual-dna-modal-poster-scale .dvd-frame,
+.visual-dna-modal-poster-scale .dvd-grid {
+  border-radius: 10px;
+}
+
+.visual-dna-modal-poster-scale .dvd-fullscreen {
   width: 100%;
 }
 
 @media (max-width: 760px) {
   .visual-dna-modal {
     padding: 1rem;
-    align-items: start;
-    overflow: auto;
   }
 
   .visual-dna-modal-shell {
-    width: max(980px, 96vw);
-    max-height: none;
+    width: 100%;
+    max-height: calc(100vh - 2rem);
+  }
+
+  .visual-dna-modal-toolbar {
+    align-items: flex-start;
   }
 }
 `;
