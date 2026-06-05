@@ -9,6 +9,7 @@ import Success from './Success.jsx'
 import VisualDNAPreview from './VisualDNAPreview.jsx'
 import LeadershipPortal from './LeadershipPortal.jsx'
 import LeadershipDemo from './LeadershipDemo.jsx'
+import BusinessAssessment from './BusinessAssessment.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -23,6 +24,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/visual-dna-preview" element={<VisualDNAPreview />} />
         <Route path="/leadership" element={<LeadershipPortal />} />
         <Route path="/leadership-demo" element={<LeadershipDemo />} />
+        <Route path="/business-assessment" element={<BusinessAssessment />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

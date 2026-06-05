@@ -62,10 +62,10 @@ export default function App() {
             />
             <PathCard
               eyebrow="Path 2"
-              title="Assess Your Real Estate Business"
-              description="Get a direct diagnosis of your business, your database, and your next stage of growth using a strategic relationship-first assessment."
+              title="ASSESS YOUR BUSINESS"
+              description={"Every business is producing a future.\n\nThe system identifies:\n\n• What's working\n• What's limiting growth\n• The future already forming\n• The One Move most likely to change it"}
               button="Start Here"
-              to="/real-estate"
+              to="/business-assessment"
               featured
             />
             <PathCard
@@ -135,7 +135,7 @@ function PathCard({ eyebrow, title, description, button, to, featured = false })
         <h3 className="mt-5 text-2xl md:text-[1.85rem] leading-tight font-semibold tracking-tight max-w-sm">
           {title}
         </h3>
-        <p className="mt-5 text-white/66 text-base leading-7">{description}</p>
+        <p className="mt-5 whitespace-pre-line text-white/66 text-base leading-7">{description}</p>
       </div>
       <div className="pt-8">
         <Link
