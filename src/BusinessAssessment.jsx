@@ -11,6 +11,106 @@ const INDUSTRIES = [
   { label: 'Other (Beta Coming Soon)', disabled: true }
 ];
 
+const QUESTIONS = [
+  {
+    key: 'q1',
+    purpose: 'Business Awareness Reality',
+    title: 'Do you currently have enough leads and opportunities to achieve your goals?',
+    prompt: 'Why or why not?\n\nBe specific.',
+    rows: 8
+  },
+  {
+    key: 'q2',
+    purpose: 'Desired Future',
+    title: 'What are your goals over the next:',
+    prompt:
+      '• 12 months\n• 24 months\n• 36 months\n\nAnd where would you like your business and life to be in 5–7 years?\n\nBe specific.',
+    rows: 10
+  },
+  {
+    key: 'q3',
+    purpose: 'Relationship Asset Reality',
+    title: 'How many people are currently in your database?',
+    prompt:
+      'Of those, approximately how many are true relationships?\n\n(True relationships = people who know you and think of you when it is time to buy, sell, or refer.)',
+    rows: 8
+  },
+  {
+    key: 'q4',
+    purpose: 'Business Generation Behavior',
+    title: 'If I asked you to generate business today and meet three new people before the day ended, what would you do?',
+    prompt: 'Be specific.',
+    rows: 8
+  },
+  {
+    key: 'q5',
+    purpose: 'Database Intelligence',
+    title: 'Describe your database and follow-up system.',
+    prompt:
+      'Include:\n\n• CRM\n• database size\n• database organization\n• A+, A, B, C, D segmentation if applicable\n• vendor database if applicable\n• frequency of contact\n• follow-up process\n• strengths\n• weaknesses',
+    rows: 12
+  },
+  {
+    key: 'q6',
+    purpose: 'Lead Generation Reality',
+    title: 'What lead generation activities are you willing to do consistently?',
+    prompt: 'What lead generation activities are you unwilling to do?\n\nWhy?',
+    rows: 9
+  },
+  {
+    key: 'q7',
+    purpose: 'Accountability Reality',
+    title: 'Who is holding you accountable?',
+    prompt:
+      'Describe:\n\n• coach\n• manager\n• team leader\n• spouse\n• accountability partner\n• nobody\n\nHow effective is that accountability?',
+    rows: 11
+  },
+  {
+    key: 'q8',
+    purpose: 'Systems Reality',
+    title: 'Describe your business systems.',
+    prompt:
+      'Include:\n\n• listing process\n• buyer process\n• lead conversion\n• transaction management\n• recruiting process if applicable\n\nWhat works?\n\nWhat is missing?',
+    rows: 12
+  },
+  {
+    key: 'q9',
+    purpose: 'Financial Reality',
+    title: 'Provide as much business and financial information as you are willing to share.',
+    prompt:
+      'Examples:\n\n• units closed\n• sales volume\n• average sales price\n• revenue\n• GCI\n• expenses\n• profit\n• marketing spend\n• P&L summaries\n• annual results\n• quarterly results\n• business notes\n• financial observations\n\nThe more information provided, the higher the confidence of the analysis.',
+    rows: 18
+  },
+  {
+    key: 'q10',
+    purpose: 'Constraint Reality',
+    title: 'What do you believe is currently limiting your growth?',
+    prompt:
+      'What is the biggest problem in the business today?\n\nIf I could wave a magic wand and solve one problem immediately, what would it be?',
+    rows: 10
+  },
+  {
+    key: 'q11',
+    purpose: 'Team Reality',
+    title: 'If you have a team:',
+    prompt:
+      'Enter team member Profile IDs.\n\nInclude:\n\n• role\n• production level\n• brief notes if helpful\n\nIf you do not have a team, leave blank.',
+    rows: 12
+  },
+  {
+    key: 'q12',
+    purpose: 'Scaling Reality',
+    title: 'Imagine your goals were tripled overnight.',
+    prompt: 'What would have to change for that outcome to become possible?\n\nWhat is the first thing that breaks?',
+    rows: 10
+  }
+];
+
+const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
+  acc[question.key] = '';
+  return acc;
+}, {});
+
 const DIMENSION_LABELS = {
   vector: 'Command',
   velocity: 'Tempo',
@@ -23,7 +123,7 @@ const DIMENSION_LABELS = {
 };
 
 function buildApiUrl(path) {
-  const baseUrl = import.meta.env.VITE_API_URL || 'https://moremindmap-backend.vercel.app';
+  const baseUrl = import.meta.env.VITE_API_URL || '';
   return `${baseUrl}${path}`;
 }
 
@@ -80,9 +180,11 @@ function deriveProfileType(canonical) {
 
 function extractProfileResult(payload, profileId) {
   const canonical = unwrapCanonical(payload);
+  const dossier = payload?.canonical_dossier || {};
   const metadata = canonical?.metadata || canonical?.profile_metadata || {};
   const answers = canonical?.answers || canonical?.assessment_answers || {};
   const name =
+    dossier?.person_name ||
     canonical?.person_name ||
     canonical?.full_name ||
     canonical?.name ||
@@ -100,6 +202,20 @@ function extractProfileResult(payload, profileId) {
   };
 }
 
+function formatDate(value) {
+  if (!value) return 'Unknown';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString();
+}
+
+function isComplete(answers) {
+  return QUESTIONS.every((question) => {
+    if (question.key === 'q11') return true;
+    return answers[question.key]?.trim().length > 0;
+  });
+}
+
 export default function BusinessAssessment() {
   const [industry, setIndustry] = useState('Real Estate');
   const [profileId, setProfileId] = useState('');
@@ -108,13 +224,22 @@ export default function BusinessAssessment() {
   const [profileResult, setProfileResult] = useState(null);
   const [profileError, setProfileError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+  const [flowStarted, setFlowStarted] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState(INITIAL_ANSWERS);
+  const [submitState, setSubmitState] = useState({ status: 'idle', error: '', result: null });
+  const [retrieveState, setRetrieveState] = useState({ status: 'idle', error: '', result: null });
 
   const normalizedProfileId = useMemo(() => profileId.trim(), [profileId]);
+  const currentQuestion = QUESTIONS[currentQuestionIndex];
+  const canSubmit = isComplete(answers);
 
   async function validateProfile(event) {
     event.preventDefault();
     setProfileResult(null);
     setProfileError('');
+    setFlowStarted(false);
+    setSubmitState({ status: 'idle', error: '', result: null });
 
     if (!normalizedProfileId) {
       setProfileError('Enter your MORE MindMap Profile ID to continue.');
@@ -142,6 +267,78 @@ export default function BusinessAssessment() {
     }
   }
 
+  function beginAssessment() {
+    setFlowStarted(true);
+    setCurrentQuestionIndex(0);
+    setSubmitState({ status: 'idle', error: '', result: null });
+  }
+
+  function updateAnswer(value) {
+    setAnswers((current) => ({
+      ...current,
+      [currentQuestion.key]: value
+    }));
+  }
+
+  async function submitAssessment() {
+    if (!profileResult || !canSubmit) return;
+    setSubmitState({ status: 'saving', error: '', result: null });
+
+    try {
+      const response = await fetch(buildApiUrl('/api/business-assessment/start'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          owner_profile_id: profileResult.id || normalizedProfileId,
+          answers
+        })
+      });
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || 'Unable to save assessment intake.');
+      }
+
+      setSubmitState({ status: 'saved', error: '', result: payload });
+    } catch (error) {
+      setSubmitState({
+        status: 'error',
+        error: error.message || 'Unable to save assessment intake.',
+        result: null
+      });
+    }
+  }
+
+  async function retrieveAssessment(event) {
+    event.preventDefault();
+    const id = retrieveId.trim();
+    setRetrieveState({ status: 'loading', error: '', result: null });
+
+    if (!id) {
+      setRetrieveState({ status: 'error', error: 'Enter a Profile ID.', result: null });
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(id)}`)
+      );
+      const payload = await response.json().catch(() => null);
+
+      if (!response.ok || !payload?.success) {
+        throw new Error(payload?.error || 'Unable to retrieve assessment.');
+      }
+
+      setRetrieveState({ status: payload.found ? 'found' : 'not_found', error: '', result: payload });
+    } catch (error) {
+      setRetrieveState({
+        status: 'error',
+        error: error.message || 'Unable to retrieve assessment.',
+        result: null
+      });
+    }
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(249,115,22,0.16),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(168,85,247,0.13),transparent_30%),linear-gradient(180deg,#050505_0%,#0b0b0d_52%,#000_100%)]" />
@@ -159,7 +356,7 @@ export default function BusinessAssessment() {
           </Link>
         </nav>
 
-        <main className="grid flex-1 gap-8 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
+        <main className="grid flex-1 gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
           <section className="space-y-8">
             <div className="space-y-5">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300">
@@ -227,6 +424,93 @@ export default function BusinessAssessment() {
                 <p>The quality of the output depends on the quality of the reality provided.</p>
               </div>
             </section>
+
+            {flowStarted && (
+              <section className="rounded-3xl border border-orange-400/25 bg-black/55 p-5 shadow-[0_0_60px_rgba(249,115,22,0.12)] sm:p-6">
+                <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
+                      Question {currentQuestionIndex + 1} of {QUESTIONS.length}
+                    </p>
+                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/40">
+                      {currentQuestion.purpose}
+                    </p>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-white/10 sm:w-44">
+                    <div
+                      className="h-full rounded-full bg-orange-400 transition-all"
+                      style={{ width: `${((currentQuestionIndex + 1) / QUESTIONS.length) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                <h2 className="text-2xl font-semibold leading-tight text-white">{currentQuestion.title}</h2>
+                <p className="mt-4 whitespace-pre-line text-base leading-7 text-white/70">
+                  {currentQuestion.prompt}
+                </p>
+                <textarea
+                  value={answers[currentQuestion.key]}
+                  onChange={(event) => updateAnswer(event.target.value)}
+                  rows={currentQuestion.rows}
+                  placeholder="Write the real answer here."
+                  className="mt-5 w-full resize-y rounded-2xl border border-white/12 bg-black/70 px-4 py-4 text-base leading-7 text-white outline-none placeholder:text-white/30 focus:border-orange-300"
+                />
+
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
+                  <button
+                    type="button"
+                    disabled={currentQuestionIndex === 0}
+                    onClick={() => setCurrentQuestionIndex((index) => Math.max(index - 1, 0))}
+                    className="rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white/70 transition hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    Previous
+                  </button>
+                  {currentQuestionIndex < QUESTIONS.length - 1 ? (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentQuestionIndex((index) => Math.min(index + 1, QUESTIONS.length - 1))
+                      }
+                      className="rounded-xl bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-200"
+                    >
+                      Next
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={!canSubmit || submitState.status === 'saving'}
+                      onClick={submitAssessment}
+                      className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-45"
+                    >
+                      {submitState.status === 'saving' ? 'Saving...' : 'Submit Assessment'}
+                    </button>
+                  )}
+                </div>
+
+                {!canSubmit && currentQuestionIndex === QUESTIONS.length - 1 && (
+                  <p className="mt-4 text-sm text-white/46">
+                    Questions 1-10 and 12 need an answer. Question 11 can stay blank if you do not have a team.
+                  </p>
+                )}
+
+                {submitState.status === 'saved' && (
+                  <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
+                    <p className="text-sm font-semibold text-emerald-200">Business Assessment intake saved.</p>
+                    <p className="mt-2 text-sm text-white/78">
+                      Assessment ID: <span className="font-semibold text-white">{submitState.result.assessment_id}</span>
+                    </p>
+                    <p className="mt-1 text-sm text-white/78">Status: Intake saved.</p>
+                    <p className="mt-1 text-sm text-white/62">Intelligence generation begins in the next sprint.</p>
+                  </div>
+                )}
+
+                {submitState.status === 'error' && (
+                  <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                    {submitState.error}
+                  </div>
+                )}
+              </section>
+            )}
           </section>
 
           <aside className="space-y-5">
@@ -277,6 +561,13 @@ export default function BusinessAssessment() {
                   <p className="mt-1 text-sm uppercase tracking-[0.16em] text-white/62">
                     {profileResult.profileType}
                   </p>
+                  <button
+                    type="button"
+                    onClick={beginAssessment}
+                    className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.16em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
+                  >
+                    Begin Business Assessment
+                  </button>
                 </div>
               )}
 
@@ -303,19 +594,52 @@ export default function BusinessAssessment() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-white">
                 Already Completed A Business Assessment?
               </h2>
-              <input
-                value={retrieveId}
-                onChange={(event) => setRetrieveId(event.target.value)}
-                placeholder="Enter Profile ID"
-                className="mt-4 w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-blue-300"
-              />
-              <button
-                type="button"
-                disabled
-                className="mt-4 w-full rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white/45"
-              >
-                Retrieve
-              </button>
+              <form className="mt-4 space-y-4" onSubmit={retrieveAssessment}>
+                <input
+                  value={retrieveId}
+                  onChange={(event) => setRetrieveId(event.target.value)}
+                  placeholder="Enter Profile ID"
+                  className="w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-blue-300"
+                />
+                <button
+                  type="submit"
+                  disabled={retrieveState.status === 'loading'}
+                  className="w-full rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white/72 transition hover:border-blue-300/60 disabled:cursor-wait disabled:opacity-45"
+                >
+                  {retrieveState.status === 'loading' ? 'Retrieving...' : 'Retrieve'}
+                </button>
+              </form>
+
+              {retrieveState.status === 'found' && (
+                <div className="mt-5 rounded-2xl border border-blue-300/30 bg-blue-400/[0.08] p-4">
+                  <p className="text-sm font-semibold text-blue-100">Business Assessment Found</p>
+                  <p className="mt-2 text-sm text-white/78">
+                    Assessment ID:{' '}
+                    <span className="font-semibold text-white">
+                      {retrieveState.result.assessment.assessment_id}
+                    </span>
+                  </p>
+                  <p className="mt-1 text-sm text-white/78">
+                    Created At: {formatDate(retrieveState.result.assessment.created_at)}
+                  </p>
+                  <p className="mt-1 text-sm text-white/78">
+                    Status: {retrieveState.result.assessment.status}
+                  </p>
+                  <p className="mt-1 text-sm text-white/62">This assessment intake is saved.</p>
+                </div>
+              )}
+
+              {retrieveState.status === 'not_found' && (
+                <div className="mt-5 rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-white/68">
+                  No Business Assessment found for this Profile ID.
+                </div>
+              )}
+
+              {retrieveState.status === 'error' && (
+                <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                  {retrieveState.error}
+                </div>
+              )}
             </section>
           </aside>
         </main>
