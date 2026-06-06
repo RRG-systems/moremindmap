@@ -19,6 +19,10 @@ const REQUIRED_SECTION_TITLES = [
   'Preliminary One Move Direction'
 ];
 
+const MINIMUM_BRIEFING_CHARACTERS = 12000;
+const MINIMUM_BRIEFING_WORDS = 1800;
+const MINIMUM_SECTION_BODY_WORDS = 100;
+
 function safeObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
 }
@@ -166,9 +170,17 @@ export function buildExecutiveDiagnosticBriefingPrompt({
   const system = [
     'You are writing the MORE MindMap Business Assessment V1 Executive Diagnostic Briefing.',
     'This is a premium real estate business operating diagnostic for agents and teams, including high-producing teams.',
+    'This is not a short summary. It is a substantial Executive Diagnostic Briefing.',
     'Write in direct, senior, plain-English diagnostic language.',
     'Be evidence-based. Tie claims back to the assessment answers, business intelligence draft, behavioral profile, or real estate business model.',
+    'Use the Business Intelligence Draft fields as the reasoning spine.',
+    'Use the Real Estate Business Model V1 as the business model lens.',
+    'Use the Behavior Profile as the behavioral interpretation layer.',
+    'Use confidence and missing data honestly.',
     'Do not invent numbers, team details, financials, or facts not present in the inputs.',
+    'Do not summarize briefly. Do not compress sections.',
+    'Each section must contain diagnostic reasoning, evidence, implication, and what it means.',
+    'The client should receive substantial value from the written briefing alone.',
     'Do not generate Five Futures. Do not generate the final One Move.',
     'Use the label "Preliminary One Move Direction" only as a preview of the likely intervention category.',
     'Avoid generic coaching fluff, motivational speech, vague MBA language, unsupported certainty, and cheap AI-sounding phrases.',
@@ -182,6 +194,13 @@ export function buildExecutiveDiagnosticBriefingPrompt({
       title: 'Executive Diagnostic Briefing',
       audience_type: audienceType,
       word_count_target: target,
+      minimum_acceptance_gate: {
+        briefing_markdown_minimum_characters: MINIMUM_BRIEFING_CHARACTERS,
+        briefing_markdown_minimum_estimated_words: MINIMUM_BRIEFING_WORDS,
+        sections_minimum_count: REQUIRED_SECTION_TITLES.length,
+        each_section_body_minimum_words: MINIMUM_SECTION_BODY_WORDS,
+        rule: 'If your first draft is shorter than this, expand it before returning JSON.'
+      },
       required_top_level_keys: [
         'version',
         'generated_at',
@@ -201,7 +220,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
       section_shape: {
         key: 'stable snake_case section key',
         title: 'section title',
-        body: 'substantial prose',
+        body: 'substantial prose of at least 100 words; target 120-250+ words for normal cases',
         evidence: ['specific evidence references from answers/draft/profile/model'],
         confidence: 'high | moderate | low'
       },
@@ -211,7 +230,20 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     },
     writing_requirements: {
       target_length: target,
-      substantial: 'This should read like an executive diagnostic briefing, not a short summary.',
+      substantial:
+        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters.',
+      section_depth:
+        'Write every required section as a real diagnostic section. Target 120-250 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
+      no_compression:
+        'Do not compress the briefing to fit a short response. Do not provide brief bullet summaries in place of analysis.',
+      standalone_value:
+        'The briefing must be valuable as a standalone written deliverable even before Five Futures, One Move, or visuals exist.',
+      reasoning_spine: [
+        'Business Intelligence Draft fields are the reasoning spine.',
+        'Real Estate Business Model V1 is the business model lens.',
+        'Behavior Profile is the behavioral interpretation layer.',
+        'Confidence and missing data must be stated honestly.'
+      ],
       evidence_based: true,
       direct: true,
       plain_english: true,

@@ -11,6 +11,27 @@ import { buildExecutiveDiagnosticBriefingPrompt } from '../engine/businessAssess
 
 const BRIEFING_VERSION = 'executive_diagnostic_briefing_v1';
 const MODEL = process.env.BUSINESS_ASSESSMENT_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+const REQUIRED_SECTION_TITLES = [
+  'Executive Readout',
+  'Current Business Reality',
+  'Behavioral Reality Applied to the Business',
+  'Relationship / Database Reality',
+  'Lead Generation Reality',
+  'Lead Conversion / Follow-Up Reality',
+  'Systems Reality',
+  'Accountability Reality',
+  'Financial Reality',
+  'Team / Leadership Reality',
+  'Contradictions and Blind Spots',
+  'Primary Constraint',
+  'Current Trajectory Signal',
+  'Confidence / Missing Data',
+  'Strategic Interpretation',
+  'Preliminary One Move Direction'
+];
+const MINIMUM_BRIEFING_CHARACTERS = 12000;
+const MINIMUM_BRIEFING_WORDS = 1800;
+const MINIMUM_SECTION_BODY_WORDS = 100;
 
 async function resolveAssessmentId(redis, { assessment_id, owner_profile_id }) {
   if (assessment_id) return assessment_id;
@@ -55,6 +76,10 @@ function normalizeBriefingOutput(parsed, { assessmentId, ownerProfileId, prompt 
   };
 }
 
+function wordCount(value) {
+  return String(value || '').trim().split(/\s+/).filter(Boolean).length;
+}
+
 function validateBriefingOutput(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return { valid: false, reason: 'briefing_not_object' };
@@ -88,12 +113,48 @@ function validateBriefingOutput(value) {
     return { valid: false, reason: 'invalid_title', title: value.title };
   }
 
-  if (typeof value.briefing_markdown !== 'string' || value.briefing_markdown.trim().length < 3000) {
-    return { valid: false, reason: 'briefing_markdown_too_short' };
+  const briefingMarkdown = String(value.briefing_markdown || '').trim();
+  const briefingWordCount = wordCount(briefingMarkdown);
+
+  if (typeof value.briefing_markdown !== 'string' || briefingMarkdown.length < MINIMUM_BRIEFING_CHARACTERS) {
+    return {
+      valid: false,
+      reason: 'briefing_markdown_too_short',
+      minimum_characters: MINIMUM_BRIEFING_CHARACTERS,
+      actual_characters: briefingMarkdown.length
+    };
   }
 
-  if (!Array.isArray(value.sections) || value.sections.length < 10) {
-    return { valid: false, reason: 'sections_missing_or_too_few' };
+  if (briefingWordCount < MINIMUM_BRIEFING_WORDS) {
+    return {
+      valid: false,
+      reason: 'briefing_word_count_too_short',
+      minimum_words: MINIMUM_BRIEFING_WORDS,
+      actual_words: briefingWordCount
+    };
+  }
+
+  if (!Array.isArray(value.sections) || value.sections.length < REQUIRED_SECTION_TITLES.length) {
+    return {
+      valid: false,
+      reason: 'sections_missing_or_too_few',
+      minimum_sections: REQUIRED_SECTION_TITLES.length,
+      actual_sections: Array.isArray(value.sections) ? value.sections.length : 0
+    };
+  }
+
+  const sectionText = [
+    briefingMarkdown,
+    ...value.sections.map((section) => `${section?.title || ''}\n${section?.body || ''}`)
+  ].join('\n');
+  const missingSectionTitles = REQUIRED_SECTION_TITLES.filter((title) => !sectionText.includes(title));
+
+  if (missingSectionTitles.length) {
+    return {
+      valid: false,
+      reason: 'required_section_titles_missing',
+      missing_section_titles: missingSectionTitles
+    };
   }
 
   const malformedSection = value.sections.find(
@@ -103,11 +164,17 @@ function validateBriefingOutput(value) {
       !section.key ||
       !section.title ||
       typeof section.body !== 'string' ||
-      section.body.trim().length < 80
+      wordCount(section.body) < MINIMUM_SECTION_BODY_WORDS
   );
 
   if (malformedSection) {
-    return { valid: false, reason: 'malformed_section', section: malformedSection?.key || malformedSection?.title };
+    return {
+      valid: false,
+      reason: 'malformed_or_thin_section',
+      section: malformedSection?.key || malformedSection?.title,
+      minimum_words: MINIMUM_SECTION_BODY_WORDS,
+      actual_words: wordCount(malformedSection?.body)
+    };
   }
 
   return { valid: true };
@@ -130,7 +197,7 @@ async function callOpenAIForBriefing(prompt) {
       model: MODEL,
       messages: prompt.messages,
       response_format: { type: 'json_object' },
-      max_completion_tokens: 12000
+      max_completion_tokens: 16000
     })
   });
 
