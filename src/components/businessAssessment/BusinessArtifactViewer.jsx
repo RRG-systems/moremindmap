@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 export const BUSINESS_ARTIFACT_WIDTH = 1672;
 export const BUSINESS_ARTIFACT_HEIGHT = 941;
 export const BUSINESS_MAP_ARTIFACT_HEIGHT = 1180;
-export const FIVE_FUTURES_ARTIFACT_HEIGHT = 1120;
+export const FIVE_FUTURES_ARTIFACT_HEIGHT = 1720;
 
 export default function BusinessArtifactViewer({
   children,

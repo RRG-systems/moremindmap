@@ -99,6 +99,84 @@ function displayLabel(future) {
   return future.label || 'Future';
 }
 
+function evidenceStatus(label, status, note) {
+  return { label, status, note };
+}
+
+function statusFromConfidence(value) {
+  const text = String(value || '').toLowerCase();
+  if (/high|strong|complete/.test(text)) return 'strong';
+  if (/low|missing|weak/.test(text)) return 'missing';
+  return 'partial';
+}
+
+function hasMeaningfulText(value, minLength = 80) {
+  return String(value || '').trim().length >= minLength;
+}
+
+function buildEvidenceInputs(data) {
+  const answers = data.answers || {};
+  const financialText = String(answers.q9 || '');
+  const financialCompleteness = [
+    /closed units|units/i,
+    /sales volume|volume/i,
+    /gci|gross commission/i,
+    /expenses|profit|net/i,
+  ].filter((pattern) => pattern.test(financialText)).length;
+  const relationshipText = `${answers.q3 || ''}\n${answers.q5 || ''}`;
+  const hasRelationshipNumbers = /\b(true relationships|database|contacts)\b/i.test(relationshipText) && /\d/.test(relationshipText);
+  const accountabilityScore = Number(data.eToP?.accountability?.score || 0);
+  const systemsScore = Number(data.eToP?.systems?.score || 0);
+  const confidenceStatus = statusFromConfidence(data.fiveFutures?.confidenceSnapshot || data.oneMove?.confidence);
+  const constraintConfidence = statusFromConfidence(data.primaryConstraint?.confidence);
+  const hasConstraint = hasMeaningfulText(data.primaryConstraint?.label, 12);
+  const hasProfile = data.ownerProfileType && data.ownerProfileType !== 'MORE MindMap Profile';
+  const modelSupported = /real[_\s-]?estate/i.test(`${data.assessmentType || ''} ${data.fiveFutures?.title || ''}`);
+
+  return [
+    evidenceStatus(
+      'Financial Reality',
+      financialCompleteness >= 4 ? 'strong' : financialCompleteness >= 2 ? 'partial' : 'missing',
+      financialCompleteness >= 4 ? 'Units, volume, GCI, and expense/profit evidence present.' : financialCompleteness >= 2 ? 'Some financials present; deeper P&L/ROI detail may be incomplete.' : 'Financial evidence mostly missing.'
+    ),
+    evidenceStatus(
+      'Behavioral Profile',
+      hasProfile ? 'strong' : 'partial',
+      hasProfile ? 'Owner behavioral profile context is available.' : 'Only partial profile context is available.'
+    ),
+    evidenceStatus(
+      'Business Model',
+      modelSupported ? 'strong' : data.assessmentType ? 'partial' : 'missing',
+      modelSupported ? 'Real estate assessment model is applied.' : data.assessmentType ? 'Assessment type exists, but model fit is inferred.' : 'No supported business model evidence found.'
+    ),
+    evidenceStatus(
+      'Constraint',
+      hasConstraint && constraintConfidence !== 'missing' ? 'strong' : hasConstraint ? 'partial' : 'missing',
+      hasConstraint && constraintConfidence !== 'missing' ? 'Primary constraint is detected with usable confidence.' : hasConstraint ? 'Primary constraint exists but confidence is weak or inferred.' : 'Primary constraint is missing.'
+    ),
+    evidenceStatus(
+      'Confidence',
+      confidenceStatus,
+      confidenceStatus === 'strong' ? 'Overall confidence is high.' : confidenceStatus === 'partial' ? 'Overall confidence is moderate or mixed.' : 'Overall confidence is low or missing.'
+    ),
+    evidenceStatus(
+      'Relationships',
+      hasRelationshipNumbers ? 'strong' : /database|relationship|contacts/i.test(relationshipText) ? 'partial' : 'missing',
+      hasRelationshipNumbers ? 'Total contacts and true relationship evidence are present.' : /database|relationship|contacts/i.test(relationshipText) ? 'Relationship evidence exists but counts are incomplete.' : 'Relationship evidence is missing.'
+    ),
+    evidenceStatus(
+      'Accountability',
+      accountabilityScore >= 7 ? 'strong' : accountabilityScore >= 3 ? 'partial' : 'missing',
+      accountabilityScore >= 7 ? 'Inspection/accountability appears functional.' : accountabilityScore >= 3 ? 'Accountability exists only partially or is weak.' : 'Accountability evidence is absent or memory-based.'
+    ),
+    evidenceStatus(
+      'Systems',
+      systemsScore >= 7 ? 'strong' : systemsScore >= 3 ? 'partial' : 'missing',
+      systemsScore >= 7 ? 'Systems appear repeatable.' : systemsScore >= 3 ? 'Systems/tools exist, but execution is inconsistent.' : 'Systems evidence is absent or mostly memory-based.'
+    ),
+  ];
+}
+
 function FutureCard({ future, index }) {
   const tone = futureTone(future);
   const signals = futureSignals(future);
@@ -154,10 +232,59 @@ function OneMoveCard({ oneMove }) {
     <section className="bff-one-move">
       <span>One Move</span>
       <h2>{oneMove.title}</h2>
-      <p><strong>Root Constraint:</strong> {clip(oneMove.rootConstraint, 58)}</p>
-      <p><strong>Recommendation:</strong> {clip(oneMove.recommendation, 68)}</p>
-      <em>Probability Shift: {clip(oneMove.probabilityShift, 68)}</em>
+      <p><strong>Root Constraint:</strong> {oneMove.rootConstraint}</p>
+      <p><strong>Recommendation:</strong> {oneMove.recommendation}</p>
+      <em><strong>Probability Shift:</strong> {oneMove.probabilityShift}</em>
     </section>
+  );
+}
+
+function EvidenceRail({ inputs }) {
+  return (
+    <aside className="bff-inputs">
+      <span>LDE Analysis</span>
+      <strong>Evidence Status</strong>
+      {inputs.map((source) => (
+        <div className={`bff-input-row status-${source.status}`} key={source.label} title={source.note}>
+          {source.label}
+        </div>
+      ))}
+    </aside>
+  );
+}
+
+function TrajectoryPaths() {
+  const paths = [
+    { key: 'current', tone: 'red', d: 'M 632 520 C 548 485, 505 390, 448 332', endpoint: [448, 332] },
+    { key: 'likely', tone: 'orange', d: 'M 626 608 C 535 632, 498 678, 448 702', endpoint: [448, 702] },
+    { key: 'constraint', tone: 'purple', d: 'M 858 500 C 914 434, 954 344, 1008 310', endpoint: [1008, 310] },
+    { key: 'optimized', tone: 'green', d: 'M 866 618 C 924 642, 958 666, 1010 684', endpoint: [1010, 684] },
+    { key: 'transform', tone: 'cyan', d: 'M 852 700 C 920 778, 958 896, 1010 1028', endpoint: [1010, 1028] },
+  ];
+
+  return (
+    <svg className="bff-trajectory-svg" viewBox="0 0 1672 1720" aria-hidden="true">
+      <defs>
+        <filter id="bff-path-glow" x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur stdDeviation="5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      {paths.map((path) => (
+        <g key={path.key} className={`bff-trajectory-path tone-${path.tone}`}>
+          <path className="glow" d={path.d} />
+          <path className="midglow" d={path.d} />
+          <path className="line" d={path.d} />
+          <path className="spark" d={path.d} />
+          <path className="spark offset" d={path.d} />
+          <circle className="endpoint-glow" cx={path.endpoint[0]} cy={path.endpoint[1]} r="11" />
+          <circle className="endpoint-core" cx={path.endpoint[0]} cy={path.endpoint[1]} r="3.2" />
+        </g>
+      ))}
+    </svg>
   );
 }
 
@@ -175,6 +302,7 @@ function FiveFuturesCanvas({ data }) {
   const current = futures.find((future) => future.key === 'current_future') || futures[0] || {};
   const likely = futures.find((future) => future.key === 'most_likely_next_future') || futures[1] || {};
   const displayFutures = futures.slice(0, 5);
+  const evidenceInputs = buildEvidenceInputs(data);
 
   return (
     <div
@@ -186,6 +314,7 @@ function FiveFuturesCanvas({ data }) {
     >
       <style>{styles}</style>
       <div className="bff-bg-grid" />
+      <TrajectoryPaths />
       <header className="bff-header">
         <div className="bff-title">
           <h1>The Five Futures</h1>
@@ -203,21 +332,10 @@ function FiveFuturesCanvas({ data }) {
         </div>
       </header>
 
-      <aside className="bff-inputs">
-        <span>LDE Analysis</span>
-        <strong>Inputs</strong>
-        {['Financial Reality', 'Behavioral Profile', 'Business Model', 'Constraint Detection', 'Confidence Reality', 'Relationship Signals', 'Accountability Pattern', 'Systems Maturity'].map((source) => (
-          <div key={source}>{source}</div>
-        ))}
-      </aside>
+      <EvidenceRail inputs={evidenceInputs} />
 
       <main className="bff-core">
         <div className="bff-orb-shell">
-          <div className="bff-path path-current" />
-          <div className="bff-path path-likely" />
-          <div className="bff-path path-constraint" />
-          <div className="bff-path path-optimized" />
-          <div className="bff-path path-transform" />
           <div className="bff-orb-ring outer" />
           <div className="bff-orb-ring middle" />
           <div className="bff-orb">
@@ -345,6 +463,92 @@ const styles = `
   background-size: 72px 72px;
   mask-image: radial-gradient(circle at 50% 50%, black, transparent 78%);
 }
+
+.bff-trajectory-svg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.bff-trajectory-path .glow {
+  fill: none;
+  stroke-width: 18;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.24;
+  filter: url(#bff-path-glow);
+}
+
+.bff-trajectory-path .midglow {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.48;
+  filter: url(#bff-path-glow);
+}
+
+.bff-trajectory-path .line {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.96;
+}
+
+.bff-trajectory-path .spark {
+  fill: none;
+  stroke: rgba(255,255,255,0.44);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 7 32;
+  opacity: 0.34;
+}
+
+.bff-trajectory-path .spark.offset {
+  stroke-dasharray: 2 40;
+  stroke-dashoffset: 16;
+  opacity: 0.22;
+}
+
+.bff-trajectory-path .endpoint-glow {
+  opacity: 0.22;
+  filter: url(#bff-path-glow);
+}
+
+.bff-trajectory-path .endpoint-core {
+  opacity: 0.86;
+}
+
+.bff-trajectory-path.tone-red .glow,
+.bff-trajectory-path.tone-red .midglow,
+.bff-trajectory-path.tone-red .line { stroke: #f87171; }
+.bff-trajectory-path.tone-red .endpoint-glow,
+.bff-trajectory-path.tone-red .endpoint-core { fill: #f87171; }
+.bff-trajectory-path.tone-orange .glow,
+.bff-trajectory-path.tone-orange .midglow,
+.bff-trajectory-path.tone-orange .line { stroke: #fb923c; }
+.bff-trajectory-path.tone-orange .endpoint-glow,
+.bff-trajectory-path.tone-orange .endpoint-core { fill: #fb923c; }
+.bff-trajectory-path.tone-purple .glow,
+.bff-trajectory-path.tone-purple .midglow,
+.bff-trajectory-path.tone-purple .line { stroke: #c084fc; }
+.bff-trajectory-path.tone-purple .endpoint-glow,
+.bff-trajectory-path.tone-purple .endpoint-core { fill: #c084fc; }
+.bff-trajectory-path.tone-green .glow,
+.bff-trajectory-path.tone-green .midglow,
+.bff-trajectory-path.tone-green .line { stroke: #86efac; }
+.bff-trajectory-path.tone-green .endpoint-glow,
+.bff-trajectory-path.tone-green .endpoint-core { fill: #86efac; }
+.bff-trajectory-path.tone-cyan .glow,
+.bff-trajectory-path.tone-cyan .midglow,
+.bff-trajectory-path.tone-cyan .line { stroke: #67e8f9; }
+.bff-trajectory-path.tone-cyan .endpoint-glow,
+.bff-trajectory-path.tone-cyan .endpoint-core { fill: #67e8f9; }
 
 .bff-header {
   position: relative;
@@ -752,11 +956,11 @@ const styles = `
 .bff-inputs {
   position: absolute;
   right: 24px;
-  top: 224px;
+  top: 248px;
   z-index: 4;
   width: 208px;
-  height: 522px;
-  padding: 20px 18px;
+  height: 706px;
+  padding: 22px 17px;
 }
 
 .bff-inputs > span {
@@ -768,48 +972,66 @@ const styles = `
 
 .bff-inputs > strong {
   display: block;
-  margin: 21px 0 7px;
+  margin: 19px 0 13px;
   color: rgba(255,255,255,0.84);
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.16em;
 }
 
-.bff-inputs div {
+.bff-inputs .bff-input-row {
   position: relative;
-  margin-top: 11px;
+  margin-top: 12px;
   border: 0;
   border-top: 1px solid rgba(255,255,255,0.09);
   border-radius: 0;
-  padding: 12px 8px 9px 44px;
+  padding: 14px 6px 11px 39px;
   background: transparent;
   color: rgba(255,255,255,0.72);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.055em;
 }
 
-.bff-inputs div::before {
+.bff-inputs .bff-input-row::before {
   content: "";
   position: absolute;
   left: 5px;
-  top: 9px;
-  width: 28px;
-  height: 28px;
+  top: 13px;
+  width: 22px;
+  height: 22px;
   border: 1px solid rgba(251,146,60,0.36);
   border-radius: 999px;
   box-shadow: inset 0 0 16px rgba(251,146,60,0.07), 0 0 14px rgba(251,146,60,0.14);
 }
 
+.bff-input-row.status-strong::before {
+  background: rgba(34,197,94,0.80);
+  border-color: rgba(134,239,172,0.72) !important;
+  box-shadow: 0 0 14px rgba(34,197,94,0.34), inset 0 0 10px rgba(187,247,208,0.22) !important;
+}
+
+.bff-input-row.status-partial::before {
+  background: rgba(234,179,8,0.82);
+  border-color: rgba(253,224,71,0.70) !important;
+  box-shadow: 0 0 14px rgba(234,179,8,0.30), inset 0 0 10px rgba(254,240,138,0.18) !important;
+}
+
+.bff-input-row.status-missing::before {
+  background: rgba(239,68,68,0.76);
+  border-color: rgba(252,165,165,0.70) !important;
+  box-shadow: 0 0 14px rgba(239,68,68,0.30), inset 0 0 10px rgba(254,202,202,0.18) !important;
+}
+
 .bff-core {
   position: absolute;
-  left: 504px;
-  top: 236px;
+  left: 492px;
+  top: 322px;
   z-index: 2;
   display: block;
-  width: 520px;
-  height: 520px;
+  width: 500px;
+  height: 500px;
 }
 
 .bff-orb-shell {
@@ -820,6 +1042,19 @@ const styles = `
   background: transparent;
 }
 
+.bff-orb-shell::before {
+  content: "";
+  position: absolute;
+  inset: 58px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle, rgba(103,232,249,0.22), rgba(59,130,246,0.10) 44%, transparent 70%),
+    radial-gradient(circle at 30% 25%, rgba(251,146,60,0.18), transparent 42%),
+    radial-gradient(circle at 72% 74%, rgba(168,85,247,0.18), transparent 45%);
+  filter: blur(16px);
+  opacity: 0.88;
+}
+
 .bff-path {
   z-index: 1;
   height: 8px;
@@ -828,32 +1063,79 @@ const styles = `
   filter: blur(0.2px);
 }
 
-.path-current { width: 520px; top: 178px; left: -338px; transform: rotate(-18deg); background: linear-gradient(90deg, transparent, rgba(248,113,113,0.90)); box-shadow: 0 0 24px rgba(248,113,113,0.62); }
-.path-likely { width: 420px; top: 300px; left: -300px; transform: rotate(14deg); background: linear-gradient(90deg, transparent, rgba(251,146,60,0.92)); box-shadow: 0 0 24px rgba(251,146,60,0.62); }
-.path-constraint { width: 460px; top: 120px; right: -330px; transform: rotate(18deg); background: linear-gradient(90deg, rgba(59,130,246,0.96), transparent); box-shadow: 0 0 24px rgba(59,130,246,0.62); }
-.path-optimized { width: 430px; top: 286px; right: -315px; transform: rotate(-18deg); background: linear-gradient(90deg, rgba(34,197,94,0.92), transparent); box-shadow: 0 0 24px rgba(34,197,94,0.62); }
-.path-transform { width: 500px; top: 388px; right: -365px; transform: rotate(15deg); background: linear-gradient(90deg, rgba(168,85,247,0.92), transparent); box-shadow: 0 0 24px rgba(168,85,247,0.62); }
+.path-current { width: 500px; top: 162px; left: -320px; transform: rotate(-18deg); background: linear-gradient(90deg, transparent, rgba(248,113,113,0.90)); box-shadow: 0 0 24px rgba(248,113,113,0.62); }
+.path-likely { width: 410px; top: 300px; left: -292px; transform: rotate(13deg); background: linear-gradient(90deg, transparent, rgba(251,146,60,0.92)); box-shadow: 0 0 24px rgba(251,146,60,0.62); }
+.path-constraint { width: 438px; top: 106px; right: -312px; transform: rotate(18deg); background: linear-gradient(90deg, rgba(59,130,246,0.96), transparent); box-shadow: 0 0 24px rgba(59,130,246,0.62); }
+.path-optimized { width: 426px; top: 282px; right: -304px; transform: rotate(-18deg); background: linear-gradient(90deg, rgba(34,197,94,0.92), transparent); box-shadow: 0 0 24px rgba(34,197,94,0.62); }
+.path-transform { width: 476px; top: 408px; right: -346px; transform: rotate(15deg); background: linear-gradient(90deg, rgba(168,85,247,0.92), transparent); box-shadow: 0 0 24px rgba(168,85,247,0.62); }
 
-.bff-orb-ring.outer { width: 345px; height: 345px; }
-.bff-orb-ring.middle { width: 260px; height: 260px; }
+.bff-orb-ring.outer {
+  width: 360px;
+  height: 360px;
+  border-color: rgba(219,244,255,0.92);
+  border-width: 3px;
+  box-shadow:
+    0 0 10px rgba(255,255,255,0.46),
+    0 0 32px rgba(125,211,252,0.72),
+    0 0 86px rgba(14,165,233,0.50),
+    0 0 132px rgba(59,130,246,0.28),
+    inset 0 0 52px rgba(125,211,252,0.24);
+}
+
+.bff-orb-ring.middle {
+  width: 274px;
+  height: 274px;
+  border-color: rgba(251,146,60,0.48);
+  box-shadow: 0 0 34px rgba(251,146,60,0.22), inset 0 0 26px rgba(168,85,247,0.15);
+}
 
 .bff-orb {
-  width: 238px;
-  height: 238px;
-  box-shadow: inset 0 0 54px rgba(96,165,250,0.16), 0 0 65px rgba(96,165,250,0.34);
+  width: 236px;
+  height: 236px;
+  border-color: rgba(125,211,252,0.68);
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255,255,255,0.16), transparent 20%),
+    radial-gradient(circle at 50% 45%, rgba(59,130,246,0.36), rgba(14,165,233,0.12) 44%, rgba(0,0,0,0.90) 72%),
+    radial-gradient(circle at 72% 74%, rgba(168,85,247,0.22), transparent 58%);
+  box-shadow:
+    inset 0 0 58px rgba(96,165,250,0.24),
+    inset 0 0 18px rgba(255,255,255,0.10),
+    0 0 42px rgba(103,232,249,0.40),
+    0 0 92px rgba(96,165,250,0.28),
+    0 0 128px rgba(168,85,247,0.12);
+}
+
+.bff-orb::before,
+.bff-orb::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+}
+
+.bff-orb::before {
+  inset: -23px;
+  border: 1px solid rgba(103,232,249,0.30);
+  transform: rotate(-18deg) scaleX(1.20);
+}
+
+.bff-orb::after {
+  inset: -39px;
+  border: 1px solid rgba(251,146,60,0.18);
+  transform: rotate(24deg) scaleX(1.30);
 }
 
 .bff-orb span { font-size: 11px; }
-.bff-orb h2 { margin: 11px 28px 0; font-size: 25px; }
+.bff-orb h2 { margin: 10px 28px 0; font-size: 23px; }
 .bff-orb p { margin: 9px 24px 0; }
 
 .bff-lde {
   position: absolute;
-  left: 86px;
-  bottom: -18px;
+  left: 72px;
+  bottom: -132px;
   z-index: 4;
-  width: 348px;
-  padding: 20px 24px;
+  width: 356px;
+  padding: 18px 24px;
   text-align: center;
 }
 
@@ -863,57 +1145,86 @@ const styles = `
 }
 
 .bff-lde p {
-  margin: 13px 0 0;
+  margin: 11px 0 0;
   color: rgba(255,255,255,0.78);
-  font-size: 16px;
-  line-height: 1.34;
+  font-size: 15px;
+  line-height: 1.36;
 }
 
 .bff-move {
   position: absolute;
-  left: 340px;
+  left: 28px;
   right: auto;
-  top: 728px;
+  top: 1190px;
   bottom: auto;
   z-index: 4;
-  width: 520px;
-  height: 180px;
+  width: 1394px;
+  height: 358px;
 }
 
 .bff-one-move {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto 1fr;
+  column-gap: 22px;
   height: 100%;
   border-color: rgba(251,146,60,0.34);
-  padding: 15px 20px;
-  overflow: hidden;
+  padding: 24px 28px;
+  overflow: visible;
+}
+
+.bff-one-move span,
+.bff-one-move h2 {
+  grid-column: 1 / 4;
 }
 
 .bff-one-move h2 {
-  margin: 8px 0 0;
-  font-size: 15px;
+  margin: 10px 0 0;
+  color: #f8fafc;
+  font-size: 28px;
+  line-height: 1.06;
+  text-transform: uppercase;
 }
 
 .bff-one-move p {
-  display: inline-block;
-  width: 31.5%;
-  margin: 8px 1.2% 0 0;
-  font-size: 11.5px;
-  line-height: 1.22;
-  vertical-align: top;
+  display: block;
+  width: auto;
+  margin: 18px 0 0;
+  color: rgba(255,255,255,0.75);
+  font-size: 15px;
+  line-height: 1.44;
+  vertical-align: initial;
 }
 
 .bff-one-move p strong {
+  display: block;
+  margin-bottom: 4px;
   color: #fed7aa;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.bff-one-move em strong {
+  display: block;
+  margin-bottom: 4px;
+  color: #fed7aa;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
 }
 
 .bff-one-move em {
-  display: inline-block;
-  width: 31.5%;
-  margin-top: 8px;
+  display: block;
+  width: auto;
+  margin-top: 18px;
   color: #fed7aa;
-  font-size: 11.5px;
+  font-size: 15px;
   font-style: normal;
-  line-height: 1.22;
-  vertical-align: top;
+  line-height: 1.44;
+  vertical-align: initial;
 }
 
 .bff-futures {
@@ -926,17 +1237,18 @@ const styles = `
 
 .bff-future-card {
   position: absolute;
-  width: 378px;
-  min-height: 196px;
-  padding: 17px 19px;
+  width: 402px;
+  min-height: 232px;
+  padding: 18px 20px;
   pointer-events: auto;
+  overflow: visible;
 }
 
-.future-1 { left: 28px; top: 224px; }
-.future-2 { left: 28px; top: 474px; }
-.future-3 { right: 260px; top: 224px; }
-.future-4 { right: 260px; top: 448px; }
-.future-5 { right: 260px; top: 672px; }
+.future-1 { left: 28px; top: 228px; }
+.future-2 { left: 28px; top: 596px; }
+.future-3 { right: 268px; top: 238px; }
+.future-4 { right: 268px; top: 568px; }
+.future-5 { right: 268px; top: 898px; }
 
 .tone-red { border-color: rgba(248,113,113,0.35); }
 .tone-red .bff-future-head strong,
@@ -965,11 +1277,11 @@ const styles = `
 }
 
 .bff-future-head strong {
-  font-size: 34px;
+  font-size: 35px;
 }
 
 .bff-future-card h3 {
-  font-size: 20px;
+  font-size: 19px;
   text-transform: uppercase;
 }
 
@@ -995,23 +1307,23 @@ const styles = `
 }
 
 .bff-signals li {
-  margin-top: 3px;
+  margin-top: 4px;
   color: rgba(255,255,255,0.72);
-  font-size: 11px;
-  line-height: 1.24;
+  font-size: 11.5px;
+  line-height: 1.25;
 }
 
 .bff-future-card p {
-  margin-top: 10px;
-  font-size: 11px;
-  line-height: 1.30;
+  margin-top: 11px;
+  font-size: 11.5px;
+  line-height: 1.34;
 }
 
 .bff-bottom {
   position: absolute;
   left: 28px;
   right: 250px;
-  bottom: 24px;
+  bottom: 32px;
   z-index: 4;
   display: grid;
   grid-template-columns: 1.4fr 1fr 1.25fr;
@@ -1019,15 +1331,15 @@ const styles = `
 }
 
 .bff-band {
-  min-height: 78px;
-  padding: 13px 18px;
+  min-height: 122px;
+  padding: 22px 22px;
   text-align: center;
 }
 
 .bff-band p {
-  margin: 7px 0 0;
-  font-size: 13px;
-  line-height: 1.25;
+  margin: 10px 0 0;
+  font-size: 15px;
+  line-height: 1.35;
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }

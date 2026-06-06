@@ -112,6 +112,8 @@ const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
   return acc;
 }, {});
 
+const BUSINESS_ASSESSMENT_PROMO_CODES = new Set(['BA5FREE']);
+
 const DIMENSION_LABELS = {
   vector: 'Command',
   velocity: 'Tempo',
@@ -221,6 +223,7 @@ export default function BusinessAssessment() {
   const [industry, setIndustry] = useState('Real Estate');
   const [profileId, setProfileId] = useState('');
   const [promoCode, setPromoCode] = useState('');
+  const [promoState, setPromoState] = useState({ status: 'idle', message: '' });
   const [retrieveId, setRetrieveId] = useState('');
   const [profileResult, setProfileResult] = useState(null);
   const [profileError, setProfileError] = useState('');
@@ -274,6 +277,26 @@ export default function BusinessAssessment() {
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
     setSubmitState({ status: 'idle', error: '', result: null });
+  }
+
+  function validateBusinessAssessmentPromo(event) {
+    event.preventDefault();
+    const code = promoCode.trim().toUpperCase();
+
+    if (!code) {
+      setPromoState({ status: 'error', message: 'Enter a Business Assessment promo code.' });
+      return;
+    }
+
+    if (BUSINESS_ASSESSMENT_PROMO_CODES.has(code)) {
+      setPromoState({
+        status: 'valid',
+        message: `${code} accepted. Business Assessment access unlocked.`
+      });
+      return;
+    }
+
+    setPromoState({ status: 'error', message: 'Promo code not recognized for Business Assessment.' });
   }
 
   function updateAnswer(value) {
@@ -585,12 +608,35 @@ export default function BusinessAssessment() {
               <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-white">
                 Have A Promo Code?
               </h2>
-              <input
-                value={promoCode}
-                onChange={(event) => setPromoCode(event.target.value)}
-                placeholder="Enter Promo Code"
-                className="mt-4 w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-purple-300"
-              />
+              <form className="mt-4 space-y-3" onSubmit={validateBusinessAssessmentPromo}>
+                <input
+                  value={promoCode}
+                  onChange={(event) => {
+                    setPromoCode(event.target.value);
+                    setPromoState({ status: 'idle', message: '' });
+                  }}
+                  placeholder="Enter Promo Code"
+                  className="w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-purple-300"
+                />
+                <button
+                  type="submit"
+                  disabled={!promoCode.trim()}
+                  className="w-full rounded-xl border border-purple-300/35 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-purple-100 transition hover:border-purple-200 hover:bg-purple-300/10 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  Apply Promo
+                </button>
+              </form>
+              {promoState.message && (
+                <p
+                  className={`mt-3 rounded-xl border px-4 py-3 text-sm leading-6 ${
+                    promoState.status === 'valid'
+                      ? 'border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100'
+                      : 'border-red-400/30 bg-red-500/[0.08] text-red-100'
+                  }`}
+                >
+                  {promoState.message}
+                </p>
+              )}
             </section>
 
             <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
