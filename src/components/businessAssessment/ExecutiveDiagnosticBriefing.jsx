@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 function formatValue(value) {
   if (value === null || value === undefined || value === '') return 'Not available';
   if (typeof value === 'string') return value.replace(/_/g, ' ');
@@ -155,6 +157,11 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
 
   const sections = Array.isArray(briefing.sections) ? briefing.sections : [];
   const hasSections = sections.length > 0;
+  const ownerProfileId = briefing.owner_profile_id || assessment?.owner_profile_id || '';
+  const encodedProfileId = encodeURIComponent(ownerProfileId);
+  const output = assessment?.output || {};
+  const mapReady = Boolean(output.business_intelligence_draft || output.executive_diagnostic_briefing_v1 || briefing);
+  const futuresReady = Boolean(output.five_futures_v1 && output.one_move_v1);
   const caveat = Array.isArray(briefing.caveats)
     ? briefing.caveats.join(' ')
     : briefing.caveats || 'This diagnostic is an operating analysis, not legal, tax, or financial advice.';
@@ -228,30 +235,65 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
       )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <button
-          type="button"
-          disabled
-          className="rounded-3xl border border-orange-300/25 bg-orange-400/[0.06] p-6 text-left opacity-75"
-        >
-          <span className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-200">
-            Business Assessment Map
-          </span>
-          <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
-            Coming next.
-          </span>
-        </button>
-        <button
-          type="button"
-          disabled
-          className="rounded-3xl border border-purple-300/25 bg-purple-400/[0.06] p-6 text-left opacity-75"
-        >
-          <span className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-200">
-            Five Futures + One Move
-          </span>
-          <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
-            Coming next.
-          </span>
-        </button>
+        {mapReady ? (
+          <Link
+            to={`/business-assessment/visual-map?id=${encodedProfileId}`}
+            className="group rounded-3xl border border-orange-300/30 bg-orange-400/[0.08] p-6 text-left transition hover:border-orange-200/70 hover:bg-orange-400/[0.12] hover:shadow-[0_0_42px_rgba(249,115,22,0.16)]"
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-200">
+              Business Assessment Map
+            </span>
+            <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
+              View Map
+            </span>
+            <span className="mt-3 block text-sm leading-6 text-white/58">
+              Open the Business Operating System Diagnostic artifact.
+            </span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="rounded-3xl border border-orange-300/18 bg-orange-400/[0.04] p-6 text-left opacity-55"
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-200">
+              Business Assessment Map
+            </span>
+            <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
+              Not ready yet
+            </span>
+          </button>
+        )}
+
+        {futuresReady ? (
+          <Link
+            to={`/business-assessment/five-futures?id=${encodedProfileId}`}
+            className="group rounded-3xl border border-purple-300/30 bg-purple-400/[0.08] p-6 text-left transition hover:border-purple-200/70 hover:bg-purple-400/[0.12] hover:shadow-[0_0_42px_rgba(168,85,247,0.16)]"
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-200">
+              Five Futures + One Move
+            </span>
+            <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
+              View Futures
+            </span>
+            <span className="mt-3 block text-sm leading-6 text-white/58">
+              Open the probability-weighted trajectory and intervention artifact.
+            </span>
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            className="rounded-3xl border border-purple-300/18 bg-purple-400/[0.04] p-6 text-left opacity-55"
+          >
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-200">
+              Five Futures + One Move
+            </span>
+            <span className="mt-3 block text-2xl font-semibold uppercase tracking-[0.08em] text-white">
+              Not ready yet
+            </span>
+          </button>
+        )}
       </div>
     </section>
   );
