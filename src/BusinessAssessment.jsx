@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import ExecutiveDiagnosticBriefing from './components/businessAssessment/ExecutiveDiagnosticBriefing.jsx';
 
 const INDUSTRIES = [
   { label: 'Real Estate', disabled: false },
@@ -233,6 +234,8 @@ export default function BusinessAssessment() {
   const normalizedProfileId = useMemo(() => profileId.trim(), [profileId]);
   const currentQuestion = QUESTIONS[currentQuestionIndex];
   const canSubmit = isComplete(answers);
+  const retrievedAssessment = retrieveState.result?.assessment || null;
+  const retrievedBriefing = retrievedAssessment?.output?.executive_diagnostic_briefing_v1 || null;
 
   async function validateProfile(event) {
     event.preventDefault();
@@ -613,6 +616,11 @@ export default function BusinessAssessment() {
               {retrieveState.status === 'found' && (
                 <div className="mt-5 rounded-2xl border border-blue-300/30 bg-blue-400/[0.08] p-4">
                   <p className="text-sm font-semibold text-blue-100">Business Assessment Found</p>
+                  <p className="mt-2 text-sm font-semibold text-white">
+                    {retrievedBriefing
+                      ? 'Executive Diagnostic Briefing Ready'
+                      : 'Executive Diagnostic Briefing not generated yet.'}
+                  </p>
                   <p className="mt-2 text-sm text-white/78">
                     Assessment ID:{' '}
                     <span className="font-semibold text-white">
@@ -643,6 +651,10 @@ export default function BusinessAssessment() {
             </section>
           </aside>
         </main>
+
+        {retrievedBriefing && (
+          <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
+        )}
       </div>
     </div>
   );
