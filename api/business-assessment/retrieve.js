@@ -55,6 +55,7 @@ export default async function handler(req, res) {
       success: true,
       found: true,
       status: assessment.status,
+      has_business_intelligence_draft: Boolean(assessment.output?.business_intelligence_draft),
       owner_profile_id: parsedProfile.normalized,
       assessment
     });
