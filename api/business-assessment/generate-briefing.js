@@ -130,7 +130,6 @@ async function callOpenAIForBriefing(prompt) {
       model: MODEL,
       messages: prompt.messages,
       response_format: { type: 'json_object' },
-      temperature: 0.35,
       max_completion_tokens: 12000
     })
   });
