@@ -64,7 +64,7 @@ function extractJsonObject(content) {
 
 function normalizeBriefingOutput(parsed, { assessmentId, ownerProfileId, prompt }) {
   const now = new Date().toISOString();
-  return {
+  const normalized = {
     ...parsed,
     version: parsed.version || BRIEFING_VERSION,
     generated_at: parsed.generated_at || now,
@@ -74,6 +74,57 @@ function normalizeBriefingOutput(parsed, { assessmentId, ownerProfileId, prompt 
     audience_type: parsed.audience_type || prompt.audience_type,
     word_count_target: parsed.word_count_target || prompt.word_count_target
   };
+
+  const sectionMarkdown = buildBriefingMarkdownFromSections(normalized);
+  if (wordCount(sectionMarkdown) > wordCount(normalized.briefing_markdown)) {
+    normalized.briefing_markdown = sectionMarkdown;
+  }
+
+  return normalized;
+}
+
+function buildBriefingMarkdownFromSections(value) {
+  if (!value || !Array.isArray(value.sections) || !value.sections.length) {
+    return String(value?.briefing_markdown || '').trim();
+  }
+
+  const parts = [`# ${value.title || 'Executive Diagnostic Briefing'}`];
+
+  for (const section of value.sections) {
+    if (!section || typeof section !== 'object') continue;
+    const title = String(section.title || '').trim();
+    const body = String(section.body || '').trim();
+    if (!title && !body) continue;
+
+    if (title) parts.push(`\n## ${title}`);
+    if (body) parts.push(body);
+
+    if (Array.isArray(section.evidence) && section.evidence.length) {
+      parts.push(
+        [
+          'Evidence:',
+          ...section.evidence
+            .map((item) => String(item || '').trim())
+            .filter(Boolean)
+            .slice(0, 6)
+            .map((item) => `- ${item}`)
+        ].join('\n')
+      );
+    }
+
+    if (section.confidence) {
+      parts.push(`Confidence: ${String(section.confidence).trim()}`);
+    }
+  }
+
+  const caveats = Array.isArray(value.caveats)
+    ? value.caveats.map((item) => String(item || '').trim()).filter(Boolean)
+    : [String(value.caveats || '').trim()].filter(Boolean);
+  if (caveats.length) {
+    parts.push(`\n## Caveats\n${caveats.join('\n')}`);
+  }
+
+  return parts.join('\n\n').trim();
 }
 
 function wordCount(value) {
