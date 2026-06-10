@@ -140,6 +140,16 @@ function sectionWordCount(section) {
   };
 }
 
+function sectionTitleFingerprint(value) {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\bthe\b/g, ' ')
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+}
+
 function validateBriefingOutput(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return { valid: false, reason: 'briefing_not_object' };
@@ -207,7 +217,12 @@ function validateBriefingOutput(value) {
     briefingMarkdown,
     ...value.sections.map((section) => `${section?.title || ''}\n${section?.body || ''}`)
   ].join('\n');
-  const missingSectionTitles = REQUIRED_SECTION_TITLES.filter((title) => !sectionText.includes(title));
+  const sectionTextFingerprint = sectionTitleFingerprint(sectionText);
+  const missingSectionTitles = REQUIRED_SECTION_TITLES.filter(
+    (title) =>
+      !sectionText.includes(title) &&
+      !sectionTextFingerprint.includes(sectionTitleFingerprint(title))
+  );
 
   if (missingSectionTitles.length) {
     return {
