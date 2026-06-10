@@ -22,6 +22,7 @@ const REQUIRED_SECTION_TITLES = [
 const MINIMUM_BRIEFING_CHARACTERS = 12000;
 const MINIMUM_BRIEFING_WORDS = 1800;
 const MINIMUM_SECTION_BODY_WORDS = 100;
+const PROMPT_PACKET_CHARACTER_LIMIT = 45000;
 
 function safeObject(value, fallback = {}) {
   return value && typeof value === 'object' && !Array.isArray(value) ? value : fallback;
@@ -114,7 +115,7 @@ function answersSnapshot(assessmentRecord) {
   return Object.fromEntries(
     Array.from({ length: 12 }, (_, index) => {
       const key = `q${index + 1}`;
-      return [key, truncate(answers[key], key === 'q9' ? 10000 : 5000)];
+      return [key, truncate(answers[key], key === 'q9' ? 5000 : 3000)];
     })
   );
 }
@@ -132,9 +133,9 @@ function wordCountTarget(assessmentRecord, draft) {
   const richness = answerRichness(answers);
   const isTeam = assessmentRecord?.assessment_type === 'real_estate_team' || draft?.team_reality?.team_exists;
   const highDetail = richness.total_words >= 900 || richness.financial_character_count >= 2500 || richness.numeric_reference_count >= 12;
-  if (isTeam && highDetail) return '5,000-8,000 words';
-  if (highDetail) return '4,000-6,000 words';
-  return '2,500-5,000 words';
+  if (isTeam && highDetail) return '3,500-5,000 words';
+  if (highDetail) return '2,500-3,500 words';
+  return '1,800-2,800 words';
 }
 
 function modelSnapshot(realEstateBusinessModel) {
@@ -199,7 +200,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
         briefing_markdown_minimum_estimated_words: MINIMUM_BRIEFING_WORDS,
         sections_minimum_count: REQUIRED_SECTION_TITLES.length,
         each_section_body_minimum_words: MINIMUM_SECTION_BODY_WORDS,
-        rule: 'If your first draft is shorter than this, expand it before returning JSON.'
+        rule: 'Meet this gate, but do not exceed the target length. Keep the briefing complete and efficient.'
       },
       required_top_level_keys: [
         'version',
@@ -220,7 +221,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
       section_shape: {
         key: 'stable snake_case section key',
         title: 'section title',
-        body: 'substantial prose of at least 100 words; target 120-250+ words for normal cases',
+        body: 'substantial prose of at least 100 words; target 100-180 words for normal cases',
         evidence: ['specific evidence references from answers/draft/profile/model'],
         confidence: 'high | moderate | low'
       },
@@ -231,9 +232,9 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     writing_requirements: {
       target_length: target,
       substantial:
-        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters.',
+        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters. Do not exceed the target length.',
       section_depth:
-        'Write every required section as a real diagnostic section. Target 120-250 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
+        'Write every required section as a real diagnostic section. Target 100-180 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
       no_compression:
         'Do not compress the briefing to fit a short response. Do not provide brief bullet summaries in place of analysis.',
       standalone_value:
@@ -300,9 +301,9 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     version: BRIEFING_VERSION,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: compactJson(userPayload, 60000) }
+      { role: 'user', content: compactJson(userPayload, PROMPT_PACKET_CHARACTER_LIMIT) }
     ],
-    prompt_text: `${system}\n\n${compactJson(userPayload, 60000)}`,
+    prompt_text: `${system}\n\n${compactJson(userPayload, PROMPT_PACKET_CHARACTER_LIMIT)}`,
     word_count_target: target,
     audience_type: audienceType,
     required_sections: REQUIRED_SECTION_TITLES

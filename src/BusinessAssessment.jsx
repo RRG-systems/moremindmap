@@ -114,6 +114,27 @@ const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
 
 const BUSINESS_ASSESSMENT_PROMO_CODES = new Set(['BA5FREE']);
 
+const GENERATION_STEPS = [
+  {
+    key: 'business_intelligence_draft',
+    label: 'Building Business Intelligence Draft...',
+    endpoint: '/api/business-assessment/analyze',
+    isComplete: (assessment) => Boolean(assessment?.output?.business_intelligence_draft)
+  },
+  {
+    key: 'executive_diagnostic_briefing',
+    label: 'Generating Executive Diagnostic Briefing...',
+    endpoint: '/api/business-assessment/generate-briefing',
+    isComplete: (assessment) => Boolean(assessment?.output?.executive_diagnostic_briefing_v1)
+  },
+  {
+    key: 'five_futures_and_one_move',
+    label: 'Modeling Five Futures and One Move...',
+    endpoint: '/api/business-assessment/generate-futures',
+    isComplete: (assessment) => Boolean(assessment?.output?.five_futures_v1 && assessment?.output?.one_move_v1)
+  }
+];
+
 const DIMENSION_LABELS = {
   vector: 'Command',
   velocity: 'Tempo',
@@ -233,12 +254,28 @@ export default function BusinessAssessment() {
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
   const [submitState, setSubmitState] = useState({ status: 'idle', error: '', result: null });
   const [retrieveState, setRetrieveState] = useState({ status: 'idle', error: '', result: null });
+  const [generationState, setGenerationState] = useState({
+    status: 'idle',
+    phase: '',
+    error: '',
+    assessmentId: null,
+    ownerProfileId: null
+  });
 
   const normalizedProfileId = useMemo(() => profileId.trim(), [profileId]);
   const currentQuestion = QUESTIONS[currentQuestionIndex];
   const canSubmit = isComplete(answers);
   const retrievedAssessment = retrieveState.result?.assessment || null;
   const retrievedBriefing = retrievedAssessment?.output?.executive_diagnostic_briefing_v1 || null;
+  const retrievedOutput = retrievedAssessment?.output || {};
+  const retrievedNeedsGeneration = Boolean(
+    retrievedAssessment &&
+      (!retrievedOutput.business_intelligence_draft ||
+        !retrievedOutput.executive_diagnostic_briefing_v1 ||
+        !retrievedOutput.five_futures_v1 ||
+        !retrievedOutput.one_move_v1)
+  );
+  const generationIsRunning = generationState.status === 'running';
 
   async function validateProfile(event) {
     event.preventDefault();
@@ -306,9 +343,112 @@ export default function BusinessAssessment() {
     }));
   }
 
+  function getMissingGenerationSteps(assessment) {
+    return GENERATION_STEPS.filter((step) => !step.isComplete(assessment));
+  }
+
+  async function postGenerationStep(step, assessmentId) {
+    const response = await fetch(buildApiUrl(step.endpoint), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ assessment_id: assessmentId })
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.ok) {
+      throw new Error(payload?.error || payload?.detail || `Unable to complete ${step.label}`);
+    }
+
+    return payload;
+  }
+
+  async function retrieveAssessmentByProfileId(ownerProfileId) {
+    const response = await fetch(
+      buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(ownerProfileId)}`)
+    );
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.success || !payload?.found) {
+      throw new Error(payload?.error || 'Unable to retrieve completed assessment.');
+    }
+
+    return payload;
+  }
+
+  async function runGenerationSequence({ assessmentId, ownerProfileId, assessmentRecord }) {
+    const normalizedOwnerProfileId = String(ownerProfileId || '').trim();
+
+    if (!assessmentId || !normalizedOwnerProfileId) {
+      throw new Error('Assessment ID and owner Profile ID are required for generation.');
+    }
+
+    let currentAssessment = assessmentRecord;
+    if (!currentAssessment) {
+      const currentPayload = await retrieveAssessmentByProfileId(normalizedOwnerProfileId);
+      currentAssessment = currentPayload.assessment;
+    }
+
+    const missingSteps = getMissingGenerationSteps(currentAssessment);
+
+    setGenerationState({
+      status: 'running',
+      phase: missingSteps[0]?.label || 'Checking completed intelligence...',
+      error: '',
+      assessmentId,
+      ownerProfileId: normalizedOwnerProfileId
+    });
+
+    try {
+      for (const step of missingSteps) {
+        setGenerationState({
+          status: 'running',
+          phase: step.label,
+          error: '',
+          assessmentId,
+          ownerProfileId: normalizedOwnerProfileId
+        });
+        await postGenerationStep(step, assessmentId);
+      }
+
+      setGenerationState({
+        status: 'running',
+        phase: 'Retrieving completed assessment...',
+        error: '',
+        assessmentId,
+        ownerProfileId: normalizedOwnerProfileId
+      });
+
+      const completed = await retrieveAssessmentByProfileId(normalizedOwnerProfileId);
+      setRetrieveId(normalizedOwnerProfileId);
+      setRetrieveState({ status: 'found', error: '', result: completed });
+      setGenerationState({
+        status: 'complete',
+        phase: 'Complete.',
+        error: '',
+        assessmentId,
+        ownerProfileId: normalizedOwnerProfileId
+      });
+
+      return completed;
+    } catch (error) {
+      setGenerationState({
+        status: 'error',
+        phase: '',
+        error:
+          error.message ||
+          'Your intake was saved, but intelligence generation did not complete. You can retry generation.',
+        assessmentId,
+        ownerProfileId: normalizedOwnerProfileId
+      });
+      throw error;
+    }
+  }
+
   async function submitAssessment() {
     if (!profileResult || !canSubmit) return;
     setSubmitState({ status: 'saving', error: '', result: null });
+    setGenerationState({ status: 'idle', phase: '', error: '', assessmentId: null, ownerProfileId: null });
+    let savedPayload = null;
 
     try {
       const response = await fetch(buildApiUrl('/api/business-assessment/start'), {
@@ -325,13 +465,40 @@ export default function BusinessAssessment() {
         throw new Error(payload?.error || 'Unable to save assessment intake.');
       }
 
-      setSubmitState({ status: 'saved', error: '', result: payload });
+      savedPayload = payload;
+      const ownerProfileId =
+        payload.profile_context?.owner_profile_id || profileResult.id || normalizedProfileId;
+      setSubmitState({ status: 'generating', error: '', result: payload });
+      const completed = await runGenerationSequence({
+        assessmentId: payload.assessment_id,
+        ownerProfileId,
+        assessmentRecord: null
+      });
+      setSubmitState({ status: 'complete', error: '', result: completed });
     } catch (error) {
       setSubmitState({
-        status: 'error',
-        error: error.message || 'Unable to save assessment intake.',
-        result: null
+        status: savedPayload ? 'generation_error' : 'error',
+        error:
+          savedPayload
+            ? 'Your intake was saved, but intelligence generation did not complete. You can retry generation.'
+            : error.message || 'Unable to save assessment intake.',
+        result: savedPayload
       });
+    }
+  }
+
+  async function generateRetrievedAssessment() {
+    if (!retrievedAssessment || generationIsRunning) return;
+
+    try {
+      setSubmitState({ status: 'idle', error: '', result: null });
+      await runGenerationSequence({
+        assessmentId: retrievedAssessment.assessment_id,
+        ownerProfileId: retrievedAssessment.owner_profile_id,
+        assessmentRecord: retrievedAssessment
+      });
+    } catch {
+      // runGenerationSequence owns the user-facing recovery state.
     }
   }
 
@@ -504,11 +671,15 @@ export default function BusinessAssessment() {
                   ) : (
                     <button
                       type="button"
-                      disabled={!canSubmit || submitState.status === 'saving'}
+                      disabled={!canSubmit || submitState.status === 'saving' || submitState.status === 'generating' || generationIsRunning}
                       onClick={submitAssessment}
                       className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-45"
                     >
-                      {submitState.status === 'saving' ? 'Saving...' : 'Submit Assessment'}
+                      {submitState.status === 'saving'
+                        ? 'Saving...'
+                        : submitState.status === 'generating' || generationIsRunning
+                          ? 'Generating...'
+                          : 'Submit Assessment'}
                     </button>
                   )}
                 </div>
@@ -519,20 +690,66 @@ export default function BusinessAssessment() {
                   </p>
                 )}
 
-                {submitState.status === 'saved' && (
-                  <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
-                    <p className="text-sm font-semibold text-emerald-200">Business Assessment intake saved.</p>
-                    <p className="mt-2 text-sm text-white/78">
-                      Assessment ID: <span className="font-semibold text-white">{submitState.result.assessment_id}</span>
+                {(submitState.status === 'generating' || generationIsRunning) && (
+                  <div className="mt-5 rounded-2xl border border-orange-300/35 bg-orange-400/[0.08] p-4">
+                    <p className="text-sm font-semibold text-orange-100">
+                      {submitState.status === 'saving' ? 'Saving intake...' : generationState.phase || 'Preparing intelligence generation...'}
                     </p>
-                    <p className="mt-1 text-sm text-white/78">Status: Intake saved.</p>
-                    <p className="mt-1 text-sm text-white/62">Intelligence generation begins in the next sprint.</p>
+                    <p className="mt-2 text-sm leading-6 text-white/66">
+                      Your intake has been saved. The system is now building the Business Intelligence
+                      Draft, Executive Diagnostic Briefing, Five Futures, and One Move.
+                    </p>
+                  </div>
+                )}
+
+                {submitState.status === 'complete' && (
+                  <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
+                    <p className="text-sm font-semibold text-emerald-200">Business Assessment intelligence complete.</p>
+                    <p className="mt-2 text-sm text-white/78">
+                      Assessment ID:{' '}
+                      <span className="font-semibold text-white">
+                        {submitState.result?.assessment?.assessment_id || submitState.result?.assessment_id}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-sm text-white/78">Status: five_futures_and_one_move_ready</p>
+                    <p className="mt-1 text-sm text-white/62">
+                      Executive Diagnostic, Business Assessment Map, Five Futures, and One Move are ready below.
+                    </p>
                   </div>
                 )}
 
                 {submitState.status === 'error' && (
                   <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
                     {submitState.error}
+                  </div>
+                )}
+
+                {submitState.status === 'generation_error' && (
+                  <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                    <p>{submitState.error}</p>
+                    <p className="mt-2">
+                      Assessment ID:{' '}
+                      <span className="font-semibold text-white">{submitState.result?.assessment_id}</span>
+                    </p>
+                    <button
+                      type="button"
+                      disabled={generationIsRunning}
+                      onClick={() =>
+                        runGenerationSequence({
+                          assessmentId: submitState.result?.assessment_id,
+                          ownerProfileId:
+                            submitState.result?.profile_context?.owner_profile_id ||
+                            profileResult?.id ||
+                            normalizedProfileId,
+                          assessmentRecord: null
+                        }).then((completed) =>
+                          setSubmitState({ status: 'complete', error: '', result: completed })
+                        ).catch(() => {})
+                      }
+                      className="mt-4 rounded-xl border border-red-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-red-50 transition hover:border-red-100 hover:bg-red-300/10 disabled:cursor-wait disabled:opacity-55"
+                    >
+                      Retry Generation
+                    </button>
                   </div>
                 )}
               </section>
@@ -679,7 +896,36 @@ export default function BusinessAssessment() {
                   <p className="mt-1 text-sm text-white/78">
                     Status: {retrieveState.result.assessment.status}
                   </p>
-                  <p className="mt-1 text-sm text-white/62">This assessment intake is saved.</p>
+                  <p className="mt-1 text-sm text-white/62">
+                    {retrievedNeedsGeneration
+                      ? 'This assessment intake is saved and can now complete intelligence generation.'
+                      : 'This assessment intelligence is complete.'}
+                  </p>
+
+                  {retrievedNeedsGeneration && (
+                    <button
+                      type="button"
+                      disabled={generationIsRunning}
+                      onClick={generateRetrievedAssessment}
+                      className="mt-4 w-full rounded-xl border border-blue-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-blue-50 transition hover:border-blue-100 hover:bg-blue-300/10 disabled:cursor-wait disabled:opacity-55"
+                    >
+                      {generationIsRunning ? generationState.phase || 'Generating...' : 'Generate Executive Diagnostic'}
+                    </button>
+                  )}
+
+                  {generationState.status === 'running' &&
+                    generationState.assessmentId === retrieveState.result.assessment.assessment_id && (
+                      <p className="mt-3 rounded-xl border border-orange-300/25 bg-orange-400/[0.08] px-4 py-3 text-sm leading-6 text-orange-100">
+                        {generationState.phase || 'Generating intelligence...'}
+                      </p>
+                    )}
+
+                  {generationState.status === 'error' &&
+                    generationState.assessmentId === retrieveState.result.assessment.assessment_id && (
+                      <p className="mt-3 rounded-xl border border-red-400/30 bg-red-500/[0.08] px-4 py-3 text-sm leading-6 text-red-100">
+                        Your intake was saved, but intelligence generation did not complete. You can retry generation.
+                      </p>
+                    )}
                 </div>
               )}
 

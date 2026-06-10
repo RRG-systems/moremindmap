@@ -10,7 +10,7 @@ import { REAL_ESTATE_BUSINESS_MODEL_V1 } from '../engine/businessAssessment/real
 import { buildExecutiveDiagnosticBriefingPrompt } from '../engine/businessAssessment/buildExecutiveDiagnosticBriefingPrompt.js';
 
 const BRIEFING_VERSION = 'executive_diagnostic_briefing_v1';
-const MODEL = process.env.BUSINESS_ASSESSMENT_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+const MODEL = process.env.BUSINESS_ASSESSMENT_BRIEFING_MODEL || 'gpt-4o-2024-08-06';
 const REQUIRED_SECTION_TITLES = [
   'Executive Readout',
   'Current Business Reality',
@@ -180,6 +180,10 @@ function validateBriefingOutput(value) {
   return { valid: true };
 }
 
+function elapsed(startedAt) {
+  return `${Date.now() - startedAt}ms`;
+}
+
 async function callOpenAIForBriefing(prompt) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error('OPENAI_API_KEY is not configured');
@@ -187,6 +191,7 @@ async function callOpenAIForBriefing(prompt) {
     throw error;
   }
 
+  const startedAt = Date.now();
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -197,7 +202,7 @@ async function callOpenAIForBriefing(prompt) {
       model: MODEL,
       messages: prompt.messages,
       response_format: { type: 'json_object' },
-      max_completion_tokens: 16000
+      max_completion_tokens: 10000
     })
   });
 
@@ -219,7 +224,8 @@ async function callOpenAIForBriefing(prompt) {
   return {
     parsed: extractJsonObject(content),
     model: data.model || MODEL,
-    usage: data.usage || null
+    usage: data.usage || null,
+    duration_ms: Date.now() - startedAt
   };
 }
 
@@ -235,6 +241,7 @@ export default async function handler(req, res) {
   }
 
   let redis;
+  const requestStartedAt = Date.now();
   try {
     const { assessment_id, owner_profile_id } = req.body || {};
 
@@ -277,14 +284,30 @@ export default async function handler(req, res) {
       });
     }
 
+    const promptStartedAt = Date.now();
     const prompt = buildExecutiveDiagnosticBriefingPrompt({
       assessmentRecord,
       businessIntelligenceDraft,
       canonicalProfile: profileLookup.dossier,
       realEstateBusinessModel: REAL_ESTATE_BUSINESS_MODEL_V1
     });
+    console.log('[BUSINESS-ASSESSMENT-BRIEFING] Prompt built', {
+      assessment_id: assessmentId,
+      owner_profile_id: ownerProfileId,
+      model: MODEL,
+      messages_characters: JSON.stringify(prompt.messages).length,
+      word_count_target: prompt.word_count_target,
+      duration: elapsed(promptStartedAt)
+    });
 
     const generation = await callOpenAIForBriefing(prompt);
+    console.log('[BUSINESS-ASSESSMENT-BRIEFING] OpenAI completed', {
+      assessment_id: assessmentId,
+      owner_profile_id: ownerProfileId,
+      model: generation.model,
+      duration_ms: generation.duration_ms,
+      usage: generation.usage || null
+    });
     const briefing = normalizeBriefingOutput(generation.parsed, {
       assessmentId,
       ownerProfileId,
@@ -321,6 +344,11 @@ export default async function handler(req, res) {
     };
 
     await redis.set(businessAssessmentKey(assessmentId), JSON.stringify(updatedRecord));
+    console.log('[BUSINESS-ASSESSMENT-BRIEFING] Saved briefing', {
+      assessment_id: assessmentId,
+      owner_profile_id: ownerProfileId,
+      total_duration: elapsed(requestStartedAt)
+    });
 
     return res.status(200).json({
       ok: true,
