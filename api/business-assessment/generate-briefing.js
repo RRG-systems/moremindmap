@@ -231,6 +231,48 @@ function validateBriefingOutput(value) {
   return { valid: true };
 }
 
+function shouldAttemptBriefingRepair(validation) {
+  return [
+    'briefing_markdown_too_short',
+    'briefing_word_count_too_short',
+    'malformed_or_thin_section'
+  ].includes(validation?.reason);
+}
+
+function compactForRepair(value, maxLength = 36000) {
+  const body = JSON.stringify(value ?? {}, null, 2);
+  if (body.length <= maxLength) return body;
+  return `${body.slice(0, maxLength)}\n[TRUNCATED ${body.length - maxLength} CHARACTERS]`;
+}
+
+function buildRepairPrompt(prompt, previousOutput, validation) {
+  return {
+    ...prompt,
+    messages: [
+      ...prompt.messages,
+      {
+        role: 'assistant',
+        content: compactForRepair(previousOutput)
+      },
+      {
+        role: 'user',
+        content: [
+          'The previous JSON output failed validation for the Executive Diagnostic Briefing.',
+          `Validation failure: ${JSON.stringify(validation)}`,
+          'Return one corrected complete JSON object with the same required top-level keys.',
+          'Keep the product name exactly "Executive Diagnostic Briefing".',
+          'Do not summarize briefly and do not use placeholder markdown.',
+          'The briefing_markdown field must contain the full written briefing, not a pointer to the sections.',
+          'The corrected output must be at least 12,000 characters and at least 1,800 words.',
+          'Each of the 16 required sections must have a substantial body of at least 120 words.',
+          'Preserve the same evidence and diagnostic conclusions, but expand the reasoning, implications, and missing-data explanation where needed.',
+          'Return valid JSON only. No markdown fences.'
+        ].join('\n')
+      }
+    ]
+  };
+}
+
 function elapsed(startedAt) {
   return `${Date.now() - startedAt}ms`;
 }
@@ -351,7 +393,7 @@ export default async function handler(req, res) {
       duration: elapsed(promptStartedAt)
     });
 
-    const generation = await callOpenAIForBriefing(prompt);
+    let generation = await callOpenAIForBriefing(prompt);
     console.log('[BUSINESS-ASSESSMENT-BRIEFING] OpenAI completed', {
       assessment_id: assessmentId,
       owner_profile_id: ownerProfileId,
@@ -359,13 +401,36 @@ export default async function handler(req, res) {
       duration_ms: generation.duration_ms,
       usage: generation.usage || null
     });
-    const briefing = normalizeBriefingOutput(generation.parsed, {
+    let briefing = normalizeBriefingOutput(generation.parsed, {
       assessmentId,
       ownerProfileId,
       prompt
     });
 
-    const validation = validateBriefingOutput(briefing);
+    let validation = validateBriefingOutput(briefing);
+    if (!validation.valid && shouldAttemptBriefingRepair(validation)) {
+      const repairPrompt = buildRepairPrompt(prompt, briefing, validation);
+      console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repairing briefing output', {
+        assessment_id: assessmentId,
+        owner_profile_id: ownerProfileId,
+        reason: validation.reason
+      });
+      generation = await callOpenAIForBriefing(repairPrompt);
+      console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repair OpenAI completed', {
+        assessment_id: assessmentId,
+        owner_profile_id: ownerProfileId,
+        model: generation.model,
+        duration_ms: generation.duration_ms,
+        usage: generation.usage || null
+      });
+      briefing = normalizeBriefingOutput(generation.parsed, {
+        assessmentId,
+        ownerProfileId,
+        prompt
+      });
+      validation = validateBriefingOutput(briefing);
+    }
+
     if (!validation.valid) {
       return res.status(502).json({
         ok: false,
