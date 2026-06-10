@@ -134,8 +134,8 @@ function wordCountTarget(assessmentRecord, draft) {
   const isTeam = assessmentRecord?.assessment_type === 'real_estate_team' || draft?.team_reality?.team_exists;
   const highDetail = richness.total_words >= 900 || richness.financial_character_count >= 2500 || richness.numeric_reference_count >= 12;
   if (isTeam && highDetail) return '3,500-5,000 words';
-  if (highDetail) return '2,500-3,500 words';
-  return '1,800-2,800 words';
+  if (highDetail) return '2,700-3,700 words';
+  return '2,100-3,000 words';
 }
 
 function modelSnapshot(realEstateBusinessModel) {
@@ -221,7 +221,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
       section_shape: {
         key: 'stable snake_case section key',
         title: 'section title',
-        body: 'substantial prose of at least 100 words; target 100-180 words for normal cases',
+        body: 'substantial prose of at least 120 words; target 140-220 words for normal cases',
         evidence: ['specific evidence references from answers/draft/profile/model'],
         confidence: 'high | moderate | low'
       },
@@ -232,9 +232,9 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     writing_requirements: {
       target_length: target,
       substantial:
-        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters. Do not exceed the target length.',
+        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters, but aim comfortably above that floor. Do not exceed the target length.',
       section_depth:
-        'Write every required section as a real diagnostic section. Target 100-180 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
+        'Write every required section as a real diagnostic section. Target 140-220 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
       no_compression:
         'Do not compress the briefing to fit a short response. Do not provide brief bullet summaries in place of analysis.',
       standalone_value:
