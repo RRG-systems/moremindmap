@@ -31,7 +31,7 @@ const REQUIRED_SECTION_TITLES = [
 ];
 const MINIMUM_BRIEFING_CHARACTERS = 12000;
 const MINIMUM_BRIEFING_WORDS = 1800;
-const MINIMUM_SECTION_BODY_WORDS = 100;
+const MINIMUM_SECTION_BODY_WORDS = 90;
 
 async function resolveAssessmentId(redis, { assessment_id, owner_profile_id }) {
   if (assessment_id) return assessment_id;
