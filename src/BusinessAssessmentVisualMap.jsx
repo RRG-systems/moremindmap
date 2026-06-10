@@ -86,7 +86,10 @@ function MetricPanel({ title, metrics, tone = 'orange' }) {
         {metrics.map((metric) => (
           <div className="bam-metric-row" key={metric.label}>
             <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
+            <strong>
+              {metric.value}
+              {metric.source && <em>{metric.source}</em>}
+            </strong>
           </div>
         ))}
       </div>
@@ -576,14 +579,29 @@ const styles = `
   font-size: 15px;
 }
 
-.bam-metric-row strong {
-  color: #fb7c00;
-  font-size: 28px;
-  font-weight: 500;
-  line-height: 1;
-}
+  .bam-metric-row strong {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #fb7c00;
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1;
+    text-align: right;
+  }
 
-.tone-green .bam-metric-row strong { color: #84cc16; }
+  .tone-green .bam-metric-row strong { color: #84cc16; }
+
+  .bam-metric-row strong em {
+    margin-top: 6px;
+    color: rgba(255,255,255,0.46);
+    font-size: 9px;
+    font-style: normal;
+    font-weight: 800;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
 
 .bam-mini-chart {
   position: relative;

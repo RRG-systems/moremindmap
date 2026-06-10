@@ -1,5 +1,7 @@
 import { inferEToPScores } from './inferEToPScores.js';
 
+const REAL_ESTATE_GROSS_COMMISSION_RATE_ASSUMPTION = 0.0265;
+
 function formatValue(value, fallback = 'Not available') {
   if (value === null || value === undefined || value === '') return fallback;
   if (typeof value === 'string') return value.replace(/_/g, ' ');
@@ -35,8 +37,8 @@ function textBlock(...values) {
   return values.map((value) => String(value || '')).join('\n\n');
 }
 
-function makeMetric(value, estimated = false) {
-  return Number.isFinite(value) ? { value, estimated } : null;
+function makeMetric(value, estimated = false, metadata = {}) {
+  return Number.isFinite(value) ? { value, estimated, ...metadata } : null;
 }
 
 function metricNumber(metric) {
@@ -102,6 +104,16 @@ function compactMoney(value) {
   }
   if (abs >= 1000) return `${prefix}$${Math.round(numeric / 1000)}K`;
   return `${prefix}$${Math.round(numeric)}`;
+}
+
+function metricSource(metric, fallback = 'Insufficient data') {
+  if (!metric) return fallback;
+  if (metric.source) return metric.source;
+  return metric.estimated ? 'Extracted' : 'User provided';
+}
+
+function metricBasis(metric, fallback = '') {
+  return metric?.basis || fallback;
 }
 
 function findBriefingSection(briefing, pattern) {
@@ -203,21 +215,43 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
     /goal is\s+([\d,]+)\s+units/i,
     /like\s+to\s+be\s+at\s+([\d,]+)\s*transactions/i,
   ]);
-  const goalVolume = parseMoneyNear(answers.q2, [
+  const goalVolumeValue = parseMoneyNear(answers.q2, [
     /roughly\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+sales volume/i,
     /around\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
     /(\$?[\d,.]+\s*[mk]?)\s+in\s+sales volume/i,
   ]);
-  const goalGci = parseMoneyNear(answers.q2, [
+  const goalVolume = makeMetric(goalVolumeValue, false, { source: 'Extracted' });
+  const goalGciValue = parseMoneyNear(answers.q2, [
     /with\s+about\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+gci/i,
     /gci\.\s*i want/i,
   ]);
-  const goalNet = parseMoneyNear(answers.q2, [
+  const goalGci = firstMetric(
+    makeMetric(goalGciValue, false, { source: 'Extracted' }),
+    goalVolume
+      ? makeMetric(goalVolume.value * REAL_ESTATE_GROSS_COMMISSION_RATE_ASSUMPTION, true, {
+          source: 'Model estimate',
+          basis: 'Goal production x 2.65% gross commission assumption'
+        })
+      : null
+  );
+  const goalNetValue = parseMoneyNear(answers.q2, [
     /net at least\s*(\$?[\d,.]+\s*[mk]?)/i,
     /net\s+(?:at least\s+)?(\$?[\d,.]+\s*[mk]?)/i,
   ]);
+  const goalNet = makeMetric(goalNetValue, false, { source: 'Extracted' });
   const currentTrueRelationshipValue = metricNumber(currentTrueRelationships);
-  const relationshipTargetValue = metricNumber(relationshipTarget);
+  const modelRelationshipTarget = !relationshipTarget && goalUnits >= 20 && currentTrueRelationshipValue && currentTrueRelationshipValue < 500
+    ? makeMetric(500, true, {
+        source: 'Model estimate',
+        unit: 'true relationships',
+        basis: 'Real Estate Business Model V1 relationship economics'
+      })
+    : null;
+  const resolvedRelationshipTarget = firstMetric(
+    relationshipTarget ? { ...relationshipTarget, source: 'Extracted', unit: 'true relationships' } : null,
+    modelRelationshipTarget
+  );
+  const relationshipTargetValue = metricNumber(resolvedRelationshipTarget);
 
   return {
     currentTrueRelationships,
@@ -230,9 +264,12 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
     goalVolume,
     goalGci,
     goalNet,
-    relationshipTarget,
+    relationshipTarget: resolvedRelationshipTarget,
     relationshipGap: relationshipTargetValue && currentTrueRelationshipValue
-      ? makeMetric(Math.max(0, relationshipTargetValue - currentTrueRelationshipValue), relationshipTarget?.estimated || currentTrueRelationships?.estimated)
+      ? makeMetric(Math.max(0, relationshipTargetValue - currentTrueRelationshipValue), resolvedRelationshipTarget?.estimated || currentTrueRelationships?.estimated, {
+          source: resolvedRelationshipTarget?.source,
+          basis: resolvedRelationshipTarget?.basis
+        })
       : null,
     hasWeeklyRhythmGap: /weekly operating rhythm|weekly database review|inspectable|from my head|memory|follow-up/i.test(all),
   };
@@ -267,11 +304,35 @@ function buildBusinessMapVisualCopy({
       { label: 'Estimated Net', value: compactMoney(metrics.currentNet) },
     ],
     targetMetrics: [
-      { label: 'Relationship Target', value: compactNumber(metrics.relationshipTarget) },
-      { label: 'Goal Production', value: compactMoney(metrics.goalVolume) },
-      { label: 'Goal Units', value: goalUnits },
-      { label: 'Potential GCI', value: compactMoney(metrics.goalGci) },
-      { label: 'Potential Net', value: compactMoney(metrics.goalNet) },
+      {
+        label: 'Relationship Target',
+        value: `${compactNumber(metrics.relationshipTarget)}${metrics.relationshipTarget?.unit ? ` ${metrics.relationshipTarget.unit}` : ''}`,
+        source: metricSource(metrics.relationshipTarget),
+        basis: metricBasis(metrics.relationshipTarget)
+      },
+      {
+        label: 'Goal Production',
+        value: compactMoney(metrics.goalVolume),
+        source: metricSource(metrics.goalVolume),
+        basis: metricBasis(metrics.goalVolume)
+      },
+      {
+        label: 'Goal Units',
+        value: goalUnits,
+        source: metrics.goalUnits ? 'Extracted' : 'Insufficient data'
+      },
+      {
+        label: 'Potential GCI',
+        value: compactMoney(metrics.goalGci),
+        source: metricSource(metrics.goalGci),
+        basis: metricBasis(metrics.goalGci)
+      },
+      {
+        label: 'Potential Net',
+        value: compactMoney(metrics.goalNet),
+        source: metricSource(metrics.goalNet),
+        basis: metrics.goalNet ? metricBasis(metrics.goalNet) : 'Company split / net margin missing'
+      },
     ],
     lake: {
       current: compactNumber(metrics.currentTrueRelationships),
