@@ -296,12 +296,36 @@ function buildBusinessMapVisualCopy({
 
   return {
     currentMetrics: [
-      { label: 'True Relationships', value: compactNumber(metrics.currentTrueRelationships) },
-      { label: 'Total Contacts', value: compactNumber(metrics.totalContacts) },
-      { label: 'Annual Production', value: compactMoney(metrics.currentVolume) },
-      { label: 'Units Closed', value: compactNumber(metrics.currentUnits) },
-      { label: 'GCI', value: compactMoney(metrics.currentGci) },
-      { label: 'Estimated Net', value: compactMoney(metrics.currentNet) },
+      {
+        label: 'True Relationships',
+        value: compactNumber(metrics.currentTrueRelationships),
+        source: metricSource(metrics.currentTrueRelationships)
+      },
+      {
+        label: 'Total Contacts',
+        value: compactNumber(metrics.totalContacts),
+        source: metricSource(metrics.totalContacts)
+      },
+      {
+        label: 'Annual Production',
+        value: compactMoney(metrics.currentVolume),
+        source: metricSource(metrics.currentVolume)
+      },
+      {
+        label: 'Units Closed',
+        value: compactNumber(metrics.currentUnits),
+        source: metrics.currentUnits ? 'Extracted' : 'Insufficient data'
+      },
+      {
+        label: 'GCI',
+        value: compactMoney(metrics.currentGci),
+        source: metricSource(metrics.currentGci)
+      },
+      {
+        label: 'Estimated Net',
+        value: compactMoney(metrics.currentNet),
+        source: metricSource(metrics.currentNet)
+      },
     ],
     targetMetrics: [
       {
