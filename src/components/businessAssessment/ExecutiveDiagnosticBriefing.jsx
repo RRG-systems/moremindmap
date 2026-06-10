@@ -42,6 +42,120 @@ function sentenceCase(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+const DISCLAIMER = 'This diagnostic is an operating analysis, not legal, tax, or financial advice.';
+
+const EVIDENCE_LABELS = {
+  'assessment_answers.q1': 'Q1: Lead and opportunity reality',
+  'assessment_answers.q2': 'Q2: Growth goals and long-range business aim',
+  'assessment_answers.q3': 'Q3: Database size and relationship count',
+  'assessment_answers.q4': 'Q4: Same-day business generation behavior',
+  'assessment_answers.q5': 'Q5: CRM, database, and follow-up system',
+  'assessment_answers.q6': 'Q6: Lead generation willingness and resistance',
+  'assessment_answers.q7': 'Q7: Accountability answer',
+  'assessment_answers.q8': 'Q8: Business systems answer',
+  'assessment_answers.q9': 'Q9: Financial and production numbers',
+  'assessment_answers.q10': 'Q10: Stated growth limiter',
+  'assessment_answers.q11': 'Q11: Team / role information',
+  'assessment_answers.q12': 'Q12: Tripled-goal stress test',
+  'relationship_reality.evidence.q3': 'Q3: Database size and relationship count',
+  'relationship_reality.evidence.q5': 'Q5: CRM, database, and follow-up system',
+  'lead_generation_reality.evidence.q4': 'Q4: Same-day business generation behavior',
+  'lead_conversion_reality.evidence.q5': 'Q5: CRM, database, and follow-up system',
+  'financial_reality.evidence.q9': 'Q9: Financial and production numbers',
+  'constraint_analysis.primary_constraint': 'Business Intelligence Draft: primary constraint',
+  'constraint_analysis.primary_constraint.evidence': 'Business Intelligence Draft: primary constraint evidence',
+  'constraint_analysis.ranked_constraints': 'Business Intelligence Draft: ranked constraint analysis',
+  'current_stage.stage': 'Business Intelligence Draft: current business stage',
+  'current_stage.description': 'Business Intelligence Draft: current stage description',
+  'growth_ambition.signal': 'Business Intelligence Draft: growth ambition signal',
+  'current_production_reality.financial_detail_score': 'Business Intelligence Draft: financial detail score',
+  'current_trajectory_signal.signal': 'Business Intelligence Draft: current trajectory signal',
+  'current_trajectory_signal.source_constraint': 'Business Intelligence Draft: source constraint',
+  'confidence_engine.known': 'Confidence Engine: known evidence',
+  'confidence_engine.observed': 'Confidence Engine: observed evidence',
+  'confidence_engine.missing': 'Confidence Engine: missing data',
+  'behavioral_reality.profile_type': 'Behavioral Profile: profile type',
+  'behavioral_reality.ranked_dimensions': 'Behavioral Profile: ranked dimensions',
+  'behavioral_reality.pressure_mechanics': 'Behavioral Profile: pressure mechanics',
+  'behavior_business_fusion.fusion_summary': 'Behavior + Business Fusion: diagnostic summary',
+  'relationship_reality.database_size_mentions': 'Q3: database and relationship count signals',
+  'relationship_reality.true_relationship_count_mentioned': 'Q3: true relationship count signal',
+  'relationship_reality.lake_health': 'Real Estate Business Model V1: relationship lake health',
+  'lead_generation_reality.believes_enough_leads': 'Q1: stated lead sufficiency',
+  'lead_generation_reality.lead_shortage_signal': 'Business Intelligence Draft: lead shortage signal',
+  'lead_conversion_reality.follow_up_system_strength': 'Business Intelligence Draft: follow-up system strength',
+  'lead_conversion_reality.conversion_discipline': 'Business Intelligence Draft: conversion discipline',
+  'systems_reality.database_system.score': 'Real Estate Business Model V1: database system maturity',
+  'systems_reality.listing_system.score': 'Real Estate Business Model V1: listing system maturity',
+  'systems_reality.transaction_system.score': 'Real Estate Business Model V1: transaction system maturity',
+  'systems_reality.overall_maturity_score': 'Real Estate Business Model V1: systems maturity score',
+  'accountability_reality.maturity_label': 'Real Estate Business Model V1: accountability maturity',
+  'accountability_reality.accountability_source': 'Q7: accountability answer',
+  'accountability_reality.evidence.no_accountability_signal': 'Q7: weak or absent accountability signal',
+  'financial_reality.extracted_numbers': 'Q9: extracted financial numbers',
+  'financial_reality.fields_detected.average_sales_price': 'Q9: average sales price signal',
+  'financial_reality.missing_financial_data': 'Q9: missing financial detail',
+  'team_reality.roles_mentioned': 'Q11: team role evidence',
+  'team_reality.solo_or_team': 'Q11: solo/team status',
+  'team_reality.leadership_or_leverage_clues': 'Q8/Q12: leverage and bandwidth clues',
+  'contradiction_analysis.contradictions': 'Business Intelligence Draft: contradictions and blind spots',
+  'contradiction_analysis.count': 'Business Intelligence Draft: contradiction count',
+  'business_intelligence_draft.contradictions_blind_spots': 'Business Intelligence Draft: blind spot analysis',
+  primary_constraint: 'Business Intelligence Draft: primary constraint',
+  'constraint_analysis.primary_constraint.likely_one_move_categories': 'Business Intelligence Draft: likely intervention categories',
+  evidence_count: 'Evidence depth signal'
+};
+
+function displayEvidenceLabel(item) {
+  const raw = formatValue(item).trim();
+  if (!raw) return '';
+
+  const normalized = raw
+    .replace(/\s+/g, ' ')
+    .replace(/^business intelligence draft\./i, 'business_intelligence_draft.')
+    .replace(/^business_intelligence_draft\./i, '')
+    .replace(/\s*\.\s*/g, '.')
+    .replace(/\s+/g, '_')
+    .toLowerCase();
+
+  const direct =
+    EVIDENCE_LABELS[raw] ||
+    EVIDENCE_LABELS[normalized] ||
+    EVIDENCE_LABELS[normalized.replace(/^business_intelligence_draft\./, '')];
+  if (direct) return direct;
+
+  const qMatch = normalized.match(/(?:assessment_answers|evidence)\.(q\d{1,2})\b/);
+  if (qMatch) {
+    return EVIDENCE_LABELS[`assessment_answers.${qMatch[1]}`] || `Assessment answer ${qMatch[1].toUpperCase()}`;
+  }
+
+  if (/real[_\s-]?estate[_\s-]?business[_\s-]?model|lake|database|relationship/.test(normalized)) {
+    return `Real Estate Business Model V1: ${sentenceCase(raw.split('.').pop())}`;
+  }
+
+  if (/behavior|profile|ranked[_\s-]?dimensions|command|tempo/.test(normalized)) {
+    return `Behavioral Profile: ${sentenceCase(raw.split('.').pop())}`;
+  }
+
+  if (/constraint|trajectory|confidence|financial|systems|accountability|lead[_\s-]?generation|conversion|team/.test(normalized)) {
+    return `Business Intelligence Draft: ${sentenceCase(raw.split('.').pop())}`;
+  }
+
+  return raw.includes('.') || raw.includes('_') ? sentenceCase(raw.split('.').pop()) : raw;
+}
+
+function cleanCaveat(value) {
+  const body = Array.isArray(value) ? value.join(' ') : String(value || '');
+  if (!body.trim()) return DISCLAIMER;
+  if (/include exactly once|at the bottom/i.test(body) && /operating analysis/i.test(body)) {
+    return DISCLAIMER;
+  }
+  return body
+    .replace(/Include exactly once at the bottom:\s*/gi, '')
+    .replace(/^["“]|["”]$/g, '')
+    .trim();
+}
+
 function normalizeParagraphs(text) {
   return String(text || '')
     .split(/\n{2,}/)
@@ -95,7 +209,9 @@ function SnapshotCard({ label, value, accent = 'orange' }) {
 }
 
 function EvidenceList({ evidence }) {
-  const items = Array.isArray(evidence) ? evidence.filter(Boolean) : evidence ? [evidence] : [];
+  const items = (Array.isArray(evidence) ? evidence.filter(Boolean) : evidence ? [evidence] : [])
+    .map(displayEvidenceLabel)
+    .filter(Boolean);
   if (!items.length) return null;
 
   return (
@@ -105,9 +221,9 @@ function EvidenceList({ evidence }) {
       </p>
       <ul className="mt-3 space-y-2 text-sm leading-6 text-white/62">
         {items.map((item, index) => (
-          <li key={`${formatValue(item).slice(0, 40)}-${index}`} className="flex gap-3">
+          <li key={`${item.slice(0, 40)}-${index}`} className="flex gap-3">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-300/80" />
-            <span>{formatValue(item)}</span>
+            <span>{item}</span>
           </li>
         ))}
       </ul>
@@ -162,9 +278,7 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
   const output = assessment?.output || {};
   const mapReady = Boolean(output.business_intelligence_draft || output.executive_diagnostic_briefing_v1 || briefing);
   const futuresReady = Boolean(output.five_futures_v1 && output.one_move_v1);
-  const caveat = Array.isArray(briefing.caveats)
-    ? briefing.caveats.join(' ')
-    : briefing.caveats || 'This diagnostic is an operating analysis, not legal, tax, or financial advice.';
+  const caveat = cleanCaveat(briefing.caveats);
 
   return (
     <section className="mt-12 border-t border-white/10 pt-10">
