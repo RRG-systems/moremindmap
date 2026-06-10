@@ -35,6 +35,16 @@ function textBlock(...values) {
   return values.map((value) => String(value || '')).join('\n\n');
 }
 
+function makeMetric(value, estimated = false) {
+  return Number.isFinite(value) ? { value, estimated } : null;
+}
+
+function metricNumber(metric) {
+  if (Number.isFinite(metric)) return metric;
+  if (metric && typeof metric === 'object' && Number.isFinite(metric.value)) return metric.value;
+  return null;
+}
+
 function parseNumberNear(text, patterns) {
   const source = String(text || '');
   for (const pattern of patterns) {
@@ -47,73 +57,151 @@ function parseNumberNear(text, patterns) {
   return null;
 }
 
+function parseNumberMetric(text, patterns, estimated = false) {
+  const value = parseNumberNear(text, patterns);
+  return makeMetric(value, estimated);
+}
+
+function firstMetric(...metrics) {
+  return metrics.find((metric) => metricNumber(metric) !== null) || null;
+}
+
 function parseMoneyNear(text, patterns) {
   const source = String(text || '');
   for (const pattern of patterns) {
     const match = source.match(pattern);
     if (!match) continue;
     const raw = String(match[1] || match[0]).replace(/[$,\s]/g, '');
-    const multiplier = /m\b/i.test(raw) ? 1000000 : /k\b/i.test(raw) ? 1000 : 1;
-    const numeric = Number(raw.replace(/[mk]/gi, ''));
+    const multiplier = /billion|bn|b\b/i.test(raw) ? 1000000000 : /million|mm|m\b/i.test(raw) ? 1000000 : /thousand|k\b/i.test(raw) ? 1000 : 1;
+    const numeric = Number(raw.replace(/billion|million|thousand|bn|mm|[bmk]/gi, ''));
     if (Number.isFinite(numeric)) return numeric * multiplier;
   }
   return null;
 }
 
+function parseMoneyMetric(text, patterns, estimated = false) {
+  const value = parseMoneyNear(text, patterns);
+  return makeMetric(value, estimated);
+}
+
 function compactNumber(value) {
-  if (!Number.isFinite(value)) return 'Not provided';
-  return new Intl.NumberFormat('en-US').format(Math.round(value));
+  const numeric = metricNumber(value);
+  if (!Number.isFinite(numeric)) return 'Not provided';
+  const prefix = value && typeof value === 'object' && value.estimated ? '~' : '';
+  return `${prefix}${new Intl.NumberFormat('en-US').format(Math.round(numeric))}`;
 }
 
 function compactMoney(value) {
-  if (!Number.isFinite(value)) return 'Not provided';
-  const abs = Math.abs(value);
+  const numeric = metricNumber(value);
+  if (!Number.isFinite(numeric)) return 'Not provided';
+  const prefix = value && typeof value === 'object' && value.estimated ? '~' : '';
+  const abs = Math.abs(numeric);
   if (abs >= 1000000) {
-    const millions = value / 1000000;
-    return `$${Number.isInteger(millions) ? millions.toFixed(0) : millions.toFixed(1)}M`;
+    const millions = numeric / 1000000;
+    return `${prefix}$${Number.isInteger(millions) ? millions.toFixed(0) : millions.toFixed(1)}M`;
   }
-  if (abs >= 1000) return `$${Math.round(value / 1000)}K`;
-  return `$${Math.round(value)}`;
+  if (abs >= 1000) return `${prefix}$${Math.round(numeric / 1000)}K`;
+  return `${prefix}$${Math.round(numeric)}`;
 }
 
-function extractBusinessMetrics(answers) {
-  const all = textBlock(answers.q1, answers.q2, answers.q3, answers.q5, answers.q8, answers.q9, answers.q10, answers.q12);
-  const currentTrueRelationships = parseNumberNear(answers.q3, [
-    /about\s+([\d,]+)\s+are\s+true relationships/i,
-    /approximately\s+([\d,]+)\s+are\s+true relationships/i,
-    /([\d,]+)\s+are\s+true relationships/i,
-    /true relationship(?:s)?(?: database)?(?: is|:)?\s+(?:probably\s+)?([\d,]+)/i,
-  ]);
-  const totalContacts = parseNumberNear(answers.q3 + '\n' + answers.q5, [
-    /about\s+([\d,]+)\s+people\s+in\s+my\s+total\s+contact/i,
-    /total database(?: is)?(?: roughly)?\s+([\d,]+)/i,
-    /total contact list(?: across)?(?: is|:)?\s+(?:around\s+|roughly\s+|about\s+)?([\d,]+)/i,
-    /([\d,]+)\s+contacts/i,
-  ]);
+function findBriefingSection(briefing, pattern) {
+  return (Array.isArray(briefing?.sections) ? briefing.sections : []).find((section) =>
+    pattern.test(`${section?.key || ''} ${section?.title || ''}`)
+  ) || {};
+}
+
+function sectionText(section) {
+  return textBlock(section?.title, section?.body, ...(Array.isArray(section?.evidence) ? section.evidence : []));
+}
+
+function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
+  const relationshipSection = findBriefingSection(briefing, /relationship|database/i);
+  const currentBusinessSection = findBriefingSection(briefing, /current.*business|business.*reality/i);
+  const financialSection = findBriefingSection(briefing, /financial/i);
+  const relationshipDraftEvidence = draft?.relationship_reality?.evidence || {};
+  const financialDraftEvidence = draft?.financial_reality?.evidence || {};
+  const relationshipText = textBlock(
+    answers.q3,
+    answers.q5,
+    relationshipDraftEvidence.q3,
+    relationshipDraftEvidence.q5,
+    sectionText(relationshipSection),
+    oneMove?.recommendation,
+    oneMove?.why_this_move
+  );
+  const financialText = textBlock(
+    answers.q9,
+    answers.q2,
+    financialDraftEvidence.q9,
+    sectionText(currentBusinessSection),
+    sectionText(financialSection)
+  );
+  const all = textBlock(answers.q1, answers.q2, answers.q3, answers.q5, answers.q8, answers.q9, answers.q10, answers.q12, relationshipText);
+  const currentTrueRelationships = firstMetric(
+    parseNumberMetric(answers.q3, [
+      /about\s+([\d,]+)\s+are\s+true relationships/i,
+      /approximately\s+([\d,]+)\s+are\s+true relationships/i,
+      /([\d,]+)\s+are\s+true relationships/i,
+      /true relationship(?:s)?(?: database)?(?: is|:)?\s+(?:probably\s+)?([\d,]+)/i,
+    ]),
+    parseNumberMetric(relationshipText, [
+      /about\s+([\d,]+)\s+strong relationships/i,
+      /([\d,]+)\s+strong relationships/i,
+      /([\d,]+)\s+of\s+those\s+are\s+friends,\s*good relationships/i,
+      /([\d,]+)\s+friends,\s*good relationships/i,
+      /with\s+about\s+([\d,]+)\s+strong relationships/i,
+    ], true)
+  );
+  const totalContacts = firstMetric(
+    parseNumberMetric(answers.q3 + '\n' + answers.q5, [
+      /about\s+([\d,]+)\s+people\s+in\s+my\s+total\s+contact/i,
+      /total database(?: is)?(?: roughly)?\s+([\d,]+)/i,
+      /total contact list(?: across)?(?: is|:)?\s+(?:around\s+|roughly\s+|about\s+)?([\d,]+)/i,
+      /([\d,]+)\s+contacts/i,
+    ]),
+    parseNumberMetric(relationshipText, [
+      /([\d,]+)\s+people\s+in\s+my\s+database/i,
+      /database\s+estimated\s+at\s+([\d,]+)\s+contacts/i,
+      /estimated\s+at\s+([\d,]+)\s+contacts/i,
+      /database\s+(?:of|has|includes)\s+([\d,]+)\s+(?:people|contacts)/i,
+    ], true)
+  );
+  const relationshipTarget = parseNumberMetric(relationshipText, [
+    /grow\s+true relationships\s+toward\s+([\d,]+)/i,
+    /true relationships\s+toward\s+([\d,]+)/i,
+    /relationship(?:\s+lake)?\s+target(?:\s+is|:)?\s+([\d,]+)/i,
+    /target\s+of\s+([\d,]+)\s+(?:true\s+)?relationships/i,
+    /toward\s+([\d,]+)\s+(?:true\s+)?relationships/i,
+  ], true);
   const currentUnits = parseNumberNear(answers.q9 + '\n' + answers.q1, [
     /closed units:\s*([\d,]+)/i,
     /closed\s+([\d,]+)\s+units/i,
     /([\d,]+)\s+closed units/i,
   ]);
-  const currentVolume = parseMoneyNear(answers.q9 + '\n' + answers.q1, [
+  const currentVolume = firstMetric(parseMoneyMetric(financialText + '\n' + answers.q1, [
     /sales volume:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
+    /annual sales.*?(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
+    /average sales are about\s*(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
     /approximately\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
     /for\s+about\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
-  ]);
-  const currentGci = parseMoneyNear(answers.q9 + '\n' + answers.q2, [
+  ], true));
+  const currentGci = firstMetric(parseMoneyMetric(financialText + '\n' + answers.q2, [
     /gross commission income:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
     /gci:\s*(?:about\s+|approximately\s+)?(\$?[\d,.]+\s*[mk]?)/i,
     /about\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+gci/i,
-  ]);
-  const currentNet = parseMoneyNear(answers.q9 + '\n' + answers.q2, [
+    /earn\s+about\s+(\$?[\d,.]+\s*(?:m|k|million|billion)?)\s+per\s+year/i,
+  ], true));
+  const currentNet = firstMetric(parseMoneyMetric(financialText + '\n' + answers.q2, [
     /estimated net income before taxes:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
     /estimated net before taxes:\s*about\s*(\$?[\d,.]+\s*[mk]?)/i,
     /net before taxes:\s*(?:approximately\s+|about\s+)?(\$?[\d,.]+\s*[mk]?)/i,
-  ]);
+    /profit\s+is\s+about\s+(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
+  ], true));
   const goalUnits = parseNumberNear(answers.q2 + '\n' + answers.q12, [
     /12-month goal:\s*close\s+([\d,]+)\s+units/i,
     /close\s+([\d,]+)\s+units/i,
     /goal is\s+([\d,]+)\s+units/i,
+    /like\s+to\s+be\s+at\s+([\d,]+)\s*transactions/i,
   ]);
   const goalVolume = parseMoneyNear(answers.q2, [
     /roughly\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+sales volume/i,
@@ -128,9 +216,8 @@ function extractBusinessMetrics(answers) {
     /net at least\s*(\$?[\d,.]+\s*[mk]?)/i,
     /net\s+(?:at least\s+)?(\$?[\d,.]+\s*[mk]?)/i,
   ]);
-  const relationshipTarget = currentTrueRelationships
-    ? Math.max(500, Math.ceil((currentTrueRelationships * 1.45) / 25) * 25)
-    : null;
+  const currentTrueRelationshipValue = metricNumber(currentTrueRelationships);
+  const relationshipTargetValue = metricNumber(relationshipTarget);
 
   return {
     currentTrueRelationships,
@@ -144,7 +231,9 @@ function extractBusinessMetrics(answers) {
     goalGci,
     goalNet,
     relationshipTarget,
-    relationshipGap: relationshipTarget && currentTrueRelationships ? Math.max(0, relationshipTarget - currentTrueRelationships) : null,
+    relationshipGap: relationshipTargetValue && currentTrueRelationshipValue
+      ? makeMetric(Math.max(0, relationshipTargetValue - currentTrueRelationshipValue), relationshipTarget?.estimated || currentTrueRelationships?.estimated)
+      : null,
     hasWeeklyRhythmGap: /weekly operating rhythm|weekly database review|inspectable|from my head|memory|follow-up/i.test(all),
   };
 }
@@ -158,8 +247,11 @@ function buildBusinessMapVisualCopy({
   impact,
   bottomLine,
   eToP,
+  draft,
+  briefing,
+  oneMove,
 }) {
-  const metrics = extractBusinessMetrics(answers);
+  const metrics = extractBusinessMetrics({ answers, draft, briefing, oneMove });
   const constraintLabel = formatValue(primaryConstraint.label, 'Primary constraint');
   const constraintSummary = formatValue(primaryConstraint.summary, 'The business needs a more inspectable operating rhythm.');
   const goalUnits = metrics.goalUnits ? `${metrics.goalUnits}` : 'Not provided';
@@ -207,7 +299,7 @@ function buildBusinessMapVisualCopy({
       },
       {
         title: 'Diagnosis',
-        body: metrics.currentTrueRelationships && metrics.goalUnits
+        body: metricNumber(metrics.currentTrueRelationships) && metrics.goalUnits
           ? `${compactNumber(metrics.currentTrueRelationships)} true relationships support a real business, but not the ${goalUnits}-unit goal without growth and inspection.`
           : clipForVisual(businessReality.summary || constraintSummary, 130),
       },
@@ -217,7 +309,7 @@ function buildBusinessMapVisualCopy({
       },
       {
         title: 'Opportunity',
-        body: metrics.relationshipTarget
+        body: metricNumber(metrics.relationshipTarget)
           ? `Grow the lake toward ${compactNumber(metrics.relationshipTarget)}. Activate the current relationships. Create a weekly appointment rhythm.`
           : clipForVisual(opportunity, 130),
       },
@@ -237,7 +329,11 @@ function buildClosingInsight({ metrics, primaryConstraint, eToP }) {
   const accountabilityScore = Number(eToP?.accountability?.score || 0);
   const toolsScore = Number(eToP?.tools?.score || 0);
 
-  if (metrics.currentTrueRelationships && metrics.relationshipTarget && metrics.relationshipTarget > metrics.currentTrueRelationships) {
+  if (
+    metricNumber(metrics.currentTrueRelationships) &&
+    metricNumber(metrics.relationshipTarget) &&
+    metricNumber(metrics.relationshipTarget) > metricNumber(metrics.currentTrueRelationships)
+  ) {
     return {
       headline: 'THE LAKE IS REAL. THE RHYTHM IS THE GAP.',
       subline: `Grow true relationships toward ${compactNumber(metrics.relationshipTarget)} and inspect weekly appointment creation.`,
@@ -406,6 +502,9 @@ export function normalizeBusinessVisualArtifactData(record) {
     impact: normalized.impact,
     bottomLine: normalized.bottomLine,
     eToP,
+    draft,
+    briefing,
+    oneMove,
   });
 
   return normalized;
