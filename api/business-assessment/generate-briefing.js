@@ -131,6 +131,15 @@ function wordCount(value) {
   return String(value || '').trim().split(/\s+/).filter(Boolean).length;
 }
 
+function sectionWordCount(section) {
+  const bodyWords = wordCount(section?.body);
+  const evidenceWords = Array.isArray(section?.evidence) ? wordCount(section.evidence.join(' ')) : 0;
+  return {
+    bodyWords,
+    combinedWords: bodyWords + evidenceWords
+  };
+}
+
 function validateBriefingOutput(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return { valid: false, reason: 'briefing_not_object' };
@@ -208,23 +217,30 @@ function validateBriefingOutput(value) {
     };
   }
 
-  const malformedSection = value.sections.find(
-    (section) =>
+  const malformedSection = value.sections.find((section) => {
+    if (
       !section ||
       typeof section !== 'object' ||
       !section.key ||
       !section.title ||
-      typeof section.body !== 'string' ||
-      wordCount(section.body) < MINIMUM_SECTION_BODY_WORDS
-  );
+      typeof section.body !== 'string'
+    ) {
+      return true;
+    }
+
+    const counts = sectionWordCount(section);
+    return counts.bodyWords < 60 || counts.combinedWords < MINIMUM_SECTION_BODY_WORDS;
+  });
 
   if (malformedSection) {
+    const counts = sectionWordCount(malformedSection);
     return {
       valid: false,
       reason: 'malformed_or_thin_section',
       section: malformedSection?.key || malformedSection?.title,
       minimum_words: MINIMUM_SECTION_BODY_WORDS,
-      actual_words: wordCount(malformedSection?.body)
+      actual_body_words: counts.bodyWords,
+      actual_words: counts.combinedWords
     };
   }
 
