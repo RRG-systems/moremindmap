@@ -32,6 +32,16 @@ const REQUIRED_SECTION_TITLES = [
 const MINIMUM_BRIEFING_CHARACTERS = 12000;
 const MINIMUM_BRIEFING_WORDS = 1800;
 const MINIMUM_SECTION_BODY_WORDS = 90;
+const MAX_REPAIR_ATTEMPTS = 2;
+const NARROW_SECTION_WORD_GAP = 25;
+const STRUCTURAL_TOP_LEVEL_KEYS = [
+  'sections',
+  'primary_constraint_snapshot',
+  'current_trajectory_signal',
+  'confidence_snapshot',
+  'missing_data',
+  'caveats'
+];
 
 async function resolveAssessmentId(redis, { assessment_id, owner_profile_id }) {
   if (assessment_id) return assessment_id;
@@ -262,6 +272,48 @@ function validateBriefingOutput(value) {
   return { valid: true };
 }
 
+function structurallyComplete(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  return STRUCTURAL_TOP_LEVEL_KEYS.every((key) => value[key] !== undefined && value[key] !== null);
+}
+
+function thinSectionFailures(value) {
+  if (!Array.isArray(value?.sections)) return [];
+  return value.sections
+    .map((section) => {
+      const counts = sectionWordCount(section);
+      const structurallyInvalid =
+        !section ||
+        typeof section !== 'object' ||
+        !section.key ||
+        !section.title ||
+        typeof section.body !== 'string';
+
+      if (!structurallyInvalid && counts.bodyWords >= 60 && counts.combinedWords >= MINIMUM_SECTION_BODY_WORDS) {
+        return null;
+      }
+
+      return {
+        key: section?.key || null,
+        title: section?.title || null,
+        structurally_invalid: structurallyInvalid,
+        body_words: counts.bodyWords,
+        combined_words: counts.combinedWords,
+        words_needed: Math.max(0, MINIMUM_SECTION_BODY_WORDS - counts.combinedWords)
+      };
+    })
+    .filter(Boolean);
+}
+
+function isNarrowThinSectionFailure(validation, value) {
+  if (validation?.reason !== 'malformed_or_thin_section') return false;
+  if (!structurallyComplete(value)) return false;
+  const failures = thinSectionFailures(value);
+  if (failures.length !== 1) return false;
+  const [failure] = failures;
+  return !failure.structurally_invalid && failure.words_needed > 0 && failure.words_needed <= NARROW_SECTION_WORD_GAP;
+}
+
 function shouldAttemptBriefingRepair(validation) {
   return [
     'briefing_markdown_too_short',
@@ -274,6 +326,44 @@ function compactForRepair(value, maxLength = 36000) {
   const body = JSON.stringify(value ?? {}, null, 2);
   if (body.length <= maxLength) return body;
   return `${body.slice(0, maxLength)}\n[TRUNCATED ${body.length - maxLength} CHARACTERS]`;
+}
+
+function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation) {
+  const failingSection =
+    Array.isArray(previousOutput?.sections) &&
+    previousOutput.sections.find(
+      (section) => section?.key === validation?.section || section?.title === validation?.section
+    );
+
+  return {
+    ...prompt,
+    messages: [
+      ...prompt.messages,
+      {
+        role: 'assistant',
+        content: compactForRepair(previousOutput)
+      },
+      {
+        role: 'user',
+        content: [
+          'The previous Executive Diagnostic Briefing JSON is structurally complete but one section is narrowly too thin.',
+          `Validation failure: ${JSON.stringify(validation)}`,
+          failingSection
+            ? `Failing section title: ${failingSection.title}. Failing section key: ${failingSection.key}.`
+            : '',
+          'Return the FULL corrected Executive Diagnostic Briefing JSON object, not a partial patch.',
+          'Preserve every required top-level key exactly: version, generated_at, assessment_id, owner_profile_id, title, audience_type, word_count_target, briefing_markdown, sections, primary_constraint_snapshot, current_trajectory_signal, confidence_snapshot, missing_data, caveats.',
+          'Preserve all existing diagnostic conclusions and all other sections.',
+          'Expand only the failing section enough to comfortably clear the section-depth requirement, adding evidence-based reasoning, implications, and missing-data interpretation.',
+          'Regenerate briefing_markdown so it reflects the corrected full sections.',
+          'Do not remove sections, evidence, confidence labels, snapshots, missing_data, or caveats.',
+          'Return valid JSON only. No markdown fences.'
+        ]
+          .filter(Boolean)
+          .join('\n')
+      }
+    ]
+  };
 }
 
 function buildRepairPrompt(prompt, previousOutput, validation) {
@@ -290,7 +380,8 @@ function buildRepairPrompt(prompt, previousOutput, validation) {
         content: [
           'The previous JSON output failed validation for the Executive Diagnostic Briefing.',
           `Validation failure: ${JSON.stringify(validation)}`,
-          'Return one corrected complete JSON object with the same required top-level keys.',
+          'Return one corrected complete JSON object with every required top-level key.',
+          'Required top-level keys: version, generated_at, assessment_id, owner_profile_id, title, audience_type, word_count_target, briefing_markdown, sections, primary_constraint_snapshot, current_trajectory_signal, confidence_snapshot, missing_data, caveats.',
           'Keep the product name exactly "Executive Diagnostic Briefing".',
           'Do not summarize briefly and do not use placeholder markdown.',
           'The briefing_markdown field must contain the full written briefing, not a pointer to the sections.',
@@ -301,6 +392,18 @@ function buildRepairPrompt(prompt, previousOutput, validation) {
         ].join('\n')
       }
     ]
+  };
+}
+
+function validationDiagnostics(validation, candidate, extra = {}) {
+  return {
+    ...extra,
+    validation,
+    structurally_complete: structurallyComplete(candidate),
+    missing_structural_keys: STRUCTURAL_TOP_LEVEL_KEYS.filter(
+      (key) => candidate?.[key] === undefined || candidate?.[key] === null
+    ),
+    thin_section_failures: thinSectionFailures(candidate)
   };
 }
 
@@ -439,40 +542,137 @@ export default async function handler(req, res) {
     });
 
     let validation = validateBriefingOutput(briefing);
-    if (!validation.valid && shouldAttemptBriefingRepair(validation)) {
-      const repairPrompt = buildRepairPrompt(prompt, briefing, validation);
+    let bestStructurallyCompleteBriefing = structurallyComplete(briefing) ? briefing : null;
+    const repairDiagnostics = [
+      validationDiagnostics(validation, briefing, {
+        attempt: 'initial',
+        model: generation.model,
+        usage: generation.usage || null,
+        duration_ms: generation.duration_ms
+      })
+    ];
+
+    let repairAttempts = 0;
+    while (!validation.valid && repairAttempts < MAX_REPAIR_ATTEMPTS) {
+      const repairSource = bestStructurallyCompleteBriefing || briefing;
+      const repairSourceValidation = validateBriefingOutput(repairSource);
+      const targetedRepair = isNarrowThinSectionFailure(repairSourceValidation, repairSource);
+
+      if (!targetedRepair && !shouldAttemptBriefingRepair(repairSourceValidation)) {
+        break;
+      }
+
+      const repairPrompt = targetedRepair
+        ? buildTargetedSectionExpansionPrompt(prompt, repairSource, repairSourceValidation)
+        : buildRepairPrompt(prompt, repairSource, repairSourceValidation);
+      repairAttempts += 1;
       console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repairing briefing output', {
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId,
-        reason: validation.reason
+        reason: repairSourceValidation.reason,
+        repair_attempt: repairAttempts,
+        targeted_section_expansion: targetedRepair
       });
-      generation = await callOpenAIForBriefing(repairPrompt);
+      const repairGeneration = await callOpenAIForBriefing(repairPrompt);
       console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repair OpenAI completed', {
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId,
-        model: generation.model,
-        duration_ms: generation.duration_ms,
-        usage: generation.usage || null
+        model: repairGeneration.model,
+        duration_ms: repairGeneration.duration_ms,
+        usage: repairGeneration.usage || null,
+        repair_attempt: repairAttempts
       });
-      briefing = normalizeBriefingOutput(generation.parsed, {
+      const repairedBriefing = normalizeBriefingOutput(repairGeneration.parsed, {
         assessmentId,
         ownerProfileId,
         prompt
       });
-      validation = validateBriefingOutput(briefing);
+      const repairValidation = validateBriefingOutput(repairedBriefing);
+      const repairStructurallyComplete = structurallyComplete(repairedBriefing);
+      repairDiagnostics.push(
+        validationDiagnostics(repairValidation, repairedBriefing, {
+          attempt: `repair_${repairAttempts}`,
+          model: repairGeneration.model,
+          usage: repairGeneration.usage || null,
+          duration_ms: repairGeneration.duration_ms,
+          targeted_section_expansion: targetedRepair,
+          structurally_worse_than_previous: Boolean(bestStructurallyCompleteBriefing && !repairStructurallyComplete)
+        })
+      );
+
+      if (repairStructurallyComplete) {
+        briefing = repairedBriefing;
+        validation = repairValidation;
+        bestStructurallyCompleteBriefing = repairedBriefing;
+        generation = repairGeneration;
+      } else if (bestStructurallyCompleteBriefing) {
+        briefing = bestStructurallyCompleteBriefing;
+        validation = validateBriefingOutput(bestStructurallyCompleteBriefing);
+      } else {
+        briefing = repairedBriefing;
+        validation = repairValidation;
+        generation = repairGeneration;
+      }
     }
 
     if (!validation.valid) {
+      const now = new Date().toISOString();
+      const failureMetadata = {
+        ...(assessmentRecord.metadata || {}),
+        last_briefing_generation_error: {
+          generated_at: now,
+          validation,
+          assessment_id: assessmentId,
+          owner_profile_id: ownerProfileId,
+          initial_output_structurally_complete: Boolean(repairDiagnostics[0]?.structurally_complete),
+          repair_output_structurally_incomplete: repairDiagnostics.some(
+            (item) => String(item.attempt || '').startsWith('repair_') && !item.structurally_complete
+          ),
+          repair_attempts: repairAttempts,
+          diagnostics: repairDiagnostics
+        }
+      };
+
+      await redis.set(
+        businessAssessmentKey(assessmentId),
+        JSON.stringify({
+          ...assessmentRecord,
+          updated_at: now,
+          metadata: failureMetadata
+        })
+      );
+
       return res.status(502).json({
         ok: false,
         error: 'invalid_briefing_output',
         validation,
+        diagnostics: {
+          initial_output_structurally_complete: Boolean(repairDiagnostics[0]?.structurally_complete),
+          repair_output_structurally_incomplete: repairDiagnostics.some(
+            (item) => String(item.attempt || '').startsWith('repair_') && !item.structurally_complete
+          ),
+          repair_attempts: repairAttempts,
+          attempts: repairDiagnostics
+        },
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId
       });
     }
 
     const now = new Date().toISOString();
+    const previousMetadata = assessmentRecord.metadata || {};
+    const {
+      notes,
+      last_briefing_generation_error: _lastBriefingGenerationError,
+      ...metadataWithoutStaleBriefingFields
+    } = previousMetadata;
+    const cleanedMetadata =
+      notes === 'Sprint 2 intake only. No intelligence generated.'
+        ? metadataWithoutStaleBriefingFields
+        : {
+            ...metadataWithoutStaleBriefingFields,
+            ...(notes ? { notes } : {})
+          };
     const updatedRecord = {
       ...assessmentRecord,
       status: 'executive_diagnostic_briefing_ready',
@@ -482,11 +682,13 @@ export default async function handler(req, res) {
         executive_diagnostic_briefing_v1: briefing
       },
       metadata: {
-        ...(assessmentRecord.metadata || {}),
+        ...cleanedMetadata,
         briefing_version: BRIEFING_VERSION,
         briefing_generated_at: now,
         briefing_model: generation.model,
-        briefing_usage: generation.usage
+        briefing_usage: generation.usage,
+        briefing_repair_attempts: repairAttempts,
+        briefing_repair_diagnostics: repairDiagnostics
       }
     };
 
