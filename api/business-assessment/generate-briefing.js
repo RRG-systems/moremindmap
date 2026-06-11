@@ -305,13 +305,14 @@ function thinSectionFailures(value) {
     .filter(Boolean);
 }
 
-function isNarrowThinSectionFailure(validation, value) {
-  if (validation?.reason !== 'malformed_or_thin_section') return false;
+function expandableThinSectionFailure(validation, value) {
+  if (!['malformed_or_thin_section', 'briefing_markdown_too_short', 'briefing_word_count_too_short'].includes(validation?.reason)) {
+    return false;
+  }
   if (!structurallyComplete(value)) return false;
   const failures = thinSectionFailures(value);
-  if (failures.length !== 1) return false;
-  const [failure] = failures;
-  return !failure.structurally_invalid && failure.words_needed > 0 && failure.words_needed <= NARROW_SECTION_WORD_GAP;
+  if (!failures.length) return false;
+  return failures.every((failure) => !failure.structurally_invalid && failure.words_needed > 0);
 }
 
 function shouldAttemptBriefingRepair(validation) {
@@ -329,11 +330,14 @@ function compactForRepair(value, maxLength = 36000) {
 }
 
 function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation) {
-  const failingSection =
-    Array.isArray(previousOutput?.sections) &&
-    previousOutput.sections.find(
-      (section) => section?.key === validation?.section || section?.title === validation?.section
-    );
+  const thinFailures = thinSectionFailures(previousOutput);
+  const failingSections = Array.isArray(previousOutput?.sections)
+    ? previousOutput.sections.filter((section) =>
+        thinFailures.some((failure) => failure.key === section?.key || failure.title === section?.title)
+      )
+    : [];
+  const isNarrowSingleSection =
+    thinFailures.length === 1 && thinFailures[0].words_needed <= NARROW_SECTION_WORD_GAP;
 
   return {
     ...prompt,
@@ -346,15 +350,20 @@ function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation)
       {
         role: 'user',
         content: [
-          'The previous Executive Diagnostic Briefing JSON is structurally complete but one section is narrowly too thin.',
+          isNarrowSingleSection
+            ? 'The previous Executive Diagnostic Briefing JSON is structurally complete but one section is narrowly too thin.'
+            : 'The previous Executive Diagnostic Briefing JSON is structurally complete but some sections are still too thin after repair.',
           `Validation failure: ${JSON.stringify(validation)}`,
-          failingSection
-            ? `Failing section title: ${failingSection.title}. Failing section key: ${failingSection.key}.`
+          failingSections.length
+            ? `Sections that must be expanded: ${failingSections
+                .map((section) => `${section.title} (${section.key})`)
+                .join('; ')}.`
             : '',
           'Return the FULL corrected Executive Diagnostic Briefing JSON object, not a partial patch.',
           'Preserve every required top-level key exactly: version, generated_at, assessment_id, owner_profile_id, title, audience_type, word_count_target, briefing_markdown, sections, primary_constraint_snapshot, current_trajectory_signal, confidence_snapshot, missing_data, caveats.',
           'Preserve all existing diagnostic conclusions and all other sections.',
-          'Expand only the failing section enough to comfortably clear the section-depth requirement, adding evidence-based reasoning, implications, and missing-data interpretation.',
+          'Expand only the listed thin sections enough to comfortably clear the section-depth requirement, adding evidence-based reasoning, implications, and missing-data interpretation.',
+          'Each listed section body should be at least 120 words. Do not shorten any other section.',
           'Regenerate briefing_markdown so it reflects the corrected full sections.',
           'Do not remove sections, evidence, confidence labels, snapshots, missing_data, or caveats.',
           'Return valid JSON only. No markdown fences.'
@@ -556,7 +565,8 @@ export default async function handler(req, res) {
     while (!validation.valid && repairAttempts < MAX_REPAIR_ATTEMPTS) {
       const repairSource = bestStructurallyCompleteBriefing || briefing;
       const repairSourceValidation = validateBriefingOutput(repairSource);
-      const targetedRepair = isNarrowThinSectionFailure(repairSourceValidation, repairSource);
+      const targetedRepair =
+        repairAttempts > 0 && expandableThinSectionFailure(repairSourceValidation, repairSource);
 
       if (!targetedRepair && !shouldAttemptBriefingRepair(repairSourceValidation)) {
         break;
