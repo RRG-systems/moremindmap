@@ -12,6 +12,10 @@ import { buildFiveFuturesPrompt, REQUIRED_FUTURE_KEYS } from '../engine/business
 const FIVE_FUTURES_VERSION = 'five_futures_v1';
 const ONE_MOVE_VERSION = 'one_move_v1';
 const MODEL = process.env.BUSINESS_ASSESSMENT_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+const FUTURES_ENDPOINT_TIME_BUDGET_MS = 165000;
+const FUTURES_OPENAI_CALL_TIMEOUT_MS = 150000;
+const FUTURES_OPENAI_SAFETY_BUFFER_MS = 10000;
+const FUTURES_MAX_COMPLETION_TOKENS = 14000;
 const REQUIRED_FUTURE_FIELDS = [
   'title',
   'probability',
@@ -196,13 +200,81 @@ function validateOutput({ five_futures_v1, one_move_v1 }) {
   return { valid: true };
 }
 
-async function callOpenAIForFutures(prompt) {
+function elapsedMs(startedAt) {
+  return Date.now() - startedAt;
+}
+
+function remainingMs(startedAt) {
+  return Math.max(0, FUTURES_ENDPOINT_TIME_BUDGET_MS - elapsedMs(startedAt));
+}
+
+function shouldStopBeforeTimeout(startedAt) {
+  return remainingMs(startedAt) <= FUTURES_OPENAI_CALL_TIMEOUT_MS + FUTURES_OPENAI_SAFETY_BUFFER_MS;
+}
+
+function futuresDiagnostics({
+  assessmentId,
+  ownerProfileId,
+  prompt,
+  startedAt,
+  stage,
+  error,
+  validation,
+  timeoutMs
+}) {
+  return {
+    generated_at: new Date().toISOString(),
+    stage,
+    error: error || null,
+    validation: validation || null,
+    assessment_id: assessmentId,
+    owner_profile_id: ownerProfileId,
+    model: MODEL,
+    prompt_chars: JSON.stringify(prompt?.messages || []).length,
+    user_prompt_chars: String(prompt?.messages?.[1]?.content || '').length,
+    max_completion_tokens: FUTURES_MAX_COMPLETION_TOKENS,
+    elapsed_ms: elapsedMs(startedAt),
+    remaining_ms: remainingMs(startedAt),
+    timeout_ms: timeoutMs || null
+  };
+}
+
+async function saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics) {
+  const now = new Date().toISOString();
+  await redis.set(
+    businessAssessmentKey(assessmentId),
+    JSON.stringify({
+      ...assessmentRecord,
+      updated_at: now,
+      metadata: {
+        ...(assessmentRecord.metadata || {}),
+        last_futures_generation_error: diagnostics
+      }
+    })
+  );
+}
+
+function sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentStatus) {
+  return res.status(503).json({
+    ok: false,
+    error: 'futures_generation_time_budget_exceeded',
+    status: assessmentStatus,
+    assessment_id: diagnostics.assessment_id,
+    owner_profile_id: diagnostics.owner_profile_id,
+    diagnostics
+  });
+}
+
+async function callOpenAIForFutures(prompt, { timeoutMs = FUTURES_OPENAI_CALL_TIMEOUT_MS } = {}) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error('OPENAI_API_KEY is not configured');
     error.code = 'missing_openai_api_key';
     throw error;
   }
 
+  const startedAt = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -213,9 +285,18 @@ async function callOpenAIForFutures(prompt) {
       model: MODEL,
       messages: prompt.messages,
       response_format: { type: 'json_object' },
-      max_completion_tokens: 14000
-    })
-  });
+      max_completion_tokens: FUTURES_MAX_COMPLETION_TOKENS
+    }),
+    signal: controller.signal
+  }).catch((error) => {
+    if (error?.name === 'AbortError') {
+      const timeoutError = new Error(`OpenAI futures call exceeded ${timeoutMs}ms`);
+      timeoutError.code = 'openai_futures_call_timeout';
+      timeoutError.timeout_ms = timeoutMs;
+      throw timeoutError;
+    }
+    throw error;
+  }).finally(() => clearTimeout(timeout));
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -235,7 +316,8 @@ async function callOpenAIForFutures(prompt) {
   return {
     parsed: extractJsonObject(content),
     model: data.model || MODEL,
-    usage: data.usage || null
+    usage: data.usage || null,
+    duration_ms: Date.now() - startedAt
   };
 }
 
@@ -246,6 +328,10 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
 
   let redis;
+  const requestStartedAt = Date.now();
+  let activeAssessmentRecord = null;
+  let activeAssessmentId = null;
+  let activeOwnerProfileId = null;
   try {
     const { assessment_id, owner_profile_id } = req.body || {};
     if (!assessment_id && !owner_profile_id) {
@@ -254,6 +340,7 @@ export default async function handler(req, res) {
 
     redis = createRedisClient();
     const assessmentId = await resolveAssessmentId(redis, { assessment_id, owner_profile_id });
+    activeAssessmentId = assessmentId;
     if (!assessmentId) return res.status(404).json({ ok: false, error: 'assessment_not_found' });
 
     const rawAssessment = await redis.get(businessAssessmentKey(assessmentId));
@@ -262,7 +349,9 @@ export default async function handler(req, res) {
     }
 
     const assessmentRecord = JSON.parse(rawAssessment);
+    activeAssessmentRecord = assessmentRecord;
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
+    activeOwnerProfileId = ownerProfileId;
     const businessIntelligenceDraft = assessmentRecord.output?.business_intelligence_draft;
     const executiveDiagnosticBriefing = assessmentRecord.output?.executive_diagnostic_briefing_v1;
 
@@ -302,10 +391,65 @@ export default async function handler(req, res) {
       realEstateBusinessModel: REAL_ESTATE_BUSINESS_MODEL_V1
     });
 
-    const generation = await callOpenAIForFutures(prompt);
+    const beforeOpenAIDiagnostics = futuresDiagnostics({
+      assessmentId,
+      ownerProfileId,
+      prompt,
+      startedAt: requestStartedAt,
+      stage: 'before_initial_futures_generation',
+      error: 'futures_generation_started'
+    });
+    await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, beforeOpenAIDiagnostics);
+
+    if (shouldStopBeforeTimeout(requestStartedAt)) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        prompt,
+        startedAt: requestStartedAt,
+        stage: 'before_initial_futures_generation',
+        error: 'insufficient_time_before_initial_futures_generation',
+        timeoutMs: FUTURES_OPENAI_CALL_TIMEOUT_MS
+      });
+      await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+      return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+    }
+
+    let generation;
+    try {
+      generation = await callOpenAIForFutures(prompt, { timeoutMs: FUTURES_OPENAI_CALL_TIMEOUT_MS });
+    } catch (error) {
+      if (error?.code === 'openai_futures_call_timeout') {
+        const diagnostics = futuresDiagnostics({
+          assessmentId,
+          ownerProfileId,
+          prompt,
+          startedAt: requestStartedAt,
+          stage: 'openai_futures_call_timeout',
+          error: 'openai_futures_call_timeout',
+          timeoutMs: error.timeout_ms
+        });
+        await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+        return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+      }
+      throw error;
+    }
+
     const normalized = normalizeFuturesOutput(generation.parsed, { assessmentId, ownerProfileId });
     const validation = validateOutput(normalized);
     if (!validation.valid) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        prompt,
+        startedAt: requestStartedAt,
+        stage: 'after_futures_validation',
+        error: 'invalid_futures_output',
+        validation
+      });
+      diagnostics.generation_duration_ms = generation.duration_ms;
+      diagnostics.generation_usage = generation.usage || null;
+      await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
       return res.status(502).json({
         ok: false,
         error: 'invalid_futures_output',
@@ -331,9 +475,11 @@ export default async function handler(req, res) {
         one_move_version: ONE_MOVE_VERSION,
         futures_generated_at: now,
         futures_model: generation.model,
-        futures_usage: generation.usage
+        futures_usage: generation.usage,
+        last_futures_generation_error: undefined
       }
     };
+    delete updatedRecord.metadata.last_futures_generation_error;
 
     await redis.set(businessAssessmentKey(assessmentId), JSON.stringify(updatedRecord));
 
@@ -347,6 +493,34 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('[BUSINESS-ASSESSMENT-FUTURES] Error:', error);
+    if (error?.code === 'openai_futures_call_timeout' && redis && activeAssessmentRecord && activeAssessmentId) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId: activeAssessmentId,
+        ownerProfileId: activeOwnerProfileId || activeAssessmentRecord.owner_profile_id,
+        prompt: null,
+        startedAt: requestStartedAt,
+        stage: 'openai_futures_call_timeout',
+        error: 'openai_futures_call_timeout',
+        timeoutMs: error.timeout_ms
+      });
+      await saveFuturesFailureMetadata(redis, activeAssessmentRecord, activeAssessmentId, diagnostics);
+      return sendFuturesTimeBudgetExceeded(res, diagnostics, activeAssessmentRecord.status);
+    }
+
+    if (redis && activeAssessmentRecord && activeAssessmentId) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId: activeAssessmentId,
+        ownerProfileId: activeOwnerProfileId || activeAssessmentRecord.owner_profile_id,
+        prompt: null,
+        startedAt: requestStartedAt,
+        stage: 'futures_generation_failed',
+        error: error.message || 'Unknown futures generation error'
+      });
+      diagnostics.code = error.code;
+      diagnostics.status = error.status;
+      await saveFuturesFailureMetadata(redis, activeAssessmentRecord, activeAssessmentId, diagnostics);
+    }
+
     return res.status(500).json({
       ok: false,
       error: 'futures_generation_failed',

@@ -143,7 +143,7 @@ function briefingSnapshot(executiveDiagnosticBriefing) {
       ? briefing.sections.map((section) => ({
           key: section.key,
           title: section.title,
-          body: truncate(section.body, 2500),
+          body: truncate(section.body, 1100),
           evidence: section.evidence,
           confidence: section.confidence
         }))
@@ -313,9 +313,9 @@ export function buildFiveFuturesPrompt({
     version: FIVE_FUTURES_VERSION,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: compactJson(userPayload, 80000) }
+      { role: 'user', content: compactJson(userPayload, 60000) }
     ],
-    prompt_text: `${system}\n\n${compactJson(userPayload, 80000)}`,
+    prompt_text: `${system}\n\n${compactJson(userPayload, 60000)}`,
     required_future_keys: REQUIRED_FUTURE_KEYS,
     required_future_labels: REQUIRED_FUTURE_LABELS
   };
