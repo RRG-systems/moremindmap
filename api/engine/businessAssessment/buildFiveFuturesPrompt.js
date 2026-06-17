@@ -168,8 +168,11 @@ export function buildFiveFuturesPrompt({
     'The Five Futures are modeled from current operating reality, business constraints, behavioral profile, assessment answers, and the Executive Diagnostic Briefing.',
     'The One Move is generated after the Five Futures logic and identifies the intervention most likely to shift probability mass from the current / constraint trajectory toward the optimized trajectory.',
     'Use plain-English strategic diagnostic language.',
+    'Produce concise schema-complete JSON, not prose-heavy narrative.',
+    'Target roughly 4,500-6,500 completion tokens.',
     'Do not invent financial numbers, team facts, production history, or market facts not present in the inputs.',
     'Do not generate a frontend report, visual artifact, or modal copy.',
+    'Do not include extra top-level sections, long essays, markdown, or padding.',
     'Return valid JSON only. No markdown fences.'
   ].join('\n');
 
@@ -277,6 +280,16 @@ export function buildFiveFuturesPrompt({
       'transformational_future should usually be lower probability unless evidence supports readiness.',
       'optimized_future requires intervention.',
       'constraint_future shows what happens if the bottleneck persists.'
+    ],
+    output_length_rules: [
+      'Be concise but specific.',
+      'Use short paragraphs and compact arrays.',
+      'Each future should be evidence-linked without becoming a long essay.',
+      'summary, trajectory_logic, what_the_system_sees, risk_if_unchanged, upside, and required_shift should usually be 1-3 sentences each.',
+      'signal_bullets should be 3-5 short bullets.',
+      'evidence arrays should use the strongest 3-5 grounded evidence items.',
+      'One Move should be practical and complete, but not padded.',
+      'Do not add fields outside the requested JSON contract.'
     ],
     one_move_rules: [
       'Generate One Move after the Five Futures logic.',
