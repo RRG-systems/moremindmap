@@ -46,6 +46,8 @@ const NEAR_PASS_CHARACTER_GAP = 500;
 const NEAR_PASS_WORD_GAP = 75;
 const UNDER_LENGTH_CHARACTER_GAP = 2500;
 const UNDER_LENGTH_WORD_GAP = 500;
+const DETERMINISTIC_CLOSE_GAP_WORD_GAP = 250;
+const DETERMINISTIC_CLOSE_GAP_CHARACTER_GAP = 1500;
 const SECOND_SUPPLEMENTAL_CHARACTER_GAP = 1500;
 const SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS = 60;
 const SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS = 90;
@@ -561,6 +563,172 @@ function secondSupplementalExpansionCandidate(validation, candidate, attemptsUse
   if (gap?.type === 'word_gap') return gap.value > 0 && gap.value <= UNDER_LENGTH_WORD_GAP;
   if (gap?.type === 'character_gap') return gap.value > 0 && gap.value <= SECOND_SUPPLEMENTAL_CHARACTER_GAP;
   return false;
+}
+
+function isDeterministicCloseGapCandidate(validation, candidate) {
+  if (!structurallyComplete(candidate)) return false;
+  if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
+  if (validation?.reason === 'missing_required_keys') return false;
+
+  const gap = briefingLengthGap(validation);
+  if (gap?.type === 'word_gap') {
+    return gap.value > 0 && gap.value <= DETERMINISTIC_CLOSE_GAP_WORD_GAP;
+  }
+  if (gap?.type === 'character_gap') {
+    return gap.value > 0 && gap.value <= DETERMINISTIC_CLOSE_GAP_CHARACTER_GAP;
+  }
+  return false;
+}
+
+function findSectionForDeterministicCloseGap(candidate) {
+  const priority = [
+    'executive_readout',
+    'primary_constraint',
+    'behavioral_reality_applied_to_business',
+    'relationship_database_reality',
+    'accountability_reality',
+    'preliminary_one_move_direction'
+  ];
+  const sections = Array.isArray(candidate?.sections) ? candidate.sections : [];
+  for (const key of priority) {
+    const section = sections.find((item) => item?.key === key);
+    if (section) return section;
+  }
+
+  return sections
+    .filter((section) => section?.key && typeof section.body === 'string')
+    .sort((a, b) => sectionWordCount(a).bodyWords - sectionWordCount(b).bodyWords)[0] || null;
+}
+
+function displayTextFromValue(value) {
+  if (value === undefined || value === null) return '';
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    return String(value).trim();
+  }
+  if (Array.isArray(value)) {
+    return value.map(displayTextFromValue).filter(Boolean).slice(0, 4).join('; ');
+  }
+  if (typeof value === 'object') {
+    return firstNonEmpty(
+      value.summary,
+      value.constraint,
+      value.signal,
+      value.level,
+      value.label,
+      value.title,
+      value.description,
+      value.interpretation
+    );
+  }
+  return '';
+}
+
+function firstNonEmpty(...values) {
+  return values
+    .map(displayTextFromValue)
+    .find(Boolean) || '';
+}
+
+function buildDeterministicDiagnosticExpansion({ candidate, businessDraft }) {
+  const primaryConstraint = firstNonEmpty(
+    candidate?.primary_constraint_snapshot?.summary,
+    candidate?.primary_constraint_snapshot?.constraint,
+    candidate?.primary_constraint_snapshot,
+    businessDraft?.constraint_analysis?.primary_constraint,
+    businessDraft?.primary_constraint
+  );
+  const trajectory = firstNonEmpty(
+    candidate?.current_trajectory_signal?.summary,
+    candidate?.current_trajectory_signal?.signal,
+    candidate?.current_trajectory_signal,
+    businessDraft?.current_stage?.stage,
+    businessDraft?.trajectory?.current_signal
+  );
+  const confidence = firstNonEmpty(
+    candidate?.confidence_snapshot?.summary,
+    candidate?.confidence_snapshot?.level,
+    candidate?.confidence_snapshot,
+    businessDraft?.confidence?.level
+  );
+  const missingData = Array.isArray(candidate?.missing_data)
+    ? candidate.missing_data.map((item) => String(item || '').trim()).filter(Boolean).slice(0, 4).join('; ')
+    : firstNonEmpty(candidate?.missing_data, businessDraft?.missing_data);
+
+  const constraintSentence = primaryConstraint
+    ? `The clearest constraint already named in the diagnostic is ${primaryConstraint}.`
+    : 'The clearest constraint is the gap between the business the owner is trying to build and the operating rhythm currently visible in the evidence.';
+  const trajectorySentence = trajectory
+    ? `The current trajectory signal is ${trajectory}.`
+    : 'The current trajectory should be read as a continuation of the existing operating pattern unless the leading activities become more visible and inspectable.';
+  const confidenceSentence = confidence
+    ? `The confidence picture is ${confidence}, which means the recommendation should be used as an operating hypothesis to inspect weekly rather than as a static label.`
+    : 'The confidence picture depends on the owner turning the most important leading indicators into observable weekly facts.';
+  const missingDataSentence = missingData
+    ? `The missing or partial evidence still matters: ${missingData}.`
+    : 'Where data is still missing, the business should treat that absence as operational evidence because unclear numbers make it harder to know which activity is working.';
+
+  return [
+    [
+      `${constraintSentence} ${trajectorySentence}`,
+      'That matters because the next stage of the business will not be created only by more effort; it will be created by a tighter connection between relationship activity, follow-up discipline, appointment creation, and visible review.',
+      'When those links are left informal, the owner can still produce results, but the business remains harder to forecast, harder to coach, and harder to improve under pressure.',
+      'The practical implication is that the operating system must make the leading behavior visible before the lagging result arrives.',
+      'This keeps the diagnostic focused on operating leverage: what is happening repeatedly, what is not being inspected, and what must become measurable before the business can rely on the next level of production.'
+    ].join(' '),
+    [
+      `${missingDataSentence} ${confidenceSentence}`,
+      'The strongest next move is therefore not to add complexity, but to make the existing business easier to inspect.',
+      'A useful weekly rhythm should clarify which relationships were activated, which opportunities moved forward, which follow-up promises were completed, and which constraints repeated.',
+      'That gives the owner a way to separate a temporary activity problem from a structural system problem and creates a cleaner path from current production to the modeled future.',
+      'It also protects the business from mistaking confidence, effort, or recent momentum for a repeatable system when the evidence still shows gaps in cadence, accountability, or source-level clarity.'
+    ].join(' ')
+  ].join('\n\n');
+}
+
+function applyDeterministicCloseGapFallback(candidate, validation, context) {
+  if (!isDeterministicCloseGapCandidate(validation, candidate)) {
+    return { attempted: false };
+  }
+
+  const targetSection = findSectionForDeterministicCloseGap(candidate);
+  if (!targetSection?.key) {
+    return { attempted: false, error: 'deterministic_close_gap_section_missing' };
+  }
+
+  const gap = briefingLengthGap(validation);
+  const appendText = buildDeterministicDiagnosticExpansion({
+    candidate,
+    businessDraft: context?.businessDraft,
+    assessmentRecord: context?.assessmentRecord
+  });
+  const merged = {
+    ...candidate,
+    sections: candidate.sections.map((section) => {
+      if (section?.key !== targetSection.key) return section;
+      return {
+        ...section,
+        body: [String(section.body || '').trim(), appendText].filter(Boolean).join('\n\n')
+      };
+    })
+  };
+  merged.briefing_markdown = buildBriefingMarkdownFromSections(merged);
+  const normalized = normalizeBriefingOutput(merged, {
+    assessmentId: context.assessmentId,
+    ownerProfileId: context.ownerProfileId,
+    prompt: context.prompt
+  });
+  const validationAfter = validateBriefingOutput(normalized);
+
+  return {
+    attempted: true,
+    briefing: normalized,
+    validation: validationAfter,
+    section_key: targetSection.key,
+    word_gap_before: gap?.type === 'word_gap' ? gap.value : null,
+    character_gap_before: gap?.type === 'character_gap' ? gap.value : null,
+    words_added: wordCount(appendText),
+    validation_after: validationAfter
+  };
 }
 
 function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, validation, attemptNumber = 1) {
@@ -1317,6 +1485,47 @@ export default async function handler(req, res) {
             );
           } catch (error) {
             if (error?.code === 'openai_call_timeout') {
+              const deterministicFallback = applyDeterministicCloseGapFallback(
+                supplementalSource,
+                supplementalValidation,
+                {
+                  assessmentId,
+                  ownerProfileId,
+                  prompt,
+                  businessDraft: businessIntelligenceDraft,
+                  assessmentRecord
+                }
+              );
+              if (deterministicFallback.attempted) {
+                repairDiagnostics.push(
+                  validationDiagnostics(deterministicFallback.validation, deterministicFallback.briefing, {
+                    attempt: `repair_${repairAttempts}`,
+                    stage: 'after_deterministic_close_gap_fallback',
+                    deterministic_close_gap_candidate: true,
+                    deterministic_close_gap_attempted: true,
+                    deterministic_close_gap_section_key: deterministicFallback.section_key,
+                    deterministic_close_gap_word_gap_before: deterministicFallback.word_gap_before,
+                    deterministic_close_gap_character_gap_before: deterministicFallback.character_gap_before,
+                    deterministic_close_gap_words_added: deterministicFallback.words_added,
+                    deterministic_close_gap_validation_after: deterministicFallback.validation_after,
+                    prior_stage: 'openai_supplemental_expansion_timeout',
+                    under_length_supplemental_expansion_candidate: true,
+                    under_length_supplemental_expansion_attempted: true,
+                    second_supplemental_expansion_attempted: supplementalAttemptNumber > 1,
+                    supplemental_attempt_number: supplementalAttemptNumber,
+                    supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+                    requested_supplemental_words: supplementalPlan.requestedWords,
+                    minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
+                    supplemental_timeout_ms: callTimeoutMs,
+                    supplemental_safety_buffer_ms: safetyBufferMs
+                  })
+                );
+                briefing = deterministicFallback.briefing;
+                validation = deterministicFallback.validation;
+                bestStructurallyCompleteBriefing = deterministicFallback.briefing;
+                break;
+              }
+
               const diagnostics = timeoutDiagnostics({
                 assessmentId,
                 ownerProfileId,
@@ -1353,6 +1562,53 @@ export default async function handler(req, res) {
             { minimumAppendTextWords: UNDER_LENGTH_SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS }
           );
           if (!mergeResult.ok) {
+            const deterministicFallback = applyDeterministicCloseGapFallback(
+              supplementalSource,
+              supplementalValidation,
+              {
+                assessmentId,
+                ownerProfileId,
+                prompt,
+                businessDraft: businessIntelligenceDraft,
+                assessmentRecord
+              }
+            );
+            if (deterministicFallback.attempted) {
+              repairDiagnostics.push(
+                validationDiagnostics(deterministicFallback.validation, deterministicFallback.briefing, {
+                  attempt: `repair_${repairAttempts}`,
+                  model: supplementalGeneration.model,
+                  usage: supplementalGeneration.usage || null,
+                  duration_ms: supplementalGeneration.duration_ms,
+                  stage: 'after_deterministic_close_gap_fallback',
+                  deterministic_close_gap_candidate: true,
+                  deterministic_close_gap_attempted: true,
+                  deterministic_close_gap_section_key: deterministicFallback.section_key,
+                  deterministic_close_gap_word_gap_before: deterministicFallback.word_gap_before,
+                  deterministic_close_gap_character_gap_before: deterministicFallback.character_gap_before,
+                  deterministic_close_gap_words_added: deterministicFallback.words_added,
+                  deterministic_close_gap_validation_after: deterministicFallback.validation_after,
+                  prior_stage: mergeStage,
+                  prior_supplemental_error: mergeResult.error,
+                  under_length_supplemental_expansion_candidate: true,
+                  under_length_supplemental_expansion_attempted: true,
+                  second_supplemental_expansion_attempted: supplementalAttemptNumber > 1,
+                  supplemental_attempt_number: supplementalAttemptNumber,
+                  supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+                  requested_supplemental_words: supplementalPlan.requestedWords,
+                  minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
+                  supplemental_timeout_ms: callTimeoutMs,
+                  supplemental_safety_buffer_ms: safetyBufferMs,
+                  expansions_count: mergeResult.expansions_count
+                })
+              );
+              briefing = deterministicFallback.briefing;
+              validation = deterministicFallback.validation;
+              bestStructurallyCompleteBriefing = deterministicFallback.briefing;
+              generation = supplementalGeneration;
+              break;
+            }
+
             validation = {
               valid: false,
               reason: mergeResult.error,
@@ -1423,6 +1679,49 @@ export default async function handler(req, res) {
           bestStructurallyCompleteBriefing = mergedBriefing;
           generation = supplementalGeneration;
           if (validation.valid) break;
+
+          const deterministicFallback = applyDeterministicCloseGapFallback(briefing, validation, {
+            assessmentId,
+            ownerProfileId,
+            prompt,
+            businessDraft: businessIntelligenceDraft,
+            assessmentRecord
+          });
+          if (deterministicFallback.attempted) {
+            repairDiagnostics.push(
+              validationDiagnostics(deterministicFallback.validation, deterministicFallback.briefing, {
+                attempt: `repair_${repairAttempts}`,
+                model: supplementalGeneration.model,
+                usage: supplementalGeneration.usage || null,
+                duration_ms: supplementalGeneration.duration_ms,
+                stage: 'after_deterministic_close_gap_fallback',
+                deterministic_close_gap_candidate: true,
+                deterministic_close_gap_attempted: true,
+                deterministic_close_gap_section_key: deterministicFallback.section_key,
+                deterministic_close_gap_word_gap_before: deterministicFallback.word_gap_before,
+                deterministic_close_gap_character_gap_before: deterministicFallback.character_gap_before,
+                deterministic_close_gap_words_added: deterministicFallback.words_added,
+                deterministic_close_gap_validation_after: deterministicFallback.validation_after,
+                prior_stage: mergeStage,
+                under_length_supplemental_expansion_candidate: true,
+                under_length_supplemental_expansion_attempted: true,
+                second_supplemental_expansion_attempted: supplementalAttemptNumber > 1,
+                supplemental_attempt_number: supplementalAttemptNumber,
+                supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+                requested_supplemental_words: supplementalPlan.requestedWords,
+                minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
+                supplemental_timeout_ms: callTimeoutMs,
+                supplemental_safety_buffer_ms: safetyBufferMs,
+                word_gap_before: postExpansionGap?.type === 'word_gap' ? postExpansionGap.value : null,
+                character_gap_before: postExpansionGap?.type === 'character_gap' ? postExpansionGap.value : null
+              })
+            );
+            briefing = deterministicFallback.briefing;
+            validation = deterministicFallback.validation;
+            bestStructurallyCompleteBriefing = deterministicFallback.briefing;
+            if (validation.valid) break;
+            break;
+          }
 
           if (secondSupplementalExpansionCandidate(validation, briefing, supplementalAttemptsUsed)) {
             supplementalSource = briefing;
