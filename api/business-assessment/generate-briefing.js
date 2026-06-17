@@ -37,6 +37,10 @@ const NARROW_SECTION_WORD_GAP = 25;
 const BRIEFING_ENDPOINT_TIME_BUDGET_MS = 165000;
 const BRIEFING_OPENAI_CALL_TIMEOUT_MS = 70000;
 const BRIEFING_REPAIR_SAFETY_BUFFER_MS = 35000;
+const BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS = 45000;
+const BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS = 15000;
+const NEAR_PASS_CHARACTER_GAP = 500;
+const NEAR_PASS_WORD_GAP = 75;
 const STRUCTURAL_TOP_LEVEL_KEYS = [
   'sections',
   'primary_constraint_snapshot',
@@ -318,6 +322,38 @@ function expandableThinSectionFailure(validation, value) {
   return failures.every((failure) => !failure.structurally_invalid && failure.words_needed > 0);
 }
 
+function nearPassBriefingGap(validation) {
+  if (validation?.reason === 'briefing_markdown_too_short') {
+    const gap = Math.max(0, (validation.minimum_characters || 0) - (validation.actual_characters || 0));
+    return gap > 0 && gap <= NEAR_PASS_CHARACTER_GAP
+      ? { type: 'character_gap', value: gap }
+      : null;
+  }
+
+  if (validation?.reason === 'briefing_word_count_too_short') {
+    const gap = Math.max(0, (validation.minimum_words || 0) - (validation.actual_words || 0));
+    return gap > 0 && gap <= NEAR_PASS_WORD_GAP
+      ? { type: 'word_gap', value: gap }
+      : null;
+  }
+
+  if (validation?.reason === 'malformed_or_thin_section') {
+    const gap = Math.max(0, (validation.minimum_words || 0) - (validation.actual_words || 0));
+    return gap > 0 && gap <= NARROW_SECTION_WORD_GAP
+      ? { type: 'section_word_gap', value: gap }
+      : null;
+  }
+
+  return null;
+}
+
+function isNearPassingBriefing(validation, candidate) {
+  if (!structurallyComplete(candidate)) return false;
+  if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
+  if (validation?.reason === 'missing_required_keys') return false;
+  return Boolean(nearPassBriefingGap(validation));
+}
+
 function shouldAttemptBriefingRepair(validation) {
   return [
     'briefing_markdown_too_short',
@@ -334,6 +370,7 @@ function compactForRepair(value, maxLength = 36000) {
 
 function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation) {
   const thinFailures = thinSectionFailures(previousOutput);
+  const nearPassGap = nearPassBriefingGap(validation);
   const failingSections = Array.isArray(previousOutput?.sections)
     ? previousOutput.sections.filter((section) =>
         thinFailures.some((failure) => failure.key === section?.key || failure.title === section?.title)
@@ -353,10 +390,13 @@ function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation)
       {
         role: 'user',
         content: [
-          isNarrowSingleSection
+          nearPassGap
+            ? 'The previous Executive Diagnostic Briefing JSON is structurally complete and very close to passing validation.'
+            : isNarrowSingleSection
             ? 'The previous Executive Diagnostic Briefing JSON is structurally complete but one section is narrowly too thin.'
             : 'The previous Executive Diagnostic Briefing JSON is structurally complete but some sections are still too thin after repair.',
           `Validation failure: ${JSON.stringify(validation)}`,
+          nearPassGap ? `Near-pass gap: ${nearPassGap.type} = ${nearPassGap.value}.` : '',
           failingSections.length
             ? `Sections that must be expanded: ${failingSections
                 .map((section) => `${section.title} (${section.key})`)
@@ -364,8 +404,10 @@ function buildTargetedSectionExpansionPrompt(prompt, previousOutput, validation)
             : '',
           'Return the FULL corrected Executive Diagnostic Briefing JSON object, not a partial patch.',
           'Preserve every required top-level key exactly: version, generated_at, assessment_id, owner_profile_id, title, audience_type, word_count_target, briefing_markdown, sections, primary_constraint_snapshot, current_trajectory_signal, confidence_snapshot, missing_data, caveats.',
-          'Preserve all existing diagnostic conclusions and all other sections.',
-          'Expand only the listed thin sections enough to comfortably clear the section-depth requirement, adding evidence-based reasoning, implications, and missing-data interpretation.',
+          'Preserve all existing diagnostic conclusions, section order, evidence, and confidence labels.',
+          nearPassGap
+            ? 'Do not rewrite the whole diagnostic. Add only enough evidence-based diagnostic detail to the weakest or shortest relevant section, caveat, or missing-data explanation to clear the validation gate comfortably.'
+            : 'Expand only the listed thin sections enough to comfortably clear the section-depth requirement, adding evidence-based reasoning, implications, and missing-data interpretation.',
           'Each listed section body should be at least 120 words. Do not shorten any other section.',
           'Regenerate briefing_markdown so it reflects the corrected full sections.',
           'Do not remove sections, evidence, confidence labels, snapshots, missing_data, or caveats.',
@@ -431,8 +473,12 @@ function remainingMs(startedAt) {
   return Math.max(0, BRIEFING_ENDPOINT_TIME_BUDGET_MS - elapsedMs(startedAt));
 }
 
-function hasTimeForOpenAICall(startedAt, minimumBufferMs = BRIEFING_REPAIR_SAFETY_BUFFER_MS) {
-  return remainingMs(startedAt) > BRIEFING_OPENAI_CALL_TIMEOUT_MS + minimumBufferMs;
+function hasTimeForOpenAICall(
+  startedAt,
+  minimumBufferMs = BRIEFING_REPAIR_SAFETY_BUFFER_MS,
+  timeoutMs = BRIEFING_OPENAI_CALL_TIMEOUT_MS
+) {
+  return remainingMs(startedAt) > timeoutMs + minimumBufferMs;
 }
 
 function timeoutDiagnostics({
@@ -663,8 +709,9 @@ export default async function handler(req, res) {
     while (!validation.valid && repairAttempts < MAX_REPAIR_ATTEMPTS) {
       const repairSource = bestStructurallyCompleteBriefing || briefing;
       const repairSourceValidation = validateBriefingOutput(repairSource);
+      const nearPassExpansion = isNearPassingBriefing(repairSourceValidation, repairSource);
       const targetedRepair =
-        expandableThinSectionFailure(repairSourceValidation, repairSource);
+        nearPassExpansion || expandableThinSectionFailure(repairSourceValidation, repairSource);
 
       if (!targetedRepair && !shouldAttemptBriefingRepair(repairSourceValidation)) {
         break;
@@ -683,12 +730,36 @@ export default async function handler(req, res) {
         repair_attempts_started: repairAttempts,
         repair_attempts: repairAttempts,
         targeted_section_expansion: targetedRepair,
+        near_pass_expansion: nearPassExpansion,
+        character_gap:
+          repairSourceValidation.reason === 'briefing_markdown_too_short'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : null,
+        word_gap:
+          repairSourceValidation.reason === 'briefing_word_count_too_short'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : repairSourceValidation.reason === 'malformed_or_thin_section'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : null,
+        targeted_timeout_ms: nearPassExpansion
+          ? BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS
+          : BRIEFING_OPENAI_CALL_TIMEOUT_MS,
+        targeted_safety_buffer_ms: nearPassExpansion
+          ? BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS
+          : BRIEFING_REPAIR_SAFETY_BUFFER_MS,
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId
       });
       await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, preRepairDiagnostics);
 
-      if (!hasTimeForOpenAICall(requestStartedAt)) {
+      const callTimeoutMs = nearPassExpansion
+        ? BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS
+        : BRIEFING_OPENAI_CALL_TIMEOUT_MS;
+      const safetyBufferMs = nearPassExpansion
+        ? BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS
+        : BRIEFING_REPAIR_SAFETY_BUFFER_MS;
+
+      if (!hasTimeForOpenAICall(requestStartedAt, safetyBufferMs, callTimeoutMs)) {
         const diagnostics = timeoutDiagnostics({
           assessmentId,
           ownerProfileId,
@@ -698,6 +769,19 @@ export default async function handler(req, res) {
           bestStructurallyCompleteBriefing,
           stage: targetedRepair ? 'before_targeted_section_expansion' : 'before_general_repair'
         });
+        diagnostics.near_pass_expansion = nearPassExpansion;
+        diagnostics.character_gap =
+          repairSourceValidation.reason === 'briefing_markdown_too_short'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : null;
+        diagnostics.word_gap =
+          repairSourceValidation.reason === 'briefing_word_count_too_short'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : repairSourceValidation.reason === 'malformed_or_thin_section'
+            ? nearPassBriefingGap(repairSourceValidation)?.value || null
+            : null;
+        diagnostics.targeted_timeout_ms = callTimeoutMs;
+        diagnostics.targeted_safety_buffer_ms = safetyBufferMs;
         await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
         return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
       }
@@ -707,9 +791,12 @@ export default async function handler(req, res) {
         owner_profile_id: ownerProfileId,
         reason: repairSourceValidation.reason,
         repair_attempt: repairAttempts,
-        targeted_section_expansion: targetedRepair
+        targeted_section_expansion: targetedRepair,
+        near_pass_expansion: nearPassExpansion
       });
-      const repairGeneration = await callOpenAIForBriefing(repairPrompt);
+      const repairGeneration = await callOpenAIForBriefing(repairPrompt, {
+        timeoutMs: callTimeoutMs
+      });
       console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repair OpenAI completed', {
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId,
@@ -732,6 +819,19 @@ export default async function handler(req, res) {
           usage: repairGeneration.usage || null,
           duration_ms: repairGeneration.duration_ms,
           targeted_section_expansion: targetedRepair,
+          near_pass_expansion: nearPassExpansion,
+          character_gap:
+            repairSourceValidation.reason === 'briefing_markdown_too_short'
+              ? nearPassBriefingGap(repairSourceValidation)?.value || null
+              : null,
+          word_gap:
+            repairSourceValidation.reason === 'briefing_word_count_too_short'
+              ? nearPassBriefingGap(repairSourceValidation)?.value || null
+              : repairSourceValidation.reason === 'malformed_or_thin_section'
+              ? nearPassBriefingGap(repairSourceValidation)?.value || null
+              : null,
+          targeted_timeout_ms: callTimeoutMs,
+          targeted_safety_buffer_ms: safetyBufferMs,
           structurally_worse_than_previous: Boolean(bestStructurallyCompleteBriefing && !repairStructurallyComplete)
         })
       );
