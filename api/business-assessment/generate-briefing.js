@@ -45,6 +45,10 @@ const NEAR_PASS_CHARACTER_GAP = 500;
 const NEAR_PASS_WORD_GAP = 75;
 const UNDER_LENGTH_CHARACTER_GAP = 2500;
 const UNDER_LENGTH_WORD_GAP = 350;
+const SECOND_SUPPLEMENTAL_CHARACTER_GAP = 1500;
+const SECOND_SUPPLEMENTAL_WORD_GAP = 250;
+const SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS = 60;
+const SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS = 90;
 const STRUCTURAL_TOP_LEVEL_KEYS = [
   'sections',
   'primary_constraint_snapshot',
@@ -441,8 +445,44 @@ function sectionExcerpts(value) {
   });
 }
 
-function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, validation) {
+function supplementalExpansionPlan(validation) {
   const gap = underLengthBriefingGap(validation);
+  if (gap?.type === 'word_gap') {
+    return {
+      ...gap,
+      requestedWords: Math.min(700, Math.max(400, gap.value + 150)),
+      minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
+    };
+  }
+
+  if (gap?.type === 'character_gap') {
+    return {
+      ...gap,
+      requestedWords: 450,
+      minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
+    };
+  }
+
+  return {
+    type: null,
+    value: null,
+    requestedWords: 450,
+    minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
+  };
+}
+
+function secondSupplementalExpansionCandidate(validation, candidate, attemptsUsed) {
+  if (attemptsUsed >= 2) return false;
+  if (!structurallyComplete(candidate)) return false;
+  if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
+  const gap = briefingLengthGap(validation);
+  if (gap?.type === 'word_gap') return gap.value > 0 && gap.value <= SECOND_SUPPLEMENTAL_WORD_GAP;
+  if (gap?.type === 'character_gap') return gap.value > 0 && gap.value <= SECOND_SUPPLEMENTAL_CHARACTER_GAP;
+  return false;
+}
+
+function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, validation, attemptNumber = 1) {
+  const plan = supplementalExpansionPlan(validation);
   return {
     ...prompt,
     messages: [
@@ -458,13 +498,20 @@ function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, val
         content: [
           'The Executive Diagnostic Briefing is structurally complete but under the required total length.',
           `Validation failure: ${JSON.stringify(validation)}`,
-          gap ? `Under-length gap: ${gap.type} = ${gap.value}.` : '',
+          plan.type ? `Under-length gap: ${plan.type} = ${plan.value}.` : '',
+          `Supplemental attempt number: ${attemptNumber}.`,
           `Shortest sections by body length: ${JSON.stringify(sectionLengthSummary(previousOutput))}`,
           `Current sections and excerpts: ${JSON.stringify(sectionExcerpts(previousOutput))}`,
           'Return only this JSON shape: {"expansions":[{"section_key":"string","append_text":"string"}]}.',
           'section_key must exactly match one of the existing section keys.',
-          'Add 350-500 words total across 2-4 append_text values.',
+          `Add approximately ${plan.requestedWords} total words across 3-5 append_text values.`,
+          `Each append_text must be at least ${plan.minimumAppendTextWords} words.`,
+          'Do not use headings.',
+          'Do not use bullet lists.',
+          'Do not use short summary statements.',
+          'Add full diagnostic paragraphs.',
           'Prioritize practical implications, missing-data interpretation, constraint reasoning, business consequences, and why the current trajectory matters.',
+          'Also include leadership/accountability implications where relevant.',
           'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
           'Keep the tone professional, direct, and diagnostic.',
           'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
@@ -483,6 +530,7 @@ function invalidSupplementalText(value) {
   if (/```/.test(body)) return true;
   if (/^\s*[{[]/.test(body)) return true;
   if (/"expansions"\s*:/.test(body)) return true;
+  if (wordCount(body) < SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS) return true;
   return false;
 }
 
@@ -1003,104 +1051,208 @@ export default async function handler(req, res) {
       }
 
       if (underLengthExpansion) {
-        console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting supplemental under-length expansion', {
-          assessment_id: assessmentId,
-          owner_profile_id: ownerProfileId,
-          reason: repairSourceValidation.reason,
-          repair_attempt: repairAttempts,
-          gap: preExpansionGap
-        });
+        let supplementalSource = repairSource;
+        let supplementalValidation = repairSourceValidation;
+        let supplementalAttemptsUsed = 0;
+        while (true) {
+          supplementalAttemptsUsed += 1;
+          if (supplementalAttemptsUsed > 1) repairAttempts += 1;
+          const supplementalAttemptNumber = supplementalAttemptsUsed;
+          const supplementalStage =
+            supplementalAttemptNumber === 1
+              ? 'before_supplemental_under_length_expansion'
+              : 'before_second_supplemental_under_length_expansion';
+          const mergeStage =
+            supplementalAttemptNumber === 1
+              ? 'after_deterministic_under_length_merge'
+              : 'after_second_deterministic_under_length_merge';
+          const supplementalPlan = supplementalExpansionPlan(supplementalValidation);
+          const gapBefore = briefingLengthGap(supplementalValidation);
 
-        let supplementalGeneration;
-        try {
-          supplementalGeneration = await callOpenAIForBriefing(
-            buildSupplementalUnderLengthExpansionPrompt(prompt, repairSource, repairSourceValidation),
-            { timeoutMs: callTimeoutMs }
-          );
-        } catch (error) {
-          if (error?.code === 'openai_call_timeout') {
+          if (supplementalAttemptNumber > 1) {
+            const beforeSecondDiagnostics = validationDiagnostics(supplementalValidation, supplementalSource, {
+              generated_at: new Date().toISOString(),
+              reason: supplementalValidation.reason,
+              stage: supplementalStage,
+              elapsed_ms: elapsedMs(requestStartedAt),
+              remaining_ms: remainingMs(requestStartedAt),
+              repair_attempts_started: repairAttempts,
+              repair_attempts: repairAttempts,
+              under_length_supplemental_expansion_candidate: true,
+              under_length_supplemental_expansion_attempted: true,
+              second_supplemental_expansion_attempted: true,
+              supplemental_attempt_number: supplementalAttemptNumber,
+              supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+              requested_supplemental_words: supplementalPlan.requestedWords,
+              minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
+              supplemental_timeout_ms: callTimeoutMs,
+              supplemental_safety_buffer_ms: safetyBufferMs,
+              word_gap_before: gapBefore?.type === 'word_gap' ? gapBefore.value : null,
+              character_gap_before: gapBefore?.type === 'character_gap' ? gapBefore.value : null,
+              assessment_id: assessmentId,
+              owner_profile_id: ownerProfileId
+            });
+            await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, beforeSecondDiagnostics);
+          }
+
+          if (!hasTimeForOpenAICall(requestStartedAt, safetyBufferMs, callTimeoutMs)) {
             const diagnostics = timeoutDiagnostics({
               assessmentId,
               ownerProfileId,
-              validation: {
-                valid: false,
-                reason: 'openai_supplemental_expansion_timeout',
-                timeout_ms: error.timeout_ms
-              },
+              validation: supplementalValidation,
               startedAt: requestStartedAt,
               repairAttempts,
               bestStructurallyCompleteBriefing,
-              stage: 'openai_supplemental_expansion_timeout'
+              stage: supplementalStage
             });
             diagnostics.under_length_supplemental_expansion_candidate = true;
             diagnostics.under_length_supplemental_expansion_attempted = true;
+            diagnostics.second_supplemental_expansion_attempted = supplementalAttemptNumber > 1;
+            diagnostics.supplemental_attempt_number = supplementalAttemptNumber;
+            diagnostics.supplemental_expansion_attempts_used = supplementalAttemptsUsed;
+            diagnostics.requested_supplemental_words = supplementalPlan.requestedWords;
+            diagnostics.minimum_append_text_words = supplementalPlan.minimumAppendTextWords;
             diagnostics.supplemental_timeout_ms = callTimeoutMs;
             diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
-            diagnostics.word_gap_before = preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null;
-            diagnostics.character_gap_before = preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null;
+            diagnostics.word_gap_before = gapBefore?.type === 'word_gap' ? gapBefore.value : null;
+            diagnostics.character_gap_before = gapBefore?.type === 'character_gap' ? gapBefore.value : null;
             await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
             return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
           }
-          throw error;
-        }
 
-        const mergeResult = applySupplementalUnderLengthExpansions(repairSource, supplementalGeneration.parsed);
-        if (!mergeResult.ok) {
-          validation = {
-            valid: false,
-            reason: mergeResult.error,
-            expansions_count: mergeResult.expansions_count
-          };
+          console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting supplemental under-length expansion', {
+            assessment_id: assessmentId,
+            owner_profile_id: ownerProfileId,
+            reason: supplementalValidation.reason,
+            repair_attempt: repairAttempts,
+            supplemental_attempt_number: supplementalAttemptNumber,
+            requested_supplemental_words: supplementalPlan.requestedWords,
+            gap: gapBefore
+          });
+
+          let supplementalGeneration;
+          try {
+            supplementalGeneration = await callOpenAIForBriefing(
+              buildSupplementalUnderLengthExpansionPrompt(
+                prompt,
+                supplementalSource,
+                supplementalValidation,
+                supplementalAttemptNumber
+              ),
+              { timeoutMs: callTimeoutMs }
+            );
+          } catch (error) {
+            if (error?.code === 'openai_call_timeout') {
+              const diagnostics = timeoutDiagnostics({
+                assessmentId,
+                ownerProfileId,
+                validation: {
+                  valid: false,
+                  reason: 'openai_supplemental_expansion_timeout',
+                  timeout_ms: error.timeout_ms
+                },
+                startedAt: requestStartedAt,
+                repairAttempts,
+                bestStructurallyCompleteBriefing,
+                stage: 'openai_supplemental_expansion_timeout'
+              });
+              diagnostics.under_length_supplemental_expansion_candidate = true;
+              diagnostics.under_length_supplemental_expansion_attempted = true;
+              diagnostics.second_supplemental_expansion_attempted = supplementalAttemptNumber > 1;
+              diagnostics.supplemental_attempt_number = supplementalAttemptNumber;
+              diagnostics.supplemental_expansion_attempts_used = supplementalAttemptsUsed;
+              diagnostics.requested_supplemental_words = supplementalPlan.requestedWords;
+              diagnostics.minimum_append_text_words = supplementalPlan.minimumAppendTextWords;
+              diagnostics.supplemental_timeout_ms = callTimeoutMs;
+              diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
+              diagnostics.word_gap_before = gapBefore?.type === 'word_gap' ? gapBefore.value : null;
+              diagnostics.character_gap_before = gapBefore?.type === 'character_gap' ? gapBefore.value : null;
+              await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+              return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+            }
+            throw error;
+          }
+
+          const mergeResult = applySupplementalUnderLengthExpansions(
+            supplementalSource,
+            supplementalGeneration.parsed
+          );
+          if (!mergeResult.ok) {
+            validation = {
+              valid: false,
+              reason: mergeResult.error,
+              expansions_count: mergeResult.expansions_count
+            };
+            repairDiagnostics.push(
+              validationDiagnostics(validation, supplementalSource, {
+                attempt: `repair_${repairAttempts}`,
+                model: supplementalGeneration.model,
+                usage: supplementalGeneration.usage || null,
+                duration_ms: supplementalGeneration.duration_ms,
+                stage: mergeStage,
+                under_length_supplemental_expansion_candidate: true,
+                under_length_supplemental_expansion_attempted: true,
+                second_supplemental_expansion_attempted: supplementalAttemptNumber > 1,
+                supplemental_attempt_number: supplementalAttemptNumber,
+                supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+                requested_supplemental_words: supplementalPlan.requestedWords,
+                minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
+                supplemental_timeout_ms: callTimeoutMs,
+                supplemental_safety_buffer_ms: safetyBufferMs,
+                expansions_count: mergeResult.expansions_count,
+                word_gap_before: gapBefore?.type === 'word_gap' ? gapBefore.value : null,
+                character_gap_before: gapBefore?.type === 'character_gap' ? gapBefore.value : null
+              })
+            );
+            break;
+          }
+
+          const mergedBriefing = normalizeBriefingOutput(mergeResult.merged, {
+            assessmentId,
+            ownerProfileId,
+            prompt
+          });
+          const mergedValidation = validateBriefingOutput(mergedBriefing);
+          const postExpansionGap = briefingLengthGap(mergedValidation);
           repairDiagnostics.push(
-            validationDiagnostics(validation, repairSource, {
+            validationDiagnostics(mergedValidation, mergedBriefing, {
               attempt: `repair_${repairAttempts}`,
               model: supplementalGeneration.model,
               usage: supplementalGeneration.usage || null,
               duration_ms: supplementalGeneration.duration_ms,
-              stage: 'after_deterministic_under_length_merge',
+              stage: mergeStage,
               under_length_supplemental_expansion_candidate: true,
               under_length_supplemental_expansion_attempted: true,
+              second_supplemental_expansion_attempted: supplementalAttemptNumber > 1,
+              supplemental_attempt_number: supplementalAttemptNumber,
+              supplemental_expansion_attempts_used: supplementalAttemptsUsed,
+              requested_supplemental_words: supplementalPlan.requestedWords,
+              minimum_append_text_words: supplementalPlan.minimumAppendTextWords,
               supplemental_timeout_ms: callTimeoutMs,
               supplemental_safety_buffer_ms: safetyBufferMs,
               expansions_count: mergeResult.expansions_count,
-              word_gap_before: preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null,
-              character_gap_before: preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null
+              submitted_expansions_count: mergeResult.submitted_expansions_count,
+              word_gap_before: gapBefore?.type === 'word_gap' ? gapBefore.value : null,
+              character_gap_before: gapBefore?.type === 'character_gap' ? gapBefore.value : null,
+              word_gap_after: postExpansionGap?.type === 'word_gap' ? postExpansionGap.value : null,
+              character_gap_after: postExpansionGap?.type === 'character_gap' ? postExpansionGap.value : null
             })
           );
-          break;
+
+          briefing = mergedBriefing;
+          validation = mergedValidation;
+          bestStructurallyCompleteBriefing = mergedBriefing;
+          generation = supplementalGeneration;
+          if (validation.valid) break;
+
+          if (!secondSupplementalExpansionCandidate(validation, briefing, supplementalAttemptsUsed)) {
+            break;
+          }
+
+          supplementalSource = briefing;
+          supplementalValidation = validation;
         }
 
-        const mergedBriefing = normalizeBriefingOutput(mergeResult.merged, {
-          assessmentId,
-          ownerProfileId,
-          prompt
-        });
-        const mergedValidation = validateBriefingOutput(mergedBriefing);
-        const postExpansionGap = briefingLengthGap(mergedValidation);
-        repairDiagnostics.push(
-          validationDiagnostics(mergedValidation, mergedBriefing, {
-            attempt: `repair_${repairAttempts}`,
-            model: supplementalGeneration.model,
-            usage: supplementalGeneration.usage || null,
-            duration_ms: supplementalGeneration.duration_ms,
-            stage: 'after_deterministic_under_length_merge',
-            under_length_supplemental_expansion_candidate: true,
-            under_length_supplemental_expansion_attempted: true,
-            supplemental_timeout_ms: callTimeoutMs,
-            supplemental_safety_buffer_ms: safetyBufferMs,
-            expansions_count: mergeResult.expansions_count,
-            submitted_expansions_count: mergeResult.submitted_expansions_count,
-            word_gap_before: preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null,
-            character_gap_before: preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null,
-            word_gap_after: postExpansionGap?.type === 'word_gap' ? postExpansionGap.value : null,
-            character_gap_after: postExpansionGap?.type === 'character_gap' ? postExpansionGap.value : null
-          })
-        );
-
-        briefing = mergedBriefing;
-        validation = mergedValidation;
-        bestStructurallyCompleteBriefing = mergedBriefing;
-        generation = supplementalGeneration;
         if (!validation.valid) break;
         continue;
       }
