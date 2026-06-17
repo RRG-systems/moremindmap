@@ -49,6 +49,7 @@ const SECOND_SUPPLEMENTAL_CHARACTER_GAP = 1500;
 const SECOND_SUPPLEMENTAL_WORD_GAP = 250;
 const SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS = 60;
 const SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS = 90;
+const MAX_THIN_SECTION_BATCH_SIZE = 6;
 const STRUCTURAL_TOP_LEVEL_KEYS = [
   'sections',
   'primary_constraint_snapshot',
@@ -414,6 +415,42 @@ function thinSectionGap(validation) {
   };
 }
 
+function findThinSections(candidate, limit = MAX_THIN_SECTION_BATCH_SIZE) {
+  if (!Array.isArray(candidate?.sections)) return [];
+
+  return candidate.sections
+    .map((section) => {
+      const counts = sectionWordCount(section);
+      const structurallyInvalid =
+        !section ||
+        typeof section !== 'object' ||
+        !section.key ||
+        !section.title ||
+        typeof section.body !== 'string';
+
+      if (structurallyInvalid) return null;
+
+      const bodyWordGap = Math.max(0, 60 - counts.bodyWords);
+      const combinedWordGap = Math.max(0, MINIMUM_SECTION_BODY_WORDS - counts.combinedWords);
+      const gapWords = Math.max(bodyWordGap, combinedWordGap);
+      if (!gapWords) return null;
+
+      const body = String(section.body || '').trim();
+      return {
+        section_key: section.key,
+        section_title: section.title,
+        body_words: counts.bodyWords,
+        combined_words: counts.combinedWords,
+        required_words: MINIMUM_SECTION_BODY_WORDS,
+        gap_words: gapWords,
+        body_excerpt: body.length > 700 ? `${body.slice(0, 700)}...` : body
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.gap_words - a.gap_words)
+    .slice(0, limit);
+}
+
 function isStructurallyCompleteUnderLengthExpansionCandidate(validation, candidate) {
   if (!structurallyComplete(candidate)) return false;
   if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
@@ -439,6 +476,14 @@ function isStructurallyCompleteThinSectionSupplementCandidate(validation, candid
   if (validation?.reason === 'missing_required_keys') return false;
   if (!thinSectionGap(validation)) return false;
   return Boolean(findSectionForValidation(candidate, validation));
+}
+
+function isStructurallyCompleteBatchThinSectionSupplementCandidate(validation, candidate) {
+  if (!structurallyComplete(candidate)) return false;
+  if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
+  if (validation?.reason === 'missing_required_keys') return false;
+  if (validation?.reason !== 'malformed_or_thin_section') return false;
+  return findThinSections(candidate).length > 0;
 }
 
 function shouldAttemptBriefingRepair(validation) {
@@ -593,6 +638,45 @@ function buildThinSectionSupplementalPrompt(prompt, previousOutput, validation) 
           'Expand practical implications, business consequence, and behavioral/operating impact of this section.',
           'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
           'Keep the tone professional, direct, and diagnostic.',
+          'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
+          'Return valid JSON only.'
+        ]
+          .filter(Boolean)
+          .join('\n')
+      }
+    ]
+  };
+}
+
+function buildBatchThinSectionSupplementalPrompt(prompt, validation, thinSections) {
+  return {
+    ...prompt,
+    messages: [
+      {
+        role: 'system',
+        content: [
+          'You are writing supplemental diagnostic paragraphs for an already-structured MORE MindMap Executive Diagnostic Briefing.',
+          'Return valid JSON only. Do not return the full briefing object. Do not use markdown fences.'
+        ].join('\n')
+      },
+      {
+        role: 'user',
+        content: [
+          'The Executive Diagnostic Briefing is structurally complete, but multiple sections are below the section-depth requirement.',
+          `Validation failure: ${JSON.stringify(validation)}`,
+          `Thin sections to repair: ${JSON.stringify(thinSections)}`,
+          'Return only this JSON shape: {"expansions":[{"section_key":"string","append_text":"string"}]}.',
+          'Repair every listed thin section.',
+          'Provide exactly one expansion per listed section.',
+          'section_key must exactly match one of the provided section_key values.',
+          'Each append_text must be 90-140 words.',
+          'Do not use headings.',
+          'Do not use bullet lists.',
+          'Do not use short summaries.',
+          'Use diagnostic paragraph style.',
+          'Expand practical implications, business consequences, behavioral/operating impact, accountability implications, and why the section matters to the business trajectory.',
+          'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
+          'Do not return the full Executive Diagnostic object.',
           'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
           'Return valid JSON only.'
         ]
@@ -1333,12 +1417,13 @@ export default async function handler(req, res) {
 
           if (
             !thinSectionSupplementAttempted &&
-            isStructurallyCompleteThinSectionSupplementCandidate(validation, briefing)
+            isStructurallyCompleteBatchThinSectionSupplementCandidate(validation, briefing)
           ) {
             thinSectionSupplementAttempted = true;
             repairAttempts += 1;
-            const thinGap = thinSectionGap(validation);
-            const thinStage = 'before_thin_section_supplemental_expansion';
+            const allThinSections = findThinSections(briefing, Number.POSITIVE_INFINITY);
+            const requestedThinSections = allThinSections.slice(0, MAX_THIN_SECTION_BATCH_SIZE);
+            const thinStage = 'before_batch_thin_section_supplemental_expansion';
             const thinBeforeDiagnostics = validationDiagnostics(validation, briefing, {
               generated_at: new Date().toISOString(),
               reason: validation.reason,
@@ -1347,13 +1432,25 @@ export default async function handler(req, res) {
               remaining_ms: remainingMs(requestStartedAt),
               repair_attempts_started: repairAttempts,
               repair_attempts: repairAttempts,
+              batch_thin_section_supplemental_candidate: true,
+              batch_thin_section_supplemental_attempted: true,
+              thin_sections_found: allThinSections.length,
+              thin_sections_requested: requestedThinSections.length,
+              thin_section_keys: requestedThinSections.map((section) => section.section_key),
+              thin_section_gaps: requestedThinSections.map((section) => ({
+                section_key: section.section_key,
+                gap_words: section.gap_words,
+                body_words: section.body_words,
+                combined_words: section.combined_words,
+                required_words: section.required_words
+              })),
               thin_section_supplemental_candidate: true,
               thin_section_supplemental_attempted: true,
-              thin_section_key: thinGap?.section || null,
-              thin_section_word_gap: thinGap?.gap_words || null,
-              thin_section_actual_body_words: thinGap?.actual_body_words || null,
-              thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
-              thin_section_required_words: thinGap?.required_words || null,
+              thin_section_key: requestedThinSections[0]?.section_key || null,
+              thin_section_word_gap: requestedThinSections[0]?.gap_words || null,
+              thin_section_actual_body_words: requestedThinSections[0]?.body_words || null,
+              thin_section_actual_combined_words: requestedThinSections[0]?.combined_words || null,
+              thin_section_required_words: requestedThinSections[0]?.required_words || null,
               supplemental_timeout_ms: callTimeoutMs,
               supplemental_safety_buffer_ms: safetyBufferMs,
               assessment_id: assessmentId,
@@ -1371,31 +1468,44 @@ export default async function handler(req, res) {
                 bestStructurallyCompleteBriefing,
                 stage: thinStage
               });
+              diagnostics.batch_thin_section_supplemental_candidate = true;
+              diagnostics.batch_thin_section_supplemental_attempted = true;
+              diagnostics.thin_sections_found = allThinSections.length;
+              diagnostics.thin_sections_requested = requestedThinSections.length;
+              diagnostics.thin_section_keys = requestedThinSections.map((section) => section.section_key);
+              diagnostics.thin_section_gaps = requestedThinSections.map((section) => ({
+                section_key: section.section_key,
+                gap_words: section.gap_words,
+                body_words: section.body_words,
+                combined_words: section.combined_words,
+                required_words: section.required_words
+              }));
               diagnostics.thin_section_supplemental_candidate = true;
               diagnostics.thin_section_supplemental_attempted = true;
-              diagnostics.thin_section_key = thinGap?.section || null;
-              diagnostics.thin_section_word_gap = thinGap?.gap_words || null;
-              diagnostics.thin_section_actual_body_words = thinGap?.actual_body_words || null;
-              diagnostics.thin_section_actual_combined_words = thinGap?.actual_combined_words || null;
-              diagnostics.thin_section_required_words = thinGap?.required_words || null;
+              diagnostics.thin_section_key = requestedThinSections[0]?.section_key || null;
+              diagnostics.thin_section_word_gap = requestedThinSections[0]?.gap_words || null;
+              diagnostics.thin_section_actual_body_words = requestedThinSections[0]?.body_words || null;
+              diagnostics.thin_section_actual_combined_words = requestedThinSections[0]?.combined_words || null;
+              diagnostics.thin_section_required_words = requestedThinSections[0]?.required_words || null;
               diagnostics.supplemental_timeout_ms = callTimeoutMs;
               diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
               await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
               return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
             }
 
-            console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting thin-section supplemental expansion', {
+            console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting batch thin-section supplemental expansion', {
               assessment_id: assessmentId,
               owner_profile_id: ownerProfileId,
               repair_attempt: repairAttempts,
-              thin_section_key: thinGap?.section || null,
-              thin_section_word_gap: thinGap?.gap_words || null
+              thin_sections_found: allThinSections.length,
+              thin_sections_requested: requestedThinSections.length,
+              thin_section_keys: requestedThinSections.map((section) => section.section_key)
             });
 
             let thinGeneration;
             try {
               thinGeneration = await callOpenAIForBriefing(
-                buildThinSectionSupplementalPrompt(prompt, briefing, validation),
+                buildBatchThinSectionSupplementalPrompt(prompt, validation, requestedThinSections),
                 { timeoutMs: callTimeoutMs }
               );
             } catch (error) {
@@ -1411,15 +1521,27 @@ export default async function handler(req, res) {
                   startedAt: requestStartedAt,
                   repairAttempts,
                   bestStructurallyCompleteBriefing,
-                  stage: 'openai_thin_section_supplemental_timeout'
+                  stage: 'openai_batch_thin_section_supplemental_timeout'
                 });
+                diagnostics.batch_thin_section_supplemental_candidate = true;
+                diagnostics.batch_thin_section_supplemental_attempted = true;
+                diagnostics.thin_sections_found = allThinSections.length;
+                diagnostics.thin_sections_requested = requestedThinSections.length;
+                diagnostics.thin_section_keys = requestedThinSections.map((section) => section.section_key);
+                diagnostics.thin_section_gaps = requestedThinSections.map((section) => ({
+                  section_key: section.section_key,
+                  gap_words: section.gap_words,
+                  body_words: section.body_words,
+                  combined_words: section.combined_words,
+                  required_words: section.required_words
+                }));
                 diagnostics.thin_section_supplemental_candidate = true;
                 diagnostics.thin_section_supplemental_attempted = true;
-                diagnostics.thin_section_key = thinGap?.section || null;
-                diagnostics.thin_section_word_gap = thinGap?.gap_words || null;
-                diagnostics.thin_section_actual_body_words = thinGap?.actual_body_words || null;
-                diagnostics.thin_section_actual_combined_words = thinGap?.actual_combined_words || null;
-                diagnostics.thin_section_required_words = thinGap?.required_words || null;
+                diagnostics.thin_section_key = requestedThinSections[0]?.section_key || null;
+                diagnostics.thin_section_word_gap = requestedThinSections[0]?.gap_words || null;
+                diagnostics.thin_section_actual_body_words = requestedThinSections[0]?.body_words || null;
+                diagnostics.thin_section_actual_combined_words = requestedThinSections[0]?.combined_words || null;
+                diagnostics.thin_section_required_words = requestedThinSections[0]?.required_words || null;
                 diagnostics.supplemental_timeout_ms = callTimeoutMs;
                 diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
                 await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
@@ -1441,14 +1563,26 @@ export default async function handler(req, res) {
                   model: thinGeneration.model,
                   usage: thinGeneration.usage || null,
                   duration_ms: thinGeneration.duration_ms,
-                  stage: 'after_thin_section_deterministic_merge',
+                  stage: 'after_batch_thin_section_deterministic_merge',
+                  batch_thin_section_supplemental_candidate: true,
+                  batch_thin_section_supplemental_attempted: true,
+                  thin_sections_found: allThinSections.length,
+                  thin_sections_requested: requestedThinSections.length,
+                  thin_section_keys: requestedThinSections.map((section) => section.section_key),
+                  thin_section_gaps: requestedThinSections.map((section) => ({
+                    section_key: section.section_key,
+                    gap_words: section.gap_words,
+                    body_words: section.body_words,
+                    combined_words: section.combined_words,
+                    required_words: section.required_words
+                  })),
                   thin_section_supplemental_candidate: true,
                   thin_section_supplemental_attempted: true,
-                  thin_section_key: thinGap?.section || null,
-                  thin_section_word_gap: thinGap?.gap_words || null,
-                  thin_section_actual_body_words: thinGap?.actual_body_words || null,
-                  thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
-                  thin_section_required_words: thinGap?.required_words || null,
+                  thin_section_key: requestedThinSections[0]?.section_key || null,
+                  thin_section_word_gap: requestedThinSections[0]?.gap_words || null,
+                  thin_section_actual_body_words: requestedThinSections[0]?.body_words || null,
+                  thin_section_actual_combined_words: requestedThinSections[0]?.combined_words || null,
+                  thin_section_required_words: requestedThinSections[0]?.required_words || null,
                   expansions_count: thinMergeResult.expansions_count,
                   supplemental_timeout_ms: callTimeoutMs,
                   supplemental_safety_buffer_ms: safetyBufferMs
@@ -1469,14 +1603,26 @@ export default async function handler(req, res) {
                 model: thinGeneration.model,
                 usage: thinGeneration.usage || null,
                 duration_ms: thinGeneration.duration_ms,
-                stage: 'after_thin_section_deterministic_merge',
+                stage: 'after_batch_thin_section_deterministic_merge',
+                batch_thin_section_supplemental_candidate: true,
+                batch_thin_section_supplemental_attempted: true,
+                thin_sections_found: allThinSections.length,
+                thin_sections_requested: requestedThinSections.length,
+                thin_section_keys: requestedThinSections.map((section) => section.section_key),
+                thin_section_gaps: requestedThinSections.map((section) => ({
+                  section_key: section.section_key,
+                  gap_words: section.gap_words,
+                  body_words: section.body_words,
+                  combined_words: section.combined_words,
+                  required_words: section.required_words
+                })),
                 thin_section_supplemental_candidate: true,
                 thin_section_supplemental_attempted: true,
-                thin_section_key: thinGap?.section || null,
-                thin_section_word_gap: thinGap?.gap_words || null,
-                thin_section_actual_body_words: thinGap?.actual_body_words || null,
-                thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
-                thin_section_required_words: thinGap?.required_words || null,
+                thin_section_key: requestedThinSections[0]?.section_key || null,
+                thin_section_word_gap: requestedThinSections[0]?.gap_words || null,
+                thin_section_actual_body_words: requestedThinSections[0]?.body_words || null,
+                thin_section_actual_combined_words: requestedThinSections[0]?.combined_words || null,
+                thin_section_required_words: requestedThinSections[0]?.required_words || null,
                 expansions_count: thinMergeResult.expansions_count,
                 submitted_expansions_count: thinMergeResult.submitted_expansions_count,
                 supplemental_timeout_ms: callTimeoutMs,
