@@ -47,9 +47,9 @@ const NEAR_PASS_WORD_GAP = 75;
 const UNDER_LENGTH_CHARACTER_GAP = 2500;
 const UNDER_LENGTH_WORD_GAP = 500;
 const SECOND_SUPPLEMENTAL_CHARACTER_GAP = 1500;
-const SECOND_SUPPLEMENTAL_WORD_GAP = 250;
 const SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS = 60;
 const SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS = 90;
+const UNDER_LENGTH_SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS = 80;
 const MAX_THIN_SECTION_BATCH_SIZE = 10;
 const STRUCTURAL_TOP_LEVEL_KEYS = [
   'sections',
@@ -532,7 +532,7 @@ function supplementalExpansionPlan(validation) {
   if (gap?.type === 'word_gap') {
     return {
       ...gap,
-      requestedWords: Math.min(700, Math.max(400, gap.value + 150)),
+      requestedWords: Math.min(1000, Math.max(750, gap.value + 500)),
       minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
     };
   }
@@ -540,7 +540,7 @@ function supplementalExpansionPlan(validation) {
   if (gap?.type === 'character_gap') {
     return {
       ...gap,
-      requestedWords: 450,
+      requestedWords: 650,
       minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
     };
   }
@@ -548,7 +548,7 @@ function supplementalExpansionPlan(validation) {
   return {
     type: null,
     value: null,
-    requestedWords: 450,
+    requestedWords: 750,
     minimumAppendTextWords: SUPPLEMENTAL_PROMPT_MIN_APPEND_TEXT_WORDS
   };
 }
@@ -558,7 +558,7 @@ function secondSupplementalExpansionCandidate(validation, candidate, attemptsUse
   if (!structurallyComplete(candidate)) return false;
   if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
   const gap = briefingLengthGap(validation);
-  if (gap?.type === 'word_gap') return gap.value > 0 && gap.value <= SECOND_SUPPLEMENTAL_WORD_GAP;
+  if (gap?.type === 'word_gap') return gap.value > 0 && gap.value <= UNDER_LENGTH_WORD_GAP;
   if (gap?.type === 'character_gap') return gap.value > 0 && gap.value <= SECOND_SUPPLEMENTAL_CHARACTER_GAP;
   return false;
 }
@@ -586,7 +586,8 @@ function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, val
           `Current sections and excerpts: ${JSON.stringify(sectionExcerpts(previousOutput))}`,
           'Return only this JSON shape: {"expansions":[{"section_key":"string","append_text":"string"}]}.',
           'section_key must exactly match one of the existing section keys.',
-          `Add approximately ${plan.requestedWords} total words across 3-5 append_text values.`,
+          `Add approximately ${plan.requestedWords} total words across 6-8 append_text values when enough existing sections are available.`,
+          'Use exactly one expansion per selected section.',
           `Each append_text must be at least ${plan.minimumAppendTextWords} words.`,
           'Do not use headings.',
           'Do not use bullet lists.',
@@ -688,17 +689,18 @@ function buildBatchThinSectionSupplementalPrompt(prompt, validation, thinSection
   };
 }
 
-function invalidSupplementalText(value) {
+function invalidSupplementalText(value, minimumWords = SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS) {
   const body = String(value || '').trim();
   if (!body) return true;
   if (/```/.test(body)) return true;
   if (/^\s*[{[]/.test(body)) return true;
   if (/"expansions"\s*:/.test(body)) return true;
-  if (wordCount(body) < SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS) return true;
+  if (wordCount(body) < minimumWords) return true;
   return false;
 }
 
-function applySupplementalUnderLengthExpansions(candidate, parsedExpansion) {
+function applySupplementalUnderLengthExpansions(candidate, parsedExpansion, options = {}) {
+  const minimumAppendTextWords = options.minimumAppendTextWords || SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS;
   if (!parsedExpansion || typeof parsedExpansion !== 'object' || Array.isArray(parsedExpansion)) {
     return { ok: false, error: 'supplemental_expansion_not_object', expansions_count: 0 };
   }
@@ -714,7 +716,7 @@ function applySupplementalUnderLengthExpansions(candidate, parsedExpansion) {
     const sectionKey = String(expansion?.section_key || '').trim();
     const appendText = String(expansion?.append_text || '').trim();
     if (!sectionKeys.has(sectionKey)) continue;
-    if (invalidSupplementalText(appendText)) continue;
+    if (invalidSupplementalText(appendText, minimumAppendTextWords)) continue;
     accepted.push({ section_key: sectionKey, append_text: appendText });
   }
 
@@ -745,7 +747,12 @@ function applySupplementalUnderLengthExpansions(candidate, parsedExpansion) {
     ok: true,
     merged,
     expansions_count: accepted.length,
-    submitted_expansions_count: expansions.length
+    submitted_expansions_count: expansions.length,
+    accepted_expansion_words_total: accepted.reduce(
+      (total, expansion) => total + wordCount(expansion.append_text),
+      0
+    ),
+    rejected_expansions_count: expansions.length - accepted.length
   };
 }
 
@@ -1342,7 +1349,8 @@ export default async function handler(req, res) {
 
           const mergeResult = applySupplementalUnderLengthExpansions(
             supplementalSource,
-            supplementalGeneration.parsed
+            supplementalGeneration.parsed,
+            { minimumAppendTextWords: UNDER_LENGTH_SUPPLEMENTAL_MIN_APPEND_TEXT_WORDS }
           );
           if (!mergeResult.ok) {
             validation = {
@@ -1367,6 +1375,8 @@ export default async function handler(req, res) {
                 supplemental_timeout_ms: callTimeoutMs,
                 supplemental_safety_buffer_ms: safetyBufferMs,
                 expansions_count: mergeResult.expansions_count,
+                accepted_expansion_words_total: mergeResult.accepted_expansion_words_total || null,
+                rejected_expansions_count: mergeResult.rejected_expansions_count ?? null,
                 word_gap_before: gapBefore?.type === 'word_gap' ? gapBefore.value : null,
                 character_gap_before: gapBefore?.type === 'character_gap' ? gapBefore.value : null
               })
@@ -1399,6 +1409,8 @@ export default async function handler(req, res) {
               supplemental_safety_buffer_ms: safetyBufferMs,
               expansions_count: mergeResult.expansions_count,
               submitted_expansions_count: mergeResult.submitted_expansions_count,
+              accepted_expansion_words_total: mergeResult.accepted_expansion_words_total,
+              rejected_expansions_count: mergeResult.rejected_expansions_count,
               word_gap_before: gapBefore?.type === 'word_gap' ? gapBefore.value : null,
               character_gap_before: gapBefore?.type === 'character_gap' ? gapBefore.value : null,
               word_gap_after: postExpansionGap?.type === 'word_gap' ? postExpansionGap.value : null,
