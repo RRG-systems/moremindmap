@@ -7,15 +7,21 @@ import {
   setCors
 } from './shared.js';
 import { REAL_ESTATE_BUSINESS_MODEL_V1 } from '../engine/businessAssessment/realEstateBusinessModelV1.js';
-import { buildFiveFuturesPrompt, REQUIRED_FUTURE_KEYS } from '../engine/businessAssessment/buildFiveFuturesPrompt.js';
+import {
+  buildFiveFuturesOnlyPrompt,
+  buildOneMovePrompt,
+  REQUIRED_FUTURE_KEYS
+} from '../engine/businessAssessment/buildFiveFuturesPrompt.js';
 
 const FIVE_FUTURES_VERSION = 'five_futures_v1';
 const ONE_MOVE_VERSION = 'one_move_v1';
 const MODEL = process.env.BUSINESS_ASSESSMENT_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
 const FUTURES_ENDPOINT_TIME_BUDGET_MS = 165000;
-const FUTURES_OPENAI_CALL_TIMEOUT_MS = 150000;
+const FIVE_FUTURES_STAGE_TIMEOUT_MS = 75000;
+const ONE_MOVE_STAGE_TIMEOUT_MS = 60000;
 const FUTURES_OPENAI_SAFETY_BUFFER_MS = 10000;
-const FUTURES_MAX_COMPLETION_TOKENS = 9000;
+const FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS = 6000;
+const ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS = 3500;
 const REQUIRED_FUTURE_FIELDS = [
   'title',
   'probability',
@@ -85,6 +91,20 @@ function normalizeFuturesOutput(parsed, { assessmentId, ownerProfileId }) {
       owner_profile_id: oneMove?.owner_profile_id || ownerProfileId
     }
   };
+}
+
+function normalizeFiveFuturesOutput(parsed, { assessmentId, ownerProfileId }) {
+  return normalizeFuturesOutput({ five_futures_v1: parsed?.five_futures_v1 || parsed }, {
+    assessmentId,
+    ownerProfileId
+  }).five_futures_v1;
+}
+
+function normalizeOneMoveOutput(parsed, { assessmentId, ownerProfileId }) {
+  return normalizeFuturesOutput({ one_move_v1: parsed?.one_move_v1 || parsed?.oneMove || parsed }, {
+    assessmentId,
+    ownerProfileId
+  }).one_move_v1;
 }
 
 function numberValue(value) {
@@ -208,8 +228,8 @@ function remainingMs(startedAt) {
   return Math.max(0, FUTURES_ENDPOINT_TIME_BUDGET_MS - elapsedMs(startedAt));
 }
 
-function shouldStopBeforeTimeout(startedAt) {
-  return remainingMs(startedAt) <= FUTURES_OPENAI_CALL_TIMEOUT_MS + FUTURES_OPENAI_SAFETY_BUFFER_MS;
+function shouldStopBeforeTimeout(startedAt, timeoutMs) {
+  return remainingMs(startedAt) <= timeoutMs + FUTURES_OPENAI_SAFETY_BUFFER_MS;
 }
 
 function futuresDiagnostics({
@@ -220,7 +240,8 @@ function futuresDiagnostics({
   stage,
   error,
   validation,
-  timeoutMs
+  timeoutMs,
+  maxCompletionTokens
 }) {
   return {
     generated_at: new Date().toISOString(),
@@ -232,7 +253,7 @@ function futuresDiagnostics({
     model: MODEL,
     prompt_chars: JSON.stringify(prompt?.messages || []).length,
     user_prompt_chars: String(prompt?.messages?.[1]?.content || '').length,
-    max_completion_tokens: FUTURES_MAX_COMPLETION_TOKENS,
+    max_completion_tokens: maxCompletionTokens || null,
     elapsed_ms: elapsedMs(startedAt),
     remaining_ms: remainingMs(startedAt),
     timeout_ms: timeoutMs || null
@@ -265,7 +286,7 @@ function sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentStatus) {
   });
 }
 
-async function callOpenAIForFutures(prompt, { timeoutMs = FUTURES_OPENAI_CALL_TIMEOUT_MS } = {}) {
+async function callOpenAIForFutures(prompt, { timeoutMs, maxCompletionTokens, stage } = {}) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error('OPENAI_API_KEY is not configured');
     error.code = 'missing_openai_api_key';
@@ -285,7 +306,7 @@ async function callOpenAIForFutures(prompt, { timeoutMs = FUTURES_OPENAI_CALL_TI
       model: MODEL,
       messages: prompt.messages,
       response_format: { type: 'json_object' },
-      max_completion_tokens: FUTURES_MAX_COMPLETION_TOKENS
+      max_completion_tokens: maxCompletionTokens
     }),
     signal: controller.signal
   }).catch((error) => {
@@ -293,6 +314,7 @@ async function callOpenAIForFutures(prompt, { timeoutMs = FUTURES_OPENAI_CALL_TI
       const timeoutError = new Error(`OpenAI futures call exceeded ${timeoutMs}ms`);
       timeoutError.code = 'openai_futures_call_timeout';
       timeoutError.timeout_ms = timeoutMs;
+      timeoutError.stage = stage;
       throw timeoutError;
     }
     throw error;
@@ -317,7 +339,8 @@ async function callOpenAIForFutures(prompt, { timeoutMs = FUTURES_OPENAI_CALL_TI
     parsed: extractJsonObject(content),
     model: data.model || MODEL,
     usage: data.usage || null,
-    duration_ms: Date.now() - startedAt
+    duration_ms: Date.now() - startedAt,
+    stage
   };
 }
 
@@ -383,7 +406,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const prompt = buildFiveFuturesPrompt({
+    const fiveFuturesPrompt = buildFiveFuturesOnlyPrompt({
       assessmentRecord,
       businessIntelligenceDraft,
       executiveDiagnosticBriefing,
@@ -394,40 +417,48 @@ export default async function handler(req, res) {
     const beforeOpenAIDiagnostics = futuresDiagnostics({
       assessmentId,
       ownerProfileId,
-      prompt,
+      prompt: fiveFuturesPrompt,
       startedAt: requestStartedAt,
-      stage: 'before_initial_futures_generation',
-      error: 'futures_generation_started'
+      stage: 'before_five_futures_stage',
+      error: 'five_futures_stage_started',
+      timeoutMs: FIVE_FUTURES_STAGE_TIMEOUT_MS,
+      maxCompletionTokens: FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS
     });
     await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, beforeOpenAIDiagnostics);
 
-    if (shouldStopBeforeTimeout(requestStartedAt)) {
+    if (shouldStopBeforeTimeout(requestStartedAt, FIVE_FUTURES_STAGE_TIMEOUT_MS)) {
       const diagnostics = futuresDiagnostics({
         assessmentId,
         ownerProfileId,
-        prompt,
+        prompt: fiveFuturesPrompt,
         startedAt: requestStartedAt,
-        stage: 'before_initial_futures_generation',
-        error: 'insufficient_time_before_initial_futures_generation',
-        timeoutMs: FUTURES_OPENAI_CALL_TIMEOUT_MS
+        stage: 'before_five_futures_stage',
+        error: 'insufficient_time_before_five_futures_stage',
+        timeoutMs: FIVE_FUTURES_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS
       });
       await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
       return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
     }
 
-    let generation;
+    let fiveFuturesGeneration;
     try {
-      generation = await callOpenAIForFutures(prompt, { timeoutMs: FUTURES_OPENAI_CALL_TIMEOUT_MS });
+      fiveFuturesGeneration = await callOpenAIForFutures(fiveFuturesPrompt, {
+        timeoutMs: FIVE_FUTURES_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS,
+        stage: 'five_futures_stage'
+      });
     } catch (error) {
       if (error?.code === 'openai_futures_call_timeout') {
         const diagnostics = futuresDiagnostics({
           assessmentId,
           ownerProfileId,
-          prompt,
+          prompt: fiveFuturesPrompt,
           startedAt: requestStartedAt,
-          stage: 'openai_futures_call_timeout',
-          error: 'openai_futures_call_timeout',
-          timeoutMs: error.timeout_ms
+          stage: 'five_futures_stage_timeout',
+          error: 'openai_five_futures_stage_timeout',
+          timeoutMs: error.timeout_ms,
+          maxCompletionTokens: FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS
         });
         await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
         return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
@@ -435,20 +466,144 @@ export default async function handler(req, res) {
       throw error;
     }
 
-    const normalized = normalizeFuturesOutput(generation.parsed, { assessmentId, ownerProfileId });
+    const fiveFutures = normalizeFiveFuturesOutput(fiveFuturesGeneration.parsed, { assessmentId, ownerProfileId });
+    const fiveFuturesValidation = validateFiveFutures(fiveFutures);
+    if (!fiveFuturesValidation.valid) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        prompt: fiveFuturesPrompt,
+        startedAt: requestStartedAt,
+        stage: 'five_futures_stage_validation_failed',
+        error: 'invalid_five_futures_output',
+        validation: fiveFuturesValidation,
+        timeoutMs: FIVE_FUTURES_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: FIVE_FUTURES_STAGE_MAX_COMPLETION_TOKENS
+      });
+      diagnostics.generation_duration_ms = fiveFuturesGeneration.duration_ms;
+      diagnostics.generation_usage = fiveFuturesGeneration.usage || null;
+      await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+      return res.status(502).json({
+        ok: false,
+        error: 'invalid_five_futures_output',
+        validation: fiveFuturesValidation,
+        assessment_id: assessmentId,
+        owner_profile_id: ownerProfileId
+      });
+    }
+
+    const oneMovePrompt = buildOneMovePrompt({
+      assessmentRecord,
+      businessIntelligenceDraft,
+      executiveDiagnosticBriefing,
+      fiveFutures,
+      canonicalProfile: profileLookup.dossier,
+      realEstateBusinessModel: REAL_ESTATE_BUSINESS_MODEL_V1
+    });
+    const beforeOneMoveDiagnostics = futuresDiagnostics({
+      assessmentId,
+      ownerProfileId,
+      prompt: oneMovePrompt,
+      startedAt: requestStartedAt,
+      stage: 'before_one_move_stage',
+      error: 'one_move_stage_started',
+      timeoutMs: ONE_MOVE_STAGE_TIMEOUT_MS,
+      maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS
+    });
+    beforeOneMoveDiagnostics.five_futures_stage_duration_ms = fiveFuturesGeneration.duration_ms;
+    beforeOneMoveDiagnostics.five_futures_stage_usage = fiveFuturesGeneration.usage || null;
+    await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, beforeOneMoveDiagnostics);
+
+    if (shouldStopBeforeTimeout(requestStartedAt, ONE_MOVE_STAGE_TIMEOUT_MS)) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        prompt: oneMovePrompt,
+        startedAt: requestStartedAt,
+        stage: 'before_one_move_stage',
+        error: 'insufficient_time_before_one_move_stage',
+        timeoutMs: ONE_MOVE_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS
+      });
+      diagnostics.five_futures_stage_duration_ms = fiveFuturesGeneration.duration_ms;
+      diagnostics.five_futures_stage_usage = fiveFuturesGeneration.usage || null;
+      await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+      return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+    }
+
+    let oneMoveGeneration;
+    try {
+      oneMoveGeneration = await callOpenAIForFutures(oneMovePrompt, {
+        timeoutMs: ONE_MOVE_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS,
+        stage: 'one_move_stage'
+      });
+    } catch (error) {
+      if (error?.code === 'openai_futures_call_timeout') {
+        const diagnostics = futuresDiagnostics({
+          assessmentId,
+          ownerProfileId,
+          prompt: oneMovePrompt,
+          startedAt: requestStartedAt,
+          stage: 'one_move_stage_timeout',
+          error: 'openai_one_move_stage_timeout',
+          timeoutMs: error.timeout_ms,
+          maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS
+        });
+        diagnostics.five_futures_stage_duration_ms = fiveFuturesGeneration.duration_ms;
+        diagnostics.five_futures_stage_usage = fiveFuturesGeneration.usage || null;
+        await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+        return sendFuturesTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+      }
+      throw error;
+    }
+
+    const oneMove = normalizeOneMoveOutput(oneMoveGeneration.parsed, { assessmentId, ownerProfileId });
+    const oneMoveValidation = validateOneMove(oneMove);
+    if (!oneMoveValidation.valid) {
+      const diagnostics = futuresDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        prompt: oneMovePrompt,
+        startedAt: requestStartedAt,
+        stage: 'one_move_stage_validation_failed',
+        error: 'invalid_one_move_output',
+        validation: oneMoveValidation,
+        timeoutMs: ONE_MOVE_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS
+      });
+      diagnostics.five_futures_stage_duration_ms = fiveFuturesGeneration.duration_ms;
+      diagnostics.five_futures_stage_usage = fiveFuturesGeneration.usage || null;
+      diagnostics.one_move_stage_duration_ms = oneMoveGeneration.duration_ms;
+      diagnostics.one_move_stage_usage = oneMoveGeneration.usage || null;
+      await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+      return res.status(502).json({
+        ok: false,
+        error: 'invalid_one_move_output',
+        validation: oneMoveValidation,
+        assessment_id: assessmentId,
+        owner_profile_id: ownerProfileId
+      });
+    }
+
+    const normalized = { five_futures_v1: fiveFutures, one_move_v1: oneMove };
     const validation = validateOutput(normalized);
     if (!validation.valid) {
       const diagnostics = futuresDiagnostics({
         assessmentId,
         ownerProfileId,
-        prompt,
+        prompt: oneMovePrompt,
         startedAt: requestStartedAt,
-        stage: 'after_futures_validation',
-        error: 'invalid_futures_output',
-        validation
+        stage: 'assembled_futures_validation_failed',
+        error: 'assembled_futures_validation_failed',
+        validation,
+        timeoutMs: ONE_MOVE_STAGE_TIMEOUT_MS,
+        maxCompletionTokens: ONE_MOVE_STAGE_MAX_COMPLETION_TOKENS
       });
-      diagnostics.generation_duration_ms = generation.duration_ms;
-      diagnostics.generation_usage = generation.usage || null;
+      diagnostics.five_futures_stage_duration_ms = fiveFuturesGeneration.duration_ms;
+      diagnostics.five_futures_stage_usage = fiveFuturesGeneration.usage || null;
+      diagnostics.one_move_stage_duration_ms = oneMoveGeneration.duration_ms;
+      diagnostics.one_move_stage_usage = oneMoveGeneration.usage || null;
       await saveFuturesFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
       return res.status(502).json({
         ok: false,
@@ -474,8 +629,18 @@ export default async function handler(req, res) {
         futures_version: FIVE_FUTURES_VERSION,
         one_move_version: ONE_MOVE_VERSION,
         futures_generated_at: now,
-        futures_model: generation.model,
-        futures_usage: generation.usage,
+        futures_model: fiveFuturesGeneration.model,
+        futures_usage: {
+          five_futures_stage: fiveFuturesGeneration.usage || null,
+          one_move_stage: oneMoveGeneration.usage || null,
+          total_tokens:
+            (fiveFuturesGeneration.usage?.total_tokens || 0) +
+            (oneMoveGeneration.usage?.total_tokens || 0)
+        },
+        futures_stage_durations_ms: {
+          five_futures_stage: fiveFuturesGeneration.duration_ms,
+          one_move_stage: oneMoveGeneration.duration_ms
+        },
         last_futures_generation_error: undefined
       }
     };
