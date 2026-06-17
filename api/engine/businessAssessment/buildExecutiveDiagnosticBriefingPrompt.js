@@ -133,9 +133,9 @@ function wordCountTarget(assessmentRecord, draft) {
   const richness = answerRichness(answers);
   const isTeam = assessmentRecord?.assessment_type === 'real_estate_team' || draft?.team_reality?.team_exists;
   const highDetail = richness.total_words >= 900 || richness.financial_character_count >= 2500 || richness.numeric_reference_count >= 12;
-  if (isTeam && highDetail) return '3,500-5,000 words';
-  if (highDetail) return '2,700-3,700 words';
-  return '2,100-3,000 words';
+  if (isTeam && highDetail) return '2,600-3,200 words';
+  if (highDetail) return '2,100-2,600 words';
+  return '1,950-2,300 words';
 }
 
 function modelSnapshot(realEstateBusinessModel) {
@@ -221,7 +221,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
       section_shape: {
         key: 'stable snake_case section key',
         title: 'section title',
-        body: 'substantial prose of at least 120 words; target 140-220 words for normal cases',
+        body: 'substantial prose of at least 90 words; target 115-160 words for normal cases',
         evidence: ['specific evidence references from answers/draft/profile/model'],
         confidence: 'high | moderate | low'
       },
@@ -232,9 +232,9 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     writing_requirements: {
       target_length: target,
       substantial:
-        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters. Aim for a safer delivery margin: at least 2,100 words and 14,000 characters when the target length allows it. Do not exceed the target length.',
+        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters. For solo assessments, aim for 1,950-2,300 words and 12,750-13,500 characters. For high-detail solo assessments, aim for 2,100-2,600 words and 13,000-14,000 characters. Meet every section minimum without excessive length.',
       section_depth:
-        'Write every required section as a real diagnostic section. Target 140-220 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
+        'Write every required section as a real diagnostic section. Every required section must be at least 90 words. Target 115-160 words per section for normal cases. Do not over-expand sections far beyond the requested range. Prefer concise diagnostic density over filler. Include diagnostic reasoning, evidence, implication, and what it means.',
       no_compression:
         'Do not compress the briefing to fit a short response. Do not provide brief bullet summaries in place of analysis.',
       standalone_value:

@@ -35,6 +35,7 @@ const MINIMUM_SECTION_BODY_WORDS = 90;
 const MAX_REPAIR_ATTEMPTS = 2;
 const NARROW_SECTION_WORD_GAP = 25;
 const BRIEFING_ENDPOINT_TIME_BUDGET_MS = 165000;
+const BRIEFING_INITIAL_OPENAI_CALL_TIMEOUT_MS = 90000;
 const BRIEFING_OPENAI_CALL_TIMEOUT_MS = 70000;
 const BRIEFING_REPAIR_SAFETY_BUFFER_MS = 35000;
 const BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS = 45000;
@@ -1060,7 +1061,9 @@ export default async function handler(req, res) {
       return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
     }
 
-    let generation = await callOpenAIForBriefing(prompt);
+    let generation = await callOpenAIForBriefing(prompt, {
+      timeoutMs: BRIEFING_INITIAL_OPENAI_CALL_TIMEOUT_MS
+    });
     console.log('[BUSINESS-ASSESSMENT-BRIEFING] OpenAI completed', {
       assessment_id: assessmentId,
       owner_profile_id: ownerProfileId,
