@@ -232,7 +232,7 @@ export function buildExecutiveDiagnosticBriefingPrompt({
     writing_requirements: {
       target_length: target,
       substantial:
-        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters, but aim comfortably above that floor. Do not exceed the target length.',
+        'This should read like an executive diagnostic briefing, not a short summary. Minimum acceptable output is 1,800 words and 12,000 characters. Aim for a safer delivery margin: at least 2,100 words and 14,000 characters when the target length allows it. Do not exceed the target length.',
       section_depth:
         'Write every required section as a real diagnostic section. Target 140-220 words per section for normal cases. Include diagnostic reasoning, evidence, implication, and what it means.',
       no_compression:
