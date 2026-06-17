@@ -34,6 +34,9 @@ const MINIMUM_BRIEFING_WORDS = 1800;
 const MINIMUM_SECTION_BODY_WORDS = 90;
 const MAX_REPAIR_ATTEMPTS = 2;
 const NARROW_SECTION_WORD_GAP = 25;
+const BRIEFING_ENDPOINT_TIME_BUDGET_MS = 165000;
+const BRIEFING_OPENAI_CALL_TIMEOUT_MS = 70000;
+const BRIEFING_REPAIR_SAFETY_BUFFER_MS = 35000;
 const STRUCTURAL_TOP_LEVEL_KEYS = [
   'sections',
   'primary_constraint_snapshot',
@@ -420,7 +423,71 @@ function elapsed(startedAt) {
   return `${Date.now() - startedAt}ms`;
 }
 
-async function callOpenAIForBriefing(prompt) {
+function elapsedMs(startedAt) {
+  return Date.now() - startedAt;
+}
+
+function remainingMs(startedAt) {
+  return Math.max(0, BRIEFING_ENDPOINT_TIME_BUDGET_MS - elapsedMs(startedAt));
+}
+
+function hasTimeForOpenAICall(startedAt, minimumBufferMs = BRIEFING_REPAIR_SAFETY_BUFFER_MS) {
+  return remainingMs(startedAt) > BRIEFING_OPENAI_CALL_TIMEOUT_MS + minimumBufferMs;
+}
+
+function timeoutDiagnostics({
+  assessmentId,
+  ownerProfileId,
+  validation,
+  startedAt,
+  repairAttempts,
+  bestStructurallyCompleteBriefing,
+  stage
+}) {
+  return {
+    generated_at: new Date().toISOString(),
+    reason: 'briefing_generation_time_budget_exceeded',
+    stage,
+    validation,
+    elapsed_ms: elapsedMs(startedAt),
+    remaining_ms: remainingMs(startedAt),
+    last_validation_reason: validation?.reason || null,
+    last_failing_section: validation?.section || null,
+    repair_attempts: repairAttempts,
+    structurally_complete_candidate_available: Boolean(bestStructurallyCompleteBriefing),
+    assessment_id: assessmentId,
+    owner_profile_id: ownerProfileId,
+    message: 'Generation did not complete before server time budget. Retry can resume from saved draft.'
+  };
+}
+
+async function saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics) {
+  const now = new Date().toISOString();
+  await redis.set(
+    businessAssessmentKey(assessmentId),
+    JSON.stringify({
+      ...assessmentRecord,
+      updated_at: now,
+      metadata: {
+        ...(assessmentRecord.metadata || {}),
+        last_briefing_generation_error: diagnostics
+      }
+    })
+  );
+}
+
+function sendTimeBudgetExceeded(res, diagnostics, assessmentStatus) {
+  return res.status(503).json({
+    ok: false,
+    error: 'briefing_generation_time_budget_exceeded',
+    status: assessmentStatus,
+    assessment_id: diagnostics.assessment_id,
+    owner_profile_id: diagnostics.owner_profile_id,
+    diagnostics
+  });
+}
+
+async function callOpenAIForBriefing(prompt, { timeoutMs = BRIEFING_OPENAI_CALL_TIMEOUT_MS } = {}) {
   if (!process.env.OPENAI_API_KEY) {
     const error = new Error('OPENAI_API_KEY is not configured');
     error.code = 'missing_openai_api_key';
@@ -428,6 +495,8 @@ async function callOpenAIForBriefing(prompt) {
   }
 
   const startedAt = Date.now();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -439,8 +508,17 @@ async function callOpenAIForBriefing(prompt) {
       messages: prompt.messages,
       response_format: { type: 'json_object' },
       max_completion_tokens: 10000
-    })
-  });
+    }),
+    signal: controller.signal
+  }).catch((error) => {
+    if (error?.name === 'AbortError') {
+      const timeoutError = new Error(`OpenAI call exceeded ${timeoutMs}ms`);
+      timeoutError.code = 'openai_call_timeout';
+      timeoutError.timeout_ms = timeoutMs;
+      throw timeoutError;
+    }
+    throw error;
+  }).finally(() => clearTimeout(timeout));
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
@@ -478,6 +556,9 @@ export default async function handler(req, res) {
 
   let redis;
   const requestStartedAt = Date.now();
+  let activeAssessmentRecord = null;
+  let activeAssessmentId = null;
+  let activeOwnerProfileId = null;
   try {
     const { assessment_id, owner_profile_id } = req.body || {};
 
@@ -487,6 +568,7 @@ export default async function handler(req, res) {
 
     redis = createRedisClient();
     const assessmentId = await resolveAssessmentId(redis, { assessment_id, owner_profile_id });
+    activeAssessmentId = assessmentId;
 
     if (!assessmentId) {
       return res.status(404).json({ ok: false, error: 'assessment_not_found' });
@@ -498,7 +580,9 @@ export default async function handler(req, res) {
     }
 
     const assessmentRecord = JSON.parse(rawAssessment);
+    activeAssessmentRecord = assessmentRecord;
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
+    activeOwnerProfileId = ownerProfileId;
     const businessIntelligenceDraft = assessmentRecord.output?.business_intelligence_draft;
 
     if (!businessIntelligenceDraft) {
@@ -536,6 +620,20 @@ export default async function handler(req, res) {
       duration: elapsed(promptStartedAt)
     });
 
+    if (!hasTimeForOpenAICall(requestStartedAt, 0)) {
+      const diagnostics = timeoutDiagnostics({
+        assessmentId,
+        ownerProfileId,
+        validation: { valid: false, reason: 'insufficient_time_before_initial_generation' },
+        startedAt: requestStartedAt,
+        repairAttempts: 0,
+        bestStructurallyCompleteBriefing: null,
+        stage: 'before_initial_generation'
+      });
+      await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+      return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+    }
+
     let generation = await callOpenAIForBriefing(prompt);
     console.log('[BUSINESS-ASSESSMENT-BRIEFING] OpenAI completed', {
       assessment_id: assessmentId,
@@ -566,7 +664,7 @@ export default async function handler(req, res) {
       const repairSource = bestStructurallyCompleteBriefing || briefing;
       const repairSourceValidation = validateBriefingOutput(repairSource);
       const targetedRepair =
-        repairAttempts > 0 && expandableThinSectionFailure(repairSourceValidation, repairSource);
+        expandableThinSectionFailure(repairSourceValidation, repairSource);
 
       if (!targetedRepair && !shouldAttemptBriefingRepair(repairSourceValidation)) {
         break;
@@ -576,6 +674,34 @@ export default async function handler(req, res) {
         ? buildTargetedSectionExpansionPrompt(prompt, repairSource, repairSourceValidation)
         : buildRepairPrompt(prompt, repairSource, repairSourceValidation);
       repairAttempts += 1;
+      const preRepairDiagnostics = validationDiagnostics(repairSourceValidation, repairSource, {
+        generated_at: new Date().toISOString(),
+        reason: repairSourceValidation.reason,
+        stage: targetedRepair ? 'before_targeted_section_expansion' : 'before_general_repair',
+        elapsed_ms: elapsedMs(requestStartedAt),
+        remaining_ms: remainingMs(requestStartedAt),
+        repair_attempts_started: repairAttempts,
+        repair_attempts: repairAttempts,
+        targeted_section_expansion: targetedRepair,
+        assessment_id: assessmentId,
+        owner_profile_id: ownerProfileId
+      });
+      await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, preRepairDiagnostics);
+
+      if (!hasTimeForOpenAICall(requestStartedAt)) {
+        const diagnostics = timeoutDiagnostics({
+          assessmentId,
+          ownerProfileId,
+          validation: repairSourceValidation,
+          startedAt: requestStartedAt,
+          repairAttempts,
+          bestStructurallyCompleteBriefing,
+          stage: targetedRepair ? 'before_targeted_section_expansion' : 'before_general_repair'
+        });
+        await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+        return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+      }
+
       console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repairing briefing output', {
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId,
@@ -718,6 +844,24 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('[BUSINESS-ASSESSMENT-BRIEFING] Error:', error);
+    if (error?.code === 'openai_call_timeout' && redis && activeAssessmentRecord && activeAssessmentId) {
+      const diagnostics = timeoutDiagnostics({
+        assessmentId: activeAssessmentId,
+        ownerProfileId: activeOwnerProfileId || activeAssessmentRecord.owner_profile_id,
+        validation: {
+          valid: false,
+          reason: 'openai_call_timeout',
+          timeout_ms: error.timeout_ms
+        },
+        startedAt: requestStartedAt,
+        repairAttempts: activeAssessmentRecord.metadata?.last_briefing_generation_error?.repair_attempts || 0,
+        bestStructurallyCompleteBriefing: null,
+        stage: 'openai_call_timeout'
+      });
+      await saveBriefingFailureMetadata(redis, activeAssessmentRecord, activeAssessmentId, diagnostics);
+      return sendTimeBudgetExceeded(res, diagnostics, activeAssessmentRecord.status);
+    }
+
     return res.status(500).json({
       ok: false,
       error: 'briefing_generation_failed',
