@@ -39,8 +39,8 @@ const BRIEFING_OPENAI_CALL_TIMEOUT_MS = 70000;
 const BRIEFING_REPAIR_SAFETY_BUFFER_MS = 35000;
 const BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS = 45000;
 const BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS = 15000;
-const BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS = 45000;
-const BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS = 12000;
+const BRIEFING_SUPPLEMENTAL_EXPANSION_TIMEOUT_MS = 25000;
+const BRIEFING_SUPPLEMENTAL_EXPANSION_SAFETY_BUFFER_MS = 10000;
 const NEAR_PASS_CHARACTER_GAP = 500;
 const NEAR_PASS_WORD_GAP = 75;
 const UNDER_LENGTH_CHARACTER_GAP = 2500;
@@ -376,6 +376,24 @@ function underLengthBriefingGap(validation) {
   return null;
 }
 
+function briefingLengthGap(validation) {
+  if (validation?.reason === 'briefing_word_count_too_short') {
+    return {
+      type: 'word_gap',
+      value: Math.max(0, (validation.minimum_words || 0) - (validation.actual_words || 0))
+    };
+  }
+
+  if (validation?.reason === 'briefing_markdown_too_short') {
+    return {
+      type: 'character_gap',
+      value: Math.max(0, (validation.minimum_characters || 0) - (validation.actual_characters || 0))
+    };
+  }
+
+  return null;
+}
+
 function isStructurallyCompleteUnderLengthExpansionCandidate(validation, candidate) {
   if (!structurallyComplete(candidate)) return false;
   if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
@@ -410,38 +428,112 @@ function sectionLengthSummary(value) {
     .slice(0, 8);
 }
 
-function buildUnderLengthExpansionPrompt(prompt, previousOutput, validation) {
+function sectionExcerpts(value) {
+  if (!Array.isArray(value?.sections)) return [];
+  return value.sections.map((section) => {
+    const body = String(section?.body || '').trim();
+    return {
+      key: section?.key || null,
+      title: section?.title || null,
+      body_words: sectionWordCount(section).bodyWords,
+      excerpt: body.length > 700 ? `${body.slice(0, 700)}...` : body
+    };
+  });
+}
+
+function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, validation) {
   const gap = underLengthBriefingGap(validation);
   return {
     ...prompt,
     messages: [
-      ...prompt.messages,
       {
-        role: 'assistant',
-        content: compactForRepair(previousOutput)
+        role: 'system',
+        content: [
+          'You are writing a small supplemental expansion for an already-structured MORE MindMap Executive Diagnostic Briefing.',
+          'Return valid JSON only. Do not return the full briefing object. Do not use markdown fences.'
+        ].join('\n')
       },
       {
         role: 'user',
         content: [
-          'The previous Executive Diagnostic Briefing JSON is structurally complete but under the required total length.',
+          'The Executive Diagnostic Briefing is structurally complete but under the required total length.',
           `Validation failure: ${JSON.stringify(validation)}`,
           gap ? `Under-length gap: ${gap.type} = ${gap.value}.` : '',
           `Shortest sections by body length: ${JSON.stringify(sectionLengthSummary(previousOutput))}`,
-          'Return the FULL corrected Executive Diagnostic Briefing JSON object, not a partial patch.',
-          'Preserve every required top-level key exactly: version, generated_at, assessment_id, owner_profile_id, title, audience_type, word_count_target, briefing_markdown, sections, primary_constraint_snapshot, current_trajectory_signal, confidence_snapshot, missing_data, caveats.',
-          'Preserve all existing section order, conclusions, evidence, and confidence labels.',
-          'Do not rewrite the whole diagnostic.',
-          'Add 350-500 words of evidence-based diagnostic depth across the weakest or shortest relevant sections.',
+          `Current sections and excerpts: ${JSON.stringify(sectionExcerpts(previousOutput))}`,
+          'Return only this JSON shape: {"expansions":[{"section_key":"string","append_text":"string"}]}.',
+          'section_key must exactly match one of the existing section keys.',
+          'Add 350-500 words total across 2-4 append_text values.',
           'Prioritize practical implications, missing-data interpretation, constraint reasoning, business consequences, and why the current trajectory matters.',
+          'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
           'Keep the tone professional, direct, and diagnostic.',
-          'The final briefing_markdown must exceed 1,800 words and 12,000 characters.',
-          'Regenerate briefing_markdown so it reflects the corrected full sections.',
-          'Return valid JSON only. No markdown fences.'
+          'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
+          'Return valid JSON only.'
         ]
           .filter(Boolean)
           .join('\n')
       }
     ]
+  };
+}
+
+function invalidSupplementalText(value) {
+  const body = String(value || '').trim();
+  if (!body) return true;
+  if (/```/.test(body)) return true;
+  if (/^\s*[{[]/.test(body)) return true;
+  if (/"expansions"\s*:/.test(body)) return true;
+  return false;
+}
+
+function applySupplementalUnderLengthExpansions(candidate, parsedExpansion) {
+  if (!parsedExpansion || typeof parsedExpansion !== 'object' || Array.isArray(parsedExpansion)) {
+    return { ok: false, error: 'supplemental_expansion_not_object', expansions_count: 0 };
+  }
+
+  const expansions = parsedExpansion.expansions;
+  if (!Array.isArray(expansions) || !expansions.length) {
+    return { ok: false, error: 'supplemental_expansions_missing', expansions_count: 0 };
+  }
+
+  const sectionKeys = new Set((candidate.sections || []).map((section) => section?.key).filter(Boolean));
+  const accepted = [];
+  for (const expansion of expansions) {
+    const sectionKey = String(expansion?.section_key || '').trim();
+    const appendText = String(expansion?.append_text || '').trim();
+    if (!sectionKeys.has(sectionKey)) continue;
+    if (invalidSupplementalText(appendText)) continue;
+    accepted.push({ section_key: sectionKey, append_text: appendText });
+  }
+
+  if (!accepted.length) {
+    return {
+      ok: false,
+      error: 'no_valid_supplemental_expansions',
+      expansions_count: expansions.length
+    };
+  }
+
+  const merged = {
+    ...candidate,
+    sections: candidate.sections.map((section) => {
+      const additions = accepted
+        .filter((expansion) => expansion.section_key === section.key)
+        .map((expansion) => expansion.append_text);
+      if (!additions.length) return section;
+      return {
+        ...section,
+        body: [String(section.body || '').trim(), ...additions].filter(Boolean).join('\n\n')
+      };
+    })
+  };
+  merged.briefing_markdown = buildBriefingMarkdownFromSections(merged);
+
+  return {
+    ok: true,
+    merged,
+    expansions_count: accepted.length,
+    submitted_expansions_count: expansions.length
   };
 }
 
@@ -790,10 +882,10 @@ export default async function handler(req, res) {
       const nearPassExpansion = isNearPassingBriefing(repairSourceValidation, repairSource);
       const underLengthExpansion =
         !underLengthExpansionAttempted &&
-        !nearPassExpansion &&
         isStructurallyCompleteUnderLengthExpansionCandidate(repairSourceValidation, repairSource);
       const targetedRepair =
-        nearPassExpansion || expandableThinSectionFailure(repairSourceValidation, repairSource);
+        !underLengthExpansion &&
+        (nearPassExpansion || expandableThinSectionFailure(repairSourceValidation, repairSource));
       const canAttemptStandardRepair = repairAttempts < MAX_REPAIR_ATTEMPTS;
 
       if (!canAttemptStandardRepair && !underLengthExpansion) {
@@ -804,18 +896,14 @@ export default async function handler(req, res) {
         break;
       }
 
-      const repairPrompt = underLengthExpansion
-        ? buildUnderLengthExpansionPrompt(prompt, repairSource, repairSourceValidation)
-        : targetedRepair
-        ? buildTargetedSectionExpansionPrompt(prompt, repairSource, repairSourceValidation)
-        : buildRepairPrompt(prompt, repairSource, repairSourceValidation);
       repairAttempts += 1;
       if (underLengthExpansion) underLengthExpansionAttempted = true;
+      const preExpansionGap = briefingLengthGap(repairSourceValidation);
       const preRepairDiagnostics = validationDiagnostics(repairSourceValidation, repairSource, {
         generated_at: new Date().toISOString(),
         reason: repairSourceValidation.reason,
         stage: underLengthExpansion
-          ? 'before_under_length_expansion'
+          ? 'before_supplemental_under_length_expansion'
           : targetedRepair
           ? 'before_targeted_section_expansion'
           : 'before_general_repair',
@@ -825,8 +913,8 @@ export default async function handler(req, res) {
         repair_attempts: repairAttempts,
         targeted_section_expansion: targetedRepair,
         near_pass_expansion: nearPassExpansion,
-        under_length_expansion_candidate: underLengthExpansion,
-        under_length_expansion_attempted: underLengthExpansion,
+        under_length_supplemental_expansion_candidate: underLengthExpansion,
+        under_length_supplemental_expansion_attempted: underLengthExpansion,
         character_gap:
           repairSourceValidation.reason === 'briefing_markdown_too_short'
             ? (underLengthExpansion
@@ -842,29 +930,31 @@ export default async function handler(req, res) {
             ? nearPassBriefingGap(repairSourceValidation)?.value || null
             : null,
         targeted_timeout_ms: underLengthExpansion
-          ? BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS
+          ? BRIEFING_SUPPLEMENTAL_EXPANSION_TIMEOUT_MS
           : nearPassExpansion
           ? BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS
           : BRIEFING_OPENAI_CALL_TIMEOUT_MS,
         targeted_safety_buffer_ms: underLengthExpansion
-          ? BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS
+          ? BRIEFING_SUPPLEMENTAL_EXPANSION_SAFETY_BUFFER_MS
           : nearPassExpansion
           ? BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS
           : BRIEFING_REPAIR_SAFETY_BUFFER_MS,
-        under_length_timeout_ms: underLengthExpansion ? BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS : null,
-        under_length_safety_buffer_ms: underLengthExpansion ? BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS : null,
+        supplemental_timeout_ms: underLengthExpansion ? BRIEFING_SUPPLEMENTAL_EXPANSION_TIMEOUT_MS : null,
+        supplemental_safety_buffer_ms: underLengthExpansion ? BRIEFING_SUPPLEMENTAL_EXPANSION_SAFETY_BUFFER_MS : null,
+        word_gap_before: preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null,
+        character_gap_before: preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null,
         assessment_id: assessmentId,
         owner_profile_id: ownerProfileId
       });
       await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, preRepairDiagnostics);
 
       const callTimeoutMs = underLengthExpansion
-        ? BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS
+        ? BRIEFING_SUPPLEMENTAL_EXPANSION_TIMEOUT_MS
         : nearPassExpansion
         ? BRIEFING_TARGETED_EXPANSION_TIMEOUT_MS
         : BRIEFING_OPENAI_CALL_TIMEOUT_MS;
       const safetyBufferMs = underLengthExpansion
-        ? BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS
+        ? BRIEFING_SUPPLEMENTAL_EXPANSION_SAFETY_BUFFER_MS
         : nearPassExpansion
         ? BRIEFING_TARGETED_EXPANSION_SAFETY_BUFFER_MS
         : BRIEFING_REPAIR_SAFETY_BUFFER_MS;
@@ -878,14 +968,14 @@ export default async function handler(req, res) {
           repairAttempts,
           bestStructurallyCompleteBriefing,
           stage: underLengthExpansion
-            ? 'before_under_length_expansion'
+            ? 'before_supplemental_under_length_expansion'
             : targetedRepair
             ? 'before_targeted_section_expansion'
             : 'before_general_repair'
         });
         diagnostics.near_pass_expansion = nearPassExpansion;
-        diagnostics.under_length_expansion_candidate = underLengthExpansion;
-        diagnostics.under_length_expansion_attempted = underLengthExpansion;
+        diagnostics.under_length_supplemental_expansion_candidate = underLengthExpansion;
+        diagnostics.under_length_supplemental_expansion_attempted = underLengthExpansion;
         diagnostics.character_gap =
           repairSourceValidation.reason === 'briefing_markdown_too_short'
             ? (underLengthExpansion
@@ -902,13 +992,122 @@ export default async function handler(req, res) {
             : null;
         diagnostics.targeted_timeout_ms = callTimeoutMs;
         diagnostics.targeted_safety_buffer_ms = safetyBufferMs;
-        diagnostics.under_length_timeout_ms = underLengthExpansion ? BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS : null;
-        diagnostics.under_length_safety_buffer_ms = underLengthExpansion
-          ? BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS
+        diagnostics.supplemental_timeout_ms = underLengthExpansion ? BRIEFING_SUPPLEMENTAL_EXPANSION_TIMEOUT_MS : null;
+        diagnostics.supplemental_safety_buffer_ms = underLengthExpansion
+          ? BRIEFING_SUPPLEMENTAL_EXPANSION_SAFETY_BUFFER_MS
           : null;
+        diagnostics.word_gap_before = preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null;
+        diagnostics.character_gap_before = preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null;
         await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
         return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
       }
+
+      if (underLengthExpansion) {
+        console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting supplemental under-length expansion', {
+          assessment_id: assessmentId,
+          owner_profile_id: ownerProfileId,
+          reason: repairSourceValidation.reason,
+          repair_attempt: repairAttempts,
+          gap: preExpansionGap
+        });
+
+        let supplementalGeneration;
+        try {
+          supplementalGeneration = await callOpenAIForBriefing(
+            buildSupplementalUnderLengthExpansionPrompt(prompt, repairSource, repairSourceValidation),
+            { timeoutMs: callTimeoutMs }
+          );
+        } catch (error) {
+          if (error?.code === 'openai_call_timeout') {
+            const diagnostics = timeoutDiagnostics({
+              assessmentId,
+              ownerProfileId,
+              validation: {
+                valid: false,
+                reason: 'openai_supplemental_expansion_timeout',
+                timeout_ms: error.timeout_ms
+              },
+              startedAt: requestStartedAt,
+              repairAttempts,
+              bestStructurallyCompleteBriefing,
+              stage: 'openai_supplemental_expansion_timeout'
+            });
+            diagnostics.under_length_supplemental_expansion_candidate = true;
+            diagnostics.under_length_supplemental_expansion_attempted = true;
+            diagnostics.supplemental_timeout_ms = callTimeoutMs;
+            diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
+            diagnostics.word_gap_before = preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null;
+            diagnostics.character_gap_before = preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null;
+            await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+            return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+          }
+          throw error;
+        }
+
+        const mergeResult = applySupplementalUnderLengthExpansions(repairSource, supplementalGeneration.parsed);
+        if (!mergeResult.ok) {
+          validation = {
+            valid: false,
+            reason: mergeResult.error,
+            expansions_count: mergeResult.expansions_count
+          };
+          repairDiagnostics.push(
+            validationDiagnostics(validation, repairSource, {
+              attempt: `repair_${repairAttempts}`,
+              model: supplementalGeneration.model,
+              usage: supplementalGeneration.usage || null,
+              duration_ms: supplementalGeneration.duration_ms,
+              stage: 'after_deterministic_under_length_merge',
+              under_length_supplemental_expansion_candidate: true,
+              under_length_supplemental_expansion_attempted: true,
+              supplemental_timeout_ms: callTimeoutMs,
+              supplemental_safety_buffer_ms: safetyBufferMs,
+              expansions_count: mergeResult.expansions_count,
+              word_gap_before: preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null,
+              character_gap_before: preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null
+            })
+          );
+          break;
+        }
+
+        const mergedBriefing = normalizeBriefingOutput(mergeResult.merged, {
+          assessmentId,
+          ownerProfileId,
+          prompt
+        });
+        const mergedValidation = validateBriefingOutput(mergedBriefing);
+        const postExpansionGap = briefingLengthGap(mergedValidation);
+        repairDiagnostics.push(
+          validationDiagnostics(mergedValidation, mergedBriefing, {
+            attempt: `repair_${repairAttempts}`,
+            model: supplementalGeneration.model,
+            usage: supplementalGeneration.usage || null,
+            duration_ms: supplementalGeneration.duration_ms,
+            stage: 'after_deterministic_under_length_merge',
+            under_length_supplemental_expansion_candidate: true,
+            under_length_supplemental_expansion_attempted: true,
+            supplemental_timeout_ms: callTimeoutMs,
+            supplemental_safety_buffer_ms: safetyBufferMs,
+            expansions_count: mergeResult.expansions_count,
+            submitted_expansions_count: mergeResult.submitted_expansions_count,
+            word_gap_before: preExpansionGap?.type === 'word_gap' ? preExpansionGap.value : null,
+            character_gap_before: preExpansionGap?.type === 'character_gap' ? preExpansionGap.value : null,
+            word_gap_after: postExpansionGap?.type === 'word_gap' ? postExpansionGap.value : null,
+            character_gap_after: postExpansionGap?.type === 'character_gap' ? postExpansionGap.value : null
+          })
+        );
+
+        briefing = mergedBriefing;
+        validation = mergedValidation;
+        bestStructurallyCompleteBriefing = mergedBriefing;
+        generation = supplementalGeneration;
+        if (!validation.valid) break;
+        continue;
+      }
+
+      const repairPrompt = targetedRepair
+        ? buildTargetedSectionExpansionPrompt(prompt, repairSource, repairSourceValidation)
+        : buildRepairPrompt(prompt, repairSource, repairSourceValidation);
 
       console.log('[BUSINESS-ASSESSMENT-BRIEFING] Repairing briefing output', {
         assessment_id: assessmentId,
@@ -945,26 +1144,18 @@ export default async function handler(req, res) {
           duration_ms: repairGeneration.duration_ms,
           targeted_section_expansion: targetedRepair,
           near_pass_expansion: nearPassExpansion,
-          under_length_expansion_candidate: underLengthExpansion,
-          under_length_expansion_attempted: underLengthExpansion,
           character_gap:
             repairSourceValidation.reason === 'briefing_markdown_too_short'
-              ? (underLengthExpansion
-                  ? underLengthBriefingGap(repairSourceValidation)?.value
-                  : nearPassBriefingGap(repairSourceValidation)?.value) || null
+              ? nearPassBriefingGap(repairSourceValidation)?.value || null
               : null,
           word_gap:
             repairSourceValidation.reason === 'briefing_word_count_too_short'
-              ? (underLengthExpansion
-                  ? underLengthBriefingGap(repairSourceValidation)?.value
-                  : nearPassBriefingGap(repairSourceValidation)?.value) || null
+              ? nearPassBriefingGap(repairSourceValidation)?.value || null
               : repairSourceValidation.reason === 'malformed_or_thin_section'
               ? nearPassBriefingGap(repairSourceValidation)?.value || null
               : null,
           targeted_timeout_ms: callTimeoutMs,
           targeted_safety_buffer_ms: safetyBufferMs,
-          under_length_timeout_ms: underLengthExpansion ? BRIEFING_UNDER_LENGTH_EXPANSION_TIMEOUT_MS : null,
-          under_length_safety_buffer_ms: underLengthExpansion ? BRIEFING_UNDER_LENGTH_EXPANSION_SAFETY_BUFFER_MS : null,
           structurally_worse_than_previous: Boolean(bestStructurallyCompleteBriefing && !repairStructurallyComplete)
         })
       );
@@ -986,10 +1177,12 @@ export default async function handler(req, res) {
 
     if (!validation.valid) {
       const now = new Date().toISOString();
+      const latestDiagnostic = repairDiagnostics[repairDiagnostics.length - 1] || null;
       const failureMetadata = {
         ...(assessmentRecord.metadata || {}),
         last_briefing_generation_error: {
           generated_at: now,
+          stage: latestDiagnostic?.stage || 'after_briefing_validation',
           validation,
           assessment_id: assessmentId,
           owner_profile_id: ownerProfileId,
@@ -1016,6 +1209,7 @@ export default async function handler(req, res) {
         error: 'invalid_briefing_output',
         validation,
         diagnostics: {
+          stage: latestDiagnostic?.stage || 'after_briefing_validation',
           initial_output_structurally_complete: Boolean(repairDiagnostics[0]?.structurally_complete),
           repair_output_structurally_incomplete: repairDiagnostics.some(
             (item) => String(item.attempt || '').startsWith('repair_') && !item.structurally_complete
