@@ -398,11 +398,47 @@ function briefingLengthGap(validation) {
   return null;
 }
 
+function thinSectionGap(validation) {
+  if (validation?.reason !== 'malformed_or_thin_section' || !validation.section) return null;
+  const requiredWords = Number(validation.minimum_words || MINIMUM_SECTION_BODY_WORDS);
+  const actualBodyWords = Number(validation.actual_body_words ?? validation.actual_words ?? 0);
+  const actualCombinedWords = Number(validation.actual_words ?? actualBodyWords);
+  const gapWords = Math.max(0, requiredWords - actualCombinedWords);
+  if (!gapWords || gapWords > NARROW_SECTION_WORD_GAP) return null;
+  return {
+    section: validation.section,
+    required_words: requiredWords,
+    actual_body_words: actualBodyWords,
+    actual_combined_words: actualCombinedWords,
+    gap_words: gapWords
+  };
+}
+
 function isStructurallyCompleteUnderLengthExpansionCandidate(validation, candidate) {
   if (!structurallyComplete(candidate)) return false;
   if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
   if (validation?.reason === 'missing_required_keys') return false;
   return Boolean(underLengthBriefingGap(validation));
+}
+
+function findSectionForValidation(candidate, validation) {
+  const sectionLabel = String(validation?.section || '').trim();
+  if (!sectionLabel || !Array.isArray(candidate?.sections)) return null;
+  return candidate.sections.find(
+    (section) =>
+      section?.key === sectionLabel ||
+      section?.title === sectionLabel ||
+      sectionTitleFingerprint(section?.key) === sectionTitleFingerprint(sectionLabel) ||
+      sectionTitleFingerprint(section?.title) === sectionTitleFingerprint(sectionLabel)
+  ) || null;
+}
+
+function isStructurallyCompleteThinSectionSupplementCandidate(validation, candidate) {
+  if (!structurallyComplete(candidate)) return false;
+  if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
+  if (validation?.reason === 'missing_required_keys') return false;
+  if (!thinSectionGap(validation)) return false;
+  return Boolean(findSectionForValidation(candidate, validation));
 }
 
 function shouldAttemptBriefingRepair(validation) {
@@ -512,6 +548,49 @@ function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, val
           'Add full diagnostic paragraphs.',
           'Prioritize practical implications, missing-data interpretation, constraint reasoning, business consequences, and why the current trajectory matters.',
           'Also include leadership/accountability implications where relevant.',
+          'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
+          'Keep the tone professional, direct, and diagnostic.',
+          'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
+          'Return valid JSON only.'
+        ]
+          .filter(Boolean)
+          .join('\n')
+      }
+    ]
+  };
+}
+
+function buildThinSectionSupplementalPrompt(prompt, previousOutput, validation) {
+  const gap = thinSectionGap(validation);
+  const section = findSectionForValidation(previousOutput, validation);
+  const body = String(section?.body || '').trim();
+  return {
+    ...prompt,
+    messages: [
+      {
+        role: 'system',
+        content: [
+          'You are writing one supplemental paragraph for an already-structured MORE MindMap Executive Diagnostic Briefing.',
+          'Return valid JSON only. Do not return the full briefing object. Do not use markdown fences.'
+        ].join('\n')
+      },
+      {
+        role: 'user',
+        content: [
+          'The Executive Diagnostic Briefing is structurally complete and has passed total length, but one section is narrowly under the section-depth requirement.',
+          `Validation failure: ${JSON.stringify(validation)}`,
+          gap ? `Thin section gap: ${JSON.stringify(gap)}.` : '',
+          `Target section key: ${section?.key || validation.section}.`,
+          `Target section title: ${section?.title || validation.section}.`,
+          `Current target section body excerpt: ${body.length > 1200 ? `${body.slice(0, 1200)}...` : body}`,
+          'Return only this JSON shape: {"expansions":[{"section_key":"string","append_text":"string"}]}.',
+          `section_key must be exactly "${section?.key || validation.section}".`,
+          'Return exactly one expansion.',
+          'append_text must be one diagnostic paragraph of 90-140 words.',
+          'Do not use headings.',
+          'Do not use bullet lists.',
+          'Do not use short summary statements.',
+          'Expand practical implications, business consequence, and behavioral/operating impact of this section.',
           'Preserve all existing conclusions. Do not contradict or rewrite the diagnostic.',
           'Keep the tone professional, direct, and diagnostic.',
           'Do not include markdown fences, raw JSON inside append_text, or headings that duplicate section titles.',
@@ -1054,6 +1133,7 @@ export default async function handler(req, res) {
         let supplementalSource = repairSource;
         let supplementalValidation = repairSourceValidation;
         let supplementalAttemptsUsed = 0;
+        let thinSectionSupplementAttempted = false;
         while (true) {
           supplementalAttemptsUsed += 1;
           if (supplementalAttemptsUsed > 1) repairAttempts += 1;
@@ -1245,12 +1325,173 @@ export default async function handler(req, res) {
           generation = supplementalGeneration;
           if (validation.valid) break;
 
-          if (!secondSupplementalExpansionCandidate(validation, briefing, supplementalAttemptsUsed)) {
+          if (secondSupplementalExpansionCandidate(validation, briefing, supplementalAttemptsUsed)) {
+            supplementalSource = briefing;
+            supplementalValidation = validation;
+            continue;
+          }
+
+          if (
+            !thinSectionSupplementAttempted &&
+            isStructurallyCompleteThinSectionSupplementCandidate(validation, briefing)
+          ) {
+            thinSectionSupplementAttempted = true;
+            repairAttempts += 1;
+            const thinGap = thinSectionGap(validation);
+            const thinStage = 'before_thin_section_supplemental_expansion';
+            const thinBeforeDiagnostics = validationDiagnostics(validation, briefing, {
+              generated_at: new Date().toISOString(),
+              reason: validation.reason,
+              stage: thinStage,
+              elapsed_ms: elapsedMs(requestStartedAt),
+              remaining_ms: remainingMs(requestStartedAt),
+              repair_attempts_started: repairAttempts,
+              repair_attempts: repairAttempts,
+              thin_section_supplemental_candidate: true,
+              thin_section_supplemental_attempted: true,
+              thin_section_key: thinGap?.section || null,
+              thin_section_word_gap: thinGap?.gap_words || null,
+              thin_section_actual_body_words: thinGap?.actual_body_words || null,
+              thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
+              thin_section_required_words: thinGap?.required_words || null,
+              supplemental_timeout_ms: callTimeoutMs,
+              supplemental_safety_buffer_ms: safetyBufferMs,
+              assessment_id: assessmentId,
+              owner_profile_id: ownerProfileId
+            });
+            await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, thinBeforeDiagnostics);
+
+            if (!hasTimeForOpenAICall(requestStartedAt, safetyBufferMs, callTimeoutMs)) {
+              const diagnostics = timeoutDiagnostics({
+                assessmentId,
+                ownerProfileId,
+                validation,
+                startedAt: requestStartedAt,
+                repairAttempts,
+                bestStructurallyCompleteBriefing,
+                stage: thinStage
+              });
+              diagnostics.thin_section_supplemental_candidate = true;
+              diagnostics.thin_section_supplemental_attempted = true;
+              diagnostics.thin_section_key = thinGap?.section || null;
+              diagnostics.thin_section_word_gap = thinGap?.gap_words || null;
+              diagnostics.thin_section_actual_body_words = thinGap?.actual_body_words || null;
+              diagnostics.thin_section_actual_combined_words = thinGap?.actual_combined_words || null;
+              diagnostics.thin_section_required_words = thinGap?.required_words || null;
+              diagnostics.supplemental_timeout_ms = callTimeoutMs;
+              diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
+              await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+              return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+            }
+
+            console.log('[BUSINESS-ASSESSMENT-BRIEFING] Requesting thin-section supplemental expansion', {
+              assessment_id: assessmentId,
+              owner_profile_id: ownerProfileId,
+              repair_attempt: repairAttempts,
+              thin_section_key: thinGap?.section || null,
+              thin_section_word_gap: thinGap?.gap_words || null
+            });
+
+            let thinGeneration;
+            try {
+              thinGeneration = await callOpenAIForBriefing(
+                buildThinSectionSupplementalPrompt(prompt, briefing, validation),
+                { timeoutMs: callTimeoutMs }
+              );
+            } catch (error) {
+              if (error?.code === 'openai_call_timeout') {
+                const diagnostics = timeoutDiagnostics({
+                  assessmentId,
+                  ownerProfileId,
+                  validation: {
+                    valid: false,
+                    reason: 'openai_thin_section_supplemental_timeout',
+                    timeout_ms: error.timeout_ms
+                  },
+                  startedAt: requestStartedAt,
+                  repairAttempts,
+                  bestStructurallyCompleteBriefing,
+                  stage: 'openai_thin_section_supplemental_timeout'
+                });
+                diagnostics.thin_section_supplemental_candidate = true;
+                diagnostics.thin_section_supplemental_attempted = true;
+                diagnostics.thin_section_key = thinGap?.section || null;
+                diagnostics.thin_section_word_gap = thinGap?.gap_words || null;
+                diagnostics.thin_section_actual_body_words = thinGap?.actual_body_words || null;
+                diagnostics.thin_section_actual_combined_words = thinGap?.actual_combined_words || null;
+                diagnostics.thin_section_required_words = thinGap?.required_words || null;
+                diagnostics.supplemental_timeout_ms = callTimeoutMs;
+                diagnostics.supplemental_safety_buffer_ms = safetyBufferMs;
+                await saveBriefingFailureMetadata(redis, assessmentRecord, assessmentId, diagnostics);
+                return sendTimeBudgetExceeded(res, diagnostics, assessmentRecord.status);
+              }
+              throw error;
+            }
+
+            const thinMergeResult = applySupplementalUnderLengthExpansions(briefing, thinGeneration.parsed);
+            if (!thinMergeResult.ok) {
+              validation = {
+                valid: false,
+                reason: thinMergeResult.error,
+                expansions_count: thinMergeResult.expansions_count
+              };
+              repairDiagnostics.push(
+                validationDiagnostics(validation, briefing, {
+                  attempt: `repair_${repairAttempts}`,
+                  model: thinGeneration.model,
+                  usage: thinGeneration.usage || null,
+                  duration_ms: thinGeneration.duration_ms,
+                  stage: 'after_thin_section_deterministic_merge',
+                  thin_section_supplemental_candidate: true,
+                  thin_section_supplemental_attempted: true,
+                  thin_section_key: thinGap?.section || null,
+                  thin_section_word_gap: thinGap?.gap_words || null,
+                  thin_section_actual_body_words: thinGap?.actual_body_words || null,
+                  thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
+                  thin_section_required_words: thinGap?.required_words || null,
+                  expansions_count: thinMergeResult.expansions_count,
+                  supplemental_timeout_ms: callTimeoutMs,
+                  supplemental_safety_buffer_ms: safetyBufferMs
+                })
+              );
+              break;
+            }
+
+            const thinMergedBriefing = normalizeBriefingOutput(thinMergeResult.merged, {
+              assessmentId,
+              ownerProfileId,
+              prompt
+            });
+            const thinMergedValidation = validateBriefingOutput(thinMergedBriefing);
+            repairDiagnostics.push(
+              validationDiagnostics(thinMergedValidation, thinMergedBriefing, {
+                attempt: `repair_${repairAttempts}`,
+                model: thinGeneration.model,
+                usage: thinGeneration.usage || null,
+                duration_ms: thinGeneration.duration_ms,
+                stage: 'after_thin_section_deterministic_merge',
+                thin_section_supplemental_candidate: true,
+                thin_section_supplemental_attempted: true,
+                thin_section_key: thinGap?.section || null,
+                thin_section_word_gap: thinGap?.gap_words || null,
+                thin_section_actual_body_words: thinGap?.actual_body_words || null,
+                thin_section_actual_combined_words: thinGap?.actual_combined_words || null,
+                thin_section_required_words: thinGap?.required_words || null,
+                expansions_count: thinMergeResult.expansions_count,
+                submitted_expansions_count: thinMergeResult.submitted_expansions_count,
+                supplemental_timeout_ms: callTimeoutMs,
+                supplemental_safety_buffer_ms: safetyBufferMs
+              })
+            );
+
+            briefing = thinMergedBriefing;
+            validation = thinMergedValidation;
+            bestStructurallyCompleteBriefing = thinMergedBriefing;
+            generation = thinGeneration;
             break;
           }
 
-          supplementalSource = briefing;
-          supplementalValidation = validation;
+          break;
         }
 
         if (!validation.valid) break;
