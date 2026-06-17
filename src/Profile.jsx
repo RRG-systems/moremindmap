@@ -5,6 +5,8 @@ import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalCont
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 
+const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
+
 /**
  * buildApiUrl - Safely join API base URL with endpoint path
  * Handles both absolute URLs (production) and relative paths (local dev with proxy)
@@ -80,8 +82,8 @@ export default function Profile() {
 
   function validatePromoCode() {
     const code = promoCode.trim().toUpperCase()
-    if (code === "FATHOMFREE") {
-      console.log("[PROMO VALIDATION] FATHOMFREE code accepted")
+    if (BEHAVIOR_PROFILE_PROMO_CODES.has(code)) {
+      console.log("[PROMO VALIDATION] Behavior Profile promo code accepted")
       setPromoValidated(true)
       setPaymentPassed(true)
       setSelectedOffer("full_profile")
@@ -260,8 +262,8 @@ export default function Profile() {
       // Use env-based API URL
       const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
       
-      // CONTROLLED BETA: Route FATHOMFREE users to Mini V2 async endpoint
-      const useV2 = promoValidated && promoCode.trim().toUpperCase() === "FATHOMFREE"
+      // CONTROLLED BETA: Route validated Behavior Profile promo users to Mini V2 async endpoint
+      const useV2 = promoValidated && BEHAVIOR_PROFILE_PROMO_CODES.has(promoCode.trim().toUpperCase())
       
       console.log("[SUBMIT] Using Mini V2:", useV2)
 
@@ -798,7 +800,7 @@ function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, se
             <div className="text-2xl">✓</div>
             <div>
               <div className="text-xs uppercase tracking-[0.22em] text-green-400">Promo Code Active</div>
-              <div className="mt-1 text-white">FATHOMFREE — Full Profile unlocked</div>
+              <div className="mt-1 text-white">{promoCode.trim().toUpperCase()} — Full Profile unlocked</div>
             </div>
           </div>
         </div>
