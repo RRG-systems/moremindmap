@@ -15,6 +15,7 @@ import { updateJob, JOB_STAGE as MANAGER_JOB_STAGE } from '../miniV2JobManager.j
 import { extractBehavioralIntelligence } from './extractIntelligence.js'
 import { refineExtraction } from './extractIntelligenceRefinement.js'
 import { generateCanonicalProfile } from './canonicalProfileGenerator.js'
+import { buildBehaviorProfileNotification, sendFormspreeNotification } from '../notifications/formspreeNotifications.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -325,9 +326,10 @@ export async function executeCanonicalGeneration(job) {
     
     // VAULT SAVE: Persist canonical to vault
     trace.push('before_vault_save')
+    let vault_result = null
     try {
       const { saveCanonicalProfile } = await import('../vault/saveCanonicalProfile.js')
-      const vault_result = await saveCanonicalProfile({
+      vault_result = await saveCanonicalProfile({
         canonical_profile,
         profile_id,
         job_id: job.job_id,
@@ -346,6 +348,26 @@ export async function executeCanonicalGeneration(job) {
       console.error('[CANONICAL-GENERATION] Vault save failed (non-blocking):', vaultErr.message)
       trace.push(`vault_save_error: ${vaultErr.message}`)
       canonical_diagnostics.vault_save_attempted = true
+    }
+
+    if (vault_result?.success) {
+      trace.push('before_behavior_profile_notification')
+      const notificationResult = await sendFormspreeNotification(
+        buildBehaviorProfileNotification({
+          profileId: profile_id,
+          jobId: job.job_id,
+          fullName: job.payload?.metadata?.person_name || job.payload?.metadata?.name || null,
+          email: job.payload?.metadata?.email || null,
+          company: job.payload?.metadata?.organization?.company || job.payload?.metadata?.company_name || null,
+          status: 'canonical_profile_saved',
+          timestamp: new Date().toISOString()
+        })
+      )
+      canonical_diagnostics.notification = notificationResult
+      trace.push(notificationResult.sent ? 'behavior_profile_notification_sent' : `behavior_profile_notification_not_sent:${notificationResult.reason || notificationResult.status || 'unknown'}`)
+      if (notificationResult.attempted && !notificationResult.sent) {
+        console.warn('[CANONICAL-GENERATION] Behavior Profile notification was not sent:', notificationResult.reason || notificationResult.status)
+      }
     }
     
     trace.push('after_vault_attempt')

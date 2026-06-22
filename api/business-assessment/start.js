@@ -12,6 +12,11 @@ import {
   parseTeamProfileIds,
   setCors
 } from './shared.js';
+import {
+  buildBusinessAssessmentNotification,
+  extractNotificationIdentityFromDossier,
+  sendFormspreeNotification
+} from '../engine/notifications/formspreeNotifications.js';
 
 const QUESTION_KEYS = Array.from({ length: 12 }, (_, index) => `q${index + 1}`);
 
@@ -103,6 +108,24 @@ export default async function handler(req, res) {
     await redis.set(businessAssessmentJobKey(jobId), JSON.stringify(job));
     await redis.sadd(`business_assessment:index:date:${now.toISOString().slice(0, 10)}`, assessmentId);
     await redis.sadd(`business_assessment:index:type:${assessmentType}`, assessmentId);
+
+    const identity = extractNotificationIdentityFromDossier(profileLookup.dossier);
+    const notificationResult = await sendFormspreeNotification(
+      buildBusinessAssessmentNotification({
+        assessmentId,
+        ownerProfileId: parsedProfile.normalized,
+        fullName: identity.full_name || profileContext.owner_profile_name,
+        email: identity.email,
+        company: identity.company,
+        assessmentType,
+        status: 'intake_saved',
+        timestamp: now.toISOString()
+      })
+    );
+
+    if (notificationResult.attempted && !notificationResult.sent) {
+      console.warn('[BUSINESS-ASSESSMENT-START] Business Assessment notification was not sent:', notificationResult.reason || notificationResult.status);
+    }
 
     return res.status(200).json({
       success: true,
