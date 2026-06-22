@@ -1,0 +1,104 @@
+{
+  "sprint": "MM-DL-6",
+  "verdict": "MOREMINDMAP_REPAIR_ARCHIVE_HUMAN_APPROVAL_PACKET_SCHEMA_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_REPAIR_ARCHIVE_HUMAN_APPROVAL_PACKET_SCHEMA_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_MOREMINDMAP_REPAIR_ARCHIVE_APPROVAL_SCHEMA",
+  "source_doctrine_ref": {"sprint": "MM-DL-1", "commit": "e7f7eb0", "file": "MOREMINDMAP_DEV_LOOP_DOCTRINE_REPORT_ONLY.md"},
+  "source_batch_packet_schema_ref": {"sprint": "MM-DL-2", "commit": "4cc547e", "file": "moremindmap_sprint_batch_packet_schema.py"},
+  "source_codex_result_packet_schema_ref": {"sprint": "MM-DL-3", "commit": "56e9493", "file": "moremindmap_codex_builder_result_packet_schema.py"},
+  "source_product_reality_review_packet_schema_ref": {"sprint": "MM-DL-4", "commit": "c473be6", "file": "moremindmap_product_reality_review_packet_schema.py"},
+  "source_stop_condition_schema_ref": {"sprint": "MM-DL-5", "commit": "f181167", "file": "moremindmap_stop_condition_schema.py"},
+  "schema_summary": {
+    "module": "moremindmap_repair_archive_human_approval_packet_schema.py",
+    "schema_version": "moremindmap_repair_archive_human_approval_packet_schema_v1",
+    "purpose": "Define report-only repair, archive, human approval request, and combined envelope packet schemas.",
+    "unknown_fields_fail_closed": true,
+    "active_repair_execution_implemented": false,
+    "rollback_execution_implemented": false,
+    "archive_persistence_implemented": false,
+    "approval_workflow_runtime_implemented": false
+  },
+  "required_repair_packet_fields": [
+    "schema_version", "repair_id", "packet_class", "source_stop_condition_ref", "source_stop_condition_digest", "source_builder_result_ref", "source_product_reality_review_ref", "batch_id", "sprint_id", "repair_class", "repair_reason", "failed_verification_area", "affected_files", "allowed_repair_files", "forbidden_repair_files", "proposed_repair_summary", "repair_scope", "repair_attempt_number", "max_repair_attempts_allowed", "red_stop_repair_prohibited", "human_review_required", "product_reality_review_required_after_repair", "verification_required_after_repair", "production_deploy_allowed", "production_deploy_requires_human_approval", "forbidden_recommendations", "highest_allowed_readiness", "report_only", "schema_only"
+  ],
+  "required_archive_packet_fields": [
+    "schema_version", "archive_id", "packet_class", "source_stop_condition_ref", "source_builder_result_ref", "source_product_reality_review_ref", "batch_id", "sprint_id", "archive_class", "archive_reason", "artifacts_to_archive", "artifacts_not_to_archive", "archive_scope", "preserve_user_records", "preserve_saved_artifacts", "preserve_retrievable_outputs", "archive_execution_allowed", "archive_persistence_allowed", "human_review_required", "forbidden_recommendations", "highest_allowed_readiness", "report_only", "schema_only"
+  ],
+  "required_human_approval_packet_fields": [
+    "schema_version", "approval_request_id", "packet_class", "source_batch_packet_ref", "source_builder_result_ref", "source_product_reality_review_ref", "source_stop_condition_ref", "request_class", "approval_question", "requested_decision", "allowed_decisions", "forbidden_decisions", "approval_scope", "production_deploy_requested", "production_deploy_requires_human_approval", "repair_requested", "archive_requested", "continuation_requested", "user_visibility_requested", "evidence_summary", "unresolved_risks", "required_verifications_before_approval", "approval_effect", "authority_effect", "production_truth_effect", "highest_allowed_readiness", "report_only", "schema_only"
+  ],
+  "required_envelope_fields": [
+    "schema_version", "envelope_id", "envelope_class", "batch_id", "sprint_id", "repair_packet", "archive_packet", "human_approval_request_packet", "envelope_summary", "stop_condition_refs", "builder_result_refs", "product_reality_review_refs", "recommended_disposition", "continuation_allowed", "commit_allowed", "deploy_allowed", "user_visibility_allowed", "partial_artifact_exposure_allowed", "validation_downgrade_allowed", "fake_success_allowed", "frontend_only_success_allowed", "human_review_required", "highest_allowed_readiness", "report_only", "schema_only"
+  ],
+  "valid_repair_classes": ["MECHANICAL_SCHEMA_REPAIR", "DOC_TRACE_REPAIR", "JSON_TRACE_REPAIR", "BUILD_VERIFICATION_REPAIR", "ROUTE_VERIFICATION_REPAIR", "RETRIEVAL_VERIFICATION_REPAIR", "PRODUCT_REALITY_REPAIR_PLAN", "PAYMENT_STATE_REPAIR_PLAN", "SUBSCRIPTION_STATE_REPAIR_PLAN", "OUTCOME_LEDGER_REPAIR_PLAN", "DESIGN_REPAIR_PLAN", "BLOCKED_REPAIR_REQUIRES_HUMAN"],
+  "valid_archive_classes": ["ARCHIVE_FAILED_SPRINT_PLAN", "ARCHIVE_FAILED_BATCH_PLAN", "ARCHIVE_INVALID_RESULT_PACKET", "ARCHIVE_INVALID_REVIEW_PACKET", "ARCHIVE_SUPERSEDED_TRACE", "ARCHIVE_WITH_HUMAN_REVIEW_ONLY"],
+  "valid_approval_request_classes": ["HUMAN_REVIEW_REQUEST", "REPAIR_APPROVAL_REQUEST", "ARCHIVE_APPROVAL_REQUEST", "DEPLOY_APPROVAL_REQUEST", "CONTINUATION_APPROVAL_REQUEST", "USER_VISIBILITY_APPROVAL_REQUEST", "BLOCKED_DECISION_REQUEST"],
+  "valid_envelope_classes": ["REPAIR_ARCHIVE_HUMAN_APPROVAL_ENVELOPE", "BLOCKED_WITH_REASON_ENVELOPE", "HUMAN_REVIEW_REQUIRED_ENVELOPE"],
+  "forbidden_recommendations": ["READY_FOR_STRIPE_BATCH", "READY_FOR_AUTOMATED_BATCH_EXECUTION", "READY_FOR_PRODUCTION_DEPLOY_WITHOUT_HUMAN_APPROVAL", "READY_FOR_USER_VISIBILITY", "READY_FOR_SUBSCRIPTION_RELEASE", "READY_FOR_OUTCOME_LEDGER_RELEASE", "READY_FOR_FRONTEND_ONLY_SUCCESS", "READY_FOR_PARTIAL_ARTIFACT_EXPOSURE", "READY_FOR_VALIDATION_DOWNGRADE"],
+  "forbidden_decisions": ["APPROVE_PRODUCTION_DEPLOY_WITHOUT_HUMAN_REVIEW", "APPROVE_FRONTEND_ONLY_SUCCESS", "APPROVE_PARTIAL_ARTIFACT_EXPOSURE", "APPROVE_FAKE_SUCCESS", "APPROVE_VALIDATION_DOWNGRADE", "APPROVE_UNVERIFIED_PAYMENT_STATE", "APPROVE_UNVERIFIED_SUBSCRIPTION_STATE", "APPROVE_UNVERIFIED_OUTCOME_LEDGER", "APPROVE_AUTOMATED_BATCH_EXECUTION", "APPROVE_STRIPE_BATCH_AUTOMATICALLY"],
+  "invalid_fixture_catalog": [
+    "repair_report_only_false", "repair_schema_only_false", "repair_human_review_false", "repair_deploy_allowed_true", "repair_deploy_human_false", "repair_max_attempts_gt_two", "repair_attempt_gt_max", "repair_red_stop_not_prohibited", "repair_missing_forbidden_recommendation", "repair_readiness_wrong", "archive_execution_allowed", "archive_persistence_allowed", "archive_preserve_user_records_false", "archive_preserve_saved_artifacts_false", "archive_preserve_retrievable_false", "archive_human_review_false", "approval_deploy_human_false", "approval_authority_effect_not_none", "approval_production_truth_effect_not_none", "approval_missing_forbidden_decision", "approval_allows_frontend_only", "approval_allows_validation_downgrade", "approval_allows_stripe_auto", "envelope_continuation_allowed", "envelope_commit_allowed", "envelope_deploy_allowed", "envelope_user_visibility_allowed", "envelope_partial_allowed", "envelope_validation_downgrade_allowed", "envelope_fake_success_allowed", "envelope_frontend_only_allowed", "envelope_human_review_false", "envelope_readiness_wrong", "repair_unknown_field", "archive_unknown_field", "approval_unknown_field", "envelope_unknown_field", "missing_source_stop_condition_ref", "missing_builder_result_ref", "missing_product_reality_review_ref"
+  ],
+  "selftest_summary": {"expected_valid_records_passed": 4, "expected_invalid_records_failed_closed": 40, "selftest_trace": "runtime_traces/moremindmap_repair_archive_human_approval_packet_schema_selftest_06.json"},
+  "safety_boundary": {
+    "report_only": true,
+    "schema_only": true,
+    "unknown_fields_fail_closed": true,
+    "no_active_repair_execution": true,
+    "no_rollback_execution": true,
+    "no_archive_persistence": true,
+    "no_approval_workflow_runtime": true
+  },
+  "verification_summary": {
+    "required_commands": [
+      "python3 moremindmap_repair_archive_human_approval_packet_schema.py --self-test",
+      "python3 -m json.tool runtime_traces/moremindmap_repair_archive_human_approval_packet_schema_06.json >/tmp/mm_dl6_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_repair_archive_human_approval_packet_schema_selftest_06.json >/tmp/mm_dl6_selftest_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_stop_condition_schema_05.json >/tmp/mm_dl5_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_product_reality_review_packet_schema_04.json >/tmp/mm_dl4_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_codex_builder_result_packet_schema_03.json >/tmp/mm_dl3_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_sprint_batch_packet_schema_02.json >/tmp/mm_dl2_json_check.out",
+      "python3 -m json.tool runtime_traces/moremindmap_dev_loop_doctrine_01.json >/tmp/mm_dl1_json_check.out",
+      "PYTHONPYCACHEPREFIX=/private/tmp/mm_pycache python3 -m py_compile moremindmap_repair_archive_human_approval_packet_schema.py",
+      "import-time behavior check",
+      "capability scan",
+      "git diff --check",
+      "npm run build",
+      "git status --short"
+    ],
+    "status": "passed",
+    "selftest_status": "passed",
+    "valid_records_passed": 4,
+    "invalid_records_failed_closed": 40,
+    "json_artifacts_valid": true,
+    "mm_dl5_json_valid": true,
+    "mm_dl4_json_valid": true,
+    "mm_dl3_json_valid": true,
+    "mm_dl2_json_valid": true,
+    "mm_dl1_json_valid": true,
+    "py_compile_passed": true,
+    "import_time_behavior_check_passed": true,
+    "capability_scan_violations": [],
+    "git_diff_check_passed": true,
+    "npm_run_build_passed": true,
+    "build_warning": "Vite reported existing large chunk warning after successful build."
+  },
+  "report_only": true,
+  "schema_only": true,
+  "no_runtime": true,
+  "no_batch_execution": true,
+  "no_codex_automation": true,
+  "no_active_agents": true,
+  "no_routes": true,
+  "no_ui": true,
+  "no_stripe_changes": true,
+  "no_formspree_changes": true,
+  "no_subscription_changes": true,
+  "no_outcome_ledger_changes": true,
+  "no_assessment_generation_changes": true,
+  "no_active_repair_execution": true,
+  "no_rollback_execution": true,
+  "no_archive_persistence": true,
+  "no_approval_workflow_runtime": true,
+  "no_deployment": true
+}
