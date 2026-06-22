@@ -1,0 +1,478 @@
+{
+  "sprint": "MM-DL-1",
+  "verdict": "MOREMINDMAP_DEV_LOOP_DOCTRINE_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DEVELOPMENT_LOOP_DOCTRINE_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_MOREMINDMAP_DEV_LOOP_DOCTRINE",
+  "report_only": true,
+  "doctrine_only": true,
+  "no_runtime": true,
+  "no_batch_execution": true,
+  "no_codex_automation": true,
+  "no_active_agents": true,
+  "no_routes": true,
+  "no_ui": true,
+  "no_stripe_changes": true,
+  "no_formspree_changes": true,
+  "no_subscription_changes": true,
+  "no_outcome_ledger_changes": true,
+  "no_assessment_generation_changes": true,
+  "no_deployment": true,
+  "human_governor_doctrine": {
+    "summary": "Human governs. ChatGPT Think architects and reviews. Codex builds only approved scope.",
+    "principles": [
+      "Codex may accelerate development but may not approve production truth.",
+      "Codex may not lower validation standards.",
+      "Codex may not fake saved artifacts.",
+      "Codex may not expose partial intelligence.",
+      "Codex may not deploy without human approval."
+    ]
+  },
+  "role_boundaries": [
+    {
+      "role_id": "HUMAN_GOVERNOR",
+      "role_name": "Human Governor",
+      "allowed_responsibilities": [
+        "Define product intent",
+        "Approve sprint scope",
+        "Approve production deploys",
+        "Accept or reject recommendations",
+        "Decide whether a stop condition can be cleared"
+      ],
+      "forbidden_responsibilities": [
+        "None assigned by automation",
+        "Human authority is not delegated to code"
+      ],
+      "allowed_outputs": [
+        "Approval",
+        "Rejection",
+        "Clarification",
+        "Scope boundary",
+        "Deploy authorization",
+        "Stop-condition decision"
+      ],
+      "forbidden_outputs": [
+        "Automated production changes without explicit action"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "CHATGPT_ARCHITECT",
+      "role_name": "ChatGPT Architect",
+      "allowed_responsibilities": [
+        "Translate product intent into sprint scope",
+        "Identify architecture risks",
+        "Propose allowlists",
+        "Define verification expectations",
+        "Review Codex reports"
+      ],
+      "forbidden_responsibilities": [
+        "Modify code directly",
+        "Deploy",
+        "Approve production truth",
+        "Bypass human review",
+        "Lower validation standards"
+      ],
+      "allowed_outputs": [
+        "Architecture notes",
+        "Sprint packet recommendations",
+        "Risk review",
+        "Review comments",
+        "Stop-condition recommendations"
+      ],
+      "forbidden_outputs": [
+        "Runtime changes",
+        "Production mutation",
+        "Deploy authorization",
+        "Fake pass reports"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "CODEX_BUILDER",
+      "role_name": "Codex Builder",
+      "allowed_responsibilities": [
+        "Implement explicitly approved scoped changes",
+        "Run required checks",
+        "Report files changed",
+        "Report failures honestly",
+        "Stop when stop conditions are hit"
+      ],
+      "forbidden_responsibilities": [
+        "Touch files outside allowlist",
+        "Deploy without approval",
+        "Implement unapproved product areas",
+        "Hide errors",
+        "Lower validation gates",
+        "Expose partial artifacts"
+      ],
+      "allowed_outputs": [
+        "Code changes within allowlist when approved",
+        "Verification output",
+        "Failure diagnostics",
+        "Final status report"
+      ],
+      "forbidden_outputs": [
+        "Unapproved runtime",
+        "Unapproved routes",
+        "Unapproved automation",
+        "Fake success",
+        "Partial intelligence exposed as complete"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "PRODUCT_REALITY_REVIEWER",
+      "role_name": "Product Reality Reviewer",
+      "allowed_responsibilities": [
+        "Check whether implemented behavior is real",
+        "Verify retrievability",
+        "Identify frontend illusions",
+        "Validate source-backed visible claims"
+      ],
+      "forbidden_responsibilities": [
+        "Approve deployment",
+        "Alter product scope",
+        "Excuse missing backend behavior behind UI polish"
+      ],
+      "allowed_outputs": [
+        "Product reality review",
+        "Gap list",
+        "Pass/fail recommendation",
+        "Stop-condition findings"
+      ],
+      "forbidden_outputs": [
+        "Deployment approval",
+        "Validation downgrades",
+        "Fake readiness claims"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "ARCHITECTURE_REVIEWER",
+      "role_name": "Architecture Reviewer",
+      "allowed_responsibilities": [
+        "Review layering",
+        "Review persistence and retrieval boundaries",
+        "Review failure boundaries",
+        "Review route and API contracts",
+        "Review future extensibility"
+      ],
+      "forbidden_responsibilities": [
+        "Ship unapproved architecture",
+        "Create active workers",
+        "Add queues",
+        "Approve production deploys"
+      ],
+      "allowed_outputs": [
+        "Architecture risk report",
+        "Recommended constraints",
+        "Refactor recommendations"
+      ],
+      "forbidden_outputs": [
+        "Runtime execution",
+        "Production mutation",
+        "Deploy approval"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "DATA_INTEGRITY_REVIEWER",
+      "role_name": "Data Integrity Reviewer",
+      "allowed_responsibilities": [
+        "Verify saved artifacts",
+        "Verify retrieval behavior",
+        "Review schema discipline",
+        "Review source labels",
+        "Review validation gates",
+        "Review controlled diagnostics"
+      ],
+      "forbidden_responsibilities": [
+        "Accept corrupted records",
+        "Approve partial saves as complete",
+        "Infer unsupported facts",
+        "Lower schema requirements"
+      ],
+      "allowed_outputs": [
+        "Data integrity report",
+        "Artifact save/retrieve findings",
+        "Schema risk notes"
+      ],
+      "forbidden_outputs": [
+        "Fake data",
+        "Hidden placeholder data",
+        "Validation bypass"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "PRODUCTION_VERIFICATION_REVIEWER",
+      "role_name": "Production Verification Reviewer",
+      "allowed_responsibilities": [
+        "Verify production routes after approved deployment",
+        "Verify production records and artifacts",
+        "Check browser/runtime errors",
+        "Check user-visible claims"
+      ],
+      "forbidden_responsibilities": [
+        "Deploy",
+        "Approve deploy",
+        "Skip production verification",
+        "Substitute local-only checks for production truth"
+      ],
+      "allowed_outputs": [
+        "Production verification report",
+        "Route check results",
+        "Runtime error count",
+        "Caveats"
+      ],
+      "forbidden_outputs": [
+        "Deploy approval",
+        "Unverified readiness claim",
+        "Fake production pass"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "STOP_CONDITION_MONITOR",
+      "role_name": "Stop Condition Monitor",
+      "allowed_responsibilities": [
+        "Detect stop conditions",
+        "Require pause and report",
+        "Prevent continuation when product reality is broken"
+      ],
+      "forbidden_responsibilities": [
+        "Override stop conditions",
+        "Deploy through a stop condition",
+        "Hide stop-condition evidence"
+      ],
+      "allowed_outputs": [
+        "Stop report",
+        "Blocking reason",
+        "Required human decision"
+      ],
+      "forbidden_outputs": [
+        "Silent continuation",
+        "Fake pass",
+        "Validation downgrade"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    },
+    {
+      "role_id": "EVIDENCE_AUDITOR",
+      "role_name": "Evidence Auditor",
+      "allowed_responsibilities": [
+        "Verify visible claims are backed by user-provided data",
+        "Verify extraction-backed claims",
+        "Verify model-estimate labels",
+        "Verify admitted missing-data labels"
+      ],
+      "forbidden_responsibilities": [
+        "Accept decorative intelligence",
+        "Accept unsupported certainty",
+        "Convert guesses into facts"
+      ],
+      "allowed_outputs": [
+        "Evidence audit",
+        "Unsupported-claim findings",
+        "Source-label recommendations"
+      ],
+      "forbidden_outputs": [
+        "Unsupported claims",
+        "Fake confidence",
+        "Hidden source gaps"
+      ],
+      "authority_status": "NO_PRODUCTION_AUTHORITY",
+      "can_modify_production": false,
+      "can_deploy": false,
+      "can_lower_validation": false,
+      "can_expose_partial_artifacts": false,
+      "can_fake_success": false,
+      "report_only": true
+    }
+  ],
+  "product_reality_stop_conditions": [
+    "STOP if build fails.",
+    "STOP if route fails.",
+    "STOP if retrieval fails.",
+    "STOP if saved artifact is missing.",
+    "STOP if frontend claims an artifact exists but backend did not save it.",
+    "STOP if raw JSON or debug output appears.",
+    "STOP if fake profile, fake company, or fake headshot appears.",
+    "STOP if Craig Fox or Fathom placeholder content leaks where not intended.",
+    "STOP if payment state is ambiguous.",
+    "STOP if webhook verification fails.",
+    "STOP if subscription usage state is ambiguous.",
+    "STOP if Outcome Ledger write fails.",
+    "STOP if generation corrupts saved draft.",
+    "STOP if Executive Diagnostic fails without controlled diagnostics.",
+    "STOP if Five Futures fails without controlled diagnostics.",
+    "STOP if One Move fails without controlled diagnostics.",
+    "STOP if Codex touches files outside allowlist.",
+    "STOP if production verification is incomplete.",
+    "STOP if a user-visible feature cannot be retrieved after save."
+  ],
+  "future_batch_packet_doctrine": {
+    "implemented_now": false,
+    "required_fields": [
+      "batch_id",
+      "sprint_ids",
+      "goal",
+      "allowed_files",
+      "forbidden_files",
+      "allowed_behavior",
+      "forbidden_behavior",
+      "stop_conditions",
+      "max_sprint_count",
+      "max_repair_attempts",
+      "human_approval_required",
+      "production_deploy_allowed",
+      "verification_required",
+      "closure_report_required"
+    ],
+    "authority_limits": [
+      "No packet may grant authority to lower validation.",
+      "No packet may grant authority to fake saved artifacts.",
+      "No packet may grant authority to expose partial intelligence.",
+      "No packet may grant authority to deploy without explicit human approval."
+    ]
+  },
+  "future_codex_result_packet_doctrine": {
+    "implemented_now": false,
+    "required_report_fields": [
+      "files changed",
+      "code changed yes/no",
+      "tests run",
+      "build result",
+      "route checks",
+      "production checks if deployed",
+      "artifact save/retrieve checks",
+      "regressions checked",
+      "raw JSON/debug checks",
+      "banned placeholder checks",
+      "failure diagnostics",
+      "final git status",
+      "recommendation"
+    ],
+    "must_distinguish_local_from_production": true
+  },
+  "proposed_dev_loop_phases": [
+    {
+      "phase_id": "MM-DL-1",
+      "name": "Development Loop Doctrine and Product Reality Boundary",
+      "status": "defined_in_this_report"
+    },
+    {
+      "phase_id": "MM-DL-2",
+      "name": "Sprint Batch Packet Schema",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-3",
+      "name": "Codex Builder Result Packet",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-4",
+      "name": "Product Reality Review Packet",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-5",
+      "name": "Stop Condition Schema",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-6",
+      "name": "Repair / Archive / Human Approval Packet",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-7",
+      "name": "Synthetic Canary Batch",
+      "status": "future_human_review_required"
+    },
+    {
+      "phase_id": "MM-DL-8",
+      "name": "First real bounded batch candidate, possibly Stripe + notification plumbing, only after human review",
+      "status": "candidate_only_not_approved"
+    }
+  ],
+  "first_real_batch_candidate": {
+    "candidate": "Stripe one-time access + Darren notification events",
+    "approved": false,
+    "possible_sprints": [
+      "Trace current ingress/payment/promo architecture.",
+      "Implement Stripe one-time checkout for Behavior Profile and Business Assessment.",
+      "Implement notification events for profile/assessment completion and ready states.",
+      "Closure audit and production verification."
+    ],
+    "approval_boundary": "Candidate only. Do not approve automatically."
+  },
+  "what_this_enables": [
+    "Report-only doctrine for a future governed MORE MindMap development loop.",
+    "A product reality boundary for later sprint packets.",
+    "Role and authority boundaries for later review artifacts.",
+    "A stop-condition baseline for future bounded development."
+  ],
+  "what_this_does_not_enable": [
+    "No runtime loop.",
+    "No batch execution.",
+    "No Codex automation.",
+    "No active agents.",
+    "No Stripe work.",
+    "No Formspree work.",
+    "No subscription work.",
+    "No Outcome Ledger work.",
+    "No MOLT integration.",
+    "No production deploy."
+  ],
+  "recommended_next_step": "Human review of MM-DL-1, then MM-DL-2 Sprint Batch Packet Schema if approved."
+}
