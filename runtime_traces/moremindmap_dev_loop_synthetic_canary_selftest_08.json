@@ -1,0 +1,140 @@
+{
+  "authority_claimed": false,
+  "automated_batch_execution_approved": false,
+  "automatic_repair_after_red_stop": false,
+  "canary_file_allowlist": {
+    "allowed": [
+      "happy_path_sprint_1_builder_result.json",
+      "happy_path_sprint_1_product_review.json",
+      "happy_path_sprint_2_builder_result.json",
+      "happy_path_sprint_2_product_review.json",
+      "happy_path_batch_closure.json",
+      "injected_stop_sprint_1_builder_result.json",
+      "injected_stop_sprint_1_product_review.json",
+      "injected_stop_sprint_2_failure_result.json",
+      "injected_stop_stop_condition.json",
+      "injected_stop_repair_human_approval_packet.json",
+      "injected_stop_batch_closure.json"
+    ],
+    "found": [
+      "happy_path_batch_closure.json",
+      "happy_path_sprint_1_builder_result.json",
+      "happy_path_sprint_1_product_review.json",
+      "happy_path_sprint_2_builder_result.json",
+      "happy_path_sprint_2_product_review.json",
+      "injected_stop_batch_closure.json",
+      "injected_stop_repair_human_approval_packet.json",
+      "injected_stop_sprint_1_builder_result.json",
+      "injected_stop_sprint_1_product_review.json",
+      "injected_stop_sprint_2_failure_result.json",
+      "injected_stop_stop_condition.json"
+    ],
+    "missing": [],
+    "passed": true,
+    "unexpected": []
+  },
+  "classification": "MOREMINDMAP_DEV_LOOP_SYNTHETIC_CANARY_PASSED_WITH_LIMITS",
+  "continuation_after_red_stop": false,
+  "errors": [],
+  "fake_success_claimed": false,
+  "files_created": [
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_batch_closure.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_batch_closure.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_repair_human_approval_packet.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_2_failure_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_stop_condition.json"
+  ],
+  "forbidden_files_absent": true,
+  "frontend_only_success_claimed": false,
+  "generated_at": "2026-06-22T19:16:16Z",
+  "happy_path_result": {
+    "batch_id": "MM_CANARY_HAPPY_PATH_BATCH_08",
+    "files_created": [
+      "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_builder_result.json",
+      "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_product_review.json",
+      "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_builder_result.json",
+      "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_product_review.json",
+      "runtime_traces/moremindmap_dev_loop_canary/happy_path_batch_closure.json"
+    ],
+    "final_status": "PASS",
+    "passed": true,
+    "repair_packet_required": false,
+    "sprint_ids": [
+      "MM_CANARY_HAPPY_SPRINT_1",
+      "MM_CANARY_HAPPY_SPRINT_2"
+    ],
+    "stop_conditions_triggered": []
+  },
+  "injected_stop_result": {
+    "automatic_repair_after_red_stop": false,
+    "batch_id": "MM_CANARY_INJECTED_STOP_BATCH_08",
+    "continuation_after_red_stop": false,
+    "files_created": [
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_builder_result.json",
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_product_review.json",
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_2_failure_result.json",
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_stop_condition.json",
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_repair_human_approval_packet.json",
+      "runtime_traces/moremindmap_dev_loop_canary/injected_stop_batch_closure.json"
+    ],
+    "final_status": "STOPPED_AS_EXPECTED",
+    "forbidden_sprint_3_file_created": false,
+    "passed": true,
+    "red_stop_code": "FRONTEND_CLAIMS_UNSAVED_ARTIFACT",
+    "red_stop_triggered": true,
+    "sprint_3_started": false,
+    "sprint_ids": [
+      "MM_CANARY_STOP_SPRINT_1",
+      "MM_CANARY_STOP_SPRINT_2",
+      "MM_CANARY_STOP_SPRINT_3_MUST_NOT_START"
+    ]
+  },
+  "production_deploy_approved": false,
+  "red_stop_triggered": true,
+  "removed_prior_allowed_files": [
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_1_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_sprint_2_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/happy_path_batch_closure.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_builder_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_1_product_review.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_sprint_2_failure_result.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_stop_condition.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_repair_human_approval_packet.json",
+    "runtime_traces/moremindmap_dev_loop_canary/injected_stop_batch_closure.json",
+    "runtime_traces/moremindmap_dev_loop_synthetic_canary_selftest_08.json"
+  ],
+  "safety_flags": {
+    "canary_only": true,
+    "no_active_agents": true,
+    "no_active_repair_execution": true,
+    "no_active_stop_enforcement": true,
+    "no_approval_workflow_runtime": true,
+    "no_assessment_generation_changes": true,
+    "no_codex_automation": true,
+    "no_deployment": true,
+    "no_formspree_changes": true,
+    "no_outcome_ledger_changes": true,
+    "no_real_batch_execution": true,
+    "no_routes": true,
+    "no_runtime": true,
+    "no_stripe_changes": true,
+    "no_subscription_changes": true,
+    "no_ui": true,
+    "report_only": true,
+    "synthetic_only": true
+  },
+  "selftest_digest": "9f5ff23644965d52676f3022023cdfbda562ac95f1123204a71dd6b06829f331",
+  "sprint": "MM-DL-8",
+  "sprint_3_started": false,
+  "status": "passed",
+  "stripe_approved": false,
+  "verdict": "MOREMINDMAP_DEV_LOOP_SYNTHETIC_CANARY_COMPLETE_WITH_LIMITS"
+}
