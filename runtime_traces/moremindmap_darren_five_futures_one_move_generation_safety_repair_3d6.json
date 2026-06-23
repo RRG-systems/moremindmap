@@ -1,0 +1,60 @@
+{
+  "phase_id": "MM-ADMIN-3D.6",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_SAFETY_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_SAFETY_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_SAFETY_REPAIR_REPORT_ONLY_3D6.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_safety_repair_3d6.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "observed_failure": {
+    "frontend_message": "Generated intelligence failed a safety check and was not returned.",
+    "likely_route_stage": "privacy_scan_failed",
+    "generation_reached_safety_scan": true
+  },
+  "safety_failure_diagnosis": {
+    "best_diagnosis": "The prior broad substring scanner could block normal generated strategy language because a bare initials fragment can appear inside ordinary words. The scan also covered the full normalized response object instead of only generated user-facing strategy fields.",
+    "overbroad_rule_repaired": true,
+    "scan_scope_narrowed_to_user_facing_generated_fields": true
+  },
+  "diagnostic_fields_added": [
+    "safety_check_failed",
+    "safety_failure_code",
+    "safety_failure_category",
+    "failed_field_path",
+    "matched_rule_id"
+  ],
+  "repair_made": {
+    "explicit_rule_scanner_added": true,
+    "bare_initials_substring_rule_removed": true,
+    "generated_field_scope_added": true,
+    "privacy_scan_started_stage_added": true,
+    "privacy_scan_passed_stage_added": true,
+    "truth_boundaries_preserved": true
+  },
+  "validation_results": {
+    "node_check_generation_route": "passed",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "invalid_admin_code_local_test": "passed_403_no_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_no_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required_before_test": true,
+    "valid_generation_requests_allowed_after_deploy": 1,
+    "debug_mode": "safe",
+    "retry_without_approval": false,
+    "report_full_generated_strategy": false
+  },
+  "limits": [
+    "No production smoke test was run in this sprint.",
+    "No safety scan was removed.",
+    "No chat or persistence was added.",
+    "No production generation success is claimed until controlled smoke testing passes."
+  ]
+}

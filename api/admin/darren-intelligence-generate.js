@@ -27,23 +27,26 @@ const REQUIRED_TRUTH_BOUNDARIES = [
   'Cross-vertical expansion is hypothesis until evidenced.',
   'Paid/free/revenue fields are unavailable until indexed.'
 ];
-const FORBIDDEN_OUTPUT_FRAGMENTS = [
-  ['canonical', 'dossier'],
-  ['canonical', 'profile', 'json'],
-  ['canonical', 'profile', 'text'],
-  ['assessment', 'answers'],
-  ['raw', 'answers'],
-  ['role', 'lane'],
-  ['d' + 'j', 'context'],
-  ['d' + 'j'],
-  ['d' + '.j.'],
-  ['steve', 'jobs'],
-  ['w' + 'oz'],
-  ['lane', 'policing'],
-  ['lane', 'check'],
-  ['stay', 'in', 'your', 'lane'],
-  ['stay', 'in', 'lane']
-].map((parts) => parts.join('_'));
+const FORBIDDEN_OUTPUT_RULES = [
+  { id: 'private_source_dossier', category: 'private_source_exposure', pattern: /canonical[\s_-]+dossier/i },
+  { id: 'private_source_profile_json', category: 'private_source_exposure', pattern: /canonical[\s_-]+profile[\s_-]+json/i },
+  { id: 'private_source_profile_text', category: 'private_source_exposure', pattern: /canonical[\s_-]+profile[\s_-]+text/i },
+  { id: 'private_assessment_response_set', category: 'private_source_exposure', pattern: /assessment[\s_-]+answers/i },
+  { id: 'private_answer_set', category: 'private_source_exposure', pattern: /raw[\s_-]+answers/i },
+  { id: 'storage_key_exposure', category: 'storage_exposure', pattern: /\b(?:vault|business_assessment):[A-Za-z0-9:_-]+/i },
+  { id: 'env_openai_key', category: 'env_exposure', pattern: /openai[\s_-]*api[\s_-]*key/i },
+  { id: 'env_admin_code', category: 'env_exposure', pattern: /moremindmap[\s_-]*admin[\s_-]*dashboard[\s_-]*code/i },
+  { id: 'prompt_exposure', category: 'prompt_exposure', pattern: /(?:system|developer|user)[\s_-]*prompt|raw[\s_-]*prompt/i },
+  { id: 'provider_payload_phrase', category: 'model_output_exposure', pattern: /raw[\s_-]*model[\s_-]*output/i },
+  { id: 'role_boundary_phrase', category: 'forbidden_framing', pattern: /\brole[\s_-]+lane\b/i },
+  { id: 'boundary_policing_phrase', category: 'forbidden_framing', pattern: /\blane[\s_-]+check\b/i },
+  { id: 'lane_policing_phrase', category: 'forbidden_framing', pattern: /\blane[\s_-]+policing\b/i },
+  { id: 'stay_in_lane_phrase', category: 'forbidden_framing', pattern: /\bstay\s+in\s+(?:your\s+)?lane\b/i },
+  { id: 'initials_context_phrase', category: 'forbidden_framing', pattern: /\bd\.?j\.?[\s_-]+context\b/i },
+  { id: 'initials_only_phrase', category: 'forbidden_framing', pattern: /\bd\.j\.?\b|\bdj\b/i },
+  { id: 'steve_jobs_comparison', category: 'forbidden_framing', pattern: /\bsteve\s+jobs\b/i },
+  { id: 'woz_comparison', category: 'forbidden_framing', pattern: /\bwoz\b|\bwozniak\b/i }
+];
 
 function setJsonHeaders(res) {
   res.setHeader('Content-Type', 'application/json');
@@ -102,6 +105,11 @@ function createDiagnostic() {
     parsing_failed: false,
     privacy_scan_failed: false,
     schema_validation_failed: false,
+    safety_check_failed: false,
+    safety_failure_code: null,
+    safety_failure_category: null,
+    failed_field_path: null,
+    matched_rule_id: null,
     timeout: false,
     response_status: null,
     error_name: null
@@ -124,6 +132,11 @@ function updateDiagnostic(diagnostic, generationStage, details = {}) {
     'parsing_failed',
     'privacy_scan_failed',
     'schema_validation_failed',
+    'safety_check_failed',
+    'safety_failure_code',
+    'safety_failure_category',
+    'failed_field_path',
+    'matched_rule_id',
     'timeout',
     'response_status',
     'error_name'
@@ -380,9 +393,48 @@ function logSafeGenerationDiagnostic(stage, details = {}) {
   });
 }
 
-function hasForbiddenExposure(value) {
-  const serialized = JSON.stringify(value || {}).toLowerCase().replace(/\s+/g, '_');
-  return FORBIDDEN_OUTPUT_FRAGMENTS.some((fragment) => serialized.includes(fragment));
+function generatedUserFacingFields(generated) {
+  return {
+    five_futures: generated?.five_futures,
+    one_move: generated?.one_move,
+    evidence_gaps: generated?.evidence_gaps,
+    next_proof_targets: generated?.next_proof_targets,
+    truth_boundaries: generated?.truth_boundaries,
+    model_limits: generated?.model_limits
+  };
+}
+
+function findForbiddenExposure(value, path = 'generated') {
+  if (typeof value === 'string') {
+    for (const rule of FORBIDDEN_OUTPUT_RULES) {
+      if (rule.pattern.test(value)) {
+        return {
+          safety_check_failed: true,
+          safety_failure_code: 'generated_output_failed_privacy_scan',
+          safety_failure_category: rule.category,
+          failed_field_path: path,
+          matched_rule_id: rule.id
+        };
+      }
+    }
+    return null;
+  }
+
+  if (Array.isArray(value)) {
+    for (let index = 0; index < value.length; index += 1) {
+      const result = findForbiddenExposure(value[index], `${path}[${index}]`);
+      if (result) return result;
+    }
+    return null;
+  }
+
+  if (value && typeof value === 'object') {
+    for (const [key, child] of Object.entries(value)) {
+      const result = findForbiddenExposure(child, `${path}.${key}`);
+      if (result) return result;
+    }
+  }
+  return null;
 }
 
 function validateGeneratedSchema(generated) {
@@ -463,16 +515,21 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
     throw error;
   }
 
-  if (hasForbiddenExposure(normalized)) {
+  updateDiagnostic(diagnostic, 'privacy_scan_started');
+  const safetyFailure = findForbiddenExposure(generatedUserFacingFields(normalized));
+  if (safetyFailure) {
     updateDiagnostic(diagnostic, 'privacy_scan_failed', {
       safe_error_code: 'generated_output_failed_privacy_scan',
-      privacy_scan_failed: true
+      privacy_scan_failed: true,
+      ...safetyFailure
     });
     const error = new Error('generated_output_failed_privacy_scan');
     error.code = 'generated_output_failed_privacy_scan';
+    error.safetyFailure = safetyFailure;
     throw error;
   }
 
+  updateDiagnostic(diagnostic, 'privacy_scan_passed');
   updateDiagnostic(diagnostic, 'generation_complete');
   return normalized;
 }
