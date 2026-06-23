@@ -1,0 +1,233 @@
+{
+  "phase_id": "MM-ADMIN-1",
+  "verdict": "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_V1_PLANNING_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_ADMIN_SALES_DASHBOARD_V1_PLAN_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_ADMIN_DASHBOARD_V1_PLAN",
+  "files_created": [
+    "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_V1_PLANNING_REPORT_ONLY.md",
+    "runtime_traces/moremindmap_leadership_sales_dashboard_v1_planning_01.json"
+  ],
+  "files_changed": [
+    "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_V1_PLANNING_REPORT_ONLY.md",
+    "runtime_traces/moremindmap_leadership_sales_dashboard_v1_planning_01.json"
+  ],
+  "code_changed": false,
+  "deploy_required": false,
+  "data_sources_examined": [
+    "api/engine/vault/saveCanonicalProfile.js",
+    "api/engine/vault/getCanonicalProfile.js",
+    "api/engine/vault/listCanonicalProfiles.js",
+    "api/engine/vault/queryProfilesByOrg.js",
+    "api/engine/miniV2JobManager.js",
+    "api/engine/canonical/executeCanonicalGeneration.js",
+    "api/moremindmap/start.js",
+    "api/moremindmap/retrieve-profile.js",
+    "api/diagnostic/list-all-profiles.js",
+    "api/business-assessment/start.js",
+    "api/business-assessment/shared.js",
+    "api/business-assessment/retrieve.js",
+    "src/Profile.jsx",
+    "src/BusinessAssessment.jsx",
+    "src/LeadershipPortal.jsx",
+    "src/LeadershipDemo.jsx",
+    "src/main.jsx"
+  ],
+  "profile_indexes_found": [
+    {
+      "key_pattern": "vault:profile:{profile_id}",
+      "purpose": "durable canonical dossier record"
+    },
+    {
+      "key_pattern": "vault:markdown:{profile_id}",
+      "purpose": "durable markdown artifact"
+    },
+    {
+      "key_pattern": "vault:index:date:{YYYY-MM-DD}",
+      "purpose": "profiles created on date"
+    },
+    {
+      "key_pattern": "vault:index:email:{email}",
+      "purpose": "profiles by email"
+    },
+    {
+      "key_pattern": "vault:index:company:{company_slug}",
+      "purpose": "profiles by company"
+    },
+    {
+      "key_pattern": "vault:index:department:{department_slug}",
+      "purpose": "profiles by department"
+    },
+    {
+      "key_pattern": "vault:index:role:{role_slug}",
+      "purpose": "profiles by role title"
+    },
+    {
+      "key_pattern": "vault:index:manager:{manager_slug}",
+      "purpose": "profiles by manager"
+    },
+    {
+      "key_pattern": "vault:index:industry:{industry_slug}",
+      "purpose": "profiles by industry"
+    },
+    {
+      "key_pattern": "vault:index:org_context:{context_slug}",
+      "purpose": "profiles by organization context"
+    },
+    {
+      "key_pattern": "vault:metadata:count",
+      "purpose": "total profile counter"
+    }
+  ],
+  "assessment_indexes_found": [
+    {
+      "key_pattern": "business_assessment:{assessment_id}",
+      "purpose": "durable Business Assessment record"
+    },
+    {
+      "key_pattern": "business_assessment_by_profile:{owner_profile_id}",
+      "purpose": "latest assessment ID for owner profile"
+    },
+    {
+      "key_pattern": "business_assessment_job:{job_id}",
+      "purpose": "intake job record"
+    },
+    {
+      "key_pattern": "business_assessment:index:date:{YYYY-MM-DD}",
+      "purpose": "assessments created on date"
+    },
+    {
+      "key_pattern": "business_assessment:index:type:{assessment_type}",
+      "purpose": "assessments by type"
+    }
+  ],
+  "available_fields": {
+    "profiles": [
+      "profile_id",
+      "job_id",
+      "person_name",
+      "email",
+      "company_name",
+      "company_slug",
+      "created_at",
+      "assessment_version",
+      "model",
+      "quality_score",
+      "profile_signature",
+      "metadata.identity.full_name",
+      "metadata.identity.email",
+      "metadata.identity.phone",
+      "metadata.organization.company",
+      "metadata.organization.role_title",
+      "metadata.organization.department",
+      "metadata.organization.industry",
+      "metadata.organization.reports_to"
+    ],
+    "business_assessments": [
+      "assessment_id",
+      "owner_profile_id",
+      "assessment_type",
+      "status",
+      "created_at",
+      "updated_at",
+      "version",
+      "inputs.team_profile_ids",
+      "profile_context.owner_profile_name",
+      "profile_context.owner_profile_type",
+      "output.business_intelligence_draft presence",
+      "output.executive_diagnostic_briefing_v1 presence",
+      "output.five_futures_v1 presence",
+      "output.one_move_v1 presence",
+      "metadata.last_briefing_generation_error",
+      "metadata.last_futures_generation_error"
+    ],
+    "leadership_portal": [
+      "existing DARRENDEMO access-code path",
+      "existing /leadership-demo route",
+      "existing demo slide experience"
+    ]
+  },
+  "missing_fields": [
+    "durable paid/free status per profile",
+    "durable paid/free status per Business Assessment",
+    "durable promo code used per Business Assessment",
+    "durable Stripe checkout session linkage",
+    "revenue totals",
+    "global Business Assessment count",
+    "Business Assessment all-ID index",
+    "Business Assessment status index",
+    "Business Assessment monthly aggregate",
+    "sales follow-up owner/status/notes",
+    "notification delivery history",
+    "explicit RRG readiness status",
+    "admin audit trail"
+  ],
+  "paid_free_promo_status": {
+    "behavior_profile_promo_codes_found": [
+      "FATHOMFREE",
+      "MOREFREE26"
+    ],
+    "business_assessment_promo_codes_found": [
+      "BA5FREE"
+    ],
+    "behavior_profile_paid_status": "payment_success exists in frontend flow, but no durable paid status field confirmed in vault record",
+    "business_assessment_paid_status": "unavailable from current assessment record",
+    "promo_persistence": "not reliable as a first-class persisted dashboard field today",
+    "dashboard_rule": "display unavailable unless a real persisted field exists"
+  },
+  "proposed_routes": {
+    "existing_entry_route_to_preserve": "/leadership",
+    "existing_demo_route_to_preserve": "/leadership-demo",
+    "recommended_dashboard_route": "/leadership-dashboard",
+    "recommended_backend_api_route": "/api/admin/sales-dashboard"
+  },
+  "proposed_access_model": {
+    "current_demo_code": "DARRENDEMO",
+    "desired_admin_code": "MOREADMIN26",
+    "recommended_env_var": "MOREMINDMAP_ADMIN_DASHBOARD_CODE",
+    "frontend_behavior": "branch existing Leadership Portal: DARRENDEMO to /leadership-demo, MOREADMIN26 to /leadership-dashboard",
+    "backend_behavior": "validate admin code server-side before returning dashboard data",
+    "security_note": "frontend access code is navigation gating only; private dashboard data requires backend env-backed validation"
+  },
+  "implementation_recommendation": {
+    "difficulty": "medium",
+    "existing_indexes_enough_for_first_backend_read_only_api": "partially",
+    "recommended_next_sprint": "MM-ADMIN-2A: build read-only backend API from existing indexes only with admin-code gate and source-labeled missing-data notes",
+    "recommended_split": [
+      "MM-ADMIN-2A: backend read-only API and data shaping from existing indexes",
+      "MM-ADMIN-2B: Leadership Portal MOREADMIN26 branch and dashboard UI"
+    ],
+    "future_indexing_sprint": "Add global/status/month indexes and promo/payment fields only after V1 proves the exact dashboard needs"
+  },
+  "stop_conditions": [
+    "DARRENDEMO no longer opens existing demo",
+    "dashboard data exposed without backend admin-code validation",
+    "raw canonical dossiers exposed by default",
+    "full assessment answers exposed by default",
+    "Redis keys or env vars shown in UI",
+    "fake paid/free totals shown",
+    "fake revenue shown",
+    "Business Assessment totals guessed without source label",
+    "payment or promo status inferred without persisted evidence",
+    "raw JSON/debug output visible",
+    "Craig Fox/Fathom demo content leaks into admin dashboard unintentionally",
+    "frontend claims unavailable backend data exists",
+    "build fails",
+    "route fails",
+    "retrieval fails",
+    "generation logic touched",
+    "Stripe/subscription/Outcome Ledger logic touched"
+  ],
+  "limits": [
+    "report-only planning sprint",
+    "no dashboard implemented",
+    "no route created",
+    "no frontend UI created",
+    "no auth logic added",
+    "no Redis scan performed",
+    "no production data read",
+    "no records modified",
+    "no payment logic changed",
+    "no generation logic changed",
+    "no deployment"
+  ]
+}
