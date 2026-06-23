@@ -68,8 +68,8 @@ export const leadershipBuildMap = [
       'Prepare subscription coaching memory architecture'
     ],
     salesMeaning: 'MORE MindMap is beginning to remember generated strategy, One Move status, and evidence events, then show what changed since the last strategy.',
-    currentTruth: 'Generated strategy persistence, One Move status tracking, and Outcome Ledger v0 are live. Since Last Snapshot v0 is being implemented as a readable comparison layer. This is not automatic learning yet.',
-    limits: 'No chat memory, predictive scoring, or automatic learning is live until future movement and evidence-weighted memory are implemented.'
+    currentTruth: 'Generated strategy persistence, One Move status tracking, and Outcome Ledger v0 are live. Since Last Snapshot v0 is being implemented as a readable comparison layer. Automatic learning: not live yet.',
+    limits: 'The system compares strategy status and ledger events, but it does not automatically update future movement or generate a new strategy yet. No chat memory, predictive scoring, or automatic learning is live until future movement and evidence-weighted memory are implemented.'
   },
   {
     id: 'outcome-ledger',

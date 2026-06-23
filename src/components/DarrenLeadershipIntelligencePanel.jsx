@@ -859,6 +859,10 @@ function SinceLastSnapshotPanel({ adminCode }) {
           <ListWithTitle title="Do not claim yet" items={asArray(comparison.not_yet_claims).slice(0, 4)} compact />
         </div>
       </div>
+
+      <div className="mt-5 rounded-xl border border-cyan-200/14 bg-black/18 px-4 py-3 text-sm leading-6 text-cyan-50/66">
+        Automatic learning: not live yet. The system compares strategy status and ledger events, but it does not automatically update future movement or generate a new strategy yet.
+      </div>
     </div>
   )
 }
