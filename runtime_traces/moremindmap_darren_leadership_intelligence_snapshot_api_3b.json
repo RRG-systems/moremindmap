@@ -36,8 +36,11 @@
     "snapshot_version",
     "generated_at",
     "darren",
+    "darren.operating_mode",
+    "darren.operating_advantage",
+    "darren.operating_risk",
+    "darren.purposeful_scale_recommendation",
     "darren_assessment_context",
-    "dj_context",
     "strategic_goal",
     "current_dashboard_context",
     "build_map_context",
@@ -80,7 +83,10 @@
     "no fake revenue",
     "no fake partner funding",
     "no fake channel adoption",
-    "no fake RRG readiness"
+    "no fake RRG readiness",
+    "no lane-check framing returned",
+    "product governance and truth boundaries remain internal",
+    "Darren-facing language centers ownership: your momentum, your strategy, your opportunity map, your next proof target, your strongest path, your sales story, and your strategic options"
   ],
   "validation_results": {
     "node_check": "passed",

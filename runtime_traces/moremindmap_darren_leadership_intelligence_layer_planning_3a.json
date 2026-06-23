@@ -456,27 +456,39 @@
     "next_proof_needed",
     "confidence_level"
   ],
-  "role_boundary_model": {
-    "darren_lane": "momentum_sales_frontline_adoption_relationship_activation_market_signal",
-    "dj_lane": "vision_build_product_architecture_validation_product_truth",
+  "darren_operating_style_model": {
+    "operating_mode": "Momentum Machine Operating Mode",
+    "operating_advantage": [
+      "vision",
+      "sales story",
+      "partner activation",
+      "market motion",
+      "frontline opportunity creation",
+      "fast follow-up energy"
+    ],
     "darren_should": [
       "sell what exists",
       "gather market signal",
+      "test partner and channel proof",
       "use approved sales language",
       "bring ideas in as hypotheses"
     ],
-    "dj_should": [
-      "architect",
-      "build",
-      "validate",
-      "decide what becomes product",
-      "protect product truth"
+    "purposeful_scale_recommendation": [
+      "convert Entrepreneurial momentum into Purposeful execution",
+      "use models",
+      "use systems",
+      "use tools",
+      "use accountability",
+      "use coaching",
+      "use ongoing education",
+      "avoid hubris"
     ],
     "system_should_prevent": [
-      "Darren overclaiming future features",
-      "D.J. becoming the sales follow-up clerk",
+      "overclaiming future features",
+      "presenting Darren as controlled or constrained",
       "Darren ideas becoming direct build instructions without evidence review"
-    ]
+    ],
+    "product_governance_boundary": "Product governance and truth boundaries remain internal and source-labeled."
   },
   "five_futures_model": [
     {

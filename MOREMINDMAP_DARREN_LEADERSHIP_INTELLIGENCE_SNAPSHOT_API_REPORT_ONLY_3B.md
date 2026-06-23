@@ -43,8 +43,10 @@ The snapshot returns:
 - generated timestamp
 - sanitized Darren identity fields
 - Darren behavioral identity: `Momentum Machine`
-- Darren role lane: `momentum + sales`
-- D.J. role lane: `vision + build`
+- Darren operating style: `Momentum Machine Operating Mode`
+- Darren operating advantage: vision, sales story, partner activation, market motion, frontline opportunity creation, and fast follow-up energy
+- Darren operating risk: momentum can outrun evidence when interest, funding conversations, channel access, or valuation assumptions are treated as proof
+- Purposeful scale recommendation: convert Entrepreneurial momentum into Purposeful execution through models, systems, tools, accountability, coaching, ongoing education, and no hubris
 - Darren linked Business Assessment status and output availability flags
 - $250M / $15M-$30M gross revenue scenario lens
 - dashboard metric context
@@ -97,6 +99,9 @@ The route:
 - does not merge partner capital with revenue
 - does not merge channel reach with adoption or revenue
 - does not claim valuation certainty
+- does not return lane-check framing
+- keeps product governance and truth boundaries internal rather than presenting Darren as controlled or constrained
+- frames the experience around your momentum, your strategy, your opportunity map, your next proof target, your strongest path, your sales story, and your strategic options
 
 ## Explicit Limits
 

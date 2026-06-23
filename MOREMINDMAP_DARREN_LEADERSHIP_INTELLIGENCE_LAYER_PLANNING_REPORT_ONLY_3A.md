@@ -468,16 +468,16 @@ The model should block direct conversion of Darren's ideas into product instruct
 
 Darren's ideas should also be mapped against each possible company path. The system should ask: does this idea strengthen the SaaS/subscription path, the RRG path, the mortgage infrastructure path, the brokerage recruiting path, the leadership intelligence/LDE path, the hybrid company path, the Partner Capital / Strategic Funding path, or the Channel / Distribution Power Path? If the answer is unclear, the idea should become an evidence gap or proof target, not a build instruction.
 
-## Role-Boundary Model
+## Darren Operating Style Model
 
-Encode the operating boundary explicitly:
+Encode Darren's operating style explicitly:
 
-- Darren = momentum, sales, frontline adoption, relationship activation, market signal
-- D.J. = vision, build, product architecture, validation, product truth
-- Darren should sell what exists and gather market signal
-- D.J. should architect, build, validate, and decide what becomes product
-- the system should protect against Darren overclaiming future features
-- the system should protect D.J. from becoming a sales follow-up clerk
+- Darren = Momentum Machine
+- Darren's power is vision, sales story, partner activation, market motion, frontline opportunity creation, and fast follow-up energy
+- Darren should sell what exists, gather market signal, test partner/channel proof, and bring ideas in as hypotheses
+- the system should help Darren convert Entrepreneurial momentum into Purposeful execution through models, systems, tools, accountability, coaching, ongoing education, and no hubris
+- the system should protect against overclaiming future features without making Darren feel controlled, constrained, or managed
+- product governance and truth boundaries should remain internal and source-labeled
 
 The Leadership Intelligence Layer should give Darren action targets and sales language without handing him unverified product claims.
 

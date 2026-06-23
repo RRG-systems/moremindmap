@@ -46,8 +46,10 @@ The current `api/admin/darren-intelligence-snapshot.js` route includes Darren-sp
 
 - hardcoded profile ID: `mm-20260527-6zshuaao`
 - hardcoded behavioral identity: `Momentum Machine`
-- hardcoded role lane: `momentum + sales`
-- D.J. context: `vision + build`
+- Darren operating style: `Momentum Machine Operating Mode`
+- Darren operating advantage: vision, sales story, partner activation, market motion, frontline opportunity creation, and fast follow-up energy
+- Darren operating risk: momentum can outrun evidence when interest, funding conversations, channel access, or valuation assumptions are treated as proof
+- Purposeful scale recommendation: convert Entrepreneurial momentum into Purposeful execution through models, systems, tools, accountability, coaching, ongoing education, and no hubris
 - $250M company goal
 - $15M-$30M gross revenue scenario lens
 - MMM + RRG business context
@@ -60,6 +62,8 @@ The current `api/admin/darren-intelligence-snapshot.js` route includes Darren-sp
 - overclaim boundaries specific to valuation, partner interest, channel reach, RRG readiness, and cross-vertical claims
 
 These should remain valid for Darren, but they should be represented as configuration/context over a generic snapshot shape.
+
+The coaching experience should center Darren's ownership, strategy, opportunity map, sales story, and next proof target. Product governance and truth boundaries should remain internal; Darren-facing intelligence should feel empowering while still forcing claims through evidence, business model fit, partner/channel proof, and current product truth. The system should help Darren convert vision and momentum into purposeful scale.
 
 ## Reusable Snapshot Elements
 

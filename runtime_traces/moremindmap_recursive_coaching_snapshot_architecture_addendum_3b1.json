@@ -12,8 +12,10 @@
   "darren_specific_elements": [
     "hardcoded profile ID mm-20260527-6zshuaao",
     "Momentum Machine label",
-    "Darren role lane: momentum + sales",
-    "D.J. role lane: vision + build",
+    "Darren operating style: Momentum Machine Operating Mode",
+    "Darren operating advantage: vision, sales story, partner activation, market motion, frontline opportunity creation, and fast follow-up energy",
+    "Darren operating risk: momentum can outrun evidence when interest, funding conversations, channel access, or valuation assumptions are treated as proof",
+    "Purposeful scale recommendation: convert Entrepreneurial momentum into Purposeful execution through models, systems, tools, accountability, coaching, ongoing education, and no hubris",
     "$250M company goal",
     "$15M-$30M gross revenue scenario lens",
     "MMM + RRG business context",
@@ -23,6 +25,12 @@
     "admin-only access",
     "Leadership Sales Dashboard metrics context",
     "Strategic Build Map context"
+  ],
+  "user_experience_boundary": [
+    "Darren-facing intelligence should center Darren's ownership, strategy, opportunity map, sales story, and next proof target.",
+    "Product governance and truth boundaries remain internal.",
+    "The experience should empower Darren while testing ideas against evidence, business model fit, partner/channel proof, and current product truth.",
+    "The system helps Darren convert vision and momentum into purposeful scale."
   ],
   "reusable_elements": [
     "profile identity retrieval",

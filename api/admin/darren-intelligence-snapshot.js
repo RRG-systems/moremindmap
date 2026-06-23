@@ -460,18 +460,20 @@ function buildSnapshot({ generatedAt, profileLookup, assessmentContext, dashboar
       email: identity.email,
       company: identity.company,
       behavioral_identity: 'Momentum Machine',
-      role_lane: 'momentum + sales',
+      operating_mode: 'Momentum Machine Operating Mode',
+      operating_advantage: 'Momentum, sales motion, partner activation, frontline opportunity creation, and fast follow-up energy.',
+      operating_risk: 'Momentum can outrun evidence when interest, funding conversations, channel access, or valuation assumptions are treated as proof.',
+      purposeful_scale_recommendation: 'Convert Entrepreneurial momentum into Purposeful execution through models, systems, tools, accountability, coaching, ongoing education, and no hubris.',
       source_labels: {
         identity: 'darren_profile',
         behavioral_identity: 'user_provided_context',
-        role_lane: 'user_provided_context'
+        operating_mode: 'user_provided_context',
+        operating_advantage: 'model_interpretation',
+        operating_risk: 'model_interpretation',
+        purposeful_scale_recommendation: 'model_interpretation'
       }
     },
     darren_assessment_context: assessmentContext,
-    dj_context: {
-      role_lane: 'vision + build',
-      source_label: 'user_provided_context'
-    },
     strategic_goal: buildStrategicGoal(),
     current_dashboard_context: dashboardContext,
     build_map_context: summarizeBuildMap(),
