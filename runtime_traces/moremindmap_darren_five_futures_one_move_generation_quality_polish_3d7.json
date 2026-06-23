@@ -1,0 +1,93 @@
+{
+  "phase_id": "MM-ADMIN-3D.7",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_QUALITY_POLISH_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_QUALITY_POLISH_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_QUALITY_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_QUALITY_POLISH_REPORT_ONLY_3D7.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_quality_polish_3d7.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "quality_issues_addressed": [
+    "generic_strategy_language",
+    "broad_one_move_timeframe",
+    "thin_one_move_action",
+    "generic_proof_target",
+    "weak_sales_story_specificity",
+    "underused_momentum_machine_profile",
+    "weak_e_to_p_application"
+  ],
+  "prompt_or_schema_changes": {
+    "generation_guidance_strengthened": true,
+    "future_path_distinctions_required": true,
+    "plain_english_sales_story_required": true,
+    "weekly_one_move_required": true,
+    "measurable_proof_target_required": true
+  },
+  "one_move_weekly_validation": {
+    "broad_timeframes_normalized": true,
+    "weekly_pattern_required": true,
+    "blocked_timeframes": [
+      "future quarter",
+      "later this year",
+      "eventually",
+      "broad annual timeframe"
+    ],
+    "fallback_timeframe": "Next 7 days"
+  },
+  "sales_story_quality_rules": {
+    "plain_english_required": true,
+    "partner_conversation_usefulness_required": true,
+    "dashboard_as_evidence_not_story": true,
+    "generic_corporate_phrases_discouraged": true
+  },
+  "momentum_machine_personalization": {
+    "motion_creation": true,
+    "door_opening": true,
+    "partner_activation": true,
+    "short_cycle_proof_targets": true,
+    "risk_of_momentum_outrunning_evidence": true
+  },
+  "e_to_p_lens_application": {
+    "entrepreneurial_motion": true,
+    "purposeful_execution": true,
+    "models_systems_tools_accountability_coaching_education": true,
+    "no_hubris_boundary": true
+  },
+  "safety_preserved": {
+    "safety_scan_retained": true,
+    "private_source_exposure_blocked": true,
+    "private_answer_set_blocked": true,
+    "storage_reference_exposure_blocked": true,
+    "environment_reference_exposure_blocked": true,
+    "provider_payload_exposure_blocked": true,
+    "forbidden_framing_blocked": true,
+    "truth_boundaries_required": true
+  },
+  "validation_results": {
+    "node_check_generation_route": "passed",
+    "node_check_frontend_component": "not_applicable_node_unknown_jsx_extension",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "invalid_admin_code_local_test": "passed_403_no_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_no_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required_before_test": true,
+    "valid_generation_requests_allowed_after_deploy": 1,
+    "report_full_generated_strategy": false,
+    "quality_pass_required": true,
+    "retry_without_approval": false
+  },
+  "limits": [
+    "No production smoke test was run in this sprint.",
+    "No generated output persistence was added.",
+    "No chat was added.",
+    "No production success is claimed until controlled smoke testing passes."
+  ]
+}

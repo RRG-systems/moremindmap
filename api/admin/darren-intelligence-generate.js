@@ -27,6 +27,11 @@ const REQUIRED_TRUTH_BOUNDARIES = [
   'Cross-vertical expansion is hypothesis until evidenced.',
   'Paid/free/revenue fields are unavailable until indexed.'
 ];
+const WEEKLY_TIMEFRAME_FALLBACK = 'Next 7 days';
+const BROAD_TIMEFRAME_PATTERN = /\b(q[1-4]|quarter|later this year|eventually|someday|future quarter|next quarter|202[6-9]|203\d|annual|year[-\s]*long)\b/i;
+const WEEKLY_TIMEFRAME_PATTERN = /\b(this week|next 7 days|seven days|by friday|before the next dashboard review|within 7 days|next week)\b/i;
+const CONCRETE_ACTION_PATTERN = /\b(contact|call|ask|choose|pick|schedule|secure|request|send|meet|pilot|partner|brokerage|mortgage|channel|profiles?|assessments?|commit|audience access|next meeting|proof target)\b/i;
+const GENERIC_PROOF_PATTERN = /\b(increase awareness|build momentum|create alignment|drive engagement|improve visibility|grow interest|explore opportunities|strengthen relationships)\b/i;
 const FORBIDDEN_OUTPUT_RULES = [
   { id: 'private_source_dossier', category: 'private_source_exposure', pattern: /canonical[\s_-]+dossier/i },
   { id: 'private_source_profile_json', category: 'private_source_exposure', pattern: /canonical[\s_-]+profile[\s_-]+json/i },
@@ -239,6 +244,16 @@ function buildPrompt(snapshot, diagnostic) {
           'No chat. No motivational fluff. No fake certainty.',
           'Do not mention backstage product/build governance, celebrity comparisons, lane policing, or supervisory framing.',
           'Darren-facing language must feel empowering and centered on his momentum, strategy, opportunity map, sales story, strongest path, and next proof target.',
+          'Write like a sharp operating memo for Darren, not corporate strategy filler.',
+          'Make every future materially different and grounded in current evidence, missing proof, business model path, Darren Momentum Machine advantage, the E to P shift, and overclaim risk.',
+          'For Conservative Continuation, frame disciplined V1 proof-building, not failure.',
+          'For Dashboard-Led Sales Traction, treat the dashboard as evidence supporting the story, not the story itself.',
+          'For Channel Distribution Acceleration, separate access from adoption.',
+          'For Strategic Partner Capital Acceleration, separate interest from funding.',
+          'For Full V2 Leadership Intelligence Company Path, separate roadmap from live capability.',
+          'The One Move must be weekly: this week, next 7 days, by Friday, or before the next dashboard review. Never use a quarter, future quarter, later this year, or eventually.',
+          'The One Move must name who or what partner category Darren should contact, what he should ask for, what measurable proof target he is creating, what signal counts, and what he must not claim.',
+          'Sales story fields must be plain English Darren can use in a real partner conversation. Avoid corporate phrases like unlock new audiences, redefine leadership intelligence, or real-time insights.',
           'Truth boundaries are mandatory: valuation assumptions are not guarantees; partner interest is not funding; funding conversations are not revenue; channel access is not adoption; audience reach is not revenue; RRG readiness is not live until tracked; cross-vertical expansion is hypothesis until evidenced; paid/free/revenue fields are unavailable until indexed.'
         ].join('\n')
       },
@@ -284,6 +299,13 @@ function buildPrompt(snapshot, diagnostic) {
             next_proof_targets: ['string'],
             truth_boundaries: REQUIRED_TRUTH_BOUNDARIES,
             model_limits: ['string']
+          },
+          quality_requirements: {
+            one_move_timeframe: 'must be this week, next 7 days, by Friday, or before the next dashboard review',
+            one_move_exact_action: 'must name a person/category/company type, an ask, and a measurable proof target',
+            one_move_proof_target: 'must define a measurable signal, not whether someone likes the idea',
+            momentum_machine: 'Darren creates motion, opens doors, activates partners, and needs short-cycle proof targets',
+            e_to_p: 'Entrepreneurial energy creates motion; Purposeful scale requires models, systems, tools, accountability, coaching, ongoing education, and no hubris'
           },
           grounding_snapshot: safeSnapshot
         })
@@ -441,9 +463,69 @@ function validateGeneratedSchema(generated) {
   if (!Array.isArray(generated.five_futures) || generated.five_futures.length !== REQUIRED_FUTURE_NAMES.length) return false;
   const names = generated.five_futures.map((future) => future.name);
   if (!REQUIRED_FUTURE_NAMES.every((name) => names.includes(name))) return false;
+  for (const future of generated.five_futures) {
+    if (
+      !future.summary ||
+      !future.current_evidence ||
+      !future.missing_evidence ||
+      !future.likely_bottleneck ||
+      !future.upside ||
+      !future.danger ||
+      !future.what_makes_it_more_likely ||
+      !future.what_would_invalidate_it ||
+      !future.e_to_p_shift ||
+      !future.sales_story ||
+      !future.what_not_to_overclaim
+    ) return false;
+  }
   if (!generated.one_move?.title || !generated.one_move?.exact_action || !generated.one_move?.proof_target) return false;
   if (!Array.isArray(generated.truth_boundaries) || generated.truth_boundaries.length < REQUIRED_TRUTH_BOUNDARIES.length) return false;
   return true;
+}
+
+function normalizeOneMoveTimeframe(value) {
+  const text = normalizeString(value, WEEKLY_TIMEFRAME_FALLBACK);
+  if (BROAD_TIMEFRAME_PATTERN.test(text)) return WEEKLY_TIMEFRAME_FALLBACK;
+  return text;
+}
+
+function validateOneMoveQuality(oneMove = {}) {
+  const timeframe = String(oneMove.timeframe || '');
+  const exactAction = String(oneMove.exact_action || '');
+  const proofTarget = String(oneMove.proof_target || '');
+  const expectedSignal = String(oneMove.expected_signal || '');
+  const whatToSay = String(oneMove.what_to_say || '');
+  const whatNotToSay = String(oneMove.what_not_to_say || '');
+
+  if (!WEEKLY_TIMEFRAME_PATTERN.test(timeframe)) {
+    return {
+      code: 'one_move_timeframe_not_weekly',
+      category: 'one_move_weekly_validation',
+      field: 'one_move.timeframe'
+    };
+  }
+  if (exactAction.length < 80 || !CONCRETE_ACTION_PATTERN.test(exactAction)) {
+    return {
+      code: 'one_move_exact_action_not_concrete',
+      category: 'one_move_concreteness_validation',
+      field: 'one_move.exact_action'
+    };
+  }
+  if (proofTarget.length < 50 || GENERIC_PROOF_PATTERN.test(proofTarget)) {
+    return {
+      code: 'one_move_proof_target_not_measurable',
+      category: 'one_move_proof_validation',
+      field: 'one_move.proof_target'
+    };
+  }
+  if (expectedSignal.length < 35 || whatToSay.length < 35 || whatNotToSay.length < 35) {
+    return {
+      code: 'one_move_sales_fields_too_thin',
+      category: 'one_move_sales_utility_validation',
+      field: 'one_move'
+    };
+  }
+  return null;
 }
 
 function normalizeString(value, fallback = 'Unavailable') {
@@ -488,7 +570,7 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
       expected_signal: normalizeString(oneMove.expected_signal),
       what_to_say: normalizeString(oneMove.what_to_say),
       what_not_to_say: normalizeString(oneMove.what_not_to_say),
-      timeframe: normalizeString(oneMove.timeframe, 'This week'),
+      timeframe: normalizeOneMoveTimeframe(oneMove.timeframe),
       success_condition: normalizeString(oneMove.success_condition)
     },
     evidence_gaps: Array.isArray(parsed?.evidence_gaps) ? parsed.evidence_gaps.map((item) => normalizeString(item)).slice(0, 12) : snapshot.evidence_gaps,
@@ -512,6 +594,22 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
     });
     const error = new Error('darren_intelligence_schema_validation_failed');
     error.code = 'darren_intelligence_schema_validation_failed';
+    throw error;
+  }
+
+  const oneMoveQualityFailure = validateOneMoveQuality(normalized.one_move);
+  if (oneMoveQualityFailure) {
+    updateDiagnostic(diagnostic, 'schema_validation_failed', {
+      safe_error_code: 'darren_intelligence_quality_validation_failed',
+      schema_validation_failed: true,
+      safety_check_failed: true,
+      safety_failure_code: oneMoveQualityFailure.code,
+      safety_failure_category: oneMoveQualityFailure.category,
+      failed_field_path: oneMoveQualityFailure.field,
+      matched_rule_id: oneMoveQualityFailure.code
+    });
+    const error = new Error('darren_intelligence_quality_validation_failed');
+    error.code = 'darren_intelligence_quality_validation_failed';
     throw error;
   }
 
@@ -612,6 +710,15 @@ export default async function handler(req, res) {
         openai_responded: true
       });
       return sendError(res, 502, 'darren_intelligence_schema_validation_failed', diagnostic, debugMode);
+    }
+    if (error?.code === 'darren_intelligence_quality_validation_failed') {
+      logSafeGenerationDiagnostic('quality_validation_failed', {
+        error_code: error.code,
+        model: configuredGenerationModel(),
+        snapshot_loaded: true,
+        openai_responded: true
+      });
+      return sendError(res, 502, 'darren_intelligence_quality_validation_failed', diagnostic, debugMode);
     }
     if (error?.code === 'generated_output_failed_privacy_scan') {
       logSafeGenerationDiagnostic('privacy_scan_failed', {

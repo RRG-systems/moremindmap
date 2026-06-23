@@ -339,6 +339,9 @@ function generationErrorMessage(error) {
   if (error === 'darren_intelligence_generation_failed_privacy_scan') {
     return 'Generated intelligence failed a safety check and was not returned.'
   }
+  if (error === 'darren_intelligence_quality_validation_failed') {
+    return 'Generated intelligence was too broad for Darren’s weekly operating view and was not returned.'
+  }
   return 'Darren Five Futures + One Move generation is unavailable right now.'
 }
 
