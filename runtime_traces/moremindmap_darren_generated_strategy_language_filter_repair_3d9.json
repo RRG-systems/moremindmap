@@ -1,0 +1,63 @@
+{
+  "phase_id": "MM-ADMIN-3D.9",
+  "verdict": "MOREMINDMAP_DARREN_GENERATED_LANGUAGE_FILTER_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATED_LANGUAGE_FILTER_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_LANGUAGE_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_GENERATED_STRATEGY_LANGUAGE_FILTER_REPAIR_REPORT_ONLY_3D9.md",
+    "runtime_traces/moremindmap_darren_generated_strategy_language_filter_repair_3d9.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "observed_failure": {
+    "status": 502,
+    "error": "darren_intelligence_quality_validation_failed",
+    "safety_failure_code": "generated_strategy_language_too_generic",
+    "safety_failure_category": "language_quality_validation",
+    "failed_field_path": "one_move.what_not_to_say",
+    "matched_rule_id": "market_penetration",
+    "privacy_scan_failed": false,
+    "raw_source_exposure": false,
+    "forbidden_framing": false
+  },
+  "filter_repair": {
+    "market_penetration_removed_from_hard_fail_rules": true,
+    "language_quality_gate_retained": true,
+    "privacy_safety_gate_retained": true,
+    "truth_boundaries_retained": true
+  },
+  "hard_fail_rules_preserved": [
+    "unlock_new_audiences",
+    "redefine_leadership_intelligence",
+    "ensure_every_action_aligns",
+    "growth_trajectory_attracts",
+    "strategic_alignment_faster_growth",
+    "real_time_insights",
+    "synergistic_growth"
+  ],
+  "downgraded_or_removed_rules": [
+    "market_penetration"
+  ],
+  "validation_results": {
+    "node_check_generation_route": "passed",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "invalid_admin_code_local_test": "passed_403_no_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_no_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required_before_test": true,
+    "valid_generation_requests_allowed_after_deploy": 1,
+    "retry_without_approval": false,
+    "report_full_generated_strategy": false
+  },
+  "limits": [
+    "No production smoke test was run in this sprint.",
+    "No chat was added.",
+    "No persistence was added.",
+    "No privacy or truth-boundary protections were removed."
+  ]
+}

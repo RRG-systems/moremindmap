@@ -37,7 +37,6 @@ const GENERIC_CORPORATE_LANGUAGE_RULES = [
   { id: 'redefine_leadership_intelligence', pattern: /\bredefine leadership intelligence\b/i },
   { id: 'ensure_every_action_aligns', pattern: /\bensure every action aligns\b/i },
   { id: 'growth_trajectory_attracts', pattern: /\bgrowth trajectory attracts\b/i },
-  { id: 'market_penetration', pattern: /\bmarket penetration\b/i },
   { id: 'strategic_alignment_faster_growth', pattern: /\bstrategic alignment\b.*\bfaster growth\b/i },
   { id: 'real_time_insights', pattern: /\breal[-\s]*time insights\b/i },
   { id: 'synergistic_growth', pattern: /\bsynerg(?:y|istic)\b/i }
