@@ -1,0 +1,66 @@
+{
+  "phase_id": "MM-ADMIN-3D.1",
+  "verdict": "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_500_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_REPAIR_REPORT_ONLY_3D1.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_repair_3d1.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "root_cause_or_best_diagnosis": "The production 500 was most likely an OpenAI model request or model-parameter compatibility failure that the route collapsed into a generic generation failure. The original route did not expose safe stage-specific diagnostics.",
+  "repair_made": [
+    "Added safe generation model resolution with fallback for malformed configured model text.",
+    "Added model-family token parameter selection between max_tokens and max_completion_tokens.",
+    "Added controlled response codes for model request failure, model response invalid, timeout, missing model configuration, snapshot unavailable, and privacy scan failure.",
+    "Added safe server-side diagnostics with generation stage, safe error code, HTTP status, model name, and booleans for snapshot/model/parse/privacy state.",
+    "Kept return-only V1 persistence decision."
+  ],
+  "model_call_pattern": {
+    "endpoint": "https://api.openai.com/v1/chat/completions",
+    "response_format": "json_object",
+    "model_resolution": "DARREN_INTELLIGENCE_OPENAI_MODEL, then OPENAI_MODEL, then gpt-4o-2024-08-06 fallback",
+    "token_parameter": "max_completion_tokens for newer completion-token model families; max_tokens for standard chat-completion model families",
+    "prompt_exposed_to_client": false,
+    "raw_model_output_logged": false
+  },
+  "safe_diagnostics_added": [
+    "generation_stage",
+    "error_code",
+    "http_status",
+    "model",
+    "snapshot_loaded",
+    "openai_responded",
+    "parsing_failed",
+    "privacy_scan_failed"
+  ],
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_local_test": "passed_controlled_403_before_snapshot_or_model_access",
+    "static_privacy_scan": "passed_for_forbidden_terms; safe_server_diagnostic_console_warn_contains_no_private_payload_data"
+  },
+  "production_smoke_test_plan": [
+    "Deploy committed repair after approval.",
+    "Confirm /leadership and /leadership-dashboard return 200.",
+    "Confirm existing sales dashboard and Darren snapshot APIs still pass invalid and valid auth checks.",
+    "Confirm POST /api/admin/darren-intelligence-generate with invalid code returns 403.",
+    "Run exactly one valid generation request.",
+    "Report only counts, required future names presence, one_move field presence, persistence_saved, and safety exposure booleans."
+  ],
+  "limits": [
+    "No chat",
+    "No Outcome Ledger runtime",
+    "No subscriptions",
+    "No Stripe",
+    "No RRG runtime",
+    "No Redis persistence",
+    "No canonical profile mutation",
+    "No assessment record mutation",
+    "No production valid generation test run in this repair sprint"
+  ]
+}

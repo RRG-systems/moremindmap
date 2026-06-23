@@ -1,8 +1,9 @@
 import snapshotHandler from './darren-intelligence-snapshot.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
-const GENERATION_MODEL = process.env.DARREN_INTELLIGENCE_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+const DEFAULT_GENERATION_MODEL = 'gpt-4o-2024-08-06';
 const GENERATION_TIMEOUT_MS = 70000;
+const GENERATION_MAX_TOKENS = 5000;
 const REQUIRED_FUTURE_NAMES = [
   'Conservative Continuation',
   'Dashboard-Led Sales Traction',
@@ -46,6 +47,19 @@ function setJsonHeaders(res) {
 
 function configuredAdminCode() {
   return process.env.MOREMINDMAP_ADMIN_DASHBOARD_CODE || DEFAULT_ADMIN_CODE;
+}
+
+function configuredGenerationModel() {
+  const explicitModel = String(process.env.DARREN_INTELLIGENCE_OPENAI_MODEL || '').trim();
+  const sharedModel = String(process.env.OPENAI_MODEL || '').trim();
+  const selected = explicitModel || sharedModel || DEFAULT_GENERATION_MODEL;
+
+  if (!/^[A-Za-z0-9._:-]+$/.test(selected)) return DEFAULT_GENERATION_MODEL;
+  return selected;
+}
+
+function usesCompletionTokenParameter(model) {
+  return /^(gpt-5|o[134]|o\d|chatgpt-4o)/i.test(model);
 }
 
 function getProvidedAdminCode(req) {
@@ -215,6 +229,10 @@ async function callOpenAIForDarrenIntelligence(snapshot) {
     throw error;
   }
 
+  const model = configuredGenerationModel();
+  const tokenParameter = usesCompletionTokenParameter(model)
+    ? { max_completion_tokens: GENERATION_MAX_TOKENS }
+    : { max_tokens: GENERATION_MAX_TOKENS };
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), GENERATION_TIMEOUT_MS);
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -224,10 +242,10 @@ async function callOpenAIForDarrenIntelligence(snapshot) {
       Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
     },
     body: JSON.stringify({
-      model: GENERATION_MODEL,
+      model,
       messages: buildPrompt(snapshot).messages,
       response_format: { type: 'json_object' },
-      max_completion_tokens: 5000
+      ...tokenParameter
     }),
     signal: controller.signal
   }).catch((error) => {
@@ -241,17 +259,42 @@ async function callOpenAIForDarrenIntelligence(snapshot) {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = new Error(data?.error?.message || `OpenAI HTTP ${response.status}`);
+    const error = new Error('OpenAI request failed');
+    error.code = 'darren_intelligence_model_request_failed';
     error.status = response.status;
+    error.model = model;
+    error.openai_error_type = data?.error?.type || null;
+    error.openai_error_code = data?.error?.code || null;
     throw error;
   }
 
-  const parsed = extractJsonObject(data?.choices?.[0]?.message?.content);
+  let parsed;
+  try {
+    parsed = extractJsonObject(data?.choices?.[0]?.message?.content);
+  } catch (error) {
+    error.code = 'darren_intelligence_model_response_invalid';
+    error.model = model;
+    throw error;
+  }
+
   return {
     parsed,
-    model: data.model || GENERATION_MODEL,
+    model: data.model || model,
     usage: data.usage || null
   };
+}
+
+function logSafeGenerationDiagnostic(stage, details = {}) {
+  console.warn('[DARREN_INTELLIGENCE_GENERATE]', {
+    generation_stage: stage,
+    error_code: details.error_code || null,
+    http_status: details.http_status || null,
+    model: details.model || null,
+    snapshot_loaded: details.snapshot_loaded === true,
+    openai_responded: details.openai_responded === true,
+    parsing_failed: details.parsing_failed === true,
+    privacy_scan_failed: details.privacy_scan_failed === true
+  });
 }
 
 function hasForbiddenExposure(value) {
@@ -346,17 +389,62 @@ export default async function handler(req, res) {
     return res.status(200).json(generated);
   } catch (error) {
     if (error?.safeError) {
+      logSafeGenerationDiagnostic('snapshot_load_failed', {
+        error_code: error.safeError,
+        http_status: error.status,
+        snapshot_loaded: false
+      });
       return res.status(error.status || 500).json({ ok: false, error: error.safeError });
     }
     if (error?.code === 'missing_openai_api_key') {
+      logSafeGenerationDiagnostic('model_not_configured', {
+        error_code: error.code,
+        snapshot_loaded: true
+      });
       return res.status(503).json({ ok: false, error: 'darren_intelligence_model_not_configured' });
     }
     if (error?.code === 'darren_intelligence_generation_timeout') {
+      logSafeGenerationDiagnostic('model_timeout', {
+        error_code: error.code,
+        model: configuredGenerationModel(),
+        snapshot_loaded: true
+      });
       return res.status(504).json({ ok: false, error: 'darren_intelligence_generation_timeout' });
     }
+    if (error?.code === 'darren_intelligence_model_request_failed') {
+      logSafeGenerationDiagnostic('model_request_failed', {
+        error_code: error.openai_error_code || error.openai_error_type || error.code,
+        http_status: error.status,
+        model: error.model,
+        snapshot_loaded: true,
+        openai_responded: true
+      });
+      return res.status(502).json({ ok: false, error: 'darren_intelligence_model_request_failed' });
+    }
+    if (error?.code === 'darren_intelligence_model_response_invalid') {
+      logSafeGenerationDiagnostic('model_response_invalid', {
+        error_code: error.code,
+        model: error.model,
+        snapshot_loaded: true,
+        openai_responded: true,
+        parsing_failed: true
+      });
+      return res.status(502).json({ ok: false, error: 'darren_intelligence_model_response_invalid' });
+    }
     if (error?.code === 'generated_output_failed_privacy_scan') {
+      logSafeGenerationDiagnostic('privacy_scan_failed', {
+        error_code: error.code,
+        model: configuredGenerationModel(),
+        snapshot_loaded: true,
+        openai_responded: true,
+        privacy_scan_failed: true
+      });
       return res.status(502).json({ ok: false, error: 'darren_intelligence_generation_failed_privacy_scan' });
     }
+    logSafeGenerationDiagnostic('unhandled_generation_failure', {
+      error_code: error?.code || 'unhandled_generation_failure',
+      model: configuredGenerationModel()
+    });
     return res.status(500).json({ ok: false, error: 'darren_intelligence_generation_failed' });
   }
 }
