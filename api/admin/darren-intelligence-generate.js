@@ -1,4 +1,4 @@
-import snapshotHandler from './darren-intelligence-snapshot.js';
+import { buildDarrenIntelligenceSnapshot } from './darren-intelligence-snapshot-core.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
 const DEFAULT_GENERATION_MODEL = 'gpt-4o-2024-08-06';
@@ -97,8 +97,6 @@ function createDiagnostic() {
     token_parameter: tokenParameter,
     snapshot_loaded: false,
     snapshot_ok: false,
-    snapshot_handler_invoked: false,
-    snapshot_handler_returned: false,
     openai_requested: false,
     openai_responded: false,
     parsing_failed: false,
@@ -121,8 +119,6 @@ function updateDiagnostic(diagnostic, generationStage, details = {}) {
     'token_parameter',
     'snapshot_loaded',
     'snapshot_ok',
-    'snapshot_handler_invoked',
-    'snapshot_handler_returned',
     'openai_requested',
     'openai_responded',
     'parsing_failed',
@@ -168,102 +164,32 @@ function extractJsonObject(content) {
   }
 }
 
-function createCaptureResponse() {
-  return {
-    statusCode: 200,
-    headers: {},
-    body: null,
-    ended: false,
-    headersSent: false,
-    setHeader(name, value) {
-      this.headers[String(name).toLowerCase()] = value;
-    },
-    getHeader(name) {
-      return this.headers[String(name).toLowerCase()];
-    },
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(payload) {
-      this.body = payload;
-      this.ended = true;
-      this.headersSent = true;
-      return this;
-    },
-    send(payload) {
-      this.body = payload;
-      this.ended = true;
-      this.headersSent = true;
-      return this;
-    },
-    end(payload) {
-      if (payload !== undefined) this.body = payload;
-      this.ended = true;
-      this.headersSent = true;
-      return this;
-    }
-  };
-}
-
-async function loadSnapshot(req, diagnostic) {
+async function loadSnapshot(diagnostic) {
   updateDiagnostic(diagnostic, 'snapshot_load_started');
-  const capture = createCaptureResponse();
   try {
-    updateDiagnostic(diagnostic, 'snapshot_handler_invoked', {
-      snapshot_handler_invoked: true
+    const snapshot = await buildDarrenIntelligenceSnapshot();
+    updateDiagnostic(diagnostic, 'snapshot_loaded', {
+      snapshot_loaded: true,
+      snapshot_ok: true
     });
-    await snapshotHandler(
-      {
-        ...req,
-        method: 'GET',
-        query: {
-          ...(req.query || {}),
-          code: undefined,
-          admin_code: undefined
-        }
-      },
-      capture
-    );
-    updateDiagnostic(diagnostic, 'snapshot_handler_returned', {
-      snapshot_handler_returned: true,
-      response_status: capture.statusCode
-    });
+    return snapshot;
   } catch (error) {
+    const safeStatus = error?.status || 500;
     updateDiagnostic(diagnostic, null, {
-      failure_stage: 'snapshot_handler_exception',
-      safe_error_code: 'darren_intelligence_snapshot_handler_exception',
-      http_status: 500,
-      response_status: 500,
-      snapshot_handler_invoked: true,
-      snapshot_handler_returned: false,
-      error_name: safeErrorName(error)
-    });
-    const wrapped = new Error('snapshot_handler_exception');
-    wrapped.status = 500;
-    wrapped.safeError = 'darren_intelligence_snapshot_handler_exception';
-    throw wrapped;
-  }
-
-  if (capture.statusCode !== 200 || !capture.body?.ok) {
-    updateDiagnostic(diagnostic, 'snapshot_load_failed', {
-      failure_stage: 'snapshot_load_failed',
+      failure_stage: 'snapshot_builder_exception',
+      safe_error_code: 'darren_intelligence_snapshot_builder_exception',
+      http_status: safeStatus,
+      response_status: safeStatus,
       snapshot_loaded: false,
       snapshot_ok: false,
-      response_status: capture.statusCode,
-      safe_error_code: capture.body?.error || 'darren_intelligence_snapshot_unavailable'
+      error_name: safeErrorName(error)
     });
-    const error = new Error(capture.body?.error || 'snapshot_unavailable');
-    error.status = capture.statusCode || 500;
-    error.safeError = 'darren_intelligence_snapshot_unavailable';
-    throw error;
+    const wrapped = new Error('snapshot_builder_exception');
+    wrapped.status = safeStatus;
+    wrapped.safeError = 'darren_intelligence_snapshot_builder_exception';
+    wrapped.safeErrorDetail = error?.code || null;
+    throw wrapped;
   }
-
-  updateDiagnostic(diagnostic, 'snapshot_loaded', {
-    snapshot_loaded: true,
-    snapshot_ok: true
-  });
-  return capture.body;
 }
 
 function buildPrompt(snapshot, diagnostic) {
@@ -573,7 +499,7 @@ export default async function handler(req, res) {
 
   try {
     updateDiagnostic(diagnostic, 'before_snapshot_load_call');
-    const snapshot = await loadSnapshot(req, diagnostic);
+    const snapshot = await loadSnapshot(diagnostic);
     const modelResult = await callOpenAIForDarrenIntelligence(snapshot, diagnostic);
     const generated = normalizeGeneratedIntelligence(modelResult.parsed, snapshot, modelResult, diagnostic);
     return res.status(200).json(generated);

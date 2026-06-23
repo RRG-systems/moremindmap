@@ -1,0 +1,61 @@
+{
+  "phase_id": "MM-ADMIN-3D.5",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_SNAPSHOT_BUILDER_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_SNAPSHOT_BUILDER_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-snapshot-core.js",
+    "api/admin/darren-intelligence-snapshot.js",
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_SNAPSHOT_BUILDER_REPAIR_REPORT_ONLY_3D5.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_snapshot_builder_repair_3d5.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "root_cause_or_best_diagnosis": {
+    "prior_failure_stage": "snapshot_handler_exception",
+    "prior_error_name": "TypeError",
+    "best_diagnosis": "The generation route was invoking the snapshot HTTP route through a synthetic request/response adapter. The external snapshot route worked, but the internal HTTP-handler invocation failed before returning."
+  },
+  "shared_snapshot_builder_created": true,
+  "snapshot_route_update": {
+    "route": "/api/admin/darren-intelligence-snapshot",
+    "admin_auth_preserved": true,
+    "uses_shared_builder_after_auth": true,
+    "sanitized_shape_preserved": true
+  },
+  "generation_route_update": {
+    "route": "/api/admin/darren-intelligence-generate",
+    "uses_shared_builder_after_auth": true,
+    "invalid_auth_before_snapshot_or_model": true,
+    "return_only_v1_no_persistence": true,
+    "route_specific_model_resolution_preserved": true
+  },
+  "internal_http_handler_invocation_removed": true,
+  "validation_results": {
+    "node_check_snapshot_core": "passed",
+    "node_check_snapshot_route": "passed",
+    "node_check_generation_route": "passed",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "snapshot_invalid_auth_local_test": "passed_403",
+    "generation_invalid_auth_local_test": "passed_403_no_diagnostic",
+    "generation_invalid_debug_auth_local_test": "passed_403_no_diagnostic",
+    "direct_builder_local_test": "skipped_local_redis_env_unavailable",
+    "static_privacy_scan": "passed_private_source_terms_absent_backend_env_reads_present"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required_before_test": true,
+    "valid_generation_requests_allowed_after_deploy": 1,
+    "safe_debug_enabled": true,
+    "retry_without_approval": false,
+    "report_full_generated_strategy": false
+  },
+  "limits": [
+    "No production smoke test has been run in this sprint.",
+    "No generation success is claimed until a controlled production test passes.",
+    "No generated intelligence persistence was added.",
+    "No chat or frontend behavior was changed."
+  ]
+}
