@@ -1,0 +1,182 @@
+{
+  "phase_id": "MM-ADMIN-3B.1",
+  "verdict": "MOREMINDMAP_RECURSIVE_COACHING_SNAPSHOT_ARCHITECTURE_ADDENDUM_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_RECURSIVE_COACHING_SNAPSHOT_ARCHITECTURE_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_RECURSIVE_COACHING_SNAPSHOT_ARCHITECTURE",
+  "files_created": [
+    "MOREMINDMAP_RECURSIVE_COACHING_SNAPSHOT_ARCHITECTURE_ADDENDUM_3B1.md",
+    "runtime_traces/moremindmap_recursive_coaching_snapshot_architecture_addendum_3b1.json"
+  ],
+  "code_changed": false,
+  "deploy_required": false,
+  "darren_specific_elements": [
+    "hardcoded profile ID mm-20260527-6zshuaao",
+    "Momentum Machine label",
+    "Darren role lane: momentum + sales",
+    "D.J. role lane: vision + build",
+    "$250M company goal",
+    "$15M-$30M gross revenue scenario lens",
+    "MMM + RRG business context",
+    "partner capital path",
+    "channel distribution path",
+    "E->P lens tuned to Darren",
+    "admin-only access",
+    "Leadership Sales Dashboard metrics context",
+    "Strategic Build Map context"
+  ],
+  "reusable_elements": [
+    "profile identity retrieval",
+    "canonical profile availability check",
+    "linked context retrieval",
+    "source-labeling model",
+    "sanitized identity summary",
+    "behavioral summary",
+    "dashboard/activity metric context",
+    "goal model",
+    "current business context",
+    "E->P or other operating lens",
+    "path comparison model",
+    "unavailable fields",
+    "truth boundaries",
+    "evidence gaps",
+    "proof targets",
+    "what not to overclaim",
+    "Five Futures scaffold",
+    "One Move scaffold",
+    "cost-control metadata",
+    "controlled access pattern",
+    "read-only snapshot response",
+    "no raw dossier / no raw answers guardrail"
+  ],
+  "generic_snapshot_schema": [
+    "snapshot_id",
+    "profile_id",
+    "user_type",
+    "context_type",
+    "created_at",
+    "source_labels",
+    "identity_summary",
+    "behavioral_summary",
+    "current_goal",
+    "current_business_context",
+    "financial_context",
+    "dashboard_or_activity_metrics",
+    "prior_snapshot_reference",
+    "prior_one_move_reference",
+    "outcome_ledger_references",
+    "evidence_gaps",
+    "proof_targets",
+    "five_futures_scaffold",
+    "one_move_scaffold",
+    "coaching_style",
+    "unavailable_fields",
+    "truth_boundaries",
+    "cost_control_metadata"
+  ],
+  "future_storage_model": [
+    {
+      "key_pattern": "canonical_profile:{profile_id}",
+      "purpose": "who the person is"
+    },
+    {
+      "key_pattern": "intelligence_snapshot:{snapshot_id}",
+      "purpose": "current interpretation"
+    },
+    {
+      "key_pattern": "intelligence_latest:{profile_id}:{context_type}",
+      "purpose": "pointer to latest snapshot"
+    },
+    {
+      "key_pattern": "coaching_session:{session_id}",
+      "purpose": "chat/session record"
+    },
+    {
+      "key_pattern": "coaching_session_summary:{session_id}",
+      "purpose": "compact session summary"
+    },
+    {
+      "key_pattern": "outcome_ledger_event:{event_id}",
+      "purpose": "what happened after actions"
+    },
+    {
+      "key_pattern": "one_move:{move_id}",
+      "purpose": "assigned action"
+    },
+    {
+      "key_pattern": "future_state:{snapshot_id}",
+      "purpose": "Five Futures version"
+    }
+  ],
+  "outcome_ledger_relationship": {
+    "snapshot": "current strategic mirror",
+    "outcome_ledger": "history of what happened after action",
+    "chat": "exploration interface",
+    "one_move": "action commitment",
+    "future_refresh": "updated trajectory based on evidence/outcomes",
+    "rule": "Snapshot should read prior Outcome Ledger events, not replace them."
+  },
+  "subscription_implications": [
+    "entitlement check required",
+    "usage limits required",
+    "weekly coaching session count required",
+    "monthly refresh count required",
+    "snapshot generation should be controlled and cached",
+    "GPT-5.5 should only be used for strategic synthesis",
+    "cheaper/cached responses should handle simple display",
+    "every paid user should have source-labeled outputs",
+    "no fake coaching",
+    "no fake progress",
+    "no chat without a grounded snapshot",
+    "no outcome claims without Outcome Ledger evidence"
+  ],
+  "future_api_recommendations": [
+    "GET /api/intelligence/snapshot?profile_id=...&context_type=...",
+    "POST /api/intelligence/snapshot/generate",
+    "GET /api/intelligence/latest?profile_id=...",
+    "POST /api/coaching/session/start",
+    "POST /api/coaching/session/message",
+    "POST /api/outcome-ledger/event"
+  ],
+  "darren_route_evolution_recommendation": {
+    "recommendation": "Keep Darren-specific admin route for now, then refactor shared helper functions before chat.",
+    "reasoning": [
+      "The current route is useful as an admin prototype and review surface.",
+      "Immediate refactor before deploy/smoke test adds unnecessary risk.",
+      "Waiting until subscription infrastructure would let chat/subscription layers build on a snowflake.",
+      "Shared helpers should be extracted before MM-ADMIN-3D chat."
+    ],
+    "recommended_sequence": [
+      "Keep GET /api/admin/darren-intelligence-snapshot as admin prototype.",
+      "Deploy and smoke-test Darren route.",
+      "Extract shared helpers before chat.",
+      "Build generic snapshot storage and latest-pointer model before recursive subscription rollout."
+    ]
+  },
+  "stop_conditions": [
+    "raw dossier exposure would occur",
+    "raw answer exposure would occur",
+    "uncontrolled GPT cost is possible",
+    "chat is introduced without snapshot grounding",
+    "outcome update has no clear event type",
+    "subscription coaching lacks entitlement checks",
+    "valuation/revenue claims lack source labels",
+    "user ideas become build instructions automatically",
+    "snapshot writes can corrupt canonical profiles",
+    "latest snapshot pointers can point to invalid snapshots",
+    "Outcome Ledger events cannot be retrieved",
+    "paid users could see fake coaching or fake progress",
+    "Five Futures or One Move refresh lacks validation"
+  ],
+  "limits": [
+    "Report-only addendum",
+    "No code changes",
+    "No routes created",
+    "No UI created",
+    "No Redis records modified",
+    "No generation triggered",
+    "No chat implemented",
+    "No subscriptions implemented",
+    "No Outcome Ledger runtime implemented",
+    "No deployment"
+  ]
+}
