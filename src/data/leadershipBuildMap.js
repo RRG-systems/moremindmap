@@ -62,13 +62,14 @@ export const leadershipBuildMap = [
       'Track One Move acceptance and status',
       'Capture lightweight result notes and signal strength v0',
       'Create separate Outcome Ledger v0 evidence events',
+      'Compare strategy status and ledger events with Since Last Snapshot v0',
       'Keep canonical dossier unchanged',
-      'Prepare for Since Last Snapshot comparison',
+      'Prepare for future movement and evidence-weighted memory',
       'Prepare subscription coaching memory architecture'
     ],
-    salesMeaning: 'MORE MindMap is beginning to remember generated strategy, One Move status, and evidence events so future coaching can compare recommendation against action and outcome.',
-    currentTruth: 'Generated strategy persistence and One Move status tracking are live. Outcome Ledger v0 is being implemented as separate evidence events linked to Darren strategy and One Move. This is not automatic learning yet.',
-    limits: 'No outcome comparison, chat memory, or automatic learning is live until Outcome Ledger records and snapshot comparison exist.'
+    salesMeaning: 'MORE MindMap is beginning to remember generated strategy, One Move status, and evidence events, then show what changed since the last strategy.',
+    currentTruth: 'Generated strategy persistence, One Move status tracking, and Outcome Ledger v0 are live. Since Last Snapshot v0 is being implemented as a readable comparison layer. This is not automatic learning yet.',
+    limits: 'No chat memory, predictive scoring, or automatic learning is live until future movement and evidence-weighted memory are implemented.'
   },
   {
     id: 'outcome-ledger',

@@ -422,7 +422,7 @@ function generationErrorMessage(error) {
     return 'Generated intelligence failed a safety check and was not returned.'
   }
   if (error === 'darren_intelligence_quality_validation_failed') {
-    return 'Generated intelligence was too broad for Darren’s weekly operating view and was not returned.'
+    return "Generated intelligence was too broad for Darren's weekly operating view and was not returned."
   }
   return 'Darren Five Futures + One Move generation is unavailable right now.'
 }
@@ -751,6 +751,113 @@ function OutcomeLedgerControls({ adminCode, generated }) {
             ))}
           </div>
         )}
+      </div>
+
+      <SinceLastSnapshotPanel adminCode={adminCode} />
+    </div>
+  )
+}
+
+function SinceLastSnapshotPanel({ adminCode }) {
+  const [comparisonState, setComparisonState] = useState({
+    status: 'loading',
+    data: null,
+    error: ''
+  })
+
+  useEffect(() => {
+    if (!adminCode) return undefined
+    const controller = new AbortController()
+
+    async function loadComparison() {
+      setComparisonState({ status: 'loading', data: null, error: '' })
+      try {
+        const response = await fetch('/api/admin/darren-since-last-snapshot', {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'X-Admin-Code': adminCode
+          },
+          signal: controller.signal
+        })
+        const payload = await response.json().catch(() => null)
+        if (!response.ok || !payload?.ok) {
+          setComparisonState({ status: 'error', data: null, error: 'Since Last Snapshot is unavailable.' })
+          return
+        }
+        setComparisonState({ status: 'ready', data: payload, error: '' })
+      } catch (error) {
+        if (error.name === 'AbortError') return
+        setComparisonState({ status: 'error', data: null, error: 'Since Last Snapshot is unavailable.' })
+      }
+    }
+
+    loadComparison()
+    return () => controller.abort()
+  }, [adminCode])
+
+  if (comparisonState.status === 'loading') {
+    return (
+      <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4 text-sm leading-6 text-white/54">
+        Loading Since Last Snapshot.
+      </div>
+    )
+  }
+
+  if (comparisonState.status === 'error') {
+    return (
+      <div className="mt-6 rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-sm leading-6 text-red-50">
+        {comparisonState.error}
+      </div>
+    )
+  }
+
+  const comparison = comparisonState.data || {}
+  const changes = comparison.changes_since_last_strategy || {}
+  const movement = comparison.future_path_movement_v0 || {}
+  const ledger = comparison.outcome_ledger_summary || {}
+  const oneMove = comparison.one_move_status || {}
+
+  return (
+    <div className="mt-6 rounded-2xl border border-cyan-300/16 bg-cyan-400/[0.07] p-4">
+      <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/48">Since Last Snapshot</div>
+      <p className="mt-3 text-sm leading-6 text-white/66">{display(comparison.safe_summary)}</p>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <FieldLabel label="One Move status" value={`${display(oneMove.accepted_status)} / ${display(oneMove.outcome_status)}`} />
+        <FieldLabel label="Latest status action" value={oneMove.latest_status_action} />
+        <FieldLabel label="Ledger events" value={ledger.outcome_event_count} />
+        <FieldLabel label="Future movement" value={changes.future_movement_supported ? 'Supported by evidence' : 'Unchanged'} />
+      </div>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/36">What changed</div>
+          <ListItems items={[
+            `One Move status changed: ${changes.one_move_status_changed ? 'yes' : 'no'}`,
+            `Outcome event added: ${changes.outcome_event_added ? 'yes' : 'no'}`,
+            `Evidence added: ${changes.evidence_added ? 'yes' : 'no'}`,
+            `Strong evidence added: ${changes.strong_evidence_added ? 'yes' : 'no'}`,
+            `Validated evidence added: ${changes.validated_evidence_added ? 'yes' : 'no'}`
+          ]} />
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/36">Future movement status</div>
+          <p className="mt-3 text-sm leading-6 text-white/62">{display(movement.movement_summary)}</p>
+          <p className="mt-3 text-sm leading-6 text-white/48">{display(movement.reason)}</p>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/36">Still missing</div>
+          <ListItems items={asArray(comparison.still_missing)} />
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/20 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/36">Next best prompt</div>
+          <p className="mt-3 text-sm leading-6 text-white/62">{display(comparison.next_best_prompt)}</p>
+          <ListWithTitle title="Do not claim yet" items={asArray(comparison.not_yet_claims).slice(0, 4)} compact />
+        </div>
       </div>
     </div>
   )

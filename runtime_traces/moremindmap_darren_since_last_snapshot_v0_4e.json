@@ -1,0 +1,111 @@
+{
+  "phase_id": "MM-ADMIN-4E",
+  "verdict": "MOREMINDMAP_DARREN_SINCE_LAST_SNAPSHOT_V0_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_SINCE_LAST_SNAPSHOT_V0_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_SINCE_LAST_SNAPSHOT_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-since-last-snapshot.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_SINCE_LAST_SNAPSHOT_V0_REPORT_ONLY_4E.md",
+    "runtime_traces/moremindmap_darren_since_last_snapshot_v0_4e.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "routes_added": [
+    "GET /api/admin/darren-since-last-snapshot"
+  ],
+  "comparison_inputs": [
+    "latest generated strategy",
+    "strategy created_at",
+    "strategy updated_at",
+    "accepted_status",
+    "outcome_status",
+    "status_history_count",
+    "latest status action",
+    "Outcome Ledger v0 events",
+    "latest event type",
+    "latest signal type",
+    "latest signal strength",
+    "latest evidence weight"
+  ],
+  "comparison_outputs": [
+    "profile_id",
+    "context_type",
+    "comparison_generated_at",
+    "current_strategy_present",
+    "current_strategy_id",
+    "strategy_created_at",
+    "strategy_updated_at",
+    "one_move_status",
+    "outcome_ledger_summary",
+    "changes_since_last_strategy",
+    "future_path_movement_v0",
+    "still_missing",
+    "safe_summary",
+    "not_yet_claims",
+    "next_best_prompt"
+  ],
+  "evidence_rules": {
+    "none_weak_early": "future_movement_supported false unless existing stronger evidence exists",
+    "moderate": "possible but not validated; no v0 movement scoring",
+    "strong_validated": "may support non-numeric movement language",
+    "one_move_planned_with_none": "loop active but no proof signal created; future movement false",
+    "no_numeric_prediction": true
+  },
+  "frontend_section": {
+    "title": "Since Last Snapshot",
+    "shows": [
+      "What changed",
+      "Evidence added",
+      "Future movement status",
+      "Still missing",
+      "Next best prompt/action"
+    ],
+    "renders_raw_json": false
+  },
+  "build_map_updated": true,
+  "canonical_dossier_mutated": false,
+  "assessment_records_mutated": false,
+  "privacy_guardrails": [
+    "invalid admin code returns 403 before Redis access",
+    "route is read-only and return-only",
+    "no canonical dossier content is returned",
+    "no raw assessment answers are returned",
+    "no Redis keys are returned to clients",
+    "no environment values are returned",
+    "no prompts or raw model output are returned",
+    "no lane-check or celebrity-comparison framing is introduced"
+  ],
+  "validation_results": {
+    "node_check_backend": "passed for api/admin/darren-since-last-snapshot.js",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed with existing Vite chunk-size warning",
+    "invalid_admin_code_route": "passed: 403 admin_since_last_snapshot_access_denied before Redis access",
+    "valid_route_local": "skipped: valid route requires production Redis state and is reserved for controlled production smoke test",
+    "static_privacy_scan": "passed: findings limited to backend admin-code environment access and required trace mutation-status terminology; no client-side env, raw source, raw answer, prompt, raw model output, raw error, or forbidden framing exposure"
+  },
+  "production_smoke_test_plan": [
+    "deploy production after commit and push if approved/safe",
+    "confirm /leadership returns 200",
+    "confirm /leadership-dashboard returns 200",
+    "confirm since-last-snapshot invalid code returns 403",
+    "confirm since-last-snapshot valid code returns 200",
+    "confirm current_strategy_present yes",
+    "confirm one_move_status reflects current production state",
+    "confirm outcome_ledger_summary shows at least one event",
+    "confirm future_movement_supported false when latest evidence_weight is none",
+    "confirm safe_summary, still_missing, and next_best_prompt are present",
+    "confirm no raw dossier, raw answer, Redis key, env, prompt, or forbidden framing exposure",
+    "confirm frontend Since Last Snapshot section is visible"
+  ],
+  "limits": [
+    "Comparison artifacts are not persisted in this sprint.",
+    "No automatic learning is claimed.",
+    "No future probability scoring is implemented.",
+    "No chat was added.",
+    "No subscriptions, Stripe, or RRG runtime were added.",
+    "Canonical profile records and assessment records remain untouched."
+  ]
+}
