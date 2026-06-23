@@ -1,0 +1,103 @@
+{
+  "phase_id": "MM-ADMIN-3B",
+  "verdict": "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_SNAPSHOT_API_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_SNAPSHOT_API_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_DARREN_INTELLIGENCE_SNAPSHOT_API",
+  "files_changed": [
+    "api/admin/darren-intelligence-snapshot.js",
+    "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_SNAPSHOT_API_REPORT_ONLY_3B.md",
+    "runtime_traces/moremindmap_darren_leadership_intelligence_snapshot_api_3b.json"
+  ],
+  "code_changed": true,
+  "deploy_required": false,
+  "api_route": "GET /api/admin/darren-intelligence-snapshot",
+  "admin_access_model": {
+    "env_var": "MOREMINDMAP_ADMIN_DASHBOARD_CODE",
+    "fallback_code": "MOREADMIN26",
+    "accepted_inputs": [
+      "Authorization Bearer",
+      "X-Admin-Code",
+      "query code",
+      "query admin_code"
+    ],
+    "invalid_code_behavior": "controlled 403 before Redis data access"
+  },
+  "data_sources_used": [
+    "Darren canonical profile lookup by profile_id mm-20260527-6zshuaao",
+    "Darren linked Business Assessment lookup by profile key",
+    "vault profile indexes and bounded scan for dashboard metrics",
+    "business assessment date/type indexes for dashboard metrics",
+    "src/data/leadershipBuildMap.js",
+    "MM-ADMIN-3A planning assumptions",
+    "MM-ADMIN-3A.1 valuation and E->P addendum assumptions"
+  ],
+  "snapshot_fields": [
+    "ok",
+    "snapshot_version",
+    "generated_at",
+    "darren",
+    "darren_assessment_context",
+    "dj_context",
+    "strategic_goal",
+    "current_dashboard_context",
+    "build_map_context",
+    "e_to_p_lens",
+    "path_comparison",
+    "five_futures_scaffold",
+    "one_move_scaffold",
+    "evidence_gaps",
+    "next_proof_targets",
+    "what_not_to_overclaim",
+    "unavailable_fields",
+    "limits"
+  ],
+  "unavailable_fields": [
+    "verified revenue",
+    "paid/free/promo totals",
+    "Stripe payment state",
+    "subscription state",
+    "Outcome Ledger state",
+    "RRG activity/recovery metrics",
+    "partner capital pipeline",
+    "channel distribution pipeline",
+    "cross-vertical adoption metrics",
+    "final GPT-generated Darren Five Futures",
+    "final GPT-generated Darren One Move",
+    "chat"
+  ],
+  "privacy_guardrails": [
+    "raw canonical dossier not returned",
+    "raw assessment answers not returned",
+    "Redis keys not returned",
+    "environment values not returned",
+    "secrets not returned",
+    "read-only Redis operations only",
+    "no profile mutation",
+    "no assessment mutation",
+    "no generation trigger",
+    "no GPT/model call",
+    "no valuation certainty",
+    "no fake revenue",
+    "no fake partner funding",
+    "no fake channel adoption",
+    "no fake RRG readiness"
+  ],
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_local_test": "passed_controlled_403_admin_snapshot_access_denied",
+    "valid_admin_code_local_test": "skipped_local_REDIS_URL_not_configured"
+  },
+  "limits": [
+    "Backend route only",
+    "No frontend UI",
+    "No chat",
+    "No GPT/model generation",
+    "Five Futures scaffold only",
+    "One Move scaffold only",
+    "No Redis writes",
+    "No deployment in this sprint"
+  ]
+}
