@@ -63,13 +63,31 @@ export const leadershipBuildMap = [
       'Capture lightweight result notes and signal strength v0',
       'Create separate Outcome Ledger v0 evidence events',
       'Compare strategy status and ledger events with Since Last Snapshot v0',
+      'Add Darren Strategy Chat foundation as a non-mutating conversational layer',
       'Keep canonical dossier unchanged',
       'Prepare for future movement and evidence-weighted memory',
       'Prepare subscription coaching memory architecture'
     ],
     salesMeaning: 'MORE MindMap is beginning to remember generated strategy, One Move status, and evidence events, then show what changed since the last strategy.',
-    currentTruth: 'Generated strategy persistence, One Move status tracking, and Outcome Ledger v0 are live. Since Last Snapshot v0 is being implemented as a readable comparison layer. Automatic learning: not live yet.',
-    limits: 'The system compares strategy status and ledger events, but it does not automatically update future movement or generate a new strategy yet. No chat memory, predictive scoring, or automatic learning is live until future movement and evidence-weighted memory are implemented.'
+    currentTruth: 'Generated strategy persistence, One Move status tracking, Outcome Ledger v0, and Since Last Snapshot v0 are live. Darren Strategy Chat Foundation is being implemented as a context-aware, non-mutating conversational layer. Automatic learning: not live yet.',
+    limits: 'The system compares strategy status and ledger events, but it does not automatically update future movement or generate a new strategy yet. Chat does not mutate strategy, One Move status, or Outcome Ledger yet. No chat memory, predictive scoring, or automatic learning is live until future movement and evidence-weighted memory are implemented.'
+  },
+  {
+    id: 'darren-strategy-chat-foundation',
+    title: 'Darren Strategy Chat Foundation',
+    dateRange: 'Current Build',
+    label: 'Context-Aware Chat Foundation',
+    status: 'in_progress',
+    bullets: [
+      'Open-ended Darren Strategy Chat inside the Leadership Dashboard',
+      'Ground replies in latest strategy, One Move status, Outcome Ledger v0, and Since Last Snapshot v0',
+      'Support natural language questions without requiring product taxonomy',
+      'Keep chat non-mutating for V0',
+      'Prepare future durable chat summaries and evidence-weighted memory'
+    ],
+    salesMeaning: 'Darren can talk through strategy, pitch language, what changed, and overclaim risk while the structured dashboard remains the source-labeled truth layer.',
+    currentTruth: 'Darren Strategy Chat Foundation is in progress as a context-aware, non-mutating conversational layer. Automatic learning: not live yet.',
+    limits: 'Chat does not update generated strategy, One Move status, or Outcome Ledger yet. It does not create automatic learning, future scoring, subscription behavior, or RRG runtime.'
   },
   {
     id: 'outcome-ledger',

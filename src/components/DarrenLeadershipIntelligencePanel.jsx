@@ -72,6 +72,7 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
     error: '',
     source: ''
   })
+  const [strategyChatOpen, setStrategyChatOpen] = useState(false)
 
   useEffect(() => {
     if (!adminCode) {
@@ -177,8 +178,17 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
             Your cockpit for turning MORE MindMap + RRG into purposeful scale through your momentum, your strategy, your opportunity map, your sales story, and your next proof target.
           </p>
         </div>
-        <div className="rounded-xl border border-violet-200/20 bg-black/24 px-4 py-3 text-xs leading-5 text-violet-50/68 md:max-w-xs">
-          Snapshot-first. Saved strategy when generated. No chat or Outcome Ledger yet.
+        <div className="flex flex-col gap-3 md:items-end">
+          <button
+            type="button"
+            onClick={() => setStrategyChatOpen(true)}
+            className="rounded-2xl border border-cyan-200/25 bg-cyan-300/12 px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100/50 hover:bg-cyan-300/18"
+          >
+            Darren Strategy Chat
+          </button>
+          <div className="rounded-xl border border-violet-200/20 bg-black/24 px-4 py-3 text-xs leading-5 text-violet-50/68 md:max-w-xs">
+            Snapshot-first. Saved strategy when generated. Outcome Ledger v0 is separate. Chat does not mutate records yet.
+          </div>
         </div>
       </div>
 
@@ -196,6 +206,11 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
           setGenerationState={setGenerationState}
         />
       )}
+      <DarrenStrategyChatDrawer
+        adminCode={adminCode}
+        isOpen={strategyChatOpen}
+        onClose={() => setStrategyChatOpen(false)}
+      />
     </section>
   )
 }
@@ -865,6 +880,150 @@ function SinceLastSnapshotPanel({ adminCode }) {
       </div>
     </div>
   )
+}
+
+
+function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
+  const starterMessages = [
+    "I don't know where to start",
+    'Help me explain this',
+    'What changed?',
+    'Am I overclaiming?'
+  ]
+  const [conversationId, setConversationId] = useState('')
+  const [message, setMessage] = useState('')
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: 'assistant',
+      text: "Talk naturally. I can reason over Darren's current strategy, One Move status, Outcome Ledger, and Since Last Snapshot context."
+    }
+  ])
+  const [chatState, setChatState] = useState({ status: 'idle', error: '' })
+  const [possibleSignal, setPossibleSignal] = useState(null)
+
+  useEffect(() => {
+    if (!conversationId) setConversationId(`darren-chat-${Date.now()}`)
+  }, [conversationId])
+
+  if (!isOpen) return null
+
+  async function sendChat(nextMessage = message) {
+    const trimmed = String(nextMessage || '').trim()
+    if (!trimmed || chatState.status === 'loading') return
+
+    const nextHistory = [...chatMessages, { role: 'user', text: trimmed }]
+    setChatMessages(nextHistory)
+    setMessage('')
+    setPossibleSignal(null)
+    setChatState({ status: 'loading', error: '' })
+
+    try {
+      const response = await fetch('/api/admin/darren-strategy-chat', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          entry_context: inferEntryContext(trimmed),
+          message: trimmed
+        })
+      })
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
+        setChatState({ status: 'error', error: 'Chat unavailable.' })
+        return
+      }
+
+      const assistantText = display(payload.reply)
+      const suggestionText = asArray(payload.suggested_next_actions).filter(Boolean)
+      const assistantMessage = suggestionText.length
+        ? `${assistantText}\n\nSuggested next actions: ${suggestionText.join(' / ')}`
+        : assistantText
+      setChatMessages([...nextHistory, { role: 'assistant', text: assistantMessage }])
+      setPossibleSignal(payload.possible_memory_signal || null)
+      setChatState({ status: 'idle', error: '' })
+    } catch {
+      setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
+      setChatState({ status: 'error', error: 'Chat unavailable.' })
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/52 backdrop-blur-sm" role="dialog" aria-modal="true">
+      <button type="button" className="absolute inset-0 cursor-default" onClick={onClose} aria-label="Close Darren Strategy Chat" />
+      <aside className="relative flex h-full w-full max-w-xl flex-col border-l border-cyan-200/18 bg-[#05070c] shadow-[0_30px_120px_rgba(0,0,0,0.7)]">
+        <div className="border-b border-white/10 p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="text-xs uppercase tracking-[0.22em] text-cyan-100/58">Darren Strategy Chat</div>
+              <h3 className="mt-2 text-2xl font-semibold tracking-tight text-white">Talk through the next move</h3>
+              <p className="mt-3 text-sm leading-6 text-white/62">
+                Talk naturally. The system uses Darren's latest strategy, One Move status, Outcome Ledger, and Since Last Snapshot context.
+              </p>
+            </div>
+            <button type="button" onClick={onClose} className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white/64 transition hover:bg-white/10 hover:text-white">
+              Close
+            </button>
+          </div>
+          <p className="mt-4 rounded-xl border border-cyan-200/14 bg-cyan-400/[0.07] px-4 py-3 text-xs leading-5 text-cyan-50/66">
+            Chat can reason over Darren's current context, but it does not automatically update strategy, One Move status, or the Outcome Ledger yet.
+          </p>
+        </div>
+
+        <div className="flex-1 space-y-4 overflow-y-auto p-5">
+          {chatMessages.map((item, index) => (
+            <div key={`${item.role}-${index}`} className={item.role === 'user' ? 'ml-auto max-w-[86%] rounded-2xl bg-cyan-200 px-4 py-3 text-sm leading-6 text-black' : 'mr-auto max-w-[92%] rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-sm leading-6 text-white/72'}>
+              {item.text}
+            </div>
+          ))}
+          {possibleSignal && (
+            <div className="rounded-2xl border border-amber-300/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-50/72">
+              <span className="font-semibold text-amber-50">Possible signal to log later:</span>{' '}
+              {formatListKey(possibleSignal.signal_type)} / {formatListKey(possibleSignal.signal_strength)}. {display(possibleSignal.reason)}
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-white/10 p-5">
+          <div className="mb-3 flex flex-wrap gap-2">
+            {starterMessages.map((starter) => (
+              <button key={starter} type="button" onClick={() => sendChat(starter)} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-white/58 transition hover:border-cyan-200/30 hover:text-cyan-50">
+                {starter}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-3">
+            <textarea
+              value={message}
+              onChange={(event) => setMessage(event.target.value.slice(0, 4000))}
+              rows={3}
+              className="min-h-[84px] flex-1 rounded-2xl border border-white/10 bg-black/36 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/28 focus:border-cyan-200/45"
+              placeholder="Type anything..."
+            />
+            <button type="button" onClick={() => sendChat()} disabled={!message.trim() || chatState.status === 'loading'} className="self-end rounded-2xl bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-55">
+              {chatState.status === 'loading' ? 'Thinking' : 'Send'}
+            </button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  )
+}
+
+function inferEntryContext(text) {
+  const value = String(text || '').toLowerCase()
+  if (value.includes('overclaim') || value.includes('not say')) return 'safe_to_sell'
+  if (value.includes('what changed') || value.includes('changed since')) return 'what_changed'
+  if (value.includes('pitch') || value.includes('explain')) return 'pitch_help'
+  if (value.includes('one move') || value.includes('today') || value.includes('start')) return 'one_move'
+  if (value.includes('future')) return 'five_futures'
+  if (value.includes('lender') || value.includes('partner')) return 'partner_idea'
+  return 'general'
 }
 
 function TextInput({ label, value, onChange, maxLength }) {

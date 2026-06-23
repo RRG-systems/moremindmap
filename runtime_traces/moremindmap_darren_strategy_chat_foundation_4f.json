@@ -1,0 +1,88 @@
+{
+  "phase_id": "MM-ADMIN-4F",
+  "verdict": "MOREMINDMAP_DARREN_STRATEGY_CHAT_FOUNDATION_IMPLEMENTED_WITH_LIMITS",
+  "classification": "DARREN_STRATEGY_CHAT_FOUNDATION_CONTEXT_AWARE_NON_MUTATING_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_DARREN_STRATEGY_CHAT_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-strategy-chat.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_STRATEGY_CHAT_FOUNDATION_REPORT_ONLY_4F.md",
+    "runtime_traces/moremindmap_darren_strategy_chat_foundation_4f.json"
+  ],
+  "code_changed": true,
+  "route_added": "/api/admin/darren-strategy-chat",
+  "context_pack_sources": [
+    "Darren intelligence snapshot builder",
+    "Latest generated Darren strategy artifact",
+    "Outcome Ledger v0 latest events",
+    "Since Last Snapshot v0 derived summary",
+    "Repo-backed Strategic Build Map"
+  ],
+  "model_used_or_model_resolution": "Uses DARREN_STRATEGY_CHAT_OPENAI_MODEL when allowlisted; otherwise defaults to gpt-4o-2024-08-06. Shared OPENAI_MODEL is not used for this route.",
+  "frontend_chat_drawer": {
+    "title": "Darren Strategy Chat",
+    "type": "right-side drawer",
+    "history_persistence": "frontend_session_only",
+    "truth_note_visible": true
+  },
+  "starter_chips": [
+    "I don't know where to start",
+    "Help me explain this",
+    "What changed?",
+    "Am I overclaiming?"
+  ],
+  "mutation_policy": {
+    "mutation_performed": false,
+    "chat_updates_strategy": false,
+    "chat_updates_one_move_status": false,
+    "chat_creates_outcome_ledger_events": false,
+    "chat_persistence": false
+  },
+  "build_map_updated": true,
+  "canonical_dossier_mutated": false,
+  "assessment_records_mutated": false,
+  "generated_strategy_mutated_by_chat": false,
+  "outcome_ledger_mutated_by_chat": false,
+  "one_move_status_mutated_by_chat": false,
+  "privacy_guardrails": [
+    "No raw canonical dossier returned.",
+    "No raw assessment answers returned.",
+    "No Redis keys returned to clients.",
+    "No env vars or secrets returned.",
+    "No prompts or raw model output returned.",
+    "Forbidden lane-check and celebrity-comparison framing blocked."
+  ],
+  "validation_results": {
+    "node_check_chat_route": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_chat_route": "passed_403_before_redis_or_model_access",
+    "empty_message_chat_route": "passed_400_before_redis_or_model_access",
+    "invalid_entry_context_chat_route": "passed_400_before_redis_or_model_access",
+    "valid_local_model_test": "skipped_no_local_production_openai_redis_smoke_requested",
+    "static_privacy_scan": "passed_no_client_side_env_or_raw_private_exposure_expected_backend_env_config_references_only"
+  },
+  "production_smoke_test_plan": [
+    "/leadership returns 200",
+    "/leadership-dashboard returns 200",
+    "Invalid chat admin code returns 403",
+    "Empty message returns 400",
+    "Invalid entry_context returns 400",
+    "One controlled valid chat request returns a reply with mutation_performed false",
+    "Frontend drawer and starter chips are visible",
+    "Truth note states chat does not update strategy, One Move status, or Outcome Ledger yet"
+  ],
+  "limits": [
+    "No automatic learning added.",
+    "No future movement scoring added.",
+    "No subscriptions added.",
+    "No Stripe changes.",
+    "No RRG runtime added.",
+    "No generated strategy mutation from chat.",
+    "No Outcome Ledger mutation from chat.",
+    "No One Move status mutation from chat.",
+    "No durable chat persistence yet."
+  ]
+}
