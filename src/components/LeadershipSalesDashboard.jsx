@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { leadershipBuildMap } from '../data/leadershipBuildMap'
+import DarrenLeadershipIntelligencePanel from './DarrenLeadershipIntelligencePanel'
 
 const DASHBOARD_CODE_SESSION_KEY = 'leadershipDashboardCode'
 const DASHBOARD_ACCESS_SESSION_KEY = 'leadershipDashboardAccess'
@@ -115,6 +116,7 @@ export default function LeadershipSalesDashboard() {
     data: null,
     error: ''
   })
+  const [adminCode, setAdminCode] = useState('')
 
   const hasAccess = useMemo(
     () => sessionStorage.getItem(DASHBOARD_ACCESS_SESSION_KEY) === 'true',
@@ -140,6 +142,7 @@ export default function LeadershipSalesDashboard() {
       })
       return undefined
     }
+    setAdminCode(adminCode)
 
     const controller = new AbortController()
 
@@ -205,7 +208,7 @@ export default function LeadershipSalesDashboard() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-10">
         {dashboardState.status === 'loading' && <StatePanel title="Loading dashboard" body="Retrieving read-only leadership sales visibility." />}
         {dashboardState.status === 'error' && <StatePanel title="Dashboard unavailable" body={dashboardState.error} tone="error" />}
-        {dashboardState.status === 'ready' && <DashboardContent data={dashboardState.data} />}
+        {dashboardState.status === 'ready' && <DashboardContent data={dashboardState.data} adminCode={adminCode} />}
       </main>
     </div>
   )
@@ -243,7 +246,7 @@ function DashboardHeader({ data }) {
   )
 }
 
-function DashboardContent({ data }) {
+function DashboardContent({ data, adminCode }) {
   const summary = data?.summary || {}
   const sourceLabels = data?.source_labels || {}
   const rawProfiles = Array.isArray(data?.profiles) ? data.profiles : []
@@ -273,6 +276,8 @@ function DashboardContent({ data }) {
       />
 
       <StrategicBuildMapSection />
+
+      <DarrenLeadershipIntelligencePanel adminCode={adminCode} />
 
       <UnavailablePanel summary={summary} />
 
