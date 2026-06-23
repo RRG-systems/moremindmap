@@ -83,11 +83,12 @@ export const leadershipBuildMap = [
       'Ground replies in latest strategy, One Move status, Outcome Ledger v0, and Since Last Snapshot v0',
       'Support natural language questions without requiring product taxonomy',
       'Keep chat non-mutating for V0',
+      'Define chat action proposal contract for future confirmation flows',
       'Prepare future durable chat summaries and evidence-weighted memory'
     ],
     salesMeaning: 'Darren can talk through strategy, pitch language, what changed, and overclaim risk while the structured dashboard remains the source-labeled truth layer.',
-    currentTruth: 'Darren Strategy Chat Foundation is in progress as a context-aware, non-mutating conversational layer. Automatic learning: not live yet.',
-    limits: 'Chat does not update generated strategy, One Move status, or Outcome Ledger yet. It does not create automatic learning, future scoring, subscription behavior, or RRG runtime.'
+    currentTruth: 'Darren Strategy Chat Foundation is live as a context-aware, non-mutating conversational layer. Chat Action Proposal Contract is defined for future confirmed actions. Automatic learning: not live yet.',
+    limits: 'Chat can propose actions, but confirm/edit writes are not live yet. Chat does not update generated strategy, One Move status, or Outcome Ledger yet. It does not create automatic learning, future scoring, subscription behavior, or RRG runtime.'
   },
   {
     id: 'outcome-ledger',

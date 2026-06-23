@@ -1,0 +1,86 @@
+{
+  "phase_id": "MM-ADMIN-4G",
+  "verdict": "MOREMINDMAP_DARREN_RECURSIVE_ACTION_DOCTRINE_DEFINED_WITH_LIMITS",
+  "classification": "DARREN_CHAT_ACTION_PROPOSAL_CONTRACT_DEFINED_NON_MUTATING",
+  "highest_allowed_readiness": "READY_FOR_CHAT_GUIDED_ACTION_CAPTURE_IMPLEMENTATION",
+  "code_changed": true,
+  "files_changed": [
+    "api/admin/darren-strategy-chat.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_RECURSIVE_ACTION_DOCTRINE_4G.md",
+    "runtime_traces/moremindmap_darren_recursive_action_doctrine_4g.json"
+  ],
+  "doctrine": [
+    "Chat is natural.",
+    "Mutation is explicit.",
+    "Memory is structured.",
+    "Evidence gates movement.",
+    "Human confirms action.",
+    "The system suggests.",
+    "The user confirms.",
+    "The ledger remembers.",
+    "The future only moves when evidence deserves it."
+  ],
+  "proposed_action_contract": {
+    "required_fields": [
+      "action_type",
+      "action_label",
+      "reason",
+      "confidence_band",
+      "requires_confirmation",
+      "mutation_allowed_without_confirmation",
+      "target_route",
+      "payload_preview",
+      "evidence_impact",
+      "future_movement_policy",
+      "user_options"
+    ],
+    "requires_confirmation": true,
+    "mutation_allowed_without_confirmation": false
+  },
+  "allowed_action_types": [
+    "update_one_move_status",
+    "create_outcome_ledger_event",
+    "add_result_note",
+    "suggest_proof_target",
+    "suggest_follow_up_ask",
+    "suggest_pitch_language",
+    "flag_overclaim_risk",
+    "no_action"
+  ],
+  "mutation_policy": "Chat may propose actions but performs no writes in 4G.",
+  "confirmation_policy": "Every proposed action must require confirm, edit, or cancel. Confirm and edit are display-only in 4G.",
+  "evidence_policy": "Evidence impact is only possible after a confirmed ledger write. Chat suggestions alone are not evidence.",
+  "memory_policy": "No durable chat memory is added in 4G. Structured memory remains in linked records.",
+  "future_movement_policy": "Future movement remains unchanged until evidence-weighted ledger events are evaluated by a later movement layer.",
+  "prohibited_behaviors": [
+    "No automatic mutation from natural language.",
+    "No Outcome Ledger event creation from chat in 4G.",
+    "No One Move status update from chat in 4G.",
+    "No generated strategy mutation from chat in 4G.",
+    "No automatic learning claim.",
+    "No future movement claim without evidence.",
+    "No raw dossier, raw answer, Redis key, env var, prompt, raw model output, or raw error exposure."
+  ],
+  "validation_results": {
+    "node_check_chat_route": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_chat_route": "passed_403_before_redis_or_model_access",
+    "empty_message_chat_route": "passed_400_before_redis_or_model_access",
+    "invalid_entry_context_chat_route": "passed_400_before_redis_or_model_access",
+    "valid_local_model_test": "skipped_no_local_production_model_smoke_requested",
+    "static_privacy_scan": "passed_no_client_side_env_or_raw_private_exposure_expected_backend_env_config_and_guardrail_text_only"
+  },
+  "build_map_updated": true,
+  "limits": [
+    "No automatic learning added.",
+    "No future movement scoring added.",
+    "No subscriptions, Stripe, or RRG runtime added.",
+    "No canonical profile or assessment records changed.",
+    "No generated strategy, One Move status, or Outcome Ledger mutation from chat.",
+    "No durable chat memory added."
+  ]
+}

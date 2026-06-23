@@ -19,6 +19,23 @@ const ENTRY_CONTEXTS = new Set([
   'pitch_help',
   'what_changed'
 ]);
+const PROPOSED_ACTION_TYPES = new Set([
+  'update_one_move_status',
+  'create_outcome_ledger_event',
+  'add_result_note',
+  'suggest_proof_target',
+  'suggest_follow_up_ask',
+  'suggest_pitch_language',
+  'flag_overclaim_risk',
+  'no_action'
+]);
+const PROPOSED_ACTION_CONFIDENCE = new Set(['low', 'possible', 'likely', 'strong']);
+const PROPOSED_ACTION_TARGET_ROUTES = new Set([
+  '/api/admin/darren-one-move-status',
+  '/api/admin/darren-outcome-ledger-event',
+  'none'
+]);
+const EVIDENCE_IMPACT_VALUES = new Set(['none', 'weak', 'early', 'moderate', 'strong', 'validated', 'invalidated']);
 const FORBIDDEN_OUTPUT = [
   /canonical[\s_-]+dossier/i,
   /canonical[\s_-]+profile[\s_-]+(?:json|text)/i,
@@ -209,7 +226,8 @@ function buildMessages(message, entryContext, contextPack) {
         'Never claim a future moved unless the context evidence supports it.',
         'Do not mention internal implementation details, storage, hidden instructions, or raw source fields.',
         'Do not mention celebrity comparisons or lane policing.',
-        'Return only JSON with keys: reply, suggested_next_actions, possible_memory_signal.'
+        'You may include proposed_action when useful, but it must require confirmation and must never imply a write already happened.',
+        'Return only JSON with keys: reply, suggested_next_actions, possible_memory_signal, proposed_action.'
       ].join(' ')
     },
     {
@@ -281,6 +299,52 @@ function sanitizeSignal(signal) {
   };
 }
 
+function sanitizePayloadPreview(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  const allowed = {};
+  for (const [key, rawValue] of Object.entries(value).slice(0, 8)) {
+    const safeKey = cleanText(key, 60).replace(/[^A-Za-z0-9_-]/g, '_');
+    if (!safeKey) continue;
+    if (rawValue === null || rawValue === undefined) continue;
+    if (typeof rawValue === 'boolean') {
+      allowed[safeKey] = rawValue;
+    } else {
+      allowed[safeKey] = cleanText(rawValue, 300);
+    }
+  }
+  return scanUnsafe(allowed) ? {} : allowed;
+}
+
+function sanitizeProposedAction(action) {
+  if (!action || typeof action !== 'object') return null;
+  const actionType = cleanText(action.action_type, 80) || 'no_action';
+  const targetRoute = cleanText(action.target_route, 120) || 'none';
+  const confidenceBand = cleanText(action.confidence_band, 40) || 'possible';
+  const evidenceImpact = cleanText(action.evidence_impact, 40) || 'none';
+
+  if (!PROPOSED_ACTION_TYPES.has(actionType)) return null;
+  if (!PROPOSED_ACTION_TARGET_ROUTES.has(targetRoute)) return null;
+  if (!PROPOSED_ACTION_CONFIDENCE.has(confidenceBand)) return null;
+  if (!EVIDENCE_IMPACT_VALUES.has(evidenceImpact)) return null;
+
+  const proposed = {
+    action_type: actionType,
+    action_label: cleanText(action.action_label, 140) || 'Suggested action',
+    reason: cleanText(action.reason, 500),
+    confidence_band: confidenceBand,
+    requires_confirmation: true,
+    mutation_allowed_without_confirmation: false,
+    target_route: targetRoute,
+    payload_preview: sanitizePayloadPreview(action.payload_preview),
+    evidence_impact: evidenceImpact,
+    future_movement_policy: cleanText(action.future_movement_policy, 360) || 'Future movement remains unchanged until confirmed evidence is written and evaluated later.',
+    user_options: ['confirm', 'edit', 'cancel']
+  };
+
+  if (scanUnsafe(proposed)) return null;
+  return proposed;
+}
+
 function buildReplyPayload({ body, contextPack, modelResult }) {
   const reply = cleanText(modelResult?.reply, MAX_REPLY_LENGTH);
   if (!reply) throw new Error('empty_reply');
@@ -295,6 +359,7 @@ function buildReplyPayload({ body, contextPack, modelResult }) {
       .filter(Boolean)
       .slice(0, 3),
     possible_memory_signal: sanitizeSignal(modelResult.possible_memory_signal),
+    proposed_action: sanitizeProposedAction(modelResult.proposed_action),
     mutation_performed: false,
     context_used_summary: {
       latest_strategy_present: contextPack.latest_strategy.present === true,

@@ -900,6 +900,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
   ])
   const [chatState, setChatState] = useState({ status: 'idle', error: '' })
   const [possibleSignal, setPossibleSignal] = useState(null)
+  const [proposedAction, setProposedAction] = useState(null)
 
   useEffect(() => {
     if (!conversationId) setConversationId(`darren-chat-${Date.now()}`)
@@ -915,6 +916,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
     setChatMessages(nextHistory)
     setMessage('')
     setPossibleSignal(null)
+    setProposedAction(null)
     setChatState({ status: 'loading', error: '' })
 
     try {
@@ -946,6 +948,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
         : assistantText
       setChatMessages([...nextHistory, { role: 'assistant', text: assistantMessage }])
       setPossibleSignal(payload.possible_memory_signal || null)
+      setProposedAction(payload.proposed_action || null)
       setChatState({ status: 'idle', error: '' })
     } catch {
       setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
@@ -985,6 +988,26 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
             <div className="rounded-2xl border border-amber-300/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-50/72">
               <span className="font-semibold text-amber-50">Possible signal to log later:</span>{' '}
               {formatListKey(possibleSignal.signal_type)} / {formatListKey(possibleSignal.signal_strength)}. {display(possibleSignal.reason)}
+            </div>
+          )}
+          {proposedAction && (
+            <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-4 text-sm leading-6 text-emerald-50/74">
+              <div className="text-xs uppercase tracking-[0.18em] text-emerald-100/58">Suggested action</div>
+              <div className="mt-2 text-base font-semibold text-white">{display(proposedAction.action_label)}</div>
+              <p className="mt-2 text-white/62">{display(proposedAction.reason)}</p>
+              <div className="mt-3 grid gap-2 text-xs uppercase tracking-[0.13em] text-emerald-100/54 sm:grid-cols-2">
+                <span>Evidence: {formatListKey(proposedAction.evidence_impact)}</span>
+                <span>Confirmation: {proposedAction.requires_confirmation ? 'required' : 'required'}</span>
+              </div>
+              <p className="mt-3 text-xs leading-5 text-emerald-50/56">{display(proposedAction.future_movement_policy)}</p>
+              <p className="mt-3 text-xs leading-5 text-emerald-50/56">
+                Action proposals require confirmation. In this version, chat can suggest actions but does not write them yet.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" disabled className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/38">Confirm - Coming next</button>
+                <button type="button" disabled className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/38">Edit - Coming next</button>
+                <button type="button" onClick={() => setProposedAction(null)} className="rounded-full border border-white/10 bg-black/24 px-3 py-2 text-xs text-white/58 transition hover:text-white">Cancel</button>
+              </div>
             </div>
           )}
         </div>
