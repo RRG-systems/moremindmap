@@ -64,6 +64,11 @@ const CHAT_ONE_MOVE_ACTIONS = [
 
 const CHAT_WRITING_ACTIONS = new Set(['create_outcome_ledger_event', 'update_one_move_status', 'add_result_note'])
 
+const fieldBaseClass = 'w-full rounded-xl border border-white/10 bg-white px-3 py-3 text-sm text-slate-950 caret-slate-950 outline-none transition placeholder:text-slate-500 selection:bg-cyan-200 selection:text-slate-950 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200/35'
+const textareaFieldClass = `${fieldBaseClass} leading-6`
+const chatTextareaClass = 'min-h-[84px] flex-1 rounded-2xl border border-white/10 bg-white px-4 py-3 text-sm leading-6 text-slate-950 caret-slate-950 outline-none transition placeholder:text-slate-500 selection:bg-cyan-200 selection:text-slate-950 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-200/35'
+const selectFieldClass = `${fieldBaseClass} appearance-auto`
+
 const CHAT_SESSION_INTENTS = [
   ['general', 'General'],
   ['partner_idea', 'Partner idea'],
@@ -618,7 +623,7 @@ function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
             value={note}
             onChange={(event) => setNote(event.target.value.slice(0, 1200))}
             rows={4}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45"
+            className={`mt-2 ${textareaFieldClass}`}
             placeholder="Add a short result note."
           />
         </label>
@@ -628,7 +633,7 @@ function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
             value={modifiedText}
             onChange={(event) => setModifiedText(event.target.value.slice(0, 2000))}
             rows={4}
-            className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45"
+            className={`mt-2 ${textareaFieldClass}`}
             placeholder="Use only if Darren is modifying the One Move."
           />
         </label>
@@ -759,7 +764,7 @@ function OutcomeLedgerControls({ adminCode, generated }) {
           value={eventNote}
           onChange={(event) => setEventNote(event.target.value.slice(0, 1200))}
           rows={4}
-          className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-sky-200/45"
+          className={`mt-2 ${textareaFieldClass}`}
           placeholder="Record what happened as evidence."
         />
       </label>
@@ -975,7 +980,7 @@ function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
               value={summaryNote}
               onChange={(event) => setSummaryNote(event.target.value.slice(0, 1600))}
               rows={4}
-              className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-fuchsia-200/45"
+              className={`mt-2 ${textareaFieldClass}`}
               placeholder="Summarize what was decided, what is still open, or what signal may need to be logged."
             />
           </label>
@@ -1355,7 +1360,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
                   <SelectField label="Evidence weight" value={actionDraft.evidence_weight} onChange={(value) => setActionDraft((draft) => ({ ...draft, evidence_weight: value }))} options={LEDGER_EVIDENCE_WEIGHTS} />
                   <label className="block">
                     <span className="text-xs uppercase tracking-[0.16em] text-white/38">Note</span>
-                    <textarea value={actionDraft.note} onChange={(event) => setActionDraft((draft) => ({ ...draft, note: event.target.value.slice(0, 1200) }))} rows={3} className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45" />
+                    <textarea value={actionDraft.note} onChange={(event) => setActionDraft((draft) => ({ ...draft, note: event.target.value.slice(0, 1200) }))} rows={3} className={`mt-2 ${textareaFieldClass}`} />
                   </label>
                 </div>
               )}
@@ -1382,7 +1387,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
               value={message}
               onChange={(event) => setMessage(event.target.value.slice(0, 4000))}
               rows={3}
-              className="min-h-[84px] flex-1 rounded-2xl border border-white/10 bg-black/36 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/28 focus:border-cyan-200/45"
+              className={chatTextareaClass}
               placeholder="Type anything..."
             />
             <button type="button" onClick={() => sendChat()} disabled={!message.trim() || chatState.status === 'loading'} className="self-end rounded-2xl bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-55">
@@ -1458,7 +1463,7 @@ function TextInput({ label, value, onChange, maxLength }) {
         type="text"
         value={value}
         onChange={(event) => onChange(event.target.value.slice(0, maxLength))}
-        className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm text-white outline-none transition focus:border-sky-200/45"
+        className={`mt-2 ${fieldBaseClass}`}
       />
     </label>
   )
@@ -1471,10 +1476,10 @@ function SelectField({ label, value, onChange, options }) {
       <select
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm text-white outline-none transition focus:border-emerald-200/45"
+        className={`mt-2 ${selectFieldClass}`}
       >
         {options.map(([optionValue, optionLabel]) => (
-          <option key={optionValue} value={optionValue}>{optionLabel}</option>
+          <option key={optionValue} value={optionValue} className="bg-white text-slate-950">{optionLabel}</option>
         ))}
       </select>
     </label>
