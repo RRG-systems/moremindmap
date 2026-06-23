@@ -2,6 +2,12 @@ import snapshotHandler from './darren-intelligence-snapshot.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
 const DEFAULT_GENERATION_MODEL = 'gpt-4o-2024-08-06';
+const SAFE_DARREN_GENERATION_MODELS = new Set([
+  'gpt-4o-2024-08-06',
+  'gpt-4.1',
+  'gpt-4.1-mini',
+  'gpt-4o'
+]);
 const GENERATION_TIMEOUT_MS = 70000;
 const GENERATION_MAX_TOKENS = 5000;
 const REQUIRED_FUTURE_NAMES = [
@@ -51,15 +57,15 @@ function configuredAdminCode() {
 
 function configuredGenerationModel() {
   const explicitModel = String(process.env.DARREN_INTELLIGENCE_OPENAI_MODEL || '').trim();
-  const sharedModel = String(process.env.OPENAI_MODEL || '').trim();
-  const selected = explicitModel || sharedModel || DEFAULT_GENERATION_MODEL;
 
-  if (!/^[A-Za-z0-9._:-]+$/.test(selected)) return DEFAULT_GENERATION_MODEL;
-  return selected;
+  // Darren generation uses a route-specific safe model fallback because shared
+  // OPENAI_MODEL may be set to a future/non-chat-compatible value.
+  if (SAFE_DARREN_GENERATION_MODELS.has(explicitModel)) return explicitModel;
+  return DEFAULT_GENERATION_MODEL;
 }
 
 function usesCompletionTokenParameter(model) {
-  return /^(gpt-5|o[134]|o\d|chatgpt-4o)/i.test(model);
+  return /^(o[134]|o\d|chatgpt-4o)/i.test(model);
 }
 
 function getProvidedAdminCode(req) {

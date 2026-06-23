@@ -1,0 +1,63 @@
+{
+  "phase_id": "MM-ADMIN-3D.3",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_MODEL_RESOLUTION_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_MODEL_RESOLUTION_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_MODEL_REPAIR_REPORT_ONLY_3D3.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_model_repair_3d3.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "root_cause_or_best_diagnosis": "The safe-debug production response showed model gpt-5.5 selected before snapshot loading. The route was accepting shared OPENAI_MODEL for a chat-completions JSON path where that future/shared value is not safe.",
+  "model_resolution_repair": [
+    "Use DARREN_INTELLIGENCE_OPENAI_MODEL only when explicitly configured to an allowlisted safe model.",
+    "Ignore shared OPENAI_MODEL for this route.",
+    "Fallback to gpt-4o-2024-08-06.",
+    "Documented route-specific fallback because shared OPENAI_MODEL may be future/non-chat-compatible."
+  ],
+  "selected_default_model": "gpt-4o-2024-08-06",
+  "ignored_shared_model_values": [
+    "gpt-5.5",
+    "any shared OPENAI_MODEL value not explicitly configured through DARREN_INTELLIGENCE_OPENAI_MODEL"
+  ],
+  "safe_route_specific_models": [
+    "gpt-4o-2024-08-06",
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4o"
+  ],
+  "token_parameter_behavior": {
+    "default_model": "max_tokens",
+    "gpt-4o-2024-08-06": "max_tokens",
+    "future_completion_token_model_families": "max_completion_tokens"
+  },
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_local_test": "passed_403_without_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_without_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "production_smoke_test_plan": [
+    "Deploy committed repair after approval.",
+    "Confirm invalid-code generation test returns 403.",
+    "Run exactly one valid generation request.",
+    "Report only safe shape/count/safety fields if successful.",
+    "Report only safe debug diagnostic fields if failed."
+  ],
+  "limits": [
+    "No chat",
+    "No Outcome Ledger runtime",
+    "No subscriptions",
+    "No Stripe",
+    "No RRG runtime",
+    "No Redis persistence",
+    "No canonical profile mutation",
+    "No assessment record mutation",
+    "No production valid generation test run in this sprint"
+  ]
+}
