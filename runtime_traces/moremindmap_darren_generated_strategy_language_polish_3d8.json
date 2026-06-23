@@ -1,0 +1,79 @@
+{
+  "phase_id": "MM-ADMIN-3D.8",
+  "verdict": "MOREMINDMAP_DARREN_GENERATED_STRATEGY_LANGUAGE_POLISH_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATED_STRATEGY_LANGUAGE_POLISH_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_LANGUAGE_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_GENERATED_STRATEGY_LANGUAGE_POLISH_REPORT_ONLY_3D8.md",
+    "runtime_traces/moremindmap_darren_generated_strategy_language_polish_3d8.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "language_quality_rules": {
+    "direct_plain_english_required": true,
+    "corporate_filler_blocked": true,
+    "known_generic_phrases_blocked": [
+      "unlock new audiences",
+      "redefine leadership intelligence",
+      "ensure every action aligns",
+      "growth trajectory attracts",
+      "market penetration",
+      "strategic alignment leading to faster growth",
+      "real-time insights"
+    ],
+    "schema_preserved": true
+  },
+  "sales_story_rules": {
+    "real_partner_conversation_language": true,
+    "dashboard_as_evidence_not_whole_story": true,
+    "live_now_vs_future_path_distinction": true,
+    "what_not_to_overclaim_required": true
+  },
+  "momentum_machine_rules": {
+    "darren_creates_motion": true,
+    "darren_opens_doors": true,
+    "partner_activation_emphasized": true,
+    "short_cycle_proof_required": true,
+    "momentum_outrunning_evidence_risk_preserved": true
+  },
+  "e_to_p_language_rules": {
+    "instinct_to_model": true,
+    "motion_to_system": true,
+    "interest_to_proof": true,
+    "access_to_adoption": true,
+    "conversation_to_commitment": true,
+    "excitement_to_measurable_signal": true
+  },
+  "future_chat_preparation": {
+    "chat_added": false,
+    "panels_remain_operating_picture": true,
+    "future_chat_should_use_generated_strategy_as_grounding": true,
+    "snapshot_remains_source_labeled_truth_layer": true
+  },
+  "safety_preserved": {
+    "safety_scan_retained": true,
+    "truth_boundaries_retained": true,
+    "private_source_exposure_blocked": true,
+    "private_answer_set_blocked": true,
+    "storage_reference_exposure_blocked": true,
+    "environment_reference_exposure_blocked": true,
+    "forbidden_framing_blocked": true,
+    "valuation_funding_revenue_channel_rrg_overclaims_blocked": true
+  },
+  "validation_results": {
+    "node_check_generation_route": "passed",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "invalid_admin_code_local_test": "passed_403_no_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "limits": [
+    "No chat was added.",
+    "No persistence was added.",
+    "No Outcome Ledger runtime was added.",
+    "No subscription, Stripe, or RRG runtime was added.",
+    "No production language smoke test was run in this sprint."
+  ]
+}

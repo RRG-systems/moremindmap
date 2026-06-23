@@ -32,6 +32,16 @@ const BROAD_TIMEFRAME_PATTERN = /\b(q[1-4]|quarter|later this year|eventually|so
 const WEEKLY_TIMEFRAME_PATTERN = /\b(this week|next 7 days|seven days|by friday|before the next dashboard review|within 7 days|next week)\b/i;
 const CONCRETE_ACTION_PATTERN = /\b(contact|call|ask|choose|pick|schedule|secure|request|send|meet|pilot|partner|brokerage|mortgage|channel|profiles?|assessments?|commit|audience access|next meeting|proof target)\b/i;
 const GENERIC_PROOF_PATTERN = /\b(increase awareness|build momentum|create alignment|drive engagement|improve visibility|grow interest|explore opportunities|strengthen relationships)\b/i;
+const GENERIC_CORPORATE_LANGUAGE_RULES = [
+  { id: 'unlock_new_audiences', pattern: /\bunlock new audiences\b/i },
+  { id: 'redefine_leadership_intelligence', pattern: /\bredefine leadership intelligence\b/i },
+  { id: 'ensure_every_action_aligns', pattern: /\bensure every action aligns\b/i },
+  { id: 'growth_trajectory_attracts', pattern: /\bgrowth trajectory attracts\b/i },
+  { id: 'market_penetration', pattern: /\bmarket penetration\b/i },
+  { id: 'strategic_alignment_faster_growth', pattern: /\bstrategic alignment\b.*\bfaster growth\b/i },
+  { id: 'real_time_insights', pattern: /\breal[-\s]*time insights\b/i },
+  { id: 'synergistic_growth', pattern: /\bsynerg(?:y|istic)\b/i }
+];
 const FORBIDDEN_OUTPUT_RULES = [
   { id: 'private_source_dossier', category: 'private_source_exposure', pattern: /canonical[\s_-]+dossier/i },
   { id: 'private_source_profile_json', category: 'private_source_exposure', pattern: /canonical[\s_-]+profile[\s_-]+json/i },
@@ -254,6 +264,9 @@ function buildPrompt(snapshot, diagnostic) {
           'The One Move must be weekly: this week, next 7 days, by Friday, or before the next dashboard review. Never use a quarter, future quarter, later this year, or eventually.',
           'The One Move must name who or what partner category Darren should contact, what he should ask for, what measurable proof target he is creating, what signal counts, and what he must not claim.',
           'Sales story fields must be plain English Darren can use in a real partner conversation. Avoid corporate phrases like unlock new audiences, redefine leadership intelligence, or real-time insights.',
+          'Use language like: interest is useful but it is not proof; the dashboard is evidence, not the whole story; create one measurable signal; sell the path and the proof, not V2 as live.',
+          'Make the E to P move explicit: instinct to model, motion to system, interest to proof, access to adoption, conversation to commitment, excitement to measurable signal.',
+          'The stable panels remain the source-labeled operating picture for future strategy chat. Do not write chat content now.',
           'Truth boundaries are mandatory: valuation assumptions are not guarantees; partner interest is not funding; funding conversations are not revenue; channel access is not adoption; audience reach is not revenue; RRG readiness is not live until tracked; cross-vertical expansion is hypothesis until evidenced; paid/free/revenue fields are unavailable until indexed.'
         ].join('\n')
       },
@@ -306,6 +319,19 @@ function buildPrompt(snapshot, diagnostic) {
             one_move_proof_target: 'must define a measurable signal, not whether someone likes the idea',
             momentum_machine: 'Darren creates motion, opens doors, activates partners, and needs short-cycle proof targets',
             e_to_p: 'Entrepreneurial energy creates motion; Purposeful scale requires models, systems, tools, accountability, coaching, ongoing education, and no hubris'
+          },
+          language_requirements: {
+            plain_english: true,
+            avoid_corporate_filler: [
+              'unlock new audiences',
+              'redefine leadership intelligence',
+              'ensure every action aligns',
+              'growth trajectory attracts',
+              'market penetration',
+              'strategic alignment leading to faster growth',
+              'real-time insights'
+            ],
+            future_chat_preparation: 'Generated panels are the grounded operating picture. Future chat may explore ideas, but the panels/snapshot remain the source-labeled truth layer.'
           },
           grounding_snapshot: safeSnapshot
         })
@@ -528,6 +554,38 @@ function validateOneMoveQuality(oneMove = {}) {
   return null;
 }
 
+function findGenericCorporateLanguage(generated) {
+  const fields = {
+    'one_move.summary': generated?.one_move?.summary,
+    'one_move.why_this_move': generated?.one_move?.why_this_move,
+    'one_move.exact_action': generated?.one_move?.exact_action,
+    'one_move.proof_target': generated?.one_move?.proof_target,
+    'one_move.what_to_say': generated?.one_move?.what_to_say,
+    'one_move.what_not_to_say': generated?.one_move?.what_not_to_say
+  };
+
+  for (let index = 0; index < generated.five_futures.length; index += 1) {
+    fields[`five_futures[${index}].summary`] = generated.five_futures[index]?.summary;
+    fields[`five_futures[${index}].sales_story`] = generated.five_futures[index]?.sales_story;
+    fields[`five_futures[${index}].what_not_to_overclaim`] = generated.five_futures[index]?.what_not_to_overclaim;
+  }
+
+  for (const [field, value] of Object.entries(fields)) {
+    const text = String(value || '');
+    for (const rule of GENERIC_CORPORATE_LANGUAGE_RULES) {
+      if (rule.pattern.test(text)) {
+        return {
+          code: 'generated_strategy_language_too_generic',
+          category: 'language_quality_validation',
+          field,
+          rule: rule.id
+        };
+      }
+    }
+  }
+  return null;
+}
+
 function normalizeString(value, fallback = 'Unavailable') {
   const text = String(value || '').trim();
   return text || fallback;
@@ -607,6 +665,22 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
       safety_failure_category: oneMoveQualityFailure.category,
       failed_field_path: oneMoveQualityFailure.field,
       matched_rule_id: oneMoveQualityFailure.code
+    });
+    const error = new Error('darren_intelligence_quality_validation_failed');
+    error.code = 'darren_intelligence_quality_validation_failed';
+    throw error;
+  }
+
+  const languageQualityFailure = findGenericCorporateLanguage(normalized);
+  if (languageQualityFailure) {
+    updateDiagnostic(diagnostic, 'schema_validation_failed', {
+      safe_error_code: 'darren_intelligence_quality_validation_failed',
+      schema_validation_failed: true,
+      safety_check_failed: true,
+      safety_failure_code: languageQualityFailure.code,
+      safety_failure_category: languageQualityFailure.category,
+      failed_field_path: languageQualityFailure.field,
+      matched_rule_id: languageQualityFailure.rule
     });
     const error = new Error('darren_intelligence_quality_validation_failed');
     error.code = 'darren_intelligence_quality_validation_failed';
