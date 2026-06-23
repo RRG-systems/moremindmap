@@ -854,7 +854,7 @@ function SinceLastSnapshotPanel({ adminCode }) {
           <ListItems items={asArray(comparison.still_missing)} />
         </div>
         <div className="rounded-xl border border-white/10 bg-black/20 p-4">
-          <div className="text-xs uppercase tracking-[0.16em] text-white/36">Next best prompt</div>
+          <div className="text-xs uppercase tracking-[0.16em] text-white/36">Next best prompt/action</div>
           <p className="mt-3 text-sm leading-6 text-white/62">{display(comparison.next_best_prompt)}</p>
           <ListWithTitle title="Do not claim yet" items={asArray(comparison.not_yet_claims).slice(0, 4)} compact />
         </div>

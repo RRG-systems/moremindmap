@@ -1,0 +1,44 @@
+{
+  "phase_id": "MM-ADMIN-4E.1",
+  "verdict": "MOREMINDMAP_DARREN_SINCE_LAST_SNAPSHOT_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "SINCE_LAST_SNAPSHOT_EVIDENCE_SEMANTICS_AND_UI_LABEL_REPAIRED",
+  "files_changed": [
+    "api/admin/darren-since-last-snapshot.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "MOREMINDMAP_DARREN_SINCE_LAST_SNAPSHOT_REPAIR_4E1.md",
+    "runtime_traces/moremindmap_darren_since_last_snapshot_repair_4e1.json"
+  ],
+  "evidence_semantics": {
+    "outcome_event_added": "Remains true when an Outcome Ledger event exists.",
+    "evidence_added": "True only when latest_evidence_weight is weak, early, moderate, strong, validated, or invalidated; false when latest_evidence_weight is none.",
+    "strong_evidence_added": "True only for strong or validated evidence weights.",
+    "validated_evidence_added": "True only for validated evidence weight.",
+    "future_movement_supported": "Remains false when latest_evidence_weight is none."
+  },
+  "ui_label_repair": {
+    "file": "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "old_label": "Next best prompt",
+    "new_label": "Next best prompt/action",
+    "api_field_unchanged": "next_best_prompt"
+  },
+  "validation_results": {
+    "node_check_since_last_route": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_route_test": "passed_403_before_redis_access",
+    "local_direct_semantics_check": "passed_source_assertion_latest_evidence_weight_none_keeps_evidence_added_false",
+    "static_privacy_scan": "passed_no_client_env_or_raw_private_exposure_found_existing_server_admin_env_reference_only"
+  },
+  "deploy_required": true,
+  "limits": [
+    "No chat added.",
+    "No automatic learning added.",
+    "No future scoring added.",
+    "No Redis write behavior changed.",
+    "No canonical profile records changed.",
+    "No assessment records changed.",
+    "No generated strategy records mutated by this patch.",
+    "No ledger events created by this patch."
+  ]
+}

@@ -7,6 +7,7 @@ import { DARREN_PROFILE_ID } from './darren-intelligence-snapshot-core.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
 const WEAK_EVIDENCE = new Set(['none', 'weak', 'early']);
+const RECORDED_EVIDENCE = new Set(['weak', 'early', 'moderate', 'strong', 'validated', 'invalidated']);
 const MODERATE_EVIDENCE = new Set(['moderate']);
 const STRONG_EVIDENCE = new Set(['strong', 'validated']);
 
@@ -123,7 +124,7 @@ function buildComparison(strategy, events) {
   const statusHistory = asArray(strategy?.status_history);
   const oneMoveStatusChanged = statusHistory.length > 0;
   const outcomeEventAdded = ledgerSummary.outcome_event_count > 0;
-  const evidenceAdded = outcomeEventAdded;
+  const evidenceAdded = RECORDED_EVIDENCE.has(evidenceWeight);
   const strongEvidenceAdded = STRONG_EVIDENCE.has(evidenceWeight);
   const validatedEvidenceAdded = evidenceWeight === 'validated';
 
