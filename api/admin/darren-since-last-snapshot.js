@@ -117,7 +117,7 @@ function buildSafeSummary({ strategy, ledgerSummary, movement }) {
   return 'Since the last strategy, no material proof signal has been recorded yet. The system can show status movement, but future paths remain unchanged.';
 }
 
-function buildComparison(strategy, events) {
+export function buildComparison(strategy, events) {
   const ledgerSummary = summarizeLatestEvent(events);
   const evidenceWeight = ledgerSummary.latest_evidence_weight || 'none';
   const movement = movementForEvidence(evidenceWeight, ledgerSummary.latest_event_type);

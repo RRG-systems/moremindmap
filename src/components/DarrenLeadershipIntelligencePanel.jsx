@@ -64,6 +64,17 @@ const CHAT_ONE_MOVE_ACTIONS = [
 
 const CHAT_WRITING_ACTIONS = new Set(['create_outcome_ledger_event', 'update_one_move_status', 'add_result_note'])
 
+const CHAT_SESSION_INTENTS = [
+  ['general', 'General'],
+  ['partner_idea', 'Partner idea'],
+  ['pitch_help', 'Pitch help'],
+  ['one_move', 'One Move'],
+  ['what_changed', 'What changed'],
+  ['overclaim_risk', 'Overclaim risk'],
+  ['proof_target', 'Proof target'],
+  ['other', 'Other']
+]
+
 function sectionStatus(status) {
   if (!status) return 'Scaffold'
   return display(status).replace(/_/g, ' ')
@@ -499,6 +510,10 @@ function GeneratedIntelligence({ adminCode, generated, source, setGenerationStat
         )}
       </PanelBlock>
 
+      {generated?.strategy_id && (
+        <AdaptiveStrategyLoopPanel adminCode={adminCode} generated={generated} />
+      )}
+
       <div className="grid gap-6 xl:grid-cols-2">
         <PanelBlock eyebrow="Evidence Gaps" title="What Still Needs Proof">
           <ListItems items={asArray(generated?.evidence_gaps)} />
@@ -781,6 +796,242 @@ function OutcomeLedgerControls({ adminCode, generated }) {
 
       <SinceLastSnapshotPanel adminCode={adminCode} />
     </div>
+  )
+}
+
+function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
+  const [summaryNote, setSummaryNote] = useState('')
+  const [sessionIntent, setSessionIntent] = useState('general')
+  const [loopState, setLoopState] = useState({
+    status: 'idle',
+    message: '',
+    summaries: [],
+    movement: null,
+    draft: null
+  })
+
+  useEffect(() => {
+    if (!adminCode || !generated?.strategy_id) return undefined
+    const controller = new AbortController()
+    loadAdaptiveLoop(controller.signal)
+    return () => controller.abort()
+  }, [adminCode, generated?.strategy_id])
+
+  async function loadAdaptiveLoop(signal) {
+    try {
+      const [summaryResponse, movementResponse, draftResponse] = await Promise.all([
+        fetch('/api/admin/darren-chat-session-summaries-latest', {
+          method: 'GET',
+          headers: { Accept: 'application/json', 'X-Admin-Code': adminCode },
+          signal
+        }),
+        fetch('/api/admin/darren-future-movement-latest', {
+          method: 'GET',
+          headers: { Accept: 'application/json', 'X-Admin-Code': adminCode },
+          signal
+        }),
+        fetch('/api/admin/darren-adaptive-strategy-draft-latest', {
+          method: 'GET',
+          headers: { Accept: 'application/json', 'X-Admin-Code': adminCode },
+          signal
+        })
+      ])
+      const [summaryPayload, movementPayload, draftPayload] = await Promise.all([
+        summaryResponse.json().catch(() => null),
+        movementResponse.json().catch(() => null),
+        draftResponse.json().catch(() => null)
+      ])
+      setLoopState((current) => ({
+        ...current,
+        summaries: summaryResponse.ok && summaryPayload?.ok ? asArray(summaryPayload.summaries) : current.summaries,
+        movement: movementResponse.ok && movementPayload?.ok ? movementPayload.assessment : current.movement,
+        draft: draftResponse.ok && draftPayload?.ok ? draftPayload.draft : current.draft
+      }))
+    } catch (error) {
+      if (error.name === 'AbortError') return
+    }
+  }
+
+  async function saveSessionSummary() {
+    if (!adminCode || !generated?.strategy_id || loopState.status === 'saving_summary') return
+    if (!summaryNote.trim()) {
+      setLoopState((current) => ({ ...current, message: 'Add a short summary before saving.' }))
+      return
+    }
+    setLoopState((current) => ({ ...current, status: 'saving_summary', message: '' }))
+    try {
+      const response = await fetch('/api/admin/darren-chat-session-summary', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify({
+          strategy_id: generated.strategy_id,
+          source: 'strategy_chat',
+          session_intent: sessionIntent,
+          summary_note: summaryNote
+        })
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        setLoopState((current) => ({ ...current, status: 'idle', message: 'Session summary could not be saved.' }))
+        return
+      }
+      setSummaryNote('')
+      setLoopState((current) => ({
+        ...current,
+        status: 'idle',
+        message: 'Session summary saved. Raw chat transcripts are not stored.',
+        summaries: [
+          {
+            summary_id: payload.summary_id,
+            created_at: new Date().toISOString(),
+            session_intent: sessionIntent,
+            summary_preview: payload.summary_preview
+          },
+          ...current.summaries
+        ].slice(0, 5)
+      }))
+    } catch {
+      setLoopState((current) => ({ ...current, status: 'idle', message: 'Session summary could not be saved.' }))
+    }
+  }
+
+  async function assessFutureMovement() {
+    if (!adminCode || loopState.status === 'assessing') return
+    setLoopState((current) => ({ ...current, status: 'assessing', message: '' }))
+    try {
+      const response = await fetch('/api/admin/darren-future-movement-assessment', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'X-Admin-Code': adminCode }
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        setLoopState((current) => ({ ...current, status: 'idle', message: 'Future movement could not be assessed.' }))
+        return
+      }
+      setLoopState((current) => ({
+        ...current,
+        status: 'idle',
+        message: 'Future movement assessed with evidence bands only.',
+        movement: payload.assessment
+      }))
+    } catch {
+      setLoopState((current) => ({ ...current, status: 'idle', message: 'Future movement could not be assessed.' }))
+    }
+  }
+
+  async function generateAdaptiveDraft() {
+    if (!adminCode || loopState.status === 'drafting') return
+    setLoopState((current) => ({ ...current, status: 'drafting', message: '' }))
+    try {
+      const response = await fetch('/api/admin/darren-adaptive-strategy-draft', {
+        method: 'POST',
+        headers: { Accept: 'application/json', 'X-Admin-Code': adminCode }
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        setLoopState((current) => ({ ...current, status: 'idle', message: 'Adaptive Strategy Draft could not be generated.' }))
+        return
+      }
+      setLoopState((current) => ({
+        ...current,
+        status: 'idle',
+        message: 'Adaptive Strategy Draft saved as pending review. Active strategy was not replaced.',
+        draft: payload.draft
+      }))
+    } catch {
+      setLoopState((current) => ({ ...current, status: 'idle', message: 'Adaptive Strategy Draft could not be generated.' }))
+    }
+  }
+
+  const movementItems = asArray(loopState.movement?.future_movements)
+
+  return (
+    <section className="rounded-2xl border border-fuchsia-300/16 bg-fuchsia-400/[0.065] p-5">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.18em] text-fuchsia-100/52">Adaptive Strategy Loop v0</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">Session memory, evidence gates, and strategy drafts</h3>
+          <p className="mt-3 max-w-4xl text-sm leading-6 text-fuchsia-50/68">
+            Adaptive Strategy Loop v0 can summarize sessions, assess evidence-gated future movement, and generate a draft. It does not automatically replace Darren&apos;s active strategy.
+          </p>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/24 px-4 py-3 text-xs leading-5 text-fuchsia-50/62 lg:max-w-xs">
+          Automatic replacement of strategy is not live. Bands are used instead of percentages.
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-4 xl:grid-cols-3">
+        <div className="rounded-2xl border border-white/10 bg-black/22 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/38">Session Memory</div>
+          <p className="mt-3 text-sm leading-6 text-white/58">Save a structured summary only. Raw chat transcripts are not stored.</p>
+          <SelectField label="Session intent" value={sessionIntent} onChange={setSessionIntent} options={CHAT_SESSION_INTENTS} />
+          <label className="mt-4 block">
+            <span className="text-xs uppercase tracking-[0.16em] text-white/38">Session summary</span>
+            <textarea
+              value={summaryNote}
+              onChange={(event) => setSummaryNote(event.target.value.slice(0, 1600))}
+              rows={4}
+              className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-fuchsia-200/45"
+              placeholder="Summarize what was decided, what is still open, or what signal may need to be logged."
+            />
+          </label>
+          <StatusButton disabled={loopState.status === 'saving_summary'} onClick={saveSessionSummary}>Save Session Summary</StatusButton>
+          <div className="mt-4 space-y-2">
+            {asArray(loopState.summaries).slice(0, 3).map((summary, index) => (
+              <div key={summary.summary_id || index} className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-sm leading-6 text-white/58">
+                {formatListKey(summary.session_intent)}: {display(summary.summary_preview)}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/22 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/38">Future Movement Gate</div>
+          <p className="mt-3 text-sm leading-6 text-white/58">Assess movement with evidence bands only. No percentages and no validated movement from early evidence.</p>
+          <StatusButton disabled={loopState.status === 'assessing'} onClick={assessFutureMovement}>Assess Future Movement</StatusButton>
+          <p className="mt-4 text-sm leading-6 text-white/62">{display(loopState.movement?.overall_summary)}</p>
+          <div className="mt-4 space-y-2">
+            {movementItems.slice(0, 5).map((item) => (
+              <div key={item.future_name} className="rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2">
+                <div className="text-sm font-semibold text-white">{display(item.future_name)}</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.13em] text-fuchsia-100/48">
+                  {formatListKey(item.movement_band)} / {formatListKey(item.evidence_weight)}
+                </div>
+                <p className="mt-2 text-sm leading-6 text-white/54">{display(item.what_is_still_missing)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/22 p-4">
+          <div className="text-xs uppercase tracking-[0.16em] text-white/38">Adaptive Strategy Draft</div>
+          <p className="mt-3 text-sm leading-6 text-white/58">Generate a pending-review draft. It does not replace the active strategy.</p>
+          <StatusButton disabled={loopState.status === 'drafting'} onClick={generateAdaptiveDraft}>Generate Adaptive Strategy Draft</StatusButton>
+          {loopState.draft && (
+            <div className="mt-4 space-y-3">
+              <FieldLabel label="Draft status" value={loopState.draft.draft_status} />
+              <FieldLabel label="Adoption recommendation" value={loopState.draft.adoption_recommendation} />
+              <FieldLabel label="Recommendation" value={loopState.draft.updated_recommendation} />
+              <FieldLabel label="Suggested One Move" value={loopState.draft.suggested_one_move} />
+              <FieldLabel label="Proof target next" value={loopState.draft.proof_target_next} />
+              <p className="rounded-xl border border-fuchsia-200/14 bg-fuchsia-300/10 px-3 py-2 text-sm leading-6 text-fuchsia-50/64">
+                {display(loopState.draft.automatic_learning_boundary)}
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {loopState.message && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white/62">
+          {loopState.message}
+        </div>
+      )}
+    </section>
   )
 }
 

@@ -1,0 +1,107 @@
+{
+  "phase_id": "MM-ADMIN-4I",
+  "verdict": "MOREMINDMAP_DARREN_ADAPTIVE_STRATEGY_LOOP_V0_IMPLEMENTED_WITH_LIMITS",
+  "classification": "ADAPTIVE_STRATEGY_LOOP_V0_EVIDENCE_GATED_DRAFT_NON_REPLACEMENT",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_ADAPTIVE_LOOP_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-adaptive-loop-core.js",
+    "api/admin/darren-chat-session-summary.js",
+    "api/admin/darren-chat-session-summaries-latest.js",
+    "api/admin/darren-future-movement-assessment.js",
+    "api/admin/darren-future-movement-latest.js",
+    "api/admin/darren-adaptive-strategy-draft.js",
+    "api/admin/darren-adaptive-strategy-draft-latest.js",
+    "api/admin/darren-since-last-snapshot.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_ADAPTIVE_STRATEGY_LOOP_V0_REPORT_ONLY_4I.md",
+    "runtime_traces/moremindmap_darren_adaptive_strategy_loop_v0_4i.json"
+  ],
+  "code_changed": true,
+  "routes_added": [
+    "POST /api/admin/darren-chat-session-summary",
+    "GET /api/admin/darren-chat-session-summaries-latest",
+    "POST /api/admin/darren-future-movement-assessment",
+    "GET /api/admin/darren-future-movement-latest",
+    "POST /api/admin/darren-adaptive-strategy-draft",
+    "GET /api/admin/darren-adaptive-strategy-draft-latest"
+  ],
+  "durable_records_added": [
+    "chat_session_summary:{summary_id}",
+    "chat_session_summary_index:{profile_id}:{context_type}",
+    "future_movement_assessment:{assessment_id}",
+    "future_movement_latest:{profile_id}:{context_type}",
+    "adaptive_strategy_draft:{draft_id}",
+    "adaptive_strategy_draft_latest:{profile_id}:{context_type}"
+  ],
+  "session_summary_policy": {
+    "stores_structured_summary_only": true,
+    "stores_decisions": true,
+    "stores_open_questions": true,
+    "stores_possible_signals": true,
+    "stores_recommended_follow_up": true
+  },
+  "raw_transcript_storage": false,
+  "future_movement_policy": {
+    "numeric_probabilities": false,
+    "evidence_bands_only": true,
+    "early_evidence_can_validate": false,
+    "validated_requires_validated_evidence": true
+  },
+  "movement_bands": [
+    "unchanged",
+    "watch",
+    "early_support",
+    "strengthening",
+    "strong_support",
+    "validated",
+    "weakening",
+    "invalidated"
+  ],
+  "adaptive_strategy_draft_policy": {
+    "draft_status": "pending_review",
+    "active_strategy_replacement": false,
+    "generated_strategy_latest_updated": false,
+    "review_or_adopt_flow_added": false
+  },
+  "active_strategy_replaced": false,
+  "build_map_updated": true,
+  "canonical_dossier_mutated": false,
+  "assessment_records_mutated": false,
+  "generated_strategy_latest_mutated": false,
+  "privacy_guardrails": {
+    "raw_dossier_exposure": false,
+    "raw_assessment_answer_exposure": false,
+    "redis_key_exposure_to_client": false,
+    "env_exposure_to_client": false,
+    "raw_model_output_returned": false,
+    "raw_error_stack_returned": false,
+    "forbidden_framing_allowed": false
+  },
+  "validation_results": {
+    "node_check_changed_backend_js": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_admin_code_new_routes": "passed",
+    "missing_or_invalid_inputs": "passed",
+    "valid_local_model_tests": "skipped_local_model_env_not_used",
+    "static_privacy_scan": "passed_boundary_wording_only_for_raw_transcript_not_stored"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required": true,
+    "create_one_chat_session_summary": true,
+    "create_one_future_movement_assessment": true,
+    "create_one_pending_review_adaptive_strategy_draft": true,
+    "active_strategy_not_replaced": true,
+    "raw_transcript_not_stored": true,
+    "no_unsafe_exposure": true
+  },
+  "limits": [
+    "Automatic learning is not fully live.",
+    "Adaptive Strategy Drafts do not replace the active strategy.",
+    "Draft adoption is not implemented.",
+    "No numeric future probabilities are introduced.",
+    "No subscriptions, Stripe, or RRG runtime are added."
+  ]
+}

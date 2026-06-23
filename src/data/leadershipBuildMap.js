@@ -85,11 +85,30 @@ export const leadershipBuildMap = [
       'Keep chat non-mutating for V0',
       'Define chat action proposal contract for future confirmation flows',
       'Capture confirmed chat actions through approved One Move status and Outcome Ledger routes',
+      'Add Adaptive Strategy Loop v0 with session summaries, evidence bands, and pending-review strategy drafts',
       'Prepare future durable chat summaries and evidence-weighted memory'
     ],
     salesMeaning: 'Darren can talk through strategy, pitch language, what changed, and overclaim risk while the structured dashboard remains the source-labeled truth layer.',
-    currentTruth: 'Darren Strategy Chat Foundation is live. Chat Action Proposal Contract is live. Confirmed Chat Action Capture is being implemented so explicit confirmation can write only to One Move status or Outcome Ledger routes. Automatic learning: not live yet.',
-    limits: 'Chat can propose actions and confirmed actions can write only to approved status or ledger routes. Chat does not regenerate strategy, update future movement, create automatic learning, subscription behavior, Stripe behavior, or RRG runtime.'
+    currentTruth: 'Darren Strategy Chat Foundation is live. Chat Action Proposal Contract is live. Confirmed Chat Action Capture is live. Adaptive Strategy Loop v0 is being implemented with chat session summaries, future movement bands, and pending-review strategy drafts. Automatic learning: not live yet.',
+    limits: 'Chat can propose actions and confirmed actions can write only to approved status or ledger routes. Adaptive Strategy Drafts do not replace the active strategy automatically. Chat does not create autonomous learning, subscription behavior, Stripe behavior, or RRG runtime.'
+  },
+  {
+    id: 'adaptive-strategy-loop-v0',
+    title: 'Adaptive Strategy Loop v0',
+    dateRange: 'Current Build',
+    label: 'Evidence-Gated Strategy Drafts',
+    status: 'in_progress',
+    bullets: [
+      'Store durable chat session summaries without raw transcript persistence',
+      'Assess Five Futures movement with evidence bands instead of percentages',
+      'Generate Adaptive Strategy Drafts as pending-review artifacts',
+      'Keep active latest strategy unchanged until a future review/adopt flow exists',
+      'Keep canonical dossier and assessment records unchanged',
+      'Keep automatic replacement and future scoring claims out of the product'
+    ],
+    salesMeaning: 'MORE MindMap can begin converting confirmed evidence and summarized strategic conversations into a reviewable next-strategy draft without pretending the system has autonomously learned.',
+    currentTruth: "Adaptive Strategy Loop v0 creates separate summary, movement assessment, and draft artifacts. It does not replace Darren's active strategy automatically. Automatic learning: not live yet.",
+    limits: 'No numeric probability scoring, subscription runtime, Stripe runtime, RRG runtime, or automatic strategy replacement is live.'
   },
   {
     id: 'outcome-ledger',
