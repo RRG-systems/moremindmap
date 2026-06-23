@@ -1,0 +1,124 @@
+{
+  "phase_id": "MM-ADMIN-2A",
+  "verdict": "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_BACKEND_API_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_ADMIN_SALES_DASHBOARD_BACKEND_API_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_ADMIN_DASHBOARD_BACKEND_API",
+  "files_changed": [
+    "api/admin/sales-dashboard.js",
+    "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_BACKEND_API_REPORT_ONLY_2A.md",
+    "runtime_traces/moremindmap_leadership_sales_dashboard_backend_api_2a.json"
+  ],
+  "code_changed": true,
+  "deploy_required": false,
+  "api_route": {
+    "path": "/api/admin/sales-dashboard",
+    "method": "GET",
+    "read_only": true,
+    "frontend_created": false
+  },
+  "admin_access_model": {
+    "preferred_env_var": "MOREMINDMAP_ADMIN_DASHBOARD_CODE",
+    "fallback_code": "MOREADMIN26",
+    "fallback_limit": "Fallback MOREADMIN26 is accepted for V1 only; production should prefer the env var.",
+    "accepted_request_locations": [
+      "Authorization: Bearer <code>",
+      "X-Admin-Code: <code>",
+      "query admin_code",
+      "query code"
+    ],
+    "invalid_access_response": "403 admin_dashboard_access_denied",
+    "env_values_exposed": false
+  },
+  "data_sources_used": [
+    "vault:metadata:count counter",
+    "profile date indexes",
+    "bounded vault profile scan",
+    "business assessment date indexes",
+    "business assessment type indexes",
+    "business assessment records",
+    "latest assessment by profile links"
+  ],
+  "fields_returned": {
+    "summary": [
+      "total_profiles",
+      "total_business_assessments",
+      "profiles_this_month",
+      "business_assessments_this_month",
+      "paid_free_promo_status"
+    ],
+    "profiles": [
+      "profile_id",
+      "name",
+      "email",
+      "phone",
+      "company",
+      "role",
+      "created_at",
+      "source",
+      "completion_status"
+    ],
+    "business_assessments": [
+      "assessment_id",
+      "owner_profile_id",
+      "name",
+      "email",
+      "phone",
+      "company",
+      "assessment_type",
+      "created_at",
+      "updated_at",
+      "status"
+    ],
+    "companies": [
+      "company",
+      "profile_count",
+      "assessment_count"
+    ]
+  },
+  "unavailable_fields": [
+    "paid/free totals",
+    "promo usage totals",
+    "revenue totals",
+    "Stripe payment state",
+    "subscription state",
+    "Outcome Ledger state",
+    "sales follow-up owner/status/notes",
+    "full company analytics beyond returned rows"
+  ],
+  "privacy_guardrails": [
+    "raw canonical dossiers excluded",
+    "raw assessment answers excluded",
+    "Redis keys excluded from response",
+    "environment values excluded from response",
+    "secrets excluded from response",
+    "rows bounded to 100 profiles and 100 business assessments",
+    "source labels included",
+    "unavailable paid/free/promo status explicitly labeled",
+    "read-only Redis operations only"
+  ],
+  "review_outcome": {
+    "review_verdict": "PASS_WITH_BOUNDED_REPAIR",
+    "repairs_made": [
+      "Removed broad Access-Control-Allow-Origin wildcard from admin endpoint"
+    ],
+    "cors_decision": "same_origin_admin_api_no_public_wildcard_cors",
+    "privacy_decision": "passed_no_raw_dossiers_no_raw_answers_no_redis_keys_no_env_values_no_internal_error_details",
+    "deployment_recommendation": "commit_and_push_only_do_not_deploy",
+    "stop_conditions_triggered": []
+  },
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "local_api_invalid_code": "passed_403_admin_dashboard_access_denied_before_redis_access_no_wildcard_cors_header",
+    "local_api_valid_code": "not_run_no_safe_local_redis_read_without_environment_context"
+  },
+  "limits": [
+    "Business Assessment total is exact only for currently indexed assessment types",
+    "Profile rows use bounded scan plus current-month indexed records",
+    "Company rows are derived from returned dashboard rows",
+    "No dashboard UI was created",
+    "No production deploy was run"
+  ]
+}
