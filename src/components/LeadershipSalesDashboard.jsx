@@ -9,6 +9,11 @@ function display(value) {
   return String(value)
 }
 
+function displayMissing(value) {
+  if (value === null || value === undefined || value === '') return 'Missing'
+  return String(value)
+}
+
 function formatDate(value) {
   if (!value) return 'Unavailable'
   const date = new Date(value)
@@ -31,9 +36,76 @@ function formatNumber(value) {
 }
 
 function normalizeCompany(value) {
-  const text = display(value)
-  if (text === 'Unavailable') return 'Unknown / Missing company'
-  return text
+  const raw = String(value || '').trim()
+  if (!raw || /^unavailable$/i.test(raw) || /^unknown/i.test(raw)) return 'Missing Company Data'
+
+  const cleaned = raw
+    .replace(/\s+/g, ' ')
+    .replace(/\s*,?\s*llc\.?$/i, '')
+    .trim()
+  const normalized = cleaned.toLowerCase()
+
+  if (normalized === 'fathom realty') return 'Fathom Realty'
+  if (normalized === 'fathom realty nc') return 'Fathom Realty NC'
+  if (normalized === 'fathom realty mt') return 'Fathom Realty MT'
+  if (normalized === 'the more companies' || normalized === 'the more company') return 'The MORE Companies'
+
+  return cleaned || 'Missing Company Data'
+}
+
+function isSafelyDetectableTestRecord(record) {
+  const name = String(record?.name || '').toLowerCase()
+  const email = String(record?.email || '').toLowerCase()
+  const company = String(record?.company || '').toLowerCase()
+
+  return (
+    email.includes('example.invalid') ||
+    /\bqa\b/.test(name) ||
+    company.includes('qa synthetic') ||
+    company.includes('diagnostic test') ||
+    name.includes('smoke test') ||
+    email.includes('smoke test') ||
+    name.includes('synthetic fixture') ||
+    email.includes('synthetic fixture')
+  )
+}
+
+function normalizeProfileRow(profile) {
+  return {
+    ...profile,
+    display_company: normalizeCompany(profile?.company)
+  }
+}
+
+function normalizeAssessmentRow(assessment) {
+  return {
+    ...assessment,
+    display_company: normalizeCompany(assessment?.company)
+  }
+}
+
+function buildNormalizedCompanyRows(profileRows, assessmentRows) {
+  const companies = new Map()
+
+  for (const profile of profileRows) {
+    const company = profile.display_company || normalizeCompany(profile.company)
+    if (!companies.has(company)) {
+      companies.set(company, { company, profile_count: 0, assessment_count: 0 })
+    }
+    companies.get(company).profile_count += 1
+  }
+
+  for (const assessment of assessmentRows) {
+    const company = assessment.display_company || normalizeCompany(assessment.company)
+    if (!companies.has(company)) {
+      companies.set(company, { company, profile_count: 0, assessment_count: 0 })
+    }
+    companies.get(company).assessment_count += 1
+  }
+
+  return [...companies.values()]
+    .sort((a, b) => b.profile_count + b.assessment_count - (a.profile_count + a.assessment_count))
+    .slice(0, 100)
 }
 
 export default function LeadershipSalesDashboard() {
@@ -173,19 +245,30 @@ function DashboardHeader({ data }) {
 function DashboardContent({ data }) {
   const summary = data?.summary || {}
   const sourceLabels = data?.source_labels || {}
-  const profiles = Array.isArray(data?.profiles) ? data.profiles : []
-  const assessments = Array.isArray(data?.business_assessments) ? data.business_assessments : []
-  const companies = Array.isArray(data?.companies) ? data.companies : []
+  const rawProfiles = Array.isArray(data?.profiles) ? data.profiles : []
+  const rawAssessments = Array.isArray(data?.business_assessments) ? data.business_assessments : []
+  const profiles = rawProfiles.filter((profile) => !isSafelyDetectableTestRecord(profile)).map(normalizeProfileRow)
+  const assessments = rawAssessments.filter((assessment) => !isSafelyDetectableTestRecord(assessment)).map(normalizeAssessmentRow)
+  const companies = buildNormalizedCompanyRows(profiles, assessments)
   const notes = Array.isArray(data?.missing_data_notes) ? data.missing_data_notes : []
   const limits = Array.isArray(data?.limits) ? data.limits : []
+  const hiddenTestRecordsCount = rawProfiles.length + rawAssessments.length - profiles.length - assessments.length
 
   return (
     <div className="space-y-10">
+      <SalesContextPanel
+        profilesDisplayed={profiles.length}
+        assessmentsDisplayed={assessments.length}
+        hiddenTestRecordsCount={hiddenTestRecordsCount}
+      />
+
       <SummaryGrid
         summary={summary}
         companiesCount={companies.length}
         notesCount={notes.length}
         sourceLabels={sourceLabels}
+        profilesDisplayed={profiles.length}
+        assessmentsDisplayed={assessments.length}
       />
 
       <UnavailablePanel summary={summary} />
@@ -201,7 +284,35 @@ function DashboardContent({ data }) {
   )
 }
 
-function SummaryGrid({ summary, companiesCount, notesCount, sourceLabels }) {
+function SalesContextPanel({ profilesDisplayed, assessmentsDisplayed, hiddenTestRecordsCount }) {
+  return (
+    <section className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-6">
+      <div className="text-xs uppercase tracking-[0.24em] text-emerald-100/70">Sales Visibility</div>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+        Real V1 activity for follow-up and adoption conversations
+      </h2>
+      <p className="mt-3 max-w-5xl text-sm leading-6 text-emerald-50/76">
+        This dashboard shows real V1 profile and assessment activity, company adoption signals, and follow-up targets. Paid/free/revenue and RRG readiness remain unavailable until those systems are persistently indexed.
+      </p>
+      <div className="mt-5 grid gap-3 text-sm text-white/68 md:grid-cols-3">
+        <div className="rounded-xl border border-white/10 bg-black/25 px-4 py-3">
+          Displayed profiles: <span className="font-semibold text-white">{formatNumber(profilesDisplayed)}</span>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/25 px-4 py-3">
+          Displayed assessments: <span className="font-semibold text-white">{formatNumber(assessmentsDisplayed)}</span>
+        </div>
+        <div className="rounded-xl border border-white/10 bg-black/25 px-4 py-3">
+          QA/test rows hidden: <span className="font-semibold text-white">{formatNumber(hiddenTestRecordsCount)}</span>
+        </div>
+      </div>
+      <p className="mt-4 text-xs leading-5 text-emerald-50/58">
+        Internal QA/test records are hidden from the default sales view when safely detectable. Backend totals remain sourced totals.
+      </p>
+    </section>
+  )
+}
+
+function SummaryGrid({ summary, companiesCount, notesCount, sourceLabels, profilesDisplayed, assessmentsDisplayed }) {
   const cards = [
     {
       label: 'Total Behavior Profiles',
@@ -226,12 +337,22 @@ function SummaryGrid({ summary, companiesCount, notesCount, sourceLabels }) {
     {
       label: 'Companies Represented',
       value: formatNumber(companiesCount),
-      source: sourceLabels.companies
+      source: 'normalized_display_sales_view'
     },
     {
       label: 'Missing Data Notes',
       value: formatNumber(notesCount),
       source: 'visible_v1_limits'
+    },
+    {
+      label: 'Displayed Sales Profiles',
+      value: formatNumber(profilesDisplayed),
+      source: 'filtered_sales_view'
+    },
+    {
+      label: 'Displayed Sales Assessments',
+      value: formatNumber(assessmentsDisplayed),
+      source: 'filtered_sales_view'
     }
   ]
 
@@ -267,6 +388,9 @@ function CompaniesSection({ companies }) {
   return (
     <section className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
       <SectionHeading eyebrow="Company Adoption" title="Companies Represented" />
+      <p className="mt-3 text-xs leading-5 text-white/45">
+        Company names are normalized for dashboard display only. Stored records are not changed.
+      </p>
       {companies.length === 0 ? (
         <EmptyState message="No company rows were returned by the dashboard API." />
       ) : (
@@ -274,8 +398,8 @@ function CompaniesSection({ companies }) {
           {companies.map((company, index) => (
             <div key={`${company.company || 'company'}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-white/8 bg-black/30 px-4 py-3">
               <div>
-                <div className="font-medium text-white">{normalizeCompany(company.company)}</div>
-                <div className="mt-1 text-xs text-white/42">Profiles and assessments from returned dashboard rows</div>
+                <div className="font-medium text-white">{displayMissing(company.company)}</div>
+                <div className="mt-1 text-xs text-white/42">Normalized display grouping from sales-view rows</div>
               </div>
               <div className="flex shrink-0 gap-4 text-right text-sm">
                 <div>
@@ -333,11 +457,11 @@ function ProfilesTable({ profiles }) {
               {profiles.map((profile) => (
                 <tr key={profile.profile_id} className="text-white/72">
                   <Td mono>{display(profile.profile_id)}</Td>
-                  <Td>{display(profile.name)}</Td>
-                  <Td>{display(profile.email)}</Td>
-                  <Td>{display(profile.phone)}</Td>
-                  <Td>{display(profile.company)}</Td>
-                  <Td>{display(profile.role)}</Td>
+                  <Td>{displayMissing(profile.name)}</Td>
+                  <Td>{displayMissing(profile.email)}</Td>
+                  <Td>{displayMissing(profile.phone)}</Td>
+                  <Td>{displayMissing(profile.display_company)}</Td>
+                  <Td>{displayMissing(profile.role)}</Td>
                   <Td>{formatDate(profile.created_at)}</Td>
                   <Td>{display(profile.completion_status || profile.source)}</Td>
                 </tr>
@@ -379,11 +503,11 @@ function AssessmentsTable({ assessments }) {
                 <tr key={assessment.assessment_id} className="text-white/72">
                   <Td mono>{display(assessment.assessment_id)}</Td>
                   <Td mono>{display(assessment.owner_profile_id)}</Td>
-                  <Td>{display(assessment.name)}</Td>
-                  <Td>{display(assessment.email)}</Td>
-                  <Td>{display(assessment.phone)}</Td>
-                  <Td>{display(assessment.company)}</Td>
-                  <Td>{display(assessment.assessment_type)}</Td>
+                  <Td>{displayMissing(assessment.name)}</Td>
+                  <Td>{displayMissing(assessment.email)}</Td>
+                  <Td>{displayMissing(assessment.phone)}</Td>
+                  <Td>{displayMissing(assessment.display_company)}</Td>
+                  <Td>{displayMissing(assessment.assessment_type)}</Td>
                   <Td>{formatDate(assessment.created_at)}</Td>
                   <Td>{display(assessment.status)}</Td>
                 </tr>
