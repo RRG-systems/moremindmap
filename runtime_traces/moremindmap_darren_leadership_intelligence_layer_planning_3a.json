@@ -1,0 +1,589 @@
+{
+  "phase_id": "MM-ADMIN-3A",
+  "verdict": "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_LAYER_PLANNING_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_LAYER_PLAN_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_DARREN_LEADERSHIP_INTELLIGENCE_LAYER_PLAN",
+  "files_created": [
+    "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_LAYER_PLANNING_REPORT_ONLY_3A.md",
+    "runtime_traces/moremindmap_darren_leadership_intelligence_layer_planning_3a.json"
+  ],
+  "files_changed": [
+    "MOREMINDMAP_DARREN_LEADERSHIP_INTELLIGENCE_LAYER_PLANNING_REPORT_ONLY_3A.md",
+    "runtime_traces/moremindmap_darren_leadership_intelligence_layer_planning_3a.json"
+  ],
+  "code_changed": false,
+  "deploy_required": false,
+  "darren_profile_data_availability": {
+    "profile_id": "mm-20260527-6zshuaao",
+    "controlled_read_only_check_run": true,
+    "profile_found": true,
+    "canonical_dossier_available": true,
+    "behavioral_intelligence_available": true,
+    "visual_dna_metadata_available": false,
+    "identity_categories_present": {
+      "name": true,
+      "email": true,
+      "phone": false,
+      "company": true,
+      "role": false
+    },
+    "raw_profile_content_included_in_report": false
+  },
+  "darren_assessment_data_availability": {
+    "known_possible_assessment_ids": [
+      "ba-20260609-d379499d",
+      "ba-20260609-1b9c8c7a"
+    ],
+    "controlled_profile_linked_check_run": true,
+    "business_assessment_found_by_profile_id": true,
+    "status_category": "five_futures_and_one_move_ready",
+    "has_business_intelligence_draft": true,
+    "has_executive_diagnostic_briefing": true,
+    "has_five_futures": true,
+    "has_one_move": true,
+    "raw_assessment_content_included_in_report": false,
+    "implementation_note": "MM-ADMIN-3B should resolve and record the exact assessment ID used by the snapshot without exposing raw answers to the client."
+  },
+  "dashboard_data_sources": {
+    "admin_dashboard_api": "/api/admin/sales-dashboard",
+    "build_map_source": "src/data/leadershipBuildMap.js",
+    "available_fields": [
+      "total_profiles",
+      "total_business_assessments",
+      "profiles_this_month",
+      "business_assessments_this_month",
+      "bounded sanitized profile summaries",
+      "bounded sanitized business assessment summaries",
+      "company adoption rows",
+      "missing_data_notes",
+      "limits",
+      "paid_free_promo_status unavailable note",
+      "repo-backed Strategic Build Map phases"
+    ],
+    "unavailable_fields": [
+      "durable paid/free totals",
+      "durable promo totals",
+      "durable revenue totals",
+      "Stripe payment state connected to records",
+      "subscription state",
+      "Outcome Ledger state",
+      "RRG transaction/recovery revenue",
+      "recruiting intelligence output",
+      "Leadership Suite runtime state",
+      "V2 runtime leadership detection"
+    ]
+  },
+  "proposed_snapshot_fields": [
+    "snapshot_id",
+    "generated_at",
+    "darren_profile_id",
+    "darren_assessment_id",
+    "darren_profile_source_label",
+    "darren_business_assessment_source_label",
+    "dashboard_metrics_source_label",
+    "build_map_source_label",
+    "goal_source_label",
+    "business_model_baseline_source_label",
+    "darren_behavioral_summary",
+    "role_boundary_summary",
+    "dashboard_metric_summary",
+    "strategic_build_map_summary",
+    "goal",
+    "assumptions",
+    "unavailable_fields",
+    "valuation_baseline",
+    "revenue_engine_summary",
+    "five_futures",
+    "one_move",
+    "evidence_gaps",
+    "next_proof_target",
+    "what_not_to_overclaim",
+    "sales_talk_track",
+    "cost_control_metadata"
+  ],
+  "source_labeling_model": [
+    "darren_profile",
+    "darren_business_assessment",
+    "dashboard_metric",
+    "build_map",
+    "user_provided_goal",
+    "business_model_baseline",
+    "model_interpretation",
+    "assumption",
+    "unavailable"
+  ],
+  "valuation_baseline_model": {
+    "goal": "$250M company ambition",
+    "revenue_ambition": "$15M-$30M gross revenue ambition",
+    "valuation_math_examples": [
+      {
+        "valuation_multiple": "5x revenue",
+        "annual_revenue_required": "$50M",
+        "monthly_revenue_required": "$4.17M"
+      },
+      {
+        "valuation_multiple": "8x revenue",
+        "annual_revenue_required": "$31.25M",
+        "monthly_revenue_required": "$2.60M"
+      },
+      {
+        "valuation_multiple": "10x revenue",
+        "annual_revenue_required": "$25M",
+        "monthly_revenue_required": "$2.08M"
+      }
+    ],
+    "strategic_company_archetypes": [
+      "SaaS / subscription intelligence company",
+      "RRG-powered revenue recovery company",
+      "mortgage-company infrastructure partner",
+      "brokerage recruiting + retention intelligence platform",
+      "leadership intelligence / LDE company",
+      "hybrid MMM + RRG + Leadership Suite + Conversion Cloud company",
+      "Partner Capital / Strategic Funding Path",
+      "Channel / Distribution Power Path"
+    ],
+    "path_comparison_models": [
+      "vertical-specific company path",
+      "multi-vertical platform path",
+      "hybrid beachhead-to-platform path"
+    ],
+    "path_comparison_inputs": [
+      "dashboard activity",
+      "adoption by company",
+      "revenue data when available",
+      "paid/free/promo source data when available",
+      "partner response",
+      "RRG activity",
+      "sales-cycle friction",
+      "implementation cost",
+      "business model fit",
+      "operational complexity",
+      "product truth risk",
+      "capital leverage",
+      "control risk",
+      "channel leverage",
+      "channel risk",
+      "next proof required"
+    ],
+    "truth_boundary": "All valuation math must be marked as assumption/model baseline, not guarantee. The system should compare paths and identify the most evidence-supported direction over time instead of prescribing one company narrative."
+  },
+  "partner_capital_strategic_funding_model": {
+    "path_name": "Partner Capital / Strategic Funding Path",
+    "truth_boundary": [
+      "Partner interest is not funding.",
+      "Funding conversations are not revenue.",
+      "Strategic capital should be labeled separately from customer revenue.",
+      "Partner money is not guaranteed.",
+      "Partner capital must not be mixed with recurring revenue metrics."
+    ],
+    "capital_routes": [
+      "mortgage-company strategic funding",
+      "brokerage/network sponsorship",
+      "enterprise pilot funding",
+      "revenue-share partner funding",
+      "channel partner investment",
+      "strategic investor introductions",
+      "acquisition-minded partner interest",
+      "pilot-to-contract financing",
+      "partner-funded RRG launch support"
+    ],
+    "evaluation_questions": [
+      "Is the partner just interested or actually willing to fund?",
+      "Does the money come with strategic leverage or dangerous control?",
+      "Does funding accelerate product proof or distract from product truth?",
+      "Does partner capital support the $250M path?",
+      "Does the partner want MMM, RRG, Leadership Suite, or the whole ecosystem?",
+      "What proof does the partner need before writing a check?"
+    ],
+    "evidence_fields": [
+      "partner type",
+      "expressed interest",
+      "funding likelihood",
+      "strategic fit",
+      "control risk",
+      "proof requested",
+      "expected check size if known",
+      "timeline",
+      "dependency on live product/revenue/results",
+      "next proof target"
+    ]
+  },
+  "channel_distribution_power_model": {
+    "path_name": "Channel / Distribution Power Path",
+    "truth_boundary": [
+      "Channel interest is not distribution.",
+      "A warm introduction is not adoption.",
+      "Audience access is not revenue.",
+      "Distribution should be tracked separately from partner capital and customer revenue.",
+      "Partner enthusiasm is not distribution proof."
+    ],
+    "channel_routes": [
+      "mortgage company salesforce access",
+      "brokerage network access",
+      "district/director access",
+      "enterprise pilot access",
+      "conference/training stage access",
+      "lender/agent database access",
+      "referral network access",
+      "white-label distribution",
+      "partner-led onboarding",
+      "association/franchise/channel access"
+    ],
+    "evaluation_questions": [
+      "Does the partner have real audience/control or only enthusiasm?",
+      "Can the channel produce profiles, assessments, paid users, RRG opportunities, or enterprise pilots?",
+      "Is distribution exclusive, semi-exclusive, or open?",
+      "Can the channel partner operationally execute?",
+      "Does channel access create evidence faster than paid ads or direct sales?",
+      "Does the partner want MMM, RRG, Leadership Suite, or the whole ecosystem?",
+      "What proof does the channel partner need before introducing MMM/RRG broadly?"
+    ],
+    "evidence_fields": [
+      "channel type",
+      "audience size",
+      "decision-maker access",
+      "distribution authority",
+      "activation likelihood",
+      "expected profile volume",
+      "expected assessment volume",
+      "expected paid conversion",
+      "expected RRG opportunity volume if known",
+      "operational lift",
+      "proof required",
+      "timeline",
+      "strategic fit",
+      "channel risk",
+      "next proof target"
+    ]
+  },
+  "multi_vertical_expansion_model": {
+    "beachhead_verticals": [
+      "real estate",
+      "lending"
+    ],
+    "beachhead_truth_boundary": "Real estate and lending are current beachhead verticals, not the total addressable future.",
+    "strategic_vertical_paths": [
+      "real estate + lending beachhead",
+      "mortgage-company-powered revenue recovery",
+      "brokerage/recruiting/retention intelligence",
+      "professional services revenue recovery",
+      "insurance/financial services relationship reactivation",
+      "franchise/network sales intelligence",
+      "enterprise leadership intelligence",
+      "multi-vertical lifecycle detection engine / LDE platform"
+    ],
+    "expansion_conditions": [
+      "relationships go dormant",
+      "revenue opportunity is hidden in existing databases",
+      "individuals/teams/companies need behavioral intelligence",
+      "leaders need recruiting, retention, performance, and follow-up intelligence",
+      "lifecycle/event signals can identify timing windows",
+      "trust, timing, and behavioral fit drive conversion"
+    ],
+    "evidence_required_before_cross_vertical_claims": [
+      "repeated adoption inside real estate/lending",
+      "measurable RRG activity or recovery outcomes",
+      "partner pull from adjacent verticals",
+      "evidence that the core mechanism works outside real estate/lending",
+      "repeatable onboarding and data capture",
+      "operational ability to support another vertical without weakening the beachhead",
+      "revenue proof or credible paid demand"
+    ],
+    "decision_question": "Should MMM + RRG stay focused in real estate/lending, expand into adjacent verticals, or become a broader leadership/revenue intelligence platform?",
+    "truth_boundary": "Cross-vertical expansion is future/hypothesis unless supported by evidence, adoption, revenue, partner response, and operational proof."
+  },
+  "revenue_engine_model": {
+    "customer_revenue_streams": [
+      {
+        "stream": "Behavior Profile access",
+        "status": "live_product_capability_revenue_attribution_unavailable"
+      },
+      {
+        "stream": "Business Assessment access",
+        "status": "live_product_capability_revenue_attribution_unavailable"
+      },
+      {
+        "stream": "one-time assessment payments",
+        "status": "planned"
+      },
+      {
+        "stream": "$23.95/month subscription",
+        "status": "planned"
+      },
+      {
+        "stream": "team assessment upgrades",
+        "status": "future"
+      },
+      {
+        "stream": "Leadership Suite licensing",
+        "status": "future"
+      },
+      {
+        "stream": "brokerage enterprise licensing",
+        "status": "future"
+      },
+      {
+        "stream": "mortgage partner licensing",
+        "status": "future"
+      },
+      {
+        "stream": "RRG pay-at-close revenue",
+        "status": "future_unavailable_in_dashboard"
+      },
+      {
+        "stream": "recruiting intelligence products",
+        "status": "future"
+      },
+      {
+        "stream": "coaching/training packages",
+        "status": "future"
+      },
+      {
+        "stream": "future intelligence/data subscription",
+        "status": "future"
+      }
+    ],
+    "partner_capital_streams": [
+      {
+        "stream": "mortgage-company strategic funding",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "brokerage/network sponsorship",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "enterprise pilot funding",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "revenue-share partner funding",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "channel partner investment",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "strategic investor introductions",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "acquisition-minded partner interest",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "pilot-to-contract financing",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "partner-funded RRG launch support",
+        "status": "future_hypothesis"
+      }
+    ],
+    "channel_distribution_streams": [
+      {
+        "stream": "mortgage company salesforce access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "brokerage network access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "district/director access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "enterprise pilot access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "conference/training stage access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "lender/agent database access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "referral network access",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "white-label distribution",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "partner-led onboarding",
+        "status": "future_hypothesis"
+      },
+      {
+        "stream": "association/franchise/channel access",
+        "status": "future_hypothesis"
+      }
+    ],
+    "truth_boundary": "Partner capital is capital leverage, not customer revenue, recurring revenue, paid/free/promo totals, or guaranteed funding. Channel distribution is distribution leverage, not revenue, adoption, or funding."
+  },
+  "evidence_scoring_model": [
+    "evidence_available",
+    "evidence_missing",
+    "business_model_fit",
+    "build_stage_fit",
+    "revenue_relevance",
+    "RRG_relevance",
+    "partner_capital_relevance",
+    "funding_likelihood",
+    "strategic_fit",
+    "control_risk",
+    "proof_requested",
+    "expected_check_size_if_known",
+    "timeline",
+    "dependency_on_live_product_revenue_results",
+    "channel_distribution_relevance",
+    "channel_type",
+    "audience_size",
+    "decision_maker_access",
+    "distribution_authority",
+    "activation_likelihood",
+    "expected_profile_volume",
+    "expected_assessment_volume",
+    "expected_paid_conversion",
+    "expected_RRG_opportunity_volume_if_known",
+    "operational_lift",
+    "channel_risk",
+    "risk",
+    "next_proof_needed",
+    "confidence_level"
+  ],
+  "role_boundary_model": {
+    "darren_lane": "momentum_sales_frontline_adoption_relationship_activation_market_signal",
+    "dj_lane": "vision_build_product_architecture_validation_product_truth",
+    "darren_should": [
+      "sell what exists",
+      "gather market signal",
+      "use approved sales language",
+      "bring ideas in as hypotheses"
+    ],
+    "dj_should": [
+      "architect",
+      "build",
+      "validate",
+      "decide what becomes product",
+      "protect product truth"
+    ],
+    "system_should_prevent": [
+      "Darren overclaiming future features",
+      "D.J. becoming the sales follow-up clerk",
+      "Darren ideas becoming direct build instructions without evidence review"
+    ]
+  },
+  "five_futures_model": [
+    {
+      "key": "conservative_continuation",
+      "name": "Conservative Continuation"
+    },
+    {
+      "key": "dashboard_led_sales_traction",
+      "name": "Dashboard-Led Sales Traction"
+    },
+    {
+      "key": "channel_distribution_acceleration",
+      "name": "Channel Distribution Acceleration",
+      "description": "Channel Distribution accelerates MMM + RRG adoption before full direct-sales maturity if access produces real profiles, assessments, paid users, RRG opportunities, or enterprise pilots."
+    },
+    {
+      "key": "strategic_partner_capital_acceleration",
+      "name": "Strategic Partner Capital Acceleration",
+      "description": "Strategic Partner Capital accelerates MMM + RRG before full organic revenue maturity if funding supports product proof without dangerous control."
+    },
+    {
+      "key": "full_v2_leadership_intelligence_company_path",
+      "name": "Full V2 Leadership Intelligence Company Path"
+    }
+  ],
+  "one_move_model": {
+    "cadence": "weekly",
+    "requirements": [
+      "concrete",
+      "sales-useful",
+      "tied to current dashboard reality",
+      "adapted to Darren's Momentum Machine profile",
+      "tied to the $250M / $15M-$30M ambition without certainty claims",
+      "focused on next proof target",
+      "includes one partner-capital proof target when a funding path is active",
+      "includes one channel proof target when a distribution path is active"
+    ]
+  },
+  "coaching_style_model": [
+    "direct",
+    "action-oriented",
+    "target-driven",
+    "sales-language-forward",
+    "momentum-preserving",
+    "explicit about overclaim risk",
+    "not architecture-heavy",
+    "not generic motivation"
+  ],
+  "cost_control_model": [
+    "cached Darren profile summary",
+    "cached Darren Business Assessment summary",
+    "cached MMM + RRG business model summary",
+    "cached dashboard metrics snapshot",
+    "cached build map summary",
+    "limited chat history",
+    "structured snapshot before chat",
+    "GPT-5.5 only for strategic synthesis",
+    "Deep Strategy generation button",
+    "optional daily/monthly usage cap",
+    "token budget diagnostics",
+    "controlled timeout diagnostics"
+  ],
+  "privacy_guardrails": [
+    "no raw dossier client exposure",
+    "no raw assessment answers",
+    "no unrestricted chat access to Redis",
+    "no fake financials",
+    "no ungrounded future claims",
+    "no hidden prompt injection from user notes or arbitrary text",
+    "no automatic product-building from Darren's ideas",
+    "no generated snapshot save unless validation passes",
+    "no valuation certainty",
+    "no overclaiming planned roadmap phases as live"
+  ],
+  "stop_conditions": [
+    "Darren profile cannot be safely retrieved",
+    "Darren Business Assessment cannot be safely resolved",
+    "raw dossier or raw answers would be exposed to the client",
+    "snapshot validation fails",
+    "source labels are missing",
+    "generated output claims planned systems are live",
+    "financial numbers are invented",
+    "$250M valuation is presented as guaranteed",
+    "dashboard metrics are unavailable but treated as evidence",
+    "chat is proposed before a validated snapshot",
+    "Redis writes are needed before schema review",
+    "generation failure would corrupt dashboard state",
+    "cost diagnostics are missing"
+  ],
+  "implementation_recommendation": [
+    "MM-ADMIN-3B backend Darren Intelligence Snapshot API",
+    "MM-ADMIN-3C dashboard panel for validated snapshot",
+    "MM-ADMIN-3D GPT-5.5 strategy chat grounded in snapshot",
+    "MM-ADMIN-3E optional recurring refresh and usage controls"
+  ],
+  "limits": [
+    "Planning only",
+    "No code changes",
+    "No routes created",
+    "No UI created",
+    "No Redis records modified",
+    "No profile records modified",
+    "No assessment records modified",
+    "No generation triggered",
+    "No Outcome Ledger runtime",
+    "No RRG runtime",
+    "No Stripe or subscription work",
+    "No deployment"
+  ]
+}
