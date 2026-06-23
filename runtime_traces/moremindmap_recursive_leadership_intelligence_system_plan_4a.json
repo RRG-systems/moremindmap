@@ -1,0 +1,279 @@
+{
+  "phase_id": "MM-ADMIN-4A",
+  "verdict": "MOREMINDMAP_RECURSIVE_LEADERSHIP_INTELLIGENCE_SYSTEM_PLAN_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_RECURSIVE_LEADERSHIP_INTELLIGENCE_SYSTEM_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_RECURSIVE_LEADERSHIP_INTELLIGENCE_SYSTEM_PLAN",
+  "files_created": [
+    "MOREMINDMAP_RECURSIVE_LEADERSHIP_INTELLIGENCE_SYSTEM_PLAN_4A.md",
+    "runtime_traces/moremindmap_recursive_leadership_intelligence_system_plan_4a.json"
+  ],
+  "code_changed": false,
+  "deploy_required": false,
+  "product_thesis": "I used MORE MindMap to build MORE MindMap.",
+  "current_recursive_readiness": {
+    "live_foundation": [
+      "Leadership Dashboard",
+      "Sales Dashboard V1",
+      "Strategic Build Map",
+      "Darren Leadership Intelligence Snapshot",
+      "Darren Five Futures and One Move generation",
+      "quality validation",
+      "safety/privacy validation"
+    ],
+    "recursive_now": [
+      "snapshot creates current understanding",
+      "generation creates current strategy",
+      "dashboard renders the current strategy"
+    ],
+    "not_recursive_yet": [
+      "no persisted generated strategy",
+      "no One Move status",
+      "no Outcome Ledger",
+      "no since-last comparison",
+      "no evidence-weighted memory",
+      "no future movement tracking",
+      "no chat"
+    ]
+  },
+  "target_architecture": {
+    "canonical_profile": "who the person is",
+    "snapshot": "what the system currently understands",
+    "generated_five_futures_one_move": "what the system recommends now",
+    "coaching_session": "what the person explores or decides",
+    "outcome_ledger": "what actually happened afterward",
+    "next_snapshot": "updated understanding based on evidence"
+  },
+  "persistence_model": {
+    "definition": "Durable linked storage of generated strategy, One Move, source snapshot, assumptions, proof target, decision status, outcome, and next snapshot reference.",
+    "canonical_dossier_mutation_allowed": false,
+    "chat_stored_inside_profile": false,
+    "linked_records_required": true
+  },
+  "storage_model": {
+    "records": [
+      "intelligence_snapshot:{snapshot_id}",
+      "intelligence_latest:{profile_id}:{context_type}",
+      "generated_strategy:{strategy_id}",
+      "generated_strategy_latest:{profile_id}:{context_type}",
+      "one_move:{move_id}",
+      "outcome_ledger_event:{event_id}",
+      "coaching_session:{session_id}",
+      "coaching_session_summary:{session_id}",
+      "future_state:{future_state_id}"
+    ],
+    "required_fields": [
+      "profile_id",
+      "context_type",
+      "created_at",
+      "source_labels",
+      "version",
+      "status"
+    ],
+    "darren_context": {
+      "profile_id": "mm-20260527-6zshuaao",
+      "context_type": "darren_leadership_intelligence"
+    }
+  },
+  "evidence_weighted_memory": {
+    "memory_types": [
+      "idea",
+      "hypothesis",
+      "claim",
+      "action",
+      "evidence",
+      "proof",
+      "outcome",
+      "invalidated assumption",
+      "open question",
+      "partner signal",
+      "channel signal",
+      "funding signal",
+      "revenue signal",
+      "RRG signal"
+    ],
+    "evidence_weights": [
+      "none",
+      "weak",
+      "early",
+      "moderate",
+      "strong",
+      "validated",
+      "invalidated"
+    ],
+    "core_rule": "Ideas are hypotheses until supported by evidence."
+  },
+  "future_likelihood_movement": {
+    "likelihood_bands": [
+      "low",
+      "emerging",
+      "moderate",
+      "strong",
+      "leading",
+      "invalidated"
+    ],
+    "movement_values": [
+      "up",
+      "down",
+      "unchanged",
+      "new",
+      "invalidated"
+    ],
+    "fake_probabilities_allowed": false,
+    "evidence_required_for_movement": true
+  },
+  "since_last_snapshot": {
+    "comparison_fields": [
+      "profiles changed",
+      "assessments changed",
+      "companies changed",
+      "paid/revenue changed when available",
+      "RRG metrics changed when available",
+      "One Move status changed",
+      "new evidence added",
+      "assumptions validated",
+      "assumptions invalidated",
+      "future likelihood movement",
+      "proof targets completed or missed"
+    ],
+    "unavailable_fields_must_be_labeled": true
+  },
+  "proof_target_library": {
+    "paths": [
+      "SaaS / subscription intelligence",
+      "RRG-powered revenue recovery",
+      "mortgage-company infrastructure",
+      "brokerage recruiting/retention intelligence",
+      "leadership intelligence / LDE",
+      "hybrid ecosystem",
+      "partner capital / strategic funding",
+      "channel / distribution power",
+      "multi-vertical platform"
+    ],
+    "proof_target_fields": [
+      "target_name",
+      "what_it_proves",
+      "minimum_viable_proof",
+      "stronger_proof",
+      "evidence_source",
+      "metric",
+      "what_does_not_count_as_proof",
+      "related_one_move_examples",
+      "overclaim_warning"
+    ]
+  },
+  "safe_to_sell_boundary": {
+    "categories": [
+      "safe_to_sell_now",
+      "safe_to_describe_as_roadmap",
+      "do_not_claim_yet",
+      "internal_only",
+      "evidence_emerging"
+    ],
+    "safe_to_sell_now": [
+      "Behavior Profiles",
+      "Business Assessments",
+      "profile IDs",
+      "dashboard visibility",
+      "completion notifications",
+      "current Build Map",
+      "generated Darren Five Futures and One Move as internal leadership intelligence"
+    ],
+    "roadmap": [
+      "subscriptions",
+      "Outcome Ledger",
+      "recursive coaching",
+      "recruiting intelligence",
+      "Leadership Suite",
+      "MOLT Lite",
+      "V2 runtime / LDE"
+    ],
+    "do_not_claim_yet": [
+      "revenue traction",
+      "RRG recovery results",
+      "predictive accuracy",
+      "cross-vertical proof",
+      "funded partner commitments",
+      "channel adoption",
+      "subscription retention",
+      "outcome-validated coaching"
+    ]
+  },
+  "darren_recursive_experience": {
+    "future_panels": [
+      "Latest Snapshot",
+      "Generated Five Futures and One Move",
+      "Since Last Snapshot",
+      "Current One Move status",
+      "Evidence-weighted memories",
+      "Proof targets",
+      "What became more or less likely",
+      "Safe to Sell / Do Not Claim Yet",
+      "Strategy chat"
+    ],
+    "future_actions": [
+      "accept One Move",
+      "modify One Move",
+      "reject One Move",
+      "log what happened",
+      "classify partner/channel/funding conversation",
+      "test an idea",
+      "ask what changed",
+      "ask which future is becoming more likely",
+      "ask what can safely be said now",
+      "ask what proof is needed next"
+    ]
+  },
+  "subscription_reuse_model": {
+    "reuse_targets": [
+      "agent subscription",
+      "weekly recursive coaching",
+      "monthly full refresh",
+      "team intelligence",
+      "brokerage leadership",
+      "mortgage partner intelligence",
+      "cross-vertical users"
+    ],
+    "requirements": [
+      "entitlement check",
+      "usage counters",
+      "monthly refresh tracking",
+      "source-labeled outputs",
+      "Outcome Ledger references before claiming progress"
+    ],
+    "subscription_price_context": "$23.95/month",
+    "fake_progress_allowed": false
+  },
+  "implementation_sequence": [
+    "MM-ADMIN-4B: Persist generated Darren strategy as linked artifact.",
+    "MM-ADMIN-4C: One Move status plus acceptance/modification/rejection.",
+    "MM-ADMIN-4D: Outcome Ledger v0 for Darren.",
+    "MM-ADMIN-4E: Since Last Snapshot comparison.",
+    "MM-ADMIN-4F: Proof Target Library.",
+    "MM-ADMIN-4G: Safe to Sell / Do Not Claim Yet panel.",
+    "MM-ADMIN-4H: Strategy Chat planning.",
+    "MM-ADMIN-4I: Strategy Chat v1."
+  ],
+  "stop_conditions": [
+    "storage would mutate canonical dossier directly",
+    "generated strategy cannot be linked by profile_id/context_type",
+    "outcomes cannot be source-labeled",
+    "future movement would be fake/probabilistic without evidence",
+    "chat would not have saved summaries",
+    "subscription coaching would not verify entitlement",
+    "system claims learning without evidence/outcome records",
+    "raw source profile or raw assessment answers would be exposed",
+    "safety/truth boundaries are weakened"
+  ],
+  "limits": [
+    "Report-only planning.",
+    "No code changed.",
+    "No routes created.",
+    "No UI created.",
+    "No Redis writes.",
+    "No generation triggered.",
+    "No chat added.",
+    "No Outcome Ledger runtime added.",
+    "No subscriptions or Stripe added.",
+    "No deployment required."
+  ]
+}
