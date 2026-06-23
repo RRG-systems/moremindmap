@@ -1,0 +1,88 @@
+{
+  "phase_id": "MM-ADMIN-3D.4",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_EARLY_STAGE_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_EARLY_STAGE_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_GENERATION_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_EARLY_STAGE_REPAIR_REPORT_ONLY_3D4.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_early_stage_repair_3d4.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "prior_failure_summary": {
+    "production_status": 500,
+    "prior_error": "darren_intelligence_generation_failed",
+    "prior_generation_stage": "unhandled_generation_failure",
+    "model_resolution_confirmed": "gpt-4o-2024-08-06",
+    "token_parameter_confirmed": "max_tokens",
+    "snapshot_loaded": false,
+    "openai_requested": false
+  },
+  "diagnostic_repair": {
+    "preserves_last_useful_generation_stage": true,
+    "adds_failure_stage": true,
+    "adds_handler_micro_stages": [
+      "handler_started",
+      "auth_checked",
+      "auth_passed",
+      "debug_mode_resolved",
+      "diagnostic_initialized",
+      "before_snapshot_load_call",
+      "snapshot_load_started",
+      "snapshot_handler_invoked",
+      "snapshot_handler_returned",
+      "snapshot_loaded",
+      "snapshot_load_failed"
+    ],
+    "safe_fields_added": [
+      "failure_stage",
+      "snapshot_handler_invoked",
+      "snapshot_handler_returned",
+      "error_name"
+    ],
+    "normal_invalid_auth_returns_diagnostic": false
+  },
+  "snapshot_load_repair": {
+    "snapshot_handler_call_wrapped": true,
+    "snapshot_handler_exception_safe_code": "darren_intelligence_snapshot_handler_exception",
+    "snapshot_load_failure_safe_code": "darren_intelligence_snapshot_unavailable",
+    "private_source_content_returned": false,
+    "private_rows_returned": false
+  },
+  "create_capture_response_changes": {
+    "setHeader_supported": true,
+    "getHeader_supported": true,
+    "status_supported": true,
+    "json_supported": true,
+    "send_supported": true,
+    "end_supported": true,
+    "headersSent_supported": true
+  },
+  "identified_code_repair": {
+    "prompt_builder_receives_diagnostic": true,
+    "generic_catch_no_longer_overwrites_generation_stage": true
+  },
+  "validation_results": {
+    "node_check_generation_route": "passed",
+    "json_trace_valid": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed",
+    "invalid_admin_code_local_test": "passed_403_no_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_no_diagnostic",
+    "static_privacy_scan": "passed_with_backend_env_access_present_for_existing_openai_request_only"
+  },
+  "production_smoke_test_plan": {
+    "deploy_required_before_test": true,
+    "valid_generation_requests_allowed_after_deploy": 1,
+    "debug_mode": "safe",
+    "retry_without_approval": false,
+    "report_full_generated_strategy": false
+  },
+  "limits": [
+    "No production smoke test has been run in this sprint.",
+    "No generation success is claimed until a controlled production test passes.",
+    "No persistence was added.",
+    "No frontend or chat behavior was changed."
+  ]
+}

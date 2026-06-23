@@ -69,10 +69,11 @@ function usesCompletionTokenParameter(model) {
 }
 
 function getProvidedAdminCode(req) {
-  const authHeader = req.headers.authorization || '';
+  const headers = req.headers || {};
+  const authHeader = headers.authorization || '';
   if (authHeader.startsWith('Bearer ')) return authHeader.slice(7).trim();
   return (
-    req.headers['x-admin-code'] ||
+    headers['x-admin-code'] ||
     req.query?.admin_code ||
     req.query?.code ||
     ''
@@ -80,7 +81,8 @@ function getProvidedAdminCode(req) {
 }
 
 function isSafeDebugMode(req) {
-  return req.query?.debug === '1' || String(req.headers['x-debug-mode'] || '').toLowerCase() === 'safe';
+  const headers = req.headers || {};
+  return req.query?.debug === '1' || String(headers['x-debug-mode'] || '').toLowerCase() === 'safe';
 }
 
 function createDiagnostic() {
@@ -88,42 +90,58 @@ function createDiagnostic() {
   const tokenParameter = usesCompletionTokenParameter(model) ? 'max_completion_tokens' : 'max_tokens';
   return {
     generation_stage: 'initialized',
+    failure_stage: null,
     safe_error_code: null,
     http_status: null,
     model,
     token_parameter: tokenParameter,
     snapshot_loaded: false,
     snapshot_ok: false,
+    snapshot_handler_invoked: false,
+    snapshot_handler_returned: false,
     openai_requested: false,
     openai_responded: false,
     parsing_failed: false,
     privacy_scan_failed: false,
     schema_validation_failed: false,
     timeout: false,
-    response_status: null
+    response_status: null,
+    error_name: null
   };
 }
 
 function updateDiagnostic(diagnostic, generationStage, details = {}) {
-  diagnostic.generation_stage = generationStage;
+  if (!diagnostic) return diagnostic;
+  if (generationStage) diagnostic.generation_stage = generationStage;
   for (const key of [
+    'failure_stage',
     'safe_error_code',
     'http_status',
     'model',
     'token_parameter',
     'snapshot_loaded',
     'snapshot_ok',
+    'snapshot_handler_invoked',
+    'snapshot_handler_returned',
     'openai_requested',
     'openai_responded',
     'parsing_failed',
     'privacy_scan_failed',
     'schema_validation_failed',
     'timeout',
-    'response_status'
+    'response_status',
+    'error_name'
   ]) {
     if (Object.prototype.hasOwnProperty.call(details, key)) diagnostic[key] = details[key];
   }
   return diagnostic;
+}
+
+function safeErrorName(error) {
+  const name = String(error?.name || 'Error')
+    .replace(/[^A-Za-z0-9_:-]/g, '')
+    .slice(0, 80);
+  return name || 'Error';
 }
 
 function sendError(res, status, error, diagnostic, debugMode) {
@@ -156,8 +174,12 @@ function createCaptureResponse() {
     headers: {},
     body: null,
     ended: false,
+    headersSent: false,
     setHeader(name, value) {
-      this.headers[name.toLowerCase()] = value;
+      this.headers[String(name).toLowerCase()] = value;
+    },
+    getHeader(name) {
+      return this.headers[String(name).toLowerCase()];
     },
     status(code) {
       this.statusCode = code;
@@ -166,10 +188,19 @@ function createCaptureResponse() {
     json(payload) {
       this.body = payload;
       this.ended = true;
+      this.headersSent = true;
       return this;
     },
-    end() {
+    send(payload) {
+      this.body = payload;
       this.ended = true;
+      this.headersSent = true;
+      return this;
+    },
+    end(payload) {
+      if (payload !== undefined) this.body = payload;
+      this.ended = true;
+      this.headersSent = true;
       return this;
     }
   };
@@ -178,21 +209,45 @@ function createCaptureResponse() {
 async function loadSnapshot(req, diagnostic) {
   updateDiagnostic(diagnostic, 'snapshot_load_started');
   const capture = createCaptureResponse();
-  await snapshotHandler(
-    {
-      ...req,
-      method: 'GET',
-      query: {
-        ...(req.query || {}),
-        code: undefined,
-        admin_code: undefined
-      }
-    },
-    capture
-  );
+  try {
+    updateDiagnostic(diagnostic, 'snapshot_handler_invoked', {
+      snapshot_handler_invoked: true
+    });
+    await snapshotHandler(
+      {
+        ...req,
+        method: 'GET',
+        query: {
+          ...(req.query || {}),
+          code: undefined,
+          admin_code: undefined
+        }
+      },
+      capture
+    );
+    updateDiagnostic(diagnostic, 'snapshot_handler_returned', {
+      snapshot_handler_returned: true,
+      response_status: capture.statusCode
+    });
+  } catch (error) {
+    updateDiagnostic(diagnostic, null, {
+      failure_stage: 'snapshot_handler_exception',
+      safe_error_code: 'darren_intelligence_snapshot_handler_exception',
+      http_status: 500,
+      response_status: 500,
+      snapshot_handler_invoked: true,
+      snapshot_handler_returned: false,
+      error_name: safeErrorName(error)
+    });
+    const wrapped = new Error('snapshot_handler_exception');
+    wrapped.status = 500;
+    wrapped.safeError = 'darren_intelligence_snapshot_handler_exception';
+    throw wrapped;
+  }
 
   if (capture.statusCode !== 200 || !capture.body?.ok) {
     updateDiagnostic(diagnostic, 'snapshot_load_failed', {
+      failure_stage: 'snapshot_load_failed',
       snapshot_loaded: false,
       snapshot_ok: false,
       response_status: capture.statusCode,
@@ -324,7 +379,7 @@ async function callOpenAIForDarrenIntelligence(snapshot, diagnostic) {
     },
     body: JSON.stringify({
       model,
-      messages: buildPrompt(snapshot).messages,
+      messages: buildPrompt(snapshot, diagnostic).messages,
       response_format: { type: 'json_object' },
       ...tokenParameter
     }),
@@ -502,17 +557,22 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
 
+  const diagnostic = createDiagnostic();
+  updateDiagnostic(diagnostic, 'handler_started');
+  updateDiagnostic(diagnostic, 'auth_checked');
   const expectedCode = configuredAdminCode();
   const providedCode = getProvidedAdminCode(req);
   if (!expectedCode || providedCode !== expectedCode) {
     return res.status(403).json({ ok: false, error: 'admin_generation_access_denied' });
   }
 
-  const debugMode = isSafeDebugMode(req);
-  const diagnostic = createDiagnostic();
   updateDiagnostic(diagnostic, 'auth_passed');
+  const debugMode = isSafeDebugMode(req);
+  updateDiagnostic(diagnostic, 'debug_mode_resolved');
+  updateDiagnostic(diagnostic, 'diagnostic_initialized');
 
   try {
+    updateDiagnostic(diagnostic, 'before_snapshot_load_call');
     const snapshot = await loadSnapshot(req, diagnostic);
     const modelResult = await callOpenAIForDarrenIntelligence(snapshot, diagnostic);
     const generated = normalizeGeneratedIntelligence(modelResult.parsed, snapshot, modelResult, diagnostic);
@@ -580,8 +640,12 @@ export default async function handler(req, res) {
       });
       return sendError(res, 502, 'darren_intelligence_generation_failed_privacy_scan', diagnostic, debugMode);
     }
-    updateDiagnostic(diagnostic, 'unhandled_generation_failure', {
-      safe_error_code: error?.code || 'unhandled_generation_failure'
+    updateDiagnostic(diagnostic, null, {
+      failure_stage: 'unhandled_generation_failure',
+      safe_error_code: error?.code || 'unhandled_generation_failure',
+      http_status: 500,
+      response_status: 500,
+      error_name: safeErrorName(error)
     });
     logSafeGenerationDiagnostic('unhandled_generation_failure', {
       error_code: error?.code || 'unhandled_generation_failure',
