@@ -26,6 +26,8 @@ export function extractNotificationIdentityFromDossier(dossier = {}) {
   const canonical = dossier?.canonical_profile_json || dossier?.canonical_dossier?.canonical_profile_json || dossier;
   const metadata = canonical?.metadata || canonical?.profile_metadata || {};
   const answers = canonical?.answers || canonical?.assessment_answers || {};
+  const identity = metadata?.identity || {};
+  const organization = metadata?.organization || {};
 
   return {
     full_name:
@@ -44,6 +46,27 @@ export function extractNotificationIdentityFromDossier(dossier = {}) {
       canonical?.email ||
       metadata?.email ||
       answers?.email?.answer_text ||
+      '',
+    phone:
+      dossier?.phone ||
+      canonical?.phone ||
+      metadata?.phone ||
+      metadata?.person_phone ||
+      metadata?.mobile ||
+      metadata?.cell ||
+      metadata?.telephone ||
+      identity?.phone ||
+      identity?.mobile ||
+      identity?.cell ||
+      identity?.telephone ||
+      organization?.phone ||
+      organization?.mobile ||
+      organization?.cell ||
+      organization?.telephone ||
+      answers?.phone?.answer_text ||
+      answers?.mobile?.answer_text ||
+      answers?.cell?.answer_text ||
+      answers?.telephone?.answer_text ||
       '',
     company:
       dossier?.company_name ||
@@ -101,6 +124,7 @@ export function buildBehaviorProfileNotification({
   jobId,
   fullName,
   email,
+  phone,
   company,
   status = 'canonical_profile_saved',
   timestamp = new Date().toISOString(),
@@ -111,6 +135,7 @@ export function buildBehaviorProfileNotification({
     notification_type: 'behavior_profile_completed',
     full_name: safeString(fullName),
     email: safeString(email),
+    phone: safeString(phone),
     company: safeString(company),
     profile_id: safeString(profileId),
     job_id: safeString(jobId),
@@ -126,6 +151,7 @@ export function buildBusinessAssessmentNotification({
   ownerProfileId,
   fullName,
   email,
+  phone,
   company,
   assessmentType,
   status = 'intake_saved',
@@ -137,6 +163,7 @@ export function buildBusinessAssessmentNotification({
     notification_type: 'business_assessment_completed',
     full_name: safeString(fullName),
     email: safeString(email),
+    phone: safeString(phone),
     company: safeString(company),
     profile_id: safeString(ownerProfileId),
     assessment_id: safeString(assessmentId),

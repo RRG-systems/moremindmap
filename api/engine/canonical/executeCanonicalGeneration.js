@@ -358,6 +358,7 @@ export async function executeCanonicalGeneration(job) {
           jobId: job.job_id,
           fullName: job.payload?.metadata?.person_name || job.payload?.metadata?.name || null,
           email: job.payload?.metadata?.email || null,
+          phone: job.payload?.metadata?.identity?.phone || job.payload?.metadata?.phone || job.payload?.metadata?.person_phone || null,
           company: job.payload?.metadata?.organization?.company || job.payload?.metadata?.company_name || null,
           status: 'canonical_profile_saved',
           timestamp: new Date().toISOString()

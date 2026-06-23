@@ -116,6 +116,7 @@ export default async function handler(req, res) {
         ownerProfileId: parsedProfile.normalized,
         fullName: identity.full_name || profileContext.owner_profile_name,
         email: identity.email,
+        phone: identity.phone,
         company: identity.company,
         assessmentType,
         status: 'intake_saved',
