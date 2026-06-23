@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 const DEMO_CODE = 'darrendemo'
+const ADMIN_DASHBOARD_CODE = 'moreadmin26'
 
 export default function LeadershipPortal() {
   const navigate = useNavigate()
@@ -11,13 +12,25 @@ export default function LeadershipPortal() {
   const handleSubmit = (event) => {
     event.preventDefault()
 
-    if (accessCode.trim().toLowerCase() !== DEMO_CODE) {
-      setError('That access code is not recognized.')
+    const normalizedCode = accessCode.trim().toLowerCase()
+
+    if (normalizedCode === DEMO_CODE) {
+      sessionStorage.setItem('leadershipDemoAccess', 'true')
+      navigate('/leadership-demo')
       return
     }
 
-    sessionStorage.setItem('leadershipDemoAccess', 'true')
-    navigate('/leadership-demo')
+    if (normalizedCode === ADMIN_DASHBOARD_CODE) {
+      sessionStorage.setItem('leadershipDashboardAccess', 'true')
+      sessionStorage.setItem('leadershipDashboardCode', accessCode.trim().toUpperCase())
+      navigate('/leadership-dashboard')
+      return
+    }
+
+    if (normalizedCode !== DEMO_CODE) {
+      setError('That access code is not recognized.')
+      return
+    }
   }
 
   return (
@@ -42,7 +55,7 @@ export default function LeadershipPortal() {
         <section className="grid w-full gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
           <div>
             <div className="inline-flex rounded-full border border-orange-300/25 bg-orange-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-orange-100">
-              Executive Demo Access
+              Executive Access
             </div>
             <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">
               Leadership Portal
@@ -55,7 +68,7 @@ export default function LeadershipPortal() {
           <div className="rounded-[2rem] border border-white/12 bg-white/[0.055] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-md md:p-8">
             <div className="rounded-[1.5rem] border border-orange-300/20 bg-black/45 p-6 md:p-8">
               <div className="text-xs uppercase tracking-[0.24em] text-white/42">
-                Demo Gate
+                Leadership Gate
               </div>
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <label className="block">

@@ -1,0 +1,88 @@
+{
+  "phase_id": "MM-ADMIN-2B",
+  "verdict": "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_UI_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_ADMIN_SALES_DASHBOARD_UI_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_ADMIN_DASHBOARD_UI",
+  "files_changed": [
+    "src/LeadershipPortal.jsx",
+    "src/main.jsx",
+    "src/components/LeadershipSalesDashboard.jsx",
+    "MOREMINDMAP_LEADERSHIP_SALES_DASHBOARD_UI_REPORT_ONLY_2B.md",
+    "runtime_traces/moremindmap_leadership_sales_dashboard_ui_2b.json"
+  ],
+  "code_changed": true,
+  "deploy_required": false,
+  "routes_added": [
+    "/leadership-dashboard"
+  ],
+  "portal_codes": {
+    "DARRENDEMO": "/leadership-demo",
+    "MOREADMIN26": "/leadership-dashboard"
+  },
+  "api_consumed": {
+    "route": "/api/admin/sales-dashboard",
+    "method": "GET",
+    "admin_code_transport": "X-Admin-Code header"
+  },
+  "ui_sections": [
+    "dashboard header",
+    "summary cards",
+    "paid/free/promo/revenue unavailable panel",
+    "companies represented section",
+    "profiles table",
+    "business assessments table",
+    "missing data and limits panel",
+    "loading state",
+    "locked state",
+    "invalid access state",
+    "api unavailable state",
+    "empty states"
+  ],
+  "unavailable_fields_rendered": [
+    "paid/free totals",
+    "promo usage totals",
+    "revenue totals",
+    "Stripe payment state",
+    "subscription state",
+    "Outcome Ledger state",
+    "RRG readiness",
+    "writable follow-up notes"
+  ],
+  "privacy_guardrails": [
+    "raw API JSON not rendered",
+    "raw canonical dossiers not rendered",
+    "raw Business Assessment answers not rendered",
+    "no console logging of user rows",
+    "no env vars rendered",
+    "no Redis keys rendered",
+    "admin code sent in request header rather than URL",
+    "read-only UI only",
+    "missing data and limits remain visible"
+  ],
+  "review_outcome": {
+    "review_verdict": "PASS_NO_REPAIR_REQUIRED",
+    "repairs_made": [],
+    "routing_decision": "DARRENDEMO preserved for /leadership-demo; MOREADMIN26 routes to /leadership-dashboard",
+    "access_decision": "dashboard uses X-Admin-Code header after portal entry; backend API remains real data gate",
+    "privacy_decision": "passed_static_scan_no_raw_json_no_raw_dossier_no_raw_answers_no_redis_env_no_console_logging",
+    "deploy_recommendation": "commit_push_and_deploy_after_validation",
+    "stop_conditions_triggered": []
+  },
+  "validation_results": {
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "local_route_check": "passed_http_200_for_leadership_and_leadership_dashboard_routes",
+    "browser_interaction_check": "not_run_playwright_not_installed",
+    "raw_json_render_check": "passed_static_scan_no_raw_json_dossier_answer_redis_env_or_console_logging_in_changed_frontend_files",
+    "portal_routing_static_check": "passed_darrendemo_to_leadership_demo_moreadmin26_to_leadership_dashboard"
+  },
+  "limits": [
+    "frontend access code is session-only convenience gating; backend API validation remains the data gate",
+    "no frontend UI for Darren notes",
+    "no writable feedback capture",
+    "no Outcome Ledger",
+    "no RRG runtime",
+    "no deployment in this sprint"
+  ]
+}

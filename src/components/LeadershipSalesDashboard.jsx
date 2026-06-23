@@ -1,0 +1,497 @@
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+
+const DASHBOARD_CODE_SESSION_KEY = 'leadershipDashboardCode'
+const DASHBOARD_ACCESS_SESSION_KEY = 'leadershipDashboardAccess'
+
+function display(value) {
+  if (value === null || value === undefined || value === '') return 'Unavailable'
+  return String(value)
+}
+
+function formatDate(value) {
+  if (!value) return 'Unavailable'
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return display(value)
+  return date.toLocaleString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+function formatNumber(value) {
+  if (value === null || value === undefined || value === 'unavailable') return 'Unavailable'
+  if (typeof value === 'number') return value.toLocaleString()
+  const parsed = Number(value)
+  if (Number.isFinite(parsed)) return parsed.toLocaleString()
+  return display(value)
+}
+
+function normalizeCompany(value) {
+  const text = display(value)
+  if (text === 'Unavailable') return 'Unknown / Missing company'
+  return text
+}
+
+export default function LeadershipSalesDashboard() {
+  const [dashboardState, setDashboardState] = useState({
+    status: 'loading',
+    data: null,
+    error: ''
+  })
+
+  const hasAccess = useMemo(
+    () => sessionStorage.getItem(DASHBOARD_ACCESS_SESSION_KEY) === 'true',
+    []
+  )
+
+  useEffect(() => {
+    if (!hasAccess) {
+      setDashboardState({
+        status: 'locked',
+        data: null,
+        error: 'Enter the admin access code through the Leadership Portal.'
+      })
+      return undefined
+    }
+
+    const adminCode = sessionStorage.getItem(DASHBOARD_CODE_SESSION_KEY)
+    if (!adminCode) {
+      setDashboardState({
+        status: 'locked',
+        data: null,
+        error: 'Admin dashboard access was not found for this session.'
+      })
+      return undefined
+    }
+
+    const controller = new AbortController()
+
+    async function loadDashboard() {
+      setDashboardState({ status: 'loading', data: null, error: '' })
+
+      try {
+        const response = await fetch('/api/admin/sales-dashboard', {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'X-Admin-Code': adminCode
+          },
+          signal: controller.signal
+        })
+        const payload = await response.json().catch(() => null)
+
+        if (response.status === 403) {
+          sessionStorage.removeItem(DASHBOARD_ACCESS_SESSION_KEY)
+          sessionStorage.removeItem(DASHBOARD_CODE_SESSION_KEY)
+          setDashboardState({
+            status: 'denied',
+            data: null,
+            error: 'Admin dashboard access was not recognized.'
+          })
+          return
+        }
+
+        if (!response.ok || !payload?.ok) {
+          setDashboardState({
+            status: 'error',
+            data: null,
+            error: 'The dashboard API is unavailable right now.'
+          })
+          return
+        }
+
+        setDashboardState({ status: 'ready', data: payload, error: '' })
+      } catch (error) {
+        if (error.name === 'AbortError') return
+        setDashboardState({
+          status: 'error',
+          data: null,
+          error: 'The dashboard API is unavailable right now.'
+        })
+      }
+    }
+
+    loadDashboard()
+
+    return () => controller.abort()
+  }, [hasAccess])
+
+  if (dashboardState.status === 'locked' || dashboardState.status === 'denied') {
+    return <DashboardLocked message={dashboardState.error} />
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <DashboardBackground />
+      <DashboardHeader data={dashboardState.data} />
+
+      <main className="relative z-10 mx-auto max-w-7xl px-6 py-10">
+        {dashboardState.status === 'loading' && <StatePanel title="Loading dashboard" body="Retrieving read-only leadership sales visibility." />}
+        {dashboardState.status === 'error' && <StatePanel title="Dashboard unavailable" body={dashboardState.error} tone="error" />}
+        {dashboardState.status === 'ready' && <DashboardContent data={dashboardState.data} />}
+      </main>
+    </div>
+  )
+}
+
+function DashboardHeader({ data }) {
+  return (
+    <header className="relative z-10 border-b border-white/10 bg-black/40 backdrop-blur-sm">
+      <div className="mx-auto flex max-w-7xl flex-col gap-5 px-6 py-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <Link to="/" className="text-lg font-semibold tracking-wide md:text-xl">
+            MoreMindMap
+          </Link>
+          <div className="mt-5 inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-emerald-100">
+            V1 Read-Only
+          </div>
+          <h1 className="mt-5 text-3xl font-semibold tracking-tight md:text-5xl">
+            MORE MindMap Leadership Sales Dashboard
+          </h1>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-white/62 md:text-lg">
+            Internal sales visibility for MORE MindMap V1
+          </p>
+          <p className="mt-3 text-sm text-white/45">
+            Generated: {formatDate(data?.generated_at)}
+          </p>
+        </div>
+        <Link
+          to="/leadership"
+          className="inline-flex items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-medium text-white/72 transition hover:bg-white/10 hover:text-white"
+        >
+          Leadership Portal
+        </Link>
+      </div>
+    </header>
+  )
+}
+
+function DashboardContent({ data }) {
+  const summary = data?.summary || {}
+  const sourceLabels = data?.source_labels || {}
+  const profiles = Array.isArray(data?.profiles) ? data.profiles : []
+  const assessments = Array.isArray(data?.business_assessments) ? data.business_assessments : []
+  const companies = Array.isArray(data?.companies) ? data.companies : []
+  const notes = Array.isArray(data?.missing_data_notes) ? data.missing_data_notes : []
+  const limits = Array.isArray(data?.limits) ? data.limits : []
+
+  return (
+    <div className="space-y-10">
+      <SummaryGrid
+        summary={summary}
+        companiesCount={companies.length}
+        notesCount={notes.length}
+        sourceLabels={sourceLabels}
+      />
+
+      <UnavailablePanel summary={summary} />
+
+      <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+        <CompaniesSection companies={companies} />
+        <NotesAndLimits notes={notes} limits={limits} />
+      </section>
+
+      <ProfilesTable profiles={profiles} />
+      <AssessmentsTable assessments={assessments} />
+    </div>
+  )
+}
+
+function SummaryGrid({ summary, companiesCount, notesCount, sourceLabels }) {
+  const cards = [
+    {
+      label: 'Total Behavior Profiles',
+      value: formatNumber(summary.total_profiles),
+      source: sourceLabels.total_profiles
+    },
+    {
+      label: 'Total Business Assessments',
+      value: formatNumber(summary.total_business_assessments),
+      source: sourceLabels.total_business_assessments
+    },
+    {
+      label: 'Profiles This Month',
+      value: formatNumber(summary.profiles_this_month),
+      source: sourceLabels.profiles_this_month
+    },
+    {
+      label: 'Business Assessments This Month',
+      value: formatNumber(summary.business_assessments_this_month),
+      source: sourceLabels.business_assessments_this_month
+    },
+    {
+      label: 'Companies Represented',
+      value: formatNumber(companiesCount),
+      source: sourceLabels.companies
+    },
+    {
+      label: 'Missing Data Notes',
+      value: formatNumber(notesCount),
+      source: 'visible_v1_limits'
+    }
+  ]
+
+  return (
+    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {cards.map((card) => (
+        <div key={card.label} className="rounded-2xl border border-white/10 bg-white/[0.055] p-5 shadow-[0_18px_70px_rgba(0,0,0,0.28)] backdrop-blur-md">
+          <div className="text-xs uppercase tracking-[0.2em] text-white/42">{card.label}</div>
+          <div className="mt-4 text-3xl font-semibold tracking-tight text-white">{card.value}</div>
+          <div className="mt-4 text-xs text-white/40">Source: {display(card.source)}</div>
+        </div>
+      ))}
+    </section>
+  )
+}
+
+function UnavailablePanel({ summary }) {
+  const status = summary?.paid_free_promo_status
+  const note = status?.note || 'Paid/free/promo and revenue totals are not available until access source and payment fields are persistently indexed.'
+
+  return (
+    <section className="rounded-2xl border border-amber-300/20 bg-amber-400/10 p-6">
+      <div className="text-xs uppercase tracking-[0.24em] text-amber-100/70">Unavailable Revenue Fields</div>
+      <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
+        Paid/free/promo and revenue totals are unavailable
+      </h2>
+      <p className="mt-3 max-w-4xl text-sm leading-6 text-amber-50/72">{note}</p>
+    </section>
+  )
+}
+
+function CompaniesSection({ companies }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
+      <SectionHeading eyebrow="Company Adoption" title="Companies Represented" />
+      {companies.length === 0 ? (
+        <EmptyState message="No company rows were returned by the dashboard API." />
+      ) : (
+        <div className="mt-5 space-y-3">
+          {companies.map((company, index) => (
+            <div key={`${company.company || 'company'}-${index}`} className="flex items-center justify-between gap-4 rounded-xl border border-white/8 bg-black/30 px-4 py-3">
+              <div>
+                <div className="font-medium text-white">{normalizeCompany(company.company)}</div>
+                <div className="mt-1 text-xs text-white/42">Profiles and assessments from returned dashboard rows</div>
+              </div>
+              <div className="flex shrink-0 gap-4 text-right text-sm">
+                <div>
+                  <div className="font-semibold text-white">{formatNumber(company.profile_count)}</div>
+                  <div className="text-xs text-white/38">profiles</div>
+                </div>
+                <div>
+                  <div className="font-semibold text-white">{formatNumber(company.assessment_count)}</div>
+                  <div className="text-xs text-white/38">assessments</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
+function NotesAndLimits({ notes, limits }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
+      <SectionHeading eyebrow="V1 Truth Boundary" title="Missing Data & Limits" />
+      <div className="mt-5 grid gap-5 md:grid-cols-2">
+        <ListBlock title="Missing data notes" items={notes} empty="No missing-data notes returned." />
+        <ListBlock title="API limits" items={limits} empty="No limits returned." />
+      </div>
+    </section>
+  )
+}
+
+function ProfilesTable({ profiles }) {
+  return (
+    <TableSection
+      eyebrow="Behavior Profiles"
+      title="Recent Canonical Dossiers"
+      empty="No profile rows were returned by the dashboard API."
+    >
+      {profiles.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-[1100px] w-full border-separate border-spacing-0 text-left text-sm">
+            <thead>
+              <tr className="text-xs uppercase tracking-[0.16em] text-white/38">
+                <Th>Profile ID</Th>
+                <Th>Name</Th>
+                <Th>Email</Th>
+                <Th>Phone</Th>
+                <Th>Company</Th>
+                <Th>Role</Th>
+                <Th>Created</Th>
+                <Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {profiles.map((profile) => (
+                <tr key={profile.profile_id} className="text-white/72">
+                  <Td mono>{display(profile.profile_id)}</Td>
+                  <Td>{display(profile.name)}</Td>
+                  <Td>{display(profile.email)}</Td>
+                  <Td>{display(profile.phone)}</Td>
+                  <Td>{display(profile.company)}</Td>
+                  <Td>{display(profile.role)}</Td>
+                  <Td>{formatDate(profile.created_at)}</Td>
+                  <Td>{display(profile.completion_status || profile.source)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {profiles.length === 0 && <EmptyState message="No profile rows were returned by the dashboard API." />}
+    </TableSection>
+  )
+}
+
+function AssessmentsTable({ assessments }) {
+  return (
+    <TableSection
+      eyebrow="Business Assessments"
+      title="Recent Assessment Activity"
+      empty="No Business Assessment rows were returned by the dashboard API."
+    >
+      {assessments.length > 0 && (
+        <div className="overflow-x-auto">
+          <table className="min-w-[1180px] w-full border-separate border-spacing-0 text-left text-sm">
+            <thead>
+              <tr className="text-xs uppercase tracking-[0.16em] text-white/38">
+                <Th>Assessment ID</Th>
+                <Th>Owner Profile ID</Th>
+                <Th>Name</Th>
+                <Th>Email</Th>
+                <Th>Phone</Th>
+                <Th>Company</Th>
+                <Th>Type</Th>
+                <Th>Created</Th>
+                <Th>Status</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {assessments.map((assessment) => (
+                <tr key={assessment.assessment_id} className="text-white/72">
+                  <Td mono>{display(assessment.assessment_id)}</Td>
+                  <Td mono>{display(assessment.owner_profile_id)}</Td>
+                  <Td>{display(assessment.name)}</Td>
+                  <Td>{display(assessment.email)}</Td>
+                  <Td>{display(assessment.phone)}</Td>
+                  <Td>{display(assessment.company)}</Td>
+                  <Td>{display(assessment.assessment_type)}</Td>
+                  <Td>{formatDate(assessment.created_at)}</Td>
+                  <Td>{display(assessment.status)}</Td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      {assessments.length === 0 && <EmptyState message="No Business Assessment rows were returned by the dashboard API." />}
+    </TableSection>
+  )
+}
+
+function SectionHeading({ eyebrow, title }) {
+  return (
+    <div>
+      <div className="text-xs uppercase tracking-[0.22em] text-white/42">{eyebrow}</div>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">{title}</h2>
+    </div>
+  )
+}
+
+function ListBlock({ title, items, empty }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-white/80">{title}</h3>
+      {items.length === 0 ? (
+        <p className="mt-3 text-sm text-white/45">{empty}</p>
+      ) : (
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-white/60">
+          {items.map((item, index) => (
+            <li key={`${title}-${index}`} className="rounded-xl border border-white/8 bg-black/25 px-3 py-2">
+              {display(item)}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+function TableSection({ eyebrow, title, children }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.05] p-6">
+      <SectionHeading eyebrow={eyebrow} title={title} />
+      <div className="mt-6">{children}</div>
+    </section>
+  )
+}
+
+function Th({ children }) {
+  return <th className="border-b border-white/10 px-4 py-3 font-medium">{children}</th>
+}
+
+function Td({ children, mono = false }) {
+  return (
+    <td className={`border-b border-white/8 px-4 py-4 align-top ${mono ? 'font-mono text-xs text-white/64' : ''}`}>
+      {children}
+    </td>
+  )
+}
+
+function EmptyState({ message }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/25 p-5 text-sm text-white/52">
+      {message}
+    </div>
+  )
+}
+
+function StatePanel({ title, body, tone = 'default' }) {
+  const toneClass = tone === 'error' ? 'border-red-400/25 bg-red-500/10 text-red-50' : 'border-white/10 bg-white/[0.055] text-white'
+  return (
+    <div className={`rounded-2xl border p-6 ${toneClass}`}>
+      <h2 className="text-2xl font-semibold tracking-tight">{title}</h2>
+      <p className="mt-3 text-sm leading-6 opacity-75">{body}</p>
+    </div>
+  )
+}
+
+function DashboardLocked({ message }) {
+  return (
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-6 text-white">
+      <DashboardBackground />
+      <div className="relative z-10 max-w-xl rounded-2xl border border-white/12 bg-white/[0.055] p-8 text-center shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-md">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-emerald-300/30 bg-emerald-400/10 text-emerald-100">
+          V1
+        </div>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
+          Leadership Dashboard Locked
+        </h1>
+        <p className="mt-4 text-white/62">{message}</p>
+        <Link
+          to="/leadership"
+          className="mt-7 inline-flex rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-100"
+        >
+          Go to Access Screen
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+function DashboardBackground() {
+  return (
+    <div className="pointer-events-none fixed inset-0">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(16,185,129,0.14),transparent_28%),radial-gradient(circle_at_82%_28%,rgba(249,115,22,0.12),transparent_28%),radial-gradient(circle_at_60%_88%,rgba(14,165,233,0.1),transparent_30%)]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:80px_80px] opacity-30" />
+    </div>
+  )
+}
