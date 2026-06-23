@@ -66,7 +66,7 @@ export const leadershipBuildMap = [
       'Add Darren Strategy Chat foundation as a non-mutating conversational layer',
       'Keep canonical dossier unchanged',
       'Prepare for future movement and evidence-weighted memory',
-      'Prepare subscription coaching memory architecture'
+      'Provide the proof pattern for future subscription coaching memory architecture'
     ],
     salesMeaning: 'MORE MindMap is beginning to remember generated strategy, One Move status, and evidence events, then show what changed since the last strategy.',
     currentTruth: 'Generated strategy persistence, One Move status tracking, Outcome Ledger v0, Since Last Snapshot v0, Darren Strategy Chat, confirmed chat action capture, session summaries, future movement bands, and Adaptive Strategy Draft v0 are live. Automatic learning: not live yet.',
@@ -112,19 +112,19 @@ export const leadershipBuildMap = [
   },
   {
     id: 'outcome-ledger',
-    title: 'July 8-July 31: Outcome Ledger',
+    title: 'July 8-July 31: Outcome Ledger v1 / Weekly Recursive Coaching',
     dateRange: 'July 8-July 31',
     label: 'Recursive Coaching Begins',
     status: 'future',
     bullets: [
-      'Outcome Ledger v1',
+      'Outcome Ledger v1 beyond current v0',
       'weekly recursive coaching sessions',
       'monthly full refresh',
       'system starts learning what advice worked'
     ],
     salesMeaning: 'Moves MORE MindMap from one-time insight toward measured coaching feedback and improvement loops.',
-    currentTruth: 'Future roadmap phase. Outcome Ledger runtime is not implemented.',
-    limits: 'No recursive learning claims are made without stored outcome data.'
+    currentTruth: 'Future roadmap phase. Outcome Ledger v0 is live today. Outcome Ledger v1, weekly recursive coaching, and autonomous learning workflows are not live.',
+    limits: 'Outcome Ledger v0 records evidence events. Advanced Outcome Ledger learning and automatic strategy replacement are not live yet.'
   },
   {
     id: 'recruiting-intelligence',

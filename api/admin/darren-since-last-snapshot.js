@@ -65,13 +65,18 @@ function movementForEvidence(evidenceWeight, latestEventType) {
   }
 
   if (WEAK_EVIDENCE.has(evidenceWeight)) {
+    const weakReason = {
+      none: 'No evidence signal has been created yet, so future movement remains unchanged.',
+      weak: 'The latest evidence is weak, so it is not enough to move a future path materially.',
+      early: 'The latest evidence is early, so it is enough to record evidence but not enough to move a future path materially.'
+    };
     return {
       future_movement_supported: false,
       movement_allowed: false,
       movement_summary: 'Future movement remains unchanged.',
       reason: latestEventType === 'one_move_planned' && evidenceWeight === 'none'
         ? 'The loop is active, but no proof signal has been created yet.'
-        : 'The latest evidence is none, weak, or early, so it is not strong enough to move a future path.'
+        : weakReason[evidenceWeight] || 'The latest evidence is not strong enough to move a future path materially.'
     };
   }
 

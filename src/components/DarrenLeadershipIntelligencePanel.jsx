@@ -255,6 +255,7 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
   const unavailableFields = asArray(snapshot?.unavailable_fields)
   const evidenceGaps = asArray(snapshot?.evidence_gaps)
   const dashboardContext = snapshot?.current_dashboard_context || {}
+  const hasSavedGeneratedStrategy = generationState.status === 'ready' && Boolean(generationState.data?.strategy_id)
 
   const contextCards = useMemo(() => [
     {
@@ -331,27 +332,31 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
         <ListWithTitle title="Truth boundaries" items={asArray(pathComparison.truth_boundaries)} />
       </PanelBlock>
 
-      <PanelBlock eyebrow="Five Futures Scaffold" title="Scaffolded Futures, Not Final Generated Strategy">
-        <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-          {futures.map((future) => (
-            <div key={future.key} className="rounded-xl border border-white/10 bg-black/24 p-4">
-              <div className="text-sm font-semibold leading-6 text-white">{formatListKey(future.key)}</div>
-              <div className="mt-2 text-xs uppercase tracking-[0.16em] text-white/38">{sectionStatus(future.status)}</div>
-              <ListWithTitle title="Required for final generation" items={asArray(future.required_fields_for_generation).slice(0, 5)} compact />
-            </div>
-          ))}
-        </div>
-      </PanelBlock>
+      {!hasSavedGeneratedStrategy && (
+        <PanelBlock eyebrow="Five Futures Scaffold" title="Scaffolded Futures, Not Final Generated Strategy">
+          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            {futures.map((future) => (
+              <div key={future.key} className="rounded-xl border border-white/10 bg-black/24 p-4">
+                <div className="text-sm font-semibold leading-6 text-white">{formatListKey(future.key)}</div>
+                <div className="mt-2 text-xs uppercase tracking-[0.16em] text-white/38">{sectionStatus(future.status)}</div>
+                <ListWithTitle title="Required for final generation" items={asArray(future.required_fields_for_generation).slice(0, 5)} compact />
+              </div>
+            ))}
+          </div>
+        </PanelBlock>
+      )}
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <PanelBlock eyebrow="One Move Scaffold" title="Your Next Focus Will Stay Concrete">
-          <FieldLabel label="Status" value={sectionStatus(oneMove.status)} />
-          <FieldLabel label="Cadence" value={oneMove.cadence} />
-          <ListWithTitle title="Requirements" items={asArray(oneMove.requirements)} />
-          <p className="mt-4 text-sm leading-6 text-white/54">
-            Final generated One Move comes later. This scaffold keeps it weekly, sales-useful, and tied to evidence.
-          </p>
-        </PanelBlock>
+        {!hasSavedGeneratedStrategy && (
+          <PanelBlock eyebrow="One Move Scaffold" title="Your Next Focus Will Stay Concrete">
+            <FieldLabel label="Status" value={sectionStatus(oneMove.status)} />
+            <FieldLabel label="Cadence" value={oneMove.cadence} />
+            <ListWithTitle title="Requirements" items={asArray(oneMove.requirements)} />
+            <p className="mt-4 text-sm leading-6 text-white/54">
+              Final generated One Move comes later. This scaffold keeps it weekly, sales-useful, and tied to evidence.
+            </p>
+          </PanelBlock>
+        )}
 
         <PanelBlock eyebrow="Your Next Proof Targets" title="Make The Strongest Path More Evident">
           <ListItems items={proofTargets} />
@@ -1143,7 +1148,7 @@ function SinceLastSnapshotPanel({ adminCode }) {
       </div>
 
       <div className="mt-5 rounded-xl border border-cyan-200/14 bg-black/18 px-4 py-3 text-sm leading-6 text-cyan-50/66">
-        Automatic learning: not live yet. The system compares strategy status and ledger events, but it does not automatically update future movement or generate a new strategy yet.
+        Automatic learning: not live yet. Since Last Snapshot compares strategy status and ledger events, but it does not automatically replace strategy or validate future movement.
       </div>
     </div>
   )
@@ -1322,7 +1327,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
             </button>
           </div>
           <p className="mt-4 rounded-xl border border-cyan-200/14 bg-cyan-400/[0.07] px-4 py-3 text-xs leading-5 text-cyan-50/66">
-            Chat can reason over Darren's current context, but it does not automatically update strategy, One Move status, or the Outcome Ledger yet.
+            Chat proposes actions. Confirmed actions can update One Move status or the Outcome Ledger through approved routes. Chat does not automatically replace strategy, move futures, or create autonomous learning.
           </p>
         </div>
 
