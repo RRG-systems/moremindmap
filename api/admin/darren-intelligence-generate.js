@@ -1,4 +1,5 @@
 import { buildDarrenIntelligenceSnapshot } from './darren-intelligence-snapshot-core.js';
+import { persistDarrenGeneratedStrategy } from './darren-generated-strategy-core.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
 const DEFAULT_GENERATION_MODEL = 'gpt-4o-2024-08-06';
@@ -640,7 +641,7 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
     ],
     persistence: {
       saved: false,
-      reason: 'return_only_v1_no_redis_persistence'
+      reason: 'not_saved_until_validation_passes'
     }
   };
 
@@ -705,6 +706,37 @@ function normalizeGeneratedIntelligence(parsed, snapshot, modelResult, diagnosti
   return normalized;
 }
 
+async function persistGeneratedIntelligence(generated, snapshot, diagnostic) {
+  updateDiagnostic(diagnostic, 'persistence_started');
+  try {
+    const artifact = await persistDarrenGeneratedStrategy({ generated, snapshot });
+    updateDiagnostic(diagnostic, 'persistence_saved');
+    return {
+      ...generated,
+      strategy_id: artifact.strategy_id,
+      accepted_status: artifact.accepted_status,
+      outcome_status: artifact.outcome_status,
+      persistence: {
+        saved: true,
+        strategy_id: artifact.strategy_id,
+        persistence_version: artifact.persistence_version
+      }
+    };
+  } catch (error) {
+    updateDiagnostic(diagnostic, null, {
+      failure_stage: 'strategy_persistence_failed',
+      safe_error_code: 'darren_intelligence_strategy_persistence_failed',
+      http_status: error?.status || 500,
+      response_status: error?.status || 500,
+      error_name: safeErrorName(error)
+    });
+    const wrapped = new Error('darren_intelligence_strategy_persistence_failed');
+    wrapped.code = 'darren_intelligence_strategy_persistence_failed';
+    wrapped.status = error?.status || 500;
+    throw wrapped;
+  }
+}
+
 export default async function handler(req, res) {
   setJsonHeaders(res);
 
@@ -730,7 +762,8 @@ export default async function handler(req, res) {
     const snapshot = await loadSnapshot(diagnostic);
     const modelResult = await callOpenAIForDarrenIntelligence(snapshot, diagnostic);
     const generated = normalizeGeneratedIntelligence(modelResult.parsed, snapshot, modelResult, diagnostic);
-    return res.status(200).json(generated);
+    const savedGenerated = await persistGeneratedIntelligence(generated, snapshot, diagnostic);
+    return res.status(200).json(savedGenerated);
   } catch (error) {
     if (error?.safeError) {
       logSafeGenerationDiagnostic('snapshot_load_failed', {
@@ -802,6 +835,16 @@ export default async function handler(req, res) {
         privacy_scan_failed: true
       });
       return sendError(res, 502, 'darren_intelligence_generation_failed_privacy_scan', diagnostic, debugMode);
+    }
+    if (error?.code === 'darren_intelligence_strategy_persistence_failed') {
+      logSafeGenerationDiagnostic('strategy_persistence_failed', {
+        error_code: error.code,
+        http_status: error.status || 500,
+        model: configuredGenerationModel(),
+        snapshot_loaded: true,
+        openai_responded: true
+      });
+      return sendError(res, 500, 'darren_intelligence_strategy_persistence_failed', diagnostic, debugMode);
     }
     updateDiagnostic(diagnostic, null, {
       failure_stage: 'unhandled_generation_failure',

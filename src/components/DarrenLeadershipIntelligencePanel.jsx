@@ -29,7 +29,8 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
   const [generationState, setGenerationState] = useState({
     status: 'idle',
     data: null,
-    error: ''
+    error: '',
+    source: ''
   })
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
         }
 
         setSnapshotState({ status: 'ready', data: payload, error: '' })
+        loadLatestStrategy()
       } catch (error) {
         if (error.name === 'AbortError') return
         setSnapshotState({
@@ -84,6 +86,37 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
           data: null,
           error: 'Darren Intelligence Snapshot unavailable.'
         })
+      }
+    }
+
+    async function loadLatestStrategy() {
+      try {
+        const response = await fetch('/api/admin/darren-generated-strategy-latest', {
+          method: 'GET',
+          headers: {
+            Accept: 'application/json',
+            'X-Admin-Code': adminCode
+          },
+          signal: controller.signal
+        })
+        const payload = await response.json().catch(() => null)
+        if (!response.ok || !payload?.ok || !payload.latest_strategy) return
+
+        setGenerationState({
+          status: 'ready',
+          data: {
+            ...payload.latest_strategy,
+            persistence: {
+              saved: true,
+              strategy_id: payload.latest_strategy.strategy_id,
+              persistence_version: payload.latest_strategy.persistence_version
+            }
+          },
+          error: '',
+          source: 'latest'
+        })
+      } catch (error) {
+        if (error.name === 'AbortError') return
       }
     }
 
@@ -105,7 +138,7 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
           </p>
         </div>
         <div className="rounded-xl border border-violet-200/20 bg-black/24 px-4 py-3 text-xs leading-5 text-violet-50/68 md:max-w-xs">
-          Snapshot-first. No chat, no model generation, and no final Five Futures or One Move yet.
+          Snapshot-first. Saved strategy when generated. No chat or Outcome Ledger yet.
         </div>
       </div>
 
@@ -266,7 +299,7 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
   async function generateIntelligence() {
     if (!adminCode || generationState.status === 'loading') return
 
-    setGenerationState({ status: 'loading', data: null, error: '' })
+    setGenerationState({ status: 'loading', data: null, error: '', source: '' })
 
     try {
       const response = await fetch('/api/admin/darren-intelligence-generate', {
@@ -282,17 +315,19 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
         setGenerationState({
           status: 'error',
           data: null,
-          error: generationErrorMessage(payload?.error)
+          error: generationErrorMessage(payload?.error),
+          source: ''
         })
         return
       }
 
-      setGenerationState({ status: 'ready', data: payload, error: '' })
+      setGenerationState({ status: 'ready', data: payload, error: '', source: 'generated' })
     } catch {
       setGenerationState({
         status: 'error',
         data: null,
-        error: 'Darren Five Futures + One Move generation is unavailable right now.'
+        error: 'Darren Five Futures + One Move generation is unavailable right now.',
+        source: ''
       })
     }
   }
@@ -306,7 +341,7 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
             Generate Darren Five Futures + One Move
           </h3>
           <p className="mt-3 max-w-4xl text-sm leading-6 text-emerald-50/72">
-            Generate the actual MMM + RRG Five Futures and this week&apos;s One Move from the current source-labeled snapshot. This is not chat and does not save a persistent artifact yet.
+            Generate and save the actual MMM + RRG Five Futures and this week&apos;s One Move from the current source-labeled snapshot. This is not chat, and it does not record outcomes yet.
           </p>
         </div>
         <button
@@ -324,7 +359,9 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
           {generationState.error}
         </div>
       )}
-      {generationState.status === 'ready' && <GeneratedIntelligence generated={generationState.data} />}
+      {generationState.status === 'ready' && (
+        <GeneratedIntelligence generated={generationState.data} source={generationState.source} />
+      )}
     </section>
   )
 }
@@ -345,12 +382,25 @@ function generationErrorMessage(error) {
   return 'Darren Five Futures + One Move generation is unavailable right now.'
 }
 
-function GeneratedIntelligence({ generated }) {
+function GeneratedIntelligence({ generated, source }) {
   const futures = asArray(generated?.five_futures)
   const oneMove = generated?.one_move || {}
+  const saved = generated?.persistence?.saved === true
+  const strategyLabel = source === 'latest' ? 'Latest saved strategy' : 'Generated strategy'
 
   return (
     <div className="mt-7 space-y-6">
+      <div className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm leading-6 text-emerald-50/78">
+        <span className="font-semibold text-emerald-50">{strategyLabel}.</span>{' '}
+        {saved ? "Saved as Darren's latest leadership strategy." : 'Strategy has not been saved.'}{' '}
+        Future Outcome Ledger work will compare it against what actually happened.
+        {generated?.accepted_status && (
+          <span className="block pt-2 text-xs uppercase tracking-[0.16em] text-emerald-100/54">
+            Acceptance: {display(generated.accepted_status)} - Outcome: {display(generated.outcome_status)}
+          </span>
+        )}
+      </div>
+
       <PanelBlock eyebrow="Generated Five Futures" title="Your Strategic Futures">
         <div className="grid gap-4 xl:grid-cols-2">
           {futures.map((future) => (

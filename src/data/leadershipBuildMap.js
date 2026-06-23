@@ -51,6 +51,23 @@ export const leadershipBuildMap = [
     limits: 'No subscription status or usage limits are displayed as live product truth.'
   },
   {
+    id: 'generated-strategy-persistence',
+    title: 'Generated Strategy Persistence',
+    dateRange: 'Current Build',
+    label: 'Recursive Memory Foundation',
+    status: 'in_progress',
+    bullets: [
+      'Save Darren generated Five Futures + One Move as linked artifact',
+      'Retrieve latest saved leadership strategy',
+      'Keep canonical dossier unchanged',
+      'Prepare for One Move status and Outcome Ledger v0',
+      'Prepare subscription coaching memory architecture'
+    ],
+    salesMeaning: 'MORE MindMap is beginning to remember generated strategy so future coaching can compare recommendation against action and outcome.',
+    currentTruth: 'Generated strategy persistence is being implemented as a linked artifact. This is not full Outcome Ledger learning yet.',
+    limits: 'No outcome comparison, chat memory, or automatic learning is live until One Move status and Outcome Ledger records exist.'
+  },
+  {
     id: 'outcome-ledger',
     title: 'July 8-July 31: Outcome Ledger',
     dateRange: 'July 8-July 31',
