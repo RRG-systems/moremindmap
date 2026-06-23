@@ -1,0 +1,77 @@
+{
+  "phase_id": "MM-ADMIN-3D.2",
+  "verdict": "MOREMINDMAP_DARREN_GENERATION_DEBUG_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_GENERATION_DEBUG_REPAIR_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_DEBUG_GENERATION_TEST",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_DEBUG_REPAIR_REPORT_ONLY_3D2.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_debug_repair_3d2.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "root_cause_or_best_diagnosis": "The exact production cause is still not identifiable from the prior generic error. Best diagnosis is a runtime exception or model call failure outside the prior controlled branches. The route needed admin-safe response diagnostics carried through every generation stage.",
+  "debug_response_added": true,
+  "safe_debug_fields": [
+    "generation_stage",
+    "safe_error_code",
+    "http_status",
+    "model",
+    "token_parameter",
+    "snapshot_loaded",
+    "snapshot_ok",
+    "openai_requested",
+    "openai_responded",
+    "parsing_failed",
+    "privacy_scan_failed",
+    "schema_validation_failed",
+    "timeout",
+    "response_status"
+  ],
+  "forbidden_debug_fields": [
+    "raw snapshot payload",
+    "raw profile content",
+    "raw assessment content",
+    "prompt text",
+    "raw model output",
+    "environment values",
+    "storage keys",
+    "private user rows",
+    "generated full futures text",
+    "generated full One Move text"
+  ],
+  "repair_made": [
+    "Added safe debug mode gated behind valid admin auth.",
+    "Added diagnostic object carried through auth, snapshot load, prompt build, model request, parse, schema validation, privacy scan, and completion.",
+    "Added explicit schema validation for required future names, Five Futures count, One Move required fields, and truth boundaries.",
+    "Ensured invalid admin code with debug mode still returns 403 without diagnostic.",
+    "Kept return-only V1 persistence."
+  ],
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_local_test": "passed_403_without_diagnostic",
+    "invalid_admin_code_debug_local_test": "passed_403_without_diagnostic",
+    "static_privacy_scan": "passed"
+  },
+  "production_smoke_test_plan": [
+    "Deploy committed debug repair after approval.",
+    "Run invalid-code generation test.",
+    "Run exactly one valid generation request with safe debug enabled.",
+    "If failed, report only safe diagnostic fields.",
+    "If successful, report only shape/count/safety fields."
+  ],
+  "limits": [
+    "No chat",
+    "No Outcome Ledger runtime",
+    "No subscriptions",
+    "No Stripe",
+    "No RRG runtime",
+    "No Redis persistence",
+    "No canonical profile mutation",
+    "No assessment record mutation",
+    "No production valid generation test run in this sprint"
+  ]
+}
