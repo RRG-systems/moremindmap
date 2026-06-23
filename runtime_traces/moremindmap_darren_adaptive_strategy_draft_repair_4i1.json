@@ -1,0 +1,48 @@
+{
+  "phase_id": "MM-ADMIN-4I.1",
+  "verdict": "MOREMINDMAP_DARREN_ADAPTIVE_STRATEGY_DRAFT_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "ADAPTIVE_DRAFT_ROUTE_REPAIRED_PENDING_REVIEW_NON_REPLACEMENT",
+  "files_changed": [
+    "api/admin/darren-adaptive-loop-core.js",
+    "MOREMINDMAP_DARREN_ADAPTIVE_STRATEGY_DRAFT_REPAIR_4I1.md",
+    "runtime_traces/moremindmap_darren_adaptive_strategy_draft_repair_4i1.json"
+  ],
+  "root_cause": "Adaptive draft model output was passed through strict bounded text validation. Missing, overlong, or safety-rejected model fields could return a controlled 400 instead of saving a safe pending-review draft.",
+  "repair_summary": {
+    "safe_fallback_fields_added": true,
+    "adoption_recommendation_normalized": true,
+    "model_limits_normalized": true,
+    "raw_model_output_returned": false
+  },
+  "draft_policy_preserved": {
+    "draft_status": "pending_review",
+    "active_strategy_replacement": false,
+    "automatic_learning_boundary": "This draft does not replace the active strategy until reviewed/adopted."
+  },
+  "active_strategy_replaced": false,
+  "generated_strategy_latest_mutated": false,
+  "validation_results": {
+    "node_check_changed_backend_js": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_admin_code_draft_route": "passed",
+    "local_guarded_route_test": "passed_invalid_auth_before_redis_or_model",
+    "static_privacy_scan": "passed_report_boundary_wording_only"
+  },
+  "production_smoke_plan": {
+    "deploy_required": true,
+    "post_adaptive_strategy_draft_once": true,
+    "draft_status_pending_review": true,
+    "active_latest_strategy_unchanged": true,
+    "generated_strategy_latest_unchanged": true,
+    "outcome_event_count_unchanged": true,
+    "no_unsafe_exposure": true
+  },
+  "limits": [
+    "Draft adoption is not implemented.",
+    "Adaptive draft does not replace active strategy.",
+    "Automatic learning is not fully live.",
+    "No numeric future probabilities are introduced."
+  ]
+}

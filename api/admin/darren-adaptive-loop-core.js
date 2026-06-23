@@ -117,6 +117,32 @@ function safeArray(values, maxItems = 6, maxLength = 240) {
     .slice(0, maxItems);
 }
 
+function safeDraftText(value, fallback, maxLength) {
+  try {
+    return boundedText(value, maxLength) || fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function safeDraftArray(values, fallback = []) {
+  try {
+    const cleaned = safeArray(values, 6, 220);
+    return cleaned.length ? cleaned : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function normalizeAdoptionRecommendation(value) {
+  const cleaned = safeDraftText(value, 'review_first', 80);
+  if (['adopt_now', 'review_first', 'wait_for_more_evidence'].includes(cleaned)) return cleaned;
+  const lower = cleaned.toLowerCase();
+  if (lower.includes('wait')) return 'wait_for_more_evidence';
+  if (lower.includes('adopt')) return 'adopt_now';
+  return 'review_first';
+}
+
 function summarizeMessages(messages) {
   const safeMessages = asArray(messages)
     .slice(-MAX_SESSION_MESSAGES)
@@ -500,23 +526,27 @@ export async function createDarrenAdaptiveStrategyDraft() {
     source_strategy_id: strategy.strategy_id,
     created_at: now.toISOString(),
     draft_status: 'pending_review',
-    what_changed_since_last_strategy: boundedText(modelResult.what_changed_since_last_strategy, 900),
-    evidence_summary: boundedText(modelResult.evidence_summary, 900),
-    future_movement_summary: boundedText(modelResult.future_movement_summary, 900),
-    updated_recommendation: boundedText(modelResult.updated_recommendation, 900),
-    suggested_one_move: boundedText(modelResult.suggested_one_move, 900),
-    proof_target_next: boundedText(modelResult.proof_target_next, 600),
-    what_not_to_overclaim: boundedText(modelResult.what_not_to_overclaim, 600),
-    what_to_watch_next: boundedText(modelResult.what_to_watch_next, 600),
-    adoption_recommendation: boundedText(modelResult.adoption_recommendation, 80) || 'review_first',
-    reason: boundedText(modelResult.reason, 600),
+    what_changed_since_last_strategy: safeDraftText(modelResult.what_changed_since_last_strategy, comparison.safe_summary || 'Evidence was added, but the active strategy remains unchanged.', 900),
+    evidence_summary: safeDraftText(modelResult.evidence_summary, 'Latest evidence is early and should be treated as a signal to review, not validated proof.', 900),
+    future_movement_summary: safeDraftText(modelResult.future_movement_summary, movement?.overall_summary || 'Future movement remains evidence-gated and non-numeric.', 900),
+    updated_recommendation: safeDraftText(modelResult.updated_recommendation, 'Review the early signal and decide whether Darren should create a more specific partner commitment next.', 900),
+    suggested_one_move: safeDraftText(modelResult.suggested_one_move, 'Ask for one specific next commitment tied to a pilot, cohort, or measurable partner action.', 900),
+    proof_target_next: safeDraftText(modelResult.proof_target_next, 'A named commitment with scope, owner, and next meeting.', 600),
+    what_not_to_overclaim: safeDraftText(modelResult.what_not_to_overclaim, 'Do not claim validated adoption, funding, revenue, or automatic learning from early interest.', 600),
+    what_to_watch_next: safeDraftText(modelResult.what_to_watch_next, 'Watch whether the partner converts interest into a concrete next action.', 600),
+    adoption_recommendation: normalizeAdoptionRecommendation(modelResult.adoption_recommendation),
+    reason: safeDraftText(modelResult.reason, 'The draft is useful for review, but evidence is still early.', 600),
     source_labels: {
       strategy: 'latest_generated_strategy_read_only',
       ledger: 'outcome_ledger_v0',
       chat_summary: 'chat_session_summary_v0',
       future_movement: 'future_movement_assessment_v0'
     },
-    model_limits: safeArray(modelResult.model_limits, 6, 220),
+    model_limits: safeDraftArray(modelResult.model_limits, [
+      'This draft is pending review and does not replace the active strategy.',
+      'No numeric probabilities are used.',
+      'Early evidence is not validated proof.'
+    ]),
     automatic_learning_boundary: 'This draft does not replace the active strategy until reviewed/adopted.',
     draft_version: ADAPTIVE_STRATEGY_DRAFT_VERSION
   };
