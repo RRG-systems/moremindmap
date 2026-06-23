@@ -38,6 +38,23 @@ const SIGNAL_STRENGTHS = [
   ['invalidated', 'Invalidated']
 ]
 
+const LEDGER_EVENT_TYPES = [
+  ['one_move_planned', 'One Move planned'],
+  ['one_move_started', 'One Move started'],
+  ['one_move_completed', 'One Move completed'],
+  ['one_move_skipped', 'One Move skipped'],
+  ['one_move_invalidated', 'One Move invalidated'],
+  ['result_note_added', 'Result note added'],
+  ['partner_signal', 'Partner signal'],
+  ['channel_signal', 'Channel signal'],
+  ['funding_signal', 'Funding signal'],
+  ['revenue_signal', 'Revenue signal'],
+  ['proof_target_signal', 'Proof target signal'],
+  ['other', 'Other']
+]
+
+const LEDGER_EVIDENCE_WEIGHTS = SIGNAL_STRENGTHS
+
 function sectionStatus(status) {
   if (!status) return 'Scaffold'
   return display(status).replace(/_/g, ' ')
@@ -597,7 +614,159 @@ function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
           {statusMessage}
         </div>
       )}
+
+      <OutcomeLedgerControls adminCode={adminCode} generated={generated} />
     </div>
+  )
+}
+
+function OutcomeLedgerControls({ adminCode, generated }) {
+  const [eventType, setEventType] = useState('one_move_planned')
+  const [eventNote, setEventNote] = useState('')
+  const [signalType, setSignalType] = useState('none')
+  const [signalStrength, setSignalStrength] = useState('none')
+  const [evidenceWeight, setEvidenceWeight] = useState('none')
+  const [proofTargetName, setProofTargetName] = useState('')
+  const [futurePath, setFuturePath] = useState('')
+  const [ledgerState, setLedgerState] = useState({ status: 'idle', events: [], message: '' })
+
+  useEffect(() => {
+    if (!adminCode || !generated?.strategy_id) return undefined
+    const controller = new AbortController()
+    loadLedgerEvents(controller.signal)
+    return () => controller.abort()
+  }, [adminCode, generated?.strategy_id])
+
+  async function loadLedgerEvents(signal) {
+    try {
+      const response = await fetch(`/api/admin/darren-outcome-ledger-latest?strategy_id=${encodeURIComponent(generated.strategy_id)}`, {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        signal
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) return
+      setLedgerState({ status: 'ready', events: asArray(payload.events), message: '' })
+    } catch (error) {
+      if (error.name === 'AbortError') return
+    }
+  }
+
+  async function saveLedgerEvent() {
+    if (!adminCode || !generated?.strategy_id || ledgerState.status === 'saving') return
+    setLedgerState((current) => ({ ...current, status: 'saving', message: '' }))
+
+    try {
+      const response = await fetch('/api/admin/darren-outcome-ledger-event', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify({
+          strategy_id: generated.strategy_id,
+          event_type: eventType,
+          event_source: 'admin_dashboard',
+          event_note: eventNote,
+          signal_type: signalType,
+          signal_strength: signalStrength,
+          evidence_weight: evidenceWeight,
+          proof_target_name: proofTargetName,
+          future_path: futurePath
+        })
+      })
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        setLedgerState((current) => ({ ...current, status: 'error', message: 'Ledger event could not be saved.' }))
+        return
+      }
+
+      setEventNote('')
+      const nextEvents = payload.latest_outcome_event_summary
+        ? [payload.latest_outcome_event_summary, ...ledgerState.events].slice(0, 10)
+        : ledgerState.events
+      setLedgerState({ status: 'ready', events: nextEvents, message: 'Ledger event saved.' })
+    } catch {
+      setLedgerState((current) => ({ ...current, status: 'error', message: 'Ledger event could not be saved.' }))
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-sky-300/16 bg-sky-400/[0.07] p-4">
+      <div className="text-xs uppercase tracking-[0.18em] text-sky-100/48">Outcome Ledger v0</div>
+      <p className="mt-3 text-sm leading-6 text-white/62">
+        This records what happened as evidence. It does not mean the system has automatically learned yet. Later snapshots will compare these events against future movement.
+      </p>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <SelectField label="Event type" value={eventType} onChange={setEventType} options={LEDGER_EVENT_TYPES} />
+        <SelectField label="Signal type" value={signalType} onChange={setSignalType} options={SIGNAL_TYPES} />
+        <SelectField label="Signal strength" value={signalStrength} onChange={setSignalStrength} options={SIGNAL_STRENGTHS} />
+        <SelectField label="Evidence weight" value={evidenceWeight} onChange={setEvidenceWeight} options={LEDGER_EVIDENCE_WEIGHTS} />
+        <TextInput label="Proof target" value={proofTargetName} onChange={setProofTargetName} maxLength={240} />
+        <TextInput label="Future path" value={futurePath} onChange={setFuturePath} maxLength={240} />
+      </div>
+
+      <label className="mt-4 block">
+        <span className="text-xs uppercase tracking-[0.16em] text-white/38">Ledger note</span>
+        <textarea
+          value={eventNote}
+          onChange={(event) => setEventNote(event.target.value.slice(0, 1200))}
+          rows={4}
+          className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-sky-200/45"
+          placeholder="Record what happened as evidence."
+        />
+      </label>
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <StatusButton disabled={ledgerState.status === 'saving'} onClick={saveLedgerEvent}>Save Ledger Event</StatusButton>
+        {ledgerState.message && <span className="text-sm leading-6 text-white/58">{ledgerState.message}</span>}
+      </div>
+
+      <div className="mt-5">
+        <div className="text-xs uppercase tracking-[0.16em] text-white/36">Latest ledger events</div>
+        {!ledgerState.events.length && (
+          <p className="mt-3 text-sm leading-6 text-white/48">No ledger events recorded yet.</p>
+        )}
+        {!!ledgerState.events.length && (
+          <div className="mt-3 space-y-2">
+            {ledgerState.events.slice(0, 5).map((event, index) => (
+              <div key={`${event.event_id || index}-${event.created_at || index}`} className="rounded-xl border border-white/10 bg-black/24 px-4 py-3">
+                <div className="flex flex-col gap-1 text-xs uppercase tracking-[0.13em] text-sky-100/48 md:flex-row md:items-center md:justify-between">
+                  <span>{formatListKey(event.event_type)}</span>
+                  <span>{display(event.created_at)}</span>
+                </div>
+                <div className="mt-2 text-sm leading-6 text-white/62">
+                  {formatListKey(event.signal_type)} / {formatListKey(event.signal_strength)} / {formatListKey(event.evidence_weight)}
+                </div>
+                {event.note_preview && (
+                  <p className="mt-2 text-sm leading-6 text-white/52">{event.note_preview}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function TextInput({ label, value, onChange, maxLength }) {
+  return (
+    <label className="block">
+      <span className="text-xs uppercase tracking-[0.16em] text-white/38">{label}</span>
+      <input
+        type="text"
+        value={value}
+        onChange={(event) => onChange(event.target.value.slice(0, maxLength))}
+        className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm text-white outline-none transition focus:border-sky-200/45"
+      />
+    </label>
   )
 }
 
