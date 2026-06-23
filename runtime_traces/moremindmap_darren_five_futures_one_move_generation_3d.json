@@ -1,0 +1,122 @@
+{
+  "phase_id": "MM-ADMIN-3D",
+  "verdict": "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_HUMAN_REVIEW_OF_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION",
+  "files_changed": [
+    "api/admin/darren-intelligence-generate.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "MOREMINDMAP_DARREN_FIVE_FUTURES_ONE_MOVE_GENERATION_REPORT_ONLY_3D.md",
+    "runtime_traces/moremindmap_darren_five_futures_one_move_generation_3d.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "api_route": "POST /api/admin/darren-intelligence-generate",
+  "model_used_or_model_env": {
+    "primary_env": "DARREN_INTELLIGENCE_OPENAI_MODEL",
+    "fallback_env": "OPENAI_MODEL",
+    "default_model": "gpt-4o-2024-08-06",
+    "api_key_env": "OPENAI_API_KEY"
+  },
+  "generated_output_schema": {
+    "ok": true,
+    "generated_at": "ISO timestamp",
+    "source_snapshot_version": "string",
+    "darren_profile_id": "string",
+    "five_futures": [
+      {
+        "name": "string",
+        "summary": "string",
+        "current_evidence": "string",
+        "missing_evidence": "string",
+        "likely_bottleneck": "string",
+        "upside": "string",
+        "danger": "string",
+        "what_makes_it_more_likely": "string",
+        "what_would_invalidate_it": "string",
+        "e_to_p_shift": "string",
+        "sales_story": "string",
+        "what_not_to_overclaim": "string"
+      }
+    ],
+    "one_move": {
+      "title": "string",
+      "summary": "string",
+      "why_this_move": "string",
+      "exact_action": "string",
+      "proof_target": "string",
+      "expected_signal": "string",
+      "what_to_say": "string",
+      "what_not_to_say": "string",
+      "timeframe": "string",
+      "success_condition": "string"
+    },
+    "evidence_gaps": [
+      "string"
+    ],
+    "next_proof_targets": [
+      "string"
+    ],
+    "truth_boundaries": [
+      "string"
+    ],
+    "model_limits": [
+      "string"
+    ]
+  },
+  "persistence_decision": {
+    "mode": "return_only_v1",
+    "saved_to_redis": false,
+    "canonical_profile_mutated": false,
+    "assessment_record_mutated": false,
+    "reason": "Generation can be proven safely before adding a separate persisted artifact lifecycle."
+  },
+  "frontend_sections": [
+    "Generate Darren Five Futures + One Move button",
+    "Generated Five Futures",
+    "One Move This Week",
+    "Evidence Gaps",
+    "Next Proof Targets",
+    "What Not To Overclaim",
+    "Model Limits"
+  ],
+  "privacy_guardrails": [
+    "invalid admin code returns 403 before snapshot/model access",
+    "snapshot route supplies sanitized grounding data",
+    "raw canonical dossier is not returned",
+    "raw assessment answers are not returned",
+    "raw JSON is not rendered",
+    "private payloads are not logged",
+    "Redis keys are not exposed",
+    "environment values are not exposed",
+    "prompt text is not returned",
+    "model metadata is not returned to the client",
+    "lane-check framing is not returned",
+    "literal celebrity comparison is not returned",
+    "fake revenue is not allowed",
+    "fake valuation certainty is not allowed",
+    "fake partner funding is not allowed",
+    "fake channel adoption is not allowed",
+    "fake RRG readiness is not allowed"
+  ],
+  "validation_results": {
+    "node_check": "passed",
+    "json_trace_validation": "passed",
+    "git_diff_check": "passed",
+    "npm_build": "passed_with_existing_vite_chunk_size_warning",
+    "invalid_admin_code_test": "passed_controlled_403_admin_generation_access_denied_before_snapshot_or_model_access",
+    "model_generation_test": "skipped_local_OPENAI_API_KEY_and_REDIS_URL_not_configured",
+    "static_privacy_scan": "passed_for_frontend_and_forbidden_terms_backend"
+  },
+  "limits": [
+    "No chat",
+    "No Outcome Ledger runtime",
+    "No subscriptions",
+    "No Stripe",
+    "No RRG runtime",
+    "No Redis persistence for generated output in V1",
+    "No canonical profile mutation",
+    "No assessment record mutation",
+    "No generation on page load"
+  ]
+}

@@ -26,6 +26,11 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
     data: null,
     error: ''
   })
+  const [generationState, setGenerationState] = useState({
+    status: 'idle',
+    data: null,
+    error: ''
+  })
 
   useEffect(() => {
     if (!adminCode) {
@@ -110,12 +115,19 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
       {(snapshotState.status === 'locked' || snapshotState.status === 'denied' || snapshotState.status === 'error') && (
         <SnapshotState title="Darren Intelligence Snapshot unavailable" body={snapshotState.error} tone="error" />
       )}
-      {snapshotState.status === 'ready' && <DarrenSnapshotContent snapshot={snapshotState.data} />}
+      {snapshotState.status === 'ready' && (
+        <DarrenSnapshotContent
+          snapshot={snapshotState.data}
+          adminCode={adminCode}
+          generationState={generationState}
+          setGenerationState={setGenerationState}
+        />
+      )}
     </section>
   )
 }
 
-function DarrenSnapshotContent({ snapshot }) {
+function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenerationState }) {
   const darren = snapshot?.darren || {}
   const strategicGoal = snapshot?.strategic_goal || {}
   const eToP = snapshot?.e_to_p_lens || {}
@@ -240,7 +252,158 @@ function DarrenSnapshotContent({ snapshot }) {
           <ListWithTitle title="Evidence gaps" items={evidenceGaps} />
         </PanelBlock>
       </div>
+
+      <GenerationControl
+        adminCode={adminCode}
+        generationState={generationState}
+        setGenerationState={setGenerationState}
+      />
     </div>
+  )
+}
+
+function GenerationControl({ adminCode, generationState, setGenerationState }) {
+  async function generateIntelligence() {
+    if (!adminCode || generationState.status === 'loading') return
+
+    setGenerationState({ status: 'loading', data: null, error: '' })
+
+    try {
+      const response = await fetch('/api/admin/darren-intelligence-generate', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'X-Admin-Code': adminCode
+        }
+      })
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        setGenerationState({
+          status: 'error',
+          data: null,
+          error: generationErrorMessage(payload?.error)
+        })
+        return
+      }
+
+      setGenerationState({ status: 'ready', data: payload, error: '' })
+    } catch {
+      setGenerationState({
+        status: 'error',
+        data: null,
+        error: 'Darren Five Futures + One Move generation is unavailable right now.'
+      })
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-emerald-300/18 bg-emerald-400/[0.08] p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-emerald-100/58">Generated Strategy</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">
+            Generate Darren Five Futures + One Move
+          </h3>
+          <p className="mt-3 max-w-4xl text-sm leading-6 text-emerald-50/72">
+            Generate the actual MMM + RRG Five Futures and this week&apos;s One Move from the current source-labeled snapshot. This is not chat and does not save a persistent artifact yet.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={generateIntelligence}
+          disabled={generationState.status === 'loading'}
+          className="rounded-2xl bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-55"
+        >
+          {generationState.status === 'loading' ? 'Generating...' : 'Generate Darren Five Futures + One Move'}
+        </button>
+      </div>
+
+      {generationState.status === 'error' && (
+        <div className="mt-5 rounded-xl border border-red-400/24 bg-red-500/10 px-4 py-3 text-sm leading-6 text-red-50">
+          {generationState.error}
+        </div>
+      )}
+      {generationState.status === 'ready' && <GeneratedIntelligence generated={generationState.data} />}
+    </section>
+  )
+}
+
+function generationErrorMessage(error) {
+  if (error === 'darren_intelligence_model_not_configured') {
+    return 'Darren Five Futures + One Move generation is not configured yet.'
+  }
+  if (error === 'darren_intelligence_generation_timeout') {
+    return 'Darren Five Futures + One Move generation timed out. Try again later.'
+  }
+  if (error === 'darren_intelligence_generation_failed_privacy_scan') {
+    return 'Generated intelligence failed a safety check and was not returned.'
+  }
+  return 'Darren Five Futures + One Move generation is unavailable right now.'
+}
+
+function GeneratedIntelligence({ generated }) {
+  const futures = asArray(generated?.five_futures)
+  const oneMove = generated?.one_move || {}
+
+  return (
+    <div className="mt-7 space-y-6">
+      <PanelBlock eyebrow="Generated Five Futures" title="Your Strategic Futures">
+        <div className="grid gap-4 xl:grid-cols-2">
+          {futures.map((future) => (
+            <GeneratedFutureCard key={future.name} future={future} />
+          ))}
+        </div>
+      </PanelBlock>
+
+      <PanelBlock eyebrow="One Move This Week" title={display(oneMove.title)}>
+        <FieldLabel label="Summary" value={oneMove.summary} />
+        <FieldLabel label="Why this move" value={oneMove.why_this_move} />
+        <FieldLabel label="Exact action" value={oneMove.exact_action} />
+        <FieldLabel label="Proof target" value={oneMove.proof_target} />
+        <FieldLabel label="Expected signal" value={oneMove.expected_signal} />
+        <FieldLabel label="What to say" value={oneMove.what_to_say} />
+        <FieldLabel label="What not to say" value={oneMove.what_not_to_say} />
+        <FieldLabel label="Timeframe" value={oneMove.timeframe} />
+        <FieldLabel label="Success condition" value={oneMove.success_condition} />
+      </PanelBlock>
+
+      <div className="grid gap-6 xl:grid-cols-2">
+        <PanelBlock eyebrow="Evidence Gaps" title="What Still Needs Proof">
+          <ListItems items={asArray(generated?.evidence_gaps)} />
+        </PanelBlock>
+        <PanelBlock eyebrow="Next Proof Targets" title="Your Next Signals">
+          <ListItems items={asArray(generated?.next_proof_targets)} />
+        </PanelBlock>
+        <PanelBlock eyebrow="What Not To Overclaim" title="Generated Sales Guardrails">
+          <ListItems items={asArray(generated?.truth_boundaries)} />
+        </PanelBlock>
+        <PanelBlock eyebrow="Model Limits" title="Not Yet Proven">
+          <ListItems items={asArray(generated?.model_limits)} />
+        </PanelBlock>
+      </div>
+    </div>
+  )
+}
+
+function GeneratedFutureCard({ future }) {
+  return (
+    <article className="rounded-xl border border-white/10 bg-black/24 p-4">
+      <h4 className="text-lg font-semibold leading-7 text-white">{display(future.name)}</h4>
+      <p className="mt-3 text-sm leading-6 text-white/66">{display(future.summary)}</p>
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <FieldLabel label="Current evidence" value={future.current_evidence} />
+        <FieldLabel label="Missing evidence" value={future.missing_evidence} />
+        <FieldLabel label="Likely bottleneck" value={future.likely_bottleneck} />
+        <FieldLabel label="Upside" value={future.upside} />
+        <FieldLabel label="Danger" value={future.danger} />
+        <FieldLabel label="E->P shift" value={future.e_to_p_shift} />
+      </div>
+      <FieldLabel label="Your sales story" value={future.sales_story} />
+      <FieldLabel label="What makes it more likely" value={future.what_makes_it_more_likely} />
+      <FieldLabel label="What would invalidate it" value={future.what_would_invalidate_it} />
+      <FieldLabel label="What not to overclaim" value={future.what_not_to_overclaim} />
+    </article>
   )
 }
 
