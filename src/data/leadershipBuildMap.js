@@ -59,13 +59,15 @@ export const leadershipBuildMap = [
     bullets: [
       'Save Darren generated Five Futures + One Move as linked artifact',
       'Retrieve latest saved leadership strategy',
+      'Track One Move acceptance and status',
+      'Capture lightweight result notes and signal strength v0',
       'Keep canonical dossier unchanged',
       'Prepare for One Move status and Outcome Ledger v0',
       'Prepare subscription coaching memory architecture'
     ],
-    salesMeaning: 'MORE MindMap is beginning to remember generated strategy so future coaching can compare recommendation against action and outcome.',
-    currentTruth: 'Generated strategy persistence is being implemented as a linked artifact. This is not full Outcome Ledger learning yet.',
-    limits: 'No outcome comparison, chat memory, or automatic learning is live until One Move status and Outcome Ledger records exist.'
+    salesMeaning: 'MORE MindMap is beginning to remember generated strategy and One Move status so future coaching can compare recommendation against action and outcome.',
+    currentTruth: 'Generated strategy persistence is live, and One Move status tracking is being implemented as lightweight result capture v0. This is not full Outcome Ledger learning yet.',
+    limits: 'No outcome comparison, chat memory, or automatic learning is live until Outcome Ledger records and snapshot comparison exist.'
   },
   {
     id: 'outcome-ledger',

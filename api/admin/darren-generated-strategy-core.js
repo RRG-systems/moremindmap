@@ -5,6 +5,45 @@ import { DARREN_PROFILE_ID, SNAPSHOT_VERSION } from './darren-intelligence-snaps
 export const DARREN_STRATEGY_CONTEXT_TYPE = 'darren_leadership_intelligence';
 export const DARREN_STRATEGY_GENERATION_VERSION = 'DARREN-FIVE-FUTURES-ONE-MOVE-V1';
 export const DARREN_STRATEGY_PERSISTENCE_VERSION = 'generated_strategy_v1';
+export const ONE_MOVE_STATUS_VERSION = 'one_move_status_v0';
+
+export const ONE_MOVE_ACTIONS = new Set([
+  'accept',
+  'modify',
+  'reject',
+  'mark_planned',
+  'mark_in_progress',
+  'mark_completed',
+  'mark_skipped',
+  'mark_invalidated',
+  'add_result_note'
+]);
+
+export const RESULT_SIGNAL_TYPES = new Set([
+  'none',
+  'customer_revenue',
+  'partner_capital',
+  'channel_distribution',
+  'profile_volume',
+  'assessment_volume',
+  'RRG_opportunity',
+  'follow_up_meeting',
+  'funded_pilot',
+  'other'
+]);
+
+export const RESULT_SIGNAL_STRENGTHS = new Set([
+  'none',
+  'weak',
+  'early',
+  'moderate',
+  'strong',
+  'validated',
+  'invalidated'
+]);
+
+const MAX_NOTE_LENGTH = 1200;
+const MAX_MODIFIED_MOVE_LENGTH = 2000;
 
 function generatedStrategyKey(strategyId) {
   return `generated_strategy:${strategyId}`;
@@ -52,6 +91,14 @@ function sanitizeArtifact(artifact) {
     privacy_validation: artifact.privacy_validation || null,
     accepted_status: artifact.accepted_status || 'pending',
     outcome_status: artifact.outcome_status || 'not_recorded',
+    one_move_user_note: artifact.one_move_user_note || null,
+    one_move_modified_text: artifact.one_move_modified_text || null,
+    one_move_result_note: artifact.one_move_result_note || null,
+    result_signal_type: artifact.result_signal_type || 'none',
+    result_signal_strength: artifact.result_signal_strength || 'none',
+    updated_at: artifact.updated_at || null,
+    status_history: asArray(artifact.status_history).slice(-25),
+    one_move_status_version: artifact.one_move_status_version || null,
     persistence_version: artifact.persistence_version || DARREN_STRATEGY_PERSISTENCE_VERSION
   };
 }
@@ -107,8 +154,85 @@ function buildStrategyArtifact({ generated, snapshot }) {
     },
     accepted_status: 'pending',
     outcome_status: 'not_recorded',
+    one_move_user_note: null,
+    one_move_modified_text: null,
+    one_move_result_note: null,
+    result_signal_type: 'none',
+    result_signal_strength: 'none',
+    updated_at: null,
+    status_history: [],
+    one_move_status_version: ONE_MOVE_STATUS_VERSION,
     persistence_version: DARREN_STRATEGY_PERSISTENCE_VERSION
   };
+}
+
+function statusError(code, status = 400) {
+  const error = new Error(code);
+  error.code = code;
+  error.status = status;
+  return error;
+}
+
+function boundedText(value, maxLength) {
+  const text = String(value || '').trim();
+  if (!text) return null;
+  if (text.length > maxLength) throw statusError('one_move_status_text_too_long', 400);
+  if (/canonical[\s_-]+dossier|canonical[\s_-]+profile[\s_-]+json|canonical[\s_-]+profile[\s_-]+text|assessment[\s_-]+answers|raw[\s_-]+answers/i.test(text)) {
+    throw statusError('one_move_status_private_source_reference_rejected', 400);
+  }
+  return text;
+}
+
+function applyOneMoveAction(artifact, input) {
+  const action = String(input?.action || '').trim();
+  if (!ONE_MOVE_ACTIONS.has(action)) throw statusError('invalid_one_move_status_action', 400);
+
+  const now = new Date().toISOString();
+  const note = boundedText(input?.note, MAX_NOTE_LENGTH);
+  const modifiedText = boundedText(input?.modified_one_move_text, MAX_MODIFIED_MOVE_LENGTH);
+  const signalType = String(input?.result_signal_type || artifact.result_signal_type || 'none').trim();
+  const signalStrength = String(input?.result_signal_strength || artifact.result_signal_strength || 'none').trim();
+
+  if (!RESULT_SIGNAL_TYPES.has(signalType)) throw statusError('invalid_result_signal_type', 400);
+  if (!RESULT_SIGNAL_STRENGTHS.has(signalStrength)) throw statusError('invalid_result_signal_strength', 400);
+  if (action === 'modify' && !modifiedText) throw statusError('modified_one_move_text_required', 400);
+
+  const updated = {
+    ...artifact,
+    updated_at: now,
+    result_signal_type: signalType,
+    result_signal_strength: signalStrength,
+    one_move_status_version: ONE_MOVE_STATUS_VERSION
+  };
+
+  if (note) updated.one_move_user_note = note;
+  if (action === 'add_result_note' && note) updated.one_move_result_note = note;
+
+  if (action === 'accept') updated.accepted_status = 'accepted';
+  if (action === 'modify') {
+    updated.accepted_status = 'modified';
+    updated.one_move_modified_text = modifiedText;
+  }
+  if (action === 'reject') updated.accepted_status = 'rejected';
+  if (action === 'mark_planned') updated.outcome_status = 'planned';
+  if (action === 'mark_in_progress') updated.outcome_status = 'in_progress';
+  if (action === 'mark_completed') updated.outcome_status = 'completed';
+  if (action === 'mark_skipped') updated.outcome_status = 'skipped';
+  if (action === 'mark_invalidated') updated.outcome_status = 'invalidated';
+  if (action === 'add_result_note' && updated.outcome_status === 'not_recorded') updated.outcome_status = 'in_progress';
+
+  const historyEvent = {
+    action,
+    accepted_status: updated.accepted_status,
+    outcome_status: updated.outcome_status,
+    result_signal_type: updated.result_signal_type,
+    result_signal_strength: updated.result_signal_strength,
+    note_present: Boolean(note),
+    modified_text_present: Boolean(modifiedText),
+    created_at: now
+  };
+  updated.status_history = [...asArray(artifact.status_history), historyEvent].slice(-25);
+  return updated;
 }
 
 function getRedis() {
@@ -151,6 +275,37 @@ export async function loadLatestDarrenGeneratedStrategy() {
       error.status = 500;
       throw error;
     }
+  } finally {
+    redis.disconnect();
+  }
+}
+
+export async function updateDarrenOneMoveStatus(input) {
+  const strategyId = String(input?.strategy_id || '').trim();
+  if (!strategyId) throw statusError('strategy_id_required', 400);
+  const action = String(input?.action || '').trim();
+  if (!ONE_MOVE_ACTIONS.has(action)) throw statusError('invalid_one_move_status_action', 400);
+
+  const redis = getRedis();
+  try {
+    const raw = await redis.get(generatedStrategyKey(strategyId));
+    if (!raw) throw statusError('generated_strategy_not_found', 404);
+
+    let artifact;
+    try {
+      artifact = JSON.parse(raw);
+    } catch {
+      throw statusError('strategy_artifact_parse_failed', 500);
+    }
+
+    if (artifact.profile_id !== DARREN_PROFILE_ID || artifact.context_type !== DARREN_STRATEGY_CONTEXT_TYPE) {
+      throw statusError('generated_strategy_context_mismatch', 403);
+    }
+
+    const updated = applyOneMoveAction(artifact, input);
+    await redis.set(generatedStrategyKey(strategyId), JSON.stringify(updated));
+    await redis.set(generatedStrategyLatestKey(DARREN_PROFILE_ID, DARREN_STRATEGY_CONTEXT_TYPE), strategyId);
+    return sanitizeArtifact(updated);
   } finally {
     redis.disconnect();
   }

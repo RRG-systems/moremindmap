@@ -1,0 +1,127 @@
+{
+  "phase_id": "MM-ADMIN-4C",
+  "verdict": "MOREMINDMAP_DARREN_ONE_MOVE_STATUS_TRACKING_IMPLEMENTED_WITH_LIMITS",
+  "classification": "MOREMINDMAP_DARREN_ONE_MOVE_STATUS_TRACKING_DEFINED_WITH_LIMITS",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_ONE_MOVE_STATUS_SMOKE_TEST",
+  "files_changed": [
+    "api/admin/darren-generated-strategy-core.js",
+    "api/admin/darren-one-move-status.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_ONE_MOVE_STATUS_TRACKING_REPORT_ONLY_4C.md",
+    "runtime_traces/moremindmap_darren_one_move_status_tracking_4c.json"
+  ],
+  "code_changed": true,
+  "deploy_required": true,
+  "routes_added": [
+    "POST /api/admin/darren-one-move-status"
+  ],
+  "status_fields": [
+    "accepted_status",
+    "outcome_status",
+    "one_move_user_note",
+    "one_move_modified_text",
+    "one_move_result_note",
+    "result_signal_type",
+    "result_signal_strength",
+    "updated_at",
+    "status_history",
+    "one_move_status_version"
+  ],
+  "allowed_actions": [
+    "accept",
+    "modify",
+    "reject",
+    "mark_planned",
+    "mark_in_progress",
+    "mark_completed",
+    "mark_skipped",
+    "mark_invalidated",
+    "add_result_note"
+  ],
+  "signal_types": [
+    "none",
+    "customer_revenue",
+    "partner_capital",
+    "channel_distribution",
+    "profile_volume",
+    "assessment_volume",
+    "RRG_opportunity",
+    "follow_up_meeting",
+    "funded_pilot",
+    "other"
+  ],
+  "signal_strengths": [
+    "none",
+    "weak",
+    "early",
+    "moderate",
+    "strong",
+    "validated",
+    "invalidated"
+  ],
+  "redis_write_scope": {
+    "allowed": [
+      "update generated_strategy:{strategy_id}",
+      "refresh generated_strategy_latest:{profile_id}:{context_type}"
+    ],
+    "canonical_profile_writes": false,
+    "assessment_record_writes": false,
+    "other_redis_writes": false
+  },
+  "frontend_controls": [
+    "Accept One Move",
+    "Modify",
+    "Mark Planned",
+    "Mark In Progress",
+    "Mark Completed",
+    "Mark Skipped",
+    "Reject",
+    "Save Result Note",
+    "note field",
+    "modified One Move text field",
+    "signal type selector",
+    "signal strength selector"
+  ],
+  "build_map_updated": true,
+  "canonical_dossier_mutated": false,
+  "assessment_records_mutated": false,
+  "privacy_guardrails": [
+    "invalid admin code returns 403 before Redis access",
+    "strategy_id is required",
+    "action is allowlisted",
+    "strategy must belong to Darren profile/context",
+    "notes and modified text are bounded",
+    "private source field references are rejected",
+    "signal type and signal strength are allowlisted",
+    "raw profile source data is not returned",
+    "raw assessment responses are not returned",
+    "storage internals and environment values are not returned"
+  ],
+  "validation_results": {
+    "node_check_backend": "passed for api/admin/darren-generated-strategy-core.js and api/admin/darren-one-move-status.js",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed with existing Vite chunk-size warning",
+    "invalid_admin_code_route_test": "passed: 403 admin_one_move_status_access_denied before Redis access",
+    "invalid_status_action_route_test": "passed: 400 invalid_one_move_status_action before Redis access",
+    "static_privacy_scan": "passed: findings limited to backend environment access and required trace mutation-status terminology; no client-side env, raw source, raw answer, prompt, raw model output, raw error, or forbidden framing exposure"
+  },
+  "production_smoke_test_plan": [
+    "deploy production after commit and push if approved/safe",
+    "confirm /leadership returns 200",
+    "confirm /leadership-dashboard returns 200",
+    "confirm latest generated strategy valid route returns strategy",
+    "confirm one move status invalid code returns 403",
+    "confirm invalid action returns controlled 400",
+    "run at most one controlled valid status update using mark_planned",
+    "confirm latest strategy retrieval reflects status/history update",
+    "confirm no raw dossier, raw assessment answer, storage internal, env, prompt, or forbidden framing exposure"
+  ],
+  "limits": [
+    "This is One Move status tracking and lightweight result capture v0, not full Outcome Ledger runtime.",
+    "No chat was added.",
+    "No subscriptions, Stripe, RRG runtime, canonical dossier mutation, or assessment mutation were added.",
+    "The system must not claim learning has happened until outcome records and later snapshot comparison exist."
+  ]
+}

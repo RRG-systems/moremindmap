@@ -15,6 +15,29 @@ function asArray(value) {
   return Array.isArray(value) ? value : []
 }
 
+const SIGNAL_TYPES = [
+  ['none', 'None'],
+  ['customer_revenue', 'Customer revenue'],
+  ['partner_capital', 'Partner capital'],
+  ['channel_distribution', 'Channel distribution'],
+  ['profile_volume', 'Profile volume'],
+  ['assessment_volume', 'Assessment volume'],
+  ['RRG_opportunity', 'RRG opportunity'],
+  ['follow_up_meeting', 'Follow-up meeting'],
+  ['funded_pilot', 'Funded pilot'],
+  ['other', 'Other']
+]
+
+const SIGNAL_STRENGTHS = [
+  ['none', 'None'],
+  ['weak', 'Weak'],
+  ['early', 'Early'],
+  ['moderate', 'Moderate'],
+  ['strong', 'Strong'],
+  ['validated', 'Validated'],
+  ['invalidated', 'Invalidated']
+]
+
 function sectionStatus(status) {
   if (!status) return 'Scaffold'
   return display(status).replace(/_/g, ' ')
@@ -360,7 +383,12 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
         </div>
       )}
       {generationState.status === 'ready' && (
-        <GeneratedIntelligence generated={generationState.data} source={generationState.source} />
+        <GeneratedIntelligence
+          adminCode={adminCode}
+          generated={generationState.data}
+          source={generationState.source}
+          setGenerationState={setGenerationState}
+        />
       )}
     </section>
   )
@@ -382,7 +410,7 @@ function generationErrorMessage(error) {
   return 'Darren Five Futures + One Move generation is unavailable right now.'
 }
 
-function GeneratedIntelligence({ generated, source }) {
+function GeneratedIntelligence({ adminCode, generated, source, setGenerationState }) {
   const futures = asArray(generated?.five_futures)
   const oneMove = generated?.one_move || {}
   const saved = generated?.persistence?.saved === true
@@ -419,6 +447,13 @@ function GeneratedIntelligence({ generated, source }) {
         <FieldLabel label="What not to say" value={oneMove.what_not_to_say} />
         <FieldLabel label="Timeframe" value={oneMove.timeframe} />
         <FieldLabel label="Success condition" value={oneMove.success_condition} />
+        {generated?.strategy_id && (
+          <OneMoveStatusControls
+            adminCode={adminCode}
+            generated={generated}
+            setGenerationState={setGenerationState}
+          />
+        )}
       </PanelBlock>
 
       <div className="grid gap-6 xl:grid-cols-2">
@@ -436,6 +471,163 @@ function GeneratedIntelligence({ generated, source }) {
         </PanelBlock>
       </div>
     </div>
+  )
+}
+
+function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
+  const [note, setNote] = useState('')
+  const [modifiedText, setModifiedText] = useState(generated.one_move_modified_text || '')
+  const [signalType, setSignalType] = useState(generated.result_signal_type || 'none')
+  const [signalStrength, setSignalStrength] = useState(generated.result_signal_strength || 'none')
+  const [statusMessage, setStatusMessage] = useState('')
+  const [isSaving, setIsSaving] = useState(false)
+  const latestHistory = asArray(generated.status_history).slice(-1)[0]
+
+  async function updateStatus(action) {
+    if (!adminCode || !generated.strategy_id || isSaving) return
+
+    setIsSaving(true)
+    setStatusMessage('')
+    try {
+      const response = await fetch('/api/admin/darren-one-move-status', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify({
+          strategy_id: generated.strategy_id,
+          action,
+          note,
+          modified_one_move_text: modifiedText,
+          result_signal_type: signalType,
+          result_signal_strength: signalStrength
+        })
+      })
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok || !payload.updated_strategy) {
+        setStatusMessage('One Move status could not be saved.')
+        return
+      }
+
+      setGenerationState({
+        status: 'ready',
+        data: {
+          ...payload.updated_strategy,
+          persistence: {
+            saved: true,
+            strategy_id: payload.updated_strategy.strategy_id,
+            persistence_version: payload.updated_strategy.persistence_version
+          }
+        },
+        error: '',
+        source: 'latest'
+      })
+      setStatusMessage('One Move status saved.')
+    } catch {
+      setStatusMessage('One Move status could not be saved.')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-emerald-300/16 bg-black/24 p-4">
+      <div className="text-xs uppercase tracking-[0.18em] text-emerald-100/48">One Move Status Tracking</div>
+      <p className="mt-3 text-sm leading-6 text-white/62">
+        This starts the recursive loop: the system can now remember whether the One Move was accepted and what signal it created. Future Outcome Ledger work will compare this against later snapshots.
+      </p>
+
+      <div className="mt-5 grid gap-4 md:grid-cols-2">
+        <FieldLabel label="Acceptance status" value={generated.accepted_status} />
+        <FieldLabel label="Outcome status" value={generated.outcome_status} />
+        <FieldLabel label="Signal type" value={generated.result_signal_type || 'none'} />
+        <FieldLabel label="Signal strength" value={generated.result_signal_strength || 'none'} />
+      </div>
+
+      {latestHistory && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.035] px-4 py-3 text-sm leading-6 text-white/58">
+          Most recent update: {formatListKey(latestHistory.action)} / {formatListKey(latestHistory.outcome_status)}.
+        </div>
+      )}
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-2">
+        <label className="block">
+          <span className="text-xs uppercase tracking-[0.16em] text-white/38">What happened / what did you learn?</span>
+          <textarea
+            value={note}
+            onChange={(event) => setNote(event.target.value.slice(0, 1200))}
+            rows={4}
+            className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45"
+            placeholder="Add a short result note."
+          />
+        </label>
+        <label className="block">
+          <span className="text-xs uppercase tracking-[0.16em] text-white/38">Modified One Move text</span>
+          <textarea
+            value={modifiedText}
+            onChange={(event) => setModifiedText(event.target.value.slice(0, 2000))}
+            rows={4}
+            className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45"
+            placeholder="Use only if Darren is modifying the One Move."
+          />
+        </label>
+      </div>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <SelectField label="Signal type" value={signalType} onChange={setSignalType} options={SIGNAL_TYPES} />
+        <SelectField label="Signal strength" value={signalStrength} onChange={setSignalStrength} options={SIGNAL_STRENGTHS} />
+      </div>
+
+      <div className="mt-5 flex flex-wrap gap-2">
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('accept')}>Accept One Move</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('modify')}>Modify</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('mark_planned')}>Mark Planned</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('mark_in_progress')}>Mark In Progress</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('mark_completed')}>Mark Completed</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('mark_skipped')}>Mark Skipped</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('reject')}>Reject</StatusButton>
+        <StatusButton disabled={isSaving} onClick={() => updateStatus('add_result_note')}>Save Result Note</StatusButton>
+      </div>
+
+      {statusMessage && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white/62">
+          {statusMessage}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SelectField({ label, value, onChange, options }) {
+  return (
+    <label className="block">
+      <span className="text-xs uppercase tracking-[0.16em] text-white/38">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm text-white outline-none transition focus:border-emerald-200/45"
+      >
+        {options.map(([optionValue, optionLabel]) => (
+          <option key={optionValue} value={optionValue}>{optionLabel}</option>
+        ))}
+      </select>
+    </label>
+  )
+}
+
+function StatusButton({ children, disabled, onClick }) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="rounded-xl border border-white/10 bg-white/[0.08] px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-white/72 transition hover:border-emerald-200/36 hover:bg-emerald-300/12 disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {children}
+    </button>
   )
 }
 
