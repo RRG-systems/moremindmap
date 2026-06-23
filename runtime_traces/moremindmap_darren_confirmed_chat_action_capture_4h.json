@@ -1,0 +1,66 @@
+{
+  "phase_id": "MM-ADMIN-4H",
+  "verdict": "MOREMINDMAP_DARREN_CONFIRMED_CHAT_ACTION_CAPTURE_IMPLEMENTED_WITH_LIMITS",
+  "classification": "CHAT_GUIDED_CONFIRMED_ACTION_CAPTURE_LIMITED_TO_STATUS_AND_LEDGER",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_CONFIRMED_CHAT_ACTION_SMOKE_TEST",
+  "files_changed": [
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "MOREMINDMAP_DARREN_CONFIRMED_CHAT_ACTION_CAPTURE_REPORT_ONLY_4H.md",
+    "runtime_traces/moremindmap_darren_confirmed_chat_action_capture_4h.json"
+  ],
+  "code_changed": true,
+  "frontend_confirm_enabled": true,
+  "edit_enabled": true,
+  "cancel_enabled": true,
+  "routes_called_by_confirm": [
+    "/api/admin/darren-one-move-status",
+    "/api/admin/darren-outcome-ledger-event"
+  ],
+  "allowed_confirmed_action_types": [
+    "create_outcome_ledger_event",
+    "update_one_move_status",
+    "add_result_note"
+  ],
+  "disallowed_action_types": [
+    "suggest_proof_target",
+    "suggest_follow_up_ask",
+    "suggest_pitch_language",
+    "flag_overclaim_risk",
+    "no_action"
+  ],
+  "mutation_policy": "Chat remains non-mutating. Only explicit Confirm on an action proposal can call an approved existing status or ledger route.",
+  "confirmation_policy": "Confirm writes only after user click. Edit changes local payload only. Cancel dismisses locally with no route call.",
+  "evidence_policy": "Evidence can be recorded only through confirmed Outcome Ledger writes. Chat text alone is not evidence.",
+  "future_movement_policy": "Confirmed writes do not directly update future movement or scoring. Since Last Snapshot may reflect evidence_added according to existing evidence rules.",
+  "build_map_updated": true,
+  "canonical_dossier_mutated": false,
+  "assessment_records_mutated": false,
+  "generated_strategy_mutated_by_chat_route": false,
+  "outcome_ledger_mutated_by_confirm": "allowed_only_after_explicit_confirm",
+  "one_move_status_mutated_by_confirm": "allowed_only_after_explicit_confirm",
+  "validation_results": {
+    "node_check_changed_backend": "not_applicable_no_backend_changed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_chunk_size_warning",
+    "static_privacy_scan": "passed_no_client_side_env_or_raw_private_exposure_trace_guardrail_field_only"
+  },
+  "production_smoke_test_plan": [
+    "/leadership returns 200",
+    "/leadership-dashboard returns 200",
+    "Chat still returns proposed_action requiring confirmation",
+    "Cancel performs no write",
+    "Edit changes local payload only",
+    "Confirm creates exactly one controlled Outcome Ledger event",
+    "No canonical dossier or assessment records are mutated",
+    "No strategy regeneration or future movement direct update occurs"
+  ],
+  "limits": [
+    "No automatic learning added.",
+    "No future movement scoring added.",
+    "No strategy regeneration from chat.",
+    "No durable chat memory added.",
+    "No subscription, Stripe, or RRG runtime added."
+  ]
+}

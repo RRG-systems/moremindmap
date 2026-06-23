@@ -55,6 +55,15 @@ const LEDGER_EVENT_TYPES = [
 
 const LEDGER_EVIDENCE_WEIGHTS = SIGNAL_STRENGTHS
 
+const CHAT_ONE_MOVE_ACTIONS = [
+  ['mark_planned', 'Mark planned'],
+  ['mark_in_progress', 'Mark in progress'],
+  ['mark_completed', 'Mark completed'],
+  ['add_result_note', 'Add result note']
+]
+
+const CHAT_WRITING_ACTIONS = new Set(['create_outcome_ledger_event', 'update_one_move_status', 'add_result_note'])
+
 function sectionStatus(status) {
   if (!status) return 'Scaffold'
   return display(status).replace(/_/g, ' ')
@@ -210,6 +219,8 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
         adminCode={adminCode}
         isOpen={strategyChatOpen}
         onClose={() => setStrategyChatOpen(false)}
+        generationState={generationState}
+        setGenerationState={setGenerationState}
       />
     </section>
   )
@@ -883,7 +894,7 @@ function SinceLastSnapshotPanel({ adminCode }) {
 }
 
 
-function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
+function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState, setGenerationState }) {
   const starterMessages = [
     "I don't know where to start",
     'Help me explain this',
@@ -901,10 +912,20 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
   const [chatState, setChatState] = useState({ status: 'idle', error: '' })
   const [possibleSignal, setPossibleSignal] = useState(null)
   const [proposedAction, setProposedAction] = useState(null)
+  const [actionDraft, setActionDraft] = useState(defaultActionDraft())
+  const [actionMode, setActionMode] = useState('view')
+  const [actionMessage, setActionMessage] = useState('')
+  const [isConfirmingAction, setIsConfirmingAction] = useState(false)
 
   useEffect(() => {
     if (!conversationId) setConversationId(`darren-chat-${Date.now()}`)
   }, [conversationId])
+
+  useEffect(() => {
+    setActionDraft(defaultActionDraft(proposedAction))
+    setActionMode('view')
+    setActionMessage('')
+  }, [proposedAction])
 
   if (!isOpen) return null
 
@@ -917,6 +938,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
     setMessage('')
     setPossibleSignal(null)
     setProposedAction(null)
+    setActionMessage('')
     setChatState({ status: 'loading', error: '' })
 
     try {
@@ -953,6 +975,76 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
     } catch {
       setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
       setChatState({ status: 'error', error: 'Chat unavailable.' })
+    }
+  }
+
+  const strategyId = generationState?.data?.strategy_id || generationState?.data?.persistence?.strategy_id || ''
+
+  async function refreshLatestStrategy() {
+    try {
+      const response = await fetch('/api/admin/darren-generated-strategy-latest', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'X-Admin-Code': adminCode
+        }
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok || !payload.latest_strategy) return
+      setGenerationState({
+        status: 'ready',
+        data: {
+          ...payload.latest_strategy,
+          persistence: {
+            saved: true,
+            strategy_id: payload.latest_strategy.strategy_id,
+            persistence_version: payload.latest_strategy.persistence_version
+          }
+        },
+        error: '',
+        source: 'latest'
+      })
+    } catch {
+      // Status message below remains enough for V0; no raw error exposure.
+    }
+  }
+
+  async function confirmProposedAction() {
+    if (!proposedAction || isConfirmingAction) return
+    if (!CHAT_WRITING_ACTIONS.has(proposedAction.action_type)) {
+      setActionMessage('No write needed for this suggestion.')
+      return
+    }
+    if (!strategyId) {
+      setActionMessage('No saved strategy is available to update yet.')
+      return
+    }
+
+    setIsConfirmingAction(true)
+    setActionMessage('')
+    try {
+      const isLedgerAction = proposedAction.action_type === 'create_outcome_ledger_event'
+      const response = await fetch(isLedgerAction ? '/api/admin/darren-outcome-ledger-event' : '/api/admin/darren-one-move-status', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify(isLedgerAction ? buildLedgerActionPayload(strategyId, actionDraft) : buildOneMoveActionPayload(strategyId, actionDraft, proposedAction.action_type))
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || !payload?.ok) {
+        setActionMessage('Action could not be saved.')
+        return
+      }
+      await refreshLatestStrategy()
+      setActionMessage(isLedgerAction ? 'Outcome Ledger event saved.' : 'One Move status updated.')
+      setProposedAction(null)
+    } catch {
+      setActionMessage('Action could not be saved.')
+    } finally {
+      setIsConfirmingAction(false)
     }
   }
 
@@ -1001,13 +1093,27 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
               </div>
               <p className="mt-3 text-xs leading-5 text-emerald-50/56">{display(proposedAction.future_movement_policy)}</p>
               <p className="mt-3 text-xs leading-5 text-emerald-50/56">
-                Action proposals require confirmation. In this version, chat can suggest actions but does not write them yet.
+                Confirmed actions write to Darren's One Move status or Outcome Ledger only after you choose Confirm. Chat still does not update future movement or regenerate strategy automatically.
               </p>
+              {actionMode === 'edit' && (
+                <div className="mt-4 grid gap-3 rounded-xl border border-white/10 bg-black/22 p-3">
+                  <SelectField label="Event type" value={actionDraft.event_type} onChange={(value) => setActionDraft((draft) => ({ ...draft, event_type: value }))} options={LEDGER_EVENT_TYPES} />
+                  <SelectField label="One Move action" value={actionDraft.action} onChange={(value) => setActionDraft((draft) => ({ ...draft, action: value }))} options={CHAT_ONE_MOVE_ACTIONS} />
+                  <SelectField label="Signal type" value={actionDraft.signal_type} onChange={(value) => setActionDraft((draft) => ({ ...draft, signal_type: value }))} options={SIGNAL_TYPES} />
+                  <SelectField label="Signal strength" value={actionDraft.signal_strength} onChange={(value) => setActionDraft((draft) => ({ ...draft, signal_strength: value }))} options={SIGNAL_STRENGTHS} />
+                  <SelectField label="Evidence weight" value={actionDraft.evidence_weight} onChange={(value) => setActionDraft((draft) => ({ ...draft, evidence_weight: value }))} options={LEDGER_EVIDENCE_WEIGHTS} />
+                  <label className="block">
+                    <span className="text-xs uppercase tracking-[0.16em] text-white/38">Note</span>
+                    <textarea value={actionDraft.note} onChange={(event) => setActionDraft((draft) => ({ ...draft, note: event.target.value.slice(0, 1200) }))} rows={3} className="mt-2 w-full rounded-xl border border-white/10 bg-black/32 px-3 py-3 text-sm leading-6 text-white outline-none transition focus:border-emerald-200/45" />
+                  </label>
+                </div>
+              )}
               <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" disabled className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/38">Confirm - Coming next</button>
-                <button type="button" disabled className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/38">Edit - Coming next</button>
-                <button type="button" onClick={() => setProposedAction(null)} className="rounded-full border border-white/10 bg-black/24 px-3 py-2 text-xs text-white/58 transition hover:text-white">Cancel</button>
+                <button type="button" onClick={confirmProposedAction} disabled={isConfirmingAction} className="rounded-full border border-emerald-200/25 bg-emerald-300/14 px-3 py-2 text-xs text-emerald-50 transition hover:bg-emerald-300/20 disabled:cursor-not-allowed disabled:opacity-50">{isConfirmingAction ? 'Saving' : 'Confirm'}</button>
+                <button type="button" onClick={() => setActionMode(actionMode === 'edit' ? 'view' : 'edit')} disabled={isConfirmingAction} className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/58 transition hover:text-white disabled:opacity-50">Edit</button>
+                <button type="button" onClick={() => { setProposedAction(null); setActionMessage('Action proposal canceled.') }} disabled={isConfirmingAction} className="rounded-full border border-white/10 bg-black/24 px-3 py-2 text-xs text-white/58 transition hover:text-white disabled:opacity-50">Cancel</button>
               </div>
+              {actionMessage && <p className="mt-3 text-xs leading-5 text-emerald-50/62">{actionMessage}</p>}
             </div>
           )}
         </div>
@@ -1036,6 +1142,50 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose }) {
       </aside>
     </div>
   )
+}
+
+
+function defaultActionDraft(proposedAction = null) {
+  const preview = proposedAction?.payload_preview || {}
+  return {
+    event_type: normalizeOption(preview.event_type, LEDGER_EVENT_TYPES, 'partner_signal'),
+    action: normalizeOption(preview.action, CHAT_ONE_MOVE_ACTIONS, proposedAction?.action_type === 'add_result_note' ? 'add_result_note' : 'mark_planned'),
+    note: String(preview.event_note || preview.note || proposedAction?.reason || '').slice(0, 1200),
+    signal_type: normalizeOption(preview.signal_type || preview.result_signal_type, SIGNAL_TYPES, 'none'),
+    signal_strength: normalizeOption(preview.signal_strength || preview.result_signal_strength, SIGNAL_STRENGTHS, 'none'),
+    evidence_weight: normalizeOption(preview.evidence_weight || preview.signal_strength, LEDGER_EVIDENCE_WEIGHTS, 'none'),
+    proof_target_name: display(preview.proof_target_name || '').slice(0, 240),
+    future_path: display(preview.future_path || '').slice(0, 240)
+  }
+}
+
+function normalizeOption(value, options, fallback) {
+  const raw = String(value || '').trim()
+  return options.some(([optionValue]) => optionValue === raw) ? raw : fallback
+}
+
+function buildLedgerActionPayload(strategyId, draft) {
+  return {
+    strategy_id: strategyId,
+    event_type: draft.event_type,
+    event_source: 'future_chat_context',
+    event_note: draft.note,
+    signal_type: draft.signal_type,
+    signal_strength: draft.signal_strength,
+    evidence_weight: draft.evidence_weight,
+    proof_target_name: draft.proof_target_name,
+    future_path: draft.future_path
+  }
+}
+
+function buildOneMoveActionPayload(strategyId, draft, actionType) {
+  return {
+    strategy_id: strategyId,
+    action: actionType === 'add_result_note' ? 'add_result_note' : draft.action,
+    note: draft.note,
+    result_signal_type: draft.signal_type,
+    result_signal_strength: draft.signal_strength
+  }
 }
 
 function inferEntryContext(text) {
