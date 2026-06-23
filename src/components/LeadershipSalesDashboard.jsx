@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { leadershipBuildMap } from '../data/leadershipBuildMap'
 
 const DASHBOARD_CODE_SESSION_KEY = 'leadershipDashboardCode'
 const DASHBOARD_ACCESS_SESSION_KEY = 'leadershipDashboardAccess'
@@ -271,6 +272,8 @@ function DashboardContent({ data }) {
         assessmentsDisplayed={assessments.length}
       />
 
+      <StrategicBuildMapSection />
+
       <UnavailablePanel summary={summary} />
 
       <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
@@ -367,6 +370,111 @@ function SummaryGrid({ summary, companiesCount, notesCount, sourceLabels, profil
       ))}
     </section>
   )
+}
+
+function StrategicBuildMapSection() {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 shadow-[0_20px_80px_rgba(0,0,0,0.25)]">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.24em] text-sky-100/58">Strategic Build Map</div>
+          <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+            From V1 assessment intelligence to leadership intelligence
+          </h2>
+          <p className="mt-3 max-w-5xl text-sm leading-6 text-white/62">
+            V1 proves assessment intelligence. The roadmap turns that intelligence into paid access, recursive coaching, recruiting intelligence, RRG opportunity, and eventually runtime leadership detection.
+          </p>
+        </div>
+        <div className="rounded-xl border border-sky-300/20 bg-sky-400/10 px-4 py-3 text-xs leading-5 text-sky-50/70 md:max-w-xs">
+          Repo-backed roadmap. Future sprints can update this source file as phases move from planned to live.
+        </div>
+      </div>
+
+      <div className="mt-7 grid gap-4 lg:grid-cols-3">
+        {leadershipBuildMap.map((phase) => (
+          <BuildMapCard key={phase.id} phase={phase} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function BuildMapCard({ phase }) {
+  const status = getBuildMapStatus(phase.status)
+
+  return (
+    <article className="flex h-full flex-col rounded-2xl border border-white/10 bg-black/28 p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <div className="text-xs uppercase tracking-[0.18em] text-white/38">{phase.dateRange}</div>
+          <h3 className="mt-2 text-lg font-semibold leading-7 text-white">{phase.title}</h3>
+        </div>
+        <span className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] ${status.className}`}>
+          {status.label}
+        </span>
+      </div>
+
+      <div className="mt-4 text-sm font-medium text-sky-100/82">{phase.label}</div>
+      <ul className="mt-4 space-y-2 text-sm leading-6 text-white/62">
+        {phase.bullets.map((bullet) => (
+          <li key={bullet} className="flex gap-2">
+            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-sky-200/70" />
+            <span>{bullet}</span>
+          </li>
+        ))}
+      </ul>
+
+      <div className="mt-5 space-y-3 border-t border-white/10 pt-4 text-xs leading-5">
+        <p className="text-white/58">
+          <span className="font-semibold text-white/78">Sales meaning: </span>
+          {phase.salesMeaning}
+        </p>
+        <p className="text-white/50">
+          <span className="font-semibold text-white/72">Current truth: </span>
+          {phase.currentTruth}
+        </p>
+        <p className="text-white/42">
+          <span className="font-semibold text-white/64">Limit: </span>
+          {phase.limits}
+        </p>
+      </div>
+    </article>
+  )
+}
+
+function getBuildMapStatus(status) {
+  if (status === 'live') {
+    return {
+      label: 'Live',
+      className: 'border-emerald-300/30 bg-emerald-400/12 text-emerald-100'
+    }
+  }
+
+  if (status === 'in_progress') {
+    return {
+      label: 'In Progress',
+      className: 'border-sky-300/30 bg-sky-400/12 text-sky-100'
+    }
+  }
+
+  if (status === 'planned') {
+    return {
+      label: 'Planned',
+      className: 'border-amber-300/30 bg-amber-400/12 text-amber-100'
+    }
+  }
+
+  if (status === 'blocked') {
+    return {
+      label: 'Blocked',
+      className: 'border-red-300/30 bg-red-400/12 text-red-100'
+    }
+  }
+
+  return {
+    label: 'Future',
+    className: 'border-white/15 bg-white/[0.06] text-white/58'
+  }
 }
 
 function UnavailablePanel({ summary }) {
