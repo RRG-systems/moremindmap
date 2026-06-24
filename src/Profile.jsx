@@ -985,243 +985,194 @@ export default function Profile() {
 /* ── Intro Screen ── */
 
 function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading, checkoutError }) {
-  // DEBUG: Immediate render log
-  const isButtonDisabled = !fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading
-  console.log("[INTROSCREEN RENDER]", {
-    hasOnStart: !!onStart,
-    onStartType: typeof onStart,
-    selectedOffer,
-    promoValidated,
-    fullNameTrimmed: fullName.trim(),
-    emailTrimmed: email.trim(),
-    isButtonDisabled,
-    checkoutLoading,
-  })
-
-  // DEBUG: Verify button handler is wired
-  useEffect(() => {
-    console.log("[INTROSCREEN MOUNTED]", {
-      onStart: typeof onStart,
-      selectedOffer,
-      promoValidated,
-      checkoutLoading,
-    })
-  }, [onStart, selectedOffer, promoValidated, checkoutLoading])
+  const featureList = [
+    "24 scenario-based questions",
+    "Behavior Operating System profile",
+    "Primary and secondary patterns",
+    "Strengths and blind spots",
+    "Pressure response",
+    "Communication and decision style",
+    "Profile DNA",
+    "Five Futures",
+    "One Move",
+    "Universal Translator"
+  ];
 
   return (
-    <div className="space-y-10">
+    <div className="mx-auto max-w-6xl">
       <a
         href="/"
-        className="inline-flex items-center text-sm text-white/60 hover:text-white transition"
+        className="inline-flex items-center text-sm text-white/52 transition hover:text-white"
       >
         ← Back to Home
       </a>
 
-      <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30">
-        <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/60">
-          MORE MindMap Profile
-        </div>
-
-        <h1 className="mt-6 text-4xl md:text-5xl leading-[0.98] font-semibold tracking-tight">
-          Build Your MORE MindMap Profile
-        </h1>
-
-        <p className="mt-6 text-lg md:text-xl text-white/72 leading-relaxed max-w-3xl">
-          Understand how you think, communicate, decide, and operate. Get a sharper picture of your
-          strengths, blind spots, and working style.
+      <div className="pt-8 text-center md:pt-10">
+        <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">
+          MOREMINDMAP
         </p>
-
-        <div className="mt-10 grid gap-6 md:grid-cols-2">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-6">
-            <div className="text-xs uppercase tracking-[0.22em] text-white/45">What this is</div>
-            <div className="mt-4 space-y-4 text-white/70 leading-8">
-              <p>
-                This is not a generic personality quiz. It is a behavioral mapping tool designed to
-                identify how you actually move through decisions, pressure, leadership, and
-                relationships.
-              </p>
-              <p>
-                You will be given 24 scenario-based questions designed to reveal how you actually operate under pressure. Most people complete it in 5–7 minutes.
-              </p>
-            </div>
-          </div>
-
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-6">
-            <div className="text-xs uppercase tracking-[0.22em] text-white/45">What you receive</div>
-            <div className="mt-4 space-y-4 text-white/70 leading-8">
-              <p>
-                After completing the assessment, your responses are scored across 8 behavioral
-                dimensions and interpreted into a personalized profile.
-              </p>
-              <p>
-                You will see your primary and secondary patterns, a percentage breakdown, and an
-                interpretation of how you operate.
-              </p>
-            </div>
-          </div>
-        </div>
+        <h1 className="mx-auto mt-5 max-w-3xl text-3xl font-semibold leading-tight tracking-tight text-white md:text-5xl">
+          Build the profile that explains how you operate.
+        </h1>
+        <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-white/64 md:text-lg">
+          A premium Behavior Operating System profile for how you think, communicate, decide, lead,
+          and respond under pressure.
+        </p>
       </div>
 
-      {/* Promo Code Section */}
-      {!promoValidated && (
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
-          <div className="text-xs uppercase tracking-[0.22em] text-white/45">Have a Promo Code?</div>
-          <div className="mt-4 flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter promo code"
-              className="flex-1 rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-white placeholder:text-white/30 outline-none focus:border-white/25 uppercase"
-            />
-            <button
-              onClick={validatePromoCode}
-              disabled={!promoCode.trim()}
-              className="rounded-2xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Validate
-            </button>
-          </div>
-        </div>
-      )}
-
-      {promoValidated && (
-        <div className="rounded-[2rem] border border-green-500/30 bg-green-500/10 backdrop-blur-md p-8">
-          <div className="flex items-center gap-3">
-            <div className="text-2xl">✓</div>
-            <div>
-              <div className="text-xs uppercase tracking-[0.22em] text-green-400">Promo Code Active</div>
-              <div className="mt-1 text-white">{promoCode.trim().toUpperCase()} — Full Profile unlocked</div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Profile ID Retrieval Section */}
-      <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
-        <div className="text-xs uppercase tracking-[0.22em] text-white/45">Already have a profile?</div>
-        <p className="mt-2 text-sm text-white/60">Enter your Profile ID to regenerate your report without retaking the assessment.</p>
-        
-        <div className="mt-4 flex flex-col sm:flex-row gap-3">
-          <input
-            type="text"
-            value={profileId}
-            onChange={(e) => setProfileId(e.target.value)}
-            placeholder="MM-20260523-xxxxxxx"
-            className="flex-1 rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-white placeholder:text-white/30 outline-none focus:border-white/25 font-mono text-sm"
-          />
-          <button
-            onClick={validateProfileId}
-            disabled={!profileId.trim() || profileIdLoading}
-            className="rounded-2xl border border-white/15 bg-white/5 px-6 py-3.5 text-sm font-medium text-white hover:bg-white/10 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
-          >
-            {profileIdLoading ? "Loading..." : "Validate"}
-          </button>
-        </div>
-        
-        {profileIdError && (
-          <div className="mt-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30">
-            <p className="text-sm text-red-400">{profileIdError}</p>
-          </div>
-        )}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <div className="relative overflow-hidden rounded-[2rem] border border-orange-300/20 bg-white/5 p-8 shadow-[0_24px_90px_rgba(0,0,0,0.35)] backdrop-blur-md">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_12%,rgba(249,115,22,0.18),transparent_32%),radial-gradient(circle_at_82%_78%,rgba(168,85,247,0.15),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.055),transparent_42%)]" />
+      <div className="mt-10 grid gap-6 lg:grid-cols-2 lg:items-stretch">
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[#101114] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.4)] md:p-8">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_70%_0%,rgba(56,189,248,0.14),transparent_34%),linear-gradient(145deg,rgba(255,255,255,0.075),transparent_46%)]" />
           <div className="relative">
-            <div className="text-xs uppercase tracking-[0.24em] text-orange-100/65">Pricing</div>
+            <div className="flex flex-col gap-5 border-b border-white/10 pb-6 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <p className="text-xl font-semibold text-white">Full MORE MindMap Profile</p>
+                <div className="mt-4 flex items-end gap-3">
+                  <span className="text-5xl font-semibold tracking-tight text-white md:text-6xl">$149</span>
+                  <span className="pb-2 text-sm font-medium text-white/45">One profile</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedOffer("mini_profile")}
+                className={[
+                  "rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] transition",
+                  selectedOffer === "mini_profile"
+                    ? "border-cyan-200/70 bg-cyan-300/[0.14] text-cyan-50"
+                    : "border-white/18 bg-white/[0.06] text-white/66 hover:border-white/38 hover:text-white"
+                ].join(" ")}
+              >
+                {selectedOffer === "mini_profile" ? "Selected" : "Select Profile"}
+              </button>
+            </div>
+
+            <p className="mt-6 text-base font-semibold leading-7 text-white">
+              Understand how you think, communicate, decide, lead, and operate under pressure.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              {featureList.map((feature) => (
+                <div key={feature} className="flex items-start gap-3 text-sm leading-6 text-white/72">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-200/80" />
+                  <span>{feature}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8 space-y-4 border-t border-white/10 pt-6">
+              <label className="block">
+                <div className="mb-2 text-sm font-medium text-white/62">Your Name</div>
+                <input
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Enter your full name"
+                  className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-white caret-white placeholder:text-white/32 outline-none transition focus:border-cyan-200/45"
+                />
+              </label>
+              <label className="block">
+                <div className="mb-2 text-sm font-medium text-white/62">Email</div>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email"
+                  className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-white caret-white placeholder:text-white/32 outline-none transition focus:border-cyan-200/45"
+                />
+              </label>
+            </div>
 
             <button
-              onClick={() => setSelectedOffer("mini_profile")}
-              className={[
-                "mt-6 w-full text-left rounded-[1.75rem] border p-6 md:p-7 transition duration-200",
-                selectedOffer === "mini_profile"
-                  ? "border-orange-200/70 bg-orange-300/[0.13] shadow-[0_0_50px_rgba(251,146,60,0.16)]"
-                  : "border-white/12 bg-black/28 hover:border-orange-200/45 hover:bg-white/[0.055]",
-              ].join(" ")}
+              type="button"
+              onClick={() => onStart()}
+              disabled={!fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading}
+              className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-white px-6 py-4 text-base font-semibold text-black transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              <div className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-100">
-                See the future you're creating.
-              </div>
-
-              <div className="mt-7 flex flex-col gap-4 border-y border-white/10 py-6 md:flex-row md:items-end md:justify-between">
-                <div>
-                  <div className="text-sm uppercase tracking-[0.24em] text-white/50">
-                    Full MORE MindMap Profile
-                  </div>
-                  <div className="mt-3 text-5xl font-semibold tracking-tight text-white md:text-6xl">
-                    $149
-                  </div>
-                </div>
-                <div className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-4 py-2 text-xs uppercase tracking-[0.18em] text-cyan-100">
-                  One Profile
-                </div>
-              </div>
-
-              <p className="mt-6 text-white/72 leading-8">
-                MORE MindMap reveals how you think, decide, communicate, lead, and operate under pressure.
-              </p>
-              <p className="mt-4 text-white/72 leading-8">
-                Then it shows where those patterns are likely to lead and the One Move most likely to change the outcome.
-              </p>
+              {checkoutLoading ? "Redirecting to checkout..." : promoValidated ? "Start Assessment (Promo Active)" : "Continue to Checkout"}
             </button>
+
+            {checkoutError && (
+              <div className="mt-4 rounded-xl border border-red-400/30 bg-red-500/[0.08] p-4">
+                <p className="text-sm text-red-100">{checkoutError}</p>
+              </div>
+            )}
+
+            {!promoValidated && !selectedOffer && fullName.trim() && email.trim() && (
+              <div className="mt-4 rounded-xl border border-white/16 bg-white/[0.06] p-4">
+                <p className="text-sm text-white/64">
+                  Select the profile option above to continue to checkout.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8">
-          <div className="text-xs uppercase tracking-[0.22em] text-white/45">Get started</div>
-
-          <div className="mt-6 space-y-5">
-            <label className="block">
-              <div className="mb-2 text-sm text-white/60">Your Name</div>
-              <input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-white placeholder:text-white/30 outline-none focus:border-white/25"
-              />
-            </label>
-            <label className="block">
-              <div className="mb-2 text-sm text-white/60">Email</div>
-              <input
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-white placeholder:text-white/30 outline-none focus:border-white/25"
-              />
-            </label>
+        <div className="rounded-[2rem] border border-white/12 bg-[#111216] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.35)] md:p-8">
+          <div className="border-b border-white/10 pb-6">
+            <p className="text-xl font-semibold text-white">Already have access?</p>
+            <p className="mt-3 text-sm leading-6 text-white/56">
+              Use an approved promo code or retrieve an existing profile by Profile ID.
+            </p>
           </div>
 
-          <button
-            type="button"
-            onClick={(e) => {
-              console.log("[BUTTON CLICKED DIRECTLY]", e, onStart)
-              onStart()
-            }}
-            disabled={!fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading}
-            className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-white text-black px-6 py-4 text-base font-medium hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
-          >
-            {checkoutLoading ? "Redirecting to checkout..." : promoValidated ? "Start Assessment (Promo Active)" : "Continue to Checkout"}
-          </button>
-
-          {checkoutError && (
-            <div className="mt-4 rounded-xl border border-red-400/30 bg-red-500/[0.08] p-4">
-              <p className="text-sm text-red-100">{checkoutError}</p>
-            </div>
-          )}
-
-          {!promoValidated && !selectedOffer && fullName.trim() && email.trim() && (
-            <div className="mt-4 p-4 rounded-xl border border-white/20 bg-white/[0.08]">
-              <p className="text-sm text-white/70">
-                <span className="font-medium">⚠ Select a pricing option above</span> to continue to checkout.
+          <div className="mt-6 space-y-7">
+            <section>
+              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">Promo Code</div>
+              <p className="mt-2 text-sm leading-6 text-white/56">
+                Approved promo access lets you start without checkout.
               </p>
-            </div>
-          )}
+              {!promoValidated ? (
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <input
+                    type="text"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    placeholder="Enter promo code"
+                    className="flex-1 rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-white caret-white placeholder:text-white/32 outline-none uppercase transition focus:border-cyan-200/45"
+                  />
+                  <button
+                    onClick={validatePromoCode}
+                    disabled={!promoCode.trim()}
+                    className="rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Validate
+                  </button>
+                </div>
+              ) : (
+                <div className="mt-4 rounded-2xl border border-green-400/28 bg-green-400/10 p-4">
+                  <div className="text-xs uppercase tracking-[0.22em] text-green-200">Promo Code Active</div>
+                  <div className="mt-1 text-sm text-white">{promoCode.trim().toUpperCase()} - Full Profile unlocked</div>
+                </div>
+              )}
+            </section>
 
-          <p className="mt-4 text-sm text-white/45 leading-6">
-            24 scenario-based questions designed to reveal how you actually operate under pressure. Most people complete it in 5–7 minutes.
-          </p>
+            <section className="border-t border-white/10 pt-7">
+              <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">Profile ID Retrieval</div>
+              <p className="mt-2 text-sm leading-6 text-white/56">
+                Regenerate a saved report without retaking the assessment.
+              </p>
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  type="text"
+                  value={profileId}
+                  onChange={(e) => setProfileId(e.target.value)}
+                  placeholder="MM-20260523-xxxxxxx"
+                  className="flex-1 rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 font-mono text-sm text-white caret-white placeholder:text-white/32 outline-none transition focus:border-cyan-200/45"
+                />
+                <button
+                  onClick={validateProfileId}
+                  disabled={!profileId.trim() || profileIdLoading}
+                  className="whitespace-nowrap rounded-2xl border border-white/15 bg-white/[0.06] px-6 py-3.5 text-sm font-medium text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {profileIdLoading ? "Loading..." : "Validate"}
+                </button>
+              </div>
+
+              {profileIdError && (
+                <div className="mt-3 rounded-xl border border-red-500/30 bg-red-500/10 p-3">
+                  <p className="text-sm text-red-300">{profileIdError}</p>
+                </div>
+              )}
+            </section>
+          </div>
         </div>
       </div>
     </div>
