@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import ExecutiveDiagnosticBriefing from './components/businessAssessment/ExecutiveDiagnosticBriefing.jsx';
 
 const INDUSTRIES = [
@@ -241,6 +241,7 @@ function isComplete(answers) {
 }
 
 export default function BusinessAssessment() {
+  const [searchParams] = useSearchParams();
   const [industry, setIndustry] = useState('Real Estate');
   const [profileId, setProfileId] = useState('');
   const [promoCode, setPromoCode] = useState('');
@@ -276,6 +277,7 @@ export default function BusinessAssessment() {
         !retrievedOutput.one_move_v1)
   );
   const generationIsRunning = generationState.status === 'running';
+  const routeProfileId = searchParams.get('id') || '';
 
   async function validateProfile(event) {
     event.preventDefault();
@@ -502,9 +504,9 @@ export default function BusinessAssessment() {
     }
   }
 
-  async function retrieveAssessment(event) {
-    event.preventDefault();
-    const id = retrieveId.trim();
+  async function retrieveAssessment(event, requestedId = retrieveId) {
+    event?.preventDefault();
+    const id = requestedId.trim();
     setRetrieveState({ status: 'loading', error: '', result: null });
 
     if (!id) {
@@ -531,6 +533,22 @@ export default function BusinessAssessment() {
       });
     }
   }
+
+  useEffect(() => {
+    if (!routeProfileId) return;
+    if (retrieveState.status !== 'idle') return;
+    setRetrieveId(routeProfileId);
+    retrieveAssessment(null, routeProfileId);
+  }, [routeProfileId, retrieveState.status]);
+
+  useEffect(() => {
+    if (!retrievedBriefing) return;
+    if (typeof window === 'undefined') return;
+    if (window.location.hash !== '#business-assessment-results') return;
+    window.requestAnimationFrame(() => {
+      document.getElementById('business-assessment-results')?.scrollIntoView({ block: 'start' });
+    });
+  }, [retrievedBriefing]);
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -945,7 +963,9 @@ export default function BusinessAssessment() {
         </main>
 
         {retrievedBriefing && (
+          <div id="business-assessment-results">
           <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
+          </div>
         )}
       </div>
     </div>

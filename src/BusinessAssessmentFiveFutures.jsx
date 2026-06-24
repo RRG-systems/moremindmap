@@ -14,13 +14,22 @@ function buildApiUrl(path) {
   return `${baseUrl}${path}`;
 }
 
-function ArtifactShell({ children, profileId }) {
+function resolveReturnTo(searchParams, profileId) {
+  const requestedReturnTo = searchParams.get('returnTo') || '';
+  if (requestedReturnTo.startsWith('/business-assessment')) return requestedReturnTo;
+  const encodedProfileId = encodeURIComponent(profileId || '');
+  return encodedProfileId
+    ? `/business-assessment?id=${encodedProfileId}#business-assessment-results`
+    : '/business-assessment';
+}
+
+function ArtifactShell({ children, profileId, returnTo }) {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(59,130,246,0.14),transparent_30%),radial-gradient(circle_at_18%_16%,rgba(249,115,22,0.14),transparent_32%),radial-gradient(circle_at_78%_20%,rgba(168,85,247,0.14),transparent_33%),linear-gradient(180deg,#030303_0%,#09090b_58%,#000_100%)]" />
       <div className="relative mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-4">
         <nav className="mb-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link to="/business-assessment" className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
+          <Link to={returnTo || '/business-assessment'} className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
             MORE MINDMAP / Business Assessment
           </Link>
           <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">
@@ -33,17 +42,17 @@ function ArtifactShell({ children, profileId }) {
   );
 }
 
-function LoadingState({ profileId }) {
+function LoadingState({ profileId, returnTo }) {
   return (
-    <ArtifactShell profileId={profileId}>
+    <ArtifactShell profileId={profileId} returnTo={returnTo}>
       <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 text-white/70">Loading...</div>
     </ArtifactShell>
   );
 }
 
-function ErrorState({ profileId, message }) {
+function ErrorState({ profileId, message, returnTo }) {
   return (
-    <ArtifactShell profileId={profileId}>
+    <ArtifactShell profileId={profileId} returnTo={returnTo}>
       <div className="rounded-3xl border border-red-400/30 bg-red-500/[0.08] p-8 text-red-100">
         {message}
       </div>
@@ -382,6 +391,7 @@ function FiveFuturesCanvas({ data }) {
 export default function BusinessAssessmentFiveFutures() {
   const [searchParams] = useSearchParams();
   const profileId = searchParams.get('id') || '';
+  const returnTo = resolveReturnTo(searchParams, profileId);
   const [state, setState] = useState({ status: 'loading', error: '', record: null });
 
   useEffect(() => {
@@ -414,20 +424,21 @@ export default function BusinessAssessmentFiveFutures() {
 
   const data = useMemo(() => normalizeBusinessVisualArtifactData(state.record), [state.record]);
 
-  if (state.status === 'loading') return <LoadingState profileId={profileId} />;
-  if (state.status === 'error') return <ErrorState profileId={profileId} message={state.error} />;
+  if (state.status === 'loading') return <LoadingState profileId={profileId} returnTo={returnTo} />;
+  if (state.status === 'error') return <ErrorState profileId={profileId} returnTo={returnTo} message={state.error} />;
 
   if (!data.hasFutures) {
     return (
       <ErrorState
         profileId={profileId}
+        returnTo={returnTo}
         message="Five Futures + One Move is not ready yet. Complete futures generation first."
       />
     );
   }
 
   return (
-    <ArtifactShell profileId={data.profileId}>
+    <ArtifactShell profileId={data.profileId} returnTo={returnTo}>
       <BusinessArtifactViewer width={FUTURES_CANVAS_WIDTH} height={FUTURES_CANVAS_HEIGHT}>
         <FiveFuturesCanvas data={data} />
       </BusinessArtifactViewer>

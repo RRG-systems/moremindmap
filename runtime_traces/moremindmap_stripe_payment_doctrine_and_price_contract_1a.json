@@ -1,0 +1,123 @@
+{
+  "phase_id": "MM-PAY-1A",
+  "verdict": "MOREMINDMAP_STRIPE_PAYMENT_DOCTRINE_AND_PRICE_CONTRACT_DEFINED_WITH_LIMITS",
+  "classification": "STRIPE_PAYMENT_FOUNDATION_READY_FOR_CHECKOUT_IMPLEMENTATION",
+  "highest_allowed_readiness": "READY_FOR_STRIPE_CHECKOUT_FOUNDATION_BUILD",
+  "products": [
+    {
+      "name": "Behavior Operating System",
+      "amount": 14900,
+      "currency": "usd",
+      "mode": "payment",
+      "access_type": "behavior_operating_system",
+      "description": "one-time access to behavior profile / profile intelligence"
+    },
+    {
+      "name": "Business Assessment",
+      "amount": 4900,
+      "currency": "usd",
+      "mode": "payment",
+      "access_type": "business_assessment",
+      "description": "one-time business assessment"
+    },
+    {
+      "name": "MORE Monthly Intelligence",
+      "amount": 2395,
+      "currency": "usd",
+      "mode": "subscription",
+      "interval": "month",
+      "access_type": "more_monthly_intelligence",
+      "description": "monthly recursive coaching / strategy loop",
+      "promise": "keep improving over time",
+      "headline": "You have your map. Now keep it alive."
+    }
+  ],
+  "prices": {
+    "behavior_operating_system": "$149",
+    "business_assessment": "$49",
+    "more_monthly_intelligence": "$23.95/month"
+  },
+  "subscription_positioning": {
+    "before_business_assessment": "soft awareness below or near the $49 assessment card",
+    "after_business_assessment_output": "primary upgrade panel after Five Futures + One Move",
+    "headline": "You have your map. Now keep it alive.",
+    "lead_language": "MORE Monthly Intelligence",
+    "fine_print": "subscription/legal language can appear in fine print"
+  },
+  "required_env_vars": [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_PRICE_BEHAVIOR_OS",
+    "STRIPE_PRICE_BUSINESS_ASSESSMENT",
+    "STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE",
+    "PUBLIC_SITE_URL or existing equivalent"
+  ],
+  "future_routes": [
+    "POST /api/stripe/create-checkout-session",
+    "POST /api/stripe/webhook",
+    "GET /api/stripe/access-status if needed",
+    "success/cancel pages or existing route query-state handling if safe"
+  ],
+  "durable_records": [
+    "payment_session:{session_id}",
+    "payment_event:{event_id}",
+    "access_grant:{grant_id}",
+    "access_grant_by_email:{email}",
+    "access_grant_by_profile:{profile_id}",
+    "subscription_state:{customer_or_subscription_id}",
+    "revenue_index:{date_or_month}"
+  ],
+  "access_source_labels": [
+    "paid_stripe",
+    "promo_code",
+    "free_admin",
+    "partner_sponsored",
+    "internal_test"
+  ],
+  "payment_truth_rules": [
+    "Payments do not create intelligence.",
+    "Payments unlock access.",
+    "Stripe records payment truth.",
+    "MORE MindMap records access truth.",
+    "Checkout redirect success is not sufficient payment proof.",
+    "Webhook-confirmed events are required for durable paid access.",
+    "One-time products and subscription products must be stored separately.",
+    "Promo/free/admin access must remain explicitly labeled."
+  ],
+  "revenue_truth_rules": [
+    "Revenue claims remain unavailable until payment records are persistently indexed.",
+    "Checkout starts, redirects, abandoned sessions, promo access, free access, and admin access are not revenue."
+  ],
+  "implementation_limits": [
+    "Stripe Checkout routes were not added.",
+    "Stripe webhook routes were not added.",
+    "Payment state writes were not added.",
+    "No fake Stripe price IDs were created.",
+    "No Stripe keys were exposed.",
+    "No subscription/payment behavior is live."
+  ],
+  "visual_return_state_investigated": true,
+  "visual_return_state_fixed": true,
+  "files_changed": [
+    "src/BusinessAssessment.jsx",
+    "src/BusinessAssessmentVisualMap.jsx",
+    "src/BusinessAssessmentFiveFutures.jsx",
+    "src/components/businessAssessment/ExecutiveDiagnosticBriefing.jsx",
+    "MOREMINDMAP_STRIPE_PAYMENT_DOCTRINE_AND_PRICE_CONTRACT_1A.md",
+    "runtime_traces/moremindmap_stripe_payment_doctrine_and_price_contract_1a.json"
+  ],
+  "close_behavior_before": "Business Assessment visual artifact nav returned to /business-assessment without preserving the retrieved result context.",
+  "close_behavior_after": "Result links include a safe returnTo target and visual artifact nav returns to /business-assessment?id={profile_id}#business-assessment-results.",
+  "routes_checked": [
+    "/business-assessment",
+    "/business-assessment/visual-map",
+    "/business-assessment/five-futures"
+  ],
+  "validation_results": {
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "privacy_scan": "passed_on_added_diff_lines",
+    "visual_return_grep": "passed"
+  }
+}
