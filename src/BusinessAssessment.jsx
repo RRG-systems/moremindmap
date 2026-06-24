@@ -251,6 +251,10 @@ export default function BusinessAssessment() {
   const [profileResult, setProfileResult] = useState(null);
   const [profileError, setProfileError] = useState('');
   const [isValidating, setIsValidating] = useState(false);
+  const [businessAssessmentCompletion, setBusinessAssessmentCompletion] = useState({
+    status: 'idle',
+    assessmentId: ''
+  });
   const [flowStarted, setFlowStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
@@ -280,11 +284,18 @@ export default function BusinessAssessment() {
   );
   const generationIsRunning = generationState.status === 'running';
   const routeProfileId = searchParams.get('id') || '';
+  const hasValidatedProfile = Boolean(profileResult?.id);
+  const hasCompletedBusinessAssessment = businessAssessmentCompletion.status === 'found';
+  const devCodeAccepted = promoState.status === 'valid' && hasValidatedProfile;
 
   async function validateProfile(event) {
     event.preventDefault();
     setProfileResult(null);
     setProfileError('');
+    setBusinessAssessmentCompletion({ status: 'idle', assessmentId: '' });
+    setPromoState((current) =>
+      current.status === 'valid' ? { status: 'idle', message: '' } : current
+    );
     setFlowStarted(false);
     setSubmitState({ status: 'idle', error: '', result: null });
 
@@ -306,7 +317,9 @@ export default function BusinessAssessment() {
         return;
       }
 
-      setProfileResult(extractProfileResult(payload, normalizedProfileId));
+      const profile = extractProfileResult(payload, normalizedProfileId);
+      setProfileResult(profile);
+      checkCompletedBusinessAssessment(profile.id || normalizedProfileId);
     } catch {
       setProfileError('Profile not found.\nPlease complete your MORE MindMap Profile first.');
     } finally {
@@ -315,17 +328,37 @@ export default function BusinessAssessment() {
   }
 
   function beginAssessment() {
+    if (!devCodeAccepted) {
+      setPromoState({
+        status: 'error',
+        message: 'First validate your profile, then apply a valid Dev Code to unlock the Business Assessment.'
+      });
+      return;
+    }
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
     setSubmitState({ status: 'idle', error: '', result: null });
   }
 
   async function startProductCheckout(productKey, sourceContext) {
+    if (!hasValidatedProfile) {
+      setCheckoutState({ loading: '', error: 'First validate your profile to unlock checkout.' });
+      return;
+    }
+
+    if (productKey === 'more_monthly_intelligence' && !hasCompletedBusinessAssessment) {
+      setCheckoutState({
+        loading: '',
+        error: 'First you must take the Business Assessment to unlock Monthly Intelligence.'
+      });
+      return;
+    }
+
     setCheckoutState({ loading: productKey, error: '' });
     try {
       await startStripeCheckout({
         product_key: productKey,
-        profile_id: profileResult?.id || normalizedProfileId || retrieveId.trim(),
+        profile_id: profileResult?.id || normalizedProfileId,
         assessment_id: retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '',
         source_context: sourceContext
       });
@@ -338,8 +371,16 @@ export default function BusinessAssessment() {
     event.preventDefault();
     const code = promoCode.trim().toUpperCase();
 
+    if (!hasValidatedProfile) {
+      setPromoState({
+        status: 'error',
+        message: 'First validate your profile before applying a Dev Code.'
+      });
+      return;
+    }
+
     if (!code) {
-      setPromoState({ status: 'error', message: 'Enter a Business Assessment promo code.' });
+      setPromoState({ status: 'error', message: 'Enter a Business Assessment Dev Code.' });
       return;
     }
 
@@ -351,7 +392,7 @@ export default function BusinessAssessment() {
       return;
     }
 
-    setPromoState({ status: 'error', message: 'Promo code not recognized for Business Assessment.' });
+    setPromoState({ status: 'error', message: 'Dev Code not recognized for Business Assessment.' });
   }
 
   function updateAnswer(value) {
@@ -391,6 +432,31 @@ export default function BusinessAssessment() {
     }
 
     return payload;
+  }
+
+  async function checkCompletedBusinessAssessment(ownerProfileId) {
+    const id = String(ownerProfileId || '').trim();
+    if (!id) return;
+
+    setBusinessAssessmentCompletion({ status: 'checking', assessmentId: '' });
+    try {
+      const payload = await retrieveAssessmentByProfileId(id);
+      const assessment = payload?.assessment || null;
+      const output = assessment?.output || {};
+      const isComplete = Boolean(
+        output.business_intelligence_draft &&
+          output.executive_diagnostic_briefing_v1 &&
+          output.five_futures_v1 &&
+          output.one_move_v1
+      );
+
+      setBusinessAssessmentCompletion({
+        status: isComplete ? 'found' : 'not_found',
+        assessmentId: isComplete ? assessment.assessment_id || '' : ''
+      });
+    } catch {
+      setBusinessAssessmentCompletion({ status: 'not_found', assessmentId: '' });
+    }
   }
 
   async function runGenerationSequence({ assessmentId, ownerProfileId, assessmentRecord }) {
@@ -580,6 +646,80 @@ export default function BusinessAssessment() {
     });
   }, [retrievedBriefing]);
 
+  function renderProfileValidationForm({ helperText, accent = 'orange' }) {
+    const focusClass =
+      accent === 'cyan'
+        ? 'focus:border-cyan-300/60'
+        : accent === 'purple'
+          ? 'focus:border-purple-300/60'
+          : 'focus:border-orange-300/60';
+    const buttonClass =
+      accent === 'cyan'
+        ? 'border border-cyan-200/40 bg-white/[0.06] text-cyan-50 hover:border-cyan-100 hover:bg-cyan-300/10'
+        : accent === 'purple'
+          ? 'border border-purple-300/35 bg-white/[0.06] text-purple-100 hover:border-purple-200 hover:bg-purple-300/10'
+          : 'bg-white text-black hover:bg-orange-100';
+
+    return (
+      <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white">
+          FIRST validate your profile.
+        </p>
+        <p className="mt-2 text-sm leading-6 text-white/58">{helperText}</p>
+        <form className="mt-4 space-y-3" onSubmit={validateProfile}>
+          <input
+            value={profileId}
+            onChange={(event) => {
+              setProfileId(event.target.value);
+              setProfileResult(null);
+              setProfileError('');
+              setBusinessAssessmentCompletion({ status: 'idle', assessmentId: '' });
+              setPromoState((current) =>
+                current.status === 'valid' ? { status: 'idle', message: '' } : current
+              );
+            }}
+            placeholder="MM-20260531-XXXXXXX"
+            className={`w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition ${focusClass}`}
+          />
+          <button
+            type="submit"
+            disabled={isValidating}
+            className={`w-full rounded-2xl px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] transition disabled:cursor-wait disabled:opacity-55 ${buttonClass}`}
+          >
+            {isValidating ? 'Validating...' : 'Validate Profile'}
+          </button>
+        </form>
+
+        {profileResult && (
+          <div className="mt-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
+            <p className="text-sm font-semibold text-emerald-200">Profile ID validated.</p>
+            <p className="mt-2 text-base font-semibold text-white">{profileResult.name}</p>
+            <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/62">
+              {profileResult.profileType}
+            </p>
+            {businessAssessmentCompletion.status === 'checking' && (
+              <p className="mt-2 text-sm text-white/58">Checking Business Assessment completion...</p>
+            )}
+            {businessAssessmentCompletion.status === 'found' && (
+              <p className="mt-2 text-sm text-emerald-100">Completed Business Assessment found.</p>
+            )}
+            {businessAssessmentCompletion.status === 'not_found' && (
+              <p className="mt-2 text-sm text-white/58">
+                Monthly Intelligence requires a completed Business Assessment first.
+              </p>
+            )}
+          </div>
+        )}
+
+        {profileError && (
+          <div className="mt-4 whitespace-pre-line rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+            {profileError}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(249,115,22,0.16),transparent_32%),radial-gradient(circle_at_80%_0%,rgba(168,85,247,0.13),transparent_30%),linear-gradient(180deg,#050505_0%,#0b0b0d_52%,#000_100%)]" />
@@ -643,11 +783,18 @@ export default function BusinessAssessment() {
                     ))}
                   </div>
 
+                  <div className="mt-6">
+                    {renderProfileValidationForm({
+                      helperText: 'First validate your profile to unlock Business Assessment checkout.',
+                      accent: 'orange'
+                    })}
+                  </div>
+
                   <button
                     type="button"
-                    disabled={checkoutState.loading === 'business_assessment'}
+                    disabled={!hasValidatedProfile || checkoutState.loading === 'business_assessment'}
                     onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
-                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-wait disabled:opacity-55"
+                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     {checkoutState.loading === 'business_assessment' ? 'Opening Checkout...' : 'Start Business Assessment Checkout'}
                   </button>
@@ -694,11 +841,28 @@ export default function BusinessAssessment() {
                     ))}
                   </div>
 
+                  <div className="mt-6">
+                    {renderProfileValidationForm({
+                      helperText: 'First validate your profile to unlock Monthly Intelligence.',
+                      accent: 'cyan'
+                    })}
+                  </div>
+
+                  {hasValidatedProfile && businessAssessmentCompletion.status === 'not_found' && (
+                    <p className="mt-4 rounded-2xl border border-orange-300/25 bg-orange-400/[0.08] px-4 py-3 text-sm leading-6 text-orange-100">
+                      First you must take the Business Assessment to unlock Monthly Intelligence.
+                    </p>
+                  )}
+
                   <button
                     type="button"
-                    disabled={checkoutState.loading === 'more_monthly_intelligence'}
+                    disabled={
+                      !hasValidatedProfile ||
+                      !hasCompletedBusinessAssessment ||
+                      checkoutState.loading === 'more_monthly_intelligence'
+                    }
                     onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_soft_awareness')}
-                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl border border-cyan-200/38 bg-white/[0.06] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
+                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl border border-cyan-200/38 bg-white/[0.06] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-not-allowed disabled:opacity-35"
                   >
                     {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence'}
                   </button>
@@ -709,7 +873,7 @@ export default function BusinessAssessment() {
                 <div className="border-b border-white/10 pb-5">
                   <p className="text-xl font-semibold text-white">Already have access?</p>
                   <p className="mt-3 text-sm leading-6 text-white/56">
-                    Validate a profile, apply a promo code, or retrieve a completed Business Assessment.
+                    Validate a profile, apply a Dev Code, or retrieve a completed Business Assessment.
                   </p>
                 </div>
 
@@ -724,55 +888,20 @@ export default function BusinessAssessment() {
                     <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">
                       Start Here / Profile ID Validation
                     </div>
-                    <p className="mt-2 text-sm leading-6 text-white/56">
-                      Enter your Profile ID to unlock the assessment flow.
-                    </p>
-                    <form className="mt-4 space-y-3" onSubmit={validateProfile}>
-                      <input
-                        value={profileId}
-                        onChange={(event) => setProfileId(event.target.value)}
-                        placeholder="MM-20260531-XXXXXXX"
-                        className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-orange-300/60"
-                      />
-                      <button
-                        type="submit"
-                        disabled={isValidating}
-                        className="w-full rounded-2xl bg-white px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-wait disabled:opacity-55"
-                      >
-                        {isValidating ? 'Validating...' : 'Validate Profile'}
-                      </button>
-                    </form>
-
-                    {profileResult && (
-                      <div className="mt-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
-                        <p className="text-sm font-semibold text-emerald-200">Profile Found</p>
-                        <p className="mt-2 text-base font-semibold text-white">{profileResult.name}</p>
-                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/62">
-                          {profileResult.profileType}
-                        </p>
-                        <button
-                          type="button"
-                          onClick={beginAssessment}
-                          className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
-                        >
-                          Begin Business Assessment
-                        </button>
-                      </div>
-                    )}
-
-                    {profileError && (
-                      <div className="mt-4 whitespace-pre-line rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                        {profileError}
-                      </div>
-                    )}
+                    <div className="mt-4">
+                      {renderProfileValidationForm({
+                        helperText: 'First validate your profile. Profile validation alone does not start the test.',
+                        accent: 'purple'
+                      })}
+                    </div>
                   </section>
 
                   <section className="border-t border-white/10 pt-7">
                     <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">
-                      Promo Code
+                      Dev Code
                     </div>
                     <p className="mt-2 text-sm leading-6 text-white/56">
-                      Apply approved Business Assessment access.
+                      After your profile is validated, apply an approved Dev Code to unlock free Business Assessment access.
                     </p>
                     <form className="mt-4 space-y-3" onSubmit={validateBusinessAssessmentPromo}>
                       <input
@@ -781,15 +910,15 @@ export default function BusinessAssessment() {
                           setPromoCode(event.target.value);
                           setPromoState({ status: 'idle', message: '' });
                         }}
-                        placeholder="Enter promo code"
+                        placeholder="Enter Dev Code"
                         className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-purple-300/60"
                       />
                       <button
                         type="submit"
-                        disabled={!promoCode.trim()}
+                        disabled={!hasValidatedProfile || !promoCode.trim()}
                         className="w-full rounded-2xl border border-purple-300/35 bg-white/[0.06] px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-purple-100 transition hover:border-purple-200 hover:bg-purple-300/10 disabled:cursor-not-allowed disabled:opacity-45"
                       >
-                        Apply Promo
+                        Apply Dev Code
                       </button>
                     </form>
                     {promoState.message && (
@@ -802,6 +931,15 @@ export default function BusinessAssessment() {
                       >
                         {promoState.message}
                       </p>
+                    )}
+                    {devCodeAccepted && (
+                      <button
+                        type="button"
+                        onClick={beginAssessment}
+                        className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
+                      >
+                        Begin Business Assessment
+                      </button>
                     )}
                   </section>
 

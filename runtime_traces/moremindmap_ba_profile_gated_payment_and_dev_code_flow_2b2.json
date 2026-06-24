@@ -1,0 +1,78 @@
+{
+  "phase_id": "MM-UX-2B.2",
+  "verdict": "MOREMINDMAP_BA_PROFILE_GATED_PAYMENT_AND_DEV_CODE_FLOW_COMPLETE_WITH_LIMITS",
+  "classification": "BA_PROFILE_ID_REQUIRED_FOR_PAYMENT_AND_DEV_CODE_ACCESS_NO_PRICE_CHANGE",
+  "highest_allowed_readiness": "READY_FOR_USER_RETEST_OF_BA_PANEL_GATES",
+  "files_changed": [
+    "src/BusinessAssessment.jsx",
+    "MOREMINDMAP_BA_PROFILE_GATED_PAYMENT_AND_DEV_CODE_FLOW_2B2.md",
+    "runtime_traces/moremindmap_ba_profile_gated_payment_and_dev_code_flow_2b2.json"
+  ],
+  "runtime_code_changed": true,
+  "backend_changed": false,
+  "stripe_route_changed": false,
+  "stripe_price_changed": false,
+  "access_backend_changed": false,
+  "root_cause": "Profile validation could expose the Begin Business Assessment action directly, while checkout buttons were not gated by validated Profile ID.",
+  "repair_summary": "Business Assessment actions now require validated Profile ID first; Dev Code access requires validated Profile ID plus valid Dev Code; Monthly Intelligence requires validated Profile ID plus completed Business Assessment.",
+  "panel_1_profile_gate": {
+    "product": "Business Assessment",
+    "button_initial_state": "disabled",
+    "instruction": "First validate your profile to unlock Business Assessment checkout.",
+    "enabled_when": "validated_profile_id_exists"
+  },
+  "panel_2_profile_gate": {
+    "product": "MORE Monthly Intelligence",
+    "button_initial_state": "disabled",
+    "instruction": "First validate your profile to unlock Monthly Intelligence.",
+    "enabled_when": "validated_profile_id_exists_and_completed_business_assessment_found"
+  },
+  "panel_3_dev_code_gate": {
+    "visible_label": "Dev Code",
+    "profile_validation_alone_starts_test": false,
+    "dev_code_alone_starts_test": false,
+    "begin_button_visible_when": "validated_profile_id_exists_and_valid_dev_code_accepted"
+  },
+  "combined_profile_plus_dev_code_rule": "Free Business Assessment access requires validated Profile ID plus valid Dev Code.",
+  "monthly_intelligence_ba_completion_rule": "Monthly Intelligence checkout remains disabled unless the existing retrieval path confirms completed Business Assessment output.",
+  "checkout_profile_id_preservation": "Existing checkout route already accepts profile_id, uses it as client_reference_id, and stores it in Stripe metadata; no backend change required.",
+  "render_split_preserved": true,
+  "preserved_behaviors": [
+    "stripe_checkout_session_creation",
+    "stripe_webhook_processing",
+    "access_grant_logic",
+    "business_assessment_questions",
+    "business_assessment_generation",
+    "completed_assessment_retrieval",
+    "universal_translator",
+    "bos_profile",
+    "darren_dashboard"
+  ],
+  "validation_results": {
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "json_parse": "passed",
+    "static_privacy_scan": "passed_with_existing_profile_retrieval_terms_only_no_new_secret_payment_webhook_or_access_backend_exposure"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "initial page shows three premium panels",
+    "Panel 1 checkout disabled before Profile ID validation",
+    "Panel 2 Monthly Intelligence disabled before Profile ID validation and BA completion",
+    "Panel 3 says Dev Code",
+    "Profile ID validation alone does not start test",
+    "validated Profile ID plus BA5FREE unlocks Begin Business Assessment",
+    "active question view remains clean after begin",
+    "no checkout started during smoke"
+  ],
+  "limits": [
+    "Frontend gating repair only",
+    "No Stripe price or product changes",
+    "No webhook changes",
+    "No access backend changes",
+    "No question or generation changes",
+    "Live browser retest recommended with known valid Profile ID and BA5FREE"
+  ]
+}
