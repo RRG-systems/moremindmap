@@ -586,8 +586,8 @@ export default function BusinessAssessment() {
 
       <div className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-5 py-6 sm:px-8 lg:px-10">
         <nav className="mb-12 flex items-center justify-between">
-          <Link to="/" className="text-sm font-semibold tracking-[0.28em] text-orange-300">
-            MORE MINDMAP
+          <Link to="/" className="text-sm font-medium text-white/52 transition hover:text-white">
+            ← Back to Home
           </Link>
           <Link
             to="/profile"
@@ -597,7 +597,294 @@ export default function BusinessAssessment() {
           </Link>
         </nav>
 
-        <main className="grid flex-1 gap-8 lg:grid-cols-[1.02fr_0.98fr] lg:items-start">
+        {!flowStarted && (
+          <section className="mx-auto w-full max-w-7xl">
+            <div className="text-center">
+              <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">
+                MOREMINDMAP
+              </p>
+              <h1 className="mx-auto mt-5 max-w-4xl text-3xl font-semibold leading-tight tracking-tight text-white md:text-5xl">
+                See the future your business is creating.
+              </h1>
+              <p className="mx-auto mt-4 max-w-3xl text-base leading-7 text-white/64 md:text-lg">
+                The system identifies where your business is today, where it is headed next, and the
+                One Move most likely to change the outcome.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-6 xl:grid-cols-3">
+              <section className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[#101114] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.4)] md:p-7">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_76%_0%,rgba(249,115,22,0.14),transparent_33%),linear-gradient(145deg,rgba(255,255,255,0.075),transparent_46%)]" />
+                <div className="relative flex h-full flex-col">
+                  <div className="border-b border-white/10 pb-5">
+                    <p className="text-xl font-semibold text-white">Business Assessment</p>
+                    <div className="mt-4 flex items-end gap-3">
+                      <span className="text-5xl font-semibold tracking-tight text-white">$49</span>
+                    </div>
+                    <p className="mt-5 text-base font-semibold leading-7 text-white">
+                      See the future your business is creating.
+                    </p>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    {[
+                      'Executive Business Summary',
+                      'Business Operating System Diagnostic',
+                      'Five Futures',
+                      'One Move',
+                      'Business Assessment Map',
+                      'Universal Translator',
+                      'Retrieval by Profile ID'
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-3 text-sm leading-6 text-white/72">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-orange-200/80" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={checkoutState.loading === 'business_assessment'}
+                    onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
+                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-wait disabled:opacity-55"
+                  >
+                    {checkoutState.loading === 'business_assessment' ? 'Opening Checkout...' : 'Start Business Assessment Checkout'}
+                  </button>
+                  <p className="mt-3 text-xs leading-5 text-white/46">
+                    Checkout opens through Stripe. Durable paid access is confirmed after payment processing.
+                  </p>
+                </div>
+              </section>
+
+              <section className="relative overflow-hidden rounded-[2rem] border border-white/12 bg-[#101114] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.36)] md:p-7">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_0%,rgba(34,211,238,0.13),transparent_34%),linear-gradient(145deg,rgba(255,255,255,0.07),transparent_48%)]" />
+                <div className="relative flex h-full flex-col">
+                  <div className="border-b border-white/10 pb-5">
+                    <p className="text-xl font-semibold text-white">MORE Monthly Intelligence</p>
+                    <div className="mt-4 flex items-end gap-3">
+                      <span className="text-5xl font-semibold tracking-tight text-white">$23.95</span>
+                      <span className="pb-2 text-sm font-medium text-white/45">/month</span>
+                    </div>
+                    <p className="mt-5 text-base font-semibold leading-7 text-white">
+                      You have your map. Now keep it alive.
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-white/58">
+                      Monthly Intelligence helps MORE MindMap learn from what actually happens, adapt
+                      the strategy, and keep your next move aligned with evidence.
+                    </p>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    {[
+                      'Track your One Move',
+                      'Record what happened',
+                      'See what changed',
+                      'Avoid overclaiming progress',
+                      'Generate an updated strategy draft',
+                      'Choose the next best move',
+                      'Build evidence over time',
+                      'Keep improving as reality changes'
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-3 text-sm leading-6 text-white/72">
+                        <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-200/80" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={checkoutState.loading === 'more_monthly_intelligence'}
+                    onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_soft_awareness')}
+                    className="mt-7 inline-flex w-full items-center justify-center rounded-2xl border border-cyan-200/38 bg-white/[0.06] px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
+                  >
+                    {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence'}
+                  </button>
+                </div>
+              </section>
+
+              <section className="rounded-[2rem] border border-white/12 bg-[#111216] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.35)] md:p-7">
+                <div className="border-b border-white/10 pb-5">
+                  <p className="text-xl font-semibold text-white">Already have access?</p>
+                  <p className="mt-3 text-sm leading-6 text-white/56">
+                    Validate a profile, apply a promo code, or retrieve a completed Business Assessment.
+                  </p>
+                </div>
+
+                {checkoutState.error && (
+                  <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                    {checkoutState.error}
+                  </div>
+                )}
+
+                <div className="mt-6 space-y-7">
+                  <section>
+                    <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">
+                      Start Here / Profile ID Validation
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-white/56">
+                      Enter your Profile ID to unlock the assessment flow.
+                    </p>
+                    <form className="mt-4 space-y-3" onSubmit={validateProfile}>
+                      <input
+                        value={profileId}
+                        onChange={(event) => setProfileId(event.target.value)}
+                        placeholder="MM-20260531-XXXXXXX"
+                        className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-orange-300/60"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isValidating}
+                        className="w-full rounded-2xl bg-white px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-wait disabled:opacity-55"
+                      >
+                        {isValidating ? 'Validating...' : 'Validate Profile'}
+                      </button>
+                    </form>
+
+                    {profileResult && (
+                      <div className="mt-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
+                        <p className="text-sm font-semibold text-emerald-200">Profile Found</p>
+                        <p className="mt-2 text-base font-semibold text-white">{profileResult.name}</p>
+                        <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/62">
+                          {profileResult.profileType}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={beginAssessment}
+                          className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
+                        >
+                          Begin Business Assessment
+                        </button>
+                      </div>
+                    )}
+
+                    {profileError && (
+                      <div className="mt-4 whitespace-pre-line rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                        {profileError}
+                      </div>
+                    )}
+                  </section>
+
+                  <section className="border-t border-white/10 pt-7">
+                    <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">
+                      Promo Code
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-white/56">
+                      Apply approved Business Assessment access.
+                    </p>
+                    <form className="mt-4 space-y-3" onSubmit={validateBusinessAssessmentPromo}>
+                      <input
+                        value={promoCode}
+                        onChange={(event) => {
+                          setPromoCode(event.target.value);
+                          setPromoState({ status: 'idle', message: '' });
+                        }}
+                        placeholder="Enter promo code"
+                        className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-purple-300/60"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!promoCode.trim()}
+                        className="w-full rounded-2xl border border-purple-300/35 bg-white/[0.06] px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-purple-100 transition hover:border-purple-200 hover:bg-purple-300/10 disabled:cursor-not-allowed disabled:opacity-45"
+                      >
+                        Apply Promo
+                      </button>
+                    </form>
+                    {promoState.message && (
+                      <p
+                        className={`mt-3 rounded-xl border px-4 py-3 text-sm leading-6 ${
+                          promoState.status === 'valid'
+                            ? 'border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100'
+                            : 'border-red-400/30 bg-red-500/[0.08] text-red-100'
+                        }`}
+                      >
+                        {promoState.message}
+                      </p>
+                    )}
+                  </section>
+
+                  <section className="border-t border-white/10 pt-7">
+                    <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/42">
+                      Already completed a Business Assessment?
+                    </div>
+                    <p className="mt-2 text-sm leading-6 text-white/56">
+                      Retrieve saved Business Assessment intelligence by Profile ID.
+                    </p>
+                    <form className="mt-4 space-y-3" onSubmit={retrieveAssessment}>
+                      <input
+                        value={retrieveId}
+                        onChange={(event) => setRetrieveId(event.target.value)}
+                        placeholder="Enter Profile ID"
+                        className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-cyan-300/60"
+                      />
+                      <button
+                        type="submit"
+                        disabled={retrieveState.status === 'loading'}
+                        className="w-full rounded-2xl border border-white/14 bg-white/[0.06] px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-white/78 transition hover:border-cyan-300/60 hover:text-white disabled:cursor-wait disabled:opacity-45"
+                      >
+                        {retrieveState.status === 'loading' ? 'Retrieving...' : 'Retrieve'}
+                      </button>
+                    </form>
+
+                    {retrieveState.status === 'found' && (
+                      <div className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-400/[0.08] p-4">
+                        <p className="text-sm font-semibold text-cyan-100">Business Assessment Found</p>
+                        <p className="mt-2 text-sm font-semibold text-white">
+                          {retrievedBriefing
+                            ? 'Executive Diagnostic Briefing Ready'
+                            : 'Executive Diagnostic Briefing not generated yet.'}
+                        </p>
+                        <p className="mt-2 text-sm text-white/78">
+                          Assessment ID:{' '}
+                          <span className="font-semibold text-white">
+                            {retrieveState.result.assessment.assessment_id}
+                          </span>
+                        </p>
+                        <p className="mt-1 text-sm text-white/78">
+                          Created At: {formatDate(retrieveState.result.assessment.created_at)}
+                        </p>
+                        <p className="mt-1 text-sm text-white/78">
+                          Status: {retrieveState.result.assessment.status}
+                        </p>
+                        <p className="mt-1 text-sm text-white/62">
+                          {retrievedNeedsGeneration
+                            ? 'This assessment intake is saved and can now complete intelligence generation.'
+                            : 'This assessment intelligence is complete.'}
+                        </p>
+
+                        {retrievedNeedsGeneration && (
+                          <button
+                            type="button"
+                            disabled={generationIsRunning}
+                            onClick={generateRetrievedAssessment}
+                            className="mt-4 w-full rounded-xl border border-cyan-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
+                          >
+                            {generationIsRunning ? generationState.phase || 'Generating...' : 'Generate Executive Diagnostic'}
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {retrieveState.status === 'not_found' && (
+                      <div className="mt-4 rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-white/68">
+                        No Business Assessment found for this Profile ID.
+                      </div>
+                    )}
+
+                    {retrieveState.status === 'error' && (
+                      <div className="mt-4 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                        {retrieveState.error}
+                      </div>
+                    )}
+                  </section>
+                </div>
+              </section>
+            </div>
+          </section>
+        )}
+
+        <main className={flowStarted ? "mt-10 flex-1" : "hidden"}>
           <section className="space-y-8">
             <div className="space-y-5">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300">
