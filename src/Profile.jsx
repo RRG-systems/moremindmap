@@ -203,7 +203,7 @@ export default function Profile() {
         source_context: "behavior_operating_system_profile"
       })
     } catch {
-      setCheckoutError("Payment setup is not available yet.")
+      setCheckoutError("Payment setup is not available yet. Please try again shortly.")
       setCheckoutLoading(false)
     }
   }
@@ -487,6 +487,7 @@ export default function Profile() {
               validateProfileId={validateProfileId}
               onStart={handleStartAssessment}
               checkoutLoading={checkoutLoading}
+              checkoutError={checkoutError}
             />
           )}
 
@@ -684,7 +685,7 @@ export default function Profile() {
 
 /* ── Intro Screen ── */
 
-function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading }) {
+function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading, checkoutError }) {
   // DEBUG: Immediate render log
   const isButtonDisabled = !fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading
   console.log("[INTROSCREEN RENDER]", {

@@ -1,0 +1,41 @@
+{
+  "phase_id": "MM-PAY-1B.1",
+  "verdict": "MOREMINDMAP_BEHAVIOR_OS_CHECKOUT_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "BEHAVIOR_OS_CHECKOUT_LAUNCH_REPAIRED_NO_PAYMENT_ACCESS_CHANGE",
+  "files_changed": [
+    "src/Profile.jsx",
+    "MOREMINDMAP_BEHAVIOR_OS_CHECKOUT_REPAIR_1B1.md",
+    "runtime_traces/moremindmap_behavior_os_checkout_repair_1b1.json"
+  ],
+  "root_cause": "IntroScreen referenced checkoutError without receiving it as a declared prop, creating a client-side render failure on the Behavior Operating System checkout path.",
+  "repair_summary": {
+    "checkout_error_prop_passed": true,
+    "intro_screen_prop_declared": true,
+    "safe_error_message_added": true,
+    "stripe_product_mapping_changed": false,
+    "webhook_behavior_changed": false,
+    "durable_access_behavior_changed": false
+  },
+  "validation_results": {
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_product_key_controlled_400": "passed",
+    "behavior_operating_system_checkout_url": "passed",
+    "business_assessment_checkout_url": "passed",
+    "more_monthly_intelligence_checkout_url": "passed",
+    "privacy_scan": "passed_with_existing_profile_file_terms_not_added_by_diff"
+  },
+  "checkout_products_verified": {
+    "behavior_operating_system": "checkout_url_present",
+    "business_assessment": "checkout_url_present",
+    "more_monthly_intelligence": "checkout_url_present"
+  },
+  "durable_access_created": false,
+  "real_payment_completed": false,
+  "limits": [
+    "Hosted Checkout launch only.",
+    "Redirect success is not durable access proof.",
+    "Webhook-confirmed access remains the payment truth layer.",
+    "No real payment was completed."
+  ]
+}
