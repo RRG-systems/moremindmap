@@ -1,0 +1,109 @@
+{
+  "phase_id": "MM-UX-1C.1",
+  "verdict": "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_SECTION_EXTRACTION_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "BOS_TRANSLATOR_REAL_SECTION_EXTRACTION_REPAIRED_NO_SOURCE_REPLACEMENT",
+  "highest_allowed_readiness": "READY_FOR_USER_RETEST_OF_DARREN_BOS_TRANSLATOR",
+  "files_changed": [
+    "src/Profile.jsx",
+    "api/universal-translator.js",
+    "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_SECTION_EXTRACTION_REPAIR_1C1.md",
+    "runtime_traces/moremindmap_universal_translator_bos_section_extraction_repair_1c1.json"
+  ],
+  "root_cause": "MM-UX-1C used keyword windows over flattened visible text, so real retrieved BOS headings could be missed and the fallback excerpt could still dominate.",
+  "actual_issue_found": {
+    "same_origin_darren_retrieve_shape": "canonical_profile_data_without_html",
+    "html_branch_repaired": "src/Profile.jsx result.version === retrieved && result.html",
+    "fragile_keyword_only_extraction_replaced": true
+  },
+  "extraction_repair_summary": {
+    "dom_heading_extraction_added": true,
+    "heading_to_bos_category_mapping_added": true,
+    "sentence_window_fallback_added": true,
+    "structured_section_self_check_added": true,
+    "fallback_excerpt_shortened_when_sections_exist": true
+  },
+  "real_heading_strategy": {
+    "heading_selectors": [
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "strong",
+      "b",
+      "[class*='title']",
+      "[class*='heading']"
+    ],
+    "mapped_categories": [
+      "Behavior Operating System summary",
+      "Core Operating Style",
+      "Behavioral Advantages",
+      "Behavioral Risks",
+      "Pressure Pattern",
+      "Communication Style",
+      "Decision Style",
+      "Execution Pattern",
+      "Growth Edge",
+      "Recommended Next Move",
+      "Profile DNA / DNA Summary"
+    ]
+  },
+  "fallback_strategy": "If fewer than three mapped sections are found, use sentence windows around flexible BOS category patterns and include a bounded visible fallback excerpt.",
+  "source_excerpt_policy": {
+    "source": "visible rendered profile text only",
+    "section_marker_added": "BOS section-aware excerpt: true",
+    "max_length": 6000,
+    "raw_html_passed": false,
+    "raw_json_passed": false,
+    "raw_canonical_dossier_passed": false,
+    "raw_profile_json_passed": false,
+    "raw_scoring_objects_passed": false
+  },
+  "api_prompt_changes": [
+    "BOS sections should be translated section by section.",
+    "BOS output should not collapse into generic personality summary."
+  ],
+  "business_assessment_changes": false,
+  "english_only_policy": {
+    "allowed_modes": [
+      "plain_english",
+      "explain_like_busy",
+      "coach_me_through_this"
+    ],
+    "language_selector_added": false,
+    "locale_metadata_added": false,
+    "multilingual_output_added": false
+  },
+  "record_mutation_policy": "No records are mutated and no translations are stored.",
+  "validation_results": {
+    "node_check_backend": "passed",
+    "node_check_dictionary": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_source_type_400": "passed",
+    "invalid_translation_mode_400": "passed",
+    "missing_source_excerpt_400": "passed",
+    "raw_object_excerpt_400": "passed",
+    "privacy_scan": "passed_with_expected_existing_profile_retrieval_canonical_term_hits"
+  },
+  "production_smoke_plan": [
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "bundle contains Explain This Profile",
+    "bundle contains improved section extraction logic or real heading mapping",
+    "Business Assessment translator button remains present",
+    "controlled valid one_move request works",
+    "controlled valid bos_profile request works",
+    "no multilingual selector or locale metadata",
+    "no records mutate",
+    "original BOS output remains visible"
+  ],
+  "limits": [
+    "No section-level BOS buttons added.",
+    "No raw Darren profile text committed.",
+    "No translation storage.",
+    "No output replacement.",
+    "No record mutation.",
+    "No multilingual support."
+  ]
+}
