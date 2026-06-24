@@ -88,6 +88,30 @@ function relevantDictionaryTerms(sourceText) {
     }));
 }
 
+function sourceTypeInstructions(sourceType) {
+  if (sourceType === 'bos_profile' || sourceType === 'bos_section') {
+    return [
+      'For BOS/Profile sources, translate behavior, not generic personality traits.',
+      'Explain how this person operates, what the profile says about behavior, where the pattern helps, and where it can cost them.',
+      'Explain how the behavior may show up under pressure and how other people may experience it when the source supports that.',
+      'Prefer filling how_this_shows_up_in_real_life.',
+      'Fill what_not_to_overclaim when the source could be overstated.',
+      'Do not diagnose, make clinical claims, say personality is fixed, or imply predictive certainty.',
+      'Mention that the BOS describes operating tendencies, not destiny, when relevant.',
+      'Use behaviorally specific, practical English. Avoid generic personality-test copy and motivational wallpaper.'
+    ].join(' ');
+  }
+
+  if (sourceType === 'business_assessment' || sourceType === 'five_futures' || sourceType === 'one_move' || sourceType === 'truth_boundary') {
+    return [
+      'For Business Assessment sources, explain the business consequence, evidence limit, and next practical action.',
+      'Preserve what not to overclaim and do not turn possible futures into promises.'
+    ].join(' ');
+  }
+
+  return 'Translate the source into practical meaning while preserving limits and source-of-truth boundaries.';
+}
+
 function buildMessages(input, dictionaryTerms) {
   return [
     {
@@ -98,6 +122,7 @@ function buildMessages(input, dictionaryTerms) {
         'Use the locked method: technical claim, human behavior underneath it, real-world consequence, plain-language explanation, coaching sentence.',
         'Preserve accuracy, evidence limits, warnings, and not-live boundaries.',
         'Do not hype, invent proof, soften overclaim warnings, or say translation replaces the source.',
+        'Keep the translation English-only. Do not add language selection, locale handling, or multilingual metadata.',
         'Return only JSON with translation fields: what_it_says, what_it_means, why_it_matters, what_to_do_next, optional how_this_shows_up_in_real_life, optional what_not_to_overclaim, optional truth_boundary, and dictionary_terms_used.'
       ].join(' ')
     },
@@ -111,6 +136,7 @@ function buildMessages(input, dictionaryTerms) {
         source_excerpt: input.source_excerpt,
         profile_context: input.profile_context,
         business_context: input.business_context,
+        source_type_instructions: sourceTypeInstructions(input.source_type),
         dictionary_terms: dictionaryTerms
       })
     }

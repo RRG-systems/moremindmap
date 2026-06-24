@@ -1,0 +1,119 @@
+{
+  "phase_id": "MM-UX-1C",
+  "verdict": "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_SECTION_AWARE_QUALITY_UPGRADE_COMPLETE_WITH_LIMITS",
+  "classification": "BOS_TRANSLATOR_SECTION_AWARE_CONTEXT_SHAPING_REPAIRED_NO_SOURCE_REPLACEMENT",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_BOS_TRANSLATOR_QUALITY_REVIEW",
+  "files_changed": [
+    "src/Profile.jsx",
+    "src/components/reports/WebProfileReport.jsx",
+    "src/components/universalTranslator/UniversalTranslatorDrawer.jsx",
+    "api/universal-translator.js",
+    "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_SECTION_AWARE_QUALITY_UPGRADE_1C.md",
+    "runtime_traces/moremindmap_universal_translator_bos_section_aware_quality_upgrade_1c.json"
+  ],
+  "code_changed": true,
+  "root_cause": "Business Assessment used clean section-specific inputs while retrieved BOS used one broad flattened visible text excerpt.",
+  "repair_summary": {
+    "retrieved_bos_section_aware_excerpt_added": true,
+    "web_profile_bos_section_aware_excerpt_added": true,
+    "bos_specific_route_instructions_added": true,
+    "bos_drawer_helper_copy_added": true,
+    "section_level_bos_buttons_added": false
+  },
+  "section_aware_strategy": {
+    "strategy": "Top-level BOS translator control now sends labeled section-aware visible text.",
+    "sections": [
+      "Profile context",
+      "Behavior Operating System summary",
+      "Core Operating Style",
+      "Behavioral Advantages",
+      "Behavioral Risks",
+      "Pressure Pattern",
+      "Communication Style",
+      "Decision Style",
+      "Execution Pattern",
+      "Growth Edge",
+      "Recommended Next Move",
+      "Profile DNA / DNA Summary",
+      "Visible source excerpt"
+    ],
+    "actual_section_buttons": "deferred"
+  },
+  "bos_excerpt_builder": {
+    "helper": "buildBosTranslatorExcerptFromRenderedProfile",
+    "input_source": "visible rendered profile text",
+    "max_length": 6000,
+    "raw_html_passed": false,
+    "raw_json_passed": false,
+    "raw_canonical_profile_passed": false,
+    "raw_scoring_objects_passed": false
+  },
+  "bos_prompt_upgrade": {
+    "source_types": [
+      "bos_profile",
+      "bos_section"
+    ],
+    "behavior_specific": true,
+    "generic_personality_copy_avoided": true,
+    "clinical_claims_disallowed": true,
+    "fixed_personality_claims_disallowed": true,
+    "predictive_certainty_disallowed": true
+  },
+  "bos_ui_changes": {
+    "explain_this_profile_preserved": true,
+    "section_buttons_added": false
+  },
+  "drawer_changes": {
+    "bos_helper_copy_added": true,
+    "business_assessment_behavior_changed": false
+  },
+  "business_assessment_changes": false,
+  "english_only_policy": {
+    "allowed_modes": [
+      "plain_english",
+      "explain_like_busy",
+      "coach_me_through_this"
+    ],
+    "language_selector_added": false,
+    "locale_metadata_added": false,
+    "multilingual_output_added": false
+  },
+  "record_mutation_policy": "No records are mutated and no translations are stored.",
+  "source_of_truth_policy": "Original BOS output remains the source of truth.",
+  "raw_private_data_policy": "Translator launchers pass bounded visible text only, not raw profile JSON, raw scoring objects, or hidden source data.",
+  "validation_results": {
+    "node_check_backend": "passed",
+    "node_check_dictionary": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_source_type_400": "passed",
+    "invalid_translation_mode_400": "passed",
+    "missing_source_excerpt_400": "passed",
+    "raw_object_excerpt_400": "passed",
+    "valid_one_move_translator": "skipped_openai_api_key_missing_locally",
+    "valid_bos_profile_translator": "skipped_openai_api_key_missing_locally",
+    "privacy_scan": "passed_with_existing_profile_retrieval_terms_and_english_only_policy_text"
+  },
+  "production_smoke_plan": [
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "retrieved Darren BOS profile path still shows Explain This Profile",
+    "drawer opens when practical",
+    "BOS source excerpt is section-aware",
+    "Business Assessment translator buttons remain present",
+    "controlled valid one_move request still works",
+    "controlled valid bos_profile request works",
+    "no records mutate",
+    "no multilingual selector or locale metadata",
+    "original BOS output remains visible"
+  ],
+  "limits": [
+    "English-only v0.",
+    "Section-level BOS buttons deferred.",
+    "No translation storage.",
+    "No output replacement.",
+    "No record mutation.",
+    "No Stripe, access grant, Darren dashboard, or payment changes."
+  ]
+}

@@ -28,10 +28,27 @@ import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslato
 function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence, visualDNA, deterministicVisualDNA }) {
   const [translatorSource, setTranslatorSource] = useState(null);
   const profileSummary = [
+    'Profile context:',
     `Profile: ${personName}`,
     `Type: ${profileType}`,
+    company ? `Company: ${company}` : '',
+    '',
+    'Behavior Operating System summary:',
     narrative.executiveSummary?.body || narrative.executiveSummary || '',
+    '',
+    'Core Operating Style:',
     narrative.profileDNA?.body || narrative.profileDNA || '',
+    '',
+    'Pressure Pattern:',
+    narrative.systemUnderStrain?.body || narrative.systemUnderStrain || '',
+    '',
+    'Communication Style:',
+    narrative.howOthersExperienceYou?.body || narrative.howOthersExperienceYou || '',
+    '',
+    'Growth Edge:',
+    narrative.scalingConstraint?.body || narrative.scalingConstraint || '',
+    '',
+    'Recommended Next Move:',
     narrative.recommendedNextStep?.body || narrative.recommendedNextStep || ''
   ].filter(Boolean).join('\n\n').slice(0, 5000);
 
