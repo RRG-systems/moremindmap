@@ -279,6 +279,15 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
     ? `/business-assessment?id=${encodedProfileId}#business-assessment-results`
     : '/business-assessment#business-assessment-results';
   const encodedReturnTo = encodeURIComponent(returnTo);
+  const rememberVisualReturnState = () => {
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem('business_assessment_visual_return_url', returnTo);
+      window.sessionStorage.setItem('business_assessment_visual_scroll_y', String(window.scrollY || 0));
+    } catch {
+      // Session storage is a best-effort return-state helper only.
+    }
+  };
   const output = assessment?.output || {};
   const mapReady = Boolean(output.business_intelligence_draft || output.executive_diagnostic_briefing_v1 || briefing);
   const futuresReady = Boolean(output.five_futures_v1 && output.one_move_v1);
@@ -356,6 +365,7 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
         {mapReady ? (
           <Link
             to={`/business-assessment/visual-map?id=${encodedProfileId}&returnTo=${encodedReturnTo}`}
+            onClick={rememberVisualReturnState}
             className="group rounded-3xl border border-orange-300/30 bg-orange-400/[0.08] p-6 text-left transition hover:border-orange-200/70 hover:bg-orange-400/[0.12] hover:shadow-[0_0_42px_rgba(249,115,22,0.16)]"
           >
             <span className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-200">
@@ -386,6 +396,7 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
         {futuresReady ? (
           <Link
             to={`/business-assessment/five-futures?id=${encodedProfileId}&returnTo=${encodedReturnTo}`}
+            onClick={rememberVisualReturnState}
             className="group rounded-3xl border border-purple-300/30 bg-purple-400/[0.08] p-6 text-left transition hover:border-purple-200/70 hover:bg-purple-400/[0.12] hover:shadow-[0_0_42px_rgba(168,85,247,0.16)]"
           >
             <span className="text-xs font-semibold uppercase tracking-[0.28em] text-purple-200">

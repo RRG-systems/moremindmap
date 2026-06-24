@@ -1,0 +1,56 @@
+{
+  "phase_id": "MM-BA-UX-1B",
+  "verdict": "MOREMINDMAP_BUSINESS_ASSESSMENT_VISUAL_RETURN_STATE_REPAIRED_WITH_LIMITS",
+  "classification": "VISUAL_CLOSE_RETURNS_TO_ASSESSMENT_RESULT_CONTEXT_NO_PAYMENT_ROUTE_REGRESSION",
+  "files_changed": [
+    "src/BusinessAssessment.jsx",
+    "src/BusinessAssessmentVisualMap.jsx",
+    "src/BusinessAssessmentFiveFutures.jsx",
+    "src/components/businessAssessment/ExecutiveDiagnosticBriefing.jsx",
+    "MOREMINDMAP_BUSINESS_ASSESSMENT_VISUAL_RETURN_STATE_REPAIR_1B.md",
+    "runtime_traces/moremindmap_business_assessment_visual_return_state_repair_1b.json"
+  ],
+  "root_cause": "Visual routes closed through a reconstructed Business Assessment URL, which forced route rehydration and could expose the entry/payment area instead of returning to the existing result context.",
+  "repair_summary": {
+    "session_return_marker_added": true,
+    "raw_assessment_content_stored": false,
+    "visual_close_uses_history_when_launched_from_result": true,
+    "direct_visual_route_fallback_preserved": true,
+    "scroll_restore_fallback_added": true
+  },
+  "return_state_policy": {
+    "stored_fields": [
+      "business_assessment_visual_return_url",
+      "business_assessment_visual_scroll_y"
+    ],
+    "stored_assessment_answers_payload": false,
+    "stored_dossier_content": false,
+    "stored_assessment_result_payload": false
+  },
+  "visual_dna_close_behavior": "Close returns to the existing Business Assessment result history entry when launched from the result; otherwise it falls back to the safe returnTo URL.",
+  "five_futures_close_behavior": "Close returns to the existing Business Assessment result history entry when launched from the result; otherwise it falls back to the safe returnTo URL.",
+  "payment_route_affected": false,
+  "assessment_records_mutated": false,
+  "canonical_dossiers_mutated": false,
+  "validation_results": {
+    "npm_run_build": "passed",
+    "git_diff_check": "passed",
+    "node_check_changed_backend": "not_applicable_no_backend_changed",
+    "privacy_scan": "passed_with_existing_assessment_label_terms_not_added_by_diff",
+    "close_handler_static_check": "passed"
+  },
+  "production_smoke_plan": [
+    "/business-assessment returns 200",
+    "direct visual-map route returns 200",
+    "direct five-futures route returns 200",
+    "Visual DNA close returns to Business Assessment result context",
+    "Five Futures close returns to Business Assessment result context",
+    "no payment route triggered",
+    "no writes or mutations performed"
+  ],
+  "limits": [
+    "This repair changes only visual return-state behavior.",
+    "No payment, Stripe, access grant, assessment generation, or storage behavior changed.",
+    "Scroll restoration is best effort."
+  ]
+}

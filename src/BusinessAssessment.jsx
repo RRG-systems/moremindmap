@@ -562,6 +562,20 @@ export default function BusinessAssessment() {
     if (typeof window === 'undefined') return;
     if (window.location.hash !== '#business-assessment-results') return;
     window.requestAnimationFrame(() => {
+      let storedScrollY = null;
+      try {
+        storedScrollY = window.sessionStorage.getItem('business_assessment_visual_scroll_y');
+        window.sessionStorage.removeItem('business_assessment_visual_scroll_y');
+      } catch {
+        storedScrollY = null;
+      }
+
+      const parsedScrollY = storedScrollY ? Number(storedScrollY) : NaN;
+      if (Number.isFinite(parsedScrollY) && parsedScrollY > 0) {
+        window.scrollTo({ top: parsedScrollY, behavior: 'auto' });
+        return;
+      }
+
       document.getElementById('business-assessment-results')?.scrollIntoView({ block: 'start' });
     });
   }, [retrievedBriefing]);

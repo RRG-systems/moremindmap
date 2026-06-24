@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import BusinessArtifactViewer, {
   BUSINESS_ARTIFACT_WIDTH,
   BUSINESS_MAP_ARTIFACT_HEIGHT,
@@ -24,14 +24,40 @@ function resolveReturnTo(searchParams, profileId) {
 }
 
 function ArtifactShell({ children, title, profileId, returnTo }) {
+  const navigate = useNavigate();
+
+  function closeArtifact() {
+    let storedReturnTo = '';
+    try {
+      storedReturnTo = window.sessionStorage.getItem('business_assessment_visual_return_url') || '';
+      window.sessionStorage.removeItem('business_assessment_visual_return_url');
+    } catch {
+      storedReturnTo = '';
+    }
+
+    const hasAssessmentResultHistory =
+      storedReturnTo === returnTo && Number(window.history.state?.idx || 0) > 0;
+
+    if (hasAssessmentResultHistory) {
+      navigate(-1);
+      return;
+    }
+
+    navigate(returnTo || '/business-assessment', { replace: true });
+  }
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_18%_15%,rgba(249,115,22,0.18),transparent_31%),radial-gradient(circle_at_75%_15%,rgba(6,182,212,0.12),transparent_32%),radial-gradient(circle_at_50%_84%,rgba(168,85,247,0.13),transparent_34%),linear-gradient(180deg,#030303_0%,#09090b_56%,#000_100%)]" />
       <div className="relative mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-4">
         <nav className="mb-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link to={returnTo || '/business-assessment'} className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
-            MORE MINDMAP / Business Assessment
-          </Link>
+          <button
+            type="button"
+            onClick={closeArtifact}
+            className="text-left text-xs font-semibold uppercase tracking-[0.28em] text-orange-300 transition hover:text-orange-100"
+          >
+            Close / Business Assessment
+          </button>
           <div className="text-xs font-semibold uppercase tracking-[0.22em] text-white/45">
             {profileId || 'Profile ID'} / {title}
           </div>
