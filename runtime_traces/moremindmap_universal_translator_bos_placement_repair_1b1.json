@@ -1,0 +1,51 @@
+{
+  "phase_id": "MM-UX-1B.1",
+  "verdict": "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_PLACEMENT_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "BOS_RETRIEVAL_TRANSLATOR_PLACEMENT_REPAIRED_NO_SOURCE_REPLACEMENT",
+  "files_changed": [
+    "src/Profile.jsx",
+    "MOREMINDMAP_UNIVERSAL_TRANSLATOR_BOS_PLACEMENT_REPAIR_1B1.md",
+    "runtime_traces/moremindmap_universal_translator_bos_placement_repair_1b1.json"
+  ],
+  "root_cause": "The retrieved BOS/Profile ID path renders regenerated HTML through src/Profile.jsx instead of the WebProfileReport dashboard where the first translator placement was added.",
+  "actual_bos_renderer": "src/Profile.jsx retrieved result branch: result.version === retrieved && result.html",
+  "repair_summary": {
+    "explain_this_profile_button_added": true,
+    "universal_translator_drawer_mounted": true,
+    "translator_api_changed": false,
+    "business_assessment_translator_changed": false,
+    "multilingual_support_added": false
+  },
+  "source_excerpt_policy": {
+    "source_type": "bos_profile",
+    "source_excerpt_source": "visible rendered report HTML text",
+    "max_excerpt_length": 5000,
+    "raw_canonical_dossier_passed": false,
+    "raw_scoring_objects_passed": false,
+    "raw_full_json_passed": false
+  },
+  "record_mutation_policy": "No records are mutated. Original BOS output remains the source of truth.",
+  "validation_results": {
+    "node_check_backend": "not_applicable_no_backend_changed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "privacy_scan": "passed_with_existing_profile_retrieval_terms_not_added_as_raw_exposure"
+  },
+  "production_smoke_plan": [
+    "/profile loads 200",
+    "retrieve Darren Profile ID mm-20260527-6zshuaao through safe retrieval path if practical",
+    "retrieved BOS/profile output shows Explain This Profile",
+    "translator drawer can open if practical",
+    "Business Assessment translator remains present",
+    "original BOS output remains visible",
+    "no records mutated",
+    "no unsafe exposure"
+  ],
+  "limits": [
+    "Repairs placement only.",
+    "No API behavior changes.",
+    "No section-level BOS buttons added in this repair.",
+    "No multilingual translation."
+  ]
+}

@@ -5,8 +5,25 @@ import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalCont
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 import { startStripeCheckout } from "./lib/stripeCheckout.js";
+import UniversalTranslatorDrawer from "./components/universalTranslator/UniversalTranslatorDrawer.jsx";
 
 const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
+
+function visibleTextFromHtml(html, maxLength = 5000) {
+  if (!html) return "";
+  if (typeof window !== "undefined" && window.DOMParser) {
+    const parsed = new window.DOMParser().parseFromString(String(html), "text/html");
+    return String(parsed.body?.textContent || "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, maxLength);
+  }
+  return String(html)
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
 
 /**
  * buildApiUrl - Safely join API base URL with endpoint path
@@ -50,6 +67,7 @@ export default function Profile() {
   const [promoValidated, setPromoValidated] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState("")
+  const [translatorSource, setTranslatorSource] = useState(null)
   
   // Profile ID retrieval (recovery/testing path)
   const [profileId, setProfileId] = useState("")
@@ -599,6 +617,18 @@ export default function Profile() {
                     <div className="p-4 md:p-6 bg-gradient-to-r from-amber-600 to-orange-600 text-white">
                       <div className="text-xs uppercase tracking-wider opacity-90">Profile Report</div>
                       <div className="text-sm mt-1">Regenerated from Profile ID: {result.profile_id}</div>
+                      <button
+                        type="button"
+                        onClick={() => setTranslatorSource({
+                          source_type: "bos_profile",
+                          source_title: "Behavior Operating System Profile",
+                          source_excerpt: visibleTextFromHtml(result.html),
+                          profile_context: `Retrieved Profile ID: ${result.profile_id || "available"}`
+                        })}
+                        className="mt-4 rounded-full border border-white/35 bg-white/15 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-white transition hover:border-white hover:bg-white/22"
+                      >
+                        Explain This Profile
+                      </button>
                     </div>
                     <div 
                       className="mini-v2-report-container"
@@ -613,6 +643,12 @@ export default function Profile() {
                   </a>
                 </>
               )}
+
+              <UniversalTranslatorDrawer
+                isOpen={Boolean(translatorSource)}
+                onClose={() => setTranslatorSource(null)}
+                source={translatorSource}
+              />
 
               {/* WEB-FIRST: PREMIUM PROFILE REPORT */}
               {!processing && result?.success && result?.version === "web" && result?.canonical_dossier && (
