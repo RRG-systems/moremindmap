@@ -115,6 +115,26 @@ const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
 
 const BUSINESS_ASSESSMENT_PROMO_CODES = new Set(['BA5FREE']);
 
+function createProfileGateState() {
+  return {
+    input: '',
+    status: 'idle',
+    profile: null,
+    error: ''
+  };
+}
+
+function createMonthlyProfileGateState() {
+  return {
+    input: '',
+    status: 'idle',
+    profile: null,
+    error: '',
+    businessAssessmentStatus: 'idle',
+    businessAssessmentId: ''
+  };
+}
+
 const GENERATION_STEPS = [
   {
     key: 'business_intelligence_draft',
@@ -244,17 +264,13 @@ function isComplete(answers) {
 export default function BusinessAssessment() {
   const [searchParams] = useSearchParams();
   const [industry, setIndustry] = useState('Real Estate');
-  const [profileId, setProfileId] = useState('');
   const [promoCode, setPromoCode] = useState('');
   const [promoState, setPromoState] = useState({ status: 'idle', message: '' });
   const [retrieveId, setRetrieveId] = useState('');
-  const [profileResult, setProfileResult] = useState(null);
-  const [profileError, setProfileError] = useState('');
-  const [isValidating, setIsValidating] = useState(false);
-  const [businessAssessmentCompletion, setBusinessAssessmentCompletion] = useState({
-    status: 'idle',
-    assessmentId: ''
-  });
+  const [checkoutProfileGate, setCheckoutProfileGate] = useState(createProfileGateState);
+  const [monthlyProfileGate, setMonthlyProfileGate] = useState(createMonthlyProfileGateState);
+  const [devCodeProfileGate, setDevCodeProfileGate] = useState(createProfileGateState);
+  const [assessmentProfile, setAssessmentProfile] = useState(null);
   const [flowStarted, setFlowStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
@@ -269,7 +285,6 @@ export default function BusinessAssessment() {
     ownerProfileId: null
   });
 
-  const normalizedProfileId = useMemo(() => profileId.trim(), [profileId]);
   const currentQuestion = QUESTIONS[currentQuestionIndex];
   const canSubmit = isComplete(answers);
   const retrievedAssessment = retrieveState.result?.assessment || null;
@@ -284,46 +299,102 @@ export default function BusinessAssessment() {
   );
   const generationIsRunning = generationState.status === 'running';
   const routeProfileId = searchParams.get('id') || '';
-  const hasValidatedProfile = Boolean(profileResult?.id);
-  const hasCompletedBusinessAssessment = businessAssessmentCompletion.status === 'found';
-  const devCodeAccepted = promoState.status === 'valid' && hasValidatedProfile;
+  const checkoutProfileValidated = Boolean(checkoutProfileGate.profile?.id);
+  const monthlyProfileValidated = Boolean(monthlyProfileGate.profile?.id);
+  const hasCompletedBusinessAssessment = monthlyProfileGate.businessAssessmentStatus === 'found';
+  const devCodeProfileValidated = Boolean(devCodeProfileGate.profile?.id);
+  const devCodeAccepted = promoState.status === 'valid' && devCodeProfileValidated;
 
-  async function validateProfile(event) {
+  async function validateProfileForGate(event, gateType) {
     event.preventDefault();
-    setProfileResult(null);
-    setProfileError('');
-    setBusinessAssessmentCompletion({ status: 'idle', assessmentId: '' });
-    setPromoState((current) =>
-      current.status === 'valid' ? { status: 'idle', message: '' } : current
-    );
+    const gate =
+      gateType === 'monthly'
+        ? monthlyProfileGate
+        : gateType === 'devCode'
+          ? devCodeProfileGate
+          : checkoutProfileGate;
+    const normalizedGateProfileId = gate.input.trim();
+
     setFlowStarted(false);
     setSubmitState({ status: 'idle', error: '', result: null });
 
-    if (!normalizedProfileId) {
-      setProfileError('Enter your MORE MindMap Profile ID to continue.');
+    if (!normalizedGateProfileId) {
+      setProfileGateState(gateType, {
+        status: 'error',
+        profile: null,
+        error: 'Enter your MORE MindMap Profile ID to continue.',
+        ...(gateType === 'monthly'
+          ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
+          : {})
+      });
       return;
     }
 
-    setIsValidating(true);
+    setProfileGateState(gateType, {
+      status: 'validating',
+      profile: null,
+      error: '',
+      ...(gateType === 'monthly'
+        ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
+        : {})
+    });
+
     try {
       const url = buildApiUrl(
-        `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(normalizedProfileId)}&nocache=1`
+        `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(normalizedGateProfileId)}&nocache=1`
       );
       const response = await fetch(url);
       const payload = await response.json().catch(() => null);
 
       if (!response.ok || !payload?.canonical_dossier) {
-        setProfileError('Profile not found.\nPlease complete your MORE MindMap Profile first.');
+        setProfileGateState(gateType, {
+          status: 'error',
+          profile: null,
+          error:
+            gateType === 'monthly'
+              ? 'Profile not found. First complete your Behavior Operating System profile, then take the Business Assessment.'
+              : 'First you must complete your Behavior Operating System profile to unlock this action.',
+          ...(gateType === 'monthly'
+            ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
+            : {})
+        });
         return;
       }
 
-      const profile = extractProfileResult(payload, normalizedProfileId);
-      setProfileResult(profile);
-      checkCompletedBusinessAssessment(profile.id || normalizedProfileId);
+      const profile = extractProfileResult(payload, normalizedGateProfileId);
+
+      if (gateType === 'monthly') {
+        setMonthlyProfileGate((current) => ({
+          ...current,
+          status: 'valid',
+          profile,
+          error: '',
+          businessAssessmentStatus: 'checking',
+          businessAssessmentId: ''
+        }));
+        const completion = await getBusinessAssessmentCompletion(profile.id || normalizedGateProfileId);
+        setMonthlyProfileGate((current) => ({
+          ...current,
+          businessAssessmentStatus: completion.status,
+          businessAssessmentId: completion.assessmentId
+        }));
+        return;
+      }
+
+      setProfileGateState(gateType, {
+        status: 'valid',
+        profile,
+        error: ''
+      });
     } catch {
-      setProfileError('Profile not found.\nPlease complete your MORE MindMap Profile first.');
-    } finally {
-      setIsValidating(false);
+      setProfileGateState(gateType, {
+        status: 'error',
+        profile: null,
+        error: 'Profile validation is not available right now. Please try again shortly.',
+        ...(gateType === 'monthly'
+          ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
+          : {})
+      });
     }
   }
 
@@ -335,18 +406,27 @@ export default function BusinessAssessment() {
       });
       return;
     }
+    setAssessmentProfile(devCodeProfileGate.profile);
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
     setSubmitState({ status: 'idle', error: '', result: null });
   }
 
   async function startProductCheckout(productKey, sourceContext) {
-    if (!hasValidatedProfile) {
+    const profile =
+      productKey === 'more_monthly_intelligence'
+        ? monthlyProfileGate.profile
+        : checkoutProfileGate.profile;
+
+    if (!profile?.id) {
       setCheckoutState({ loading: '', error: 'First validate your profile to unlock checkout.' });
       return;
     }
 
-    if (productKey === 'more_monthly_intelligence' && !hasCompletedBusinessAssessment) {
+    if (
+      productKey === 'more_monthly_intelligence' &&
+      monthlyProfileGate.businessAssessmentStatus !== 'found'
+    ) {
       setCheckoutState({
         loading: '',
         error: 'First you must take the Business Assessment to unlock Monthly Intelligence.'
@@ -358,8 +438,11 @@ export default function BusinessAssessment() {
     try {
       await startStripeCheckout({
         product_key: productKey,
-        profile_id: profileResult?.id || normalizedProfileId,
-        assessment_id: retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '',
+        profile_id: profile.id,
+        assessment_id:
+          productKey === 'more_monthly_intelligence'
+            ? monthlyProfileGate.businessAssessmentId
+            : retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '',
         source_context: sourceContext
       });
     } catch {
@@ -371,7 +454,7 @@ export default function BusinessAssessment() {
     event.preventDefault();
     const code = promoCode.trim().toUpperCase();
 
-    if (!hasValidatedProfile) {
+    if (!devCodeProfileValidated) {
       setPromoState({
         status: 'error',
         message: 'First validate your profile before applying a Dev Code.'
@@ -393,6 +476,58 @@ export default function BusinessAssessment() {
     }
 
     setPromoState({ status: 'error', message: 'Dev Code not recognized for Business Assessment.' });
+  }
+
+  function setProfileGateState(gateType, patch) {
+    if (gateType === 'monthly') {
+      setMonthlyProfileGate((current) => ({ ...current, ...patch }));
+      return;
+    }
+
+    if (gateType === 'devCode') {
+      setDevCodeProfileGate((current) => ({ ...current, ...patch }));
+      return;
+    }
+
+    setCheckoutProfileGate((current) => ({ ...current, ...patch }));
+  }
+
+  function updateProfileGateInput(gateType, value) {
+    if (gateType === 'monthly') {
+      setMonthlyProfileGate((current) => ({
+        ...current,
+        input: value,
+        status: 'idle',
+        profile: null,
+        error: '',
+        businessAssessmentStatus: 'idle',
+        businessAssessmentId: ''
+      }));
+      return;
+    }
+
+    if (gateType === 'devCode') {
+      setDevCodeProfileGate((current) => ({
+        ...current,
+        input: value,
+        status: 'idle',
+        profile: null,
+        error: ''
+      }));
+      setPromoState((current) =>
+        current.status === 'valid' ? { status: 'idle', message: '' } : current
+      );
+      setAssessmentProfile(null);
+      return;
+    }
+
+    setCheckoutProfileGate((current) => ({
+      ...current,
+      input: value,
+      status: 'idle',
+      profile: null,
+      error: ''
+    }));
   }
 
   function updateAnswer(value) {
@@ -434,11 +569,10 @@ export default function BusinessAssessment() {
     return payload;
   }
 
-  async function checkCompletedBusinessAssessment(ownerProfileId) {
+  async function getBusinessAssessmentCompletion(ownerProfileId) {
     const id = String(ownerProfileId || '').trim();
-    if (!id) return;
+    if (!id) return { status: 'not_found', assessmentId: '' };
 
-    setBusinessAssessmentCompletion({ status: 'checking', assessmentId: '' });
     try {
       const payload = await retrieveAssessmentByProfileId(id);
       const assessment = payload?.assessment || null;
@@ -450,12 +584,12 @@ export default function BusinessAssessment() {
           output.one_move_v1
       );
 
-      setBusinessAssessmentCompletion({
+      return {
         status: isComplete ? 'found' : 'not_found',
         assessmentId: isComplete ? assessment.assessment_id || '' : ''
-      });
+      };
     } catch {
-      setBusinessAssessmentCompletion({ status: 'not_found', assessmentId: '' });
+      return { status: 'not_found', assessmentId: '' };
     }
   }
 
@@ -529,7 +663,7 @@ export default function BusinessAssessment() {
   }
 
   async function submitAssessment() {
-    if (!profileResult || !canSubmit) return;
+    if (!assessmentProfile?.id || !canSubmit) return;
     setSubmitState({ status: 'saving', error: '', result: null });
     setGenerationState({ status: 'idle', phase: '', error: '', assessmentId: null, ownerProfileId: null });
     let savedPayload = null;
@@ -539,7 +673,7 @@ export default function BusinessAssessment() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          owner_profile_id: profileResult.id || normalizedProfileId,
+          owner_profile_id: assessmentProfile.id,
           answers
         })
       });
@@ -551,7 +685,7 @@ export default function BusinessAssessment() {
 
       savedPayload = payload;
       const ownerProfileId =
-        payload.profile_context?.owner_profile_id || profileResult.id || normalizedProfileId;
+        payload.profile_context?.owner_profile_id || assessmentProfile.id;
       setSubmitState({ status: 'generating', error: '', result: payload });
       const completed = await runGenerationSequence({
         assessmentId: payload.assessment_id,
@@ -646,7 +780,13 @@ export default function BusinessAssessment() {
     });
   }, [retrievedBriefing]);
 
-  function renderProfileValidationForm({ helperText, accent = 'orange' }) {
+  function renderProfileValidationForm({ gateType, helperText, accent = 'orange' }) {
+    const gate =
+      gateType === 'monthly'
+        ? monthlyProfileGate
+        : gateType === 'devCode'
+          ? devCodeProfileGate
+          : checkoutProfileGate;
     const focusClass =
       accent === 'cyan'
         ? 'focus:border-cyan-300/60'
@@ -666,44 +806,36 @@ export default function BusinessAssessment() {
           FIRST validate your profile.
         </p>
         <p className="mt-2 text-sm leading-6 text-white/58">{helperText}</p>
-        <form className="mt-4 space-y-3" onSubmit={validateProfile}>
+        <form className="mt-4 space-y-3" onSubmit={(event) => validateProfileForGate(event, gateType)}>
           <input
-            value={profileId}
-            onChange={(event) => {
-              setProfileId(event.target.value);
-              setProfileResult(null);
-              setProfileError('');
-              setBusinessAssessmentCompletion({ status: 'idle', assessmentId: '' });
-              setPromoState((current) =>
-                current.status === 'valid' ? { status: 'idle', message: '' } : current
-              );
-            }}
+            value={gate.input}
+            onChange={(event) => updateProfileGateInput(gateType, event.target.value)}
             placeholder="MM-20260531-XXXXXXX"
             className={`w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition ${focusClass}`}
           />
           <button
             type="submit"
-            disabled={isValidating}
+            disabled={gate.status === 'validating'}
             className={`w-full rounded-2xl px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] transition disabled:cursor-wait disabled:opacity-55 ${buttonClass}`}
           >
-            {isValidating ? 'Validating...' : 'Validate Profile'}
+            {gate.status === 'validating' ? 'Validating...' : 'Validate Profile'}
           </button>
         </form>
 
-        {profileResult && (
+        {gate.profile && (
           <div className="mt-4 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
             <p className="text-sm font-semibold text-emerald-200">Profile ID validated.</p>
-            <p className="mt-2 text-base font-semibold text-white">{profileResult.name}</p>
+            <p className="mt-2 text-base font-semibold text-white">{gate.profile.name}</p>
             <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/62">
-              {profileResult.profileType}
+              {gate.profile.profileType}
             </p>
-            {businessAssessmentCompletion.status === 'checking' && (
+            {gateType === 'monthly' && gate.businessAssessmentStatus === 'checking' && (
               <p className="mt-2 text-sm text-white/58">Checking Business Assessment completion...</p>
             )}
-            {businessAssessmentCompletion.status === 'found' && (
+            {gateType === 'monthly' && gate.businessAssessmentStatus === 'found' && (
               <p className="mt-2 text-sm text-emerald-100">Completed Business Assessment found.</p>
             )}
-            {businessAssessmentCompletion.status === 'not_found' && (
+            {gateType === 'monthly' && gate.businessAssessmentStatus === 'not_found' && (
               <p className="mt-2 text-sm text-white/58">
                 Monthly Intelligence requires a completed Business Assessment first.
               </p>
@@ -711,9 +843,9 @@ export default function BusinessAssessment() {
           </div>
         )}
 
-        {profileError && (
+        {gate.error && (
           <div className="mt-4 whitespace-pre-line rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-            {profileError}
+            {gate.error}
           </div>
         )}
       </div>
@@ -785,6 +917,7 @@ export default function BusinessAssessment() {
 
                   <div className="mt-6">
                     {renderProfileValidationForm({
+                      gateType: 'checkout',
                       helperText: 'First validate your profile to unlock Business Assessment checkout.',
                       accent: 'orange'
                     })}
@@ -792,7 +925,7 @@ export default function BusinessAssessment() {
 
                   <button
                     type="button"
-                    disabled={!hasValidatedProfile || checkoutState.loading === 'business_assessment'}
+                    disabled={!checkoutProfileValidated || checkoutState.loading === 'business_assessment'}
                     onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
                     className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-35"
                   >
@@ -843,12 +976,13 @@ export default function BusinessAssessment() {
 
                   <div className="mt-6">
                     {renderProfileValidationForm({
+                      gateType: 'monthly',
                       helperText: 'First validate your profile to unlock Monthly Intelligence.',
                       accent: 'cyan'
                     })}
                   </div>
 
-                  {hasValidatedProfile && businessAssessmentCompletion.status === 'not_found' && (
+                  {monthlyProfileValidated && monthlyProfileGate.businessAssessmentStatus === 'not_found' && (
                     <p className="mt-4 rounded-2xl border border-orange-300/25 bg-orange-400/[0.08] px-4 py-3 text-sm leading-6 text-orange-100">
                       First you must take the Business Assessment to unlock Monthly Intelligence.
                     </p>
@@ -857,7 +991,7 @@ export default function BusinessAssessment() {
                   <button
                     type="button"
                     disabled={
-                      !hasValidatedProfile ||
+                      !monthlyProfileValidated ||
                       !hasCompletedBusinessAssessment ||
                       checkoutState.loading === 'more_monthly_intelligence'
                     }
@@ -890,6 +1024,7 @@ export default function BusinessAssessment() {
                     </div>
                     <div className="mt-4">
                       {renderProfileValidationForm({
+                        gateType: 'devCode',
                         helperText: 'First validate your profile. Profile validation alone does not start the test.',
                         accent: 'purple'
                       })}
@@ -915,7 +1050,7 @@ export default function BusinessAssessment() {
                       />
                       <button
                         type="submit"
-                        disabled={!hasValidatedProfile || !promoCode.trim()}
+                        disabled={!devCodeProfileValidated || !promoCode.trim()}
                         className="w-full rounded-2xl border border-purple-300/35 bg-white/[0.06] px-5 py-3.5 text-sm font-semibold uppercase tracking-[0.14em] text-purple-100 transition hover:border-purple-200 hover:bg-purple-300/10 disabled:cursor-not-allowed disabled:opacity-45"
                       >
                         Apply Dev Code
@@ -1156,8 +1291,7 @@ export default function BusinessAssessment() {
                       assessmentId: submitState.result?.assessment_id,
                       ownerProfileId:
                         submitState.result?.profile_context?.owner_profile_id ||
-                        profileResult?.id ||
-                        normalizedProfileId,
+                        assessmentProfile?.id,
                       assessmentRecord: null
                     }).then((completed) =>
                       setSubmitState({ status: 'complete', error: '', result: completed })
