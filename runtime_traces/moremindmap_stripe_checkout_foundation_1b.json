@@ -1,0 +1,89 @@
+{
+  "phase_id": "MM-PAY-1B",
+  "verdict": "MOREMINDMAP_STRIPE_CHECKOUT_FOUNDATION_IMPLEMENTED_WITH_LIMITS",
+  "classification": "STRIPE_HOSTED_CHECKOUT_READY_WITH_WEBHOOK_ACCESS_PENDING",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_STRIPE_CHECKOUT_SMOKE_TEST_WITH_NO_DURABLE_ACCESS",
+  "files_changed": [
+    "api/stripe/create-checkout-session.js",
+    "src/lib/stripeCheckout.js",
+    "src/Profile.jsx",
+    "src/BusinessAssessment.jsx",
+    "src/PaymentSuccess.jsx",
+    "src/PaymentCancelled.jsx",
+    "src/main.jsx",
+    "MOREMINDMAP_STRIPE_CHECKOUT_FOUNDATION_1B.md",
+    "runtime_traces/moremindmap_stripe_checkout_foundation_1b.json"
+  ],
+  "code_changed": true,
+  "route_added": "POST /api/stripe/create-checkout-session",
+  "stripe_dependency_added": false,
+  "product_mappings": {
+    "behavior_operating_system": {
+      "env": "STRIPE_PRICE_BEHAVIOR_OS",
+      "mode": "payment",
+      "access_type": "behavior_operating_system"
+    },
+    "business_assessment": {
+      "env": "STRIPE_PRICE_BUSINESS_ASSESSMENT",
+      "mode": "payment",
+      "access_type": "business_assessment"
+    },
+    "more_monthly_intelligence": {
+      "env": "STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE",
+      "mode": "subscription",
+      "access_type": "more_monthly_intelligence"
+    }
+  },
+  "env_vars_required": [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_PRICE_BEHAVIOR_OS",
+    "STRIPE_PRICE_BUSINESS_ASSESSMENT",
+    "STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE",
+    "PUBLIC_SITE_URL or SITE_URL fallback"
+  ],
+  "checkout_modes": {
+    "one_time": [
+      "behavior_operating_system",
+      "business_assessment"
+    ],
+    "subscription": [
+      "more_monthly_intelligence"
+    ]
+  },
+  "frontend_buttons_added": true,
+  "success_cancel_pages_added": true,
+  "webhook_implemented": false,
+  "durable_access_grants_created": false,
+  "redirect_success_payment_truth": false,
+  "promo_free_flows_preserved": true,
+  "validation_results": {
+    "node_check_backend": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_product_key": "passed_controlled_400",
+    "missing_local_stripe_secret": "passed_controlled_503_without_value_exposure",
+    "valid_local_checkout": "skipped_stripe_secret_key_production_only",
+    "privacy_scan": "passed_on_added_diff_lines"
+  },
+  "production_smoke_plan": [
+    "/leadership-dashboard returns 200",
+    "/business-assessment returns 200",
+    "invalid product_key returns 400",
+    "valid checkout session creation returns checkout_url for each product if production env vars are configured",
+    "/payment-success returns 200",
+    "/payment-cancelled returns 200",
+    "no real payment completion without explicit approval",
+    "no durable access grant",
+    "no payment truth claimed from redirect success",
+    "no secret exposure"
+  ],
+  "limits": [
+    "No Stripe webhook processing in this sprint.",
+    "No durable paid access grants in this sprint.",
+    "No payment_event records in this sprint.",
+    "No subscription_state records in this sprint.",
+    "No revenue_index records in this sprint.",
+    "Checkout redirect success remains pending verification only."
+  ]
+}

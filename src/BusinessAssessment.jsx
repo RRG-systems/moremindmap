@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ExecutiveDiagnosticBriefing from './components/businessAssessment/ExecutiveDiagnosticBriefing.jsx';
+import { startStripeCheckout } from './lib/stripeCheckout.js';
 
 const INDUSTRIES = [
   { label: 'Real Estate', disabled: false },
@@ -255,6 +256,7 @@ export default function BusinessAssessment() {
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
   const [submitState, setSubmitState] = useState({ status: 'idle', error: '', result: null });
   const [retrieveState, setRetrieveState] = useState({ status: 'idle', error: '', result: null });
+  const [checkoutState, setCheckoutState] = useState({ loading: '', error: '' });
   const [generationState, setGenerationState] = useState({
     status: 'idle',
     phase: '',
@@ -316,6 +318,20 @@ export default function BusinessAssessment() {
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
     setSubmitState({ status: 'idle', error: '', result: null });
+  }
+
+  async function startProductCheckout(productKey, sourceContext) {
+    setCheckoutState({ loading: productKey, error: '' });
+    try {
+      await startStripeCheckout({
+        product_key: productKey,
+        profile_id: profileResult?.id || normalizedProfileId || retrieveId.trim(),
+        assessment_id: retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '',
+        source_context: sourceContext
+      });
+    } catch {
+      setCheckoutState({ loading: '', error: 'Payment setup is not available yet.' });
+    }
   }
 
   function validateBusinessAssessmentPromo(event) {
@@ -790,7 +806,42 @@ export default function BusinessAssessment() {
                 <p>+</p>
                 <p>One Move</p>
               </div>
+              <button
+                type="button"
+                disabled={checkoutState.loading === 'business_assessment'}
+                onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
+                className="mt-6 w-full rounded-xl bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-200 disabled:cursor-wait disabled:opacity-55"
+              >
+                {checkoutState.loading === 'business_assessment' ? 'Opening Checkout...' : 'Start Business Assessment Checkout'}
+              </button>
+              <p className="mt-3 text-xs leading-5 text-white/46">
+                Checkout opens through Stripe. Durable paid access is confirmed after payment processing.
+              </p>
             </section>
+
+            <section className="rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.055] p-6">
+              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-cyan-200">
+                MORE Monthly Intelligence
+              </p>
+              <h2 className="mt-3 text-2xl font-semibold text-white">Keep improving over time.</h2>
+              <p className="mt-3 text-sm leading-6 text-white/66">
+                You have your map. Now keep it alive.
+              </p>
+              <button
+                type="button"
+                disabled={checkoutState.loading === 'more_monthly_intelligence'}
+                onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_soft_awareness')}
+                className="mt-5 w-full rounded-xl border border-cyan-200/40 px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
+              >
+                {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence'}
+              </button>
+            </section>
+
+            {checkoutState.error && (
+              <section className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                {checkoutState.error}
+              </section>
+            )}
 
             <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
               <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-white">
@@ -964,7 +1015,44 @@ export default function BusinessAssessment() {
 
         {retrievedBriefing && (
           <div id="business-assessment-results">
-          <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
+            <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
+            <section className="mt-10 rounded-[2rem] border border-cyan-300/25 bg-gradient-to-br from-cyan-400/[0.1] via-white/[0.035] to-purple-500/[0.09] p-6 shadow-[0_0_70px_rgba(34,211,238,0.12)] sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-200">
+                MORE Monthly Intelligence
+              </p>
+              <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
+                You have your map.
+                <span className="block text-cyan-100">Now keep it alive.</span>
+              </h2>
+              <p className="mt-5 max-w-2xl text-lg leading-8 text-white/72">
+                Your assessment created your current map. Monthly Intelligence helps you keep moving.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  'track your One Move',
+                  'record what happened',
+                  'see what changed',
+                  'avoid overclaiming progress',
+                  'generate an updated strategy draft',
+                  'choose the next best move'
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/76">
+                    {item}
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                disabled={checkoutState.loading === 'more_monthly_intelligence'}
+                onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_result_upgrade')}
+                className="mt-7 rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-cyan-100 disabled:cursor-wait disabled:opacity-55"
+              >
+                {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence - $23.95/month'}
+              </button>
+              <p className="mt-4 text-xs leading-5 text-white/46">
+                Checkout starts access verification. Durable paid access requires payment processing confirmation.
+              </p>
+            </section>
           </div>
         )}
       </div>

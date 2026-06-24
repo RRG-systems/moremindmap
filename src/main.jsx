@@ -13,6 +13,8 @@ import LeadershipSalesDashboard from './components/LeadershipSalesDashboard.jsx'
 import BusinessAssessment from './BusinessAssessment.jsx'
 import BusinessAssessmentVisualMap from './BusinessAssessmentVisualMap.jsx'
 import BusinessAssessmentFiveFutures from './BusinessAssessmentFiveFutures.jsx'
+import PaymentSuccess from './PaymentSuccess.jsx'
+import PaymentCancelled from './PaymentCancelled.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -31,6 +33,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/business-assessment" element={<BusinessAssessment />} />
         <Route path="/business-assessment/visual-map" element={<BusinessAssessmentVisualMap />} />
         <Route path="/business-assessment/five-futures" element={<BusinessAssessmentFiveFutures />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

@@ -4,6 +4,7 @@ import WebProfileReport from "./components/reports/WebProfileReport.jsx";
 import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
+import { startStripeCheckout } from "./lib/stripeCheckout.js";
 
 const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
 
@@ -48,6 +49,7 @@ export default function Profile() {
   const [promoCode, setPromoCode] = useState("")
   const [promoValidated, setPromoValidated] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutError, setCheckoutError] = useState("")
   
   // Profile ID retrieval (recovery/testing path)
   const [profileId, setProfileId] = useState("")
@@ -66,9 +68,7 @@ export default function Profile() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     if (params.has('payment_success')) {
-      console.log('[PAYMENT SUCCESS] Detected from query param')
-      setPaymentPassed(true)
-      // Clean up URL
+      console.log('[PAYMENT SUCCESS] Redirect success is pending webhook verification')
       window.history.replaceState({}, document.title, window.location.pathname)
     }
   }, [])
@@ -195,26 +195,17 @@ export default function Profile() {
 
     console.log("[CHECKOUT PATH] Redirecting to Stripe with offer:", selectedOffer)
     setCheckoutLoading(true)
+    setCheckoutError("")
     try {
-      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const res = await fetch(buildApiUrl(API, `/create-checkout-session`), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedOffer }),
+      await startStripeCheckout({
+        product_key: "behavior_operating_system",
+        email: email.trim(),
+        source_context: "behavior_operating_system_profile"
       })
-
-      const data = await res.json()
-      console.log("[STRIPE SESSION RESPONSE]", data)
-      if (data.url) {
-        console.log("[REDIRECTING TO STRIPE]", data.url)
-        window.location.href = data.url
-      } else {
-        console.error("[NO CHECKOUT URL] Response:", data)
-      }
-    } catch (error) {
-      console.error("[CHECKOUT ERROR]", error)
+    } catch {
+      setCheckoutError("Payment setup is not available yet.")
+      setCheckoutLoading(false)
     }
-    setCheckoutLoading(false)
   }
 
   function goNext() {
@@ -911,8 +902,14 @@ function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, se
             disabled={!fullName.trim() || !email.trim() || (!promoValidated && !selectedOffer) || checkoutLoading}
             className="mt-8 inline-flex w-full items-center justify-center rounded-2xl bg-white text-black px-6 py-4 text-base font-medium hover:bg-white/90 transition disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {checkoutLoading ? "Redirecting to checkout..." : promoValidated ? "Start Assessment (Promo Active)" : "Start Assessment"}
+            {checkoutLoading ? "Redirecting to checkout..." : promoValidated ? "Start Assessment (Promo Active)" : "Continue to Checkout"}
           </button>
+
+          {checkoutError && (
+            <div className="mt-4 rounded-xl border border-red-400/30 bg-red-500/[0.08] p-4">
+              <p className="text-sm text-red-100">{checkoutError}</p>
+            </div>
+          )}
 
           {!promoValidated && !selectedOffer && fullName.trim() && email.trim() && (
             <div className="mt-4 p-4 rounded-xl border border-white/20 bg-white/[0.08]">
