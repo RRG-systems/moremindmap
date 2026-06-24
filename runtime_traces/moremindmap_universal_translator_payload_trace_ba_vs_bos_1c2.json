@@ -1,0 +1,174 @@
+{
+  "phase_id": "MM-UX-1C.2",
+  "verdict": "MOREMINDMAP_UNIVERSAL_TRANSLATOR_PAYLOAD_TRACE_COMPLETE_WITH_LIMITS",
+  "classification": "BA_VS_BOS_TRANSLATOR_PAYLOAD_QUALITY_GAP_DIAGNOSED_NO_RUNTIME_CHANGE",
+  "highest_allowed_readiness": "READY_FOR_BOS_TRANSLATOR_SOURCE_PAYLOAD_REPAIR_PLAN",
+  "runtime_code_changed": false,
+  "model_called": false,
+  "records_mutated": false,
+  "payloads": [
+    {
+      "id": "bos_retrieved_profile",
+      "source_type": "bos_profile",
+      "source_title": "Behavior Operating System Profile",
+      "translation_mode": "plain_english",
+      "source_excerpt_length": 606,
+      "source_excerpt_first_500_chars": "BOS section-aware excerpt: true\n\nProfile context:\nRetrieved Profile ID: available\n\nBehavior Operating System summary:\nSource heading: Behavioral Intelligence Profile\nVisible profile output describes the person through a broad behavioral profile frame.\n\nBehavioral Risks:\nSource heading: limiting pattern\nVisible profile output includes a limiting pattern but the extracted section is short and does not carry many named behavioral subsections.\n\nVisible source excerpt fallback:\nProfile report visible",
+      "section_label_count": 4,
+      "detected_section_labels": [
+        "Profile context",
+        "Behavior Operating System summary",
+        "Behavioral Risks",
+        "Visible source excerpt fallback"
+      ],
+      "dictionary_terms_matched": [
+        "Behavior Operating System",
+        "Profile ID",
+        "Business Intelligence Draft",
+        "MORE Monthly Intelligence",
+        "operating advantage",
+        "operating risk"
+      ],
+      "context_fields_present": {
+        "profile_context": true,
+        "business_context": false
+      },
+      "prompt_instruction_family": "bos_behavior_translation_section_if_available",
+      "likely_quality_risk": "BOS has section markers, but quality depends on whether rendered profile HTML exposes complete visible section bodies.",
+      "notes": "Representative of current retrieved BOS drawer shape reported by user: section-aware marker exists, but extracted sections are shallow."
+    },
+    {
+      "id": "ba_executive_diagnostic",
+      "source_type": "business_assessment",
+      "source_title": "Executive Diagnostic Briefing",
+      "translation_mode": "plain_english",
+      "source_excerpt_length": 384,
+      "source_excerpt_first_500_chars": "Executive Diagnostic Briefing\n\nPrimary constraint: lead conversion reality\nCurrent trajectory signal: early channel distribution pressure\nConfidence: moderate\n\nConstraint Detection: The business has enough relationship surface area to test a narrower channel, but follow-up discipline is the bottleneck.\nEvidence labels: Q3 database and relationship count, Q5 CRM and follow-up system",
+      "section_label_count": 0,
+      "detected_section_labels": [],
+      "dictionary_terms_matched": [
+        "Behavior Operating System",
+        "Business Assessment",
+        "Business Intelligence Draft",
+        "Executive Diagnostic",
+        "Business Assessment Map",
+        "Evidence Weight",
+        "Constraint Detection",
+        "Confidence Reality",
+        "pressure response",
+        "database",
+        "conversion gap",
+        "paid conversion"
+      ],
+      "context_fields_present": {
+        "profile_context": false,
+        "business_context": true
+      },
+      "prompt_instruction_family": "business_consequence_evidence_limit_next_action",
+      "likely_quality_risk": "BA payload is narrow, named, and action/evidence-specific, which gives the model clearer translation anchors.",
+      "notes": "Representative of BA component behavior: payload is already scoped to a specific artifact or section."
+    },
+    {
+      "id": "ba_five_futures",
+      "source_type": "five_futures",
+      "source_title": "Five Futures",
+      "translation_mode": "plain_english",
+      "source_excerpt_length": 416,
+      "source_excerpt_first_500_chars": "Five Futures + One Move\n\nFuture 1: Referral compounding improves if database follow-up becomes consistent.\nFuture 2: Paid conversion remains fragile if the agent adds lead spend before fixing response discipline.\nFuture 3: Partner channel becomes a testable path if a lender or mortgage company commits to a concrete pilot.\n\nOne Move: Ask one lender for a specific pilot commitment and record the result as evidence.",
+      "section_label_count": 0,
+      "detected_section_labels": [],
+      "dictionary_terms_matched": [
+        "Five Futures",
+        "One Move",
+        "Evidence Weight",
+        "Future Movement Gate",
+        "pressure response",
+        "database",
+        "referral base",
+        "conversion gap",
+        "paid conversion",
+        "channel distribution",
+        "partner capital"
+      ],
+      "context_fields_present": {
+        "profile_context": false,
+        "business_context": true
+      },
+      "prompt_instruction_family": "business_consequence_evidence_limit_next_action",
+      "likely_quality_risk": "BA payload is narrow, named, and action/evidence-specific, which gives the model clearer translation anchors.",
+      "notes": "Representative of BA component behavior: payload is already scoped to a specific artifact or section."
+    },
+    {
+      "id": "ba_one_move",
+      "source_type": "one_move",
+      "source_title": "One Move",
+      "translation_mode": "plain_english",
+      "source_excerpt_length": 166,
+      "source_excerpt_first_500_chars": "One Move\n\nAsk one lender for a specific pilot commitment this week. The move is designed to test whether channel distribution is real or only conversational interest.",
+      "section_label_count": 0,
+      "detected_section_labels": [],
+      "dictionary_terms_matched": [
+        "One Move",
+        "channel distribution"
+      ],
+      "context_fields_present": {
+        "profile_context": false,
+        "business_context": true
+      },
+      "prompt_instruction_family": "business_consequence_evidence_limit_next_action",
+      "likely_quality_risk": "BA payload is narrow, named, and action/evidence-specific, which gives the model clearer translation anchors.",
+      "notes": "Representative of BA component behavior: payload is already scoped to a specific artifact or section."
+    },
+    {
+      "id": "ba_truth_boundary",
+      "source_type": "truth_boundary",
+      "source_title": "Truth Boundaries / What Not To Overclaim",
+      "translation_mode": "plain_english",
+      "source_excerpt_length": 205,
+      "source_excerpt_first_500_chars": "Truth Boundaries / What Not To Overclaim\n\nDo not claim partner adoption from a positive conversation alone.\nMissing data: named partner, specific pilot terms, timeline, budget, and follow-through evidence.",
+      "section_label_count": 0,
+      "detected_section_labels": [],
+      "dictionary_terms_matched": [
+        "Evidence Weight",
+        "What Not To Overclaim",
+        "partner capital",
+        "adoption signal"
+      ],
+      "context_fields_present": {
+        "profile_context": false,
+        "business_context": true
+      },
+      "prompt_instruction_family": "business_consequence_evidence_limit_next_action",
+      "likely_quality_risk": "BA payload is narrow, named, and action/evidence-specific, which gives the model clearer translation anchors.",
+      "notes": "Representative of BA component behavior: payload is already scoped to a specific artifact or section."
+    }
+  ],
+  "comparison_findings": {
+    "ba_payload_pattern": "BA uses multiple narrow source types and source titles: business_assessment, five_futures, one_move, and truth_boundary.",
+    "bos_payload_pattern": "Retrieved BOS uses one bos_profile payload from rendered HTML extraction.",
+    "ba_section_specificity": "high",
+    "bos_section_specificity": "moderate",
+    "likely_primary_gap": "BOS source material remains too broad or shallow compared with BA section-specific artifacts.",
+    "api_prompt_difference": "API has separate BOS and BA instruction families, but BA also supplies cleaner domain-specific payloads.",
+    "prompt_only_fix_sufficient": false
+  },
+  "recommended_next_sprint": [
+    "Add section-level BOS translator launchers where the rendered profile exposes reliable sections, or route retrieved BOS through the same structured profile summary used by WebProfileReport.",
+    "Use bos_section payloads with source_title equal to the actual BOS section heading.",
+    "Pass one clean visible section at a time instead of one broad bos_profile excerpt.",
+    "Keep original BOS output as source of truth and do not pass raw canonical profile JSON or hidden scoring objects."
+  ],
+  "validation_results": {
+    "node_check_script": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "privacy_scan": "passed_with_expected_report_boundary_language_hits_only"
+  },
+  "limits": [
+    "No production UI debug was added.",
+    "No model call was made by this diagnostic script.",
+    "No full private BOS, BA, prompt, or model output is stored.",
+    "Representative payload excerpts are sanitized and bounded."
+  ]
+}
