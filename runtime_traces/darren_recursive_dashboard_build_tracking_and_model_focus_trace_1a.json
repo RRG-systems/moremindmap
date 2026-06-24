@@ -1,0 +1,84 @@
+{
+  "phase_id": "DASH-TRACE-1A",
+  "verdict": "DARREN_RECURSIVE_DASHBOARD_BUILD_TRACKING_AND_MODEL_FOCUS_TRACE_COMPLETE_WITH_LIMITS",
+  "classification": "TRACE_ONLY_NO_RUNTIME_CHANGE_BUILD_EVENT_BRIDGE_NOT_CONFIRMED_MODEL_FOCUS_REVIEW_READY",
+  "files_inspected": [
+    "api/admin/darren-generated-strategy-core.js",
+    "api/admin/darren-intelligence-snapshot-core.js",
+    "api/admin/darren-intelligence-generate.js",
+    "api/admin/darren-strategy-chat.js",
+    "api/admin/darren-since-last-snapshot.js",
+    "api/admin/darren-outcome-ledger-event.js",
+    "api/admin/darren-adaptive-loop-core.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "runtime_traces/"
+  ],
+  "runtime_code_changed": false,
+  "build_tracking_automatic": false,
+  "build_tracking_findings": {
+    "commits_to_outcome_ledger": false,
+    "deployments_to_outcome_ledger": false,
+    "runtime_traces_ingested": false,
+    "product_milestones_to_since_last_snapshot": false,
+    "product_milestones_to_adaptive_draft": false,
+    "static_build_map_present": true,
+    "manual_ledger_routes_present": true
+  },
+  "manual_tracking_paths": [
+    "POST /api/admin/darren-outcome-ledger-event",
+    "confirmed chat action capture through approved Outcome Ledger route",
+    "manual static Build Map updates in src/data/leadershipBuildMap.js",
+    "manual report or trace summaries entered through confirmed chat or ledger event"
+  ],
+  "missing_build_event_bridge": true,
+  "darren_business_model_paths_found": [
+    "SaaS / subscription intelligence",
+    "RRG-powered revenue recovery",
+    "mortgage-company infrastructure",
+    "brokerage recruiting/retention intelligence",
+    "leadership intelligence / LDE",
+    "hybrid ecosystem",
+    "partner capital / strategic funding",
+    "channel / distribution power",
+    "multi-vertical platform"
+  ],
+  "expected_business_model_path_count": 9,
+  "channel_growth_bias_detected": "partial",
+  "channel_growth_bias_source": [
+    "recent evidence/history includes channel_distribution",
+    "strategy generation has required Channel Distribution and Strategic Partner futures",
+    "chat and snapshot language repeatedly asks for partner/channel/revenue/proof-target signals",
+    "future movement relevance maps channel_distribution toward channel/partner/dashboard/sales/capital/mortgage names",
+    "nine-path model exists as context but not as durable enforced registry"
+  ],
+  "prompt_bias_findings": "Prompt framing is not channel-only, but it repeatedly emphasizes partner, channel, pilot, proof target, revenue, and commitment language. This likely pulls Darren toward channel and partner-capital reasoning.",
+  "evidence_bias_findings": "The latest known controlled evidence is early channel_distribution, so channel focus is partly evidence-driven. The evidence is early and should not be treated as validated.",
+  "hardcoded_logic_findings": "No single rule forces Channel Growth to win. However, five required generated futures include Channel Distribution Acceleration and Strategic Partner Capital Acceleration, and future movement relevance uses keyword matching that favors channel/partner paths for channel_distribution signals.",
+  "schema_limit_findings": "The snapshot has nine paths, but generation requires five futures. Several business models are collapsed or indirect rather than first-class generated paths.",
+  "future_movement_gate_findings": "Future Movement v0 uses evidence bands and a simple signal-to-future-name relevance function. It can mark non-channel futures as watch, but channel_distribution signals naturally favor channel/partner/mortgage/dashboard/sales-related future names.",
+  "adaptive_draft_findings": "Adaptive Strategy Draft reads latest strategy, Outcome Ledger, Since Last Snapshot, chat summaries, and Future Movement. It does not ingest build events automatically and inherits the current five-future strategy structure.",
+  "outcome_ledger_findings": "Outcome Ledger supports manual event types and signal types including customer_revenue, partner_capital, channel_distribution, profile_volume, assessment_volume, RRG_opportunity, funded_pilot, other, recruiting_signal, retention_signal, and product_usage. It has no automatic commit/deploy/build import.",
+  "since_last_snapshot_findings": "Since Last Snapshot reads latest strategy and Outcome Ledger events. It does not read git commits, Vercel deploys, runtime traces, or product build milestone files.",
+  "recommended_next_steps": [
+    "Build Event Ledger v0",
+    "9-Path Business Model Backbone Registry",
+    "Darren Model Path Coverage Audit",
+    "Adaptive Strategy Multi-Path Review",
+    "Outcome Ledger Product-Build Event Import"
+  ],
+  "validation_results": {
+    "json_parse": "passed",
+    "git_diff_check": "passed",
+    "static_privacy_scan": "passed_no_matches",
+    "npm_run_build": "not_run_runtime_code_unchanged"
+  },
+  "limits": [
+    "Trace-only report",
+    "No runtime code changed",
+    "No prompt or scoring changes",
+    "No dashboard behavior changed",
+    "No ledger writes created",
+    "No production deploy required"
+  ]
+}
