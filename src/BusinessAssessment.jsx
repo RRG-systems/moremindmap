@@ -671,7 +671,8 @@ export default function BusinessAssessment() {
                     </p>
                     <p className="mt-3 text-sm leading-6 text-white/58">
                       Monthly Intelligence helps MORE MindMap learn from what actually happens, adapt
-                      the strategy, and keep your next move aligned with evidence.
+                      the strategy, and keep your next move aligned with evidence through a
+                      self-improving monthly loop.
                     </p>
                   </div>
 
