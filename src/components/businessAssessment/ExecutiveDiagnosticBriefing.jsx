@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslatorDrawer.jsx';
 
 function formatValue(value) {
   if (value === null || value === undefined || value === '') return 'Not available';
@@ -163,6 +165,23 @@ function normalizeParagraphs(text) {
     .filter(Boolean);
 }
 
+function boundedText(value, maxLength = 5000) {
+  return String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function sectionExcerpt(section) {
+  return boundedText([
+    section.title,
+    section.body,
+    Array.isArray(section.evidence) && section.evidence.length
+      ? `Evidence labels: ${section.evidence.map(displayEvidenceLabel).filter(Boolean).slice(0, 4).join(', ')}`
+      : ''
+  ].filter(Boolean).join('\n\n'));
+}
+
 function MarkdownFallback({ markdown }) {
   const blocks = normalizeParagraphs(markdown);
   return (
@@ -231,7 +250,7 @@ function EvidenceList({ evidence }) {
   );
 }
 
-function DiagnosticSection({ section, index }) {
+function DiagnosticSection({ section, index, onExplain }) {
   return (
     <article className="rounded-3xl border border-white/10 bg-black/45 p-5 shadow-[0_0_45px_rgba(0,0,0,0.28)] sm:p-7">
       <div className="mb-4 flex flex-col gap-3 border-b border-white/10 pb-4 sm:flex-row sm:items-start sm:justify-between">
@@ -250,6 +269,18 @@ function DiagnosticSection({ section, index }) {
             )}
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => onExplain?.({
+            source_type: 'business_assessment',
+            source_title: section.title,
+            source_excerpt: sectionExcerpt(section),
+            business_context: 'Business Assessment Executive Diagnostic Briefing'
+          })}
+          className="rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+        >
+          Explain simply
+        </button>
       </div>
 
       <div className="space-y-4">
@@ -271,6 +302,7 @@ function DiagnosticSection({ section, index }) {
 export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
   if (!briefing) return null;
 
+  const [translatorSource, setTranslatorSource] = useState(null);
   const sections = Array.isArray(briefing.sections) ? briefing.sections : [];
   const hasSections = sections.length > 0;
   const ownerProfileId = briefing.owner_profile_id || assessment?.owner_profile_id || '';
@@ -292,6 +324,27 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
   const mapReady = Boolean(output.business_intelligence_draft || output.executive_diagnostic_briefing_v1 || briefing);
   const futuresReady = Boolean(output.five_futures_v1 && output.one_move_v1);
   const caveat = cleanCaveat(briefing.caveats);
+  const topLevelExcerpt = boundedText([
+    'Executive Diagnostic Briefing',
+    briefing.primary_constraint_snapshot && `Primary constraint: ${formatValue(briefing.primary_constraint_snapshot)}`,
+    briefing.current_trajectory_signal && `Current trajectory signal: ${formatValue(briefing.current_trajectory_signal)}`,
+    briefing.confidence_snapshot && `Confidence: ${formatValue(briefing.confidence_snapshot)}`,
+    sections.slice(0, 4).map((section) => `${section.title}: ${boundedText(section.body, 700)}`).join('\n')
+  ].filter(Boolean).join('\n\n'));
+  const fiveFuturesExcerpt = boundedText([
+    'Five Futures + One Move',
+    formatValue(output.five_futures_v1),
+    formatValue(output.one_move_v1)
+  ].filter(Boolean).join('\n\n'));
+  const oneMoveExcerpt = boundedText([
+    'One Move',
+    formatValue(output.one_move_v1)
+  ].filter(Boolean).join('\n\n'));
+  const truthBoundaryExcerpt = boundedText([
+    'Truth Boundaries / What Not To Overclaim',
+    caveat,
+    briefing.missing_data && `Missing data: ${formatValue(briefing.missing_data)}`
+  ].filter(Boolean).join('\n\n'));
 
   return (
     <section className="mt-12 border-t border-white/10 pt-10">
@@ -307,6 +360,18 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
             <p className="mt-4 max-w-3xl text-lg leading-8 text-white/70">
               Business Reality + Behavioral Reality = Future Business Trajectory
             </p>
+            <button
+              type="button"
+              onClick={() => setTranslatorSource({
+                source_type: 'business_assessment',
+                source_title: 'Executive Diagnostic Briefing',
+                source_excerpt: topLevelExcerpt,
+                business_context: 'Business Assessment result'
+              })}
+              className="mt-5 rounded-full border border-cyan-200/35 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+            >
+              Make this plain English
+            </button>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
             <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/42">
@@ -346,6 +411,7 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
               key={section.key || `${section.title}-${index}`}
               section={section}
               index={index}
+              onExplain={setTranslatorSource}
             />
           ))
         ) : (
@@ -356,9 +422,23 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
       </div>
 
       {caveat && (
-        <p className="mt-7 rounded-2xl border border-white/10 bg-white/[0.035] p-4 text-sm leading-6 text-white/54">
-          {caveat}
-        </p>
+        <div className="mt-7 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <p className="text-sm leading-6 text-white/54">{caveat}</p>
+            <button
+              type="button"
+              onClick={() => setTranslatorSource({
+                source_type: 'truth_boundary',
+                source_title: 'Truth Boundaries / What Not To Overclaim',
+                source_excerpt: truthBoundaryExcerpt,
+                business_context: 'Business Assessment truth boundary'
+              })}
+              className="shrink-0 rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+            >
+              Why this matters
+            </button>
+          </div>
+        </div>
       )}
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
@@ -424,6 +504,53 @@ export default function ExecutiveDiagnosticBriefing({ briefing, assessment }) {
           </button>
         )}
       </div>
+      {futuresReady && (
+        <div className="mt-5 rounded-2xl border border-cyan-300/18 bg-cyan-400/[0.055] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm leading-6 text-white/64">
+              Five Futures can be translated into plain meaning without replacing the original artifact.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTranslatorSource({
+                source_type: 'five_futures',
+                source_title: 'Five Futures',
+                source_excerpt: fiveFuturesExcerpt,
+                business_context: 'Business Assessment Five Futures'
+              })}
+              className="rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+            >
+              Explain these futures
+            </button>
+          </div>
+        </div>
+      )}
+      {output.one_move_v1 && (
+        <div className="mt-5 rounded-2xl border border-cyan-300/18 bg-cyan-400/[0.055] p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm leading-6 text-white/64">
+              The One Move can be translated without changing the original assessment result.
+            </p>
+            <button
+              type="button"
+              onClick={() => setTranslatorSource({
+                source_type: 'one_move',
+                source_title: 'One Move',
+                source_excerpt: oneMoveExcerpt,
+                business_context: 'Business Assessment One Move'
+              })}
+              className="rounded-full border border-cyan-200/30 bg-cyan-300/10 px-3 py-2 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+            >
+              Explain this move
+            </button>
+          </div>
+        </div>
+      )}
+      <UniversalTranslatorDrawer
+        isOpen={Boolean(translatorSource)}
+        onClose={() => setTranslatorSource(null)}
+        source={translatorSource}
+      />
     </section>
   );
 }

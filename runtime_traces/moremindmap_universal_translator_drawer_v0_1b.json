@@ -1,0 +1,83 @@
+{
+  "phase_id": "MM-UX-1B",
+  "verdict": "MOREMINDMAP_UNIVERSAL_TRANSLATOR_DRAWER_V0_IMPLEMENTED_WITH_LIMITS",
+  "classification": "BOS_AND_BA_MEANING_TRANSLATOR_NON_MUTATING_V0",
+  "highest_allowed_readiness": "READY_FOR_CONTROLLED_PRODUCTION_TRANSLATOR_SMOKE_TEST",
+  "files_changed": [
+    "api/universal-translator.js",
+    "src/components/universalTranslator/UniversalTranslatorDrawer.jsx",
+    "src/components/reports/WebProfileReport.jsx",
+    "src/components/businessAssessment/ExecutiveDiagnosticBriefing.jsx",
+    "MOREMINDMAP_UNIVERSAL_TRANSLATOR_DRAWER_V0_1B.md",
+    "runtime_traces/moremindmap_universal_translator_drawer_v0_1b.json"
+  ],
+  "code_changed": true,
+  "routes_added": [
+    "POST /api/universal-translator"
+  ],
+  "components_added": [
+    "UniversalTranslatorDrawer"
+  ],
+  "bos_placement": {
+    "top_level_button": "Explain This Profile",
+    "section_level_buttons": "deferred_for_next_polish",
+    "raw_canonical_dossier_passed": false
+  },
+  "business_assessment_placement": {
+    "top_result_button": "Make this plain English",
+    "section_buttons": "Explain simply",
+    "five_futures_button": "Explain these futures",
+    "one_move_button": "Explain this move",
+    "truth_boundary_button": "Why this matters",
+    "raw_assessment_answers_passed": false
+  },
+  "translation_modes": [
+    "plain_english",
+    "explain_like_busy",
+    "coach_me_through_this"
+  ],
+  "dictionary_used": true,
+  "model_route_added": true,
+  "record_mutation_policy": "No records are mutated and no translation is stored as source truth.",
+  "source_of_truth_policy": "Original MORE MindMap output remains the source of truth.",
+  "raw_private_data_policy": "UI passes bounded visible excerpts only. Route rejects raw object excerpts and obvious raw payloads.",
+  "english_only_policy": {
+    "language_selection_ui_added": false,
+    "locale_handling_added": false,
+    "multilingual_output_added": false
+  },
+  "validation_results": {
+    "node_check_backend": "passed",
+    "node_check_dictionary": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "invalid_source_type_400": "passed",
+    "invalid_translation_mode_400": "passed",
+    "missing_source_excerpt_400": "passed",
+    "raw_object_excerpt_400": "passed",
+    "valid_local_model_test": "skipped_openai_api_key_missing_locally",
+    "privacy_scan": "passed_with_existing_profile_and_assessment_label_terms_not_added_as_raw_exposure"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/business-assessment returns 200",
+    "BOS/Profile output page still loads",
+    "Business Assessment output page still loads",
+    "invalid source_type returns 400",
+    "invalid translation_mode returns 400",
+    "missing source_excerpt returns 400",
+    "one controlled valid translator request returns sanitized translation",
+    "translator drawer visible from Business Assessment when practical",
+    "original output remains visible",
+    "no writes or mutations performed"
+  ],
+  "limits": [
+    "English-only meaning translation.",
+    "No durable translation storage.",
+    "No output replacement.",
+    "No record mutation.",
+    "No Stripe or payment changes.",
+    "No Darren dashboard changes."
+  ]
+}

@@ -19,12 +19,22 @@ import { buildBehavioralDNAInterpretation } from '../../lib/behavioralDNAInterpr
 import DeterministicVisualDNA from '../visualDNA/DeterministicVisualDNA.jsx';
 import VisualDNAModal from '../visualDNA/VisualDNAModal.jsx';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
+import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslatorDrawer.jsx';
 
 // ============================================================================
 // DASHBOARD COMPONENTS (V1)
 // ============================================================================
 
 function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence, visualDNA, deterministicVisualDNA }) {
+  const [translatorSource, setTranslatorSource] = useState(null);
+  const profileSummary = [
+    `Profile: ${personName}`,
+    `Type: ${profileType}`,
+    narrative.executiveSummary?.body || narrative.executiveSummary || '',
+    narrative.profileDNA?.body || narrative.profileDNA || '',
+    narrative.recommendedNextStep?.body || narrative.recommendedNextStep || ''
+  ].filter(Boolean).join('\n\n').slice(0, 5000);
+
   return (
     <div className="dashboard-report-v1 intelligence-system">
       {/* HERO HEADER */}
@@ -39,6 +49,18 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
               <h1 className="identity-name">{personName}</h1>
               <p className="identity-tagline">The architecture of how you think, decide, and create impact</p>
               {company && <p className="identity-company">{company}</p>}
+              <button
+                type="button"
+                onClick={() => setTranslatorSource({
+                  source_type: 'bos_profile',
+                  source_title: 'Behavior Operating System Profile',
+                  source_excerpt: profileSummary,
+                  profile_context: `${profileType}${company ? ` · ${company}` : ''}`
+                })}
+                className="mt-4 rounded-full border border-cyan-200/35 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
+              >
+                Explain This Profile
+              </button>
             </div>
           </div>
           
@@ -100,6 +122,11 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
 
       <VisualDNASection visualDNA={visualDNA} />
       <DeterministicVisualDNAReportSection viewModel={deterministicVisualDNA} />
+      <UniversalTranslatorDrawer
+        isOpen={Boolean(translatorSource)}
+        onClose={() => setTranslatorSource(null)}
+        source={translatorSource}
+      />
     </div>
   );
 }
