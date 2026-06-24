@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../data/darrenBusinessModelBackbone.js'
 
 function display(value) {
   if (value === null || value === undefined || value === '') return 'Unavailable'
@@ -256,6 +257,10 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
   const evidenceGaps = asArray(snapshot?.evidence_gaps)
   const dashboardContext = snapshot?.current_dashboard_context || {}
   const hasSavedGeneratedStrategy = generationState.status === 'ready' && Boolean(generationState.data?.strategy_id)
+  const pathCoverage = useMemo(() => evaluateDarrenBusinessModelPathCoverage({
+    snapshot,
+    generatedStrategy: generationState.data
+  }), [snapshot, generationState.data])
 
   const contextCards = useMemo(() => [
     {
@@ -332,6 +337,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
         <ListWithTitle title="Truth boundaries" items={asArray(pathComparison.truth_boundaries)} />
       </PanelBlock>
 
+      <BusinessModelBackbonePanel coverage={pathCoverage} />
+
       {!hasSavedGeneratedStrategy && (
         <PanelBlock eyebrow="Five Futures Scaffold" title="Scaffolded Futures, Not Final Generated Strategy">
           <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
@@ -379,6 +386,74 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
         setGenerationState={setGenerationState}
       />
     </div>
+  )
+}
+
+function BusinessModelBackbonePanel({ coverage }) {
+  const currentPath = coverage?.current_favored_path
+  const paths = asArray(coverage?.paths)
+
+  return (
+    <PanelBlock eyebrow="9-Path Business Model Backbone" title="Full Strategic Field, Not Single-Path Collapse">
+      <div className="grid gap-4 xl:grid-cols-[0.8fr_1.2fr]">
+        <div className="rounded-2xl border border-cyan-200/16 bg-cyan-300/[0.075] p-4">
+          <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/54">Current strategic center of gravity</div>
+          <div className="mt-3 text-lg font-semibold leading-7 text-white">
+            {currentPath ? currentPath.title : 'No single path is dominant yet'}
+          </div>
+          <p className="mt-3 text-sm leading-6 text-cyan-50/72">
+            Current evidence may support Channel Growth, but this view keeps the full strategic field visible. Channel Growth is a valid path, not a final destiny.
+          </p>
+          <p className="mt-3 rounded-xl border border-white/10 bg-black/24 px-4 py-3 text-sm leading-6 text-white/62">
+            Five Futures show possible strategic outcomes. The 9-Path Backbone shows the major business model routes that could create enterprise value.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-amber-200/16 bg-amber-300/[0.075] p-4">
+          <div className="text-xs uppercase tracking-[0.18em] text-amber-100/56">Strategic coverage guardrail</div>
+          <p className="mt-3 text-sm leading-6 text-amber-50/76">
+            This is not an anti-channel warning. If Darren chooses Channel Growth, the dashboard should help him execute it with focus, proof targets, partner milestones, and failure signals while still preserving optionality.
+          </p>
+          <ListWithTitle
+            title="What would change the recommendation"
+            items={[
+              'Evidence that one path creates repeatable paid activity, funded pilots, adoption, or product usage.',
+              'Evidence that Channel Growth strengthens into adoption, not just access.',
+              'Evidence that another path creates stronger traction than the current center of gravity.'
+            ]}
+            compact
+          />
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-3 lg:grid-cols-2 xl:grid-cols-3">
+        {paths.map((path) => {
+          const registryPath = darrenBusinessModelBackbone.find((candidate) => candidate.id === path.id) || {}
+          return (
+            <div key={path.id} className="rounded-2xl border border-white/10 bg-black/24 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold leading-6 text-white">{display(path.title)}</div>
+                  <p className="mt-2 text-sm leading-6 text-white/58">{display(registryPath.plain_english_summary)}</p>
+                </div>
+                <span className="shrink-0 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/58">
+                  {display(path.status_band)}
+                </span>
+              </div>
+              <ListWithTitle title="Evidence to watch" items={asArray(path.recommended_next_evidence_to_collect)} compact />
+              <ListWithTitle title="Missing evidence" items={asArray(path.missing_evidence_hits)} compact />
+              <p className="mt-3 rounded-xl border border-white/10 bg-black/24 px-3 py-2 text-xs leading-5 text-white/50">
+                {display(registryPath.anti_overclaim_warning)}
+              </p>
+            </div>
+          )
+        })}
+      </div>
+
+      <p className="mt-5 rounded-xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm leading-6 text-white/58">
+        Intelligence boundary: this is a strategic coverage layer, not a prediction, valuation claim, or automatic strategy replacement.
+      </p>
+    </PanelBlock>
   )
 }
 

@@ -1,0 +1,66 @@
+{
+  "phase_id": "DASH-1B",
+  "verdict": "DARREN_9_PATH_BUSINESS_MODEL_BACKBONE_REGISTRY_AND_PANEL_IMPLEMENTED_WITH_LIMITS",
+  "classification": "DARREN_MULTI_PATH_STRATEGIC_INTELLIGENCE_LAYER_ADDED_NO_STRATEGY_REPLACEMENT",
+  "highest_allowed_readiness": "READY_FOR_DARREN_MULTI_PATH_DASHBOARD_REVIEW",
+  "files_changed": [
+    "src/data/darrenBusinessModelBackbone.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "DARREN_9_PATH_BUSINESS_MODEL_BACKBONE_REGISTRY_AND_PANEL_1B.md",
+    "runtime_traces/darren_9_path_business_model_backbone_registry_and_panel_1b.json"
+  ],
+  "runtime_code_changed": true,
+  "registry_added": true,
+  "dashboard_panel_added": true,
+  "adaptive_context_changed": false,
+  "build_event_ingestion_added": false,
+  "channel_bias_guardrail_added": true,
+  "business_model_paths": [
+    "channel_growth",
+    "paid_saas_subscription",
+    "rrg_revenue_recovery",
+    "mortgage_company_infrastructure",
+    "brokerage_recruiting_retention",
+    "leadership_intelligence_lde",
+    "enterprise_platform",
+    "partner_capital_strategic_funding",
+    "hybrid_ecosystem"
+  ],
+  "path_count": 9,
+  "channel_growth_status": "valid_path_with_coverage_guardrail_not_discouraged",
+  "source_of_truth_policy": "Original generated strategy, Five Futures, One Move, Outcome Ledger, Since Last Snapshot, Future Movement Gate, and Adaptive Strategy Draft remain authoritative. The 9-path registry is a strategic coverage layer.",
+  "record_mutation_policy": "No records are mutated by the registry or dashboard panel.",
+  "valuation_claim_policy": "The registry supports strategic route coverage toward major enterprise value creation. It does not prove valuation, certainty, or path dominance.",
+  "validation_results": {
+    "node_check_new_registry": "passed",
+    "node_check_dashboard_component": "not_applicable_jsx_validated_by_build",
+    "json_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_large_chunk_warning",
+    "static_privacy_scan": "passed_no_matches"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "Darren dashboard route loads",
+    "9-Path Business Model Backbone panel visible",
+    "all 9 paths visible",
+    "Channel Growth not shown as only path",
+    "coverage guardrail visible",
+    "no build-event import claim",
+    "no automatic strategy replacement",
+    "no enterprise-value certainty claim",
+    "no records mutated during smoke"
+  ],
+  "limits": [
+    "No product-build event ingestion",
+    "No automatic strategy replacement",
+    "No generated strategy authority change",
+    "No Future Movement Gate logic change",
+    "No Stripe/payment/access changes",
+    "No Universal Translator changes",
+    "No public page changes",
+    "No numeric probabilities"
+  ]
+}
