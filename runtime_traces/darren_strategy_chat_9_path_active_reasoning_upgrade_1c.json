@@ -1,0 +1,80 @@
+{
+  "phase_id": "DASH-1C",
+  "verdict": "DARREN_STRATEGY_CHAT_9_PATH_ACTIVE_REASONING_UPGRADE_COMPLETE_WITH_LIMITS",
+  "classification": "DARREN_CHAT_MULTI_PATH_STRATEGIC_OPERATOR_ADDED_NO_AUTONOMOUS_STRATEGY_REPLACEMENT",
+  "highest_allowed_readiness": "READY_FOR_DARREN_STRATEGY_CHAT_QUALITY_REVIEW",
+  "files_changed": [
+    "api/admin/darren-strategy-chat.js",
+    "DARREN_STRATEGY_CHAT_9_PATH_ACTIVE_REASONING_UPGRADE_1C.md",
+    "runtime_traces/darren_strategy_chat_9_path_active_reasoning_upgrade_1c.json"
+  ],
+  "runtime_code_changed": true,
+  "dashboard_panel_added": false,
+  "dashboard_ui_changed": false,
+  "chat_route_changed": true,
+  "model_selection_before": {
+    "env_var": "DARREN_STRATEGY_CHAT_OPENAI_MODEL",
+    "default": "gpt-4o-2024-08-06",
+    "safe_models": [
+      "gpt-4o-2024-08-06",
+      "gpt-4.1-mini",
+      "gpt-4.1",
+      "gpt-4o"
+    ]
+  },
+  "model_selection_after": {
+    "preferred_env_var": "DARREN_STRATEGY_CHAT_MODEL",
+    "legacy_env_var": "DARREN_STRATEGY_CHAT_OPENAI_MODEL",
+    "preferred_default": "gpt-5.5",
+    "fallback": "gpt-4o-2024-08-06",
+    "safe_models_include": [
+      "gpt-5.5",
+      "gpt-5.5-chat",
+      "gpt-5.5-chat-latest",
+      "gpt-5",
+      "gpt-4o-2024-08-06",
+      "gpt-4.1-mini",
+      "gpt-4.1",
+      "gpt-4o"
+    ]
+  },
+  "gpt_5_5_preferred": true,
+  "nine_path_context_injected": true,
+  "five_futures_separation_preserved": true,
+  "channel_growth_policy": "Channel Growth is valid, not bad. Chat should support it strongly when chosen while preserving optionality and defining proof targets, adoption evidence, and failure signals.",
+  "valuation_policy": "$250M+ may be discussed as a strategic scenario or target requiring evidence. The chat must not claim valuation is guaranteed or proven.",
+  "confirmed_action_policy": "Confirmed action writes remain limited to existing One Move status and Outcome Ledger routes. Chat cannot directly mutate active strategy, registry, generated futures, adaptive draft adoption, or payment/access records.",
+  "record_mutation_policy": "No records are mutated by the route unless a user separately confirms an existing approved action in the UI.",
+  "build_event_ingestion_added": false,
+  "strategy_replacement_added": false,
+  "validation_results": {
+    "node_check_chat_route": "passed",
+    "node_check_registry": "passed",
+    "json_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_large_chunk_warning",
+    "static_privacy_scan": "passed_no_matches"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "/leadership-dashboard returns 200",
+    "controlled Darren Strategy Chat prompt if safe: Should Darren keep pursuing Channel Growth?",
+    "response treats Channel Growth as valid",
+    "response references optionality or alternative paths",
+    "response defines a proof target",
+    "response avoids valuation guarantee",
+    "response does not mutate records"
+  ],
+  "limits": [
+    "No dashboard panels added",
+    "No public page changes",
+    "No Stripe/payment/access changes",
+    "No build-event ingestion",
+    "No active strategy auto-replacement",
+    "No numeric probabilities",
+    "No machine-only decisions",
+    "Manual Darren chat quality review still recommended"
+  ]
+}

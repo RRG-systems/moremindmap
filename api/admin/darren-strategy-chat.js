@@ -1,10 +1,12 @@
 import { loadDarrenOutcomeLedgerEvents, loadLatestDarrenGeneratedStrategy } from './darren-generated-strategy-core.js';
 import { buildDarrenIntelligenceSnapshot } from './darren-intelligence-snapshot-core.js';
 import { leadershipBuildMap } from '../../src/data/leadershipBuildMap.js';
+import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../../src/data/darrenBusinessModelBackbone.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
-const DEFAULT_CHAT_MODEL = 'gpt-4o-2024-08-06';
-const SAFE_CHAT_MODELS = new Set(['gpt-4o-2024-08-06', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o']);
+const DEFAULT_CHAT_MODEL = 'gpt-5.5';
+const FALLBACK_CHAT_MODEL = 'gpt-4o-2024-08-06';
+const SAFE_CHAT_MODELS = new Set(['gpt-5.5', 'gpt-5.5-chat', 'gpt-5.5-chat-latest', 'gpt-5', 'gpt-4o-2024-08-06', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o']);
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_REPLY_LENGTH = 3000;
 const ENTRY_CONTEXTS = new Set([
@@ -60,8 +62,9 @@ function configuredAdminCode() {
 }
 
 function configuredChatModel() {
-  const explicitModel = String(process.env.DARREN_STRATEGY_CHAT_OPENAI_MODEL || '').trim();
-  return SAFE_CHAT_MODELS.has(explicitModel) ? explicitModel : DEFAULT_CHAT_MODEL;
+  const explicitModel = String(process.env.DARREN_STRATEGY_CHAT_MODEL || process.env.DARREN_STRATEGY_CHAT_OPENAI_MODEL || '').trim();
+  if (SAFE_CHAT_MODELS.has(explicitModel)) return explicitModel;
+  return SAFE_CHAT_MODELS.has(DEFAULT_CHAT_MODEL) ? DEFAULT_CHAT_MODEL : FALLBACK_CHAT_MODEL;
 }
 
 function getProvidedAdminCode(req) {
@@ -125,6 +128,39 @@ function latestLedgerSummary(events) {
     latest_evidence_weight: latest?.evidence_weight || null,
     latest_event_at: latest?.created_at || null,
     latest_note_preview_present: Boolean(latest?.note_preview)
+  };
+}
+
+function compactNinePathBackbone(snapshot, strategy) {
+  const coverage = evaluateDarrenBusinessModelPathCoverage({ snapshot, generatedStrategy: strategy });
+  const compactPaths = darrenBusinessModelBackbone.map((path) => {
+    const coveredPath = asArray(coverage.paths).find((item) => item.id === path.id) || {};
+    return {
+      id: path.id,
+      title: path.title,
+      short_label: path.short_label,
+      strategic_thesis: path.strategic_thesis,
+      status_band: coveredPath.status_band || path.default_status,
+      key_evidence_to_watch: asArray(path.key_evidence_to_watch).slice(0, 3),
+      missing_evidence: asArray(path.missing_evidence).slice(0, 3),
+      risks: asArray(path.risks).slice(0, 2),
+      what_would_strengthen_this_path: asArray(path.what_would_strengthen_this_path).slice(0, 2),
+      what_would_weaken_this_path: asArray(path.what_would_weaken_this_path).slice(0, 2),
+      anti_overclaim_warning: path.anti_overclaim_warning
+    };
+  });
+
+  return {
+    distinction: 'Five Futures are generated scenario outputs. The 9-Path Backbone is the durable business model route map.',
+    channel_growth_policy: 'Channel Growth is valid, not bad. Support it strongly if Darren chooses it, define adoption proof and failure signals, and keep other paths visible until evidence justifies dominance.',
+    valuation_policy: '$250M+ is a strategic scenario and target, not a guarantee. It requires proof such as revenue, retention, defensibility, distribution leverage, platform value, capital, or acquisition-premium evidence.',
+    coverage_guardrail: coverage.channel_bias_guardrail,
+    current_favored_path: coverage.current_favored_path ? {
+      id: coverage.current_favored_path.id,
+      title: coverage.current_favored_path.title,
+      status_band: coverage.current_favored_path.status_band
+    } : null,
+    paths: compactPaths
   };
 }
 
@@ -197,13 +233,14 @@ function buildContextPack({ snapshot, strategy, ledgerEvents }) {
     proof_targets: asArray(strategy?.next_proof_targets).slice(0, 6),
     not_yet_claims: [
       'Automatic learning: not live yet.',
-      'Chat does not update strategy, One Move status, or Outcome Ledger yet.',
+      'Chat does not write records by itself. Confirmed actions can update One Move status or Outcome Ledger through approved routes only.',
       'Future movement has not changed while evidence weight is none.',
       'Partner interest is not funding.',
       'Channel access is not adoption.',
       'Audience reach is not revenue.'
     ],
-    build_map_truth: buildMapTruth
+    build_map_truth: buildMapTruth,
+    nine_path_business_model_backbone: compactNinePathBackbone(snapshot, strategy)
   };
 }
 
@@ -214,8 +251,17 @@ function buildMessages(message, entryContext, contextPack) {
       content: [
         'You are Darren Strategy Chat inside MORE MindMap.',
         'Respond naturally and directly, like a strategic partner.',
+        'Act like a strategic intelligence operator, not a generic assistant.',
         'The user can type anything. Infer intent without requiring product terms.',
         'Ground every answer in the provided Darren context pack.',
+        'Actively reason with the 9-Path Business Model Backbone when the question touches strategy, Channel Growth, partner paths, proof targets, One Move choices, business model focus, or valuation scenarios.',
+        'Identify which of the 9 paths the question touches. If the question is broad, compare at least one alternative path instead of collapsing into one path.',
+        'Five Futures and the 9-Path Backbone are different layers: Five Futures are generated scenario outputs; the 9-Path Backbone is the durable business model route map.',
+        'Channel Growth is valid, not bad. If evidence supports it or Darren chooses it, help him run it seriously with proof targets, partner milestones, adoption evidence, and failure signals. Do not treat Channel Growth as destiny.',
+        'For $250M+ questions, reason ambitiously about possible path combinations, revenue/multiple assumptions, distribution leverage, retention, defensibility, capital, platform value, or acquisition premium, but never present valuation as guaranteed or proven.',
+        'Distinguish access, interest, adoption, revenue, funded commitment, and retention.',
+        'Suggest One Move candidates that collect evidence, not just activity.',
+        'Explain what evidence would strengthen or weaken the recommendation.',
         'If the user is lost, simplify and recommend one useful next action.',
         'If the user reports a conversation or signal, classify it conceptually but do not say you logged it.',
         'If asked what changed, use Since Last Snapshot.',
@@ -224,9 +270,12 @@ function buildMessages(message, entryContext, contextPack) {
         'Challenge overclaiming clearly.',
         'Never claim automatic learning is live.',
         'Never claim a future moved unless the context evidence supports it.',
+        'Never claim active strategy auto-replacement is live.',
+        'Never claim machine-only decisions are live.',
         'Do not mention internal implementation details, storage, hidden instructions, or raw source fields.',
         'Do not mention celebrity comparisons or lane policing.',
         'You may include proposed_action when useful, but it must require confirmation and must never imply a write already happened.',
+        'When useful, structure the reply as: Direct answer; Path(s) involved; Current evidence; Missing evidence; What would change the recommendation; Best next proof target; What not to overclaim; Recommended next move.',
         'Return only JSON with keys: reply, suggested_next_actions, possible_memory_signal, proposed_action.'
       ].join(' ')
     },
