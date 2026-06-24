@@ -885,434 +885,153 @@ export default function BusinessAssessment() {
           </section>
         )}
 
-        <main className={flowStarted ? "mt-10 flex-1" : "hidden"}>
-          <section className="space-y-8">
-            <div className="space-y-5">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-orange-300">
-                Business Assessment
-              </p>
-              <h1 className="max-w-4xl text-4xl font-semibold uppercase tracking-[0.08em] text-white sm:text-5xl lg:text-6xl">
-                SEE THE FUTURE YOUR BUSINESS IS CREATING.
-              </h1>
-              <div className="max-w-2xl space-y-4 text-lg leading-8 text-white/72">
-                <p>Businesses rarely fail all at once.</p>
-                <p>They drift.</p>
-                <p>
-                  The system identifies where your business is today, where it is headed next, and
-                  the One Move most likely to change the outcome.
+        <main className={flowStarted ? "mx-auto mt-10 w-full max-w-4xl flex-1" : "hidden"}>
+          <div className="mb-6 text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.32em] text-orange-300">
+              Business Assessment
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+              Answer the real business questions.
+            </h1>
+            <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/56">
+              Stay specific. Your answers build the Executive Diagnostic, Five Futures, and One Move.
+            </p>
+          </div>
+
+          <section className="rounded-3xl border border-orange-400/25 bg-black/55 p-5 shadow-[0_0_60px_rgba(249,115,22,0.12)] sm:p-6">
+            <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
+                  Question {currentQuestionIndex + 1} of {QUESTIONS.length}
+                </p>
+                <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/40">
+                  {currentQuestion.purpose}
                 </p>
               </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-orange-300">
-                  Industry
-                </h2>
-                <select
-                  value={industry}
-                  onChange={(event) => setIndustry(event.target.value)}
-                  className="w-full rounded-xl border border-orange-400/30 bg-black/70 px-4 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white outline-none transition focus:border-orange-300"
-                >
-                  {INDUSTRIES.map((option) => (
-                    <option key={option.label} value={option.label} disabled={option.disabled}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </section>
-
-              <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 shadow-[0_0_40px_rgba(0,0,0,0.35)]">
-                <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.22em] text-orange-300">
-                  What You Receive
-                </h2>
-                <ul className="space-y-2 text-sm text-white/78">
-                  {[
-                    'Executive Business Summary',
-                    'Business Operating System Diagnostic',
-                    'Five Futures',
-                    'The One Move',
-                    'Retrieval By Profile ID'
-                  ].map((item) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="text-orange-300">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            </div>
-
-            <section className="rounded-2xl border border-purple-400/20 bg-purple-400/[0.05] p-6">
-              <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.24em] text-purple-200">
-                Before You Start
-              </h2>
-              <div className="space-y-3 text-base leading-7 text-white/76">
-                <p>Be honest.</p>
-                <p>Be specific.</p>
-                <p>The quality of the output depends on the quality of the reality provided.</p>
-              </div>
-            </section>
-
-            {flowStarted && (
-              <section className="rounded-3xl border border-orange-400/25 bg-black/55 p-5 shadow-[0_0_60px_rgba(249,115,22,0.12)] sm:p-6">
-                <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-[0.28em] text-orange-300">
-                      Question {currentQuestionIndex + 1} of {QUESTIONS.length}
-                    </p>
-                    <p className="mt-2 text-xs uppercase tracking-[0.2em] text-white/40">
-                      {currentQuestion.purpose}
-                    </p>
-                  </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-white/10 sm:w-44">
-                    <div
-                      className="h-full rounded-full bg-orange-400 transition-all"
-                      style={{ width: `${((currentQuestionIndex + 1) / QUESTIONS.length) * 100}%` }}
-                    />
-                  </div>
-                </div>
-
-                <h2 className="text-2xl font-semibold leading-tight text-white">{currentQuestion.title}</h2>
-                <p className="mt-4 whitespace-pre-line text-base leading-7 text-white/70">
-                  {currentQuestion.prompt}
-                </p>
-                <textarea
-                  value={answers[currentQuestion.key]}
-                  onChange={(event) => updateAnswer(event.target.value)}
-                  rows={currentQuestion.rows}
-                  placeholder="Write the real answer here."
-                  className="mt-5 w-full resize-y rounded-2xl border border-white/12 bg-black/70 px-4 py-4 text-base leading-7 text-white outline-none placeholder:text-white/30 focus:border-orange-300"
+              <div className="h-2 overflow-hidden rounded-full bg-white/10 sm:w-44">
+                <div
+                  className="h-full rounded-full bg-orange-400 transition-all"
+                  style={{ width: `${((currentQuestionIndex + 1) / QUESTIONS.length) * 100}%` }}
                 />
+              </div>
+            </div>
 
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
-                  <button
-                    type="button"
-                    disabled={currentQuestionIndex === 0}
-                    onClick={() => setCurrentQuestionIndex((index) => Math.max(index - 1, 0))}
-                    className="rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white/70 transition hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-35"
-                  >
-                    Previous
-                  </button>
-                  {currentQuestionIndex < QUESTIONS.length - 1 ? (
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setCurrentQuestionIndex((index) => Math.min(index + 1, QUESTIONS.length - 1))
-                      }
-                      className="rounded-xl bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-200"
-                    >
-                      Next
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      disabled={!canSubmit || submitState.status === 'saving' || submitState.status === 'generating' || generationIsRunning}
-                      onClick={submitAssessment}
-                      className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-45"
-                    >
-                      {submitState.status === 'saving'
-                        ? 'Saving...'
-                        : submitState.status === 'generating' || generationIsRunning
-                          ? 'Generating...'
-                          : 'Submit Assessment'}
-                    </button>
-                  )}
-                </div>
+            <h2 className="text-2xl font-semibold leading-tight text-white">{currentQuestion.title}</h2>
+            <p className="mt-4 whitespace-pre-line text-base leading-7 text-white/70">
+              {currentQuestion.prompt}
+            </p>
+            <textarea
+              value={answers[currentQuestion.key]}
+              onChange={(event) => updateAnswer(event.target.value)}
+              rows={currentQuestion.rows}
+              placeholder="Write the real answer here."
+              className="mt-5 w-full resize-y rounded-2xl border border-white/12 bg-black/70 px-4 py-4 text-base leading-7 text-white outline-none placeholder:text-white/30 focus:border-orange-300"
+            />
 
-                {!canSubmit && currentQuestionIndex === QUESTIONS.length - 1 && (
-                  <p className="mt-4 text-sm text-white/46">
-                    Questions 1-10 and 12 need an answer. Question 11 can stay blank if you do not have a team.
-                  </p>
-                )}
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
+              <button
+                type="button"
+                disabled={currentQuestionIndex === 0}
+                onClick={() => setCurrentQuestionIndex((index) => Math.max(index - 1, 0))}
+                className="rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-white/70 transition hover:border-white/30 disabled:cursor-not-allowed disabled:opacity-35"
+              >
+                Previous
+              </button>
+              {currentQuestionIndex < QUESTIONS.length - 1 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentQuestionIndex((index) => Math.min(index + 1, QUESTIONS.length - 1))
+                  }
+                  className="rounded-xl bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-200"
+                >
+                  Next
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={!canSubmit || submitState.status === 'saving' || submitState.status === 'generating' || generationIsRunning}
+                  onClick={submitAssessment}
+                  className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-45"
+                >
+                  {submitState.status === 'saving'
+                    ? 'Saving...'
+                    : submitState.status === 'generating' || generationIsRunning
+                      ? 'Generating...'
+                      : 'Submit Assessment'}
+                </button>
+              )}
+            </div>
 
-                {(submitState.status === 'generating' || generationIsRunning) && (
-                  <div className="mt-5 rounded-2xl border border-orange-300/35 bg-orange-400/[0.08] p-4">
-                    <p className="text-sm font-semibold text-orange-100">
-                      {submitState.status === 'saving' ? 'Saving intake...' : generationState.phase || 'Preparing intelligence generation...'}
-                    </p>
-                    <p className="mt-2 text-sm leading-6 text-white/66">
-                      Your intake has been saved. The system is now building the Business Intelligence
-                      Draft, Executive Diagnostic Briefing, Five Futures, and One Move.
-                    </p>
-                  </div>
-                )}
+            {!canSubmit && currentQuestionIndex === QUESTIONS.length - 1 && (
+              <p className="mt-4 text-sm text-white/46">
+                Questions 1-10 and 12 need an answer. Question 11 can stay blank if you do not have a team.
+              </p>
+            )}
 
-                {submitState.status === 'complete' && (
-                  <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
-                    <p className="text-sm font-semibold text-emerald-200">Business Assessment intelligence complete.</p>
-                    <p className="mt-2 text-sm text-white/78">
-                      Assessment ID:{' '}
-                      <span className="font-semibold text-white">
-                        {submitState.result?.assessment?.assessment_id || submitState.result?.assessment_id}
-                      </span>
-                    </p>
-                    <p className="mt-1 text-sm text-white/78">Status: five_futures_and_one_move_ready</p>
-                    <p className="mt-1 text-sm text-white/62">
-                      Executive Diagnostic, Business Assessment Map, Five Futures, and One Move are ready below.
-                    </p>
-                  </div>
-                )}
+            {(submitState.status === 'generating' || generationIsRunning) && (
+              <div className="mt-5 rounded-2xl border border-orange-300/35 bg-orange-400/[0.08] p-4">
+                <p className="text-sm font-semibold text-orange-100">
+                  {submitState.status === 'saving' ? 'Saving intake...' : generationState.phase || 'Preparing intelligence generation...'}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-white/66">
+                  Your intake has been saved. The system is now building the Business Intelligence
+                  Draft, Executive Diagnostic Briefing, Five Futures, and One Move.
+                </p>
+              </div>
+            )}
 
-                {submitState.status === 'error' && (
-                  <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                    {submitState.error}
-                  </div>
-                )}
+            {submitState.status === 'complete' && (
+              <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
+                <p className="text-sm font-semibold text-emerald-200">Business Assessment intelligence complete.</p>
+                <p className="mt-2 text-sm text-white/78">
+                  Assessment ID:{' '}
+                  <span className="font-semibold text-white">
+                    {submitState.result?.assessment?.assessment_id || submitState.result?.assessment_id}
+                  </span>
+                </p>
+                <p className="mt-1 text-sm text-white/78">Status: five_futures_and_one_move_ready</p>
+                <p className="mt-1 text-sm text-white/62">
+                  Executive Diagnostic, Business Assessment Map, Five Futures, and One Move are ready below.
+                </p>
+              </div>
+            )}
 
-                {submitState.status === 'generation_error' && (
-                  <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                    <p>{submitState.error}</p>
-                    <p className="mt-2">
-                      Assessment ID:{' '}
-                      <span className="font-semibold text-white">{submitState.result?.assessment_id}</span>
-                    </p>
-                    <button
-                      type="button"
-                      disabled={generationIsRunning}
-                      onClick={() =>
-                        runGenerationSequence({
-                          assessmentId: submitState.result?.assessment_id,
-                          ownerProfileId:
-                            submitState.result?.profile_context?.owner_profile_id ||
-                            profileResult?.id ||
-                            normalizedProfileId,
-                          assessmentRecord: null
-                        }).then((completed) =>
-                          setSubmitState({ status: 'complete', error: '', result: completed })
-                        ).catch(() => {})
-                      }
-                      className="mt-4 rounded-xl border border-red-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-red-50 transition hover:border-red-100 hover:bg-red-300/10 disabled:cursor-wait disabled:opacity-55"
-                    >
-                      Retry Generation
-                    </button>
-                  </div>
-                )}
-              </section>
+            {submitState.status === 'error' && (
+              <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                {submitState.error}
+              </div>
+            )}
+
+            {submitState.status === 'generation_error' && (
+              <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                <p>{submitState.error}</p>
+                <p className="mt-2">
+                  Assessment ID:{' '}
+                  <span className="font-semibold text-white">{submitState.result?.assessment_id}</span>
+                </p>
+                <button
+                  type="button"
+                  disabled={generationIsRunning}
+                  onClick={() =>
+                    runGenerationSequence({
+                      assessmentId: submitState.result?.assessment_id,
+                      ownerProfileId:
+                        submitState.result?.profile_context?.owner_profile_id ||
+                        profileResult?.id ||
+                        normalizedProfileId,
+                      assessmentRecord: null
+                    }).then((completed) =>
+                      setSubmitState({ status: 'complete', error: '', result: completed })
+                    ).catch(() => {})
+                  }
+                  className="mt-4 rounded-xl border border-red-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-red-50 transition hover:border-red-100 hover:bg-red-300/10 disabled:cursor-wait disabled:opacity-55"
+                >
+                  Retry Generation
+                </button>
+              </div>
             )}
           </section>
-
-          <aside className="space-y-5">
-            <section className="rounded-3xl border border-orange-400/35 bg-gradient-to-br from-orange-500/12 via-white/[0.035] to-purple-500/10 p-6 shadow-[0_0_55px_rgba(249,115,22,0.16)]">
-              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-orange-300">
-                Business Assessment
-              </p>
-              <div className="mt-4 text-6xl font-semibold tracking-tight text-white">$49</div>
-              <p className="mt-4 text-base leading-7 text-white/70">
-                See the future your business is creating.
-              </p>
-              <div className="mt-5 space-y-1 text-lg font-semibold text-white/86">
-                <p>Business Assessment</p>
-                <p>+</p>
-                <p>Five Futures</p>
-                <p>+</p>
-                <p>One Move</p>
-              </div>
-              <button
-                type="button"
-                disabled={checkoutState.loading === 'business_assessment'}
-                onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
-                className="mt-6 w-full rounded-xl bg-white px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-200 disabled:cursor-wait disabled:opacity-55"
-              >
-                {checkoutState.loading === 'business_assessment' ? 'Opening Checkout...' : 'Start Business Assessment Checkout'}
-              </button>
-              <p className="mt-3 text-xs leading-5 text-white/46">
-                Checkout opens through Stripe. Durable paid access is confirmed after payment processing.
-              </p>
-            </section>
-
-            <section className="rounded-3xl border border-cyan-300/20 bg-cyan-300/[0.055] p-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.26em] text-cyan-200">
-                MORE Monthly Intelligence
-              </p>
-              <h2 className="mt-3 text-2xl font-semibold text-white">Keep improving over time.</h2>
-              <p className="mt-3 text-sm leading-6 text-white/66">
-                You have your map. Now keep it alive.
-              </p>
-              <button
-                type="button"
-                disabled={checkoutState.loading === 'more_monthly_intelligence'}
-                onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_soft_awareness')}
-                className="mt-5 w-full rounded-xl border border-cyan-200/40 px-5 py-3 text-sm font-bold uppercase tracking-[0.16em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
-              >
-                {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence'}
-              </button>
-            </section>
-
-            {checkoutState.error && (
-              <section className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                {checkoutState.error}
-              </section>
-            )}
-
-            <section className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.24em] text-white">
-                Start Here
-              </h2>
-              <form className="mt-5 space-y-4" onSubmit={validateProfile}>
-                <label className="block text-xs font-semibold uppercase tracking-[0.2em] text-white/62">
-                  Enter Your Profile ID
-                </label>
-                <input
-                  value={profileId}
-                  onChange={(event) => setProfileId(event.target.value)}
-                  placeholder="MM-20260531-XXXXXXX"
-                  className="w-full rounded-xl border border-white/12 bg-black/65 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none transition placeholder:text-white/34 focus:border-orange-300"
-                />
-                <button
-                  type="submit"
-                  disabled={isValidating}
-                  className="w-full rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-black transition hover:bg-orange-300 disabled:cursor-wait disabled:opacity-60"
-                >
-                  {isValidating ? 'Validating...' : 'Validate Profile'}
-                </button>
-              </form>
-
-              {profileResult && (
-                <div className="mt-5 rounded-2xl border border-emerald-400/35 bg-emerald-400/[0.08] p-4">
-                  <p className="text-sm font-semibold text-emerald-200">✓ Profile Found</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{profileResult.name}</p>
-                  <p className="mt-1 text-sm uppercase tracking-[0.16em] text-white/62">
-                    {profileResult.profileType}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={beginAssessment}
-                    className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.16em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
-                  >
-                    Begin Business Assessment
-                  </button>
-                </div>
-              )}
-
-              {profileError && (
-                <div className="mt-5 whitespace-pre-line rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                  {profileError}
-                </div>
-              )}
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-white">
-                Have A Promo Code?
-              </h2>
-              <form className="mt-4 space-y-3" onSubmit={validateBusinessAssessmentPromo}>
-                <input
-                  value={promoCode}
-                  onChange={(event) => {
-                    setPromoCode(event.target.value);
-                    setPromoState({ status: 'idle', message: '' });
-                  }}
-                  placeholder="Enter Promo Code"
-                  className="w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-purple-300"
-                />
-                <button
-                  type="submit"
-                  disabled={!promoCode.trim()}
-                  className="w-full rounded-xl border border-purple-300/35 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-purple-100 transition hover:border-purple-200 hover:bg-purple-300/10 disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  Apply Promo
-                </button>
-              </form>
-              {promoState.message && (
-                <p
-                  className={`mt-3 rounded-xl border px-4 py-3 text-sm leading-6 ${
-                    promoState.status === 'valid'
-                      ? 'border-emerald-300/30 bg-emerald-400/[0.08] text-emerald-100'
-                      : 'border-red-400/30 bg-red-500/[0.08] text-red-100'
-                  }`}
-                >
-                  {promoState.message}
-                </p>
-              )}
-            </section>
-
-            <section className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-[0.22em] text-white">
-                Already Completed A Business Assessment?
-              </h2>
-              <form className="mt-4 space-y-4" onSubmit={retrieveAssessment}>
-                <input
-                  value={retrieveId}
-                  onChange={(event) => setRetrieveId(event.target.value)}
-                  placeholder="Enter Profile ID"
-                  className="w-full rounded-xl border border-white/12 bg-black/60 px-4 py-3 text-sm uppercase tracking-[0.08em] text-white outline-none placeholder:text-white/34 focus:border-blue-300"
-                />
-                <button
-                  type="submit"
-                  disabled={retrieveState.status === 'loading'}
-                  className="w-full rounded-xl border border-white/14 px-5 py-3 text-sm font-bold uppercase tracking-[0.2em] text-white/72 transition hover:border-blue-300/60 disabled:cursor-wait disabled:opacity-45"
-                >
-                  {retrieveState.status === 'loading' ? 'Retrieving...' : 'Retrieve'}
-                </button>
-              </form>
-
-              {retrieveState.status === 'found' && (
-                <div className="mt-5 rounded-2xl border border-blue-300/30 bg-blue-400/[0.08] p-4">
-                  <p className="text-sm font-semibold text-blue-100">Business Assessment Found</p>
-                  <p className="mt-2 text-sm font-semibold text-white">
-                    {retrievedBriefing
-                      ? 'Executive Diagnostic Briefing Ready'
-                      : 'Executive Diagnostic Briefing not generated yet.'}
-                  </p>
-                  <p className="mt-2 text-sm text-white/78">
-                    Assessment ID:{' '}
-                    <span className="font-semibold text-white">
-                      {retrieveState.result.assessment.assessment_id}
-                    </span>
-                  </p>
-                  <p className="mt-1 text-sm text-white/78">
-                    Created At: {formatDate(retrieveState.result.assessment.created_at)}
-                  </p>
-                  <p className="mt-1 text-sm text-white/78">
-                    Status: {retrieveState.result.assessment.status}
-                  </p>
-                  <p className="mt-1 text-sm text-white/62">
-                    {retrievedNeedsGeneration
-                      ? 'This assessment intake is saved and can now complete intelligence generation.'
-                      : 'This assessment intelligence is complete.'}
-                  </p>
-
-                  {retrievedNeedsGeneration && (
-                    <button
-                      type="button"
-                      disabled={generationIsRunning}
-                      onClick={generateRetrievedAssessment}
-                      className="mt-4 w-full rounded-xl border border-blue-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-blue-50 transition hover:border-blue-100 hover:bg-blue-300/10 disabled:cursor-wait disabled:opacity-55"
-                    >
-                      {generationIsRunning ? generationState.phase || 'Generating...' : 'Generate Executive Diagnostic'}
-                    </button>
-                  )}
-
-                  {generationState.status === 'running' &&
-                    generationState.assessmentId === retrieveState.result.assessment.assessment_id && (
-                      <p className="mt-3 rounded-xl border border-orange-300/25 bg-orange-400/[0.08] px-4 py-3 text-sm leading-6 text-orange-100">
-                        {generationState.phase || 'Generating intelligence...'}
-                      </p>
-                    )}
-
-                  {generationState.status === 'error' &&
-                    generationState.assessmentId === retrieveState.result.assessment.assessment_id && (
-                      <p className="mt-3 rounded-xl border border-red-400/30 bg-red-500/[0.08] px-4 py-3 text-sm leading-6 text-red-100">
-                        Your intake was saved, but intelligence generation did not complete. You can retry generation.
-                      </p>
-                    )}
-                </div>
-              )}
-
-              {retrieveState.status === 'not_found' && (
-                <div className="mt-5 rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-white/68">
-                  No Business Assessment found for this Profile ID.
-                </div>
-              )}
-
-              {retrieveState.status === 'error' && (
-                <div className="mt-5 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                  {retrieveState.error}
-                </div>
-              )}
-            </section>
-          </aside>
         </main>
 
         {retrievedBriefing && (

@@ -1,0 +1,58 @@
+{
+  "phase_id": "MM-UX-2B.1",
+  "verdict": "MOREMINDMAP_BA_ACCESS_FLOW_RENDERING_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "BA_ACCESS_UNLOCK_RENDER_SPLIT_REPAIRED_NO_PAYMENT_LOGIC_CHANGE",
+  "highest_allowed_readiness": "READY_FOR_USER_RETEST_OF_BA_ACCESS_START_FLOW",
+  "files_changed": [
+    "src/BusinessAssessment.jsx",
+    "MOREMINDMAP_BA_ACCESS_FLOW_RENDERING_REPAIR_2B1.md",
+    "runtime_traces/moremindmap_ba_access_flow_rendering_repair_2b1.json"
+  ],
+  "runtime_code_changed": true,
+  "backend_changed": false,
+  "stripe_changed": false,
+  "access_logic_changed": false,
+  "root_cause": "The active assessment state reused the old pre-redesign combined layout, so flowStarted rendered both the question form and legacy payment/access panels.",
+  "repair_summary": "The active flow now renders a focused assessment-only layout while the premium entry page remains gated behind !flowStarted.",
+  "render_split_policy": {
+    "entry_page": "Business Assessment checkout, MORE Monthly Intelligence, and Access/Codes panels render only before flowStarted.",
+    "assessment_active_view": "Current question, answer field, navigation, submission, generation, success, and error states render when flowStarted is true.",
+    "retrieved_results": "Completed assessment retrieval result rendering remains unchanged."
+  },
+  "assessment_active_view_policy": "No pricing, checkout, promo, profile validation, or retrieval panels are shown around the active question flow.",
+  "entry_page_policy": "The clean premium three-panel entry page remains the only initial entry/payment/access layout.",
+  "preserved_behaviors": [
+    "business_assessment_checkout",
+    "more_monthly_intelligence_checkout",
+    "profile_id_validation",
+    "promo_code_validation",
+    "completed_assessment_retrieval",
+    "assessment_answer_state",
+    "question_navigation",
+    "assessment_submission",
+    "assessment_generation",
+    "generation_retry"
+  ],
+  "validation_results": {
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "json_parse": "passed",
+    "static_privacy_scan": "passed_no_hits_for_secret_payment_access_translator_or_darren_terms"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "initial Business Assessment entry shows premium three-panel layout",
+    "active assessment view hides entry/payment/access panels after approved start",
+    "no checkout started during smoke",
+    "no backend writes beyond existing validation flow"
+  ],
+  "limits": [
+    "Frontend render repair only",
+    "No Stripe backend changes",
+    "No access grant changes",
+    "No assessment question or generation changes",
+    "Manual live Profile ID plus promo retest may be required"
+  ]
+}
