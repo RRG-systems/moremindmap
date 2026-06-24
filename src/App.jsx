@@ -54,14 +54,14 @@ export default function App() {
         <section id="paths" className="mx-auto max-w-7xl px-6 pb-24 md:pb-28">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <PathCard
-              eyebrow="Path 1"
+              eyebrow="Step 1"
               title="Build Your MORE MindMap Profile"
               description="Understand how you think, communicate, decide, and operate. Get a sharper picture of your strengths, blind spots, and working style."
               button="Start Here"
               to="/profile"
             />
             <PathCard
-              eyebrow="Path 2"
+              eyebrow="Step 2"
               title="ASSESS YOUR BUSINESS"
               description={"Every business is producing a future.\n\nThe system identifies:\n\n• What's working\n• What's limiting growth\n• The future already forming\n• The One Move most likely to change it"}
               button="Start Here"
@@ -69,7 +69,7 @@ export default function App() {
               featured
             />
             <PathCard
-              eyebrow="Path 3"
+              eyebrow="Step 3"
               title="Recover or Reactivate Your Dead Leads"
               description="You may not need more leads first. You may need to recover the revenue sitting in the leads you already paid for."
               button="Start Here"
