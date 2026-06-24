@@ -34,6 +34,7 @@ export default function UniversalTranslatorDrawer({
   const sourceTitle = source?.source_title || source?.title || 'Selected output';
   const preview = useMemo(() => String(source?.source_excerpt || '').slice(0, 420), [source]);
   const isBosSource = source?.source_type === 'bos_profile' || source?.source_type === 'bos_section';
+  const isBosSection = source?.source_type === 'bos_section';
 
   if (!isOpen) return null;
 
@@ -78,7 +79,9 @@ export default function UniversalTranslatorDrawer({
               </h2>
               {isBosSource && (
                 <p className="mt-2 text-sm leading-6 text-white/58">
-                  Translate this profile into how you operate, where it helps, and where it can cost you.
+                  {isBosSection
+                    ? 'Translate this behavior section into plain English.'
+                    : 'Translate this profile into how you operate, where it helps, and where it can cost you.'}
                 </p>
               )}
             </div>

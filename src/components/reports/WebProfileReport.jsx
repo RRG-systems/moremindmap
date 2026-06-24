@@ -21,12 +21,38 @@ import VisualDNAModal from '../visualDNA/VisualDNAModal.jsx';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslatorDrawer.jsx';
 
+function cleanTranslatorText(value, maxLength = 1200) {
+  return String(value?.body || value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength);
+}
+
+function buildBosSectionSource(title, body, profileContext) {
+  const text = cleanTranslatorText(body);
+  if (text.length < 80) return null;
+  return {
+    title,
+    label: title
+      .replace(/^Core /, '')
+      .replace(/^Behavioral /, '')
+      .replace('Profile DNA / DNA Summary', 'Profile DNA'),
+    source: {
+      source_type: 'bos_section',
+      source_title: title,
+      source_excerpt: `${title}:\n${text}`,
+      profile_context: profileContext
+    }
+  };
+}
+
 // ============================================================================
 // DASHBOARD COMPONENTS (V1)
 // ============================================================================
 
 function DashboardReportV1({ canonical, profileId, narrative, profileNumber, profileCode, personName, company, profileType, ranked, behavioralIntelligence, visualDNA, deterministicVisualDNA }) {
   const [translatorSource, setTranslatorSource] = useState(null);
+  const profileContext = `${profileType}${company ? ` · ${company}` : ''}`;
   const profileSummary = [
     'Profile context:',
     `Profile: ${personName}`,
@@ -51,6 +77,14 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
     'Recommended Next Move:',
     narrative.recommendedNextStep?.body || narrative.recommendedNextStep || ''
   ].filter(Boolean).join('\n\n').slice(0, 5000);
+  const bosSectionSources = [
+    buildBosSectionSource('Core Operating Style', narrative.profileDNA, profileContext),
+    buildBosSectionSource('Pressure Pattern', narrative.systemUnderStrain, profileContext),
+    buildBosSectionSource('Communication Style', narrative.howOthersExperienceYou, profileContext),
+    buildBosSectionSource('Growth Edge', narrative.scalingConstraint, profileContext),
+    buildBosSectionSource('Recommended Next Move', narrative.recommendedNextStep, profileContext),
+    buildBosSectionSource('Behavior Operating System summary', narrative.executiveSummary, profileContext)
+  ].filter(Boolean).slice(0, 6);
 
   return (
     <div className="dashboard-report-v1 intelligence-system">
@@ -72,12 +106,31 @@ function DashboardReportV1({ canonical, profileId, narrative, profileNumber, pro
                   source_type: 'bos_profile',
                   source_title: 'Behavior Operating System Profile',
                   source_excerpt: profileSummary,
-                  profile_context: `${profileType}${company ? ` · ${company}` : ''}`
+                  profile_context: profileContext
                 })}
                 className="mt-4 rounded-full border border-cyan-200/35 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.16em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/16"
               >
                 Explain This Profile
               </button>
+              {bosSectionSources.length >= 2 && (
+                <div className="mt-4 max-w-2xl rounded-2xl border border-cyan-200/14 bg-cyan-300/[0.045] p-3">
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-cyan-100/70">
+                    Explain specific parts
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {bosSectionSources.map((section) => (
+                      <button
+                        key={section.title}
+                        type="button"
+                        onClick={() => setTranslatorSource(section.source)}
+                        className="rounded-full border border-cyan-200/24 bg-cyan-300/10 px-3 py-2 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-cyan-50 transition hover:border-cyan-100/70 hover:bg-cyan-300/15"
+                      >
+                        Explain {section.label.toLowerCase()}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           

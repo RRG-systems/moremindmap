@@ -97,6 +97,7 @@ function sourceTypeInstructions(sourceType) {
       'Prefer filling how_this_shows_up_in_real_life.',
       'Fill what_not_to_overclaim when the source could be overstated.',
       'If the source excerpt is organized into BOS sections, translate section by section. Do not collapse the profile into a generic personality summary.',
+      'For bos_section, translate only the submitted BOS section. Do not infer the entire profile.',
       'Do not diagnose, make clinical claims, say personality is fixed, or imply predictive certainty.',
       'Mention that the BOS describes operating tendencies, not destiny, when relevant.',
       'Use behaviorally specific, practical English. Avoid generic personality-test copy and motivational wallpaper.'

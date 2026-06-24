@@ -81,6 +81,26 @@ const BOS_SECTION_MAPPINGS = [
   }
 ];
 
+const BOS_SECTION_BUTTON_PRIORITY = [
+  "Core Operating Style",
+  "Behavioral Advantages",
+  "Behavioral Risks",
+  "Pressure Pattern",
+  "Communication Style",
+  "Growth Edge",
+  "Profile DNA / DNA Summary"
+];
+
+const BOS_SECTION_BUTTON_LABELS = {
+  "Core Operating Style": "Explain operating style",
+  "Behavioral Advantages": "Explain advantages",
+  "Behavioral Risks": "Explain risks",
+  "Pressure Pattern": "Explain pressure pattern",
+  "Communication Style": "Explain communication style",
+  "Growth Edge": "Explain growth edge",
+  "Profile DNA / DNA Summary": "Explain profile DNA"
+};
+
 function categoryForBosHeading(heading) {
   const match = BOS_SECTION_MAPPINGS.find((section) => section.pattern.test(heading));
   return match?.title || "";
@@ -136,6 +156,66 @@ function buildFallbackBosSections(visibleText) {
       return text ? { category: section.title, heading: section.title, text } : null;
     })
     .filter(Boolean);
+}
+
+function reliableBosSectionText(text) {
+  const cleaned = cleanVisibleProfileText(text).slice(0, 1200);
+  if (cleaned.length < 90) return "";
+  if (/^(not available|none listed)$/i.test(cleaned)) return "";
+  return cleaned;
+}
+
+function buildBosSectionTranslatorPayloadsFromRenderedProfile(html, profileId) {
+  const visibleText = cleanVisibleProfileText(visibleTextFromHtml(html, 14000));
+  const mapped = new Map();
+
+  parseBosHtmlSections(html).forEach((section) => {
+    const category = categoryForBosHeading(section.heading);
+    const text = reliableBosSectionText(section.text);
+    if (!category || !text || mapped.has(category)) return;
+    mapped.set(category, {
+      category,
+      heading: section.heading,
+      text
+    });
+  });
+
+  if (mapped.size < 2) {
+    buildFallbackBosSections(visibleText).forEach((section) => {
+      const text = reliableBosSectionText(section.text);
+      if (!text || mapped.has(section.category)) return;
+      mapped.set(section.category, {
+        category: section.category,
+        heading: section.heading,
+        text
+      });
+    });
+  }
+
+  const ordered = [
+    ...BOS_SECTION_BUTTON_PRIORITY
+      .map((category) => mapped.get(category))
+      .filter(Boolean),
+    ...Array.from(mapped.values()).filter((section) => !BOS_SECTION_BUTTON_PRIORITY.includes(section.category))
+  ];
+
+  return ordered
+    .slice(0, 6)
+    .map((section) => ({
+      category: section.category,
+      heading: section.heading,
+      buttonLabel: BOS_SECTION_BUTTON_LABELS[section.category] || `Explain ${section.category.toLowerCase()}`,
+      source: {
+        source_type: "bos_section",
+        source_title: section.heading || section.category,
+        source_excerpt: [
+          `${section.category}:`,
+          `Source heading: ${section.heading || section.category}`,
+          section.text
+        ].join("\n"),
+        profile_context: `Retrieved Profile ID: ${profileId || "available"}`
+      }
+    }));
 }
 
 function buildBosTranslatorExcerptFromRenderedProfile(html, profileId) {
@@ -241,6 +321,10 @@ export default function Profile() {
     questions: MOREMINDMAP_QUESTIONS,
   }), [])
   const [responses, setResponses] = useState({})
+  const retrievedBosSectionPayloads = useMemo(() => {
+    if (!(result?.success && result?.version === "retrieved" && result?.html)) return [];
+    return buildBosSectionTranslatorPayloadsFromRenderedProfile(result.html, result.profile_id);
+  }, [result]);
 
   // Check for payment success query param on mount
   useEffect(() => {
@@ -789,6 +873,25 @@ export default function Profile() {
                       >
                         Explain This Profile
                       </button>
+                      {retrievedBosSectionPayloads.length >= 2 && (
+                        <div className="mt-4 max-w-3xl rounded-2xl border border-white/18 bg-black/10 p-3">
+                          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.22em] text-white/72">
+                            Explain specific parts
+                          </p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {retrievedBosSectionPayloads.map((section) => (
+                              <button
+                                key={`${section.category}-${section.heading}`}
+                                type="button"
+                                onClick={() => setTranslatorSource(section.source)}
+                                className="rounded-full border border-white/24 bg-white/10 px-3 py-2 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-white transition hover:border-white/70 hover:bg-white/18"
+                              >
+                                {section.buttonLabel}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div 
                       className="mini-v2-report-container"
