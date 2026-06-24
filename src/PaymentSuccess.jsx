@@ -1,4 +1,13 @@
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+
+function buildApiUrl(path) {
+  const baseUrl = import.meta.env.VITE_API_URL || '';
+  if (!baseUrl) return path;
+  const base = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const endpoint = path.startsWith('/') ? path : `/${path}`;
+  return `${base}${endpoint}`;
+}
 
 function displayProduct(value) {
   const product = String(value || '').replace(/_/g, ' ').trim();
@@ -8,6 +17,33 @@ function displayProduct(value) {
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
   const product = displayProduct(searchParams.get('product'));
+  const sessionId = searchParams.get('session_id') || '';
+  const [accessState, setAccessState] = useState({ status: 'idle', active: false });
+
+  useEffect(() => {
+    let cancelled = false;
+    async function checkAccess() {
+      if (!sessionId) return;
+      setAccessState({ status: 'checking', active: false });
+      try {
+        const response = await fetch(
+          buildApiUrl(`/api/stripe/access-status?session_id=${encodeURIComponent(sessionId)}`)
+        );
+        const payload = await response.json().catch(() => null);
+        if (cancelled) return;
+        setAccessState({
+          status: 'checked',
+          active: Boolean(response.ok && payload?.access_found && payload?.payment_truth === 'webhook_confirmed')
+        });
+      } catch {
+        if (!cancelled) setAccessState({ status: 'checked', active: false });
+      }
+    }
+    checkAccess();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId]);
 
   return (
     <main className="min-h-screen bg-black px-6 py-10 text-white">
@@ -16,10 +52,13 @@ export default function PaymentSuccess() {
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-200">
             Checkout Status
           </p>
-          <h1 className="mt-4 text-4xl font-semibold tracking-tight">Checkout completed.</h1>
+          <h1 className="mt-4 text-4xl font-semibold tracking-tight">
+            {accessState.active ? 'Payment verified.' : 'Checkout completed.'}
+          </h1>
           <p className="mt-5 text-lg leading-8 text-white/72">
-            We are verifying your access for {product}. Durable paid access will be confirmed by
-            payment processing.
+            {accessState.active
+              ? `Your access is active for ${product}.`
+              : `We are verifying your access for ${product}. Durable paid access will be confirmed by payment processing.`}
           </p>
           <p className="mt-4 text-sm leading-6 text-white/54">
             Checkout redirect success is not payment proof. MORE MindMap grants durable paid access

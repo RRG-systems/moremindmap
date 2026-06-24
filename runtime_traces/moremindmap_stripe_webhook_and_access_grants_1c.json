@@ -1,0 +1,78 @@
+{
+  "phase_id": "MM-PAY-1C",
+  "verdict": "MOREMINDMAP_STRIPE_WEBHOOK_AND_ACCESS_GRANTS_IMPLEMENTED_WITH_LIMITS",
+  "classification": "WEBHOOK_CONFIRMED_PAYMENT_TRUTH_READY_FOR_CONTROLLED_STRIPE_EVENT_TEST",
+  "highest_allowed_readiness": "READY_FOR_STRIPE_WEBHOOK_ENDPOINT_CONFIGURATION_AND_CONTROLLED_PAYMENT_TEST",
+  "files_changed": [
+    "api/stripe/shared.js",
+    "api/stripe/webhook.js",
+    "api/stripe/access-status.js",
+    "src/PaymentSuccess.jsx",
+    "MOREMINDMAP_STRIPE_WEBHOOK_AND_ACCESS_GRANTS_1C.md",
+    "runtime_traces/moremindmap_stripe_webhook_and_access_grants_1c.json"
+  ],
+  "code_changed": true,
+  "routes_added": [
+    "POST /api/stripe/webhook",
+    "GET /api/stripe/access-status"
+  ],
+  "webhook_events_handled": [
+    "checkout.session.completed",
+    "invoice.paid",
+    "customer.subscription.created",
+    "customer.subscription.updated",
+    "customer.subscription.deleted"
+  ],
+  "durable_records_created": [
+    "payment_event:{stripe_event_id}",
+    "access_grant:{grant_id}",
+    "access_grant_by_email:{email}",
+    "access_grant_by_profile:{profile_id}",
+    "access_grant_by_assessment:{assessment_id}",
+    "access_grant_by_session:{session_id}",
+    "subscription_state:{subscription_id}",
+    "payment_revenue_index:{yyyy_mm}"
+  ],
+  "idempotency_policy": "Stripe event id is stored as payment_event:{stripe_event_id}; already processed events return success without duplicate writes.",
+  "access_grant_policy": "Durable paid access is created only from verified Stripe webhook events and is source-labeled paid_stripe.",
+  "subscription_state_policy": "Subscription state is compact and updated from subscription Checkout, invoice.paid, and customer.subscription lifecycle events.",
+  "revenue_index_policy": "V0 indexes payment event ids by month only; no revenue totals are exposed.",
+  "redirect_success_payment_truth": false,
+  "webhook_secret_required": true,
+  "promo_free_flows_preserved": true,
+  "validation_results": {
+    "node_check_backend": "passed",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed",
+    "webhook_missing_signature": "passed_controlled_400",
+    "webhook_invalid_signature": "passed_controlled_400_with_local_test_secret",
+    "access_status_missing_identifier": "passed_controlled_400",
+    "access_status_unknown_identifier": "skipped_locally_redis_url_unavailable",
+    "privacy_scan": "passed_on_added_diff_lines"
+  },
+  "production_setup_steps": [
+    "Create Stripe webhook endpoint at https://moremindmap.com/api/stripe/webhook.",
+    "Subscribe to checkout.session.completed, invoice.paid, customer.subscription.created, customer.subscription.updated, customer.subscription.deleted.",
+    "Add STRIPE_WEBHOOK_SECRET directly to Vercel Production without pasting it into chat.",
+    "Redeploy production if Vercel requires env redeploy."
+  ],
+  "production_smoke_plan": [
+    "webhook missing signature returns 400",
+    "access-status unknown identifier returns access_found false",
+    "optional Stripe Dashboard test event verifies signed route after STRIPE_WEBHOOK_SECRET is configured",
+    "controlled real payment only with explicit approval",
+    "verified payment creates payment_event and access_grant",
+    "monthly subscription creates or updates subscription_state",
+    "access-status returns active grant after webhook confirmation",
+    "success page shows verified only after grant exists"
+  ],
+  "limits": [
+    "STRIPE_WEBHOOK_SECRET is not configured yet.",
+    "No real payment has been completed.",
+    "No fake payment events are created.",
+    "No durable access is granted from redirect success.",
+    "No raw Stripe payloads are stored.",
+    "No broad revenue totals are exposed."
+  ]
+}
