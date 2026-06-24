@@ -25,8 +25,8 @@
   "model_selection_after": {
     "preferred_env_var": "DARREN_STRATEGY_CHAT_MODEL",
     "legacy_env_var": "DARREN_STRATEGY_CHAT_OPENAI_MODEL",
-    "preferred_default": "gpt-5.5",
-    "fallback": "gpt-4o-2024-08-06",
+    "gpt_5_5_behavior": "allowlisted_and_preferred_when_configured",
+    "production_safe_default": "gpt-4o-2024-08-06",
     "safe_models_include": [
       "gpt-5.5",
       "gpt-5.5-chat",
@@ -38,7 +38,7 @@
       "gpt-4o"
     ]
   },
-  "gpt_5_5_preferred": true,
+  "gpt_5_5_preferred": "true_when_configured_route_env_supports_it",
   "nine_path_context_injected": true,
   "five_futures_separation_preserved": true,
   "channel_growth_policy": "Channel Growth is valid, not bad. Chat should support it strongly when chosen while preserving optionality and defining proof targets, adoption evidence, and failure signals.",

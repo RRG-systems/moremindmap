@@ -25,10 +25,10 @@ After this sprint, Darren Strategy Chat supports:
 
 - preferred env var: `DARREN_STRATEGY_CHAT_MODEL`
 - legacy env var: `DARREN_STRATEGY_CHAT_OPENAI_MODEL`
-- preferred default: `gpt-5.5`
-- retained fallback: `gpt-4o-2024-08-06`
+- GPT-5.5 allowlisted and preferred when configured through route-specific env
+- production-safe default: `gpt-4o-2024-08-06`
 
-GPT-5.5 is now preferred through the route allowlist and default. If production sets a supported route-specific model env var, that value wins. The prior GPT-4o model remains available as a safe fallback in code.
+GPT-5.5 is now supported through the route allowlist and preferred when production explicitly configures it. If the route-specific env var is missing or unsupported, the route uses the known production-safe default instead of breaking chat.
 
 ## 9-Path Context Integration
 

@@ -4,8 +4,8 @@ import { leadershipBuildMap } from '../../src/data/leadershipBuildMap.js';
 import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../../src/data/darrenBusinessModelBackbone.js';
 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
-const DEFAULT_CHAT_MODEL = 'gpt-5.5';
-const FALLBACK_CHAT_MODEL = 'gpt-4o-2024-08-06';
+const PREFERRED_CHAT_MODEL = 'gpt-5.5';
+const DEFAULT_CHAT_MODEL = 'gpt-4o-2024-08-06';
 const SAFE_CHAT_MODELS = new Set(['gpt-5.5', 'gpt-5.5-chat', 'gpt-5.5-chat-latest', 'gpt-5', 'gpt-4o-2024-08-06', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o']);
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_REPLY_LENGTH = 3000;
@@ -64,7 +64,7 @@ function configuredAdminCode() {
 function configuredChatModel() {
   const explicitModel = String(process.env.DARREN_STRATEGY_CHAT_MODEL || process.env.DARREN_STRATEGY_CHAT_OPENAI_MODEL || '').trim();
   if (SAFE_CHAT_MODELS.has(explicitModel)) return explicitModel;
-  return SAFE_CHAT_MODELS.has(DEFAULT_CHAT_MODEL) ? DEFAULT_CHAT_MODEL : FALLBACK_CHAT_MODEL;
+  return SAFE_CHAT_MODELS.has(DEFAULT_CHAT_MODEL) ? DEFAULT_CHAT_MODEL : PREFERRED_CHAT_MODEL;
 }
 
 function getProvidedAdminCode(req) {
