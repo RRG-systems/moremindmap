@@ -42,7 +42,27 @@
     "static_privacy_scan_changed_files": "passed_no_matches",
     "backend_node_check": "skipped_backend_not_touched",
     "backbone_node_check": "skipped_backbone_not_touched",
-    "production_smoke": "pending"
+    "production_smoke": "passed"
+  },
+  "deployment": {
+    "deployment_url": "https://moremindmap-im45t4tck-rrg-systems-projects.vercel.app",
+    "production_alias": "https://moremindmap.com",
+    "ready_state": "READY"
+  },
+  "production_smoke_result": {
+    "/": 200,
+    "/profile": 200,
+    "/business-assessment": 200,
+    "/leadership-dashboard": 200,
+    "controlled_strategy_chat_status": 200,
+    "controlled_strategy_chat_ok": true,
+    "controlled_strategy_chat_reply_present": true,
+    "controlled_strategy_chat_mutation_performed": false,
+    "deployed_bundle_whitespace_pre_wrap_marker": true,
+    "deployed_bundle_controlled_error_copy_marker": true,
+    "deployed_bundle_disabled_starter_chip_marker": true,
+    "source_level_in_flight_guard_marker": true,
+    "records_intentionally_mutated": false
   },
   "production_smoke_plan": [
     "/ returns 200",

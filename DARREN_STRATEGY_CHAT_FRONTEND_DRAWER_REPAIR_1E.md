@@ -41,7 +41,14 @@ Frontend bugs repaired:
 
 ## Validation Results
 
-Validation is recorded in `runtime_traces/darren_strategy_chat_frontend_drawer_repair_1e.json`.
+Validation passed:
+
+- `git diff --check`: passed
+- `npm run build`: passed with existing Vite large chunk warning
+- `python3 -m json.tool runtime_traces/darren_strategy_chat_frontend_drawer_repair_1e.json`: passed
+- Static privacy/claim scan of changed files: passed with no matches
+- Backend syntax check: skipped because backend was not touched
+- Backbone syntax check: skipped because backbone data was not touched
 
 ## Production Smoke Plan
 
@@ -52,6 +59,20 @@ Validation is recorded in `runtime_traces/darren_strategy_chat_frontend_drawer_r
 - Confirm deployed bundle contains `whitespace-pre-wrap`.
 - Confirm deployed bundle contains the in-flight loading guard marker.
 - Optional single controlled Strategy Chat route smoke: expect 200, `ok: true`, reply present, `mutation_performed: false`.
+
+Production deployment:
+
+- Deployment URL: `https://moremindmap-im45t4tck-rrg-systems-projects.vercel.app`
+- Production alias: `https://moremindmap.com`
+- `/`: 200
+- `/profile`: 200
+- `/business-assessment`: 200
+- `/leadership-dashboard`: 200
+- Controlled Strategy Chat route smoke: 200, `ok: true`, reply present, `mutation_performed: false`
+- Deployed bundle marker `whitespace-pre-wrap`: present
+- Deployed bundle marker for controlled error copy: present
+- Deployed bundle marker for disabled starter chip styling: present
+- Source-level in-flight request guard: present in `src/components/DarrenLeadershipIntelligencePanel.jsx`
 
 ## Limits
 
