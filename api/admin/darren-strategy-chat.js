@@ -1,5 +1,6 @@
 import { loadDarrenOutcomeLedgerEvents, loadLatestDarrenGeneratedStrategy } from './darren-generated-strategy-core.js';
 import { buildDarrenIntelligenceSnapshot } from './darren-intelligence-snapshot-core.js';
+import { buildDarrenDashboardContextCompact } from './darren-dashboard-context-core.js';
 import { leadershipBuildMap } from '../../src/data/leadershipBuildMap.js';
 import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../../src/data/darrenBusinessModelBackbone.js';
 
@@ -193,6 +194,7 @@ function buildSinceLastSummary(strategy, ledgerSummary) {
 function buildContextPack({ snapshot, strategy, ledgerEvents }) {
   const ledgerSummary = latestLedgerSummary(ledgerEvents);
   const sinceLast = buildSinceLastSummary(strategy, ledgerSummary);
+  const dashboardIntelligenceContext = buildDarrenDashboardContextCompact({ snapshot, strategy });
   const buildMapTruth = leadershipBuildMap.map((item) => ({
     title: item.title,
     status: item.status,
@@ -240,7 +242,8 @@ function buildContextPack({ snapshot, strategy, ledgerEvents }) {
       'Audience reach is not revenue.'
     ],
     build_map_truth: buildMapTruth,
-    nine_path_business_model_backbone: compactNinePathBackbone(snapshot, strategy)
+    nine_path_business_model_backbone: compactNinePathBackbone(snapshot, strategy),
+    dashboard_intelligence_context: dashboardIntelligenceContext
   };
 }
 
@@ -254,6 +257,9 @@ function buildMessages(message, entryContext, contextPack) {
         'Act like a strategic intelligence operator, not a generic assistant.',
         'The user can type anything. Infer intent without requiring product terms.',
         'Ground every answer in the provided Darren context pack.',
+        'Use dashboard_intelligence_context as compact current dashboard context. Treat it as evidence-weighted context, not absolute truth and not permission to write records.',
+        'If asked about current operating state, reality completeness, financial/admin evidence, roadmap status, people reality, or missing evidence, use dashboard_intelligence_context first, then latest strategy, ledger, and since-last context.',
+        'Future movement requires accepted decisions and recorded proof. External or displayed context alone does not justify automatic future percentage movement.',
         'Actively reason with the 9-Path Business Model Backbone when the question touches strategy, Channel Growth, partner paths, proof targets, One Move choices, business model focus, or valuation scenarios.',
         'Identify which of the 9 paths the question touches. If the question is broad, compare at least one alternative path instead of collapsing into one path.',
         'Five Futures and the 9-Path Backbone are different layers: Five Futures are generated scenario outputs; the 9-Path Backbone is the durable business model route map.',
@@ -418,6 +424,7 @@ function buildReplyPayload({ body, contextPack, modelResult }) {
       },
       outcome_event_count: contextPack.outcome_ledger.outcome_event_count || 0,
       since_last_snapshot_present: contextPack.since_last_snapshot.present === true,
+      dashboard_intelligence_context_present: Boolean(contextPack.dashboard_intelligence_context),
       automatic_learning_live: false
     }
   };

@@ -1,0 +1,73 @@
+{
+  "phase_id": "DASH-WIRE-2F",
+  "verdict": "DARREN_DASHBOARD_INTELLIGENCE_CONTEXT_WIRING_COMPLETE_WITH_LIMITS",
+  "classification": "COMPACT_CONTEXT_WIRED_TO_CHAT_AND_ADAPTIVE_NO_MUTATION",
+  "files_changed": [
+    "api/admin/darren-dashboard-context-core.js",
+    "api/admin/darren-strategy-chat.js",
+    "api/admin/darren-adaptive-loop-core.js",
+    "DARREN_DASHBOARD_INTELLIGENCE_CONTEXT_WIRING_2F.md",
+    "runtime_traces/darren_dashboard_intelligence_context_wiring_2f.json"
+  ],
+  "runtime_code_changed": true,
+  "frontend_changed": false,
+  "backend_changed": true,
+  "prompt_changed": true,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "compact_context_created": true,
+  "shared_helper_created": true,
+  "strategy_chat_context_wired": true,
+  "adaptive_strategy_context_wired": true,
+  "current_operating_state_wired": true,
+  "reality_completeness_wired": true,
+  "financial_admin_summary_wired": true,
+  "business_model_context_wired": true,
+  "confidence_boundary_wired": true,
+  "roadmap_status_wired": true,
+  "raw_tables_injected": false,
+  "raw_profile_content_injected": false,
+  "raw_assessment_answers_injected": false,
+  "people_reality_boundary_preserved": "Darren build uses Darren's behavioral operating style only. Employee/team/org personality layers are future organizational intelligence, not part of this current Darren dashboard.",
+  "dashboard_help_built": false,
+  "recursion_score_built": false,
+  "molt_built": false,
+  "grok_api_added": false,
+  "probability_mutation_added": false,
+  "automatic_strategy_replacement_added": false,
+  "strategy_chat_smoke": {
+    "status": "pending",
+    "mutation_performed_expected": false
+  },
+  "adaptive_strategy_smoke": {
+    "status": "pending",
+    "note": "No draft-generation smoke run at initial report creation because that route persists pending-review drafts."
+  },
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "8cc1d0d audit darren dashboard intelligence feed gaps",
+    "node_check_dashboard_context_core": "passed",
+    "node_check_strategy_chat": "passed",
+    "node_check_adaptive_loop_core": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed",
+    "static_privacy_claim_scan_changed_files": "passed_after_privacy_boundary_wording_adjustment"
+  },
+  "limits": [
+    "Compact context only.",
+    "No frontend layout change.",
+    "No records intentionally mutated.",
+    "No full admin rows in model context.",
+    "No private profile text in model context.",
+    "No assessment response detail in model context.",
+    "No dashboard help feature built.",
+    "No recursive score feature built.",
+    "No MOLT or outside discovery integration built.",
+    "No probability mutation added.",
+    "No automatic active-strategy replacement added."
+  ],
+  "recommended_next_sprint": "DASH-HELP-2G",
+  "planned_following_sprint": "DASH-RECURSION-2H"
+}

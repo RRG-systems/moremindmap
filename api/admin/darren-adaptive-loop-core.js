@@ -6,7 +6,8 @@ import {
   loadDarrenOutcomeLedgerEvents,
   loadLatestDarrenGeneratedStrategy
 } from './darren-generated-strategy-core.js';
-import { DARREN_PROFILE_ID } from './darren-intelligence-snapshot-core.js';
+import { DARREN_PROFILE_ID, buildDarrenIntelligenceSnapshot } from './darren-intelligence-snapshot-core.js';
+import { buildDarrenDashboardContextCompact } from './darren-dashboard-context-core.js';
 import { buildComparison } from './darren-since-last-snapshot.js';
 
 export const CHAT_SESSION_SUMMARY_VERSION = 'chat_session_summary_v0';
@@ -418,7 +419,7 @@ function configuredDraftModel() {
   return SAFE_DRAFT_MODELS.has(explicitModel) ? explicitModel : DEFAULT_DRAFT_MODEL;
 }
 
-function buildDraftContext({ strategy, events, comparison, summaries, movement }) {
+function buildDraftContext({ strategy, events, comparison, summaries, movement, dashboardContext }) {
   return {
     strategy_id_present: Boolean(strategy?.strategy_id),
     one_move_status: {
@@ -463,8 +464,10 @@ function buildDraftContext({ strategy, events, comparison, summaries, movement }
       'Do not replace the active strategy.',
       'Do not claim automatic learning is fully live.',
       'Do not use numeric probabilities.',
-      'Do not claim validated future movement from early evidence.'
-    ]
+      'Do not claim validated future movement from early evidence.',
+      'Future movement requires accepted decisions and recorded proof. External or displayed context alone does not justify automatic future percentage movement.'
+    ],
+    dashboard_intelligence_context: dashboardContext || null
   };
 }
 
@@ -487,6 +490,8 @@ async function callDraftModel(context) {
             'Create a concise Adaptive Strategy Draft for Darren.',
             'Use plain English. Use evidence bands, not percentages.',
             'The draft is pending review and must not replace the active strategy.',
+            'Use dashboard_intelligence_context as low-to-medium weight context for current operating state, reality completeness, financial/admin status, business model focus, roadmap status, and confidence boundaries.',
+            'Dashboard context is not authority to replace strategy, mutate records, or move future percentages.',
             'Do not claim automatic learning is fully live.',
             'Return only JSON with fields: what_changed_since_last_strategy, evidence_summary, future_movement_summary, updated_recommendation, suggested_one_move, proof_target_next, what_not_to_overclaim, what_to_watch_next, adoption_recommendation, reason, model_limits.'
           ].join(' ')
@@ -511,13 +516,15 @@ async function callDraftModel(context) {
 export async function createDarrenAdaptiveStrategyDraft() {
   const strategy = await loadLatestDarrenGeneratedStrategy();
   if (!strategy?.strategy_id) throw statusError('generated_strategy_not_found', 404);
-  const [events, summaries, movement] = await Promise.all([
+  const [events, summaries, movement, snapshot] = await Promise.all([
     loadDarrenOutcomeLedgerEvents({ strategy_id: strategy.strategy_id, limit: 10 }),
     loadDarrenChatSessionSummaries({ limit: 5 }),
-    loadLatestDarrenFutureMovementAssessment()
+    loadLatestDarrenFutureMovementAssessment(),
+    buildDarrenIntelligenceSnapshot()
   ]);
   const comparison = buildComparison(strategy, events);
-  const modelResult = await callDraftModel(buildDraftContext({ strategy, events, comparison, summaries, movement }));
+  const dashboardContext = buildDarrenDashboardContextCompact({ snapshot, strategy });
+  const modelResult = await callDraftModel(buildDraftContext({ strategy, events, comparison, summaries, movement, dashboardContext }));
   const now = new Date();
   const draft = {
     draft_id: createId('asd', now),
