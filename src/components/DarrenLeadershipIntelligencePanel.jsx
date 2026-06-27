@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../data/darrenBusinessModelBackbone.js'
 
 function display(value) {
@@ -1252,6 +1252,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
   const [actionMode, setActionMode] = useState('view')
   const [actionMessage, setActionMessage] = useState('')
   const [isConfirmingAction, setIsConfirmingAction] = useState(false)
+  const chatRequestInFlight = useRef(false)
 
   useEffect(() => {
     if (!conversationId) setConversationId(`darren-chat-${Date.now()}`)
@@ -1265,12 +1266,14 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
 
   if (!isOpen) return null
 
+  const isChatLoading = chatState.status === 'loading'
+
   async function sendChat(nextMessage = message) {
     const trimmed = String(nextMessage || '').trim()
-    if (!trimmed || chatState.status === 'loading') return
+    if (!trimmed || isChatLoading || chatRequestInFlight.current) return
 
-    const nextHistory = [...chatMessages, { role: 'user', text: trimmed }]
-    setChatMessages(nextHistory)
+    chatRequestInFlight.current = true
+    setChatMessages((current) => [...current, { role: 'user', text: trimmed }])
     setMessage('')
     setPossibleSignal(null)
     setProposedAction(null)
@@ -1294,8 +1297,8 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
       const payload = await response.json().catch(() => null)
 
       if (!response.ok || !payload?.ok) {
-        setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
-        setChatState({ status: 'error', error: 'Chat unavailable.' })
+        setChatMessages((current) => [...current, { role: 'assistant', text: 'Strategy Chat is not available right now. The dashboard data is unchanged.' }])
+        setChatState({ status: 'error', error: 'Strategy Chat is not available right now. The dashboard data is unchanged.' })
         return
       }
 
@@ -1304,13 +1307,15 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
       const assistantMessage = suggestionText.length
         ? `${assistantText}\n\nSuggested next actions: ${suggestionText.join(' / ')}`
         : assistantText
-      setChatMessages([...nextHistory, { role: 'assistant', text: assistantMessage }])
+      setChatMessages((current) => [...current, { role: 'assistant', text: assistantMessage }])
       setPossibleSignal(payload.possible_memory_signal || null)
       setProposedAction(payload.proposed_action || null)
       setChatState({ status: 'idle', error: '' })
     } catch {
-      setChatMessages([...nextHistory, { role: 'assistant', text: 'Darren Strategy Chat is unavailable right now.' }])
-      setChatState({ status: 'error', error: 'Chat unavailable.' })
+      setChatMessages((current) => [...current, { role: 'assistant', text: 'Strategy Chat is not available right now. The dashboard data is unchanged.' }])
+      setChatState({ status: 'error', error: 'Strategy Chat is not available right now. The dashboard data is unchanged.' })
+    } finally {
+      chatRequestInFlight.current = false
     }
   }
 
@@ -1408,10 +1413,13 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5">
           {chatMessages.map((item, index) => (
-            <div key={`${item.role}-${index}`} className={item.role === 'user' ? 'ml-auto max-w-[86%] rounded-2xl bg-cyan-200 px-4 py-3 text-sm leading-6 text-black' : 'mr-auto max-w-[92%] rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-sm leading-6 text-white/72'}>
+            <div key={`${item.role}-${index}`} className={item.role === 'user' ? 'ml-auto max-w-[86%] rounded-2xl bg-cyan-200 px-4 py-3 text-sm leading-6 text-black break-words' : 'mr-auto max-w-[92%] rounded-2xl border border-white/10 bg-white/[0.055] px-4 py-3 text-sm leading-relaxed whitespace-pre-wrap break-words text-white/72'}>
               {item.text}
             </div>
           ))}
+          {chatState.status === 'error' && chatState.error && (
+            <p className="text-xs leading-5 text-rose-100/70">{chatState.error}</p>
+          )}
           {possibleSignal && (
             <div className="rounded-2xl border border-amber-300/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-50/72">
               <span className="font-semibold text-amber-50">Possible signal to log later:</span>{' '}
@@ -1457,7 +1465,7 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
         <div className="border-t border-white/10 p-5">
           <div className="mb-3 flex flex-wrap gap-2">
             {starterMessages.map((starter) => (
-              <button key={starter} type="button" onClick={() => sendChat(starter)} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-white/58 transition hover:border-cyan-200/30 hover:text-cyan-50">
+              <button key={starter} type="button" onClick={() => sendChat(starter)} disabled={isChatLoading} className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-2 text-xs text-white/58 transition hover:border-cyan-200/30 hover:text-cyan-50 disabled:cursor-not-allowed disabled:opacity-45">
                 {starter}
               </button>
             ))}
@@ -1470,8 +1478,8 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
               className={chatTextareaClass}
               placeholder="Type anything..."
             />
-            <button type="button" onClick={() => sendChat()} disabled={!message.trim() || chatState.status === 'loading'} className="self-end rounded-2xl bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-55">
-              {chatState.status === 'loading' ? 'Thinking' : 'Send'}
+            <button type="button" onClick={() => sendChat()} disabled={!message.trim() || isChatLoading} className="self-end rounded-2xl bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-cyan-100 disabled:cursor-not-allowed disabled:opacity-55">
+              {isChatLoading ? 'Thinking...' : 'Send'}
             </button>
           </div>
         </div>

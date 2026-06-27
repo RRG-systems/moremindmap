@@ -1,0 +1,75 @@
+{
+  "phase_id": "DASH-FIX-1E",
+  "verdict": "DARREN_STRATEGY_CHAT_FRONTEND_DRAWER_REPAIR_COMPLETE_WITH_LIMITS",
+  "classification": "DARREN_CHAT_FRONTEND_UX_REPAIRED_NO_BACKEND_OR_PROMPT_CHANGE",
+  "highest_allowed_readiness": "READY_FOR_DARREN_CHAT_BROWSER_RETEST",
+  "files_changed": [
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "DARREN_STRATEGY_CHAT_FRONTEND_DRAWER_REPAIR_1E.md",
+    "runtime_traces/darren_strategy_chat_frontend_drawer_repair_1e.json"
+  ],
+  "runtime_code_changed": true,
+  "backend_changed": false,
+  "dashboard_ui_scope": "Strategy Chat drawer frontend UX and loading state only; no panels added or removed.",
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "assistant_formatting_repaired": true,
+  "loading_guard_added": true,
+  "overlapping_request_guard_added": true,
+  "stale_message_append_repaired": true,
+  "error_state_repaired": true,
+  "proposed_action_behavior_changed": false,
+  "confirmed_action_behavior_changed": false,
+  "record_mutation_policy": {
+    "chat_response_mutates_records": false,
+    "confirmed_actions_preserved": true,
+    "records_intentionally_mutated_during_this_sprint": false
+  },
+  "frontend_repairs": {
+    "assistant_message_rendering": "Assistant bubbles use whitespace-pre-wrap, leading-relaxed, and break-words so structured replies remain readable as plain text.",
+    "front_door_request_guard": "sendChat returns immediately when the drawer is loading or chatRequestInFlight.current is true.",
+    "starter_chip_guard": "Starter prompt chips are disabled and visually subdued while loading.",
+    "send_button_guard": "Send remains disabled while loading or when the input is empty.",
+    "message_append_strategy": "User, assistant, and error messages append through functional setChatMessages updates.",
+    "controlled_error_copy": "Strategy Chat is not available right now. The dashboard data is unchanged."
+  },
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "267d204 trace darren strategy chat bug",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed",
+    "static_privacy_scan_changed_files": "passed_no_matches",
+    "backend_node_check": "skipped_backend_not_touched",
+    "backbone_node_check": "skipped_backbone_not_touched",
+    "production_smoke": "pending"
+  },
+  "production_smoke_plan": [
+    "/ returns 200",
+    "/profile returns 200",
+    "/business-assessment returns 200",
+    "/leadership-dashboard returns 200",
+    "Confirm deployed bundle contains whitespace-pre-wrap or equivalent.",
+    "Confirm deployed bundle contains loading guard logic.",
+    "Optional one controlled Strategy Chat route smoke returns 200, ok true, reply present, mutation_performed false.",
+    "Manual browser retest: open dashboard, open chat, send one prompt, verify readable formatting, blocked duplicate submits, no stuck loading, no record mutation."
+  ],
+  "limits": [
+    "Frontend drawer repair only.",
+    "No backend route edits.",
+    "No prompt edits.",
+    "No model choice edits.",
+    "No Stripe, payment, or access edits.",
+    "No public page edits.",
+    "No new dashboard panels.",
+    "No dashboard redesign.",
+    "No strategy generation edits.",
+    "No Adaptive Strategy Draft edits.",
+    "No confirmed action write flow edits.",
+    "No records intentionally mutated.",
+    "No build-event ingestion.",
+    "No active strategy replacement.",
+    "No numeric probabilities.",
+    "No guaranteed valuation language."
+  ]
+}
