@@ -82,6 +82,10 @@ When the user asks "what is NOT fed into intelligence?", trace the remaining sca
 - `npm run build`: passed with existing Vite large chunk warning
 - JSON trace parse: passed
 - Static privacy/claim scan: passed after replacing one negated watched phrase with equivalent boundary wording
+- Production deploy: `https://moremindmap-cddcf34ar-rrg-systems-projects.vercel.app`, aliased to `https://moremindmap.com`
+- Production route smoke: `/`, `/profile`, `/business-assessment`, and `/leadership-dashboard` returned 200
+- Production bundle marker check: all requested app-stack labels present in `index-Dcu63Q9X.js`
+- Manual browser retest: not performed; project does not include Playwright and no browser tooling was added in this sprint
 
 ## Limits
 
@@ -92,4 +96,4 @@ When the user asks "what is NOT fed into intelligence?", trace the remaining sca
 - No section deletion.
 - No durable UI state persistence.
 - No usage tracking.
-- No deployment until validation passes.
+- No browser automation dependency was added.

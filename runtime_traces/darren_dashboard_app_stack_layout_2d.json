@@ -94,19 +94,35 @@
         "json_trace_parse": "passed",
         "static_privacy_claim_scan_changed_files": "passed_after_negated_watched_phrase_reworded"
   },
-  "deployment": {
-    "deployed": false,
-    "deployment_url": null,
-    "production_alias": null,
-    "ready_state": null
-  },
-  "production_smoke_result": {
-    "/": "pending",
-    "/profile": "pending",
-    "/business-assessment": "pending",
-    "/leadership-dashboard": "pending",
-    "bundle_markers": "pending"
-  },
+    "deployment": {
+        "deployed": true,
+        "deployment_url": "https://moremindmap-cddcf34ar-rrg-systems-projects.vercel.app",
+        "production_alias": "https://moremindmap.com",
+        "ready_state": "READY",
+        "deployment_id": "dpl_22Cs3fy1DzscEdpKUq7rEJLQxy4s",
+        "inspect_url": "https://vercel.com/rrg-systems-projects/moremindmap/22Cs3fy1DzscEdpKUq7rEJLQxy4s"
+    },
+    "production_smoke_result": {
+        "/": 200,
+        "/profile": 200,
+        "/business-assessment": 200,
+        "/leadership-dashboard": 200,
+        "bundle_asset": "https://moremindmap.com/assets/index-Dcu63Q9X.js",
+        "bundle_markers": {
+            "Strategy Chat": "present",
+            "Current Operating State": "present",
+            "Current Strategy / Five Futures / One Move": "present",
+            "Evidence & Proof / Outcome Loop": "present",
+            "Five Realities / System Status": "present",
+            "9-Path Business Model Map": "present",
+            "Adaptive Strategy Draft": "present",
+            "Confidence / Truth Boundaries": "present",
+            "Financial/Admin Data": "present",
+            "Raw Profiles / Assessments / Adoption Records": "present",
+            "Build Map / Roadmap": "present"
+        },
+        "manual_browser_retest": "not_performed_no_browser_automation_dependency_added"
+    },
   "limits": [
     "Frontend-only layout sprint.",
     "No backend route edits.",
@@ -115,7 +131,7 @@
     "No section deletion.",
     "No durable UI state persistence.",
     "No usage tracking.",
-    "No records mutated.",
-    "No deployment until validation passes."
-  ]
+        "No records mutated.",
+        "No browser automation dependency was added."
+    ]
 }
