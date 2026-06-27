@@ -1,0 +1,291 @@
+{
+  "phase_id": "DASH-GUTS-2E",
+  "verdict": "DARREN_DASHBOARD_INTELLIGENCE_FEED_AUDIT_COMPLETE_WITH_LIMITS",
+  "classification": "TRACE_ONLY_GUTS_AUDIT_NO_RUNTIME_CHANGE",
+  "files_changed": [
+    "DARREN_DASHBOARD_INTELLIGENCE_FEED_AUDIT_2E.md",
+    "runtime_traces/darren_dashboard_intelligence_feed_audit_2e.json"
+  ],
+  "runtime_code_changed": false,
+  "frontend_changed": false,
+  "backend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "panels_audited": [
+    "Strategy Chat",
+    "Current Operating State",
+    "Current Strategy / Five Futures / One Move",
+    "Evidence & Proof / Outcome Loop",
+    "Five Realities / System Status",
+    "9-Path Business Model Map",
+    "Adaptive Strategy Draft",
+    "Confidence / Truth Boundaries",
+    "Financial/Admin Data",
+    "Raw Profiles / Assessments / Adoption Records",
+    "Build Map / Roadmap",
+    "Archive Candidates"
+  ],
+  "items_audited_count": 47,
+  "direct_feed_items": [
+    "Strategy Chat request/reply route",
+    "latest generated strategy",
+    "generated Five Futures",
+    "generated One Move",
+    "snapshot proof targets",
+    "snapshot evidence gaps",
+    "generated proof targets",
+    "generated guardrails",
+    "latest ledger events",
+    "Since Last Snapshot",
+    "9-Path Business Model Backbone",
+    "Opportunity Path Comparison",
+    "Strategic Goal scenario lens",
+    "E->P Lens",
+    "latest session summaries",
+    "Future Movement Gate",
+    "Adaptive Strategy Draft output",
+    "What Not To Overclaim",
+    "Unavailable / Not Yet Live",
+    "Model Limits",
+    "summary counters",
+    "compact build-map truth"
+  ],
+  "indirect_feed_items": [
+    "Current Operating State dominant path",
+    "Current Operating State evidence strength",
+    "Current Operating State confidence state",
+    "company adoption grouping",
+    "profile and assessment indexes",
+    "sales visibility context",
+    "raw admin row availability",
+    "reality completeness labels"
+  ],
+  "explains_intelligence_items": [
+    "Strategy Chat launch copy",
+    "Five Realities Map",
+    "Reality Completeness Meter",
+    "Sales Visibility explanatory paragraph",
+    "E->P explanatory framing",
+    "scenario lens explanation",
+    "panel summaries and badges"
+  ],
+  "captures_evidence_items": [
+    "suggested next actions and proposed action preview",
+    "One Move Status controls",
+    "Outcome Ledger controls",
+    "Session Memory input",
+    "confirmed chat action flow"
+  ],
+  "protects_confidence_items": [
+    "Darren people boundary copy",
+    "Strategic coverage guardrail copy",
+    "Future Movement Readiness",
+    "Unavailable Revenue Fields",
+    "V1 Truth Boundary notes and limits",
+    "duplicate unavailable/not-yet-live copy",
+    "no autonomous strategy replacement boundaries",
+    "no live percentage movement boundaries"
+  ],
+  "admin_evidence_store_items": [
+    "Behavior Profiles table",
+    "Business Assessments table",
+    "Company Adoption grouping",
+    "Financial/Admin Data counters",
+    "full roadmap cards"
+  ],
+  "not_feeding_items": [
+    "app-stack panel badges and collapsed summaries",
+    "Strategy Chat launch explanatory copy",
+    "Current Operating State as a named object",
+    "Reality Completeness Meter as a distinct context object",
+    "Sales Visibility explanatory paragraph",
+    "QA/test rows hidden note",
+    "full company adoption grouping",
+    "full Behavior Profiles table",
+    "full Business Assessments table",
+    "full Strategic Build Map cards",
+    "future roadmap/future phase copy",
+    "duplicate unavailable/not-yet-live copy",
+    "duplicate proof/guardrail copy",
+    "Five Futures Scaffold",
+    "One Move Scaffold"
+  ],
+  "unknown_feed_items": [],
+  "panel_feed_summary": {
+    "Strategy Chat": "direct route feed plus explanatory launch copy",
+    "Current Operating State": "derived summary; underlying data feeds, named object does not",
+    "Current Strategy / Five Futures / One Move": "direct generated intelligence output",
+    "Evidence & Proof / Outcome Loop": "direct evidence capture and route feed",
+    "Five Realities / System Status": "mostly explanatory, with derived confidence value",
+    "9-Path Business Model Map": "direct chat/generation feed plus explanatory guardrails",
+    "Adaptive Strategy Draft": "direct adaptive route feed and evidence capture",
+    "Confidence / Truth Boundaries": "direct and indirect confidence protection, with duplicate copy",
+    "Financial/Admin Data": "summary counters direct through snapshot; display groupings indirect",
+    "Raw Profiles / Assessments / Adoption Records": "admin evidence store, not full direct context",
+    "Build Map / Roadmap": "compact truth direct to chat; full cards mostly not feeding",
+    "Archive Candidates": "scaffold-only when generated outputs are absent"
+  },
+  "not_fed_into_intelligence": [
+    {
+      "item": "app-stack panel badges and collapsed summaries",
+      "where": "all app-stack panels",
+      "why": "UI-only structure; no active route consumes these strings.",
+      "still_useful_as": "user explanation",
+      "best_solution": "keep_as_ui_only"
+    },
+    {
+      "item": "Current Operating State as a named object",
+      "where": "top visible Current Operating State card",
+      "why": "Frontend-derived summary; underlying fields feed routes, but the summary object is not routed.",
+      "still_useful_as": "user explanation",
+      "best_solution": "route_compact_fields_later"
+    },
+    {
+      "item": "Reality Completeness Meter",
+      "where": "Five Realities / System Status",
+      "why": "Frontend-only labels are not consumed by Strategy Chat or adaptive routes.",
+      "still_useful_as": "confidence boundary",
+      "best_solution": "collapse_or_route_compact_confidence_state"
+    },
+    {
+      "item": "full company adoption grouping",
+      "where": "Financial/Admin Data",
+      "why": "The display grouping is not passed as full context; counts and dashboard context are used.",
+      "still_useful_as": "admin evidence",
+      "best_solution": "route_compact_company_summary"
+    },
+    {
+      "item": "full raw profile and assessment tables",
+      "where": "Raw Profiles / Assessments / Adoption Records",
+      "why": "Full displayed rows are not used by reasoning routes.",
+      "still_useful_as": "admin evidence",
+      "best_solution": "move_admin_only"
+    },
+    {
+      "item": "full Strategic Build Map cards",
+      "where": "Build Map / Roadmap",
+      "why": "Strategy Chat receives compact build-map truth, not full roadmap card detail.",
+      "still_useful_as": "planning context",
+      "best_solution": "move_admin_only"
+    },
+    {
+      "item": "Five Futures Scaffold",
+      "where": "Archive Candidates",
+      "why": "Scaffold only; generated Five Futures replace it as active intelligence.",
+      "still_useful_as": "temporary fallback",
+      "best_solution": "archive_after_confirmation"
+    },
+    {
+      "item": "One Move Scaffold",
+      "where": "Archive Candidates",
+      "why": "Scaffold only; generated One Move replaces it as active intelligence.",
+      "still_useful_as": "temporary fallback",
+      "best_solution": "archive_after_confirmation"
+    }
+  ],
+  "duplicate_or_scaffold_items": [
+    "snapshot proof targets plus generated proof targets",
+    "snapshot evidence gaps plus generated evidence gaps",
+    "snapshot guardrails plus generated truth boundaries",
+    "Unavailable / Not Yet Live plus unavailable revenue fields plus V1 limits",
+    "Five Futures Scaffold after generated futures exist",
+    "One Move Scaffold after generated One Move exists"
+  ],
+  "recommended_solution_map": {
+    "DASH-WIRE-2F": {
+      "what_it_fixes": "Routes valuable indirect/static context into compact Strategy Chat and Adaptive Strategy context.",
+      "likely_files_changed": [
+        "api/admin/darren-strategy-chat.js",
+        "api/admin/darren-adaptive-loop-core.js",
+        "src/data/darrenBusinessModelBackbone.js",
+        "optional shared context helper"
+      ],
+      "backend_changed": true,
+      "prompt_changed": "small context-shape change likely",
+      "risk_level": "medium",
+      "validation_needed": [
+        "route smoke",
+        "bad auth smoke",
+        "controlled chat smoke",
+        "adaptive route shape check",
+        "privacy scan"
+      ],
+      "deploy_required": true
+    },
+    "DASH-MERGE-2F": {
+      "what_it_fixes": "Merges duplicate proof, guardrail, and unavailable-field copy into cleaner Evidence and Confidence stacks.",
+      "likely_files_changed": [
+        "src/components/DarrenLeadershipIntelligencePanel.jsx",
+        "src/components/LeadershipSalesDashboard.jsx"
+      ],
+      "backend_changed": false,
+      "prompt_changed": false,
+      "risk_level": "low",
+      "validation_needed": [
+        "npm run build",
+        "browser layout check",
+        "no-section-deletion check"
+      ],
+      "deploy_required": true
+    }
+  },
+  "recommended_next_sprint": "DASH-WIRE-2F",
+  "backup_next_sprint": "DASH-MERGE-2F",
+  "risk_assessment": {
+    "trace_risk": "low",
+    "wire_risk": "medium because compact context must remain privacy-safe and not bloat prompts",
+    "merge_risk": "low because it is frontend-only cleanup"
+  },
+  "five_realities_coverage": {
+    "Financial Reality": "summary counters direct through snapshot; company grouping and raw rows indirect/admin",
+    "Behavioral Reality": "Darren operating style direct through snapshot; session summaries direct in adaptive loop",
+    "Business Model Alignment": "9-path backbone and path comparison direct",
+    "Constraint Reality": "proof targets, One Move status, ledger, and since-last direct",
+    "Confidence Reality": "guardrails, unavailable fields, model limits, and movement boundaries direct/protective"
+  },
+  "strategy_chat_feed_gap": [
+    "Current Operating State named object",
+    "Reality Completeness labels",
+    "full company adoption grouping",
+    "full raw admin rows"
+  ],
+  "five_futures_feed_gap": [
+    "ledger evidence is not part of initial generation route",
+    "session summaries are not part of initial generation route",
+    "frontend reality completeness labels are not generation context"
+  ],
+  "adaptive_strategy_feed_gap": [
+    "full 9-path backbone is not explicitly in draft context",
+    "full sales/admin table rows are not draft context",
+    "frontend completeness labels are not draft context"
+  ],
+  "future_movement_feed_gap": [
+    "full company adoption grouping is not movement input",
+    "full financial/admin rows are not movement input",
+    "full roadmap context is not movement input"
+  ],
+  "people_reality_boundary_preserved": "Darren build remains limited to Darren's behavioral operating style and profile. No team or organization personality layer was added or required.",
+  "no_probability_mutation_claim": true,
+  "no_molt_built": true,
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "7c32e4c record darren app stack deployment smoke",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "static_privacy_claim_scan_changed_files": "passed_no_matches",
+    "npm_run_build": "not_run_runtime_code_unchanged"
+  },
+  "limits": [
+    "Trace and judgment only.",
+    "No runtime UI changed.",
+    "No frontend code changed.",
+    "No backend changed.",
+    "No prompt changed.",
+    "No model choice changed.",
+    "No records mutated.",
+    "No deploy performed.",
+    "No new discovery or classification runtime built."
+  ]
+}
