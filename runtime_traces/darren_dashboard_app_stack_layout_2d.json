@@ -1,0 +1,121 @@
+{
+  "phase_id": "DASH-UI-2D",
+  "verdict": "DARREN_DASHBOARD_APP_STACK_LAYOUT_COMPLETE_WITH_LIMITS",
+  "classification": "FRONTEND_APP_STACK_LAYOUT_CREATED_NO_BACKEND_OR_INTELLIGENCE_CHANGE",
+  "files_changed": [
+    "src/components/dashboard/LeadershipAppStackPanel.jsx",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/components/LeadershipSalesDashboard.jsx",
+    "DARREN_DASHBOARD_APP_STACK_LAYOUT_2D.md",
+    "runtime_traces/darren_dashboard_app_stack_layout_2d.json"
+  ],
+  "runtime_code_changed": true,
+  "frontend_changed": true,
+  "backend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "sections_deleted": false,
+  "app_stack_layout_created": true,
+  "strategy_chat_preserved": true,
+  "current_operating_state_top_visible": true,
+  "default_open_panels": [
+    "Current Strategy / Five Futures / One Move",
+    "Evidence & Proof / Outcome Loop"
+  ],
+  "collapsed_panels": [
+    "Five Realities / System Status",
+    "9-Path Business Model Map",
+    "Adaptive Strategy Draft",
+    "Confidence / Truth Boundaries"
+  ],
+  "admin_collapsed_panels": [
+    "Financial/Admin Data",
+    "Raw Profiles / Assessments / Adoption Records",
+    "Build Map / Roadmap"
+  ],
+  "archive_candidates_preserved": [
+    "Five Futures Scaffold",
+    "One Move Scaffold"
+  ],
+  "five_realities_system_status_created": true,
+  "reality_completeness_meter_merged": true,
+  "future_movement_readiness_placement": "Confidence / Truth Boundaries",
+  "people_reality_boundary_preserved": "Darren dashboard uses Darren behavioral operating style only. No employee, team, agent, or organization personality layer was added.",
+  "section_to_panel_mapping": {
+    "Strategy Chat": "top visible",
+    "Current Operating State": "top visible",
+    "Generated Strategy": "Current Strategy / Five Futures / One Move",
+    "Generated Five Futures": "Current Strategy / Five Futures / One Move",
+    "Generated One Move": "Current Strategy / Five Futures / One Move",
+    "Proof targets": "Evidence & Proof / Outcome Loop",
+    "Evidence gaps": "Evidence & Proof / Outcome Loop",
+    "One Move Status Tracking": "Evidence & Proof / Outcome Loop",
+    "Outcome Ledger v0": "Evidence & Proof / Outcome Loop",
+    "Since Last Snapshot": "Evidence & Proof / Outcome Loop",
+    "Five Realities Map": "Five Realities / System Status",
+    "Reality Completeness Meter": "Five Realities / System Status",
+    "9-Path Business Model Backbone": "9-Path Business Model Map",
+    "Opportunity Path Comparison": "9-Path Business Model Map",
+    "Strategic Goal scenario lens": "9-Path Business Model Map",
+    "E->P Lens": "9-Path Business Model Map",
+    "Adaptive Strategy Loop v0": "Adaptive Strategy Draft",
+    "Session Memory": "Adaptive Strategy Draft",
+    "Future Movement Gate": "Adaptive Strategy Draft",
+    "Adaptive Strategy Draft": "Adaptive Strategy Draft",
+    "What Not To Overclaim": "Confidence / Truth Boundaries",
+    "Model Limits": "Confidence / Truth Boundaries",
+    "Unavailable / Not Yet Live": "Confidence / Truth Boundaries",
+    "Future Movement Readiness": "Confidence / Truth Boundaries",
+    "Sales Visibility": "Financial/Admin Data",
+    "Summary counters": "Financial/Admin Data",
+    "Company Adoption": "Financial/Admin Data",
+    "Unavailable Revenue Fields": "Financial/Admin Data",
+    "Behavior Profiles table": "Raw Profiles / Assessments / Adoption Records",
+    "Business Assessments table": "Raw Profiles / Assessments / Adoption Records",
+    "Strategic Build Map": "Build Map / Roadmap",
+    "V1 Truth Boundary": "Build Map / Roadmap",
+    "Scaffolds": "Archive Candidates when applicable"
+  },
+  "intelligence_roles_preserved": [
+    "Generate intelligence",
+    "Feed intelligence",
+    "Explain intelligence",
+    "Capture evidence for future intelligence",
+    "Protect the user from overclaiming"
+  ],
+  "no_probability_mutation_claim": true,
+  "no_valuation_certainty_claim": true,
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "0527ba6 judge darren five realities dashboard architecture",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+        "json_trace_parse": "passed",
+        "static_privacy_claim_scan_changed_files": "passed_after_negated_watched_phrase_reworded"
+  },
+  "deployment": {
+    "deployed": false,
+    "deployment_url": null,
+    "production_alias": null,
+    "ready_state": null
+  },
+  "production_smoke_result": {
+    "/": "pending",
+    "/profile": "pending",
+    "/business-assessment": "pending",
+    "/leadership-dashboard": "pending",
+    "bundle_markers": "pending"
+  },
+  "limits": [
+    "Frontend-only layout sprint.",
+    "No backend route edits.",
+    "No prompt edits.",
+    "No model choice edits.",
+    "No section deletion.",
+    "No durable UI state persistence.",
+    "No usage tracking.",
+    "No records mutated.",
+    "No deployment until validation passes."
+  ]
+}

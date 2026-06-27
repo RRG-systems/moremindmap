@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { leadershipBuildMap } from '../data/leadershipBuildMap'
 import DarrenLeadershipIntelligencePanel from './DarrenLeadershipIntelligencePanel'
+import LeadershipAppStackPanel from './dashboard/LeadershipAppStackPanel.jsx'
 
 const DASHBOARD_CODE_SESSION_KEY = 'leadershipDashboardCode'
 const DASHBOARD_ACCESS_SESSION_KEY = 'leadershipDashboardAccess'
@@ -260,34 +261,59 @@ function DashboardContent({ data, adminCode }) {
 
   return (
     <div className="space-y-10">
-      <SalesContextPanel
-        profilesDisplayed={profiles.length}
-        assessmentsDisplayed={assessments.length}
-        hiddenTestRecordsCount={hiddenTestRecordsCount}
-      />
-
-      <SummaryGrid
-        summary={summary}
-        companiesCount={companies.length}
-        notesCount={notes.length}
-        sourceLabels={sourceLabels}
-        profilesDisplayed={profiles.length}
-        assessmentsDisplayed={assessments.length}
-      />
-
-      <StrategicBuildMapSection />
-
       <DarrenLeadershipIntelligencePanel adminCode={adminCode} />
 
-      <UnavailablePanel summary={summary} />
+      <LeadershipAppStackPanel
+        title="Financial/Admin Data"
+        eyebrow="Collapsed Admin"
+        badge="Admin"
+        description="Financial Reality and adoption evidence: profile/assessment counts, company adoption, and revenue availability boundaries."
+        summary="Sales Visibility, summary counters, Company Adoption, and unavailable revenue fields."
+      >
+        <SalesContextPanel
+          profilesDisplayed={profiles.length}
+          assessmentsDisplayed={assessments.length}
+          hiddenTestRecordsCount={hiddenTestRecordsCount}
+        />
 
-      <section className="grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
-        <CompaniesSection companies={companies} />
-        <NotesAndLimits notes={notes} limits={limits} />
-      </section>
+        <SummaryGrid
+          summary={summary}
+          companiesCount={companies.length}
+          notesCount={notes.length}
+          sourceLabels={sourceLabels}
+          profilesDisplayed={profiles.length}
+          assessmentsDisplayed={assessments.length}
+        />
 
-      <ProfilesTable profiles={profiles} />
-      <AssessmentsTable assessments={assessments} />
+        <div className="mt-6 grid gap-6 xl:grid-cols-[0.8fr_1.2fr]">
+          <CompaniesSection companies={companies} />
+          <UnavailablePanel summary={summary} />
+        </div>
+      </LeadershipAppStackPanel>
+
+      <LeadershipAppStackPanel
+        title="Raw Profiles / Assessments / Adoption Records"
+        eyebrow="Collapsed Admin"
+        badge="Records"
+        description="Raw admin evidence rows. These feed visibility and follow-up, but they are not the primary Darren-facing intelligence surface."
+        summary="Behavior Profiles table and Business Assessments table."
+      >
+        <ProfilesTable profiles={profiles} />
+        <AssessmentsTable assessments={assessments} />
+      </LeadershipAppStackPanel>
+
+      <LeadershipAppStackPanel
+        title="Build Map / Roadmap"
+        eyebrow="Collapsed Admin"
+        badge="Roadmap"
+        description="Planning context and build truth. Kept available, but no longer allowed to dominate the dashboard surface."
+        summary="Strategic Build Map, roadmap phases, V1 truth boundary, missing data notes, and API limits."
+      >
+        <StrategicBuildMapSection />
+        <div className="mt-6">
+          <NotesAndLimits notes={notes} limits={limits} />
+        </div>
+      </LeadershipAppStackPanel>
     </div>
   )
 }

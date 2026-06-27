@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } from '../data/darrenBusinessModelBackbone.js'
+import LeadershipAppStackPanel from './dashboard/LeadershipAppStackPanel.jsx'
 
 function display(value) {
   if (value === null || value === undefined || value === '') return 'Unavailable'
@@ -331,13 +332,6 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
           </p>
         </div>
         <div className="flex flex-col gap-3 md:items-end">
-          <button
-            type="button"
-            onClick={() => setStrategyChatOpen(true)}
-            className="rounded-2xl border border-cyan-200/25 bg-cyan-300/12 px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100/50 hover:bg-cyan-300/18"
-          >
-            Darren Strategy Chat
-          </button>
           <div className="rounded-xl border border-violet-200/20 bg-black/24 px-4 py-3 text-xs leading-5 text-violet-50/68 md:max-w-xs">
             Snapshot-first. Saved strategy when generated. Outcome Ledger v0 is separate. Chat does not mutate records yet.
           </div>
@@ -356,6 +350,7 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
           adminCode={adminCode}
           generationState={generationState}
           setGenerationState={setGenerationState}
+          onOpenStrategyChat={() => setStrategyChatOpen(true)}
         />
       )}
       <DarrenStrategyChatDrawer
@@ -369,7 +364,7 @@ export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
   )
 }
 
-function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenerationState }) {
+function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenerationState, onOpenStrategyChat }) {
   const darren = snapshot?.darren || {}
   const strategicGoal = snapshot?.strategic_goal || {}
   const eToP = snapshot?.e_to_p_lens || {}
@@ -383,6 +378,7 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
   const evidenceGaps = asArray(snapshot?.evidence_gaps)
   const dashboardContext = snapshot?.current_dashboard_context || {}
   const hasSavedGeneratedStrategy = generationState.status === 'ready' && Boolean(generationState.data?.strategy_id)
+  const generated = generationState.status === 'ready' ? generationState.data : null
   const pathCoverage = useMemo(() => evaluateDarrenBusinessModelPathCoverage({
     snapshot,
     generatedStrategy: generationState.data
@@ -423,105 +419,206 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
         ))}
       </div>
 
-      <CurrentOperatingStatePanel state={realityArchitecture.currentState} />
-
-      <FiveRealitiesArchitecturePanel realities={realityArchitecture.realities} />
-
-      <FutureMovementReadinessPanel />
-
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <PanelBlock eyebrow="Darren Operating Style" title="Momentum into Purposeful Scale">
-          <FieldLabel label="Operating mode" value={darren.operating_mode} />
-          <FieldLabel label="Operating advantage" value={darren.operating_advantage} />
-          <FieldLabel label="Operating risk" value={darren.operating_risk} />
-          <FieldLabel label="Purposeful scale recommendation" value={darren.purposeful_scale_recommendation} />
-        </PanelBlock>
-
-        <PanelBlock eyebrow="Strategic Goal" title="Scenario Lens, Not Guaranteed Valuation">
-          <FieldLabel label="Target company valuation" value={strategicGoal.target_company_valuation} />
-          <FieldLabel label="Gross revenue lens" value={strategicGoal.gross_revenue_lens} />
-          <ListItems items={asArray(strategicGoal.valuation_multiple_notes)} />
-          <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-50/78">
-            {display(strategicGoal.truth_boundary || 'This is a scenario lens, not a guaranteed valuation rule.')}
-          </div>
-        </PanelBlock>
+      <div className="grid gap-5 xl:grid-cols-[0.82fr_1.18fr]">
+        <StrategyChatLaunchPanel onOpen={onOpenStrategyChat} />
+        <CurrentOperatingStatePanel state={realityArchitecture.currentState} />
       </div>
 
-      <PanelBlock eyebrow="E->P Lens" title="Entrepreneurial Energy Into Purposeful Execution">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <FieldLabel label="Entrepreneurial" value="Momentum, instinct, speed, vision, energy, sales pressure, and partner activation." />
-          <FieldLabel label="Purposeful" value="Models, systems, tools, accountability, coaching, ongoing education, and no hubris." />
-          <FieldLabel label="Model needed" value={eToP.model_needed} />
-          <FieldLabel label="Proof needed" value={eToP.proof_needed} />
+      <LeadershipAppStackPanel
+        title="Current Strategy / Five Futures / One Move"
+        eyebrow="Default Open"
+        badge="Output"
+        defaultOpen
+        description="Generated strategic output stays close to the current operating state: Five Futures, One Move, and saved strategy status."
+        summary="Main generated intelligence output."
+      >
+        <GenerationControl
+          adminCode={adminCode}
+          generationState={generationState}
+          setGenerationState={setGenerationState}
+          showGenerated={false}
+        />
+        {generated && (
+          <GeneratedStrategyOutput generated={generated} source={generationState.source} />
+        )}
+      </LeadershipAppStackPanel>
+
+      <LeadershipAppStackPanel
+        title="Evidence & Proof / Outcome Loop"
+        eyebrow="Default Open"
+        badge="Evidence"
+        defaultOpen
+        description="Accepted decisions and recorded proof are what eventually justify movement toward better, worse, current, or uncertain futures."
+        summary="Proof targets, evidence gaps, One Move status, Outcome Ledger, and Since Last Snapshot."
+      >
+        <div className="grid gap-6 xl:grid-cols-2">
+          <PanelBlock eyebrow="Your Next Proof Targets" title="Make The Strongest Path More Evident">
+            <ListItems items={proofTargets} />
+          </PanelBlock>
+          <PanelBlock eyebrow="Evidence Gaps" title="What Still Needs Proof">
+            <ListItems items={generated ? asArray(generated.evidence_gaps) : evidenceGaps} />
+          </PanelBlock>
+          {generated && (
+            <>
+              <PanelBlock eyebrow="Generated Proof Targets" title="Your Next Signals">
+                <ListItems items={asArray(generated.next_proof_targets)} />
+              </PanelBlock>
+              <PanelBlock eyebrow="Generated Guardrails" title="What Not To Overclaim">
+                <ListItems items={asArray(generated.truth_boundaries)} />
+              </PanelBlock>
+            </>
+          )}
         </div>
-        <p className="mt-4 rounded-xl border border-emerald-300/18 bg-emerald-400/10 px-4 py-3 text-sm leading-6 text-emerald-50/78">
-          The goal is not to slow your momentum. The goal is to make it repeatable.
+        {generated?.strategy_id ? (
+          <OneMoveStatusControls
+            adminCode={adminCode}
+            generated={generated}
+            setGenerationState={setGenerationState}
+          />
+        ) : (
+          <p className="mt-5 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white/54">
+            Generate or load a saved strategy before One Move status, Outcome Ledger, and Since Last Snapshot can become active.
+          </p>
+        )}
+      </LeadershipAppStackPanel>
+
+      <LeadershipAppStackPanel
+        title="Five Realities / System Status"
+        eyebrow="Collapsed Support"
+        badge="System Status"
+        description="The architecture layer: Financial, Behavioral, Business Model, Constraint, and Confidence realities."
+        summary="System status and completeness labels."
+      >
+        <FiveRealitiesArchitecturePanel realities={realityArchitecture.realities} />
+        <p className="mt-4 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-xs leading-5 text-white/50">
+          Darren build boundary: People / Behavioral Reality uses Darren's behavioral operating style only. Future organizational builds can incorporate employee, leader, and agent profiles.
         </p>
-      </PanelBlock>
+      </LeadershipAppStackPanel>
 
-      <PanelBlock eyebrow="Opportunity Path Comparison" title="Your Strategic Options">
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {paths.map((path) => (
-            <div key={path} className="rounded-xl border border-white/10 bg-black/24 p-4">
-              <div className="text-sm font-semibold leading-6 text-white">{display(path)}</div>
-              <div className="mt-3 text-xs uppercase tracking-[0.16em] text-violet-100/46">Evidence state</div>
-              <p className="mt-2 text-sm leading-6 text-white/56">
-                Compare against dashboard metrics, revenue evidence, partner proof, channel proof, and product truth before treating this as your strongest path.
-              </p>
+      <LeadershipAppStackPanel
+        title="9-Path Business Model Map"
+        eyebrow="Collapsed Support"
+        badge="Business Model"
+        description="The durable business model map and scenario lens behind generated strategy."
+        summary="9-Path Backbone, Opportunity Path Comparison, scenario lens, and E->P framing."
+      >
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <PanelBlock eyebrow="Strategic Goal" title="$250M Scenario Lens">
+            <FieldLabel label="Target company valuation" value={strategicGoal.target_company_valuation} />
+            <FieldLabel label="Gross revenue lens" value={strategicGoal.gross_revenue_lens} />
+            <ListItems items={asArray(strategicGoal.valuation_multiple_notes)} />
+            <div className="mt-4 rounded-xl border border-amber-300/20 bg-amber-400/10 px-4 py-3 text-sm leading-6 text-amber-50/78">
+              {display(strategicGoal.truth_boundary || 'This is a scenario lens, not a guaranteed valuation rule.')}
             </div>
-          ))}
+          </PanelBlock>
+
+          <PanelBlock eyebrow="E->P Lens" title="Entrepreneurial Energy Into Purposeful Execution">
+            <div className="grid gap-4 lg:grid-cols-2">
+              <FieldLabel label="Entrepreneurial" value="Momentum, instinct, speed, vision, energy, sales pressure, and partner activation." />
+              <FieldLabel label="Purposeful" value="Models, systems, tools, accountability, coaching, ongoing education, and no hubris." />
+              <FieldLabel label="Model needed" value={eToP.model_needed} />
+              <FieldLabel label="Proof needed" value={eToP.proof_needed} />
+            </div>
+            <p className="mt-4 rounded-xl border border-emerald-300/18 bg-emerald-400/10 px-4 py-3 text-sm leading-6 text-emerald-50/78">
+              The goal is not to slow your momentum. The goal is to make it repeatable.
+            </p>
+          </PanelBlock>
         </div>
-        <ListWithTitle title="Truth boundaries" items={asArray(pathComparison.truth_boundaries)} />
-      </PanelBlock>
 
-      <BusinessModelBackbonePanel coverage={pathCoverage} />
-
-      {!hasSavedGeneratedStrategy && (
-        <PanelBlock eyebrow="Five Futures Scaffold" title="Scaffolded Futures, Not Final Generated Strategy">
-          <div className="grid gap-4 lg:grid-cols-2 xl:grid-cols-3">
-            {futures.map((future) => (
-              <div key={future.key} className="rounded-xl border border-white/10 bg-black/24 p-4">
-                <div className="text-sm font-semibold leading-6 text-white">{formatListKey(future.key)}</div>
-                <div className="mt-2 text-xs uppercase tracking-[0.16em] text-white/38">{sectionStatus(future.status)}</div>
-                <ListWithTitle title="Required for final generation" items={asArray(future.required_fields_for_generation).slice(0, 5)} compact />
+        <PanelBlock eyebrow="Opportunity Path Comparison" title="Your Strategic Options">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {paths.map((path) => (
+              <div key={path} className="rounded-xl border border-white/10 bg-black/24 p-4">
+                <div className="text-sm font-semibold leading-6 text-white">{display(path)}</div>
+                <div className="mt-3 text-xs uppercase tracking-[0.16em] text-violet-100/46">Evidence state</div>
+                <p className="mt-2 text-sm leading-6 text-white/56">
+                  Compare against dashboard metrics, revenue evidence, partner proof, channel proof, and product truth before treating this as your strongest path.
+                </p>
               </div>
             ))}
           </div>
+          <ListWithTitle title="Truth boundaries" items={asArray(pathComparison.truth_boundaries)} />
         </PanelBlock>
-      )}
 
-      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        {!hasSavedGeneratedStrategy && (
-          <PanelBlock eyebrow="One Move Scaffold" title="Your Next Focus Will Stay Concrete">
-            <FieldLabel label="Status" value={sectionStatus(oneMove.status)} />
-            <FieldLabel label="Cadence" value={oneMove.cadence} />
-            <ListWithTitle title="Requirements" items={asArray(oneMove.requirements)} />
-            <p className="mt-4 text-sm leading-6 text-white/54">
-              Final generated One Move comes later. This scaffold keeps it weekly, sales-useful, and tied to evidence.
-            </p>
-          </PanelBlock>
+        <BusinessModelBackbonePanel coverage={pathCoverage} />
+      </LeadershipAppStackPanel>
+
+      <LeadershipAppStackPanel
+        title="Adaptive Strategy Draft"
+        eyebrow="Collapsed Support"
+        badge="Adaptive"
+        description="Advanced adaptive intelligence: session summaries, evidence gates, and pending-review strategy drafts."
+        summary="Session Memory, Future Movement Gate, and Adaptive Strategy Draft."
+      >
+        {generated?.strategy_id ? (
+          <AdaptiveStrategyLoopPanel adminCode={adminCode} generated={generated} />
+        ) : (
+          <p className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white/54">
+            Adaptive Strategy Draft becomes available after a saved generated strategy exists.
+          </p>
         )}
+      </LeadershipAppStackPanel>
 
-        <PanelBlock eyebrow="Your Next Proof Targets" title="Make The Strongest Path More Evident">
-          <ListItems items={proofTargets} />
-        </PanelBlock>
-      </div>
+      <LeadershipAppStackPanel
+        title="Confidence / Truth Boundaries"
+        eyebrow="Collapsed Support"
+        badge="Confidence"
+        description="Boundaries that prevent overclaiming while evidence is still developing."
+        summary="Overclaim guardrails, model limits, unavailable fields, and future movement readiness."
+      >
+        <div className="grid gap-6 xl:grid-cols-2">
+          <PanelBlock eyebrow="What Not To Overclaim" title="Sales Story Guardrails">
+            <ListItems items={overclaimBoundaries} />
+          </PanelBlock>
+          <PanelBlock eyebrow="Unavailable / Not Yet Live" title="Honest Missing Intelligence">
+            <ListItems items={unavailableFields} />
+            <ListWithTitle title="Evidence gaps" items={evidenceGaps} />
+          </PanelBlock>
+          {generated && (
+            <>
+              <PanelBlock eyebrow="Model Limits" title="Not Yet Proven">
+                <ListItems items={asArray(generated.model_limits)} />
+              </PanelBlock>
+              <PanelBlock eyebrow="Generated Sales Guardrails" title="What Not To Overclaim">
+                <ListItems items={asArray(generated.truth_boundaries)} />
+              </PanelBlock>
+            </>
+          )}
+        </div>
+        <FutureMovementReadinessPanel />
+      </LeadershipAppStackPanel>
 
-      <div className="grid gap-6 xl:grid-cols-2">
-        <PanelBlock eyebrow="What Not To Overclaim" title="Sales Story Guardrails">
-          <ListItems items={overclaimBoundaries} />
-        </PanelBlock>
-        <PanelBlock eyebrow="Unavailable / Not Yet Live" title="Honest Missing Intelligence">
-          <ListItems items={unavailableFields} />
-          <ListWithTitle title="Evidence gaps" items={evidenceGaps} />
-        </PanelBlock>
-      </div>
-
-      <GenerationControl
-        adminCode={adminCode}
-        generationState={generationState}
-        setGenerationState={setGenerationState}
-      />
+      {!hasSavedGeneratedStrategy && (
+        <LeadershipAppStackPanel
+          title="Archive Candidates"
+          eyebrow="Admin Note"
+          badge="Later"
+          description="Scaffold sections are preserved for now and can be archived after generated outputs and merged stacks are confirmed."
+          summary="Five Futures Scaffold and One Move Scaffold."
+        >
+          <div className="grid gap-6 xl:grid-cols-2">
+            <PanelBlock eyebrow="Five Futures Scaffold" title="Scaffolded Futures, Not Final Generated Strategy">
+              <div className="grid gap-4 lg:grid-cols-2">
+                {futures.map((future) => (
+                  <div key={future.key} className="rounded-xl border border-white/10 bg-black/24 p-4">
+                    <div className="text-sm font-semibold leading-6 text-white">{formatListKey(future.key)}</div>
+                    <div className="mt-2 text-xs uppercase tracking-[0.16em] text-white/38">{sectionStatus(future.status)}</div>
+                    <ListWithTitle title="Required for final generation" items={asArray(future.required_fields_for_generation).slice(0, 5)} compact />
+                  </div>
+                ))}
+              </div>
+            </PanelBlock>
+            <PanelBlock eyebrow="One Move Scaffold" title="Your Next Focus Will Stay Concrete">
+              <FieldLabel label="Status" value={sectionStatus(oneMove.status)} />
+              <FieldLabel label="Cadence" value={oneMove.cadence} />
+              <ListWithTitle title="Requirements" items={asArray(oneMove.requirements)} />
+              <p className="mt-4 text-sm leading-6 text-white/54">
+                Final generated One Move comes later. This scaffold keeps it weekly, sales-useful, and tied to evidence.
+              </p>
+            </PanelBlock>
+          </div>
+        </LeadershipAppStackPanel>
+      )}
     </div>
   )
 }
@@ -591,6 +688,28 @@ function BusinessModelBackbonePanel({ coverage }) {
         Intelligence boundary: this is a strategic coverage layer, not a prediction, valuation claim, or self-replacing strategy engine.
       </p>
     </PanelBlock>
+  )
+}
+
+function StrategyChatLaunchPanel({ onOpen }) {
+  return (
+    <section className="rounded-2xl border border-cyan-300/20 bg-cyan-400/[0.08] p-5">
+      <div className="text-xs uppercase tracking-[0.22em] text-cyan-100/58">Strategy Chat</div>
+      <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">Start with the conversation</h3>
+      <p className="mt-3 text-sm leading-6 text-cyan-50/70">
+        Ask what to do next, what changed, what to say, or what not to overclaim. Strategy Chat uses Darren's current strategy, evidence loop, and five realities context.
+      </p>
+      <button
+        type="button"
+        onClick={onOpen}
+        className="mt-5 rounded-2xl border border-cyan-100/30 bg-white px-5 py-3 text-sm font-semibold uppercase tracking-[0.14em] text-slate-950 transition hover:bg-cyan-100"
+      >
+        Open Darren Strategy Chat
+      </button>
+      <p className="mt-4 text-xs leading-5 text-cyan-50/52">
+        Confirmed actions still require explicit approval. Chat does not replace strategy or mutate records by itself.
+      </p>
+    </section>
   )
 }
 
@@ -707,7 +826,7 @@ function FutureMovementReadinessPanel() {
   )
 }
 
-function GenerationControl({ adminCode, generationState, setGenerationState }) {
+function GenerationControl({ adminCode, generationState, setGenerationState, showGenerated = true }) {
   async function generateIntelligence() {
     if (!adminCode || generationState.status === 'loading') return
 
@@ -771,7 +890,7 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
           {generationState.error}
         </div>
       )}
-      {generationState.status === 'ready' && (
+      {showGenerated && generationState.status === 'ready' && (
         <GeneratedIntelligence
           adminCode={adminCode}
           generated={generationState.data}
@@ -780,6 +899,48 @@ function GenerationControl({ adminCode, generationState, setGenerationState }) {
         />
       )}
     </section>
+  )
+}
+
+function GeneratedStrategyOutput({ generated, source }) {
+  const futures = asArray(generated?.five_futures)
+  const oneMove = generated?.one_move || {}
+  const saved = generated?.persistence?.saved === true
+  const strategyLabel = source === 'latest' ? 'Latest saved strategy' : 'Generated strategy'
+
+  return (
+    <div className="mt-6 space-y-6">
+      <div className="rounded-xl border border-emerald-300/20 bg-emerald-400/10 px-4 py-3 text-sm leading-6 text-emerald-50/78">
+        <span className="font-semibold text-emerald-50">{strategyLabel}.</span>{' '}
+        {saved ? "Saved as Darren's latest leadership strategy." : 'Strategy has not been saved.'}{' '}
+        Future movement remains evidence-gated.
+        {generated?.accepted_status && (
+          <span className="block pt-2 text-xs uppercase tracking-[0.16em] text-emerald-100/54">
+            Acceptance: {display(generated.accepted_status)} - Outcome: {display(generated.outcome_status)}
+          </span>
+        )}
+      </div>
+
+      <PanelBlock eyebrow="Generated Five Futures" title="Your Strategic Futures">
+        <div className="grid gap-4 xl:grid-cols-2">
+          {futures.map((future) => (
+            <GeneratedFutureCard key={future.name} future={future} />
+          ))}
+        </div>
+      </PanelBlock>
+
+      <PanelBlock eyebrow="One Move This Week" title={display(oneMove.title)}>
+        <FieldLabel label="Summary" value={oneMove.summary} />
+        <FieldLabel label="Why this move" value={oneMove.why_this_move} />
+        <FieldLabel label="Exact action" value={oneMove.exact_action} />
+        <FieldLabel label="Proof target" value={oneMove.proof_target} />
+        <FieldLabel label="Expected signal" value={oneMove.expected_signal} />
+        <FieldLabel label="What to say" value={oneMove.what_to_say} />
+        <FieldLabel label="What not to say" value={oneMove.what_not_to_say} />
+        <FieldLabel label="Timeframe" value={oneMove.timeframe} />
+        <FieldLabel label="Success condition" value={oneMove.success_condition} />
+      </PanelBlock>
+    </div>
   )
 }
 
