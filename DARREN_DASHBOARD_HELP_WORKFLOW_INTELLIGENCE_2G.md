@@ -115,6 +115,11 @@ DASH-RECURSION-2H should audit recursive learning readiness. It should judge whe
 - `npm run build`: passed with existing Vite large chunk warning
 - JSON trace parse: passed
 - Static privacy/claim scan: passed after scenario-lens wording avoided watched phrases
+- Production deploy: `https://moremindmap-pcsunvx6x-rrg-systems-projects.vercel.app`, aliased to `https://moremindmap.com`
+- Production route smoke: `/`, `/profile`, `/business-assessment`, and `/leadership-dashboard` returned 200
+- Strategy Chat workflow smoke 1: panels/start prompt returned 200, `ok: true`, reply present, no mutation, explained workflow, no raw JSON dump
+- Strategy Chat workflow smoke 2: next-action prompt returned 200, `ok: true`, reply present, no mutation, gave practical dashboard actions
+- Strategy Chat workflow smoke 3: Five Futures movement prompt returned 200, `ok: true`, reply present, no mutation, explained accepted decisions plus recorded proof
 
 ## Limits
 

@@ -14,7 +14,7 @@
   "prompt_changed": true,
   "model_selection_changed": false,
   "records_mutated": false,
-  "deployed": false,
+  "deployed": true,
   "dashboard_workflow_context_created": true,
   "panel_map_compact_created": true,
   "recommended_dashboard_workflow_created": true,
@@ -34,9 +34,32 @@
   "probability_mutation_added": false,
   "automatic_strategy_replacement_added": false,
   "smoke_prompt_results": {
-    "what_are_all_these_panels": "pending",
-    "what_should_i_do_next": "pending",
-    "how_do_i_move_five_futures": "pending"
+    "what_are_all_these_panels": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "explains_dashboard_workflow": true,
+      "recommends_current_operating_state_strategy_chat_or_evidence_first": true,
+      "raw_json_dump_detected": false
+    },
+    "what_should_i_do_next": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "gives_practical_next_actions": true,
+      "references_current_operating_state_or_evidence": true,
+      "future_movement_overclaim_detected": false
+    },
+    "how_do_i_move_five_futures": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "explains_accepted_decisions_and_recorded_proof": true,
+      "future_movement_overclaim_detected": false
+    }
   },
   "validation_results": {
     "git_status_initial": "clean",
@@ -49,16 +72,18 @@
     "static_privacy_claim_scan_changed_files": "passed_after_scenario_lens_wording_adjustment"
   },
   "deployment": {
-    "deployed": false,
-    "deployment_url": null,
-    "production_alias": null,
-    "ready_state": null
+    "deployed": true,
+    "deployment_url": "https://moremindmap-pcsunvx6x-rrg-systems-projects.vercel.app",
+    "production_alias": "https://moremindmap.com",
+    "ready_state": "READY",
+    "deployment_id": "dpl_31v2RFy2MaVaLcwpSCasdQ5dmvaG",
+    "inspect_url": "https://vercel.com/rrg-systems-projects/moremindmap/31v2RFy2MaVaLcwpSCasdQ5dmvaG"
   },
   "production_smoke_result": {
-    "/": "pending",
-    "/profile": "pending",
-    "/business-assessment": "pending",
-    "/leadership-dashboard": "pending"
+    "/": 200,
+    "/profile": 200,
+    "/business-assessment": 200,
+    "/leadership-dashboard": 200
   },
   "limits": [
     "Chat guidance only.",
