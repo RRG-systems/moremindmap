@@ -86,6 +86,132 @@ function sectionStatus(status) {
   return display(status).replace(/_/g, ' ')
 }
 
+function hasMeaningfulValue(value) {
+  if (value === null || value === undefined) return false
+  if (typeof value === 'number') return Number.isFinite(value) && value > 0
+  return String(value).trim() !== '' && !/^unavailable$/i.test(String(value).trim())
+}
+
+function completenessClass(level) {
+  if (level === 'STRONG') return 'border-emerald-300/24 bg-emerald-400/10 text-emerald-50'
+  if (level === 'EMERGING') return 'border-cyan-300/22 bg-cyan-400/10 text-cyan-50'
+  return 'border-amber-300/22 bg-amber-400/10 text-amber-50'
+}
+
+function evidenceStrengthFromValue(value) {
+  const normalized = String(value || '').toLowerCase()
+  if (['strong', 'validated'].includes(normalized)) return 'strong'
+  if (['early', 'moderate', 'weak'].includes(normalized)) return 'emerging'
+  return 'thin'
+}
+
+function deriveFiveRealities({ snapshot, generatedStrategy, pathCoverage }) {
+  const dashboardContext = snapshot?.current_dashboard_context || {}
+  const generated = generatedStrategy || {}
+  const proofTargets = asArray(generated.next_proof_targets).length
+    ? asArray(generated.next_proof_targets)
+    : asArray(snapshot?.next_proof_targets)
+  const evidenceGaps = asArray(generated.evidence_gaps).length
+    ? asArray(generated.evidence_gaps)
+    : asArray(snapshot?.evidence_gaps)
+  const unavailableFields = asArray(snapshot?.unavailable_fields)
+  const hasProfileActivity = hasMeaningfulValue(dashboardContext.total_profiles)
+  const hasAssessmentActivity = hasMeaningfulValue(dashboardContext.total_business_assessments)
+  const hasRevenueEvidence = !unavailableFields.some((item) => /revenue|paid|stripe|subscription/i.test(String(item)))
+  const hasOperatingStyle = hasMeaningfulValue(snapshot?.darren?.operating_mode)
+  const hasGeneratedStrategy = Boolean(generated.strategy_id)
+  const hasStatusEvidence = asArray(generated.status_history).length > 0 || hasMeaningfulValue(generated.accepted_status)
+  const hasLedgerLikeSignal = hasMeaningfulValue(generated.result_signal_strength) && generated.result_signal_strength !== 'none'
+  const hasOutcomeSignal = hasStatusEvidence || hasLedgerLikeSignal
+  const hasPathCoverage = asArray(pathCoverage?.paths).length >= 9
+  const hasProofTargets = proofTargets.length > 0
+  const hasEvidenceGaps = evidenceGaps.length > 0
+  const hasTruthBoundaries = asArray(generated.truth_boundaries).length > 0 || asArray(snapshot?.what_not_to_overclaim).length > 0
+  const hasSinceLastInputs = hasGeneratedStrategy && hasOutcomeSignal
+  const signalStrength = evidenceStrengthFromValue(generated.result_signal_strength)
+
+  const realities = [
+    {
+      id: 'financial',
+      name: 'Financial Reality',
+      completeness: hasRevenueEvidence ? 'STRONG' : (hasProfileActivity || hasAssessmentActivity ? 'EMERGING' : 'THIN'),
+      role: 'Feed intelligence',
+      sources: [
+        'Sales/adoption counts',
+        'Profile count',
+        'Assessment count',
+        hasRevenueEvidence ? 'Revenue/payment evidence available' : 'Revenue/payment evidence missing'
+      ],
+      missing: hasRevenueEvidence ? 'Connect revenue quality to strategy evidence.' : 'Paid access, payment, subscription, or revenue evidence tied to profiles and assessments.'
+    },
+    {
+      id: 'behavioral',
+      name: 'Behavioral Reality',
+      completeness: hasOperatingStyle && hasOutcomeSignal ? 'STRONG' : (hasOperatingStyle ? 'EMERGING' : 'THIN'),
+      role: 'Explain intelligence',
+      sources: [
+        'Momentum Machine operating style',
+        'Darren-specific snapshot',
+        hasOutcomeSignal ? 'One Move/session behavior evidence' : 'Limited action history'
+      ],
+      missing: hasOutcomeSignal ? 'More repeated decisions and outcomes.' : 'Repeated accepted moves, session summaries, and recorded decisions.'
+    },
+    {
+      id: 'business_model',
+      name: 'Business Model Alignment',
+      completeness: hasPathCoverage ? 'STRONG' : (hasGeneratedStrategy ? 'EMERGING' : 'THIN'),
+      role: 'Feed intelligence',
+      sources: [
+        '9-Path Business Model Backbone',
+        'Opportunity Path Comparison',
+        'Channel Growth compared with alternative paths',
+        '$250M scenario lens as ambition, not proof'
+      ],
+      missing: hasPathCoverage ? 'More real traction by path.' : 'Durable path coverage connected to evidence.'
+    },
+    {
+      id: 'constraint',
+      name: 'Constraint Reality',
+      completeness: hasProofTargets && hasOutcomeSignal ? 'STRONG' : (hasProofTargets || hasEvidenceGaps ? 'EMERGING' : 'THIN'),
+      role: 'Capture evidence for future intelligence',
+      sources: [
+        'Proof targets',
+        'Evidence gaps',
+        'One Move Status',
+        'Outcome Ledger',
+        'Future Movement Gate'
+      ],
+      missing: hasOutcomeSignal ? 'More proof depth and repeated outcomes.' : 'Accepted One Move plus recorded proof or contradiction.'
+    },
+    {
+      id: 'confidence',
+      name: 'Confidence Reality',
+      completeness: hasSinceLastInputs && hasTruthBoundaries ? 'STRONG' : (hasTruthBoundaries || hasEvidenceGaps ? 'EMERGING' : 'THIN'),
+      role: 'Protect the user from overclaiming',
+      sources: [
+        'Since Last Snapshot',
+        'Outcome Ledger',
+        'Truth boundaries',
+        'Model limits',
+        'Unavailable/not-yet-live fields'
+      ],
+      missing: hasSinceLastInputs ? 'More validated evidence before stronger confidence language.' : 'Recorded evidence for Since Last Snapshot and future movement comparison.'
+    }
+  ]
+
+  return {
+    realities,
+    currentState: {
+      dominantPath: pathCoverage?.current_favored_path?.title || 'Not enough saved evidence yet.',
+      oneMove: generated.one_move?.title || generated.one_move?.summary || 'Not enough saved evidence yet.',
+      proofTarget: proofTargets[0] || 'Not enough saved evidence yet.',
+      evidenceStrength: signalStrength,
+      biggestConstraint: evidenceGaps[0] || 'Not enough evidence yet.',
+      confidenceState: realities.find((reality) => reality.id === 'confidence')?.completeness?.toLowerCase() || 'thin'
+    }
+  }
+}
+
 export default function DarrenLeadershipIntelligencePanel({ adminCode }) {
   const [snapshotState, setSnapshotState] = useState({
     status: 'loading',
@@ -261,6 +387,11 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
     snapshot,
     generatedStrategy: generationState.data
   }), [snapshot, generationState.data])
+  const realityArchitecture = useMemo(() => deriveFiveRealities({
+    snapshot,
+    generatedStrategy: generationState.data,
+    pathCoverage
+  }), [snapshot, generationState.data, pathCoverage])
 
   const contextCards = useMemo(() => [
     {
@@ -291,6 +422,12 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
           </div>
         ))}
       </div>
+
+      <CurrentOperatingStatePanel state={realityArchitecture.currentState} />
+
+      <FiveRealitiesArchitecturePanel realities={realityArchitecture.realities} />
+
+      <FutureMovementReadinessPanel />
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <PanelBlock eyebrow="Darren Operating Style" title="Momentum into Purposeful Scale">
@@ -451,9 +588,122 @@ function BusinessModelBackbonePanel({ coverage }) {
       </div>
 
       <p className="mt-5 rounded-xl border border-white/10 bg-white/[0.045] px-4 py-3 text-sm leading-6 text-white/58">
-        Intelligence boundary: this is a strategic coverage layer, not a prediction, valuation claim, or automatic strategy replacement.
+        Intelligence boundary: this is a strategic coverage layer, not a prediction, valuation claim, or self-replacing strategy engine.
       </p>
     </PanelBlock>
+  )
+}
+
+function CurrentOperatingStatePanel({ state }) {
+  const fields = [
+    ['Current dominant path', state.dominantPath],
+    ['Current One Move', state.oneMove],
+    ['Current proof target', state.proofTarget],
+    ['Current evidence strength', formatListKey(state.evidenceStrength)],
+    ['Current biggest constraint', state.biggestConstraint],
+    ['Current confidence state', formatListKey(state.confidenceState)]
+  ]
+
+  return (
+    <section className="rounded-2xl border border-cyan-300/18 bg-cyan-400/[0.075] p-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-cyan-100/58">Current Operating State</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">What the dashboard can responsibly say right now</h3>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-cyan-50/68">
+          Future movement is evidence-aware but not self-replacing. Five Futures movement requires accepted decisions and recorded proof.
+        </p>
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        {fields.map(([label, value]) => (
+          <div key={label} className="rounded-xl border border-white/10 bg-black/22 p-4">
+            <div className="text-xs uppercase tracking-[0.16em] text-cyan-100/42">{label}</div>
+            <div className="mt-2 text-sm font-medium leading-6 text-white/78">{display(value)}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function FiveRealitiesArchitecturePanel({ realities }) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/[0.045] p-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-white/44">Five Realities Map</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">The inputs required to generate better futures</h3>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-white/58">
+          Financial Reality + Behavioral Reality + Business Model Alignment + Constraint Reality + Confidence Reality create the basis for Five Futures and One Move.
+        </p>
+      </div>
+
+      <div className="mt-5 grid gap-3 lg:grid-cols-5">
+        {realities.map((reality) => (
+          <div key={reality.id} className="rounded-2xl border border-white/10 bg-black/24 p-4">
+            <div className="text-sm font-semibold leading-6 text-white">{reality.name}</div>
+            <div className={`mt-3 inline-flex rounded-full border px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.14em] ${completenessClass(reality.completeness)}`}>
+              {reality.completeness}
+            </div>
+            <div className="mt-3 text-xs uppercase tracking-[0.14em] text-white/36">{reality.role}</div>
+            <ListWithTitle title="Sources" items={reality.sources} compact />
+            <p className="mt-3 rounded-xl border border-white/10 bg-white/[0.035] px-3 py-2 text-xs leading-5 text-white/48">
+              Missing: {reality.missing}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-5 rounded-2xl border border-violet-200/14 bg-violet-300/[0.07] p-4">
+        <div className="text-xs uppercase tracking-[0.18em] text-violet-100/50">Reality Completeness Meter</div>
+        <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-5">
+          {realities.map((reality) => (
+            <div key={`${reality.id}-meter`} className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-black/24 px-3 py-2">
+              <span className="text-xs leading-5 text-white/58">{reality.name}</span>
+              <span className={`shrink-0 rounded-full border px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.12em] ${completenessClass(reality.completeness)}`}>
+                {reality.completeness}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function FutureMovementReadinessPanel() {
+  const directions = [
+    ['Better future', 'Proof supports a higher-leverage path.'],
+    ['Worse future', 'Outcomes contradict the chosen path.'],
+    ['Current future', 'Evidence confirms the existing trajectory.'],
+    ['Uncertain', 'Evidence is too thin or conflicting.']
+  ]
+
+  return (
+    <section className="rounded-2xl border border-amber-300/18 bg-amber-400/[0.075] p-5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="text-xs uppercase tracking-[0.22em] text-amber-100/58">Future Movement Readiness</div>
+          <h3 className="mt-2 text-xl font-semibold tracking-tight text-white">What would cause Five Futures movement</h3>
+        </div>
+        <p className="max-w-2xl text-sm leading-6 text-amber-50/72">
+          The dashboard can begin showing future movement when Darren accepts a One Move, records outcomes, and adds proof. Strategy Chat uses the five realities as context. Future movement remains evidence-gated and does not replace strategy on its own.
+        </p>
+      </div>
+      <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        {directions.map(([label, body]) => (
+          <div key={label} className="rounded-xl border border-white/10 bg-black/22 p-4">
+            <div className="text-sm font-semibold text-white">{label}</div>
+            <p className="mt-2 text-sm leading-6 text-white/58">{body}</p>
+          </div>
+        ))}
+      </div>
+      <p className="mt-4 text-xs leading-5 text-amber-50/56">
+        No live percentages are changed here. This block only explains the evidence conditions required before future movement should become stronger.
+      </p>
+    </section>
   )
 }
 

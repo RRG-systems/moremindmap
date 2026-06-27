@@ -1,0 +1,192 @@
+{
+  "phase_id": "DASH-ARCH-2B",
+  "verdict": "DARREN_DASHBOARD_FIVE_REALITIES_ARCHITECTURE_COMPLETE_WITH_LIMITS",
+  "classification": "FIVE_REALITIES_ARCHITECTURE_VISIBLE_NO_BACKEND_OR_PROBABILITY_MUTATION",
+  "files_changed": [
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "DARREN_DASHBOARD_FIVE_REALITIES_ARCHITECTURE_2B.md",
+    "runtime_traces/darren_dashboard_five_realities_architecture_2b.json"
+  ],
+  "runtime_code_changed": true,
+  "backend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "dashboard_sections_deleted": false,
+  "app_stack_panels_created": false,
+  "current_operating_state_added": true,
+  "five_realities_map_added": true,
+  "reality_completeness_meter_added": true,
+  "future_movement_readiness_added": true,
+  "five_realities": [
+    {
+      "name": "Financial Reality",
+      "current_sources": [
+        "sales/adoption counts",
+        "profile count",
+        "assessment count",
+        "revenue/payment/subscription availability boundary"
+      ],
+      "deterministic_label_rule": "STRONG when payment or revenue evidence is available and related to profiles/assessments; EMERGING when activity counts exist but revenue evidence is missing; THIN when only static copy exists.",
+      "current_expected_label": "EMERGING"
+    },
+    {
+      "name": "Behavioral Reality",
+      "current_sources": [
+        "Darren operating style",
+        "Momentum Machine snapshot language",
+        "One Move status/action evidence",
+        "session summaries when saved"
+      ],
+      "deterministic_label_rule": "STRONG with operating style plus repeated action/session evidence; EMERGING with operating style but limited action evidence; THIN without Darren-specific behavior source.",
+      "current_expected_label": "EMERGING_OR_STRONG"
+    },
+    {
+      "name": "Business Model Alignment",
+      "current_sources": [
+        "9-Path Business Model Backbone",
+        "Opportunity Path Comparison",
+        "Channel Growth compared with alternative paths",
+        "$250M scenario lens as ambition"
+      ],
+      "deterministic_label_rule": "STRONG when 9-path coverage is present; EMERGING when generated strategy exists without full durable path coverage; THIN with only static roadmap copy.",
+      "current_expected_label": "STRONG"
+    },
+    {
+      "name": "Constraint Reality",
+      "current_sources": [
+        "proof targets",
+        "evidence gaps",
+        "One Move Status",
+        "Outcome Ledger",
+        "Future Movement Gate"
+      ],
+      "deterministic_label_rule": "STRONG when proof targets and outcome/action evidence exist; EMERGING when proof targets or evidence gaps exist but recorded proof is limited; THIN with only generic constraints.",
+      "current_expected_label": "EMERGING"
+    },
+    {
+      "name": "Confidence Reality",
+      "current_sources": [
+        "Since Last Snapshot",
+        "Outcome Ledger",
+        "truth boundaries",
+        "model limits",
+        "unavailable/not-yet-live fields"
+      ],
+      "deterministic_label_rule": "STRONG when since-last inputs and truth boundaries are populated; EMERGING when boundaries/gaps exist but little evidence is recorded; THIN with only static warnings.",
+      "current_expected_label": "EMERGING"
+    }
+  ],
+  "section_to_reality_mapping": {
+    "Financial Reality": [
+      "Sales Visibility",
+      "Summary Counters",
+      "Company Adoption",
+      "Behavior Profiles",
+      "Business Assessments",
+      "Unavailable Revenue Fields"
+    ],
+    "Behavioral Reality": [
+      "Momentum Machine operating view",
+      "E->P Lens",
+      "Darren Strategy Chat session summaries",
+      "One Move Status behavior"
+    ],
+    "Business Model Alignment": [
+      "Strategic Goal scenario lens",
+      "Opportunity Path Comparison",
+      "9-Path Business Model Backbone",
+      "Generated Five Futures"
+    ],
+    "Constraint Reality": [
+      "Next Proof Targets",
+      "Evidence Gaps",
+      "One Move Status Tracking",
+      "Outcome Ledger v0",
+      "Future Movement Gate"
+    ],
+    "Confidence Reality": [
+      "What Not To Overclaim",
+      "Model Limits",
+      "Since Last Snapshot",
+      "V1 Truth Boundary",
+      "Unavailable / Not Yet Live"
+    ]
+  },
+  "intelligence_roles_declared": [
+    "Generate intelligence",
+    "Feed intelligence",
+    "Explain intelligence",
+    "Capture evidence for future intelligence",
+    "Protect the user from overclaiming"
+  ],
+  "financial_reality_sources": [
+    "sales/adoption counts",
+    "profile count",
+    "assessment count",
+    "company adoption",
+    "payment/revenue/subscription availability boundary"
+  ],
+  "behavioral_reality_sources": [
+    "Darren operating style",
+    "Momentum Machine snapshot language",
+    "One Move status/action evidence",
+    "chat session summaries when saved"
+  ],
+  "business_model_alignment_sources": [
+    "9-Path Business Model Backbone",
+    "Opportunity Path Comparison",
+    "Channel Growth vs alternative paths",
+    "$250M scenario lens as ambition"
+  ],
+  "constraint_reality_sources": [
+    "proof targets",
+    "evidence gaps",
+    "One Move Status",
+    "Outcome Ledger",
+    "Future Movement Gate"
+  ],
+  "confidence_reality_sources": [
+    "Since Last Snapshot",
+    "Outcome Ledger",
+    "truth boundaries",
+    "model limits",
+    "unavailable/not-yet-live fields"
+  ],
+  "future_movement_claim_boundary": "The dashboard explains readiness only. It does not change live percentages, does not persist new movement data, and does not replace strategy on its own.",
+  "remaining_scaffold_sections": [
+    "Strategic Build Map",
+    "Five Futures Scaffold",
+    "One Move Scaffold",
+    "Unavailable / Not Yet Live",
+    "V1 Truth Boundary",
+    "Raw profile and assessment tables"
+  ],
+  "next_judgment_questions": [
+    "Which architecture blocks should remain default-open in DASH-UI-2C?",
+    "Should Opportunity Path Comparison merge into 9-Path Backbone?",
+    "Should proof targets, evidence gaps, and overclaim guardrails merge into one Evidence & Confidence stack?",
+    "Should raw profile and assessment tables become admin-only?",
+    "Should roadmap cards move behind a collapsed admin stack?"
+  ],
+  "recommended_next_sprint": "DASH-UI-2C: App-Stack Expandable Panel Layout.",
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "2d27593 trace darren dashboard intelligence sections",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed",
+    "static_privacy_claim_scan_changed_files": "passed_no_matches",
+    "production_smoke": "pending"
+  },
+  "limits": [
+    "Frontend architecture layer only.",
+    "No backend changes.",
+    "No prompt changes.",
+    "No model choice changes.",
+    "No sections deleted.",
+    "No final expandable app-stack layout created.",
+    "No records mutated.",
+    "No new persistent tracking.",
+    "No deployment until validation passes."
+  ]
+}
