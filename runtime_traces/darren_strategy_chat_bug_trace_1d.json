@@ -1,0 +1,148 @@
+{
+  "phase_id": "DASH-TRACE-1D",
+  "verdict": "DARREN_STRATEGY_CHAT_BUG_TRACE_COMPLETE_WITH_LIMITS",
+  "classification": "TRACE_ONLY_DARREN_CHAT_BUG_LOCALIZED_NO_RUNTIME_CHANGE",
+  "files_inspected": [
+    "api/admin/darren-strategy-chat.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/darrenBusinessModelBackbone.js",
+    "runtime_traces/darren_strategy_chat_9_path_active_reasoning_upgrade_1c.json",
+    "runtime_traces/moremindmap_darren_strategy_chat_foundation_4f.json",
+    "related Darren dashboard/chat trace filenames under runtime_traces/"
+  ],
+  "runtime_code_changed": false,
+  "backend_changed": false,
+  "dashboard_route_status": {
+    "url": "https://moremindmap.com/leadership-dashboard",
+    "method": "GET",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8"
+  },
+  "chat_route_status": {
+    "url": "https://moremindmap.com/api/admin/darren-strategy-chat",
+    "method": "POST",
+    "status": 200,
+    "ok": true
+  },
+  "valid_chat_smoke_result": {
+    "status": 200,
+    "ok": true,
+    "reply_present": true,
+    "suggested_next_actions_shape": "array",
+    "possible_memory_signal": null,
+    "proposed_action": null,
+    "mutation_performed": false,
+    "raw_stack_observed": false,
+    "secret_or_env_exposure_observed": false,
+    "guaranteed_valuation_language_observed": false,
+    "record_mutation_expected": false
+  },
+  "invalid_auth_smoke_result": {
+    "status": 403,
+    "ok": false,
+    "error": "admin_strategy_chat_access_denied",
+    "controlled": true,
+    "raw_error_observed": false
+  },
+  "model_selection_observed": {
+    "static_resolution_order": [
+      "DARREN_STRATEGY_CHAT_MODEL",
+      "DARREN_STRATEGY_CHAT_OPENAI_MODEL",
+      "gpt-4o-2024-08-06"
+    ],
+    "safe_models_include": [
+      "gpt-5.5",
+      "gpt-5.5-chat",
+      "gpt-5.5-chat-latest",
+      "gpt-5",
+      "gpt-4o-2024-08-06",
+      "gpt-4.1-mini",
+      "gpt-4.1",
+      "gpt-4o"
+    ],
+    "production_model_call_completed": true,
+    "selected_model_returned_to_client": false
+  },
+  "model_fallback_observed": {
+    "static_default_fallback": "gpt-4o-2024-08-06",
+    "runtime_fallback_branch_directly_observed": false,
+    "reason_not_directly_observed": "The production smoke succeeded and the route intentionally does not return selected model metadata."
+  },
+  "frontend_payload_shape": {
+    "headers": [
+      "Accept: application/json",
+      "Content-Type: application/json",
+      "X-Admin-Code"
+    ],
+    "body_keys": [
+      "conversation_id",
+      "entry_context",
+      "message"
+    ],
+    "entry_context_values_sent_by_chat_drawer": [
+      "general",
+      "safe_to_sell",
+      "what_changed",
+      "pitch_help",
+      "one_move",
+      "five_futures",
+      "partner_idea"
+    ]
+  },
+  "backend_response_shape": {
+    "required_by_frontend": [
+      "ok",
+      "reply"
+    ],
+    "optional_used_by_frontend": [
+      "suggested_next_actions",
+      "possible_memory_signal",
+      "proposed_action"
+    ],
+    "returned_by_backend": [
+      "ok",
+      "conversation_id",
+      "reply",
+      "entry_context",
+      "suggested_next_actions",
+      "possible_memory_signal",
+      "proposed_action",
+      "mutation_performed",
+      "context_used_summary"
+    ]
+  },
+  "ui_response_shape_match": true,
+  "suspected_failure_area": "frontend_browser_visible_strategy_chat_drawer_behavior",
+  "suspected_root_cause": "Production backend, auth, payload validation, and model call are healthy. The likely issue is frontend-only chat drawer behavior not covered by route smoke: assistant line breaks are not preserved in rendered chat messages, and starter buttons can still be clicked during loading, allowing overlapping requests that can make message ordering or state appear buggy.",
+  "confidence": "medium",
+  "recommended_fix_sprint": "DASH-FIX-1E: browser-reproduce the Strategy Chat drawer, then fix frontend-only chat message rendering/loading guards without changing prompts, model selection, admin auth, Strategy Chat backend behavior, Stripe/payment/access logic, public pages, or active strategy.",
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "c2128bf stabilize darren strategy chat model fallback",
+    "node_check_chat_route": "passed",
+    "node_check_backbone": "passed",
+    "production_dashboard_get": "passed_200",
+    "production_valid_chat_smoke": "passed_200_ok_reply_present_mutation_false",
+    "production_invalid_auth_smoke": "passed_controlled_403",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "static_privacy_claim_scan_changed_files": "passed_no_matches",
+    "records_mutated": false,
+    "runtime_code_changed": false,
+    "deploy_required": false
+  },
+  "limits": [
+    "Trace only.",
+    "No runtime behavior changed.",
+    "No prompt changed.",
+    "No model selection changed.",
+    "No dashboard UI changed.",
+    "No Stripe, payment, or access logic changed.",
+    "No public pages changed.",
+    "No deploy performed.",
+    "No records intentionally mutated.",
+    "One controlled valid live Strategy Chat smoke was run.",
+    "Selected production model name is not returned by the route, so runtime model identity is inferred from static code and successful model response."
+  ]
+}
