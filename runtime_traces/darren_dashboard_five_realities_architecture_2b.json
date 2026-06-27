@@ -176,7 +176,25 @@
     "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
     "json_trace_parse": "passed",
     "static_privacy_claim_scan_changed_files": "passed_no_matches",
-    "production_smoke": "pending"
+    "production_smoke": "passed"
+  },
+  "deployment": {
+    "deployment_url": "https://moremindmap-nf0rzh3j6-rrg-systems-projects.vercel.app",
+    "production_alias": "https://moremindmap.com",
+    "ready_state": "READY"
+  },
+  "production_smoke_result": {
+    "/": 200,
+    "/profile": 200,
+    "/business-assessment": 200,
+    "/leadership-dashboard": 200,
+    "deployed_bundle_current_operating_state_marker": true,
+    "deployed_bundle_five_realities_map_marker": true,
+    "deployed_bundle_reality_completeness_meter_marker": true,
+    "deployed_bundle_future_movement_readiness_marker": true,
+    "deployed_bundle_strategy_chat_marker_still_present": true,
+    "sections_deleted": false,
+    "final_app_stack_layout_created": false
   },
   "limits": [
     "Frontend architecture layer only.",
