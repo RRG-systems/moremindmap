@@ -15,7 +15,7 @@
   "prompt_changed": true,
   "model_selection_changed": false,
   "records_mutated": false,
-  "deployed": false,
+  "deployed": true,
   "compact_context_created": true,
   "shared_helper_created": true,
   "strategy_chat_context_wired": true,
@@ -37,12 +37,38 @@
   "probability_mutation_added": false,
   "automatic_strategy_replacement_added": false,
   "strategy_chat_smoke": {
-    "status": "pending",
-    "mutation_performed_expected": false
+    "status": 200,
+    "ok": true,
+    "reply_present": true,
+    "mutation_performed": false,
+    "dashboard_intelligence_context_present": true,
+    "mentions_current_operating_or_current_state": true,
+    "mentions_evidence_or_missing_proof": true,
+    "raw_json_dump_detected": false,
+    "certain_valuation_outcome_claim_detected": false,
+    "automatic_percentage_movement_claim_detected": false
   },
   "adaptive_strategy_smoke": {
-    "status": "pending",
-    "note": "No draft-generation smoke run at initial report creation because that route persists pending-review drafts."
+    "status": 200,
+    "ok": true,
+    "read_only_latest_endpoint_used": true,
+    "draft_present": true,
+    "replacement_claim_detected": false,
+    "private_source_leak_detected": false,
+    "note": "Draft generation route was not called because it persists pending-review drafts."
+  },
+  "deployment": {
+    "deployment_url": "https://moremindmap-jydv7206d-rrg-systems-projects.vercel.app",
+    "production_alias": "https://moremindmap.com",
+    "ready_state": "READY",
+    "deployment_id": "dpl_Akh7duYLoaFpLE3hCsgaU5k6tVMj",
+    "inspect_url": "https://vercel.com/rrg-systems-projects/moremindmap/Akh7duYLoaFpLE3hCsgaU5k6tVMj"
+  },
+  "production_smoke_result": {
+    "/": 200,
+    "/profile": 200,
+    "/business-assessment": 200,
+    "/leadership-dashboard": 200
   },
   "validation_results": {
     "git_status_initial": "clean",

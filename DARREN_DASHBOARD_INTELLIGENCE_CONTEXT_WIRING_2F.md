@@ -93,6 +93,10 @@ DASH-RECURSION-2H should audit recursive learning readiness after help/workflow 
 - `npm run build`: passed with existing Vite large chunk warning
 - JSON trace parse: passed
 - Static privacy/claim scan: passed after privacy-boundary wording avoided watched phrases
+- Production deploy: `https://moremindmap-jydv7206d-rrg-systems-projects.vercel.app`, aliased to `https://moremindmap.com`
+- Production route smoke: `/`, `/profile`, `/business-assessment`, and `/leadership-dashboard` returned 200
+- Strategy Chat smoke: 200, `ok: true`, reply present, `mutation_performed: false`, compact context present, no raw JSON dump, no certain valuation outcome, no automatic percentage movement language
+- Adaptive Strategy read-only smoke: latest draft endpoint returned 200 with `ok: true`, no replacement claim detected, no private source leakage detected
 
 ## Limits
 
@@ -103,4 +107,4 @@ DASH-RECURSION-2H should audit recursive learning readiness after help/workflow 
 - No usage tracking.
 - No help/workflow feature built.
 - No recursive score feature built.
-- No deploy until validation passes.
+- Deployment completed after validation passed.
