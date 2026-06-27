@@ -1,0 +1,290 @@
+{
+  "phase_id": "DASH-TRACE-2A",
+  "verdict": "DARREN_DASHBOARD_INTELLIGENCE_CLASSIFICATION_TRACE_COMPLETE_WITH_LIMITS",
+  "classification": "TRACE_ONLY_DASHBOARD_INTELLIGENCE_MAP_READY_FOR_APP_STACK_DESIGN",
+  "files_inspected": [
+    "src/components/LeadershipSalesDashboard.jsx",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/data/leadershipBuildMap.js",
+    "src/data/darrenBusinessModelBackbone.js",
+    "api/admin/sales-dashboard.js",
+    "api/admin/darren-intelligence-snapshot.js",
+    "api/admin/darren-intelligence-snapshot-core.js",
+    "api/admin/darren-intelligence-generate.js",
+    "api/admin/darren-strategy-chat.js",
+    "api/admin/darren-one-move-status.js",
+    "api/admin/darren-outcome-ledger-event.js",
+    "api/admin/darren-outcome-ledger-latest.js",
+    "api/admin/darren-since-last-snapshot.js",
+    "api/admin/darren-adaptive-loop-core.js",
+    "api/admin/darren-chat-session-summary.js",
+    "api/admin/darren-future-movement-assessment.js",
+    "api/admin/darren-adaptive-strategy-draft.js"
+  ],
+  "runtime_code_changed": false,
+  "backend_changed": false,
+  "dashboard_sections_classified": 33,
+  "api_powered_gpt_sections": [
+    "Darren Strategy Chat",
+    "Generated Strategy control",
+    "Generated Five Futures",
+    "One Move This Week",
+    "Generated Evidence Gaps",
+    "Generated Next Proof Targets",
+    "Generated What Not To Overclaim",
+    "Model Limits",
+    "Adaptive Strategy Draft"
+  ],
+  "deterministic_feeding_sections": [
+    "V1 Read-Only Leadership Sales Dashboard shell",
+    "Sales Visibility intro",
+    "Summary counters",
+    "Darren Leadership Intelligence shell",
+    "Momentum Machine operating view",
+    "Strategic Goal scenario lens",
+    "E->P Lens",
+    "Opportunity Path Comparison",
+    "9-Path Business Model Backbone",
+    "Snapshot Proof Targets",
+    "Snapshot What Not To Overclaim",
+    "Snapshot Evidence Gaps",
+    "One Move Status Tracking",
+    "Outcome Ledger v0",
+    "Since Last Snapshot",
+    "Adaptive Strategy Loop v0 shell",
+    "Session Memory",
+    "Future Movement Gate",
+    "Company Adoption",
+    "Behavior Profiles table",
+    "Business Assessments table"
+  ],
+  "static_display_legacy_sections": [
+    "Strategic Build Map",
+    "Five Futures Scaffold",
+    "One Move Scaffold",
+    "Unavailable / Not Yet Live",
+    "V1 Truth Boundary",
+    "Unavailable Revenue Fields"
+  ],
+  "duplicated_sections": [
+    {
+      "concept": "truth boundaries and limits",
+      "sections": [
+        "Snapshot What Not To Overclaim",
+        "Generated What Not To Overclaim",
+        "Model Limits",
+        "V1 Truth Boundary",
+        "Unavailable / Not Yet Live"
+      ],
+      "recommendation": "merge",
+      "reason": "Same safety concept appears in multiple panels; generated guardrails should lead, static/API limits should collapse below."
+    },
+    {
+      "concept": "evidence gaps and proof targets",
+      "sections": [
+        "Snapshot Evidence Gaps",
+        "Snapshot Proof Targets",
+        "Generated Evidence Gaps",
+        "Generated Next Proof Targets"
+      ],
+      "recommendation": "merge",
+      "reason": "All describe what proof is missing or next; one Evidence stack would reduce cockpit clutter."
+    },
+    {
+      "concept": "path taxonomy",
+      "sections": [
+        "Opportunity Path Comparison",
+        "9-Path Business Model Backbone"
+      ],
+      "recommendation": "merge_or_nest",
+      "reason": "Both compare strategic routes; 9-Path should be the durable map and Opportunity Path can be the summary."
+    },
+    {
+      "concept": "future scenarios",
+      "sections": [
+        "Five Futures Scaffold",
+        "Generated Five Futures"
+      ],
+      "recommendation": "collapse_scaffold_after_generation",
+      "reason": "Scaffold is only useful before generated strategy exists."
+    },
+    {
+      "concept": "roadmap truth",
+      "sections": [
+        "Strategic Build Map",
+        "V1 Truth Boundary",
+        "Unavailable Revenue Fields"
+      ],
+      "recommendation": "collapse_or_admin_only",
+      "reason": "Useful operational context but not primary Darren-facing intelligence."
+    }
+  ],
+  "chat_context_sources": [
+    "Darren Intelligence Snapshot operating style",
+    "latest generated strategy",
+    "generated Five Futures",
+    "generated One Move",
+    "Outcome Ledger summary",
+    "Since Last Snapshot summary",
+    "generated proof targets",
+    "leadership build map truth/limits",
+    "9-Path Business Model Backbone"
+  ],
+  "adaptive_draft_sources": [
+    "latest generated strategy",
+    "Outcome Ledger events",
+    "Since Last Snapshot comparison",
+    "chat session summaries",
+    "latest future movement assessment"
+  ],
+  "evidence_loop_sources": [
+    "One Move Status Tracking",
+    "Outcome Ledger v0",
+    "Since Last Snapshot",
+    "Future Movement Gate",
+    "Session Memory",
+    "Company Adoption counts",
+    "Profile and assessment counts"
+  ],
+  "candidate_default_open_sections": [
+    "Darren Strategy Chat",
+    "Current Strategy / Generated Five Futures / One Move",
+    "Evidence & Proof Targets",
+    "Outcome Ledger / Since Last Snapshot"
+  ],
+  "candidate_collapsible_sections": [
+    "Strategic Goal scenario lens",
+    "E->P Lens",
+    "9-Path Business Model Backbone",
+    "Adaptive Strategy Loop v0",
+    "Sales Visibility / Company Adoption",
+    "Truth Boundaries / Limits",
+    "Strategic Build Map"
+  ],
+  "candidate_admin_only_sections": [
+    "Behavior Profiles table",
+    "Business Assessments table",
+    "Raw sales dashboard records",
+    "Roadmap/future build phases"
+  ],
+  "candidate_remove_or_archive_sections": [
+    "Five Futures Scaffold after generated strategy exists",
+    "One Move Scaffold after generated strategy exists",
+    "duplicate standalone Unavailable / Not Yet Live copy after merged into Truth Boundaries"
+  ],
+  "subscription_model_signal_sections": [
+    "Summary counters",
+    "Company Adoption",
+    "Behavior Profiles table",
+    "Business Assessments table",
+    "Generated Strategy existence",
+    "Darren Strategy Chat usage via session summaries",
+    "One Move Status Tracking",
+    "Outcome Ledger v0",
+    "Future Movement Gate",
+    "Adaptive Strategy Draft"
+  ],
+  "recommended_stack_groups": [
+    {
+      "group": "Strategy Chat",
+      "default_state": "default_open",
+      "audience": "Darren-facing",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high"
+    },
+    {
+      "group": "Current Strategy / Five Futures / One Move",
+      "default_state": "default_open",
+      "audience": "Darren-facing",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high"
+    },
+    {
+      "group": "Evidence & Proof Targets",
+      "default_state": "default_open",
+      "audience": "Darren-facing",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high"
+    },
+    {
+      "group": "9-Path Business Model Map",
+      "default_state": "collapsed",
+      "audience": "Darren-facing",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "medium"
+    },
+    {
+      "group": "Outcome Ledger / Since Last Snapshot",
+      "default_state": "default_open",
+      "audience": "Darren-facing with admin controls",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high"
+    },
+    {
+      "group": "Adaptive Strategy Draft",
+      "default_state": "collapsed",
+      "audience": "admin/advanced",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high_later"
+    },
+    {
+      "group": "Sales Visibility / Adoption Data",
+      "default_state": "collapsed",
+      "audience": "admin-facing",
+      "feeds_intelligence": true,
+      "display_only": false,
+      "subscription_priority": "high"
+    },
+    {
+      "group": "Admin Tables / Raw Records",
+      "default_state": "collapsed_admin_only",
+      "audience": "admin-facing",
+      "feeds_intelligence": "partial",
+      "display_only": false,
+      "subscription_priority": "medium"
+    },
+    {
+      "group": "Roadmap / Build Map",
+      "default_state": "collapsed_or_archive",
+      "audience": "admin-facing",
+      "feeds_intelligence": "partial_for_chat_truth_context",
+      "display_only": true,
+      "subscription_priority": "low"
+    },
+    {
+      "group": "Truth Boundaries / Limits",
+      "default_state": "collapsed_with_visible_warning",
+      "audience": "both",
+      "feeds_intelligence": true,
+      "display_only": "mixed",
+      "subscription_priority": "medium"
+    }
+  ],
+  "recommended_next_sprint": "DASH-DESIGN-2B: design the simplified app-stack dashboard hierarchy from this intelligence map without changing backend behavior.",
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "d4154ca record darren strategy chat deployment smoke",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "skipped_runtime_code_unchanged",
+    "static_privacy_scan_changed_files": "passed_no_matches"
+  },
+  "limits": [
+    "Trace only.",
+    "Runtime code changed: false.",
+    "Backend changed: false.",
+    "No dashboard redesign implemented.",
+    "No API routes changed.",
+    "No prompts changed.",
+    "No model selection changed.",
+    "No records mutated.",
+    "No deploy required.",
+    "The provided PDF path is outside the allowed workspace, so classification uses the prompt's section list plus repo source inspection."
+  ]
+}
