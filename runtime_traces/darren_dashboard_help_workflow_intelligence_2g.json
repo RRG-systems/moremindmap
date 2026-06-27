@@ -1,0 +1,74 @@
+{
+  "phase_id": "DASH-HELP-2G",
+  "verdict": "DARREN_DASHBOARD_HELP_WORKFLOW_INTELLIGENCE_COMPLETE_WITH_LIMITS",
+  "classification": "STRATEGY_CHAT_WORKFLOW_GUIDANCE_ADDED_NO_RECORD_MUTATION",
+  "files_changed": [
+    "api/admin/darren-dashboard-context-core.js",
+    "api/admin/darren-strategy-chat.js",
+    "DARREN_DASHBOARD_HELP_WORKFLOW_INTELLIGENCE_2G.md",
+    "runtime_traces/darren_dashboard_help_workflow_intelligence_2g.json"
+  ],
+  "runtime_code_changed": true,
+  "frontend_changed": false,
+  "backend_changed": true,
+  "prompt_changed": true,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "dashboard_workflow_context_created": true,
+  "panel_map_compact_created": true,
+  "recommended_dashboard_workflow_created": true,
+  "next_best_action_rules_created": true,
+  "help_intent_guidance_added": true,
+  "strategy_chat_help_wired": true,
+  "adaptive_strategy_changed": false,
+  "dashboard_help_built": true,
+  "recursion_score_built": false,
+  "molt_built": false,
+  "grok_api_added": false,
+  "usage_tracking_added": false,
+  "raw_tables_injected": false,
+  "raw_profile_content_injected": false,
+  "raw_assessment_answers_injected": false,
+  "people_reality_boundary_preserved": "Darren build uses Darren's behavioral operating style only. Employee/team/org personality layers are future organizational intelligence, not part of this current Darren dashboard.",
+  "probability_mutation_added": false,
+  "automatic_strategy_replacement_added": false,
+  "smoke_prompt_results": {
+    "what_are_all_these_panels": "pending",
+    "what_should_i_do_next": "pending",
+    "how_do_i_move_five_futures": "pending"
+  },
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "8d85899 record darren context wiring deployment smoke",
+    "node_check_dashboard_context_core": "passed",
+    "node_check_strategy_chat": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed",
+    "static_privacy_claim_scan_changed_files": "passed_after_scenario_lens_wording_adjustment"
+  },
+  "deployment": {
+    "deployed": false,
+    "deployment_url": null,
+    "production_alias": null,
+    "ready_state": null
+  },
+  "production_smoke_result": {
+    "/": "pending",
+    "/profile": "pending",
+    "/business-assessment": "pending",
+    "/leadership-dashboard": "pending"
+  },
+  "limits": [
+    "Chat guidance only.",
+    "No UI redesign.",
+    "No frontend code changed.",
+    "No records intentionally mutated.",
+    "No usage tracking.",
+    "No recursive score.",
+    "No outside discovery integration.",
+    "No new persistence."
+  ],
+  "recommended_next_sprint": "DASH-RECURSION-2H"
+}

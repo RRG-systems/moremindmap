@@ -104,7 +104,7 @@ function buildBusinessModelContextCompact({ snapshot, strategy, pathCoverage } =
     current_channel_growth_emphasis: channelPath
       ? `${channelPath.status_band || 'unknown'}; Channel Growth is valid, but adoption proof still matters.`
       : 'unknown',
-    scenario_lens_boundary: '$250M scenario is an ambition/path model, not a certain valuation outcome.',
+    scenario_lens_boundary: '$250M scenario is an ambition/path model, not a proven company-value result.',
     path_comparison_present: asArray(snapshot?.path_comparison?.paths).length > 0,
     generated_strategy_path_context_present: Boolean(strategy?.strategy_id)
   };
@@ -112,10 +112,10 @@ function buildBusinessModelContextCompact({ snapshot, strategy, pathCoverage } =
 
 function buildConfidenceBoundaryCompact() {
   return {
-    future_movement_boundary: 'Future movement requires accepted decisions and recorded proof. External or displayed context alone does not justify automatic future percentage movement.',
+    future_movement_boundary: 'Future movement requires accepted decisions and recorded proof. External or displayed context alone does not justify changing future movement claims.',
     live_vs_not_live_boundary: 'Displayed roadmap and unavailable-field context separates live dashboard capability from planned or not-yet-indexed capability.',
     strategy_replacement_boundary: "Adaptive drafts are pending review and do not replace Darren's active strategy automatically.",
-    valuation_certainty_boundary: '$250M is a scenario lens and ambition/path model, not a proven or guaranteed outcome.',
+    valuation_certainty_boundary: '$250M is a scenario lens and ambition/path model, not a proven outcome.',
     people_reality_boundary: PEOPLE_REALITY_BOUNDARY
   };
 }
@@ -137,17 +137,231 @@ function buildRoadmapStatusCompact(snapshot) {
   };
 }
 
+function panel(name, visibility, primaryPurpose, whatUserShouldDo, intelligenceRole, primaryReality) {
+  return {
+    panel_name: name,
+    visibility_status: visibility,
+    primary_purpose: primaryPurpose,
+    what_user_should_do_with_it: whatUserShouldDo,
+    intelligence_role: intelligenceRole,
+    primary_reality: primaryReality
+  };
+}
+
+function buildPanelMapCompact() {
+  return [
+    panel(
+      'Strategy Chat',
+      'top_visible',
+      'Ask what changed, what to do next, what to say, and what not to overclaim.',
+      'Use it first when you need a decision, talk track, proof target, or dashboard explanation.',
+      'workflow_guide_and_strategy_reasoning',
+      'System Interface'
+    ),
+    panel(
+      'Current Operating State',
+      'top_visible',
+      'Show the current dominant path, One Move, proof target, constraint, and confidence state.',
+      'Read this before scanning the rest of the dashboard.',
+      'explains_current_intelligence_state',
+      'Multi-Reality Output'
+    ),
+    panel(
+      'Current Strategy / Five Futures / One Move',
+      'default_open',
+      'Show the current generated strategy output.',
+      'Use it to understand the futures, the current One Move, and the strategy being tested.',
+      'generated_intelligence_output',
+      'Multi-Reality Output'
+    ),
+    panel(
+      'Evidence & Proof / Outcome Loop',
+      'default_open',
+      'Capture proof, status, ledger events, and since-last movement.',
+      'Update this after real conversations, actions, or evidence changes.',
+      'captures_and_feeds_evidence',
+      'Constraint Reality'
+    ),
+    panel(
+      'Five Realities / System Status',
+      'collapsed_support',
+      'Explain which realities are thin, emerging, or strong.',
+      'Open it when you need to know why the system is cautious or confident.',
+      'explains_intelligence_health',
+      'System Interface'
+    ),
+    panel(
+      '9-Path Business Model Map',
+      'collapsed_support',
+      'Show the strategic path map behind the current recommendation.',
+      'Use it when deciding between Channel Growth, subscription, partner, RRG, or other paths.',
+      'feeds_business_model_reasoning',
+      'Business Model Alignment'
+    ),
+    panel(
+      'Adaptive Strategy Draft',
+      'collapsed_support',
+      'Create pending-review strategy drafts from evidence, summaries, and movement bands.',
+      'Use it only after enough new evidence exists to justify a review.',
+      'adaptive_generated_intelligence',
+      'Multi-Reality Output'
+    ),
+    panel(
+      'Confidence / Truth Boundaries',
+      'collapsed_support',
+      'Prevent overclaiming and separate live truth from ambition.',
+      'Open it before pitching, raising, presenting, or making claims to partners.',
+      'protects_confidence',
+      'Confidence Reality'
+    ),
+    panel(
+      'Financial/Admin Data',
+      'collapsed_admin',
+      'Show adoption counts, company grouping, and unavailable revenue/payment evidence.',
+      'Use it as supporting proof, not the main thinking surface.',
+      'feeds_financial_reality',
+      'Financial Reality'
+    ),
+    panel(
+      'Raw Profiles / Assessments / Adoption Records',
+      'collapsed_admin',
+      'Show admin evidence rows and source activity.',
+      'Use it only when admin evidence or record-level follow-up is needed.',
+      'admin_evidence_store',
+      'Admin Evidence Store'
+    ),
+    panel(
+      'Build Map / Roadmap',
+      'collapsed_admin',
+      'Separate live capabilities from planned roadmap ideas.',
+      'Use it to avoid selling planned features as live product truth.',
+      'protects_confidence',
+      'Confidence Reality'
+    )
+  ];
+}
+
+function buildRecommendedDashboardWorkflow() {
+  return [
+    {
+      step: 1,
+      start_with: 'Current Operating State',
+      purpose: 'Understand current path, One Move, proof target, constraint, and confidence state.'
+    },
+    {
+      step: 2,
+      start_with: 'Strategy Chat',
+      purpose: 'Ask what changed, what to do next, what to say, or what not to overclaim.'
+    },
+    {
+      step: 3,
+      start_with: 'Current Strategy / Five Futures / One Move',
+      purpose: 'Understand the current generated strategic output.'
+    },
+    {
+      step: 4,
+      start_with: 'Evidence & Proof / Outcome Loop',
+      purpose: 'Record proof, status, outcome, or uncertainty.'
+    },
+    {
+      step: 5,
+      start_with: 'Five Realities / System Status',
+      purpose: 'Know which reality is thin, emerging, or strong.'
+    },
+    {
+      step: 6,
+      start_with: '9-Path Business Model Map',
+      purpose: 'Use when evaluating major strategic direction.'
+    },
+    {
+      step: 7,
+      start_with: 'Adaptive Strategy Draft',
+      purpose: 'Use only when enough new evidence exists to consider an updated strategic draft.'
+    },
+    {
+      step: 8,
+      start_with: 'Confidence / Truth Boundaries',
+      purpose: 'Use before making claims to partners, investors, mortgage companies, or leadership.'
+    },
+    {
+      step: 9,
+      start_with: 'Financial/Admin Data and Raw Records',
+      purpose: 'Use as supporting evidence, not the primary thinking surface.'
+    },
+    {
+      step: 10,
+      start_with: 'Build Map / Roadmap',
+      purpose: 'Separate what is live from what is planned.'
+    }
+  ];
+}
+
+function buildNextBestActionRules({ currentState, realities, financialSummary } = {}) {
+  const rules = [];
+  if (currentState?.evidence_strength === 'thin') {
+    rules.push('Record proof before trying to move futures. Identify the active sales/channel conversation and classify it as customer revenue, partner capital, or channel distribution.');
+  }
+  if (['thin', 'emerging'].includes(realities?.financial_reality_status)) {
+    rules.push('Verify paid/free/promo or revenue evidence before claiming subscription or revenue traction.');
+  }
+  if (realities?.business_model_alignment_status === 'strong' && ['thin', 'emerging'].includes(realities?.financial_reality_status)) {
+    rules.push('The model is strategically coherent, but it needs proof. Convert one path into measurable revenue evidence or partner commitment.');
+  }
+  if (realities?.constraint_reality_status === 'emerging') {
+    rules.push('Clarify the One Move proof target and record whether the action happened.');
+  }
+  if (['thin', 'emerging'].includes(realities?.confidence_reality_status)) {
+    rules.push('Use Confidence / Truth Boundaries before pitching, raising, or presenting.');
+  }
+  if (currentState?.current_one_move && currentState.current_one_move !== NOT_ENOUGH_EVIDENCE) {
+    rules.push('Execute or update the current One Move before generating a new strategy.');
+  }
+  if (currentState?.current_proof_target && currentState.current_proof_target !== NOT_ENOUGH_EVIDENCE) {
+    rules.push('Record an outcome against the current proof target.');
+  }
+  if (financialSummary?.payment_subscription_evidence_status === NOT_INDEXED) {
+    rules.push('Do not overstate payment or subscription evidence until it is indexed.');
+  }
+  return rules.slice(0, 8);
+}
+
+function buildHelpIntentExamples() {
+  return [
+    'what are these panels',
+    'how do I use this dashboard',
+    'walk me through this',
+    'what should I look at first',
+    'what should I do next',
+    'how do I move the futures',
+    'what proof should I record',
+    'what should I update',
+    'what does this panel mean',
+    'this is confusing',
+    'where do I start'
+  ];
+}
+
 export function buildDarrenDashboardContextCompact({ snapshot, strategy } = {}) {
   const pathCoverage = evaluateDarrenBusinessModelPathCoverage({ snapshot, generatedStrategy: strategy });
+  const currentState = buildCurrentOperatingStateCompact({ snapshot, strategy, pathCoverage });
+  const realities = buildRealityCompletenessCompact({ snapshot, strategy, pathCoverage });
+  const financialSummary = buildFinancialAdminSummaryCompact(snapshot);
   return {
     context_version: 'darren_dashboard_context_compact_v1',
     context_weight: 'low_to_medium',
     privacy_boundary: 'Compact summary only. No full admin rows, private profile text, assessment response detail, secrets, tokens, or storage keys are included.',
-    current_operating_state_compact: buildCurrentOperatingStateCompact({ snapshot, strategy, pathCoverage }),
-    reality_completeness_compact: buildRealityCompletenessCompact({ snapshot, strategy, pathCoverage }),
-    financial_admin_summary_compact: buildFinancialAdminSummaryCompact(snapshot),
+    current_operating_state_compact: currentState,
+    reality_completeness_compact: realities,
+    financial_admin_summary_compact: financialSummary,
     business_model_context_compact: buildBusinessModelContextCompact({ snapshot, strategy, pathCoverage }),
     confidence_boundary_compact: buildConfidenceBoundaryCompact(),
-    roadmap_status_compact: buildRoadmapStatusCompact(snapshot)
+    roadmap_status_compact: buildRoadmapStatusCompact(snapshot),
+    dashboard_workflow_context: {
+      panel_map_compact: buildPanelMapCompact(),
+      recommended_dashboard_workflow: buildRecommendedDashboardWorkflow(),
+      next_best_action_rules: buildNextBestActionRules({ currentState, realities, financialSummary }),
+      help_intent_examples: buildHelpIntentExamples(),
+      response_style: 'Short, practical, action-oriented workflow guidance. Give 1 to 3 next actions when the user asks what to do next.'
+    }
   };
 }
