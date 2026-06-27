@@ -1,0 +1,564 @@
+{
+  "phase_id": "DASH-JUDGE-2C",
+  "verdict": "DARREN_DASHBOARD_FIVE_REALITIES_JUDGMENT_COMPLETE_WITH_LIMITS",
+  "classification": "TRACE_ONLY_READY_FOR_APP_STACK_LAYOUT_NO_RUNTIME_CHANGE",
+  "files_changed": [
+    "DARREN_DASHBOARD_FIVE_REALITIES_JUDGMENT_2C.md",
+    "runtime_traces/darren_dashboard_five_realities_judgment_2c.json"
+  ],
+  "runtime_code_changed": false,
+  "backend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "dashboard_sections_inventoried": 32,
+  "section_classifications": [
+    {
+      "section": "Strategy Chat",
+      "primary_reality": "System Interface",
+      "secondary_realities": ["Multi-Reality Output"],
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "KEEP_AS_INTERFACE",
+      "reason": "Primary interaction layer for strategy reasoning."
+    },
+    {
+      "section": "Current Operating State",
+      "primary_reality": "Multi-Reality Output",
+      "secondary_realities": ["Confidence Reality", "Constraint Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "DEFAULT_OPEN",
+      "reason": "Best current-state summary for Darren."
+    },
+    {
+      "section": "Five Realities Map",
+      "primary_reality": "System Interface",
+      "secondary_realities": ["Financial Reality", "Behavioral Reality", "Business Model Alignment", "Constraint Reality", "Confidence Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "both",
+      "recommended_next_treatment": "COLLAPSE_IN_APP_STACK",
+      "reason": "Architecture is helpful but too abstract for default daily use."
+    },
+    {
+      "section": "Reality Completeness Meter",
+      "primary_reality": "System Interface",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "no",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "both",
+      "recommended_next_treatment": "MERGE_WITH Five Realities Map",
+      "reason": "Duplicates the completeness labels in the reality map."
+    },
+    {
+      "section": "Future Movement Readiness",
+      "primary_reality": "Confidence Reality",
+      "secondary_realities": ["Constraint Reality"],
+      "intelligence_role": "PROTECTS_CONFIDENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "MERGE_WITH Confidence / Evidence stack",
+      "reason": "Explains evidence requirements and movement boundaries."
+    },
+    {
+      "section": "Sales Visibility / V1 Read-Only Dashboard",
+      "primary_reality": "Financial Reality",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "admin-facing",
+      "recommended_next_treatment": "COLLAPSE_IN_APP_STACK",
+      "reason": "Adoption/activity data matters but belongs in supporting financial/admin stack."
+    },
+    {
+      "section": "Strategic Build Map",
+      "primary_reality": "Scaffold / Legacy",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "DISPLAY_ONLY",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "no",
+      "feeds_future_movement_adaptive_strategy": "no",
+      "audience": "admin-facing",
+      "recommended_next_treatment": "MOVE_ADMIN_ONLY",
+      "reason": "Roadmap context; compact truth can remain in chat context, full panel should not be a daily surface."
+    },
+    {
+      "section": "Darren Leadership Intelligence Snapshot",
+      "primary_reality": "Multi-Reality Output",
+      "secondary_realities": ["Behavioral Reality", "Constraint Reality", "Confidence Reality"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "both",
+      "recommended_next_treatment": "DEFAULT_OPEN",
+      "reason": "Source-labeled foundation for operating state."
+    },
+    {
+      "section": "Momentum Machine operating view",
+      "primary_reality": "Behavioral Reality",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "MERGE_WITH Current Operating State",
+      "reason": "Important behavior frame but can be summarized in operating state."
+    },
+    {
+      "section": "Strategic Goal / scenario lens",
+      "primary_reality": "Business Model Alignment",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "no",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "COLLAPSE_IN_APP_STACK",
+      "reason": "Useful ambition and boundary, not a primary evidence loop."
+    },
+    {
+      "section": "E->P Lens",
+      "primary_reality": "Behavioral Reality",
+      "secondary_realities": ["Constraint Reality"],
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "MERGE_WITH Business model / behavior context",
+      "reason": "Useful explanatory frame; not a standalone app."
+    },
+    {
+      "section": "Opportunity Path Comparison",
+      "primary_reality": "Business Model Alignment",
+      "secondary_realities": ["Constraint Reality"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "MERGE_WITH 9-Path Business Model Map",
+      "reason": "Overlaps with the durable 9-path map."
+    },
+    {
+      "section": "9-Path Business Model Backbone",
+      "primary_reality": "Business Model Alignment",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "COLLAPSE_IN_APP_STACK",
+      "reason": "Durable reasoning map, too large for default open."
+    },
+    {
+      "section": "Generated Strategy / Five Futures / One Move",
+      "primary_reality": "Multi-Reality Output",
+      "secondary_realities": ["Business Model Alignment", "Constraint Reality", "Confidence Reality"],
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "KEEP_AS_OUTPUT",
+      "reason": "Core generated output stack."
+    },
+    {
+      "section": "Generated Evidence / Proof / Guardrails",
+      "primary_reality": "Constraint Reality",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "MERGE_WITH Evidence & Confidence stack",
+      "reason": "Valuable generated outputs but duplicated with snapshot proof/gap/guardrail panels."
+    },
+    {
+      "section": "One Move Status Tracking",
+      "primary_reality": "Constraint Reality",
+      "secondary_realities": ["Behavioral Reality"],
+      "intelligence_role": "CAPTURES_EVIDENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "both",
+      "recommended_next_treatment": "DEFAULT_OPEN",
+      "reason": "Captures decisions/status that future intelligence needs."
+    },
+    {
+      "section": "Outcome Ledger v0",
+      "primary_reality": "Constraint Reality",
+      "secondary_realities": ["Confidence Reality"],
+      "intelligence_role": "CAPTURES_EVIDENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "both",
+      "recommended_next_treatment": "DEFAULT_OPEN",
+      "reason": "Primary outcome evidence store."
+    },
+    {
+      "section": "Since Last Snapshot",
+      "primary_reality": "Confidence Reality",
+      "secondary_realities": ["Constraint Reality"],
+      "intelligence_role": "PROTECTS_CONFIDENCE",
+      "feeds_strategy_chat_now": "yes",
+      "feeds_five_futures_one_move": "yes",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "Darren-facing",
+      "recommended_next_treatment": "DEFAULT_OPEN",
+      "reason": "Explains what changed without overstating movement."
+    },
+    {
+      "section": "Adaptive Strategy Loop v0",
+      "primary_reality": "Multi-Reality Output",
+      "secondary_realities": ["Constraint Reality", "Confidence Reality"],
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "yes",
+      "audience": "admin-facing",
+      "recommended_next_treatment": "COLLAPSE_IN_APP_STACK",
+      "reason": "Advanced pending-review loop."
+    },
+    {
+      "section": "Company Adoption",
+      "primary_reality": "Financial Reality",
+      "secondary_realities": ["Business Model Alignment"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "admin-facing",
+      "recommended_next_treatment": "MERGE_WITH Financial/Admin Data",
+      "reason": "Adoption signal belongs with financial/admin stack."
+    },
+    {
+      "section": "Truth and unavailable boundaries",
+      "primary_reality": "Confidence Reality",
+      "secondary_realities": ["Financial Reality"],
+      "intelligence_role": "PROTECTS_CONFIDENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "no",
+      "feeds_future_movement_adaptive_strategy": "no",
+      "audience": "both",
+      "recommended_next_treatment": "KEEP_AS_CONFIDENCE_BOUNDARY",
+      "reason": "Useful safety boundary but should be consolidated."
+    },
+    {
+      "section": "Behavior Profiles and Business Assessments tables",
+      "primary_reality": "Admin Evidence Store",
+      "secondary_realities": ["Financial Reality"],
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "partial",
+      "feeds_future_movement_adaptive_strategy": "partial",
+      "audience": "admin-facing",
+      "recommended_next_treatment": "MOVE_ADMIN_ONLY",
+      "reason": "Raw operational evidence rows."
+    },
+    {
+      "section": "Five Futures and One Move scaffolds",
+      "primary_reality": "Scaffold / Legacy",
+      "secondary_realities": ["Business Model Alignment", "Constraint Reality"],
+      "intelligence_role": "SCAFFOLD_ONLY",
+      "feeds_strategy_chat_now": "partial",
+      "feeds_five_futures_one_move": "no",
+      "feeds_future_movement_adaptive_strategy": "no",
+      "audience": "hidden/technical",
+      "recommended_next_treatment": "ARCHIVE_AFTER_CONFIRMATION",
+      "reason": "Scaffold only once generated outputs exist."
+    }
+  ],
+  "architecture_block_judgment": {
+    "Current Operating State": {
+      "judgment": "keep_promote",
+      "placement": "below_or_beside_strategy_chat",
+      "reason": "Useful and concrete for Darren."
+    },
+    "Five Realities Map": {
+      "judgment": "keep_collapsed",
+      "placement": "System Status stack",
+      "reason": "Useful doctrine, too abstract as a default-open block."
+    },
+    "Reality Completeness Meter": {
+      "judgment": "merge",
+      "placement": "inside Five Realities Map",
+      "reason": "Repeats reality completeness labels."
+    },
+    "Future Movement Readiness": {
+      "judgment": "merge_or_collapse",
+      "placement": "Evidence & Confidence stack",
+      "reason": "Boundary/explanation layer, not a daily action card."
+    }
+  },
+  "merge_candidates": [
+    {
+      "name": "Evidence stack",
+      "sections": ["Evidence Gaps", "Next Proof Targets", "Generated Evidence / Proof / Guardrails", "Future Movement Gate", "Outcome Ledger", "One Move Status Tracking"],
+      "recommendation": "merge",
+      "primary_reality": "Constraint Reality",
+      "reason": "All describe or capture proof required for better futures."
+    },
+    {
+      "name": "Confidence stack",
+      "sections": ["What Not To Overclaim", "Model Limits", "V1 Truth Boundary", "Unavailable / Not Yet Live", "Future Movement Readiness", "Reality Completeness Meter"],
+      "recommendation": "merge",
+      "primary_reality": "Confidence Reality",
+      "reason": "All prevent overclaiming or explain readiness limits."
+    },
+    {
+      "name": "Business model stack",
+      "sections": ["9-Path Business Model Backbone", "Opportunity Path Comparison", "Strategic Goal scenario lens", "E->P Lens"],
+      "recommendation": "merge_or_nest",
+      "primary_reality": "Business Model Alignment",
+      "reason": "All are strategic model context."
+    },
+    {
+      "name": "Strategy output stack",
+      "sections": ["Generated Strategy", "Generated Five Futures", "Generated One Move", "Current Operating State"],
+      "recommendation": "keep_together",
+      "primary_reality": "Multi-Reality Output",
+      "reason": "Output and summary should stay close."
+    },
+    {
+      "name": "Admin financial stack",
+      "sections": ["Sales Visibility", "Company Adoption", "Behavior Profiles table", "Business Assessments table", "raw sales/adoption records", "Unavailable Revenue Fields"],
+      "recommendation": "admin_only",
+      "primary_reality": "Financial Reality",
+      "reason": "Valuable for subscription/admin tracking but not main Darren view."
+    },
+    {
+      "name": "Roadmap/build stack",
+      "sections": ["Strategic Build Map", "roadmap/future phases", "unavailable/not-yet-live future build copy"],
+      "recommendation": "collapse_or_archive_later",
+      "primary_reality": "Scaffold / Legacy",
+      "reason": "Planning context, not active intelligence loop."
+    }
+  ],
+  "sections_not_feeding_intelligence": [
+    "Strategic Build Map full panel",
+    "Five Futures Scaffold after generated outputs exist",
+    "One Move Scaffold after generated outputs exist",
+    "duplicate Unavailable / Not Yet Live copy",
+    "standalone V1 Truth Boundary panel",
+    "standalone Unavailable Revenue Fields panel",
+    "standalone Reality Completeness Meter"
+  ],
+  "rewire_needed": [
+    "Reality Completeness Meter into Five Realities / System Status",
+    "Opportunity Path Comparison into 9-Path Business Model Map",
+    "Future Movement Readiness into Confidence / Evidence stack"
+  ],
+  "collapse_needed": [
+    "Five Realities Map",
+    "9-Path Business Model Backbone",
+    "Adaptive Strategy Loop v0",
+    "Confidence boundaries",
+    "Sales Visibility",
+    "Strategic Build Map"
+  ],
+  "admin_only_needed": [
+    "Behavior Profiles table",
+    "Business Assessments table",
+    "raw sales/adoption records",
+    "Strategic Build Map / roadmap"
+  ],
+  "archive_candidates_after_confirmation": [
+    "Five Futures Scaffold after generated outputs exist",
+    "One Move Scaffold after generated outputs exist",
+    "duplicate unavailable/not-yet-live copy after confidence merge",
+    "duplicate proof/guardrail copy after evidence merge"
+  ],
+  "recommended_app_stack_layout": [
+    {
+      "panel": "Strategy Chat",
+      "default_state": "top_visible",
+      "included_sections": ["Darren Strategy Chat"],
+      "primary_reality": "System Interface",
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "audience": "Darren-facing",
+      "reason": "Primary conversational surface."
+    },
+    {
+      "panel": "Current Operating State",
+      "default_state": "top_visible",
+      "included_sections": ["Current Operating State", "operating summary"],
+      "primary_reality": "Multi-Reality Output",
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "audience": "Darren-facing",
+      "reason": "Fast current-state answer."
+    },
+    {
+      "panel": "Current Strategy / Five Futures / One Move",
+      "default_state": "default_open",
+      "included_sections": ["Generated Strategy", "Generated Five Futures", "Generated One Move"],
+      "primary_reality": "Multi-Reality Output",
+      "intelligence_role": "KEEP_AS_OUTPUT",
+      "audience": "Darren-facing",
+      "reason": "Main generated intelligence output."
+    },
+    {
+      "panel": "Evidence & Proof / Outcome Loop",
+      "default_state": "default_open",
+      "included_sections": ["Proof targets", "Evidence gaps", "One Move Status", "Outcome Ledger", "Since Last Snapshot"],
+      "primary_reality": "Constraint Reality",
+      "intelligence_role": "CAPTURES_EVIDENCE",
+      "audience": "both",
+      "reason": "Core feedback loop."
+    },
+    {
+      "panel": "Five Realities / System Status",
+      "default_state": "collapsed",
+      "included_sections": ["Five Realities Map", "Reality Completeness Meter"],
+      "primary_reality": "System Interface",
+      "intelligence_role": "EXPLAINS_INTELLIGENCE",
+      "audience": "both",
+      "reason": "Architecture/status layer."
+    },
+    {
+      "panel": "9-Path Business Model Map",
+      "default_state": "collapsed",
+      "included_sections": ["9-Path Backbone", "Opportunity Path", "Strategic Goal", "E->P Lens"],
+      "primary_reality": "Business Model Alignment",
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "audience": "Darren-facing",
+      "reason": "Deep strategy map."
+    },
+    {
+      "panel": "Adaptive Strategy Draft",
+      "default_state": "collapsed",
+      "included_sections": ["Session Memory", "Future Movement Gate", "Adaptive Strategy Draft"],
+      "primary_reality": "Multi-Reality Output",
+      "intelligence_role": "GENERATES_INTELLIGENCE",
+      "audience": "admin-facing",
+      "reason": "Advanced pending-review loop."
+    },
+    {
+      "panel": "Confidence / Truth Boundaries",
+      "default_state": "collapsed",
+      "included_sections": ["overclaim guardrails", "model limits", "V1 limits", "not-yet-live fields", "Future Movement Readiness"],
+      "primary_reality": "Confidence Reality",
+      "intelligence_role": "PROTECTS_CONFIDENCE",
+      "audience": "both",
+      "reason": "Safety and readiness boundary."
+    },
+    {
+      "panel": "Financial/Admin Data",
+      "default_state": "admin_collapsed",
+      "included_sections": ["Sales Visibility", "Company Adoption", "Unavailable Revenue Fields"],
+      "primary_reality": "Financial Reality",
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "audience": "admin-facing",
+      "reason": "Subscription/adoption context."
+    },
+    {
+      "panel": "Raw Profiles / Assessments / Adoption Records",
+      "default_state": "admin_collapsed",
+      "included_sections": ["Behavior Profiles", "Business Assessments", "raw rows"],
+      "primary_reality": "Admin Evidence Store",
+      "intelligence_role": "FEEDS_INTELLIGENCE",
+      "audience": "admin-facing",
+      "reason": "Raw operational evidence."
+    },
+    {
+      "panel": "Build Map / Roadmap",
+      "default_state": "admin_collapsed",
+      "included_sections": ["Strategic Build Map", "roadmap future phases"],
+      "primary_reality": "Scaffold / Legacy",
+      "intelligence_role": "DISPLAY_ONLY",
+      "audience": "admin-facing",
+      "reason": "Planning context."
+    },
+    {
+      "panel": "Archive Candidates",
+      "default_state": "hidden_after_confirmation",
+      "included_sections": ["scaffolds", "duplicate unavailable/proof/guardrail copy"],
+      "primary_reality": "Scaffold / Legacy",
+      "intelligence_role": "SCAFFOLD_ONLY",
+      "audience": "hidden/technical",
+      "reason": "Remove only after merged stacks are stable."
+    }
+  ],
+  "default_open_recommendations": [
+    "Strategy Chat",
+    "Current Operating State",
+    "Current Strategy / Five Futures / One Move",
+    "Evidence & Proof / Outcome Loop"
+  ],
+  "collapsed_recommendations": [
+    "Five Realities / System Status",
+    "9-Path Business Model Map",
+    "Adaptive Strategy Draft",
+    "Confidence / Truth Boundaries",
+    "Sales Visibility / Adoption Data"
+  ],
+  "admin_only_recommendations": [
+    "Financial/Admin Data",
+    "Raw Profiles / Assessments / Adoption Records",
+    "Build Map / Roadmap"
+  ],
+  "confidence_boundary_recommendations": [
+    "Merge overclaim guardrails, model limits, V1 truth boundary, unavailable/not-yet-live fields, and Future Movement Readiness."
+  ],
+  "evidence_loop_recommendations": [
+    "Keep One Move Status, Outcome Ledger, and Since Last Snapshot default-open under Evidence & Proof / Outcome Loop."
+  ],
+  "five_realities_coverage_judgment": {
+    "represented_clearly_enough": true,
+    "financial": "covered but should move admin/supporting",
+    "behavioral": "covered through operating style and actions",
+    "business_model": "strongly covered through 9-path and outputs",
+    "constraint": "covered through proof/outcome loop",
+    "confidence": "covered but duplicated"
+  },
+  "strategy_chat_feed_judgment": {
+    "strong_sources": ["generated strategy", "one move", "outcome ledger", "since last snapshot", "9-path backbone", "operating style"],
+    "weak_or_indirect_sources": ["full roadmap cards", "raw tables", "standalone unavailable panels"],
+    "judgment": "Strategy Chat has enough feed sources; UI should surface them through app stacks rather than duplicate panels."
+  },
+  "future_movement_feed_judgment": {
+    "strong_sources": ["One Move Status", "Outcome Ledger", "Since Last Snapshot", "Future Movement Gate"],
+    "missing_or_thin_sources": ["revenue/payment evidence", "repeated outcome history", "validated channel adoption", "partner/funding proof"],
+    "judgment": "Future movement feed exists but evidence depth is still emerging."
+  },
+  "recommended_next_sprint": "DASH-UI-2D: build the app-stack expandable layout using this judgment, without changing backend behavior.",
+  "validation_results": {
+    "git_status_initial": "clean",
+    "git_head_initial": "2094d53 record darren five realities deployment smoke",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "npm_run_build": "skipped_runtime_code_unchanged",
+    "static_privacy_claim_scan_changed_files": "passed_no_matches"
+  },
+  "limits": [
+    "Trace/judgment only.",
+    "No runtime code changed.",
+    "No backend changed.",
+    "No prompt changed.",
+    "No model choice changed.",
+    "No records mutated.",
+    "No deploy performed."
+  ]
+}
