@@ -1,0 +1,167 @@
+{
+  "phase_id": "DASH-FINAL-TRACE-2I",
+  "verdict": "DARREN_DASHBOARD_FINAL_TRACE_PASS_WITH_LIMITS",
+  "classification": "PRODUCTION_READY_FOR_DARREN_TRIAL_WITH_MONITORING",
+  "runtime_code_changed": false,
+  "backend_changed": false,
+  "frontend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "route_health": {
+    "/": 200,
+    "/profile": 200,
+    "/business-assessment": 200,
+    "/leadership-dashboard": 200
+  },
+  "bundle_marker_checks": {
+    "asset": "https://moremindmap.com/assets/index-Dcu63Q9X.js",
+    "Strategy Chat": "present",
+    "Current Operating State": "present",
+    "Current Strategy / Five Futures / One Move": "present",
+    "Evidence & Proof / Outcome Loop": "present",
+    "Five Realities / System Status": "present",
+    "9-Path Business Model Map": "present",
+    "Adaptive Strategy Draft": "present",
+    "Confidence / Truth Boundaries": "present",
+    "Financial/Admin Data": "present",
+    "Raw Profiles / Assessments / Adoption Records": "present",
+    "Build Map / Roadmap": "present"
+  },
+  "strategy_chat_smoke_results": {
+    "panels_start": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "explains_panels_workflow": true,
+      "raw_json_dump": false
+    },
+    "next_best": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "practical_next_actions": true,
+      "references_current_state_or_evidence": true,
+      "future_movement_overclaim_detected": false
+    },
+    "move_futures": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "mentions_decisions_or_proof": true,
+      "future_movement_overclaim_detected": false
+    },
+    "overclaim": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "mentions_evidence_boundaries": true,
+      "raw_json_dump": false
+    },
+    "people_boundary_initial": {
+      "status": 500,
+      "ok": false,
+      "classification": "transient_observation_after_successful_retry"
+    },
+    "people_boundary_retry": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "correct_boundary": true,
+      "raw_json_dump": false
+    },
+    "people_boundary_alternate_prompts": {
+      "status": 200,
+      "ok": true,
+      "correct_boundary": true
+    }
+  },
+  "adaptive_strategy_smoke_result": {
+    "endpoint": "/api/admin/darren-adaptive-strategy-draft-latest",
+    "status": 200,
+    "ok": true,
+    "draft_present": true,
+    "replacement_claim_detected": false,
+    "private_source_leak_detected": false,
+    "generation_endpoint_called": false
+  },
+  "mutation_guard_result": {
+    "strategy_chat_help_prompts_mutation_performed": false,
+    "confirmed_action_requires_existing_ui_flow": true,
+    "no_record_mutation_observed": true
+  },
+  "app_stack_behavior_result": {
+    "route_rendered": true,
+    "bundle_markers_present": true,
+    "chat_button_marker_present": true,
+    "default_open_panel_markers_present": true,
+    "collapsed_panel_markers_present": true,
+    "click_test_performed": false
+  },
+  "browser_automation_result": {
+    "available": false,
+    "playwright_dependency": false,
+    "puppeteer_dependency": false,
+    "fallback_used": "route_bundle_api_smoke"
+  },
+  "build_validation_results": {
+    "git_diff_check": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed",
+    "node_check_changed_backend_files": "not_run_no_backend_changes"
+  },
+  "static_privacy_claim_scan_result": {
+    "scope": "current relevant runtime files",
+    "result": "passed_no_matches"
+  },
+  "issues_found": [],
+  "blocker_count": 0,
+  "major_count": 0,
+  "minor_count": 0,
+  "observations": [
+    {
+      "issue": "One transient Strategy Chat 500 on initial People Reality prompt",
+      "severity": "OBSERVATION",
+      "exact_evidence": "First prompt returned status 500; exact retry and two related prompts returned 200 with correct boundary.",
+      "file_or_route_likely_involved": "/api/admin/darren-strategy-chat",
+      "recommended_fix": "Monitor production Strategy Chat 500s during Darren trial; no code fix recommended from one unreproduced failure.",
+      "safe_to_fix_now": false,
+      "should_block_darren_call": false
+    },
+    {
+      "issue": "Browser automation unavailable",
+      "severity": "OBSERVATION",
+      "exact_evidence": "package.json has no Playwright or Puppeteer dependency.",
+      "file_or_route_likely_involved": "tooling",
+      "recommended_fix": "Add browser smoke automation in a later quality sprint if repeated dashboard trials continue.",
+      "safe_to_fix_now": false,
+      "should_block_darren_call": false
+    }
+  ],
+  "should_call_darren": true,
+  "darren_ready_score": 84,
+  "confidence_level": "medium-high",
+  "recommended_pre_call_script": "This is ready for a guided trial. Start at the top. Ask Strategy Chat what the dashboard is telling you and what to do next. The dashboard is not claiming futures move automatically. It gets better when you accept a One Move, execute it, and record proof in the evidence loop.",
+  "recommended_follow_up_monitoring": [
+    "Watch for Strategy Chat 500s.",
+    "Ask Darren whether the app-stack layout is understandable.",
+    "Verify he can open chat, ask where to start, and understand the Evidence & Proof loop.",
+    "Do not ask him to use Adaptive Draft or raw admin panels first."
+  ],
+  "limits": [
+    "Trace only.",
+    "No runtime code changed.",
+    "No backend changed.",
+    "No frontend changed.",
+    "No prompts changed.",
+    "No model selection changed.",
+    "No records mutated.",
+    "No deploy performed."
+  ]
+}

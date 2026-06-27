@@ -1,0 +1,215 @@
+{
+  "phase_id": "DASH-RECURSION-2H",
+  "verdict": "DARREN_DASHBOARD_RECURSION_SCORE_COMPLETE_WITH_LIMITS",
+  "classification": "RECURSIVE_LEARNING_MATURITY_AUDIT_TRACE_ONLY",
+  "runtime_code_changed": false,
+  "backend_changed": false,
+  "frontend_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": false,
+  "records_mutated": false,
+  "deployed": false,
+  "category_scores": [
+    {
+      "category": "Architecture originality",
+      "score_1_to_100": 82,
+      "honest_reason": "The five-realities plus evidence loop architecture is differentiated and serious.",
+      "what_is_real": "Five realities, app-stack layout, context wiring, workflow guidance, evidence loop.",
+      "what_is_scaffold": "Full adaptive intelligence platform framing.",
+      "what_is_missing": "Governed multi-user operating system and mature data layer.",
+      "next_upgrade_needed": "Turn doctrine into shared reusable architecture beyond Darren."
+    },
+    {
+      "category": "Five Futures doctrine maturity",
+      "score_1_to_100": 76,
+      "honest_reason": "Real doctrine exists beyond a normal dashboard, but it is still qualitative.",
+      "what_is_real": "Five Futures, One Move, 9-path map, evidence and confidence context.",
+      "what_is_scaffold": "Future movement scoring and repeatable future model governance.",
+      "what_is_missing": "Measured calibration over time.",
+      "next_upgrade_needed": "Add governed evidence weighting and review history."
+    },
+    {
+      "category": "Evidence capture maturity",
+      "score_1_to_100": 62,
+      "honest_reason": "One Move status, Outcome Ledger, proof targets, and summaries exist, but proof volume is thin.",
+      "what_is_real": "Status, ledger events, proof targets, evidence gaps.",
+      "what_is_scaffold": "Outcome learning beyond v0.",
+      "what_is_missing": "Reliable real-world evidence volume and financial proof.",
+      "next_upgrade_needed": "Make evidence capture a repeatable weekly workflow."
+    },
+    {
+      "category": "Memory and continuity maturity",
+      "score_1_to_100": 58,
+      "honest_reason": "Latest strategy, snapshots, ledger, summaries, and since-last comparisons exist.",
+      "what_is_real": "Saved strategy, session summaries, latest draft, movement assessment.",
+      "what_is_scaffold": "Longitudinal intelligence memory.",
+      "what_is_missing": "Multi-cycle history and trend reasoning.",
+      "next_upgrade_needed": "Add historical strategy/evidence timeline and review states."
+    },
+    {
+      "category": "Adaptive strategy maturity",
+      "score_1_to_100": 50,
+      "honest_reason": "Adaptive Draft exists but remains pending-review output without adoption workflow.",
+      "what_is_real": "Draft generation from latest strategy, ledger, summaries, movement, compact context.",
+      "what_is_scaffold": "Review/adopt/update loop.",
+      "what_is_missing": "Human approval workflow and diff against active strategy.",
+      "next_upgrade_needed": "Build review/adopt/reject flow."
+    },
+    {
+      "category": "Future movement maturity",
+      "score_1_to_100": 42,
+      "honest_reason": "Evidence bands are responsible but coarse.",
+      "what_is_real": "Movement bands and since-last summary.",
+      "what_is_scaffold": "Future movement as durable learning.",
+      "what_is_missing": "Calibration, thresholds, repeated evidence comparisons.",
+      "next_upgrade_needed": "Govern movement criteria and store movement history."
+    },
+    {
+      "category": "Closed-loop learning maturity",
+      "score_1_to_100": 22,
+      "honest_reason": "The system records evidence, but it does not truly learn from outcomes yet.",
+      "what_is_real": "Evidence can be recorded and later reviewed.",
+      "what_is_scaffold": "Self-improving strategic intelligence.",
+      "what_is_missing": "Outcome-to-strategy update loop with governance.",
+      "next_upgrade_needed": "Connect accepted evidence to reviewed strategy updates."
+    },
+    {
+      "category": "Human governance maturity",
+      "score_1_to_100": 78,
+      "honest_reason": "Mutations require confirmation and strategy replacement is not autonomous.",
+      "what_is_real": "Confirmed action boundaries and non-mutating chat.",
+      "what_is_scaffold": "Formal review permissions and audit governance.",
+      "what_is_missing": "Role-based approvals and audit UI.",
+      "next_upgrade_needed": "Add explicit review/adopt permissions."
+    },
+    {
+      "category": "Confidence / anti-overclaim maturity",
+      "score_1_to_100": 82,
+      "honest_reason": "Truth boundaries are strong and consistently represented.",
+      "what_is_real": "Unavailable fields, claim boundaries, movement boundaries, people boundary.",
+      "what_is_scaffold": "Automated claim-risk review across all outputs.",
+      "what_is_missing": "Formal claim classifier and release gating.",
+      "next_upgrade_needed": "Add confidence boundary consolidation and claim checks."
+    },
+    {
+      "category": "Data/financial proof maturity",
+      "score_1_to_100": 28,
+      "honest_reason": "Financial/admin proof is mostly activity counts, not real indexed revenue or conversion proof.",
+      "what_is_real": "Profile count, assessment count, company grouping.",
+      "what_is_scaffold": "Revenue, subscription, payment, and RRG proof.",
+      "what_is_missing": "Indexed financial evidence.",
+      "next_upgrade_needed": "Connect payment, revenue, subscription, conversion, and RRG evidence."
+    },
+    {
+      "category": "External context maturity",
+      "score_1_to_100": 10,
+      "honest_reason": "Outside-signal doctrine exists but no governed external context runtime is live.",
+      "what_is_real": "Roadmap idea only.",
+      "what_is_scaffold": "Outside signal discovery and classification.",
+      "what_is_missing": "Import/reject governance and provenance.",
+      "next_upgrade_needed": "Build governed external-signal membrane later."
+    },
+    {
+      "category": "Product usability maturity",
+      "score_1_to_100": 68,
+      "honest_reason": "App-stack layout and workflow chat make it usable, though it is still dense.",
+      "what_is_real": "Chat-first top surface, current state, default-open outputs/evidence, collapsed stacks.",
+      "what_is_scaffold": "Polished onboarding and workflow telemetry.",
+      "what_is_missing": "User-tested flow and simplification after real Darren usage.",
+      "next_upgrade_needed": "Observe Darren using it and remove friction."
+    },
+    {
+      "category": "Enterprise readiness",
+      "score_1_to_100": 24,
+      "honest_reason": "It is Darren-specific and not ready for enterprise/team deployment.",
+      "what_is_real": "Internal single-profile proof lab.",
+      "what_is_scaffold": "CEO/team/board/org products.",
+      "what_is_missing": "Permissions, tenancy, org people layer, governance, repeatable workflows.",
+      "next_upgrade_needed": "Build account/org architecture only after Darren proof."
+    },
+    {
+      "category": "Production reliability",
+      "score_1_to_100": 72,
+      "honest_reason": "Routes and smokes pass; one transient Strategy Chat 500 was observed and not reproduced.",
+      "what_is_real": "Production route health and chat smokes.",
+      "what_is_scaffold": "Monitoring and error analytics.",
+      "what_is_missing": "Automated browser regression and observability.",
+      "next_upgrade_needed": "Add non-invasive monitoring and browser smoke automation."
+    },
+    {
+      "category": "Palantir-level execution proximity",
+      "score_1_to_100": 22,
+      "honest_reason": "Conceptually ambitious but far from operational intelligence infrastructure.",
+      "what_is_real": "Internal adaptive strategy proof lab.",
+      "what_is_scaffold": "Operational intelligence platform.",
+      "what_is_missing": "Scale, governance, data integration, provenance, permissions, model ops.",
+      "next_upgrade_needed": "Mature data, governance, and operational workflows."
+    }
+  ],
+  "current_overall_score": 52,
+  "idea_score": 82,
+  "execution_score": 48,
+  "recursive_learning_score": 31,
+  "enterprise_readiness_score": 25,
+  "confidence_adjusted_score": 50,
+  "strongest_parts": [
+    "Architecture doctrine",
+    "Confidence and anti-overclaim boundaries",
+    "Chat-first workflow guidance",
+    "Evidence capture scaffolding"
+  ],
+  "weakest_parts": [
+    "True closed-loop learning",
+    "Financial proof maturity",
+    "Enterprise readiness",
+    "External context maturity"
+  ],
+  "real_capabilities": [
+    "Production dashboard loads",
+    "Strategy Chat works",
+    "Compact context wiring",
+    "Generated strategy persistence",
+    "One Move status",
+    "Outcome Ledger v0",
+    "Since Last Snapshot",
+    "Adaptive Draft pending review"
+  ],
+  "scaffold_capabilities": [
+    "Future movement bands",
+    "Reality completeness labels",
+    "Enterprise/team roadmap",
+    "Outside-signal doctrine"
+  ],
+  "missing_capabilities": [
+    "Indexed financial proof",
+    "Governed strategy adoption",
+    "True outcome-to-strategy learning",
+    "Enterprise permissions",
+    "External signal provenance",
+    "Production monitoring"
+  ],
+  "ten_point_unlocks": [
+    "Index real payment/revenue/conversion proof",
+    "Create a formal review/adopt/reject flow for Adaptive Draft",
+    "Add browser smoke automation and monitoring"
+  ],
+  "twenty_five_point_unlocks": [
+    "Build a governed loop where accepted decisions and ledger evidence update strategy/future movement after review",
+    "Connect financial proof, external signals, and longitudinal evidence history",
+    "Move from Darren-specific proof lab to repeatable multi-account architecture"
+  ],
+  "honest_palantir_comparison": "Not close in execution. Conceptually it points toward operational intelligence, but current deployed state is an internal alpha proof lab, not operational infrastructure.",
+  "should_darren_use_now": true,
+  "darren_usage_guidance": "Use it as a guided strategy dashboard. Start with Current Operating State and Strategy Chat, execute One Move, record proof, and treat futures as evidence-gated.",
+  "limits": [
+    "Trace only.",
+    "No runtime code changed.",
+    "No backend changed.",
+    "No frontend changed.",
+    "No prompts changed.",
+    "No model selection changed.",
+    "No records mutated.",
+    "No deploy performed."
+  ],
+  "recommended_next_step": "Use with Darren, monitor friction, then prioritize financial proof indexing and governed strategy review/adoption."
+}
