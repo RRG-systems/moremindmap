@@ -82,6 +82,30 @@ const CHAT_SESSION_INTENTS = [
   ['other', 'Other']
 ]
 
+function recordDarrenUsageEvent(adminCode, event) {
+  if (!adminCode || !event?.event_type) return
+  fetch('/api/admin/darren-usage-event', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Admin-Code': adminCode
+    },
+    body: JSON.stringify({
+      subject_id: event.subject_id,
+      event_type: event.event_type,
+      event_source: event.event_source || 'darren_dashboard_frontend',
+      panel_id: event.panel_id,
+      action_id: event.action_id,
+      related_strategy_review_id: event.related_strategy_review_id,
+      related_one_move_id: event.related_one_move_id,
+      related_proof_target_id: event.related_proof_target_id,
+      related_chat_session_id: event.related_chat_session_id,
+      metadata: event.metadata || {}
+    })
+  }).catch(() => {})
+}
+
 function sectionStatus(status) {
   if (!status) return 'Scaffold'
   return display(status).replace(/_/g, ' ')
@@ -388,6 +412,26 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
     generatedStrategy: generationState.data,
     pathCoverage
   }), [snapshot, generationState.data, pathCoverage])
+  const trackUsage = (event) => recordDarrenUsageEvent(adminCode, event)
+
+  useEffect(() => {
+    trackUsage({
+      event_type: 'dashboard_opened',
+      panel_id: 'darren_leadership_intelligence',
+      metadata: {
+        latest_strategy_present: hasSavedGeneratedStrategy,
+        source: generationState.source || 'snapshot'
+      }
+    })
+  }, [])
+
+  function trackPanelToggle({ isOpen, panelId, title }) {
+    trackUsage({
+      event_type: isOpen ? 'panel_opened' : 'panel_collapsed',
+      panel_id: panelId,
+      metadata: { title }
+    })
+  }
 
   const contextCards = useMemo(() => [
     {
@@ -426,6 +470,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
 
       <LeadershipAppStackPanel
         title="Current Strategy / Five Futures / One Move"
+        telemetryId="current_strategy_five_futures_one_move"
+        onToggle={trackPanelToggle}
         eyebrow="Default Open"
         badge="Output"
         defaultOpen
@@ -439,12 +485,36 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
           showGenerated={false}
         />
         {generated && (
-          <GeneratedStrategyOutput generated={generated} source={generationState.source} />
+          <>
+            <GeneratedStrategyOutput generated={generated} source={generationState.source} />
+            <StrategyReviewControls
+              adminCode={adminCode}
+              subject={{
+                subject_id: generated.strategy_id,
+                subject_type: 'generated_strategy',
+                source_type: 'generated_strategy',
+                source_id: generated.strategy_id,
+                source_title: generated.one_move?.title || 'Current generated strategy',
+                linked_one_move: {
+                  title: generated.one_move?.title,
+                  proof_target: generated.one_move?.proof_target,
+                  status: generated.accepted_status
+                },
+                linked_future_context: {
+                  future_count: asArray(generated.five_futures).length,
+                  strategy_id: generated.strategy_id
+                }
+              }}
+              onUsageEvent={trackUsage}
+            />
+          </>
         )}
       </LeadershipAppStackPanel>
 
       <LeadershipAppStackPanel
         title="Evidence & Proof / Outcome Loop"
+        telemetryId="evidence_proof_outcome_loop"
+        onToggle={trackPanelToggle}
         eyebrow="Default Open"
         badge="Evidence"
         defaultOpen
@@ -474,6 +544,7 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
             adminCode={adminCode}
             generated={generated}
             setGenerationState={setGenerationState}
+            onUsageEvent={trackUsage}
           />
         ) : (
           <p className="mt-5 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white/54">
@@ -484,6 +555,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
 
       <LeadershipAppStackPanel
         title="Five Realities / System Status"
+        telemetryId="five_realities_system_status"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Support"
         badge="System Status"
         description="The architecture layer: Financial, Behavioral, Business Model, Constraint, and Confidence realities."
@@ -497,6 +570,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
 
       <LeadershipAppStackPanel
         title="9-Path Business Model Map"
+        telemetryId="nine_path_business_model_map"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Support"
         badge="Business Model"
         description="The durable business model map and scenario lens behind generated strategy."
@@ -545,13 +620,15 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
 
       <LeadershipAppStackPanel
         title="Adaptive Strategy Draft"
+        telemetryId="adaptive_strategy_draft"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Support"
         badge="Adaptive"
         description="Advanced adaptive intelligence: session summaries, evidence gates, and pending-review strategy drafts."
         summary="Session Memory, Future Movement Gate, and Adaptive Strategy Draft."
       >
         {generated?.strategy_id ? (
-          <AdaptiveStrategyLoopPanel adminCode={adminCode} generated={generated} />
+          <AdaptiveStrategyLoopPanel adminCode={adminCode} generated={generated} onUsageEvent={trackUsage} />
         ) : (
           <p className="rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-6 text-white/54">
             Adaptive Strategy Draft becomes available after a saved generated strategy exists.
@@ -561,6 +638,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
 
       <LeadershipAppStackPanel
         title="Confidence / Truth Boundaries"
+        telemetryId="confidence_truth_boundaries"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Support"
         badge="Confidence"
         description="Boundaries that prevent overclaiming while evidence is still developing."
@@ -591,6 +670,8 @@ function DarrenSnapshotContent({ snapshot, adminCode, generationState, setGenera
       {!hasSavedGeneratedStrategy && (
         <LeadershipAppStackPanel
           title="Archive Candidates"
+          telemetryId="archive_candidates"
+          onToggle={trackPanelToggle}
           eyebrow="Admin Note"
           badge="Later"
           description="Scaffold sections are preserved for now and can be archived after generated outputs and merged stacks are confirmed."
@@ -960,6 +1041,133 @@ function generationErrorMessage(error) {
   return 'Darren Five Futures + One Move generation is unavailable right now.'
 }
 
+const REVIEW_DECISIONS = [
+  ['accepted', 'Accept'],
+  ['rejected', 'Reject'],
+  ['revised', 'Revise'],
+  ['needs_discussion', 'Needs Discussion'],
+  ['deferred', 'Defer']
+]
+
+function reviewEventType(decisionStatus) {
+  if (decisionStatus === 'accepted') return 'strategy_recommendation_accepted'
+  if (decisionStatus === 'rejected') return 'strategy_recommendation_rejected'
+  if (decisionStatus === 'revised' || decisionStatus === 'needs_discussion') return 'strategy_recommendation_revised'
+  return 'strategy_recommendation_deferred'
+}
+
+function StrategyReviewControls({ adminCode, subject, onUsageEvent }) {
+  const [humanNotes, setHumanNotes] = useState('')
+  const [reviewState, setReviewState] = useState({ status: 'idle', message: '', latestReview: null })
+  const subjectId = subject?.subject_id || subject?.source_id || ''
+
+  async function submitReview(decisionStatus) {
+    if (!adminCode || !subjectId || reviewState.status === 'saving') return
+    setReviewState((current) => ({ ...current, status: 'saving', message: '' }))
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'strategy_review_opened',
+        panel_id: 'strategy_review',
+        action_id: decisionStatus,
+        related_one_move_id: subject?.linked_one_move?.title || null,
+        metadata: {
+          subject_type: subject?.subject_type,
+          source_type: subject?.source_type
+        }
+      })
+    }
+
+    try {
+      const response = await fetch('/api/admin/darren-strategy-review', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          'X-Admin-Code': adminCode
+        },
+        body: JSON.stringify({
+          subject_id: subjectId,
+          subject_type: subject?.subject_type,
+          source_type: subject?.source_type,
+          source_id: subject?.source_id || subjectId,
+          source_title: subject?.source_title,
+          decision_status: decisionStatus,
+          human_notes: humanNotes,
+          evidence_basis: {
+            source_panel: 'darren_dashboard_strategy_review',
+            current_status: subject?.linked_one_move?.status || 'unknown'
+          },
+          linked_one_move: subject?.linked_one_move,
+          linked_future_context: subject?.linked_future_context,
+          created_by: 'darren_dashboard_admin'
+        })
+      })
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok || !payload?.ok) {
+        setReviewState({ status: 'error', message: 'Strategy review could not be saved.', latestReview: null })
+        return
+      }
+
+      setReviewState({
+        status: 'ready',
+        message: payload.message || 'Strategy review recorded.',
+        latestReview: payload.review || null
+      })
+      if (typeof onUsageEvent === 'function') {
+        onUsageEvent({
+          event_type: reviewEventType(decisionStatus),
+          panel_id: 'strategy_review',
+          action_id: decisionStatus,
+          related_strategy_review_id: payload.review?.review_id,
+          related_one_move_id: subject?.linked_one_move?.title || null,
+          metadata: {
+            source_type: subject?.source_type,
+            mutation_scope: payload.mutation_scope || 'review_record_only'
+          }
+        })
+      }
+    } catch {
+      setReviewState({ status: 'error', message: 'Strategy review could not be saved.', latestReview: null })
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-cyan-300/16 bg-cyan-400/[0.06] p-4">
+      <div className="text-xs uppercase tracking-[0.18em] text-cyan-100/52">Strategy Review</div>
+      <h4 className="mt-2 text-lg font-semibold tracking-tight text-white">Human decision layer</h4>
+      <p className="mt-3 text-sm leading-6 text-white/62">
+        Record Darren's review decision without changing Five Futures, One Move, future movement, or the active strategy automatically.
+      </p>
+      <label className="mt-4 block">
+        <span className="text-xs uppercase tracking-[0.16em] text-white/38">Review note</span>
+        <textarea
+          value={humanNotes}
+          onChange={(event) => setHumanNotes(event.target.value.slice(0, 1200))}
+          rows={3}
+          className={`mt-2 ${textareaFieldClass}`}
+          placeholder="Why accept, reject, revise, discuss, or defer this recommendation?"
+        />
+      </label>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {REVIEW_DECISIONS.map(([status, label]) => (
+          <StatusButton key={status} disabled={reviewState.status === 'saving'} onClick={() => submitReview(status)}>
+            {label}
+          </StatusButton>
+        ))}
+      </div>
+      {reviewState.message && (
+        <div className="mt-4 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm leading-6 text-white/62">
+          {reviewState.message}
+          {reviewState.latestReview?.review_id && (
+            <span className="block text-xs text-white/42">Review ID: {reviewState.latestReview.review_id}</span>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function GeneratedIntelligence({ adminCode, generated, source, setGenerationState }) {
   const futures = asArray(generated?.five_futures)
   const oneMove = generated?.one_move || {}
@@ -1028,7 +1236,7 @@ function GeneratedIntelligence({ adminCode, generated, source, setGenerationStat
   )
 }
 
-function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
+function OneMoveStatusControls({ adminCode, generated, setGenerationState, onUsageEvent }) {
   const [note, setNote] = useState('')
   const [modifiedText, setModifiedText] = useState(generated.one_move_modified_text || '')
   const [signalType, setSignalType] = useState(generated.result_signal_type || 'none')
@@ -1040,6 +1248,18 @@ function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
   async function updateStatus(action) {
     if (!adminCode || !generated.strategy_id || isSaving) return
 
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'one_move_reviewed',
+        panel_id: 'evidence_proof_outcome_loop',
+        action_id: action,
+        related_one_move_id: generated.strategy_id,
+        metadata: {
+          signal_type: signalType,
+          signal_strength: signalStrength
+        }
+      })
+    }
     setIsSaving(true)
     setStatusMessage('')
     try {
@@ -1152,12 +1372,12 @@ function OneMoveStatusControls({ adminCode, generated, setGenerationState }) {
         </div>
       )}
 
-      <OutcomeLedgerControls adminCode={adminCode} generated={generated} />
+      <OutcomeLedgerControls adminCode={adminCode} generated={generated} onUsageEvent={onUsageEvent} />
     </div>
   )
 }
 
-function OutcomeLedgerControls({ adminCode, generated }) {
+function OutcomeLedgerControls({ adminCode, generated, onUsageEvent }) {
   const [eventType, setEventType] = useState('one_move_planned')
   const [eventNote, setEventNote] = useState('')
   const [signalType, setSignalType] = useState('none')
@@ -1194,6 +1414,20 @@ function OutcomeLedgerControls({ adminCode, generated }) {
 
   async function saveLedgerEvent() {
     if (!adminCode || !generated?.strategy_id || ledgerState.status === 'saving') return
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'evidence_added',
+        panel_id: 'outcome_ledger_v0',
+        action_id: eventType,
+        related_one_move_id: generated.strategy_id,
+        related_proof_target_id: proofTargetName,
+        metadata: {
+          signal_type: signalType,
+          signal_strength: signalStrength,
+          evidence_weight: evidenceWeight
+        }
+      })
+    }
     setLedgerState((current) => ({ ...current, status: 'saving', message: '' }))
 
     try {
@@ -1224,6 +1458,19 @@ function OutcomeLedgerControls({ adminCode, generated }) {
       }
 
       setEventNote('')
+      if (typeof onUsageEvent === 'function') {
+        onUsageEvent({
+          event_type: 'outcome_added',
+          panel_id: 'outcome_ledger_v0',
+          action_id: eventType,
+          related_one_move_id: generated.strategy_id,
+          related_proof_target_id: proofTargetName,
+          metadata: {
+            recorded: true,
+            evidence_weight: evidenceWeight
+          }
+        })
+      }
       const nextEvents = payload.latest_outcome_event_summary
         ? [payload.latest_outcome_event_summary, ...ledgerState.events].slice(0, 10)
         : ledgerState.events
@@ -1295,7 +1542,7 @@ function OutcomeLedgerControls({ adminCode, generated }) {
   )
 }
 
-function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
+function AdaptiveStrategyLoopPanel({ adminCode, generated, onUsageEvent }) {
   const [summaryNote, setSummaryNote] = useState('')
   const [sessionIntent, setSessionIntent] = useState('general')
   const [loopState, setLoopState] = useState({
@@ -1354,6 +1601,15 @@ function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
       setLoopState((current) => ({ ...current, message: 'Add a short summary before saving.' }))
       return
     }
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'strategy_chat_response_received',
+        panel_id: 'adaptive_strategy_draft',
+        action_id: 'save_session_summary',
+        related_one_move_id: generated.strategy_id,
+        metadata: { session_intent: sessionIntent }
+      })
+    }
     setLoopState((current) => ({ ...current, status: 'saving_summary', message: '' }))
     try {
       const response = await fetch('/api/admin/darren-chat-session-summary', {
@@ -1397,6 +1653,14 @@ function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
 
   async function assessFutureMovement() {
     if (!adminCode || loopState.status === 'assessing') return
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'future_movement_reviewed',
+        panel_id: 'future_movement_gate',
+        action_id: 'assess_future_movement',
+        related_one_move_id: generated?.strategy_id
+      })
+    }
     setLoopState((current) => ({ ...current, status: 'assessing', message: '' }))
     try {
       const response = await fetch('/api/admin/darren-future-movement-assessment', {
@@ -1421,6 +1685,14 @@ function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
 
   async function generateAdaptiveDraft() {
     if (!adminCode || loopState.status === 'drafting') return
+    if (typeof onUsageEvent === 'function') {
+      onUsageEvent({
+        event_type: 'strategy_review_opened',
+        panel_id: 'adaptive_strategy_draft',
+        action_id: 'generate_adaptive_draft',
+        related_one_move_id: generated?.strategy_id
+      })
+    }
     setLoopState((current) => ({ ...current, status: 'drafting', message: '' }))
     try {
       const response = await fetch('/api/admin/darren-adaptive-strategy-draft', {
@@ -1517,6 +1789,26 @@ function AdaptiveStrategyLoopPanel({ adminCode, generated }) {
               <p className="rounded-xl border border-fuchsia-200/14 bg-fuchsia-300/10 px-3 py-2 text-sm leading-6 text-fuchsia-50/64">
                 {display(loopState.draft.automatic_learning_boundary)}
               </p>
+              <StrategyReviewControls
+                adminCode={adminCode}
+                subject={{
+                  subject_id: loopState.draft.draft_id,
+                  subject_type: 'adaptive_strategy_draft',
+                  source_type: 'adaptive_strategy',
+                  source_id: loopState.draft.draft_id,
+                  source_title: loopState.draft.updated_recommendation || 'Adaptive Strategy Draft',
+                  linked_one_move: {
+                    title: loopState.draft.suggested_one_move,
+                    proof_target: loopState.draft.proof_target_next,
+                    status: loopState.draft.draft_status
+                  },
+                  linked_future_context: {
+                    source_strategy_id: loopState.draft.source_strategy_id,
+                    future_movement_summary: loopState.draft.future_movement_summary
+                  }
+                }}
+                onUsageEvent={onUsageEvent}
+              />
             </div>
           )}
         </div>
@@ -1690,6 +1982,15 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
     setProposedAction(null)
     setActionMessage('')
     setChatState({ status: 'loading', error: '' })
+    recordDarrenUsageEvent(adminCode, {
+      event_type: 'strategy_chat_prompt_submitted',
+      panel_id: 'strategy_chat',
+      action_id: inferEntryContext(trimmed),
+      related_chat_session_id: conversationId,
+      metadata: {
+        message_length: trimmed.length
+      }
+    })
 
     try {
       const response = await fetch('/api/admin/darren-strategy-chat', {
@@ -1722,6 +2023,18 @@ function DarrenStrategyChatDrawer({ adminCode, isOpen, onClose, generationState,
       setPossibleSignal(payload.possible_memory_signal || null)
       setProposedAction(payload.proposed_action || null)
       setChatState({ status: 'idle', error: '' })
+      recordDarrenUsageEvent(adminCode, {
+        event_type: 'strategy_chat_response_received',
+        panel_id: 'strategy_chat',
+        action_id: payload.entry_context || inferEntryContext(trimmed),
+        related_chat_session_id: conversationId,
+        metadata: {
+          model_used: payload.model_used || 'unknown',
+          fallback_used: payload.fallback_used === true,
+          suggested_next_action_count: suggestionText.length,
+          proposed_action_present: Boolean(payload.proposed_action)
+        }
+      })
     } catch {
       setChatMessages((current) => [...current, { role: 'assistant', text: 'Strategy Chat is not available right now. The dashboard data is unchanged.' }])
       setChatState({ status: 'error', error: 'Strategy Chat is not available right now. The dashboard data is unchanged.' })

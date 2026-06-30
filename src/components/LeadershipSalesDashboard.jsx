@@ -111,6 +111,26 @@ function buildNormalizedCompanyRows(profileRows, assessmentRows) {
     .slice(0, 100)
 }
 
+function recordDarrenUsageEvent(adminCode, event) {
+  if (!adminCode || !event?.event_type) return
+  fetch('/api/admin/darren-usage-event', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'X-Admin-Code': adminCode
+    },
+    body: JSON.stringify({
+      subject_id: event.subject_id,
+      event_type: event.event_type,
+      event_source: event.event_source || 'leadership_sales_dashboard_frontend',
+      panel_id: event.panel_id,
+      action_id: event.action_id,
+      metadata: event.metadata || {}
+    })
+  }).catch(() => {})
+}
+
 export default function LeadershipSalesDashboard() {
   const [dashboardState, setDashboardState] = useState({
     status: 'loading',
@@ -258,6 +278,25 @@ function DashboardContent({ data, adminCode }) {
   const notes = Array.isArray(data?.missing_data_notes) ? data.missing_data_notes : []
   const limits = Array.isArray(data?.limits) ? data.limits : []
   const hiddenTestRecordsCount = rawProfiles.length + rawAssessments.length - profiles.length - assessments.length
+  const trackPanelToggle = ({ isOpen, panelId, title }) => {
+    recordDarrenUsageEvent(adminCode, {
+      event_type: isOpen ? 'panel_opened' : 'panel_collapsed',
+      panel_id: panelId,
+      metadata: { title }
+    })
+  }
+
+  useEffect(() => {
+    recordDarrenUsageEvent(adminCode, {
+      event_type: 'dashboard_opened',
+      panel_id: 'leadership_dashboard',
+      metadata: {
+        profiles_displayed: profiles.length,
+        assessments_displayed: assessments.length,
+        companies_displayed: companies.length
+      }
+    })
+  }, [])
 
   return (
     <div className="space-y-10">
@@ -265,6 +304,8 @@ function DashboardContent({ data, adminCode }) {
 
       <LeadershipAppStackPanel
         title="Financial/Admin Data"
+        telemetryId="financial_admin_data"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Admin"
         badge="Admin"
         description="Financial Reality and adoption evidence: profile/assessment counts, company adoption, and revenue availability boundaries."
@@ -293,6 +334,8 @@ function DashboardContent({ data, adminCode }) {
 
       <LeadershipAppStackPanel
         title="Raw Profiles / Assessments / Adoption Records"
+        telemetryId="raw_profiles_assessments_adoption_records"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Admin"
         badge="Records"
         description="Raw admin evidence rows. These feed visibility and follow-up, but they are not the primary Darren-facing intelligence surface."
@@ -304,6 +347,8 @@ function DashboardContent({ data, adminCode }) {
 
       <LeadershipAppStackPanel
         title="Build Map / Roadmap"
+        telemetryId="build_map_roadmap"
+        onToggle={trackPanelToggle}
         eyebrow="Collapsed Admin"
         badge="Roadmap"
         description="Planning context and build truth. Kept available, but no longer allowed to dominate the dashboard surface."

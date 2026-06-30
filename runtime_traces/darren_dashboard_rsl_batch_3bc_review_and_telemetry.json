@@ -1,0 +1,137 @@
+{
+  "phase_id": "DASH-RSL-BATCH-3BC",
+  "runtime_changed": true,
+  "frontend_changed": true,
+  "backend_changed": true,
+  "persistence_changed": true,
+  "global_model_changed": false,
+  "strategy_chat_model_wiring_changed": false,
+  "records_mutated_during_validation": false,
+  "files_changed": [
+    "api/admin/darren-strategy-review-core.js",
+    "api/admin/darren-strategy-review.js",
+    "api/admin/darren-usage-event-core.js",
+    "api/admin/darren-usage-event.js",
+    "src/components/DarrenLeadershipIntelligencePanel.jsx",
+    "src/components/LeadershipSalesDashboard.jsx",
+    "src/components/dashboard/LeadershipAppStackPanel.jsx",
+    "DARREN_DASHBOARD_RSL_BATCH_3BC_REVIEW_AND_TELEMETRY.md",
+    "runtime_traces/darren_dashboard_rsl_batch_3bc_review_and_telemetry.json"
+  ],
+  "routes_added": [
+    "/api/admin/darren-strategy-review",
+    "/api/admin/darren-usage-event"
+  ],
+  "review_schema": {
+    "review_id": "string",
+    "subject_id": "string",
+    "subject_type": "string",
+    "source_type": "string",
+    "source_id": "string",
+    "source_title": "string",
+    "decision_status": "accepted|rejected|revised|needs_discussion|deferred",
+    "active_strategy_candidate": "boolean, true only for accepted review records",
+    "human_notes": "bounded string",
+    "evidence_basis": "compact object",
+    "linked_one_move": "compact object",
+    "linked_future_context": "compact object",
+    "created_at": "ISO timestamp",
+    "reviewed_at": "ISO timestamp",
+    "created_by": "string",
+    "mutation_scope": "review_record_only",
+    "no_auto_future_movement": true
+  },
+  "telemetry_schema": {
+    "event_id": "string",
+    "subject_id": "string",
+    "event_type": "allowed event type",
+    "event_source": "string",
+    "panel_id": "string",
+    "action_id": "string",
+    "related_strategy_review_id": "string",
+    "related_one_move_id": "string",
+    "related_proof_target_id": "string",
+    "related_chat_session_id": "string",
+    "metadata": "compact object",
+    "created_at": "ISO timestamp"
+  },
+  "allowed_review_statuses": [
+    "accepted",
+    "rejected",
+    "revised",
+    "needs_discussion",
+    "deferred"
+  ],
+  "allowed_event_types": [
+    "dashboard_opened",
+    "panel_opened",
+    "panel_collapsed",
+    "strategy_chat_prompt_submitted",
+    "strategy_chat_response_received",
+    "strategy_review_opened",
+    "strategy_recommendation_accepted",
+    "strategy_recommendation_rejected",
+    "strategy_recommendation_revised",
+    "strategy_recommendation_deferred",
+    "one_move_reviewed",
+    "proof_target_reviewed",
+    "evidence_added",
+    "outcome_added",
+    "future_movement_reviewed"
+  ],
+  "safety_boundaries": [
+    "Strategy review records are append-only.",
+    "Accepted review records mark active_strategy_candidate only inside review persistence.",
+    "No generated Five Futures artifact is mutated by strategy review.",
+    "No generated One Move artifact is mutated by strategy review.",
+    "No future movement artifact is mutated by strategy review.",
+    "Telemetry failures do not block dashboard usage.",
+    "Telemetry does not track keystrokes, mouse movement, scroll depth, or hesitation time.",
+    "Raw private source text is rejected by backend bounded text guards.",
+    "Global model configuration is unchanged.",
+    "Darren Strategy Chat remains advisory unless a user confirms existing approved action flows."
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "node_check_backend_files": "passed",
+    "json_trace_parse": "passed",
+    "npm_run_build": "passed with existing Vite large chunk warning"
+  },
+  "smoke_tests": {
+    "strategy_review_accepted": "pending",
+    "strategy_review_rejected": "pending",
+    "usage_dashboard_opened": "pending",
+    "usage_strategy_recommendation_accepted": "pending",
+    "dashboard_load": "pending",
+    "strategy_chat_gpt55": "pending"
+  },
+  "estimated_score_delta": {
+    "rsl": {
+      "from": 54,
+      "to": 63
+    },
+    "usage_value_tracking": {
+      "from": 12,
+      "to": 34
+    },
+    "outcome_ledger_proof_loop": {
+      "from": 57,
+      "to": 65
+    },
+    "subscription_readiness": {
+      "from": 35,
+      "to": 43
+    },
+    "strategy_chat_intelligence": {
+      "from": 78,
+      "to": 81
+    }
+  },
+  "deployment": {
+    "required": true,
+    "performed": false,
+    "url": null,
+    "production_alias": null
+  },
+  "verdict": "DASH_RSL_BATCH_3BC_READY_FOR_VALIDATION_AND_DEPLOY"
+}

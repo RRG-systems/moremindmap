@@ -7,10 +7,22 @@ export default function LeadershipAppStackPanel({
   badge = 'Stack',
   defaultOpen = false,
   children,
-  summary
+  summary,
+  telemetryId,
+  onToggle
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
   const panelId = `stack-panel-${String(title || 'panel').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+
+  function toggleOpen() {
+    setIsOpen((value) => {
+      const nextValue = !value
+      if (typeof onToggle === 'function') {
+        onToggle({ isOpen: nextValue, panelId: telemetryId || panelId, title })
+      }
+      return nextValue
+    })
+  }
 
   return (
     <section className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.045] shadow-[0_18px_70px_rgba(0,0,0,0.22)]">
@@ -19,7 +31,7 @@ export default function LeadershipAppStackPanel({
         className="flex w-full flex-col gap-4 px-5 py-5 text-left transition hover:bg-white/[0.035] md:flex-row md:items-start md:justify-between"
         aria-expanded={isOpen}
         aria-controls={panelId}
-        onClick={() => setIsOpen((value) => !value)}
+        onClick={toggleOpen}
       >
         <div>
           {eyebrow && <div className="text-xs uppercase tracking-[0.22em] text-white/42">{eyebrow}</div>}
