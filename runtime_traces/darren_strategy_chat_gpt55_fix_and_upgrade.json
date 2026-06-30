@@ -1,0 +1,102 @@
+{
+  "phase_id": "DARREN_STRATEGY_CHAT_GPT55_FIX_AND_UPGRADE",
+  "verdict": "DARREN_STRATEGY_CHAT_GPT55_FIX_READY_FOR_DEPLOY_WITH_LIMITS",
+  "classification": "DARREN_STRATEGY_CHAT_BACKEND_MODEL_FALLBACK_REPAIRED_NO_GLOBAL_MODEL_CHANGE",
+  "root_cause": "Production returned darren_strategy_chat_model_request_failed. The route had a single model request path with no retry to the prior stable model when a Darren-specific trial model or provider request failed.",
+  "files_changed": [
+    "api/admin/darren-strategy-chat.js",
+    "DARREN_STRATEGY_CHAT_GPT55_FIX_AND_UPGRADE.md",
+    "runtime_traces/darren_strategy_chat_gpt55_fix_and_upgrade.json"
+  ],
+  "runtime_code_changed": true,
+  "frontend_changed": false,
+  "backend_changed": true,
+  "global_model_behavior_changed": false,
+  "prompt_changed": false,
+  "model_selection_changed": true,
+  "records_mutated": false,
+  "deployed": false,
+  "strategy_chat_only": true,
+  "primary_model": "DARREN_STRATEGY_CHAT_MODEL when set and allowlisted; recommended value gpt-5.5",
+  "fallback_model": "gpt-4o-2024-08-06",
+  "allowed_trial_models_added": [
+    "gpt-5.5-2026-04-23"
+  ],
+  "model_selection_behavior": {
+    "env_var": "DARREN_STRATEGY_CHAT_MODEL",
+    "legacy_env_var_supported": "DARREN_STRATEGY_CHAT_OPENAI_MODEL",
+    "env_missing_behavior": "use stable fallback model as primary",
+    "env_invalid_behavior": "use stable fallback model as primary",
+    "primary_failure_behavior": "retry once with stable fallback model",
+    "infinite_retry_possible": false
+  },
+  "fallback_behavior": {
+    "implemented": true,
+    "timeout_ms": 22000,
+    "retry_count": 1,
+    "safe_failure_response": true,
+    "raw_provider_error_exposed": false
+  },
+  "response_shape": {
+    "backward_compatible": true,
+    "existing_fields_preserved": [
+      "ok",
+      "conversation_id",
+      "reply",
+      "entry_context",
+      "suggested_next_actions",
+      "possible_memory_signal",
+      "proposed_action",
+      "mutation_performed",
+      "context_used_summary"
+    ],
+    "new_safe_fields": [
+      "model_used",
+      "fallback_used",
+      "model_selection"
+    ]
+  },
+  "mutation_boundary": {
+    "strategy_chat_advisory_only": true,
+    "five_futures_mutation": false,
+    "one_move_mutation": false,
+    "ledger_mutation": false,
+    "dashboard_state_mutation": false,
+    "future_movement_mutation": false
+  },
+  "privacy_boundaries": {
+    "raw_admin_rows_added_to_context": false,
+    "private_profile_text_added_to_context": false,
+    "assessment_response_detail_added_to_context": false,
+    "secrets_or_tokens_exposed": false,
+    "provider_response_body_exposed": false
+  },
+  "production_pre_fix_probe": {
+    "route": "https://moremindmap.com/api/admin/darren-strategy-chat",
+    "status_shape": "ok false",
+    "error": "darren_strategy_chat_model_request_failed",
+    "mutation_performed": false
+  },
+  "local_smoke_tests": {
+    "run": false,
+    "reason": "Live local route smoke requires local runtime secrets and a server; no deploy was requested."
+  },
+  "validation_results": {
+    "node_check_api_admin_darren_strategy_chat_js": "passed",
+    "npm_run_build": "passed with existing Vite large chunk warning",
+    "json_trace_parse": "passed",
+    "git_diff_check": "passed",
+    "static_privacy_claim_scan": "passed; no matches in changed files"
+  },
+  "vercel_env_required": {
+    "production_recommendation": "Set DARREN_STRATEGY_CHAT_MODEL=gpt-5.5 for the MORE MindMap project only.",
+    "do_not_change": "OPENAI_MODEL"
+  },
+  "production_readiness_verdict": "Code is ready for validation and deploy after checks pass. Production remains on old behavior until deployed.",
+  "limits": [
+    "No deploy performed.",
+    "No commit performed.",
+    "Fallback implementation can be verified statically before deploy; runtime fallback can be verified after deploy or with local runtime env vars.",
+    "The route still depends on OPENAI_API_KEY being configured."
+  ]
+}

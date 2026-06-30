@@ -7,7 +7,8 @@ import { darrenBusinessModelBackbone, evaluateDarrenBusinessModelPathCoverage } 
 const DEFAULT_ADMIN_CODE = 'MOREADMIN26';
 const PREFERRED_CHAT_MODEL = 'gpt-5.5';
 const DEFAULT_CHAT_MODEL = 'gpt-4o-2024-08-06';
-const SAFE_CHAT_MODELS = new Set(['gpt-5.5', 'gpt-5.5-chat', 'gpt-5.5-chat-latest', 'gpt-5', 'gpt-4o-2024-08-06', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o']);
+const SAFE_CHAT_MODELS = new Set(['gpt-5.5', 'gpt-5.5-2026-04-23', 'gpt-5.5-chat', 'gpt-5.5-chat-latest', 'gpt-5', 'gpt-4o-2024-08-06', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o']);
+const CHAT_MODEL_TIMEOUT_MS = 22000;
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_REPLY_LENGTH = 3000;
 const ENTRY_CONTEXTS = new Set([
@@ -68,6 +69,20 @@ function configuredChatModel() {
   return SAFE_CHAT_MODELS.has(DEFAULT_CHAT_MODEL) ? DEFAULT_CHAT_MODEL : PREFERRED_CHAT_MODEL;
 }
 
+function configuredChatModelPlan() {
+  const primaryModel = configuredChatModel();
+  const fallbackModel = primaryModel === DEFAULT_CHAT_MODEL ? null : DEFAULT_CHAT_MODEL;
+  return {
+    primary_model: primaryModel,
+    fallback_model: fallbackModel,
+    env_model_configured: Boolean(String(process.env.DARREN_STRATEGY_CHAT_MODEL || process.env.DARREN_STRATEGY_CHAT_OPENAI_MODEL || '').trim())
+  };
+}
+
+function usesCompletionTokenParameter(model) {
+  return /^(gpt-5|o\d|o[134]|chatgpt-4o)/i.test(String(model || ''));
+}
+
 function getProvidedAdminCode(req) {
   const headers = req.headers || {};
   const authHeader = headers.authorization || '';
@@ -98,8 +113,8 @@ function cleanText(value, maxLength = MAX_MESSAGE_LENGTH) {
   return String(value || '').trim().slice(0, maxLength);
 }
 
-function safeError(res, status, error) {
-  return res.status(status).json({ ok: false, error });
+function safeError(res, status, error, details = {}) {
+  return res.status(status).json({ ok: false, error, ...details });
 }
 
 function scanUnsafe(value) {
@@ -312,7 +327,32 @@ function parseModelJson(content) {
   return JSON.parse(text.slice(first, last + 1));
 }
 
-async function callModel({ message, entryContext, contextPack }) {
+function modelRequestBody({ model, message, entryContext, contextPack }) {
+  const tokenParameter = usesCompletionTokenParameter(model) ? 'max_completion_tokens' : 'max_tokens';
+  const body = {
+    model,
+    messages: buildMessages(message, entryContext, contextPack),
+    response_format: { type: 'json_object' },
+    [tokenParameter]: 900
+  };
+  if (!usesCompletionTokenParameter(model)) body.temperature = 0.35;
+  return body;
+}
+
+function modelFailureCode(error) {
+  return error?.safeCode || error?.code || 'darren_strategy_chat_model_request_failed';
+}
+
+function logModelAttemptFailure({ model, stage, error }) {
+  console.warn('darren_strategy_chat_model_attempt_failed', {
+    stage,
+    model,
+    safe_code: modelFailureCode(error),
+    status: error?.status || null
+  });
+}
+
+async function callSingleModel({ model, message, entryContext, contextPack }) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     const error = new Error('model_not_configured');
@@ -320,25 +360,29 @@ async function callModel({ message, entryContext, contextPack }) {
     throw error;
   }
 
-  const model = configuredChatModel();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), CHAT_MODEL_TIMEOUT_MS);
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      model,
-      messages: buildMessages(message, entryContext, contextPack),
-      response_format: { type: 'json_object' },
-      temperature: 0.35,
-      max_tokens: 900
-    })
-  });
+    body: JSON.stringify(modelRequestBody({ model, message, entryContext, contextPack })),
+    signal: controller.signal
+  }).catch((error) => {
+    const safeErrorObject = new Error(error?.name === 'AbortError' ? 'model_request_timeout' : 'model_request_failed');
+    safeErrorObject.safeCode = error?.name === 'AbortError'
+      ? 'darren_strategy_chat_model_timeout'
+      : 'darren_strategy_chat_model_request_failed';
+    throw safeErrorObject;
+  }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     const error = new Error('model_request_failed');
     error.safeCode = 'darren_strategy_chat_model_request_failed';
+    error.status = response.status;
     throw error;
   }
 
@@ -349,7 +393,62 @@ async function callModel({ message, entryContext, contextPack }) {
     error.safeCode = 'darren_strategy_chat_model_response_invalid';
     throw error;
   }
-  return parseModelJson(content);
+  try {
+    return parseModelJson(content);
+  } catch {
+    const error = new Error('model_response_not_json');
+    error.safeCode = 'darren_strategy_chat_model_response_invalid';
+    throw error;
+  }
+}
+
+async function callModel({ message, entryContext, contextPack }) {
+  const plan = configuredChatModelPlan();
+
+  try {
+    const parsed = await callSingleModel({
+      model: plan.primary_model,
+      message,
+      entryContext,
+      contextPack
+    });
+    return {
+      parsed,
+      model_used: plan.primary_model,
+      fallback_used: false,
+      model_selection: plan
+    };
+  } catch (primaryError) {
+    logModelAttemptFailure({ model: plan.primary_model, stage: 'primary', error: primaryError });
+    if (!plan.fallback_model) throw primaryError;
+
+    try {
+      const parsed = await callSingleModel({
+        model: plan.fallback_model,
+        message,
+        entryContext,
+        contextPack
+      });
+      return {
+        parsed,
+        model_used: plan.fallback_model,
+        fallback_used: true,
+        model_selection: plan,
+        primary_failure_code: modelFailureCode(primaryError)
+      };
+    } catch (fallbackError) {
+      logModelAttemptFailure({ model: plan.fallback_model, stage: 'fallback', error: fallbackError });
+      const error = new Error('model_fallback_failed');
+      error.safeCode = modelFailureCode(fallbackError);
+      error.modelTrace = {
+        primary_model: plan.primary_model,
+        fallback_model: plan.fallback_model,
+        primary_failure_code: modelFailureCode(primaryError),
+        fallback_failure_code: modelFailureCode(fallbackError)
+      };
+      throw error;
+    }
+  }
 }
 
 function sanitizeSignal(signal) {
@@ -409,7 +508,8 @@ function sanitizeProposedAction(action) {
 }
 
 function buildReplyPayload({ body, contextPack, modelResult }) {
-  const reply = cleanText(modelResult?.reply, MAX_REPLY_LENGTH);
+  const result = modelResult?.parsed || modelResult || {};
+  const reply = cleanText(result?.reply, MAX_REPLY_LENGTH);
   if (!reply) throw new Error('empty_reply');
 
   const payload = {
@@ -417,13 +517,21 @@ function buildReplyPayload({ body, contextPack, modelResult }) {
     conversation_id: cleanText(body.conversation_id, 120) || `darren-chat-${Date.now()}`,
     reply,
     entry_context: body.entry_context || 'general',
-    suggested_next_actions: asArray(modelResult.suggested_next_actions)
+    suggested_next_actions: asArray(result.suggested_next_actions)
       .map((item) => cleanText(item, 180))
       .filter(Boolean)
       .slice(0, 3),
-    possible_memory_signal: sanitizeSignal(modelResult.possible_memory_signal),
-    proposed_action: sanitizeProposedAction(modelResult.proposed_action),
+    possible_memory_signal: sanitizeSignal(result.possible_memory_signal),
+    proposed_action: sanitizeProposedAction(result.proposed_action),
     mutation_performed: false,
+    model_used: cleanText(modelResult?.model_used, 80) || null,
+    fallback_used: modelResult?.fallback_used === true,
+    model_selection: {
+      primary_model: cleanText(modelResult?.model_selection?.primary_model, 80) || null,
+      fallback_model: cleanText(modelResult?.model_selection?.fallback_model, 80) || null,
+      primary_model_failed: modelResult?.fallback_used === true,
+      env_model_configured: modelResult?.model_selection?.env_model_configured === true
+    },
     context_used_summary: {
       latest_strategy_present: contextPack.latest_strategy.present === true,
       one_move_status: {
@@ -477,6 +585,16 @@ export default async function handler(req, res) {
     const modelResult = await callModel({ message, entryContext, contextPack });
     return res.status(200).json(buildReplyPayload({ body: { ...body, entry_context: entryContext }, contextPack, modelResult }));
   } catch (error) {
-    return safeError(res, 500, error?.safeCode || 'darren_strategy_chat_unavailable');
+    const errorCode = error?.safeCode || 'darren_strategy_chat_unavailable';
+    const status = errorCode.includes('model') ? 503 : 500;
+    return safeError(res, status, errorCode, {
+      mutation_performed: false,
+      model_trace: error?.modelTrace ? {
+        primary_model: cleanText(error.modelTrace.primary_model, 80) || null,
+        fallback_model: cleanText(error.modelTrace.fallback_model, 80) || null,
+        primary_failure_code: cleanText(error.modelTrace.primary_failure_code, 120) || null,
+        fallback_failure_code: cleanText(error.modelTrace.fallback_failure_code, 120) || null
+      } : undefined
+    });
   }
 }
