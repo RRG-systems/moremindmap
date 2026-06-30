@@ -1,0 +1,289 @@
+{
+  "phase_id": "DASH-RSL-AUDIT-3A",
+  "timestamp": "2026-06-30T23:05:17Z",
+  "runtime_changed": false,
+  "files_changed": [
+    "DARREN_DASHBOARD_RSL_ARCHITECTURE_AUDIT_3A.md",
+    "runtime_traces/darren_dashboard_rsl_architecture_audit_3a.json"
+  ],
+  "scores": {
+    "rsl_score": 54,
+    "architectural_wiring_score": 63,
+    "usage_value_tracking_score": 12,
+    "subscription_model_readiness_score": 35,
+    "outcome_ledger_proof_loop_score": 57,
+    "panel_intelligence_role_score": 74,
+    "strategy_chat_intelligence_score": 78,
+    "data_grounding_score": 61,
+    "confidence_truth_boundary_score": 86,
+    "future_movement_readiness_score": 44,
+    "financial_reality_score": 34,
+    "behavioral_reality_score": 74,
+    "business_model_alignment_score": 84,
+    "constraint_detection_score": 67,
+    "product_clarity_score": 70,
+    "governance_safety_score": 82,
+    "enterprise_future_readiness_score": 28,
+    "will_darren_use_this_score": 72
+  },
+  "wiring_layers": [
+    {
+      "input": "Behavioral Reality",
+      "score": 72,
+      "classification": "actively wired into Strategy Chat and generation",
+      "evidence": "Darren operating style is extracted in darren-intelligence-snapshot-core.js and included in generation/chat context."
+    },
+    {
+      "input": "Financial Reality",
+      "score": 38,
+      "classification": "partially used",
+      "evidence": "Profile, assessment, and company counts feed snapshot/compact context; payment and revenue evidence remain mostly missing."
+    },
+    {
+      "input": "Business Model Alignment",
+      "score": 82,
+      "classification": "actively wired",
+      "evidence": "9-path backbone, path coverage, path comparison, and scenario lens feed chat/generation context."
+    },
+    {
+      "input": "Constraint Reality",
+      "score": 70,
+      "classification": "actively wired",
+      "evidence": "Proof targets, evidence gaps, One Move status, ledger events, and since-last comparison are active."
+    },
+    {
+      "input": "Confidence Reality",
+      "score": 84,
+      "classification": "actively wired and protective",
+      "evidence": "Truth boundaries, unavailable fields, model limits, and anti-overclaim prompts are strong."
+    },
+    {
+      "input": "Evidence / Outcome Reality",
+      "score": 62,
+      "classification": "partially active",
+      "evidence": "Outcome Ledger exists and feeds routes, but proof depth and verified outcomes are thin."
+    },
+    {
+      "input": "Human Choice / Action Reality",
+      "score": 58,
+      "classification": "partially active",
+      "evidence": "One Move status and confirmed chat action flows exist; no full strategy adopt/reject lifecycle yet."
+    },
+    {
+      "input": "Since Last Snapshot",
+      "score": 68,
+      "classification": "actively wired",
+      "evidence": "darren-since-last-snapshot.js compares latest strategy and ledger events."
+    },
+    {
+      "input": "Outcome Ledger",
+      "score": 68,
+      "classification": "actively wired",
+      "evidence": "darren-generated-strategy-core.js persists and loads structured ledger events."
+    },
+    {
+      "input": "Future Movement Gate",
+      "score": 46,
+      "classification": "partially used",
+      "evidence": "Movement bands and assessment artifacts exist, but do not update active futures."
+    },
+    {
+      "input": "Stripe/payment/subscription evidence",
+      "score": 20,
+      "classification": "displayed boundary or mostly not present",
+      "evidence": "Darren context marks payment/subscription/revenue evidence as missing or not indexed."
+    },
+    {
+      "input": "Adoption/profile/assessment evidence",
+      "score": 58,
+      "classification": "partially used",
+      "evidence": "Counts and indexes feed snapshot; full rows remain admin evidence."
+    },
+    {
+      "input": "Roadmap/live-vs-planned boundaries",
+      "score": 66,
+      "classification": "actively protective",
+      "evidence": "Compact build-map truth feeds chat; full roadmap detail is mostly admin/display."
+    }
+  ],
+  "panel_audit": [
+    {
+      "panel": "Strategy Chat",
+      "roles": ["generate intelligence", "explain intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": true,
+      "captures_evidence": "proposed actions only; writes require confirmation",
+      "display_only": false,
+      "treatment": "stay top-visible"
+    },
+    {
+      "panel": "Current Operating State",
+      "roles": ["explain intelligence", "feed intelligence"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": "partially",
+      "treatment": "stay top-visible"
+    },
+    {
+      "panel": "Current Strategy / Five Futures / One Move",
+      "roles": ["generate intelligence"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": false,
+      "treatment": "stay default-open"
+    },
+    {
+      "panel": "Evidence & Proof / Outcome Loop",
+      "roles": ["capture evidence for future intelligence", "feed intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": true,
+      "captures_evidence": true,
+      "display_only": false,
+      "treatment": "stay default-open"
+    },
+    {
+      "panel": "Five Realities / System Status",
+      "roles": ["explain intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": "compact labels yes",
+      "captures_evidence": false,
+      "display_only": "partially",
+      "treatment": "keep collapsed"
+    },
+    {
+      "panel": "9-Path Business Model Map",
+      "roles": ["feed intelligence", "explain intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": false,
+      "treatment": "keep collapsed"
+    },
+    {
+      "panel": "Adaptive Strategy Draft",
+      "roles": ["generate intelligence", "feed intelligence"],
+      "feeds_chat_context": "indirectly through latest artifacts",
+      "captures_evidence": "creates session/movement/draft artifacts",
+      "display_only": false,
+      "treatment": "keep collapsed until review workflow exists"
+    },
+    {
+      "panel": "Confidence / Truth Boundaries",
+      "roles": ["protect user from overclaiming", "explain intelligence"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": "partially",
+      "treatment": "keep collapsed and merge duplicates later"
+    },
+    {
+      "panel": "Financial/Admin Data",
+      "roles": ["feed intelligence", "admin/debug only"],
+      "feeds_chat_context": "partially through compact counts/status",
+      "captures_evidence": false,
+      "display_only": "partially",
+      "treatment": "keep admin-collapsed"
+    },
+    {
+      "panel": "Raw Profiles / Assessments / Adoption Records",
+      "roles": ["admin/debug only"],
+      "feeds_chat_context": "indirectly through aggregate context",
+      "captures_evidence": false,
+      "display_only": "mostly",
+      "treatment": "move farther admin-only later"
+    },
+    {
+      "panel": "Build Map / Roadmap",
+      "roles": ["protect user from overclaiming", "admin/debug only", "archive candidate"],
+      "feeds_chat_context": "compact truth yes; full cards no",
+      "captures_evidence": false,
+      "display_only": "mostly",
+      "treatment": "keep admin-collapsed; reduce later"
+    },
+    {
+      "panel": "Dashboard Help / Workflow Intelligence",
+      "roles": ["explain intelligence"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": false,
+      "treatment": "keep inside Strategy Chat context"
+    },
+    {
+      "panel": "Outcome Ledger v0",
+      "roles": ["capture evidence for future intelligence", "feed intelligence"],
+      "feeds_chat_context": true,
+      "captures_evidence": true,
+      "display_only": false,
+      "treatment": "promote as core proof loop"
+    },
+    {
+      "panel": "Since Last Snapshot v0",
+      "roles": ["feed intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": true,
+      "captures_evidence": false,
+      "display_only": false,
+      "treatment": "keep with evidence loop"
+    },
+    {
+      "panel": "Future Movement Gate",
+      "roles": ["feed intelligence", "protect user from overclaiming"],
+      "feeds_chat_context": "partial",
+      "captures_evidence": "creates movement assessment artifact",
+      "display_only": false,
+      "treatment": "keep but label v0"
+    }
+  ],
+  "wiring_gaps": [
+    "No governed review/adopt flow promotes adaptive drafts into active strategy versions.",
+    "No usage telemetry tracks which panels, chat answers, or recommendations produce value.",
+    "Payment, subscription, and revenue evidence are not yet indexed as mature Financial Reality inputs.",
+    "Future movement remains evidence-band scaffolding and does not update active futures.",
+    "Initial Five Futures generation does not fully use post-generation ledger/session/adaptive history as first-class recursive inputs.",
+    "Raw profile and assessment rows are admin evidence, not subscriber-safe reasoning context.",
+    "Proof targets do not yet have a full lifecycle with owner, due date, status, and ledger linkage.",
+    "Architecture is Darren-specific and not yet profile/account/subscription scoped."
+  ],
+  "top_blockers": [
+    "No governed strategy review/adopt workflow.",
+    "No product usage/value telemetry.",
+    "Financial proof indexing is weak.",
+    "Future Movement Gate is not a durable movement engine.",
+    "Darren-specific contracts are not generalized to subscriber architecture."
+  ],
+  "recommended_next_sprints": [
+    {
+      "id": "DASH-REVIEW-3B",
+      "name": "Governed Strategy Review / Adopt Loop",
+      "why": "Converts adaptive drafts into a real human-governed learning cycle."
+    },
+    {
+      "id": "DASH-USAGE-3C",
+      "name": "Minimal Value Telemetry",
+      "why": "Shows what Darren uses, follows, ignores, and turns into proof."
+    },
+    {
+      "id": "DASH-FINANCE-3D",
+      "name": "Financial Proof Indexing",
+      "why": "Turns subscription/payment/revenue evidence into real Financial Reality."
+    },
+    {
+      "id": "DASH-PROOF-3E",
+      "name": "Proof Target Lifecycle",
+      "why": "Gives proof targets IDs, status, ownership, due dates, and ledger linkage."
+    },
+    {
+      "id": "DASH-GENERALIZE-3F",
+      "name": "Subscriber Architecture Abstraction",
+      "why": "Moves Darren-specific architecture toward profile/account/subscription-scoped product contracts."
+    }
+  ],
+  "brutal_summary": {
+    "is_becoming_subscription_architecture": true,
+    "is_finished_recursive_subscription_learning": false,
+    "is_dashboard_pretending_to_be_intelligence": "not entirely; it has real intelligence routes and persistence, but the closed loop is not mature yet",
+    "single_highest_leverage_next_build": "DASH-REVIEW-3B governed strategy review/adopt loop",
+    "should_not_build_yet": [
+      "automatic future percentage movement",
+      "broad employee/team/org people layer inside Darren dashboard",
+      "external signal layer before internal evidence governance",
+      "more visual panels",
+      "raw admin table injection into prompts"
+    ]
+  },
+  "verdict": "RSL_ARCHITECTURE_AUDIT_COMPLETE_NO_RUNTIME_CHANGE"
+}
