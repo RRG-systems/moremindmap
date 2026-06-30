@@ -6,7 +6,8 @@
   "persistence_changed": true,
   "global_model_changed": false,
   "strategy_chat_model_wiring_changed": false,
-  "records_mutated_during_validation": false,
+  "records_mutated_during_validation": true,
+  "validation_record_scope": "created only strategy review and usage telemetry smoke records; no strategy, Five Futures, One Move, or future movement artifacts were mutated",
   "files_changed": [
     "api/admin/darren-strategy-review-core.js",
     "api/admin/darren-strategy-review.js",
@@ -98,12 +99,49 @@
     "npm_run_build": "passed with existing Vite large chunk warning"
   },
   "smoke_tests": {
-    "strategy_review_accepted": "pending",
-    "strategy_review_rejected": "pending",
-    "usage_dashboard_opened": "pending",
-    "usage_strategy_recommendation_accepted": "pending",
-    "dashboard_load": "pending",
-    "strategy_chat_gpt55": "pending"
+    "strategy_review_accepted": {
+      "status": 200,
+      "ok": true,
+      "review_id_present": true,
+      "mutation_scope": "review_record_only",
+      "no_auto_future_movement": true,
+      "active_strategy_candidate": true
+    },
+    "strategy_review_rejected": {
+      "status": 200,
+      "ok": true,
+      "review_id_present": true,
+      "mutation_scope": "review_record_only",
+      "no_auto_future_movement": true,
+      "active_strategy_candidate": false
+    },
+    "usage_dashboard_opened": {
+      "status": 200,
+      "ok": true,
+      "recorded": true,
+      "event_id_present": true
+    },
+    "usage_strategy_recommendation_accepted": {
+      "status": 200,
+      "ok": true,
+      "recorded": true,
+      "event_id_present": true
+    },
+    "dashboard_load": {
+      "/": 200,
+      "/profile": 200,
+      "/business-assessment": 200,
+      "/leadership-dashboard": 200
+    },
+    "strategy_chat_gpt55": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "mutation_performed": false,
+      "model_used": "gpt-5.5",
+      "fallback_used": false,
+      "no_forbidden_claims_detected": true
+    }
   },
   "estimated_score_delta": {
     "rsl": {
@@ -129,9 +167,9 @@
   },
   "deployment": {
     "required": true,
-    "performed": false,
-    "url": null,
-    "production_alias": null
+    "performed": true,
+    "url": "https://moremindmap-3vt1j5eak-rrg-systems-projects.vercel.app",
+    "production_alias": "https://moremindmap.com"
   },
-  "verdict": "DASH_RSL_BATCH_3BC_READY_FOR_VALIDATION_AND_DEPLOY"
+  "verdict": "DASH_RSL_BATCH_3BC_DEPLOYED_AND_SMOKED_WITH_LIMITS"
 }

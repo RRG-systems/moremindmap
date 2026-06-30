@@ -4,7 +4,7 @@ Phase: DASH-RSL-BATCH-3BC
 
 ## Verdict
 
-`DASH_RSL_BATCH_3BC_READY_FOR_VALIDATION_AND_DEPLOY`
+`DASH_RSL_BATCH_3BC_DEPLOYED_AND_SMOKED_WITH_LIMITS`
 
 This sprint adds the first governed human decision layer and the first minimal value telemetry layer for Darren's dashboard. The dashboard now has a way to record a review decision without changing Five Futures, One Move, active strategy, or future movement automatically. It also records a small set of product-value events so the system can begin learning which surfaces Darren actually uses.
 
@@ -166,4 +166,43 @@ Validation results are recorded in `runtime_traces/darren_dashboard_rsl_batch_3b
 
 ## Deployment
 
-Deploy is recommended after validation because runtime frontend and backend changed.
+Deployed production URL:
+
+`https://moremindmap-3vt1j5eak-rrg-systems-projects.vercel.app`
+
+Production alias:
+
+`https://moremindmap.com`
+
+## Production Smoke
+
+Route health:
+
+- `/`: 200
+- `/profile`: 200
+- `/business-assessment`: 200
+- `/leadership-dashboard`: 200
+
+Strategy Review route:
+
+- accepted adaptive strategy review: 200, `ok: true`, review ID present, `mutation_scope: review_record_only`, no automatic future movement.
+- rejected One Move review: 200, `ok: true`, review ID present, `mutation_scope: review_record_only`, no automatic future movement.
+
+Usage Event route:
+
+- `dashboard_opened`: 200, `ok: true`, recorded.
+- `strategy_recommendation_accepted`: 200, `ok: true`, recorded.
+
+Strategy Chat:
+
+- status 200
+- `ok: true`
+- reply present
+- `mutation_performed: false`
+- `model_used: gpt-5.5`
+- `fallback_used: false`
+- no forbidden claim pattern detected in smoke response
+
+Smoke record scope:
+
+The smoke created only strategy review and usage telemetry smoke records. It did not mutate generated Five Futures, generated One Move, active strategy artifacts, or future movement artifacts.
