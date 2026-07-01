@@ -236,10 +236,30 @@
     "npm_run_build": "passed_with_existing_vite_large_chunk_warning"
   },
   "smoke_tests": {
-    "public_routes": "pending",
-    "visual_lab_route": "pending",
-    "lab_section_markers": "pending",
-    "public_nav_link_absent": "pending",
+    "deployment": {
+      "deployment_url": "https://moremindmap-clv2crr7l-rrg-systems-projects.vercel.app",
+      "production_alias": "https://moremindmap.com",
+      "aliased": true
+    },
+    "public_routes": {
+      "/": 200,
+      "/profile": 200,
+      "/business-assessment": 200,
+      "/leadership-dashboard": 200
+    },
+    "visual_lab_route": {
+      "route": "/visual-lab",
+      "status": 200,
+      "loads": true,
+      "expected_gate_mode": true
+    },
+    "lab_section_markers": {
+      "bos_visual_dna_lab": true,
+      "business_assessment_visual_dna_lab": true,
+      "five_futures_visual_lab": true
+    },
+    "public_nav_link_absent": true,
+    "openai_generation_call_marker_absent": true,
     "production_visuals_replaced": false,
     "stored_records_mutated": false,
     "openai_calls_added": false
@@ -250,5 +270,5 @@
     "VISUAL-LAB-1E Five Futures Trajectory Field Candidate v2",
     "VISUAL-UPGRADE-2A approved feature-flag wiring"
   ],
-  "verdict": "VISUAL_LAB_FOUNDATION_READY_FOR_DEPLOYMENT"
+  "verdict": "VISUAL_LAB_FOUNDATION_DEPLOYED_AND_SMOKED"
 }
