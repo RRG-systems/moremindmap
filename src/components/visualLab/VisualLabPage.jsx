@@ -76,11 +76,56 @@ const mockBusinessReality = [
 ];
 
 const mockFutures = [
-  { label: 'Future D', title: 'Current Drift', tone: 'red', likelihood: '42% / active', position: 'left-high' },
-  { label: 'Future C', title: 'Constraint Bottleneck', tone: 'orange', likelihood: '31% / next state', position: 'left-low' },
-  { label: 'Future B', title: 'Steady Progress', tone: 'blue', likelihood: '14% / requires change', position: 'right-high' },
-  { label: 'Future A', title: 'Optimized Growth', tone: 'green', likelihood: '8% / requires alignment', position: 'right-mid' },
-  { label: 'Future E', title: 'Transformational Intelligence', tone: 'purple', likelihood: '5% / new operating model', position: 'right-low' }
+  {
+    label: 'Future D',
+    title: 'Portfolio Drift / Regional Decay',
+    tone: 'red',
+    probability: '42%',
+    status: 'Currently active',
+    position: 'left-high',
+    signals: ['Leadership vision unclear', 'DD accountability inconsistent', 'Productivity stagnant'],
+    interpretation: 'The organization becomes larger without becoming stronger.'
+  },
+  {
+    label: 'Future C',
+    title: 'Leadership Bottleneck',
+    tone: 'orange',
+    probability: '31%',
+    status: 'Most likely next state',
+    position: 'left-low',
+    signals: ['Growth initiatives continue', 'Execution remains personality driven', 'Capacity becomes the constraint'],
+    interpretation: 'Growth stacks on top of weak leadership infrastructure.'
+  },
+  {
+    label: 'Future B',
+    title: 'Productive Agent Transformation',
+    tone: 'blue',
+    probability: '14%',
+    status: 'Requires structural change',
+    position: 'right-high',
+    signals: ['Economic agent count', 'DD productivity accountability', 'Higher PPP'],
+    interpretation: 'Smaller story. Stronger company.'
+  },
+  {
+    label: 'Future A',
+    title: 'Recruiting Flywheel Recovery',
+    tone: 'green',
+    probability: '8%',
+    status: 'Requires leadership alignment',
+    position: 'right-mid',
+    signals: ['Clear vision', 'Clear expectations', 'Field confidence'],
+    interpretation: 'Possible, but not currently supported by observed behavior.'
+  },
+  {
+    label: 'Future E',
+    title: 'Organizational Intelligence Flywheel',
+    tone: 'purple',
+    probability: '5%',
+    status: 'Requires new operating model',
+    position: 'right-low',
+    signals: ['Leadership intelligence', 'Behavioral intelligence', 'Lifecycle detection'],
+    interpretation: 'The organization learns faster than it drifts.'
+  }
 ];
 
 function cx(...parts) {
@@ -221,63 +266,141 @@ function BusinessRealityMapMock() {
   );
 }
 
+function TrajectoryPathSvg() {
+  return (
+    <svg
+      className="vl-path-svg"
+      viewBox="0 0 1320 760"
+      aria-label="luminous future paths"
+      role="img"
+    >
+      <defs>
+        <filter id="vlPathGlow" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="7" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      <path className="vl-path tone-red" d="M610 342 C500 250 415 188 286 176 C216 170 150 179 70 206" />
+      <path className="vl-path-core tone-red" d="M610 342 C500 250 415 188 286 176 C216 170 150 179 70 206" />
+      <path className="vl-path tone-orange" d="M610 376 C492 397 401 442 313 501 C223 560 150 574 72 555" />
+      <path className="vl-path-core tone-orange" d="M610 376 C492 397 401 442 313 501 C223 560 150 574 72 555" />
+      <path className="vl-path tone-blue" d="M678 314 C776 224 860 178 982 162 C1041 154 1099 160 1162 182" />
+      <path className="vl-path-core tone-blue" d="M678 314 C776 224 860 178 982 162 C1041 154 1099 160 1162 182" />
+      <path className="vl-path tone-green" d="M690 366 C786 372 862 413 939 486 C1000 543 1070 573 1164 565" />
+      <path className="vl-path-core tone-green" d="M690 366 C786 372 862 413 939 486 C1000 543 1070 573 1164 565" />
+      <path className="vl-path tone-purple" d="M646 414 C724 508 803 598 918 658 C984 692 1065 708 1168 694" />
+      <path className="vl-path-core tone-purple" d="M646 414 C724 508 803 598 918 658 C984 692 1065 708 1168 694" />
+      {[
+        ['tone-red', 74, 206],
+        ['tone-orange', 74, 555],
+        ['tone-blue', 1162, 182],
+        ['tone-green', 1164, 565],
+        ['tone-purple', 1168, 694]
+      ].map(([tone, cxValue, cyValue]) => (
+        <g key={tone} className={tone}>
+          <circle className="vl-path-endpoint" cx={cxValue} cy={cyValue} r="9" />
+          <circle className="vl-path-endpoint-pulse" cx={cxValue} cy={cyValue} r="19" />
+        </g>
+      ))}
+    </svg>
+  );
+}
+
 function TrajectoryFieldMock() {
   return (
-    <section className="vl-trajectory">
+    <section className="vl-trajectory vl-full-scale-candidate-stage">
+      <div className="vl-stage-label">Full-Scale Candidate Stage</div>
       <div className="vl-trajectory-header">
         <div>
-          <span>The Five Futures</span>
+          <span>MORE MindMap / Business Assessment</span>
+          <h3>THE FIVE FUTURES</h3>
           <strong>The future is not predicted. It is modeled.</strong>
         </div>
         <div className="vl-trajectory-detected">
-          <span>Current trajectory detected</span>
+          <span>Current Trajectory Detected</span>
           <p>The system begins by identifying the future already forming.</p>
+        </div>
+        <div className="vl-current-future-chip">
+          <span>Current future</span>
+          <strong>Portfolio Drift / Regional Decay</strong>
+          <em>Status: active</em>
         </div>
       </div>
 
-      <div className="vl-trajectory-core">
+      <TrajectoryPathSvg />
+
+      <div className="vl-trajectory-core" aria-label="central current trajectory orb">
         <span>Fathom Holdings</span>
         <strong>Current Trajectory</strong>
         <em>2026</em>
+        <p>Future D active</p>
       </div>
 
       <div className="vl-lde-insight">
         <span>LDE Insight</span>
+        <p><strong>Future D</strong> is not a warning.</p>
         <p><strong>Future D</strong> is already happening.</p>
         <p><strong>Future C</strong> is the most likely next state if nothing changes.</p>
-      </div>
-
-      <div className="vl-trajectory-lines" aria-hidden="true">
-        {mockFutures.map((future, index) => (
-          <i key={future.title} className={`tone-${future.tone} line-${index + 1}`} />
-        ))}
       </div>
 
       <div className="vl-future-list">
         {mockFutures.map((future) => (
           <article key={future.title} className={`tone-${future.tone} ${future.position}`}>
-            <span>{future.label}</span>
+            <header>
+              <span>{future.label}</span>
+              <em>{future.probability}</em>
+            </header>
             <strong>{future.title}</strong>
-            <em>{future.likelihood}</em>
+            <small>{future.status}</small>
+            <div>
+              <b>Signals</b>
+              <ul>
+                {future.signals.map((signal) => (
+                  <li key={signal}>{signal}</li>
+                ))}
+              </ul>
+            </div>
+            <p>{future.interpretation}</p>
           </article>
         ))}
       </div>
 
       <aside className="vl-lde-rail">
         <span>LDE Analysis</span>
-        {['Leadership Signals', 'Recruiting Activity', 'Organizational Health', 'Financial Performance', 'Historical Trends', 'Accountability Patterns'].map((item) => (
-          <div key={item}>{item}</div>
+        <strong>Inputs</strong>
+        {[
+          ['Leadership Signals', 'LS'],
+          ['Recruiting Activity', 'RA'],
+          ['Organizational Health', 'OH'],
+          ['Financial Performance', 'FP'],
+          ['Historical Trends', 'HT'],
+          ['Accountability Patterns', 'AP'],
+          ['Productivity Signals', 'PS']
+        ].map(([item, initials]) => (
+          <div key={item}>
+            <i>{initials}</i>
+            <em>{item}</em>
+          </div>
         ))}
       </aside>
 
-      <div className="vl-trajectory-legend">
+      <div className="vl-one-move-module">
+        <span>One Move: Trajectory Intervention</span>
+        <strong>Install a weekly relationship-to-appointment operating rhythm.</strong>
+        <p>Mock-only candidate note: the intervention changes leverage only after action and proof are recorded.</p>
+      </div>
+
+      <div className="vl-trajectory-legend" aria-label="trajectory legend">
         <span>Current Future / Active</span>
         <span>Most Likely Next Future</span>
         <span>Alternative Futures</span>
         <span>Required Intervention</span>
       </div>
 
-      <footer className="vl-trajectory-doctrine">
+      <footer className="vl-trajectory-doctrine" aria-label="doctrine bars">
         <strong>The Five Futures are not aspirations.</strong>
         <p>They are probability-weighted trajectories based on the current operating reality.</p>
         <em>The question is not: what future do we want?</em>
@@ -287,9 +410,9 @@ function TrajectoryFieldMock() {
   );
 }
 
-function LabSection({ system, children }) {
+function LabSection({ system, children, fullStage = false }) {
   return (
-    <section className="vl-section" id={system.id}>
+    <section className={cx('vl-section', fullStage && 'vl-section-full-stage')} id={system.id}>
       <div className="vl-section-head">
         <div>
           <p className="vl-kicker">{system.title}</p>
@@ -297,13 +420,20 @@ function LabSection({ system, children }) {
         </div>
         <span className={`vl-pill accent-${system.accent}`}>Preview only</span>
       </div>
-      <div className="vl-section-grid">
-        <SystemNotes system={system} />
-        <div className="vl-preview-stack">
-          {children}
-          <CandidatePlaceholder system={system} />
+      {fullStage ? (
+        <div className="vl-section-full">
+          <SystemNotes system={system} />
+          <div className="vl-full-stage-wrap">{children}</div>
         </div>
-      </div>
+      ) : (
+        <div className="vl-section-grid">
+          <SystemNotes system={system} />
+          <div className="vl-preview-stack">
+            {children}
+            <CandidatePlaceholder system={system} />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
@@ -350,7 +480,7 @@ export default function VisualLabPage() {
             <BusinessRealityMapMock />
           </LabSection>
 
-          <LabSection system={sections[2]}>
+          <LabSection system={sections[2]} fullStage>
             <TrajectoryFieldMock />
           </LabSection>
 
@@ -441,6 +571,41 @@ const styles = `
   display: grid;
   grid-template-columns: minmax(260px, 0.35fr) minmax(0, 0.65fr);
   gap: 1rem;
+}
+
+.vl-section-full-stage {
+  padding-left: clamp(0.75rem, 1.4vw, 1.1rem);
+  padding-right: clamp(0.75rem, 1.4vw, 1.1rem);
+}
+
+.vl-section-full {
+  display: grid;
+  gap: 1rem;
+}
+
+.vl-section-full .vl-notes {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.55fr) minmax(0, 1fr) minmax(220px, 0.7fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.vl-section-full .vl-file-list {
+  margin-top: 0;
+}
+
+.vl-section-full .vl-risk {
+  margin-top: 0;
+  border-top: 0;
+  border-left: 1px solid rgba(255,255,255,0.1);
+  padding-top: 0;
+  padding-left: 1rem;
+}
+
+.vl-full-stage-wrap {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding: 0.25rem 0 0.45rem;
 }
 
 .vl-card,
@@ -644,59 +809,95 @@ const styles = `
 
 .vl-trajectory {
   position: relative;
-  min-height: 700px;
+  width: 1320px;
+  min-width: 1320px;
+  height: 850px;
+  min-height: 850px;
   overflow: hidden;
-  padding: 1rem;
+  padding: 0;
   background:
-    radial-gradient(circle at 45% 45%, rgba(125,211,252,0.24), transparent 24%),
-    radial-gradient(circle at 31% 43%, rgba(248,113,113,0.14), transparent 28%),
-    radial-gradient(circle at 66% 48%, rgba(34,197,94,0.12), transparent 28%),
-    radial-gradient(circle at 60% 70%, rgba(168,85,247,0.13), transparent 30%),
-    linear-gradient(135deg, rgba(255,255,255,0.035), rgba(255,255,255,0.010)),
-    rgba(0,0,0,0.34);
-  box-shadow: inset 0 0 120px rgba(0,0,0,0.72), 0 0 70px rgba(59,130,246,0.10);
+    radial-gradient(circle at 48% 42%, rgba(125,211,252,0.26), transparent 17%),
+    radial-gradient(circle at 16% 31%, rgba(248,113,113,0.20), transparent 24%),
+    radial-gradient(circle at 24% 63%, rgba(251,146,60,0.15), transparent 23%),
+    radial-gradient(circle at 74% 39%, rgba(34,197,94,0.13), transparent 24%),
+    radial-gradient(circle at 76% 75%, rgba(168,85,247,0.16), transparent 24%),
+    linear-gradient(105deg, rgba(10,14,23,0.94), rgba(3,7,18,0.98) 52%, rgba(2,6,23,0.96)),
+    #020205;
+  box-shadow:
+    inset 0 0 150px rgba(0,0,0,0.82),
+    0 38px 120px rgba(0,0,0,0.48),
+    0 0 88px rgba(59,130,246,0.10);
 }
 
 .vl-trajectory::before {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.22;
+  opacity: 0.19;
   background-image:
     linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px),
     linear-gradient(0deg, rgba(255,255,255,0.025) 1px, transparent 1px);
-  background-size: 54px 54px;
+  background-size: 64px 64px;
   mask-image: radial-gradient(circle at 50% 50%, black, transparent 80%);
 }
 
+.vl-trajectory::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(0,0,0,0.44), transparent 18%, transparent 77%, rgba(0,0,0,0.5)),
+    linear-gradient(180deg, rgba(0,0,0,0.34), transparent 22%, transparent 77%, rgba(0,0,0,0.58));
+  pointer-events: none;
+}
+
+.vl-stage-label {
+  position: absolute;
+  left: 20px;
+  top: 14px;
+  z-index: 8;
+  color: rgba(255,255,255,0.42);
+  font-size: 0.62rem;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
 .vl-trajectory-header {
-  position: relative;
-  z-index: 5;
+  position: absolute;
+  left: 20px;
+  right: 198px;
+  top: 34px;
+  z-index: 8;
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
-  gap: 0.85rem;
-  margin-right: 9rem;
+  grid-template-columns: 350px 430px minmax(0, 1fr);
+  gap: 0.9rem;
+  margin-right: 0;
 }
 
 .vl-trajectory-header > div,
 .vl-trajectory-detected,
+.vl-current-future-chip,
 .vl-lde-insight,
 .vl-lde-rail,
+.vl-one-move-module,
 .vl-trajectory-legend,
 .vl-trajectory-doctrine {
   border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 0.9rem;
-  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.022)), rgba(0,0,0,0.42);
-  box-shadow: inset 0 0 28px rgba(255,255,255,0.025), 0 0 32px rgba(0,0,0,0.35);
+  border-radius: 0.7rem;
+  background: linear-gradient(145deg, rgba(255,255,255,0.078), rgba(255,255,255,0.020)), rgba(0,0,0,0.50);
+  box-shadow: inset 0 0 28px rgba(255,255,255,0.025), 0 0 36px rgba(0,0,0,0.44);
 }
 
 .vl-trajectory-header > div {
-  padding: 1rem;
+  padding: 1.05rem 1.15rem;
 }
 
 .vl-trajectory-header span,
 .vl-trajectory-detected span,
+.vl-current-future-chip span,
 .vl-lde-insight span,
+.vl-one-move-module span,
 .vl-lde-rail span {
   color: rgba(254,215,170,0.86);
   font-size: 0.68rem;
@@ -705,12 +906,22 @@ const styles = `
   text-transform: uppercase;
 }
 
+.vl-trajectory-header h3 {
+  margin: 0.42rem 0 0;
+  color: #f8fafc;
+  font-size: 3.15rem;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 0.92;
+}
+
 .vl-trajectory-header strong {
   display: block;
-  margin-top: 0.45rem;
-  color: #f8fafc;
-  font-size: clamp(1.4rem, 2.9vw, 2.25rem);
-  line-height: 1;
+  margin-top: 0.65rem;
+  color: rgba(254,215,170,0.90);
+  font-size: 1.05rem;
+  font-weight: 500;
+  line-height: 1.35;
 }
 
 .vl-trajectory-detected p {
@@ -720,30 +931,58 @@ const styles = `
   line-height: 1.45;
 }
 
+.vl-current-future-chip strong,
+.vl-current-future-chip em {
+  display: block;
+}
+
+.vl-current-future-chip strong {
+  margin-top: 0.58rem;
+  color: #fb7185;
+  font-size: 1.02rem;
+  line-height: 1.12;
+  text-transform: uppercase;
+}
+
+.vl-current-future-chip em {
+  margin-top: 0.7rem;
+  width: max-content;
+  border: 1px solid rgba(248,113,113,0.34);
+  border-radius: 999px;
+  background: rgba(248,113,113,0.14);
+  padding: 0.35rem 0.55rem;
+  color: rgba(254,202,202,0.92);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .vl-trajectory-core {
   position: absolute;
-  left: 50%;
-  top: 43%;
-  z-index: 2;
+  left: 610px;
+  top: 350px;
+  z-index: 5;
   display: flex;
-  width: 260px;
-  height: 260px;
+  width: 300px;
+  height: 300px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   transform: translate(-50%, -50%);
-  border: 2px solid rgba(186,230,253,0.82);
+  border: 2px solid rgba(186,230,253,0.86);
   border-radius: 999px;
   background:
-    radial-gradient(circle at 34% 24%, rgba(255,255,255,0.22), transparent 18%),
-    radial-gradient(circle at 50% 45%, rgba(59,130,246,0.38), rgba(14,165,233,0.14) 45%, rgba(0,0,0,0.90) 73%),
-    radial-gradient(circle at 74% 77%, rgba(251,146,60,0.20), transparent 55%);
+    radial-gradient(circle at 34% 24%, rgba(255,255,255,0.28), transparent 18%),
+    radial-gradient(circle at 50% 45%, rgba(59,130,246,0.44), rgba(14,165,233,0.16) 45%, rgba(0,0,0,0.92) 73%),
+    radial-gradient(circle at 74% 77%, rgba(251,146,60,0.24), transparent 55%);
   text-align: center;
   box-shadow:
-    0 0 40px rgba(103,232,249,0.52),
-    0 0 96px rgba(96,165,250,0.36),
-    0 0 140px rgba(251,146,60,0.12),
-    inset 0 0 58px rgba(96,165,250,0.24);
+    0 0 44px rgba(103,232,249,0.68),
+    0 0 118px rgba(96,165,250,0.44),
+    0 0 190px rgba(251,146,60,0.16),
+    inset 0 0 66px rgba(96,165,250,0.26);
 }
 
 .vl-trajectory-core::before,
@@ -755,33 +994,54 @@ const styles = `
 }
 
 .vl-trajectory-core::before {
-  inset: -38px;
+  inset: -44px;
   transform: rotate(-18deg) scaleX(1.16);
 }
 
 .vl-trajectory-core::after {
-  inset: -66px;
+  inset: -78px;
   border-color: rgba(251,146,60,0.17);
   transform: rotate(24deg) scaleX(1.25);
 }
 
-.vl-trajectory-lines i {
-  position: absolute;
-  left: 50%;
-  top: 43%;
-  width: 34%;
-  height: 4px;
-  transform-origin: 0 50%;
-  border-radius: 999px;
-  opacity: 0.92;
-  filter: drop-shadow(0 0 12px var(--tone));
+.vl-trajectory-core span {
+  font-size: 0.75rem;
 }
 
-.vl-trajectory-lines .line-1 { transform: rotate(201deg); }
-.vl-trajectory-lines .line-2 { transform: rotate(158deg); }
-.vl-trajectory-lines .line-3 { transform: rotate(-24deg); }
-.vl-trajectory-lines .line-4 { transform: rotate(10deg); }
-.vl-trajectory-lines .line-5 { transform: rotate(46deg); }
+.vl-trajectory-core strong {
+  max-width: 13rem;
+  font-size: 1.55rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.vl-trajectory-core em {
+  margin-top: 0.72rem;
+  color: rgba(186,230,253,0.96);
+  font-size: 1.42rem;
+  font-style: normal;
+  font-weight: 450;
+  letter-spacing: 0.08em;
+}
+
+.vl-trajectory-core p {
+  margin: 0.72rem 0 0;
+  color: rgba(255,255,255,0.62);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.vl-path-svg {
+  position: absolute;
+  left: 0;
+  top: 82px;
+  z-index: 3;
+  width: 1320px;
+  height: 760px;
+  pointer-events: none;
+}
 
 .tone-green { --tone: #86efac; }
 .tone-blue { --tone: #60a5fa; }
@@ -790,62 +1050,148 @@ const styles = `
 .tone-orange { --tone: #fb923c; }
 .tone-cyan { --tone: #67e8f9; }
 
-.vl-trajectory-lines i,
+.vl-path {
+  fill: none;
+  stroke: var(--tone);
+  stroke-linecap: round;
+  stroke-width: 13;
+  opacity: 0.22;
+  filter: url(#vlPathGlow);
+}
+
+.vl-path-core {
+  fill: none;
+  stroke: var(--tone);
+  stroke-dasharray: 12 16;
+  stroke-linecap: round;
+  stroke-width: 4;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 8px var(--tone));
+}
+
+.vl-path-endpoint {
+  fill: var(--tone);
+  filter: drop-shadow(0 0 10px var(--tone));
+}
+
+.vl-path-endpoint-pulse {
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 2;
+  opacity: 0.48;
+}
+
 .vl-future-list article {
   border-color: color-mix(in srgb, var(--tone) 54%, white 0%);
-  background: color-mix(in srgb, var(--tone) 16%, transparent);
-  box-shadow: 0 0 28px color-mix(in srgb, var(--tone) 26%, transparent);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--tone) 13%, rgba(255,255,255,0.06)), rgba(255,255,255,0.018)),
+    rgba(0,0,0,0.66);
+  box-shadow:
+    0 0 34px color-mix(in srgb, var(--tone) 25%, transparent),
+    inset 0 0 40px rgba(255,255,255,0.025);
 }
 
 .vl-future-list {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 6;
 }
 
 .vl-future-list article {
   position: absolute;
-  width: 220px;
-  min-height: 118px;
+  width: 286px;
+  min-height: 168px;
   border: 1px solid;
-  border-radius: 0.85rem;
-  padding: 0.8rem;
-  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.020)), rgba(0,0,0,0.58);
+  border-radius: 0.72rem;
+  padding: 0.92rem;
+}
+
+.vl-future-list header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .vl-future-list strong,
-.vl-future-list em {
+.vl-future-list em,
+.vl-future-list small,
+.vl-future-list b,
+.vl-future-list p {
   display: block;
 }
 
 .vl-future-list strong {
   margin-top: 0.45rem;
   color: white;
-  font-size: 0.94rem;
+  font-size: 0.98rem;
+  line-height: 1.14;
+  text-transform: uppercase;
 }
 
 .vl-future-list em {
-  margin-top: 0.5rem;
-  color: rgba(255,255,255,0.58);
-  font-size: 0.75rem;
+  color: var(--tone);
+  font-size: 1.82rem;
   font-style: normal;
-  line-height: 1.35;
+  font-weight: 800;
+  line-height: 0.95;
+  text-shadow: 0 0 18px color-mix(in srgb, var(--tone) 38%, transparent);
 }
 
-.vl-future-list .left-high { left: 1rem; top: 8.3rem; }
-.vl-future-list .left-low { left: 1rem; top: 20.2rem; }
-.vl-future-list .right-high { right: 10.2rem; top: 8.6rem; }
-.vl-future-list .right-mid { right: 10.2rem; top: 20rem; }
-.vl-future-list .right-low { right: 10.2rem; top: 31.4rem; }
+.vl-future-list small {
+  margin-top: 0.32rem;
+  color: color-mix(in srgb, var(--tone) 82%, white 10%);
+  font-size: 0.63rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.vl-future-list div {
+  margin-top: 0.72rem;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding-top: 0.58rem;
+}
+
+.vl-future-list b {
+  color: color-mix(in srgb, var(--tone) 72%, white 18%);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.vl-future-list ul {
+  margin: 0.36rem 0 0;
+  padding-left: 1rem;
+}
+
+.vl-future-list li {
+  color: rgba(255,255,255,0.66);
+  font-size: 0.68rem;
+  line-height: 1.36;
+}
+
+.vl-future-list p {
+  margin: 0.66rem 0 0;
+  color: rgba(255,255,255,0.78);
+  font-size: 0.73rem;
+  line-height: 1.38;
+}
+
+.vl-future-list .left-high { left: 26px; top: 150px; }
+.vl-future-list .left-low { left: 36px; top: 418px; }
+.vl-future-list .right-high { right: 186px; top: 150px; }
+.vl-future-list .right-mid { right: 186px; top: 350px; }
+.vl-future-list .right-low { right: 186px; top: 560px; }
 
 .vl-lde-insight {
   position: absolute;
-  left: 50%;
-  top: 66%;
-  z-index: 5;
-  width: min(300px, 45%);
-  transform: translateX(-50%);
-  padding: 0.95rem;
+  left: 462px;
+  top: 520px;
+  z-index: 8;
+  width: 298px;
+  transform: none;
+  padding: 1rem 1.1rem;
   text-align: center;
 }
 
@@ -862,12 +1208,12 @@ const styles = `
 
 .vl-lde-rail {
   position: absolute;
-  right: 1rem;
-  top: 8.5rem;
-  bottom: 6.2rem;
-  z-index: 5;
-  width: 128px;
-  padding: 0.95rem 0.75rem;
+  right: 22px;
+  top: 150px;
+  bottom: 146px;
+  z-index: 8;
+  width: 148px;
+  padding: 1.05rem 0.82rem;
 }
 
 .vl-lde-rail span {
@@ -876,25 +1222,80 @@ const styles = `
   text-align: center;
 }
 
+.vl-lde-rail strong {
+  display: block;
+  margin-top: 1.35rem;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .vl-lde-rail div {
-  margin-top: 0.86rem;
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 0.66rem;
+  margin-top: 0.74rem;
   border-top: 1px solid rgba(255,255,255,0.09);
-  padding-top: 0.82rem;
-  color: rgba(255,255,255,0.66);
+  padding-top: 0.72rem;
+}
+
+.vl-lde-rail i {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid rgba(254,215,170,0.26);
+  border-radius: 999px;
+  color: rgba(254,215,170,0.82);
+  font-size: 0.58rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.vl-lde-rail em {
+  color: rgba(255,255,255,0.68);
+  font-size: 0.67rem;
+  font-style: normal;
+  line-height: 1.25;
+}
+
+.vl-one-move-module {
+  position: absolute;
+  left: 358px;
+  top: 682px;
+  z-index: 8;
+  width: 472px;
+  padding: 0.82rem 1rem;
+}
+
+.vl-one-move-module strong {
+  display: block;
+  margin-top: 0.42rem;
+  color: white;
+  font-size: 0.95rem;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.vl-one-move-module p {
+  margin: 0.48rem 0 0;
+  color: rgba(255,255,255,0.64);
   font-size: 0.72rem;
-  line-height: 1.35;
+  line-height: 1.42;
 }
 
 .vl-trajectory-legend {
   position: absolute;
-  left: 1rem;
-  right: 10.2rem;
-  bottom: 4.8rem;
-  z-index: 5;
+  left: 24px;
+  right: 684px;
+  bottom: 112px;
+  z-index: 8;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.5rem;
-  padding: 0.55rem;
+  gap: 0.55rem;
+  padding: 0.6rem;
 }
 
 .vl-trajectory-legend span {
@@ -903,7 +1304,7 @@ const styles = `
   background: rgba(0,0,0,0.32);
   padding: 0.55rem;
   color: rgba(255,255,255,0.72);
-  font-size: 0.66rem;
+  font-size: 0.62rem;
   font-weight: 900;
   letter-spacing: 0.10em;
   text-align: center;
@@ -912,14 +1313,14 @@ const styles = `
 
 .vl-trajectory-doctrine {
   position: absolute;
-  left: 1rem;
-  right: 10.2rem;
-  bottom: 1rem;
-  z-index: 5;
+  left: 24px;
+  right: 24px;
+  bottom: 20px;
+  z-index: 8;
   display: grid;
-  grid-template-columns: 1.15fr 1fr 1fr 1.2fr;
-  gap: 0.5rem;
-  padding: 0.65rem;
+  grid-template-columns: 1.15fr 1.4fr 1.05fr 1.2fr;
+  gap: 0.65rem;
+  padding: 0.74rem;
 }
 
 .vl-trajectory-doctrine strong,
@@ -927,7 +1328,7 @@ const styles = `
 .vl-trajectory-doctrine em {
   margin: 0;
   color: rgba(255,255,255,0.78);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-style: normal;
   font-weight: 900;
   letter-spacing: 0.10em;
