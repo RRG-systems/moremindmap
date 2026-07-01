@@ -2,7 +2,9 @@
 
 Phase: `UNIVERSAL-TRANSLATOR-MODE-SIMPLIFICATION-3E`  
 Timestamp: `2026-07-01T01:47:07Z`  
-Verdict: `PENDING_VALIDATION_AND_DEPLOYMENT`
+Verdict: `UNIVERSAL_TRANSLATOR_TWO_MODE_UI_DEPLOYED_AND_SMOKED`
+Deployment: `https://moremindmap-fhmnbudrg-rrg-systems-projects.vercel.app`
+Production alias: `https://moremindmap.com`
 
 ## Summary
 
@@ -94,16 +96,21 @@ The response contract remains backward-compatible. The existing `translation` ob
 
 ## Smoke Plan
 
-After deployment:
+Completed after deployment:
 
-- Public routes return 200.
-- Universal Translator `plain_english` returns 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`.
-- Universal Translator `coach_me_through_this` returns 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`.
-- Coach output is meaningfully more coaching-oriented than Plain English.
-- Darren Strategy Chat still returns 200, `ok: true`, `model_used: gpt-5.5`, `fallback_used: false`.
-- `mutation_performed` remains false.
-- No raw JSON leakage.
+- Public routes `/`, `/profile`, `/business-assessment`, and `/leadership-dashboard`: 200.
+- Bundle marker check:
+  - `Plain English`: present
+  - `Coach Me Through This`: present
+  - `Explain it like I'm busy`: absent
+  - `explain_like_busy` mode id: absent from frontend bundle
+- Universal Translator `plain_english`: 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`, `fallback_used: false`.
+- Universal Translator `coach_me_through_this`: 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`, `fallback_used: false`.
+- Coach output differed from Plain English, was longer, and included coaching-specific `what_to_watch` or `coaching_question` content.
+- Plain English did not include `coaching_question`.
+- Darren Strategy Chat: 200, `ok: true`, reply present, `model_used: gpt-5.5`, `fallback_used: false`, `mutation_performed: false`.
+- No raw JSON leakage was detected in Translator smoke responses.
 
 ## Production Readiness
 
-Ready for commit, deployment, and production smoke.
+Production smoke passed with limits.

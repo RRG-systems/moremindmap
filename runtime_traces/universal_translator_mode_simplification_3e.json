@@ -62,11 +62,59 @@
     "json_trace_parse": "passed"
   },
   "smoke_tests": {
-    "post_deploy_public_routes": "pending",
-    "post_deploy_plain_english": "pending",
-    "post_deploy_coach_me_through_this": "pending",
-    "post_deploy_darren_strategy_chat": "pending",
-    "ui_mode_marker_check": "pending"
+    "deployment": {
+      "deployment_url": "https://moremindmap-fhmnbudrg-rrg-systems-projects.vercel.app",
+      "production_alias": "https://moremindmap.com",
+      "aliased": true
+    },
+    "post_deploy_public_routes": {
+      "/": 200,
+      "/profile": 200,
+      "/business-assessment": 200,
+      "/leadership-dashboard": 200
+    },
+    "post_deploy_plain_english": {
+      "status": 200,
+      "ok": true,
+      "translation_present": true,
+      "model_used": "gpt-4o-2024-08-06",
+      "fallback_used": false,
+      "mutation_performed": false,
+      "source_of_truth_note_present": true,
+      "raw_json_leakage": false
+    },
+    "post_deploy_coach_me_through_this": {
+      "status": 200,
+      "ok": true,
+      "translation_present": true,
+      "model_used": "gpt-4o-2024-08-06",
+      "fallback_used": false,
+      "mutation_performed": false,
+      "source_of_truth_note_present": true,
+      "raw_json_leakage": false,
+      "coach_fields_present": true
+    },
+    "mode_difference": {
+      "different_text": true,
+      "coach_longer": true,
+      "coach_has_question_or_watch": true,
+      "plain_has_coaching_question": false
+    },
+    "post_deploy_darren_strategy_chat": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "model_used": "gpt-5.5",
+      "fallback_used": false,
+      "mutation_performed": false
+    },
+    "ui_mode_marker_check": {
+      "bundle_url": "https://moremindmap.com/assets/index-YBSDHY9n.js",
+      "plain_english_label_present": true,
+      "coach_label_present": true,
+      "explain_like_busy_label_present": false,
+      "explain_like_busy_id_present": false
+    }
   },
-  "verdict": "PENDING_VALIDATION_AND_DEPLOYMENT"
+  "verdict": "UNIVERSAL_TRANSLATOR_TWO_MODE_UI_DEPLOYED_AND_SMOKED"
 }
