@@ -1,0 +1,254 @@
+{
+  "phase_id": "VISUAL-LAB-BATCH-1AB",
+  "timestamp": "2026-07-01T02:05:04Z",
+  "runtime_changed": true,
+  "frontend_changed": true,
+  "backend_changed": false,
+  "production_visuals_replaced": false,
+  "stored_records_mutated": false,
+  "openai_calls_added": false,
+  "routes_added": [
+    "/visual-lab"
+  ],
+  "visual_systems_audited": [
+    "BOS Visual DNA",
+    "Business Assessment Visual DNA",
+    "Business Assessment Five Futures visual"
+  ],
+  "files_discovered": [
+    {
+      "file_path": "src/components/visualDNA/DeterministicVisualDNA.jsx",
+      "visual_system": "BOS Visual DNA",
+      "purpose": "Deterministic profile Visual DNA poster component",
+      "inputs_data_dependencies": [
+        "profile object",
+        "narrative object",
+        "buildVisualDNAViewModel"
+      ],
+      "reads_stored_canonical_profile_data": "through caller props",
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": true,
+      "risk_if_modified_directly": "Changes live profile visual rendering",
+      "safest_preview_method": "Use static sample profile data in a lab route"
+    },
+    {
+      "file_path": "src/components/visualDNA/VisualDNAModal.jsx",
+      "visual_system": "BOS Visual DNA",
+      "purpose": "Fullscreen Visual DNA modal wrapper",
+      "inputs_data_dependencies": [
+        "profile prop",
+        "DeterministicVisualDNA"
+      ],
+      "reads_stored_canonical_profile_data": "through caller props",
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": "partial",
+      "risk_if_modified_directly": "Can affect profile modal behavior and fullscreen scaling",
+      "safest_preview_method": "Use direct poster component in lab, not modal"
+    },
+    {
+      "file_path": "src/lib/visualDNA/buildVisualDNAViewModel.js",
+      "visual_system": "BOS Visual DNA",
+      "purpose": "Builds deterministic Visual DNA view model and sample profiles",
+      "inputs_data_dependencies": [
+        "canonical profile",
+        "rescoring data",
+        "narrative fields"
+      ],
+      "reads_stored_canonical_profile_data": "through caller data",
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": true,
+      "risk_if_modified_directly": "Can alter profile interpretation mapping",
+      "safest_preview_method": "Read sample exports only"
+    },
+    {
+      "file_path": "api/moremindmap/visual-dna/generate.js",
+      "visual_system": "BOS Visual DNA",
+      "purpose": "OpenAI image edit generation and Visual DNA metadata persistence",
+      "inputs_data_dependencies": [
+        "profile_id",
+        "canonical profile",
+        "narrative",
+        "OpenAI image model",
+        "Vercel Blob",
+        "Redis"
+      ],
+      "reads_stored_canonical_profile_data": true,
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": true,
+      "production_facing": true,
+      "reusable_in_lab": false,
+      "risk_if_modified_directly": "Can mutate Visual DNA records or regenerate visual assets",
+      "safest_preview_method": "Do not call from lab"
+    },
+    {
+      "file_path": "api/moremindmap/visual-dna/shared.js",
+      "visual_system": "BOS Visual DNA",
+      "purpose": "Visual DNA metadata, Redis, model, and profile retrieval helpers",
+      "inputs_data_dependencies": [
+        "REDIS_URL",
+        "VISUAL_DNA_IMAGE_MODEL",
+        "profile_id"
+      ],
+      "reads_stored_canonical_profile_data": true,
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": true,
+      "production_facing": true,
+      "reusable_in_lab": false,
+      "risk_if_modified_directly": "Can affect stored Visual DNA read/write behavior",
+      "safest_preview_method": "Avoid backend helper usage in lab"
+    },
+    {
+      "file_path": "src/BusinessAssessmentVisualMap.jsx",
+      "visual_system": "Business Assessment Visual DNA",
+      "purpose": "Business Operating System Diagnostic visual route",
+      "inputs_data_dependencies": [
+        "profile id query param",
+        "api/business-assessment/retrieve",
+        "normalizeBusinessVisualArtifactData"
+      ],
+      "reads_stored_canonical_profile_data": "indirect through retrieved assessment",
+      "reads_business_assessment_output": true,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": "not directly without live fetch",
+      "risk_if_modified_directly": "Can alter live Business Assessment visual artifact",
+      "safest_preview_method": "Create static mock lab placeholder or extract pure canvas later"
+    },
+    {
+      "file_path": "src/BusinessAssessmentFiveFutures.jsx",
+      "visual_system": "Business Assessment Five Futures visual",
+      "purpose": "Five Futures and One Move visual route",
+      "inputs_data_dependencies": [
+        "profile id query param",
+        "api/business-assessment/retrieve",
+        "normalizeBusinessVisualArtifactData"
+      ],
+      "reads_stored_canonical_profile_data": "indirect through retrieved assessment",
+      "reads_business_assessment_output": true,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": "not directly without live fetch",
+      "risk_if_modified_directly": "Can alter live Five Futures artifact presentation",
+      "safest_preview_method": "Create static mock Trajectory Field placeholder or extract pure canvas later"
+    },
+    {
+      "file_path": "src/components/businessAssessment/BusinessArtifactViewer.jsx",
+      "visual_system": "Business Assessment visuals",
+      "purpose": "Fixed-size artifact viewer/scaling shell",
+      "inputs_data_dependencies": [
+        "width",
+        "height",
+        "children"
+      ],
+      "reads_stored_canonical_profile_data": false,
+      "reads_business_assessment_output": false,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": "possible",
+      "risk_if_modified_directly": "Can affect all business visual artifact scaling",
+      "safest_preview_method": "Do not modify; use lab-local containers"
+    },
+    {
+      "file_path": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+      "visual_system": "Business Assessment visuals",
+      "purpose": "Normalizes assessment records into visual artifact data",
+      "inputs_data_dependencies": [
+        "business assessment record",
+        "briefing output",
+        "five futures",
+        "one move",
+        "answers"
+      ],
+      "reads_stored_canonical_profile_data": "through assessment record",
+      "reads_business_assessment_output": true,
+      "mutates_or_writes_records": false,
+      "production_facing": true,
+      "reusable_in_lab": "possible with fixture data",
+      "risk_if_modified_directly": "Can alter all business visual interpretations",
+      "safest_preview_method": "Use fixture data in later candidate sprint"
+    },
+    {
+      "file_path": "api/business-assessment/generate-futures.js",
+      "visual_system": "Business Assessment Five Futures visual",
+      "purpose": "Generates and persists Five Futures and One Move",
+      "inputs_data_dependencies": [
+        "business assessment record",
+        "canonical profile",
+        "OpenAI model",
+        "Redis"
+      ],
+      "reads_stored_canonical_profile_data": true,
+      "reads_business_assessment_output": true,
+      "mutates_or_writes_records": true,
+      "production_facing": true,
+      "reusable_in_lab": false,
+      "risk_if_modified_directly": "Can alter generated futures and saved assessment records",
+      "safest_preview_method": "Do not call from lab"
+    }
+  ],
+  "lab_sections": [
+    {
+      "name": "BOS Visual DNA Lab",
+      "future_direction": "The Human Operating Signature",
+      "current_component_embedded": true,
+      "data_source": "static MARCUS_VISUAL_DNA_SAMPLE",
+      "candidate_slot": true
+    },
+    {
+      "name": "Business Assessment Visual DNA Lab",
+      "future_direction": "The Business Reality Map",
+      "current_component_embedded": false,
+      "data_source": "static mock business reality fields",
+      "candidate_slot": true
+    },
+    {
+      "name": "Five Futures Visual Lab",
+      "future_direction": "The Trajectory Field",
+      "current_component_embedded": false,
+      "data_source": "static mock Five Futures labels",
+      "candidate_slot": true
+    }
+  ],
+  "safety_boundaries": [
+    "No production visual replacement",
+    "No stored Visual DNA record mutation",
+    "No OpenAI call",
+    "No image generation call",
+    "No profile generation change",
+    "No business assessment generation change",
+    "No canonical dossier output change",
+    "No Five Futures generation logic change",
+    "No Universal Translator change",
+    "No Darren Strategy Chat change",
+    "No OpenAI model wiring change",
+    "No Stripe, checkout, or intake flow change",
+    "No public navigation link added"
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "json_trace_parse": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "public_routes": "pending",
+    "visual_lab_route": "pending",
+    "lab_section_markers": "pending",
+    "public_nav_link_absent": "pending",
+    "production_visuals_replaced": false,
+    "stored_records_mutated": false,
+    "openai_calls_added": false
+  },
+  "recommended_next_sprints": [
+    "VISUAL-LAB-1C BOS Visual DNA Candidate v2",
+    "VISUAL-LAB-1D Business Assessment Visual DNA Candidate v2",
+    "VISUAL-LAB-1E Five Futures Trajectory Field Candidate v2",
+    "VISUAL-UPGRADE-2A approved feature-flag wiring"
+  ],
+  "verdict": "VISUAL_LAB_FOUNDATION_READY_FOR_DEPLOYMENT"
+}
