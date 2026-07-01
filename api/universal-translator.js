@@ -21,13 +21,21 @@ const TRANSLATION_MODES = new Set([
 ]);
 
 const ALLOWED_MODELS = new Set([
-  'gpt-4o-mini',
+  'gpt-4o-2024-08-06',
+  'gpt-4o-2024-05-13',
   'gpt-4o',
+  'gpt-5.4-mini',
+  'gpt-5.4-mini-2026-03-17',
+  'gpt-5.4-2026-03-05',
+  'gpt-5.4-nano-2026-03-17',
+  'gpt-5.5',
+  'gpt-5.5-2026-04-23',
   'gpt-4.1-mini',
   'gpt-4.1',
-  'gpt-5-mini',
   'gpt-5'
 ]);
+const DEFAULT_TRANSLATOR_MODEL = 'gpt-4o-2024-08-06';
+const TRANSLATOR_TIMEOUT_MS = 22000;
 
 function sendJson(res, status, payload) {
   res.status(status).json(payload);
@@ -55,9 +63,47 @@ function isStringLike(value) {
 }
 
 function configuredModel() {
-  const explicit = cleanText(process.env.UNIVERSAL_TRANSLATOR_OPENAI_MODEL, 80);
+  const explicit = cleanText(process.env.UNIVERSAL_TRANSLATOR_MODEL || process.env.UNIVERSAL_TRANSLATOR_OPENAI_MODEL, 80);
   if (explicit && ALLOWED_MODELS.has(explicit)) return explicit;
-  return 'gpt-4o-mini';
+  return DEFAULT_TRANSLATOR_MODEL;
+}
+
+function configuredModelPlan() {
+  const primaryModel = configuredModel();
+  return {
+    primary_model: primaryModel,
+    fallback_model: primaryModel === DEFAULT_TRANSLATOR_MODEL ? null : DEFAULT_TRANSLATOR_MODEL,
+    env_model_configured: Boolean(cleanText(process.env.UNIVERSAL_TRANSLATOR_MODEL || process.env.UNIVERSAL_TRANSLATOR_OPENAI_MODEL, 80))
+  };
+}
+
+function usesCompletionTokenParameter(model) {
+  return /^(gpt-5|o\d|o[134]|chatgpt-4o)/i.test(String(model || ''));
+}
+
+function translatorRequestBody({ model, input, dictionaryTerms }) {
+  const tokenParameter = usesCompletionTokenParameter(model) ? 'max_completion_tokens' : 'max_tokens';
+  const body = {
+    model,
+    messages: buildMessages(input, dictionaryTerms),
+    response_format: { type: 'json_object' },
+    [tokenParameter]: 900
+  };
+  if (!usesCompletionTokenParameter(model)) body.temperature = 0.25;
+  return body;
+}
+
+function modelFailureCode(error) {
+  return error?.safeCode || error?.code || 'universal_translator_model_request_failed';
+}
+
+function logTranslatorModelFailure({ model, stage, error }) {
+  console.warn('universal_translator_model_attempt_failed', {
+    stage,
+    model,
+    safe_code: modelFailureCode(error),
+    status: error?.status || null
+  });
 }
 
 function relevantDictionaryTerms(sourceText) {
@@ -153,7 +199,7 @@ function parseModelJson(content) {
   return JSON.parse(text.slice(first, last + 1));
 }
 
-async function callTranslatorModel(input, dictionaryTerms) {
+async function callSingleTranslatorModel({ model, input, dictionaryTerms }) {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
     const error = new Error('translator_model_not_configured');
@@ -161,24 +207,28 @@ async function callTranslatorModel(input, dictionaryTerms) {
     throw error;
   }
 
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), TRANSLATOR_TIMEOUT_MS);
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      model: configuredModel(),
-      messages: buildMessages(input, dictionaryTerms),
-      response_format: { type: 'json_object' },
-      temperature: 0.25,
-      max_tokens: 900
-    })
-  });
+    body: JSON.stringify(translatorRequestBody({ model, input, dictionaryTerms })),
+    signal: controller.signal
+  }).catch((error) => {
+    const safeErrorObject = new Error(error?.name === 'AbortError' ? 'translator_model_timeout' : 'translator_model_request_failed');
+    safeErrorObject.safeCode = error?.name === 'AbortError'
+      ? 'universal_translator_model_timeout'
+      : 'universal_translator_model_request_failed';
+    throw safeErrorObject;
+  }).finally(() => clearTimeout(timeout));
 
   if (!response.ok) {
     const error = new Error('translator_model_request_failed');
     error.safeCode = 'universal_translator_model_request_failed';
+    error.status = response.status;
     throw error;
   }
 
@@ -190,16 +240,69 @@ async function callTranslatorModel(input, dictionaryTerms) {
     throw error;
   }
 
-  return parseModelJson(content);
+  try {
+    return parseModelJson(content);
+  } catch {
+    const error = new Error('translator_model_response_invalid');
+    error.safeCode = 'universal_translator_model_response_invalid';
+    throw error;
+  }
+}
+
+async function callTranslatorModel(input, dictionaryTerms) {
+  const plan = configuredModelPlan();
+  try {
+    const parsed = await callSingleTranslatorModel({
+      model: plan.primary_model,
+      input,
+      dictionaryTerms
+    });
+    return {
+      parsed,
+      model_used: plan.primary_model,
+      fallback_used: false,
+      model_selection: plan
+    };
+  } catch (primaryError) {
+    logTranslatorModelFailure({ model: plan.primary_model, stage: 'primary', error: primaryError });
+    if (!plan.fallback_model) throw primaryError;
+
+    try {
+      const parsed = await callSingleTranslatorModel({
+        model: plan.fallback_model,
+        input,
+        dictionaryTerms
+      });
+      return {
+        parsed,
+        model_used: plan.fallback_model,
+        fallback_used: true,
+        model_selection: plan,
+        primary_failure_code: modelFailureCode(primaryError)
+      };
+    } catch (fallbackError) {
+      logTranslatorModelFailure({ model: plan.fallback_model, stage: 'fallback', error: fallbackError });
+      const error = new Error('translator_model_fallback_failed');
+      error.safeCode = modelFailureCode(fallbackError);
+      error.modelTrace = {
+        primary_model: plan.primary_model,
+        fallback_model: plan.fallback_model,
+        primary_failure_code: modelFailureCode(primaryError),
+        fallback_failure_code: modelFailureCode(fallbackError)
+      };
+      throw error;
+    }
+  }
 }
 
 function sanitizeTranslation(modelResult, input, dictionaryTerms) {
-  const translation = modelResult?.translation && typeof modelResult.translation === 'object'
-    ? modelResult.translation
-    : modelResult;
+  const result = modelResult?.parsed || modelResult || {};
+  const translation = result?.translation && typeof result.translation === 'object'
+    ? result.translation
+    : result;
 
-  const terms = Array.isArray(modelResult?.dictionary_terms_used)
-    ? modelResult.dictionary_terms_used
+  const terms = Array.isArray(result?.dictionary_terms_used)
+    ? result.dictionary_terms_used
     : dictionaryTerms.map((entry) => entry.label);
 
   return {
@@ -217,7 +320,15 @@ function sanitizeTranslation(modelResult, input, dictionaryTerms) {
     },
     dictionary_terms_used: terms.map((term) => cleanText(term, 80)).filter(Boolean).slice(0, 12),
     source_of_truth_note: 'The original MORE MindMap output remains the source of truth.',
-    mutation_performed: false
+    mutation_performed: false,
+    model_used: cleanText(modelResult?.model_used, 80),
+    fallback_used: modelResult?.fallback_used === true,
+    model_selection: {
+      primary_model: cleanText(modelResult?.model_selection?.primary_model, 80),
+      fallback_model: cleanText(modelResult?.model_selection?.fallback_model, 80),
+      primary_model_failed: modelResult?.fallback_used === true,
+      env_model_configured: modelResult?.model_selection?.env_model_configured === true
+    }
   };
 }
 
@@ -270,9 +381,18 @@ export default async function handler(req, res) {
     const modelResult = await callTranslatorModel(input, dictionaryTerms);
     return sendJson(res, 200, sanitizeTranslation(modelResult, input, dictionaryTerms));
   } catch (error) {
-    return sendJson(res, 500, {
+    const errorCode = error.safeCode || 'universal_translator_failed';
+    const status = errorCode.includes('model') ? 503 : 500;
+    return sendJson(res, status, {
       ok: false,
-      error: error.safeCode || 'universal_translator_failed'
+      error: errorCode,
+      mutation_performed: false,
+      model_trace: error?.modelTrace ? {
+        primary_model: cleanText(error.modelTrace.primary_model, 80),
+        fallback_model: cleanText(error.modelTrace.fallback_model, 80),
+        primary_failure_code: cleanText(error.modelTrace.primary_failure_code, 120),
+        fallback_failure_code: cleanText(error.modelTrace.fallback_failure_code, 120)
+      } : undefined
     });
   }
 }

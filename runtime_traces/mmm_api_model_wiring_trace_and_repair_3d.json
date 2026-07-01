@@ -1,0 +1,275 @@
+{
+  "phase_id": "MMM-API-MODEL-WIRING-3D",
+  "timestamp": "2026-07-01T01:29:59Z",
+  "runtime_changed": true,
+  "frontend_changed": false,
+  "backend_changed": true,
+  "global_model_changed": false,
+  "routes_discovered": [
+    {
+      "file_path": "api/universal-translator.js",
+      "route_name": "/api/universal-translator",
+      "purpose": "Universal Translator comprehension and explanation layer",
+      "current_model_source": "UNIVERSAL_TRANSLATOR_MODEL || UNIVERSAL_TRANSLATOR_OPENAI_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": "gpt-4o-2024-08-06",
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_tokens for GPT-4o-class, max_completion_tokens for GPT-5/o-class",
+      "response_parsing_method": "JSON object extracted from choices[0].message.content",
+      "route_access": "public_backend_route",
+      "mutates_records": false,
+      "safe_read_only": true,
+      "recommended_model": "gpt-4o-2024-08-06",
+      "risk_level": "low_after_repair",
+      "status": "repaired"
+    },
+    {
+      "file_path": "api/admin/darren-strategy-chat.js",
+      "route_name": "/api/admin/darren-strategy-chat",
+      "purpose": "Darren advisory Strategy Chat",
+      "current_model_source": "DARREN_STRATEGY_CHAT_MODEL || DARREN_STRATEGY_CHAT_OPENAI_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": "gpt-4o-2024-08-06",
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_completion_tokens for GPT-5/o-class, max_tokens otherwise",
+      "response_parsing_method": "JSON object extracted from choices[0].message.content",
+      "route_access": "admin",
+      "mutates_records": false,
+      "safe_read_only": true,
+      "recommended_model": "gpt-5.5 with fallback gpt-4o-2024-08-06",
+      "risk_level": "low",
+      "status": "working"
+    },
+    {
+      "file_path": "api/admin/darren-adaptive-loop-core.js",
+      "route_name": "Darren adaptive strategy core",
+      "purpose": "Creates pending-review adaptive strategy draft",
+      "current_model_source": "DARREN_ADAPTIVE_STRATEGY_OPENAI_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": "gpt-4o-2024-08-06",
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_tokens",
+      "response_parsing_method": "JSON object extracted from choices[0].message.content",
+      "route_access": "admin/internal",
+      "mutates_records": "creates pending-review draft through caller when invoked",
+      "safe_read_only": false,
+      "recommended_model": "keep gpt-4o-2024-08-06 unless separately upgraded",
+      "risk_level": "medium",
+      "status": "untested"
+    },
+    {
+      "file_path": "api/admin/darren-intelligence-generate.js",
+      "route_name": "/api/admin/darren-intelligence-generate",
+      "purpose": "Generates Darren strategy, Five Futures, and One Move",
+      "current_model_source": "DARREN_INTELLIGENCE_OPENAI_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": "gpt-4o-2024-08-06",
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "model-class aware max_tokens or max_completion_tokens",
+      "response_parsing_method": "JSON object extraction and schema validation",
+      "route_access": "admin",
+      "mutates_records": true,
+      "safe_read_only": false,
+      "recommended_model": "keep route-specific gpt-4o-2024-08-06",
+      "risk_level": "medium",
+      "status": "untested"
+    },
+    {
+      "file_path": "api/business-assessment/generate-futures.js",
+      "route_name": "/api/business-assessment/generate-futures",
+      "purpose": "Business Assessment Five Futures and One Move generation",
+      "current_model_source": "BUSINESS_ASSESSMENT_OPENAI_MODEL || OPENAI_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": null,
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_completion_tokens",
+      "response_parsing_method": "JSON object extraction and strict validation",
+      "route_access": "business_assessment_backend",
+      "mutates_records": true,
+      "safe_read_only": false,
+      "recommended_model": "do not change without separate smoke",
+      "risk_level": "medium",
+      "status": "incompatible-risk"
+    },
+    {
+      "file_path": "api/business-assessment/generate-briefing.js",
+      "route_name": "/api/business-assessment/generate-briefing",
+      "purpose": "Executive Diagnostic Briefing generation",
+      "current_model_source": "BUSINESS_ASSESSMENT_BRIEFING_MODEL || gpt-4o-2024-08-06",
+      "hardcoded_model": null,
+      "fallback_model": null,
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_completion_tokens",
+      "response_parsing_method": "JSON object extraction, validation, and repair passes",
+      "route_access": "business_assessment_backend",
+      "mutates_records": true,
+      "safe_read_only": false,
+      "recommended_model": "keep gpt-4o-2024-08-06",
+      "risk_level": "medium",
+      "status": "untested"
+    },
+    {
+      "file_path": "api/moremindmap/narrative-v3.js",
+      "route_name": "/api/moremindmap/narrative-v3",
+      "purpose": "Narrative V3 section generation",
+      "current_model_source": "hardcoded gpt-4o-2024-08-06",
+      "hardcoded_model": "gpt-4o-2024-08-06",
+      "fallback_model": null,
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_tokens",
+      "response_parsing_method": "JSON.parse of choices[0].message.content",
+      "route_access": "profile_backend",
+      "mutates_records": false,
+      "safe_read_only": true,
+      "recommended_model": "keep gpt-4o-2024-08-06",
+      "risk_level": "low",
+      "status": "untested"
+    },
+    {
+      "file_path": "api/moremindmap/visual-dna/generate.js",
+      "route_name": "/api/moremindmap/visual-dna/generate",
+      "purpose": "Visual DNA image draft generation",
+      "current_model_source": "VISUAL_DNA_IMAGE_MODEL || gpt-image-1",
+      "hardcoded_model": null,
+      "fallback_model": null,
+      "api_method_used": "OpenAI SDK images.edit",
+      "token_parameter_used": "image_generation_parameters",
+      "response_parsing_method": "image base64/blob handling",
+      "route_access": "profile_backend",
+      "mutates_records": true,
+      "safe_read_only": false,
+      "recommended_model": "keep gpt-image-1",
+      "risk_level": "medium",
+      "status": "untested"
+    },
+    {
+      "file_path": "api/engine/generateReportContent.js",
+      "route_name": "generateReportContent helper",
+      "purpose": "Mini profile/report content generation helper",
+      "current_model_source": "OPENAI_MODEL || gpt-5.5",
+      "hardcoded_model": null,
+      "fallback_model": "mock mode on failure",
+      "api_method_used": "OpenAI SDK chat.completions.create",
+      "token_parameter_used": "max_completion_tokens",
+      "response_parsing_method": "JSON.parse of message content",
+      "route_access": "internal_engine",
+      "mutates_records": "writes local report content in non-repair mode",
+      "safe_read_only": false,
+      "recommended_model": "audit separately before any global model change",
+      "risk_level": "medium",
+      "status": "incompatible-risk"
+    },
+    {
+      "file_path": "api/engine/rescoring/gptBehavioralRescore.js",
+      "route_name": "gptBehavioralRescore helper",
+      "purpose": "Behavioral rescoring helper",
+      "current_model_source": "hardcoded gpt-4o",
+      "hardcoded_model": "gpt-4o",
+      "fallback_model": "deterministic rescore by caller behavior",
+      "api_method_used": "chat/completions via fetch",
+      "token_parameter_used": "max_tokens",
+      "response_parsing_method": "JSON.parse with fenced JSON fallback",
+      "route_access": "admin/internal",
+      "mutates_records": "through admin rescore caller",
+      "safe_read_only": false,
+      "recommended_model": "audit separately because schema expects gpt-5.5 while call uses gpt-4o",
+      "risk_level": "medium",
+      "status": "incompatible-risk"
+    },
+    {
+      "file_path": "api/admin/rescore-profile.js",
+      "route_name": "/api/admin/rescore-profile",
+      "purpose": "Admin GPT behavioral rescore persistence route",
+      "current_model_source": "indirect gptBehavioralRescore helper",
+      "hardcoded_model": null,
+      "fallback_model": null,
+      "api_method_used": "indirect",
+      "token_parameter_used": "indirect",
+      "response_parsing_method": "indirect helper validation",
+      "route_access": "admin",
+      "mutates_records": true,
+      "safe_read_only": false,
+      "recommended_model": "do not change in translator repair sprint",
+      "risk_level": "medium",
+      "status": "incompatible-risk"
+    }
+  ],
+  "routes_repaired": [
+    "/api/universal-translator"
+  ],
+  "model_assignments": {
+    "darren_strategy_chat": {
+      "primary": "DARREN_STRATEGY_CHAT_MODEL=gpt-5.5",
+      "fallback": "gpt-4o-2024-08-06",
+      "changed": false
+    },
+    "universal_translator": {
+      "primary": "UNIVERSAL_TRANSLATOR_MODEL || UNIVERSAL_TRANSLATOR_OPENAI_MODEL || gpt-4o-2024-08-06",
+      "fallback": "gpt-4o-2024-08-06 when primary differs",
+      "changed": true
+    },
+    "business_assessment_futures": {
+      "primary": "BUSINESS_ASSESSMENT_OPENAI_MODEL || OPENAI_MODEL || gpt-4o-2024-08-06",
+      "changed": false
+    },
+    "business_assessment_briefing": {
+      "primary": "BUSINESS_ASSESSMENT_BRIEFING_MODEL || gpt-4o-2024-08-06",
+      "changed": false
+    },
+    "visual_dna": {
+      "primary": "VISUAL_DNA_IMAGE_MODEL || gpt-image-1",
+      "changed": false
+    }
+  },
+  "env_vars_required": [],
+  "env_vars_recommended": [
+    {
+      "name": "UNIVERSAL_TRANSLATOR_MODEL",
+      "value": "gpt-4o-2024-08-06",
+      "required": false,
+      "reason": "Code defaults to this model, but explicit route-specific config prevents accidental global model coupling."
+    }
+  ],
+  "repairs_made": [
+    "Changed Universal Translator default from stale gpt-4o-mini wiring to gpt-4o-2024-08-06.",
+    "Added Universal Translator route-specific env var support for UNIVERSAL_TRANSLATOR_MODEL and legacy UNIVERSAL_TRANSLATOR_OPENAI_MODEL.",
+    "Added safe allowed model list matching confirmed project access.",
+    "Added one retry fallback to gpt-4o-2024-08-06 when a configured non-default primary fails.",
+    "Added model-class token parameter selection for GPT-5/o-class versus GPT-4o-class models.",
+    "Added safe model_used and fallback_used response metadata.",
+    "Preserved mutation_performed false and source-of-truth note."
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "node_check_universal_translator": "passed",
+    "json_trace_parse": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "pre_repair_universal_translator_production": {
+      "status": 503,
+      "ok": false,
+      "error": "universal_translator_model_request_failed"
+    },
+    "post_deploy_universal_translator": "pending",
+    "post_deploy_darren_strategy_chat": "pending",
+    "post_deploy_public_routes": "pending"
+  },
+  "remaining_risks": [
+    "GPT behavioral rescoring helper requests gpt-4o while prompt/schema expects gpt-5.5; left unchanged because it is not the reported Translator failure.",
+    "generateReportContent depends on global OPENAI_MODEL and should be audited before any global model change.",
+    "Business Assessment Five Futures route uses OPENAI_MODEL as a fallback and should be smoke-tested before changing OPENAI_MODEL."
+  ],
+  "forbidden_changes_confirmed_absent": {
+    "openai_model_global_changed": false,
+    "darren_strategy_chat_changed": false,
+    "profile_generation_changed": false,
+    "business_assessment_generation_changed": false,
+    "checkout_stripe_changed": false,
+    "visual_dna_changed": false,
+    "public_intake_changed": false,
+    "automatic_future_movement_added": false,
+    "canonical_dossier_mutation_added": false
+  },
+  "verdict": "UNIVERSAL_TRANSLATOR_MODEL_WIRING_REPAIRED_WITH_ROUTE_SPECIFIC_FALLBACKS"
+}
