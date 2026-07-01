@@ -507,6 +507,8 @@ function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
 }
 
 function FutureCard({ future }) {
+  const hiddenSignalCount = Math.max(0, future.signals.length - 1);
+
   return (
     <article className={`tone-${future.tone}`}>
       <header>
@@ -516,12 +518,9 @@ function FutureCard({ future }) {
       <strong>{future.title}</strong>
       <small>{future.status}</small>
       <div>
-        <b>Signals</b>
-        <ul>
-          {future.signals.slice(0, 3).map((signal) => (
-            <li key={signal}>{signal}</li>
-          ))}
-        </ul>
+        <b>Key signal</b>
+        <mark>{future.signals[0]}</mark>
+        {hiddenSignalCount > 0 && <i>+{hiddenSignalCount} more signals</i>}
       </div>
       <p>{future.interpretation}</p>
     </article>
@@ -1353,6 +1352,7 @@ const styles = `
 .vl-right-future-column {
   grid-column: 3;
   grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 1.2%;
 }
 
 .vl-future-list article {
@@ -1363,7 +1363,7 @@ const styles = `
   height: 100%;
   border: 1px solid;
   border-radius: 0.72rem;
-  padding: 3.4%;
+  padding: 3.15%;
   overflow: hidden;
   pointer-events: auto;
 }
@@ -1379,6 +1379,8 @@ const styles = `
 .vl-future-list em,
 .vl-future-list small,
 .vl-future-list b,
+.vl-future-list mark,
+.vl-future-list i,
 .vl-future-list p {
   display: block;
 }
@@ -1418,9 +1420,9 @@ const styles = `
 }
 
 .vl-future-list div {
-  margin-top: 0.52rem;
+  margin-top: 0.4rem;
   border-top: 1px solid rgba(255,255,255,0.10);
-  padding-top: 0.42rem;
+  padding-top: 0.34rem;
 }
 
 .vl-future-list b {
@@ -1430,30 +1432,66 @@ const styles = `
   text-transform: uppercase;
 }
 
-.vl-future-list ul {
-  margin: 0.28rem 0 0;
-  padding-left: 1rem;
+.vl-future-list mark {
+  margin-top: 0.32rem;
+  background: transparent;
+  color: rgba(255,255,255,0.72);
+  font-size: clamp(0.54rem, 0.68vw, 0.72rem);
+  font-weight: 750;
+  line-height: 1.24;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
-.vl-future-list li {
-  color: rgba(255,255,255,0.66);
-  font-size: clamp(0.52rem, 0.64vw, 0.68rem);
-  line-height: 1.28;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.vl-future-list i {
+  margin-top: 0.34rem;
+  color: color-mix(in srgb, var(--tone) 78%, white 12%);
+  font-size: clamp(0.5rem, 0.6vw, 0.66rem);
+  font-style: normal;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .vl-future-list p {
-  margin: 0.48rem 0 0;
+  margin: 0.42rem 0 0;
   color: rgba(255,255,255,0.78);
   font-size: clamp(0.55rem, 0.68vw, 0.73rem);
   line-height: 1.3;
   display: -webkit-box;
-  min-height: 2.6em;
+  min-height: 1.3em;
   overflow: hidden;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
+}
+
+.vl-right-future-column mark {
+  -webkit-line-clamp: 1;
+}
+
+.vl-right-future-column article {
+  padding: 2.35%;
+}
+
+.vl-right-future-column strong {
+  min-height: 1.14em;
+  -webkit-line-clamp: 1;
+}
+
+.vl-right-future-column div {
+  margin-top: 0.32rem;
+  padding-top: 0.28rem;
+}
+
+.vl-right-future-column i {
+  margin-top: 0.25rem;
+}
+
+.vl-right-future-column p {
+  display: none;
 }
 
 .vl-lde-insight {
