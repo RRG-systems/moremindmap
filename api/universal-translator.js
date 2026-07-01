@@ -16,6 +16,7 @@ const SOURCE_TYPES = new Set([
 
 const TRANSLATION_MODES = new Set([
   'plain_english',
+  // Legacy/internal compatibility only. The current UI exposes plain_english and coach_me_through_this.
   'explain_like_busy',
   'coach_me_through_this'
 ]);
@@ -160,6 +161,36 @@ function sourceTypeInstructions(sourceType) {
   return 'Translate the source into practical meaning while preserving limits and source-of-truth boundaries.';
 }
 
+function modeInstructions(translationMode) {
+  if (translationMode === 'coach_me_through_this') {
+    return [
+      'Act like a practical business coach helping the user understand and use this section.',
+      'Make this visibly different from Plain English mode.',
+      'Explain what the section is really saying, why it matters, what signal it reveals, what risk or opportunity to notice, and one useful question or next step.',
+      'Prefer filling headline, what_it_means, why_it_matters, what_to_watch, coaching_question, and what_to_do_next.',
+      'Use a supportive, practical, coaching-oriented tone.',
+      'Do not change the source truth, invent proof, add unsupported strategy, or imply the translation replaces the original output.'
+    ].join(' ');
+  }
+
+  if (translationMode === 'explain_like_busy') {
+    return [
+      'Legacy mode. Treat this as a compact Plain English translation.',
+      'Keep it short, direct, and non-cutesy.',
+      'Do not add a coaching framework unless the source clearly requires one.'
+    ].join(' ');
+  }
+
+  return [
+    'Translate this into clear, simple, direct language.',
+    'Make it easy to understand what the source means.',
+    'Use fewer words than coaching mode.',
+    'Do not add new strategy.',
+    'Do not over-coach.',
+    'Do not turn the response into an action plan unless a practical next step is clearly present in the source.'
+  ].join(' ');
+}
+
 function buildMessages(input, dictionaryTerms) {
   return [
     {
@@ -167,11 +198,12 @@ function buildMessages(input, dictionaryTerms) {
       content: [
         'You are the MORE MindMap Universal Translator.',
         'You translate meaning, not language.',
-        'Use the locked method: technical claim, human behavior underneath it, real-world consequence, plain-language explanation, coaching sentence.',
         'Preserve accuracy, evidence limits, warnings, and not-live boundaries.',
         'Do not hype, invent proof, soften overclaim warnings, or say translation replaces the source.',
         'Keep the translation English-only. Do not add language selection, locale handling, or multilingual metadata.',
-        'Return only JSON with translation fields: what_it_says, what_it_means, why_it_matters, what_to_do_next, optional how_this_shows_up_in_real_life, optional what_not_to_overclaim, optional truth_boundary, and dictionary_terms_used.'
+        'Return only JSON with translation fields: optional headline, what_it_says, what_it_means, why_it_matters, what_to_do_next, optional what_to_watch, optional coaching_question, optional how_this_shows_up_in_real_life, optional what_not_to_overclaim, optional truth_boundary, and dictionary_terms_used.',
+        'For Plain English mode, the goal is: What does this mean?',
+        'For Coach Me Through This mode, the goal is: How should I think about this and use it?'
       ].join(' ')
     },
     {
@@ -184,6 +216,7 @@ function buildMessages(input, dictionaryTerms) {
         source_excerpt: input.source_excerpt,
         profile_context: input.profile_context,
         business_context: input.business_context,
+        mode_instructions: modeInstructions(input.translation_mode),
         source_type_instructions: sourceTypeInstructions(input.source_type),
         dictionary_terms: dictionaryTerms
       })
@@ -310,10 +343,13 @@ function sanitizeTranslation(modelResult, input, dictionaryTerms) {
     source_type: input.source_type,
     translation_mode: input.translation_mode,
     translation: {
+      headline: cleanText(translation?.headline, 220),
       what_it_says: cleanText(translation?.what_it_says, 900),
       what_it_means: cleanText(translation?.what_it_means, 900),
       why_it_matters: cleanText(translation?.why_it_matters, 900),
       what_to_do_next: cleanText(translation?.what_to_do_next, 900),
+      what_to_watch: cleanText(translation?.what_to_watch, 900),
+      coaching_question: cleanText(translation?.coaching_question, 900),
       how_this_shows_up_in_real_life: cleanText(translation?.how_this_shows_up_in_real_life, 900),
       what_not_to_overclaim: cleanText(translation?.what_not_to_overclaim, 900),
       truth_boundary: cleanText(translation?.truth_boundary, 900)

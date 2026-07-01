@@ -2,8 +2,7 @@ import { useMemo, useState } from 'react';
 
 const MODE_OPTIONS = [
   { value: 'plain_english', label: 'Plain English' },
-  { value: 'explain_like_busy', label: "Explain it like I'm busy" },
-  { value: 'coach_me_through_this', label: 'Coach me through this' }
+  { value: 'coach_me_through_this', label: 'Coach Me Through This' }
 ];
 
 function buildApiUrl(path) {
@@ -102,7 +101,7 @@ export default function UniversalTranslatorDrawer({
         </div>
 
         <div className="flex-1 space-y-4 overflow-y-auto p-5 sm:p-6">
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-2">
             {MODE_OPTIONS.map((option) => (
               <button
                 key={option.value}
@@ -136,9 +135,12 @@ export default function UniversalTranslatorDrawer({
 
           {translation && (
             <div className="space-y-3">
+              <FieldBlock label="Headline" value={translated.headline} />
               <FieldBlock label="What it says" value={translated.what_it_says} />
               <FieldBlock label="What it means" value={translated.what_it_means} />
               <FieldBlock label="Why it matters" value={translated.why_it_matters} />
+              <FieldBlock label="What to watch" value={translated.what_to_watch} />
+              <FieldBlock label="Coaching question" value={translated.coaching_question} />
               <FieldBlock label="What to do next" value={translated.what_to_do_next} />
               <FieldBlock label="How this shows up in real life" value={translated.how_this_shows_up_in_real_life} />
               <FieldBlock label="What not to overclaim" value={translated.what_not_to_overclaim} />

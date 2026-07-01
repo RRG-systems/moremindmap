@@ -1,0 +1,72 @@
+{
+  "phase_id": "UNIVERSAL-TRANSLATOR-MODE-SIMPLIFICATION-3E",
+  "timestamp": "2026-07-01T01:47:07Z",
+  "runtime_changed": true,
+  "frontend_changed": true,
+  "backend_changed": true,
+  "model_wiring_changed": false,
+  "global_model_changed": false,
+  "darren_strategy_chat_changed": false,
+  "profile_generation_changed": false,
+  "business_assessment_generation_changed": false,
+  "source_content_mutation_added": false,
+  "canonical_dossier_mutation_added": false,
+  "modes_removed_from_ui": [
+    "explain_like_busy"
+  ],
+  "visible_modes": [
+    "plain_english",
+    "coach_me_through_this"
+  ],
+  "backend_legacy_modes_supported": [
+    "explain_like_busy"
+  ],
+  "mode_behavior": {
+    "plain_english": {
+      "goal": "What does this mean?",
+      "style": "simple, direct, fewer words, no coaching framework",
+      "fields": [
+        "what_it_says",
+        "what_it_means",
+        "why_it_matters",
+        "what_to_do_next",
+        "what_not_to_overclaim",
+        "truth_boundary"
+      ]
+    },
+    "coach_me_through_this": {
+      "goal": "How should I think about this and use it?",
+      "style": "practical business coaching with signal, risk/opportunity, question, and next step",
+      "fields": [
+        "headline",
+        "what_it_says",
+        "what_it_means",
+        "why_it_matters",
+        "what_to_watch",
+        "coaching_question",
+        "what_to_do_next",
+        "how_this_shows_up_in_real_life",
+        "what_not_to_overclaim",
+        "truth_boundary"
+      ]
+    },
+    "explain_like_busy": {
+      "status": "legacy_backend_compatibility_only",
+      "ui_visible": false
+    }
+  },
+  "validation": {
+    "git_diff_check": "passed",
+    "node_check_universal_translator": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning",
+    "json_trace_parse": "passed"
+  },
+  "smoke_tests": {
+    "post_deploy_public_routes": "pending",
+    "post_deploy_plain_english": "pending",
+    "post_deploy_coach_me_through_this": "pending",
+    "post_deploy_darren_strategy_chat": "pending",
+    "ui_mode_marker_check": "pending"
+  },
+  "verdict": "PENDING_VALIDATION_AND_DEPLOYMENT"
+}
