@@ -83,7 +83,7 @@ const mockFutures = [
     probability: '42%',
     status: 'Currently active',
     position: 'left-high',
-    signals: ['Leadership vision unclear', 'DD accountability inconsistent', 'Productivity stagnant'],
+    signals: ['Vision unclear', 'Accountability inconsistent', 'Productivity stagnant'],
     interpretation: 'The organization becomes larger without becoming stronger.'
   },
   {
@@ -93,7 +93,7 @@ const mockFutures = [
     probability: '31%',
     status: 'Most likely next state',
     position: 'left-low',
-    signals: ['Growth initiatives continue', 'Execution remains personality driven', 'Capacity becomes the constraint'],
+    signals: ['Growth continues', 'Execution personality-driven', 'Capacity constraint'],
     interpretation: 'Growth stacks on top of weak leadership infrastructure.'
   },
   {
@@ -103,7 +103,7 @@ const mockFutures = [
     probability: '14%',
     status: 'Requires structural change',
     position: 'right-high',
-    signals: ['Economic agent count', 'DD productivity accountability', 'Higher PPP'],
+    signals: ['Economic agent count', 'Productivity accountability', 'Higher PPP'],
     interpretation: 'Smaller story. Stronger company.'
   },
   {
@@ -387,12 +387,6 @@ function TrajectoryFieldMock() {
         ))}
       </aside>
 
-      <div className="vl-one-move-module">
-        <span>One Move: Trajectory Intervention</span>
-        <strong>Install a weekly relationship-to-appointment operating rhythm.</strong>
-        <p>Mock-only candidate note: the intervention changes leverage only after action and proof are recorded.</p>
-      </div>
-
       <div className="vl-trajectory-legend" aria-label="trajectory legend">
         <span>Current Future / Active</span>
         <span>Most Likely Next Future</span>
@@ -603,9 +597,8 @@ const styles = `
 }
 
 .vl-full-stage-wrap {
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  padding: 0.25rem 0 0.45rem;
+  overflow-x: hidden;
+  padding: 0.25rem 0 0;
 }
 
 .vl-card,
@@ -809,10 +802,13 @@ const styles = `
 
 .vl-trajectory {
   position: relative;
-  width: 1320px;
-  min-width: 1320px;
-  height: 850px;
-  min-height: 850px;
+  width: 100%;
+  max-width: 1320px;
+  min-width: 0;
+  aspect-ratio: 1320 / 850;
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
   overflow: hidden;
   padding: 0;
   background:
@@ -853,8 +849,8 @@ const styles = `
 
 .vl-stage-label {
   position: absolute;
-  left: 20px;
-  top: 14px;
+  left: 1.5%;
+  top: 1.45%;
   z-index: 8;
   color: rgba(255,255,255,0.42);
   font-size: 0.62rem;
@@ -865,13 +861,13 @@ const styles = `
 
 .vl-trajectory-header {
   position: absolute;
-  left: 20px;
-  right: 198px;
-  top: 34px;
+  left: 1.5%;
+  right: 15.3%;
+  top: 4%;
   z-index: 8;
   display: grid;
-  grid-template-columns: 350px 430px minmax(0, 1fr);
-  gap: 0.9rem;
+  grid-template-columns: 28% 38% minmax(0, 1fr);
+  gap: 0.75%;
   margin-right: 0;
 }
 
@@ -880,7 +876,6 @@ const styles = `
 .vl-current-future-chip,
 .vl-lde-insight,
 .vl-lde-rail,
-.vl-one-move-module,
 .vl-trajectory-legend,
 .vl-trajectory-doctrine {
   border: 1px solid rgba(255,255,255,0.12);
@@ -890,26 +885,25 @@ const styles = `
 }
 
 .vl-trajectory-header > div {
-  padding: 1.05rem 1.15rem;
+  padding: 1.04% 1.12%;
 }
 
 .vl-trajectory-header span,
 .vl-trajectory-detected span,
 .vl-current-future-chip span,
 .vl-lde-insight span,
-.vl-one-move-module span,
 .vl-lde-rail span {
   color: rgba(254,215,170,0.86);
-  font-size: 0.68rem;
+  font-size: clamp(0.5rem, 0.68vw, 0.68rem);
   font-weight: 900;
   letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
 .vl-trajectory-header h3 {
-  margin: 0.42rem 0 0;
+  margin: 0.35rem 0 0;
   color: #f8fafc;
-  font-size: 3.15rem;
+  font-size: clamp(1.9rem, 3.9vw, 3.15rem);
   font-weight: 850;
   letter-spacing: -0.035em;
   line-height: 0.92;
@@ -917,17 +911,17 @@ const styles = `
 
 .vl-trajectory-header strong {
   display: block;
-  margin-top: 0.65rem;
+  margin-top: 0.5rem;
   color: rgba(254,215,170,0.90);
-  font-size: 1.05rem;
+  font-size: clamp(0.78rem, 1vw, 1.05rem);
   font-weight: 500;
   line-height: 1.35;
 }
 
 .vl-trajectory-detected p {
-  margin: 0.55rem 0 0;
+  margin: 0.42rem 0 0;
   color: rgba(255,255,255,0.68);
-  font-size: 0.84rem;
+  font-size: clamp(0.66rem, 0.82vw, 0.84rem);
   line-height: 1.45;
 }
 
@@ -937,15 +931,15 @@ const styles = `
 }
 
 .vl-current-future-chip strong {
-  margin-top: 0.58rem;
+  margin-top: 0.42rem;
   color: #fb7185;
-  font-size: 1.02rem;
+  font-size: clamp(0.76rem, 0.94vw, 1.02rem);
   line-height: 1.12;
   text-transform: uppercase;
 }
 
 .vl-current-future-chip em {
-  margin-top: 0.7rem;
+  margin-top: 0.52rem;
   width: max-content;
   border: 1px solid rgba(248,113,113,0.34);
   border-radius: 999px;
@@ -961,12 +955,13 @@ const styles = `
 
 .vl-trajectory-core {
   position: absolute;
-  left: 610px;
-  top: 350px;
+  left: 46.2%;
+  top: 41.2%;
   z-index: 5;
   display: flex;
-  width: 300px;
-  height: 300px;
+  width: 22.7%;
+  aspect-ratio: 1;
+  height: auto;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -994,40 +989,40 @@ const styles = `
 }
 
 .vl-trajectory-core::before {
-  inset: -44px;
+  inset: -14%;
   transform: rotate(-18deg) scaleX(1.16);
 }
 
 .vl-trajectory-core::after {
-  inset: -78px;
+  inset: -25%;
   border-color: rgba(251,146,60,0.17);
   transform: rotate(24deg) scaleX(1.25);
 }
 
 .vl-trajectory-core span {
-  font-size: 0.75rem;
+  font-size: clamp(0.52rem, 0.75vw, 0.75rem);
 }
 
 .vl-trajectory-core strong {
   max-width: 13rem;
-  font-size: 1.55rem;
+  font-size: clamp(1rem, 1.6vw, 1.55rem);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
 .vl-trajectory-core em {
-  margin-top: 0.72rem;
+  margin-top: 0.62rem;
   color: rgba(186,230,253,0.96);
-  font-size: 1.42rem;
+  font-size: clamp(1rem, 1.35vw, 1.42rem);
   font-style: normal;
   font-weight: 450;
   letter-spacing: 0.08em;
 }
 
 .vl-trajectory-core p {
-  margin: 0.72rem 0 0;
+  margin: 0.55rem 0 0;
   color: rgba(255,255,255,0.62);
-  font-size: 0.74rem;
+  font-size: clamp(0.52rem, 0.72vw, 0.74rem);
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -1036,10 +1031,10 @@ const styles = `
 .vl-path-svg {
   position: absolute;
   left: 0;
-  top: 82px;
+  top: 9.6%;
   z-index: 3;
-  width: 1320px;
-  height: 760px;
+  width: 100%;
+  height: 89.4%;
   pointer-events: none;
 }
 
@@ -1099,11 +1094,11 @@ const styles = `
 
 .vl-future-list article {
   position: absolute;
-  width: 286px;
-  min-height: 168px;
+  width: 22.1%;
+  min-height: 0;
   border: 1px solid;
   border-radius: 0.72rem;
-  padding: 0.92rem;
+  padding: 0.86%;
 }
 
 .vl-future-list header {
@@ -1122,16 +1117,16 @@ const styles = `
 }
 
 .vl-future-list strong {
-  margin-top: 0.45rem;
+  margin-top: 0.35rem;
   color: white;
-  font-size: 0.98rem;
+  font-size: clamp(0.66rem, 0.92vw, 0.98rem);
   line-height: 1.14;
   text-transform: uppercase;
 }
 
 .vl-future-list em {
   color: var(--tone);
-  font-size: 1.82rem;
+  font-size: clamp(1.15rem, 1.8vw, 1.82rem);
   font-style: normal;
   font-weight: 800;
   line-height: 0.95;
@@ -1139,67 +1134,67 @@ const styles = `
 }
 
 .vl-future-list small {
-  margin-top: 0.32rem;
+  margin-top: 0.25rem;
   color: color-mix(in srgb, var(--tone) 82%, white 10%);
-  font-size: 0.63rem;
+  font-size: clamp(0.48rem, 0.58vw, 0.63rem);
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
 .vl-future-list div {
-  margin-top: 0.72rem;
+  margin-top: 0.52rem;
   border-top: 1px solid rgba(255,255,255,0.10);
-  padding-top: 0.58rem;
+  padding-top: 0.42rem;
 }
 
 .vl-future-list b {
   color: color-mix(in srgb, var(--tone) 72%, white 18%);
-  font-size: 0.6rem;
+  font-size: clamp(0.46rem, 0.55vw, 0.6rem);
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
 .vl-future-list ul {
-  margin: 0.36rem 0 0;
+  margin: 0.28rem 0 0;
   padding-left: 1rem;
 }
 
 .vl-future-list li {
   color: rgba(255,255,255,0.66);
-  font-size: 0.68rem;
-  line-height: 1.36;
+  font-size: clamp(0.52rem, 0.64vw, 0.68rem);
+  line-height: 1.28;
 }
 
 .vl-future-list p {
-  margin: 0.66rem 0 0;
+  margin: 0.48rem 0 0;
   color: rgba(255,255,255,0.78);
-  font-size: 0.73rem;
-  line-height: 1.38;
+  font-size: clamp(0.55rem, 0.68vw, 0.73rem);
+  line-height: 1.3;
 }
 
-.vl-future-list .left-high { left: 26px; top: 150px; }
-.vl-future-list .left-low { left: 36px; top: 418px; }
-.vl-future-list .right-high { right: 186px; top: 150px; }
-.vl-future-list .right-mid { right: 186px; top: 350px; }
-.vl-future-list .right-low { right: 186px; top: 560px; }
+.vl-future-list .left-high { left: 1.75%; top: 17.6%; }
+.vl-future-list .left-low { left: 2.25%; top: 49%; }
+.vl-future-list .right-high { right: 15.35%; top: 17.6%; }
+.vl-future-list .right-mid { right: 15.35%; top: 40.4%; }
+.vl-future-list .right-low { right: 15.35%; top: 64.3%; }
 
 .vl-lde-insight {
   position: absolute;
-  left: 462px;
-  top: 520px;
+  left: 35%;
+  top: 61.2%;
   z-index: 8;
-  width: 298px;
+  width: 22.4%;
   transform: none;
-  padding: 1rem 1.1rem;
+  padding: 0.88% 0.95%;
   text-align: center;
 }
 
 .vl-lde-insight p {
-  margin: 0.52rem 0 0;
+  margin: 0.36rem 0 0;
   color: rgba(255,255,255,0.74);
-  font-size: 0.84rem;
-  line-height: 1.45;
+  font-size: clamp(0.62rem, 0.78vw, 0.84rem);
+  line-height: 1.34;
 }
 
 .vl-lde-insight strong {
@@ -1208,12 +1203,12 @@ const styles = `
 
 .vl-lde-rail {
   position: absolute;
-  right: 22px;
-  top: 150px;
-  bottom: 146px;
+  right: 1.65%;
+  top: 17.6%;
+  bottom: 16.8%;
   z-index: 8;
-  width: 148px;
-  padding: 1.05rem 0.82rem;
+  width: 12.1%;
+  padding: 0.9% 0.62%;
 }
 
 .vl-lde-rail span {
@@ -1224,7 +1219,7 @@ const styles = `
 
 .vl-lde-rail strong {
   display: block;
-  margin-top: 1.35rem;
+  margin-top: 1rem;
   color: rgba(255,255,255,0.72);
   font-size: 0.62rem;
   letter-spacing: 0.16em;
@@ -1233,18 +1228,18 @@ const styles = `
 
 .vl-lde-rail div {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: 28px 1fr;
   align-items: center;
   gap: 0.66rem;
-  margin-top: 0.74rem;
+  margin-top: 0.55rem;
   border-top: 1px solid rgba(255,255,255,0.09);
-  padding-top: 0.72rem;
+  padding-top: 0.52rem;
 }
 
 .vl-lde-rail i {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   place-items: center;
   border: 1px solid rgba(254,215,170,0.26);
   border-radius: 999px;
@@ -1256,55 +1251,30 @@ const styles = `
 
 .vl-lde-rail em {
   color: rgba(255,255,255,0.68);
-  font-size: 0.67rem;
+  font-size: clamp(0.5rem, 0.62vw, 0.67rem);
   font-style: normal;
   line-height: 1.25;
 }
 
-.vl-one-move-module {
-  position: absolute;
-  left: 358px;
-  top: 682px;
-  z-index: 8;
-  width: 472px;
-  padding: 0.82rem 1rem;
-}
-
-.vl-one-move-module strong {
-  display: block;
-  margin-top: 0.42rem;
-  color: white;
-  font-size: 0.95rem;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.vl-one-move-module p {
-  margin: 0.48rem 0 0;
-  color: rgba(255,255,255,0.64);
-  font-size: 0.72rem;
-  line-height: 1.42;
-}
-
 .vl-trajectory-legend {
   position: absolute;
-  left: 24px;
-  right: 684px;
-  bottom: 112px;
+  left: 1.8%;
+  right: 52%;
+  bottom: 12.6%;
   z-index: 8;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.55rem;
-  padding: 0.6rem;
+  gap: 0.42rem;
+  padding: 0.46%;
 }
 
 .vl-trajectory-legend span {
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 0.62rem;
   background: rgba(0,0,0,0.32);
-  padding: 0.55rem;
+  padding: 0.46rem 0.36rem;
   color: rgba(255,255,255,0.72);
-  font-size: 0.62rem;
+  font-size: clamp(0.46rem, 0.55vw, 0.62rem);
   font-weight: 900;
   letter-spacing: 0.10em;
   text-align: center;
@@ -1313,14 +1283,14 @@ const styles = `
 
 .vl-trajectory-doctrine {
   position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 20px;
+  left: 1.8%;
+  right: 1.8%;
+  bottom: 2.35%;
   z-index: 8;
   display: grid;
   grid-template-columns: 1.15fr 1.4fr 1.05fr 1.2fr;
-  gap: 0.65rem;
-  padding: 0.74rem;
+  gap: 0.5rem;
+  padding: 0.58%;
 }
 
 .vl-trajectory-doctrine strong,
@@ -1328,7 +1298,7 @@ const styles = `
 .vl-trajectory-doctrine em {
   margin: 0;
   color: rgba(255,255,255,0.78);
-  font-size: 0.72rem;
+  font-size: clamp(0.54rem, 0.68vw, 0.72rem);
   font-style: normal;
   font-weight: 900;
   letter-spacing: 0.10em;
