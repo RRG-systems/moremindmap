@@ -128,6 +128,121 @@ const mockFutures = [
   }
 ];
 
+const liveStressFutures = [
+  {
+    label: 'Current Future',
+    title: 'Real Business, Memory-Based Growth',
+    tone: 'red',
+    probability: '29%',
+    status: 'Status: active',
+    position: 'left-high',
+    signals: [
+      '12 units in 2025 after 8 and 10 in prior years',
+      '538 estimated true relationships inside 1,800 total contacts',
+      'Follow-up depends on memory, mood, and busyness'
+    ],
+    interpretation: 'The business works, but it still runs too much from the owner’s head.'
+  },
+  {
+    label: 'Most Likely Next',
+    title: 'Incremental Growth Below the Goal Line',
+    tone: 'orange',
+    probability: '31%',
+    status: 'Most likely next state',
+    position: 'left-low',
+    signals: [
+      'CRM exists but is not operated consistently',
+      'No daily habit for meeting new people',
+      'No trackable appointment creation channel'
+    ],
+    interpretation: 'The business improves, but not at the pace the goal requires.'
+  },
+  {
+    label: 'Constraint Future',
+    title: 'Lead Flow Breaks Under Ambition',
+    tone: 'blue',
+    probability: '18%',
+    status: 'Requires operational repair',
+    position: 'right-high',
+    signals: [
+      'Revenue depends heavily on relationship memory',
+      'Lead conversion and follow-up are undocumented',
+      'No visible appointment creation channel'
+    ],
+    interpretation: 'The bottleneck is not effort; it is unsupported opportunity creation.'
+  },
+  {
+    label: 'Optimized Future',
+    title: 'Relationship Engine With Inspection',
+    tone: 'green',
+    probability: '17%',
+    status: 'Requires weekly inspection',
+    position: 'right-mid',
+    signals: [
+      'Financial review becomes a monthly operating habit',
+      'Action help follows model clarity',
+      'Relationships become inspectable'
+    ],
+    interpretation: 'The existing relationship asset starts compounding.'
+  },
+  {
+    label: 'Transformational Future',
+    title: 'Small Business, Not Solo Memory',
+    tone: 'purple',
+    probability: '5%',
+    status: 'Requires business system',
+    position: 'right-low',
+    signals: [
+      'Lead conversion and follow-up are documented',
+      'Advisor operations help is added only after the model is clear',
+      'Financial review becomes a monthly operating habit'
+    ],
+    interpretation: 'The agent stops being the system and starts operating one.'
+  }
+];
+
+const fitRules = [
+  'Future title clamps to two lines.',
+  'Probability and status stay visible.',
+  'Cards show three signals max.',
+  'Interpretation compresses to one or two lines.',
+  'Doctrine, rail, and orb must stay inside the stage.'
+];
+
+const cleanTrajectoryData = {
+  modeLabel: 'Clean Target-Style Mock',
+  subject: 'Fathom Holdings',
+  horizon: '2026',
+  activeFuture: 'Portfolio Drift / Regional Decay',
+  activeStatus: 'Status: active',
+  orbStatus: 'Future D active',
+  diagnostic: 'The system begins by identifying the future already forming.',
+  futures: mockFutures,
+  insight: [
+    'Future D is not a warning.',
+    'Future D is already happening.',
+    'Future C is the most likely next state if nothing changes.'
+  ],
+  intervention: 'Trajectory intervention requires action and proof.'
+};
+
+const stressTrajectoryData = {
+  modeLabel: 'Live Content Stress Test',
+  subject: 'QA Solo Agent 01',
+  horizon: 'Next 12 Months',
+  activeFuture: 'Real Business, Memory-Based Growth',
+  activeStatus: 'Status: active',
+  orbStatus: '29% current path',
+  diagnostic: 'The current trajectory is possible but incremental. The business has grown from 8 to 10 to 12 units, while the next goal requires an operating system.',
+  futures: liveStressFutures,
+  insight: [
+    'Memory-based growth is not a failure.',
+    'It is a ceiling if follow-up stays invisible.',
+    'The next future depends on relationship inspection.'
+  ],
+  intervention: 'INSTALL A WEEKLY RELATIONSHIP-TO-APPOINTMENT OPERATING RHYTHM'
+};
+
 function cx(...parts) {
   return parts.filter(Boolean).join(' ');
 }
@@ -309,9 +424,9 @@ function TrajectoryPathSvg() {
   );
 }
 
-function TrajectoryFieldMock() {
+function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
   return (
-    <section className="vl-trajectory vl-full-scale-candidate-stage">
+    <section className={cx('vl-trajectory vl-full-scale-candidate-stage', stress && 'vl-trajectory-stress')}>
       <div className="vl-stage-label">Full-Scale Candidate Stage</div>
       <div className="vl-trajectory-header">
         <div>
@@ -321,33 +436,33 @@ function TrajectoryFieldMock() {
         </div>
         <div className="vl-trajectory-detected">
           <span>Current Trajectory Detected</span>
-          <p>The system begins by identifying the future already forming.</p>
+          <p>{data.diagnostic}</p>
         </div>
         <div className="vl-current-future-chip">
           <span>Current future</span>
-          <strong>Portfolio Drift / Regional Decay</strong>
-          <em>Status: active</em>
+          <strong>{data.activeFuture}</strong>
+          <em>{data.activeStatus}</em>
         </div>
       </div>
 
       <TrajectoryPathSvg />
 
       <div className="vl-trajectory-core" aria-label="central current trajectory orb">
-        <span>Fathom Holdings</span>
+        <span>{data.subject}</span>
         <strong>Current Trajectory</strong>
-        <em>2026</em>
-        <p>Future D active</p>
+        <em>{data.horizon}</em>
+        <p>{data.orbStatus}</p>
       </div>
 
       <div className="vl-lde-insight">
         <span>LDE Insight</span>
-        <p><strong>Future D</strong> is not a warning.</p>
-        <p><strong>Future D</strong> is already happening.</p>
-        <p><strong>Future C</strong> is the most likely next state if nothing changes.</p>
+        {data.insight.map((line) => (
+          <p key={line}>{line}</p>
+        ))}
       </div>
 
       <div className="vl-future-list">
-        {mockFutures.map((future) => (
+        {data.futures.map((future) => (
           <article key={future.title} className={`tone-${future.tone} ${future.position}`}>
             <header>
               <span>{future.label}</span>
@@ -358,7 +473,7 @@ function TrajectoryFieldMock() {
             <div>
               <b>Signals</b>
               <ul>
-                {future.signals.map((signal) => (
+                {future.signals.slice(0, 3).map((signal) => (
                   <li key={signal}>{signal}</li>
                 ))}
               </ul>
@@ -394,6 +509,10 @@ function TrajectoryFieldMock() {
         <span>Required Intervention</span>
       </div>
 
+      <div className="vl-intervention-strip">
+        <span>{data.intervention}</span>
+      </div>
+
       <footer className="vl-trajectory-doctrine" aria-label="doctrine bars">
         <strong>The Five Futures are not aspirations.</strong>
         <p>They are probability-weighted trajectories based on the current operating reality.</p>
@@ -401,6 +520,48 @@ function TrajectoryFieldMock() {
         <em>The question is: what future are we already creating?</em>
       </footer>
     </section>
+  );
+}
+
+function TrajectoryLabCandidate() {
+  const [mode, setMode] = useState('clean');
+  const isStress = mode === 'stress';
+  const activeData = isStress ? stressTrajectoryData : cleanTrajectoryData;
+
+  return (
+    <div className="vl-trajectory-candidate">
+      <div className="vl-trajectory-modebar" aria-label="Five Futures candidate modes">
+        <div>
+          <span>Candidate comparison</span>
+          <strong>{activeData.modeLabel}</strong>
+        </div>
+        <div className="vl-trajectory-tabs">
+          <button
+            type="button"
+            className={mode === 'clean' ? 'is-active' : ''}
+            onClick={() => setMode('clean')}
+          >
+            Clean Target-Style Mock
+          </button>
+          <button
+            type="button"
+            className={mode === 'stress' ? 'is-active' : ''}
+            onClick={() => setMode('stress')}
+          >
+            Live Content Stress Test
+          </button>
+        </div>
+      </div>
+
+      <div className="vl-fit-rules">
+        <span>Fit rules for real content</span>
+        {fitRules.map((rule) => (
+          <em key={rule}>{rule}</em>
+        ))}
+      </div>
+
+      <TrajectoryFieldMock data={activeData} stress={isStress} />
+    </div>
   );
 }
 
@@ -475,7 +636,7 @@ export default function VisualLabPage() {
           </LabSection>
 
           <LabSection system={sections[2]} fullStage>
-            <TrajectoryFieldMock />
+            <TrajectoryLabCandidate />
           </LabSection>
 
           <section className="vl-closeout">
@@ -675,6 +836,88 @@ const styles = `
   display: grid;
   gap: 1rem;
   min-width: 0;
+}
+
+.vl-trajectory-candidate {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.vl-trajectory-modebar,
+.vl-fit-rules {
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 0.95rem;
+  background: rgba(0,0,0,0.30);
+}
+
+.vl-trajectory-modebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem;
+}
+
+.vl-trajectory-modebar span,
+.vl-fit-rules span {
+  display: block;
+  color: rgba(254,215,170,0.78);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.vl-trajectory-modebar strong {
+  display: block;
+  margin-top: 0.28rem;
+  color: rgba(255,255,255,0.88);
+  font-size: 1rem;
+}
+
+.vl-trajectory-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  justify-content: flex-end;
+}
+
+.vl-trajectory-tabs button {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.045);
+  padding: 0.62rem 0.78rem;
+  color: rgba(255,255,255,0.64);
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.vl-trajectory-tabs button.is-active {
+  border-color: rgba(103,232,249,0.46);
+  background: rgba(103,232,249,0.12);
+  color: rgba(224,242,254,0.96);
+  box-shadow: 0 0 24px rgba(103,232,249,0.10);
+}
+
+.vl-fit-rules {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  align-items: center;
+  padding: 0.72rem 0.85rem;
+}
+
+.vl-fit-rules em {
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
+  padding: 0.42rem 0.56rem;
+  color: rgba(255,255,255,0.62);
+  font-size: 0.66rem;
+  font-style: normal;
+  line-height: 1.2;
 }
 
 .vl-preview-toolbar {
@@ -923,6 +1166,10 @@ const styles = `
   color: rgba(255,255,255,0.68);
   font-size: clamp(0.66rem, 0.82vw, 0.84rem);
   line-height: 1.45;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .vl-current-future-chip strong,
@@ -936,6 +1183,10 @@ const styles = `
   font-size: clamp(0.76rem, 0.94vw, 1.02rem);
   line-height: 1.12;
   text-transform: uppercase;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .vl-current-future-chip em {
@@ -951,6 +1202,8 @@ const styles = `
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  max-width: 100%;
+  white-space: nowrap;
 }
 
 .vl-trajectory-core {
@@ -1122,6 +1375,11 @@ const styles = `
   font-size: clamp(0.66rem, 0.92vw, 0.98rem);
   line-height: 1.14;
   text-transform: uppercase;
+  display: -webkit-box;
+  min-height: 2.26em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .vl-future-list em {
@@ -1140,6 +1398,9 @@ const styles = `
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vl-future-list div {
@@ -1164,6 +1425,9 @@ const styles = `
   color: rgba(255,255,255,0.66);
   font-size: clamp(0.52rem, 0.64vw, 0.68rem);
   line-height: 1.28;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .vl-future-list p {
@@ -1171,6 +1435,11 @@ const styles = `
   color: rgba(255,255,255,0.78);
   font-size: clamp(0.55rem, 0.68vw, 0.73rem);
   line-height: 1.3;
+  display: -webkit-box;
+  min-height: 2.6em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .vl-future-list .left-high { left: 1.75%; top: 17.6%; }
@@ -1195,6 +1464,10 @@ const styles = `
   color: rgba(255,255,255,0.74);
   font-size: clamp(0.62rem, 0.78vw, 0.84rem);
   line-height: 1.34;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .vl-lde-insight strong {
@@ -1279,6 +1552,33 @@ const styles = `
   letter-spacing: 0.10em;
   text-align: center;
   text-transform: uppercase;
+}
+
+.vl-intervention-strip {
+  position: absolute;
+  left: 35%;
+  right: 35%;
+  bottom: 13.2%;
+  z-index: 8;
+  border: 1px solid rgba(251,146,60,0.22);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(251,146,60,0.14), rgba(0,0,0,0.42));
+  padding: 0.48rem 0.66rem;
+  box-shadow: 0 0 24px rgba(251,146,60,0.10);
+}
+
+.vl-intervention-strip span {
+  display: block;
+  overflow: hidden;
+  color: rgba(254,215,170,0.88);
+  font-size: clamp(0.48rem, 0.58vw, 0.66rem);
+  font-weight: 900;
+  letter-spacing: 0.11em;
+  line-height: 1.18;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .vl-trajectory-doctrine {
