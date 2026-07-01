@@ -251,9 +251,62 @@
       "ok": false,
       "error": "universal_translator_model_request_failed"
     },
-    "post_deploy_universal_translator": "pending",
-    "post_deploy_darren_strategy_chat": "pending",
-    "post_deploy_public_routes": "pending"
+    "deployment": {
+      "deployment_url": "https://moremindmap-ahmtw52rk-rrg-systems-projects.vercel.app",
+      "production_alias": "https://moremindmap.com",
+      "aliased": true
+    },
+    "post_deploy_universal_translator": {
+      "plain_english": {
+        "status": 200,
+        "ok": true,
+        "translation_present": true,
+        "model_used": "gpt-4o-2024-08-06",
+        "fallback_used": false,
+        "mutation_performed": false,
+        "raw_json_leakage": false,
+        "source_of_truth_note_present": true
+      },
+      "explain_like_busy": {
+        "status": 200,
+        "ok": true,
+        "translation_present": true,
+        "model_used": "gpt-4o-2024-08-06",
+        "fallback_used": false,
+        "mutation_performed": false,
+        "raw_json_leakage": false,
+        "source_of_truth_note_present": true
+      },
+      "coach_me_through_this": {
+        "status": 200,
+        "ok": true,
+        "translation_present": true,
+        "model_used": "gpt-4o-2024-08-06",
+        "fallback_used": false,
+        "mutation_performed": false,
+        "raw_json_leakage": false,
+        "source_of_truth_note_present": true
+      }
+    },
+    "post_deploy_darren_strategy_chat": {
+      "status": 200,
+      "ok": true,
+      "reply_present": true,
+      "model_used": "gpt-5.5",
+      "fallback_used": false,
+      "mutation_performed": false,
+      "raw_json_leakage": false,
+      "automatic_mutation_claim": false,
+      "future_percentage_movement_claim": false,
+      "valuation_certainty": false,
+      "employee_org_people_expansion": false
+    },
+    "post_deploy_public_routes": {
+      "/": 200,
+      "/profile": 200,
+      "/business-assessment": 200,
+      "/leadership-dashboard": 200
+    }
   },
   "remaining_risks": [
     "GPT behavioral rescoring helper requests gpt-4o while prompt/schema expects gpt-5.5; left unchanged because it is not the reported Translator failure.",
@@ -271,5 +324,5 @@
     "automatic_future_movement_added": false,
     "canonical_dossier_mutation_added": false
   },
-  "verdict": "UNIVERSAL_TRANSLATOR_MODEL_WIRING_REPAIRED_WITH_ROUTE_SPECIFIC_FALLBACKS"
+  "verdict": "UNIVERSAL_TRANSLATOR_MODEL_WIRING_REPAIRED_DEPLOYED_AND_SMOKED"
 }

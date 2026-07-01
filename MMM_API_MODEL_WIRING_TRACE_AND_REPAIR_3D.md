@@ -3,6 +3,8 @@
 Phase: `MMM-API-MODEL-WIRING-3D`  
 Timestamp: `2026-07-01T01:29:59Z`  
 Verdict: `UNIVERSAL_TRANSLATOR_MODEL_WIRING_REPAIRED_WITH_ROUTE_SPECIFIC_FALLBACKS`
+Deployment: `https://moremindmap-ahmtw52rk-rrg-systems-projects.vercel.app`
+Production alias: `https://moremindmap.com`
 
 ## Executive Summary
 
@@ -80,19 +82,15 @@ Do not change `OPENAI_MODEL` for this repair.
 
 ## Production Smoke Plan
 
-After deploy:
+Completed after deploy:
 
-1. Public routes: `/`, `/profile`, `/business-assessment`, `/leadership-dashboard` return 200.
-2. Universal Translator succeeds for:
-   - `plain_english`
-   - `explain_like_busy`
-   - `coach_me_through_this`
-3. Darren Strategy Chat still returns:
-   - `ok: true`
-   - reply present
-   - `model_used: gpt-5.5`
-   - `fallback_used: false` unless fallback is actually needed
-   - `mutation_performed: false`
+1. Public routes: `/`, `/profile`, `/business-assessment`, `/leadership-dashboard` all returned 200.
+2. Universal Translator succeeded for:
+   - `plain_english`: 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`, `fallback_used: false`
+   - `explain_like_busy`: 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`, `fallback_used: false`
+   - `coach_me_through_this`: 200, `ok: true`, translation present, `model_used: gpt-4o-2024-08-06`, `fallback_used: false`
+3. Darren Strategy Chat returned 200, `ok: true`, reply present, `model_used: gpt-5.5`, `fallback_used: false`, `mutation_performed: false`.
+4. Smoke scan found no raw JSON leakage, no automatic mutation claim, no future percentage movement claim, no valuation certainty, and no employee/team People Reality expansion.
 
 ## Remaining Risks
 
@@ -102,4 +100,4 @@ After deploy:
 
 ## Production Readiness Verdict
 
-Ready for commit, deployment, and production smoke.
+Production smoke passed with limits.
