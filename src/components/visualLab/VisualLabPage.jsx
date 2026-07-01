@@ -437,10 +437,6 @@ function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
         <div className="vl-trajectory-detected">
           <span>Current Trajectory Detected</span>
           <p>{data.diagnostic}</p>
-        </div>
-        <div className="vl-current-future-chip">
-          <span>Current future</span>
-          <strong>{data.activeFuture}</strong>
           <em>{data.activeStatus}</em>
         </div>
       </div>
@@ -462,25 +458,16 @@ function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
       </div>
 
       <div className="vl-future-list">
-        {data.futures.map((future) => (
-          <article key={future.title} className={`tone-${future.tone} ${future.position}`}>
-            <header>
-              <span>{future.label}</span>
-              <em>{future.probability}</em>
-            </header>
-            <strong>{future.title}</strong>
-            <small>{future.status}</small>
-            <div>
-              <b>Signals</b>
-              <ul>
-                {future.signals.slice(0, 3).map((signal) => (
-                  <li key={signal}>{signal}</li>
-                ))}
-              </ul>
-            </div>
-            <p>{future.interpretation}</p>
-          </article>
-        ))}
+        <div className="vl-future-column vl-left-future-column">
+          {data.futures.slice(0, 2).map((future) => (
+            <FutureCard key={future.title} future={future} />
+          ))}
+        </div>
+        <div className="vl-future-column vl-right-future-column">
+          {data.futures.slice(2).map((future) => (
+            <FutureCard key={future.title} future={future} />
+          ))}
+        </div>
       </div>
 
       <aside className="vl-lde-rail">
@@ -509,10 +496,6 @@ function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
         <span>Required Intervention</span>
       </div>
 
-      <div className="vl-intervention-strip">
-        <span>{data.intervention}</span>
-      </div>
-
       <footer className="vl-trajectory-doctrine" aria-label="doctrine bars">
         <strong>The Five Futures are not aspirations.</strong>
         <p>They are probability-weighted trajectories based on the current operating reality.</p>
@@ -520,6 +503,28 @@ function TrajectoryFieldMock({ data = cleanTrajectoryData, stress = false }) {
         <em>The question is: what future are we already creating?</em>
       </footer>
     </section>
+  );
+}
+
+function FutureCard({ future }) {
+  return (
+    <article className={`tone-${future.tone}`}>
+      <header>
+        <span>{future.label}</span>
+        <em>{future.probability}</em>
+      </header>
+      <strong>{future.title}</strong>
+      <small>{future.status}</small>
+      <div>
+        <b>Signals</b>
+        <ul>
+          {future.signals.slice(0, 3).map((signal) => (
+            <li key={signal}>{signal}</li>
+          ))}
+        </ul>
+      </div>
+      <p>{future.interpretation}</p>
+    </article>
   );
 }
 
@@ -1105,18 +1110,17 @@ const styles = `
 .vl-trajectory-header {
   position: absolute;
   left: 1.5%;
-  right: 15.3%;
+  right: 15.2%;
   top: 4%;
   z-index: 8;
   display: grid;
-  grid-template-columns: 28% 38% minmax(0, 1fr);
-  gap: 0.75%;
+  grid-template-columns: 35% minmax(0, 1fr);
+  gap: 0.9%;
   margin-right: 0;
 }
 
 .vl-trajectory-header > div,
 .vl-trajectory-detected,
-.vl-current-future-chip,
 .vl-lde-insight,
 .vl-lde-rail,
 .vl-trajectory-legend,
@@ -1133,7 +1137,6 @@ const styles = `
 
 .vl-trajectory-header span,
 .vl-trajectory-detected span,
-.vl-current-future-chip span,
 .vl-lde-insight span,
 .vl-lde-rail span {
   color: rgba(254,215,170,0.86);
@@ -1172,24 +1175,8 @@ const styles = `
   -webkit-line-clamp: 3;
 }
 
-.vl-current-future-chip strong,
-.vl-current-future-chip em {
+.vl-trajectory-detected em {
   display: block;
-}
-
-.vl-current-future-chip strong {
-  margin-top: 0.42rem;
-  color: #fb7185;
-  font-size: clamp(0.76rem, 0.94vw, 1.02rem);
-  line-height: 1.12;
-  text-transform: uppercase;
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-}
-
-.vl-current-future-chip em {
   margin-top: 0.52rem;
   width: max-content;
   border: 1px solid rgba(248,113,113,0.34);
@@ -1208,11 +1195,11 @@ const styles = `
 
 .vl-trajectory-core {
   position: absolute;
-  left: 46.2%;
-  top: 41.2%;
+  left: 46%;
+  top: 43%;
   z-index: 5;
   display: flex;
-  width: 22.7%;
+  width: 20.8%;
   aspect-ratio: 1;
   height: auto;
   flex-direction: column;
@@ -1284,10 +1271,10 @@ const styles = `
 .vl-path-svg {
   position: absolute;
   left: 0;
-  top: 9.6%;
+  top: 10.2%;
   z-index: 3;
   width: 100%;
-  height: 89.4%;
+  height: 81%;
   pointer-events: none;
 }
 
@@ -1341,17 +1328,44 @@ const styles = `
 
 .vl-future-list {
   position: absolute;
-  inset: 0;
-  z-index: 6;
+  left: 1.8%;
+  right: 15.2%;
+  top: 24%;
+  bottom: 17.5%;
+  z-index: 7;
+  display: grid;
+  grid-template-columns: 24.8% minmax(0, 1fr) 33.2%;
+  gap: 1.05%;
+  pointer-events: none;
+}
+
+.vl-future-column {
+  display: grid;
+  min-height: 0;
+  gap: 2.1%;
+}
+
+.vl-left-future-column {
+  grid-column: 1;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.vl-right-future-column {
+  grid-column: 3;
+  grid-template-rows: repeat(3, minmax(0, 1fr));
 }
 
 .vl-future-list article {
-  position: absolute;
-  width: 22.1%;
+  position: relative;
+  width: auto;
+  min-width: 0;
   min-height: 0;
+  height: 100%;
   border: 1px solid;
   border-radius: 0.72rem;
-  padding: 0.86%;
+  padding: 3.4%;
+  overflow: hidden;
+  pointer-events: auto;
 }
 
 .vl-future-list header {
@@ -1442,18 +1456,12 @@ const styles = `
   -webkit-line-clamp: 2;
 }
 
-.vl-future-list .left-high { left: 1.75%; top: 17.6%; }
-.vl-future-list .left-low { left: 2.25%; top: 49%; }
-.vl-future-list .right-high { right: 15.35%; top: 17.6%; }
-.vl-future-list .right-mid { right: 15.35%; top: 40.4%; }
-.vl-future-list .right-low { right: 15.35%; top: 64.3%; }
-
 .vl-lde-insight {
   position: absolute;
-  left: 35%;
-  top: 61.2%;
+  left: 36%;
+  top: 62%;
   z-index: 8;
-  width: 22.4%;
+  width: 21.2%;
   transform: none;
   padding: 0.88% 0.95%;
   text-align: center;
@@ -1477,8 +1485,8 @@ const styles = `
 .vl-lde-rail {
   position: absolute;
   right: 1.65%;
-  top: 17.6%;
-  bottom: 16.8%;
+  top: 24%;
+  bottom: 17.5%;
   z-index: 8;
   width: 12.1%;
   padding: 0.9% 0.62%;
@@ -1533,7 +1541,7 @@ const styles = `
   position: absolute;
   left: 1.8%;
   right: 52%;
-  bottom: 12.6%;
+  bottom: 11.8%;
   z-index: 8;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1554,41 +1562,14 @@ const styles = `
   text-transform: uppercase;
 }
 
-.vl-intervention-strip {
-  position: absolute;
-  left: 35%;
-  right: 35%;
-  bottom: 13.2%;
-  z-index: 8;
-  border: 1px solid rgba(251,146,60,0.22);
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(251,146,60,0.14), rgba(0,0,0,0.42));
-  padding: 0.48rem 0.66rem;
-  box-shadow: 0 0 24px rgba(251,146,60,0.10);
-}
-
-.vl-intervention-strip span {
-  display: block;
-  overflow: hidden;
-  color: rgba(254,215,170,0.88);
-  font-size: clamp(0.48rem, 0.58vw, 0.66rem);
-  font-weight: 900;
-  letter-spacing: 0.11em;
-  line-height: 1.18;
-  text-align: center;
-  text-overflow: ellipsis;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
 .vl-trajectory-doctrine {
   position: absolute;
   left: 1.8%;
   right: 1.8%;
-  bottom: 2.35%;
+  bottom: 2.3%;
   z-index: 8;
   display: grid;
-  grid-template-columns: 1.15fr 1.4fr 1.05fr 1.2fr;
+  grid-template-columns: 1fr 1.4fr 1fr 1.25fr;
   gap: 0.5rem;
   padding: 0.58%;
 }
