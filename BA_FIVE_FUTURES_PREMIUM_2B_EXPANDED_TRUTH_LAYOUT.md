@@ -102,6 +102,19 @@ Local browser smoke against production API data for `mm-20260531-asovnjz4`:
 - No truth rail/doctrine overlap detected.
 - No clipped future cards detected.
 
+Production smoke after deployment:
+
+- Deployment URL: `https://moremindmap-3rog74bib-rrg-systems-projects.vercel.app`
+- Production alias: `https://moremindmap.com`
+- `/`: 200
+- `/profile`: 200
+- `/business-assessment`: 200
+- `/leadership-dashboard`: 200
+- `/leadership-demo`: 200
+- Legacy Five Futures route: 200 and rendered `data-renderer="legacy-five-futures"`.
+- Premium preview route: 200 and rendered `data-renderer="premium-five-futures"`.
+- Premium preview retained 5 future cards, 8 truth rail dots, no legend cards, no horizontal overflow, no card/orb overlap, no card/card overlap, no truth rail/doctrine overlap, and no clipped future cards.
+
 ## Limits
 
 - Premium remains a preview renderer. It should be reviewed against multiple real Business Assessment records before default enablement.

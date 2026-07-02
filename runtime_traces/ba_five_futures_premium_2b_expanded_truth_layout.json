@@ -73,7 +73,35 @@
       "rail_doctrine_overlap": false,
       "clipped_future_cards_detected": false
     },
-    "production": "pending"
+    "production": {
+      "deployment_url": "https://moremindmap-3rog74bib-rrg-systems-projects.vercel.app",
+      "production_alias": "https://moremindmap.com",
+      "public_routes": {
+        "/": 200,
+        "/profile": 200,
+        "/business-assessment": 200,
+        "/leadership-dashboard": 200,
+        "/leadership-demo": 200
+      },
+      "legacy_five_futures_route_status": 200,
+      "premium_preview_route_status": 200,
+      "legacy_route_renderer": "legacy-five-futures",
+      "premium_preview_renderer": "premium-five-futures",
+      "stage_height_px": 1399,
+      "one_move_panel_height_px": 227,
+      "legend_cards_removed": true,
+      "horizontal_truth_rail_present": true,
+      "truth_dot_count": 8,
+      "future_card_count": 5,
+      "supporting_signals_text_present": false,
+      "more_signals_text_present_for_normal_cards": false,
+      "internal_horizontal_overflow": false,
+      "body_horizontal_overflow": false,
+      "card_orb_overlap": false,
+      "card_overlap": false,
+      "rail_doctrine_overlap": false,
+      "clipped_future_cards_detected": false
+    }
   },
-  "verdict": "PREMIUM_FIVE_FUTURES_EXPANDED_TRUTH_LAYOUT_VALIDATED_LOCALLY"
+  "verdict": "PREMIUM_FIVE_FUTURES_EXPANDED_TRUTH_LAYOUT_DEPLOYED_AND_SMOKED_WITH_LIMITS"
 }
