@@ -1,0 +1,55 @@
+{
+  "phase_id": "LEADERSHIP-DEMO-C-COMPANY-ALIGNMENT",
+  "runtime_changed": true,
+  "frontend_changed": true,
+  "backend_changed": false,
+  "assets_added": [
+    "public/leadership-demo/company-alignment/demo-c-slide-01-the-drift.png",
+    "public/leadership-demo/company-alignment/demo-c-slide-02-hidden-causes-of-decay.png",
+    "public/leadership-demo/company-alignment/demo-c-slide-03-alignment-shift.png",
+    "public/leadership-demo/company-alignment/demo-c-slide-04-moremindmap-model.png"
+  ],
+  "existing_demos_preserved": true,
+  "demo_c_added": true,
+  "slides_added": [
+    {
+      "number": 1,
+      "title": "The Drift",
+      "image": "/leadership-demo/company-alignment/demo-c-slide-01-the-drift.png"
+    },
+    {
+      "number": 2,
+      "title": "The Hidden Causes Of Decay",
+      "image": "/leadership-demo/company-alignment/demo-c-slide-02-hidden-causes-of-decay.png"
+    },
+    {
+      "number": 3,
+      "title": "The Alignment Shift",
+      "image": "/leadership-demo/company-alignment/demo-c-slide-03-alignment-shift.png"
+    },
+    {
+      "number": 4,
+      "title": "The MORE MindMap Model",
+      "image": "/leadership-demo/company-alignment/demo-c-slide-04-moremindmap-model.png"
+    }
+  ],
+  "routes_touched": [
+    "/leadership-demo"
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "json_parse": "passed",
+    "npm_run_build": "passed_with_existing_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "local_browser_route_smoke": "passed",
+    "leadership_portal_code": "darrendemo",
+    "landed_route": "/leadership-demo",
+    "demo_a_visible": "passed",
+    "demo_b_visible": "passed",
+    "demo_c_visible": "passed",
+    "demo_c_slide_cards": "passed_4_of_4",
+    "fullscreen_preview": "passed_4_of_4"
+  },
+  "verdict": "DEMO_C_COMPANY_ALIGNMENT_ADDED_WITH_EXISTING_FULLSCREEN_BEHAVIOR"
+}

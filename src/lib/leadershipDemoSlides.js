@@ -63,3 +63,30 @@ export const executiveBoardSlides = [
     type: 'Executive / Board Intelligence Demo',
   },
 ]
+
+export const companyAlignmentSlides = [
+  {
+    title: 'The Drift',
+    subtitle: 'Companies Rarely Fail All At Once',
+    image: '/leadership-demo/company-alignment/demo-c-slide-01-the-drift.png',
+    type: 'Company Alignment Intelligence Demo',
+  },
+  {
+    title: 'The Hidden Causes Of Decay',
+    subtitle: 'The Visible Decline Is Financial. The Cause Is Usually Operational.',
+    image: '/leadership-demo/company-alignment/demo-c-slide-02-hidden-causes-of-decay.png',
+    type: 'Company Alignment Intelligence Demo',
+  },
+  {
+    title: 'The Alignment Shift',
+    subtitle: 'When The Company Can See Its Own Reality',
+    image: '/leadership-demo/company-alignment/demo-c-slide-03-alignment-shift.png',
+    type: 'Company Alignment Intelligence Demo',
+  },
+  {
+    title: 'The MORE MindMap Model',
+    subtitle: 'People + Systems + Business Reality -> Five Futures + One Move',
+    image: '/leadership-demo/company-alignment/demo-c-slide-04-moremindmap-model.png',
+    type: 'Company Alignment Intelligence Demo',
+  },
+]

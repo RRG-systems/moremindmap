@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { craigFoxSlides, executiveBoardSlides } from './lib/leadershipDemoSlides'
+import { companyAlignmentSlides, craigFoxSlides, executiveBoardSlides } from './lib/leadershipDemoSlides'
 
 export default function LeadershipDemo() {
   const [hasAccess, setHasAccess] = useState(false)
@@ -52,7 +52,7 @@ export default function LeadershipDemo() {
             Leadership Intelligence Demo
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-white/66">
-            Two demonstration decks for leadership conversations. Click any slide to open a fullscreen preview.
+            Three demonstration decks for leadership conversations. Click any slide to open a fullscreen preview.
           </p>
         </section>
 
@@ -69,6 +69,14 @@ export default function LeadershipDemo() {
           title="Executive / Board Intelligence Demo"
           description="Four slide slots for board-level constraints, leadership risk, operating leverage, and action briefing."
           slides={executiveBoardSlides}
+          onOpen={setSelectedSlide}
+        />
+
+        <DemoSection
+          eyebrow="Demo C"
+          title="Company Alignment Intelligence Demo"
+          description="Four slides for business drift, operating decay, alignment, and company intelligence."
+          slides={companyAlignmentSlides}
           onOpen={setSelectedSlide}
         />
       </main>
