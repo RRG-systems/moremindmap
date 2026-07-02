@@ -96,7 +96,12 @@ Results:
 - Premium preview markers present: central current trajectory orb, LDE Analysis, LDE Insight, doctrine bars, supporting-signal compression.
 - Premium fit checks: no horizontal overflow, no card/orb overlap, no card overlap, no clipped cards, rail inside stage, doctrine inside stage.
 - Missing profile ID path: controlled route error before renderer; no records mutated.
+- Production deploy: ready at `https://moremindmap-cxi9srqvw-rrg-systems-projects.vercel.app`.
+- Production alias: `https://moremindmap.com` confirmed.
+- Production public routes: `/`, `/profile`, `/business-assessment`, `/leadership-dashboard`, `/leadership-demo`, and both Five Futures paths returned 200.
+- Production default Five Futures route: legacy renderer marker present, premium marker absent.
+- Production premium preview path: `?renderer=premium` showed the premium renderer with no horizontal overflow, no card/orb overlap, no card overlap, no clipped cards, rail inside stage, and doctrine inside stage.
 
 ## Verdict
 
-Feature-flagged premium renderer is ready for commit and deploy with production default off.
+Feature-flagged premium renderer is deployed with production default off and a controlled premium preview path.

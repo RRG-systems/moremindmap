@@ -47,8 +47,32 @@
       "doctrine_inside_stage": true
     },
     "fallback_partial_data": "selector_guard_static_validated; missing profile id route returned controlled error before renderer",
-    "public_routes": "pending_production",
-    "production_deploy": "pending"
+    "public_routes": {
+      "/": 200,
+      "/profile": 200,
+      "/business-assessment": 200,
+      "/leadership-dashboard": 200,
+      "/leadership-demo": 200,
+      "/business-assessment/five-futures?id=mm-20260531-asovnjz4": 200,
+      "/business-assessment/five-futures?id=mm-20260531-asovnjz4&renderer=premium": 200
+    },
+    "production_deploy": {
+      "status": "ready",
+      "deployment_url": "https://moremindmap-cxi9srqvw-rrg-systems-projects.vercel.app",
+      "aliased_to_moremindmap_com": true,
+      "note": "Initial Vercel CLI deploy command timed out while polling, but vercel inspect confirmed deployment ready and aliased."
+    },
+    "production_default_renderer": "legacy-five-futures",
+    "production_premium_preview": "premium-five-futures",
+    "production_premium_fit_checks": {
+      "premium_overflow_x": false,
+      "stage_overflow_x": false,
+      "card_orb_overlap": false,
+      "card_overlap": false,
+      "clipped_cards": 0,
+      "rail_inside_stage": true,
+      "doctrine_inside_stage": true
+    }
   },
-  "verdict": "FEATURE_FLAGGED_PREMIUM_RENDERER_READY_FOR_COMMIT_AND_DEPLOY"
+  "verdict": "FEATURE_FLAGGED_PREMIUM_RENDERER_DEPLOYED_DEFAULT_OFF_WITH_PREVIEW_PATH"
 }
