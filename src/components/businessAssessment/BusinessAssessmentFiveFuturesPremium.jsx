@@ -6,16 +6,6 @@ import {
 const CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
 
-const LDE_INPUTS = [
-  ['LS', 'Leadership Signals'],
-  ['RA', 'Recruiting Activity'],
-  ['OH', 'Organizational Health'],
-  ['FP', 'Financial Performance'],
-  ['HT', 'Historical Trends'],
-  ['AP', 'Accountability Patterns'],
-  ['PS', 'Productivity Signals'],
-];
-
 function text(value, fallback = 'Not available') {
   if (value === null || value === undefined || value === '') return fallback;
   if (typeof value === 'string') return value.replace(/_/g, ' ');
@@ -80,8 +70,7 @@ function signalsForFuture(future) {
   const source = future?.signal_bullets || future?.signals || future?.evidence || [];
   return asArray(source)
     .map((item) => text(item, ''))
-    .filter(Boolean)
-    .slice(0, 5);
+    .filter(Boolean);
 }
 
 function toneForFuture(future, index) {
@@ -94,22 +83,103 @@ function toneForFuture(future, index) {
 }
 
 function normalizeFuture(future, index) {
-  const signals = signalsForFuture(future);
+  const rawSignals = signalsForFuture(future);
+  const visibleSignals = rawSignals.slice(0, 6);
   return {
     key: future?.key || `future-${index}`,
     label: labelForFuture(future, index),
     title: clip(future?.title, 64, `Future ${index + 1}`),
     probability: probability(future?.probability),
     status: clip(statusForFuture(future), 44, 'Modeled trajectory'),
-    signal: clip(signals[0] || future?.summary, 68, 'Evidence still being assembled'),
-    hiddenSignalCount: Math.max(0, signals.length - 1),
+    signals: visibleSignals.length
+      ? visibleSignals.map((signal) => clip(signal, 112))
+      : [clip(future?.summary, 112, 'Evidence still being assembled')],
+    hiddenSignalCount: Math.max(0, rawSignals.length - visibleSignals.length),
     interpretation: clip(
       future?.short_interpretation || future?.central_insight || future?.summary,
-      96,
+      170,
       'Interpretation becomes clearer as evidence improves.'
     ),
     tone: toneForFuture(future, index),
   };
+}
+
+function evidenceStatus(label, status, note) {
+  return { label, status, note };
+}
+
+function statusFromConfidence(value) {
+  const source = String(value || '').toLowerCase();
+  if (/high|strong|complete/.test(source)) return 'strong';
+  if (/low|missing|weak/.test(source)) return 'missing';
+  return 'partial';
+}
+
+function hasMeaningfulText(value, minLength = 80) {
+  return String(value || '').trim().length >= minLength;
+}
+
+function buildTruthRail(data) {
+  const answers = data?.answers || {};
+  const financialText = String(answers.q9 || '');
+  const financialCompleteness = [
+    /closed units|units/i,
+    /sales volume|volume/i,
+    /gci|gross commission/i,
+    /expenses|profit|net/i,
+  ].filter((pattern) => pattern.test(financialText)).length;
+  const relationshipText = `${answers.q3 || ''}\n${answers.q5 || ''}`;
+  const hasRelationshipNumbers = /\b(true relationships|database|contacts)\b/i.test(relationshipText) && /\d/.test(relationshipText);
+  const accountabilityScore = Number(data?.eToP?.accountability?.score || 0);
+  const systemsScore = Number(data?.eToP?.systems?.score || 0);
+  const confidenceStatus = statusFromConfidence(data?.fiveFutures?.confidenceSnapshot || data?.oneMove?.confidence);
+  const constraintConfidence = statusFromConfidence(data?.primaryConstraint?.confidence);
+  const hasConstraint = hasMeaningfulText(data?.primaryConstraint?.label, 12);
+  const hasProfile = data?.ownerProfileType && data.ownerProfileType !== 'MORE MindMap Profile';
+  const modelSupported = /real[_\s-]?estate/i.test(`${data?.assessmentType || ''} ${data?.fiveFutures?.title || ''}`);
+
+  return [
+    evidenceStatus(
+      'Financial Reality',
+      financialCompleteness >= 4 ? 'strong' : financialCompleteness >= 2 ? 'partial' : 'missing',
+      financialCompleteness >= 4 ? 'Production, volume, commission, and expense/profit evidence present.' : financialCompleteness >= 2 ? 'Some financial evidence is present; deeper proof is incomplete.' : 'Financial evidence is thin or missing.'
+    ),
+    evidenceStatus(
+      'Behavioral Profile',
+      hasProfile ? 'strong' : 'partial',
+      hasProfile ? 'Owner behavioral profile context is available.' : 'Behavioral profile context is partial.'
+    ),
+    evidenceStatus(
+      'Business Model',
+      modelSupported ? 'strong' : data?.assessmentType ? 'partial' : 'missing',
+      modelSupported ? 'Real estate business model context is applied.' : data?.assessmentType ? 'Business model fit is inferred from assessment type.' : 'Business model evidence is missing.'
+    ),
+    evidenceStatus(
+      'Constraint',
+      hasConstraint && constraintConfidence !== 'missing' ? 'strong' : hasConstraint ? 'partial' : 'missing',
+      hasConstraint && constraintConfidence !== 'missing' ? 'Primary constraint is detected with usable confidence.' : hasConstraint ? 'Primary constraint exists, but confidence is weak or inferred.' : 'Primary constraint is missing.'
+    ),
+    evidenceStatus(
+      'Confidence',
+      confidenceStatus,
+      confidenceStatus === 'strong' ? 'Overall confidence is high.' : confidenceStatus === 'partial' ? 'Overall confidence is moderate or mixed.' : 'Overall confidence is weak or missing.'
+    ),
+    evidenceStatus(
+      'Relationships',
+      hasRelationshipNumbers ? 'strong' : /database|relationship|contacts/i.test(relationshipText) ? 'partial' : 'missing',
+      hasRelationshipNumbers ? 'Relationship count and database evidence are present.' : /database|relationship|contacts/i.test(relationshipText) ? 'Relationship evidence exists, but counts are incomplete.' : 'Relationship evidence is missing.'
+    ),
+    evidenceStatus(
+      'Accountability',
+      accountabilityScore >= 7 ? 'strong' : accountabilityScore >= 3 ? 'partial' : 'missing',
+      accountabilityScore >= 7 ? 'Inspection/accountability appears functional.' : accountabilityScore >= 3 ? 'Accountability exists only partially.' : 'Accountability evidence is absent or memory-based.'
+    ),
+    evidenceStatus(
+      'Systems',
+      systemsScore >= 7 ? 'strong' : systemsScore >= 3 ? 'partial' : 'missing',
+      systemsScore >= 7 ? 'Systems appear repeatable.' : systemsScore >= 3 ? 'Systems/tools exist, but execution is inconsistent.' : 'Systems evidence is absent or mostly memory-based.'
+    ),
+  ];
 }
 
 export function hasPremiumFiveFuturesData(data) {
@@ -150,7 +220,7 @@ function TrajectoryPaths() {
 }
 
 function FutureCard({ future, side = 'left' }) {
-  const moreLabel = future.hiddenSignalCount === 1 ? '+1 SUPPORTING SIGNAL' : `+${future.hiddenSignalCount} SUPPORTING SIGNALS`;
+  const moreLabel = future.hiddenSignalCount === 1 ? '+1 MORE SIGNAL' : `+${future.hiddenSignalCount} MORE SIGNALS`;
 
   return (
     <article className={`bffp-future-card tone-${future.tone} side-${side}`}>
@@ -161,26 +231,32 @@ function FutureCard({ future, side = 'left' }) {
       <strong>{future.title}</strong>
       <small>{future.status}</small>
       <div>
-        <b>Primary Signal</b>
-        <mark>{future.signal}</mark>
+        <b>Signals</b>
+        <ul>
+          {future.signals.map((signal, index) => <li key={`${future.key}-signal-${index}`}>{signal}</li>)}
+        </ul>
         {future.hiddenSignalCount > 0 && <i>{moreLabel}</i>}
       </div>
-      {side === 'left' && <p>{future.interpretation}</p>}
+      <p>{future.interpretation}</p>
     </article>
   );
 }
 
-function LdeRail() {
+function TruthRail({ inputs }) {
   return (
-    <aside className="bffp-lde-rail" aria-label="LDE Analysis rail">
-      <span>LDE Analysis</span>
-      <strong>Inputs</strong>
-      {LDE_INPUTS.map(([initials, label]) => (
-        <div key={label}>
-          <i>{initials}</i>
-          <em>{label}</em>
-        </div>
-      ))}
+    <aside className="bffp-truth-rail" aria-label="Assessment truth rail">
+      <header>
+        <span>LDE / Assessment Analysis</span>
+        <strong>Evidence Status</strong>
+      </header>
+      <div>
+        {inputs.map((input) => (
+          <section className={`status-${input.status}`} key={input.label} title={input.note}>
+            <i />
+            <span>{input.label}</span>
+          </section>
+        ))}
+      </div>
     </aside>
   );
 }
@@ -235,6 +311,7 @@ export default function BusinessAssessmentFiveFuturesPremium({ data }) {
   const likely = futures.find((future) => future.key === 'most_likely_next_future') || futures[1] || futures[0] || normalizeFuture({}, 1);
   const leftFutures = [current, likely];
   const rightFutures = futures.filter((future) => !leftFutures.includes(future)).slice(0, 3);
+  const truthInputs = buildTruthRail(data);
   const subject = clip(data?.ownerName, 34, 'Business Assessment');
   const horizon = 'Current Trajectory';
   const currentStatus = `${current.title} / ${current.probability}`;
@@ -287,14 +364,7 @@ export default function BusinessAssessmentFiveFuturesPremium({ data }) {
         </div>
 
         <LdeInsight current={current} likely={likely} oneMove={data?.oneMove} />
-        <LdeRail />
-
-        <div className="bffp-legend" aria-label="trajectory legend">
-          <span>Current Future / Active</span>
-          <span>Most Likely Next Future</span>
-          <span>Alternative Futures</span>
-          <span>Required Intervention</span>
-        </div>
+        <TruthRail inputs={truthInputs} />
 
         <DoctrineBars likely={likely} />
       </section>
@@ -323,7 +393,7 @@ const styles = `
 .bffp-stage {
   position: relative;
   width: 100%;
-  height: 1090px;
+  height: 1420px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 18px;
@@ -394,8 +464,7 @@ const styles = `
 .bffp-current-chip,
 .bffp-future-card,
 .bffp-lde-insight,
-.bffp-lde-rail,
-.bffp-legend,
+.bffp-truth-rail,
 .bffp-doctrine section,
 .bffp-intervention {
   border: 1px solid rgba(255,255,255,0.12);
@@ -420,7 +489,7 @@ const styles = `
 .bffp-detected span,
 .bffp-current-chip span,
 .bffp-lde-insight span,
-.bffp-lde-rail span,
+.bffp-truth-rail header span,
 .bffp-intervention span {
   color: rgba(254,215,170,0.86);
   font-size: 12px;
@@ -511,10 +580,10 @@ const styles = `
 .bffp-path-svg {
   position: absolute;
   left: 0;
-  top: 11%;
+  top: 9%;
   z-index: 3;
   width: 100%;
-  height: 78%;
+  height: 75%;
   pointer-events: none;
 }
 
@@ -657,12 +726,12 @@ const styles = `
 .bffp-future-grid {
   position: absolute;
   left: 1.8%;
-  right: 15.2%;
-  top: 24%;
-  bottom: 17.5%;
+  right: 1.8%;
+  top: 18.8%;
+  bottom: 17.2%;
   z-index: 7;
   display: grid;
-  grid-template-columns: 25% minmax(0, 1fr) 33%;
+  grid-template-columns: 27.5% minmax(0, 1fr) 39%;
   gap: 1.05%;
   pointer-events: none;
 }
@@ -693,7 +762,7 @@ const styles = `
   min-height: 0;
   overflow: hidden;
   border-color: var(--tone);
-  padding: 16px;
+  padding: 16px 17px;
   pointer-events: auto;
 }
 
@@ -733,7 +802,7 @@ const styles = `
 
 .bffp-future-card header em {
   color: var(--tone);
-  font-size: 30px;
+  font-size: 32px;
   font-style: normal;
   font-weight: 850;
   line-height: 0.95;
@@ -776,22 +845,24 @@ const styles = `
 }
 
 .bffp-future-card div {
-  margin-top: 12px;
+  margin-top: 11px;
   border-top: 1px solid rgba(255,255,255,0.10);
-  padding-top: 10px;
+  padding-top: 9px;
 }
 
-.bffp-future-card mark {
-  display: -webkit-box;
-  margin-top: 8px;
-  overflow: hidden;
-  background: transparent;
+.bffp-future-card ul {
+  display: grid;
+  gap: 4px;
+  margin: 7px 0 0;
+  padding: 0 0 0 16px;
   color: rgba(255,255,255,0.74);
+  list-style: disc;
+}
+
+.bffp-future-card li {
   font-size: 13px;
-  font-weight: 750;
-  line-height: 1.26;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  font-weight: 720;
+  line-height: 1.22;
 }
 
 .bffp-future-card i {
@@ -807,10 +878,10 @@ const styles = `
 }
 
 .bffp-future-card p {
-  margin: 10px 0 0;
+  margin: 9px 0 0;
   color: rgba(255,255,255,0.78);
   font-size: 13px;
-  line-height: 1.3;
+  line-height: 1.28;
   display: -webkit-box;
   min-height: 1.3em;
   overflow: hidden;
@@ -819,22 +890,33 @@ const styles = `
 }
 
 .bffp-future-card.side-right {
-  padding: 14px;
+  padding: 14px 16px;
+}
+
+.bffp-future-card.side-right header em {
+  font-size: 30px;
 }
 
 .bffp-future-card.side-right strong {
-  min-height: 1.14em;
-  -webkit-line-clamp: 1;
+  min-height: 2.28em;
+  -webkit-line-clamp: 2;
 }
 
-.bffp-future-card.side-right mark {
-  -webkit-line-clamp: 1;
+.bffp-future-card.side-right li {
+  font-size: 12px;
+  line-height: 1.16;
+}
+
+.bffp-future-card.side-right p {
+  font-size: 12px;
+  line-height: 1.22;
+  -webkit-line-clamp: 2;
 }
 
 .bffp-lde-insight {
   position: absolute;
   left: 35.8%;
-  top: 62.5%;
+  top: 60.2%;
   z-index: 8;
   width: 22.2%;
   padding: 16px;
@@ -871,90 +953,96 @@ const styles = `
   -webkit-line-clamp: 1;
 }
 
-.bffp-lde-rail {
+.bffp-truth-rail {
   position: absolute;
-  right: 1.65%;
-  top: 24%;
-  bottom: 17.5%;
+  left: 1.8%;
+  right: 1.8%;
+  bottom: 8.7%;
   z-index: 8;
-  width: 12.1%;
-  padding: 17px 12px;
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  padding: 13px 14px;
   border-color: rgba(254,215,170,0.17);
   background:
-    radial-gradient(circle at 50% 0%, rgba(254,215,170,0.085), transparent 44%),
-    linear-gradient(180deg, rgba(255,255,255,0.066), rgba(255,255,255,0.018)),
+    radial-gradient(circle at 18% 50%, rgba(254,215,170,0.10), transparent 42%),
+    linear-gradient(90deg, rgba(255,255,255,0.070), rgba(255,255,255,0.018)),
     rgba(0,0,0,0.62);
 }
 
-.bffp-lde-rail span {
-  display: block;
-  color: #fed7aa;
-  text-align: center;
+.bffp-truth-rail header {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid rgba(255,255,255,0.10);
+  padding-right: 14px;
 }
 
-.bffp-lde-rail strong {
+.bffp-truth-rail header span {
   display: block;
-  margin-top: 18px;
+  color: #fed7aa;
+}
+
+.bffp-truth-rail header strong {
+  display: block;
+  margin-top: 8px;
   color: rgba(255,255,255,0.72);
   font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
-.bffp-lde-rail div {
+.bffp-truth-rail > div {
   display: grid;
-  grid-template-columns: 34px 1fr;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.bffp-truth-rail section {
+  display: grid;
+  grid-template-columns: 10px 1fr;
   align-items: center;
-  gap: 11px;
-  margin-top: 13px;
-  border-top: 1px solid rgba(255,255,255,0.09);
-  padding-top: 12px;
-}
-
-.bffp-lde-rail i {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid rgba(254,215,170,0.26);
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(254,215,170,0.16), transparent 58%), rgba(255,255,255,0.025);
-  color: rgba(254,215,170,0.82);
-  font-size: 11px;
-  font-style: normal;
-  font-weight: 900;
-  box-shadow: 0 0 18px rgba(254,215,170,0.08);
-}
-
-.bffp-lde-rail em {
-  color: rgba(255,255,255,0.68);
-  font-size: 12px;
-  font-style: normal;
-  line-height: 1.25;
-}
-
-.bffp-legend {
-  position: absolute;
-  left: 1.8%;
-  right: 52%;
-  bottom: 11.8%;
-  z-index: 8;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 7px;
-  padding: 7px;
-}
-
-.bffp-legend span {
-  border: 1px solid rgba(255,255,255,0.10);
+  min-width: 0;
+  gap: 8px;
+  border: 1px solid rgba(255,255,255,0.09);
   border-radius: 10px;
-  background: linear-gradient(145deg, rgba(255,255,255,0.055), rgba(255,255,255,0.014)), rgba(0,0,0,0.40);
-  padding: 12px 8px;
-  color: rgba(255,255,255,0.72);
+  background: rgba(255,255,255,0.032);
+  padding: 10px 11px;
+}
+
+.bffp-truth-rail i {
+  display: grid;
+  width: 10px;
+  height: 10px;
+  place-items: center;
+  border-radius: 999px;
+  background: #facc15;
+  box-shadow: 0 0 14px rgba(250,204,21,0.40);
+}
+
+.bffp-truth-rail .status-strong i {
+  background: #22c55e;
+  box-shadow: 0 0 15px rgba(34,197,94,0.48);
+}
+
+.bffp-truth-rail .status-partial i {
+  background: #facc15;
+  box-shadow: 0 0 15px rgba(250,204,21,0.46);
+}
+
+.bffp-truth-rail .status-missing i {
+  background: #ef4444;
+  box-shadow: 0 0 15px rgba(239,68,68,0.48);
+}
+
+.bffp-truth-rail section span {
+  color: rgba(255,255,255,0.68);
   font-size: 11px;
+  font-style: normal;
   font-weight: 900;
-  letter-spacing: 0.10em;
-  text-align: center;
+  letter-spacing: 0.08em;
+  line-height: 1.15;
   text-transform: uppercase;
 }
 
@@ -962,7 +1050,7 @@ const styles = `
   position: absolute;
   left: 1.8%;
   right: 1.8%;
-  bottom: 2.3%;
+  bottom: 2.1%;
   z-index: 8;
   display: grid;
   grid-template-columns: 1.35fr 1fr 1.25fr;
@@ -1002,8 +1090,8 @@ const styles = `
   left: 30px;
   right: 30px;
   bottom: 32px;
-  height: 510px;
-  padding: 28px 34px;
+  height: 230px;
+  padding: 18px 24px;
   border-color: rgba(251,146,60,0.22);
   background:
     radial-gradient(circle at 86% 50%, rgba(251,146,60,0.16), transparent 28%),
@@ -1012,9 +1100,9 @@ const styles = `
 }
 
 .bffp-intervention h2 {
-  margin: 14px 0 0;
+  margin: 10px 0 0;
   color: #f8fafc;
-  font-size: 34px;
+  font-size: 24px;
   line-height: 1.1;
   text-transform: uppercase;
 }
@@ -1022,15 +1110,19 @@ const styles = `
 .bffp-intervention div {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  margin-top: 24px;
+  gap: 16px;
+  margin-top: 13px;
 }
 
 .bffp-intervention p {
   margin: 0;
   color: rgba(255,255,255,0.72);
-  font-size: 16px;
-  line-height: 1.45;
+  font-size: 13px;
+  line-height: 1.32;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
 }
 
 .bffp-intervention p strong {

@@ -1,0 +1,79 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2B",
+  "timestamp": "2026-07-02T00:00:00-07:00",
+  "frontend_changed": true,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "legacy_renderer_preserved": true,
+  "premium_default_enabled": false,
+  "five_futures_layout_expanded": true,
+  "one_move_panel_reduced": true,
+  "legend_cards_removed": true,
+  "horizontal_truth_rail_added": true,
+  "evidence_dots_restored": true,
+  "future_cards_enriched": true,
+  "files_changed": [
+    "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+    "BA_FIVE_FUTURES_PREMIUM_2B_EXPANDED_TRUTH_LAYOUT.md",
+    "runtime_traces/ba_five_futures_premium_2b_expanded_truth_layout.json"
+  ],
+  "truth_rail_categories": [
+    "Financial Reality",
+    "Behavioral Profile",
+    "Business Model",
+    "Constraint",
+    "Confidence",
+    "Relationships",
+    "Accountability",
+    "Systems"
+  ],
+  "fallback_behavior": [
+    "Feature flag off renders legacy renderer.",
+    "Missing or invalid data renders legacy renderer.",
+    "Premium render error falls back to legacy renderer via boundary.",
+    "renderer=premium remains a controlled preview path."
+  ],
+  "safety_boundaries": {
+    "legacy_renderer_preserved": true,
+    "premium_preview_only": true,
+    "prompt_changes": false,
+    "intelligence_changes": false,
+    "stored_record_mutations": false,
+    "api_model_changes": false,
+    "canonical_dossier_changes": false,
+    "universal_translator_changes": false,
+    "darren_strategy_chat_changes": false,
+    "leadership_demo_changes": false,
+    "visual_lab_changes": false
+  },
+  "validation": {
+    "git_diff_check": "passed",
+    "json_parse": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "local": {
+      "profile_id": "mm-20260531-asovnjz4",
+      "legacy_route_renderer": "legacy-five-futures",
+      "premium_preview_renderer": "premium-five-futures",
+      "stage_height_px": 1399,
+      "one_move_panel_height_px": 227,
+      "legend_cards_removed": true,
+      "horizontal_truth_rail_present": true,
+      "truth_dot_count": 8,
+      "future_card_count": 5,
+      "supporting_signals_text_present": false,
+      "more_signals_text_present_for_normal_cards": false,
+      "internal_horizontal_overflow": false,
+      "body_horizontal_overflow": false,
+      "card_orb_overlap": false,
+      "card_overlap": false,
+      "rail_doctrine_overlap": false,
+      "clipped_future_cards_detected": false
+    },
+    "production": "pending"
+  },
+  "verdict": "PREMIUM_FIVE_FUTURES_EXPANDED_TRUTH_LAYOUT_VALIDATED_LOCALLY"
+}
