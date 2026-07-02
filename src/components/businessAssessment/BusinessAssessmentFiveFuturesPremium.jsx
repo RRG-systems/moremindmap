@@ -1,10 +1,10 @@
 import {
   BUSINESS_ARTIFACT_WIDTH,
-  FIVE_FUTURES_ARTIFACT_HEIGHT,
 } from './BusinessArtifactViewer.jsx';
 
 const CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
-const CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
+export const PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT = 2360;
+const CANVAS_HEIGHT = PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT;
 
 function text(value, fallback = 'Not available') {
   if (value === null || value === undefined || value === '') return fallback;
@@ -182,6 +182,68 @@ function buildTruthRail(data) {
   ];
 }
 
+function meaningful(value, fallback = '') {
+  const source = text(value, fallback).trim();
+  if (!source || source === 'Not available') return '';
+  return source;
+}
+
+function sentenceCandidates(...values) {
+  return values
+    .flatMap((value) => meaningful(value).split(/(?<=[.!?])\s+/))
+    .map((value) => value.trim())
+    .filter((value) => value.length >= 18);
+}
+
+function uniqueClipped(items, maxItems = 3, maxLength = 135) {
+  const seen = new Set();
+  return items
+    .map((item) => clip(item, maxLength, ''))
+    .filter((item) => {
+      const key = item.toLowerCase();
+      if (!item || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, maxItems);
+}
+
+function buildOneMoveIntelligence(oneMove = {}) {
+  const rootConstraint = meaningful(oneMove.rootConstraint, 'Root constraint not available.');
+  const recommendation = meaningful(oneMove.recommendation, 'One Move not generated yet.');
+  const whyThisMove = meaningful(oneMove.whyThisMove);
+  const whyNow = meaningful(oneMove.whyNow);
+  const modeledShift = meaningful(oneMove.probabilityShift, 'Modeled shift not available.');
+  const first30Days = asArray(oneMove.first30Days).map((item) => meaningful(item)).filter(Boolean);
+  const successIndicators = asArray(oneMove.successIndicators).map((item) => meaningful(item)).filter(Boolean);
+
+  const downstreamEffects = uniqueClipped(
+    sentenceCandidates(whyThisMove, modeledShift, recommendation),
+    3,
+    150
+  );
+  const proofToWatch = uniqueClipped(
+    successIndicators.length ? successIndicators : first30Days,
+    4,
+    130
+  );
+
+  return {
+    rootConstraint,
+    recommendation,
+    whyThisMove,
+    whyNow,
+    modeledShift,
+    downstreamEffects: downstreamEffects.length
+      ? downstreamEffects
+      : ['Use recorded proof against the recommendation before claiming downstream movement.'],
+    proofToWatch: proofToWatch.length
+      ? proofToWatch
+      : ['Record evidence that the recommended move was adopted before treating future movement as supported.'],
+    confidence: meaningful(oneMove.confidence, 'Moderate'),
+  };
+}
+
 export function hasPremiumFiveFuturesData(data) {
   const futures = data?.fiveFutures?.futures;
   return Boolean(data?.hasFutures && Array.isArray(futures) && futures.length >= 3);
@@ -291,15 +353,63 @@ function DoctrineBars({ likely }) {
   );
 }
 
-function OneMoveIntervention({ oneMove }) {
+function OneMovePanel({ title, children, tone = 'orange' }) {
   return (
-    <section className="bffp-intervention">
-      <span>One Move: Trajectory Intervention</span>
-      <h2>{clip(oneMove?.title, 110, 'One Move not available')}</h2>
-      <div>
-        <p><strong>Root Constraint</strong>{clip(oneMove?.rootConstraint, 180, 'Root constraint not available.')}</p>
-        <p><strong>Recommendation</strong>{clip(oneMove?.recommendation, 220, 'Recommendation not available.')}</p>
-        <p><strong>Modeled Shift</strong>{clip(oneMove?.probabilityShift, 220, 'Probability shift not available.')}</p>
+    <article className={`bffp-one-move-panel tone-${tone}`}>
+      <span>{title}</span>
+      {children}
+    </article>
+  );
+}
+
+function OneMoveHero({ oneMove }) {
+  const intelligence = buildOneMoveIntelligence(oneMove);
+
+  return (
+    <section className="bffp-one-move-hero" aria-label="One Move hero intelligence block">
+      <header className="bffp-one-move-hero-head">
+        <div>
+          <span>The One Move <em>→</em></span>
+          <h2>{meaningful(oneMove?.title, 'One Move not available')}</h2>
+          <p>The highest-leverage intervention selected from the trajectory field.</p>
+        </div>
+        <aside>
+          <strong>Trajectory Intervention</strong>
+          <p>The map shows the futures. The move changes the trajectory only when execution creates proof.</p>
+        </aside>
+      </header>
+
+      <div className="bffp-one-move-grid">
+        <OneMovePanel title="Root Constraint" tone="red">
+          <p>{clip(intelligence.rootConstraint, 260, 'Root constraint not available.')}</p>
+          {intelligence.whyNow && <small>{clip(intelligence.whyNow, 180)}</small>}
+        </OneMovePanel>
+
+        <OneMovePanel title="Recommended Move" tone="orange">
+          <p>{clip(intelligence.recommendation, 360, 'Recommendation not available.')}</p>
+          {intelligence.whyThisMove && <small>{clip(intelligence.whyThisMove, 185)}</small>}
+        </OneMovePanel>
+
+        <OneMovePanel title="Downstream Effects" tone="blue">
+          <ul>
+            {intelligence.downstreamEffects.map((effect, index) => (
+              <li key={`downstream-${index}`}>{effect}</li>
+            ))}
+          </ul>
+        </OneMovePanel>
+
+        <OneMovePanel title="Modeled Shift" tone="purple">
+          <p>{clip(intelligence.modeledShift, 360, 'Modeled shift not available.')}</p>
+          <small>Confidence: {intelligence.confidence}</small>
+        </OneMovePanel>
+
+        <OneMovePanel title="Proof To Watch" tone="green">
+          <ul>
+            {intelligence.proofToWatch.map((proof, index) => (
+              <li key={`proof-${index}`}>{proof}</li>
+            ))}
+          </ul>
+        </OneMovePanel>
       </div>
     </section>
   );
@@ -369,7 +479,7 @@ export default function BusinessAssessmentFiveFuturesPremium({ data }) {
         <DoctrineBars likely={likely} />
       </section>
 
-      <OneMoveIntervention oneMove={data?.oneMove} />
+      <OneMoveHero oneMove={data?.oneMove} />
     </div>
   );
 }
@@ -466,7 +576,9 @@ const styles = `
 .bffp-lde-insight,
 .bffp-truth-rail,
 .bffp-doctrine section,
-.bffp-intervention {
+.bffp-one-move-hero,
+.bffp-one-move-panel,
+.bffp-one-move-hero-head aside {
   border: 1px solid rgba(255,255,255,0.12);
   border-radius: 13px;
   background:
@@ -490,7 +602,8 @@ const styles = `
 .bffp-current-chip span,
 .bffp-lde-insight span,
 .bffp-truth-rail header span,
-.bffp-intervention span {
+.bffp-one-move-hero span,
+.bffp-one-move-panel span {
   color: rgba(254,215,170,0.86);
   font-size: 12px;
   font-weight: 900;
@@ -1085,53 +1198,178 @@ const styles = `
   margin-top: 4px;
 }
 
-.bffp-intervention {
+.bffp-one-move-hero {
+  position: relative;
+  height: 850px;
+  margin-top: 28px;
+  padding: 31px 34px;
+  overflow: hidden;
+  border-color: rgba(255,255,255,0.17);
+  background:
+    radial-gradient(circle at 13% 20%, rgba(255,255,255,0.12), transparent 20%),
+    radial-gradient(circle at 70% 12%, rgba(251,146,60,0.18), transparent 30%),
+    radial-gradient(circle at 81% 76%, rgba(59,130,246,0.18), transparent 30%),
+    radial-gradient(circle at 32% 88%, rgba(168,85,247,0.12), transparent 28%),
+    linear-gradient(140deg, rgba(255,255,255,0.078), rgba(255,255,255,0.018)),
+    rgba(0,0,0,0.68);
+}
+
+.bffp-one-move-hero::before {
+  content: "";
   position: absolute;
-  left: 30px;
-  right: 30px;
-  bottom: 32px;
-  height: 230px;
-  padding: 18px 24px;
+  left: 33%;
+  right: 8%;
+  top: 108px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.86), rgba(251,146,60,0.46), transparent);
+  box-shadow: 0 0 26px rgba(255,255,255,0.28);
+}
+
+.bffp-one-move-hero::after {
+  content: "";
+  position: absolute;
+  right: 6.5%;
+  top: 92px;
+  width: 26px;
+  height: 26px;
+  border-right: 2px solid rgba(255,255,255,0.72);
+  border-top: 2px solid rgba(255,255,255,0.72);
+  transform: rotate(45deg);
+  filter: drop-shadow(0 0 16px rgba(255,255,255,0.44));
+}
+
+.bffp-one-move-hero-head {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) 390px;
+  gap: 34px;
+  align-items: start;
+}
+
+.bffp-one-move-hero-head h2 {
+  max-width: 960px;
+  margin: 14px 0 0;
+  color: #fff;
+  font-size: 51px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 24px rgba(255,255,255,0.22),
+    0 0 54px rgba(251,146,60,0.15);
+}
+
+.bffp-one-move-hero-head > div > p {
+  max-width: 760px;
+  margin: 18px 0 0;
+  color: rgba(255,255,255,0.70);
+  font-size: 18px;
+  line-height: 1.35;
+}
+
+.bffp-one-move-hero-head span {
+  color: rgba(255,255,255,0.92);
+  font-size: 27px;
+  letter-spacing: 0.12em;
+}
+
+.bffp-one-move-hero-head span em {
+  color: #fff;
+  font-style: normal;
+  text-shadow: 0 0 18px rgba(255,255,255,0.46);
+}
+
+.bffp-one-move-hero-head aside {
+  padding: 18px 20px;
   border-color: rgba(251,146,60,0.22);
   background:
-    radial-gradient(circle at 86% 50%, rgba(251,146,60,0.16), transparent 28%),
-    linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018)),
-    rgba(0,0,0,0.64);
+    radial-gradient(circle at 90% 20%, rgba(251,146,60,0.14), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,0.064), rgba(255,255,255,0.014)),
+    rgba(0,0,0,0.42);
 }
 
-.bffp-intervention h2 {
-  margin: 10px 0 0;
-  color: #f8fafc;
-  font-size: 24px;
-  line-height: 1.1;
-  text-transform: uppercase;
-}
-
-.bffp-intervention div {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-top: 13px;
-}
-
-.bffp-intervention p {
-  margin: 0;
-  color: rgba(255,255,255,0.72);
-  font-size: 13px;
-  line-height: 1.32;
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-}
-
-.bffp-intervention p strong {
-  display: block;
-  margin-bottom: 8px;
+.bffp-one-move-hero-head aside strong {
   color: #fed7aa;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.16em;
   text-transform: uppercase;
+}
+
+.bffp-one-move-hero-head aside p {
+  margin: 12px 0 0;
+  color: rgba(255,255,255,0.70);
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.bffp-one-move-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1.45fr 1fr;
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 34px;
+  height: 590px;
+}
+
+.bffp-one-move-panel {
+  --tone: #fb923c;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 18px 19px;
+  border-color: color-mix(in srgb, var(--tone) 46%, white 8%);
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--tone) 18%, transparent), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,0.074), rgba(255,255,255,0.016)),
+    rgba(0,0,0,0.50);
+}
+
+.bffp-one-move-panel.tone-red { --tone: #f87171; }
+.bffp-one-move-panel.tone-orange { --tone: #fb923c; }
+.bffp-one-move-panel.tone-blue { --tone: #60a5fa; }
+.bffp-one-move-panel.tone-purple { --tone: #c084fc; }
+.bffp-one-move-panel.tone-green { --tone: #86efac; }
+
+.bffp-one-move-panel:nth-child(2) {
+  grid-column: span 2;
+}
+
+.bffp-one-move-panel span {
+  color: var(--tone);
+  font-size: 12px;
+}
+
+.bffp-one-move-panel p,
+.bffp-one-move-panel li,
+.bffp-one-move-panel small {
+  color: rgba(255,255,255,0.74);
+  font-size: 14px;
+  line-height: 1.34;
+}
+
+.bffp-one-move-panel p {
+  margin: 12px 0 0;
+}
+
+.bffp-one-move-panel small {
+  display: block;
+  margin-top: 12px;
+  color: rgba(254,215,170,0.78);
+}
+
+.bffp-one-move-panel ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding-left: 18px;
+}
+
+.bffp-one-move-panel li::marker {
+  color: var(--tone);
 }
 `;

@@ -1,0 +1,80 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2C",
+  "timestamp": "2026-07-02T00:00:00-07:00",
+  "frontend_changed": true,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "legacy_renderer_preserved": true,
+  "premium_default_enabled": false,
+  "five_futures_2b_preserved": true,
+  "one_move_hero_block_added": true,
+  "one_move_title_preserved_as_generated_intelligence": true,
+  "downstream_effects_grounded_only": true,
+  "proof_to_watch_added": true,
+  "white_arrow_used_as_symbol_only": true,
+  "files_changed": [
+    "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+    "src/BusinessAssessmentFiveFutures.jsx",
+    "BA_FIVE_FUTURES_PREMIUM_2C_ONE_MOVE_HERO_INTELLIGENCE.md",
+    "runtime_traces/ba_five_futures_premium_2c_one_move_hero_intelligence.json"
+  ],
+  "one_move_source_fields": [
+    "oneMove.title",
+    "oneMove.rootConstraint",
+    "oneMove.recommendation",
+    "oneMove.whyThisMove",
+    "oneMove.whyNow",
+    "oneMove.probabilityShift",
+    "oneMove.first30Days",
+    "oneMove.successIndicators",
+    "oneMove.confidence"
+  ],
+  "safety_boundaries": {
+    "assessment_truth_preserved": true,
+    "legacy_renderer_preserved": true,
+    "premium_preview_only": true,
+    "prompt_changes": false,
+    "intelligence_changes": false,
+    "stored_record_mutations": false,
+    "api_model_changes": false,
+    "canonical_dossier_changes": false,
+    "universal_translator_changes": false,
+    "darren_strategy_chat_changes": false,
+    "leadership_demo_changes": false
+  },
+  "validation": {
+    "git_diff_check": "passed",
+    "json_parse": "passed",
+    "npm_run_build": "passed_with_existing_vite_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "local": {
+      "profile_id": "mm-20260531-asovnjz4",
+      "legacy_route_renderer": "legacy-five-futures",
+      "premium_preview_renderer": "premium-five-futures",
+      "premium_artifact_height": 2360,
+      "five_future_card_count": 5,
+      "truth_rail_present": true,
+      "truth_dot_count": 8,
+      "supporting_signals_text_present": false,
+      "one_move_hero_present": true,
+      "one_move_hero_label_visible": true,
+      "generated_one_move_title": "INSTALL A 90-DAY JUDGMENT TRANSFER CADENCE",
+      "root_constraint_visible": true,
+      "recommended_move_visible": true,
+      "downstream_effects_visible": true,
+      "modeled_shift_visible": true,
+      "proof_to_watch_visible": true,
+      "generic_filler_detected": false,
+      "horizontal_overflow_detected": false,
+      "one_move_panel_overlap": false,
+      "one_move_panel_clipping": false,
+      "future_card_clipping": false,
+      "five_futures_stage_hero_overlap": false
+    },
+    "production": "pending"
+  },
+  "verdict": "ONE_MOVE_HERO_INTELLIGENCE_VALIDATED_LOCALLY"
+}

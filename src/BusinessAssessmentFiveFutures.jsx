@@ -6,6 +6,7 @@ import BusinessArtifactViewer, {
 } from './components/businessAssessment/BusinessArtifactViewer.jsx';
 import BusinessAssessmentFiveFuturesPremium, {
   hasPremiumFiveFuturesData,
+  PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT,
 } from './components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
 
@@ -507,7 +508,10 @@ export default function BusinessAssessmentFiveFutures() {
 
   return (
     <ArtifactShell profileId={data.profileId} returnTo={returnTo}>
-      <BusinessArtifactViewer width={FUTURES_CANVAS_WIDTH} height={FUTURES_CANVAS_HEIGHT}>
+      <BusinessArtifactViewer
+        width={FUTURES_CANVAS_WIDTH}
+        height={usePremiumRenderer ? PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT : FUTURES_CANVAS_HEIGHT}
+      >
         {usePremiumRenderer ? (
           <PremiumRendererBoundary fallback={legacyRenderer}>
             <BusinessAssessmentFiveFuturesPremium data={data} />
