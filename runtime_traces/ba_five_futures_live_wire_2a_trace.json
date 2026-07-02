@@ -1,0 +1,54 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-LIVE-WIRE-2A",
+  "runtime_changed": true,
+  "frontend_changed": true,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "feature_flag_added": true,
+  "old_renderer_preserved": true,
+  "new_renderer_added": true,
+  "fallback_behavior": "Default path renders the existing FiveFuturesCanvas. Premium renders only when VITE_BA_FIVE_FUTURES_PREMIUM=true or ?renderer=premium is used and normalized data has at least three futures. Any premium render error falls back to the existing renderer.",
+  "files_changed": [
+    "src/BusinessAssessmentFiveFutures.jsx",
+    "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+    "BA_FIVE_FUTURES_LIVE_WIRE_2A_TRACE.md",
+    "runtime_traces/ba_five_futures_live_wire_2a_trace.json"
+  ],
+  "routes_touched": [
+    "/business-assessment/five-futures"
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "json_parse": "passed",
+    "npm_run_build": "passed_with_existing_large_chunk_warning"
+  },
+  "smoke_tests": {
+    "known_profile_id": "mm-20260531-asovnjz4",
+    "read_only_retrieve_status": 200,
+    "feature_flag_off_legacy_renderer": "passed_legacy_marker_present_premium_absent",
+    "premium_preview_renderer": "passed_with_renderer_query_param",
+    "premium_preview_markers": [
+      "premium-five-futures",
+      "central current trajectory orb",
+      "LDE Analysis",
+      "LDE Insight",
+      "doctrine bars",
+      "+N supporting signals"
+    ],
+    "premium_fit_checks": {
+      "premium_overflow_x": false,
+      "stage_overflow_x": false,
+      "card_orb_overlap": false,
+      "card_overlap": false,
+      "clipped_cards": 0,
+      "rail_inside_stage": true,
+      "doctrine_inside_stage": true
+    },
+    "fallback_partial_data": "selector_guard_static_validated; missing profile id route returned controlled error before renderer",
+    "public_routes": "pending_production",
+    "production_deploy": "pending"
+  },
+  "verdict": "FEATURE_FLAGGED_PREMIUM_RENDERER_READY_FOR_COMMIT_AND_DEPLOY"
+}

@@ -1,13 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { Component, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import BusinessArtifactViewer, {
   BUSINESS_ARTIFACT_WIDTH,
   FIVE_FUTURES_ARTIFACT_HEIGHT,
 } from './components/businessAssessment/BusinessArtifactViewer.jsx';
+import BusinessAssessmentFiveFuturesPremium, {
+  hasPremiumFiveFuturesData,
+} from './components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
 
 const FUTURES_CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const FUTURES_CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
+const PREMIUM_RENDERER_ENABLED = String(import.meta.env.VITE_BA_FIVE_FUTURES_PREMIUM || '').toLowerCase() === 'true';
 
 function buildApiUrl(path) {
   const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -332,6 +336,40 @@ function BottomBand({ title, text, tone }) {
   );
 }
 
+class PremiumRendererBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { failed: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+
+  componentDidCatch(error) {
+    if (import.meta.env.DEV) {
+      console.warn('[BA Five Futures] Premium renderer failed; falling back to legacy renderer.', error);
+    }
+  }
+
+  render() {
+    if (this.state.failed) return this.props.fallback;
+    return this.props.children;
+  }
+}
+
+function shouldUsePremiumRenderer({ data, searchParams }) {
+  const requestedByQuery = searchParams.get('renderer') === 'premium';
+  if (!PREMIUM_RENDERER_ENABLED && !requestedByQuery) return false;
+  if (!hasPremiumFiveFuturesData(data)) {
+    if (import.meta.env.DEV && (PREMIUM_RENDERER_ENABLED || requestedByQuery)) {
+      console.warn('[BA Five Futures] Premium renderer requested but normalized data is incomplete; falling back to legacy renderer.');
+    }
+    return false;
+  }
+  return true;
+}
+
 function FiveFuturesCanvas({ data }) {
   const futures = data.fiveFutures.futures || [];
   const current = futures.find((future) => future.key === 'current_future') || futures[0] || {};
@@ -342,6 +380,7 @@ function FiveFuturesCanvas({ data }) {
   return (
     <div
       className="ba-fixed-canvas bff-canvas"
+      data-renderer="legacy-five-futures"
       style={{
         '--ba-artifact-width': `${FUTURES_CANVAS_WIDTH}px`,
         '--ba-artifact-height': `${FUTURES_CANVAS_HEIGHT}px`,
@@ -463,10 +502,19 @@ export default function BusinessAssessmentFiveFutures() {
     );
   }
 
+  const legacyRenderer = <FiveFuturesCanvas data={data} />;
+  const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
+
   return (
     <ArtifactShell profileId={data.profileId} returnTo={returnTo}>
       <BusinessArtifactViewer width={FUTURES_CANVAS_WIDTH} height={FUTURES_CANVAS_HEIGHT}>
-        <FiveFuturesCanvas data={data} />
+        {usePremiumRenderer ? (
+          <PremiumRendererBoundary fallback={legacyRenderer}>
+            <BusinessAssessmentFiveFuturesPremium data={data} />
+          </PremiumRendererBoundary>
+        ) : (
+          legacyRenderer
+        )}
       </BusinessArtifactViewer>
     </ArtifactShell>
   );
