@@ -74,7 +74,38 @@
       "future_card_clipping": false,
       "five_futures_stage_hero_overlap": false
     },
-    "production": "pending"
+    "production": {
+      "deployment_url": "https://moremindmap-72v2oaxmh-rrg-systems-projects.vercel.app",
+      "production_alias": "https://moremindmap.com",
+      "public_routes": {
+        "/": 200,
+        "/profile": 200,
+        "/business-assessment": 200,
+        "/leadership-dashboard": 200,
+        "/leadership-demo": 200
+      },
+      "legacy_five_futures_route_status": 200,
+      "premium_preview_route_status": 200,
+      "legacy_route_renderer": "legacy-five-futures",
+      "premium_preview_renderer": "premium-five-futures",
+      "five_future_card_count": 5,
+      "truth_rail_present": true,
+      "truth_dot_count": 8,
+      "supporting_signals_text_present": false,
+      "one_move_hero_present": true,
+      "one_move_hero_label_visible": true,
+      "generated_one_move_title": "INSTALL A 90-DAY JUDGMENT TRANSFER CADENCE",
+      "root_constraint_visible": true,
+      "recommended_move_visible": true,
+      "downstream_effects_visible": true,
+      "modeled_shift_visible": true,
+      "proof_to_watch_visible": true,
+      "generic_filler_detected": false,
+      "horizontal_overflow_detected": false,
+      "one_move_panel_overlap": false,
+      "one_move_panel_clipping": false,
+      "future_card_clipping": false
+    }
   },
-  "verdict": "ONE_MOVE_HERO_INTELLIGENCE_VALIDATED_LOCALLY"
+  "verdict": "ONE_MOVE_HERO_INTELLIGENCE_DEPLOYED_AND_SMOKED_WITH_LIMITS"
 }

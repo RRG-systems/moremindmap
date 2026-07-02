@@ -79,6 +79,22 @@ Local browser smoke against production API data for `mm-20260531-asovnjz4`:
 - No future-card clipping detected.
 - No Five Futures stage / One Move hero overlap detected.
 
+Production smoke after deployment:
+
+- Deployment URL: `https://moremindmap-72v2oaxmh-rrg-systems-projects.vercel.app`
+- Production alias: `https://moremindmap.com`
+- `/`: 200
+- `/profile`: 200
+- `/business-assessment`: 200
+- `/leadership-dashboard`: 200
+- `/leadership-demo`: 200
+- Legacy Five Futures route: 200 and rendered `data-renderer="legacy-five-futures"`.
+- Premium preview route: 200 and rendered `data-renderer="premium-five-futures"`.
+- Premium preview retained 5 future cards, truth rail, and 8 evidence dots.
+- Premium preview rendered `THE ONE MOVE ->`, the generated One Move title, Root Constraint, Recommended Move, Downstream Effects, Modeled Shift, and Proof To Watch.
+- No generic filler phrases were detected.
+- No horizontal overflow, panel overlap, panel clipping, or future-card clipping was detected.
+
 ## Limits
 
 - Downstream Effects are grounded in existing One Move language and may read as source-text excerpts when explicit downstream effects are unavailable.
