@@ -240,13 +240,30 @@ function buildOneMoveIntelligence(oneMove = {}) {
     proofToWatch: proofToWatch.length
       ? proofToWatch
       : ['Record evidence that the recommended move was adopted before treating future movement as supported.'],
-    confidence: meaningful(oneMove.confidence, 'Moderate'),
+    confidence: meaningful(oneMove.confidence, 'Confidence not indexed'),
   };
+}
+
+export function hasGeneratedOneMoveIntelligence(data) {
+  const provenance = data?.oneMove?.provenance;
+  return Boolean(
+    provenance?.completeForPremium &&
+      provenance.hasRawTitle &&
+      provenance.hasRawRootConstraint &&
+      provenance.hasRawRecommendation &&
+      provenance.hasRawModeledShift &&
+      provenance.hasRawProofSignals
+  );
 }
 
 export function hasPremiumFiveFuturesData(data) {
   const futures = data?.fiveFutures?.futures;
-  return Boolean(data?.hasFutures && Array.isArray(futures) && futures.length >= 3);
+  return Boolean(
+    data?.hasFutures &&
+      Array.isArray(futures) &&
+      futures.length >= 3 &&
+      hasGeneratedOneMoveIntelligence(data)
+  );
 }
 
 function TrajectoryPaths() {

@@ -1,0 +1,56 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2E",
+  "trace_type": "one_move_provenance_guardrails",
+  "frontend_changed": true,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "premium_default_enabled": false,
+  "legacy_renderer_preserved": true,
+  "fallback_hardened": true,
+  "raw_one_move_provenance_required": true,
+  "generic_title_fallback_removed_from_premium": true,
+  "missing_confidence_fallback_hardened": true,
+  "files_changed": [
+    "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+    "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+    "BA_FIVE_FUTURES_PREMIUM_2E_ONE_MOVE_PROVENANCE_GUARDRAILS.md",
+    "runtime_traces/ba_five_futures_premium_2e_one_move_provenance_guardrails.json"
+  ],
+  "guardrails": {
+    "requires_raw_title": true,
+    "requires_raw_root_constraint": true,
+    "requires_raw_recommendation": true,
+    "requires_raw_modeled_shift": true,
+    "requires_raw_proof_or_rationale": true
+  },
+  "validation": {
+    "git_diff_check": "passed",
+    "json_tool": "passed",
+    "npm_build": "passed",
+    "runtime_scope": "frontend_normalizer_and_premium_renderer_only",
+    "backend_files_changed": false,
+    "prompt_files_changed": false,
+    "generation_files_changed": false,
+    "stored_records_mutated": false
+  },
+  "smoke_tests": {
+    "valid_profile_normalized_provenance": {
+      "profile_id": "mm-20260531-asovnjz4",
+      "title": "Install a 90-Day Judgment Transfer Cadence",
+      "confidence": "high",
+      "complete_for_premium": true,
+      "result": "passed"
+    },
+    "partial_one_move_local_fixture": {
+      "title": "One Move intelligence unavailable",
+      "confidence": "Confidence not indexed",
+      "complete_for_premium": false,
+      "expected_renderer_behavior": "legacy fallback",
+      "result": "passed"
+    },
+    "production_post_deploy": "pending"
+  },
+  "verdict": "ONE_MOVE_PROVENANCE_GUARDRAILS_ADDED_PREMIUM_REMAINS_DEFAULT_OFF"
+}

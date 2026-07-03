@@ -33,6 +33,14 @@ function asArray(value) {
   return [value];
 }
 
+function hasRawValue(value) {
+  if (value === null || value === undefined) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.filter(Boolean).length > 0;
+  if (typeof value === 'object') return Object.keys(value).length > 0;
+  return true;
+}
+
 function textBlock(...values) {
   return values.map((value) => String(value || '')).join('\n\n');
 }
@@ -498,6 +506,21 @@ export function normalizeBusinessVisualArtifactData(record) {
   const briefing = output.executive_diagnostic_briefing_v1 || {};
   const fiveFutures = output.five_futures_v1 || {};
   const oneMove = output.one_move_v1 || {};
+  const oneMoveProvenance = {
+    hasRawTitle: hasRawValue(oneMove.title),
+    hasRawRootConstraint: hasRawValue(oneMove.root_constraint),
+    hasRawRecommendation: hasRawValue(oneMove.recommendation),
+    hasRawModeledShift: hasRawValue(oneMove.expected_probability_shift?.explanation || oneMove.expected_probability_shift),
+    hasRawProofSignals: hasRawValue(oneMove.success_indicators) || hasRawValue(oneMove.first_30_days) || hasRawValue(oneMove.why_this_move) || hasRawValue(oneMove.why_now),
+    hasRawConfidence: hasRawValue(oneMove.confidence)
+  };
+  oneMoveProvenance.completeForPremium = Boolean(
+    oneMoveProvenance.hasRawTitle &&
+      oneMoveProvenance.hasRawRootConstraint &&
+      oneMoveProvenance.hasRawRecommendation &&
+      oneMoveProvenance.hasRawModeledShift &&
+      oneMoveProvenance.hasRawProofSignals
+  );
   const futures = Array.isArray(fiveFutures.futures) ? fiveFutures.futures : [];
   const primaryConstraint = normalizeConstraint(draft, briefing);
   const answers = assessment.inputs?.answers || {};
@@ -565,7 +588,7 @@ export function normalizeBusinessVisualArtifactData(record) {
       futures
     },
     oneMove: {
-      title: oneMove.title || 'One Move',
+      title: oneMoveProvenance.hasRawTitle ? oneMove.title : 'One Move intelligence unavailable',
       rootConstraint: formatValue(oneMove.root_constraint || primaryConstraint.label || primaryConstraint.constraint_key, 'Root constraint not available.'),
       interventionCategory: formatValue(oneMove.intervention_category, 'Intervention'),
       recommendation: formatValue(oneMove.recommendation, 'One Move not generated yet.'),
@@ -574,7 +597,8 @@ export function normalizeBusinessVisualArtifactData(record) {
       probabilityShift: formatValue(oneMove.expected_probability_shift?.explanation || oneMove.expected_probability_shift, 'Probability shift not available.'),
       first30Days: asArray(oneMove.first_30_days),
       successIndicators: asArray(oneMove.success_indicators),
-      confidence: formatValue(oneMove.confidence, 'Moderate')
+      confidence: oneMoveProvenance.hasRawConfidence ? formatValue(oneMove.confidence) : 'Confidence not indexed',
+      provenance: oneMoveProvenance
     }
   };
 
