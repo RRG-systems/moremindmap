@@ -1,0 +1,261 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2D",
+  "trace_type": "one_move_intelligence_provenance",
+  "frontend_changed": false,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "premium_default_enabled": false,
+  "profile_id_traced": "mm-20260531-asovnjz4",
+  "one_move_title": "Install a 90-Day Judgment Transfer Cadence",
+  "one_move_title_classification": "generated_assessment_intelligence_stored_output",
+  "one_move_title_hardcoded": false,
+  "one_move_title_generated_or_stored": true,
+  "one_move_title_source_path": [
+    {
+      "step": "premium_preview_url",
+      "path": "/business-assessment/five-futures?id=mm-20260531-asovnjz4&renderer=premium",
+      "classification": "route_input"
+    },
+    {
+      "step": "retrieve_assessment",
+      "file": "api/business-assessment/retrieve.js",
+      "function": "handler",
+      "field": "assessment.output.one_move_v1.title",
+      "classification": "stored_generated_output"
+    },
+    {
+      "step": "normalize_visual_data",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+      "function": "normalizeBusinessVisualArtifactData",
+      "field": "oneMove.title",
+      "classification": "deterministic_mapping_with_generic_fallback"
+    },
+    {
+      "step": "render_premium_one_move_hero",
+      "file": "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "function": "OneMoveHero",
+      "field": "oneMove.title",
+      "classification": "display_of_stored_generated_output"
+    }
+  ],
+  "visible_one_move_fields": [
+    {
+      "field": "The One Move ->",
+      "source": "BusinessAssessmentFiveFuturesPremium.jsx",
+      "classification": "Static UI label"
+    },
+    {
+      "field": "Generated One Move title",
+      "source": "data.oneMove.title",
+      "classification": "Generated assessment intelligence"
+    },
+    {
+      "field": "Framing line",
+      "source": "BusinessAssessmentFiveFuturesPremium.jsx",
+      "classification": "Static UI label"
+    },
+    {
+      "field": "Trajectory Intervention label and aside copy",
+      "source": "BusinessAssessmentFiveFuturesPremium.jsx",
+      "classification": "Static doctrine label"
+    },
+    {
+      "field": "Root Constraint body",
+      "source": "one_move_v1.root_constraint",
+      "classification": "Generated assessment intelligence"
+    },
+    {
+      "field": "Recommended Move body",
+      "source": "one_move_v1.recommendation",
+      "classification": "Generated assessment intelligence"
+    },
+    {
+      "field": "Downstream Effects bullets",
+      "source": "whyThisMove, probabilityShift, recommendation",
+      "classification": "Deterministically derived from generated assessment intelligence"
+    },
+    {
+      "field": "Modeled Shift body",
+      "source": "one_move_v1.expected_probability_shift.explanation",
+      "classification": "Generated assessment intelligence"
+    },
+    {
+      "field": "Confidence line",
+      "source": "one_move_v1.confidence",
+      "classification": "Generated assessment intelligence with static label"
+    },
+    {
+      "field": "Proof To Watch bullets",
+      "source": "one_move_v1.success_indicators or one_move_v1.first_30_days",
+      "classification": "Generated assessment intelligence or deterministic selection"
+    }
+  ],
+  "static_labels": [
+    "The One Move ->",
+    "The highest-leverage intervention selected from the trajectory field.",
+    "Trajectory Intervention",
+    "The map shows the futures. The move changes the trajectory only when execution creates proof.",
+    "Root Constraint",
+    "Recommended Move",
+    "Downstream Effects",
+    "Modeled Shift",
+    "Proof To Watch",
+    "Confidence:"
+  ],
+  "generated_fields": [
+    "one_move_v1.title",
+    "one_move_v1.root_constraint",
+    "one_move_v1.recommendation",
+    "one_move_v1.why_this_move",
+    "one_move_v1.why_now",
+    "one_move_v1.expected_probability_shift.explanation",
+    "one_move_v1.first_30_days",
+    "one_move_v1.success_indicators",
+    "one_move_v1.confidence"
+  ],
+  "derived_fields": [
+    {
+      "field": "Downstream Effects",
+      "derivation": "sentenceCandidates and uniqueClipped over whyThisMove, modeledShift, and recommendation"
+    },
+    {
+      "field": "Proof To Watch",
+      "derivation": "uniqueClipped over successIndicators, falling back to first30Days"
+    },
+    {
+      "field": "LDE Insight One Move line",
+      "derivation": "static prefix plus clipped generated oneMove.title"
+    }
+  ],
+  "fallback_fields": [
+    {
+      "field": "oneMove.title",
+      "fallback": "One Move",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+      "risk": "Generic title could occupy the hero title position if raw title is missing."
+    },
+    {
+      "field": "OneMoveHero title",
+      "fallback": "One Move not available",
+      "file": "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Honest unavailable fallback."
+    },
+    {
+      "field": "rootConstraint",
+      "fallback": "Root constraint not available.",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js and src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Honest unavailable fallback."
+    },
+    {
+      "field": "recommendation",
+      "fallback": "One Move not generated yet.",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js and src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Honest unavailable fallback."
+    },
+    {
+      "field": "whyThisMove",
+      "fallback": "The probability shift has not been modeled yet.",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+      "risk": "Could appear as subtext, but reads as unavailable rather than generated intelligence."
+    },
+    {
+      "field": "probabilityShift",
+      "fallback": "Probability shift not available. / Modeled shift not available.",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js and src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Honest unavailable fallback."
+    },
+    {
+      "field": "confidence",
+      "fallback": "Moderate",
+      "file": "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+      "risk": "Can look like generated confidence if raw confidence is missing."
+    },
+    {
+      "field": "Downstream Effects",
+      "fallback": "Use recorded proof against the recommendation before claiming downstream movement.",
+      "file": "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Conservative boundary fallback."
+    },
+    {
+      "field": "Proof To Watch",
+      "fallback": "Record evidence that the recommended move was adopted before treating future movement as supported.",
+      "file": "src/components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx",
+      "risk": "Conservative boundary fallback."
+    }
+  ],
+  "unknown_fields": [],
+  "upstream_generation_origin": {
+    "identified": true,
+    "files": [
+      "api/business-assessment/generate-futures.js",
+      "api/engine/businessAssessment/buildFiveFuturesPrompt.js"
+    ],
+    "model": "Traced record metadata reports gpt-5.5-2026-04-23; route model source is BUSINESS_ASSESSMENT_OPENAI_MODEL || OPENAI_MODEL || gpt-4o-2024-08-06.",
+    "prompt_or_function": "buildOneMovePrompt generates one_move_v1 after validated five_futures_v1.",
+    "input_signal_sources": [
+      "validated_five_futures_v1",
+      "executive_diagnostic_briefing.primary_constraint_snapshot",
+      "executive_diagnostic_briefing.current_trajectory_signal",
+      "executive_diagnostic_briefing.confidence_snapshot",
+      "executive_diagnostic_briefing.missing_data",
+      "executive_diagnostic_briefing selected sections",
+      "business_intelligence_draft",
+      "canonical_profile_snapshot",
+      "real_estate_one_move_model"
+    ]
+  },
+  "fallback_risks": [
+    {
+      "risk": "Normalizer maps missing raw title to generic 'One Move'.",
+      "severity": "medium",
+      "recommendation": "Before premium default, require raw one_move_v1.title or render an explicit unavailable state / legacy fallback."
+    },
+    {
+      "risk": "Normalizer maps missing confidence to 'Moderate'.",
+      "severity": "medium",
+      "recommendation": "Use an evidence-unavailable label unless raw one_move_v1.confidence exists."
+    },
+    {
+      "risk": "Premium data compatibility currently checks futures count, not One Move completeness.",
+      "severity": "medium",
+      "recommendation": "Require core one_move_v1 fields before premium preview/default rendering."
+    }
+  ],
+  "multi_record_check": {
+    "records_checked": 10,
+    "records_with_one_move": 2,
+    "unique_titles": 2,
+    "duplicates": [],
+    "records": [
+      {
+        "profile_id": "mm-20260531-asovnjz4",
+        "assessment_id": "ba-20260605-d2aa1165",
+        "one_move_title": "Install a 90-Day Judgment Transfer Cadence"
+      },
+      {
+        "profile_id": "mm-20260527-6zshuaao",
+        "assessment_id": "ba-20260609-d379499d",
+        "one_move_title": "Install a 90-Day Relationship-to-Close Operating Cadence"
+      }
+    ],
+    "limits": "Small sample. Supports not-static-default conclusion, but does not prove population-level uniqueness."
+  },
+  "assessment_truth_risk": "Low for the traced title because it is stored generated output. Medium before default premium because normalized fallbacks can make missing One Move fields appear in generated-intelligence positions.",
+  "recommendations": [
+    "Require raw output.one_move_v1.title and core One Move fields before premium rendering becomes default.",
+    "Replace generic normalized title fallback with explicit unavailable status or legacy fallback.",
+    "Replace missing confidence fallback 'Moderate' with an unavailable/evidence-thin status.",
+    "Run a larger batch uniqueness audit over generated Business Assessment records.",
+    "Store one_move_model separately in assessment metadata if the generation route continues using a separate One Move stage.",
+    "Keep legacy fallback until missing One Move intelligence fails honestly."
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "json_tool": "passed",
+    "runtime_files_changed": false,
+    "npm_build_required": false
+  },
+  "verdict": "ONE_MOVE_TITLE_IS_STORED_GENERATED_INTELLIGENCE_FOR_TRACED_RECORD_WITH_FALLBACK_LIMITS"
+}
