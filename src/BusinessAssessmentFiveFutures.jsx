@@ -360,15 +360,21 @@ class PremiumRendererBoundary extends Component {
 }
 
 function shouldUsePremiumRenderer({ data, searchParams }) {
-  const requestedByQuery = searchParams.get('renderer') === 'premium';
-  if (!PREMIUM_RENDERER_ENABLED && !requestedByQuery) return false;
+  const mode = resolveRendererMode(searchParams);
+  if (mode === 'legacy') return false;
   if (!hasPremiumFiveFuturesData(data)) {
-    if (import.meta.env.DEV && (PREMIUM_RENDERER_ENABLED || requestedByQuery)) {
+    if (import.meta.env.DEV && (PREMIUM_RENDERER_ENABLED || mode === 'premium')) {
       console.warn('[BA Five Futures] Premium renderer requested but normalized data is incomplete; falling back to legacy renderer.');
     }
     return false;
   }
   return true;
+}
+
+function resolveRendererMode(searchParams) {
+  const requested = String(searchParams.get('renderer') || '').toLowerCase();
+  if (requested === 'legacy' || requested === 'premium' || requested === 'auto') return requested;
+  return 'auto';
 }
 
 function FiveFuturesCanvas({ data }) {

@@ -1,0 +1,44 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2G",
+  "trace_type": "eligibility_gated_default_renderer",
+  "frontend_changed": true,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "default_policy": "auto",
+  "premium_global_default": false,
+  "legacy_renderer_preserved": true,
+  "premium_requires_guardrails": true,
+  "explicit_legacy_supported": true,
+  "explicit_premium_supported_with_fallback": true,
+  "auto_mode_supported": true,
+  "files_changed": [
+    "src/BusinessAssessmentFiveFutures.jsx",
+    "BA_FIVE_FUTURES_PREMIUM_2G_ELIGIBILITY_GATED_DEFAULT_RENDERER.md",
+    "runtime_traces/ba_five_futures_premium_2g_eligibility_gated_default_renderer.json"
+  ],
+  "mode_behavior": {
+    "missing_renderer_param": "auto",
+    "renderer_auto": "premium_if_eligible_else_legacy",
+    "renderer_premium": "premium_if_eligible_else_legacy",
+    "renderer_legacy": "legacy",
+    "invalid_renderer": "auto"
+  },
+  "validation": {
+    "git_diff_check": "passed",
+    "json_tool": "passed",
+    "npm_build": "passed",
+    "backend_files_changed": false,
+    "prompt_files_changed": false,
+    "generation_files_changed": false,
+    "stored_records_mutated": false
+  },
+  "smoke_tests": {
+    "production_post_deploy": "pending",
+    "eligible_profile_id": "mm-20260531-asovnjz4",
+    "second_eligible_profile_id": "mm-20260527-6zshuaao",
+    "non_eligible_profile_id": "mm-20260526-r8362esx"
+  },
+  "verdict": "ELIGIBILITY_GATED_DEFAULT_RENDERER_READY_FOR_VALIDATION"
+}
