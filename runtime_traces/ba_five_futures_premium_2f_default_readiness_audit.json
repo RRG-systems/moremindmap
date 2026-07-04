@@ -1,0 +1,112 @@
+{
+  "phase_id": "BA-FIVE-FUTURES-PREMIUM-2F",
+  "trace_type": "default_readiness_audit",
+  "frontend_changed": false,
+  "backend_changed": false,
+  "generation_changed": false,
+  "prompt_changed": false,
+  "stored_records_mutated": false,
+  "premium_default_enabled": false,
+  "legacy_renderer_preserved": true,
+  "premium_preview_available": true,
+  "profile_ids_checked": [
+    "mm-20260531-asovnjz4",
+    "mm-20260527-6zshuaao",
+    "mm-20260526-r8362esx",
+    "mm-20260527-kgppxg8e",
+    "mm-20260526-fqxptt3n",
+    "mm-20260523-mqlev9c9",
+    "mm-20260529-ceo8x7q2",
+    "mm-20260529-acc2f9d6",
+    "mm-20260529-cmp3j6z7",
+    "mm-20260529-eng7v5k3"
+  ],
+  "premium_rendered_count": 2,
+  "legacy_fallback_count": 8,
+  "fallback_reasons": [
+    {
+      "reason": "assessment_not_found",
+      "count": 8
+    }
+  ],
+  "visual_audit": {
+    "premium_route_rendered": true,
+    "legacy_route_rendered": true,
+    "no_horizontal_overflow_desktop": true,
+    "no_horizontal_overflow_tablet": true,
+    "no_horizontal_overflow_mobile": true,
+    "no_clipped_cards_detected": true,
+    "five_futures_section_readable": true,
+    "all_five_futures_present": true,
+    "visible_signals_preserved": true,
+    "truth_rail_visible": true,
+    "evidence_dots_visible": true,
+    "doctrine_bars_visible": true,
+    "central_orb_visible": true,
+    "lde_insight_visible": true,
+    "one_move_hero_visible": true,
+    "mobile_limit": "Headless layout measurements passed; manual mobile QA still recommended before broad default."
+  },
+  "assessment_truth_audit": {
+    "probabilities_from_existing_data": true,
+    "future_titles_from_existing_data": true,
+    "future_statuses_mapped_from_existing_data": true,
+    "signals_from_existing_data": true,
+    "interpretations_from_existing_data": true,
+    "no_static_mock_futures_in_live_output": true,
+    "truth_rail_uses_evidence_categories": true,
+    "unsupported_live_molt_claims": false,
+    "unsupported_autonomous_prediction_claims": false,
+    "unsupported_guaranteed_forecast_claims": false
+  },
+  "one_move_provenance_audit": {
+    "title_from_one_move_v1_title": true,
+    "root_constraint_from_generated_data": true,
+    "recommendation_from_generated_data": true,
+    "modeled_shift_from_generated_data": true,
+    "downstream_effects_derived_from_existing_fields": true,
+    "proof_to_watch_grounded_in_success_indicators_or_first_30_days": true,
+    "confidence_indexed_only_when_raw_confidence_exists": true,
+    "generic_one_move_title_fallback_seen": false,
+    "moderate_confidence_fallback_seen": false
+  },
+  "failure_mode_audit": {
+    "missing_one_move_title": "premium eligibility fails; unavailable title generated in normalizer but does not qualify for premium",
+    "missing_root_constraint": "premium eligibility fails",
+    "missing_recommendation": "premium eligibility fails",
+    "missing_modeled_shift": "premium eligibility fails",
+    "missing_proof_or_rationale": "premium eligibility fails",
+    "missing_confidence": "premium can remain eligible if other core provenance exists; displays Confidence not indexed",
+    "render_exception": "PremiumRendererBoundary falls back to legacy",
+    "feature_flag_off_default_route": "legacy renderer confirmed in production"
+  },
+  "readiness_scores": {
+    "visual_readiness": 88,
+    "assessment_truth_preservation": 90,
+    "one_move_provenance_safety": 94,
+    "fallback_safety": 92,
+    "multi_record_readiness": 45,
+    "mobile_responsive_readiness": 78,
+    "executive_presentation_readiness": 86,
+    "default_production_readiness": 74
+  },
+  "default_readiness_verdict": "NOT_READY_NEEDS_LARGER_POPULATION_AUDIT",
+  "recommendations": [
+    "Do not flip premium default globally yet.",
+    "Run BA-FIVE-FUTURES-PREMIUM-2G population audit over a larger real generated assessment set.",
+    "Consider default eligibility per-record based on provenance guardrails instead of a global visual flag.",
+    "Run manual mobile visual QA before broad default.",
+    "Keep legacy renderer available until fallback rate is known across more records."
+  ],
+  "validation": {
+    "git_diff_check": "passed",
+    "json_tool": "passed",
+    "npm_build": "passed",
+    "runtime_files_changed": false,
+    "backend_files_changed": false,
+    "prompt_files_changed": false,
+    "generation_files_changed": false,
+    "stored_records_mutated": false
+  },
+  "verdict": "DEFAULT_READINESS_AUDIT_COMPLETE_PREMIUM_NOT_DEFAULT_READY_UNTIL_LARGER_SAMPLE"
+}
