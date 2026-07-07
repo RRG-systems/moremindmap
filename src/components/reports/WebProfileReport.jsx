@@ -20,6 +20,8 @@ import DeterministicVisualDNA from '../visualDNA/DeterministicVisualDNA.jsx';
 import VisualDNAModal from '../visualDNA/VisualDNAModal.jsx';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslatorDrawer.jsx';
+import FinalBOSCustomerReport from './FinalBOSCustomerReport.jsx';
+import { buildCustomerBOSViewModel } from '../../lib/reports/buildCustomerBOSViewModel.js';
 
 function cleanTranslatorText(value, maxLength = 1200) {
   return String(value?.body || value || '')
@@ -1422,8 +1424,17 @@ function buildVisualDNAPreview({ canonical, narrative, behavioralIntelligence, r
   return null;
 }
 
-function buildDeterministicVisualDNAPreview({ canonical, narrative, ranked, profileId, personName, company, profileType }) {
-  if (!isDeterministicVisualDNAVisible()) return null;
+function buildDeterministicVisualDNAPreview({
+  canonical,
+  narrative,
+  ranked,
+  profileId,
+  personName,
+  company,
+  profileType,
+  ignoreVisibilityFlag = false,
+}) {
+  if (!ignoreVisibilityFlag && !isDeterministicVisualDNAVisible()) return null;
 
   const canonicalProfile = canonical?.canonical_profile_json || canonical || {};
   let behavioralDNA = null;
@@ -1566,7 +1577,7 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
   const [narrative, setNarrative] = useState(null);
   const [narrativeLoading, setNarrativeLoading] = useState(true);
   const [narrativeError, setNarrativeError] = useState(null);
-  const [dashboardFailed, setDashboardFailed] = useState(false);
+  const [customerBosFailed, setCustomerBosFailed] = useState(false);
   
   const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
   const disableCache = searchParams.has('nocache') || searchParams.has('v3-refresh');
@@ -1605,10 +1616,9 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
     return <div className="web-report-error">Failed to render profile narrative: {narrativeError}</div>;
   }
   
-  // TRY DASHBOARD V1, FALLBACK TO STACKED IF ERROR
-  if (!dashboardFailed) {
+  // MMB14: Customer BOS is the default production experience; stacked report remains fallback.
+  if (!customerBosFailed) {
     try {
-      // Use behavioral intelligence from prop (from backend) OR extract from canonical (fallback)
       const behavioralIntelligence = behavioralIntelligenceProp || canonical?.behavioral_intelligence_v1 || null;
       const visualDNA = buildVisualDNAPreview({
         canonical,
@@ -1619,7 +1629,7 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
         personName,
         company,
         storedVisualDNA,
-      });
+      }) || (storedVisualDNA?.image_url ? storedVisualDNA : null);
       const deterministicVisualDNA = buildDeterministicVisualDNAPreview({
         canonical,
         narrative,
@@ -1628,30 +1638,27 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
         personName,
         company,
         profileType,
+        ignoreVisibilityFlag: true,
       });
-      
+      const customerBosViewModel = buildCustomerBOSViewModel({
+        canonical,
+        narrative,
+        profileId,
+        personName,
+        company,
+        ranked,
+        visualDNA,
+        deterministicVisualDNA,
+      });
+
       return (
         <div>
-          <DashboardReportV1
-            canonical={canonical}
-            profileId={profileId}
-            narrative={narrative}
-            profileNumber={profileNumber}
-            profileCode={profileCode}
-            personName={personName}
-            company={company}
-            profileType={profileType}
-            ranked={ranked}
-            behavioralIntelligence={behavioralIntelligence}
-            visualDNA={visualDNA}
-            deterministicVisualDNA={deterministicVisualDNA}
-          />
-          <DashboardStyles />
+          <FinalBOSCustomerReport viewModel={customerBosViewModel} />
         </div>
       );
     } catch (err) {
-      console.error('[DashboardReportV1] Render failed, falling back to stacked report:', err);
-      setDashboardFailed(true);
+      console.error('[FinalBOSCustomerReport] Render failed, falling back to stacked report:', err);
+      setCustomerBosFailed(true);
     }
   }
 

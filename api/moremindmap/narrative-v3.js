@@ -6,6 +6,8 @@
  * Client calls this endpoint instead of calling OpenAI directly.
  */
 
+import { buildModelProvenance, resolveModelForRoute } from '../engine/config/modelRegistry.js';
+
 const apiKey = process.env.OPENAI_API_KEY;
 
 export default async function handler(req, res) {
@@ -37,9 +39,11 @@ export default async function handler(req, res) {
 
     const systemMessage = prompt.systemRule || '';
     const userMessage = buildUserMessage(prompt);
+    const routeResolution = resolveModelForRoute('bos.narrative');
+    const selectedModel = routeResolution.model;
 
     const requestBody = {
-      model: 'gpt-4o-2024-08-06',
+      model: selectedModel,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: systemMessage },
@@ -110,6 +114,11 @@ export default async function handler(req, res) {
     parsed.API_KEY_PRESENT = true;
     parsed.render_source = 'gpt55';
     parsed.SIGNAL_VERIFIED_55 = 'live-endpoint-verified';
+    parsed.model_used = selectedModel;
+    parsed.model_provenance = buildModelProvenance('bos.narrative', selectedModel, {
+      model_source: routeResolution.model_source,
+      cognition_source: 'narrative-v3',
+    });
 
     return res.status(200).json(parsed);
   } catch (err) {

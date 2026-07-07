@@ -16,6 +16,7 @@ import BusinessAssessmentFiveFutures from './BusinessAssessmentFiveFutures.jsx'
 import PaymentSuccess from './PaymentSuccess.jsx'
 import PaymentCancelled from './PaymentCancelled.jsx'
 import VisualLabPage from './components/visualLab/VisualLabPage.jsx'
+import BOSRegressionViewer from './lab/BOSRegressionViewer.jsx'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -35,6 +36,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/business-assessment/visual-map" element={<BusinessAssessmentVisualMap />} />
         <Route path="/business-assessment/five-futures" element={<BusinessAssessmentFiveFutures />} />
         <Route path="/visual-lab" element={<VisualLabPage />} />
+        <Route path="/visual-lab/bos-regression" element={<BOSRegressionViewer />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       </Routes>

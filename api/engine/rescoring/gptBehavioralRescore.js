@@ -1,3 +1,5 @@
+import { getModelForRoute, resolveModelForRoute } from '../config/modelRegistry.js';
+
 /**
  * gptBehavioralRescore.js
  * 
@@ -27,6 +29,9 @@ async function callGPT55Serverside(systemRule, instruction) {
     return null;
   }
 
+  const routeResolution = resolveModelForRoute('bos.rescoring');
+  const selectedModel = routeResolution.model;
+
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -35,7 +40,7 @@ async function callGPT55Serverside(systemRule, instruction) {
         'Authorization': `Bearer ${openaiApiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: selectedModel,
         messages: [
           {
             role: 'system',
@@ -66,7 +71,8 @@ async function callGPT55Serverside(systemRule, instruction) {
 
     return {
       body: data.choices[0].message.content,
-      model: 'gpt-4o'
+      model: selectedModel,
+      model_source: routeResolution.model_source,
     };
   } catch (err) {
     console.error('[GPT-RESCORE] OpenAI call failed:', err.message);
@@ -136,10 +142,16 @@ export async function gptBehavioralRescore(canonical) {
       return null;
     }
 
+    const selectedModel = gptResponse.model || getModelForRoute('bos.rescoring');
+    rescoring_gpt.model = selectedModel;
+    if (gptResponse.model_source) {
+      rescoring_gpt.model_source = gptResponse.model_source;
+    }
+
     normalizeProfileIntensity(rescoring_gpt);
 
     // Validate GPT output structure
-    const validation = validateGPTRescoreOutput(rescoring_gpt, canonical);
+    const validation = validateGPTRescoreOutput(rescoring_gpt, canonical, selectedModel);
     if (!validation.valid) {
       console.warn('[GPT-RESCORE] Validation failed:', validation.errors);
       return null;
@@ -382,7 +394,7 @@ function normalizeProfileIntensity(rescoring_gpt) {
 /**
  * Validate GPT rescoring output structure
  */
-function validateGPTRescoreOutput(output, canonical) {
+function validateGPTRescoreOutput(output, canonical, selectedModel = getModelForRoute('bos.rescoring')) {
   const errors = [];
 
   // Check source
@@ -390,8 +402,8 @@ function validateGPTRescoreOutput(output, canonical) {
     errors.push('Invalid source field');
   }
 
-  // Check model
-  if (output.model !== 'gpt-5.5') {
+  // Check model reflects the registry-selected route model
+  if (output.model !== selectedModel) {
     errors.push('Invalid model field');
   }
 

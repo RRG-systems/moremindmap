@@ -8,8 +8,9 @@ import path from 'path';
 import { buildMiniV2ReportPrompt } from '../prompts/moremindmapMiniV2Prompt.js';
 import { BuildProfileInput } from './buildProfileInput.js';
 import { groupMissingFieldsByPage } from './miniV2FieldMap.js';
+import { getModelForRoute } from './config/modelRegistry.js';
 
-const MODEL = process.env.OPENAI_MODEL || 'gpt-5.5';
+const MODEL = getModelForRoute('bos.report');
 const API_KEY = process.env.OPENAI_API_KEY;
 
 export async function generateReportContent(inputProfile = null, missingFields = null) {
