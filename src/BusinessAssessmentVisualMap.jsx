@@ -5,6 +5,7 @@ import BusinessArtifactViewer, {
   BUSINESS_MAP_ARTIFACT_HEIGHT,
 } from './components/businessAssessment/BusinessArtifactViewer.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
+import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessmentVisualRecord.js';
 
 const MAP_CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const MAP_CANVAS_HEIGHT = BUSINESS_MAP_ARTIFACT_HEIGHT;
@@ -325,20 +326,13 @@ export default function BusinessAssessmentVisualMap() {
         setState({ status: 'error', error: 'Profile ID is required.', record: null });
         return;
       }
-      try {
-        const response = await fetch(
-          buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(profileId)}`)
-        );
-        const payload = await response.json().catch(() => null);
-        if (!response.ok || !payload?.success || !payload?.found) {
-          throw new Error(payload?.error || 'Business Assessment not found.');
-        }
-        if (cancelled) return;
-        setState({ status: 'ready', error: '', record: payload });
-      } catch (error) {
-        if (cancelled) return;
-        setState({ status: 'error', error: error.message || 'Unable to load visual artifact.', record: null });
+      const result = await loadBusinessAssessmentVisualRecord(profileId, buildApiUrl);
+      if (cancelled) return;
+      if (result.record) {
+        setState({ status: 'ready', error: '', record: result.record });
+        return;
       }
+      setState({ status: 'error', error: result.error || 'Unable to load visual artifact.', record: null });
     }
     load();
     return () => {

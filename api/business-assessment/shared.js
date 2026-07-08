@@ -41,6 +41,18 @@ export function parseProfileId(profileId) {
   };
 }
 
+export function parseAssessmentId(assessmentId) {
+  const id = String(assessmentId || '').trim();
+  const match = id.match(/^ba-(\d{8})-([a-f0-9]{8})$/i);
+  if (!match) return null;
+  return {
+    input: id,
+    datepart: match[1],
+    randompart: match[2].toLowerCase(),
+    normalized: `ba-${match[1]}-${match[2].toLowerCase()}`
+  };
+}
+
 export function buildProfileKeys(parsedProfileId) {
   return [
     `vault:profile:mm-${parsedProfileId.datepart}-${parsedProfileId.randompart}`,

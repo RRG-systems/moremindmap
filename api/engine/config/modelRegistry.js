@@ -54,7 +54,7 @@ const MODEL_DEFINITIONS = Object.freeze({
     default: 'gpt-image-1',
   },
   BUSINESS_ASSESSMENT_OPENAI_MODEL: {
-    env: ['BUSINESS_ASSESSMENT_OPENAI_MODEL'],
+    env: ['BUSINESS_ASSESSMENT_OPENAI_MODEL', 'OPENAI_MODEL'],
     default: 'gpt-4o-2024-08-06',
   },
   BUSINESS_ASSESSMENT_BRIEFING_MODEL: {

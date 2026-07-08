@@ -49,6 +49,35 @@ function makeMetric(value, estimated = false, metadata = {}) {
   return Number.isFinite(value) ? { value, estimated, ...metadata } : null;
 }
 
+function makeRangeMetric(low, high, estimated = false, metadata = {}) {
+  if (!Number.isFinite(low) && !Number.isFinite(high)) return null;
+  const resolvedLow = Number.isFinite(low) ? low : high;
+  const resolvedHigh = Number.isFinite(high) ? high : low;
+  return {
+    value: (resolvedLow + resolvedHigh) / 2,
+    low: resolvedLow,
+    high: resolvedHigh,
+    range: true,
+    estimated,
+    ...metadata,
+  };
+}
+
+function parseRangeNear(text, patterns, estimated = false) {
+  const source = String(text || '');
+  for (const pattern of patterns) {
+    const match = source.match(pattern);
+    if (!match) continue;
+    const low = Number(String(match[1] || '').replace(/[$,+]/g, ''));
+    const high = Number(String(match[2] || match[1] || '').replace(/[$,+]/g, ''));
+    if (Number.isFinite(low) && Number.isFinite(high)) {
+      return makeRangeMetric(low, high, estimated);
+    }
+    if (Number.isFinite(low)) return makeMetric(low, estimated);
+  }
+  return null;
+}
+
 function metricNumber(metric) {
   if (Number.isFinite(metric)) return metric;
   if (metric && typeof metric === 'object' && Number.isFinite(metric.value)) return metric.value;
@@ -95,6 +124,12 @@ function parseMoneyMetric(text, patterns, estimated = false) {
 }
 
 function compactNumber(value) {
+  if (value && typeof value === 'object' && value.range && Number.isFinite(value.low) && Number.isFinite(value.high)) {
+    const prefix = value.estimated ? 'Approx. ' : '';
+    const low = new Intl.NumberFormat('en-US').format(Math.round(value.low));
+    const high = new Intl.NumberFormat('en-US').format(Math.round(value.high));
+    return `${prefix}${low}–${high}`;
+  }
   const numeric = metricNumber(value);
   if (!Number.isFinite(numeric)) return 'Not provided';
   const prefix = value && typeof value === 'object' && value.estimated ? '~' : '';
@@ -134,12 +169,69 @@ function sectionText(section) {
   return textBlock(section?.title, section?.body, ...(Array.isArray(section?.evidence) ? section.evidence : []));
 }
 
+function metricsFromRelationshipDraft(draft) {
+  const rel = draft?.relationship_reality || {};
+  const mentions = Array.isArray(rel.database_size_mentions) ? rel.database_size_mentions : [];
+  const q3Evidence = rel.evidence?.q3 || '';
+
+  let totalContacts = null;
+  let trueRelationships = null;
+
+  const totalFromQ3 = parseNumberNear(q3Evidence, [/maybe\s+(\d+)/i, /but maybe\s+(\d+)/i]);
+  if (Number.isFinite(totalFromQ3)) {
+    totalContacts = makeMetric(totalFromQ3, false, { source: 'User provided' });
+  }
+
+  const rangeFromQ3 = parseRangeNear(q3Evidence, [
+    /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)/i,
+    /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)/i,
+  ]);
+  if (rangeFromQ3) {
+    trueRelationships = { ...rangeFromQ3, source: 'User provided' };
+  }
+
+  if (!totalContacts && mentions.length >= 1) {
+    const total = Number(String(mentions[0]).replace(/,/g, ''));
+    if (Number.isFinite(total)) totalContacts = makeMetric(total, false, { source: 'Extracted' });
+  }
+
+  if (!trueRelationships && mentions.length >= 3) {
+    const low = Number(String(mentions[1]).replace(/,/g, ''));
+    const high = Number(String(mentions[2]).replace(/,/g, ''));
+    if (Number.isFinite(low) && Number.isFinite(high)) {
+      trueRelationships = makeRangeMetric(low, high, false, { source: 'Extracted' });
+    }
+  }
+
+  return { totalContacts, trueRelationships };
+}
+
+function metricsFromProductionDraft(draft) {
+  const production = draft?.business_reality?.current_production_reality || {};
+  const numbers = Array.isArray(production.extracted_numbers) ? production.extracted_numbers : [];
+  let units = null;
+  let volume = null;
+
+  for (const entry of numbers) {
+    const raw = String(entry || '').replace(/[$,]/g, '');
+    if (!units && /^\d{1,3}$/.test(raw)) units = Number(raw);
+    if (!volume && /^\d{4,}/.test(raw)) volume = Number(raw);
+  }
+
+  return {
+    units: Number.isFinite(units) ? makeMetric(units, false, { source: 'Extracted' }) : null,
+    volume: Number.isFinite(volume) ? makeMetric(volume, false, { source: 'Extracted' }) : null,
+  };
+}
+
 function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   const relationshipSection = findBriefingSection(briefing, /relationship|database/i);
   const currentBusinessSection = findBriefingSection(briefing, /current.*business|business.*reality/i);
   const financialSection = findBriefingSection(briefing, /financial/i);
   const relationshipDraftEvidence = draft?.relationship_reality?.evidence || {};
   const financialDraftEvidence = draft?.financial_reality?.evidence || {};
+  const draftRelationshipMetrics = metricsFromRelationshipDraft(draft);
+  const draftProductionMetrics = metricsFromProductionDraft(draft);
   const relationshipText = textBlock(
     answers.q3,
     answers.q5,
@@ -158,12 +250,17 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   );
   const all = textBlock(answers.q1, answers.q2, answers.q3, answers.q5, answers.q8, answers.q9, answers.q10, answers.q12, relationshipText);
   const currentTrueRelationships = firstMetric(
+    parseRangeNear(answers.q3, [
+      /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)/i,
+      /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)/i,
+    ]),
     parseNumberMetric(answers.q3, [
       /about\s+([\d,]+)\s+are\s+true relationships/i,
       /approximately\s+([\d,]+)\s+are\s+true relationships/i,
       /([\d,]+)\s+are\s+true relationships/i,
       /true relationship(?:s)?(?: database)?(?: is|:)?\s+(?:probably\s+)?([\d,]+)/i,
     ]),
+    draftRelationshipMetrics.trueRelationships,
     parseNumberMetric(relationshipText, [
       /about\s+([\d,]+)\s+strong relationships/i,
       /([\d,]+)\s+strong relationships/i,
@@ -174,11 +271,14 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   );
   const totalContacts = firstMetric(
     parseNumberMetric(answers.q3 + '\n' + answers.q5, [
+      /but maybe\s+(\d+)/i,
+      /maybe\s+(\d+)\s+and true relationships/i,
       /about\s+([\d,]+)\s+people\s+in\s+my\s+total\s+contact/i,
       /total database(?: is)?(?: roughly)?\s+([\d,]+)/i,
       /total contact list(?: across)?(?: is|:)?\s+(?:around\s+|roughly\s+|about\s+)?([\d,]+)/i,
       /([\d,]+)\s+contacts/i,
     ]),
+    draftRelationshipMetrics.totalContacts,
     parseNumberMetric(relationshipText, [
       /([\d,]+)\s+people\s+in\s+my\s+database/i,
       /database\s+estimated\s+at\s+([\d,]+)\s+contacts/i,
@@ -186,25 +286,52 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
       /database\s+(?:of|has|includes)\s+([\d,]+)\s+(?:people|contacts)/i,
     ], true)
   );
-  const relationshipTarget = parseNumberMetric(relationshipText, [
-    /grow\s+true relationships\s+toward\s+([\d,]+)/i,
-    /true relationships\s+toward\s+([\d,]+)/i,
-    /relationship(?:\s+lake)?\s+target(?:\s+is|:)?\s+([\d,]+)/i,
-    /target\s+of\s+([\d,]+)\s+(?:true\s+)?relationships/i,
-    /toward\s+([\d,]+)\s+(?:true\s+)?relationships/i,
-  ], true);
-  const currentUnits = parseNumberNear(answers.q9 + '\n' + answers.q1, [
-    /closed units:\s*([\d,]+)/i,
-    /closed\s+([\d,]+)\s+units/i,
-    /([\d,]+)\s+closed units/i,
-  ]);
-  const currentVolume = firstMetric(parseMoneyMetric(financialText + '\n' + answers.q1, [
-    /sales volume:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
-    /annual sales.*?(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
-    /average sales are about\s*(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
-    /approximately\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
-    /for\s+about\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
-  ], true));
+  const relationshipTarget = firstMetric(
+    parseRangeNear(answers.q2, [
+      /date base to\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i,
+      /relationship(?: and)? date base to\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i,
+      /(?:data|date) base (?:at|to)\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i,
+    ], false),
+    parseRangeNear(relationshipText, [
+      /database to\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i,
+    ], true),
+    parseNumberMetric(relationshipText, [
+      /grow\s+true relationships\s+toward\s+([\d,]+)/i,
+      /true relationships\s+toward\s+([\d,]+)/i,
+      /relationship(?:\s+lake)?\s+target(?:\s+is|:)?\s+([\d,]+)/i,
+      /target\s+of\s+([\d,]+)\s+(?:true\s+)?relationships/i,
+      /toward\s+([\d,]+)\s+(?:true\s+)?relationships/i,
+    ], true)
+  );
+  const currentUnits = firstMetric(
+    makeMetric(
+      parseNumberNear(answers.q9 + '\n' + answers.q1, [
+        /units closed\s+(\d+)/i,
+        /closed units:\s*([\d,]+)/i,
+        /closed\s+([\d,]+)\s+units/i,
+        /([\d,]+)\s+closed units/i,
+      ]),
+      false,
+      { source: 'User provided' }
+    ),
+    draftProductionMetrics.units
+  );
+  const currentVolume = firstMetric(
+    parseMoneyMetric(answers.q9, [
+      /sales volume(?:-|:|\s)*(\$?[\d,.]+)/i,
+      /sales volume:\s*(\$?[\d,.]+)/i,
+    ], false),
+    parseMoneyMetric(financialText + '\n' + answers.q1, [
+      /sales volume:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
+      /annual sales.*?(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
+      /average sales are about\s*(\$?[\d,.]+\s*(?:m|k|million|billion)?)/i,
+      /approximately\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
+      /for\s+about\s*(\$?[\d,.]+\s*[mk]?)\s+in\s+volume/i,
+    ], true),
+    draftProductionMetrics.volume
+      ? { ...draftProductionMetrics.volume, estimated: false, source: 'Extracted' }
+      : null
+  );
   const currentGci = firstMetric(parseMoneyMetric(financialText + '\n' + answers.q2, [
     /gross commission income:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,
     /gci:\s*(?:about\s+|approximately\s+)?(\$?[\d,.]+\s*[mk]?)/i,
@@ -281,6 +408,80 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
       : null,
     hasWeeklyRhythmGap: /weekly operating rhythm|weekly database review|inspectable|from my head|memory|follow-up/i.test(all),
   };
+}
+
+function deriveBusinessRealitySummary(draft) {
+  const businessReality = draft?.business_reality || {};
+  if (businessReality.summary || businessReality.diagnostic_summary) {
+    return formatValue(businessReality.summary || businessReality.diagnostic_summary);
+  }
+
+  const stageDescription = businessReality.current_stage?.description;
+  const fusionSummary = draft?.behavior_business_fusion?.fusion_summary;
+  const relationshipStrength = draft?.relationship_reality?.relationship_asset_strength;
+
+  if (stageDescription && fusionSummary) {
+    return clipForVisual(`${stageDescription} ${fusionSummary}`, 130);
+  }
+  if (stageDescription) return clipForVisual(stageDescription, 130);
+  if (fusionSummary && relationshipStrength) {
+    return clipForVisual(
+      `${fusionSummary} Relationship strength reads as ${String(relationshipStrength).replace(/_/g, ' ')}.`,
+      130
+    );
+  }
+  if (fusionSummary) return clipForVisual(fusionSummary, 130);
+
+  return null;
+}
+
+function deriveMapDiagnosisBody({
+  metrics,
+  businessReality,
+  primaryConstraint,
+  constraintSummary,
+  briefing,
+  oneMove,
+  draft,
+}) {
+  if (metricNumber(metrics.currentTrueRelationships) && metrics.goalUnits) {
+    return `${compactNumber(metrics.currentTrueRelationships)} true relationships support a real business, but not the ${metrics.goalUnits}-unit goal without growth and inspection.`;
+  }
+
+  const strategicSection = (Array.isArray(briefing?.sections) ? briefing.sections : []).find(
+    (section) => section?.key === 'strategic_interpretation'
+  );
+  if (strategicSection?.body) return clipForVisual(strategicSection.body, 130);
+
+  const constraintSection = (Array.isArray(briefing?.sections) ? briefing.sections : []).find(
+    (section) => section?.key === 'primary_constraint'
+  );
+  if (constraintSection?.body) return clipForVisual(constraintSection.body, 130);
+
+  if (oneMove?.root_constraint) return clipForVisual(oneMove.root_constraint, 130);
+
+  const fusionSummary = draft?.behavior_business_fusion?.fusion_summary;
+  const constraintEffect =
+    primaryConstraint?.summary ||
+    primaryConstraint?.diagnostic_summary ||
+    primaryConstraint?.likely_effect_if_unchanged;
+  if (fusionSummary && constraintEffect) {
+    return clipForVisual(`${fusionSummary} ${constraintEffect}`, 130);
+  }
+  if (fusionSummary) return clipForVisual(fusionSummary, 130);
+
+  const derivedSummary = deriveBusinessRealitySummary(draft);
+  if (derivedSummary) return derivedSummary;
+
+  if (constraintEffect && constraintEffect !== 'Primary constraint evidence is still being assembled.') {
+    return clipForVisual(constraintEffect, 130);
+  }
+
+  if (businessReality?.summary && businessReality.summary !== 'Business reality is still being analyzed.') {
+    return clipForVisual(businessReality.summary, 130);
+  }
+
+  return clipForVisual(constraintSummary || 'Business reality is still being analyzed.', 130);
 }
 
 function buildBusinessMapVisualCopy({
@@ -392,9 +593,15 @@ function buildBusinessMapVisualCopy({
       },
       {
         title: 'Diagnosis',
-        body: metricNumber(metrics.currentTrueRelationships) && metrics.goalUnits
-          ? `${compactNumber(metrics.currentTrueRelationships)} true relationships support a real business, but not the ${goalUnits}-unit goal without growth and inspection.`
-          : clipForVisual(businessReality.summary || constraintSummary, 130),
+        body: deriveMapDiagnosisBody({
+          metrics,
+          businessReality,
+          primaryConstraint,
+          constraintSummary,
+          briefing,
+          oneMove,
+          draft,
+        }),
       },
       {
         title: 'Impact',
@@ -491,9 +698,14 @@ function normalizeConstraint(draft, briefing) {
   );
 }
 
-function normalizeDraftSection(section, fallbackSummary = 'Not available') {
+function normalizeDraftSection(section, fallbackSummary = 'Not available', synthesizeSummary = null) {
+  const directSummary = section?.summary || section?.diagnostic_summary;
+  const resolvedSummary = directSummary
+    ? formatValue(directSummary)
+    : synthesizeSummary?.() || fallbackSummary;
+
   return {
-    summary: formatValue(section?.summary || section?.diagnostic_summary || section, fallbackSummary),
+    summary: resolvedSummary,
     evidence: asArray(section?.evidence || section?.supporting_evidence).slice(0, 4),
     confidence: formatValue(section?.confidence || section?.confidence_band, 'Moderate')
   };
@@ -540,7 +752,11 @@ export function normalizeBusinessVisualArtifactData(record) {
     hasMap: Boolean(record?.has_business_intelligence_draft || output.business_intelligence_draft || output.executive_diagnostic_briefing_v1),
     hasFutures: Boolean(record?.has_five_futures && record?.has_one_move) || Boolean(output.five_futures_v1 && output.one_move_v1),
 
-    businessReality: normalizeDraftSection(draft.business_reality, 'Business reality is still being analyzed.'),
+    businessReality: normalizeDraftSection(
+      draft.business_reality,
+      'Business reality is still being analyzed.',
+      () => deriveBusinessRealitySummary(draft) || null
+    ),
     relationshipReality: normalizeDraftSection(draft.relationship_reality, 'Relationship and database reality is still being analyzed.'),
     leadGenerationReality: normalizeDraftSection(draft.lead_generation_reality, 'Lead generation reality is still being analyzed.'),
     systemsReality: normalizeDraftSection(draft.systems_reality, 'Systems reality is still being analyzed.'),

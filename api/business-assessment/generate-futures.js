@@ -12,10 +12,16 @@ import {
   buildOneMovePrompt,
   REQUIRED_FUTURE_KEYS
 } from '../engine/businessAssessment/buildFiveFuturesPrompt.js';
+import {
+  buildModelProvenance,
+  resolveModelForRoute
+} from '../engine/config/modelRegistry.js';
 
 const FIVE_FUTURES_VERSION = 'five_futures_v1';
 const ONE_MOVE_VERSION = 'one_move_v1';
-const MODEL = process.env.BUSINESS_ASSESSMENT_OPENAI_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-2024-08-06';
+const FUTURES_ROUTE = 'business_assessment.primary';
+const futuresModelResolution = resolveModelForRoute(FUTURES_ROUTE);
+const MODEL = futuresModelResolution.model;
 const FUTURES_ENDPOINT_TIME_BUDGET_MS = 165000;
 const FIVE_FUTURES_STAGE_TIMEOUT_MS = 75000;
 const ONE_MOVE_STAGE_TIMEOUT_MS = 60000;
@@ -630,6 +636,15 @@ export default async function handler(req, res) {
         one_move_version: ONE_MOVE_VERSION,
         futures_generated_at: now,
         futures_model: fiveFuturesGeneration.model,
+        one_move_model: oneMoveGeneration.model,
+        futures_model_provenance: buildModelProvenance(FUTURES_ROUTE, fiveFuturesGeneration.model, {
+          model_source: futuresModelResolution.model_source,
+          cognition_source: 'business_assessment.five_futures'
+        }),
+        one_move_model_provenance: buildModelProvenance(FUTURES_ROUTE, oneMoveGeneration.model, {
+          model_source: futuresModelResolution.model_source,
+          cognition_source: 'business_assessment.one_move'
+        }),
         futures_usage: {
           five_futures_stage: fiveFuturesGeneration.usage || null,
           one_move_stage: oneMoveGeneration.usage || null,

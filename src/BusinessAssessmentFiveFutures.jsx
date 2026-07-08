@@ -3,12 +3,14 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import BusinessArtifactViewer, {
   BUSINESS_ARTIFACT_WIDTH,
   FIVE_FUTURES_ARTIFACT_HEIGHT,
+  normalizeArtifactViewMode,
 } from './components/businessAssessment/BusinessArtifactViewer.jsx';
 import BusinessAssessmentFiveFuturesPremium, {
   hasPremiumFiveFuturesData,
   PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT,
 } from './components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
+import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessmentVisualRecord.js';
 
 const FUTURES_CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const FUTURES_CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
@@ -28,7 +30,7 @@ function resolveReturnTo(searchParams, profileId) {
     : '/business-assessment';
 }
 
-function ArtifactShell({ children, profileId, returnTo }) {
+function ArtifactShell({ children, profileId, returnTo, readableLayout = false }) {
   const navigate = useNavigate();
 
   function closeArtifact() {
@@ -54,7 +56,11 @@ function ArtifactShell({ children, profileId, returnTo }) {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(59,130,246,0.14),transparent_30%),radial-gradient(circle_at_18%_16%,rgba(249,115,22,0.14),transparent_32%),radial-gradient(circle_at_78%_20%,rgba(168,85,247,0.14),transparent_33%),linear-gradient(180deg,#030303_0%,#09090b_58%,#000_100%)]" />
-      <div className="relative mx-auto flex min-h-screen max-w-[1800px] flex-col px-4 py-4">
+      <div
+        className={`relative mx-auto flex min-h-screen flex-col px-4 py-4 ${
+          readableLayout ? 'max-w-none w-full' : 'max-w-[1800px]'
+        }`}
+      >
         <nav className="mb-4 flex flex-col gap-3 rounded-2xl border border-white/10 bg-black/45 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
@@ -81,12 +87,18 @@ function LoadingState({ profileId, returnTo }) {
   );
 }
 
+function ErrorCard({ message }) {
+  return (
+    <div className="rounded-3xl border border-red-400/30 bg-red-500/[0.08] p-8 text-red-100">
+      {message}
+    </div>
+  );
+}
+
 function ErrorState({ profileId, message, returnTo }) {
   return (
     <ArtifactShell profileId={profileId} returnTo={returnTo}>
-      <div className="rounded-3xl border border-red-400/30 bg-red-500/[0.08] p-8 text-red-100">
-        {message}
-      </div>
+      <ErrorCard message={message} />
     </ArtifactShell>
   );
 }
@@ -349,12 +361,14 @@ class PremiumRendererBoundary extends Component {
 
   componentDidCatch(error) {
     if (import.meta.env.DEV) {
-      console.warn('[BA Five Futures] Premium renderer failed; falling back to legacy renderer.', error);
+      console.warn('[BA Five Futures] Premium renderer failed.', error);
     }
   }
 
   render() {
-    if (this.state.failed) return this.props.fallback;
+    if (this.state.failed) {
+      return this.props.fallback || this.props.children;
+    }
     return this.props.children;
   }
 }
@@ -362,19 +376,41 @@ class PremiumRendererBoundary extends Component {
 function shouldUsePremiumRenderer({ data, searchParams }) {
   const mode = resolveRendererMode(searchParams);
   if (mode === 'legacy') return false;
-  if (!hasPremiumFiveFuturesData(data)) {
-    if (import.meta.env.DEV && (PREMIUM_RENDERER_ENABLED || mode === 'premium')) {
-      console.warn('[BA Five Futures] Premium renderer requested but normalized data is incomplete; falling back to legacy renderer.');
-    }
-    return false;
+  return hasPremiumFiveFuturesData(data);
+}
+
+function premiumRendererUnavailableMessage(data) {
+  const provenance = data?.oneMove?.provenance || {};
+  const missing = [];
+  if (!provenance.hasRawTitle) missing.push('One Move title');
+  if (!provenance.hasRawRootConstraint) missing.push('One Move root constraint');
+  if (!provenance.hasRawRecommendation) missing.push('One Move recommendation');
+  if (!provenance.hasRawModeledShift) missing.push('One Move probability shift');
+  if (!provenance.hasRawProofSignals) missing.push('One Move proof signals');
+  if (!Array.isArray(data?.fiveFutures?.futures) || data.fiveFutures.futures.length < 3) {
+    missing.push('Five Futures trajectories');
   }
-  return true;
+
+  const detail = missing.length
+    ? ` Missing: ${missing.join(', ')}.`
+    : ' Stored assessment data is incomplete for the premium visual.';
+
+  return `Premium Five Futures + One Move visual is unavailable.${detail} The old visual is not shown as a substitute.`;
 }
 
 function resolveRendererMode(searchParams) {
   const requested = String(searchParams.get('renderer') || '').toLowerCase();
   if (requested === 'legacy' || requested === 'premium' || requested === 'auto') return requested;
   return 'auto';
+}
+
+function resolveViewMode(searchParams, { premiumActive = false } = {}) {
+  const requested = String(searchParams.get('view') || '').toLowerCase();
+  if (requested === 'fullscreen' || requested === 'readable' || requested === 'fit') {
+    return normalizeArtifactViewMode(requested);
+  }
+  if (premiumActive) return 'readable';
+  return 'fit';
 }
 
 function FiveFuturesCanvas({ data }) {
@@ -473,20 +509,13 @@ export default function BusinessAssessmentFiveFutures() {
         setState({ status: 'error', error: 'Profile ID is required.', record: null });
         return;
       }
-      try {
-        const response = await fetch(
-          buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(profileId)}`)
-        );
-        const payload = await response.json().catch(() => null);
-        if (!response.ok || !payload?.success || !payload?.found) {
-          throw new Error(payload?.error || 'Business Assessment not found.');
-        }
-        if (cancelled) return;
-        setState({ status: 'ready', error: '', record: payload });
-      } catch (error) {
-        if (cancelled) return;
-        setState({ status: 'error', error: error.message || 'Unable to load visual artifact.', record: null });
+      const result = await loadBusinessAssessmentVisualRecord(profileId, buildApiUrl);
+      if (cancelled) return;
+      if (result.record) {
+        setState({ status: 'ready', error: '', record: result.record });
+        return;
       }
+      setState({ status: 'error', error: result.error || 'Unable to load visual artifact.', record: null });
     }
     load();
     return () => {
@@ -509,17 +538,39 @@ export default function BusinessAssessmentFiveFutures() {
     );
   }
 
-  const legacyRenderer = <FiveFuturesCanvas data={data} />;
+  const rendererMode = resolveRendererMode(searchParams);
+  const premiumRequested = rendererMode === 'premium' || (rendererMode === 'auto' && PREMIUM_RENDERER_ENABLED);
   const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
+  const viewMode = resolveViewMode(searchParams, { premiumActive: usePremiumRenderer || premiumRequested });
+  const readableLayout = viewMode === 'fullscreen' || viewMode === 'readable';
+
+  if (premiumRequested && !usePremiumRenderer) {
+    return (
+      <ErrorState
+        profileId={profileId}
+        returnTo={returnTo}
+        message={premiumRendererUnavailableMessage(data)}
+      />
+    );
+  }
+
+  const legacyRenderer = <FiveFuturesCanvas data={data} />;
+  const premiumCrashFallback =
+    rendererMode === 'premium' ? (
+      <ErrorCard message="Premium Five Futures + One Move visual failed to render. The old visual is not shown as a substitute." />
+    ) : (
+      legacyRenderer
+    );
 
   return (
-    <ArtifactShell profileId={data.profileId} returnTo={returnTo}>
+    <ArtifactShell profileId={data.profileId} returnTo={returnTo} readableLayout={readableLayout}>
       <BusinessArtifactViewer
         width={FUTURES_CANVAS_WIDTH}
         height={usePremiumRenderer ? PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT : FUTURES_CANVAS_HEIGHT}
+        viewMode={viewMode}
       >
         {usePremiumRenderer ? (
-          <PremiumRendererBoundary fallback={legacyRenderer}>
+          <PremiumRendererBoundary fallback={premiumCrashFallback}>
             <BusinessAssessmentFiveFuturesPremium data={data} />
           </PremiumRendererBoundary>
         ) : (

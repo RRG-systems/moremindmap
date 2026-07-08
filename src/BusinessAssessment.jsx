@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import ExecutiveDiagnosticBriefing from './components/businessAssessment/ExecutiveDiagnosticBriefing.jsx';
+import PremiumCustomerBAReport from './components/businessAssessment/PremiumCustomerBAReport.jsx';
+import { buildCustomerBAViewModel } from './lib/businessAssessment/buildCustomerBAViewModel.js';
+import {
+  BA_RETRIEVE_INVALID_ID_MESSAGE,
+  BA_RETRIEVE_NOT_FOUND_MESSAGE,
+  retrieveBusinessAssessment
+} from './lib/businessAssessment/retrieveBusinessAssessment.js';
 import { startStripeCheckout } from './lib/stripeCheckout.js';
 
 const INDUSTRIES = [
@@ -254,6 +261,20 @@ function formatDate(value) {
   return date.toLocaleString();
 }
 
+function PremiumPreviewHeader({ personName }) {
+  return (
+    <header className="mb-8 border-b border-white/10 pb-6">
+      <p className="text-[0.65rem] font-bold uppercase tracking-[0.28em] text-orange-300/70">
+        MORE MindMap Business Assessment
+      </p>
+      <h1 className="mt-2 text-2xl font-bold text-white">{personName}</h1>
+      <div className="mt-5 rounded-xl border border-orange-400/20 bg-orange-500/5 px-4 py-3">
+        <p className="text-sm text-white/80">Business reality + personality reality + future consequence</p>
+      </div>
+    </header>
+  );
+}
+
 function isComplete(answers) {
   return QUESTIONS.every((question) => {
     if (question.key === 'q11') return true;
@@ -299,6 +320,31 @@ export default function BusinessAssessment() {
   );
   const generationIsRunning = generationState.status === 'running';
   const routeProfileId = searchParams.get('id') || '';
+  // preview=premium remains supported for focused preview entry; it is no longer required
+  // for completed retrieved BA rendering (MMB21E default route promotion).
+  const previewPremium = searchParams.get('preview') === 'premium';
+  const previewProfileId = (routeProfileId || retrieveId).trim();
+  const assessmentOutputComplete = Boolean(
+    retrievedAssessment?.output?.executive_diagnostic_briefing_v1 &&
+      retrievedAssessment?.output?.five_futures_v1 &&
+      retrievedAssessment?.output?.one_move_v1
+  );
+  // Default completed BA renderer: PremiumCustomerBAReport (not ExecutiveDiagnosticBriefing).
+  const showPremiumShell =
+    retrieveState.status === 'found' && assessmentOutputComplete;
+  const premiumViewModel = useMemo(() => {
+    if (!showPremiumShell || !retrieveState.result) return null;
+    try {
+      return buildCustomerBAViewModel(retrieveState.result);
+    } catch {
+      return null;
+    }
+  }, [showPremiumShell, retrieveState.result]);
+  const premiumVmBuildFailed = showPremiumShell && premiumViewModel === null;
+  const showPremiumResults = Boolean(showPremiumShell && premiumViewModel);
+  // Old Executive Diagnostic is intentionally not the default completed customer renderer.
+  // Source briefing data remains available via Technical Source / Advanced Source inside premium.
+  const showLegacyDiagnosticResults = false;
   const checkoutProfileValidated = Boolean(checkoutProfileGate.profile?.id);
   const monthlyProfileValidated = Boolean(monthlyProfileGate.profile?.id);
   const hasCompletedBusinessAssessment = monthlyProfileGate.businessAssessmentStatus === 'found';
@@ -412,21 +458,61 @@ export default function BusinessAssessment() {
     setSubmitState({ status: 'idle', error: '', result: null });
   }
 
-  async function startProductCheckout(productKey, sourceContext) {
-    const profile =
-      productKey === 'more_monthly_intelligence'
-        ? monthlyProfileGate.profile
-        : checkoutProfileGate.profile;
+  function resolveCheckoutProfileId(productKey) {
+    if (productKey === 'more_monthly_intelligence') {
+      return (
+        monthlyProfileGate.profile?.id ||
+        premiumViewModel?.profile_id ||
+        premiumViewModel?.identity?.profile_id ||
+        retrievedAssessment?.owner_profile_id ||
+        retrievedAssessment?.profile_context?.owner_profile_id ||
+        retrieveState.result?.owner_profile_id ||
+        submitState.result?.profile_context?.owner_profile_id ||
+        submitState.result?.owner_profile_id ||
+        assessmentProfile?.id ||
+        routeProfileId ||
+        ''
+      );
+    }
+    return checkoutProfileGate.profile?.id || '';
+  }
 
-    if (!profile?.id) {
+  function resolveCheckoutAssessmentId(productKey) {
+    if (productKey === 'more_monthly_intelligence') {
+      return (
+        monthlyProfileGate.businessAssessmentId ||
+        premiumViewModel?.assessment_id ||
+        premiumViewModel?.identity?.assessment_id ||
+        retrievedAssessment?.assessment_id ||
+        retrieveState.result?.assessment_id ||
+        submitState.result?.assessment?.assessment_id ||
+        submitState.result?.assessment_id ||
+        ''
+      );
+    }
+    return retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '';
+  }
+
+  function hasCompletedAssessmentContext() {
+    return Boolean(
+      monthlyProfileGate.businessAssessmentStatus === 'found' ||
+        premiumViewModel?.assessment_id ||
+        retrievedAssessment?.assessment_id ||
+        (submitState.status === 'complete' &&
+          (submitState.result?.assessment_id || submitState.result?.assessment?.assessment_id))
+    );
+  }
+
+  async function startProductCheckout(productKey, sourceContext) {
+    const profileId = resolveCheckoutProfileId(productKey);
+    const assessmentId = resolveCheckoutAssessmentId(productKey);
+
+    if (!profileId) {
       setCheckoutState({ loading: '', error: 'First validate your profile to unlock checkout.' });
       return;
     }
 
-    if (
-      productKey === 'more_monthly_intelligence' &&
-      monthlyProfileGate.businessAssessmentStatus !== 'found'
-    ) {
+    if (productKey === 'more_monthly_intelligence' && !hasCompletedAssessmentContext()) {
       setCheckoutState({
         loading: '',
         error: 'First you must take the Business Assessment to unlock Monthly Intelligence.'
@@ -438,11 +524,8 @@ export default function BusinessAssessment() {
     try {
       await startStripeCheckout({
         product_key: productKey,
-        profile_id: profile.id,
-        assessment_id:
-          productKey === 'more_monthly_intelligence'
-            ? monthlyProfileGate.businessAssessmentId
-            : retrievedAssessment?.assessment_id || submitState.result?.assessment_id || '',
+        profile_id: profileId,
+        assessment_id: assessmentId,
         source_context: sourceContext
       });
     } catch {
@@ -557,15 +640,7 @@ export default function BusinessAssessment() {
   }
 
   async function retrieveAssessmentByProfileId(ownerProfileId) {
-    const response = await fetch(
-      buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(ownerProfileId)}`)
-    );
-    const payload = await response.json().catch(() => null);
-
-    if (!response.ok || !payload?.success || !payload?.found) {
-      throw new Error(payload?.error || 'Unable to retrieve completed assessment.');
-    }
-
+    const { payload } = await retrieveBusinessAssessment(ownerProfileId, buildApiUrl);
     return payload;
   }
 
@@ -726,25 +801,18 @@ export default function BusinessAssessment() {
     setRetrieveState({ status: 'loading', error: '', result: null });
 
     if (!id) {
-      setRetrieveState({ status: 'error', error: 'Enter a Profile ID.', result: null });
+      setRetrieveState({ status: 'error', error: BA_RETRIEVE_INVALID_ID_MESSAGE, result: null });
       return;
     }
 
     try {
-      const response = await fetch(
-        buildApiUrl(`/api/business-assessment/retrieve?id=${encodeURIComponent(id)}`)
-      );
-      const payload = await response.json().catch(() => null);
-
-      if (!response.ok || !payload?.success) {
-        throw new Error(payload?.error || 'Unable to retrieve assessment.');
-      }
-
-      setRetrieveState({ status: payload.found ? 'found' : 'not_found', error: '', result: payload });
+      const { payload } = await retrieveBusinessAssessment(id, buildApiUrl);
+      setRetrieveState({ status: 'found', error: '', result: payload });
     } catch (error) {
+      const isNotFound = error.code === 'not_found';
       setRetrieveState({
-        status: 'error',
-        error: error.message || 'Unable to retrieve assessment.',
+        status: isNotFound ? 'not_found' : 'error',
+        error: isNotFound ? '' : error.message || BA_RETRIEVE_NOT_FOUND_MESSAGE,
         result: null
       });
     }
@@ -758,7 +826,7 @@ export default function BusinessAssessment() {
   }, [routeProfileId, retrieveState.status]);
 
   useEffect(() => {
-    if (!retrievedBriefing) return;
+    if (!showPremiumResults) return;
     if (typeof window === 'undefined') return;
     if (window.location.hash !== '#business-assessment-results') return;
     window.requestAnimationFrame(() => {
@@ -778,7 +846,7 @@ export default function BusinessAssessment() {
 
       document.getElementById('business-assessment-results')?.scrollIntoView({ block: 'start' });
     });
-  }, [retrievedBriefing]);
+  }, [showPremiumResults]);
 
   function renderProfileValidationForm({ gateType, helperText, accent = 'orange' }) {
     const gate =
@@ -869,7 +937,80 @@ export default function BusinessAssessment() {
           </Link>
         </nav>
 
-        {!flowStarted && (
+        {previewPremium && !showPremiumResults && (
+          <section className="mx-auto w-full max-w-5xl">
+            {!previewProfileId && (
+              <div className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-6 text-sm leading-6 text-red-100">
+                Profile ID is required. Use{' '}
+                <span className="font-mono text-red-50">?preview=premium&amp;id=&#123;profile_id&#125;</span>
+                {' '}or open{' '}
+                <span className="font-mono text-red-50">/business-assessment</span>
+                {' '}and retrieve by Profile ID (premium report is the default completed output).
+              </div>
+            )}
+
+            {previewProfileId && retrieveState.status === 'loading' && (
+              <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-8 text-center">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-white/72">Retrieving assessment...</p>
+              </div>
+            )}
+
+            {previewProfileId && retrieveState.status === 'error' && (
+              <div className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-6 text-sm leading-6 text-red-100">
+                {retrieveState.error || BA_RETRIEVE_NOT_FOUND_MESSAGE}
+              </div>
+            )}
+
+            {previewProfileId && retrieveState.status === 'not_found' && (
+              <div className="rounded-2xl border border-white/12 bg-white/[0.04] p-6 text-sm text-white/68">
+                {BA_RETRIEVE_NOT_FOUND_MESSAGE}
+              </div>
+            )}
+
+            {previewProfileId &&
+              retrieveState.status === 'found' &&
+              !assessmentOutputComplete && (
+                <div className="rounded-2xl border border-cyan-300/30 bg-cyan-400/[0.08] p-6">
+                  <p className="text-sm font-semibold text-cyan-100">Business Assessment found — intelligence incomplete</p>
+                  <p className="mt-2 text-sm text-white/78">
+                    Assessment ID:{' '}
+                    <span className="font-semibold text-white">{retrievedAssessment?.assessment_id}</span>
+                  </p>
+                  <p className="mt-2 text-sm text-white/62">
+                    Complete intelligence generation before the Business Assessment report can open.
+                  </p>
+                  {retrievedNeedsGeneration && (
+                    <button
+                      type="button"
+                      disabled={generationIsRunning}
+                      onClick={generateRetrievedAssessment}
+                      className="mt-4 w-full rounded-xl border border-cyan-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
+                    >
+                      {generationIsRunning ? generationState.phase || 'Generating...' : 'Generate Business Assessment Intelligence'}
+                    </button>
+                  )}
+                </div>
+              )}
+
+            {previewProfileId && premiumVmBuildFailed && (
+              <div className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-6 text-sm leading-6 text-red-100">
+                Premium report is unavailable for this assessment. The stored data could not be rendered into the
+                customer report. This is not shown as a legacy briefing substitute.
+              </div>
+            )}
+          </section>
+        )}
+
+        {!previewPremium && premiumVmBuildFailed && (
+          <section className="mx-auto mb-6 w-full max-w-5xl">
+            <div className="rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-6 text-sm leading-6 text-red-100">
+              Business Assessment report is unavailable for this assessment. The stored data could not be rendered into the
+              customer report. The legacy Executive Diagnostic is not substituted as a success state.
+            </div>
+          </section>
+        )}
+
+        {!flowStarted && !previewPremium && (
           <section className="mx-auto w-full max-w-7xl">
             <div className="text-center">
               <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">
@@ -1089,7 +1230,7 @@ export default function BusinessAssessment() {
                       <input
                         value={retrieveId}
                         onChange={(event) => setRetrieveId(event.target.value)}
-                        placeholder="Enter Profile ID"
+                        placeholder="Enter Profile ID or Assessment ID"
                         className="w-full rounded-2xl border border-white/10 bg-black/[0.42] px-4 py-3.5 text-sm uppercase tracking-[0.08em] text-white caret-white outline-none placeholder:text-white/32 transition focus:border-cyan-300/60"
                       />
                       <button
@@ -1105,9 +1246,15 @@ export default function BusinessAssessment() {
                       <div className="mt-4 rounded-2xl border border-cyan-300/30 bg-cyan-400/[0.08] p-4">
                         <p className="text-sm font-semibold text-cyan-100">Business Assessment Found</p>
                         <p className="mt-2 text-sm font-semibold text-white">
-                          {retrievedBriefing
-                            ? 'Executive Diagnostic Briefing Ready'
-                            : 'Executive Diagnostic Briefing not generated yet.'}
+                          {assessmentOutputComplete
+                            ? showPremiumResults
+                              ? 'Business Assessment report ready'
+                              : premiumVmBuildFailed
+                                ? 'Business Assessment found — report unavailable'
+                                : 'Business Assessment intelligence complete'
+                            : retrievedBriefing
+                              ? 'Intelligence incomplete — generation still required'
+                              : 'Business Assessment intake saved — intelligence not generated yet.'}
                         </p>
                         <p className="mt-2 text-sm text-white/78">
                           Assessment ID:{' '}
@@ -1124,7 +1271,9 @@ export default function BusinessAssessment() {
                         <p className="mt-1 text-sm text-white/62">
                           {retrievedNeedsGeneration
                             ? 'This assessment intake is saved and can now complete intelligence generation.'
-                            : 'This assessment intelligence is complete.'}
+                            : showPremiumResults
+                              ? 'Completed Business Assessment is shown below as the customer report.'
+                              : 'This assessment intelligence is complete.'}
                         </p>
 
                         {retrievedNeedsGeneration && (
@@ -1134,7 +1283,9 @@ export default function BusinessAssessment() {
                             onClick={generateRetrievedAssessment}
                             className="mt-4 w-full rounded-xl border border-cyan-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-cyan-50 transition hover:border-cyan-100 hover:bg-cyan-300/10 disabled:cursor-wait disabled:opacity-55"
                           >
-                            {generationIsRunning ? generationState.phase || 'Generating...' : 'Generate Executive Diagnostic'}
+                            {generationIsRunning
+                              ? generationState.phase || 'Generating...'
+                              : 'Generate Business Assessment Intelligence'}
                           </button>
                         )}
                       </div>
@@ -1142,7 +1293,7 @@ export default function BusinessAssessment() {
 
                     {retrieveState.status === 'not_found' && (
                       <div className="mt-4 rounded-2xl border border-white/12 bg-white/[0.04] p-4 text-sm text-white/68">
-                        No Business Assessment found for this Profile ID.
+                        {BA_RETRIEVE_NOT_FOUND_MESSAGE}
                       </div>
                     )}
 
@@ -1306,48 +1457,35 @@ export default function BusinessAssessment() {
           </section>
         </main>
 
-        {retrievedBriefing && (
-          <div id="business-assessment-results">
-            <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
-            <section className="mt-10 rounded-[2rem] border border-cyan-300/25 bg-gradient-to-br from-cyan-400/[0.1] via-white/[0.035] to-purple-500/[0.09] p-6 shadow-[0_0_70px_rgba(34,211,238,0.12)] sm:p-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-cyan-200">
-                MORE Monthly Intelligence
-              </p>
-              <h2 className="mt-4 text-4xl font-semibold tracking-tight text-white">
-                You have your map.
-                <span className="block text-cyan-100">Now keep it alive.</span>
-              </h2>
-              <p className="mt-5 max-w-2xl text-lg leading-8 text-white/72">
-                Your assessment created your current map. Monthly Intelligence helps you keep moving.
-              </p>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {[
-                  'track your One Move',
-                  'record what happened',
-                  'see what changed',
-                  'avoid overclaiming progress',
-                  'generate an updated strategy draft',
-                  'choose the next best move'
-                ].map((item) => (
-                  <div key={item} className="rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/76">
-                    {item}
-                  </div>
-                ))}
-              </div>
-              <button
-                type="button"
-                disabled={checkoutState.loading === 'more_monthly_intelligence'}
-                onClick={() => startProductCheckout('more_monthly_intelligence', 'business_assessment_result_upgrade')}
-                className="mt-7 rounded-xl bg-white px-6 py-4 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-cyan-100 disabled:cursor-wait disabled:opacity-55"
-              >
-                {checkoutState.loading === 'more_monthly_intelligence' ? 'Opening Checkout...' : 'Start MORE Monthly Intelligence - $23.95/month'}
-              </button>
-              <p className="mt-4 text-xs leading-5 text-white/46">
-                Checkout starts access verification. Durable paid access requires payment processing confirmation.
-              </p>
-            </section>
+        {showPremiumResults && (
+          <div id="business-assessment-results" className="mx-auto w-full max-w-5xl">
+            <PremiumPreviewHeader personName={premiumViewModel.person_name} />
+            <PremiumCustomerBAReport
+              viewModel={premiumViewModel}
+              showLabDebug={false}
+              monthlyIntelligenceCheckout={{
+                checkoutState,
+                onStartCheckout: () =>
+                  startProductCheckout(
+                    'more_monthly_intelligence',
+                    'business_assessment_keep_your_map_alive'
+                  ),
+              }}
+            />
           </div>
         )}
+
+        {/*
+          MMB21E: ExecutiveDiagnosticBriefing is intentionally not rendered as the default
+          completed customer BA output. Source briefing remains in assessment output and is
+          exposed through Technical Source / Advanced Source inside PremiumCustomerBAReport.
+          showLegacyDiagnosticResults is reserved and kept false so legacy is never success-default.
+        */}
+        {showLegacyDiagnosticResults && retrievedBriefing ? (
+          <div id="business-assessment-results-legacy" className="mx-auto w-full max-w-5xl">
+            <ExecutiveDiagnosticBriefing briefing={retrievedBriefing} assessment={retrievedAssessment} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

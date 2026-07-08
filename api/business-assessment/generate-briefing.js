@@ -8,9 +8,15 @@ import {
 } from './shared.js';
 import { REAL_ESTATE_BUSINESS_MODEL_V1 } from '../engine/businessAssessment/realEstateBusinessModelV1.js';
 import { buildExecutiveDiagnosticBriefingPrompt } from '../engine/businessAssessment/buildExecutiveDiagnosticBriefingPrompt.js';
+import {
+  buildModelProvenance,
+  resolveModelForRoute
+} from '../engine/config/modelRegistry.js';
 
 const BRIEFING_VERSION = 'executive_diagnostic_briefing_v1';
-const MODEL = process.env.BUSINESS_ASSESSMENT_BRIEFING_MODEL || 'gpt-4o-2024-08-06';
+const BRIEFING_ROUTE = 'business_assessment.briefing';
+const briefingModelResolution = resolveModelForRoute(BRIEFING_ROUTE);
+const MODEL = briefingModelResolution.model;
 const REQUIRED_SECTION_TITLES = [
   'Executive Readout',
   'Current Business Reality',
@@ -2102,6 +2108,10 @@ export default async function handler(req, res) {
         briefing_version: BRIEFING_VERSION,
         briefing_generated_at: now,
         briefing_model: generation.model,
+        briefing_model_provenance: buildModelProvenance(BRIEFING_ROUTE, generation.model, {
+          model_source: briefingModelResolution.model_source,
+          cognition_source: 'business_assessment.briefing'
+        }),
         briefing_usage: generation.usage,
         briefing_repair_attempts: repairAttempts,
         briefing_repair_diagnostics: repairDiagnostics

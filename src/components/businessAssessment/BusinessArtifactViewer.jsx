@@ -5,16 +5,36 @@ export const BUSINESS_ARTIFACT_HEIGHT = 941;
 export const BUSINESS_MAP_ARTIFACT_HEIGHT = 1180;
 export const FIVE_FUTURES_ARTIFACT_HEIGHT = 1720;
 
+export const BA_ARTIFACT_VIEW_MODES = ['fit', 'fullscreen', 'readable'];
+
+export function normalizeArtifactViewMode(viewMode) {
+  const normalized = String(viewMode || '').toLowerCase();
+  if (normalized === 'fullscreen' || normalized === 'readable') return normalized;
+  return 'fit';
+}
+
+export function isReadableArtifactViewMode(viewMode) {
+  const normalized = normalizeArtifactViewMode(viewMode);
+  return normalized === 'fullscreen' || normalized === 'readable';
+}
+
 export default function BusinessArtifactViewer({
   children,
   width = BUSINESS_ARTIFACT_WIDTH,
   height = BUSINESS_ARTIFACT_HEIGHT,
+  viewMode = 'fit',
 }) {
   const viewportRef = useRef(null);
+  const readableMode = isReadableArtifactViewMode(viewMode);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
     function updateScale() {
+      if (readableMode) {
+        setScale(1);
+        return;
+      }
+
       const viewport = viewportRef.current;
       if (!viewport) return;
 
@@ -26,6 +46,10 @@ export default function BusinessArtifactViewer({
     }
 
     updateScale();
+
+    if (readableMode) {
+      return undefined;
+    }
 
     let observer;
     if (typeof ResizeObserver !== 'undefined' && viewportRef.current) {
@@ -39,13 +63,21 @@ export default function BusinessArtifactViewer({
       window.removeEventListener('resize', updateScale);
       observer?.disconnect();
     };
-  }, [height, width]);
+  }, [height, readableMode, width]);
 
-  const scaledWidth = width * scale;
-  const scaledHeight = height * scale;
+  const effectiveScale = readableMode ? 1 : scale;
+  const scaledWidth = width * effectiveScale;
+  const scaledHeight = height * effectiveScale;
+  const viewerClassName = readableMode
+    ? 'ba-artifact-viewer ba-artifact-viewer--readable'
+    : 'ba-artifact-viewer';
 
   return (
-    <div className="ba-artifact-viewer" ref={viewportRef}>
+    <div
+      className={viewerClassName}
+      data-view-mode={normalizeArtifactViewMode(viewMode)}
+      ref={viewportRef}
+    >
       <style>{styles}</style>
       <div
         className="ba-artifact-footprint"
@@ -59,7 +91,7 @@ export default function BusinessArtifactViewer({
           style={{
             width: `${width}px`,
             height: `${height}px`,
-            transform: `scale(${scale})`,
+            transform: readableMode ? 'none' : `scale(${effectiveScale})`,
           }}
         >
           {children}
@@ -80,6 +112,24 @@ const styles = `
   align-items: flex-start;
   overscroll-behavior: contain;
   scrollbar-color: rgba(251, 146, 60, 0.45) rgba(15, 23, 42, 0.7);
+}
+
+.ba-artifact-viewer--readable {
+  width: 96vw;
+  max-width: none;
+  margin-inline: auto;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+.ba-artifact-viewer--readable .ba-artifact-footprint {
+  flex: 0 0 auto;
+  max-width: none;
+}
+
+.ba-artifact-viewer--readable .ba-artifact-scale {
+  position: relative;
 }
 
 .ba-artifact-footprint {
