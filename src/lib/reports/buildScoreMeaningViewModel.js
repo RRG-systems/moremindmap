@@ -32,13 +32,13 @@ const DIMENSION_CUSTOMER_COPY = {
   },
   Signal: {
     whatItMeans: (score, classification) =>
-      `Human calibration reads as ${classification} (${score.toFixed(2)}). You pick up relational and contextual cues with ${classification === 'moderate' ? 'reasonable' : classification} awareness.`,
+      `Reading people and context is a ${classification} part of how you operate (${score.toFixed(2)}). You pick up relational and situational cues with ${classification === 'moderate' ? 'reasonable' : classification} awareness.`,
     howItHelps:
       'You can read rooms, trust signals, and audience reception — useful in leadership, sales, and people-facing roles.',
     howItWorksAgainst:
-      'When speed or direction dominate, interpersonal calibration can be underweighted under load.',
+      'When speed or direction take over, you may underweight what people need to stay aligned.',
     bestUse:
-      'Use signal reading in high-stakes conversations and delegate execution once relational alignment is clear.',
+      'Use people-reading in high-stakes conversations, then hand off execution once alignment is clear.',
   },
   Fidelity: {
     whatItMeans: (score, classification) =>
@@ -66,7 +66,7 @@ const DIMENSION_CUSTOMER_COPY = {
     howItHelps:
       'Situational adjustment keeps forward motion alive when plans meet reality.',
     howItWorksAgainst:
-      'Adaptation without explicit boundaries can blur ownership and decision clarity.',
+      'Adjusting without clear boundaries can leave people unsure what is fixed, what is flexible, or who owns the next decision.',
     bestUse:
       'Name non-negotiable standards first, then adapt tactics inside those boundaries.',
   },
@@ -76,9 +76,9 @@ const DIMENSION_CUSTOMER_COPY = {
     howItHelps:
       'You stay adaptable and can change course when repetition fails.',
     howItWorksAgainst:
-      'At scale, missing decision frameworks, escalation paths, and accountability systems becomes costly.',
+      'As the organization grows, missing decision guides, escalation paths, and clear ownership becomes costly.',
     bestUse:
-      'Install external structure — decision guides, escalation rules, named owners — around your momentum.',
+      'Add simple external structure — decision guides, escalation rules, named owners — around your momentum.',
   },
   Horizon: {
     whatItMeans: (score, classification) =>

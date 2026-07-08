@@ -1,10 +1,34 @@
 /**
  * Production Customer BOS view model — dynamic from canonical + narrative.
+ *
+ * L2 architecture + L3 25/100 rewrite + L3R customer section body layer:
+ * - Customer tabs bind customer-only section bodies built from structured facts.
+ * - Raw narrative paragraphs are NOT the customer body strategy (Advanced Source only).
+ * - Advanced Source / technicalSource keep raw technical strings (forCustomer: false).
+ * - Canonical, narrative source objects, DNA engine, and BA fusion inputs are not mutated.
+ * - Display-time only; works for old retrieved dossiers and new profiles. No OpenAI.
  */
 
 import { buildOperatingScoreCards } from './scoreLabels.js';
 import { buildScoreMeaningViewModel } from './buildScoreMeaningViewModel.js';
 import { FINAL_BOS_TABS } from './buildFinalBOSTabs.js';
+import {
+  mapInterventionTypeForCustomer,
+  mapDimensionNameForCustomer,
+  presentPatternHeadlineForCustomer,
+  cleanCustomerBOSCopy,
+  preserveTechnicalSource,
+  presentOneMoveHeadlineForCustomer,
+  presentExecutiveSummaryForCustomer,
+  presentScalingRiskForCustomer,
+  presentFutureForCustomer,
+  presentTeamFitNoteForCustomer,
+  presentDimensionOneLineForCustomer,
+  buildCustomerSectionBodies,
+  buildCustomerPatternMeaning,
+  buildCustomerBestNextMoveBody,
+  collapseDuplicateCustomerPhrasing,
+} from './bosCustomerPresentationHelpers.js';
 
 const PLACEHOLDER_PATTERNS = [
   /\[scenario would be injected\]/i,
@@ -80,7 +104,7 @@ function toCustomerEvidenceLabel(text) {
   if (EVIDENCE_KEY_LABELS[clean]) return EVIDENCE_KEY_LABELS[clean];
   if (isRawBackendEvidenceKey(clean)) return '';
   if (isPlaceholderContent(clean)) return '';
-  return clean;
+  return cleanCustomerBOSCopy(clean);
 }
 
 function formatCustomerEvidence(entries, { forCustomer = true } = {}) {
@@ -98,10 +122,13 @@ function formatCustomerEvidence(entries, { forCustomer = true } = {}) {
   return formatted.map((line) => `- ${line}`).join('\n');
 }
 
-function getMicroScenarioLine(payload) {
+function getMicroScenarioLine(payload, { forCustomer = true } = {}) {
   const scenario = payload?.micro_scenario;
   if (!isRealCustomerContent(scenario)) return null;
-  return `\n\n**A moment that shows this:** ${String(scenario).trim()}`;
+  const text = forCustomer
+    ? cleanCustomerBOSCopy(String(scenario).trim())
+    : String(scenario).trim();
+  return `\n\n**A moment that shows this:** ${text}`;
 }
 
 function getSectionBody(section) {
@@ -122,6 +149,15 @@ function previewText(text, max = 160) {
   return clean.length > max ? `${clean.slice(0, max)}…` : clean;
 }
 
+function customerPreview(text, max = 160) {
+  return previewText(cleanCustomerBOSCopy(text), max);
+}
+
+/**
+ * Serialize narrative section for customer tabs (forCustomer: true) or Advanced Source (false).
+ * Customer path maps intervention enums and technical phrase fragments via helpers.
+ * Technical path preserves raw engine/source strings.
+ */
 export function formatCustomerSectionContent(sectionId, payload, { forCustomer = true } = {}) {
   if (!payload) return 'No section data available.';
 
@@ -131,141 +167,250 @@ export function formatCustomerSectionContent(sectionId, payload, { forCustomer =
       { forCustomer },
     );
     const microScenarioLine = forCustomer
-      ? getMicroScenarioLine(payload)
+      ? getMicroScenarioLine(payload, { forCustomer: true })
       : (isRealCustomerContent(payload?.micro_scenario)
         ? `\n\n**A moment that shows this:** ${String(payload.micro_scenario).trim()}`
         : null);
+    const presented = forCustomer ? presentExecutiveSummaryForCustomer(payload) : null;
+    const headline = forCustomer
+      ? presented.headline
+      : (payload.headline || '');
+    const body = forCustomer
+      ? presented.body
+      : (payload.body || '');
+    const keyWarning = payload.key_warning && isRealCustomerContent(payload.key_warning)
+      ? (forCustomer ? presentScalingRiskForCustomer(payload.key_warning) : payload.key_warning)
+      : null;
     return [
-      payload.headline ? `**${payload.headline}**` : null,
-      payload.body ? `\n${payload.body}` : null,
+      headline ? `**${headline}**` : null,
+      body ? `\n${body}` : null,
       microScenarioLine,
-      payload.key_warning && isRealCustomerContent(payload.key_warning)
-        ? `\n\n**Watch for:** ${payload.key_warning}`
-        : null,
+      keyWarning ? `\n\n**Watch for:** ${keyWarning}` : null,
       evidence ? `\n\n**Evidence used:**\n${evidence}` : null,
     ].filter(Boolean).join('');
   }
 
   if (sectionId === 'fiveFutures') {
-    const futures = (payload.futures || []).map((future, index) => (
-      `${index + 1}. **${future.title}** (${future.likelihood})\n${future.trajectory}\n\n_What the organization experiences:_ ${future.organization_experiences}`
-    )).join('\n\n');
+    const mapFuture = (future) => {
+      if (!future) return future;
+      if (!forCustomer) return future;
+      return presentFutureForCustomer(future);
+    };
+    const futures = (payload.futures || []).map((future, index) => {
+      const f = mapFuture(future);
+      return `${index + 1}. **${f.title}** (${f.likelihood})\n${f.trajectory}\n\n_What the organization experiences:_ ${f.organization_experiences}`;
+    }).join('\n\n');
+    const mostLikely = mapFuture(payload.most_likely);
+    const summary = forCustomer
+      ? cleanCustomerBOSCopy(payload.summary || '')
+      : (payload.summary || '');
     return [
-      payload.summary ? `${payload.summary}` : null,
-      payload.most_likely
-        ? `\n\n**${payload.most_likely.title || payload.most_likely.headline}** (${payload.most_likely.likelihood})\n${payload.most_likely.trajectory}\n\n_What the organization experiences:_ ${payload.most_likely.organization_experiences}`
+      summary ? `${summary}` : null,
+      mostLikely
+        ? `\n\n**${mostLikely.title || mostLikely.headline}** (${mostLikely.likelihood})\n${mostLikely.trajectory}\n\n_What the organization experiences:_ ${mostLikely.organization_experiences}`
         : null,
       futures ? `\n\n**All five futures:**\n\n${futures}` : null,
-      !payload.summary && !payload.most_likely && !futures ? getSectionBody(payload) : null,
+      !payload.summary && !payload.most_likely && !futures
+        ? (forCustomer ? cleanCustomerBOSCopy(getSectionBody(payload)) : getSectionBody(payload))
+        : null,
     ].filter(Boolean).join('');
   }
 
   if (sectionId === 'recommendedNextStep') {
     const days = (payload.first30Days || payload.first_30_days || [])
       .filter((step) => isRealCustomerContent(step))
-      .map((step, index) => `${index + 1}. ${step}`)
+      .map((step, index) => `${index + 1}. ${forCustomer ? cleanCustomerBOSCopy(step) : step}`)
       .join('\n');
     const evidence = formatCustomerEvidence(
       payload.evidenceUsed || payload.grounding_used || [],
       { forCustomer },
     );
     const signals = (payload.proofSignals || payload.proof_signals || [])
-      .filter((signal) => forCustomer ? isRealCustomerContent(signal) : Boolean(signal))
-      .map((signal) => `- ${signal}`)
+      .filter((signal) => (forCustomer ? isRealCustomerContent(signal) : Boolean(signal)))
+      .map((signal) => `- ${forCustomer ? cleanCustomerBOSCopy(signal) : signal}`)
       .join('\n');
+
+    const interventionTypeRaw = payload.interventionType || payload.intervention_type || '';
+    const interventionTypeDisplay = forCustomer
+      ? mapInterventionTypeForCustomer(interventionTypeRaw)
+      : interventionTypeRaw;
+    const interventionLabel = forCustomer ? 'Recommended move' : 'Type of move';
+
+    const headline = forCustomer
+      ? presentOneMoveHeadlineForCustomer(payload.headline || '')
+      : (payload.headline || '');
+    const body = forCustomer
+      ? cleanCustomerBOSCopy(payload.body || '')
+      : (payload.body || '');
+
     return [
-      payload.headline ? `**${payload.headline}**` : null,
-      payload.body ? `\n\n${payload.body}` : null,
-      payload.futureBottleneck ? `\n\n**Future bottleneck:** ${payload.futureBottleneck}` : null,
-      payload.interventionType ? `\n\n**Type of move:** ${payload.interventionType}` : null,
-      payload.intervention ? `\n\n**The move:** ${payload.intervention}` : null,
-      payload.whyThisMatters ? `\n\n**Why this matters:** ${payload.whyThisMatters}` : null,
-      payload.whatHappensIfIgnored ? `\n\n**If ignored:** ${payload.whatHappensIfIgnored}` : null,
-      payload.confidence ? `\n\n**Confidence:** ${payload.confidence}` : null,
+      headline ? `**${headline}**` : null,
+      body ? `\n\n${body}` : null,
+      payload.futureBottleneck
+        ? `\n\n**Future bottleneck:** ${forCustomer ? cleanCustomerBOSCopy(payload.futureBottleneck) : payload.futureBottleneck}`
+        : null,
+      interventionTypeDisplay
+        ? `\n\n**${interventionLabel}:** ${interventionTypeDisplay}`
+        : null,
+      payload.intervention
+        ? `\n\n**The move:** ${forCustomer ? cleanCustomerBOSCopy(payload.intervention) : payload.intervention}`
+        : null,
+      payload.whyThisMatters
+        ? `\n\n**Why this matters:** ${forCustomer ? cleanCustomerBOSCopy(payload.whyThisMatters) : payload.whyThisMatters}`
+        : null,
+      payload.whatHappensIfIgnored
+        ? `\n\n**If ignored:** ${forCustomer ? cleanCustomerBOSCopy(payload.whatHappensIfIgnored) : payload.whatHappensIfIgnored}`
+        : null,
+      // Confidence is technical; hide on customer tabs, keep in Advanced Source
+      (!forCustomer && payload.confidence)
+        ? `\n\n**Confidence:** ${payload.confidence}`
+        : null,
       days ? `\n\n**First 30 days:**\n${days}` : null,
       signals ? `\n\n**How you will know it is working:**\n${signals}` : null,
       evidence ? `\n\n**Evidence used:**\n${evidence}` : null,
-      !payload.headline && !payload.body ? getSectionBody(payload) : null,
+      !payload.headline && !payload.body
+        ? (forCustomer ? cleanCustomerBOSCopy(getSectionBody(payload)) : getSectionBody(payload))
+        : null,
     ].filter(Boolean).join('');
   }
 
   if (sectionId === 'facilitatorNotes') {
-    const notes = (payload.notes || []).map(
-      (note) => `**${note.label}:** ${note.guidance}\n_Why:_ ${note.rationale}`,
-    ).join('\n\n');
+    const notes = (payload.notes || []).map((note) => {
+      if (!forCustomer) {
+        return `**${note.label || ''}:** ${note.guidance || ''}\n_Why:_ ${note.rationale || ''}`;
+      }
+      const presented = presentTeamFitNoteForCustomer(note);
+      return `**${presented.label}:** ${presented.guidance}\n_Why:_ ${presented.rationale}`;
+    }).join('\n\n');
+    const summary = forCustomer
+      ? cleanCustomerBOSCopy(payload.summary || '')
+      : (payload.summary || '');
+    const primary = payload.primary_guidance
+      ? (forCustomer ? cleanCustomerBOSCopy(payload.primary_guidance) : payload.primary_guidance)
+      : null;
+    const caution = payload.caution
+      ? (forCustomer ? cleanCustomerBOSCopy(payload.caution) : payload.caution)
+      : null;
     return [
-      payload.summary ? `${payload.summary}` : null,
-      payload.primary_guidance ? `\n\n**Primary guidance:** ${payload.primary_guidance}` : null,
-      notes ? `\n\n**Environment design:**\n\n${notes}` : null,
-      payload.caution ? `\n\n**Caution:** ${payload.caution}` : null,
-      !payload.summary && !notes ? getSectionBody(payload) : null,
+      summary ? `${summary}` : null,
+      primary ? `\n\n**Primary guidance:** ${primary}` : null,
+      notes ? `\n\n**How to design the environment:**\n\n${notes}` : null,
+      caution ? `\n\n**Caution:** ${caution}` : null,
+      !payload.summary && !notes
+        ? (forCustomer ? cleanCustomerBOSCopy(getSectionBody(payload)) : getSectionBody(payload))
+        : null,
     ].filter(Boolean).join('');
   }
 
-  return getSectionBody(payload) || 'No section data available.';
+  const body = getSectionBody(payload) || 'No section data available.';
+  return forCustomer ? cleanCustomerBOSCopy(body) : body;
 }
 
-function buildOverviewSections(narrative, scoreMeaning) {
-  const executive = narrative?.executiveSummary;
-  const oneMove = narrative?.recommendedNextStep;
-  const profileDna = narrative?.profileDNA;
-  const scaling = narrative?.scalingConstraint || narrative?.strategicCeiling;
+function presentOperatingScoresForCustomer(operatingScores) {
+  return (operatingScores || []).map((card) => ({
+    ...card,
+    dimensionTechnical: preserveTechnicalSource(card.dimension),
+    displayName: mapDimensionNameForCustomer(card.dimension),
+    oneLine: presentDimensionOneLineForCustomer(card.dimension, card.oneLine || ''),
+  }));
+}
+
+function presentScoreMeaningForCustomer(scoreMeaning) {
+  if (!scoreMeaning) return scoreMeaning;
+
+  const scores = (scoreMeaning.scores || []).map((score) => ({
+    ...score,
+    dimensionTechnical: preserveTechnicalSource(score.dimension),
+    displayName: mapDimensionNameForCustomer(score.dimension),
+    whatItMeans: cleanCustomerBOSCopy(score.whatItMeans || ''),
+    howItHelps: cleanCustomerBOSCopy(score.howItHelps || ''),
+    howItWorksAgainst: cleanCustomerBOSCopy(score.howItWorksAgainst || ''),
+    bestUse: cleanCustomerBOSCopy(score.bestUse || ''),
+  }));
+
+  const technicalHeadline = scoreMeaning.patternSummary?.headline || '';
+  const technicalMeaning = scoreMeaning.patternSummary?.meaning || '';
+  const top = [...scores].sort((a, b) => Number(b.score) - Number(a.score)).slice(0, 2);
+  const bottom = [...scores].sort((a, b) => Number(a.score) - Number(b.score)).slice(0, 2);
+  // L3R: customer meaning from score cards, not cleaned DNA natural_advantage/risk dump
+  const customerMeaning = buildCustomerPatternMeaning(top, bottom);
+
+  return {
+    ...scoreMeaning,
+    scores,
+    patternSummary: {
+      ...scoreMeaning.patternSummary,
+      technicalHeadline: preserveTechnicalSource(technicalHeadline),
+      technicalMeaning: preserveTechnicalSource(technicalMeaning),
+      headline: presentPatternHeadlineForCustomer(technicalHeadline)
+        || customerMeaning,
+      meaning: customerMeaning,
+    },
+    unavailableDimensions: (scoreMeaning.unavailableDimensions || []).map((dim) =>
+      mapDimensionNameForCustomer(dim),
+    ),
+  };
+}
+
+/**
+ * Overview expandable cards — bind customer section bodies only.
+ * Raw executive/profileDNA/scaling narrative bodies are not used as content.
+ */
+function buildOverviewSections(customerBodies) {
+  const exec = customerBodies.customerExecutiveSummary;
+  const core = customerBodies.customerCorePattern;
+  const advantage = customerBodies.customerKeyAdvantage;
+  const risk = customerBodies.customerScalingRisk;
+  const nextMove = customerBodies.customerBestNextMove;
 
   return [
     {
       id: 'executive-summary',
       title: 'Executive Summary',
-      preview: getSectionHeadline(executive) || previewText(getSectionBody(executive)),
+      preview: exec.headline || customerPreview(exec.body),
       badge: 'Core Insight',
       defaultOpen: true,
-      content: formatCustomerSectionContent('executiveSummary', executive),
+      content: collapseDuplicateCustomerPhrasing(exec.content || exec.body || ''),
     },
     {
       id: 'core-operating-pattern',
       title: 'Core Operating Pattern',
-      preview: scoreMeaning.patternSummary.headline,
+      preview: core.headline || customerBodies.customerPatternHeadline,
       badge: 'Core Insight',
       defaultOpen: true,
-      content: `**${scoreMeaning.patternSummary.headline}**\n\n${scoreMeaning.patternSummary.meaning}\n\n${getSectionBody(profileDna)}`,
+      content: collapseDuplicateCustomerPhrasing(core.content || core.body || ''),
     },
     {
       id: 'key-advantage',
       title: 'Key Advantage',
-      preview: previewText(scoreMeaning.scores[0]?.howItHelps),
+      preview: customerPreview(
+        customerBodies.topScores?.[0]?.howItHelps || advantage.body,
+      ),
       badge: 'Strength',
       defaultOpen: false,
-      content: scoreMeaning.scores.length
-        ? scoreMeaning.scores.slice(0, 2).map((score) => `**${score.dimension} (${score.score.toFixed(2)})**\n${score.howItHelps}`).join('\n\n')
-        : getSectionBody(narrative?.coachingLeverage) || 'Advantage details will appear when score data is available.',
+      content: advantage.content || advantage.body,
     },
     {
       id: 'main-scaling-risk',
       title: 'Main Scaling Risk',
-      preview: executive?.key_warning || previewText(getSectionBody(scaling)),
+      preview: risk.preview || customerPreview(risk.body),
       badge: 'Watch',
       defaultOpen: false,
-      content: [
-        executive?.key_warning ? `**${executive.key_warning}**` : null,
-        getSectionBody(scaling),
-        scoreMeaning.scores.length
-          ? scoreMeaning.scores.slice(-2).map((score) => `**${score.dimension} (${score.score.toFixed(2)})**\n${score.howItWorksAgainst}`).join('\n\n')
-          : null,
-      ].filter(Boolean).join('\n\n'),
+      content: collapseDuplicateCustomerPhrasing(risk.content || risk.body || ''),
     },
     {
       id: 'best-next-move',
       title: 'Best Next Move',
-      preview: getSectionHeadline(oneMove) || previewText(getSectionBody(oneMove)),
+      preview: nextMove.headline || customerPreview(nextMove.preview || nextMove.body),
       badge: 'Action',
       defaultOpen: false,
-      content: formatCustomerSectionContent('recommendedNextStep', oneMove),
+      content: collapseDuplicateCustomerPhrasing(nextMove.content || nextMove.body || ''),
     },
   ];
 }
 
-function buildFiveFuturesSections(narrative) {
-  const fiveFutures = narrative?.fiveFutures;
-  if (!fiveFutures) {
+function buildFiveFuturesSections(customerFutureLandscape) {
+  if (!customerFutureLandscape || customerFutureLandscape.empty) {
     return [{
       id: 'five-futures-unavailable',
       title: 'Five Futures',
@@ -280,22 +425,18 @@ function buildFiveFuturesSections(narrative) {
     {
       id: 'five-futures-summary',
       title: 'Future Landscape',
-      preview: previewText(fiveFutures.summary),
+      preview: customerPreview(customerFutureLandscape.summary),
       badge: 'Future',
       defaultOpen: true,
-      content: formatCustomerSectionContent('fiveFutures', {
-        summary: fiveFutures.summary,
-        most_likely: fiveFutures.most_likely,
-        futures: [],
-      }),
+      content: collapseDuplicateCustomerPhrasing(customerFutureLandscape.content || ''),
     },
-    ...(fiveFutures.futures || []).map((future, index) => ({
+    ...(customerFutureLandscape.futures || []).map((future, index) => ({
       id: `future-${index + 1}`,
-      title: future.title,
-      preview: previewText(future.trajectory),
+      title: future.title || `Future ${index + 1}`,
+      preview: customerPreview(future.trajectory),
       badge: String(future.likelihood || '').toLowerCase() === 'risk' ? 'Watch' : 'Future',
       defaultOpen: false,
-      content: `**Likelihood:** ${future.likelihood}\n\n${future.trajectory}\n\n_What the organization experiences:_ ${future.organization_experiences}`,
+      content: collapseDuplicateCustomerPhrasing(future.content || ''),
     })),
   ];
 
@@ -304,8 +445,16 @@ function buildFiveFuturesSections(narrative) {
 
 function buildHowToUseThis(personName, operatingScores) {
   const available = operatingScores.filter((score) => score.available);
-  const strongest = available.slice().sort((a, b) => b.score - a.score).slice(0, 2).map((s) => s.dimension);
-  const weakest = available.slice().sort((a, b) => a.score - b.score).slice(0, 2).map((s) => s.dimension);
+  const strongest = available
+    .slice()
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 2)
+    .map((s) => s.displayName || mapDimensionNameForCustomer(s.dimension));
+  const weakest = available
+    .slice()
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 2)
+    .map((s) => s.displayName || mapDimensionNameForCustomer(s.dimension));
 
   const strengthLine = strongest.length
     ? `Notice where you are strongest (${strongest.join(', ')})`
@@ -339,6 +488,10 @@ function buildHowToUseThis(personName, operatingScores) {
   };
 }
 
+/**
+ * Advanced Source / technical path — raw technical strings only.
+ * Must not run customer phrase maps or enum customerization.
+ */
 function buildAdvancedSourceText(canonical, narrative) {
   const data = canonical?.canonical_profile_json || canonical;
   const cognition = data.rescoring_gpt || data.rescoring_v1 || {};
@@ -348,13 +501,15 @@ function buildAdvancedSourceText(canonical, narrative) {
   const technicalBlocks = [];
 
   if (renderReady.profile_dna) {
-    technicalBlocks.push(`**Profile DNA (technical)**\n${renderReady.profile_dna}`);
+    technicalBlocks.push(`**Profile DNA (technical)**\n${preserveTechnicalSource(renderReady.profile_dna)}`);
   }
 
   ['executiveSummary', 'fiveFutures', 'recommendedNextStep', 'facilitatorNotes'].forEach((sectionId) => {
     const payload = narrative?.[sectionId];
     if (!payload) return;
-    technicalBlocks.push(`**${sectionId}**\n${formatCustomerSectionContent(sectionId, payload, { forCustomer: false })}`);
+    technicalBlocks.push(
+      `**${sectionId}**\n${formatCustomerSectionContent(sectionId, payload, { forCustomer: false })}`,
+    );
   });
 
   if (cognition.audit) {
@@ -365,6 +520,20 @@ function buildAdvancedSourceText(canonical, narrative) {
     model,
     source: cognition.source || (data.rescoring_gpt ? 'gpt' : data.rescoring_v1 ? 'v1' : 'narrative'),
     content: technicalBlocks.join('\n\n---\n\n') || 'Technical source content is not available for this profile.',
+  };
+}
+
+function buildTechnicalSourceBundle(canonical, narrative) {
+  const data = canonical?.canonical_profile_json || canonical || {};
+  const cognition = data.rescoring_gpt || data.rescoring_v1 || null;
+  return {
+    rescoring_gpt: preserveTechnicalSource(data.rescoring_gpt || null),
+    rescoring_v1: preserveTechnicalSource(data.rescoring_v1 || null),
+    render_ready: preserveTechnicalSource(cognition?.render_ready || null),
+    ranked_dimensions: preserveTechnicalSource(cognition?.ranked_dimensions || null),
+    vector_scores: preserveTechnicalSource(data.vector_scores || null),
+    rawNarrative: preserveTechnicalSource(narrative || null),
+    sourceCognition: preserveTechnicalSource(cognition),
   };
 }
 
@@ -383,8 +552,63 @@ export function buildCustomerBOSViewModel({
     ? personName
     : null;
 
-  const operatingScores = buildOperatingScoreCards(data, ranked);
-  const scoreMeaning = buildScoreMeaningViewModel({ canonical, ranked, personName: displayName || 'You' });
+  const operatingScoresRaw = buildOperatingScoreCards(data, ranked);
+  const scoreMeaningRaw = buildScoreMeaningViewModel({
+    canonical,
+    ranked,
+    personName: displayName || 'You',
+  });
+
+  // Customer presentation layer (display-time only; does not mutate source objects)
+  const operatingScores = presentOperatingScoresForCustomer(operatingScoresRaw);
+  const scoreMeaning = presentScoreMeaningForCustomer(scoreMeaningRaw);
+
+  // L3R: customer-only section bodies from structured facts (not cleaned raw narrative)
+  const customerBodies = buildCustomerSectionBodies({
+    scoreMeaning,
+    narrative,
+    patternHeadline: scoreMeaning.patternSummary?.technicalHeadline
+      || scoreMeaning.patternSummary?.headline
+      || '',
+    keyWarning: narrative?.executiveSummary?.key_warning || '',
+    wrongSeatRisk: '',
+  });
+
+  // Align score pattern fields with section-body layer
+  if (scoreMeaning?.patternSummary) {
+    scoreMeaning.patternSummary.headline = customerBodies.customerPatternHeadline
+      || scoreMeaning.patternSummary.headline;
+    scoreMeaning.patternSummary.meaning = customerBodies.customerPatternMeaning
+      || scoreMeaning.patternSummary.meaning;
+  }
+
+  const overviewSections = buildOverviewSections(customerBodies);
+  const fiveFuturesSections = buildFiveFuturesSections(customerBodies.customerFutureLandscape);
+  const oneMoveBody = customerBodies.customerBestNextMove
+    || buildCustomerBestNextMoveBody(narrative?.recommendedNextStep);
+  const teamFitBody = customerBodies.customerTeamFit;
+  const howToUseThis = buildHowToUseThis(displayName || 'You', operatingScores);
+  const advancedSource = buildAdvancedSourceText(canonical, narrative);
+  const technicalSource = buildTechnicalSourceBundle(canonical, narrative);
+
+  const customerOneMove = {
+    headline: oneMoveBody.headline || 'Your One Move',
+    preview: oneMoveBody.preview || customerPreview(oneMoveBody.body),
+    content: collapseDuplicateCustomerPhrasing(oneMoveBody.content || oneMoveBody.body || ''),
+    intervention: oneMoveBody.intervention || '',
+    interventionType: oneMoveBody.interventionType || '',
+    interventionTypeRaw: oneMoveBody.interventionTypeRaw || '',
+  };
+
+  const customerSummary = {
+    executive: customerBodies.customerExecutiveSummary?.content
+      || customerBodies.customerExecutiveSummary?.body
+      || '',
+    patternHeadline: customerBodies.customerPatternHeadline
+      || scoreMeaning.patternSummary.headline,
+    patternMeaning: customerBodies.customerPatternMeaning
+      || scoreMeaning.patternSummary.meaning,
+  };
 
   return {
     meta: {
@@ -395,28 +619,39 @@ export function buildCustomerBOSViewModel({
       profileId: profileId || data?.profile_id || canonical?.profile_id || '',
       company,
     },
+    // Existing component contract (customer-presented)
     operatingScores,
     tabs: FINAL_BOS_TABS,
-    overviewSections: buildOverviewSections(narrative, scoreMeaning),
+    overviewSections,
     scoreMeaning,
-    fiveFuturesSections: buildFiveFuturesSections(narrative),
-    oneMove: {
-      headline: getSectionHeadline(narrative?.recommendedNextStep) || 'Your One Move',
-      preview: previewText(getSectionBody(narrative?.recommendedNextStep)),
-      content: formatCustomerSectionContent('recommendedNextStep', narrative?.recommendedNextStep),
-      intervention: narrative?.recommendedNextStep?.intervention
-        || getSectionBody(narrative?.recommendedNextStep),
-    },
+    fiveFuturesSections,
+    oneMove: customerOneMove,
     teamFit: {
-      content: formatCustomerSectionContent('facilitatorNotes', narrative?.facilitatorNotes),
+      content: collapseDuplicateCustomerPhrasing(teamFitBody?.content || teamFitBody?.body || ''),
     },
-    howToUseThis: buildHowToUseThis(displayName || 'You', operatingScores),
-    advancedSource: buildAdvancedSourceText(canonical, narrative),
+    howToUseThis,
+    advancedSource,
     visualDNA: {
       approved: visualDNA,
       deterministic: deterministicVisualDNA,
     },
+    // Raw narrative retained for Advanced Source / debugging; not for customer tab binding
     narrative,
+
+    // Explicit L2/L3R layer split fields
+    customerSections: overviewSections,
+    customerSectionBodies: customerBodies,
+    customerSummary,
+    customerOneMove,
+    customerScoreMeanings: scoreMeaning,
+    technicalSource,
+    sourceNarrative: narrative,
+    rawNarrative: narrative,
+    rawCognition: technicalSource.sourceCognition,
+    sourceCognition: technicalSource.sourceCognition,
+    // Technical operating/score meaning before customer presentation (for audits)
+    technicalOperatingScores: operatingScoresRaw,
+    technicalScoreMeaning: scoreMeaningRaw,
   };
 }
 

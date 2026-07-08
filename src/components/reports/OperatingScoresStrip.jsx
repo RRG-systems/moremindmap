@@ -3,11 +3,12 @@ import { SCORE_CLASSIFICATION_COLORS } from '../../lib/reports/scoreLabels.js';
 function OperatingScoreCard({ score }) {
   const colorClass = SCORE_CLASSIFICATION_COLORS[score.classification]
     || SCORE_CLASSIFICATION_COLORS.unavailable;
+  const label = score.displayName || score.dimension;
 
   return (
     <article className={`rounded-xl border p-3 ${colorClass}`}>
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className="text-sm font-bold text-white">{score.dimension}</h3>
+        <h3 className="text-sm font-bold text-white">{label}</h3>
         <span className="font-mono text-lg font-bold text-white">
           {score.available ? score.score.toFixed(2) : '—'}
         </span>
@@ -30,7 +31,10 @@ export default function OperatingScoresStrip({ scores = [] }) {
       </p>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {scores.map((score) => (
-          <OperatingScoreCard key={score.dimension} score={score} />
+          <OperatingScoreCard
+            key={score.dimensionTechnical || score.dimension}
+            score={score}
+          />
         ))}
       </div>
     </div>

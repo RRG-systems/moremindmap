@@ -31,15 +31,16 @@ export const DIMENSION_COLORS = {
   Horizon: '#f87171',
 };
 
+/** Customer-facing strip copy (also mirrored in bosCustomerPresentationHelpers). */
 const DIMENSION_ONE_LINE = {
-  Vector: 'Direction and path-setting in how you operate.',
-  Velocity: 'Speed from thought to action once direction forms.',
-  Signal: 'Reading relational and contextual cues.',
-  Fidelity: 'Precision and detail fidelity when it matters.',
-  Leverage: 'Using leverage points and scaling judgment.',
-  Flex: 'Adaptability and situational adjustment.',
-  Framework: 'Structure, repeatability, and operating rules.',
-  Horizon: 'Future orientation and long-range planning.',
+  Vector: 'How clearly you set direction and choose a path.',
+  Velocity: 'How quickly you move from idea to action.',
+  Signal: 'How well you read people, rooms, and context.',
+  Fidelity: 'How carefully you protect accuracy when it matters.',
+  Leverage: 'How well you multiply effort through systems and others.',
+  Flex: 'How readily you adjust when conditions change.',
+  Framework: 'How much you rely on structure, rules, and repeatable process.',
+  Horizon: 'How far ahead you naturally plan and sequence work.',
 };
 
 export function normalizeOperatingScore(raw) {
