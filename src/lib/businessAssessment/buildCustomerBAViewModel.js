@@ -6,6 +6,16 @@
 
 import { normalizeBusinessVisualArtifactData } from './normalizeBusinessVisualArtifactData.js';
 import { hasPremiumFiveFuturesData } from '../../components/businessAssessment/BusinessAssessmentFiveFuturesPremium.jsx';
+import {
+  customerDisplayLabel,
+  simplifyCustomerCopy,
+  mapLabelsForCustomer,
+  relationshipAssetCustomerLine,
+  systemsMaturityCustomerLine,
+  formatDimensionForCustomer,
+  unavailableCustomerNote,
+  hasRenderableContent,
+} from './customerPresentationHelpers.js';
 
 export const BA_SHELL_TABS = [
   { id: 'overview', label: 'Overview' },
@@ -64,22 +74,334 @@ function deriveConfidenceSummary(confidenceEngine = {}, missingData = {}) {
   const observed = asArray(confidenceEngine.observed || confidenceEngine.observed_evidence);
   const inferred = asArray(confidenceEngine.inferred || confidenceEngine.inferred_evidence);
   const missing = asArray(
-    confidenceEngine.missing || confidenceEngine.missing_data || missingData.confidence_engine_missing
+    confidenceEngine.missing ||
+      confidenceEngine.missing_data ||
+      missingData.confidence_engine_missing ||
+      missingData.financial
   );
   const score = confidenceEngine.score ?? confidenceEngine.confidence_score ?? null;
   const band = confidenceEngine.band || confidenceEngine.confidence_band || 'unknown';
+  const knownLabels = mapLabelsForCustomer(known, { technical: true });
+  const observedLabels = mapLabelsForCustomer(observed, { technical: true });
+  const inferredLabels = mapLabelsForCustomer(inferred, { technical: true });
+  const missingLabels = mapLabelsForCustomer(missing, { technical: true });
 
   return {
     band,
-    score: Number.isFinite(score) ? score : null,
+    score: Number.isFinite(Number(score)) ? Number(score) : null,
     known_count: known.length,
     observed_count: observed.length,
     inferred_count: inferred.length,
     missing_count: missing.length,
+    known_raw: known,
+    observed_raw: observed,
+    inferred_raw: inferred,
+    missing_raw: missing,
+    known_labels: knownLabels,
+    observed_labels: observedLabels,
+    inferred_labels: inferredLabels,
+    missing_labels: missingLabels,
+    what_system_knows: knownLabels.length
+      ? knownLabels
+      : observedLabels.length
+        ? observedLabels
+        : [],
+    what_system_infers: inferredLabels,
     headline:
       confidenceEngine.headline ||
       confidenceEngine.summary ||
       `${band} confidence — evidence mix includes known, observed, inferred, and missing fields.`,
+  };
+}
+
+function resolvePrimaryConstraint(bid = {}, primaryConstraintSection = null) {
+  const ranked = asArray(bid.constraint_analysis?.ranked_constraints);
+  const fromRanked = ranked[0] || null;
+  const direct =
+    bid.primary_constraint ||
+    bid.constraint_analysis?.primary_constraint ||
+    fromRanked ||
+    {};
+
+  const evidence = asArray(direct.evidence || direct.symptoms);
+  const customerSymptoms = mapLabelsForCustomer(
+    evidence.map((item) => String(item).replace(/^signal:\s*/i, '')),
+    { technical: false }
+  ).map((item) => simplifyCustomerCopy(item));
+
+  const label =
+    customerDisplayLabel(direct.label || direct.constraint_key || direct.key, { technical: false }) ||
+    textValue(direct.label || direct.constraint_key);
+
+  const summarySource = textValue(
+    direct.summary || primaryConstraintSection?.body || direct.likely_effect_if_unchanged
+  );
+  const effectSource = textValue(
+    direct.effect_if_unchanged || direct.likely_effect_if_unchanged
+  );
+  const rootSource = textValue(
+    direct.root_cause ||
+      (label
+        ? `The deeper issue is not effort. It is the missing simple system behind ${label.toLowerCase()}.`
+        : '')
+  );
+
+  return {
+    key: direct.key || direct.constraint_key || null,
+    label,
+    score: direct.score,
+    confidence: direct.confidence,
+    summary: simplifyCustomerCopy(summarySource),
+    effect_if_unchanged: simplifyCustomerCopy(effectSource),
+    symptoms: customerSymptoms.length
+      ? customerSymptoms
+      : label
+        ? [
+            'Work still depends too much on the owner',
+            'Process is informal or incomplete',
+            'Growth increases rework and confusion',
+          ]
+        : [],
+    root_cause: simplifyCustomerCopy(rootSource),
+    source_questions_technical: asArray(direct.source_questions),
+  };
+}
+
+function deriveBehavioralDimensions(behavioralReality = {}, profile = {}) {
+  const ranked = asArray(behavioralReality.ranked_dimensions || profile.ranked_dimensions);
+  const explicitLow = asArray(behavioralReality.low_dimensions || profile.low_dimensions);
+  const sorted = [...ranked].sort((a, b) => Number(a?.score ?? 0) - Number(b?.score ?? 0));
+  const top = ranked.slice(0, 3);
+  const low = explicitLow.length
+    ? explicitLow.slice(0, 3)
+    : sorted.slice(0, 2);
+
+  return {
+    top_dimensions: top,
+    low_dimensions: low,
+    top_plain: top.map(formatDimensionForCustomer).filter(Boolean),
+    low_plain: low.map(formatDimensionForCustomer).filter(Boolean),
+  };
+}
+
+function deriveHelpsAndDistorts(bid = {}, behavioralSectionBody = '') {
+  const fusion = bid.behavior_business_fusion || {};
+  const helps = asArray(
+    fusion.helps_business || fusion.strengths || bid.behavioral_reality?.helps_business
+  );
+  const distorts = asArray(
+    fusion.distorts_business || fusion.risks || bid.behavioral_reality?.distorts_business
+  );
+
+  const helpsClean = mapLabelsForCustomer(helps, { technical: false }).map(simplifyCustomerCopy);
+  const distortsClean = mapLabelsForCustomer(distorts, { technical: false }).map(simplifyCustomerCopy);
+
+  // If fusion only has technical trait names, still keep simplified lines.
+  return {
+    helps_business: helpsClean,
+    distorts_business: distortsClean,
+    fusion_summary: simplifyCustomerCopy(textValue(fusion.fusion_summary || behavioralSectionBody)),
+  };
+}
+
+function deriveLeadGenerationCustomerLine(leadGen = {}, briefingBody = '') {
+  const direct = textValue(leadGen.summary || leadGen.stated_generation_behaviors);
+  if (direct) return simplifyCustomerCopy(direct);
+  if (briefingBody) return simplifyCustomerCopy(briefingBody);
+  if (leadGen.lead_shortage_signal) {
+    return 'Lead flow looks thinner than needed for the stated goals. Generation still depends too much on personal effort and ad-hoc outreach.';
+  }
+  return '';
+}
+
+function deriveCrmCustomerLine(crm = {}, briefingBody = '') {
+  const direct = textValue(crm.summary || crm.follow_up_system_strength);
+  if (crm.follow_up_system_strength && /unclear|weak|informal/i.test(String(crm.follow_up_system_strength))) {
+    return 'Follow-up and conversion still look informal. There is relationship skill, but not a clear CRM rhythm that runs without personal memory.';
+  }
+  if (direct && !/^[a-z0-9_]+$/i.test(direct)) return simplifyCustomerCopy(direct);
+  if (briefingBody) return simplifyCustomerCopy(briefingBody);
+  if (crm.likely_issue) {
+    return simplifyCustomerCopy(
+      customerDisplayLabel(crm.likely_issue, { technical: false }) || String(crm.likely_issue)
+    );
+  }
+  return '';
+}
+
+function deriveFinancialCustomerLine(financial = {}, briefingBody = '') {
+  const direct = textValue(financial.summary);
+  if (direct) return simplifyCustomerCopy(direct);
+  if (briefingBody) return simplifyCustomerCopy(briefingBody);
+  const missing = asArray(financial.missing_financial_data);
+  if (missing.length) {
+    return 'Some production history is present, but key profit, expense, and marketing numbers are still missing. Financial clarity is incomplete.';
+  }
+  if (financial.financial_clarity) {
+    return `Financial clarity looks ${String(financial.financial_clarity).replace(/_/g, ' ')}.`;
+  }
+  return '';
+}
+
+function deriveSystemsAccountabilityLine(bid = {}, briefingBody = '') {
+  const score = bid.systems_reality?.overall_maturity_score;
+  const maturityLine = systemsMaturityCustomerLine(score);
+  if (maturityLine) return maturityLine;
+  const label = bid.accountability_reality?.maturity_label;
+  if (label) return simplifyCustomerCopy(customerDisplayLabel(label) || String(label));
+  if (briefingBody) return simplifyCustomerCopy(briefingBody);
+  return '';
+}
+
+/**
+ * Build presentation-only customer language sections when stored customer_language_v2 is absent.
+ * Derived from existing BID/briefing fields; never invents metrics.
+ */
+function buildPresentationCustomerLanguage(vmCore = {}) {
+  const person = vmCore.person_name || 'This owner';
+  const constraint = vmCore.primary_constraint || {};
+  const overview = vmCore.overview || {};
+  const oneMove = vmCore.one_move_card || {};
+  const constraintSummary = vmCore.constraint_summary || {};
+  const behavioral = vmCore.behavioral_reality_summary || {};
+  const model = vmCore.business_model_alignment_summary || {};
+  const confidence = vmCore.confidence_summary || {};
+
+  const bottleneck =
+    constraint.summary ||
+    simplifyCustomerCopy(constraintSummary.primary?.summary) ||
+    `${person}'s main bottleneck is that too much of the business still depends on personal effort, memory, and reacting in the moment.`;
+
+  const whyItMatters =
+    simplifyCustomerCopy(constraint.effect_if_unchanged) ||
+    'This matters because growth without simple systems usually creates more rework, more owner dependency, and less consistent results.';
+
+  const focusFirst =
+    simplifyCustomerCopy(oneMove.recommendation || oneMove.title || overview.one_move_teaser) ||
+    'Focus first on the main bottleneck above — not on adding more random activity.';
+
+  const oneMovePlain =
+    simplifyCustomerCopy(oneMove.title || overview.one_move_teaser || oneMove.recommendation) ||
+    focusFirst;
+
+  return {
+    target_technicality: 25,
+    presentation_derived: true,
+    sections: {
+      overview: {
+        what_assessment_found: simplifyCustomerCopy(overview.what_this_assessment_is_really_saying),
+        why_it_matters: whyItMatters,
+        focus_first: focusFirst,
+        primary_bottleneck_plain: bottleneck,
+        one_move_plain: oneMovePlain,
+        doctrine_plain: overview.doctrine_fusion_line,
+      },
+      business_reality: {
+        headline: simplifyCustomerCopy(vmCore.business_reality_summary?.headline),
+        stage_plain: simplifyCustomerCopy(
+          customerDisplayLabel(vmCore.business_reality_summary?.stage) ||
+            vmCore.business_reality_summary?.stage
+        ),
+        leads: simplifyCustomerCopy(vmCore.business_reality_summary?.leads),
+        database: simplifyCustomerCopy(vmCore.business_reality_summary?.database),
+        systems: simplifyCustomerCopy(vmCore.business_reality_summary?.systems),
+        financial: simplifyCustomerCopy(vmCore.business_reality_summary?.financial),
+        accountability: simplifyCustomerCopy(vmCore.business_reality_summary?.accountability),
+        missing_data_plain: simplifyCustomerCopy(vmCore.missing_data?.customer_note),
+      },
+      behavioral_os: {
+        profile_plain: simplifyCustomerCopy(behavioral.profile_type),
+        headline: simplifyCustomerCopy(behavioral.headline),
+        helps_business: asArray(behavioral.helps_business),
+        gets_in_the_way: asArray(behavioral.distorts_business),
+        execution_effect: simplifyCustomerCopy(behavioral.behavior_to_business),
+        dimensions_plain: {
+          strongest: asArray(behavioral.top_plain).join(' · '),
+          weakest: asArray(behavioral.low_plain).join(' · '),
+        },
+      },
+      model_alignment: {
+        headline: simplifyCustomerCopy(model.headline),
+        healthy_business_needs:
+          'A healthy real estate business needs consistent lead flow, a living database, simple follow-up systems, financial clarity, and weekly accountability — not just talent and effort.',
+        aligned: asArray(model.aligned_points),
+        thin_or_informal: asArray(model.thin_points),
+        transition_note: simplifyCustomerCopy(model.transition_note),
+      },
+      constraint_reality: {
+        bottleneck_plain: bottleneck,
+        symptoms: asArray(constraintSummary.symptoms_vs_root?.symptoms),
+        root_problem: simplifyCustomerCopy(constraintSummary.symptoms_vs_root?.root_cause),
+        if_unchanged: simplifyCustomerCopy(constraintSummary.if_unchanged),
+      },
+      one_move: {
+        title_plain: simplifyCustomerCopy(oneMove.title),
+        what_to_do: simplifyCustomerCopy(oneMove.recommendation),
+        why_this_move: simplifyCustomerCopy(oneMove.why_this_move),
+        why_now: simplifyCustomerCopy(oneMove.why_now),
+        why_fits_you: simplifyCustomerCopy(oneMove.behavior_fit),
+        first_30_days: asArray(oneMove.first_30_days).map(simplifyCustomerCopy),
+        proof_would_show_working: asArray(oneMove.proof_signals).map(simplifyCustomerCopy),
+        adoption_risks_plain: asArray(oneMove.adoption_risks).map(simplifyCustomerCopy),
+      },
+      advanced_source: {
+        intro:
+          'Technical source version for transparency. The main report tabs are the readable customer version.',
+      },
+      confidence_reality: {
+        band_plain: `Confidence: ${confidence.band || 'unknown'}${
+          Number.isFinite(confidence.score) ? ` (${confidence.score}/100)` : ''
+        }`,
+        headline: simplifyCustomerCopy(confidence.headline),
+        what_system_knows: asArray(confidence.what_system_knows),
+        what_system_infers: asArray(confidence.what_system_infers),
+        what_is_missing: asArray(confidence.missing_labels || confidence.missing_raw),
+        counts_plain: `Known: ${confidence.known_count || 0} · Observed: ${
+          confidence.observed_count || 0
+        } · Inferred: ${confidence.inferred_count || 0} · Missing: ${confidence.missing_count || 0}`,
+        customer_note: simplifyCustomerCopy(vmCore.missing_data?.customer_note),
+      },
+    },
+  };
+}
+
+function mergeCustomerLanguage(stored, presentation) {
+  if (!stored || typeof stored !== 'object') return presentation;
+  const storedSections = stored.sections || {};
+  const presentationSections = presentation?.sections || {};
+  const mergedSections = { ...presentationSections };
+
+  for (const [key, value] of Object.entries(storedSections)) {
+    if (!value || typeof value !== 'object') {
+      mergedSections[key] = value;
+      continue;
+    }
+    mergedSections[key] = {
+      ...(presentationSections[key] || {}),
+      ...value,
+    };
+    // Fill empty stored fields from presentation so empty cards do not render blank.
+    for (const [field, pVal] of Object.entries(presentationSections[key] || {})) {
+      if (!hasRenderableContent(mergedSections[key][field]) && hasRenderableContent(pVal)) {
+        mergedSections[key][field] = pVal;
+      } else if (typeof mergedSections[key][field] === 'string') {
+        mergedSections[key][field] = simplifyCustomerCopy(mergedSections[key][field]);
+      } else if (Array.isArray(mergedSections[key][field])) {
+        mergedSections[key][field] = mapLabelsForCustomer(mergedSections[key][field], {
+          technical: key === 'confidence_reality' || key === 'advanced_source',
+        }).map((item) =>
+          key === 'confidence_reality' || key === 'advanced_source' ? item : simplifyCustomerCopy(item)
+        );
+      }
+    }
+  }
+
+  return {
+    ...presentation,
+    ...stored,
+    target_technicality: stored.target_technicality ?? presentation?.target_technicality ?? 25,
+    sections: mergedSections,
+    presentation_derived: Boolean(presentation?.presentation_derived) && !stored.sections,
   };
 }
 
@@ -368,19 +690,83 @@ function buildFromRetrieve(retrieve = {}, profile = {}) {
   const primaryConstraintSection = findBriefingSection(briefing, 'primary_constraint');
   const behavioralSection = findBriefingSection(briefing, 'behavioral_reality_applied_to_business');
   const currentRealitySection = findBriefingSection(briefing, 'current_business_reality');
+  const executiveReadout =
+    findBriefingSection(briefing, 'executive_readout') ||
+    findBriefingSection(briefing, 'executive_summary');
+  const trajectorySection = findBriefingSection(briefing, 'current_trajectory_signal');
+  const leadGenSection = findBriefingSection(briefing, 'lead_generation_reality');
+  const crmSection = findBriefingSection(briefing, 'lead_conversion_follow_up_reality');
+  const systemsSection = findBriefingSection(briefing, 'systems_reality');
+  const financialSection = findBriefingSection(briefing, 'financial_reality');
+  const accountabilitySection = findBriefingSection(briefing, 'accountability_reality');
+  const databaseSection = findBriefingSection(briefing, 'relationship_database_reality');
   const confidenceEngine = output.confidence_engine || bid.confidence_engine || {};
 
-  const missingFinancial = asArray(
-    bid.missing_financial_data || bid.financial_reality?.missing_financial_data || confidenceEngine.missing
+  const missingFinancialRaw = asArray(
+    bid.missing_financial_data ||
+      bid.financial_reality?.missing_financial_data ||
+      bid.missing_data ||
+      []
   );
+  const missingFinancialLabels = mapLabelsForCustomer(missingFinancialRaw, { technical: true });
 
   const confidenceSummary = deriveConfidenceSummary(confidenceEngine, {
-    confidence_engine_missing: missingFinancial,
+    confidence_engine_missing: asArray(confidenceEngine.missing),
+    financial: missingFinancialRaw,
   });
 
-  const primaryConstraint = bid.primary_constraint || bid.constraint_analysis?.primary_constraint || {};
+  const primaryConstraint = resolvePrimaryConstraint(bid, primaryConstraintSection);
+  const dimensions = deriveBehavioralDimensions(bid.behavioral_reality || {}, profile);
+  const helpsDistorts = deriveHelpsAndDistorts(bid, behavioralSection?.body);
 
-  return {
+  const relationshipAsset = relationshipAssetCustomerLine(
+    bid.relationship_reality?.lake_health ||
+      bid.relationship_reality?.relationship_asset_strength ||
+      bid.relationship_asset_strength
+  );
+  const leadGeneration = deriveLeadGenerationCustomerLine(
+    bid.lead_generation_reality || {},
+    leadGenSection?.body
+  );
+  const crmFollowUp = deriveCrmCustomerLine(bid.lead_conversion_reality || {}, crmSection?.body);
+  const financialDiscipline = deriveFinancialCustomerLine(
+    bid.financial_reality || {},
+    financialSection?.body
+  );
+  const systemsAccountability = deriveSystemsAccountabilityLine(bid, systemsSection?.body);
+
+  const alignedPoints = [];
+  const thinPoints = [];
+  if (relationshipAsset) {
+    alignedPoints.push(relationshipAsset);
+  }
+  if (leadGeneration) thinPoints.push(`Lead generation: ${leadGeneration}`);
+  if (crmFollowUp) thinPoints.push(`CRM / follow-up: ${crmFollowUp}`);
+  if (financialDiscipline) thinPoints.push(`Financial / P&L: ${financialDiscipline}`);
+  if (systemsAccountability) thinPoints.push(`Systems / accountability: ${systemsAccountability}`);
+
+  const businessStage = textValue(
+    bid.business_reality?.operating_mode ||
+      bid.current_stage?.stage ||
+      bid.current_stage?.label ||
+      bid.business_reality?.producer_type
+  );
+
+  const oneMoveCard = deriveOneMoveCard(output.one_move_v1);
+  // Soften one-move text at presentation layer only.
+  const oneMoveCardCustomer = {
+    ...oneMoveCard,
+    title: simplifyCustomerCopy(oneMoveCard.title),
+    recommendation: simplifyCustomerCopy(oneMoveCard.recommendation),
+    why_this_move: simplifyCustomerCopy(oneMoveCard.why_this_move),
+    why_now: simplifyCustomerCopy(oneMoveCard.why_now),
+    behavior_fit: simplifyCustomerCopy(oneMoveCard.behavior_fit),
+    first_30_days: asArray(oneMoveCard.first_30_days).map(simplifyCustomerCopy),
+    proof_signals: asArray(oneMoveCard.proof_signals).map(simplifyCustomerCopy),
+    adoption_risks: asArray(oneMoveCard.adoption_risks).map(simplifyCustomerCopy),
+  };
+
+  const vmCore = {
     view_model_version: 'customer_ba_view_model_production_v1',
     person_name: personName,
     profile_id: profileId,
@@ -394,95 +780,121 @@ function buildFromRetrieve(retrieve = {}, profile = {}) {
       name: personName,
     },
     status: output.five_futures_v1 && output.one_move_v1 ? 'five_futures_and_one_move_ready' : 'partial',
-    primary_constraint: {
-      key: primaryConstraint.key || primaryConstraint.constraint_key,
-      label: primaryConstraint.label || primaryConstraint.constraint_key,
-      score: primaryConstraint.score,
-      confidence: primaryConstraint.confidence,
-      summary: textValue(primaryConstraint.summary || primaryConstraintSection?.body),
-      effect_if_unchanged: textValue(primaryConstraint.effect_if_unchanged),
-      symptoms: asArray(primaryConstraint.symptoms || primaryConstraint.evidence),
-      root_cause: textValue(primaryConstraint.root_cause),
-    },
+    primary_constraint: primaryConstraint,
     confidence_summary: confidenceSummary,
     missing_data: {
-      financial: missingFinancial,
+      financial: missingFinancialRaw,
+      financial_labels: missingFinancialLabels,
       confidence_engine_missing: asArray(confidenceEngine.missing),
+      confidence_engine_missing_labels: mapLabelsForCustomer(asArray(confidenceEngine.missing), {
+        technical: true,
+      }),
       customer_note:
         bid.missing_data_note ||
         confidenceEngine.customer_note ||
         'Some financial and conversion detail may be incomplete. This briefing is an operating diagnostic, not a complete financial model.',
     },
     overview: {
-      what_this_assessment_is_really_saying: textValue(
-        findBriefingSection(briefing, 'executive_summary')?.body ||
-          briefing?.executive_summary ||
-          currentRealitySection?.body
+      what_this_assessment_is_really_saying: simplifyCustomerCopy(
+        textValue(
+          executiveReadout?.body ||
+            findBriefingSection(briefing, 'executive_summary')?.body ||
+            briefing?.executive_summary ||
+            currentRealitySection?.body
+        )
       ),
       doctrine_fusion_line: 'Business reality + personality reality + future consequence',
-      one_move_teaser: textValue(output.one_move_v1?.title),
+      one_move_teaser: simplifyCustomerCopy(textValue(output.one_move_v1?.title)),
       confidence_band: confidenceSummary.band,
+      why_this_matters: simplifyCustomerCopy(
+        primaryConstraint.effect_if_unchanged || trajectorySection?.body
+      ),
+      focus_first: simplifyCustomerCopy(
+        textValue(output.one_move_v1?.recommendation || output.one_move_v1?.title)
+      ),
     },
     business_reality_summary: {
-      stage: textValue(bid.current_stage?.stage || bid.current_stage?.label),
-      headline: textValue(currentRealitySection?.title || bid.current_stage?.description),
-      leads: textValue(findBriefingSection(briefing, 'lead_generation_reality')?.body),
-      database: textValue(findBriefingSection(briefing, 'relationship_database_reality')?.body),
-      systems: textValue(findBriefingSection(briefing, 'systems_reality')?.body),
-      financial: textValue(findBriefingSection(briefing, 'financial_reality')?.body),
-      accountability: textValue(findBriefingSection(briefing, 'accountability_reality')?.body),
-      growth_constraint: textValue(primaryConstraint.label || primaryConstraint.constraint_key),
+      stage: customerDisplayLabel(businessStage) || simplifyCustomerCopy(businessStage),
+      headline: simplifyCustomerCopy(
+        textValue(currentRealitySection?.title || bid.current_stage?.description || executiveReadout?.title)
+      ),
+      leads: simplifyCustomerCopy(textValue(leadGenSection?.body)),
+      database: simplifyCustomerCopy(textValue(databaseSection?.body)),
+      systems: simplifyCustomerCopy(textValue(systemsSection?.body)),
+      financial: simplifyCustomerCopy(textValue(financialSection?.body)),
+      accountability: simplifyCustomerCopy(textValue(accountabilitySection?.body)),
+      growth_constraint: primaryConstraint.label,
       sections: {
-        leads: findBriefingSection(briefing, 'lead_generation_reality'),
-        database: findBriefingSection(briefing, 'relationship_database_reality'),
-        systems: findBriefingSection(briefing, 'systems_reality'),
-        financial: findBriefingSection(briefing, 'financial_reality'),
-        accountability: findBriefingSection(briefing, 'accountability_reality'),
+        leads: leadGenSection,
+        database: databaseSection,
+        systems: systemsSection,
+        financial: financialSection,
+        accountability: accountabilitySection,
       },
     },
     behavioral_reality_summary: {
-      profile_type: textValue(bid.behavioral_reality?.profile_type || profile.profile_type),
-      top_dimensions: asArray(bid.behavioral_reality?.ranked_dimensions || profile.ranked_dimensions).slice(0, 3),
-      low_dimensions: asArray(bid.behavioral_reality?.low_dimensions || profile.low_dimensions).slice(0, 2),
-      headline: textValue(behavioralSection?.body || bid.behavior_business_fusion?.fusion_summary),
-      helps_business: asArray(bid.behavior_business_fusion?.helps_business || bid.behavioral_reality?.helps_business),
-      distorts_business: asArray(
-        bid.behavior_business_fusion?.distorts_business || bid.behavioral_reality?.distorts_business
+      profile_type: simplifyCustomerCopy(
+        textValue(bid.behavioral_reality?.profile_type || profile.profile_type)
       ),
-      behavior_to_business: textValue(behavioralSection?.body),
+      top_dimensions: dimensions.top_dimensions,
+      low_dimensions: dimensions.low_dimensions,
+      top_plain: dimensions.top_plain,
+      low_plain: dimensions.low_plain,
+      headline: simplifyCustomerCopy(
+        textValue(helpsDistorts.fusion_summary || behavioralSection?.body)
+      ),
+      helps_business: helpsDistorts.helps_business,
+      distorts_business: helpsDistorts.distorts_business,
+      behavior_to_business: simplifyCustomerCopy(textValue(behavioralSection?.body)),
       section: behavioralSection,
     },
     business_model_alignment_summary: {
-      headline: textValue(currentRealitySection?.body || bid.current_stage?.description),
-      relationship_asset: textValue(bid.relationship_reality?.lake_health || bid.relationship_asset_strength),
-      lead_generation: textValue(bid.lead_generation_reality?.summary),
-      crm_follow_up: textValue(bid.lead_conversion_reality?.summary),
-      financial_discipline: textValue(bid.financial_reality?.summary),
-      systems_accountability: textValue(
-        bid.systems_reality?.overall_maturity_score || bid.accountability_reality?.maturity_label
+      headline: simplifyCustomerCopy(
+        textValue(currentRealitySection?.body || bid.current_stage?.description)
       ),
-      section: currentRealitySection,
+      relationship_asset: relationshipAsset,
+      lead_generation: leadGeneration || unavailableCustomerNote('Lead generation'),
+      crm_follow_up: crmFollowUp || unavailableCustomerNote('CRM / follow-up'),
+      financial_discipline: financialDiscipline || unavailableCustomerNote('Financial / P&L detail'),
+      systems_accountability: systemsAccountability,
+      aligned_points: alignedPoints,
+      thin_points: thinPoints,
+      transition_note: simplifyCustomerCopy(
+        textValue(
+          bid.business_reality?.transition_note ||
+            trajectorySection?.body ||
+            'The business is still transitioning from personal production toward a more system-supported model.'
+        )
+      ),
+      // Raw briefing section is technical-source material; do not surface on customer fit cards.
+      section_key: currentRealitySection?.key || currentRealitySection?.id || null,
     },
     constraint_summary: {
       primary: {
-        key: primaryConstraint.key || primaryConstraint.constraint_key,
+        key: primaryConstraint.key,
         label: primaryConstraint.label,
         score: primaryConstraint.score,
         confidence: primaryConstraint.confidence,
-        summary: textValue(primaryConstraint.summary || primaryConstraintSection?.body),
-        effect_if_unchanged: textValue(primaryConstraint.effect_if_unchanged),
-        symptoms: asArray(primaryConstraint.symptoms),
-        root_cause: textValue(primaryConstraint.root_cause),
+        summary: primaryConstraint.summary,
+        effect_if_unchanged: primaryConstraint.effect_if_unchanged,
+        symptoms: primaryConstraint.symptoms,
+        root_cause: primaryConstraint.root_cause,
       },
       symptoms_vs_root: {
-        symptoms: asArray(primaryConstraint.symptoms),
-        root_cause: textValue(primaryConstraint.root_cause),
+        symptoms: primaryConstraint.symptoms,
+        root_cause: primaryConstraint.root_cause,
       },
-      if_unchanged: textValue(primaryConstraint.effect_if_unchanged),
+      if_unchanged: primaryConstraint.effect_if_unchanged,
       section: primaryConstraintSection,
     },
-    five_futures_cards: deriveFiveFuturesCards(output.five_futures_v1),
-    one_move_card: deriveOneMoveCard(output.one_move_v1),
+    five_futures_cards: deriveFiveFuturesCards(output.five_futures_v1).map((card) => ({
+      ...card,
+      title: simplifyCustomerCopy(card.title),
+      summary: simplifyCustomerCopy(card.summary),
+      short_interpretation: simplifyCustomerCopy(card.short_interpretation),
+      behavioral_modifier: asArray(card.behavioral_modifier).map(simplifyCustomerCopy),
+    })),
+    one_move_card: oneMoveCardCustomer,
     visual_dna: deriveVisualDna(output, profileId),
     visual_dna_cards: [
       {
@@ -504,17 +916,24 @@ function buildFromRetrieve(retrieve = {}, profile = {}) {
     ],
     advanced_source_refs: deriveAdvancedSourceRefs(output, assessment, profileId),
     model_provenance: deriveModelProvenance(output, assessment),
-    customer_language_v2: retrieve.customer_language_v2 || output.customer_language_v2 || null,
     shell_tabs: BA_SHELL_TABS,
     source_mutation: false,
     meta: {
       labOnly: false,
       productionSafe: true,
       brandLine: 'MORE MindMap / Business Assessment',
-      customerLanguageTarget: retrieve.customer_language_v2?.target_technicality ?? 25,
+      customerLanguageTarget: 25,
       universalTranslatorRequired: false,
     },
   };
+
+  const storedLanguage = retrieve.customer_language_v2 || output.customer_language_v2 || null;
+  const presentationLanguage = buildPresentationCustomerLanguage(vmCore);
+  vmCore.customer_language_v2 = mergeCustomerLanguage(storedLanguage, presentationLanguage);
+  vmCore.meta.customerLanguageTarget =
+    vmCore.customer_language_v2?.target_technicality ?? 25;
+
+  return vmCore;
 }
 
 function isStaleVisualDnaCard(card) {

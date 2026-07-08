@@ -5,6 +5,7 @@ import {
 } from '../../lib/businessAssessment/buildCustomerBAViewModel.js';
 import {
   BACard,
+  BACardIfContent,
   CustomerSafeText,
   CustomerSafeListItems,
   sanitizeCustomerMarkdown,
@@ -13,47 +14,53 @@ import BAVisualDNATab from './BAVisualDNATab.jsx';
 import BAAdvancedSource from './BAAdvancedSource.jsx';
 import BAMonthlyIntelligenceCard from './BAMonthlyIntelligenceCard.jsx';
 
+function textOr(...values) {
+  for (const value of values) {
+    if (value === null || value === undefined) continue;
+    if (Array.isArray(value) && value.filter(Boolean).length) return value;
+    if (typeof value === 'string' && value.trim()) return value;
+    if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  }
+  return '';
+}
+
 function OverviewTab({ vm, lang }) {
-  const { overview, confidence_summary: cs } = vm;
+  const { overview } = vm;
   const o = lang?.overview;
+  const found = textOr(o?.what_assessment_found, overview.what_this_assessment_is_really_saying);
+  const why = textOr(o?.why_it_matters, overview.why_this_matters);
+  const focus = textOr(o?.focus_first, overview.focus_first);
+  const bottleneck = textOr(o?.primary_bottleneck_plain, vm.primary_constraint?.summary);
+  const oneMove = textOr(o?.one_move_plain, overview.one_move_teaser, vm.one_move_card?.title);
+
   return (
     <div className="space-y-4">
-      <BACard title="What This Assessment Found" badge="Focus">
-        <CustomerSafeText
-          text={o?.what_assessment_found || overview.what_this_assessment_is_really_saying}
-        />
-      </BACard>
-      <BACard title="Why This Matters">
-        <CustomerSafeText text={o?.why_it_matters} />
-      </BACard>
-      <BACard title="What To Focus On First" badge="Action">
-        <CustomerSafeText text={o?.focus_first} />
-      </BACard>
-      <div className="grid gap-4 md:grid-cols-3">
-        <BACard title="Main Bottleneck">
-          <CustomerSafeText
-            text={o?.primary_bottleneck_plain || vm.primary_constraint?.summary}
-            className="text-sm text-white/75"
-          />
-        </BACard>
-        <BACard title="Your One Move" badge="Action">
-          <CustomerSafeText
-            text={o?.one_move_plain || overview.one_move_teaser}
-            className="text-sm font-semibold text-white"
-          />
-        </BACard>
-        <BACard title="How Sure Is This?" badge="Confidence">
-          <p className="text-lg font-bold capitalize text-sky-200">
-            {cs.band} ({cs.score}/100)
-          </p>
-          <div className="mt-2">
-            <CustomerSafeText
-              text={o?.confidence_plain || cs.headline}
-              className="text-sm text-white/70"
-            />
-          </div>
-        </BACard>
+      <BACardIfContent title="What This Assessment Found" badge="Focus" content={found}>
+        <CustomerSafeText text={found} />
+      </BACardIfContent>
+      <BACardIfContent title="Why This Matters" content={why}>
+        <CustomerSafeText text={why} />
+      </BACardIfContent>
+      <BACardIfContent title="What To Focus On First" badge="Action" content={focus}>
+        <CustomerSafeText text={focus} />
+      </BACardIfContent>
+      <div className="grid gap-4 md:grid-cols-2">
+        <BACardIfContent title="Main Bottleneck" content={bottleneck}>
+          <CustomerSafeText text={bottleneck} className="text-sm text-white/75" />
+        </BACardIfContent>
+        <BACardIfContent title="Your One Move" badge="Action" content={oneMove}>
+          <CustomerSafeText text={oneMove} className="text-sm font-semibold text-white" />
+          {vm.one_move_card?.recommendation ? (
+            <div className="mt-2">
+              <CustomerSafeText
+                text={vm.one_move_card.recommendation}
+                className="text-sm text-white/70"
+              />
+            </div>
+          ) : null}
+        </BACardIfContent>
       </div>
+      {/* Confidence stays in Technical Source only — not in Overview. */}
       <CustomerSafeText
         text={o?.doctrine_plain || overview.doctrine_fusion_line}
         className="text-xs text-white/45"
@@ -66,19 +73,26 @@ function BusinessRealityTab({ vm, lang }) {
   const br = vm.business_reality_summary;
   const l = lang?.business_reality;
   const items = [
-    { label: 'Leads', value: l?.leads || br.sections?.leads?.body || br.leads },
-    { label: 'Relationships / Database', value: l?.database || br.sections?.database?.body || br.database },
-    { label: 'Systems', value: l?.systems || br.sections?.systems?.body || br.systems },
-    { label: 'Financial Reality', value: l?.financial || br.sections?.financial?.body || br.financial },
-    { label: 'Accountability', value: l?.accountability || br.sections?.accountability?.body || br.accountability },
-  ];
+    { label: 'Leads', value: textOr(l?.leads, br.leads) },
+    { label: 'Relationships / Database', value: textOr(l?.database, br.database) },
+    { label: 'Systems', value: textOr(l?.systems, br.systems) },
+    { label: 'Financial Reality', value: textOr(l?.financial, br.financial) },
+    { label: 'Accountability', value: textOr(l?.accountability, br.accountability) },
+  ].filter((item) => textOr(item.value));
+
   return (
     <div className="space-y-4">
-      <BACard title={sanitizeCustomerMarkdown(l?.headline || br.headline)} badge="Business">
-        <p className="text-xs text-white/50">
-          Stage: {sanitizeCustomerMarkdown(l?.stage_plain || br.stage)}
-        </p>
-      </BACard>
+      <BACardIfContent
+        title={sanitizeCustomerMarkdown(l?.headline || br.headline || 'Your Business Today')}
+        badge="Business"
+        content={l?.headline || br.headline || br.stage}
+      >
+        {br.stage || l?.stage_plain ? (
+          <p className="text-xs text-white/50">
+            Stage: {sanitizeCustomerMarkdown(l?.stage_plain || br.stage)}
+          </p>
+        ) : null}
+      </BACardIfContent>
       <div className="grid gap-3 md:grid-cols-2">
         {items.map((item) => (
           <BACard key={item.label} title={item.label}>
@@ -86,12 +100,16 @@ function BusinessRealityTab({ vm, lang }) {
           </BACard>
         ))}
       </div>
-      <BACard title="Missing Information (Shown Honestly)" badge="Confidence">
+      {/* Missing-data confidence detail stays in Technical Source; short honest note only. */}
+      <BACardIfContent
+        title="Where Detail Is Still Thin"
+        content={textOr(l?.missing_data_plain, vm.missing_data?.customer_note)}
+      >
         <CustomerSafeText
-          text={l?.missing_data_plain || vm.missing_data.customer_note}
+          text={textOr(l?.missing_data_plain, vm.missing_data?.customer_note)}
           className="text-sm text-white/70"
         />
-      </BACard>
+      </BACardIfContent>
     </div>
   );
 }
@@ -99,56 +117,43 @@ function BusinessRealityTab({ vm, lang }) {
 function BehavioralOSTab({ vm, lang }) {
   const beh = vm.behavioral_reality_summary;
   const l = lang?.behavioral_os;
-  const helps = l?.helps_business || beh.helps_business;
-  const distorts = l?.gets_in_the_way || beh.distorts_business;
+  const helps = textOr(l?.helps_business, beh.helps_business);
+  const distorts = textOr(l?.gets_in_the_way, beh.distorts_business);
+  const strongest = textOr(l?.dimensions_plain?.strongest, (beh.top_plain || []).join(' · '));
+  const weakest = textOr(l?.dimensions_plain?.weakest, (beh.low_plain || []).join(' · '));
+  const execution = textOr(l?.execution_effect, beh.behavior_to_business);
+
   return (
     <div className="space-y-4">
-      <BACard title={sanitizeCustomerMarkdown(l?.profile_plain || beh.profile_type)} badge="Business">
-        <CustomerSafeText text={l?.headline || beh.headline} className="text-sm text-white/75" />
-      </BACard>
-      <div className="grid gap-4 md:grid-cols-2">
-        <BACard title="Where Your Style Helps the Business">
-          <CustomerSafeListItems items={helps} />
-        </BACard>
-        <BACard title="Where It Gets In The Way">
-          <CustomerSafeListItems items={distorts} />
-        </BACard>
-      </div>
-      <BACard title="How This Affects Execution">
+      <BACardIfContent
+        title={sanitizeCustomerMarkdown(l?.profile_plain || beh.profile_type || 'How You Work')}
+        badge="Business"
+        content={textOr(l?.headline, beh.headline, l?.profile_plain, beh.profile_type)}
+      >
         <CustomerSafeText
-          text={l?.execution_effect || beh.behavior_to_business}
-          className="text-sm leading-relaxed text-white/75"
+          text={textOr(l?.headline, beh.headline)}
+          className="text-sm text-white/75"
         />
-      </BACard>
-      {l?.dimensions_plain ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <BACard title="Strongest Traits">
-            <CustomerSafeText text={l.dimensions_plain.strongest} className="text-sm text-white/75" />
-          </BACard>
-          <BACard title="Areas That Need Structure">
-            <CustomerSafeText text={l.dimensions_plain.weakest} className="text-sm text-white/75" />
-          </BACard>
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <BACard title="Top Dimensions">
-            {beh.top_dimensions.map((d) => (
-              <p key={d.label} className="text-sm text-white/80">
-                {sanitizeCustomerMarkdown(d.label)}:{' '}
-                <span className="font-mono text-emerald-300">{d.score}</span>
-              </p>
-            ))}
-          </BACard>
-          <BACard title="Low Dimensions">
-            {beh.low_dimensions.map((d) => (
-              <p key={d.label} className="text-sm text-white/80">
-                {sanitizeCustomerMarkdown(d.label)}:{' '}
-                <span className="font-mono text-amber-300">{d.score}</span>
-              </p>
-            ))}
-          </BACard>
-        </div>
-      )}
+      </BACardIfContent>
+      <div className="grid gap-4 md:grid-cols-2">
+        <BACardIfContent title="Where Your Style Helps the Business" content={helps}>
+          <CustomerSafeListItems items={Array.isArray(helps) ? helps : [helps]} />
+        </BACardIfContent>
+        <BACardIfContent title="Where It Gets In The Way" content={distorts}>
+          <CustomerSafeListItems items={Array.isArray(distorts) ? distorts : [distorts]} />
+        </BACardIfContent>
+      </div>
+      <BACardIfContent title="How This Affects Execution" content={execution}>
+        <CustomerSafeText text={execution} className="text-sm leading-relaxed text-white/75" />
+      </BACardIfContent>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <BACardIfContent title="Strongest Traits" content={strongest}>
+          <CustomerSafeText text={strongest} className="text-sm text-white/75" />
+        </BACardIfContent>
+        <BACardIfContent title="Areas That Need Structure" content={weakest}>
+          <CustomerSafeText text={weakest} className="text-sm text-white/75" />
+        </BACardIfContent>
+      </div>
     </div>
   );
 }
@@ -156,43 +161,57 @@ function BehavioralOSTab({ vm, lang }) {
 function ModelAlignmentTab({ vm, lang }) {
   const ma = vm.business_model_alignment_summary;
   const l = lang?.model_alignment;
+  const fitRows = [
+    ['Relationship asset', textOr(ma.relationship_asset)],
+    ['Lead generation', textOr(ma.lead_generation)],
+    ['CRM / follow-up', textOr(ma.crm_follow_up)],
+    ['Financial / P&L', textOr(ma.financial_discipline)],
+    ['Systems / accountability', textOr(ma.systems_accountability)],
+  ].filter(([, value]) => value);
+
+  const aligned = textOr(l?.aligned, ma.aligned_points);
+  const thin = textOr(l?.thin_or_informal, ma.thin_points);
+
   return (
     <div className="space-y-4">
-      <BACard title={sanitizeCustomerMarkdown(l?.headline || ma.headline)} badge="Business" />
-      {l?.healthy_business_needs ? (
-        <BACard title="What a Healthy Real Estate Business Needs">
-          <CustomerSafeText text={l.healthy_business_needs} className="text-sm text-white/75" />
-        </BACard>
-      ) : null}
-      {l?.aligned ? (
-        <BACard title="Where You Are Aligned">
-          <CustomerSafeListItems items={l.aligned} />
-        </BACard>
-      ) : null}
-      {l?.thin_or_informal ? (
-        <BACard title="Where the Business Is Thin or Informal">
-          <CustomerSafeListItems items={l.thin_or_informal} />
-        </BACard>
-      ) : (
+      <BACardIfContent
+        title={sanitizeCustomerMarkdown(l?.headline || 'Business Fit') || 'Business Fit'}
+        badge="Business"
+        content={textOr(l?.headline, ma.headline)}
+      >
+        <CustomerSafeText text={textOr(l?.headline, ma.headline)} className="text-sm text-white/75" />
+      </BACardIfContent>
+      <BACardIfContent
+        title="What a Healthy Real Estate Business Needs"
+        content={l?.healthy_business_needs}
+      >
+        <CustomerSafeText text={l?.healthy_business_needs} className="text-sm text-white/75" />
+      </BACardIfContent>
+      <BACardIfContent title="Where You Are Aligned" content={aligned}>
+        <CustomerSafeListItems items={Array.isArray(aligned) ? aligned : [aligned]} />
+      </BACardIfContent>
+      <BACardIfContent title="Where the Business Is Thin or Informal" content={thin}>
+        {Array.isArray(thin) ? (
+          <CustomerSafeListItems items={thin} />
+        ) : (
+          <CustomerSafeText text={thin} className="text-sm text-white/75" />
+        )}
+      </BACardIfContent>
+      {!aligned && !thin && fitRows.length ? (
         <div className="space-y-3">
-          {[
-            ['Relationship asset', ma.relationship_asset],
-            ['Lead generation', ma.lead_generation],
-            ['CRM / follow-up', ma.crm_follow_up],
-            ['Financial / P&L', ma.financial_discipline],
-            ['Systems / accountability', ma.systems_accountability],
-          ].map(([label, value]) => (
+          {fitRows.map(([label, value]) => (
             <BACard key={label} title={label}>
               <CustomerSafeText text={value} className="text-sm text-white/75" />
             </BACard>
           ))}
         </div>
-      )}
-      {l?.transition_note ? (
-        <BACard title="Where You Are in the Transition">
-          <CustomerSafeText text={l.transition_note} className="text-sm text-white/75" />
-        </BACard>
       ) : null}
+      <BACardIfContent title="Where You Are in the Transition" content={textOr(l?.transition_note, ma.transition_note)}>
+        <CustomerSafeText
+          text={textOr(l?.transition_note, ma.transition_note)}
+          className="text-sm text-white/75"
+        />
+      </BACardIfContent>
     </div>
   );
 }
@@ -200,38 +219,39 @@ function ModelAlignmentTab({ vm, lang }) {
 function ConstraintRealityTab({ vm, lang }) {
   const cs = vm.constraint_summary;
   const l = lang?.constraint_reality;
+  const bottleneck = textOr(l?.bottleneck_plain, cs.primary.summary);
+  const symptoms = textOr(l?.symptoms, cs.symptoms_vs_root.symptoms);
+  const root = textOr(l?.root_problem, cs.symptoms_vs_root.root_cause);
+  const ifUnchanged = textOr(l?.if_unchanged, cs.if_unchanged);
+
   return (
     <div className="space-y-4">
-      <BACard title="The Actual Bottleneck" badge="Focus">
-        <CustomerSafeText
-          text={l?.bottleneck_plain || cs.primary.summary}
-          className="text-sm text-white/75"
-        />
-      </BACard>
+      <BACardIfContent title="The Actual Bottleneck" badge="Focus" content={bottleneck}>
+        <CustomerSafeText text={bottleneck} className="text-sm text-white/75" />
+      </BACardIfContent>
       <div className="grid gap-4 md:grid-cols-2">
-        <BACard title="Symptoms You May Notice">
-          <CustomerSafeListItems items={l?.symptoms || cs.symptoms_vs_root.symptoms} />
-        </BACard>
-        <BACard title="Root Problem (Not Just the Symptom)">
-          <CustomerSafeText
-            text={l?.root_problem || cs.symptoms_vs_root.root_cause}
-            className="text-sm text-white/75"
+        <BACardIfContent title="Symptoms You May Notice" content={symptoms}>
+          <CustomerSafeListItems
+            items={Array.isArray(symptoms) ? symptoms : [symptoms]}
           />
+        </BACardIfContent>
+        <BACardIfContent title="Root Problem (Not Just the Symptom)" content={root}>
+          <CustomerSafeText text={root} className="text-sm text-white/75" />
           {l?.symptoms_vs_root ? (
             <div className="mt-3">
               <CustomerSafeText text={l.symptoms_vs_root} className="text-sm text-white/60" />
             </div>
           ) : null}
-        </BACard>
+        </BACardIfContent>
       </div>
-      <BACard title="What Happens If This Stays the Same">
-        <CustomerSafeText text={l?.if_unchanged || cs.if_unchanged} className="text-sm text-white/75" />
+      <BACardIfContent title="What Happens If This Stays the Same" content={ifUnchanged}>
+        <CustomerSafeText text={ifUnchanged} className="text-sm text-white/75" />
         {l?.trajectory_plain ? (
           <div className="mt-3">
             <CustomerSafeText text={l.trajectory_plain} className="text-sm text-white/60" />
           </div>
         ) : null}
-      </BACard>
+      </BACardIfContent>
     </div>
   );
 }
@@ -299,41 +319,47 @@ function FiveFuturesTab({ vm, lang }) {
 function OneMoveTab({ vm, lang }) {
   const om = vm.one_move_card;
   const l = lang?.one_move;
+  const title = textOr(l?.title_plain, om.title);
+  const what = textOr(l?.what_to_do, om.recommendation);
+  const whyMove = textOr(l?.why_this_move, om.why_this_move);
+  const whyNow = textOr(l?.why_now, om.why_now);
+  const fits = textOr(l?.why_fits_you, l?.why_fits_owner, om.behavior_fit);
+  const first30 = textOr(l?.first_30_days, om.first_30_days);
+  const proof = textOr(l?.proof_would_show_working, om.proof_signals);
+  const risks = textOr(l?.adoption_risks_plain, om.adoption_risks);
+
   return (
     <div className="space-y-4">
-      <BACard title={sanitizeCustomerMarkdown(l?.title_plain || om.title)} badge="Action">
-        <CustomerSafeText text={l?.what_to_do || om.recommendation} className="text-sm text-white/75" />
-      </BACard>
+      <BACardIfContent title={sanitizeCustomerMarkdown(title) || 'Your One Move'} badge="Action" content={what || title}>
+        <CustomerSafeText text={what} className="text-sm text-white/75" />
+      </BACardIfContent>
       <div className="grid gap-4 md:grid-cols-2">
-        <BACard title="Why This Move">
-          <CustomerSafeText text={l?.why_this_move || om.why_this_move} className="text-sm text-white/75" />
-        </BACard>
-        <BACard title="Why Now">
-          <CustomerSafeText text={l?.why_now || om.why_now} className="text-sm text-white/75" />
-        </BACard>
+        <BACardIfContent title="Why This Move" content={whyMove}>
+          <CustomerSafeText text={whyMove} className="text-sm text-white/75" />
+        </BACardIfContent>
+        <BACardIfContent title="Why Now" content={whyNow}>
+          <CustomerSafeText text={whyNow} className="text-sm text-white/75" />
+        </BACardIfContent>
       </div>
-      <BACard title="Why It Fits You">
-        <CustomerSafeText
-          text={l?.why_fits_you || l?.why_fits_owner || om.behavior_fit}
-          className="text-sm text-white/75"
-        />
-      </BACard>
-      <BACard title="First 30 Days">
+      <BACardIfContent title="Why It Fits You" content={fits}>
+        <CustomerSafeText text={fits} className="text-sm text-white/75" />
+      </BACardIfContent>
+      <BACardIfContent title="First 30 Days" content={first30}>
         <ol className="list-inside list-decimal space-y-1 text-sm text-white/75">
-          {(l?.first_30_days || om.first_30_days).map((d) => (
+          {(Array.isArray(first30) ? first30 : [first30]).filter(Boolean).map((d) => (
             <li key={d}>{sanitizeCustomerMarkdown(d)}</li>
           ))}
         </ol>
-      </BACard>
-      <BACard title="Proof That Would Show It Is Working">
-        <CustomerSafeListItems items={l?.proof_would_show_working || om.proof_signals || []} />
-      </BACard>
-      <BACard title="Risks If You Slip Back">
+      </BACardIfContent>
+      <BACardIfContent title="Proof That Would Show It Is Working" content={proof}>
+        <CustomerSafeListItems items={Array.isArray(proof) ? proof : [proof]} />
+      </BACardIfContent>
+      <BACardIfContent title="Risks If You Slip Back" content={risks}>
         <CustomerSafeListItems
-          items={l?.adoption_risks_plain || om.adoption_risks}
+          items={Array.isArray(risks) ? risks : [risks]}
           className="list-inside list-disc text-sm text-white/70"
         />
-      </BACard>
+      </BACardIfContent>
     </div>
   );
 }

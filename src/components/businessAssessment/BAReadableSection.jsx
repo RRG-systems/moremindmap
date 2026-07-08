@@ -30,6 +30,59 @@ export function BACard({ title, badge, children, className = '' }) {
   );
 }
 
+/**
+ * Renders a card only when content is present.
+ * Prevents giant empty boxes in customer tabs.
+ * If `fallback` is provided and primary content is empty, shows the fallback once.
+ */
+export function BACardIfContent({
+  title,
+  badge,
+  children,
+  content,
+  fallback = null,
+  className = '',
+}) {
+  const hasPrimary = content !== null && content !== undefined && content !== false
+    ? Boolean(
+        Array.isArray(content)
+          ? content.filter(Boolean).length
+          : String(content).trim().length
+      )
+    : null;
+
+  // When content prop is omitted, always render (caller controls children).
+  if (hasPrimary === null) {
+    return (
+      <BACard title={title} badge={badge} className={className}>
+        {children}
+      </BACard>
+    );
+  }
+
+  if (hasPrimary) {
+    return (
+      <BACard title={title} badge={badge} className={className}>
+        {children}
+      </BACard>
+    );
+  }
+
+  if (fallback) {
+    return (
+      <BACard title={title} badge={badge || 'Unavailable'} className={className}>
+        {typeof fallback === 'string' ? (
+          <p className="text-sm leading-relaxed text-white/65">{fallback}</p>
+        ) : (
+          fallback
+        )}
+      </BACard>
+    );
+  }
+
+  return null;
+}
+
 export function BAEmptyState({ title, message }) {
   return (
     <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5 text-sm text-white/60">
