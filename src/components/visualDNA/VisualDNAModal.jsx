@@ -1,13 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
-import DeterministicVisualDNA from './DeterministicVisualDNA.jsx';
+import DeterministicBOSDNAVisualV2, {
+  BOS_DNA_V2_POSTER_HEIGHT,
+  BOS_DNA_V2_POSTER_WIDTH,
+} from './DeterministicBOSDNAVisualV2.jsx';
 
-const POSTER_WIDTH = 1672;
-const POSTER_HEIGHT = 941;
-const POSTER_RATIO = POSTER_WIDTH / POSTER_HEIGHT;
+const POSTER_WIDTH = BOS_DNA_V2_POSTER_WIDTH;
+const POSTER_HEIGHT = BOS_DNA_V2_POSTER_HEIGHT;
 
-export default function VisualDNAModal({ isOpen, onClose, profile }) {
+export default function VisualDNAModal({
+  isOpen,
+  onClose,
+  profile = null,
+  viewModel = null,
+  narrative = null,
+  profileId = null,
+}) {
   const viewportRef = useRef(null);
   const [posterScale, setPosterScale] = useState(1);
+
+  const displayModel = viewModel || profile;
+  const displayName = displayModel?.name
+    || displayModel?.person_name
+    || 'Behavioral Operating System';
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -59,7 +73,7 @@ export default function VisualDNAModal({ isOpen, onClose, profile }) {
     };
   }, [isOpen]);
 
-  if (!isOpen || !profile) return null;
+  if (!isOpen || (!profile && !viewModel)) return null;
 
   const scaledPosterWidth = POSTER_WIDTH * posterScale;
   const scaledPosterHeight = POSTER_HEIGHT * posterScale;
@@ -76,8 +90,8 @@ export default function VisualDNAModal({ isOpen, onClose, profile }) {
       <div className="visual-dna-modal-shell">
         <div className="visual-dna-modal-toolbar">
           <div>
-            <span>Visual DNA Artifact</span>
-            <strong>{profile.name || 'Behavioral Operating System'}</strong>
+            <span>BOS DNA Visual Artifact</span>
+            <strong>{displayName}</strong>
           </div>
           <button type="button" className="visual-dna-modal-close" onClick={onClose}>
             Close
@@ -99,7 +113,14 @@ export default function VisualDNAModal({ isOpen, onClose, profile }) {
                 transform: `scale(${posterScale})`,
               }}
             >
-              <DeterministicVisualDNA profile={profile} variant="fullscreen" />
+              <DeterministicBOSDNAVisualV2
+                viewModel={viewModel}
+                profile={profile}
+                narrative={narrative}
+                profileId={profileId}
+                mode="fullscreen"
+                variant="fullscreen"
+              />
             </div>
           </div>
         </div>
@@ -217,6 +238,25 @@ const styles = `
   left: 0;
   top: 0;
   transform-origin: top left;
+}
+
+.visual-dna-modal-poster-scale .bos-dna-v2,
+.visual-dna-modal-poster-scale .bos-dna-v2__frame {
+  width: 1672px !important;
+  height: 941px !important;
+  min-width: 1672px !important;
+  max-width: 1672px !important;
+  aspect-ratio: 1672 / 941 !important;
+}
+
+.visual-dna-modal-poster-scale .bos-dna-v2__grid {
+  width: 1672px !important;
+  height: 941px !important;
+}
+
+.visual-dna-modal-poster-scale .bos-dna-v2__frame,
+.visual-dna-modal-poster-scale .bos-dna-v2__grid {
+  border-radius: 10px;
 }
 
 .visual-dna-modal-poster-scale .dvd-frame {
