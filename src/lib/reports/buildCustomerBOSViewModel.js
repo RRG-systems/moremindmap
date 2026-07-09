@@ -17,6 +17,7 @@ import {
   mapDimensionNameForCustomer,
   presentPatternHeadlineForCustomer,
   cleanCustomerBOSCopy,
+  stripCustomerMarkdown,
   preserveTechnicalSource,
   presentOneMoveHeadlineForCustomer,
   presentExecutiveSummaryForCustomer,
@@ -26,7 +27,8 @@ import {
   presentDimensionOneLineForCustomer,
   buildCustomerSectionBodies,
   buildCustomerPatternMeaning,
-  buildCustomerBestNextMoveBody,
+  buildCustomerOneMoveBlocks,
+  buildCustomerMainConstraintBody,
   collapseDuplicateCustomerPhrasing,
 } from './bosCustomerPresentationHelpers.js';
 
@@ -355,13 +357,15 @@ function presentScoreMeaningForCustomer(scoreMeaning) {
 /**
  * Overview expandable cards — bind customer section bodies only.
  * Raw executive/profileDNA/scaling narrative bodies are not used as content.
+ * R3B: Best Next Move → Main Constraint (bottleneck role, not action plan).
  */
 function buildOverviewSections(customerBodies) {
   const exec = customerBodies.customerExecutiveSummary;
   const core = customerBodies.customerCorePattern;
   const advantage = customerBodies.customerKeyAdvantage;
   const risk = customerBodies.customerScalingRisk;
-  const nextMove = customerBodies.customerBestNextMove;
+  const mainConstraint = customerBodies.customerMainConstraint
+    || customerBodies.customerBestNextMove;
 
   return [
     {
@@ -370,7 +374,9 @@ function buildOverviewSections(customerBodies) {
       preview: exec.headline || customerPreview(exec.body),
       badge: 'Core Insight',
       defaultOpen: true,
-      content: collapseDuplicateCustomerPhrasing(exec.content || exec.body || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(exec.content || exec.body || ''),
+      ),
     },
     {
       id: 'core-operating-pattern',
@@ -378,7 +384,9 @@ function buildOverviewSections(customerBodies) {
       preview: core.headline || customerBodies.customerPatternHeadline,
       badge: 'Core Insight',
       defaultOpen: true,
-      content: collapseDuplicateCustomerPhrasing(core.content || core.body || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(core.content || core.body || ''),
+      ),
     },
     {
       id: 'key-advantage',
@@ -388,7 +396,7 @@ function buildOverviewSections(customerBodies) {
       ),
       badge: 'Strength',
       defaultOpen: false,
-      content: advantage.content || advantage.body,
+      content: stripCustomerMarkdown(advantage.content || advantage.body || ''),
     },
     {
       id: 'main-scaling-risk',
@@ -396,15 +404,22 @@ function buildOverviewSections(customerBodies) {
       preview: risk.preview || customerPreview(risk.body),
       badge: 'Watch',
       defaultOpen: false,
-      content: collapseDuplicateCustomerPhrasing(risk.content || risk.body || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(risk.content || risk.body || ''),
+      ),
     },
     {
-      id: 'best-next-move',
-      title: 'Best Next Move',
-      preview: nextMove.headline || customerPreview(nextMove.preview || nextMove.body),
-      badge: 'Action',
+      id: 'main-constraint',
+      title: 'Main Constraint',
+      preview: mainConstraint?.preview
+        || customerPreview(mainConstraint?.body || ''),
+      badge: 'Watch',
       defaultOpen: false,
-      content: collapseDuplicateCustomerPhrasing(nextMove.content || nextMove.body || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(
+          mainConstraint?.content || mainConstraint?.body || '',
+        ),
+      ),
     },
   ];
 }
@@ -428,15 +443,19 @@ function buildFiveFuturesSections(customerFutureLandscape) {
       preview: customerPreview(customerFutureLandscape.summary),
       badge: 'Future',
       defaultOpen: true,
-      content: collapseDuplicateCustomerPhrasing(customerFutureLandscape.content || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(customerFutureLandscape.content || ''),
+      ),
     },
     ...(customerFutureLandscape.futures || []).map((future, index) => ({
       id: `future-${index + 1}`,
-      title: future.title || `Future ${index + 1}`,
+      title: stripCustomerMarkdown(future.title || `Future ${index + 1}`),
       preview: customerPreview(future.trajectory),
       badge: String(future.likelihood || '').toLowerCase() === 'risk' ? 'Watch' : 'Future',
       defaultOpen: false,
-      content: collapseDuplicateCustomerPhrasing(future.content || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(future.content || ''),
+      ),
     })),
   ];
 
@@ -584,8 +603,12 @@ export function buildCustomerBOSViewModel({
 
   const overviewSections = buildOverviewSections(customerBodies);
   const fiveFuturesSections = buildFiveFuturesSections(customerBodies.customerFutureLandscape);
-  const oneMoveBody = customerBodies.customerBestNextMove
-    || buildCustomerBestNextMoveBody(narrative?.recommendedNextStep);
+  const mainConstraintBody = customerBodies.customerMainConstraint
+    || buildCustomerMainConstraintBody(narrative?.recommendedNextStep);
+  const oneMoveBody = customerBodies.customerOneMove
+    || buildCustomerOneMoveBlocks(narrative?.recommendedNextStep, {
+      mainConstraintPreview: mainConstraintBody.preview || mainConstraintBody.body || '',
+    });
   const teamFitBody = customerBodies.customerTeamFit;
   const howToUseThis = buildHowToUseThis(displayName || 'You', operatingScores);
   const advancedSource = buildAdvancedSourceText(canonical, narrative);
@@ -594,10 +617,23 @@ export function buildCustomerBOSViewModel({
   const customerOneMove = {
     headline: oneMoveBody.headline || 'Your One Move',
     preview: oneMoveBody.preview || customerPreview(oneMoveBody.body),
-    content: collapseDuplicateCustomerPhrasing(oneMoveBody.content || oneMoveBody.body || ''),
+    content: stripCustomerMarkdown(
+      collapseDuplicateCustomerPhrasing(oneMoveBody.content || oneMoveBody.body || ''),
+    ),
+    blocks: Array.isArray(oneMoveBody.blocks) ? oneMoveBody.blocks : [],
     intervention: oneMoveBody.intervention || '',
     interventionType: oneMoveBody.interventionType || '',
     interventionTypeRaw: oneMoveBody.interventionTypeRaw || '',
+    role: 'one_move',
+  };
+
+  const customerMainConstraint = {
+    headline: mainConstraintBody.headline || 'Main Constraint',
+    preview: mainConstraintBody.preview || customerPreview(mainConstraintBody.body),
+    content: stripCustomerMarkdown(
+      collapseDuplicateCustomerPhrasing(mainConstraintBody.content || mainConstraintBody.body || ''),
+    ),
+    role: 'main_constraint',
   };
 
   const customerSummary = {
@@ -626,8 +662,11 @@ export function buildCustomerBOSViewModel({
     scoreMeaning,
     fiveFuturesSections,
     oneMove: customerOneMove,
+    mainConstraint: customerMainConstraint,
     teamFit: {
-      content: collapseDuplicateCustomerPhrasing(teamFitBody?.content || teamFitBody?.body || ''),
+      content: stripCustomerMarkdown(
+        collapseDuplicateCustomerPhrasing(teamFitBody?.content || teamFitBody?.body || ''),
+      ),
     },
     howToUseThis,
     advancedSource,
@@ -638,10 +677,11 @@ export function buildCustomerBOSViewModel({
     // Raw narrative retained for Advanced Source / debugging; not for customer tab binding
     narrative,
 
-    // Explicit L2/L3R layer split fields
+    // Explicit L2/L3R/R3B layer split fields
     customerSections: overviewSections,
     customerSectionBodies: customerBodies,
     customerSummary,
+    customerMainConstraint,
     customerOneMove,
     customerScoreMeanings: scoreMeaning,
     technicalSource,

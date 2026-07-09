@@ -9,6 +9,7 @@ const SECTION_BADGE_STYLES = {
   'Core Insight': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
   Strength: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
   Watch: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+  Constraint: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
   Action: 'bg-orange-500/20 text-orange-300 border-orange-500/40',
   Future: 'bg-violet-500/20 text-violet-300 border-violet-500/40',
   Evidence: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
@@ -24,27 +25,39 @@ function SectionBadge({ type }) {
   );
 }
 
+/** Strip residual markdown markers so customer tabs never show raw ** / __ / #. */
+function stripResidualMarkdown(text) {
+  return String(text || '')
+    .replace(/^#{1,6}\s+/gm, '')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/__([^_]+)__/g, '$1')
+    .replace(/\*\*/g, '')
+    .replace(/__/g, '')
+    .replace(/(^|[\s(])_([^_\n]+)_([\s).,;:!?]|$)/g, '$1$2$3');
+}
+
 export function PlainTextBlock({ text }) {
-  const lines = String(text || '').split('\n');
+  const lines = stripResidualMarkdown(String(text || '')).split('\n');
   return (
     <div className="space-y-2 text-sm leading-relaxed text-white/82">
       {lines.map((line, idx) => {
         const trimmed = line.trim();
         if (!trimmed) return <div key={idx} className="h-2" />;
-        if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
-          return <p key={idx} className="font-semibold text-white">{trimmed.replace(/\*\*/g, '')}</p>;
-        }
-        if (trimmed.startsWith('**')) {
-          const [label, ...rest] = trimmed.replace(/\*\*/g, '').split(':');
+        // Sequence / label lines from Core Operating Pattern and plain "Label: body"
+        if (
+          /^(Trigger|Instinct|Strength|Risk|Needed support|Watch for|Primary guidance|Caution|Likelihood)\s*:/i.test(
+            trimmed,
+          )
+        ) {
+          const colon = trimmed.indexOf(':');
+          const label = trimmed.slice(0, colon);
+          const rest = trimmed.slice(colon + 1).trim();
           return (
             <p key={idx}>
               <span className="font-semibold text-white">{label}:</span>
-              {rest.length ? ` ${rest.join(':')}` : ''}
+              {rest ? ` ${rest}` : ''}
             </p>
           );
-        }
-        if (trimmed.startsWith('_') && trimmed.endsWith('_')) {
-          return <p key={idx} className="text-xs italic text-white/55">{trimmed.replace(/_/g, '')}</p>;
         }
         if (/^\d+\./.test(trimmed)) {
           return <p key={idx} className="pl-1">{trimmed}</p>;
@@ -54,6 +67,61 @@ export function PlainTextBlock({ text }) {
         }
         return <p key={idx}>{trimmed}</p>;
       })}
+    </div>
+  );
+}
+
+/**
+ * R3B One Move structured blocks — no dense paragraph blob, no repeated inline labels.
+ */
+function OneMoveBlocks({ oneMove }) {
+  const blocks = Array.isArray(oneMove?.blocks) ? oneMove.blocks : [];
+
+  if (!blocks.length) {
+    return (
+      <ExpandableSectionList
+        sections={[{
+          id: 'one-move-intervention',
+          title: 'The Move',
+          preview: oneMove?.preview,
+          badge: 'Action',
+          defaultOpen: true,
+          content: oneMove?.content || '',
+        }]}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {blocks.map((block) => (
+        <article
+          key={block.id || block.title}
+          className="rounded-2xl border border-white/10 bg-white/[0.03] p-5"
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="text-lg font-bold text-white">{block.title}</h3>
+            {block.id === 'the-move' ? <SectionBadge type="Action" /> : null}
+          </div>
+          <div className="mt-3">
+            {block.kind === 'ordered_list' && Array.isArray(block.items) && block.items.length ? (
+              <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-white/82">
+                {block.items.map((item, i) => (
+                  <li key={`${block.id}-${i}`}>{stripResidualMarkdown(item)}</li>
+                ))}
+              </ol>
+            ) : block.kind === 'bullet_list' && Array.isArray(block.items) && block.items.length ? (
+              <ul className="list-disc space-y-2 pl-5 text-sm leading-relaxed text-white/82">
+                {block.items.map((item, i) => (
+                  <li key={`${block.id}-${i}`}>{stripResidualMarkdown(item)}</li>
+                ))}
+              </ul>
+            ) : (
+              <PlainTextBlock text={block.content || ''} />
+            )}
+          </div>
+        </article>
+      ))}
     </div>
   );
 }
@@ -253,16 +321,7 @@ export default function FinalBOSCustomerReport({ viewModel }) {
               <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-orange-200/80">Your One Move</p>
               <h2 className="mt-3 text-2xl font-bold text-white">{oneMove.headline}</h2>
             </article>
-            <ExpandableSectionList
-              sections={[{
-                id: 'one-move-intervention',
-                title: 'The Move',
-                preview: oneMove.preview,
-                badge: 'Action',
-                defaultOpen: true,
-                content: oneMove.content,
-              }]}
-            />
+            <OneMoveBlocks oneMove={oneMove} />
           </section>
         )}
 

@@ -549,6 +549,33 @@ function cleanPhraseFragment(fragment) {
 }
 
 /**
+ * Strip residual markdown markers from customer-facing strings.
+ * Keeps text; removes **, __, heading hashes, and inline code ticks.
+ * Does not alter Advanced Source / technical paths (those skip this helper).
+ */
+export function stripCustomerMarkdown(text) {
+  if (text === null || text === undefined) return '';
+  let value = typeof text === 'string' ? text : String(text);
+  if (!value) return '';
+
+  value = value.replace(/^#{1,6}\s+/gm, '');
+  value = value.replace(/\*\*([^*]+)\*\*/g, '$1');
+  value = value.replace(/__([^_]+)__/g, '$1');
+  value = value.replace(/(^|[\s(])\*([^*\n]+)\*([\s).,;:!?]|$)/g, '$1$2$3');
+  value = value.replace(/(^|[\s(])_([^_\n]+)_([\s).,;:!?]|$)/g, '$1$2$3');
+  value = value.replace(/`([^`]+)`/g, '$1');
+  // Residual lone markers after partial strip
+  value = value.replace(/\*\*/g, '').replace(/__/g, '');
+  value = value
+    .replace(/\.{2,}/g, '.')
+    .replace(/\.:/g, '.')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+  return value;
+}
+
+/**
  * Clean free-form BOS copy for customer tabs. Deterministic phrase maps only.
  * Does not invent profile-specific facts. Does not mutate source objects.
  */
@@ -591,6 +618,7 @@ export function cleanCustomerBOSCopy(text) {
     .trim();
 
   value = collapseDuplicateCustomerPhrasing(value);
+  value = stripCustomerMarkdown(value);
 
   // Capitalize sentence starts after . ! ? (keeps customer prose readable after fragment rewrites)
   value = value.replace(/(^|[.!?]\s+)([a-z])/g, (_m, boundary, ch) => `${boundary}${ch.toUpperCase()}`);
@@ -923,8 +951,294 @@ export function buildCustomerPressureLine(topScores = [], bottomScores = []) {
 }
 
 /**
- * Executive Summary customer body from scores + pattern + one-move signals.
- * Does not use narrative.executiveSummary.body.
+ * Cap customer prose to roughly maxSentences without inventing content.
+ */
+function limitCustomerSentences(text, maxSentences = 5) {
+  const clean = stripCustomerMarkdown(String(text || '')).replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  const parts = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [clean];
+  return parts
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .slice(0, maxSentences)
+    .join(' ')
+    .trim();
+}
+
+/**
+ * R3C — Premium Executive Summary copy maps (display-time only).
+ * Keys are canonical technical dimension keys (via normalizeDimensionKey).
+ * "when" / "advantage*" used when the dimension is a strength (top).
+ * "edge" / "consequence" used when the dimension is a growth gap (bottom).
+ * Deliberately high-level — not Core sequence, not Main Constraint essay, not One Move plan.
+ */
+const EXECUTIVE_DIM_COPY = {
+  vector: {
+    when: 'set direction quickly and create forward motion',
+    advantage: 'direction',
+    advantageLine: 'you can see what needs to happen and help people get unstuck',
+    edge: 'shared ownership of direction',
+    consequence:
+      'people may lose the path when you are not personally redirecting the work',
+    mapFocus:
+      'turn clear direction into something others can follow without constant re-briefing',
+  },
+  velocity: {
+    when: 'move from idea into action without getting stuck',
+    advantage: 'tempo',
+    advantageLine: 'you restart stalled work and keep projects from sitting in limbo',
+    edge: 'paced handoffs',
+    consequence:
+      'speed can outrun the detail others need, and later correction becomes expensive',
+    mapFocus: 'keep your pace while making handoffs clean enough for others to match',
+  },
+  signal: {
+    when: 'read people, rooms, and context accurately',
+    advantage: 'relational read',
+    advantageLine: 'you pick up what people need and adjust the approach in the moment',
+    edge: 'visible decision timing',
+    consequence:
+      'what you notice may stay implicit while others wait for a clearer call',
+    mapFocus: 'convert what you notice into clearer decisions others can act on',
+  },
+  fidelity: {
+    when: 'protect accuracy when the cost of error is high',
+    advantage: 'precision',
+    advantageLine:
+      'accuracy, verification, and clean closure build trust in quality-sensitive work',
+    edge: 'selective precision',
+    consequence:
+      'progress can stall while people wait for perfect certainty on reversible work',
+    mapFocus:
+      'keep precision where error cost is high without making every step a review gate',
+  },
+  leverage: {
+    when: 'multiply effort through systems and other people',
+    advantage: 'scale',
+    advantageLine:
+      'you can turn repeated judgment into systems, delegation, or broader reach',
+    edge: 'systematized transfer',
+    consequence:
+      'manual repetition can keep consuming high-value judgment that should compound',
+    mapFocus: 'convert recurring judgment into repeatable leverage others can own',
+  },
+  flex: {
+    when: 'adjust as reality changes without losing momentum',
+    advantage: 'adaptability',
+    advantageLine:
+      'you keep forward motion alive when plans meet changing conditions',
+    edge: 'named boundaries',
+    consequence:
+      'people may stay unsure what is fixed, what is flexible, or who owns the next decision',
+    mapFocus: 'turn flexible judgment into clear boundaries others can run inside',
+  },
+  framework: {
+    when: 'create structure, rules, and repeatable process',
+    advantage: 'structure',
+    advantageLine:
+      'you make work repeatable and reduce dependency on memory or urgency',
+    edge: 'transferability',
+    consequence:
+      'the team may keep waiting for clarification instead of learning the rules behind your decisions',
+    mapFocus:
+      'turn your fast read of reality into clearer structure others can follow',
+  },
+  horizon: {
+    when: 'place near-term moves inside a longer sequence',
+    advantage: 'perspective',
+    advantageLine:
+      "you can sequence work so today's moves still serve a longer arc",
+    edge: 'longer-range structure',
+    consequence:
+      'near-term motion can stack without a sequence the team can see and prepare for',
+    mapFocus:
+      'connect practical progress to a longer sequence others can anticipate',
+  },
+};
+
+/**
+ * Known top-pair identities for premium openers (order-insensitive).
+ * Falls back to per-dimension composition when no pair match.
+ */
+const EXECUTIVE_PAIR_IDENTITY = [
+  {
+    top: ['vector', 'flex'],
+    identity:
+      'You operate best when you can read the situation quickly, create direction, and adjust as reality changes.',
+    advantage: 'movement',
+    advantageLine:
+      'you can see what needs to happen and help people get unstuck',
+  },
+  {
+    top: ['vector', 'velocity'],
+    identity:
+      'You operate best when you can set direction and move on it before the work stalls.',
+    advantage: 'forward motion',
+    advantageLine:
+      'you create pace and unstick initiatives that need a clear next step',
+  },
+  {
+    top: ['flex', 'signal'],
+    identity:
+      'You operate best when you can read people quickly and adjust in the moment.',
+    advantage: 'situational read',
+    advantageLine:
+      'you pick up what the room needs and shift approach before friction hardens',
+  },
+  {
+    top: ['signal', 'velocity'],
+    identity:
+      'You operate best when you can read the room and convert that read into timely action.',
+    advantage: 'responsive motion',
+    advantageLine:
+      'you notice what is shifting and move before the window closes',
+  },
+  {
+    top: ['vector', 'signal'],
+    identity:
+      'You operate best when you can set direction while staying tuned to how people are receiving it.',
+    advantage: 'guided alignment',
+    advantageLine:
+      'you create a path and keep people with you as conditions change',
+  },
+  {
+    top: ['fidelity', 'framework'],
+    identity:
+      'You operate best when accuracy and repeatable structure protect the work.',
+    advantage: 'reliable standards',
+    advantageLine:
+      'you raise the quality bar and make the right way of working easier to repeat',
+  },
+  {
+    top: ['leverage', 'framework'],
+    identity:
+      'You operate best when systems and structure multiply effort beyond personal bandwidth.',
+    advantage: 'compounding systems',
+    advantageLine:
+      'you turn recurring work into something others can run without you at the center',
+  },
+  {
+    top: ['horizon', 'vector'],
+    identity:
+      'You operate best when near-term direction still serves a longer arc.',
+    advantage: 'sequenced direction',
+    advantageLine:
+      'you place today\'s moves inside a path the organization can grow into',
+  },
+];
+
+/**
+ * Known bottom-pair growth edges (order-insensitive).
+ * Prefer conceptual edge names over raw dimension lists (no score soup).
+ */
+const EXECUTIVE_PAIR_EDGE = [
+  {
+    bottom: ['horizon', 'framework'],
+    edge: 'transferability',
+    consequence:
+      'if too much judgment stays inside your head, the team may keep waiting for clarification instead of learning the rules behind your decisions',
+    mapFocus:
+      'turn your fast read of reality into clearer structure others can follow',
+  },
+  {
+    bottom: ['velocity', 'vector'],
+    edge: 'decisive follow-through',
+    consequence:
+      'if the call stays soft, insight and care may not convert into a path others can run',
+    mapFocus:
+      'convert what you notice into timely decisions with visible ownership',
+  },
+  {
+    bottom: ['framework', 'velocity'],
+    edge: 'repeatable handoffs',
+    consequence:
+      'if structure stays implicit, people may re-negotiate the same steps every cycle',
+    mapFocus:
+      'make the path from judgment to execution simple enough for others to own',
+  },
+  {
+    bottom: ['signal', 'fidelity'],
+    edge: 'grounded listening under speed',
+    consequence:
+      'if pace crowds out reading and precision, trust and quality can both erode',
+    mapFocus:
+      'keep momentum without losing the human and accuracy signals that protect the work',
+  },
+  {
+    bottom: ['leverage', 'framework'],
+    edge: 'system transfer',
+    consequence:
+      'if leverage stays personal, scale still depends on your direct involvement',
+    mapFocus:
+      'convert personal judgment into systems others can operate',
+  },
+  {
+    bottom: ['horizon', 'leverage'],
+    edge: 'future-ready structure',
+    consequence:
+      'if longer sequencing never leaves your head, the organization stays reactive',
+    mapFocus:
+      'translate longer-range clarity into structures the team can run ahead of you',
+  },
+];
+
+function scoreDimensionKey(score) {
+  if (!score) return '';
+  return normalizeDimensionKey(score.dimension || score.displayName || '');
+}
+
+function findExecutivePairMatch(keys, table, side) {
+  const list = (keys || []).filter(Boolean).slice(0, 2);
+  if (list.length < 2) return null;
+  for (const row of table) {
+    if (sameDimensionSet(list, row[side] || row.top || row.bottom)) {
+      return row;
+    }
+  }
+  return null;
+}
+
+function firstSentence(text) {
+  const clean = stripCustomerMarkdown(String(text || '')).replace(/\s+/g, ' ').trim();
+  if (!clean) return '';
+  const match = clean.match(/[^.!?]+[.!?]+|[^.!?]+$/);
+  return match ? match[0].trim() : clean;
+}
+
+function softenAdvantageHelp(help) {
+  let value = stripCustomerMarkdown(String(help || '')).replace(/\s+/g, ' ').trim();
+  if (!value) return '';
+  // Prefer a single clause; drop score-ish fragments
+  value = value.replace(/\(\d+\.\d{2}\)/g, '').replace(/\s{2,}/g, ' ').trim();
+  if (value.length > 120) {
+    const cut = value.slice(0, 120);
+    const lastStop = Math.max(cut.lastIndexOf(','), cut.lastIndexOf(';'), cut.lastIndexOf(' — '));
+    value = (lastStop > 40 ? cut.slice(0, lastStop) : cut).trim();
+  }
+  value = value.replace(/[.;:,\s]+$/g, '');
+  // Ensure second-person feel when howItHelps starts with "Strong..." / "You..."
+  if (/^you\b/i.test(value)) {
+    return value.charAt(0).toLowerCase() + value.slice(1);
+  }
+  if (/^(strong|accuracy|situational|turning|grounded)\b/i.test(value)) {
+    return value.charAt(0).toLowerCase() + value.slice(1);
+  }
+  return value;
+}
+
+/**
+ * Executive Summary — premium high-level read (R3C role doctrine).
+ *
+ * Answers: high-level operating identity, primary strength, growth edge,
+ * why the map matters — 4 to 6 sentences max.
+ *
+ * Must NOT become:
+ * - Core Operating Pattern sequence (Trigger / Instinct / …)
+ * - Main Constraint bottleneck essay
+ * - One Move action plan (First 30 Days, proofSignals, intervention steps)
+ * - Future product section dump (communication / conflict / hiring / etc.)
+ * - Raw narrative.executiveSummary.body (that stays Advanced Source)
+ * - Score soup or markdown
  */
 export function buildCustomerExecutiveBody({
   patternHeadline = '',
@@ -932,49 +1246,122 @@ export function buildCustomerExecutiveBody({
   bottomScores = [],
   oneMove = null,
 } = {}) {
-  const pattern = presentPatternHeadlineForCustomer(patternHeadline)
-    || buildCustomerPatternMeaning(topScores, bottomScores);
-  const topNames = topScores.map(scoreDisplayName).filter(Boolean);
-  const bottomNames = bottomScores.map(scoreDisplayName).filter(Boolean);
-  const pressure = buildCustomerPressureLine(topScores, bottomScores);
-  const normalizedMove = normalizeOneMoveSource(oneMove);
+  // Reserved for future signal use; action plan stays One Move-owned
+  void oneMove;
+  // Pattern headline may inform fallback only — do not re-paste as body opener soup
+  void patternHeadline;
 
-  const interventionType = mapInterventionTypeForCustomer(
-    normalizedMove.interventionType || '',
+  const topKeys = (topScores || []).map(scoreDimensionKey).filter(Boolean);
+  const bottomKeys = (bottomScores || []).map(scoreDimensionKey).filter(Boolean);
+  const top0 = EXECUTIVE_DIM_COPY[topKeys[0]] || null;
+  const top1 = EXECUTIVE_DIM_COPY[topKeys[1]] || null;
+  const bottom0 = EXECUTIVE_DIM_COPY[bottomKeys[0]] || null;
+  const bottom1 = EXECUTIVE_DIM_COPY[bottomKeys[1]] || null;
+
+  const pairIdentity = findExecutivePairMatch(topKeys, EXECUTIVE_PAIR_IDENTITY, 'top');
+  const pairEdge = findExecutivePairMatch(bottomKeys, EXECUTIVE_PAIR_EDGE, 'bottom');
+
+  // 1) Operating identity
+  let identity = '';
+  if (pairIdentity?.identity) {
+    identity = pairIdentity.identity;
+  } else if (top0 && top1) {
+    identity = `You operate best when you can ${top0.when}, and ${top1.when}.`;
+  } else if (top0) {
+    identity = `You operate best when you can ${top0.when}.`;
+  } else {
+    identity =
+      'You operate best when you can read the situation, choose a direction, and move with intention.';
+  }
+
+  // 2) Primary strength — prefer premium second-person advantage lines over third-person score blurbs
+  const helpRaw = cleanCustomerBOSCopy(String(topScores?.[0]?.howItHelps || '').trim());
+  const helpSoft = softenAdvantageHelp(helpRaw);
+  const helpIsPremiumSecondPerson = Boolean(
+    helpSoft
+      && helpSoft.length >= 24
+      && helpSoft.length <= 120
+      && /^you\b/i.test(helpSoft),
   );
-  const moveHeadline = presentOneMoveHeadlineForCustomer(normalizedMove.headline || '');
-  const focus = moveHeadline && moveHeadline !== 'Your One Move' && moveHeadline !== 'The One Move'
-    ? `Best next focus: ${moveHeadline}.`
-    : (interventionType
-      ? `Your next move is to ${interventionType.charAt(0).toLowerCase()}${interventionType.slice(1)} so follow-through does not depend only on memory or urgency.`
-      : (normalizedMove.intervention
-        ? `Best next focus: ${normalizedMove.intervention}`
-        : 'Focus on one clear operating change for the next 30 days.'));
+  let strength = '';
+  if (pairIdentity?.advantage) {
+    const line = helpIsPremiumSecondPerson
+      ? helpSoft
+      : pairIdentity.advantageLine;
+    strength = `Your strength is ${pairIdentity.advantage}: ${line}.`;
+  } else if (top0) {
+    const line = helpIsPremiumSecondPerson
+      ? helpSoft
+      : top0.advantageLine;
+    strength = `Your strength is ${top0.advantage}: ${line}.`;
+  } else {
+    strength =
+      'Your strength is creating movement when others need a clear next step.';
+  }
 
-  const strengthLine = topNames.length
-    ? `You are strongest when you can use ${joinPlainList(topNames)} together — reading the situation, choosing a direction, and moving.`
-    : 'You are strongest when you can read the situation, choose a direction, and move.';
+  // 3) Growth edge (concept + consequence — not Main Constraint "if this stays unsolved")
+  let edgeNoun = '';
+  let consequence = '';
+  if (pairEdge?.edge) {
+    edgeNoun = pairEdge.edge;
+    consequence = pairEdge.consequence;
+  } else if (bottom0) {
+    edgeNoun = bottom0.edge;
+    consequence = `if too much of this stays unshared, ${bottom0.consequence}`;
+  } else if (bottom1) {
+    edgeNoun = bottom1.edge;
+    consequence = `if too much of this stays unshared, ${bottom1.consequence}`;
+  } else {
+    edgeNoun = 'transferability';
+    consequence =
+      'if too much judgment stays inside your head, the team may keep waiting for clarification instead of learning the rules behind your decisions';
+  }
+  // Normalize consequence to a clause that can follow "The growth edge is X: …"
+  const consequenceClause = String(consequence || '')
+    .replace(/^if\s+/i, 'if ')
+    .replace(/[.;\s]+$/g, '');
+  const edgeLine = `The growth edge is ${edgeNoun}: ${consequenceClause}.`;
 
-  const gapLine = bottomNames.length
-    ? `Where growth gets harder: ${joinPlainList(bottomNames)} need more deliberate support so follow-through does not depend only on memory or urgency.`
-    : 'Where growth gets harder: add simple structure so follow-through does not depend only on memory or urgency.';
+  // 4) Why it matters (high-level outcome — not One Move steps)
+  const whyLine =
+    'When this is handled well, your strongest pattern becomes usable by others — not only when you are in the room.';
 
-  // Body does not restate the pattern headline sentence (avoids duplicate openers)
-  const body = collapseDuplicateCustomerPhrasing(
-    [strengthLine, pressure, gapLine, focus].filter(Boolean).join('\n\n'),
+  // 5) Map setup (sets up the BOS; does not preview every section)
+  const mapFocus = pairEdge?.mapFocus
+    || pairIdentity?.mapFocus
+    || bottom0?.mapFocus
+    || top0?.mapFocus
+    || 'turn your natural operating style into clearer structure others can follow';
+  const mapLine = `This map shows how to ${mapFocus}.`;
+
+  const body = limitCustomerSentences(
+    collapseDuplicateCustomerPhrasing(
+      [identity, strength, edgeLine, whyLine, mapLine].filter(Boolean).join(' '),
+    ),
+    6,
   );
+
+  // Single coherent block — no separate pattern dump that weakens the open
+  const content = stripCustomerMarkdown(body);
+  const headline = firstSentence(content);
 
   return {
-    headline: pattern,
-    body,
-    content: [`**${pattern}**`, body].filter(Boolean).join('\n\n'),
-    sourceStrategy: 'structured_scores_pattern_one_move',
+    headline,
+    body: content,
+    content,
+    sourceStrategy: 'structured_scores_premium_high_level',
     usesRawNarrativeBody: false,
+    role: 'executive_summary',
+    doctrine: 'bos_r3c_executive_summary',
+    sentenceBudget: { min: 4, max: 6 },
   };
 }
 
 /**
- * Core Operating Pattern — customer only. No profileDNA paragraph.
+ * Core Operating Pattern — behavioral sequence (R3B role doctrine).
+ * trigger → instinct → strength → risk → needed support
+ * Must not re-paste Executive Summary language.
+ * No profileDNA paragraph on customer path.
  */
 export function buildCustomerCorePatternBody({
   patternHeadline = '',
@@ -984,37 +1371,50 @@ export function buildCustomerCorePatternBody({
   const headline = presentPatternHeadlineForCustomer(patternHeadline)
     || buildCustomerPatternMeaning(topScores, bottomScores);
   const meaning = buildCustomerPatternMeaning(topScores, bottomScores);
-  const pressure = buildCustomerPressureLine(topScores, bottomScores);
-  const topHelp = String(topScores[0]?.howItHelps || '').trim();
-  const bottomRisk = String(bottomScores[0]?.howItWorksAgainst || '').trim();
+  const topHelp = cleanCustomerBOSCopy(String(topScores[0]?.howItHelps || '').trim());
+  const bottomRisk = cleanCustomerBOSCopy(String(bottomScores[0]?.howItWorksAgainst || '').trim());
   const topNames = topScores.map(scoreDisplayName).filter(Boolean);
   const bottomNames = bottomScores.map(scoreDisplayName).filter(Boolean);
+  const top = topNames[0] || 'your main strength';
+  const bottom = bottomNames[0] || 'work that fits less naturally';
 
-  // Body complements the headline — does not re-paste the full pattern meaning when headline already states it
-  const body = collapseDuplicateCustomerPhrasing(
-    [
-      topHelp
-        ? `This strength helps you build trust and keep work moving. ${topHelp}`
-        : (topNames.length
-          ? `This strength helps you build trust and keep work moving through ${joinPlainList(topNames)}.`
-          : 'This strength helps you build trust and keep work moving when others need clarity.'),
-      pressure,
-      bottomRisk
-        ? `The risk is that flexibility can make priorities less clear if others need structure. ${bottomRisk}`
-        : (bottomNames.length
-          ? `The risk is that flexibility can make priorities less clear if others need structure — especially around ${joinPlainList(bottomNames)}.`
-          : 'The risk is that flexibility can make priorities less clear if others need structure.'),
-    ].filter(Boolean).join('\n\n'),
-  );
+  const trigger =
+    'Trigger: When load, ambiguity, or speed demand rises, your default system activates first.';
+  const instinct = topNames.length
+    ? `Instinct: You move through ${joinPlainList(topNames)} — acting from what feels most natural before adding structure.`
+    : 'Instinct: You act from what feels most natural before adding structure.';
+  const strength = topHelp
+    ? `Strength: ${topHelp}`
+    : `Strength: ${top} helps you create momentum and keep work moving when others need a clear next step.`;
+  const risk = bottomRisk
+    ? `Risk: ${bottomRisk}`
+    : `Risk: Under pressure, ${bottom} can lag — people may lose the handoff even when direction is clear.`;
+  const support = bottomNames.length
+    ? `Needed support: Explicit ownership, simple next steps, and visible follow-through around ${joinPlainList(bottomNames)} so others can absorb your pace.`
+    : 'Needed support: Explicit ownership, simple next steps, and visible follow-through so others can absorb your pace.';
+
+  const sequence = [trigger, instinct, strength, risk, support];
+  const body = collapseDuplicateCustomerPhrasing(sequence.join('\n\n'));
+
+  // Sequence is the content — do not re-open with the same pattern headline as Executive
+  const content = stripCustomerMarkdown(body);
 
   return {
     headline,
     meaning,
-    body,
-    content: [`**${headline}**`, body].filter(Boolean).join('\n\n'),
-    sourceStrategy: 'structured_scores_pattern',
+    body: content,
+    content,
+    sequence: {
+      trigger,
+      instinct,
+      strength,
+      risk,
+      neededSupport: support,
+    },
+    sourceStrategy: 'behavioral_sequence_scores',
     usesRawNarrativeBody: false,
     usesProfileDnaBody: false,
+    role: 'core_operating_pattern',
   };
 }
 
@@ -1037,8 +1437,11 @@ export function buildCustomerKeyAdvantageBody({ topScores = [] } = {}) {
     const name = scoreDisplayName(score);
     const value = Number(score.score);
     const scoreLabel = Number.isFinite(value) ? value.toFixed(2) : '—';
-    const help = String(score.howItHelps || presentDimensionOneLineForCustomer(score.dimension)).trim();
-    return `**${name} (${scoreLabel})**\n${help}`;
+    const help = stripCustomerMarkdown(
+      String(score.howItHelps || presentDimensionOneLineForCustomer(score.dimension)).trim(),
+    );
+    // Plain label line — no markdown bold (UI can still emphasize via structure)
+    return `${name} (${scoreLabel})\n${help}`;
   }).join('\n\n');
 
   return {
@@ -1063,9 +1466,9 @@ export function buildCustomerScalingRiskBody({
     const name = scoreDisplayName(score);
     const value = Number(score.score);
     const scoreLabel = Number.isFinite(value) ? value.toFixed(2) : '—';
-    const risk = String(score.howItWorksAgainst || '').trim()
+    const risk = stripCustomerMarkdown(String(score.howItWorksAgainst || '').trim())
       || 'Without deliberate support, this area can create drag as complexity rises.';
-    return `**${name} (${scoreLabel})**\n${risk}`;
+    return `${name} (${scoreLabel})\n${risk}`;
   }).join('\n\n');
 
   const intro = roleFit
@@ -1075,7 +1478,7 @@ export function buildCustomerScalingRiskBody({
 
   const content = collapseDuplicateCustomerPhrasing(
     [
-      roleFit ? `**Watch for:** ${roleFit}` : null,
+      roleFit ? `Watch for: ${roleFit}` : null,
       !roleFit ? intro : null,
       bottomBlocks || null,
     ].filter(Boolean).join('\n\n'),
@@ -1083,7 +1486,7 @@ export function buildCustomerScalingRiskBody({
 
   return {
     body: content,
-    content,
+    content: stripCustomerMarkdown(content),
     preview: roleFit || intro,
     sourceStrategy: 'score_gaps_role_fit',
     usesRawNarrativeBody: false,
@@ -1132,27 +1535,161 @@ function normalizeOneMoveSource(oneMove = null) {
     whyThisMatters: why,
     whatHappensIfIgnored: caution,
     futureBottleneck: oneMove.futureBottleneck || oneMove.future_bottleneck || '',
+    coreConstraint: oneMove.coreConstraint || oneMove.core_constraint || '',
+    highestLeverageLever: oneMove.highestLeverageLever || oneMove.highest_leverage_lever || '',
+    lowestValueDrag: oneMove.lowestValueDrag || oneMove.lowest_value_drag || '',
+    roleTruth: oneMove.roleTruth || oneMove.role_truth || '',
     first30Days: Array.isArray(first30) ? first30 : [first30].filter(Boolean),
     proofSignals: Array.isArray(proof) ? proof : [],
   };
 }
 
+/** Score / technical residual patterns that must not leak into customer One Move. */
+const PROOF_SIGNAL_SCORE_LEAK = [
+  /\b\d+\.\d{2}\b/,
+  /lowest supported signal/i,
+  /\bleads,?\s+supported by\b/i,
+  /risk pattern:/i,
+  /pressure pattern:/i,
+  /dimension:\s*/i,
+  /score\s*[:=]/i,
+  /rescoring_/i,
+  /render_ready/i,
+  /wrong-?seat/i,
+  /install_accountability|transfer_judgment|build_system/i,
+  /five futures already points/i,
+];
+
 /**
- * Best Next Move / One Move — structured field projection only.
- * Does not dump narrative.recommendedNextStep.body as primary content.
+ * Keep only customer-safe proof signals (no raw score soup / technical residual).
  */
-export function buildCustomerBestNextMoveBody(oneMove = null) {
+export function filterCustomerProofSignals(signals = []) {
+  return (signals || [])
+    .map((signal) => cleanCustomerBOSCopy(signal))
+    .filter(Boolean)
+    .filter((signal) => !PROOF_SIGNAL_SCORE_LEAK.some((re) => re.test(signal)))
+    .filter((signal) => signal.length > 12)
+    .slice(0, 6);
+}
+
+/**
+ * Strip repeated inline labels that should only appear as block headings.
+ */
+function stripInlineMoveLabels(text) {
+  let value = String(text || '');
+  if (!value) return '';
+  value = value
+    .replace(/^\s*(Recommended move|The move|Future bottleneck|Why this matters|If ignored|First 30 days|How you will know it is working|How you'll know it is working)\s*:\s*/gim, '')
+    .replace(/\b(Recommended move|The move|Future bottleneck|Why this matters|If ignored)\s*:\s*/gi, '');
+  return stripCustomerMarkdown(value).trim();
+}
+
+function softCapWords(text, maxWords = 100) {
+  const words = String(text || '').trim().split(/\s+/).filter(Boolean);
+  if (words.length <= maxWords) return words.join(' ');
+  return `${words.slice(0, maxWords).join(' ')}…`;
+}
+
+/**
+ * Main Constraint — bottleneck only (R3B). Replaces Best Next Move action dump.
+ * Answers: what is limiting effectiveness, scale, clarity, repeatability, or transfer?
+ * Must not include the full One Move action plan.
+ */
+export function buildCustomerMainConstraintBody(oneMove = null, { bottomScores = [] } = {}) {
+  if (!oneMove && !bottomScores.length) {
+    const body = 'Main constraint details are not available for this profile yet.';
+    return {
+      headline: 'Main Constraint',
+      body,
+      content: body,
+      preview: body,
+      sourceStrategy: 'structured_constraint_fields',
+      usesRawNarrativeBody: false,
+      empty: true,
+      role: 'main_constraint',
+    };
+  }
+
+  const normalized = normalizeOneMoveSource(oneMove);
+  const coreConstraint = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.coreConstraint || ''));
+  const bottleneck = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.futureBottleneck || ''));
+  const roleTruth = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.roleTruth || ''));
+  // Soften role-truth without dumping wrong-seat jargon
+  const roleContext = roleTruth
+    ? softCapWords(
+      roleTruth
+        .replace(/\bwrong-?seat risk\b/gi, 'role-fit risk')
+        .replace(/\bthe action plan\b/gi, 'how work is designed'),
+      55,
+    )
+    : '';
+  const lowestDrag = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.lowestValueDrag || ''));
+
+  // Fallback bottleneck from bottom scores only when structured constraint fields empty
+  const bottom = scoreDisplayName(bottomScores[0]) || '';
+  const scoreFallback = !coreConstraint && !bottleneck && !roleContext && bottom
+    ? `As complexity rises, ${bottom} is the area most likely to limit clarity, handoffs, and repeatable execution.`
+    : '';
+
+  const primary = coreConstraint
+    || bottleneck
+    || roleContext
+    || lowestDrag
+    || scoreFallback
+    || 'The main limiter is how clearly others can absorb and repeat your operating pace without rework.';
+
+  const secondaryParts = [];
+  if (coreConstraint && bottleneck && bottleneck !== coreConstraint) {
+    secondaryParts.push(`If this stays unsolved: ${bottleneck}`);
+  }
+  if (coreConstraint && roleContext && roleContext !== coreConstraint) {
+    secondaryParts.push(roleContext);
+  }
+  if (!coreConstraint && lowestDrag && lowestDrag !== primary) {
+    secondaryParts.push(`Where drag shows up: ${lowestDrag}`);
+  }
+
+  const body = collapseDuplicateCustomerPhrasing(
+    [primary, ...secondaryParts].filter(Boolean).join('\n\n'),
+  );
+  const content = stripCustomerMarkdown(softCapWords(body, 120));
+
+  return {
+    headline: 'Main Constraint',
+    body: content,
+    content,
+    preview: softCapWords(primary, 28),
+    coreConstraint: coreConstraint || '',
+    futureBottleneck: bottleneck || '',
+    sourceStrategy: coreConstraint || bottleneck || roleContext
+      ? 'structured_constraint_fields'
+      : (scoreFallback ? 'score_gap_fallback' : 'default_constraint'),
+    usesRawNarrativeBody: false,
+    empty: !content,
+    role: 'main_constraint',
+  };
+}
+
+/**
+ * One Move — clean structured action plan blocks (R3B).
+ * Blocks: The Move | What It Means | First 30 Days | How You’ll Know It’s Working
+ * Does not own Main Constraint bottleneck essay. Does not dump raw scores.
+ */
+export function buildCustomerOneMoveBlocks(oneMove = null, { mainConstraintPreview = '' } = {}) {
   if (!oneMove) {
     const body = 'One Move details are not available for this profile yet.';
     return {
       headline: 'Your One Move',
       body,
       content: body,
+      preview: body,
+      blocks: [],
       interventionType: '',
       interventionTypeRaw: '',
       sourceStrategy: 'structured_one_move_fields',
       usesRawNarrativeBody: false,
       empty: true,
+      role: 'one_move',
     };
   }
 
@@ -1160,63 +1697,106 @@ export function buildCustomerBestNextMoveBody(oneMove = null) {
   const headline = presentOneMoveHeadlineForCustomer(normalized.headline || '') || 'Your One Move';
   const interventionTypeRaw = normalized.interventionType || '';
   const interventionType = mapInterventionTypeForCustomer(interventionTypeRaw);
-  const intervention = cleanCustomerBOSCopy(normalized.intervention || '');
-  const why = cleanCustomerBOSCopy(normalized.whyThisMatters || '');
-  const ifIgnored = cleanCustomerBOSCopy(normalized.whatHappensIfIgnored || '');
-  const bottleneck = cleanCustomerBOSCopy(normalized.futureBottleneck || '');
-
+  const intervention = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.intervention || ''));
+  const why = stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.whyThisMatters || ''));
   const days = (normalized.first30Days || [])
-    .map((step) => cleanCustomerBOSCopy(step))
+    .map((step) => stripInlineMoveLabels(cleanCustomerBOSCopy(step)))
     .filter(Boolean);
-  const signals = (normalized.proofSignals || [])
-    .map((signal) => cleanCustomerBOSCopy(signal))
-    .filter(Boolean);
+  const signals = filterCustomerProofSignals(normalized.proofSignals || []);
 
-  // Customer explanation when structured move fields exist; never lead with raw body
   const defaultMoveLine = interventionType
     ? `Your next move is to ${interventionType.charAt(0).toLowerCase()}${interventionType.slice(1)} so follow-through does not depend only on memory or urgency.`
-    : (intervention
-      ? `Your next move is to ${intervention.charAt(0).toLowerCase()}${intervention.slice(1)}.`
-      : '');
-
-  const hasStructured = Boolean(
-    interventionType || intervention || why || days.length || signals.length || bottleneck,
-  );
-
-  // Thin-profile residual only: if no structured fields, lightly present raw body (last resort)
-  const residualBody = !hasStructured && normalized.body
-    ? cleanCustomerBOSCopy(normalized.body)
     : '';
 
+  const theMove = intervention || defaultMoveLine || (
+    normalized.body ? stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.body)) : ''
+  );
+
+  // One brief bridge to Main Constraint — do not re-paste full constraint
+  const constraintBridge = mainConstraintPreview
+    ? softCapWords(`This move targets your main constraint: ${mainConstraintPreview}`, 40)
+    : '';
+  const whatItMeans = collapseDuplicateCustomerPhrasing(
+    [why, constraintBridge && why && !why.toLowerCase().includes(mainConstraintPreview.slice(0, 24).toLowerCase())
+      ? constraintBridge
+      : (!why ? constraintBridge : '')]
+      .filter(Boolean)
+      .join(' '),
+  ) || 'This change makes your judgment easier for others to absorb and repeat.';
+
+  const hasStructured = Boolean(theMove || why || days.length || signals.length);
+  const residualBody = !hasStructured && normalized.body
+    ? stripInlineMoveLabels(cleanCustomerBOSCopy(normalized.body))
+    : '';
+
+  const blocks = [
+    {
+      id: 'the-move',
+      title: 'The Move',
+      kind: 'paragraph',
+      content: stripCustomerMarkdown(theMove || residualBody || 'A focused operating change for the next 30 days.'),
+    },
+    {
+      id: 'what-it-means',
+      title: 'What It Means',
+      kind: 'paragraph',
+      content: stripCustomerMarkdown(whatItMeans),
+    },
+    {
+      id: 'first-30-days',
+      title: 'First 30 Days',
+      kind: 'ordered_list',
+      items: days.length ? days.map((d) => stripCustomerMarkdown(d)) : [],
+      content: days.length
+        ? days.map((step, i) => `${i + 1}. ${stripCustomerMarkdown(step)}`).join('\n')
+        : 'Work with your coach or leadership partner to sequence the first 30 days around this move.',
+    },
+    {
+      id: 'how-youll-know',
+      title: "How You'll Know It's Working",
+      kind: 'bullet_list',
+      items: signals.length ? signals.map((s) => stripCustomerMarkdown(s)) : [],
+      content: signals.length
+        ? signals.map((s) => `- ${stripCustomerMarkdown(s)}`).join('\n')
+        : 'You will know it is working when handoffs require less rework and others can act without re-asking for intent.',
+    },
+  ];
+
+  // Combined plain text for previews / legacy binders — no inline "Recommended move:" labels
   const content = collapseDuplicateCustomerPhrasing(
-    [
-      `**${headline}**`,
-      residualBody || null,
-      interventionType ? `**Recommended move:** ${interventionType}` : null,
-      intervention ? `**The move:** ${intervention}` : (!intervention && defaultMoveLine ? defaultMoveLine : null),
-      bottleneck ? `**Future bottleneck:** ${bottleneck}` : null,
-      why ? `**Why this matters:** ${why}` : null,
-      ifIgnored && !/^not advice/i.test(ifIgnored) ? `**If ignored:** ${ifIgnored}` : null,
-      days.length
-        ? `**First 30 days:**\n${days.map((step, i) => `${i + 1}. ${step}`).join('\n')}`
-        : null,
-      signals.length
-        ? `**How you will know it is working:**\n${signals.map((s) => `- ${s}`).join('\n')}`
-        : null,
-    ].filter(Boolean).join('\n\n'),
+    blocks.map((b) => `${b.title}\n${b.content}`).join('\n\n'),
   );
 
   return {
     headline,
     body: content,
     content,
-    intervention,
+    blocks,
+    intervention: theMove,
     interventionType,
     interventionTypeRaw: preserveTechnicalSource(interventionTypeRaw),
-    preview: intervention || defaultMoveLine || headline,
-    sourceStrategy: hasStructured ? 'structured_one_move_fields' : 'thin_profile_residual_body',
+    preview: softCapWords(theMove || residualBody || headline, 28),
+    sourceStrategy: hasStructured ? 'structured_one_move_blocks' : 'thin_profile_residual_body',
     usesRawNarrativeBody: Boolean(residualBody),
     empty: !content,
+    role: 'one_move',
+  };
+}
+
+/**
+ * @deprecated R3B: prefer buildCustomerMainConstraintBody + buildCustomerOneMoveBlocks.
+ * Kept as thin adapter so older imports still resolve to One Move structured content.
+ */
+export function buildCustomerBestNextMoveBody(oneMove = null) {
+  const constraint = buildCustomerMainConstraintBody(oneMove);
+  const move = buildCustomerOneMoveBlocks(oneMove, {
+    mainConstraintPreview: constraint.preview || '',
+  });
+  // Historical callers expected the action blob; return One Move blocks, not constraint
+  return {
+    ...move,
+    // Preserve dual access for transitional audits
+    mainConstraint: constraint,
   };
 }
 
@@ -1245,10 +1825,10 @@ export function buildCustomerFutureBody(future = {}) {
 
   const content = collapseDuplicateCustomerPhrasing(
     [
-      likelihood ? `**Likelihood:** ${likelihood}` : null,
+      likelihood ? `Likelihood: ${likelihood}` : null,
       trajectory || null,
       organization_experiences
-        ? `_What the organization experiences:_ ${organization_experiences}`
+        ? `What the organization experiences: ${organization_experiences}`
         : null,
     ].filter(Boolean).join('\n\n'),
   );
@@ -1258,7 +1838,7 @@ export function buildCustomerFutureBody(future = {}) {
     likelihood,
     trajectory,
     organization_experiences,
-    content,
+    content: stripCustomerMarkdown(content),
     empty: !content,
     usesRawNarrativeBody: false,
     sourceStrategy: 'structured_future_fields',
@@ -1289,31 +1869,27 @@ export function buildCustomerFutureLandscapeBody(fiveFutures = null) {
   // Prefer a plain summary built from structured titles over cleaned raw summary alone
   const titles = futures.map((f) => f.title).filter(Boolean);
   const structuredSummary = mostLikely?.title
-    ? `Based on your current operating pattern, several paths are possible. The most likely direction right now is **${mostLikely.title}**.`
+    ? `Based on your current operating pattern, several paths are possible. The most likely direction right now is ${mostLikely.title}.`
     : titles.length
       ? `Based on your current operating pattern, several paths are possible — including ${joinPlainList(titles.slice(0, 3))}.`
       : '';
 
   // Summary field is short structured text; clean it but prefer structuredSummary when thin/empty
   const cleanedSummary = cleanCustomerBOSCopy(fiveFutures.summary || '');
-  const summary = structuredSummary
+  const summary = stripCustomerMarkdown(
+    structuredSummary
     || cleanedSummary
-    || 'Based on your current operating pattern, several paths are possible. Review each future with your coach or leadership partner.';
-
-  const content = collapseDuplicateCustomerPhrasing(
-    [
-      summary,
-      mostLikely && !mostLikely.empty
-        ? `\n\n**${mostLikely.title || 'Most likely path'}** (${mostLikely.likelihood || 'likely'})\n${mostLikely.trajectory || ''}\n\n_What the organization experiences:_ ${mostLikely.organization_experiences || ''}`
-        : null,
-    ].filter(Boolean).join(''),
+    || 'Based on your current operating pattern, several paths are possible. Review each future with your coach or leadership partner.',
   );
+
+  // Landscape map only — do not re-embed full most_likely trajectory (cards own detail)
+  const content = collapseDuplicateCustomerPhrasing(summary);
 
   return {
     summary,
     mostLikely,
     futures,
-    content,
+    content: stripCustomerMarkdown(content),
     empty: false,
     usesRawNarrativeBody: false,
     sourceStrategy: 'structured_future_fields',
@@ -1337,7 +1913,7 @@ export function buildCustomerTeamFitBody(facilitatorNotes = null) {
   const notes = (facilitatorNotes.notes || []).map((note) => presentTeamFitNoteForCustomer(note));
   const notesBlock = notes
     .filter((n) => n.label || n.guidance)
-    .map((n) => `**${n.label || 'Guidance'}:** ${n.guidance || ''}${n.rationale ? `\n_Why:_ ${n.rationale}` : ''}`)
+    .map((n) => `${n.label || 'Guidance'}: ${n.guidance || ''}${n.rationale ? `\nWhy: ${n.rationale}` : ''}`)
     .join('\n\n');
 
   const primary = cleanCustomerBOSCopy(facilitatorNotes.primary_guidance || '');
@@ -1357,15 +1933,15 @@ export function buildCustomerTeamFitBody(facilitatorNotes = null) {
   const content = collapseDuplicateCustomerPhrasing(
     [
       summary && summary !== intro && !notesBlock ? summary : null,
-      `**Primary guidance:** ${intro}`,
-      notesBlock ? `**How to design the environment:**\n\n${notesBlock}` : null,
-      caution ? `**Caution:** ${caution}` : null,
+      `Primary guidance: ${intro}`,
+      notesBlock ? `How to design the environment:\n\n${notesBlock}` : null,
+      caution ? `Caution: ${caution}` : null,
     ].filter(Boolean).join('\n\n'),
   );
 
   return {
     body: content,
-    content,
+    content: stripCustomerMarkdown(content),
     sourceStrategy: 'structured_facilitator_fields',
     usesRawNarrativeBody: false,
     empty: !content,
@@ -1422,7 +1998,13 @@ export function buildCustomerSectionBodies({
     keyWarning: execKeyWarning,
     wrongSeatRisk,
   });
-  const customerBestNextMove = buildCustomerBestNextMoveBody(oneMove);
+  // R3B: split constraint vs action (no longer identical Best Next Move / One Move)
+  const customerMainConstraint = buildCustomerMainConstraintBody(oneMove, { bottomScores });
+  const customerOneMove = buildCustomerOneMoveBlocks(oneMove, {
+    mainConstraintPreview: customerMainConstraint.preview || customerMainConstraint.body || '',
+  });
+  // Transitional alias — do not use as action dump of constraint
+  const customerBestNextMove = customerMainConstraint;
   const customerFutureLandscape = buildCustomerFutureLandscapeBody(fiveFutures);
   const customerTeamFit = buildCustomerTeamFitBody(facilitatorNotes);
 
@@ -1431,6 +2013,8 @@ export function buildCustomerSectionBodies({
     customerCorePattern,
     customerKeyAdvantage,
     customerScalingRisk,
+    customerMainConstraint,
+    customerOneMove,
     customerBestNextMove,
     customerFutureLandscape,
     customerTeamFit,
@@ -1441,6 +2025,8 @@ export function buildCustomerSectionBodies({
     // Explicit contract for audits
     rawNarrativeSuppressedFromCustomer: true,
     profileDnaSuppressedFromCustomer: true,
+    // R3B section roles preserved; R3C strengthens Executive Summary only
+    sectionRoleDoctrine: 'bos_r3c',
   };
 }
 
@@ -1451,6 +2037,7 @@ export default {
   presentPatternHeadlineForCustomer,
   isPatternSoupHeadline,
   cleanCustomerBOSCopy,
+  stripCustomerMarkdown,
   collapseDuplicateCustomerPhrasing,
   makeCustomerSectionContent,
   preserveTechnicalSource,
@@ -1471,7 +2058,10 @@ export default {
   buildCustomerCorePatternBody,
   buildCustomerKeyAdvantageBody,
   buildCustomerScalingRiskBody,
+  buildCustomerMainConstraintBody,
+  buildCustomerOneMoveBlocks,
   buildCustomerBestNextMoveBody,
+  filterCustomerProofSignals,
   buildCustomerFutureBody,
   buildCustomerFutureLandscapeBody,
   buildCustomerTeamFitBody,
