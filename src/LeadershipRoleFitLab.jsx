@@ -169,7 +169,7 @@ async function resolveEvidenceIntelligence({ evidenceText, profileId, baselineRe
     evidenceInterpretationSource: 'deterministic_fallback',
     evidenceFallbackMessage:
       gptResult?.message ||
-      'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+      'Evidence interpretation unavailable. Deterministic fallback applied.',
     gptModelUsed: null,
     forceDeterministicEvidence: true,
   };
@@ -372,7 +372,7 @@ export default function LeadershipRoleFitLab() {
           gptEvidenceInterpretation: null,
           evidenceInterpretationSource: 'deterministic_fallback',
           evidenceFallbackMessage:
-            'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+            'Evidence interpretation unavailable. Deterministic fallback applied.',
           gptModelUsed: null,
           forceDeterministicEvidence: true,
         };
@@ -624,7 +624,8 @@ export default function LeadershipRoleFitLab() {
                   AI-powered role fit analysis based on Fathom DD Agreement &amp; BOS Profile
                   <span className="text-white/35">
                     {' '}
-                    — free-text evidence via GPT-5.5 interpreter + deterministic scoring guardrail.
+                    — free-text evidence interpreted through an intelligence layer + deterministic
+                    scoring guardrail.
                   </span>
                 </p>
               </div>
@@ -657,7 +658,7 @@ export default function LeadershipRoleFitLab() {
                   </div>
                   <h2 className="mt-2 text-lg font-semibold text-white">Drop a BOS Profile ID</h2>
                   <p className="mt-1 text-sm text-white/50">
-                    Uses existing read-only retrieve-profile path. No profile data is mutated.
+                    Read-only profile lookup. No profile data is mutated.
                   </p>
                 </div>
               </div>
@@ -688,9 +689,9 @@ export default function LeadershipRoleFitLab() {
                   Known Performance Evidence
                 </label>
                 <p className="mt-1.5 text-xs leading-5 text-white/45">
-                  Optional free-text. Local session only — not saved to the profile or Redis. GPT-5.5
-                  interprets normal language (positive / negative / mixed / neutral); deterministic
-                  code applies bounded score adjustments. Behavioral Fit stays the BOS baseline.
+                  Optional free-text. Local session only — not saved to the profile or Redis. The
+                  intelligence layer interprets normal language evidence; deterministic code applies
+                  bounded score adjustments. Behavioral Fit stays the BOS baseline.
                 </p>
                 <p className="mt-1 text-[0.7rem] leading-5 text-white/35">
                   Examples: number 1 recruiter at Fathom · top 10% recruiter · below recruiting
@@ -718,8 +719,8 @@ export default function LeadershipRoleFitLab() {
                   </button>
                   <span className="text-[0.7rem] text-white/35">
                     {retrievedProfilePayload
-                      ? 'Same analysis path as Analyze — applies current evidence text and rebuilds scores from scratch.'
-                      : 'Run Analyze first. Then apply current evidence without re-fetching the profile.'}
+                      ? 'Updates the role-fit estimate using the evidence above.'
+                      : 'Run Analyze first, then apply evidence to refine the estimate.'}
                   </span>
                 </div>
                 {evidenceChangedSinceApply && (
@@ -746,9 +747,9 @@ export default function LeadershipRoleFitLab() {
                     {analysisResult?.performance_evidence?.interpretation_label
                       ? ` · ${analysisResult.performance_evidence.interpretation_label}`
                       : evidenceInterpretationSource === 'gpt'
-                        ? ' · GPT-5.5'
+                        ? ' · intelligence layer'
                         : evidenceInterpretationSource === 'deterministic_fallback'
-                          ? ' · Deterministic fallback'
+                          ? ' · interpreted'
                           : ''}
                     {analysisResult?.performance_evidence?.classification
                       ? ` · ${String(analysisResult.performance_evidence.classification)}`
@@ -774,7 +775,7 @@ export default function LeadershipRoleFitLab() {
               {(loading || status === 'loading') && (
                 <div className="mt-4 rounded-2xl border border-cyan-300/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-50">
                   {evidenceText?.trim()
-                    ? 'Retrieving profile, interpreting evidence (GPT-5.5 when available), and computing District Director role fit…'
+                    ? 'Retrieving profile, interpreting evidence, and computing District Director role fit…'
                     : 'Retrieving BOS profile and computing District Director role fit…'}
                 </div>
               )}

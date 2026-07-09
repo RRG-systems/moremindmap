@@ -467,7 +467,7 @@ function AnalysisContextCard({ ctx, evidence, analyzedAt, evidenceIntelligence }
   const interpretationLabel =
     evidence?.interpretation_label ||
     (interpretationSource === 'gpt'
-      ? 'GPT-5.5'
+      ? 'Intelligence layer'
       : interpretationSource === 'deterministic_fallback'
         ? 'Deterministic fallback'
         : 'None');
@@ -479,7 +479,7 @@ function AnalysisContextCard({ ctx, evidence, analyzedAt, evidenceIntelligence }
     evidence?.fallback_message ||
     evidenceIntelligence?.fallback_message ||
     (fallbackUsed
-      ? 'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.'
+      ? 'Evidence interpretation unavailable. Deterministic fallback applied.'
       : null);
 
   return (

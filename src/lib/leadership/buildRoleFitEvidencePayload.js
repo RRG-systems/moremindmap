@@ -115,7 +115,7 @@ export async function requestGptEvidenceInterpretation(payload, { timeoutMs = 30
         error: data?.error || `http_${res.status}`,
         message:
           data?.message ||
-          'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+          'Evidence interpretation unavailable. Deterministic fallback applied.',
         fallback_recommended: true,
         data,
       };
@@ -136,7 +136,7 @@ export async function requestGptEvidenceInterpretation(payload, { timeoutMs = 30
       ok: false,
       error: aborted ? 'timeout' : 'network_error',
       message:
-        'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+        'Evidence interpretation unavailable. Deterministic fallback applied.',
       fallback_recommended: true,
     };
   } finally {

@@ -1391,7 +1391,7 @@ export function computeAnalysisConfidence({ availableCount, totalExpected, cover
   return {
     percent,
     label,
-    note: 'Deterministic first-pass confidence from BOS signal coverage. GPT-5.5 reasoning layer not applied in V1.',
+    note: 'First-pass confidence from BOS signal coverage and scoring completeness.',
   };
 }
 
@@ -1867,7 +1867,7 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
 
   const plain =
     String(interp.plain_english_summary || '').trim() ||
-    'GPT-5.5 interpreted free-text performance evidence.';
+    'Intelligence layer interpreted free-text performance evidence.';
   const boardSafe =
     String(interp.board_safe_interpretation || '').trim() || plain;
   const impact =
@@ -1930,7 +1930,7 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
     board_safe_interpretation: boardSafe,
     guardrail_note:
       String(interp.guardrail_note || '').trim() ||
-      'GPT interprets evidence; deterministic code applies bounded adjustments.',
+      'Intelligence layer interprets evidence; deterministic code applies bounded adjustments.',
   };
 }
 
@@ -1974,12 +1974,12 @@ export function resolveEvidenceParse(evidenceText = '', gptInterpretation = null
       plain_english_summary: deterministic.summary,
       board_safe_interpretation: deterministic.evidenceImpactSummary,
       guardrail_note:
-        'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+        'Evidence interpretation unavailable. Deterministic fallback applied.',
     },
     interpretation_source: 'deterministic_fallback',
     fallback_used: true,
     fallback_message:
-      'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.',
+      'Evidence interpretation unavailable. Deterministic fallback applied.',
   };
 }
 

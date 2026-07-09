@@ -83,7 +83,7 @@ export function buildDistrictDirectorFit({
     evidenceFallbackMessage ||
     resolvedFallbackMessage ||
     (evidenceFallbackUsed
-      ? 'GPT-5.5 evidence interpretation unavailable. Deterministic fallback applied.'
+      ? 'Evidence interpretation unavailable. Deterministic fallback applied.'
       : null);
 
   const {
@@ -243,11 +243,11 @@ export function buildDistrictDirectorFit({
       adjustments: evidenceAdjustments || [],
       // Explicit: evidence is local session state only — never written to profile/Redis
       persistence: 'local_component_state_only',
-      // GPT-5.5 interpreter audit (1H)
+      // Interpreter audit (1H) — interpretation_label is user-facing; interpreter ids remain internal
       interpretation_source: interpretationSource,
       interpretation_label:
         interpretationSource === 'gpt'
-          ? 'GPT-5.5'
+          ? 'Intelligence layer'
           : interpretationSource === 'deterministic_fallback'
             ? 'Deterministic fallback'
             : interpretationSource === 'none'
@@ -259,7 +259,7 @@ export function buildDistrictDirectorFit({
         evidenceParse.board_safe_interpretation || evidenceParse.evidenceImpactSummary || null,
       guardrail_note:
         evidenceParse.guardrail_note ||
-        'Deterministic scoring remains the scoring guardrail. GPT may interpret evidence only.',
+        'Deterministic scoring remains the scoring guardrail. The intelligence layer may interpret evidence only.',
       recommended_adjustments: evidenceParse.recommended_adjustments || null,
       gpt_confidence: evidenceParse.gpt_confidence ?? null,
       gpt_signals: evidenceParse.gpt_signals || null,

@@ -212,9 +212,9 @@ export const FATHOM_DISTRICT_DIRECTOR_V1 = {
   ],
   analysis_engine: {
     v1_label: 'Deterministic Role Fit Engine v1B',
-    prepared_for: 'GPT-5.5 Role Fit Engine',
+    prepared_for: 'Intelligence Layer Role Fit Engine',
     display_label:
-      'Deterministic Role Fit Engine v1B — growth-weighted + evidence-informed (prepared for GPT-5.5 reasoning layer)',
+      'Role Fit Engine — growth-weighted + evidence-informed (intelligence layer + deterministic guardrail)',
     model_calls_in_v1: false,
     scoring_mode: 'deterministic_v1b_growth_weighted_evidence',
   },
