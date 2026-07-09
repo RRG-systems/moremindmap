@@ -1,5 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  ROLE_FIT_ACCESS_CODE,
+  grantRoleFitAccess,
+  isValidRoleFitAccessCode,
+} from './components/leadership/RoleFitAccessGate.jsx'
 
 const DEMO_CODE = 'darrendemo'
 const ADMIN_DASHBOARD_CODE = 'moreadmin26'
@@ -13,6 +18,7 @@ export default function LeadershipPortal() {
     event.preventDefault()
 
     const normalizedCode = accessCode.trim().toLowerCase()
+    const rawTrimmed = accessCode.trim()
 
     if (normalizedCode === DEMO_CODE) {
       sessionStorage.setItem('leadershipDemoAccess', 'true')
@@ -27,10 +33,14 @@ export default function LeadershipPortal() {
       return
     }
 
-    if (normalizedCode !== DEMO_CODE) {
-      setError('That access code is not recognized.')
+    // Fathom District Director Role Fit Lab (FATHOMDD26)
+    if (isValidRoleFitAccessCode(rawTrimmed) || normalizedCode === ROLE_FIT_ACCESS_CODE.toLowerCase()) {
+      grantRoleFitAccess(rawTrimmed || ROLE_FIT_ACCESS_CODE)
+      navigate('/leadership/role-fit')
       return
     }
+
+    setError('That access code is not recognized.')
   }
 
   return (

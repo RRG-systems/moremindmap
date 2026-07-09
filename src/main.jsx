@@ -10,6 +10,7 @@ import VisualDNAPreview from './VisualDNAPreview.jsx'
 import LeadershipPortal from './LeadershipPortal.jsx'
 import LeadershipDemo from './LeadershipDemo.jsx'
 import LeadershipSalesDashboard from './components/LeadershipSalesDashboard.jsx'
+import LeadershipRoleFitLab from './LeadershipRoleFitLab.jsx'
 import BusinessAssessment from './BusinessAssessment.jsx'
 import BusinessAssessmentVisualMap from './BusinessAssessmentVisualMap.jsx'
 import BusinessAssessmentFiveFutures from './BusinessAssessmentFiveFutures.jsx'
@@ -33,6 +34,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/leadership" element={<LeadershipPortal />} />
         <Route path="/leadership-demo" element={<LeadershipDemo />} />
         <Route path="/leadership-dashboard" element={<LeadershipSalesDashboard />} />
+        <Route path="/leadership/role-fit" element={<LeadershipRoleFitLab />} />
+        <Route path="/leadership/fathom-dd-fit" element={<LeadershipRoleFitLab />} />
         <Route path="/business-assessment" element={<BusinessAssessment />} />
         <Route path="/business-assessment/visual-map" element={<BusinessAssessmentVisualMap />} />
         <Route path="/business-assessment/five-futures" element={<BusinessAssessmentFiveFutures />} />

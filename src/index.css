@@ -7,3 +7,50 @@ html, body, #root {
   min-height: 100%;
   background: #000;
 }
+
+/* Leadership Role Fit Lab — V1 print / Save as PDF export */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
+  body,
+  #root {
+    background: #fff !important;
+    color: #111 !important;
+    min-height: auto;
+  }
+
+  .role-fit-no-print {
+    display: none !important;
+  }
+
+  .role-fit-lab {
+    background: #fff !important;
+    color: #111 !important;
+    min-height: auto !important;
+  }
+
+  .role-fit-lab * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .role-fit-print-content,
+  .role-fit-print-content * {
+    color: #111 !important;
+    border-color: #ccc !important;
+  }
+
+  .role-fit-print-content {
+    display: block !important;
+  }
+
+  /* Prefer breaking between dashboard cards rather than mid-card when possible */
+  .role-fit-print-content section,
+  .role-fit-print-content article {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}
