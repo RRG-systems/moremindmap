@@ -334,27 +334,34 @@ async function callOpenAiJson({ apiKey, model, systemPrompt, userPrompt }) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), MODEL_TIMEOUT_MS);
 
-  const tokenParam = usesCompletionTokenParameter(model)
+  // Match established production OpenAI routes (universal-translator, BA futures):
+  // gpt-5 / o-series use max_completion_tokens and reject custom temperature.
+  const isGpt5Family = usesCompletionTokenParameter(model);
+  const tokenParam = isGpt5Family
     ? { max_completion_tokens: 1400 }
     : { max_tokens: 1400 };
 
   try {
+    const body = {
+      model,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      ...tokenParam,
+    };
+    if (!isGpt5Family) {
+      body.temperature = 0.2;
+    }
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.2,
-        response_format: { type: 'json_object' },
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        ...tokenParam,
-      }),
+      body: JSON.stringify(body),
       signal: controller.signal,
     });
 
@@ -362,7 +369,14 @@ async function callOpenAiJson({ apiKey, model, systemPrompt, userPrompt }) {
       // Do not leak response body (may contain sensitive diagnostics)
       const err = new Error('openai_request_failed');
       err.status = response.status;
-      err.safeCode = 'openai_request_failed';
+      err.safeCode =
+        response.status === 400
+          ? 'model_rejection'
+          : response.status === 401 || response.status === 403
+            ? 'openai_auth_failed'
+            : response.status === 429
+              ? 'openai_rate_limited'
+              : 'openai_request_failed';
       throw err;
     }
 
