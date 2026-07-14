@@ -104,82 +104,30 @@ function normalizeFuture(future, index) {
   };
 }
 
-function evidenceStatus(label, status, note) {
-  return { label, status, note };
-}
-
-function statusFromConfidence(value) {
-  const source = String(value || '').toLowerCase();
-  if (/high|strong|complete/.test(source)) return 'strong';
-  if (/low|missing|weak/.test(source)) return 'missing';
-  return 'partial';
-}
-
-function hasMeaningfulText(value, minLength = 80) {
-  return String(value || '').trim().length >= minLength;
-}
-
-function buildTruthRail(data) {
-  const answers = data?.answers || {};
-  const financialText = String(answers.q9 || '');
-  const financialCompleteness = [
-    /closed units|units/i,
-    /sales volume|volume/i,
-    /gci|gross commission/i,
-    /expenses|profit|net/i,
-  ].filter((pattern) => pattern.test(financialText)).length;
-  const relationshipText = `${answers.q3 || ''}\n${answers.q5 || ''}`;
-  const hasRelationshipNumbers = /\b(true relationships|database|contacts)\b/i.test(relationshipText) && /\d/.test(relationshipText);
-  const accountabilityScore = Number(data?.eToP?.accountability?.score || 0);
-  const systemsScore = Number(data?.eToP?.systems?.score || 0);
-  const confidenceStatus = statusFromConfidence(data?.fiveFutures?.confidenceSnapshot || data?.oneMove?.confidence);
-  const constraintConfidence = statusFromConfidence(data?.primaryConstraint?.confidence);
-  const hasConstraint = hasMeaningfulText(data?.primaryConstraint?.label, 12);
-  const hasProfile = data?.ownerProfileType && data.ownerProfileType !== 'MORE MindMap Profile';
-  const modelSupported = /real[_\s-]?estate/i.test(`${data?.assessmentType || ''} ${data?.fiveFutures?.title || ''}`);
-
-  return [
-    evidenceStatus(
-      'Financial Reality',
-      financialCompleteness >= 4 ? 'strong' : financialCompleteness >= 2 ? 'partial' : 'missing',
-      financialCompleteness >= 4 ? 'Production, volume, commission, and expense/profit evidence present.' : financialCompleteness >= 2 ? 'Some financial evidence is present; deeper proof is incomplete.' : 'Financial evidence is thin or missing.'
-    ),
-    evidenceStatus(
-      'Behavioral Profile',
-      hasProfile ? 'strong' : 'partial',
-      hasProfile ? 'Owner behavioral profile context is available.' : 'Behavioral profile context is partial.'
-    ),
-    evidenceStatus(
-      'Business Model',
-      modelSupported ? 'strong' : data?.assessmentType ? 'partial' : 'missing',
-      modelSupported ? 'Real estate business model context is applied.' : data?.assessmentType ? 'Business model fit is inferred from assessment type.' : 'Business model evidence is missing.'
-    ),
-    evidenceStatus(
-      'Constraint',
-      hasConstraint && constraintConfidence !== 'missing' ? 'strong' : hasConstraint ? 'partial' : 'missing',
-      hasConstraint && constraintConfidence !== 'missing' ? 'Primary constraint is detected with usable confidence.' : hasConstraint ? 'Primary constraint exists, but confidence is weak or inferred.' : 'Primary constraint is missing.'
-    ),
-    evidenceStatus(
-      'Confidence',
-      confidenceStatus,
-      confidenceStatus === 'strong' ? 'Overall confidence is high.' : confidenceStatus === 'partial' ? 'Overall confidence is moderate or mixed.' : 'Overall confidence is weak or missing.'
-    ),
-    evidenceStatus(
-      'Relationships',
-      hasRelationshipNumbers ? 'strong' : /database|relationship|contacts/i.test(relationshipText) ? 'partial' : 'missing',
-      hasRelationshipNumbers ? 'Relationship count and database evidence are present.' : /database|relationship|contacts/i.test(relationshipText) ? 'Relationship evidence exists, but counts are incomplete.' : 'Relationship evidence is missing.'
-    ),
-    evidenceStatus(
-      'Accountability',
-      accountabilityScore >= 7 ? 'strong' : accountabilityScore >= 3 ? 'partial' : 'missing',
-      accountabilityScore >= 7 ? 'Inspection/accountability appears functional.' : accountabilityScore >= 3 ? 'Accountability exists only partially.' : 'Accountability evidence is absent or memory-based.'
-    ),
-    evidenceStatus(
-      'Systems',
-      systemsScore >= 7 ? 'strong' : systemsScore >= 3 ? 'partial' : 'missing',
-      systemsScore >= 7 ? 'Systems appear repeatable.' : systemsScore >= 3 ? 'Systems/tools exist, but execution is inconsistent.' : 'Systems evidence is absent or mostly memory-based.'
-    ),
-  ];
+/**
+ * Truth Rail consumption is bind-only.
+ * Final label/status/note semantics are supplied by Business Engine Contract truth_rail.
+ * Renderer must not classify, regex-interpret, or re-threshold intelligence.
+ */
+function selectTruthRailEntries(data) {
+  const contractEntries =
+    data?.truthRail ||
+    data?.businessEngineContract?.truth_rail?.current ||
+    null;
+  if (!Array.isArray(contractEntries) || !contractEntries.length) {
+    return [
+      {
+        label: 'Truth Rail',
+        status: 'missing',
+        note: 'Truth Rail entries unavailable on contract; no renderer-side reinterpretation performed.',
+      },
+    ];
+  }
+  return contractEntries.map((entry) => ({
+    label: entry?.label || entry?.name || 'Evidence',
+    status: entry?.status || 'partial',
+    note: entry?.note || entry?.detail || '',
+  }));
 }
 
 function meaningful(value, fallback = '') {
@@ -438,7 +386,7 @@ export default function BusinessAssessmentFiveFuturesPremium({ data }) {
   const likely = futures.find((future) => future.key === 'most_likely_next_future') || futures[1] || futures[0] || normalizeFuture({}, 1);
   const leftFutures = [current, likely];
   const rightFutures = futures.filter((future) => !leftFutures.includes(future)).slice(0, 3);
-  const truthInputs = buildTruthRail(data);
+  const truthInputs = selectTruthRailEntries(data);
   const subject = clip(data?.ownerName, 34, 'Business Assessment');
   const horizon = 'Current Trajectory';
   const currentStatus = `${current.title} / ${current.probability}`;

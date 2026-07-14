@@ -1,4 +1,9 @@
 import { inferEToPScores } from './inferEToPScores.js';
+import {
+  buildBusinessEngineContract,
+  projectBusinessMapFromContract,
+  validateBusinessEngineContract,
+} from '../businessEngine/index.js';
 
 const REAL_ESTATE_GROSS_COMMISSION_RATE_ASSUMPTION = 0.0265;
 
@@ -484,25 +489,8 @@ function deriveMapDiagnosisBody({
   return clipForVisual(constraintSummary || 'Business reality is still being analyzed.', 130);
 }
 
-function buildBusinessMapVisualCopy({
-  answers,
-  primaryConstraint,
-  businessReality,
-  currentTrajectory,
-  opportunity,
-  impact,
-  bottomLine,
-  eToP,
-  draft,
-  briefing,
-  oneMove,
-}) {
-  const metrics = extractBusinessMetrics({ answers, draft, briefing, oneMove });
-  const constraintLabel = formatValue(primaryConstraint.label, 'Primary constraint');
-  const constraintSummary = formatValue(primaryConstraint.summary, 'The business needs a more inspectable operating rhythm.');
+function buildMetricPanels(metrics) {
   const goalUnits = metrics.goalUnits ? `${metrics.goalUnits}` : 'Not provided';
-  const closingInsight = buildClosingInsight({ metrics, primaryConstraint, eToP });
-
   return {
     currentMetrics: [
       {
@@ -567,12 +555,50 @@ function buildBusinessMapVisualCopy({
         basis: metrics.goalNet ? metricBasis(metrics.goalNet) : 'Company split / net margin missing'
       },
     ],
-    lake: {
+    metricDisplays: {
       current: compactNumber(metrics.currentTrueRelationships),
       target: compactNumber(metrics.relationshipTarget),
       gap: compactNumber(metrics.relationshipGap),
       label: 'TRUE RELATIONSHIPS',
       subtext: 'People who know, trust, and think of you.',
+    },
+  };
+}
+
+/**
+ * @deprecated Internal hybrid map builder. MMM8 routes intelligence via
+ * Business Engine Contract + projectBusinessMapFromContract. Kept only as
+ * emergency structural reference; not used for semantic content when contract builds.
+ */
+function buildBusinessMapVisualCopy({
+  answers,
+  primaryConstraint,
+  businessReality,
+  currentTrajectory,
+  opportunity,
+  impact,
+  bottomLine,
+  eToP,
+  draft,
+  briefing,
+  oneMove,
+}) {
+  const metrics = extractBusinessMetrics({ answers, draft, briefing, oneMove });
+  const panels = buildMetricPanels(metrics);
+  const constraintLabel = formatValue(primaryConstraint.label, 'Primary constraint');
+  const constraintSummary = formatValue(primaryConstraint.summary, 'The business needs a more inspectable operating rhythm.');
+  const goalUnits = metrics.goalUnits ? `${metrics.goalUnits}` : 'Not provided';
+  const closingInsight = buildClosingInsight({ metrics, primaryConstraint, eToP });
+
+  return {
+    ...panels,
+    lake: {
+      current: panels.metricDisplays.current,
+      target: panels.metricDisplays.target,
+      gap: panels.metricDisplays.gap,
+      label: panels.metricDisplays.label,
+      subtext: panels.metricDisplays.subtext,
+      // Explicit legacy defaults only — marked for contract fallback path
       streams: ['Past Clients', 'Referrals', 'Open Houses', 'Sphere / Network', 'Vendor Partners', 'Community Events', 'Database Reactivation'],
       outflow: ['Appointments', 'Listings', 'Buyers', 'Referrals', 'Repeat Business', 'GCI', 'Time Freedom'],
     },
@@ -609,17 +635,15 @@ function buildBusinessMapVisualCopy({
       },
       {
         title: 'Opportunity',
-        body: metricNumber(metrics.relationshipTarget)
-          ? `Grow the lake toward ${compactNumber(metrics.relationshipTarget)}. Activate the current relationships. Create a weekly appointment rhythm.`
-          : clipForVisual(opportunity, 130),
+        body: clipForVisual(opportunity, 130),
       },
       {
         title: 'Bottom Line',
-        body: metrics.goalUnits
-          ? `Close the relationship gap. Build the weekly rhythm. Move toward ${goalUnits} units.`
-          : clipForVisual(bottomLine, 130),
+        body: clipForVisual(bottomLine, 130),
       },
     ],
+    _legacy_note: 'Semantic map fields are superseded by Business Engine Contract projection when available.',
+    _unused_goal_units_for_legacy: goalUnits,
   };
 }
 
@@ -818,19 +842,97 @@ export function normalizeBusinessVisualArtifactData(record) {
     }
   };
 
-  normalized.businessMap = buildBusinessMapVisualCopy({
-    answers,
-    primaryConstraint: normalized.primaryConstraint,
-    businessReality: normalized.businessReality,
-    currentTrajectory: normalized.currentTrajectory,
-    opportunity: normalized.opportunity,
-    impact: normalized.impact,
-    bottomLine: normalized.bottomLine,
+  const metrics = extractBusinessMetrics({ answers, draft, briefing, oneMove });
+  const metricPanels = buildMetricPanels(metrics);
+
+  // Canonical Business Engine Contract — strongest intelligence routing authority.
+  const businessEngineContract = buildBusinessEngineContract(record, {
     eToP,
-    draft,
-    briefing,
-    oneMove,
+    metrics: {
+      currentTrueRelationships: metrics.currentTrueRelationships,
+      relationshipTarget: metrics.relationshipTarget,
+      relationshipGap: metrics.relationshipGap,
+    },
   });
+  const contractValidation = validateBusinessEngineContract(businessEngineContract);
+
+  const projectedMap = projectBusinessMapFromContract(businessEngineContract, {
+    currentMetrics: metricPanels.currentMetrics,
+    targetMetrics: metricPanels.targetMetrics,
+    metricDisplays: metricPanels.metricDisplays,
+  });
+
+  normalized.businessEngineContract = businessEngineContract;
+  normalized.businessEngineContractValidation = contractValidation;
+  normalized.businessMap = projectedMap;
+
+  // Align top-level normalized strings with contract (no weaker override).
+  if (businessEngineContract.current_trajectory?.current) {
+    const traj = businessEngineContract.current_trajectory.current;
+    normalized.currentTrajectory = formatValue(
+      traj.summary || traj.label || traj.direction,
+      normalized.currentTrajectory
+    );
+  }
+  if (businessEngineContract.potential_business_future?.current) {
+    normalized.potentialFuture = formatValue(
+      businessEngineContract.potential_business_future.current,
+      normalized.potentialFuture
+    );
+  }
+  if (businessEngineContract.primary_constraint?.current) {
+    const pc = businessEngineContract.primary_constraint.current;
+    normalized.primaryConstraint = {
+      ...normalized.primaryConstraint,
+      key: pc.category || normalized.primaryConstraint.key,
+      label: formatValue(pc.name, normalized.primaryConstraint.label),
+      summary: formatValue(pc.explanation, normalized.primaryConstraint.summary),
+      evidence: Array.isArray(pc.supporting_evidence) && pc.supporting_evidence.length
+        ? pc.supporting_evidence.slice(0, 5)
+        : normalized.primaryConstraint.evidence,
+      confidence: formatValue(
+        businessEngineContract.primary_constraint.confidence,
+        normalized.primaryConstraint.confidence
+      ),
+    };
+  }
+  if (businessEngineContract.causal_explanation?.current) {
+    normalized.diagnosis = formatValue(
+      businessEngineContract.causal_explanation.current,
+      normalized.diagnosis
+    );
+  }
+  if (businessEngineContract.future_change_logic?.current) {
+    normalized.opportunity = formatValue(
+      businessEngineContract.future_change_logic.current,
+      normalized.opportunity
+    );
+  }
+  if (businessEngineContract.no_change_consequence?.current) {
+    normalized.impact = formatValue(
+      businessEngineContract.no_change_consequence.current,
+      normalized.impact
+    );
+  }
+  if (businessEngineContract.one_move?.current?.recommendation) {
+    normalized.bottomLine = formatValue(
+      businessEngineContract.one_move.current.recommendation,
+      normalized.bottomLine
+    );
+  }
+  if (businessEngineContract.confidence_reality?.current) {
+    normalized.confidenceReality = businessEngineContract.confidence_reality.current;
+  }
+  if (businessEngineContract.truth_boundaries?.current) {
+    normalized.truthBoundaries = businessEngineContract.truth_boundaries.current;
+  }
+  // Final render-ready Truth Rail entries — renderer binds only; no reinterpretation.
+  if (Array.isArray(businessEngineContract.truth_rail?.current) && businessEngineContract.truth_rail.current.length) {
+    normalized.truthRail = businessEngineContract.truth_rail.current;
+  }
+
+  // Preserve legacy emergency builder only for debugging / compatibility inspection.
+  normalized._legacyBusinessMapBuilderAvailable = typeof buildBusinessMapVisualCopy === 'function';
 
   return normalized;
 }
