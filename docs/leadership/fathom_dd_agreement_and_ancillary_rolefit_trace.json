@@ -1,0 +1,55 @@
+{
+  "mission_id": "FATHOM_DD_AGREEMENT_REPLACEMENT_AND_ANCILLARY_ROLEFIT_TRACE",
+  "old_agreement_found": false,
+  "old_agreement_path": null,
+  "new_agreement_installed": true,
+  "new_agreement_path": "docs/leadership/contracts/Fathom_Realty_District_Director_Agreement_C1_v20250224.pdf",
+  "old_agreement_archived": false,
+  "old_agreement_archive_path": null,
+  "canonical_source_confirmed": true,
+  "duplicate_active_sources_detected": false,
+  "role_fit_entry_point": "src/LeadershipRoleFitLab.jsx",
+  "weight_definition_files": [
+    "src/lib/leadership/roleModels/fathomDistrictDirectorV1.js"
+  ],
+  "overall_score_files": [
+    "src/lib/leadership/roleFitScoring.js",
+    "src/lib/leadership/buildDistrictDirectorFit.js"
+  ],
+  "behavioral_role_fit_files": [
+    "src/lib/leadership/roleModels/fathomDistrictDirectorV1.js",
+    "src/lib/leadership/roleFitScoring.js",
+    "src/lib/leadership/buildDistrictDirectorFit.js"
+  ],
+  "evidence_adjusted_role_fit_files": [
+    "src/lib/leadership/roleFitScoring.js",
+    "src/lib/leadership/buildDistrictDirectorFit.js"
+  ],
+  "evidence_input_files": [
+    "src/LeadershipRoleFitLab.jsx"
+  ],
+  "evidence_interpretation_files": [
+    "src/lib/leadership/buildRoleFitEvidencePayload.js",
+    "api/leadership/dd-role-fit-evidence-interpretation.js",
+    "src/lib/leadership/roleFitScoring.js"
+  ],
+  "panel_rendering_files": [
+    "src/components/leadership/RoleFitDashboard.jsx"
+  ],
+  "recommended_ancillary_panel_location": "Add ancillary_services_capture to the buildDistrictDirectorFit result adjacent to score_stack; render one compact card in RoleFitDashboard immediately after ScoreStackSection and before the dimension grid.",
+  "recommended_overall_score_effect": "small, capped, and materially subordinate to recruiting",
+  "recruiting_remains_dominant": true,
+  "scoring_changed": false,
+  "ui_changed": false,
+  "evidence_feature_changed": false,
+  "commit_performed": false,
+  "deployment_performed": false,
+  "unresolved_questions": [
+    "The supplied PDF contains six physical pages although its footer labels pages as part of a seven-page agreement; confirm whether a seventh page is intentionally absent.",
+    "No prior agreement source document exists in the repository, so no old source could be archived or compared provision-by-provision.",
+    "Decide whether the future ancillary panel replaces, complements, or derives from the existing 3% Partner / Ecosystem Advocacy dimension to avoid double counting.",
+    "Define region-size and transaction-volume inputs, source of truth, measurement window, and missing-data policy.",
+    "Define the exact transaction denominator and qualifying Fathom Company/Partner records for the 10% goal."
+  ],
+  "recommended_next_action": "BUILD_WITH_BRIDGE_RUNNER"
+}

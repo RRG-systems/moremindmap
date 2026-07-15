@@ -433,6 +433,59 @@ export const PERFORMANCE_EVIDENCE_UI_EXAMPLES = [
   'Has recurring compliance document review delays.',
   'Maintained strong compliance record with no material audit issues.',
   'Led recurring agent training or onboarding programs.',
+  'Achieved 12% partner-included transaction capture over the last two quarters.',
+  'Large region with high transaction volume but near-zero ancillary or partner capture.',
+];
+
+/** Shared 3% overall allocation — Partner Advocacy + Ancillary Capture (not stacked). */
+export const ANCILLARY_SHARED_WEIGHT = 0.03;
+/** Max headline Overall movement attributable to ancillary (percentage points). */
+export const ANCILLARY_OVERALL_EFFECT_CAP = 3;
+export const ANCILLARY_CONTRACT_TARGET =
+  '10% or more of transactions including one or more qualifying Fathom Companies or Partners';
+
+export const POSITIVE_ANCILLARY_EVIDENCE_PATTERNS = [
+  /\bancillary\s+capture\b/i,
+  /\bpartner[\s-]included\s+transaction/i,
+  /\b\d{1,2}(\.\d+)?%\s+(partner|ancillary|fathom\s+compan)/i,
+  /\b(mortgage|title|insurance)\s+(adoption|capture|attach|attach\s*rate|usage)\b/i,
+  /\bstrong\s+(partner|ancillary)\s+(adoption|capture|conversion)\b/i,
+  /\bmeasured\s+(partner|ancillary)\s+adoption\b/i,
+  /\brepeatable\s+(introduction|partner)\s+process\b/i,
+  /\bpartner\s+collaboration\b/i,
+  /\bfathom\s+(compan(y|ies)|partners?)\s+(adoption|capture|attach)\b/i,
+  /\bqualifying\s+(fathom\s+)?(compan(y|ies)|partners?)\b/i,
+  /\bimproved\s+(partner|ancillary)\s+(capture|adoption)\b/i,
+  /\babove\s+(the\s+)?10%\s+(partner|ancillary|capture)\b/i,
+  /\b(exceeded|met)\s+(the\s+)?10%\s+(target|goal)\b/i,
+  /\bsocial\s+(media\s+)?(partner|adoption)\b/i,
+];
+
+export const NEGATIVE_ANCILLARY_EVIDENCE_PATTERNS = [
+  /\bnear[\s-]?zero\s+(ancillary|partner)\s+(capture|usage|adoption)\b/i,
+  /\blittle\s+or\s+no\s+(ancillary|partner)\s+(usage|capture|adoption)\b/i,
+  /\bno\s+(ancillary|partner)\s+(capture|usage|adoption|introductions?)\b/i,
+  /\bnegligible\s+(partner|ancillary)\s+(capture|usage|adoption)\b/i,
+  /\bpoor\s+(ancillary|partner)\s+(capture|adoption|conversion)\b/i,
+  /\bfailed?\s+to\s+introduce\s+(fathom\s+)?(compan(y|ies)|partners?)\b/i,
+  /\bmissed\s+(ancillary|partner|10%)\s+(target|goal)s?\b/i,
+  /\bbelow\s+(the\s+)?10%\s+(partner|ancillary|capture)\b/i,
+  /\bzero\s+(partner|ancillary)\s+(capture|attach|adoption)\b/i,
+  /\blost\s+(partner|ancillary)\s+opportunit/i,
+  /\bdeclining\s+(partner|ancillary)\s+(participation|capture|adoption)\b/i,
+  /\bno\s+(ownership|process|inspection)\s+of\s+(partner|ancillary)\b/i,
+  /\bdoes\s+not\s+promote\s+(fathom\s+)?(compan(y|ies)|partners?)\b/i,
+];
+
+/** Opportunity size only when factually stated — never inferred from BOS. */
+export const MEANINGFUL_OPPORTUNITY_PATTERNS = [
+  /\b(large|major|substantial|significant)\s+(region|market|market\s+center)\b/i,
+  /\b(high|heavy|substantial|significant|meaningful)\s+transaction\s+(volume|count|opportunity)\b/i,
+  /\b\d{2,}\+?\s+(agents?|transactions?|closings?)\b/i,
+  /\b\d{3,}\s+(agents?|transactions?|closings?)\b/i,
+  /\b(hundreds|dozens)\s+of\s+(transactions?|agents?)\b/i,
+  /\bmeaningful\s+(region|transaction|opportunity)\b/i,
+  /\bhigh\s+volume\s+(region|market|office)\b/i,
 ];
 
 const EMPTY_EVIDENCE_PARSE = {
@@ -447,6 +500,12 @@ const EMPTY_EVIDENCE_PARSE = {
   negative_recruiting: false,
   negative_compliance_ops: false,
   negative_support: false,
+  negative_training: false,
+  negative_partner: false,
+  positive_ancillary: false,
+  negative_ancillary: false,
+  ancillary_meaningful_opportunity: false,
+  ancillary_adjustment: 'no_change',
   sustained_underperformance: false,
   detectedPositiveSignals: [],
   detectedNegativeSignals: [],
@@ -661,12 +720,45 @@ export function parsePerformanceEvidence(evidenceText = '') {
           ? negativeRecruiting
           : negativeRecruiting.filter((p) => !/^past\s+(three|3)\s+years$/i.test(p));
 
+  const positiveAncillaryRaw = collectPatternMatches(raw, POSITIVE_ANCILLARY_EVIDENCE_PATTERNS);
+  const negativeAncillary = collectPatternMatches(raw, NEGATIVE_ANCILLARY_EVIDENCE_PATTERNS);
+  const opportunityMatches = collectPatternMatches(raw, MEANINGFUL_OPPORTUNITY_PATTERNS);
+  // Drop bare positive phrases nested inside negative frames
+  // (e.g. "near-zero ancillary capture" must not fire "ancillary capture" as positive).
+  const positiveAncillary = filterPositiveMatchesAgainstNegatives(
+    positiveAncillaryRaw,
+    negativeAncillary,
+    raw,
+  ).filter((pos) => {
+    const p = pos.toLowerCase();
+    const lower = raw.toLowerCase();
+    const idx = lower.indexOf(p);
+    if (idx < 0) return true;
+    const window = lower.slice(Math.max(0, idx - 28), idx + p.length + 8);
+    if (
+      /\b(near[\s-]?zero|zero|no|little or no|negligible|poor|weak|failed|missed|declining|without)\b/i.test(
+        window,
+      )
+    ) {
+      return false;
+    }
+    return true;
+  });
+  const hasPositiveAncillary = positiveAncillary.length > 0;
+  const hasNegativeAncillary = negativeAncillary.length > 0;
+  const hasMeaningfulOpportunity = opportunityMatches.length > 0;
+  // Opportunity alone is not negative; only elevates severity when capture is poor.
+  if (hasPositiveAncillary || hasNegativeAncillary) {
+    affectedDimSet.add('Ancillary Services Capture Potential');
+  }
+
   const hasPositiveRecruiting = positiveRecruiting.length > 0;
   const hasNegativeRecruiting = negRecruitFinal.length > 0;
   const hasNegativeOps = hitsComplianceOps || hitsSupport || hitsTraining || hitsPartner;
   const hasPositiveOnlyCompliance = positiveCompliance.length > 0 && !hasPositiveRecruiting;
-  const hasAnyPositive = hasPositiveRecruiting || positiveCompliance.length > 0;
-  const hasAnyNegative = hasNegativeRecruiting || hasNegativeOps;
+  const hasAnyPositive =
+    hasPositiveRecruiting || positiveCompliance.length > 0 || hasPositiveAncillary;
+  const hasAnyNegative = hasNegativeRecruiting || hasNegativeOps || hasNegativeAncillary;
 
   let classification = 'neutral';
   if (hasAnyPositive && hasAnyNegative) classification = 'mixed';
@@ -676,11 +768,35 @@ export function parsePerformanceEvidence(evidenceText = '') {
   if (hasPositiveRecruiting) affectedDimSet.add('Recruiting / Growth');
   if (hasNegativeRecruiting) affectedDimSet.add('Recruiting / Growth');
 
-  const detectedPositiveSignals = [...positiveRecruiting, ...positiveCompliance];
-  const detectedNegativeSignals = [...negRecruitFinal, ...negativeOpsSupportPhrases];
+  const detectedPositiveSignals = [
+    ...positiveRecruiting,
+    ...positiveCompliance,
+    ...positiveAncillary,
+  ];
+  const detectedNegativeSignals = [
+    ...negRecruitFinal,
+    ...negativeOpsSupportPhrases,
+    ...negativeAncillary,
+  ];
   // Include sustained markers in negative signals for audit when recruiting-negative
   if (sustained && hasNegativeRecruiting) {
     for (const s of sustainedMatches) pushUniquePhrase(detectedNegativeSignals, s);
+  }
+  if (hasMeaningfulOpportunity && hasNegativeAncillary) {
+    for (const s of opportunityMatches) pushUniquePhrase(detectedNegativeSignals, s);
+  }
+
+  let ancillary_adjustment = 'no_change';
+  if (hasPositiveAncillary && !hasNegativeAncillary) {
+    ancillary_adjustment =
+      positiveAncillary.length >= 2 ? 'increase_materially' : 'increase_modestly';
+  } else if (hasNegativeAncillary && !hasPositiveAncillary) {
+    ancillary_adjustment =
+      hasMeaningfulOpportunity || negativeAncillary.length >= 2
+        ? 'decrease_materially'
+        : 'decrease_modestly';
+  } else if (hasPositiveAncillary && hasNegativeAncillary) {
+    ancillary_adjustment = 'mixed';
   }
 
   const copy = buildEvidenceImpactCopy({
@@ -710,6 +826,10 @@ export function parsePerformanceEvidence(evidenceText = '') {
     negative_training: hitsTraining,
     negative_partner: hitsPartner,
     positive_compliance: positiveCompliance.length > 0,
+    positive_ancillary: hasPositiveAncillary,
+    negative_ancillary: hasNegativeAncillary,
+    ancillary_meaningful_opportunity: Boolean(hasMeaningfulOpportunity),
+    ancillary_adjustment,
     sustained_underperformance: Boolean(sustained && hasNegativeRecruiting),
     detectedPositiveSignals,
     detectedNegativeSignals,
@@ -1803,7 +1923,11 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
   const isComplianceDim = (name) => /compliance|operational|ops/i.test(String(name || ''));
   const isSupportDim = (name) => /agent support|service/i.test(String(name || ''));
   const isTrainingDim = (name) => /training|communication/i.test(String(name || ''));
-  const isPartnerDim = (name) => /partner|ecosystem/i.test(String(name || ''));
+  // Ancillary before partner so "partner capture" maps to ancillary, not only advocacy
+  const isAncillaryDim = (name) =>
+    /ancillary|capture potential|partner[\s-]included|fathom compan/i.test(String(name || ''));
+  const isPartnerDim = (name) =>
+    !isAncillaryDim(name) && /partner|ecosystem/i.test(String(name || ''));
   const isAccountabilityDim = (name) => /accountab|follow/i.test(String(name || ''));
 
   const posSignals = signals.filter((s) => String(s?.direction).toLowerCase() === 'positive');
@@ -1815,6 +1939,8 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
   const negSupport = negSignals.some((s) => isSupportDim(s.dimension));
   const negTraining = negSignals.some((s) => isTrainingDim(s.dimension));
   const negPartner = negSignals.some((s) => isPartnerDim(s.dimension));
+  const posAncillary = posSignals.some((s) => isAncillaryDim(s.dimension));
+  const negAncillary = negSignals.some((s) => isAncillaryDim(s.dimension));
   const negAccountability = negSignals.some((s) => isAccountabilityDim(s.dimension));
 
   const sustained = negSignals.some(
@@ -1844,9 +1970,44 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
   const effectiveNegSupport =
     negSupport || negAccountability || supportAdj === 'increase';
 
+  const ancillaryAdj = String(ra.ancillary_capture || ra.ancillary_fit || '').toLowerCase();
+  const effectivePosAncillary =
+    posAncillary ||
+    ancillaryAdj === 'increase_materially' ||
+    ancillaryAdj === 'increase_modestly';
+  const effectiveNegAncillary =
+    negAncillary ||
+    ancillaryAdj === 'decrease_materially' ||
+    ancillaryAdj === 'decrease_modestly';
+
+  // Opportunity context from GPT signal summaries or deterministic text only
+  const opportunityFromSignals = [...posSignals, ...negSignals].some((s) =>
+    /large region|high transaction|meaningful opportunity|substantial volume|many agents|\d{2,}\s+agents|\d{3,}\s+transaction/i.test(
+      String(s?.summary || ''),
+    ),
+  );
+  const opportunityFromText = collectPatternMatches(raw, MEANINGFUL_OPPORTUNITY_PATTERNS).length > 0;
+  const meaningfulOpportunity = opportunityFromSignals || opportunityFromText;
+
+  let ancillary_adjustment = 'no_change';
+  if (ancillaryAdj && ancillaryAdj !== 'no_change') {
+    ancillary_adjustment = ancillaryAdj;
+  } else if (effectivePosAncillary && !effectiveNegAncillary) {
+    ancillary_adjustment =
+      ancillaryAdj === 'increase_modestly' ? 'increase_modestly' : 'increase_materially';
+  } else if (effectiveNegAncillary && !effectivePosAncillary) {
+    ancillary_adjustment =
+      meaningfulOpportunity || ancillaryAdj === 'decrease_materially'
+        ? 'decrease_materially'
+        : 'decrease_modestly';
+  } else if (effectivePosAncillary && effectiveNegAncillary) {
+    ancillary_adjustment = 'mixed';
+  }
+
   const dimSet = new Set();
   for (const d of affected) {
-    if (isGrowthDim(d)) dimSet.add('Recruiting / Growth');
+    if (isAncillaryDim(d)) dimSet.add('Ancillary Services Capture Potential');
+    else if (isGrowthDim(d)) dimSet.add('Recruiting / Growth');
     else if (isComplianceDim(d)) dimSet.add('Compliance / Operations');
     else if (isSupportDim(d)) dimSet.add('Agent Support');
     else if (isTrainingDim(d)) dimSet.add('Training / Communication');
@@ -1857,6 +2018,9 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
   if (effectivePosGrowth || effectiveNegGrowth) dimSet.add('Recruiting / Growth');
   if (effectiveNegCompliance) dimSet.add('Compliance / Operations');
   if (effectiveNegSupport) dimSet.add('Agent Support');
+  if (effectivePosAncillary || effectiveNegAncillary) {
+    dimSet.add('Ancillary Services Capture Potential');
+  }
 
   const detectedPositiveSignals = posSignals
     .map((s) => String(s.summary || s.dimension || '').trim())
@@ -1894,6 +2058,10 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
     negative_training: Boolean(negTraining),
     negative_partner: Boolean(negPartner),
     positive_compliance: posSignals.some((s) => isComplianceDim(s.dimension)),
+    positive_ancillary: Boolean(effectivePosAncillary),
+    negative_ancillary: Boolean(effectiveNegAncillary),
+    ancillary_meaningful_opportunity: Boolean(meaningfulOpportunity),
+    ancillary_adjustment,
     sustained_underperformance: Boolean(sustained && effectiveNegGrowth),
     detectedPositiveSignals,
     detectedNegativeSignals,
@@ -1919,6 +2087,8 @@ export function mapGptInterpretationToEvidenceParse(interpretation, evidenceText
       overall_fit: ra.overall_fit || 'no_change',
       compliance_ops_risk: ra.compliance_ops_risk || 'no_change',
       support_required: ra.support_required || 'no_change',
+      // Category only — never a numeric score from GPT
+      ancillary_capture: ra.ancillary_capture || ra.ancillary_fit || 'no_change',
     },
     gpt_confidence:
       typeof interp.confidence === 'number' && Number.isFinite(interp.confidence)
@@ -1980,6 +2150,382 @@ export function resolveEvidenceParse(evidenceText = '', gptInterpretation = null
     fallback_used: true,
     fallback_message:
       'Evidence interpretation unavailable. Deterministic fallback applied.',
+  };
+}
+
+/**
+ * Behavioral baseline for Ancillary Services Capture Potential.
+ * Uses relationship influence (Signal), multiplication (Leverage), ecosystem
+ * awareness (Horizon), plus modest execution modifiers (Framework, Fidelity).
+ * Soft-anchors to Partner Advocacy score so Darren-like baselines do not collapse.
+ * Label as inference — never claims measured 10% capture without facts.
+ */
+export function computeAncillaryBehavioralBaseline(signalMap = {}, partnerDim = null) {
+  const advocacyAvg = averageSignals(signalMap, ['signal', 'leverage', 'horizon']);
+  const executionAvg = averageSignals(signalMap, ['framework', 'fidelity']);
+  let avg = advocacyAvg;
+  if (advocacyAvg != null && executionAvg != null) {
+    avg = 0.75 * advocacyAvg + 0.25 * executionAvg;
+  } else if (advocacyAvg == null) {
+    avg = executionAvg;
+  }
+  let percent = signalAverageToPercent(avg);
+  const partnerScore =
+    typeof partnerDim?.behavioral_score_percent === 'number'
+      ? partnerDim.behavioral_score_percent
+      : typeof partnerDim?.score_percent === 'number'
+        ? partnerDim.score_percent
+        : null;
+  if (percent != null && partnerScore != null) {
+    percent = Math.round((0.85 * percent + 0.15 * partnerScore) * 10) / 10;
+  }
+  return percent;
+}
+
+function clampAncillaryScore(score) {
+  if (score === null || score === undefined || !Number.isFinite(Number(score))) return null;
+  return Math.round(Math.min(96, Math.max(18, Number(score))) * 10) / 10;
+}
+
+function clampOverallEffect(points) {
+  const n = Number(points);
+  if (!Number.isFinite(n)) return 0;
+  const capped = Math.max(
+    -ANCILLARY_OVERALL_EFFECT_CAP,
+    Math.min(ANCILLARY_OVERALL_EFFECT_CAP, n),
+  );
+  return Math.round(capped * 10) / 10;
+}
+
+/**
+ * Resolve ancillary evidence direction and intensity from evidenceParse.
+ * GPT may set categories; deterministic code owns numeric deltas.
+ */
+export function resolveAncillaryEvidenceState(evidenceParse = null, context = {}) {
+  const ep = evidenceParse && typeof evidenceParse === 'object' ? evidenceParse : {};
+  const hasInput = Boolean(ep.has_input);
+  const raw = String(ep.raw || '');
+
+  let positive = Boolean(ep.positive_ancillary);
+  let negative = Boolean(ep.negative_ancillary);
+  let opportunity = Boolean(ep.ancillary_meaningful_opportunity);
+  let adj = String(ep.ancillary_adjustment || '').toLowerCase();
+
+  // Deterministic re-scan of free text (also strips positive hits inside negative frames)
+  if (hasInput && raw) {
+    const negHits = collectPatternMatches(raw, NEGATIVE_ANCILLARY_EVIDENCE_PATTERNS);
+    const posHitsRaw = collectPatternMatches(raw, POSITIVE_ANCILLARY_EVIDENCE_PATTERNS);
+    const posHits = filterPositiveMatchesAgainstNegatives(posHitsRaw, negHits, raw).filter(
+      (pos) => {
+        const p = pos.toLowerCase();
+        const lower = raw.toLowerCase();
+        const idx = lower.indexOf(p);
+        if (idx < 0) return true;
+        const window = lower.slice(Math.max(0, idx - 28), idx + p.length + 8);
+        return !/\b(near[\s-]?zero|zero|no|little or no|negligible|poor|weak|failed|missed|declining|without)\b/i.test(
+          window,
+        );
+      },
+    );
+    const oppHits = collectPatternMatches(raw, MEANINGFUL_OPPORTUNITY_PATTERNS);
+    if (posHits.length) positive = true;
+    if (negHits.length) negative = true;
+    // If re-scan finds only negatives, clear stale positive from incomplete GPT mapping
+    if (negHits.length && !posHits.length) positive = false;
+    if (posHits.length && !negHits.length) negative = false;
+    if (oppHits.length) opportunity = true;
+  }
+
+  // Structured context only — never invent region/volume from BOS
+  const structuredOpportunity =
+    (typeof context.transaction_volume === 'number' && context.transaction_volume >= 50) ||
+    (typeof context.current_agents === 'number' && context.current_agents >= 40) ||
+    (typeof context.region_size === 'string' &&
+      /large|major|substantial/i.test(context.region_size));
+  if (structuredOpportunity) opportunity = true;
+
+  if (!adj || adj === 'no_change') {
+    if (positive && !negative) adj = 'increase_modestly';
+    else if (negative && !positive) {
+      adj = opportunity ? 'decrease_materially' : 'decrease_modestly';
+    } else if (positive && negative) adj = 'mixed';
+    else adj = 'no_change';
+  }
+
+  let evidence_direction = 'none';
+  if (positive && negative) evidence_direction = 'mixed';
+  else if (positive) evidence_direction = 'positive';
+  else if (negative) evidence_direction = 'negative';
+  else if (hasInput) evidence_direction = 'neutral';
+
+  return {
+    has_input: hasInput,
+    positive,
+    negative,
+    opportunity,
+    adjustment: adj,
+    evidence_direction,
+  };
+}
+
+/**
+ * Deterministic ancillary score deltas (percentage points on the ancillary panel).
+ * Stronger negative when meaningful opportunity + poor capture.
+ * Never invents opportunity; missing facts stay missing.
+ */
+export function computeAncillaryEvidenceDelta(state = {}) {
+  const adj = String(state.adjustment || 'no_change').toLowerCase();
+  const opportunity = Boolean(state.opportunity);
+  const positive = Boolean(state.positive);
+  const negative = Boolean(state.negative);
+
+  if (adj === 'mixed' || (positive && negative)) {
+    // Balanced net when mixed — opportunity tilts slightly negative
+    const up = 8;
+    const down = opportunity ? 14 : 8;
+    return Math.round(((up - down) / 2) * 10) / 10;
+  }
+  if (adj === 'increase_materially') return 14;
+  if (adj === 'increase_modestly') return 8;
+  if (adj === 'decrease_materially') return opportunity ? -18 : -14;
+  if (adj === 'decrease_modestly') return opportunity ? -14 : -10;
+  if (positive && !negative) return 10;
+  if (negative && !positive) return opportunity ? -16 : -10;
+  return 0;
+}
+
+/**
+ * Build the full Ancillary Services Capture Potential result object.
+ * GPT must never assign the numeric scores here — only classification flags.
+ */
+export function computeAncillaryServicesCapture({
+  signalMap = {},
+  partnerDim = null,
+  evidenceParse = null,
+  context = {},
+} = {}) {
+  const behavioral_baseline_score = computeAncillaryBehavioralBaseline(signalMap, partnerDim);
+  const state = resolveAncillaryEvidenceState(evidenceParse, context);
+  const rawDelta = computeAncillaryEvidenceDelta(state);
+
+  let evidence_adjusted_score = behavioral_baseline_score;
+  if (behavioral_baseline_score != null && rawDelta !== 0) {
+    evidence_adjusted_score = clampAncillaryScore(behavioral_baseline_score + rawDelta);
+  } else if (behavioral_baseline_score != null) {
+    evidence_adjusted_score = behavioral_baseline_score;
+  }
+
+  const score_delta =
+    behavioral_baseline_score == null || evidence_adjusted_score == null
+      ? 0
+      : Math.round((evidence_adjusted_score - behavioral_baseline_score) * 10) / 10;
+
+  // Overall influence via shared 3% weight; hard-cap ±3 pp
+  const uncappedEffect = score_delta * ANCILLARY_SHARED_WEIGHT;
+  const overall_score_effect = clampOverallEffect(uncappedEffect);
+
+  // If cap binds (rare with 3% weight), compress adjusted score used for overall
+  let overall_contribution_score = evidence_adjusted_score;
+  if (
+    behavioral_baseline_score != null &&
+    Math.abs(uncappedEffect) > ANCILLARY_OVERALL_EFFECT_CAP + 1e-9
+  ) {
+    const sign = score_delta >= 0 ? 1 : -1;
+    const maxDimDelta = ANCILLARY_OVERALL_EFFECT_CAP / ANCILLARY_SHARED_WEIGHT;
+    overall_contribution_score = clampAncillaryScore(
+      behavioral_baseline_score + sign * maxDimDelta,
+    );
+  }
+
+  let source_mode = 'behavioral_inference';
+  if (!state.has_input) {
+    source_mode = 'behavioral_inference';
+  } else if (state.evidence_direction === 'none' || state.evidence_direction === 'neutral') {
+    source_mode = 'insufficient_evidence';
+  } else if (state.evidence_direction === 'mixed') {
+    source_mode = 'mixed_evidence';
+  } else if (state.positive && !state.negative) {
+    source_mode = 'evidence_supported';
+  } else if (state.negative && !state.positive) {
+    source_mode = 'evidence_weakened';
+  }
+
+  const missing_evidence = [];
+  if (!state.has_input || state.evidence_direction === 'none' || state.evidence_direction === 'neutral') {
+    missing_evidence.push(
+      'No factual ancillary capture rate, partner attach rate, or qualifying-company transaction share entered.',
+    );
+  }
+  if (state.negative && !state.opportunity) {
+    missing_evidence.push(
+      'Opportunity size (region scale, agent count, or transaction volume) not established — stronger opportunity-adjusted penalty not applied.',
+    );
+  }
+  if (state.has_input && !/\b\d{1,2}(\.\d+)?\s*%/.test(String(evidenceParse?.raw || ''))) {
+    if (state.positive || state.negative) {
+      missing_evidence.push(
+        'Exact capture percentage vs the 10% contract target not measured in evidence.',
+      );
+    }
+  }
+
+  const strengths = [];
+  const risks = [];
+  if (state.positive) {
+    strengths.push(
+      'Factual evidence supports ancillary or partner capture progress relative to the behavioral baseline.',
+    );
+  }
+  if (behavioral_baseline_score != null && behavioral_baseline_score >= 70) {
+    strengths.push(
+      'Behavioral profile suggests relationship influence and ecosystem awareness that can support capture when process is present.',
+    );
+  }
+  if (state.negative) {
+    risks.push(
+      state.opportunity
+        ? 'Meaningful opportunity appears present while ancillary capture evidence is weak — commercial leakage risk.'
+        : 'Factual evidence indicates weak ancillary or partner capture relative to the behavioral baseline.',
+    );
+  }
+  if (behavioral_baseline_score != null && behavioral_baseline_score < 55) {
+    risks.push(
+      'Behavioral baseline suggests capture may require structured process and inspection, not advocacy alone.',
+    );
+  }
+
+  const fit = classifyDimensionFit(evidence_adjusted_score);
+  let interpretation;
+  if (source_mode === 'behavioral_inference' || source_mode === 'insufficient_evidence') {
+    interpretation =
+      'Behavioral inference only. Capture potential is estimated from BOS relationship and execution signals; no factual ancillary performance was used. Do not treat this as measured 10% target attainment.';
+  } else if (source_mode === 'evidence_supported') {
+    interpretation =
+      'Factual ancillary or partner-capture evidence raises capture potential above the behavioral baseline. Recruiting remains the primary economic lever; ancillary influence stays modest (~3% shared weight).';
+  } else if (source_mode === 'evidence_weakened') {
+    interpretation = state.opportunity
+      ? 'Factual evidence shows weak capture where opportunity is meaningful. Ancillary score is reduced with a stronger opportunity-adjusted penalty, still capped so Overall moves only modestly.'
+      : 'Factual evidence weakens ancillary capture potential relative to the behavioral baseline. Overall impact remains limited by the shared 3% allocation.';
+  } else if (source_mode === 'mixed_evidence') {
+    interpretation =
+      'Mixed ancillary evidence produces a balanced adjustment. Positive and negative capture signals were netted deterministically without inventing missing denominators.';
+  } else {
+    interpretation =
+      'Ancillary capture potential reflects the shared Partner / Ancillary commercial allocation.';
+  }
+
+  const evidence_summary = !state.has_input
+    ? 'No external performance evidence entered for ancillary capture.'
+    : state.evidence_direction === 'positive'
+      ? 'Positive ancillary / partner-capture evidence detected.'
+      : state.evidence_direction === 'negative'
+        ? state.opportunity
+          ? 'Negative ancillary capture evidence with meaningful opportunity context.'
+          : 'Negative ancillary / partner-capture evidence detected.'
+        : state.evidence_direction === 'mixed'
+          ? 'Mixed ancillary capture evidence detected.'
+          : 'Evidence entered but no clear ancillary capture signal classified.';
+
+  const confidence =
+    source_mode === 'behavioral_inference'
+      ? 'low'
+      : source_mode === 'insufficient_evidence'
+        ? 'low'
+        : source_mode === 'mixed_evidence'
+          ? 'moderate'
+          : state.opportunity && state.negative
+            ? 'moderate'
+            : 'moderate_high';
+
+  return {
+    id: 'ancillary_services_capture',
+    label: 'Ancillary Services Capture Potential',
+    behavioral_baseline_score,
+    evidence_adjusted_score,
+    score_percent: evidence_adjusted_score,
+    display_score:
+      source_mode === 'behavioral_inference' || source_mode === 'insufficient_evidence'
+        ? behavioral_baseline_score
+        : evidence_adjusted_score,
+    score_delta,
+    overall_score_effect,
+    overall_contribution_score,
+    confidence,
+    source_mode,
+    source_label:
+      source_mode === 'behavioral_inference' || source_mode === 'insufficient_evidence'
+        ? 'Behavioral inference'
+        : 'Evidence adjusted',
+    evidence_direction: state.evidence_direction,
+    opportunity_context: state.opportunity
+      ? 'meaningful_opportunity_supported'
+      : 'unknown_or_not_established',
+    observed_capture_context:
+      state.evidence_direction === 'none' || state.evidence_direction === 'neutral'
+        ? 'not_observed'
+        : state.evidence_direction,
+    contract_target: ANCILLARY_CONTRACT_TARGET,
+    target_label: '10%+ qualifying transactions',
+    interpretation,
+    strengths,
+    risks,
+    missing_evidence,
+    evidence_summary,
+    weight: ANCILLARY_SHARED_WEIGHT,
+    weight_label: '3%',
+    weight_source: 'partner_ecosystem_advocacy',
+    double_counting_prevention:
+      'Overall uses a single shared 3% allocation (partner_ecosystem_advocacy). Ancillary capture score substitutes into that slot; Partner and Ancillary are never both added as independent 3% weights.',
+    fit_category: fit.label,
+    fit_category_id: fit.id,
+    accent: 'violet',
+    gpt_assigns_numeric_score: false,
+  };
+}
+
+/**
+ * Substitute ancillary capture score into the Partner 3% weight slot for overall.
+ * Display dimensions remain unchanged — this is scoring-only.
+ */
+export function applyAncillarySharedWeightToDimensions(dimensionResults = [], ancillaryResult = null) {
+  if (!ancillaryResult || typeof ancillaryResult !== 'object') {
+    return Array.isArray(dimensionResults) ? dimensionResults.map((d) => ({ ...d })) : [];
+  }
+  const contrib =
+    typeof ancillaryResult.overall_contribution_score === 'number'
+      ? ancillaryResult.overall_contribution_score
+      : typeof ancillaryResult.evidence_adjusted_score === 'number'
+        ? ancillaryResult.evidence_adjusted_score
+        : null;
+
+  return (dimensionResults || []).map((d) => {
+    if (d.id !== 'partner_ecosystem_advocacy') return { ...d };
+    if (contrib === null || contrib === undefined) return { ...d };
+    return {
+      ...d,
+      score_percent: contrib,
+      _ancillary_shared_weight_substituted: true,
+      _display_partner_score:
+        typeof d.score_percent === 'number' ? d.score_percent : null,
+      note:
+        d.note ||
+        'Overall contribution uses Ancillary Services Capture Potential via the shared 3% Partner/Ancillary allocation.',
+    };
+  });
+}
+
+/**
+ * Static integrity helper: sum of declared overall weights must be 1.0.
+ */
+export function assertRoleFitWeightTotal(weights = {}) {
+  const sum = Object.values(weights).reduce((a, b) => a + (Number(b) || 0), 0);
+  return {
+    sum: Math.round(sum * 1000) / 1000,
+    is_100_percent: Math.abs(sum - 1) < 1e-9,
+    recruiting_is_40: Math.abs((Number(weights.recruiting_growth_drive) || 0) - 0.4) < 1e-9,
+    ancillary_not_independent:
+      weights.ancillary_services_capture === undefined ||
+      weights.ancillary_services_capture === null,
   };
 }
 

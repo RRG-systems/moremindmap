@@ -40,6 +40,7 @@ const CANONICAL_DIMENSIONS = [
   'Training / Communication',
   'Operational Responsiveness',
   'Partner / Ecosystem Advocacy',
+  'Ancillary Services Capture Potential',
 ];
 
 const DIMENSION_ALIASES = {
@@ -60,6 +61,12 @@ const DIMENSION_ALIASES = {
   operations: 'Operational Responsiveness',
   'partner / ecosystem advocacy': 'Partner / Ecosystem Advocacy',
   'partner advocacy': 'Partner / Ecosystem Advocacy',
+  'ancillary services capture potential': 'Ancillary Services Capture Potential',
+  'ancillary services': 'Ancillary Services Capture Potential',
+  ancillary: 'Ancillary Services Capture Potential',
+  'ancillary capture': 'Ancillary Services Capture Potential',
+  'partner capture': 'Ancillary Services Capture Potential',
+  'partner adoption': 'Ancillary Services Capture Potential',
 };
 
 function setJsonHeaders(res) {
@@ -215,6 +222,8 @@ function normalizeInterpretation(parsed) {
     overall_fit: fitAdj('overall_fit'),
     compliance_ops_risk: riskAdj('compliance_ops_risk'),
     support_required: riskAdj('support_required'),
+    // Category only — deterministic code applies numeric ancillary deltas
+    ancillary_capture: fitAdj('ancillary_capture'),
   };
 
   if (classification === 'neutral') {
@@ -224,6 +233,7 @@ function normalizeInterpretation(parsed) {
       overall_fit: 'no_change',
       compliance_ops_risk: 'no_change',
       support_required: 'no_change',
+      ancillary_capture: 'no_change',
     };
   }
 
@@ -280,6 +290,11 @@ function buildSystemPrompt() {
     '- Recommend only bounded adjustment categories (not point values).',
     '- Prefer sustained duration when multi-year / last 3 years language is present.',
     '- Recruiting underperformance should map to Recruiting / Growth Drive and decrease_materially (or modestly if mild).',
+    '- Ancillary / partner capture evidence maps to Ancillary Services Capture Potential (and may also mention Partner / Ecosystem Advocacy).',
+    '- Ancillary evidence must NEVER be mapped as Recruiting / Growth Drive and must NEVER set growth_fit.',
+    '- Do not claim the 10% qualifying-transaction target is met or missed without explicit factual rates/counts in the evidence.',
+    '- If region size / transaction volume / agent count is absent, do not invent opportunity size; note it only when stated.',
+    '- Meaningful opportunity + poor capture → decrease_materially on ancillary_capture; unknown opportunity + poor capture → decrease_modestly.',
     '',
     'JSON schema keys exactly:',
     '{',
@@ -292,7 +307,8 @@ function buildSystemPrompt() {
     '    "evidence_adjusted_fit": same set,',
     '    "overall_fit": same set,',
     '    "compliance_ops_risk": "increase|no_change|decrease",',
-    '    "support_required": "increase|no_change|decrease"',
+    '    "support_required": "increase|no_change|decrease",',
+    '    "ancillary_capture": "increase_materially|increase_modestly|no_change|decrease_modestly|decrease_materially"',
     '  },',
     '  "plain_english_summary": string,',
     '  "board_safe_interpretation": string,',
@@ -463,6 +479,7 @@ export default async function handler(req, res) {
           overall_fit: 'no_change',
           compliance_ops_risk: 'no_change',
           support_required: 'no_change',
+          ancillary_capture: 'no_change',
         },
         plain_english_summary: 'No external performance evidence entered.',
         board_safe_interpretation:

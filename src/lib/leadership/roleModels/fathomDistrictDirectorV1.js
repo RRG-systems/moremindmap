@@ -1,19 +1,31 @@
 /**
  * Fathom District Director Role Model v1
  *
- * Source baseline: Fathom District Director Agreement 2025 (contract interpretation).
- * PDF may not be stored in-repo; this module encodes the locked interpretation only.
+ * Source baseline: Fathom Realty Independent Contractor District Director Agreement
+ * C1 v20250224 (canonical PDF in docs/leadership/contracts/).
+ * This module encodes the locked product interpretation only — it does not parse the PDF.
  * Do not invent extra contract terms beyond the locked summary.
  *
  * Locked interpretation:
  * - Recruiting / growth is a primary performance lever and strong economic incentive.
  * - Do NOT say "recruiting is the only job."
+ * - Ancillary / partner capture goal: 10%+ of transactions include one or more
+ *   qualifying Fathom Companies or Partners. Ancillary is supporting, not coequal
+ *   with recruiting.
  *
  * V1B (growth-weighted overall doctrine):
  * Overall DD Role Fit is intentionally weighted toward recruiting/growth because
  * agent growth is the DD role’s primary economic performance lever. Compliance,
  * operations, support, training, and partner advocacy remain critical risk and
  * coaching dimensions and should be reviewed before making role decisions.
+ *
+ * Ancillary Services Capture Potential (v1.2):
+ * - Derives from the existing Partner / Ecosystem Advocacy 3% allocation.
+ * - Does NOT add a second independent weight (no 103% total).
+ * - Partner card remains the behavioral advocacy diagnostic; overall uses the
+ *   shared 3% slot filled by ancillary capture potential (behavioral baseline +
+ *   factual ancillary evidence). Double-counting is prevented by substitution,
+ *   not by stacking weights.
  *
  * Role archetype: growth leader, field operator, compliance/risk guardian,
  * agent culture/support leader, partner ecosystem promoter.
@@ -24,6 +36,10 @@ export const FATHOM_DD_ROLE_MODEL_ID = 'fathom_district_director_v1';
 /**
  * V1B growth-weighted overall weights (sum = 1.0).
  * Not a pure average of dimensions — business-lever-weighted role fit estimate.
+ *
+ * partner_ecosystem_advocacy (3%) is the shared Partner + Ancillary commercial
+ * allocation. Ancillary Services Capture Potential reuses this slot; it does not
+ * add weight.
  */
 export const FATHOM_DD_OVERALL_WEIGHTS_V1B = {
   recruiting_growth_drive: 0.4,
@@ -35,6 +51,12 @@ export const FATHOM_DD_OVERALL_WEIGHTS_V1B = {
   partner_ecosystem_advocacy: 0.03,
 };
 
+/** Shared effective weight for Partner Advocacy + Ancillary Capture (not stacked). */
+export const FATHOM_DD_ANCILLARY_SHARED_WEIGHT = FATHOM_DD_OVERALL_WEIGHTS_V1B.partner_ecosystem_advocacy;
+
+export const FATHOM_DD_ANCILLARY_CONTRACT_TARGET =
+  '10% or more of transactions including one or more qualifying Fathom Companies or Partners';
+
 export const OVERALL_SCORE_WEIGHTING_NOTE =
   'This overall score is intentionally weighted toward recruiting/growth because agent growth is the DD role’s primary economic performance lever. Compliance, operations, support, training, and partner advocacy remain critical risk and coaching dimensions and should be reviewed before making role decisions.';
 
@@ -43,20 +65,31 @@ export const BOARD_SAFE_DISCLAIMER =
 
 export const FATHOM_DISTRICT_DIRECTOR_V1 = {
   role_model_id: FATHOM_DD_ROLE_MODEL_ID,
-  version: '1.1.0-v1b',
+  version: '1.2.0-v1b-ancillary',
   label: 'Fathom District Director v1',
   short_label: 'District Director Fit',
   organization: 'Fathom Holdings / Fathom Realty',
   source: {
-    document: 'DD Agreement 2025',
-    document_key: 'fathom_dd_agreement_2025',
+    document: 'Fathom DD Agreement C1 v20250224',
+    document_key: 'fathom_dd_agreement_c1_v20250224',
+    document_path:
+      'docs/leadership/contracts/Fathom_Realty_District_Director_Agreement_C1_v20250224.pdf',
     dependency_note:
-      'Structured from locked contract interpretation. Upload PDF is source baseline; if PDF is not in-repo, do not invent extra terms.',
+      'Structured from locked contract interpretation of the canonical C1 v20250224 PDF. Application does not parse the PDF at runtime.',
   },
   growth_target: {
     label: 'Market Center growth',
     value: '4%+ monthly',
     best_practice_recruiting: 'Directly recruit ~2 agents per month (best practice)',
+  },
+  ancillary_capture_target: {
+    label: 'Ancillary / partner capture',
+    value: '10%+ qualifying transactions',
+    contract_target: FATHOM_DD_ANCILLARY_CONTRACT_TARGET,
+    shared_weight: FATHOM_DD_ANCILLARY_SHARED_WEIGHT,
+    shared_weight_source: 'partner_ecosystem_advocacy',
+    double_counting_note:
+      'Partner Advocacy and Ancillary Capture share one 3% overall allocation. Overall scoring substitutes the ancillary capture score into the partner weight slot; weights are never stacked to 103%.',
   },
   role_archetype: [
     {
@@ -92,6 +125,8 @@ export const FATHOM_DISTRICT_DIRECTOR_V1 = {
     'Monthly base is tied to active agent count.',
     'Stock grants reward new agents added more heavily than sales transactions.',
     'Revenue share applies to directly recruited new agents.',
+    'DD must promote, support, and advocate for Fathom Companies and Partners.',
+    'Goal: 10% or more of transactions include one or more qualifying Fathom Companies or Partners.',
     'DD also carries support, training, compliance, document review, transaction issue resolution, partner advocacy, mentoring, and risk mitigation duties.',
   ],
   locked_interpretation_notes: [
@@ -99,6 +134,8 @@ export const FATHOM_DISTRICT_DIRECTOR_V1 = {
     'Do not say recruiting is the only job.',
     'Role fit is multi-dimensional: growth + accountability + support + compliance + training + operations + partner advocacy.',
     'Overall score is growth-weighted (business-lever-weighted), not a pure average of dimensions.',
+    'Ancillary services capture is commercially material but subordinate to recruiting (~3% shared influence, not coequal).',
+    'Do not claim a candidate meets or misses the 10% capture target without factual evidence.',
   ],
   overall_score_weighting_note: OVERALL_SCORE_WEIGHTING_NOTE,
   board_safe_disclaimer: BOARD_SAFE_DISCLAIMER,
@@ -189,16 +226,33 @@ export const FATHOM_DISTRICT_DIRECTOR_V1 = {
     {
       id: 'partner_ecosystem_advocacy',
       label: 'Partner / Ecosystem Advocacy',
-      weight_label: '3%',
+      weight_label: '3% (shared with Ancillary Capture)',
       weight: FATHOM_DD_OVERALL_WEIGHTS_V1B.partner_ecosystem_advocacy,
       accent: 'violet',
       bos_signals: ['signal', 'leverage', 'horizon'],
       role_demand:
         'Promotes partner ecosystem thoughtfully as a supporting lever — secondary to growth, support, and compliance duties.',
       scoring_guidance:
-        'Favor Signal + Leverage + Horizon. Keep weight supporting so it does not dominate the seat.',
+        'Favor Signal + Leverage + Horizon. Keep weight supporting so it does not dominate the seat. Overall contribution shares the 3% allocation with Ancillary Services Capture Potential (not stacked).',
     },
   ],
+  /**
+   * Ancillary panel metadata (not an independent weighted dimension).
+   * Overall influence reuses partner_ecosystem_advocacy weight only.
+   */
+  ancillary_services_capture: {
+    id: 'ancillary_services_capture',
+    label: 'Ancillary Services Capture Potential',
+    weight: FATHOM_DD_ANCILLARY_SHARED_WEIGHT,
+    weight_label: '3%',
+    weight_source: 'partner_ecosystem_advocacy',
+    accent: 'violet',
+    bos_signals: ['signal', 'leverage', 'horizon', 'framework', 'fidelity'],
+    contract_target: FATHOM_DD_ANCILLARY_CONTRACT_TARGET,
+    target_label: '10%+ qualifying transactions',
+    role_demand:
+      'Converts partner/ecosystem advocacy into measured capture of Fathom Companies and Partners on transactions — secondary to recruiting.',
+  },
   /**
    * Business-consequence score bands (V1B).
    * Used for Overall, Behavioral, and Evidence-Adjusted headline verdicts.

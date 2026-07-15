@@ -21,6 +21,8 @@ import {
   applyEvidenceToDimensions,
   classifyComplianceOperationsRisk,
   classifySupportRequired,
+  computeAncillaryServicesCapture,
+  applyAncillarySharedWeightToDimensions,
 } from './roleFitScoring.js';
 
 /**
@@ -97,8 +99,40 @@ export function buildDistrictDirectorFit({
     adjustments: evidenceAdjustments,
   } = applyEvidenceToDimensions(behavioralDimensions, evidenceParse);
 
+  // Ancillary Services Capture Potential — shared 3% Partner allocation (not stacked).
+  // Behavioral baseline uses BOS; factual evidence adjusts; overall substitutes into partner weight.
+  const partnerBehavioralDim = behavioralDimensions.find(
+    (d) => d.id === 'partner_ecosystem_advocacy',
+  );
+  const partnerEvidenceDim = evidenceDimensions.find(
+    (d) => d.id === 'partner_ecosystem_advocacy',
+  );
+  const ancillaryBehavioral = computeAncillaryServicesCapture({
+    signalMap: signals,
+    partnerDim: partnerBehavioralDim,
+    evidenceParse: null,
+    context,
+  });
+  const ancillaryCapture = computeAncillaryServicesCapture({
+    signalMap: signals,
+    partnerDim: partnerEvidenceDim || partnerBehavioralDim,
+    evidenceParse,
+    context,
+  });
+
+  // Scoring dimensions: substitute ancillary into the shared 3% partner slot.
+  // Display dimensions keep Partner Advocacy score unchanged (no double-count UI).
+  const behavioralScoringDimensions = applyAncillarySharedWeightToDimensions(
+    behavioralDimensions,
+    ancillaryBehavioral,
+  );
+  const evidenceScoringDimensions = applyAncillarySharedWeightToDimensions(
+    evidenceDimensions,
+    ancillaryCapture,
+  );
+
   // Behavioral overall: growth-weighted BOS-only (no excellence/underperformance blend)
-  const behavioralOverallMeta = computeGrowthWeightedOverall(behavioralDimensions, {
+  const behavioralOverallMeta = computeGrowthWeightedOverall(behavioralScoringDimensions, {
     strongRecruitingEvidence: false,
     negativeRecruitingEvidence: false,
   });
@@ -108,7 +142,8 @@ export function buildDistrictDirectorFit({
   );
 
   // Evidence-adjusted / Overall: growth-weighted with +/− evidence calibration
-  const evidenceOverallMeta = computeGrowthWeightedOverall(evidenceDimensions, {
+  // Ancillary evidence never sets recruiting excellence/underperformance flags.
+  const evidenceOverallMeta = computeGrowthWeightedOverall(evidenceScoringDimensions, {
     strongRecruitingEvidence: Boolean(
       evidenceParse.strong_recruiting_evidence || evidenceParse.positive_recruiting,
     ),
@@ -302,6 +337,11 @@ export function buildDistrictDirectorFit({
     score_stack: scoreStack,
     dimensions: evidenceDimensions,
     behavioral_dimensions: behavioralDimensions,
+    /**
+     * Ancillary panel result. Display-only object; overall influence is applied
+     * via shared partner 3% weight substitution (see double_counting_prevention).
+     */
+    ancillary_services_capture: ancillaryCapture,
     best_use: bestUse,
     risk: {
       ...riskPattern,
@@ -344,6 +384,9 @@ export function buildDistrictDirectorFit({
       growth_boost_applied,
       growth_penalty_applied,
       evidence_classification: evidenceParse.classification,
+      ancillary_source_mode: ancillaryCapture.source_mode,
+      ancillary_overall_effect: ancillaryCapture.overall_score_effect,
+      ancillary_shared_weight: ancillaryCapture.weight,
     },
   };
 }

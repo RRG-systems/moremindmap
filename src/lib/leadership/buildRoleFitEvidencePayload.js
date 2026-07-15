@@ -14,6 +14,8 @@ export const GPT_EVIDENCE_AFFECTED_DIMENSIONS = [
   'Training / Communication',
   'Operational Responsiveness',
   'Partner / Ecosystem Advocacy',
+  // Classification only — shares Partner 3% overall allocation; GPT must not assign numeric scores
+  'Ancillary Services Capture Potential',
 ];
 
 /**

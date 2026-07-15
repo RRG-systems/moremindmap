@@ -148,6 +148,7 @@ export default function RoleFitDashboard({ model }) {
     overall,
     score_stack: scoreStack,
     dimensions,
+    ancillary_services_capture: ancillaryCapture,
     best_use: bestUse,
     risk,
     one_move: oneMove,
@@ -175,7 +176,7 @@ export default function RoleFitDashboard({ model }) {
       {/* Score stack — compact secondary metrics */}
       <ScoreStackSection scoreStack={scoreStack} risk={risk} />
 
-      {/* Dimension cards */}
+      {/* Dimension cards — 4-col slot after Partner holds Ancillary Capture */}
       <section>
         <div className="mb-4 flex items-end justify-between gap-4">
           <div>
@@ -194,6 +195,9 @@ export default function RoleFitDashboard({ model }) {
           {(dimensions || []).map((dim) => (
             <DimensionCard key={dim.id} dim={dim} />
           ))}
+          {ancillaryCapture ? (
+            <AncillaryServicesCaptureCard key="ancillary_services_capture" ancillary={ancillaryCapture} />
+          ) : null}
         </div>
       </section>
 
@@ -641,6 +645,73 @@ function DimensionCard({ dim }) {
       <p className="mt-3 text-xs leading-5 text-white/55">{dim.note}</p>
       <div className="mt-3 text-[0.6rem] uppercase tracking-[0.16em] text-white/30">
         Weight: {dim.weight_label || '—'}
+      </div>
+    </article>
+  );
+}
+
+/**
+ * Ancillary Services Capture Potential — fills the empty fourth-column slot
+ * right of Partner / Ecosystem Advocacy and below Compliance Discipline.
+ * Shares the Partner 3% overall allocation (not an independent weight).
+ */
+function AncillaryServicesCaptureCard({ ancillary }) {
+  const accent = accentFor(ancillary?.accent || 'violet');
+  const displayScore =
+    typeof ancillary?.display_score === 'number'
+      ? ancillary.display_score
+      : typeof ancillary?.evidence_adjusted_score === 'number'
+        ? ancillary.evidence_adjusted_score
+        : typeof ancillary?.behavioral_baseline_score === 'number'
+          ? ancillary.behavioral_baseline_score
+          : null;
+  const pct = typeof displayScore === 'number' ? Math.max(0, Math.min(100, displayScore)) : 0;
+  const sourceLabel = ancillary?.source_label || 'Behavioral inference';
+  const isInference =
+    String(ancillary?.source_mode || '').includes('behavioral') ||
+    String(ancillary?.source_mode || '') === 'insufficient_evidence';
+
+  return (
+    <article
+      className={`rounded-[1.5rem] border ${accent.border} ${accent.bg} ${accent.glow} p-5 backdrop-blur-md`}
+      data-panel="ancillary_services_capture"
+      title={ancillary?.contract_target || ''}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <h4 className={`text-sm font-semibold leading-5 ${accent.text}`}>
+          Ancillary Services Capture Potential
+        </h4>
+        <div className="text-2xl font-semibold tabular-nums text-white">
+          {formatPercent(displayScore)}
+        </div>
+      </div>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="inline-flex rounded-full border border-white/12 bg-black/25 px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-white/65">
+          {ancillary?.fit_category || '—'}
+        </div>
+        <div
+          className={`inline-flex rounded-full border px-2.5 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.14em] ${
+            isInference
+              ? 'border-white/15 bg-white/5 text-white/60'
+              : 'border-cyan-300/30 bg-cyan-400/10 text-cyan-100'
+          }`}
+        >
+          {sourceLabel}
+        </div>
+      </div>
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-black/40">
+        <div
+          className={`h-full rounded-full bg-gradient-to-r ${accent.bar}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="mt-3 text-xs leading-5 text-white/55">
+        {ancillary?.interpretation ||
+          'Behavioral inference for ancillary capture potential. Factual capture evidence adjusts this panel when entered in Known Performance Evidence.'}
+      </p>
+      <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.6rem] uppercase tracking-[0.16em] text-white/30">
+        <span>Weight: {ancillary?.weight_label || '3%'}</span>
+        <span>Target: {ancillary?.target_label || '10%+ qualifying transactions'}</span>
       </div>
     </article>
   );
