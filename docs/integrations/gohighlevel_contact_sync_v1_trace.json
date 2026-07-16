@@ -19,8 +19,23 @@
   "assessment_completion_blocked_by_ghl": false,
   "tests_passed": true,
   "build_passed": true,
-  "commit_performed": false,
-  "deployment_performed": false,
-  "unresolved_blockers": [],
-  "recommended_next_action": "CONTROLLED_GHL_TEST_CONTACT_AND_PRODUCTION_DEPLOYMENT"
+  "commit_performed": true,
+  "commit_sha": "939d17a",
+  "deployment_performed": true,
+  "production_deployment_id": "dpl_4S9AVLt5RXwWb5mmwJqM5f13bmmS",
+  "production_alias": "https://moremindmap.com",
+  "production_smoke_passed": true,
+  "controlled_contact_submissions": 1,
+  "controlled_test_job_id": "026e4d30-2f69-4ce9-ad41-571f8affba71",
+  "controlled_test_profile_id": "mm-20260716-iipuev93",
+  "controlled_test_job_completed": true,
+  "production_contact_readback_attempted": true,
+  "production_contact_readback_http_status": 403,
+  "production_contact_fields_verified": false,
+  "production_duplicate_absence_verified": false,
+  "temporary_verification_surface_removed": true,
+  "unresolved_blockers": [
+    "GHL Private Integration contact readback returned HTTP 403; production contact fields, tags, matching count, and duplicate absence could not be independently verified"
+  ],
+  "recommended_next_action": "GRANT_CONTACTS_READONLY_AND_READ_BACK_EXISTING_TEST_CONTACT_WITHOUT_ANOTHER_UPSERT"
 }

@@ -67,3 +67,13 @@ Run `node --test test/gohighlevel-contact-sync.test.js`, `npm run build`, and `g
 Before production deployment: review the implementation and package diff, confirm Private Integration scopes and duplicate-contact settings, then deploy and run one operator-approved named test contact. Verify sanitized logs, fields, and tags, then monitor 401/403/429/5xx outcomes. Production environment configuration is already complete.
 
 To roll back, set `GHL_CONTACT_SYNC_ENABLED=false` (or remove it) and redeploy. Code removal is unnecessary for an emergency disable. No GHL data is read back into MORE MindMap.
+
+## Production deployment evidence (2026-07-16)
+
+Commit `939d17a` (`feat add GoHighLevel contact sync`) was pushed to `main` and deployed successfully to the existing `moremindmap` Vercel production project. Deployment `dpl_4S9AVLt5RXwWb5mmwJqM5f13bmmS` reached `READY` and was aliased to `https://moremindmap.com`. Production smoke checks returned HTTP 200 for the application shell and current hashed JavaScript asset; the serverless status route returned its expected HTTP 400 validation response when called without a job ID.
+
+Exactly one controlled synthetic BOS job was submitted through the production application. Job `026e4d30-2f69-4ce9-ad41-571f8affba71` completed successfully and produced Profile ID `mm-20260716-iipuev93`. Its contact source was `Production Integration Test`. No second submission or direct upsert was made.
+
+Contact readback was attempted inside the Vercel production environment so neither the GHL token nor location ID would be retrieved or exposed. GHL returned HTTP 403 for contact readback. The temporary authenticated verification route and its one-time environment key were removed immediately afterward. Because readback permission was unavailable, this run cannot independently assert contact count, field values, tags, or absence of duplicates. The code-level allowlist and passing tests establish that the integration payload can contain only contact identity, approved MORE metadata fields, and tags; no proprietary assessment intelligence is included, but the production contact itself could not be inspected.
+
+Required follow-up: grant `contacts.readonly` to the existing Private Integration (without changing the token value), redeploy if GHL requires it, and perform readback for the existing test email/Profile ID. Do not submit or upsert another test contact.
