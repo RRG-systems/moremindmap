@@ -16,6 +16,7 @@ import { extractBehavioralIntelligence } from './extractIntelligence.js'
 import { refineExtraction } from './extractIntelligenceRefinement.js'
 import { generateCanonicalProfile } from './canonicalProfileGenerator.js'
 import { buildBehaviorProfileNotification, sendFormspreeNotification } from '../notifications/formspreeNotifications.js'
+import { queueBosCompletedContactSync, splitContactName } from '../../integrations/gohighlevel/completionHooks.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -351,6 +352,18 @@ export async function executeCanonicalGeneration(job) {
     }
 
     if (vault_result?.success) {
+      const fullName = job.payload?.metadata?.person_name || job.payload?.metadata?.name || null
+      const { firstName, lastName } = splitContactName(fullName)
+      queueBosCompletedContactSync({
+        profileId: profile_id,
+        firstName,
+        lastName,
+        email: job.payload?.metadata?.email || null,
+        phone: job.payload?.metadata?.identity?.phone || job.payload?.metadata?.phone || job.payload?.metadata?.person_phone || null,
+        completedAt: vault_result.created_at || new Date().toISOString(),
+        source: job.payload?.metadata?.source || job.payload?.metadata?.campaign || 'behavior_profile'
+      })
+
       trace.push('before_behavior_profile_notification')
       const notificationResult = await sendFormspreeNotification(
         buildBehaviorProfileNotification({

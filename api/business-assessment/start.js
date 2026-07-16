@@ -17,6 +17,7 @@ import {
   extractNotificationIdentityFromDossier,
   sendFormspreeNotification
 } from '../engine/notifications/formspreeNotifications.js';
+import { queueBaCompletedContactSync, splitContactName } from '../integrations/gohighlevel/completionHooks.js';
 
 const QUESTION_KEYS = Array.from({ length: 12 }, (_, index) => `q${index + 1}`);
 
@@ -110,6 +111,17 @@ export default async function handler(req, res) {
     await redis.sadd(`business_assessment:index:type:${assessmentType}`, assessmentId);
 
     const identity = extractNotificationIdentityFromDossier(profileLookup.dossier);
+    const { firstName, lastName } = splitContactName(identity.full_name || profileContext.owner_profile_name);
+    queueBaCompletedContactSync({
+      profileId: parsedProfile.normalized,
+      firstName,
+      lastName,
+      email: identity.email,
+      phone: identity.phone,
+      completedAt: now.toISOString(),
+      source: req.body?.source || req.body?.campaign || 'business_assessment'
+    });
+
     const notificationResult = await sendFormspreeNotification(
       buildBusinessAssessmentNotification({
         assessmentId,

@@ -1,0 +1,26 @@
+{
+  "mission_id": "MMM_GHL_CONTACT_SYNC_V1",
+  "bos_completion_hook": "api/engine/canonical/executeCanonicalGeneration.js after saveCanonicalProfile returns success",
+  "ba_completion_hook": "api/business-assessment/start.js after assessment, profile index, job, and indexes persist",
+  "subscription_hook_future": "api/stripe/webhook.js after saveAccessGrant and active subscription state persistence; not wired in V1",
+  "ghl_client_file": "api/integrations/gohighlevel/contactSync.js",
+  "background_lifetime_mechanism": "@vercel/functions waitUntil registered synchronously in api/integrations/gohighlevel/completionHooks.js",
+  "custom_field_strategy": "fetch by location, case/whitespace-normalized name match, create only missing contact fields, cache IDs per warm invocation; Profile ID field mandatory",
+  "tag_strategy": "fetch by location, case/whitespace-normalized match, create only missing required tags, cache per warm invocation, never remove existing tags",
+  "upsert_endpoint": "/contacts/upsert",
+  "environment_variables": [
+    "GHL_PRIVATE_INTEGRATION_TOKEN",
+    "GHL_LOCATION_ID",
+    "GHL_CONTACT_SYNC_ENABLED"
+  ],
+  "production_environment_configuration_completed": true,
+  "production_environment_values_retrieved": false,
+  "proprietary_intelligence_sent": false,
+  "assessment_completion_blocked_by_ghl": false,
+  "tests_passed": true,
+  "build_passed": true,
+  "commit_performed": false,
+  "deployment_performed": false,
+  "unresolved_blockers": [],
+  "recommended_next_action": "CONTROLLED_GHL_TEST_CONTACT_AND_PRODUCTION_DEPLOYMENT"
+}
