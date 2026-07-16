@@ -17,12 +17,12 @@ const ENV = {
   GHL_CONTACT_SYNC_ENABLED: 'true',
   GHL_PRIVATE_INTEGRATION_TOKEN: 'test-token-must-never-be-logged',
   GHL_LOCATION_ID: 'location-test',
-  GHL_FIELD_MORE_PROFILE_ID: 'field-profile-id',
-  GHL_FIELD_MORE_ASSESSMENT_TYPE: 'field-assessment-type',
-  GHL_FIELD_MORE_ASSESSMENT_STATUS: 'field-assessment-status',
-  GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT: 'field-completed-at',
-  GHL_FIELD_MORE_SUBSCRIPTION_STATUS: 'field-subscription-status',
-  GHL_FIELD_MORE_SOURCE: 'field-source'
+  GHL_FIELD_MORE_PROFILE_ID: 'contact.more_profile_id',
+  GHL_FIELD_MORE_ASSESSMENT_TYPE: 'contact.1_more_assessment_type',
+  GHL_FIELD_MORE_ASSESSMENT_STATUS: 'contact.1_more_assessment_status',
+  GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT: 'contact.more_assessment_completed_at',
+  GHL_FIELD_MORE_SUBSCRIPTION_STATUS: 'contact.more_subscription_status',
+  GHL_FIELD_MORE_SOURCE: 'contact.more_source'
 };
 
 function response(status, body = {}) {
@@ -74,8 +74,18 @@ test('BOS upserts once before one additive tag application without location tag 
   assert.equal('tags' in upserts[0].body, false);
   assert.equal(upserts[0].body.email, 'ada@example.com');
   assert.equal(upserts[0].body.phone, '+16025550100');
-  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-profile-id' && field.field_value === baseContact.profileId));
-  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-assessment-status' && field.field_value === 'Completed'));
+  assert.deepEqual(upserts[0].body.customFields, [
+    { key: 'contact.more_profile_id', fieldValue: baseContact.profileId },
+    { key: 'contact.1_more_assessment_type', fieldValue: 'BOS' },
+    { key: 'contact.1_more_assessment_status', fieldValue: 'Completed' },
+    { key: 'contact.more_assessment_completed_at', fieldValue: baseContact.completedAt },
+    { key: 'contact.more_source', fieldValue: baseContact.source }
+  ]);
+  for (const field of upserts[0].body.customFields) {
+    assert.deepEqual(Object.keys(field).sort(), ['fieldValue', 'key']);
+    assert.equal(/[{}]/.test(field.key), false);
+    for (const unsupported of ['field_value', 'fieldKey', 'value', 'customFieldId']) assert.equal(unsupported in field, false);
+  }
   assert.equal(mock.calls.some((call) => call.url.endsWith('/customFields')), false);
   assert.equal(mock.calls.some((call) => call.url.includes('/locations/') && call.url.endsWith('/tags')), false);
   const tagCalls = mock.calls.filter((call) => call.url.endsWith('/contacts/contact-123/tags'));
@@ -165,14 +175,18 @@ test('static custom field references avoid all schema and location-tag requests'
 
 test('key-based custom field references produce key payload entries', async () => {
   const mock = successfulFetch();
-  const keyEnv = Object.fromEntries(Object.entries(ENV).map(([name, value]) => [
-    name,
-    name.startsWith('GHL_FIELD_') ? `contact.${name.toLowerCase()}` : value
-  ]));
-  const outcome = await syncContactToGoHighLevel(baseContact, { env: keyEnv, fetchImpl: mock.fetchImpl, logger: {} });
+  const outcome = await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
   assert.equal(outcome.success, true);
   const fields = mock.calls.find((call) => call.url.endsWith('/contacts/upsert')).body.customFields;
-  assert.ok(fields.every((field) => field.key?.startsWith('contact.') && !('id' in field)));
+  assert.ok(fields.every((field) => field.key?.startsWith('contact.') && 'fieldValue' in field && !('id' in field)));
+});
+
+test('ID-based custom field references use id with fieldValue', async () => {
+  const mock = successfulFetch();
+  const idEnv = { ...ENV, GHL_FIELD_MORE_PROFILE_ID: 'field-profile-id' };
+  await syncContactToGoHighLevel(baseContact, { env: idEnv, fetchImpl: mock.fetchImpl, logger: {} });
+  const profileField = mock.calls.find((call) => call.url.endsWith('/contacts/upsert')).body.customFields[0];
+  assert.deepEqual(profileField, { id: 'field-profile-id', fieldValue: baseContact.profileId });
 });
 
 test('missing required static field reference skips safely before network access', async () => {

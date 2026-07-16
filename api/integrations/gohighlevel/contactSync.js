@@ -135,7 +135,7 @@ function configuredField(reference, value) {
   const fieldValue = clean(value);
   if (!fieldReference || !fieldValue) return null;
   const referenceProperty = fieldReference.startsWith('contact.') ? 'key' : 'id';
-  return { [referenceProperty]: fieldReference, field_value: fieldValue };
+  return { [referenceProperty]: fieldReference, fieldValue };
 }
 
 function buildTags(eventType) {
