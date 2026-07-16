@@ -16,13 +16,14 @@ import {
 const ENV = {
   GHL_CONTACT_SYNC_ENABLED: 'true',
   GHL_PRIVATE_INTEGRATION_TOKEN: 'test-token-must-never-be-logged',
-  GHL_LOCATION_ID: 'location-test'
+  GHL_LOCATION_ID: 'location-test',
+  GHL_FIELD_MORE_PROFILE_ID: 'field-profile-id',
+  GHL_FIELD_MORE_ASSESSMENT_TYPE: 'field-assessment-type',
+  GHL_FIELD_MORE_ASSESSMENT_STATUS: 'field-assessment-status',
+  GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT: 'field-completed-at',
+  GHL_FIELD_MORE_SUBSCRIPTION_STATUS: 'field-subscription-status',
+  GHL_FIELD_MORE_SOURCE: 'field-source'
 };
-
-const FIELD_NAMES = [
-  'MORE Profile ID', 'MORE Assessment Type', 'MORE Assessment Status',
-  'MORE Assessment Completed At', 'MORE Subscription Status', 'MORE Source'
-];
 
 function response(status, body = {}) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
@@ -33,14 +34,10 @@ function successfulFetch({ existingTags = ['MMM', 'BOS Completed', 'BA Completed
   const fetchImpl = async (url, options = {}) => {
     const body = options.body ? JSON.parse(options.body) : null;
     calls.push({ url, method: options.method, body, headers: options.headers });
-    if (url.endsWith('/customFields') && options.method === 'GET') {
-      return response(200, { customFields: FIELD_NAMES.map((name, index) => ({ id: `field-${index}`, name, model: 'contact' })) });
-    }
     if (url.endsWith('/tags') && options.method === 'GET') {
       return response(200, { tags: existingTags.map((name, index) => ({ id: `tag-${index}`, name })) });
     }
     if (url.endsWith('/tags') && options.method === 'POST') return response(200, { tag: { id: 'created-tag', name: body.name } });
-    if (url.endsWith('/customFields') && options.method === 'POST') return response(200, { customField: { id: `created-${body.name}`, name: body.name } });
     if (url.endsWith('/contacts/upsert')) return response(200, { contact: { id: 'contact-123' } });
     throw new Error(`Unexpected URL ${url}`);
   };
@@ -80,8 +77,9 @@ test('BOS builds one authorized upsert with profile ID and event-specific tags',
   assert.deepEqual(upserts[0].body.tags, ['MMM', 'BOS Completed']);
   assert.equal(upserts[0].body.email, 'ada@example.com');
   assert.equal(upserts[0].body.phone, '+16025550100');
-  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-0' && field.field_value === baseContact.profileId));
-  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-2' && field.field_value === 'Completed'));
+  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-profile-id' && field.field_value === baseContact.profileId));
+  assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-assessment-status' && field.field_value === 'Completed'));
+  assert.equal(mock.calls.some((call) => call.url.endsWith('/customFields')), false);
   const serialized = JSON.stringify(upserts[0].body);
   for (const forbidden of ['answers', 'scores', 'narrative', 'five futures', 'one move', 'confidence', 'evidence', 'financial']) {
     assert.equal(serialized.toLowerCase().includes(forbidden), false);
@@ -101,30 +99,49 @@ test('missing or disabled configuration skips safely', async () => {
   assert.equal((await syncContactToGoHighLevel(baseContact, { env: { GHL_CONTACT_SYNC_ENABLED: 'true' }, logger: {} })).reason, 'missing_private_integration_token');
 });
 
-test('custom fields and tags resolve and create idempotently across sync calls', async () => {
+test('static custom field references avoid schema requests while tags remain cached', async () => {
   const mock = successfulFetch({ existingTags: [' mmm '] });
   await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
   await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
-  assert.equal(mock.calls.filter((call) => call.url.endsWith('/customFields') && call.method === 'GET').length, 1);
+  assert.equal(mock.calls.filter((call) => call.url.endsWith('/customFields')).length, 0);
   assert.equal(mock.calls.filter((call) => call.url.endsWith('/tags') && call.method === 'GET').length, 1);
   assert.equal(mock.calls.filter((call) => call.url.endsWith('/tags') && call.method === 'POST').length, 1);
   assert.equal(mock.calls.filter((call) => call.url.endsWith('/contacts/upsert')).length, 2);
 });
 
-test('missing fields are created once and Profile ID field is mandatory', async () => {
-  const calls = [];
-  const fetchImpl = async (url, options = {}) => {
-    const body = options.body ? JSON.parse(options.body) : {};
-    calls.push({ url, method: options.method, body });
-    if (url.endsWith('/customFields') && options.method === 'GET') return response(200, { customFields: [] });
-    if (url.endsWith('/customFields') && options.method === 'POST') return response(200, { customField: { id: `id-${body.name}`, name: body.name } });
-    if (url.endsWith('/tags')) return response(200, { tags: [{ name: 'MMM' }, { name: 'BOS Completed' }] });
-    if (url.endsWith('/contacts/upsert')) return response(200, { contact: { id: 'contact' } });
-    throw new Error('unexpected');
-  };
-  const result = await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl, logger: {} });
-  assert.equal(result.success, true);
-  assert.equal(calls.filter((call) => call.url.endsWith('/customFields') && call.method === 'POST').length, FIELD_NAMES.length);
+test('key-based custom field references produce key payload entries', async () => {
+  const mock = successfulFetch();
+  const keyEnv = Object.fromEntries(Object.entries(ENV).map(([name, value]) => [
+    name,
+    name.startsWith('GHL_FIELD_') ? `contact.${name.toLowerCase()}` : value
+  ]));
+  const outcome = await syncContactToGoHighLevel(baseContact, { env: keyEnv, fetchImpl: mock.fetchImpl, logger: {} });
+  assert.equal(outcome.success, true);
+  const fields = mock.calls.find((call) => call.url.endsWith('/contacts/upsert')).body.customFields;
+  assert.ok(fields.every((field) => field.key?.startsWith('contact.') && !('id' in field)));
+});
+
+test('missing required static field reference skips safely before network access', async () => {
+  let calls = 0;
+  const { GHL_FIELD_MORE_SOURCE: _missing, ...incompleteEnv } = ENV;
+  const outcome = await syncContactToGoHighLevel(baseContact, {
+    env: incompleteEnv,
+    fetchImpl: async () => { calls += 1; return response(500); },
+    logger: {}
+  });
+  assert.equal(outcome.skipped, true);
+  assert.equal(outcome.reason, 'configuration_missing');
+  assert.deepEqual(outcome.missingConfiguration, ['GHL_FIELD_MORE_SOURCE']);
+  assert.equal(calls, 0);
+});
+
+test('optional subscription field reference may be omitted', async () => {
+  const mock = successfulFetch();
+  const { GHL_FIELD_MORE_SUBSCRIPTION_STATUS: _optional, ...withoutOptional } = ENV;
+  const outcome = await syncContactToGoHighLevel(baseContact, { env: withoutOptional, fetchImpl: mock.fetchImpl, logger: {} });
+  assert.equal(outcome.success, true);
+  const upsert = mock.calls.find((call) => call.url.endsWith('/contacts/upsert'));
+  assert.equal(upsert.body.customFields.length, 5);
 });
 
 for (const [status, reason, retryable] of [[401, 'authorization_failed', false], [429, 'rate_limited', true], [500, 'ghl_server_error', true]]) {
@@ -225,4 +242,20 @@ test('subscription helper exists without a runtime hook', () => {
   const event = buildSubscriptionActiveContactEvent({ profileId: baseContact.profileId });
   assert.equal(event.eventType, GHL_EVENT_TYPE.SUBSCRIPTION_ACTIVE);
   assert.equal(event.subscriptionStatus, 'active');
+});
+
+test('server-only field and token environment names are absent from client source', async () => {
+  const clientFiles = ['../src/Profile.jsx', '../src/BusinessAssessment.jsx'];
+  const forbidden = ['GHL_PRIVATE_INTEGRATION_TOKEN', 'GHL_FIELD_MORE_PROFILE_ID', 'GHL_FIELD_MORE_SOURCE'];
+  for (const file of clientFiles) {
+    const source = await readFile(new URL(file, import.meta.url), 'utf8');
+    for (const name of forbidden) assert.equal(source.includes(name), false);
+  }
+});
+
+test('repository contains no committed real GHL field references', async () => {
+  const envExample = await readFile(new URL('../.env.example', import.meta.url), 'utf8');
+  for (const line of envExample.split('\n').filter((line) => line.startsWith('GHL_FIELD_'))) {
+    assert.match(line, /^GHL_FIELD_[A-Z_]+=$/);
+  }
 });

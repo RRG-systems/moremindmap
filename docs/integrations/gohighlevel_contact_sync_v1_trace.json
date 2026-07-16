@@ -5,13 +5,19 @@
   "subscription_hook_future": "api/stripe/webhook.js after saveAccessGrant and active subscription state persistence; not wired in V1",
   "ghl_client_file": "api/integrations/gohighlevel/contactSync.js",
   "background_lifetime_mechanism": "@vercel/functions waitUntil registered synchronously in api/integrations/gohighlevel/completionHooks.js",
-  "custom_field_strategy": "fetch by location, case/whitespace-normalized name match, create only missing contact fields, cache IDs per warm invocation; Profile ID field mandatory",
+  "custom_field_strategy": "server-only environment-configured field IDs or stable keys; no schema GET or dynamic field creation during contact sync; five metadata references required and subscription status optional",
   "tag_strategy": "fetch by location, case/whitespace-normalized match, create only missing required tags, cache per warm invocation, never remove existing tags",
   "upsert_endpoint": "/contacts/upsert",
   "environment_variables": [
     "GHL_PRIVATE_INTEGRATION_TOKEN",
     "GHL_LOCATION_ID",
-    "GHL_CONTACT_SYNC_ENABLED"
+    "GHL_CONTACT_SYNC_ENABLED",
+    "GHL_FIELD_MORE_PROFILE_ID",
+    "GHL_FIELD_MORE_ASSESSMENT_TYPE",
+    "GHL_FIELD_MORE_ASSESSMENT_STATUS",
+    "GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT",
+    "GHL_FIELD_MORE_SUBSCRIPTION_STATUS",
+    "GHL_FIELD_MORE_SOURCE"
   ],
   "production_environment_configuration_completed": true,
   "production_environment_values_retrieved": false,
@@ -35,12 +41,18 @@
   "permission_save_readback_retry_http_status": 403,
   "permission_save_readback_failure_operation": "location_custom_fields_readback",
   "additional_contact_submissions_or_upserts": 0,
-  "current_token_regeneration_likely_required": true,
+  "current_token_regeneration_likely_required": false,
+  "v3_custom_fields_readback_attempted": true,
+  "v3_custom_fields_readback_http_status": 403,
+  "static_field_reference_fallback_implemented": true,
+  "custom_field_schema_lookup_in_sync": false,
+  "dynamic_custom_field_creation_in_sync": false,
+  "required_static_field_references_configured_in_production": false,
   "production_contact_fields_verified": false,
   "production_duplicate_absence_verified": false,
   "temporary_verification_surface_removed": true,
   "unresolved_blockers": [
-    "After permissions were explicitly saved, GHL location custom-field readback still returned HTTP 403 before contact search; the current Private Integration token likely requires regeneration"
+    "Required HighLevel field IDs or stable keys must be added to the six documented Vercel production variables before full metadata sync can resume; five are required and subscription status is optional"
   ],
-  "recommended_next_action": "REGENERATE_CURRENT_PRIVATE_INTEGRATION_TOKEN_UPDATE_SERVER_SIDE_VERCEL_VALUE_AND_READ_BACK_EXISTING_TEST_CONTACT_WITHOUT_ANOTHER_UPSERT"
+  "recommended_next_action": "CREATE_OR_CONFIRM_SIX_HIGHLEVEL_CONTACT_FIELDS_COPY_IDS_OR_KEYS_TO_VERCEL_FIELD_VARIABLES_AND_REDEPLOY_WITHOUT_CREATING_ANOTHER_TEST_CONTACT"
 }

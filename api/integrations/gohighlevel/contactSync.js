@@ -16,12 +16,12 @@ export const GHL_TAG_CONFIG = Object.freeze({
 });
 
 const FIELD_DEFINITIONS = Object.freeze([
-  { name: 'MORE Profile ID', property: 'profileId', required: true },
-  { name: 'MORE Assessment Type', property: 'assessmentType' },
-  { name: 'MORE Assessment Status', property: 'completionStatus' },
-  { name: 'MORE Assessment Completed At', property: 'completedAt' },
-  { name: 'MORE Subscription Status', property: 'subscriptionStatus' },
-  { name: 'MORE Source', property: 'source' }
+  { name: 'MORE Profile ID', property: 'profileId', envName: 'GHL_FIELD_MORE_PROFILE_ID', required: true },
+  { name: 'MORE Assessment Type', property: 'assessmentType', envName: 'GHL_FIELD_MORE_ASSESSMENT_TYPE', required: true },
+  { name: 'MORE Assessment Status', property: 'completionStatus', envName: 'GHL_FIELD_MORE_ASSESSMENT_STATUS', required: true },
+  { name: 'MORE Assessment Completed At', property: 'completedAt', envName: 'GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT', required: true },
+  { name: 'MORE Subscription Status', property: 'subscriptionStatus', envName: 'GHL_FIELD_MORE_SUBSCRIPTION_STATUS', required: false },
+  { name: 'MORE Source', property: 'source', envName: 'GHL_FIELD_MORE_SOURCE', required: true }
 ]);
 
 const TAG_BY_EVENT = Object.freeze({
@@ -30,7 +30,6 @@ const TAG_BY_EVENT = Object.freeze({
   [GHL_EVENT_TYPE.SUBSCRIPTION_ACTIVE]: GHL_TAG_CONFIG.SUBSCRIPTION_ACTIVE
 });
 
-let fieldCache = new Map();
 let tagCache = new Map();
 
 function clean(value) {
@@ -62,10 +61,17 @@ function configFrom(env) {
   const enabled = clean(env.GHL_CONTACT_SYNC_ENABLED).toLowerCase() === 'true';
   const token = clean(env.GHL_PRIVATE_INTEGRATION_TOKEN);
   const locationId = clean(env.GHL_LOCATION_ID);
+  const fieldReferences = new Map(FIELD_DEFINITIONS.map((definition) => [definition.name, clean(env[definition.envName])]));
+  const missingRequiredFields = FIELD_DEFINITIONS
+    .filter((definition) => definition.required && !fieldReferences.get(definition.name))
+    .map((definition) => definition.envName);
   if (!enabled) return { enabled: false, token, locationId, reason: 'feature_disabled' };
   if (!token) return { enabled: false, token, locationId, reason: 'missing_private_integration_token' };
   if (!locationId) return { enabled: false, token, locationId, reason: 'missing_location_id' };
-  return { enabled: true, token, locationId, reason: null };
+  if (missingRequiredFields.length > 0) {
+    return { enabled: false, token, locationId, fieldReferences, missingRequiredFields, reason: 'configuration_missing' };
+  }
+  return { enabled: true, token, locationId, fieldReferences, missingRequiredFields: [], reason: null };
 }
 
 function result(overrides = {}) {
@@ -79,6 +85,7 @@ function result(overrides = {}) {
     tagsApplied: [],
     retryable: false,
     httpStatus: null,
+    missingConfiguration: [],
     ...overrides
   };
 }
@@ -123,53 +130,16 @@ async function request(path, { fetchImpl, token, signal, method = 'GET', body })
   }
 }
 
-function customFieldsFrom(response) {
-  return response?.customFields || response?.fields || [];
-}
-
 function tagsFrom(response) {
   return response?.tags || [];
 }
 
-function idFrom(value) {
-  return clean(value?.id || value?._id);
-}
-
-async function resolveCustomFields(context) {
-  const cacheKey = context.locationId;
-  if (!fieldCache.has(cacheKey)) {
-    fieldCache.set(cacheKey, (async () => {
-      const found = await request(`/locations/${encodeURIComponent(context.locationId)}/customFields`, context);
-      const byName = new Map(customFieldsFrom(found)
-        .filter((field) => normalizeKey(field?.model || 'contact') === 'contact')
-        .map((field) => [normalizeKey(field.name), idFrom(field)]));
-
-      for (const definition of FIELD_DEFINITIONS) {
-        const key = normalizeKey(definition.name);
-        if (byName.get(key)) continue;
-        try {
-          const created = await request(`/locations/${encodeURIComponent(context.locationId)}/customFields`, {
-            ...context,
-            method: 'POST',
-            body: { name: definition.name, dataType: 'TEXT', model: 'contact' }
-          });
-          const field = created?.customField || created?.field || created;
-          const id = idFrom(field);
-          if (id) byName.set(key, id);
-        } catch (error) {
-          if (definition.required) throw error;
-          // Optional CRM metadata degrades gracefully; Profile ID never does.
-        }
-      }
-      return byName;
-    })());
-  }
-  try {
-    return await fieldCache.get(cacheKey);
-  } catch (error) {
-    fieldCache.delete(cacheKey);
-    throw error;
-  }
+function configuredField(reference, value) {
+  const fieldReference = clean(reference);
+  const fieldValue = clean(value);
+  if (!fieldReference || !fieldValue) return null;
+  const referenceProperty = fieldReference.startsWith('contact.') ? 'key' : 'id';
+  return { [referenceProperty]: fieldReference, field_value: fieldValue };
 }
 
 async function resolveTags(requiredTags, context) {
@@ -241,7 +211,12 @@ export async function syncContactToGoHighLevel(input = {}, options = {}) {
   const logContext = { eventType, profileId: profileId || null, assessmentType };
 
   if (!configuration.enabled) {
-    return skippedResult(logger, logContext, { reason: configuration.reason, assessmentType, tagsApplied: desiredTags });
+    return skippedResult(logger, logContext, {
+      reason: configuration.reason,
+      assessmentType,
+      tagsApplied: desiredTags,
+      missingConfiguration: configuration.missingRequiredFields || []
+    });
   }
   if (!profileId) return skippedResult(logger, logContext, { reason: 'missing_profile_id', assessmentType, tagsApplied: desiredTags });
   if (!email && !phone) return skippedResult(logger, logContext, { reason: 'missing_valid_email_or_phone', assessmentType, tagsApplied: desiredTags });
@@ -254,19 +229,10 @@ export async function syncContactToGoHighLevel(input = {}, options = {}) {
   const context = { fetchImpl, token: configuration.token, locationId: configuration.locationId, signal: controller.signal };
 
   try {
-    const fields = await resolveCustomFields(context);
-    const profileFieldId = fields.get(normalizeKey('MORE Profile ID'));
-    if (!profileFieldId) {
-      const skipped = result({ attempted: true, skipped: true, reason: 'profile_id_custom_field_unavailable', assessmentType, tagsApplied: desiredTags });
-      safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: false, skippedReason: skipped.reason, httpStatus: null, retryable: false });
-      return skipped;
-    }
-
     const tags = await resolveTags(desiredTags, context);
     const customFields = FIELD_DEFINITIONS.flatMap((definition) => {
-      const id = fields.get(normalizeKey(definition.name));
-      const value = clean(input[definition.property]);
-      return id && value ? [{ id, field_value: value }] : [];
+      const field = configuredField(configuration.fieldReferences.get(definition.name), input[definition.property]);
+      return field ? [field] : [];
     });
     const payload = compact({
       locationId: configuration.locationId,
@@ -306,7 +272,6 @@ export function buildSubscriptionActiveContactEvent(contact = {}) {
 }
 
 export function resetGoHighLevelResolverCachesForTests() {
-  fieldCache = new Map();
   tagCache = new Map();
 }
 

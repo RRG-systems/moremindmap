@@ -2,7 +2,7 @@
 
 ## Architecture and data flow
 
-MORE MindMap remains authoritative. After a canonical write succeeds, a server-only, fail-open side effect is registered with Vercel `waitUntil`, resolves GHL contact fields and tags, and calls `POST /contacts/upsert` at `https://services.leadconnectorhq.com`. The browser never receives the private integration token. A bounded five-second default timeout covers the entire GHL operation.
+MORE MindMap remains authoritative. After a canonical write succeeds, a server-only, fail-open side effect is registered with Vercel `waitUntil`, reads configured GHL custom-field references, resolves tags, and calls `POST /contacts/upsert` at `https://services.leadconnectorhq.com`. The browser never receives the private integration token or field references. A bounded five-second default timeout covers the entire GHL operation.
 
 ```text
 BOS/BA canonical persistence -> queued contact metadata sync -> GHL upsert
@@ -24,14 +24,20 @@ These server-side production environment variables are recorded as configured in
 - `GHL_CONTACT_SYNC_ENABLED=true` (the integration remains opt-in everywhere)
 - `GHL_PRIVATE_INTEGRATION_TOKEN` (required; never use a browser-prefixed variable)
 - `GHL_LOCATION_ID` (required sub-account/location)
+- `GHL_FIELD_MORE_PROFILE_ID` (required field ID or stable key)
+- `GHL_FIELD_MORE_ASSESSMENT_TYPE` (required field ID or stable key)
+- `GHL_FIELD_MORE_ASSESSMENT_STATUS` (required field ID or stable key)
+- `GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT` (required field ID or stable key)
+- `GHL_FIELD_MORE_SUBSCRIPTION_STATUS` (optional until subscription activation is wired)
+- `GHL_FIELD_MORE_SOURCE` (required field ID or stable key)
 
 Missing configuration in production, preview, or local environments still disables or skips synchronization safely. All environment reads remain in the server-only `api/integrations/gohighlevel/contactSync.js` module.
 
-The Private Integration needs contact write/upsert scope plus location custom-field read/write and location tag read/write scopes. In GHL scope naming, enable the scopes corresponding to Contacts Write, Locations Custom Fields Read/Write, and Locations Tags Read/Write for the target location. Confirm exact labels in the current GHL Private Integration UI before production activation.
+The runtime Private Integration needs contact write/upsert scope plus location tag read/write scopes. Normal sync no longer reads or creates custom-field schemas. Custom fields must be created and mapped manually before enabling full metadata sync.
 
 ## Custom fields
 
-The resolver fetches `GET /locations/:locationId/customFields`, compares normalized field names case-insensitively, and creates only missing contact fields with `POST /locations/:locationId/customFields`. Resolutions are cached per location in the warm serverless invocation. Fields are:
+Normal contact sync never calls `GET` or `POST /locations/:locationId/customFields`. It maps server-only configured IDs or stable keys directly into `customFields`, using `{ id, field_value }` for IDs and `{ key, field_value }` for keys. Fields are:
 
 - MORE Profile ID (mandatory)
 - MORE Assessment Type
@@ -40,7 +46,33 @@ The resolver fetches `GET /locations/:locationId/customFields`, compares normali
 - MORE Subscription Status
 - MORE Source
 
-All are TEXT fields for predictable API representation. Existing stable IDs are used in `customFields: [{ id, field_value }]`. If the Profile ID field cannot be resolved, upsert is skipped; other unavailable optional metadata degrades gracefully.
+The Profile ID, assessment type, assessment status, completion timestamp, and source references are required. If any required reference is missing, sync returns a structured `configuration_missing` skipped result without making a GHL request or affecting BOS/BA completion. Subscription status is optional until its runtime hook exists and is omitted when unconfigured.
+
+## Manual Custom Field Configuration
+
+In the target HighLevel sub-account, open **Settings → Custom Fields**, select the **Contact** object, and create these fields exactly:
+
+1. **MORE Profile ID** — Type: **Single Line Text**
+2. **MORE Assessment Type** — Type: **Single Line Text**
+3. **MORE Assessment Status** — Type: **Single Line Text**
+4. **MORE Assessment Completed At** — Type: **Date/Time** if HighLevel supports ISO-8601 UTC cleanly for the field; otherwise **Single Line Text** storing ISO-8601 UTC
+5. **MORE Subscription Status** — Type: **Single Line Text**
+6. **MORE Source** — Type: **Single Line Text**
+
+For each field, open its HighLevel field details and copy either the immutable field ID or the displayed stable Contact field key. A stable key normally uses HighLevel's Contact-key form (for example, a value beginning with `contact.`); copy the actual value displayed by HighLevel. Do not derive, guess, rename, or paste example values. If the UI does not expose a value, use HighLevel's authenticated API tooling or support guidance to obtain the field ID for that sub-account.
+
+Add the copied values to the existing Vercel project as server-side **Production** environment variables with this exact mapping:
+
+| HighLevel contact field | Vercel production variable | Required |
+|---|---|---|
+| MORE Profile ID | `GHL_FIELD_MORE_PROFILE_ID` | Yes |
+| MORE Assessment Type | `GHL_FIELD_MORE_ASSESSMENT_TYPE` | Yes |
+| MORE Assessment Status | `GHL_FIELD_MORE_ASSESSMENT_STATUS` | Yes |
+| MORE Assessment Completed At | `GHL_FIELD_MORE_ASSESSMENT_COMPLETED_AT` | Yes |
+| MORE Subscription Status | `GHL_FIELD_MORE_SUBSCRIPTION_STATUS` | No, until subscription activation is wired |
+| MORE Source | `GHL_FIELD_MORE_SOURCE` | Yes |
+
+Set values only in Vercel server-side environment configuration; never prefix them with `VITE_` or expose them to browser code. After all five required references are saved, redeploy Production so serverless functions receive them. Keep `GHL_CONTACT_SYNC_ENABLED=false` until configuration is complete if an immediate fail-closed rollout is preferred.
 
 ## Tags and duplicate behavior
 
@@ -64,7 +96,7 @@ Vercel `waitUntil` extends the request lifetime for the registered bounded promi
 
 Run `node --test test/gohighlevel-contact-sync.test.js`, `npm run build`, and `git diff --check`. Tests use mocked transport and never contact GHL.
 
-Before production deployment: review the implementation and package diff, confirm Private Integration scopes and duplicate-contact settings, then deploy and run one operator-approved named test contact. Verify sanitized logs, fields, and tags, then monitor 401/403/429/5xx outcomes. Production environment configuration is already complete.
+Before production deployment: review the implementation and package diff, confirm Private Integration scopes and duplicate-contact settings, then deploy and run one operator-approved named test contact. Verify sanitized logs, fields, and tags, then monitor 401/403/429/5xx outcomes. The base token/location configuration is complete; the static field-reference variables remain pending after the fallback deployment.
 
 To roll back, set `GHL_CONTACT_SYNC_ENABLED=false` (or remove it) and redeploy. Code removal is unnecessary for an emergency disable. No GHL data is read back into MORE MindMap.
 
@@ -83,3 +115,7 @@ Required follow-up: grant `contacts.readonly` to the existing Private Integratio
 After the operator explicitly saved the existing `contacts.readonly` and `contacts.write` permissions, a second narrowly scoped production readback was attempted against the same controlled contact. No create or upsert request was made. GHL again returned HTTP 403, this time on the location custom-field read request before contact search occurred. The temporary verifier and its one-time environment key were removed without making another GHL request.
 
 The current Private Integration token likely needs to be regenerated after the saved permission update. Regenerate or rotate the token in GHL, update only the existing server-side Vercel token value, and then repeat readback against Profile ID `mm-20260716-iipuev93`. Do not create or upsert another contact.
+
+### V3 schema result and static-field fallback
+
+The final schema-only retry used the official `Version: v3` header for `GET /locations/:locationId/customFields` and still returned HTTP 403. No contact lookup or write followed that failure. The production sync was therefore changed to the static server-side field-reference strategy documented above. End-to-end metadata delivery remains unproven until the required Vercel field variables are configured; do not create another controlled contact for this setup step.
