@@ -37,7 +37,7 @@ The runtime Private Integration needs contact write/upsert scope plus location t
 
 ## Custom fields
 
-Normal contact sync never calls `GET` or `POST /locations/:locationId/customFields`. It maps server-only configured IDs or stable keys directly into `customFields`, using `{ id, fieldValue }` for IDs and `{ key, fieldValue }` for keys. Production uses the configured stable `contact.*` keys. Fields are:
+Normal contact sync never calls `GET` or `POST /locations/:locationId/customFields`. It maps the six server-only configured field IDs directly into `customFields` using exactly `{ id, fieldValue }`. Stable `contact.*` keys are not sent in the upsert payload. Fields are:
 
 - MORE Profile ID (mandatory)
 - MORE Assessment Type
