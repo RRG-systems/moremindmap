@@ -30,14 +30,8 @@ const TAG_BY_EVENT = Object.freeze({
   [GHL_EVENT_TYPE.SUBSCRIPTION_ACTIVE]: GHL_TAG_CONFIG.SUBSCRIPTION_ACTIVE
 });
 
-let tagCache = new Map();
-
 function clean(value) {
   return value === null || value === undefined ? '' : String(value).trim();
-}
-
-function normalizeKey(value) {
-  return clean(value).replace(/\s+/g, ' ').toLowerCase();
 }
 
 function normalizeEmail(value) {
@@ -80,11 +74,17 @@ function result(overrides = {}) {
     success: false,
     skipped: false,
     reason: null,
+    failureCategory: null,
     contactId: null,
     assessmentType: null,
     tagsApplied: [],
     retryable: false,
     httpStatus: null,
+    partialSuccess: false,
+    contactUpsert: 'not_attempted',
+    contactUpsertHttpStatus: null,
+    tagApplication: 'not_attempted',
+    tagApplicationHttpStatus: null,
     missingConfiguration: [],
     ...overrides
   };
@@ -130,46 +130,12 @@ async function request(path, { fetchImpl, token, signal, method = 'GET', body })
   }
 }
 
-function tagsFrom(response) {
-  return response?.tags || [];
-}
-
 function configuredField(reference, value) {
   const fieldReference = clean(reference);
   const fieldValue = clean(value);
   if (!fieldReference || !fieldValue) return null;
   const referenceProperty = fieldReference.startsWith('contact.') ? 'key' : 'id';
   return { [referenceProperty]: fieldReference, field_value: fieldValue };
-}
-
-async function resolveTags(requiredTags, context) {
-  const cacheKey = context.locationId;
-  if (!tagCache.has(cacheKey)) {
-    tagCache.set(cacheKey, (async () => {
-      const found = await request(`/locations/${encodeURIComponent(context.locationId)}/tags`, context);
-      return new Map(tagsFrom(found).map((tag) => [normalizeKey(tag.name), clean(tag.name)]));
-    })());
-  }
-  let byName;
-  try {
-    byName = await tagCache.get(cacheKey);
-  } catch (error) {
-    tagCache.delete(cacheKey);
-    throw error;
-  }
-
-  for (const tagName of requiredTags) {
-    const key = normalizeKey(tagName);
-    if (byName.has(key)) continue;
-    const created = await request(`/locations/${encodeURIComponent(context.locationId)}/tags`, {
-      ...context,
-      method: 'POST',
-      body: { name: tagName }
-    });
-    const tag = created?.tag || created;
-    byName.set(key, clean(tag?.name) || tagName);
-  }
-  return requiredTags.map((name) => byName.get(normalizeKey(name)) || name);
 }
 
 function buildTags(eventType) {
@@ -228,36 +194,73 @@ export async function syncContactToGoHighLevel(input = {}, options = {}) {
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const context = { fetchImpl, token: configuration.token, locationId: configuration.locationId, signal: controller.signal };
 
+  const customFields = FIELD_DEFINITIONS.flatMap((definition) => {
+    const field = configuredField(configuration.fieldReferences.get(definition.name), input[definition.property]);
+    return field ? [field] : [];
+  });
+  const payload = compact({
+    locationId: configuration.locationId,
+    firstName: clean(input.firstName),
+    lastName: clean(input.lastName),
+    email,
+    phone,
+    customFields
+  });
+
+  let response;
+  let contactId;
   try {
-    const tags = await resolveTags(desiredTags, context);
-    const customFields = FIELD_DEFINITIONS.flatMap((definition) => {
-      const field = configuredField(configuration.fieldReferences.get(definition.name), input[definition.property]);
-      return field ? [field] : [];
-    });
-    const payload = compact({
-      locationId: configuration.locationId,
-      firstName: clean(input.firstName),
-      lastName: clean(input.lastName),
-      email,
-      phone,
-      tags,
-      customFields
-    });
-    const response = await request('/contacts/upsert', { ...context, method: 'POST', body: payload });
-    const contactId = clean(response?.contact?.id || response?.contactId || response?.id) || null;
-    const succeeded = result({ attempted: true, success: true, assessmentType, contactId, tagsApplied: tags });
-    succeeded.httpStatus = Number(response?.__httpStatus) || 200;
-    safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: true, skippedReason: null, httpStatus: succeeded.httpStatus, retryable: false });
-    return succeeded;
+    response = await request('/contacts/upsert', { ...context, method: 'POST', body: payload });
+    contactId = clean(response?.contact?.id || response?.contactId || response?.id) || null;
+    const upsertStatus = Number(response?.__httpStatus) || 200;
+    if (!contactId) {
+      const partial = result({
+        attempted: true,
+        success: true,
+        partialSuccess: true,
+        reason: 'tag_application_failure',
+        assessmentType,
+        contactUpsert: 'contact_upsert_success',
+        contactUpsertHttpStatus: upsertStatus,
+        tagApplication: 'tag_application_failure',
+        httpStatus: upsertStatus
+      });
+      safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: true, partialSuccess: true, contactUpsert: partial.contactUpsert, tagApplication: partial.tagApplication, reason: partial.reason, httpStatus: upsertStatus, tagHttpStatus: null, retryable: false });
+      clearTimeout(timeout);
+      return partial;
+    }
   } catch (error) {
     const timedOut = error?.name === 'AbortError';
     const status = Number(error?.status) || null;
     const classification = timedOut
       ? { reason: 'request_timeout', retryable: true }
       : status ? classifyStatus(status) : { reason: 'network_error', retryable: true };
-    const failed = result({ attempted: true, reason: classification.reason, assessmentType, tagsApplied: desiredTags, retryable: classification.retryable, httpStatus: status });
-    safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: false, skippedReason: failed.reason, httpStatus: status, retryable: failed.retryable });
+    const failed = result({ attempted: true, reason: 'contact_upsert_failure', failureCategory: classification.reason, assessmentType, retryable: classification.retryable, httpStatus: status, contactUpsert: 'contact_upsert_failure', contactUpsertHttpStatus: status });
+    safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: false, partialSuccess: false, contactUpsert: failed.contactUpsert, tagApplication: failed.tagApplication, reason: failed.reason, failureCategory: classification.reason, httpStatus: status, tagHttpStatus: null, retryable: failed.retryable });
+    clearTimeout(timeout);
     return failed;
+  }
+
+  const upsertStatus = Number(response?.__httpStatus) || 200;
+  try {
+    const tagResponse = await request(`/contacts/${encodeURIComponent(contactId)}/tags`, {
+      ...context,
+      method: 'POST',
+      body: { tags: desiredTags }
+    });
+    const tagStatus = Number(tagResponse?.__httpStatus) || 200;
+    const succeeded = result({ attempted: true, success: true, assessmentType, contactId, tagsApplied: desiredTags, httpStatus: upsertStatus, contactUpsert: 'contact_upsert_success', contactUpsertHttpStatus: upsertStatus, tagApplication: 'tag_application_success', tagApplicationHttpStatus: tagStatus });
+    safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: true, partialSuccess: false, contactUpsert: succeeded.contactUpsert, tagApplication: succeeded.tagApplication, reason: null, httpStatus: upsertStatus, tagHttpStatus: tagStatus, retryable: false });
+    return succeeded;
+  } catch (error) {
+    const timedOut = error?.name === 'AbortError';
+    const tagStatus = Number(error?.status) || null;
+    const classification = timedOut
+      ? { reason: 'request_timeout', retryable: true }
+      : tagStatus ? classifyStatus(tagStatus) : { reason: 'network_error', retryable: true };
+    const partial = result({ attempted: true, success: true, partialSuccess: true, reason: 'tag_application_failure', failureCategory: classification.reason, assessmentType, contactId, httpStatus: upsertStatus, contactUpsert: 'contact_upsert_success', contactUpsertHttpStatus: upsertStatus, tagApplication: 'tag_application_failure', tagApplicationHttpStatus: tagStatus, retryable: classification.retryable });
+    safeLog(logger, { eventType, profileId, assessmentType, attempted: true, success: true, partialSuccess: true, contactUpsert: partial.contactUpsert, tagApplication: partial.tagApplication, reason: partial.reason, failureCategory: classification.reason, httpStatus: upsertStatus, tagHttpStatus: tagStatus, retryable: partial.retryable });
+    return partial;
   } finally {
     clearTimeout(timeout);
   }
@@ -272,12 +275,13 @@ export function buildSubscriptionActiveContactEvent(contact = {}) {
 }
 
 export function resetGoHighLevelResolverCachesForTests() {
-  tagCache = new Map();
+  // Kept as a stable test API; the sync no longer performs cached schema or tag lookup.
 }
 
 export const GOHIGHLEVEL_CONTACT_SYNC_CONTRACT = Object.freeze({
   apiBase: GHL_API_BASE,
   upsertEndpoint: '/contacts/upsert',
+  tagApplicationEndpoint: '/contacts/:contactId/tags',
   fieldDefinitions: FIELD_DEFINITIONS,
-  allowedPayloadKeys: ['locationId', 'firstName', 'lastName', 'email', 'phone', 'tags', 'customFields']
+  allowedPayloadKeys: ['locationId', 'firstName', 'lastName', 'email', 'phone', 'customFields']
 });

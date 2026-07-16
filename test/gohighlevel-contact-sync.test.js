@@ -29,16 +29,13 @@ function response(status, body = {}) {
   return { ok: status >= 200 && status < 300, status, json: async () => body };
 }
 
-function successfulFetch({ existingTags = ['MMM', 'BOS Completed', 'BA Completed', 'Subscription Active'] } = {}) {
+function successfulFetch({ contactId = 'contact-123', tagStatus = 200 } = {}) {
   const calls = [];
   const fetchImpl = async (url, options = {}) => {
     const body = options.body ? JSON.parse(options.body) : null;
     calls.push({ url, method: options.method, body, headers: options.headers });
-    if (url.endsWith('/tags') && options.method === 'GET') {
-      return response(200, { tags: existingTags.map((name, index) => ({ id: `tag-${index}`, name })) });
-    }
-    if (url.endsWith('/tags') && options.method === 'POST') return response(200, { tag: { id: 'created-tag', name: body.name } });
-    if (url.endsWith('/contacts/upsert')) return response(200, { contact: { id: 'contact-123' } });
+    if (url.endsWith('/contacts/upsert')) return response(200, { contact: { id: contactId } });
+    if (url.endsWith(`/contacts/${contactId}/tags`) && options.method === 'POST') return response(tagStatus, {});
     throw new Error(`Unexpected URL ${url}`);
   };
   return { fetchImpl, calls };
@@ -68,18 +65,25 @@ test('GHL tags are centralized in one changeable configuration object', () => {
   });
 });
 
-test('BOS builds one authorized upsert with profile ID and event-specific tags', async () => {
+test('BOS upserts once before one additive tag application without location tag lookup', async () => {
   const mock = successfulFetch();
   const result = await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
   assert.equal(result.success, true);
   const upserts = mock.calls.filter((call) => call.url.endsWith('/contacts/upsert'));
   assert.equal(upserts.length, 1);
-  assert.deepEqual(upserts[0].body.tags, ['MMM', 'BOS Completed']);
+  assert.equal('tags' in upserts[0].body, false);
   assert.equal(upserts[0].body.email, 'ada@example.com');
   assert.equal(upserts[0].body.phone, '+16025550100');
   assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-profile-id' && field.field_value === baseContact.profileId));
   assert.ok(upserts[0].body.customFields.some((field) => field.id === 'field-assessment-status' && field.field_value === 'Completed'));
   assert.equal(mock.calls.some((call) => call.url.endsWith('/customFields')), false);
+  assert.equal(mock.calls.some((call) => call.url.includes('/locations/') && call.url.endsWith('/tags')), false);
+  const tagCalls = mock.calls.filter((call) => call.url.endsWith('/contacts/contact-123/tags'));
+  assert.equal(tagCalls.length, 1);
+  assert.deepEqual(tagCalls[0].body, { tags: ['MMM', 'BOS Completed'] });
+  assert.ok(mock.calls.indexOf(upserts[0]) < mock.calls.indexOf(tagCalls[0]));
+  assert.equal(result.contactUpsert, 'contact_upsert_success');
+  assert.equal(result.tagApplication, 'tag_application_success');
   const serialized = JSON.stringify(upserts[0].body);
   for (const forbidden of ['answers', 'scores', 'narrative', 'five futures', 'one move', 'confidence', 'evidence', 'financial']) {
     assert.equal(serialized.toLowerCase().includes(forbidden), false);
@@ -89,9 +93,59 @@ test('BOS builds one authorized upsert with profile ID and event-specific tags',
 test('BA uses BA tag and not BOS tag', async () => {
   const mock = successfulFetch();
   await syncContactToGoHighLevel({ ...baseContact, eventType: GHL_EVENT_TYPE.BA_COMPLETED, assessmentType: 'BA' }, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
-  const payload = mock.calls.find((call) => call.url.endsWith('/contacts/upsert')).body;
+  const payload = mock.calls.find((call) => call.url.endsWith('/contacts/contact-123/tags')).body;
   assert.deepEqual(payload.tags, ['MMM', 'BA Completed']);
   assert.equal(payload.tags.includes('BOS Completed'), false);
+});
+
+test('valid email permits upsert without phone', async () => {
+  const mock = successfulFetch();
+  const outcome = await syncContactToGoHighLevel({ ...baseContact, phone: '' }, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
+  assert.equal(outcome.success, true);
+  const upsert = mock.calls.find((call) => call.url.endsWith('/contacts/upsert'));
+  assert.equal(upsert.body.email, 'ada@example.com');
+  assert.equal('phone' in upsert.body, false);
+});
+
+test('contact tag endpoint adds desired tags without replacing existing tags', async () => {
+  const mock = successfulFetch();
+  await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
+  const tagCall = mock.calls.find((call) => call.url.endsWith('/contacts/contact-123/tags'));
+  assert.equal(tagCall.method, 'POST');
+  assert.deepEqual(tagCall.body, { tags: ['MMM', 'BOS Completed'] });
+  assert.equal(mock.calls.some((call) => ['DELETE', 'PUT'].includes(call.method)), false);
+});
+
+test('tag failure is partial success and does not negate successful upsert', async () => {
+  const mock = successfulFetch({ tagStatus: 403 });
+  const outcome = await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
+  assert.equal(outcome.success, true);
+  assert.equal(outcome.partialSuccess, true);
+  assert.equal(outcome.reason, 'tag_application_failure');
+  assert.equal(outcome.failureCategory, 'authorization_failed');
+  assert.equal(outcome.contactUpsert, 'contact_upsert_success');
+  assert.equal(outcome.tagApplication, 'tag_application_failure');
+  assert.equal(outcome.contactId, 'contact-123');
+  assert.equal(mock.calls.filter((call) => call.url.endsWith('/contacts/upsert')).length, 1);
+  assert.equal(mock.calls.filter((call) => call.url.endsWith('/contacts/contact-123/tags')).length, 1);
+});
+
+test('upsert failure prevents tag application', async () => {
+  const calls = [];
+  const outcome = await syncContactToGoHighLevel(baseContact, {
+    env: ENV,
+    fetchImpl: async (url, options = {}) => {
+      calls.push({ url, method: options.method });
+      return response(422, {});
+    },
+    logger: {}
+  });
+  assert.equal(outcome.success, false);
+  assert.equal(outcome.reason, 'contact_upsert_failure');
+  assert.equal(outcome.contactUpsert, 'contact_upsert_failure');
+  assert.equal(outcome.tagApplication, 'not_attempted');
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].url.endsWith('/contacts/upsert'), true);
 });
 
 test('missing or disabled configuration skips safely', async () => {
@@ -99,13 +153,13 @@ test('missing or disabled configuration skips safely', async () => {
   assert.equal((await syncContactToGoHighLevel(baseContact, { env: { GHL_CONTACT_SYNC_ENABLED: 'true' }, logger: {} })).reason, 'missing_private_integration_token');
 });
 
-test('static custom field references avoid schema requests while tags remain cached', async () => {
-  const mock = successfulFetch({ existingTags: [' mmm '] });
+test('static custom field references avoid all schema and location-tag requests', async () => {
+  const mock = successfulFetch();
   await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
   await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl: mock.fetchImpl, logger: {} });
   assert.equal(mock.calls.filter((call) => call.url.endsWith('/customFields')).length, 0);
-  assert.equal(mock.calls.filter((call) => call.url.endsWith('/tags') && call.method === 'GET').length, 1);
-  assert.equal(mock.calls.filter((call) => call.url.endsWith('/tags') && call.method === 'POST').length, 1);
+  assert.equal(mock.calls.filter((call) => call.url.includes('/locations/') && call.url.endsWith('/tags')).length, 0);
+  assert.equal(mock.calls.filter((call) => call.url.endsWith('/contacts/contact-123/tags') && call.method === 'POST').length, 2);
   assert.equal(mock.calls.filter((call) => call.url.endsWith('/contacts/upsert')).length, 2);
 });
 
@@ -149,10 +203,11 @@ for (const [status, reason, retryable] of [[401, 'authorization_failed', false],
     const logs = [];
     const outcome = await syncContactToGoHighLevel(baseContact, {
       env: ENV,
-      fetchImpl: async () => response(status),
+      fetchImpl: async (url) => url.endsWith('/contacts/upsert') ? response(status) : response(500),
       logger: { info: (...args) => logs.push(args) }
     });
-    assert.equal(outcome.reason, reason);
+    assert.equal(outcome.reason, 'contact_upsert_failure');
+    assert.equal(outcome.failureCategory, reason);
     assert.equal(outcome.retryable, retryable);
     assert.equal(JSON.stringify({ outcome, logs }).includes(ENV.GHL_PRIVATE_INTEGRATION_TOKEN), false);
   });
@@ -164,7 +219,8 @@ test('network timeout is bounded and retryable', async () => {
     options.signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
   });
   const outcome = await syncContactToGoHighLevel(baseContact, { env: ENV, fetchImpl, timeoutMs: 100, logger: {} });
-  assert.equal(outcome.reason, 'request_timeout');
+  assert.equal(outcome.reason, 'contact_upsert_failure');
+  assert.equal(outcome.failureCategory, 'request_timeout');
   assert.equal(outcome.retryable, true);
   assert.ok(Date.now() - started < 1000);
 });

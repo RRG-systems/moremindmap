@@ -76,7 +76,7 @@ Set values only in Vercel server-side environment configuration; never prefix th
 
 ## Tags and duplicate behavior
 
-Tags are centralized in the exported `GHL_TAG_CONFIG` object in the server integration module, so tag names can change without modifying sync logic. They are fetched with `GET /locations/:locationId/tags`, normalized for whitespace/case, created only when absent through `POST /locations/:locationId/tags`, and cached per location. Every event has `MMM`; BOS adds `BOS Completed`, BA adds `BA Completed`, and the future subscription event adds `Subscription Active`. Existing GHL tags are not removed or replaced.
+Tags are centralized in the exported `GHL_TAG_CONFIG` object in the server integration module, so tag names can change without modifying sync logic. The critical path does not read, discover, or create location tag definitions. It first calls `POST /contacts/upsert`, extracts the returned contact ID, and then makes one additive `POST /contacts/:contactId/tags` call. Every event adds `MMM`; BOS adds `BOS Completed`, BA adds `BA Completed`, and the future subscription event adds `Subscription Active`. The additive contact-tag endpoint does not remove or replace existing GHL tags.
 
 `POST /contacts/upsert` delegates matching to the sub-account duplicate-contact configuration. Email/phone collision behavior therefore depends on that setting. Review it before launch; the integration does not intentionally create duplicates and retries remain idempotent through upsert.
 
@@ -88,7 +88,7 @@ Tags are centralized in the exported `GHL_TAG_CONFIG` object in the server integ
 
 ## Failure and observability policy
 
-Missing/disabled configuration skips. Invalid contact data skips. HTTP 401/403 is non-retryable configuration failure; 429 and 5xx are retryable; network and timeout failures are retryable. There is no retry loop. Assessment responses remain successful. Structured logs contain event type, Profile ID, assessment type, attempted/success state, reason, HTTP status, and retryability—never authorization headers, the token, raw assessment payloads, or proprietary intelligence.
+Missing/disabled configuration skips. Invalid contact data skips. HTTP 401/403 is non-retryable configuration failure; 429 and 5xx are retryable; network and timeout failures are retryable. There is no retry loop. Upsert failure prevents tag application. A successful upsert followed by tag failure returns `success: true`, `partialSuccess: true`, `contactUpsert: contact_upsert_success`, and `tagApplication: tag_application_failure`; it never invalidates assessment completion or the successful contact write. Structured logs distinguish both operations and contain only event type, Profile ID, assessment type, state, sanitized reason/category, HTTP status, and retryability—never authorization headers, the token, raw assessment payloads, or proprietary intelligence.
 
 Vercel `waitUntil` extends the request lifetime for the registered bounded promise without delaying the response. If background registration is unavailable, the helper logs only sanitized event metadata, skips dispatch, and leaves assessment completion successful. No durable queue or retry service is used.
 

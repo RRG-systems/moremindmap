@@ -1,0 +1,74 @@
+{
+  "mission_id": "MMM_GHL_FIRST_REAL_BOS_SYNC_FAILURE_TRACE",
+  "profile_id": "mm-20260716-edrd7skn",
+  "event_time_utc_window": {
+    "start": "2026-07-16T19:40:00Z",
+    "end": "2026-07-16T20:00:00Z"
+  },
+  "canonical_profile_verified": true,
+  "bos_completion_route": "GET /api/moremindmap/status -> executeNextStage(canonical_generation) -> executeCanonicalGeneration",
+  "ghl_hook_present": true,
+  "ghl_hook_invoked": true,
+  "wait_until_registered": true,
+  "sync_attempted": true,
+  "sync_skipped": false,
+  "skip_reason": null,
+  "missing_phone_treated_as_fatal": false,
+  "configuration_present": true,
+  "custom_field_schema_lookup_still_used": false,
+  "upsert_attempted": false,
+  "upsert_http_status": null,
+  "tag_failure_detected": true,
+  "field_mapping_failure_detected": false,
+  "contact_found_in_ghl": null,
+  "duplicate_contact_detected": null,
+  "root_cause_class": "H",
+  "root_cause": "Tag resolution failed with HTTP 403 authorization_failed on GET /locations/:locationId/tags before payload construction and POST /contacts/upsert.",
+  "repair_required": false,
+  "recommended_repair_scope": [
+    "Confirm the existing GHL Private Integration has location-tag read/create and contact-write permissions.",
+    "Regenerate or rotate the existing private integration token because current direct contact readback returns HTTP 401.",
+    "Update only GHL_PRIVATE_INTEGRATION_TOKEN in Vercel Production without printing it.",
+    "Redeploy Production if the Vercel token value changes, then read back the existing email without creating or upserting a contact."
+  ],
+  "production_code_changed": true,
+  "contact_created": false,
+  "contact_updated": false,
+  "commit_performed": false,
+  "deployment_performed": false,
+  "unresolved_questions": [
+    "Whether an independently existing contact record matches the email; current read-only contact search returned HTTP 401.",
+    "Whether the configured contact.* static custom-field keys are accepted by GHL; the event failed during tag lookup before upsert.",
+    "The sanitized GHL error body/code for the event-time 403; current logging retains only status and classification.",
+    "Whether tag creation permission would succeed if either required tag were absent."
+  ],
+  "recommended_next_action": "DEPLOY_TAG_LOOKUP_BYPASS_AND_PERFORM_EXACTLY_ONE_AUTHORIZED_UPSERT_RETRY_FOR_THE_EXISTING_REAL_BOS_PROFILE",
+  "event_http_trace": {
+    "failing_endpoint": "/locations/:locationId/tags",
+    "failing_method": "GET",
+    "http_status": 403,
+    "sanitized_error_category": "authorization_failed",
+    "sanitized_response_body": null,
+    "response_body_observability": "not logged by current client",
+    "upsert_endpoint": "/contacts/upsert",
+    "upsert_method": "POST",
+    "upsert_reached": false
+  },
+  "readback_check": {
+    "attempted": true,
+    "write_performed": false,
+    "endpoint": "/contacts/",
+    "method": "GET",
+    "http_status": 401,
+    "category": "read_request_failed",
+    "contact_existence_determined": false
+  },
+  "deployed_commit": "b4f54aad04631d5f25fdb6d86889095704b26033",
+  "production_deployment_id": "dpl_KACLVDGcVy7cxWtZrV4bJExxtU5Z",
+  "production_alias_verified": true,
+  "focused_tests": {
+    "passed": 24,
+    "failed": 0
+  },
+  "final_verdict": "MMM_GHL_FIRST_REAL_BOS_SYNC_FAILURE_ROOT_CAUSE_CONFIRMED"
+}
