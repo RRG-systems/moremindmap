@@ -77,3 +77,9 @@ Exactly one controlled synthetic BOS job was submitted through the production ap
 Contact readback was attempted inside the Vercel production environment so neither the GHL token nor location ID would be retrieved or exposed. GHL returned HTTP 403 for contact readback. The temporary authenticated verification route and its one-time environment key were removed immediately afterward. Because readback permission was unavailable, this run cannot independently assert contact count, field values, tags, or absence of duplicates. The code-level allowlist and passing tests establish that the integration payload can contain only contact identity, approved MORE metadata fields, and tags; no proprietary assessment intelligence is included, but the production contact itself could not be inspected.
 
 Required follow-up: grant `contacts.readonly` to the existing Private Integration (without changing the token value), redeploy if GHL requires it, and perform readback for the existing test email/Profile ID. Do not submit or upsert another test contact.
+
+### Permission-save readback retry
+
+After the operator explicitly saved the existing `contacts.readonly` and `contacts.write` permissions, a second narrowly scoped production readback was attempted against the same controlled contact. No create or upsert request was made. GHL again returned HTTP 403, this time on the location custom-field read request before contact search occurred. The temporary verifier and its one-time environment key were removed without making another GHL request.
+
+The current Private Integration token likely needs to be regenerated after the saved permission update. Regenerate or rotate the token in GHL, update only the existing server-side Vercel token value, and then repeat readback against Profile ID `mm-20260716-iipuev93`. Do not create or upsert another contact.

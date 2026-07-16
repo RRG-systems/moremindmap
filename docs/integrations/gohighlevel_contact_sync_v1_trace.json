@@ -31,11 +31,16 @@
   "controlled_test_job_completed": true,
   "production_contact_readback_attempted": true,
   "production_contact_readback_http_status": 403,
+  "permission_save_readback_retry_attempted": true,
+  "permission_save_readback_retry_http_status": 403,
+  "permission_save_readback_failure_operation": "location_custom_fields_readback",
+  "additional_contact_submissions_or_upserts": 0,
+  "current_token_regeneration_likely_required": true,
   "production_contact_fields_verified": false,
   "production_duplicate_absence_verified": false,
   "temporary_verification_surface_removed": true,
   "unresolved_blockers": [
-    "GHL Private Integration contact readback returned HTTP 403; production contact fields, tags, matching count, and duplicate absence could not be independently verified"
+    "After permissions were explicitly saved, GHL location custom-field readback still returned HTTP 403 before contact search; the current Private Integration token likely requires regeneration"
   ],
-  "recommended_next_action": "GRANT_CONTACTS_READONLY_AND_READ_BACK_EXISTING_TEST_CONTACT_WITHOUT_ANOTHER_UPSERT"
+  "recommended_next_action": "REGENERATE_CURRENT_PRIVATE_INTEGRATION_TOKEN_UPDATE_SERVER_SIDE_VERCEL_VALUE_AND_READ_BACK_EXISTING_TEST_CONTACT_WITHOUT_ANOTHER_UPSERT"
 }
