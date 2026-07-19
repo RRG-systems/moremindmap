@@ -15,6 +15,7 @@ import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessment
 const FUTURES_CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const FUTURES_CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
 const PREMIUM_RENDERER_ENABLED = String(import.meta.env.VITE_BA_FIVE_FUTURES_PREMIUM || '').toLowerCase() === 'true';
+const CONSTRAINED_FUTURES_VIEW_QUERY = '(max-width: 1376px)';
 
 function buildApiUrl(path) {
   const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -404,12 +405,12 @@ function resolveRendererMode(searchParams) {
   return 'auto';
 }
 
-function resolveViewMode(searchParams, { premiumActive = false } = {}) {
+function resolveViewMode(searchParams, { premiumActive = false, constrainedViewport = false } = {}) {
   const requested = String(searchParams.get('view') || '').toLowerCase();
   if (requested === 'fullscreen' || requested === 'readable' || requested === 'fit') {
     return normalizeArtifactViewMode(requested);
   }
-  if (premiumActive) return 'readable';
+  if (premiumActive) return constrainedViewport ? 'fit' : 'readable';
   return 'fit';
 }
 
@@ -501,6 +502,18 @@ export default function BusinessAssessmentFiveFutures() {
   const profileId = searchParams.get('id') || '';
   const returnTo = resolveReturnTo(searchParams, profileId);
   const [state, setState] = useState({ status: 'loading', error: '', record: null });
+  const [constrainedViewport, setConstrainedViewport] = useState(() =>
+    typeof window !== 'undefined' && window.matchMedia(CONSTRAINED_FUTURES_VIEW_QUERY).matches
+  );
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const query = window.matchMedia(CONSTRAINED_FUTURES_VIEW_QUERY);
+    const syncViewport = (event) => setConstrainedViewport(event.matches);
+    syncViewport(query);
+    query.addEventListener('change', syncViewport);
+    return () => query.removeEventListener('change', syncViewport);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -541,7 +554,10 @@ export default function BusinessAssessmentFiveFutures() {
   const rendererMode = resolveRendererMode(searchParams);
   const premiumRequested = rendererMode === 'premium' || (rendererMode === 'auto' && PREMIUM_RENDERER_ENABLED);
   const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
-  const viewMode = resolveViewMode(searchParams, { premiumActive: usePremiumRenderer || premiumRequested });
+  const viewMode = resolveViewMode(searchParams, {
+    premiumActive: usePremiumRenderer || premiumRequested,
+    constrainedViewport,
+  });
   const readableLayout = viewMode === 'fullscreen' || viewMode === 'readable';
 
   if (premiumRequested && !usePremiumRenderer) {
