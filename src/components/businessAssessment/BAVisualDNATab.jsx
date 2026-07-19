@@ -21,6 +21,14 @@ function appendViewFullscreen(route) {
   return route.includes('?') ? `${route}&view=fullscreen` : `${route}?view=fullscreen`;
 }
 
+function useFitView(route) {
+  if (!route) return route;
+  if (/[?&]view=(fullscreen|readable|fit)\b/i.test(route)) {
+    return route.replace(/([?&])view=(fullscreen|readable|fit)\b/i, '$1view=fit');
+  }
+  return route.includes('?') ? `${route}&view=fit` : `${route}?view=fit`;
+}
+
 function buildPremiumRoute(profileId, card) {
   const fromCard = card?.route || card?.safe_route_ref;
   if (fromCard?.includes('renderer=premium')) {
@@ -111,6 +119,7 @@ export default function BAVisualDNATab({ vm, lang, showLabDebug = false }) {
 
   const visualMapRoute = buildVisualMapRoute(profileId, baMapCard);
   const premiumRoute = buildPremiumRoute(profileId, ffomCard);
+  const premiumIPadRoute = useFitView(premiumRoute);
 
   return (
     <div className="space-y-4">
@@ -156,12 +165,20 @@ export default function BAVisualDNATab({ vm, lang, showLabDebug = false }) {
         ) : null}
 
         {premiumEligible ? (
-          <VisualDnaCtaLink
-            href={premiumRoute}
-            className={`${CTA_CLASS} border-violet-400/30 bg-violet-500/10 text-violet-200 hover:bg-violet-500/15`}
-          >
-            Open Five Futures + One Move
-          </VisualDnaCtaLink>
+          <div className="flex flex-wrap items-center gap-2">
+            <VisualDnaCtaLink
+              href={premiumRoute}
+              className={`${CTA_CLASS} border-violet-400/30 bg-violet-500/10 text-violet-200 hover:bg-violet-500/15`}
+            >
+              Open Five Futures + One Move
+            </VisualDnaCtaLink>
+            <VisualDnaCtaLink
+              href={premiumIPadRoute}
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/[0.03] px-2.5 py-1.5 text-[11px] font-semibold text-white/65 hover:bg-white/[0.06] hover:text-white/80"
+            >
+              iPad View
+            </VisualDnaCtaLink>
+          </div>
         ) : (
           <PremiumUnavailableState card={ffomCard || ffom || {}} profileId={profileId} showLabDebug={showLabDebug} />
         )}
