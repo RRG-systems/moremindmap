@@ -597,11 +597,15 @@ function resolveRendererMode(searchParams) {
   return 'auto';
 }
 
-function resolveViewMode(searchParams, { premiumActive = false, constrainedViewport = false } = {}) {
+function resolveViewMode(
+  searchParams,
+  { premiumActive = false, iPadDetected = false, constrainedViewport = false } = {}
+) {
   const requested = String(searchParams.get('view') || '').toLowerCase();
   if (requested === 'fullscreen' || requested === 'readable' || requested === 'fit') {
     return normalizeArtifactViewMode(requested);
   }
+  if (premiumActive && iPadDetected) return 'fit';
   if (premiumActive) return constrainedViewport ? 'fit' : 'readable';
   return 'fit';
 }
@@ -771,6 +775,7 @@ export default function BusinessAssessmentFiveFutures() {
   const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
   const viewMode = resolveViewMode(searchParams, {
     premiumActive: usePremiumRenderer || premiumRequested,
+    iPadDetected: viewport.isIPad,
     constrainedViewport: viewport.constrained,
   });
   const readableLayout = viewMode === 'fullscreen' || viewMode === 'readable';
