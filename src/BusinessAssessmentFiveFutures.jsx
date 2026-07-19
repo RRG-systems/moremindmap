@@ -118,6 +118,7 @@ function collectFitDiagnostics({ selectedViewMode, explicitViewOverride }) {
     explicitViewOverride: explicitViewOverride || null,
     calculatedAvailableWidth: rounded((fitBounds?.width || viewer?.getBoundingClientRect().width || 0) - 2),
     calculatedScale: rounded(scale),
+    fitMeasurementPass: fitWrapper?.dataset.fitMeasurementPass || null,
     designWidth: FUTURES_CANVAS_WIDTH,
     scaledWidth: rounded(FUTURES_CANVAS_WIDTH * scale),
     fitBoundaryWidth: fitBounds?.width || null,
@@ -694,6 +695,7 @@ export default function BusinessAssessmentFiveFutures() {
   const returnTo = resolveReturnTo(searchParams, profileId);
   const [state, setState] = useState({ status: 'loading', error: '', record: null });
   const [viewport, setViewport] = useState(readFuturesViewport);
+  const [fitMeasurementPass, setFitMeasurementPass] = useState(0);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -730,6 +732,22 @@ export default function BusinessAssessmentFiveFutures() {
       cancelled = true;
     };
   }, [profileId]);
+
+  useEffect(() => {
+    if (state.status !== 'ready') return undefined;
+
+    let frame2 = 0;
+    const frame1 = window.requestAnimationFrame(() => {
+      frame2 = window.requestAnimationFrame(() => {
+        setFitMeasurementPass((pass) => pass + 1);
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame1);
+      if (frame2) window.cancelAnimationFrame(frame2);
+    };
+  }, [profileId, state.status, viewport.isIPad, viewport.visualWidth]);
 
   const data = useMemo(() => normalizeBusinessVisualArtifactData(state.record), [state.record]);
 
@@ -786,6 +804,7 @@ export default function BusinessAssessmentFiveFutures() {
 
   const artifactViewer = (
     <BusinessArtifactViewer
+      key={readableLayout ? 'readable' : `fit-${fitMeasurementPass}`}
       width={FUTURES_CANVAS_WIDTH}
       height={usePremiumRenderer ? PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT : FUTURES_CANVAS_HEIGHT}
       viewMode={viewMode}
@@ -810,6 +829,7 @@ export default function BusinessAssessmentFiveFutures() {
           data-region="five-futures-fit-boundary"
           data-ipad-fit={viewport.isIPad ? 'true' : 'false'}
           data-visual-viewport-width={String(viewport.visualWidth)}
+          data-fit-measurement-pass={String(fitMeasurementPass)}
           style={{ contain: 'inline-size', width: `${fitBoundaryWidth}px`, marginInline: 'auto' }}
         >
           {/* Isolate fit sizing from the fixed canvas's max-content width in Safari flex layout. */}
