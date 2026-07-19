@@ -17,6 +17,7 @@ const FUTURES_CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
 const PREMIUM_RENDERER_ENABLED = String(import.meta.env.VITE_BA_FIVE_FUTURES_PREMIUM || '').toLowerCase() === 'true';
 const MAX_IPAD_LANDSCAPE_WIDTH = 1376;
 const ARTIFACT_SHELL_INLINE_PADDING = 32;
+const FIT_DIAGNOSTIC_BUILD_ID = 'MMM_BA_FIVE_FUTURES_PHYSICAL_IPAD_DIAGNOSTIC_004';
 
 function readFuturesViewport() {
   if (typeof window === 'undefined') {
@@ -37,6 +38,173 @@ function readFuturesViewport() {
     isIPad,
     visualWidth,
   };
+}
+
+function rounded(value) {
+  return Number.isFinite(Number(value)) ? Number(Number(value).toFixed(2)) : null;
+}
+
+function elementBounds(element) {
+  if (!element) return null;
+  const rect = element.getBoundingClientRect();
+  return {
+    left: rounded(rect.left),
+    right: rounded(rect.right),
+    width: rounded(rect.width),
+    center: rounded(rect.left + rect.width / 2),
+  };
+}
+
+function describeClippingAncestor(element) {
+  let ancestor = element?.parentElement || null;
+  while (ancestor) {
+    const style = window.getComputedStyle(ancestor);
+    const overflowX = style.overflowX;
+    const overflowY = style.overflowY;
+    if (/(auto|scroll|hidden|clip)/.test(`${overflowX} ${overflowY}`)) {
+      return {
+        element: `${ancestor.tagName.toLowerCase()}${ancestor.className ? `.${String(ancestor.className).trim().replace(/\s+/g, '.')}` : ''}`,
+        overflowX,
+        overflowY,
+        clientWidth: ancestor.clientWidth,
+        scrollWidth: ancestor.scrollWidth,
+        bounds: elementBounds(ancestor),
+      };
+    }
+    ancestor = ancestor.parentElement;
+  }
+  return null;
+}
+
+function collectFitDiagnostics({ selectedViewMode, explicitViewOverride }) {
+  const routeShell = document.querySelector('[data-region="five-futures-route-shell"]');
+  const fitWrapper = document.querySelector('[data-region="five-futures-fit-boundary"]');
+  const footprint = document.querySelector('.ba-artifact-footprint');
+  const scaleElement = document.querySelector('.ba-artifact-scale');
+  const premiumCanvas = document.querySelector('[data-renderer="premium-five-futures"]');
+  const viewer = document.querySelector('.ba-artifact-viewer');
+  const scaleStyle = scaleElement ? window.getComputedStyle(scaleElement) : null;
+  const viewport = readFuturesViewport();
+  const scale = Number(viewer?.dataset.fitScale || 1);
+  const visualViewportWidth = window.visualViewport?.width || null;
+  const visualViewportHeight = window.visualViewport?.height || null;
+  const viewportCenter = (visualViewportWidth || window.innerWidth) / 2;
+  const canvasBounds = elementBounds(premiumCanvas);
+  const fitBounds = elementBounds(fitWrapper);
+
+  return {
+    buildIdentifier: FIT_DIAGNOSTIC_BUILD_ID,
+    userAgent: window.navigator.userAgent,
+    platform: window.navigator.platform,
+    maxTouchPoints: window.navigator.maxTouchPoints,
+    iPadDetected: viewport.isIPad,
+    orientation:
+      window.screen.orientation?.type ||
+      (window.matchMedia('(orientation: landscape)').matches ? 'landscape' : 'portrait'),
+    screen: { width: window.screen.width, height: window.screen.height },
+    window: {
+      innerWidth: window.innerWidth,
+      innerHeight: window.innerHeight,
+      devicePixelRatio: window.devicePixelRatio,
+    },
+    visualViewport: { width: rounded(visualViewportWidth), height: rounded(visualViewportHeight) },
+    documentElement: {
+      clientWidth: document.documentElement.clientWidth,
+      clientHeight: document.documentElement.clientHeight,
+      scrollWidth: document.documentElement.scrollWidth,
+    },
+    bodyScrollWidth: document.body.scrollWidth,
+    selectedViewMode,
+    explicitViewOverride: explicitViewOverride || null,
+    calculatedAvailableWidth: rounded((fitBounds?.width || viewer?.getBoundingClientRect().width || 0) - 2),
+    calculatedScale: rounded(scale),
+    designWidth: FUTURES_CANVAS_WIDTH,
+    scaledWidth: rounded(FUTURES_CANVAS_WIDTH * scale),
+    fitBoundaryWidth: fitBounds?.width || null,
+    routeShellBounds: elementBounds(routeShell),
+    fitWrapperBounds: fitBounds,
+    scaledFootprintBounds: elementBounds(footprint),
+    premiumCanvasVisibleBounds: canvasBounds,
+    viewportCenter: rounded(viewportCenter),
+    canvasCenterDelta: canvasBounds ? rounded(canvasBounds.center - viewportCenter) : null,
+    computedTransform: scaleStyle?.transform || null,
+    transformOrigin: scaleStyle?.transformOrigin || null,
+    nearestClippingAncestor: describeClippingAncestor(premiumCanvas),
+    currentUrl: window.location.href,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+function formatFitDiagnostics(diagnostics) {
+  return Object.entries(diagnostics || {})
+    .map(([key, value]) => `${key}: ${typeof value === 'object' && value !== null ? JSON.stringify(value) : String(value)}`)
+    .join('\n');
+}
+
+function FitDiagnosticOverlay({ selectedViewMode, explicitViewOverride }) {
+  const [diagnostics, setDiagnostics] = useState(null);
+  const [hidden, setHidden] = useState(false);
+  const [copyStatus, setCopyStatus] = useState('');
+
+  useEffect(() => {
+    const update = () => setDiagnostics(collectFitDiagnostics({ selectedViewMode, explicitViewOverride }));
+    const visualViewport = window.visualViewport;
+    const frame = window.requestAnimationFrame(update);
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    visualViewport?.addEventListener('resize', update);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+      visualViewport?.removeEventListener('resize', update);
+    };
+  }, [explicitViewOverride, selectedViewMode]);
+
+  if (hidden) return null;
+
+  async function copy(value, label) {
+    try {
+      await window.navigator.clipboard.writeText(value);
+      setCopyStatus(`${label} copied`);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = value;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      setCopyStatus(copied ? `${label} copied` : 'Copy failed — select the text below');
+    }
+  }
+
+  const text = formatFitDiagnostics(diagnostics);
+
+  return (
+    <aside
+      className="fixed left-3 top-3 z-[9999] flex max-h-[85vh] w-[min(410px,calc(100vw-24px))] flex-col rounded-xl border border-cyan-300/50 bg-black/90 p-3 font-mono text-[10px] leading-[1.45] text-cyan-50 shadow-2xl backdrop-blur"
+      data-region="five-futures-fit-diagnostics"
+      aria-label="Five Futures fit diagnostics"
+    >
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <strong className="mr-auto text-[11px] uppercase tracking-wider text-cyan-200">Fit Diagnostics</strong>
+        <button type="button" className="rounded border border-cyan-300/40 px-2 py-1" onClick={() => copy(text, 'Diagnostics')}>
+          COPY DIAGNOSTICS
+        </button>
+        <button type="button" className="rounded border border-cyan-300/40 px-2 py-1" onClick={() => copy(JSON.stringify(diagnostics, null, 2), 'JSON')}>
+          COPY JSON
+        </button>
+        <button type="button" className="rounded border border-white/30 px-2 py-1" onClick={() => setHidden(true)}>
+          HIDE
+        </button>
+      </div>
+      {copyStatus ? <div className="mb-2 text-emerald-300">{copyStatus}</div> : null}
+      <pre className="m-0 min-h-0 select-text overflow-auto whitespace-pre-wrap break-words text-left">{text || 'Collecting diagnostics...'}</pre>
+    </aside>
+  );
 }
 
 function buildApiUrl(path) {
@@ -80,6 +248,7 @@ function ArtifactShell({ children, profileId, returnTo, readableLayout = false }
     <div className="min-h-screen bg-black text-white">
       <div className="fixed inset-0 bg-[radial-gradient(circle_at_50%_34%,rgba(59,130,246,0.14),transparent_30%),radial-gradient(circle_at_18%_16%,rgba(249,115,22,0.14),transparent_32%),radial-gradient(circle_at_78%_20%,rgba(168,85,247,0.14),transparent_33%),linear-gradient(180deg,#030303_0%,#09090b_58%,#000_100%)]" />
       <div
+        data-region="five-futures-route-shell"
         className={`relative mx-auto flex min-h-screen flex-col px-4 py-4 ${
           readableLayout ? 'max-w-none w-full' : 'max-w-[1800px]'
         }`}
@@ -578,6 +747,8 @@ export default function BusinessAssessmentFiveFutures() {
   }
 
   const rendererMode = resolveRendererMode(searchParams);
+  const debugFit = searchParams.get('debugFit') === '1';
+  const explicitViewOverride = searchParams.get('view') || '';
   const premiumRequested = rendererMode === 'premium' || (rendererMode === 'auto' && PREMIUM_RENDERER_ENABLED);
   const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
   const viewMode = resolveViewMode(searchParams, {
@@ -645,6 +816,9 @@ export default function BusinessAssessmentFiveFutures() {
           {artifactViewer}
         </div>
       )}
+      {debugFit ? (
+        <FitDiagnosticOverlay selectedViewMode={viewMode} explicitViewOverride={explicitViewOverride} />
+      ) : null}
     </ArtifactShell>
   );
 }
