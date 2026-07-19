@@ -578,21 +578,36 @@ export default function BusinessAssessmentFiveFutures() {
       legacyRenderer
     );
 
+  const artifactViewer = (
+    <BusinessArtifactViewer
+      width={FUTURES_CANVAS_WIDTH}
+      height={usePremiumRenderer ? PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT : FUTURES_CANVAS_HEIGHT}
+      viewMode={viewMode}
+    >
+      {usePremiumRenderer ? (
+        <PremiumRendererBoundary fallback={premiumCrashFallback}>
+          <BusinessAssessmentFiveFuturesPremium data={data} />
+        </PremiumRendererBoundary>
+      ) : (
+        legacyRenderer
+      )}
+    </BusinessArtifactViewer>
+  );
+
   return (
     <ArtifactShell profileId={data.profileId} returnTo={returnTo} readableLayout={readableLayout}>
-      <BusinessArtifactViewer
-        width={FUTURES_CANVAS_WIDTH}
-        height={usePremiumRenderer ? PREMIUM_FIVE_FUTURES_ARTIFACT_HEIGHT : FUTURES_CANVAS_HEIGHT}
-        viewMode={viewMode}
-      >
-        {usePremiumRenderer ? (
-          <PremiumRendererBoundary fallback={premiumCrashFallback}>
-            <BusinessAssessmentFiveFuturesPremium data={data} />
-          </PremiumRendererBoundary>
-        ) : (
-          legacyRenderer
-        )}
-      </BusinessArtifactViewer>
+      {readableLayout ? (
+        artifactViewer
+      ) : (
+        <div
+          className="w-full min-w-0 max-w-full"
+          data-region="five-futures-fit-boundary"
+          style={{ contain: 'inline-size' }}
+        >
+          {/* Isolate fit sizing from the fixed canvas's max-content width in Safari flex layout. */}
+          {artifactViewer}
+        </div>
+      )}
     </ArtifactShell>
   );
 }
