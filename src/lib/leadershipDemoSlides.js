@@ -90,3 +90,27 @@ export const companyAlignmentSlides = [
     type: 'Company Alignment Intelligence Demo',
   },
 ]
+
+export const livingMapCoachConnectSlides = [
+  {
+    title: 'Living Business Map — Upper UI',
+    subtitle: 'Your business. Your evidence. Your future. Continuously updated.',
+    image: '/leadership-demo/living-map-coach-connect/darren-demo-d-slide-01-living-map-top.jpeg',
+    type: 'The Living Business Map',
+    fit: 'contain',
+  },
+  {
+    title: 'Living Business Map — Lower UI',
+    subtitle: 'Ongoing evidence, active goals, conversational intelligence, and Coach Connect.',
+    image: '/leadership-demo/living-map-coach-connect/darren-demo-d-slide-02-living-map-chat.jpeg',
+    type: 'The Living Business Map',
+    fit: 'contain',
+  },
+  {
+    title: 'Coach Connect Cockpit',
+    subtitle: 'The paid human-intelligence layer for a continuously updated business map.',
+    image: '/leadership-demo/living-map-coach-connect/darren-demo-d-slide-03-coach-connect.png',
+    type: 'The Living Business Map',
+    fit: 'contain',
+  },
+]

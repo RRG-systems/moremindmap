@@ -1,25 +1,36 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { companyAlignmentSlides, craigFoxSlides, executiveBoardSlides } from './lib/leadershipDemoSlides'
+import {
+  companyAlignmentSlides,
+  craigFoxSlides,
+  executiveBoardSlides,
+  livingMapCoachConnectSlides,
+} from './lib/leadershipDemoSlides'
 
 export default function LeadershipDemo() {
   const [hasAccess, setHasAccess] = useState(false)
-  const [selectedSlide, setSelectedSlide] = useState(null)
+  const [selectedDeck, setSelectedDeck] = useState(null)
 
   useEffect(() => {
     setHasAccess(sessionStorage.getItem('leadershipDemoAccess') === 'true')
   }, [])
 
   useEffect(() => {
-    if (!selectedSlide) return undefined
+    if (!selectedDeck) return undefined
 
     const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setSelectedSlide(null)
+      if (event.key === 'Escape') setSelectedDeck(null)
+      if (event.key === 'ArrowLeft') {
+        setSelectedDeck((deck) => ({ ...deck, index: Math.max(0, deck.index - 1) }))
+      }
+      if (event.key === 'ArrowRight') {
+        setSelectedDeck((deck) => ({ ...deck, index: Math.min(deck.slides.length - 1, deck.index + 1) }))
+      }
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedSlide])
+  }, [selectedDeck])
 
   if (!hasAccess) {
     return <LockedLeadershipDemo />
@@ -52,7 +63,7 @@ export default function LeadershipDemo() {
             Leadership Intelligence Demo
           </h1>
           <p className="mt-5 max-w-3xl text-lg leading-8 text-white/66">
-            Three demonstration decks for leadership conversations. Click any slide to open a fullscreen preview.
+            Four demonstration decks for leadership conversations. Click any slide to open a fullscreen preview.
           </p>
         </section>
 
@@ -61,7 +72,7 @@ export default function LeadershipDemo() {
           title="Craig Fox Recruiting Intelligence Demo"
           description="Six slide slots for recruiting intelligence, agent attraction, conversion friction, and field-leadership leverage."
           slides={craigFoxSlides}
-          onOpen={setSelectedSlide}
+          onOpen={setSelectedDeck}
         />
 
         <DemoSection
@@ -69,7 +80,7 @@ export default function LeadershipDemo() {
           title="Executive / Board Intelligence Demo"
           description="Four slide slots for board-level constraints, leadership risk, operating leverage, and action briefing."
           slides={executiveBoardSlides}
-          onOpen={setSelectedSlide}
+          onOpen={setSelectedDeck}
         />
 
         <DemoSection
@@ -77,12 +88,25 @@ export default function LeadershipDemo() {
           title="Company Alignment Intelligence Demo"
           description="Four slides for business drift, operating decay, alignment, and company intelligence."
           slides={companyAlignmentSlides}
-          onOpen={setSelectedSlide}
+          onOpen={setSelectedDeck}
+        />
+
+        <DemoSection
+          eyebrow="Demo D"
+          title="Demo D — Living Business Map + Coach Connect"
+          description="A living business intelligence system that combines ongoing agent evidence, Five Futures, One Move, and weighted human coaching."
+          slides={livingMapCoachConnectSlides}
+          onOpen={setSelectedDeck}
         />
       </main>
 
-      {selectedSlide && (
-        <SlideLightbox slide={selectedSlide} onClose={() => setSelectedSlide(null)} />
+      {selectedDeck && (
+        <SlideLightbox
+          slides={selectedDeck.slides}
+          index={selectedDeck.index}
+          onNavigate={(index) => setSelectedDeck((deck) => ({ ...deck, index }))}
+          onClose={() => setSelectedDeck(null)}
+        />
       )}
     </div>
   )
@@ -134,7 +158,7 @@ function DemoSection({ eyebrow, title, description, slides, onOpen }) {
             key={slide.image}
             slide={slide}
             number={index + 1}
-            onOpen={() => onOpen({ ...slide, number: index + 1 })}
+            onOpen={() => onOpen({ slides, index })}
           />
         ))}
       </div>
@@ -156,7 +180,7 @@ function SlideCard({ slide, number, onOpen }) {
           <img
             src={slide.image}
             alt={slide.title}
-            className="h-full w-full object-cover"
+            className={`h-full w-full ${slide.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
             onError={() => setImageFailed(true)}
           />
         )}
@@ -201,8 +225,12 @@ function SlidePlaceholder({ slide, number }) {
   )
 }
 
-function SlideLightbox({ slide, onClose }) {
-  const [imageFailed, setImageFailed] = useState(false)
+function SlideLightbox({ slides, index, onNavigate, onClose }) {
+  const [failedImage, setFailedImage] = useState('')
+  const slide = slides[index]
+  const imageFailed = failedImage === slide.image
+  const canGoPrevious = index > 0
+  const canGoNext = index < slides.length - 1
 
   return (
     <div
@@ -229,20 +257,42 @@ function SlideLightbox({ slide, onClose }) {
               src={slide.image}
               alt={slide.title}
               className="h-full w-full object-contain"
-              onError={() => setImageFailed(true)}
+              onError={() => setFailedImage(slide.image)}
             />
           )}
-          {imageFailed && <SlidePlaceholder slide={slide} number={slide.number || 1} />}
+          {imageFailed && <SlidePlaceholder slide={slide} number={index + 1} />}
         </div>
 
-        <div className="border-t border-white/10 p-5 md:p-6">
-          <div className="text-xs uppercase tracking-[0.22em] text-orange-200/70">
-            {slide.type}
+        <div className="flex flex-col gap-4 border-t border-white/10 p-5 md:flex-row md:items-end md:justify-between md:p-6">
+          <div>
+            <div className="text-xs uppercase tracking-[0.22em] text-orange-200/70">
+              {slide.type} · Slide {index + 1} of {slides.length}
+            </div>
+            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
+              {slide.title}
+            </h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">{slide.subtitle}</p>
           </div>
-          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-            {slide.title}
-          </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">{slide.subtitle}</p>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              aria-label="Previous slide"
+              disabled={!canGoPrevious}
+              onClick={() => onNavigate(index - 1)}
+              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white/80 transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-25"
+            >
+              ← Previous
+            </button>
+            <button
+              type="button"
+              aria-label="Next slide"
+              disabled={!canGoNext}
+              onClick={() => onNavigate(index + 1)}
+              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white/80 transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-25"
+            >
+              Next →
+            </button>
+          </div>
         </div>
       </div>
     </div>
