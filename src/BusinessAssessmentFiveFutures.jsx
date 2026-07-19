@@ -15,7 +15,29 @@ import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessment
 const FUTURES_CANVAS_WIDTH = BUSINESS_ARTIFACT_WIDTH;
 const FUTURES_CANVAS_HEIGHT = FIVE_FUTURES_ARTIFACT_HEIGHT;
 const PREMIUM_RENDERER_ENABLED = String(import.meta.env.VITE_BA_FIVE_FUTURES_PREMIUM || '').toLowerCase() === 'true';
-const CONSTRAINED_FUTURES_VIEW_QUERY = '(max-width: 1376px)';
+const MAX_IPAD_LANDSCAPE_WIDTH = 1376;
+const ARTIFACT_SHELL_INLINE_PADDING = 32;
+
+function readFuturesViewport() {
+  if (typeof window === 'undefined') {
+    return { constrained: false, isIPad: false, visualWidth: MAX_IPAD_LANDSCAPE_WIDTH };
+  }
+
+  const visualWidth =
+    window.visualViewport?.width ||
+    document.documentElement?.clientWidth ||
+    window.innerWidth ||
+    MAX_IPAD_LANDSCAPE_WIDTH;
+  const isIPad =
+    /iPad/i.test(window.navigator.userAgent) ||
+    (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
+
+  return {
+    constrained: isIPad || visualWidth <= MAX_IPAD_LANDSCAPE_WIDTH,
+    isIPad,
+    visualWidth,
+  };
+}
 
 function buildApiUrl(path) {
   const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -502,17 +524,21 @@ export default function BusinessAssessmentFiveFutures() {
   const profileId = searchParams.get('id') || '';
   const returnTo = resolveReturnTo(searchParams, profileId);
   const [state, setState] = useState({ status: 'loading', error: '', record: null });
-  const [constrainedViewport, setConstrainedViewport] = useState(() =>
-    typeof window !== 'undefined' && window.matchMedia(CONSTRAINED_FUTURES_VIEW_QUERY).matches
-  );
+  const [viewport, setViewport] = useState(readFuturesViewport);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    const query = window.matchMedia(CONSTRAINED_FUTURES_VIEW_QUERY);
-    const syncViewport = (event) => setConstrainedViewport(event.matches);
-    syncViewport(query);
-    query.addEventListener('change', syncViewport);
-    return () => query.removeEventListener('change', syncViewport);
+    const syncViewport = () => setViewport(readFuturesViewport());
+    const visualViewport = window.visualViewport;
+    syncViewport();
+    window.addEventListener('resize', syncViewport);
+    window.addEventListener('orientationchange', syncViewport);
+    visualViewport?.addEventListener('resize', syncViewport);
+    return () => {
+      window.removeEventListener('resize', syncViewport);
+      window.removeEventListener('orientationchange', syncViewport);
+      visualViewport?.removeEventListener('resize', syncViewport);
+    };
   }, []);
 
   useEffect(() => {
@@ -556,9 +582,18 @@ export default function BusinessAssessmentFiveFutures() {
   const usePremiumRenderer = shouldUsePremiumRenderer({ data, searchParams });
   const viewMode = resolveViewMode(searchParams, {
     premiumActive: usePremiumRenderer || premiumRequested,
-    constrainedViewport,
+    constrainedViewport: viewport.constrained,
   });
   const readableLayout = viewMode === 'fullscreen' || viewMode === 'readable';
+  const fitBoundaryWidth = Math.max(
+    320,
+    Math.min(
+      viewport.visualWidth - ARTIFACT_SHELL_INLINE_PADDING,
+      viewport.isIPad
+        ? MAX_IPAD_LANDSCAPE_WIDTH - ARTIFACT_SHELL_INLINE_PADDING
+        : Number.POSITIVE_INFINITY
+    )
+  );
 
   if (premiumRequested && !usePremiumRenderer) {
     return (
@@ -602,7 +637,9 @@ export default function BusinessAssessmentFiveFutures() {
         <div
           className="w-full min-w-0 max-w-full"
           data-region="five-futures-fit-boundary"
-          style={{ contain: 'inline-size' }}
+          data-ipad-fit={viewport.isIPad ? 'true' : 'false'}
+          data-visual-viewport-width={String(viewport.visualWidth)}
+          style={{ contain: 'inline-size', width: `${fitBoundaryWidth}px`, marginInline: 'auto' }}
         >
           {/* Isolate fit sizing from the fixed canvas's max-content width in Safari flex layout. */}
           {artifactViewer}
