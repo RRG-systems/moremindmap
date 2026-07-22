@@ -1,0 +1,50 @@
+{
+  "scenario_id": "happy_path",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "CREATE_INVITATION",
+    "ACCEPT_INVITATION",
+    "ACTIVATE_SYNTHETIC_ENTITLEMENT",
+    "AUTHORIZE_COCKPIT",
+    "COMPLETE_STRUCTURED_SESSION",
+    "CREATE_COACHING_NOTE",
+    "ADVANCE_PROMOTION_WITH_CONFIRMATION_EVIDENCE_OUTCOME",
+    "APPEND_THROUGH_GOVERNED_RUNTIME"
+  ],
+  "authorization_decisions": [
+    "AUTHORIZED"
+  ],
+  "state_transitions": [
+    "PENDING→CONSUMED",
+    "ACCEPTED→ACTIVE",
+    "DRAFT→READY→IN_PROGRESS→COMPLETED",
+    "COACH_OBSERVATION→CANONICAL_BUSINESS_STATE"
+  ],
+  "business_engine_effects": [
+    "canonical append through injected confirmed runtime",
+    "Living Map and chat source authoritative Business Engine"
+  ],
+  "privacy_effects": [
+    "raw transcript absent",
+    "coach-private content excluded"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

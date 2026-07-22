@@ -1,0 +1,40 @@
+{
+  "scenario_id": "revoked_relationship_active_billing",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "REVOKE_RELATIONSHIP",
+    "AUTHORIZE_COCKPIT"
+  ],
+  "authorization_decisions": [
+    "RELATIONSHIP_REVOKED"
+  ],
+  "state_transitions": [
+    "ACTIVE→REVOKED",
+    "entitlement remains ACTIVE"
+  ],
+  "business_engine_effects": [
+    "no change"
+  ],
+  "privacy_effects": [
+    "access denied immediately"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

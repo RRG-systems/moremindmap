@@ -1,0 +1,14 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-COACH-CONNECT-INVITE-ENTITLEMENT-V1",
+  "verdict": "COACH_CONNECT_INVITE_ENTITLEMENT_CAMPAIGN_COMPLETE_WITH_LIMITS",
+  "authoritative_files": ["src/lib/intelligenceFabric/coachConnect", "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_IMPLEMENTATION.md", "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_REPORT.md", "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_ARCHITECTURE_DECISION_V1.md"],
+  "runtime_entry_points": ["createCoachConnectService", "evaluateCoachConnectActivation", "projectCoachCockpit", "projectSubscriberCoachConnect"],
+  "contracts": ["CoachInvitation", "CoachIdentityBinding", "CoachRelationship", "CoachEntitlement", "ScopedCoachAuthority", "CoachCockpitProjection", "CoachingSession", "CoachJudgment", "CoachCommitment", "CoachInterventionProposal", "CoachEvidenceProposal", "CoachConfidenceRecord", "BusinessEnginePromotionRecord"],
+  "state_machines": ["invitation", "relationship", "entitlement", "coaching_session", "judgment_evidence", "intervention", "promotion"],
+  "feature_flags": { "default_off": true, "emergency_override": true, "production_traffic": false, "live_auth": false, "live_billing": false, "live_model": false, "live_voice_video": false },
+  "validation_commands": ["node --test test/intelligenceFabric.coachConnect*.test.js", "node --test test/intelligenceFabric*.test.js", "npx eslint src/lib/intelligenceFabric test/intelligenceFabric*.test.js", "npm run build", "git diff --check"],
+  "proof_packets": "lab_outputs/coach_connect_invite_entitlement_v1/*.json",
+  "known_limits": ["synthetic in-memory adapter", "inactive view models", "no public route", "no production provider persistence billing deployment or certification"],
+  "forbidden_assumptions": ["payment grants authority", "QR grants identity", "coach judgment is evidence", "coach can edit canonical state", "second Business Engine exists", "universal learning is enabled", "production readiness is proven"],
+  "next_recommended_campaign": "MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_V1.md"
+}

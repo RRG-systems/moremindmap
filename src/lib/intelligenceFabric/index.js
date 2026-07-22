@@ -40,3 +40,4 @@ export * from './production/modelMembrane.js';
 export * from './production/activation.js';
 export * from './production/subscriberService.js';
 export * from './auth/index.js';
+export * from './coachConnect/index.js';

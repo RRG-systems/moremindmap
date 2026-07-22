@@ -1,0 +1,40 @@
+{
+  "scenario_id": "unsupported_coach_judgment",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "RECORD_HYPOTHESIS",
+    "CREATE_COACHING_NOTE"
+  ],
+  "authorization_decisions": [
+    "ATTRIBUTED_COACH_JUDGMENT"
+  ],
+  "state_transitions": [
+    "UNSUPPORTED→HELD_FOR_EVIDENCE"
+  ],
+  "business_engine_effects": [
+    "no Five Futures or One Move mutation",
+    "evidence request required"
+  ],
+  "privacy_effects": [
+    "bounded weight 0.1"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

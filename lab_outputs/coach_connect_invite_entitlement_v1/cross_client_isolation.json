@@ -1,0 +1,43 @@
+{
+  "scenario_id": "cross_client_isolation",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "CREATE_RELATIONSHIP_A",
+    "CREATE_RELATIONSHIP_B",
+    "CANCEL_A",
+    "AUTHORIZE_B"
+  ],
+  "authorization_decisions": [
+    "A denied",
+    "B authorized"
+  ],
+  "state_transitions": [
+    "A ACTIVE→SUSPENDED",
+    "B remains ACTIVE"
+  ],
+  "business_engine_effects": [
+    "separate projections"
+  ],
+  "privacy_effects": [
+    "A notes absent from B"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-COACH-CONNECT-INVITE-ENTITLEMENT-V1",
+  "version": "1.0.0",
+  "verdict": "COACH_CONNECT_INVITE_ENTITLEMENT_CAMPAIGN_COMPLETE_WITH_LIMITS",
+  "campaign_parts": [
+    "/Users/rrg/Desktop/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_PART_1.md",
+    "/Users/rrg/Desktop/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_PART_2.md",
+    "/Users/rrg/Desktop/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_PART_3.md"
+  ],
+  "artifacts": [
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_IMPLEMENTATION.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1_REPORT.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_ARCHITECTURE_DECISION_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_INDEX_V1.json",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_EVIDENCE_MANIFEST_V1.json",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_AI_HANDOFF_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_INVITE_ENTITLEMENT_AI_HANDOFF_V1.json"
+  ],
+  "runtime_entry": "src/lib/intelligenceFabric/coachConnect/index.js",
+  "tests": ["test/intelligenceFabric.coachConnect.test.js", "test/intelligenceFabric.coachConnect.e2e.test.js"],
+  "proof_packet_root": "lab_outputs/coach_connect_invite_entitlement_v1",
+  "proof_packet_count": 10
+}

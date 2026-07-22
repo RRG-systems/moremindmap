@@ -1,0 +1,39 @@
+{
+  "scenario_id": "invitation_replay_denial",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "CONSUME_BY_COACH_A",
+    "REPLAY_BY_COACH_B"
+  ],
+  "authorization_decisions": [
+    "INVITATION_CONSUMED"
+  ],
+  "state_transitions": [
+    "PENDING→CONSUMED"
+  ],
+  "business_engine_effects": [
+    "no second relationship"
+  ],
+  "privacy_effects": [
+    "no scope disclosed during lookup"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

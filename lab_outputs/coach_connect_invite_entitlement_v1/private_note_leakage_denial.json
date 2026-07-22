@@ -1,0 +1,39 @@
+{
+  "scenario_id": "private_note_leakage_denial",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "PROJECT_COACH_COCKPIT",
+    "PROJECT_SUBSCRIBER_STATUS"
+  ],
+  "authorization_decisions": [
+    "AUTHORIZED_SCOPED_PROJECTION"
+  ],
+  "state_transitions": [],
+  "business_engine_effects": [
+    "governed summaries only"
+  ],
+  "privacy_effects": [
+    "coach-private notes absent",
+    "subscriber-private chat absent",
+    "audit opaque"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}

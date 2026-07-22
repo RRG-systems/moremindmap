@@ -1,0 +1,40 @@
+{
+  "scenario_id": "promotion_ladder_enforcement",
+  "inputs": {
+    "fixture_class": "SYNTHETIC_ONLY",
+    "raw_customer_data": false,
+    "live_provider": false
+  },
+  "initial_state": {
+    "production_traffic": false,
+    "live_billing": false,
+    "emergency_disabled": false
+  },
+  "commands_or_events": [
+    "ATTEMPT_STAGE_SKIP",
+    "ADVANCE_SEQUENTIALLY"
+  ],
+  "authorization_decisions": [
+    "PROMOTION_STAGE_SKIP_DENIED",
+    "CANONICAL_RUNTIME_AUTHORITY_REQUIRED until complete"
+  ],
+  "state_transitions": [
+    "all seven stages in order"
+  ],
+  "business_engine_effects": [
+    "only injected confirmed runtime appends"
+  ],
+  "privacy_effects": [
+    "universal learning false"
+  ],
+  "audit_references": [
+    "opaque_audit_reference"
+  ],
+  "expected_result": "FAIL_CLOSED_OR_GOVERNED_SUCCESS_AS_SPECIFIED",
+  "actual_result": "MATCHED_FOCUSED_TEST_EVIDENCE",
+  "verdict": "PASS",
+  "limits": [
+    "synthetic in-memory proof",
+    "not production certification"
+  ]
+}
