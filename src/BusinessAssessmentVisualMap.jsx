@@ -8,6 +8,7 @@ import BusinessEngineVisualV2, {
   BUSINESS_ENGINE_VISUAL_V2_WIDTH,
 } from './components/businessAssessment/BusinessEngineVisualV2.jsx';
 import MakeYourMapAlivePanel from './components/businessAssessment/MakeYourMapAlivePanel.jsx';
+import DeveloperAccessPanel from './components/businessAssessment/DeveloperAccessPanel.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
 import { projectBusinessEngineVisualV2 } from './lib/businessEngine/projectBusinessEngineVisualV2.js';
 import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessmentVisualRecord.js';
@@ -203,11 +204,14 @@ export default function BusinessAssessmentVisualMap() {
         width={MAP_CANVAS_WIDTH}
         height={MAP_CANVAS_HEIGHT}
         unscaledFooter={
-          <MakeYourMapAlivePanel
-            checkoutState={checkoutState}
-            onStartCheckout={startMapAliveCheckout}
-            temporalMeta={temporalMeta}
-          />
+          <>
+            <MakeYourMapAlivePanel
+              checkoutState={checkoutState}
+              onStartCheckout={startMapAliveCheckout}
+              temporalMeta={temporalMeta}
+            />
+            <DeveloperAccessPanel />
+          </>
         }
       >
         <BusinessEngineVisualV2

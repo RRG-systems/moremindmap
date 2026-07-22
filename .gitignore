@@ -26,5 +26,8 @@ dist-ssr
 *.sw?
 .env*.local
 
+# Default-off local durability journals; never commit runtime subscriber data.
+.runtime-data/
+
 # Browser profiles contain cookies, sessions, caches, and machine-local state.
 lab_outputs/**/.chrome-*/

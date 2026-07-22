@@ -42,3 +42,4 @@ export * from './production/subscriberService.js';
 export * from './auth/index.js';
 export * from './coachConnect/index.js';
 export * from './testing/inMemoryLiveSessionDriver.js';
+export * from './testing/inMemoryDurableLiveSessionDriver.js';

@@ -1,0 +1,1 @@
+{"evidence_class":"observed","status":"COMPLETE","source_files":18,"test_files":5,"campaign_documents":5,"repository_config_files":1,"new_repair_files":[".gitignore","api/internal/subscription-entitlement.js","src/lib/intelligenceFabric/coachConnect/liveSession/durable/localJsonlDriver.js"],"proof_directory":"lab_outputs/coach_connect_production_persistence_service_wiring_v1"}

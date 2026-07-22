@@ -1,0 +1,1 @@
+{"evidence_class":"synthetic","default_off":"INACTIVE","write":"WRITTEN","duplicate_expected_version":"CONCURRENCY_CONFLICT","same_scope_read":"READ","cross_tenant_read":"NOT_FOUND","fresh_service_read":"READ","journal":"JSONL_APPEND_FSYNC","path_escape":"DENIED","production_redis_invocations":0}

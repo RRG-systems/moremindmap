@@ -1,0 +1,1 @@
+{"evidence_class":"synthetic","default":"INACTIVE","foundation_enabled_required":true,"synthetic_only_required":true,"writes_enabled_required":true,"emergency_disabled_must_be_false":true,"developer_endpoint_default":"404 disabled","production_developer_access":"403 denied","migration_enabled":false}

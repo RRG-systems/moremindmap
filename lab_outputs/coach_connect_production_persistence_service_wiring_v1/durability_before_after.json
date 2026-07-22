@@ -1,0 +1,1 @@
+{"evidence_class":"synthetic","before":{"durable_records":0},"after":{"session_state":1,"checkpoint":2,"promotion_receipt":1},"restart_shape":"fresh LocalJsonlDurableLiveSessionDriver instance from fsynced append-only journal","fresh_instance_read":true,"replay_resumed":true,"canonical_append_total":1,"duplicate_after_restart":0,"production_persistence_used":false}

@@ -1,0 +1,58 @@
+{
+  "index_version": "1.0.0",
+  "campaign": "Coach Connect Production Persistence and Service Wiring V1",
+  "status": "AFW_EXPANSION_READY_WITH_PHASE_6_BLOCKER",
+  "generated_date": "2026-07-22",
+  "repository": "/Users/rrg/.openclaw/workspace/moremindmap-live",
+  "predecessor": {
+    "commit": "d783e6d50de77e668f1c2b60538b151e282dea5d",
+    "subject": "feat coach connect live session intelligence v1",
+    "focused_tests": {
+      "command": "node --test test/intelligenceFabric.coachConnect.liveSession*.test.js",
+      "passed": 18,
+      "failed": 0
+    },
+    "diff_check": "PASS"
+  },
+  "documents": [
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_PART_1_V1.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_PART_2_V1.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_PART_3_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_CROSS_PART_CONSISTENCY_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_EXPANSION_INDEX_V1.json"
+  ],
+  "phases": [
+    { "number": 1, "name": "repository revalidation and frozen plan", "gate": "required" },
+    { "number": 2, "name": "durable ports and injected adapter", "gate": "required" },
+    { "number": 3, "name": "checkpoint replay and unresolved work", "gate": "required" },
+    { "number": 4, "name": "one service registry and composition root", "gate": "required" },
+    { "number": 5, "name": "Business Engine confirmation and projection durability", "gate": "required" },
+    { "number": 6, "name": "temporary Developer Access", "gate": "blocked_pending_safe_server_boundary" },
+    { "number": 7, "name": "synthetic migration dry run", "gate": "required_after_phase_6_disposition" },
+    { "number": 8, "name": "end-to-end durable proof", "gate": "required_after_phase_6_disposition" }
+  ],
+  "non_authorizations": [
+    "implementation",
+    "commit",
+    "push",
+    "deployment",
+    "promotion",
+    "activation",
+    "billing changes",
+    "production Redis",
+    "live providers or models",
+    "production traffic",
+    "production migration",
+    "public routes"
+  ],
+  "blockers": [
+    {
+      "id": "PHASE_6_SERVER_VALIDATION_BOUNDARY",
+      "status": "UNRESOLVED",
+      "reason": "The Vite client cannot safely validate the temporary unlock, and no non-public server-side validation boundary is grounded within the authorized no-public-route scope.",
+      "required_disposition": "Separate human authorization identifying a server-side non-public validator; never place the unlock value or equivalent in client-visible material."
+    }
+  ],
+  "review_zip": "~/Desktop/COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_AFW_REVIEW_V1.zip",
+  "implementation_review_zip": "~/Desktop/COACH_CONNECT_PRODUCTION_PERSISTENCE_AND_SERVICE_WIRING_IMPLEMENTATION_REVIEW_V1.zip"
+}

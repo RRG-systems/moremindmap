@@ -1,0 +1,1 @@
+{"evidence_class":"observed","status":"COMPLETE","file_count_including_manifest":41,"manifest_excludes_self":true,"undeclared_extras":0,"repair_artifacts":["restart_persistence_trace.json","entitlement_access_trace.json","cookie_behavior_trace.json"],"directory":"lab_outputs/coach_connect_production_persistence_service_wiring_v1"}

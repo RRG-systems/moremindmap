@@ -9,3 +9,4 @@ export * from './businessEngine.js';
 export * from './projections.js';
 export * from './recovery.js';
 export * from './service.js';
+export * from './durable/index.js';
