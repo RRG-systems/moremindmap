@@ -1,0 +1,68 @@
+{
+  "mission_id": "MMM8_REAL_ESTATE_DOCTRINE_GOAL_AND_FUTURES_ALIGNMENT",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "1_declared_250k_maps_to_approx_500_true_relationships": {
+      "pass": true,
+      "failures": []
+    },
+    "2_production_goal_bounded": {
+      "pass": true,
+      "failures": []
+    },
+    "3_units_goal_bounded": {
+      "pass": true,
+      "failures": []
+    },
+    "4_narrative_goal_recovered": {
+      "pass": true,
+      "failures": []
+    },
+    "5_weak_evidence_no_false_precision": {
+      "pass": true,
+      "failures": []
+    },
+    "6_honest_goal_absence": {
+      "pass": true,
+      "failures": []
+    },
+    "7_11_lake_true_vs_total_target_gap": {
+      "pass": true,
+      "failures": []
+    },
+    "12_15_ba_shares_futures_and_one_move": {
+      "pass": true,
+      "failures": []
+    },
+    "16_renderer_purity": {
+      "pass": true,
+      "failures": []
+    },
+    "17_legacy_tammy_compatible": {
+      "pass": true,
+      "failures": []
+    },
+    "18_no_internal_model_names": {
+      "pass": true,
+      "failures": []
+    },
+    "19_no_invented_financial_values": {
+      "pass": true,
+      "failures": []
+    },
+    "20_unsupported_precision_avoided": {
+      "pass": true,
+      "failures": []
+    },
+    "extra_goal_source_confidence_on_contract": {
+      "pass": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total": 14,
+    "passed": 14,
+    "failed": 0,
+    "pass": true
+  }
+}

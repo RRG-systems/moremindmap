@@ -39,3 +39,4 @@ export * from './production/security.js';
 export * from './production/modelMembrane.js';
 export * from './production/activation.js';
 export * from './production/subscriberService.js';
+export * from './auth/index.js';

@@ -1,0 +1,46 @@
+{
+  "mission_id": "MMM8_BA_VISUAL_RENDERER_V2",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "full_intelligence_v2_regions": {
+      "passed": true,
+      "failures": [],
+      "region_flags": {
+        "governing_business_pattern": true,
+        "behavioral_modifier": true,
+        "current_trajectory": true,
+        "potential_trajectory": true,
+        "primary_constraint": true,
+        "causal_chain_len": 3,
+        "one_move": true,
+        "modeled_opportunity": true,
+        "confidence_reality": true,
+        "footer": true,
+        "streams_fallback": true,
+        "outflow_fallback": true
+      }
+    },
+    "honest_absence_without_futures": {
+      "passed": true,
+      "failures": [],
+      "potential_trajectory_available": false,
+      "one_move_available": true,
+      "modeled_opportunity_available": false
+    },
+    "renderer_purity_scan": {
+      "passed": true,
+      "failures": []
+    },
+    "legacy_retrieval_compatible": {
+      "passed": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "all_passed": true
+  },
+  "generated_at": "2026-07-22T06:29:01.610Z"
+}

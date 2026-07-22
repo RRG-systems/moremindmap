@@ -1,0 +1,113 @@
+{
+  "mission_id": "MMM8_BUSINESS_ENGINE_CONTRACT_AND_INTELLIGENCE_ROUTING_REPAIR",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "strong_intelligence_available": {
+      "pass": true,
+      "failures": [],
+      "samples": {
+        "current_trajectory_caption": "Current trajectory",
+        "current_trajectory_line": "The trajectory reflects a vulnerability tied to the persistent systems constraint. Continued reliance on personal execution without system support implies opera...",
+        "potential_trajectory_caption": "Systemized Relationship Engine",
+        "opportunity": "This move attacks the primary constraint without forcing Tammy into a business model that fights her profile. Her advantage is rel...",
+        "one_move_title": "Install a 90-Day CRM Relationship Operating System",
+        "streams": [
+          "Paid / Online Leads",
+          "Community Events",
+          "Personal Connections",
+          "Referrals",
+          "Sphere / Network",
+          "Vendor Partners",
+          "Database Reactivation"
+        ],
+        "streams_fallback": true,
+        "streams_source_type": "deterministic_normalized",
+        "outflow": [
+          "Relationship Touches",
+          "Time Freedom",
+          "Pipeline Conversion"
+        ],
+        "outflow_fallback": true,
+        "outflow_source_type": "deterministic_normalized",
+        "no_change_consequence": "The business can stay productive in pockets but will likely remain inconsistent, emotionally expensive, and overly dependent on Tammy's personal follow-through.",
+        "no_change_source_path": "futures[current_future].risk_if_unchanged",
+        "truth_rail_labels": [
+          "Financial Reality:missing",
+          "Behavioral Profile:strong",
+          "Business Model:strong",
+          "Constraint:strong",
+          "Confidence:partial",
+          "Relationships:strong",
+          "Inferred vs Assumed:partial",
+          "Truth Boundaries:partial"
+        ],
+        "confidence_band": "moderate",
+        "footer": {
+          "headline": "INSTALL A 90-DAY CRM RELATIONSHIP OPERATING SYSTEM",
+          "subline": "The operator may read people and context well but still fail to convert awareness into inspected behavior.",
+          "personalized": true
+        },
+        "validation_errors": [],
+        "validation_warnings_count": 0
+      }
+    },
+    "absent_intelligence": {
+      "pass": true,
+      "failures": [],
+      "samples": {
+        "one_move_status": "absent",
+        "trajectory_status": "absent",
+        "opportunity_status": "absent",
+        "modeled_not_guaranteed": true
+      }
+    },
+    "older_assessment_compatibility": {
+      "pass": true,
+      "failures": [],
+      "samples": {
+        "constraint": "Systems Constraint",
+        "one_move_status": "absent",
+        "has_map_chain": 5,
+        "truth_rail_count": 8
+      }
+    },
+    "fallback_path": {
+      "pass": true,
+      "failures": [],
+      "samples": {
+        "streams_fallback_used": true,
+        "streams_fallback_reason": "streams_derived_via_alias_regex_text_scan_not_canonical_domain_intelligence",
+        "streams_source_type": "deterministic_normalized",
+        "legacy_fallbacks_used": [
+          {
+            "path": "relationship_lake.streams",
+            "fallback_reason": "streams_derived_via_alias_regex_text_scan_not_canonical_domain_intelligence",
+            "source_type": "deterministic_normalized",
+            "source_path": "deriveRealEstateStreams(lead_generation_reality|briefing|answers)"
+          },
+          {
+            "path": "relationship_lake.outflow",
+            "fallback_reason": "personalized_outflow_intelligence_unavailable_using_real_estate_legacy_defaults",
+            "source_type": "legacy_fallback",
+            "source_path": "REAL_ESTATE_LEGACY_OUTFLOW"
+          }
+        ]
+      }
+    },
+    "provenance_temporal_no_model_names": {
+      "pass": true,
+      "failures": [],
+      "leak_count": 0
+    },
+    "renderer_truth_rail_purity": {
+      "pass": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total_cases": 6,
+    "passed": 6,
+    "failed": 0,
+    "all_passed": true
+  }
+}

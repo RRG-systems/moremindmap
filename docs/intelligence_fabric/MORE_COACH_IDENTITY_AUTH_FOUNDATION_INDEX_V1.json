@@ -1,0 +1,18 @@
+{
+  "campaign_id": "MORE_CAMPAIGN_COACH_IDENTITY_AUTH_FOUNDATION_V1",
+  "version": "1.0.0",
+  "date": "2026-07-21",
+  "verdict": "COACH_IDENTITY_AUTH_FOUNDATION_CAMPAIGN_COMPLETE_WITH_LIMITS",
+  "artifacts": [
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_IDENTITY_AUTH_FOUNDATION_V1_IMPLEMENTATION.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_IDENTITY_AUTH_FOUNDATION_V1_REPORT.md",
+    "docs/intelligence_fabric/MORE_COACH_IDENTITY_AUTH_ARCHITECTURE_DECISION_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_IDENTITY_AUTH_FOUNDATION_INDEX_V1.json",
+    "docs/intelligence_fabric/MORE_COACH_IDENTITY_AUTH_FOUNDATION_EVIDENCE_MANIFEST_V1.json",
+    "docs/intelligence_fabric/MORE_COACH_IDENTITY_AUTH_FOUNDATION_AI_HANDOFF_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_IDENTITY_AUTH_FOUNDATION_AI_HANDOFF_V1.json"
+  ],
+  "source_root": "src/lib/intelligenceFabric/auth",
+  "test_glob": "test/intelligenceFabric.auth*.test.js",
+  "activation": "DEFAULT_OFF_SYNTHETIC_ONLY"
+}

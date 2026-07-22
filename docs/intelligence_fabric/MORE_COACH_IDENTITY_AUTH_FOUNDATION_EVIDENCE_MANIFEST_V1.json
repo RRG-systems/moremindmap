@@ -1,0 +1,24 @@
+{
+  "campaign_id": "MORE_CAMPAIGN_COACH_IDENTITY_AUTH_FOUNDATION_V1",
+  "captured_at": "2026-07-21",
+  "environment": "isolated local git worktree; synthetic inputs only",
+  "validation": {
+    "auth_tests": { "command": "node --test test/intelligenceFabric.auth*.test.js", "total": 13, "passed": 13, "failed": 0 },
+    "intelligence_fabric_tests": { "command": "node --test test/intelligenceFabric*.test.js", "total": 184, "passed": 184, "failed": 0 },
+    "business_engine_fixtures": { "command": "node lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs", "total": 6, "passed": 6, "failed": 0 },
+    "real_estate_alignment_fixtures": { "command": "node lab_outputs/mmm8_real_estate_doctrine_goal_alignment/run_fixture_validation.mjs", "total": 14, "passed": 14, "failed": 0 },
+    "ba_renderer_fixtures": { "command": "node lab_outputs/mmm8_ba_visual_renderer_v2/run_fixture_validation.mjs", "total": 4, "passed": 4, "failed": 0 },
+    "eslint": { "command": "npx eslint src/lib/intelligenceFabric test/intelligenceFabric*.test.js", "result": "PASS" },
+    "build": { "command": "npm run build", "result": "PASS", "modules_transformed": 126, "known_warning": "existing output chunk exceeds 500 kB" },
+    "diff_check": { "command": "git diff --check", "result": "PASS" }
+  },
+  "generated_fixture_evidence": [
+    "lab_outputs/mmm8_business_engine_contract/mmm8_business_engine_fixture_validation.json",
+    "lab_outputs/mmm8_real_estate_doctrine_goal_alignment/mmm8_adversarial_fixture_validation.json",
+    "lab_outputs/mmm8_ba_visual_renderer_v2/mmm8_ba_visual_renderer_v2_fixture_validation.json"
+  ],
+  "production_actions": [],
+  "live_credentials_created": false,
+  "live_provider_enabled": false,
+  "coach_connect_authority_granted": false
+}
