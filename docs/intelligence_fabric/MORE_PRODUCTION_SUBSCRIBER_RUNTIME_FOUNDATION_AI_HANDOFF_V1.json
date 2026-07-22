@@ -1,0 +1,24 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-PRODUCTION-SUBSCRIBER-RUNTIME-FOUNDATION-V1",
+  "status": "COMPLETE_WITH_LIMITS",
+  "entry_path": "src/lib/intelligenceFabric/production/",
+  "persistence_choice": "REDIS_EXISTING_REPOSITORY_MECHANISM",
+  "adapter_posture": "INJECTED_INACTIVE_NO_ENV_OR_CONNECTION",
+  "test_command": "node --test test/intelligenceFabric*.test.js",
+  "test_result": {"passed": 171, "failed": 0},
+  "validation": {
+    "lint": {"command": "npx eslint src/lib/intelligenceFabric test/intelligenceFabric*.test.js", "status": "passed"},
+    "build": {"command": "npm run build", "status": "passed", "modules": 126, "warning": "existing large client chunk"},
+    "diff_check": {"command": "git diff --check", "status": "passed"}
+  },
+  "review_repairs": ["EXPLICIT_CONFIRMATION", "EVENT_ID_SEMANTIC_CONFLICT", "LATE_EFFECTIVE_CHECKPOINT_INVALIDATION", "CHROME_PROFILE_EXCLUSION", "REPLAY_SCOPE_FILTERING", "REPLACEMENT_CHECKPOINT_INVALIDATION", "SESSION_EXPIRY_INSTANT_COMPARISON"],
+  "feature_flags_default_off": true,
+  "public_routes": [],
+  "production_traffic": false,
+  "production_migration": false,
+  "production_redis_access": false,
+  "live_model": false,
+  "prerequisite_commit_required": true,
+  "known_limits": ["NO_LIVE_REDIS_ATOMIC_SCRIPT", "NO_DURABILITY_HA_BACKUP_TLS_ACL_PROOF", "NO_LOAD_CERTIFICATION", "NO_FORMAL_SECURITY_OR_COMPLIANCE_CERTIFICATION", "NO_PRODUCTION_TRAFFIC_OR_MIGRATION"],
+  "next_campaign": "MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1.md"
+}

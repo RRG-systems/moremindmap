@@ -1,0 +1,15 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-PRODUCTION-SUBSCRIBER-RUNTIME-FOUNDATION-V1",
+  "version": "1.0.0",
+  "verdict": "PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_CAMPAIGN_COMPLETE_WITH_LIMITS",
+  "architecture": "INACTIVE_INJECTED_REDIS_EVENT_LOG_AND_DERIVED_STORES",
+  "modules": ["production/contracts.js", "production/persistence.js", "production/recovery.js", "production/security.js", "production/modelMembrane.js", "production/activation.js", "production/subscriberService.js", "testing/inMemoryProductionDriver.js"],
+  "repair_modules": ["runtime/replay.js", "subscriber/subscriberCycle.js"],
+  "tests": ["intelligenceFabric.production.persistence.test.js", "intelligenceFabric.production.recovery.test.js", "intelligenceFabric.production.security.test.js", "intelligenceFabric.production.model.test.js", "intelligenceFabric.production.service.test.js", "intelligenceFabric.production.e2e.test.js", "intelligenceFabric.runtime.replay.test.js", "intelligenceFabric.subscriber.cycle.test.js"],
+  "artifacts": ["MORE_PRODUCTION_SUBSCRIBER_RUNTIME_ARCHITECTURE_DECISION_V1.md", "MORE_CAMPAIGN_PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_V1_IMPLEMENTATION.md", "MORE_CAMPAIGN_PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_V1_REPORT.md", "MORE_PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_EVIDENCE_MANIFEST_V1.json", "MORE_PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_AI_HANDOFF_V1.md", "MORE_PRODUCTION_SUBSCRIBER_RUNTIME_FOUNDATION_AI_HANDOFF_V1.json"],
+  "validation": {"tests": {"passed": 171, "failed": 0}, "lint": "passed", "build_modules": 126, "git_diff_check": "passed"},
+  "review_repairs": ["EXPLICIT_CONFIRMATION", "EVENT_ID_SEMANTIC_CONFLICT", "LATE_EFFECTIVE_CHECKPOINT_INVALIDATION", "CHROME_PROFILE_EXCLUSION", "REPLAY_SCOPE_FILTERING", "REPLACEMENT_CHECKPOINT_INVALIDATION", "SESSION_EXPIRY_INSTANT_COMPARISON"],
+  "prerequisite_commit_required": true,
+  "production_traffic": false,
+  "next_campaign": "MORE_CAMPAIGN_COACH_CONNECT_INVITE_ENTITLEMENT_V1.md"
+}
