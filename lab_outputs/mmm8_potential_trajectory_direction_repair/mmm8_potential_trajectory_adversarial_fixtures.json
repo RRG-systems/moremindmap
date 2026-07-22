@@ -1,0 +1,155 @@
+{
+  "mission_id": "MMM8_BUSINESS_ENGINE_POTENTIAL_TRAJECTORY_DIRECTION_REPAIR",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "optimized_declining_preserved": {
+      "passed": true,
+      "failures": [],
+      "direction": "declining",
+      "shape": "descending",
+      "future_category": "optimized_future"
+    },
+    "transformational_stable_preserved": {
+      "passed": true,
+      "failures": [],
+      "direction": "stable",
+      "shape": "flat",
+      "future_category": "transformational_future"
+    },
+    "preferred_unknown_preserved": {
+      "passed": true,
+      "failures": [],
+      "direction": "unknown",
+      "availability": "text_only",
+      "shape": "none"
+    },
+    "category_alone_not_rising": {
+      "passed": true,
+      "failures": []
+    },
+    "absent_direction_not_rising": {
+      "passed": true,
+      "failures": [],
+      "direction": "unknown",
+      "basis": "no_supported_direction"
+    },
+    "explicit_rising_preserved": {
+      "passed": true,
+      "failures": [],
+      "direction": "rising",
+      "shape": "ascending"
+    },
+    "explicit_declining_non_rising_points": {
+      "passed": true,
+      "failures": [],
+      "points": [
+        {
+          "x": 0.18,
+          "y": 0.62
+        },
+        {
+          "x": 0.4,
+          "y": 0.48
+        },
+        {
+          "x": 0.62,
+          "y": 0.34
+        },
+        {
+          "x": 0.82,
+          "y": 0.22
+        }
+      ]
+    },
+    "explicit_stable_non_rising_points": {
+      "passed": true,
+      "failures": [],
+      "points": [
+        {
+          "x": 0.18,
+          "y": 0.4
+        },
+        {
+          "x": 0.4,
+          "y": 0.42
+        },
+        {
+          "x": 0.62,
+          "y": 0.38
+        },
+        {
+          "x": 0.82,
+          "y": 0.4
+        }
+      ]
+    },
+    "unknown_no_false_rising_shape": {
+      "passed": true,
+      "failures": [],
+      "shape": "none",
+      "availability": "text_only"
+    },
+    "direction_source_priority": {
+      "passed": true,
+      "failures": [],
+      "samples": {
+        "r1": {
+          "direction": "declining",
+          "raw": "declining",
+          "source_path": "visualization.direction",
+          "basis": "visualization.direction"
+        },
+        "r2": {
+          "direction": "stable",
+          "raw": "stable",
+          "source_path": "direction",
+          "basis": "direction"
+        },
+        "r3": {
+          "direction": "declining",
+          "raw": "declining",
+          "source_path": "expected_direction",
+          "basis": "expected_direction"
+        },
+        "r4": {
+          "direction": "unknown",
+          "raw": null,
+          "source_path": null,
+          "basis": "no_supported_direction"
+        },
+        "r5": {
+          "direction": "declining",
+          "raw": "systems_drag",
+          "source_path": "signal",
+          "basis": "signal"
+        }
+      }
+    },
+    "category_direction_separation": {
+      "passed": true,
+      "failures": []
+    },
+    "tammy_fixture_no_invented_rising": {
+      "passed": true,
+      "failures": [],
+      "potential_direction": "unknown",
+      "current_direction": "declining",
+      "future_category": "optimized_future"
+    },
+    "shape_points_follow_direction": {
+      "passed": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total": 13,
+    "passed": 13,
+    "failed": 0,
+    "all_passed": true
+  },
+  "generated_at": "2026-07-22T06:52:02.279Z",
+  "secondary_bridge_copy": {
+    "status": "skipped",
+    "reason": "destination_not_writable"
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "mission_id": "MMM8_BUSINESS_ENGINE_CONTRACT_VISUALIZATION_SEMANTICS",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "normalized_only_current_blocked": {
+      "passed": true,
+      "failures": [],
+      "available": false,
+      "metric_count": 0
+    },
+    "normalized_only_future_blocked": {
+      "passed": true,
+      "failures": [],
+      "available": false,
+      "honest_absence": true
+    },
+    "absent_contract_future_honest": {
+      "passed": true,
+      "failures": []
+    },
+    "trajectory_direction_semantics": {
+      "passed": true,
+      "failures": [],
+      "declining": "declining",
+      "stable": "stable",
+      "unknown": "unknown",
+      "potential_declining": "declining"
+    },
+    "stage_labels_and_points_fidelity": {
+      "passed": true,
+      "failures": []
+    },
+    "legacy_retrieval_compatible": {
+      "passed": true,
+      "failures": []
+    },
+    "contract_display_rows_and_validation": {
+      "passed": true,
+      "failures": [],
+      "current_row_count": 4,
+      "future_row_count": 1,
+      "current_direction": "declining",
+      "potential_direction": "unknown"
+    },
+    "source_purity_scan": {
+      "passed": true,
+      "failures": []
+    },
+    "direction_normalizer": {
+      "passed": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0,
+    "all_passed": true
+  },
+  "generated_at": "2026-07-22T06:52:02.198Z",
+  "secondary_bridge_copy": {
+    "status": "skipped",
+    "reason": "destination_not_writable"
+  }
+}

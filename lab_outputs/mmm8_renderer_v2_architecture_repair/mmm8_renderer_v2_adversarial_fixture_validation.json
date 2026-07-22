@@ -1,0 +1,129 @@
+{
+  "mission_id": "MMM8_BA_VISUAL_RENDERER_V2_ARCHITECTURE_REPAIR",
+  "mission_slug": "mmm8_ba_visual_renderer_v2_architecture_repair",
+  "contract_version": "business-engine-contract-v1",
+  "cases": {
+    "01_normalized_only_current_blocked": {
+      "passed": true,
+      "failures": [],
+      "available": false,
+      "metric_count": 0
+    },
+    "02_target_metrics_only_future_blocked": {
+      "passed": true,
+      "failures": [],
+      "available": false,
+      "honest_absence": true
+    },
+    "03_absent_contract_future_remains_absent": {
+      "passed": true,
+      "failures": []
+    },
+    "04_declining_renders_descending": {
+      "passed": true,
+      "failures": [],
+      "direction": "declining",
+      "shape": "descending"
+    },
+    "05_stable_does_not_render_rising": {
+      "passed": true,
+      "failures": [],
+      "direction": "stable",
+      "shape": "flat"
+    },
+    "06_unknown_no_false_chart_direction": {
+      "passed": true,
+      "failures": [],
+      "direction": "unknown",
+      "availability": "text_only",
+      "shape": "none"
+    },
+    "07_potential_trajectory_not_auto_rise": {
+      "passed": true,
+      "failures": [],
+      "bare_direction": "unknown",
+      "declining_direction": "declining"
+    },
+    "08_contract_stage_labels_exact": {
+      "passed": true,
+      "failures": [],
+      "stage_labels": [
+        "Alpha",
+        "Beta",
+        "Gamma",
+        "Delta"
+      ]
+    },
+    "09_contract_points_no_rewrite": {
+      "passed": true,
+      "failures": [],
+      "points": [
+        {
+          "x": 0.12,
+          "y": 0.55
+        },
+        {
+          "x": 0.33,
+          "y": 0.44
+        },
+        {
+          "x": 0.61,
+          "y": 0.33
+        },
+        {
+          "x": 0.88,
+          "y": 0.22
+        }
+      ]
+    },
+    "10_renderer_no_semantic_inference": {
+      "passed": true,
+      "failures": []
+    },
+    "11_one_move_contract_driven": {
+      "passed": true,
+      "failures": [],
+      "available": true,
+      "stripped_available": false
+    },
+    "12_confidence_contract_driven": {
+      "passed": true,
+      "failures": [],
+      "available": true,
+      "stripped_available": false
+    },
+    "13_footer_contract_driven": {
+      "passed": true,
+      "failures": [],
+      "personalized": true,
+      "stripped_available": false
+    },
+    "14_legacy_retrieval_compatible": {
+      "passed": true,
+      "failures": []
+    },
+    "15_no_internal_model_names": {
+      "passed": true,
+      "failures": []
+    },
+    "16_no_invented_evidence_or_financials": {
+      "passed": true,
+      "failures": []
+    },
+    "17_hierarchy_and_subscription_compatibility": {
+      "passed": true,
+      "failures": []
+    }
+  },
+  "summary": {
+    "total": 17,
+    "passed": 17,
+    "failed": 0,
+    "all_passed": true
+  },
+  "generated_at": "2026-07-22T06:52:02.357Z",
+  "secondary_bridge_copy": {
+    "status": "skipped",
+    "reason": "destination_not_writable"
+  }
+}
