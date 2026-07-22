@@ -1,0 +1,12 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-REPOSITORY-WORKTREE-INTEGRATION-V1",
+  "verdict": "REPOSITORY_WORKTREE_INTEGRATION_COMPLETE_WITH_LIMITS",
+  "canonical_branch": "main",
+  "foundation_commits": ["a558cc8", "5ca3e01"],
+  "runtime_roots": ["src/lib/intelligenceFabric/auth", "src/lib/intelligenceFabric/coachConnect"],
+  "nested_worktree": { "path": "moremindmap-coach-connect", "remaining": false, "metadata_pruned": true },
+  "validation": { "tests": "204/204 PASS", "eslint": "PASS", "build": "PASS", "exports": "PASS", "artifacts": "PASS" },
+  "preserved_limits": ["unrelated pre-existing canonical untracked files", "no production activation", "no live providers"],
+  "forbidden_assumptions": ["nested directories may be staged as repositories", "unrelated untracked files belong to these foundations", "production is activated", "product behavior changed"],
+  "next_campaign": "MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_V1.md"
+}

@@ -1,0 +1,43 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-REPOSITORY-WORKTREE-INTEGRATION-V1",
+  "generated_at": "2026-07-21",
+  "canonical_root": "/Users/rrg/.openclaw/workspace/moremindmap-live",
+  "starting_head": "763e07fe819658e901f61a846a0dbe0ddbd1bc7b",
+  "strategy": "FILE_LEVEL_PROMOTION",
+  "backup": {
+    "path": "/private/tmp/more-repository-worktree-integration-v1-backup-763e07f.tar.gz",
+    "sha256": "dcf1042eb59361def3ad208ab6e31c204fb75e174414845290d1c3a52b3be1d5",
+    "entries": 83,
+    "forbidden_paths_found": 0,
+    "verified": true
+  },
+  "commits": [
+    { "commit": "a558cc8", "subject": "integrate coach identity auth foundation v1" },
+    { "commit": "5ca3e01", "subject": "integrate coach connect invite entitlement foundation v1" }
+  ],
+  "classification": {
+    "integrate_unique_files": 45,
+    "merge_required": ["src/lib/intelligenceFabric/index.js"],
+    "semantic_divergences": 0,
+    "no_loss_comparison_mismatches": 0,
+    "excluded": ["nested .git", ".env files", "node_modules", "dist", "browser profiles", "caches", "unrelated canonical work"]
+  },
+  "validation": {
+    "canonical_intelligence_fabric": "204/204 PASS",
+    "auth_checkpoint": "184/184 PASS",
+    "coach_connect": "20/20 PASS",
+    "business_engine": "6/6 PASS",
+    "real_estate_alignment": "14/14 PASS from identical validator evidence",
+    "ba_renderer": "4/4 PASS from identical validator evidence",
+    "eslint": "PASS",
+    "build": "PASS",
+    "exports": "PASS",
+    "json": "PASS",
+    "diff_check": "PASS",
+    "gitlink_scan": "PASS",
+    "nested_git_scan": "PASS"
+  },
+  "worktree_retirement": { "removed": true, "metadata_pruned": true, "force_reason": "uncommitted files were fully integrated, committed, validated, compared, and archived" },
+  "known_limits": ["unrelated pre-existing canonical untracked files remain", "sandbox denied optional secondary Bridge evidence-copy side effects"],
+  "final_verdict": "REPOSITORY_WORKTREE_INTEGRATION_COMPLETE_WITH_LIMITS"
+}

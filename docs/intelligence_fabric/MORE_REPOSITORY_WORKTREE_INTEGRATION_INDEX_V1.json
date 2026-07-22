@@ -1,0 +1,18 @@
+{
+  "campaign_id": "MORE-CAMPAIGN-REPOSITORY-WORKTREE-INTEGRATION-V1",
+  "verdict": "REPOSITORY_WORKTREE_INTEGRATION_COMPLETE_WITH_LIMITS",
+  "artifacts": [
+    "docs/intelligence_fabric/MORE_CAMPAIGN_REPOSITORY_WORKTREE_INTEGRATION_V1_IMPLEMENTATION.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_REPOSITORY_WORKTREE_INTEGRATION_V1_REPORT.md",
+    "docs/intelligence_fabric/MORE_REPOSITORY_WORKTREE_INTEGRATION_ARCHITECTURE_DECISION_V1.md",
+    "docs/intelligence_fabric/MORE_REPOSITORY_WORKTREE_INTEGRATION_EVIDENCE_MANIFEST_V1.json",
+    "docs/intelligence_fabric/MORE_REPOSITORY_WORKTREE_INTEGRATION_INDEX_V1.json",
+    "docs/intelligence_fabric/MORE_REPOSITORY_WORKTREE_INTEGRATION_AI_HANDOFF_V1.md",
+    "docs/intelligence_fabric/MORE_REPOSITORY_WORKTREE_INTEGRATION_AI_HANDOFF_V1.json"
+  ],
+  "foundation_commits": ["a558cc8", "5ca3e01"],
+  "canonical_runtime_roots": ["src/lib/intelligenceFabric/auth", "src/lib/intelligenceFabric/coachConnect"],
+  "test_roots": ["test/intelligenceFabric.auth*.test.js", "test/intelligenceFabric.coachConnect*.test.js"],
+  "proof_root": "lab_outputs/coach_connect_invite_entitlement_v1",
+  "nested_worktree_remaining": false
+}
