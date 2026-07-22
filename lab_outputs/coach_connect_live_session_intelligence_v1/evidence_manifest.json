@@ -1,0 +1,87 @@
+{
+  "artifact_id": "CCLSI_EVIDENCE_MANIFEST_V1",
+  "schema_version": "1.0.0",
+  "generated_at": "2026-07-22",
+  "evidence": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession/service.js",
+      "sha256": "b9f29a967d4d7bc1e696282e65d6261537cdabad9d86eff5ca37d04d647cb50e",
+      "producer": "Codex apply_patch",
+      "claim": "governed synthetic live-session orchestration"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession/businessEngine.js",
+      "sha256": "87a35ff7d9bed41911856f1a045f8de3c3daa9ec4c3afc40560ad3e28f4cc202",
+      "producer": "Codex apply_patch",
+      "claim": "confirmation evidence outcome and version gated canonical append"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession/contracts.js",
+      "sha256": "10f9e4ad3e1ef1088273a02e1121b0fa63323a95aaf43c5bbb07e1c58ebba013",
+      "producer": "Codex apply_patch",
+      "claim": "strict live-session contracts and authority boundaries"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession/stateMachines.js",
+      "sha256": "c416b21721f6f74de6327415f4010f0d5a2cedf3b8c3d0649460f582301a9f5a",
+      "producer": "Codex apply_patch",
+      "claim": "explicit legal transitions and fail-closed skips"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.liveSession.e2e.test.js",
+      "sha256": "b4ba38f2e105bb20d48b634abca50893c398dca13d8b4f2f12358e35c4bb38b4",
+      "producer": "Codex apply_patch and node test runner",
+      "claim": "synthetic happy path plus service-driven subscriber rejection with zero canonical append"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.liveSession.service.test.js",
+      "sha256": "4d0598782a7ef82666c292bce8d921991dc9c99594061f7e7513ab4d351acce6",
+      "producer": "Codex apply_patch and node test runner",
+      "claim": "adversarial authority consent replay checkpoint teardown confirmation and recovery proof"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/synthetic_session_trace.json",
+      "sha256": "bfec0f9f8a2a1994133d3ba7e16d62563847fc9ee07b0f21e63c8d35ff51bf01",
+      "producer": "Codex evidence synthesis from passing deterministic test",
+      "claim": "happy path trace summary"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/test_results.json",
+      "sha256": "da7b0b7417f382cdc60f94a90c5c3ef1115fdc0c79e6372854f257fd6586a3eb",
+      "producer": "recorded literal command results",
+      "claim": "repaired test and validation results"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession/recovery.js",
+      "sha256": "3890e7bb4c66bda9d2b2aa559dabb42a69711ff5048749b2a6f0c2692253b61b",
+      "producer": "Codex narrow repair apply_patch",
+      "claim": "replay and checkpoint outcomes fail closed with attributable failure artifacts"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/failed_session_trace.json",
+      "sha256": "cbbd9b90a1893c59fcb1f40bc2e8f9761a60ebf451c971ea485eec921d1b864e",
+      "producer": "Codex evidence refresh from passing deterministic tests",
+      "claim": "zero canonical mutation on rejection recovery and teardown failure paths"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/replay_trace.json",
+      "sha256": "ee40086edd13c180b5a5922ddc6cddc0a9f579c5d02e5ee780834291358a8179",
+      "producer": "Codex evidence refresh from passing deterministic tests",
+      "claim": "provider remains interrupted unless replay and checkpoint both succeed"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/business_engine_before_after.json",
+      "sha256": "4baef4d15adfe6656125262c3c508d8850b8d1e6b75302962747d238906adfe8",
+      "producer": "Codex evidence refresh from service-driven rejection test",
+      "claim": "rejected proposal leaves Business Engine version and state unchanged"
+    },
+    {
+      "path": "lab_outputs/coach_connect_live_session_intelligence_v1/protected_root_verification.json",
+      "sha256": "b44fe0ff1453dace9c75bc2669fa5590c5e8a5e3457adbc86bef224e00c05aa9",
+      "producer": "git status diff and static scans",
+      "claim": "protected boundary verification"
+    }
+  ],
+  "production_services_invoked": false,
+  "secrets_recorded": false
+}

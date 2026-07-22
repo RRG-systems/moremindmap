@@ -1,0 +1,7 @@
+{
+  "artifact_id": "CCLSI_CONTRACT_INVENTORY_V1",
+  "schema_version": "1.0.0",
+  "contracts": ["CoachLiveSession", "LiveSessionAuthority", "SessionEvent", "ParticipantState", "MediaState", "LiveSessionConsentRecord", "RecordingState", "TranscriptArtifact", "StructuredSessionArtifact", "CoachCommitment", "BusinessEngineProposal", "SubscriberConfirmationRequest", "ProjectionRefresh"],
+  "candidate_types": ["FACT_CLAIM", "GOAL", "OBSERVATION", "RECOMMENDATION", "COMMITMENT", "CONTRADICTION", "MISSING_EVIDENCE", "INTERVENTION"],
+  "canonical_authority": false
+}

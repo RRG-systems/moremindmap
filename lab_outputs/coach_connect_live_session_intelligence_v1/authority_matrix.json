@@ -1,0 +1,10 @@
+{
+  "artifact_id": "CCLSI_AUTHORITY_MATRIX_V1",
+  "schema_version": "1.0.0",
+  "rechecks": ["AUTHORIZE", "CONNECT", "INGEST_EVENT", "TRANSCRIPTION", "EXTRACTION", "REVIEW", "ENGINE_EVALUATION", "RECOVER", "CLOSE"],
+  "subscriber_confirmation_actor": "EXACT_SUBSCRIBER",
+  "coach_canonical_mutation": false,
+  "model_canonical_mutation": false,
+  "canonical_append_authority": "INJECTED_EXISTING_BUSINESS_ENGINE_RUNTIME",
+  "unknown_confirmation_policy": "REQUIRE_CONFIRMATION_OR_STOP"
+}

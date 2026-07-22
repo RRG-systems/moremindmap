@@ -1,0 +1,8 @@
+{
+  "artifact_id": "CCLSI_STATE_MACHINE_INVENTORY_V1",
+  "schema_version": "1.0.0",
+  "machines": ["live_session", "structured_artifact", "consent", "commitment", "business_engine_proposal"],
+  "illegal_skips_fail_closed": true,
+  "terminal_reopen_forbidden": true,
+  "existing_compact_session_unchanged": true
+}

@@ -1,0 +1,7 @@
+{
+  "artifact_id": "CCLSI_CONFIDENCE_REALITY_BEFORE_AFTER_V1",
+  "schema_version": "1.0.0",
+  "before": {"coaching_notes": [], "known_changed": false},
+  "after": {"coaching_note_count": 1, "destination_class": "COACHING_NOTES", "known_changed": false, "confidence_cap": 0.25, "canonical_authority": false, "universal_learning_eligible": false},
+  "reason": "reviewed coach-session material enters coaching notes before any governed promotion"
+}

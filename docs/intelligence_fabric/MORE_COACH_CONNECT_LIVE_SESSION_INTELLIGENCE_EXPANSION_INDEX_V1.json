@@ -1,0 +1,37 @@
+{
+  "artifact_id": "MORE_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_EXPANSION_INDEX_V1",
+  "schema_version": "1.0.0",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_V1",
+  "generated_at": "2026-07-22",
+  "authority": {
+    "afw_expansion": true,
+    "implementation": false,
+    "deployment": false,
+    "promotion": false,
+    "commit": false,
+    "push": false
+  },
+  "artifacts": [
+    {
+      "part": 1,
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_PART_1_V1.md",
+      "purpose": "doctrine, repository grounding, architecture, and authorized file plan"
+    },
+    {
+      "part": 2,
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_PART_2_V1.md",
+      "purpose": "implementation workflow gated on separate authority and approved Part 1"
+    },
+    {
+      "part": 3,
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_PART_3_V1.md",
+      "purpose": "validation, proof, and handoff workflow"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_CROSS_PART_CONSISTENCY_V1.md",
+      "purpose": "cross-part consistency, unresolved conflicts, and expansion verdict"
+    }
+  ],
+  "source_packet": "/Users/rrg/Desktop/MORE_CAMPAIGN_COACH_CONNECT_LIVE_SESSION_INTELLIGENCE_ARCHITECTURE_PACKET_V1.md",
+  "status": "AFW_EXPANSION_COMPLETE_IMPLEMENTATION_NOT_STARTED"
+}

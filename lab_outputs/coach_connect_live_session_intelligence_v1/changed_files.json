@@ -1,0 +1,12 @@
+{
+  "artifact_id": "CCLSI_CHANGED_FILES_V1",
+  "schema_version": "1.0.0",
+  "new_runtime_files": ["constants.js", "contracts.js", "stateMachines.js", "provider.js", "persistence.js", "extraction.js", "review.js", "businessEngine.js", "projections.js", "recovery.js", "service.js", "index.js"],
+  "runtime_root": "src/lib/intelligenceFabric/coachConnect/liveSession/",
+  "new_testing_driver": "src/lib/intelligenceFabric/testing/inMemoryLiveSessionDriver.js",
+  "narrow_export_edits": ["src/lib/intelligenceFabric/coachConnect/index.js", "src/lib/intelligenceFabric/index.js"],
+  "new_tests": ["test/intelligenceFabric.coachConnect.liveSession.contracts.test.js", "test/intelligenceFabric.coachConnect.liveSession.service.test.js", "test/intelligenceFabric.coachConnect.liveSession.e2e.test.js"],
+  "proof_root": "lab_outputs/coach_connect_live_session_intelligence_v1/",
+  "narrow_repair_files": ["src/lib/intelligenceFabric/coachConnect/liveSession/recovery.js", "src/lib/intelligenceFabric/coachConnect/liveSession/service.js", "test/intelligenceFabric.coachConnect.liveSession.service.test.js", "test/intelligenceFabric.coachConnect.liveSession.e2e.test.js"],
+  "unrelated_files_modified": []
+}

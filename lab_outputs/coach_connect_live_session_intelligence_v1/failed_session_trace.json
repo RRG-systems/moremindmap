@@ -1,0 +1,19 @@
+{
+  "artifact_id": "CCLSI_FAILED_SESSION_TRACE_V1",
+  "schema_version": "1.0.0",
+  "cases": [
+    {"case": "relationship_revoked", "result": "AUTHORIZATION_FAILED", "canonical_appends": 0},
+    {"case": "participation_consent_missing", "result": "CONSENT_BLOCKED", "canonical_appends": 0},
+    {"case": "recording_restricted", "result": "RECORDING_NOT_AUTHORIZED", "canonical_appends": 0},
+    {"case": "sequence_gap", "result": "SEQUENCE_GAP", "canonical_appends": 0},
+    {"case": "ambiguous_speaker", "result": "UNSAFE_OR_UNATTRIBUTED_CANDIDATE", "canonical_appends": 0},
+    {"case": "coach_confirms", "result": "SUBSCRIBER_CONFIRMATION_ACTOR_REQUIRED", "canonical_appends": 0},
+    {"case": "stale_proposal", "result": "STALE_PROPOSAL_REEVALUATION_REQUIRED", "canonical_appends": 0},
+    {"case": "projection_partial_failure", "result": "PREVIOUS_VERSION_REMAINS_EXPOSED", "canonical_appends": 0},
+    {"case": "unresolved_closure", "result": "INCOMPLETE", "canonical_appends": 0},
+    {"case": "subscriber_rejects_evaluated_proposal", "result": "SUBSCRIBER_CONFIRMATION_REQUIRED", "confirmation_state": "REJECTED", "business_engine_before_version": 2, "business_engine_after_version": 2, "state_unchanged": true, "canonical_appends": 0},
+    {"case": "replay_failure", "result": "RECOVERY_FAILED", "media_state": "INTERRUPTED", "failure_artifact": "ATTRIBUTABLE", "unresolved_work": ["PROVIDER_RECOVERY", "RECOVERY_REPLAY"], "canonical_appends": 0},
+    {"case": "checkpoint_failure", "result": "RECOVERY_FAILED", "media_state": "INTERRUPTED", "failure_artifact": "ATTRIBUTABLE", "unresolved_work": ["PROVIDER_RECOVERY", "RECOVERY_CHECKPOINT"], "canonical_appends": 0},
+    {"case": "provider_teardown_failure", "result": "FAILED", "closure_verdict": "INCOMPLETE", "failure_artifact": "ATTRIBUTABLE", "unresolved_work": ["PROVIDER_TEARDOWN"], "canonical_appends": 0}
+  ]
+}

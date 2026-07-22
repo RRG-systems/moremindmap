@@ -1,0 +1,9 @@
+{
+  "artifact_id": "CCLSI_PRIVACY_MATRIX_V1",
+  "schema_version": "1.0.0",
+  "classes": ["SUBSCRIBER_PRIVATE", "COACH_SHARED", "BUSINESS_ENGINE_ELIGIBLE", "RESTRICTED_SENSITIVE", "REDACTED", "LEARNING_INELIGIBLE", "LEARNING_CANDIDATE"],
+  "separate_consent": ["PARTICIPATION", "TRANSCRIPTION", "RECORDING", "STRUCTURED_EXTRACTION", "COACH_SHARING", "BUSINESS_ENGINE_EVALUATION", "FUTURE_LEARNING"],
+  "raw_transcript_in_projection": false,
+  "learning_candidate_is_permission": false,
+  "recording_default": "PROHIBITED_OR_RESTRICTED"
+}

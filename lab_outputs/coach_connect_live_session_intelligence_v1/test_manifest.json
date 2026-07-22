@@ -1,0 +1,17 @@
+{
+  "artifact_id": "CCLSI_TEST_MANIFEST_V1",
+  "schema_version": "1.0.0",
+  "commands": [
+    "node --test test/intelligenceFabric.coachConnect.liveSession*.test.js",
+    "node --test test/intelligenceFabric.coachConnect*.test.js",
+    "node --test test/intelligenceFabric.auth*.test.js",
+    "node --test test/intelligenceFabric.production*.test.js",
+    "node --test test/intelligenceFabric.runtime*.test.js test/intelligenceFabric.predictive*.test.js test/intelligenceFabric.subscriber*.test.js",
+    "node --test test/intelligenceFabric.contracts.test.js test/intelligenceFabric.durableCore.test.js",
+    "node --test test/intelligenceFabric*.test.js",
+    "node lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs",
+    "npx eslint src/lib/intelligenceFabric/coachConnect/liveSession src/lib/intelligenceFabric/testing/inMemoryLiveSessionDriver.js test/intelligenceFabric.coachConnect.liveSession*.test.js",
+    "npm run build",
+    "git diff --check"
+  ]
+}

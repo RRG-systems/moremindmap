@@ -1,0 +1,14 @@
+{
+  "artifact_id": "CCLSI_SYNTHETIC_SESSION_TRACE_V1",
+  "schema_version": "1.0.0",
+  "synthetic": true,
+  "stages": ["AUTHORIZED", "CONSENTED", "CONNECTED", "EVENTS_APPENDED", "TRANSCRIPT_FINALIZED", "CANDIDATE_EXTRACTED", "COACH_ACCEPTED", "COACHING_NOTE_PROPOSED", "ENGINE_EVALUATED", "SUBSCRIBER_CONFIRMED", "EVIDENCE_AND_OUTCOME_PRESENT", "CANONICAL_APPEND", "PROJECTIONS_REFRESHED", "CLOSED"],
+  "event_count": 2,
+  "canonical_append_count": 1,
+  "business_engine_before_version": 7,
+  "business_engine_after_version": 8,
+  "subscriber_projection_version": 8,
+  "coach_projection_version": 8,
+  "unresolved_items": [],
+  "session_verdict": "CLOSED_COMPLETE"
+}

@@ -1,0 +1,8 @@
+{
+  "artifact_id": "CCLSI_ARTIFACT_INDEX_V1",
+  "schema_version": "1.0.0",
+  "review_revision": "PRECOMMIT_NARROW_REPAIR_V2",
+  "root": "lab_outputs/coach_connect_live_session_intelligence_v1/",
+  "artifacts": ["architecture_report.md", "repository_grounding_report.md", "implementation_report.md", "contract_inventory.json", "state_machine_inventory.json", "authority_matrix.json", "privacy_matrix.json", "failure_taxonomy.json", "test_manifest.json", "test_results.json", "synthetic_session_trace.json", "failed_session_trace.json", "replay_trace.json", "business_engine_before_after.json", "confidence_reality_before_after.json", "projection_before_after.json", "protected_root_verification.json", "changed_files.json", "evidence_manifest.json", "executive_handoff.md", "ai_handoff.json", "final_verdict.json", "artifact_index.json"],
+  "artifact_count": 23
+}

@@ -1,0 +1,17 @@
+{
+  "artifact_id": "CCLSI_BUSINESS_ENGINE_BEFORE_AFTER_V1",
+  "schema_version": "1.0.0",
+  "accepted_path": {
+    "before": {"version": 7, "coaching_note_count": 0, "five_futures_status": "CURRENT", "one_move_id": "move_existing"},
+    "after": {"version": 8, "coaching_note_count": 1, "five_futures_status": "RECOMPUTED_FROM_CANONICAL_INPUTS", "one_move_id": "move_existing", "one_move_status": "REEVALUATED_FROM_CANONICAL_INPUTS"},
+    "proposer": "ATTRIBUTED_REVIEWED_SESSION_ARTIFACT",
+    "evidence": ["opaque_evidence_reference"],
+    "contradictions": [],
+    "reviewer": "AUTHORIZED_COACH_REFERENCE",
+    "subscriber_confirmation_required": true,
+    "subscriber_confirmation_received": true,
+    "promotion_policy": "policy_live_v1",
+    "future_validation": "opaque_outcome_reference"
+  },
+  "rejected_path": {"proof": "SERVICE_DRIVEN", "session_authorized": true, "session_connected": true, "artifact_reviewed": true, "proposal_evaluated": true, "confirmation_state": "REJECTED", "promotion_result": "SUBSCRIBER_CONFIRMATION_REQUIRED", "before_version": 2, "after_version": 2, "state_unchanged": true, "canonical_append_count": 0, "canonical_change": false}
+}

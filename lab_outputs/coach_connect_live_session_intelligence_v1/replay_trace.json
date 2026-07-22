@@ -1,0 +1,18 @@
+{
+  "artifact_id": "CCLSI_REPLAY_TRACE_V1",
+  "schema_version": "1.0.0",
+  "source": "append_only_normalized_session_events",
+  "replayed_event_count": 1,
+  "checkpoint_written": true,
+  "duplicate_canonical_promotions": 0,
+  "idempotent_promotion_replay_status": "IDEMPOTENT_REPLAY",
+  "canonical_append_count_after_replay": 1
+  ,"failure_behavior": {
+    "replay_failure_state": "RECOVERY_FAILED",
+    "checkpoint_failure_state": "RECOVERY_FAILED",
+    "provider_media_reactivated_on_failure": false,
+    "failure_artifact_recorded": true,
+    "unresolved_recovery_work_preserved": true,
+    "canonical_append_count_on_failure": 0
+  }
+}

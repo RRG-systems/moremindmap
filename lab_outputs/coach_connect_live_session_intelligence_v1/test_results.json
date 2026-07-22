@@ -1,0 +1,21 @@
+{
+  "artifact_id": "CCLSI_TEST_RESULTS_V1",
+  "schema_version": "1.0.0",
+  "results": [
+    {"suite": "live_session_focused", "passed": 18, "failed": 0, "exit": 0},
+    {"suite": "coach_connect_all", "passed": 38, "failed": 0, "exit": 0},
+    {"suite": "coach_auth", "passed": 13, "failed": 0, "exit": 0},
+    {"suite": "production_foundation", "passed": 29, "failed": 0, "exit": 0},
+    {"suite": "runtime_predictive_subscriber", "passed": 98, "failed": 0, "exit": 0},
+    {"suite": "core_contracts", "passed": 44, "failed": 0, "exit": 0},
+    {"suite": "all_intelligence_fabric", "passed": 222, "failed": 0, "exit": 0},
+    {"suite": "business_engine_fixtures", "passed": 6, "failed": 0, "exit": 0},
+    {"suite": "focused_eslint", "passed": 1, "failed": 0, "exit": 0},
+    {"suite": "vite_build", "passed": 1, "failed": 0, "exit": 0, "warning": "pre_existing_large_chunk_warning"},
+    {"suite": "real_estate_local_result", "passed": 14, "failed": 0, "exit": 1, "limit": "final sibling-worktree evidence copy blocked by sandbox"},
+    {"suite": "ba_renderer_local_result", "passed": 4, "failed": 0, "exit": 1, "limit": "final sibling-worktree evidence copy blocked by sandbox"}
+  ],
+  "repair_validation": {"subscriber_rejection_service_driven": true, "replay_failure_fail_closed": true, "checkpoint_failure_fail_closed": true, "provider_teardown_failure_fail_closed": true, "zero_canonical_mutation_on_repaired_failure_paths": true},
+  "clean_required_gates_passed": true,
+  "production_services_invoked": false
+}

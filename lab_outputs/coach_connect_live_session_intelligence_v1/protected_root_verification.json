@@ -1,0 +1,10 @@
+{
+  "artifact_id": "CCLSI_PROTECTED_ROOT_VERIFICATION_V1",
+  "schema_version": "1.0.0",
+  "changed_protected_roots": [],
+  "narrow_exports": ["src/lib/intelligenceFabric/coachConnect/index.js", "src/lib/intelligenceFabric/index.js"],
+  "export_edit_lines": 2,
+  "unchanged": ["src/lib/businessEngine", "src/components", "api", "src/lib/stripe", "package.json", "deployment_configuration", "production_redis_configuration", "scoring", "profile_id_logic"],
+  "production_services_invoked": false,
+  "commit_push_deploy_activate": false
+}

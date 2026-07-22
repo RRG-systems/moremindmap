@@ -1,0 +1,12 @@
+{
+  "artifact_id": "CCLSI_PROJECTION_BEFORE_AFTER_V1",
+  "schema_version": "1.0.0",
+  "previous_visible_version": 7,
+  "subscriber_after_version": 8,
+  "coach_after_version": 8,
+  "source": "AUTHORITATIVE_BUSINESS_ENGINE",
+  "same_business_engine": true,
+  "coach_canonical_write_capability": false,
+  "partial_failure_exposes_new_version": false,
+  "raw_transcript_exposed": false
+}
