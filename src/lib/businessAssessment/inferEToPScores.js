@@ -1,3 +1,5 @@
+import { deriveRelationshipStructureEvidence } from '../businessEngine/relationshipEvidence.js';
+
 const PILLAR_KEYS = ['models', 'systems', 'tools', 'accountability', 'education'];
 
 function lower(value) {
@@ -59,7 +61,10 @@ function buildContext(record) {
   const futures = output.five_futures_v1 || {};
   const oneMove = output.one_move_v1 || {};
   const allAnswers = Object.values(answers).join('\n\n');
-  const intelligenceText = JSON.stringify({ draft, briefing, futures, oneMove });
+  const relationshipStructure = deriveRelationshipStructureEvidence({
+    q3: answers.q3,
+    q5: answers.q5,
+  });
 
   return {
     assessment,
@@ -69,7 +74,10 @@ function buildContext(record) {
     briefing,
     futures,
     oneMove,
-    all: lower(`${allAnswers}\n\n${intelligenceText}`),
+    relationshipStructure,
+    // Current pillar scores must not be inflated by future recommendations or
+    // One Move language. Score only the persisted current-state intake.
+    all: lower(allAnswers),
     q1: lower(answers.q1),
     q2: lower(answers.q2),
     q3: lower(answers.q3),
@@ -90,9 +98,14 @@ function inferModels(ctx) {
   const evidence = [];
   const cautions = [];
 
-  if (hasAny(ctx.q3, [/true relationship/, /\b338\b/, /a\+|a relationships|b relationships|c-level/])) {
-    score += 2;
-    evidence.push('Distinguishes total contacts from true relationships and segments relationship quality.');
+  if (hasAny(ctx.q3, [/true relationship/, /\b338\b/])) {
+    score += 1;
+    evidence.push('Distinguishes total contacts from true relationships.');
+  }
+
+  if (ctx.relationshipStructure.segmentation_status === 'present') {
+    score += 1;
+    evidence.push('Segments relationship quality into explicit tiers.');
   }
 
   if (hasAny(ctx.q2 + ctx.q9, [/12[-\s]?month/, /24[-\s]?month/, /36[-\s]?month/, /\b24 units\b/, /\b36 units\b/, /\b50 units\b/])) {
@@ -145,12 +158,15 @@ function inferSystems(ctx) {
   const evidence = [];
   const cautions = [];
 
-  if (hasAny(ctx.q5, [/follow up boss|crm/])) {
+  if (ctx.relationshipStructure.crm_status === 'present') {
     score += 1;
     evidence.push('CRM exists and is named as part of the business infrastructure.');
+  } else if (ctx.relationshipStructure.crm_status === 'absent') {
+    evidence.push('The intake explicitly says an active CRM is not in use.');
+    cautions.push('A named CRM concept is not evidence that a working system exists.');
   }
 
-  if (hasAny(ctx.q5, [/a\+ relationships|a relationships|b relationships|c relationships|segmentation/])) {
+  if (ctx.relationshipStructure.segmentation_status === 'present') {
     score += 1;
     evidence.push('Relationship segmentation exists at least in rough form.');
   }
@@ -190,13 +206,21 @@ function inferTools(ctx) {
   let score = 4;
   const evidence = [];
   const cautions = [];
+  const crmStatus = ctx.relationshipStructure.crm_status;
+  const crmExplicitlyAbsent = crmStatus === 'absent';
+  const technologyPresent =
+    crmStatus === 'present' ||
+    hasAny(ctx.q5 + ctx.q8 + ctx.q9, [/spreadsheet|software|technology/]);
   const technologyTrap =
-    hasAny(ctx.q5 + ctx.q8 + ctx.q9, [/crm|follow up boss|spreadsheet|software|technology/]) &&
+    technologyPresent &&
     hasAny(ctx.q5 + ctx.q8 + ctx.q10, [/not as consistently|inconsistent|depends on my mood|depends on my memory|no weekly|random|not as an operating tool/]);
 
-  if (hasAny(ctx.q5, [/follow up boss|crm/])) {
+  if (crmStatus === 'present') {
     score += 2;
     evidence.push('Follow Up Boss / CRM exists as a tool layer.');
+  } else if (crmExplicitlyAbsent) {
+    evidence.push('The intake explicitly says an active CRM is not in use.');
+    cautions.push('A named CRM concept is not evidence that a working tool layer exists.');
   }
 
   if (hasAny(ctx.q9, [/spreadsheet|financial tracking|software|crm|technology/])) {
@@ -221,15 +245,30 @@ function inferTools(ctx) {
   }
 
   score = clampScore(score);
+  const toolLabels = crmExplicitlyAbsent
+    ? {
+        low: 'No active CRM tool layer',
+        mid: 'Spreadsheet or partial tools are not driving behavior',
+        high: 'Partial tools support execution',
+        scale: 'Tools create inspectable sales behavior',
+      }
+    : crmStatus === 'present'
+      ? {
+          low: 'Tools are not driving behavior',
+          mid: 'CRM exists but is not driving behavior',
+          high: 'Tools support execution',
+          scale: 'Tools create inspectable sales behavior',
+        }
+      : {
+          low: 'Tool layer is missing or unverified',
+          mid: 'Tool layer is incomplete or unverified',
+          high: 'Available tools support execution',
+          scale: 'Tools create inspectable sales behavior',
+        };
   return {
     score,
     confidence: confidenceFor(evidence, technologyTrap),
-    label: labelForScore(score, {
-      low: 'Tools are not driving behavior',
-      mid: 'CRM exists but is not driving behavior',
-      high: 'Tools support execution',
-      scale: 'Tools create inspectable sales behavior',
-    }),
+    label: labelForScore(score, toolLabels),
     evidence: evidenceText(evidence),
     caution: cautions[0] || 'Validate whether tools create conversations and appointments.',
   };
@@ -287,9 +326,16 @@ function inferEducation(ctx) {
     evidence.push('Understands that lead generation strategy must fit actual behavior.');
   }
 
-  if (hasAny(ctx.q3 + ctx.q5, [/true relationships|database is not fully organized|relationship database|a\+|vendor database/])) {
+  if (hasAny(ctx.q3 + ctx.q5, [/true relationships|database is not fully organized|relationship database/])) {
     score += 1;
-    evidence.push('Shows awareness of database quality, relationship tiers, and vendor leverage.');
+    evidence.push('Shows awareness that database quality and true relationships matter.');
+  }
+
+  if (
+    ctx.relationshipStructure.segmentation_status === 'present' ||
+    ctx.relationshipStructure.vendor_database_present
+  ) {
+    evidence.push('Names relationship tiers or vendor structure as part of the operating model.');
   }
 
   if (hasAny(ctx.q10 + ctx.q12, [/not effort|structure|inspectable weekly system|stop running the business from my head|run it from a system/])) {
@@ -348,13 +394,29 @@ function overallStage(pillars) {
 
 export function inferEToPScores(record) {
   const ctx = buildContext(record);
-  const pillars = {
+  const inferred = {
     models: inferModels(ctx),
     systems: inferSystems(ctx),
     tools: inferTools(ctx),
     accountability: inferAccountability(ctx),
     education: inferEducation(ctx),
   };
+  const pillars = Object.fromEntries(
+    Object.entries(inferred).map(([key, pillar]) => {
+      const individualizedEvidence = evidenceText(pillar.evidence).length > 0;
+      return [
+        key,
+        {
+          ...pillar,
+          source_type: 'deterministic_normalized',
+          fallback_used: !individualizedEvidence,
+          fallback_reason: individualizedEvidence
+            ? null
+            : 'pillar_evidence_unavailable_using_explicit_absence_baseline',
+        },
+      ];
+    })
+  );
 
   return {
     ...pillars,

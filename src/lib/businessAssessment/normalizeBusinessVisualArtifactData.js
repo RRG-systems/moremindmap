@@ -311,7 +311,7 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   const currentUnits = firstMetric(
     makeMetric(
       parseNumberNear(answers.q9 + '\n' + answers.q1, [
-        /units closed\s+(\d+)/i,
+        /units closed\s*:?\s*([\d,]+)/i,
         /closed units:\s*([\d,]+)/i,
         /closed\s+([\d,]+)\s+units/i,
         /([\d,]+)\s+closed units/i,
@@ -323,8 +323,9 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   );
   const currentVolume = firstMetric(
     parseMoneyMetric(answers.q9, [
-      /sales volume(?:-|:|\s)*(\$?[\d,.]+)/i,
-      /sales volume:\s*(\$?[\d,.]+)/i,
+      /(\$[\d,.]+\s*[mk]?)\s+(?:in\s+)?sales volume\b/i,
+      /sales volume\s*(?:-|:|=)\s*(\$?[\d,.]{4,}\s*[mk]?)/i,
+      /sales volume\s+(\$[\d,.]+\s*[mk]?|[\d,.]{4,}\s*[mk]?)/i,
     ], false),
     parseMoneyMetric(financialText + '\n' + answers.q1, [
       /sales volume:\s*approximately\s*(\$?[\d,.]+\s*[mk]?)/i,

@@ -406,7 +406,7 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
   const currentUnits = firstMetric(
     makeMetric(
       parseNumberNear(String(answers.q9 || '') + '\n' + String(answers.q1 || ''), [
-        /units closed\s+(\d+)/i,
+        /units closed\s*:?\s*([\d,]+)/i,
         /closed units:\s*([\d,]+)/i,
         /closed\s+([\d,]+)\s+units/i,
         /([\d,]+)\s+closed units/i,
@@ -418,7 +418,15 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
   );
 
   const currentVolume = firstMetric(
-    parseMoneyMetric(answers.q9, [/sales volume(?:-|:|\s)*(\$?[\d,.]+)/i, /sales volume:\s*(\$?[\d,.]+)/i], false),
+    parseMoneyMetric(
+      answers.q9,
+      [
+        /(\$[\d,.]+\s*[mk]?)\s+(?:in\s+)?sales volume\b/i,
+        /sales volume\s*(?:-|:|=)\s*(\$?[\d,.]{4,}\s*[mk]?)/i,
+        /sales volume\s+(\$[\d,.]+\s*[mk]?|[\d,.]{4,}\s*[mk]?)/i,
+      ],
+      false
+    ),
     parseMoneyMetric(
       financialText + '\n' + String(answers.q1 || ''),
       [
@@ -533,7 +541,10 @@ export function makeDisplayRow({
   const source = metricSource(metric);
   const basis = metricBasis(metric);
   const estimated = Boolean(metric && typeof metric === 'object' && metric.estimated);
-  const fallback_used = estimated || source_type === SOURCE_TYPES.DETERMINISTIC_NORMALIZED;
+  // Normalizing an explicit, profile-owned metric for display is not a
+  // fallback. Only values inferred from incomplete evidence carry fallback
+  // semantics here.
+  const fallback_used = estimated;
 
   return {
     id,
@@ -556,11 +567,7 @@ export function makeDisplayRow({
       notes: source,
     }),
     fallback_used,
-    fallback_reason: fallback_used
-      ? estimated
-        ? 'estimated_metric_from_evidence_extraction'
-        : 'deterministic_display_assembly_from_assessment_evidence'
-      : null,
+    fallback_reason: fallback_used ? 'estimated_metric_from_evidence_extraction' : null,
     intelligence_status: estimated ? INTELLIGENCE_STATUS.FALLBACK : INTELLIGENCE_STATUS.PARTIAL,
     last_updated: last_updated || null,
     source_label: source,

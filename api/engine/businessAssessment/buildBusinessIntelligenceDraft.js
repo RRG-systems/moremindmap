@@ -1,5 +1,6 @@
-const DRAFT_VERSION = 'business_intelligence_draft_v1';
+import { deriveRelationshipStructureEvidence } from '../../../src/lib/businessEngine/relationshipEvidence.js';
 
+const DRAFT_VERSION = 'business_intelligence_draft_v1';
 const DIMENSION_LABELS = {
   vector: 'Command',
   velocity: 'Tempo',
@@ -194,7 +195,9 @@ function extractBehavioralReality(canonicalProfile) {
 }
 
 function inferAgentStage(answers, assessmentType, model) {
+  const q1 = answers.q1;
   const q2 = answers.q2;
+  const q6 = answers.q6;
   const q8 = answers.q8;
   const q9 = answers.q9;
   const q11 = answers.q11;
@@ -314,24 +317,26 @@ function buildBehaviorBusinessFusion(behavioralReality, assessmentRecord, model)
 function buildRelationshipReality(assessmentRecord) {
   const q3 = answer(assessmentRecord, 'q3');
   const q5 = answer(assessmentRecord, 'q5');
-  const combined = `${q3} ${q5}`;
   const numbers = extractNumbers(q3);
-  const segmentationPresent = hasAny(combined, ['a+', ' a ', ' b ', ' c ', ' d ', 'segmentation', 'segment']);
-  const vendorPresent = hasAny(combined, ['vendor']);
-  const databaseMentioned = hasAny(combined, ['database', 'crm', 'contacts', 'people', 'relationships']);
-  const trueRelationshipsMentioned = hasAny(combined, ['true relationship', 'relationships']);
+  const relationshipStructure = deriveRelationshipStructureEvidence({ q3, q5 });
 
   return {
     database_size_mentions: numbers,
-    true_relationship_count_mentioned: trueRelationshipsMentioned,
-    segmentation_present: segmentationPresent,
-    vendor_database_present: vendorPresent,
+    true_relationship_count_mentioned: relationshipStructure.true_relationship_count_mentioned,
+    segmentation_present: relationshipStructure.segmentation_present,
+    segmentation_status: relationshipStructure.segmentation_status,
+    vendor_database_present: relationshipStructure.vendor_database_present,
     relationship_asset_strength:
-      databaseMentioned && segmentationPresent ? 'moderate_to_strong' : databaseMentioned ? 'unclear_or_understructured' : 'weak_evidence',
-    lake_health:
-      segmentationPresent && trueRelationshipsMentioned ? 'organized_lake_signal' : trueRelationshipsMentioned ? 'relationship_asset_present' : 'unclear',
+      relationshipStructure.database_mentioned && relationshipStructure.segmentation_present
+        ? 'moderate_to_strong'
+        : relationshipStructure.database_mentioned
+          ? 'unclear_or_understructured'
+          : 'weak_evidence',
+    lake_health: relationshipStructure.lake_health,
     possible_false_database_confidence:
-      numbers.length > 0 && !segmentationPresent ? 'possible_large_list_without_relationship_structure' : null,
+      numbers.length > 0 && !relationshipStructure.segmentation_present
+        ? 'possible_large_list_without_relationship_structure'
+        : null,
     evidence: { q3, q5 }
   };
 }

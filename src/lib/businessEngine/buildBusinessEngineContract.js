@@ -10,6 +10,7 @@ import {
   CONTRACT_NAME,
   CONTRACT_VERSION,
   COMPATIBILITY_MODE_BA_SNAPSHOT,
+  BA_VISUAL_PROJECTION_VERSION,
   SOURCE_TYPES,
   INTELLIGENCE_STATUS,
   SNAPSHOT_TREND,
@@ -48,6 +49,7 @@ import {
   buildRealEstateTargetModel,
   computeRelationshipGap,
 } from './realEstateTargetModel.js';
+import { deriveRelationshipStructureEvidence } from './relationshipEvidence.js';
 
 function resolveTimestamp(assessment, draft, briefing, fiveFutures, oneMove) {
   return (
@@ -183,13 +185,31 @@ function pickTextMatching(items, pattern) {
   return null;
 }
 
-function buildGoverningBusinessPattern({ draft, briefing, lastUpdated }) {
+function uniqueText(items, limit = 6) {
+  const seen = new Set();
+  const values = [];
+  for (const item of asArray(items).flat()) {
+    const value = textFrom(item);
+    const key = value?.toLowerCase();
+    if (!value || seen.has(key)) continue;
+    seen.add(key);
+    values.push(value);
+    if (values.length >= limit) break;
+  }
+  return values;
+}
+
+function buildGoverningBusinessPattern({ draft, briefing, fiveFutures, lastUpdated }) {
   const fusion = draft?.behavior_business_fusion || {};
   const primary = draft?.constraint_analysis?.primary_constraint || briefing?.primary_constraint_snapshot || {};
   const trajectory = draft?.current_trajectory_signal || briefing?.current_trajectory_signal || {};
   const strategic = firstSectionBody(briefing, ['strategic_interpretation']);
   const constraintBody = firstSectionBody(briefing, ['primary_constraint']);
   const trajBody = firstSectionBody(briefing, ['current_trajectory_signal']);
+  const futures = Array.isArray(fiveFutures?.futures) ? fiveFutures.futures : [];
+  const currentFuture = findFuture(futures, 'current_future');
+  const constraintFuture = findFuture(futures, 'constraint_future');
+  const optimizedFuture = findFuture(futures, 'optimized_future');
 
   const title =
     textFrom(primary.label || primary.constraint_key) ||
@@ -198,18 +218,28 @@ function buildGoverningBusinessPattern({ draft, briefing, lastUpdated }) {
     null;
 
   const summaryParts = [
-    textFrom(fusion.fusion_summary),
+    textFrom(currentFuture?.summary || currentFuture?.trajectory_logic),
     strategic ? clipText(strategic, 280) : null,
+    textFrom(fusion.fusion_summary),
     textFrom(primary.diagnostic_summary || primary.likely_effect_if_unchanged || primary.summary),
     trajBody ? clipText(trajBody, 200) : textFrom(trajectory.diagnostic_summary),
   ].filter(Boolean);
 
-  const momentum = asArray(fusion.strengths).map((item) => textFrom(item)).filter(Boolean);
-  const drag = [
-    ...asArray(fusion.risks).map((item) => textFrom(item)).filter(Boolean),
-    ...asArray(fusion.likely_business_effects).map((item) => textFrom(item)).filter(Boolean),
+  const momentum = uniqueText([
+    asArray(optimizedFuture?.behavioral_drivers),
+    asArray(optimizedFuture?.business_drivers),
+    textFrom(optimizedFuture?.upside),
+    asArray(fusion.strengths),
+  ]);
+  const drag = uniqueText([
+    asArray(constraintFuture?.behavioral_drivers),
+    asArray(constraintFuture?.business_drivers),
+    textFrom(constraintFuture?.risk_if_unchanged),
+    asArray(currentFuture?.behavioral_drivers),
+    asArray(fusion.risks),
+    asArray(fusion.likely_business_effects),
     textFrom(primary.likely_effect_if_unchanged),
-  ].filter(Boolean);
+  ]);
 
   if (!title && summaryParts.length === 0) {
     return selectByPriority([], { last_updated: lastUpdated });
@@ -225,9 +255,11 @@ function buildGoverningBusinessPattern({ draft, briefing, lastUpdated }) {
   };
 
   const sourceRank = hasMeaningfulValue(fusion.fusion_summary)
-    ? 1
+    ? strategic
+      ? 1
+      : 2
     : strategic
-      ? 2
+      ? 1
       : hasMeaningfulValue(primary)
         ? 3
         : 4;
@@ -237,17 +269,29 @@ function buildGoverningBusinessPattern({ draft, briefing, lastUpdated }) {
     last_updated: lastUpdated,
     confidence: confidenceValue(primary.confidence || trajectory.confidence),
     provenance: makeProvenance({
-      source_artifact: sourceRank <= 1 ? 'business_intelligence_draft' : strategic ? 'executive_diagnostic_briefing_v1' : 'business_intelligence_draft',
-      source_path:
-        sourceRank <= 1
-          ? 'behavior_business_fusion+constraint_analysis+current_trajectory_signal'
-          : strategic
-            ? 'sections.strategic_interpretation'
-            : 'constraint_analysis.primary_constraint',
+      source_artifact: strategic
+        ? 'executive_diagnostic_briefing_v1|five_futures_v1|business_intelligence_draft'
+        : hasMeaningfulValue(currentFuture)
+          ? 'five_futures_v1|business_intelligence_draft'
+          : 'business_intelligence_draft',
+      source_path: strategic
+        ? 'sections.strategic_interpretation+futures[optimized|constraint]+constraint_analysis'
+        : hasMeaningfulValue(currentFuture)
+          ? 'futures[current|optimized|constraint]+constraint_analysis'
+          : 'behavior_business_fusion+constraint_analysis+current_trajectory_signal',
       source_rank: sourceRank,
+      notes: strategic || hasMeaningfulValue(currentFuture)
+        ? 'Read-time individualized projection prefers persisted generated intelligence over shared deterministic fusion copy'
+        : 'Legacy deterministic fusion used because generated individualized artifacts are unavailable',
     }),
-    source_type: sourceRank <= 2 ? SOURCE_TYPES.CANONICAL_FUSED : SOURCE_TYPES.DOMAIN_INTELLIGENCE,
-    fallback_used: false,
+    source_type: strategic || hasMeaningfulValue(currentFuture)
+      ? SOURCE_TYPES.CANONICAL_FUSED
+      : SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
+    fallback_used: !strategic && !hasMeaningfulValue(currentFuture),
+    fallback_reason:
+      !strategic && !hasMeaningfulValue(currentFuture)
+        ? 'generated_individualized_governing_pattern_sources_unavailable'
+        : null,
     intelligence_status: summaryParts.length > 1 ? INTELLIGENCE_STATUS.AVAILABLE : INTELLIGENCE_STATUS.PARTIAL,
     evidence_sources: [
       { artifact: 'business_intelligence_draft', path: 'behavior_business_fusion' },
@@ -258,16 +302,35 @@ function buildGoverningBusinessPattern({ draft, briefing, lastUpdated }) {
   });
 }
 
-function buildBehavioralModifier({ draft, oneMove, lastUpdated }) {
+function buildBehavioralModifier({ draft, fiveFutures, oneMove, lastUpdated }) {
   const fusion = draft?.behavior_business_fusion || {};
   const behavioral = draft?.behavioral_reality || {};
   const primary = draft?.constraint_analysis?.primary_constraint || {};
+  const futures = Array.isArray(fiveFutures?.futures) ? fiveFutures.futures : [];
+  const currentFuture = findFuture(futures, 'current_future');
+  const constraintFuture = findFuture(futures, 'constraint_future');
+  const optimizedFuture = findFuture(futures, 'optimized_future');
+  const optimizedDrivers = uniqueText(asArray(optimizedFuture?.behavioral_drivers), 8);
+  const riskDrivers = uniqueText([
+    asArray(constraintFuture?.behavioral_drivers),
+    asArray(currentFuture?.behavioral_drivers),
+  ], 10);
 
   const asset =
+    pickTextMatching(
+      optimizedDrivers,
+      /\b(?:strength|supports?|fit|well-suited|advantage|helps?|can|natural|effective)\b/i
+    ) ||
+    optimizedDrivers[0] ||
     asArray(fusion.strengths)[0] ||
     textFrom(behavioral.profile_type) ||
     null;
   const distortion =
+    pickTextMatching(
+      riskDrivers,
+      /\b(?:risk|may|can lead|low|weak|avoid|depend|pressure|over|under|delay|inconsisten)\b/i
+    ) ||
+    riskDrivers[0] ||
     asArray(fusion.risks)[0] ||
     asArray(fusion.likely_business_effects)[0] ||
     asArray(primary.behavior_modifiers)[0] ||
@@ -282,8 +345,15 @@ function buildBehavioralModifier({ draft, oneMove, lastUpdated }) {
   }
 
   const explanation =
+    textFrom(oneMove?.behavior_fit) ||
+    textFrom(optimizedFuture?.trajectory_logic) ||
     textFrom(fusion.fusion_summary) ||
     [textFrom(asset), textFrom(distortion), textFrom(implication)].filter(Boolean).join(' ');
+  const individualizedGeneratedSource = Boolean(
+    hasMeaningfulValue(oneMove?.behavior_fit) ||
+    optimizedDrivers.length ||
+    riskDrivers.length
+  );
 
   return makeIntelligenceNode({
     current: {
@@ -296,21 +366,25 @@ function buildBehavioralModifier({ draft, oneMove, lastUpdated }) {
     last_updated: lastUpdated,
     confidence: confidenceValue(behavioral.ranked_dimensions?.[0]?.confidence) || 'moderate',
     provenance: makeProvenance({
-      source_artifact: hasMeaningfulValue(fusion)
-        ? 'business_intelligence_draft'
-        : hasMeaningfulValue(oneMove?.behavior_fit)
-          ? 'one_move_v1'
-          : 'business_intelligence_draft',
-      source_path: hasMeaningfulValue(fusion)
-        ? 'behavior_business_fusion'
-        : hasMeaningfulValue(oneMove?.behavior_fit)
-          ? 'behavior_fit'
-          : 'behavioral_reality',
-      source_rank: hasMeaningfulValue(fusion) ? 1 : hasMeaningfulValue(oneMove?.behavior_fit) ? 3 : 2,
+      source_artifact: individualizedGeneratedSource
+        ? 'five_futures_v1|one_move_v1|business_intelligence_draft'
+        : 'business_intelligence_draft',
+      source_path: individualizedGeneratedSource
+        ? 'futures[optimized|constraint].behavioral_drivers+behavior_fit+behavioral_reality'
+        : 'behavior_business_fusion+behavioral_reality',
+      source_rank: individualizedGeneratedSource ? 1 : 2,
+      notes: individualizedGeneratedSource
+        ? 'Read-time BOS plus BA compatibility projection from persisted fused generation'
+        : 'Legacy deterministic behavioral fusion because generated individualized artifacts are unavailable',
     }),
-    source_type: hasMeaningfulValue(fusion) ? SOURCE_TYPES.CANONICAL_FUSED : SOURCE_TYPES.DOMAIN_INTELLIGENCE,
-    fallback_used: false,
-    intelligence_status: hasMeaningfulValue(fusion.fusion_summary)
+    source_type: individualizedGeneratedSource
+      ? SOURCE_TYPES.CANONICAL_FUSED
+      : SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
+    fallback_used: !individualizedGeneratedSource,
+    fallback_reason: individualizedGeneratedSource
+      ? null
+      : 'generated_individualized_behavioral_modifier_sources_unavailable',
+    intelligence_status: individualizedGeneratedSource || hasMeaningfulValue(fusion.fusion_summary)
       ? INTELLIGENCE_STATUS.AVAILABLE
       : INTELLIGENCE_STATUS.PARTIAL,
     evidence_sources: asArray(fusion.evidence).slice(0, 4).map((item) => ({
@@ -638,22 +712,22 @@ function buildRelationshipLake({
 
   let streamsNode;
   if (hasPersonalizedStreams(personalizedStreams)) {
-    // Alias/regex/text-scan streams are deterministic inference — never claim domain_intelligence.
+    // These values are individualized from this record's evidence. They remain
+    // deterministic inference, but are not a shared fallback packet.
     const deterministic = isDeterministicStreamOrOutflowDerivation(personalizedStreams);
     streamsNode = makeIntelligenceNode({
       current: personalizedStreams,
       last_updated: lastUpdated,
       source_type: SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
-      intelligence_status: INTELLIGENCE_STATUS.FALLBACK,
-      fallback_used: true,
-      fallback_reason: deterministic
-        ? 'streams_derived_via_alias_regex_text_scan_not_canonical_domain_intelligence'
-        : 'streams_derived_via_vertical_deterministic_mapping',
+      intelligence_status: INTELLIGENCE_STATUS.PARTIAL,
+      fallback_used: false,
       provenance: makeProvenance({
         source_artifact: 'real_estate_vertical_adapter',
         source_path: 'deriveRealEstateStreams(lead_generation_reality|briefing|answers)',
-        source_rank: 3,
-        notes: 'Deterministic vertical inference; not canonical domain stream intelligence',
+        source_rank: 2,
+        notes: deterministic
+          ? 'Deterministic individualized inference from this assessment; not persisted domain stream intelligence'
+          : 'Individualized vertical mapping from this assessment',
       }),
       evidence_sources: collectStreamEvidence(personalizedStreams),
       confidence: 'inferred',
@@ -689,21 +763,20 @@ function buildRelationshipLake({
 
   let outflowNode;
   if (hasPersonalizedStreams(personalizedOutflow)) {
-    // Alias-matched outcome labels only — deterministic inference, not domain intelligence.
+    // Alias-matched outcomes are profile-scoped deterministic inference, not
+    // a shared real-estate fallback list.
     outflowNode = makeIntelligenceNode({
       current: personalizedOutflow,
       last_updated: lastUpdated,
       source_type: SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
-      intelligence_status: INTELLIGENCE_STATUS.FALLBACK,
-      fallback_used: true,
-      fallback_reason:
-        'outflow_derived_via_alias_regex_text_scan_or_structured_mapping_not_canonical_domain_intelligence',
+      intelligence_status: INTELLIGENCE_STATUS.PARTIAL,
+      fallback_used: false,
       provenance: makeProvenance({
         source_artifact: 'real_estate_vertical_adapter',
         source_path: 'deriveRealEstateOutflow(conversion|one_move_aliases|briefing)',
-        source_rank: 3,
+        source_rank: 2,
         notes:
-          'Deterministic outcome alias extraction; clipped success-indicator prose and issue labels excluded',
+          'Deterministic individualized outcome extraction; clipped success-indicator prose and issue labels excluded',
       }),
       evidence_sources: collectStreamEvidence(personalizedOutflow),
       confidence: 'inferred',
@@ -735,6 +808,10 @@ function buildRelationshipLake({
   }
 
   const relationship = draft?.relationship_reality || {};
+  const relationshipStructure = deriveRelationshipStructureEvidence({
+    q3: answers?.q3,
+    q5: answers?.q5,
+  });
   const currentTrue =
     metrics?.currentTrueRelationships ??
     targetModel?.current_true_relationships ??
@@ -747,12 +824,16 @@ function buildRelationshipLake({
     metrics?.relationshipGap ??
     computeRelationshipGap(currentTrue, targetTrue);
   const totalContacts = metrics?.totalContacts ?? null;
-  const lakeFallback =
-    Boolean(targetModel?.fallback_used) ||
-    (!currentTrue && !targetTrue);
+  const lakeFallback = !currentTrue && !targetTrue;
   const lakeFallbackReason = !currentTrue && !targetTrue
     ? 'relationship_lake_metrics_unavailable'
-    : targetModel?.fallback_reason || null;
+    : null;
+  const derivedLakeHealth =
+    relationshipStructure.lake_health !== 'unclear'
+      ? relationshipStructure.lake_health
+      : textFrom(relationship.lake_health) ||
+        textFrom(relationship.relationship_asset_strength) ||
+        null;
 
   return {
     label: realEstate ? 'Relationship Lake' : 'Relationship System',
@@ -771,14 +852,12 @@ function buildRelationshipLake({
     goal_source: goal?.goal_source || 'unavailable',
     goal_confidence: goal?.goal_confidence || null,
     target_basis: targetModel?.calculation_basis || null,
-    current_quality:
-      textFrom(relationship.lake_health) ||
-      textFrom(relationship.relationship_asset_strength) ||
-      null,
-    lake_health:
-      textFrom(relationship.lake_health) ||
-      textFrom(relationship.relationship_asset_strength) ||
-      null,
+    current_quality: derivedLakeHealth,
+    lake_health: derivedLakeHealth,
+    segmentation_status:
+      relationshipStructure.segmentation_status !== 'unknown'
+        ? relationshipStructure.segmentation_status
+        : relationship.segmentation_status || null,
     streams: streamsNode,
     outflow: outflowNode,
     vertical_specific: realEstate,
@@ -790,7 +869,7 @@ function buildRelationshipLake({
       source_path: 'buildRelationshipLake',
       source_rank: 2,
       notes: realEstate
-        ? 'Lake center is True Relationships only; total contacts are supporting context'
+        ? 'Lake center is True Relationships only; total contacts are supporting context; structure is re-evaluated from intake with negation-aware rules'
         : 'Non-RE relationship system',
     }),
     fallback_used: lakeFallback,
@@ -1640,6 +1719,7 @@ function buildFooterIntelligence({
 function buildCurrentBusinessReality({
   draft,
   briefing,
+  fiveFutures,
   lastUpdated,
   answers,
   oneMove,
@@ -1647,10 +1727,17 @@ function buildCurrentBusinessReality({
 }) {
   const reality = draft?.business_reality || {};
   const section = firstSectionBody(briefing, ['current_business_reality']);
+  const futures = Array.isArray(fiveFutures?.futures) ? fiveFutures.futures : [];
+  const currentFuture = findFuture(futures, 'current_future');
+  const draftSummary = textFrom(reality.summary || reality.diagnostic_summary);
+  const generatedSummary = textFrom(currentFuture?.summary || currentFuture?.trajectory_logic);
+  const briefingSummary = section ? clipText(section, 280) : null;
   const summary =
-    textFrom(reality.summary || reality.diagnostic_summary) ||
-    textFrom(reality.current_stage?.description) ||
-    (section ? clipText(section, 280) : null);
+    draftSummary ||
+    generatedSummary ||
+    briefingSummary ||
+    textFrom(reality.current_stage?.description);
+  const individualizedSummary = Boolean(draftSummary || generatedSummary || briefingSummary);
 
   const display = buildCurrentRealityDisplayRows({
     answers,
@@ -1680,19 +1767,39 @@ function buildCurrentBusinessReality({
       stage: textFrom(reality.current_stage?.label || reality.current_stage?.description),
       production: reality.current_production_reality || null,
       raw_section: reality,
+      summary_source: draftSummary
+        ? 'business_intelligence_draft.business_reality'
+        : generatedSummary
+          ? 'five_futures_v1.futures[current_future]'
+          : briefingSummary
+            ? 'executive_diagnostic_briefing_v1.sections[current_business_reality]'
+            : 'business_intelligence_draft.business_reality.current_stage.description',
       availability: summary || hasRows ? (hasRows && summary ? 'available' : 'partial') : 'absent',
       rows: display.rows,
     },
     last_updated: lastUpdated,
     confidence: confidenceValue(reality.confidence),
     provenance: makeProvenance({
-      source_artifact: 'business_intelligence_draft',
-      source_path: 'business_reality',
-      source_rank: 1,
+      source_artifact: individualizedSummary
+        ? 'business_intelligence_draft|five_futures_v1|executive_diagnostic_briefing_v1'
+        : 'business_intelligence_draft',
+      source_path: individualizedSummary
+        ? 'business_reality|futures[current_future]|sections[current_business_reality]'
+        : 'business_reality.current_stage.description',
+      source_rank: individualizedSummary ? 1 : 3,
+      notes: individualizedSummary
+        ? 'Individualized condition summary; shared stage taxonomy remains classification only'
+        : 'Legacy stage description used because individualized condition narrative is unavailable',
     }),
-    source_type: SOURCE_TYPES.DOMAIN_INTELLIGENCE,
+    source_type: individualizedSummary
+      ? SOURCE_TYPES.DOMAIN_INTELLIGENCE
+      : SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
     intelligence_status,
-    fallback_used: false,
+    fallback_used: Boolean(summary && !individualizedSummary),
+    fallback_reason:
+      summary && !individualizedSummary
+        ? 'individualized_business_condition_summary_unavailable_using_stage_taxonomy'
+        : null,
     evidence_sources: asArray(reality.evidence).slice(0, 4).map((item) => ({
       artifact: 'business_intelligence_draft',
       path: 'business_reality.evidence',
@@ -1741,11 +1848,25 @@ function buildFutureOperatingModel({
   const first30 = asArray(oneMove?.first_30_days)
     .map((item) => textFrom(item))
     .filter(Boolean);
+  const cadenceInstruction =
+    pickTextMatching(
+      first30,
+      /\b(?:daily|weekly|monthly|every\s+(?:day|week|month)|cadence|rhythm)\b/i
+    ) ||
+    pickTextMatching(
+      first30,
+      /\b(?:review|inspection)\b/i
+    ) ||
+    (/(\bdaily\b|\bweekly\b|\bmonthly\b|\bcadence\b|\brhythm\b|\binspect)/i.test(
+      textFrom(oneMove?.recommendation) || ''
+    )
+      ? textFrom(oneMove?.recommendation)
+      : null);
   const expectedBusinessRhythm =
     textFrom(future?.expected_business_rhythm) ||
     textFrom(future?.business_rhythm) ||
     textFrom(oneMove?.review_period) ||
-    (first30.length ? '30-day execution rhythm' : null) ||
+    cadenceInstruction ||
     null;
 
   const expectedProductionEffect =
@@ -1758,7 +1879,6 @@ function buildFutureOperatingModel({
     textFrom(future?.time_to_effect) ||
     textFrom(oneMove?.review_period) ||
     textFrom(oneMove?.expected_probability_shift?.time_horizon) ||
-    (first30.length ? '30–90 days (modeled window)' : null) ||
     null;
 
   // Doctrine tokens only when RE + source language actually supports them.
@@ -1908,7 +2028,9 @@ function buildBusinessModelAlignment({ draft, record, lastUpdated }) {
 }
 
 function buildBusinessEngineDimensions({ draft, eToP, lastUpdated }) {
-  // Prefer structured realities when present; otherwise mark deterministic eToP as fallback.
+  // Legacy BA records do not persist a separate pillar model. inferEToPScores
+  // is still profile-scoped when it has evidence from this record, so classify
+  // it as deterministic individualized inference rather than a shared fallback.
   const systemsSummary = textFrom(draft?.systems_reality?.summary || draft?.systems_reality?.diagnostic_summary);
   const accountabilitySummary = textFrom(
     draft?.accountability_reality?.summary || draft?.accountability_reality?.diagnostic_summary
@@ -1917,6 +2039,14 @@ function buildBusinessEngineDimensions({ draft, eToP, lastUpdated }) {
   const dimensions = eToP && typeof eToP === 'object' ? eToP : null;
   const usedDeterministic = Boolean(dimensions);
   const usedIntelligence = Boolean(systemsSummary || accountabilitySummary);
+  const pillarKeys = ['models', 'systems', 'tools', 'accountability', 'education'];
+  const hasIndividualizedEvidence = Boolean(
+    dimensions &&
+      pillarKeys.some((key) => {
+        const pillar = dimensions[key];
+        return asArray(pillar?.evidence).length > 0;
+      })
+  );
 
   if (!dimensions && !usedIntelligence) {
     return selectByPriority([], { last_updated: lastUpdated });
@@ -1927,23 +2057,29 @@ function buildBusinessEngineDimensions({ draft, eToP, lastUpdated }) {
       pillars: dimensions,
       systems_reality_summary: systemsSummary,
       accountability_reality_summary: accountabilitySummary,
-      interpretation_note: usedIntelligence
-        ? 'Domain realities available; pillar scores may still be deterministic until structured pillar intelligence exists.'
-        : 'Pillar scores are deterministic fallback (inferEToPScores), not Intelligence Layer pillar model.',
+      interpretation_note: hasIndividualizedEvidence
+        ? 'Pillar scores are deterministic individualized inference from this assessment evidence; not a persisted Intelligence Layer pillar model.'
+        : 'Pillar scores are generic deterministic fallback because individualized pillar evidence is unavailable.',
     },
     last_updated: lastUpdated,
     source_type: usedIntelligence && !usedDeterministic
       ? SOURCE_TYPES.DOMAIN_INTELLIGENCE
       : SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
-    intelligence_status: usedIntelligence ? INTELLIGENCE_STATUS.PARTIAL : INTELLIGENCE_STATUS.FALLBACK,
-    fallback_used: usedDeterministic,
-    fallback_reason: usedDeterministic
-      ? 'etop_scores_deterministic_until_structured_pillar_intelligence'
+    intelligence_status:
+      usedIntelligence || hasIndividualizedEvidence
+        ? INTELLIGENCE_STATUS.PARTIAL
+        : INTELLIGENCE_STATUS.FALLBACK,
+    fallback_used: usedDeterministic && !hasIndividualizedEvidence,
+    fallback_reason: usedDeterministic && !hasIndividualizedEvidence
+      ? 'individualized_pillar_evidence_unavailable_using_generic_deterministic_baseline'
       : null,
     provenance: makeProvenance({
       source_artifact: usedDeterministic ? 'inferEToPScores' : 'business_intelligence_draft',
       source_path: usedDeterministic ? 'eToP' : 'systems_reality|accountability_reality',
-      source_rank: usedIntelligence ? 1 : 2,
+      source_rank: hasIndividualizedEvidence || usedIntelligence ? 1 : 2,
+      notes: hasIndividualizedEvidence
+        ? 'Read-time individualized legacy projection; scores remain deterministic and evidence-bound'
+        : null,
     }),
   });
 }
@@ -2001,8 +2137,18 @@ export function buildBusinessEngineContract(record, options = {}) {
     lastUpdated,
   });
 
-  const governing_business_pattern = buildGoverningBusinessPattern({ draft, briefing, lastUpdated });
-  const behavioral_modifier = buildBehavioralModifier({ draft, oneMove, lastUpdated });
+  const governing_business_pattern = buildGoverningBusinessPattern({
+    draft,
+    briefing,
+    fiveFutures,
+    lastUpdated,
+  });
+  const behavioral_modifier = buildBehavioralModifier({
+    draft,
+    fiveFutures,
+    oneMove,
+    lastUpdated,
+  });
   const current_trajectory = buildCurrentTrajectory({ draft, briefing, fiveFutures, lastUpdated });
   const potential_trajectory = buildPotentialTrajectory({ fiveFutures, oneMove, lastUpdated });
   const primary_constraint = buildPrimaryConstraint({ draft, briefing, oneMove, lastUpdated });
@@ -2186,6 +2332,8 @@ export function buildBusinessEngineContract(record, options = {}) {
       source_assessment_id:
         assessment.assessment_id || briefing.assessment_id || fiveFutures.assessment_id || oneMove.assessment_id || null,
       compatibility_mode: COMPATIBILITY_MODE_BA_SNAPSHOT,
+      compatibility_projection_version: BA_VISUAL_PROJECTION_VERSION,
+      compatibility_projection_strategy: 'deterministic_read_time_from_preserved_ba_artifacts',
       legacy_fallbacks_used: [],
       snapshot_mode: true,
       customer_facing_model_names_exposed: false,
@@ -2207,6 +2355,7 @@ export function buildBusinessEngineContract(record, options = {}) {
     current_business_reality: buildCurrentBusinessReality({
       draft,
       briefing,
+      fiveFutures,
       lastUpdated,
       answers,
       oneMove,

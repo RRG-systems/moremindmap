@@ -477,12 +477,21 @@ function pillarList(dimensionsNode) {
       const item = pillars[key];
       if (!item) return null;
       const score = item.score ?? item.value ?? null;
-      const label = displayText(item.label || item.summary || item.description, 96);
+      const classification = displayText(item.label || item.summary || item.description, 96);
+      const evidence = listFrom(item.evidence, 2);
+      const explanation = displayText(
+        evidence.length ? evidence.join(' ') : item.caution || classification,
+        180
+      );
       return {
         key,
         title: labels[key],
         score: score === null || score === undefined ? null : String(score),
-        label: label || (score !== null ? `${score} / 10` : UNAVAILABLE),
+        label: explanation || (score !== null ? `${score} / 10` : UNAVAILABLE),
+        classification,
+        source_type: item.source_type || null,
+        fallback_used: Boolean(item.fallback_used),
+        fallback_reason: item.fallback_reason || null,
       };
     })
     .filter(Boolean);
