@@ -60,7 +60,7 @@ export default function VisualDNADraftPanel() {
             <p className="text-center text-[0.62rem] font-bold uppercase tracking-[0.24em] text-white/40">
               Operating System Map
             </p>
-            <p className="mt-2 text-center text-lg font-bold text-white">Darren Kirkland</p>
+            <p className="mt-2 text-center text-lg font-bold text-white">Avery North</p>
             <div className="mt-6 grid grid-cols-4 gap-4">
               {ALL_OPERATING_SCORES.map((s) => (
                 <ScoreArc

@@ -1,4 +1,4 @@
-import { getTammyBALabRetrieveFixture } from '../../lab/getTammyBALabFixture.js';
+import { getSyntheticBALabRetrieveFixture } from '../../lab/getTammyBALabFixture.js';
 
 export const BA_RETRIEVE_NOT_FOUND_MESSAGE =
   'We could not find a completed Business Assessment for that Profile ID. Please check the ID and try again.';
@@ -200,7 +200,7 @@ export async function retrieveBusinessAssessment(rawId, buildApiUrl) {
     }
   }
 
-  const labFixture = getTammyBALabRetrieveFixture(identifier.normalized);
+  const labFixture = getSyntheticBALabRetrieveFixture(identifier.normalized);
   const labNormalized = normalizeRetrieveResponse(labFixture);
 
   if (import.meta.env.DEV && labNormalized?.success && labNormalized.found && labNormalized.assessment) {

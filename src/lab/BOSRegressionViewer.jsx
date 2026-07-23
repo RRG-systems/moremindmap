@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { bosRegressionDataDarrenMmb9 as data } from './bosRegressionData.darren.mmb9.js';
+import { bosRegressionDataSynthetic as data } from './bosRegressionData.darren.mmb9.js';
 import {
   CUSTOMER_SECTION_ORDER,
-  customerBosSectionsDarrenMmb11,
+  customerBosSectionsSynthetic,
   formatCustomerBosFullText,
   formatCustomerSectionContent,
 } from './customerBosRenderer.js';
 import {
-  DARREN_OPERATING_SCORES,
+  SYNTHETIC_OPERATING_SCORES,
   SCORES_REVEAL_META,
   UNAVAILABLE_SCORE_DIMENSIONS,
   UNIVERSAL_TRANSLATOR_LAB_NOTE,
@@ -21,7 +21,7 @@ import {
   PREMIUM_SHELL_META,
 } from './premiumCustomerBosData.js';
 
-const NOTES_KEY = 'mmb10_darren_bos_regression_review_notes';
+const NOTES_KEY = 'mmm_synthetic_bos_regression_review_notes';
 
 const SECTION_ORDER = ['executiveSummary', 'fiveFutures', 'recommendedNextStep', 'facilitatorNotes'];
 
@@ -204,7 +204,7 @@ function SectionPanel({ sectionMeta, defaultSection, gpt55Section, syncScroll })
 
 function TechCustomerSectionPanel({ sectionId, syncScroll }) {
   const technicalText = formatSectionContent(sectionId, data.gpt55Sections[sectionId]);
-  const customerText = formatCustomerSectionContent(sectionId, customerBosSectionsDarrenMmb11[sectionId]);
+  const customerText = formatCustomerSectionContent(sectionId, customerBosSectionsSynthetic[sectionId]);
 
   return (
     <section id={`mmb11-section-${sectionId}`} className="scroll-mt-28">
@@ -289,7 +289,7 @@ function WhatYourScoresReveal() {
       </div>
 
       <div className="space-y-5">
-        {DARREN_OPERATING_SCORES.map((score) => (
+        {SYNTHETIC_OPERATING_SCORES.map((score) => (
           <article key={score.dimension} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
             <div className="flex flex-wrap items-baseline gap-3">
               <h3 className="text-lg font-bold text-white">{score.dimension}</h3>
@@ -433,15 +433,15 @@ export default function BOSRegressionViewer() {
   const sectionNavOrder = activeView === 'mmb9-compare' ? SECTION_ORDER : CUSTOMER_SECTION_ORDER;
 
   const fiveFuturesText = useMemo(
-    () => formatCustomerSectionContent('fiveFutures', customerBosSectionsDarrenMmb11.fiveFutures),
+    () => formatCustomerSectionContent('fiveFutures', customerBosSectionsSynthetic.fiveFutures),
     [],
   );
   const oneMoveText = useMemo(
-    () => formatCustomerSectionContent('recommendedNextStep', customerBosSectionsDarrenMmb11.recommendedNextStep),
+    () => formatCustomerSectionContent('recommendedNextStep', customerBosSectionsSynthetic.recommendedNextStep),
     [],
   );
   const teamFitText = useMemo(
-    () => formatCustomerSectionContent('facilitatorNotes', customerBosSectionsDarrenMmb11.facilitatorNotes),
+    () => formatCustomerSectionContent('facilitatorNotes', customerBosSectionsSynthetic.facilitatorNotes),
     [],
   );
 
@@ -453,7 +453,7 @@ export default function BOSRegressionViewer() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-[0.68rem] font-bold uppercase tracking-[0.24em] text-orange-200/80">Visual Lab · BOS Regression</p>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-white/90">Darren BOS Lab Viewer</h1>
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-white/90">Avery BOS Lab Viewer</h1>
               <p className="mt-1 text-sm text-white/50">Internal lab route · Profile: {PREMIUM_SHELL_META.profileId}</p>
             </div>
             <div className="flex flex-wrap gap-2">

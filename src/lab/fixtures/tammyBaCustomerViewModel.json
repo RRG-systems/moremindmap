@@ -2,251 +2,251 @@
   "mission_id": "MMB18_PREMIUM_CUSTOMER_BA_SHELL_LAB",
   "generated_at": "2026-07-07T21:01:38.285320Z",
   "view_model_version": "customer_ba_view_model_v1_lab",
-  "person_name": "Tammy Metcalf",
-  "profile_id": "mm-20260610-qes82pi1",
-  "assessment_id": "ba-20260610-3a517fd8",
+  "person_name": "Avery North",
+  "profile_id": "mm-20990101-labsyn01",
+  "assessment_id": "ba-20990101-deadbeef",
   "status": "five_futures_and_one_move_ready",
   "primary_constraint": {
     "key": "systems_constraint",
-    "label": "Systems Constraint",
-    "score": 4,
+    "label": "Synthetic label",
+    "score": 2.11,
     "confidence": "moderate",
-    "summary": "The primary constraint is the systems constraint. The reason is not simply that Tammy lacks a CRM. The deeper issue is that the business depends on Tammy personally translating every situation: meeting people, building \u2026",
-    "effect_if_unchanged": "Growth creates rework, confusion, and owner dependency.",
+    "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+    "effect_if_unchanged": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
     "symptoms": [
-      "No definitive follow-up process",
-      "Database lives in memory and scattered notes",
-      "Self-accountability without inspection rhythm"
+      "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     ],
-    "root_cause": "The business depends on Tammy personally translating every situation rather than a visible operating model."
+    "root_cause": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
   },
   "one_move": {
-    "title": "Install a 90-Day CRM Relationship Operating System",
-    "root_constraint": "Systems Constraint: Tammy's relationship skill is not yet supported by a visible database, nurture, follow-up, and accountability system.",
+    "title": "Synthetic Relationship Engine",
+    "root_constraint": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
     "intervention_category": "clean_database",
-    "recommendation": "For the next 90 days, make one CRM-based Relationship Operating System the center of the business: consolidate every known contact and lead into one database, segment contacts by relationship strength, assign every person a next touch date, and inspect the system every week against completed meaningful touches, new conversations, active leads, and follow-up tasks.",
-    "why_this_move": "This move attacks the primary constraint without forcing Tammy into a business model that fights her profile. Her advantage is relational connection, but the business currently loses leverage because relationships, leads, and follow-up are not consistently captured or inspected. A CRM relationship operating system turns her natural conversations into visible pipeline, keeps true relationships warm, reduces memory dependence, and creates the foundation for lead generation, conversion, financial tracking, and later leverage.",
-    "why_now": "Tammy has just moved from very part-time real estate into building the business full time. This is the moment when habits harden. If she scales activity before building the system, the business becomes busier and more scattered. If she builds the system now, every new relationship and opportunity can compound from the beginning.",
-    "behavior_fit": "This fits Tammy because it uses her natural relationship strength instead of making cold calling the center of the model. It also challenges her because it requires visible structure, weekly inspection, and non-negotiable follow-through, which are not the strongest parts of the profile. The system must be simple, relational, and used daily; if it becomes too complex, it will likely be avoided.",
+    "recommendation": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+    "why_this_move": "This intervention converts an existing fictional strength into a durable system while keeping complexity low and making progress observable.",
+    "why_now": "The lab business is at a clean transition point where a simple operating rhythm can be installed before additional demand increases coordination load.",
+    "behavior_fit": "The design fits a reflective, relationship-oriented operator because it uses short visible routines, a peer review, and limited administrative overhead.",
     "first_30_days": [
-      "Choose one CRM and stop storing relationship information across scattered places.",
-      "Import or manually enter the known database, starting with the approximately 65 contacts already identified.",
-      "Tag every contact by relationship strength, using a simple A/B/C/D or equivalent segmentation.",
-      "Identify the current 15-20 true relationships and assign each a next meaningful touch date.",
-      "Create one standard follow-up path for new leads: capture source, need, timing, next step, and next touch date.",
-      "Hold one weekly 30-minute inspection meeting with herself or an external accountability partner to review contacts added, touches completed, follow-ups overdue, and active opportunities."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "first_90_days": [
-      "Run the weekly CRM inspection every week without skipping it.",
-      "Assign every active lead and relationship a next action so there are no orphaned contacts.",
-      "Track the source of every new conversation, including sphere, referral, paid lead, builder-related, community, open house, or other source.",
-      "Build a repeatable monthly nurture rhythm for A, B, and C relationships.",
-      "Review which relationship segments are creating real conversations, referrals, appointments, or transactions.",
-      "Document the working version of the relationship operating system in one page so it can be repeated and later delegated or supported."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "proof_signals": [
-      "All known contacts and new leads are in one CRM.",
-      "Every meaningful relationship has a next touch date.",
-      "Overdue follow-up tasks are visible and declining.",
-      "Weekly inspection happens consistently.",
-      "Tammy can state how many A, B, C, and D relationships are in the database.",
-      "New leads are not just contacted; they are assigned to a clear follow-up path.",
-      "The business has cleaner visibility into which lead and relationship sources are producing conversations and opportunities."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "adoption_risks": [
-      "Over-customizing the CRM instead of using it daily.",
-      "Treating database cleanup as a one-time admin project rather than an operating rhythm.",
-      "Avoiding weekly inspection because self-accountability feels easier than measurement.",
-      "Continuing to rely on memory and organic conversations when the system feels tedious.",
-      "Adding more lead sources before the follow-up system is stable."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "what_to_not_do": [
-      "Do not buy more tools before choosing and using one CRM consistently.",
-      "Do not make cold calling the central strategy if the relationship system is still disorganized.",
-      "Do not chase a large database number before cleaning and nurturing the current relationship base.",
-      "Do not hire support before the core process is documented.",
-      "Do not confuse paid lead volume with a functioning pipeline.",
-      "Do not wait for the perfect system; install the simple system and inspect it weekly."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "confidence": "moderate"
   },
   "confidence_summary": {
-    "band": "moderate",
-    "score": 73,
-    "known_count": 7,
-    "observed_count": 3,
-    "inferred_count": 1,
-    "missing_count": 4,
-    "headline": "Moderate confidence \u2014 behavioral profile and stated systems gaps are strong; financial and conversion detail is incomplete."
+    "band": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "score": 34.86,
+    "known_count": 10,
+    "observed_count": 9,
+    "inferred_count": 8,
+    "missing_count": 9,
+    "headline": "Turn trusted relationships into a measured operating rhythm"
   },
   "missing_data": {
     "financial": [
-      "financial_average_sales_price",
-      "financial_gci",
-      "financial_expenses",
-      "financial_profit",
-      "financial_marketing_spend",
-      "financial_p_and_l",
-      "financial_team_overhead",
-      "financial_net_income"
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+      "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent."
     ],
     "confidence_engine_missing": [
-      "q1_missing_or_vague",
-      "q7_missing_or_vague",
-      "q10_missing_or_vague",
-      "complete_financial_detail"
+      "Synthetic evidence gap retained to exercise honest-absence rendering.",
+      "Synthetic evidence gap retained to exercise honest-absence rendering.",
+      "Synthetic evidence gap retained to exercise honest-absence rendering.",
+      "Synthetic evidence gap retained to exercise honest-absence rendering."
     ],
-    "customer_note": "Net income goals are stated, but GCI, expenses, marketing spend, and P&L detail were not provided. This briefing is an operating diagnostic, not a complete financial model."
+    "customer_note": "Synthetic evidence gap retained to exercise honest-absence rendering."
   },
   "overview": {
-    "what_this_assessment_is_really_saying": "Tammy has real relationship ability and production proof, but the business still runs on personal memory and improvisation. The primary constraint is systems \u2014 not a broken business, but an operating model that cannot yet compound toward her income and balance goals.",
-    "doctrine_fusion_line": "Business reality + personality reality + future consequence",
-    "one_move_teaser": "Install a 90-Day CRM Relationship Operating System",
+    "what_this_assessment_is_really_saying": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "doctrine_fusion_line": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "one_move_teaser": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
     "confidence_band": "moderate"
   },
   "business_reality_summary": {
-    "stage": "stable solo producer",
-    "headline": "Early full-time solo business with production proof but thin operating structure.",
-    "leads": "I would go somewhere people gather and start a conversation and or call friends to see if they know anyone looking to buy or sell or refer to me.",
-    "database": "~65, 15, 20 contacts; true relationships ~15\u201320",
-    "systems": "Systems maturity 1.43; no CRM rhythm",
-    "financial": "32 units, $9.76M volume (2019\u20132026, part-time); net income goals stated without margin detail",
-    "accountability": "informal",
-    "growth_constraint": "Systems Constraint",
+    "stage": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "headline": "Turn trusted relationships into a measured operating rhythm",
+    "leads": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "database": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "systems": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "financial": "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+    "accountability": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "growth_constraint": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
     "sections": {
       "leads": {
         "key": "lead_generation_reality",
-        "title": "Lead Generation Reality",
-        "body": "Tammy stated the core issue plainly: \u201cNot enough leads but more opportunities to achieve goals.\u201d The diagnostic agrees that lead generation pressure is elevated, but it should not be treated as the only problem. Her instinctive generation behavior is relational and community-based: go where people gather, start conversations, and call friends to see who they know. That is aligned with her behavioral profile and likely more sustainable than heavy cold calling. However, she also says she does not like cold calls, though she has done them, and she is not sure what she is unwilling to do. This shows willingness is not absent, but the generation lane is not yet chosen with enough specificity. Paid lead generation has produced several leads, but there is no source mix, activity standard, or cost-to-result analysis. The risk is inconsistent generation driven by mood, comfort, or urgency instead of an inspected weekly rhythm.",
+        "title": "Synthetic Relationship Engine",
+        "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
         "evidence": [
-          "q1: not enough leads",
-          "q4: go where people gather; call friends for referrals",
-          "q6: does not like cold calls but has done them",
-          "q5: several leads from paid lead generation"
+          "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
         ],
         "confidence": "moderate"
       },
       "database": {
         "key": "relationship_database_reality",
-        "title": "Relationship / Database Reality",
-        "body": "The database is currently an underbuilt asset, not yet a compounding engine. Tammy estimates she may have about 65 people to pull together, with maybe 15-20 true relationships. This is a useful and honest distinction. The real estate model treats the database as the primary business asset, but not because names in a CRM automatically create opportunity. The lake is only healthy when people know, trust, remember, refer, repeat, or can be reactivated. Tammy has relationship strength, but the relationship asset is not yet organized, segmented, or nurtured at the level required by her goals. She wants 200-300 database contacts in 12 months, 600-1200 in 24 months, and 2222 in 36 months. Those goals are possible only if the database becomes a managed operating asset with categories, touch rhythm, reactivation, and referral prompts. Vendor database evidence is not present, though her son\u2019s contractor/builder connection may represent a relationship lane.",
+        "title": "Synthetic Relationship Engine",
+        "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
         "evidence": [
-          "q3: maybe 65 contacts and 15-20 true relationships",
-          "q2: database goals of 200-300, 600-1200, and 2222",
-          "Business Intelligence Draft relationship_asset_strength: moderate_to_strong",
-          "Real Estate Business Model V1: Lake and database as primary asset"
+          "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
         ],
         "confidence": "moderate"
       },
       "systems": {
         "key": "systems_reality",
-        "title": "Systems Reality",
-        "body": "Systems are the clearest operating gap in the assessment. Tammy says directly, \u201cI don\u2019t have any systems in place and thus the reason I\u2019m here,\u201d and \u201cI need to find a system that works for me for database and nurture and follow-up.\u201d The Business Intelligence Draft scores overall systems maturity at 1.43, with database system at 1, financial tracking at 0, and accountability rhythm at 0. Some functional behaviors exist around buyers and lead conversion, but they are not yet mature systems. The real estate model distinguishes tools from systems. A CRM alone will not solve this unless it carries a simple operating model: who goes in, how they are segmented, what touch plan they receive, what follow-up standards apply, and what is reviewed weekly. The implication is direct: the business cannot scale toward her income and balance goals while living mainly in personal effort and memory.",
+        "title": "Synthetic Relationship Engine",
+        "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
         "evidence": [
-          "q5: no systems in place",
-          "q5: needs database, nurture, and follow-up system",
-          "Business Intelligence Draft systems overall_maturity_score: 1.43",
-          "Business Intelligence Draft financial_tracking_system: 0; accountability_rhythm: 0"
+          "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
         ],
         "confidence": "high"
       },
       "financial": {
         "key": "financial_reality",
-        "title": "Financial Reality",
-        "body": "Financial clarity is partial. Tammy provided useful production history: 2019-2026 in North Carolina only, average sales price stated as 309,587, 32 units closed, and sales volume of 9,757,625. She also stated this was while working very part time and sometimes not at all, which suggests the production history may understate her full-time potential. However, the diagnostic cannot responsibly model profitability from these numbers alone. GCI, splits, referral fees, expenses, marketing spend, paid lead cost, CRM/tool cost, taxes, net income detail, profit by source, and P&L data are not provided. Her goals are expressed in netted income: 111,000 at 12 months, 222,000 at 24 months, and 333,000 at 36 months. Because net income is the target, the missing financial data matters. Revenue growth without margin visibility can create a busier business that does not produce the intended life outcome.",
+        "title": "Synthetic Relationship Engine",
+        "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
         "evidence": [
-          "q9: 32 units, 9,757,625 sales volume, average sales price 309,587",
-          "q2: netted income goals of 111,000, 222,000, and 333,000",
-          "Business Intelligence Draft missing financial data: GCI, expenses, profit, marketing spend, P&L, net income",
-          "q10: not sure how to answer"
+          "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
         ],
         "confidence": "moderate"
       },
       "accountability": {
         "key": "accountability_reality",
-        "title": "Accountability Reality",
-        "body": "Accountability is currently informal and self-contained. Tammy answered the accountability question with \u201cMe, myself and I :)\u201d That is candid and important. For a solo agent, self-accountability is normal at the beginning, but it is not usually enough to move from intention into consistent execution, especially when the business requires new habits that do not match the owner\u2019s natural wiring. Her behavioral profile shows strong relational awareness and adaptability, but low structure and command. That combination can create a pattern where Tammy knows what matters, cares deeply, adjusts well in the moment, and still does not inspect the behavior consistently. Accountability here does not mean pressure for its own sake. It means a visible cadence where database growth, meaningful touches, lead generation activities, follow-up attempts, appointments, and financial indicators are reviewed often enough to change behavior before the month is already lost.",
+        "title": "Synthetic Relationship Engine",
+        "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
         "evidence": [
-          "q7: Me, myself and I",
-          "Business Intelligence Draft accountability maturity_label: informal",
-          "Business Intelligence Draft accountability rhythm score: 0",
-          "Behavior profile: low Structure and Command"
+          "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+          "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
         ],
         "confidence": "moderate"
       }
     }
   },
   "behavioral_reality_summary": {
-    "profile_type": "Relational Awareness/Adaptability",
+    "profile_type": "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
     "top_dimensions": [
       {
-        "label": "Signal",
-        "score": 0.82
+        "label": "Synthetic label",
+        "score": 0.6
       },
       {
-        "label": "Adaptability",
-        "score": 0.77
+        "label": "Synthetic label",
+        "score": 0.58
       },
       {
-        "label": "Perspective",
-        "score": 0.67
+        "label": "Synthetic label",
+        "score": 0.53
       }
     ],
     "low_dimensions": [
       {
-        "label": "Command",
+        "label": "Synthetic label",
         "score": 0
       },
       {
-        "label": "Structure",
-        "score": -0.17
+        "label": "Synthetic label",
+        "score": 0.14
       }
     ],
-    "headline": "The operator may read people and context well but still fail to convert awareness into inspected behavior.",
+    "headline": "Turn trusted relationships into a measured operating rhythm",
     "helps_business": [
-      "Signal can support business execution when paired with visible systems.",
-      "Adaptability can support business execution when paired with visible systems.",
-      "Perspective can support business execution when paired with visible systems.",
-      "Goals are specific enough to begin testing business reality against desired future."
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference."
     ],
     "distorts_business": [
-      "The operator may read people and context well but still fail to convert awareness into inspected behavior."
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference."
     ],
     "implementation_risks": [
-      "Relational scanning can feel like a system when it is not one",
-      "Low Structure/Command makes inspection and cadence less natural",
-      "Pressure may increase anxiety and reduce follow-through discipline"
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
+      "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference."
     ],
-    "behavior_to_business": "Tammy\u2019s profile, Relational Awareness/Adaptability, fits much of what she described. Her strongest behavioral dimensions are Signal at 0.82 and Adaptability at 0.77, with Perspective also elevated at 0.67. In business t\u2026",
+    "behavior_to_business": "Synthetic behavioral signal: reflective pacing with strong relational awareness and moderate structure preference.",
     "section": {
       "key": "behavioral_reality_applied_to_business",
-      "title": "Behavioral Reality Applied to the Business",
-      "body": "Tammy\u2019s profile, Relational Awareness/Adaptability, fits much of what she described. Her strongest behavioral dimensions are Signal at 0.82 and Adaptability at 0.77, with Perspective also elevated at 0.67. In business terms, she is likely good at reading people, sensing context, adjusting in conversation, and creating trust without a rigid script. That is an asset in real estate, especially in relationship and referral-based production. The risk is that high relational awareness can feel like a system when it is not one. The profile also shows low Command at 0 and low Structure at -0.17. That means decisions, boundaries, cadence, documentation, and inspection may not naturally lead the operating system. Under pressure, the profile suggests relational scanning increases while command and structure disappear. This explains why she can connect naturally but still not have a definitive process.",
+      "title": "Synthetic Relationship Engine",
+      "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
       "evidence": [
-        "Canonical profile: Relational Awareness/Adaptability",
-        "Ranked dimensions: Signal 0.82, Adaptability 0.77, Perspective 0.67",
-        "Low dimensions: Command 0, Structure -0.17",
-        "q8: no definitive process; relationship-led business"
+        "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
       ],
       "confidence": "high"
     }
   },
   "business_model_alignment_summary": {
-    "headline": "E-to-P transition: relationship strength present; lake not yet a managed asset.",
-    "relationship_asset": "moderate_to_strong",
-    "lead_generation": "Relational/community lane aligned with profile; not yet inspected weekly",
-    "crm_follow_up": "Human nurture instinct present; no standardized pipeline or response standards",
-    "financial_discipline": "Production history known; net economics not modeled",
-    "systems_accountability": "Systems maturity 1.43; accountability rhythm score 0",
+    "headline": "Turn trusted relationships into a measured operating rhythm",
+    "relationship_asset": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "lead_generation": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "crm_follow_up": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+    "financial_discipline": "Synthetic financial signal used only for lab rendering; values are fictional and internally consistent.",
+    "systems_accountability": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
     "section": {
       "key": "current_business_reality",
-      "title": "Current Business Reality",
-      "body": "Tammy\u2019s current reality sits between past part-time production and a newly intentional full-time business. The Business Intelligence Draft labels the stage as stable solo producer, but her own language is more transitional: \u201cI just started full time and I am building a new business.\u201d This distinction matters. She has proof of market participation, but she does not yet have the database, follow-up, accountability, and financial tracking maturity that would support the 12-, 24-, and 36-month goals. Her goals are numerically specific around database growth and netted income, but the path is not yet translated into operating math. The desired future includes a larger database, higher net income, a solid CRM, better balance, and eventual easing toward retirement. The business model lens says this is an E-to-P transition: moving from entrepreneurial effort into purposeful systems.",
+      "title": "Synthetic Relationship Engine",
+      "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
       "evidence": [
-        "Business Intelligence Draft current_stage: stable_solo_producer",
-        "q2: 12-, 24-, 36-month database and netted income goals",
-        "q5: just started full time and building a new business",
-        "Real Estate Business Model V1: E -> P framework"
+        "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 4: fictional CRM and operating-rhythm signal."
       ],
       "confidence": "moderate"
     }
@@ -254,43 +254,43 @@
   "constraint_summary": {
     "primary": {
       "key": "systems_constraint",
-      "label": "Systems Constraint",
-      "score": 4,
+      "label": "Synthetic label",
+      "score": 2.11,
       "confidence": "moderate",
-      "summary": "The primary constraint is the systems constraint. The reason is not simply that Tammy lacks a CRM. The deeper issue is that the business depends on Tammy personally translating every situation: meeting people, building \u2026",
-      "effect_if_unchanged": "Growth creates rework, confusion, and owner dependency.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "effect_if_unchanged": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
       "symptoms": [
-        "No definitive follow-up process",
-        "Database lives in memory and scattered notes",
-        "Self-accountability without inspection rhythm"
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
       ],
-      "root_cause": "The business depends on Tammy personally translating every situation rather than a visible operating model."
+      "root_cause": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     },
     "trajectory_signal": {
-      "signal": "systems_drag",
-      "source_constraint": "systems_constraint",
-      "label": "Systems Constraint"
+      "signal": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "source_constraint": "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+      "label": "Synthetic label"
     },
     "symptoms_vs_root": {
       "symptoms": [
-        "Not enough leads (stated)",
-        "No definitive process",
-        "Database not consolidated"
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+        "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
       ],
-      "root_cause": "The business depends on Tammy personally translating every situation rather than a visible operating model."
+      "root_cause": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     },
-    "why_creates_trajectory": "The current trajectory signal is systems drag. That means the business is likely to create more friction as ambition rises unless the operating model changes. Tammy\u2019s production history shows that she can generate and c\u2026",
-    "if_unchanged": "Growth creates rework, confusion, and owner dependency.",
+    "why_creates_trajectory": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+    "if_unchanged": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
     "section": {
       "key": "primary_constraint",
-      "title": "Primary Constraint",
-      "body": "The primary constraint is the systems constraint. The reason is not simply that Tammy lacks a CRM. The deeper issue is that the business depends on Tammy personally translating every situation: meeting people, building relationship, gathering needs, making a plan, remembering follow-up, and deciding what to do next. That is entrepreneurial mode. It can produce sales, but it does not reliably produce compounding growth, predictable net income, or peace. The Business Intelligence Draft ranks systems constraint highest, with evidence from q5, q8, and q12: no systems in place, no definitive process, and concern that growth will require restructuring time and threaten calm. The behavioral profile intensifies this because low Structure and low Command make it less likely that systems will appear naturally without deliberate design. If unchanged, growth will create rework, inconsistency, and owner dependency.",
+      "title": "Synthetic Relationship Engine",
+      "body": "Avery creates value through careful listening, practical decisions, and consistent client care. The synthetic constraint is not demand alone; it is translating relationship strength into visible segmentation, scheduled next actions, and a weekly inspection rhythm.",
       "evidence": [
-        "Business Intelligence Draft primary_constraint: systems_constraint",
-        "q5: no systems in place",
-        "q8: no definitive process",
-        "q12: would have to restructure life and time; calm and peace at stake",
-        "Behavior profile: Structure -0.17 and Command 0"
+        "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 2: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 3: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 4: fictional CRM and operating-rhythm signal.",
+        "Synthetic evidence 5: fictional CRM and operating-rhythm signal."
       ],
       "confidence": "moderate"
     }
@@ -298,241 +298,241 @@
   "five_futures_cards": [
     {
       "key": "current_future",
-      "label": "Current Future",
-      "title": "Relationship Skill Carrying an Unsystemized Business",
-      "probability": 25,
+      "label": "Synthetic label",
+      "title": "Synthetic Relationship Engine",
+      "probability": 12.08,
       "status": "active",
-      "summary": "Tammy continues building from natural connection, referrals, builder-related relationships, paid leads, and personal follow-up, but the business remains dependent on her memory, mood, and availability because the core relationship and follow-up system is not yet formalized.",
-      "short_interpretation": "The business works when Tammy is personally engaged, but it does not yet compound reliably.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "short_interpretation": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "behavioral_modifier": [
-        "High relational awareness supports trust-building and client connection.",
-        "High adaptability helps her respond to individual client needs.",
-        "Low structure makes it easier to rely on flexible judgment than repeatable process.",
-        "Low command can delay decisive operating standards and inspection."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
       "business_drivers": [
-        "Solo agent structure with no team leverage.",
-        "Relationship-driven acquisition is present but not yet systematized.",
-        "Database asset exists but is small and not fully organized.",
-        "Lead generation is acknowledged as insufficient.",
-        "Follow-up is described as calling, texting, auto search, and periodic touch base rather than a defined system."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
-      "trajectory_logic": "This future forms because Tammy has enough relational skill to create opportunity, but the business is still organized around personal effort rather than a documented database, nurture, follow-up, financial, and accountability rhythm.",
-      "risk_if_unchanged": "The business can stay productive in pockets but will likely remain inconsistent, emotionally expensive, and overly dependent on Tammy's personal follow-through.",
-      "required_shift": "Convert relationship memory into a visible CRM-based relationship, follow-up, and accountability system.",
+      "trajectory_logic": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "risk_if_unchanged": "Opportunity remains scattered, follow-up quality varies, and owner dependency continues.",
+      "required_shift": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "confidence": "moderate"
     },
     {
       "key": "most_likely_next_future",
-      "label": "Most Likely Next Future",
-      "title": "More Activity, Same Operating Drag",
-      "probability": 30,
+      "label": "Synthetic label",
+      "title": "Synthetic Relationship Engine",
+      "probability": 14.45,
       "status": "most_likely_next",
-      "summary": "If nothing material changes, Tammy is most likely to increase activity as a full-time agent, create more conversations, and close some opportunities, but the lack of a defined database and follow-up system keeps growth uneven.",
-      "short_interpretation": "More effort produces more motion, but not yet a more durable business.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "short_interpretation": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "behavioral_modifier": [
-        "Adaptability may keep the business moving but can also prevent firm operating commitments.",
-        "Relational awareness may favor organic conversations over structured prospecting.",
-        "Low framework score raises risk that new contacts are not captured or nurtured consistently.",
-        "Command suppression may show up as delayed standards around weekly activity."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
       "business_drivers": [
-        "The business has a plausible relationship-based path but not yet enough organized relationship inventory.",
-        "Paid lead generation has produced several leads, but the conversion and follow-up process is not fully clear.",
-        "Builder-family connection may create opportunities, but it is not described as a formal channel.",
-        "No team layer exists to absorb complexity."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
-      "trajectory_logic": "This future forms because Tammy's relational skill and increased focus should generate more conversations, but without a disciplined CRM, nurture cadence, and weekly inspection, the additional activity is likely to create scattered opportunity rather than clean pipeline growth.",
-      "risk_if_unchanged": "Tammy may become busier while still feeling behind, with opportunity leaking through inconsistent capture, nurturing, and inspection.",
-      "required_shift": "Tie every new conversation, lead, and relationship to a single database and follow-up rhythm immediately.",
+      "trajectory_logic": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "risk_if_unchanged": "Opportunity remains scattered, follow-up quality varies, and owner dependency continues.",
+      "required_shift": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "confidence": "moderate"
     },
     {
       "key": "constraint_future",
-      "label": "Constraint Future",
-      "title": "Pipeline Friction and Relationship Decay",
-      "probability": 22,
+      "label": "Synthetic label",
+      "title": "Synthetic Relationship Engine",
+      "probability": 10.65,
       "status": "active",
-      "summary": "If the systems constraint persists, Tammy's growth goals become constrained by scattered contacts, inconsistent follow-up, unclear lead math, and self-managed accountability. The business remains dependent on fresh effort rather than compounding relationship equity.",
-      "short_interpretation": "The bottleneck is not only lead volume; it is unconverted, unorganized, and under-nurtured opportunity.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "short_interpretation": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "behavioral_modifier": [
-        "High relational sensitivity can lead to over-customizing instead of standardizing.",
-        "Adaptability may compensate temporarily, making the system gap look less urgent until volume rises.",
-        "Low structure creates risk of inconsistent routines.",
-        "Low command can make it difficult to enforce non-negotiable prospecting and follow-up standards."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
       "business_drivers": [
-        "Database goal is large relative to current known database size.",
-        "Lead generation is already identified as insufficient.",
-        "No formal accountability rhythm is documented.",
-        "Solo operator model limits capacity when volume increases.",
-        "Financial tracking system score is 0 in the draft."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
-      "trajectory_logic": "This future forms if Tammy attempts to reach larger database and income goals without first installing the operating structure that makes relationships visible, segmented, touched, and inspected.",
-      "risk_if_unchanged": "The likely risk is a business that grows in effort but not reliability, with database decay, missed follow-up, uneven income, and pressure on Tammy's desired calm and balance.",
-      "required_shift": "Stop treating the CRM, follow-up, and accountability rhythm as future infrastructure; make them the current operating center.",
+      "trajectory_logic": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "risk_if_unchanged": "Opportunity remains scattered, follow-up quality varies, and owner dependency continues.",
+      "required_shift": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "confidence": "moderate"
     },
     {
       "key": "optimized_future",
-      "label": "Optimized Future",
-      "title": "Systemized Relationship Engine",
-      "probability": 18,
+      "label": "Synthetic label",
+      "title": "Synthetic Relationship Engine",
+      "probability": 8.76,
       "status": "requires_change",
-      "summary": "If Tammy addresses the systems constraint with discipline, her relational strength can be converted into a visible CRM, segmented database, meaningful touch cadence, clean follow-up process, and weekly accountability rhythm. This makes growth more repeatable and less dependent on improvisation.",
-      "short_interpretation": "The optimized future turns natural connection into managed relationship equity.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "short_interpretation": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "behavioral_modifier": [
-        "High relational awareness is well-suited to a relationship database strategy.",
-        "Adaptability can make touches feel human rather than mechanical.",
-        "Moderate perspective supports longer-term database thinking.",
-        "The system must be simple enough to avoid triggering structure resistance."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
       "business_drivers": [
-        "Existing relationships can be consolidated and reactivated.",
-        "The business can reduce dependence on cold activity by compounding the lake.",
-        "Paid leads and builder-related opportunities can be captured into the same follow-up model.",
-        "A weekly scorecard can replace self-encouragement with visible inspection."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
-      "trajectory_logic": "This future forms if Tammy installs a simple but non-negotiable relationship operating system before scaling lead volume. Her behavioral profile fits relationship-based growth, but it needs structure, inspection, and database discipline to compound.",
-      "risk_if_unchanged": "Without intervention, this optimized path stays possible but underweighted.",
-      "required_shift": "Install and run one CRM-based relationship operating system for 90 days before adding complexity.",
+      "trajectory_logic": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "risk_if_unchanged": "Opportunity remains scattered, follow-up quality varies, and owner dependency continues.",
+      "required_shift": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "confidence": "moderate"
     },
     {
       "key": "transformational_future",
-      "label": "Transformational Future",
-      "title": "Purposeful Solo Platform with Selective Leverage",
-      "probability": 5,
+      "label": "Synthetic label",
+      "title": "Synthetic Relationship Engine",
+      "probability": 2.58,
       "status": "requires_new_model",
-      "summary": "The highest-upside future is a purposeful business model where Tammy operates from a documented relationship platform, clear financial dashboard, defined lead source strategy, and selective support or leverage as needed. This would move the business beyond personal production alone.",
-      "short_interpretation": "Transformation requires moving from personal effort to an operating platform.",
+      "summary": "This fictional lab profile has credible relationship strength, uneven follow-up discipline, and a clear opportunity to convert personal trust into a repeatable operating system.",
+      "short_interpretation": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "behavioral_modifier": [
-        "Relational strengths could support a high-trust referral platform.",
-        "Adaptability can help evolve the model over time.",
-        "Low structure and low command mean transformation will require externalized standards, not just intention.",
-        "Pressure mechanics indicate structure can disappear under stress unless built before volume rises."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
       "business_drivers": [
-        "A purposeful platform would require a documented client journey, database model, lead source model, financial review rhythm, and accountability cadence.",
-        "Selective leverage is premature until the core process is documented.",
-        "The current solo model can be a strength if simplified and systemized before expansion."
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+        "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       ],
-      "trajectory_logic": "This future forms only if Tammy first proves the core relationship operating system, then adds financial clarity and selective leverage around documented processes rather than adding people or tools to an unclear model.",
-      "risk_if_unchanged": "Without a new model, this path remains aspirational rather than operational.",
-      "required_shift": "After proving the CRM relationship system, build the financial dashboard and support model around documented work, not around overwhelm.",
+      "trajectory_logic": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "risk_if_unchanged": "Opportunity remains scattered, follow-up quality varies, and owner dependency continues.",
+      "required_shift": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "confidence": "low"
     }
   ],
   "one_move_card": {
-    "title": "Install a 90-Day CRM Relationship Operating System",
-    "root_constraint": "Systems Constraint: Tammy's relationship skill is not yet supported by a visible database, nurture, follow-up, and accountability system.",
+    "title": "Synthetic Relationship Engine",
+    "root_constraint": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
     "intervention_category": "clean_database",
-    "recommendation": "For the next 90 days, make one CRM-based Relationship Operating System the center of the business: consolidate every known contact and lead into one database, segment contacts by relationship strength, assign every person a next touch date, and inspect the system every week against completed meaningful touches, new conversations, active leads, and follow-up tasks.",
-    "why_this_move": "This move attacks the primary constraint without forcing Tammy into a business model that fights her profile. Her advantage is relational connection, but the business currently loses leverage because relationships, leads, and follow-up are not consistently captured or inspected. A CRM relationship operating system turns her natural conversations into visible pipeline, keeps true relationships warm, reduces memory dependence, and creates the foundation for lead generation, conversion, financial tracking, and later leverage.",
-    "why_now": "Tammy has just moved from very part-time real estate into building the business full time. This is the moment when habits harden. If she scales activity before building the system, the business becomes busier and more scattered. If she builds the system now, every new relationship and opportunity can compound from the beginning.",
-    "behavior_fit": "This fits Tammy because it uses her natural relationship strength instead of making cold calling the center of the model. It also challenges her because it requires visible structure, weekly inspection, and non-negotiable follow-through, which are not the strongest parts of the profile. The system must be simple, relational, and used daily; if it becomes too complex, it will likely be avoided.",
+    "recommendation": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+    "why_this_move": "This intervention converts an existing fictional strength into a durable system while keeping complexity low and making progress observable.",
+    "why_now": "The lab business is at a clean transition point where a simple operating rhythm can be installed before additional demand increases coordination load.",
+    "behavior_fit": "The design fits a reflective, relationship-oriented operator because it uses short visible routines, a peer review, and limited administrative overhead.",
     "first_30_days": [
-      "Choose one CRM and stop storing relationship information across scattered places.",
-      "Import or manually enter the known database, starting with the approximately 65 contacts already identified.",
-      "Tag every contact by relationship strength, using a simple A/B/C/D or equivalent segmentation.",
-      "Identify the current 15-20 true relationships and assign each a next meaningful touch date.",
-      "Create one standard follow-up path for new leads: capture source, need, timing, next step, and next touch date.",
-      "Hold one weekly 30-minute inspection meeting with herself or an external accountability partner to review contacts added, touches completed, follow-ups overdue, and active opportunities."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "first_90_days": [
-      "Run the weekly CRM inspection every week without skipping it.",
-      "Assign every active lead and relationship a next action so there are no orphaned contacts.",
-      "Track the source of every new conversation, including sphere, referral, paid lead, builder-related, community, open house, or other source.",
-      "Build a repeatable monthly nurture rhythm for A, B, and C relationships.",
-      "Review which relationship segments are creating real conversations, referrals, appointments, or transactions.",
-      "Document the working version of the relationship operating system in one page so it can be repeated and later delegated or supported."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "proof_signals": [
-      "All known contacts and new leads are in one CRM.",
-      "Every meaningful relationship has a next touch date.",
-      "Overdue follow-up tasks are visible and declining.",
-      "Weekly inspection happens consistently.",
-      "Tammy can state how many A, B, C, and D relationships are in the database.",
-      "New leads are not just contacted; they are assigned to a clear follow-up path.",
-      "The business has cleaner visibility into which lead and relationship sources are producing conversations and opportunities."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "adoption_risks": [
-      "Over-customizing the CRM instead of using it daily.",
-      "Treating database cleanup as a one-time admin project rather than an operating rhythm.",
-      "Avoiding weekly inspection because self-accountability feels easier than measurement.",
-      "Continuing to rely on memory and organic conversations when the system feels tedious.",
-      "Adding more lead sources before the follow-up system is stable."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "what_to_not_do": [
-      "Do not buy more tools before choosing and using one CRM consistently.",
-      "Do not make cold calling the central strategy if the relationship system is still disorganized.",
-      "Do not chase a large database number before cleaning and nurturing the current relationship base.",
-      "Do not hire support before the core process is documented.",
-      "Do not confuse paid lead volume with a functioning pipeline.",
-      "Do not wait for the perfect system; install the simple system and inspect it weekly."
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday.",
+      "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     ],
     "confidence": "moderate"
   },
   "visual_dna": {
     "business_assessment_map": {
-      "title": "Business Assessment Map",
-      "subtitle": "Business Reality Map / BA DNA",
-      "purpose": "Shows the current operating system of the business \u2014 constraint surface, trajectory signal, and operating reality fused into one visual explanation layer.",
-      "route": "/business-assessment/visual-map?id=mm-20260610-qes82pi1",
-      "data_status": "available",
-      "source": "stored_business_intelligence_draft_and_executive_diagnostic_briefing"
+      "title": "Synthetic Relationship Engine",
+      "subtitle": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "purpose": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "route": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "data_status": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "source": "Synthetic evidence 1: fictional CRM and operating-rhythm signal."
     },
     "five_futures_one_move": {
-      "title": "Five Futures + One Move",
-      "subtitle": "Trajectory Field / Future Consequence Map",
-      "purpose": "Shows probability-weighted futures and the One Move intervention that shifts the trajectory field \u2014 business-first with behavioral operating system modifiers.",
-      "route": "/business-assessment/five-futures?id=mm-20260610-qes82pi1&renderer=premium",
-      "route_auto": "/business-assessment/five-futures?id=mm-20260610-qes82pi1&renderer=auto",
-      "renderer_preference": "premium",
+      "title": "Synthetic Relationship Engine",
+      "subtitle": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "purpose": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "route": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "route_auto": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
+      "renderer_preference": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
       "premium_eligible": true,
       "legacy_fallback_used_as_success": false,
       "missing_premium_fields": [],
       "new_five_futures_visual_selected": true,
-      "source": "stored_five_futures_v1_and_one_move_v1_gpt55_baseline",
+      "source": "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
       "provenance": {
-        "futures_count": 5,
-        "probability_total": 100,
-        "one_move_title": "Install a 90-Day CRM Relationship Operating System",
+        "futures_count": 10,
+        "probability_total": 47.68,
+        "one_move_title": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably.",
         "complete_for_premium": true,
         "behavioral_drivers_present": true,
-        "behavioral_modifier_field_note": "Stored futures use behavioral_drivers; lab shell surfaces as behavioral_modifier in text tabs; premium canvas uses signal/evidence rails."
+        "behavioral_modifier_field_note": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
       }
     }
   },
   "visual_dna_cards": [
     {
       "id": "ba_map",
-      "title": "Business Assessment Map",
-      "subtitle": "Business Reality Map / BA DNA",
+      "title": "Synthetic Relationship Engine",
+      "subtitle": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
       "status": "integrated_mmb19",
-      "description": "Read-only visual map of business reality, constraint, and operating surface. Opens existing route \u2014 no new artifact generation.",
-      "safe_route_ref": "/business-assessment/visual-map?id=mm-20260610-qes82pi1",
+      "description": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "safe_route_ref": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
       "generation_allowed": false
     },
     {
       "id": "five_futures_one_move",
-      "title": "Five Futures + One Move",
-      "subtitle": "Trajectory Field / Future Consequence Map",
+      "title": "Synthetic Relationship Engine",
+      "subtitle": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
       "status": "integrated_mmb19_premium",
-      "description": "Premium trajectory visual with provenance-complete Five Futures + One Move data. Legacy fallback is error-boundary only \u2014 never presented as success.",
-      "safe_route_ref": "/business-assessment/five-futures?id=mm-20260610-qes82pi1&renderer=premium",
-      "renderer_preference": "premium",
+      "description": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "safe_route_ref": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "renderer_preference": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
       "premium_eligible": true,
       "generation_allowed": false
     }
   ],
   "advanced_source_refs": {
     "executive_diagnostic_briefing": {
-      "source": "gpt55_lab_when_present_else_stored",
+      "source": "Synthetic evidence 1: fictional CRM and operating-rhythm signal.",
       "model": "gpt-5.5-2026-04-23",
       "generated_at": "2026-07-07T18:39:59.471Z",
-      "stored_model": "gpt-4o-2024-08-06",
-      "section_count": 16
+      "stored_model": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "section_count": 12
     },
     "business_intelligence_draft": {
       "version": "business_intelligence_draft_v1",
@@ -541,74 +541,74 @@
     "five_futures_v1": {
       "version": "five_futures_v1",
       "generated_at": "2026-06-10T21:05:00.000Z",
-      "probability_total": 100,
-      "model_note": "Stored GPT-5.5 production baseline \u2014 not regenerated in MMB17C.6"
+      "probability_total": 47.68,
+      "model_note": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
     },
     "one_move_v1": {
       "version": "one_move_v1",
       "generated_at": "2026-06-10T21:05:00.000Z",
-      "model_note": "Stored GPT-5.5 production baseline \u2014 not regenerated in MMB17C.6"
+      "model_note": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     },
     "profile_canonical": {
-      "profile_id": "mm-20260610-qes82pi1",
-      "assessment_version": "mini-v2"
+      "profile_id": "mm-20990101-labsyn01",
+      "assessment_version": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     }
   },
   "model_provenance": {
     "briefing_lab": {
       "model": "gpt-5.5-2026-04-23",
-      "mission": "MMB17C6_BA_GPT55_LAB_TIMEOUT_REPAIR",
-      "scope": "executive_diagnostic_briefing_only"
+      "mission": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data.",
+      "scope": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     },
     "five_futures": {
       "model": "gpt-5.5-2026-04-23",
-      "scope": "stored_baseline_not_regenerated_mmb17c6"
+      "scope": "If the weekly relationship rhythm remains inconsistent, growth will continue to depend on owner memory and fresh effort. If the rhythm is installed, the same trusted network can compound more predictably."
     },
     "one_move": {
       "model": "gpt-5.5-2026-04-23",
-      "scope": "stored_baseline_not_regenerated_mmb17c6"
+      "scope": "Run one 90-day relationship operating rhythm: segment the synthetic database, assign every active relationship a next action, and inspect the scorecard each Friday."
     },
     "business_intelligence_draft": {
       "model": "deterministic_intake_fusion",
-      "scope": "intake_plus_profile_fusion"
+      "scope": "Synthetic lab content used to preserve production rendering and regression coverage without customer-derived data."
     }
   },
   "shell_tabs": [
     {
       "id": "overview",
-      "label": "Overview"
+      "label": "Synthetic label"
     },
     {
       "id": "business-reality",
-      "label": "Business Reality"
+      "label": "Synthetic label"
     },
     {
       "id": "behavioral-os",
-      "label": "Behavioral Operating System"
+      "label": "Synthetic label"
     },
     {
       "id": "model-alignment",
-      "label": "Business Model Alignment"
+      "label": "Synthetic label"
     },
     {
       "id": "constraint-reality",
-      "label": "Constraint Reality"
+      "label": "Synthetic label"
     },
     {
       "id": "five-futures",
-      "label": "Five Futures"
+      "label": "Synthetic label"
     },
     {
       "id": "one-move",
-      "label": "One Move"
+      "label": "Synthetic label"
     },
     {
       "id": "visual-dna",
-      "label": "Visual DNA"
+      "label": "Synthetic label"
     },
     {
       "id": "advanced-source",
-      "label": "Advanced Source"
+      "label": "Synthetic label"
     }
   ],
   "source_mutation": false

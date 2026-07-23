@@ -1,16 +1,16 @@
 /**
  * MMB12 lab-only — Premium Customer BOS shell section metadata and derived content.
- * Static fixture for Darren Kirkland; no production mutation.
+ * Static fixture for Avery North; no production mutation.
  */
 
-import { customerBosSectionsDarrenMmb11, formatCustomerSectionContent } from './customerBosRenderer.js';
+import { customerBosSectionsSynthetic, formatCustomerSectionContent } from './customerBosRenderer.js';
 import { SCORES_REVEAL_META } from './customerBosScoreMeaning.js';
 
 export const PREMIUM_SHELL_META = {
   brandLine: 'MORE MindMap / Behavioral Operating System',
-  labTitle: 'Darren BOS Customer Output Lab',
-  profileId: 'mm-20260527-6zshuaao',
-  profileName: 'Darren Kirkland',
+  labTitle: 'Avery BOS Customer Output Lab',
+  profileId: 'mm-20990102-labsyn02',
+  profileName: 'Avery North',
 };
 
 export const START_HERE_COPY = {
@@ -22,7 +22,7 @@ export const START_HERE_COPY = {
   ],
 };
 
-const sections = customerBosSectionsDarrenMmb11;
+const sections = customerBosSectionsSynthetic;
 
 export const PREMIUM_SECTION_BADGES = {
   orientation: 'Core Insight',
@@ -62,7 +62,7 @@ export const PREMIUM_EXPANDABLE_SECTIONS = [
     defaultOpen: false,
     type: 'content',
     content: formatCustomerSectionContent('executiveSummary', sections.executiveSummary),
-    evidenceNote: 'Grounded in intake answers, operating scores, and scaling constraint from MMB9 GPT-5.5 technical BOS.',
+    evidenceNote: 'Grounded exclusively in fictional intake, synthetic operating scores, and a synthetic scaling constraint.',
   },
   {
     id: 'operating-pattern',
@@ -72,51 +72,51 @@ export const PREMIUM_EXPANDABLE_SECTIONS = [
     defaultOpen: false,
     type: 'content',
     content: `**${SCORES_REVEAL_META.patternSummary.headline}**\n\n${SCORES_REVEAL_META.patternSummary.meaning}`,
-    evidenceNote: 'Derived from Vector 0.88, Velocity 0.75, Framework 0.17, Horizon 0.00 — MMB9/MMB10 lab fixture.',
+    evidenceNote: 'Derived from the synthetic Signal, Fidelity, Framework, and Horizon fixture values.',
   },
   {
     id: 'pressure-pattern',
     title: 'Pressure Pattern',
-    preview: 'Under pressure you double down: more decisive, faster, less reading of detail. Prolonged load is your break point.',
+    preview: 'Under pressure the fictional operator gathers more context and may delay commitment.',
     badge: PREMIUM_SECTION_BADGES.pressure,
     defaultOpen: false,
     type: 'content',
-    content: `Under pressure, you double down: more decisive, faster, less reading of detail. Prolonged load is your break point. Roles that require constant permission-seeking, repeated process failure without correction, or heavy coordination without clear escalation paths will drain you.
+    content: `Under pressure, the fictional operator seeks additional context and may keep options open too long. A bounded decision window and a named owner prevent thoughtful analysis from becoming delay.
 
-You are not built for indefinite coordination layers. You are built to set direction, create opportunity, and define the model — especially for a business you want to become subscription-based, residual, and eventually able to operate mostly on its own.
+The synthetic profile is designed for relationship-sensitive work with compact operating rules, visible proof conditions, and a weekly review rhythm.
 
 **A moment that shows this:** ${sections.executiveSummary.micro_scenario}
 
 **Watch for:** ${sections.executiveSummary.key_warning}`,
-    evidenceNote: 'From GPT-5.5 technical BOS pressure_pattern and executive summary grounding.',
+    evidenceNote: 'From synthetic pressure-pattern and executive-summary evidence.',
   },
   {
     id: 'team-experience',
     title: 'Team Experience',
-    preview: 'How teams experience your direction, pace, and model when momentum depends on your personal unblock.',
+    preview: 'How a fictional team experiences careful judgment when decision ownership is unclear.',
     badge: PREMIUM_SECTION_BADGES.team,
     defaultOpen: false,
     type: 'content',
     content: `**Most likely team experience:** ${sections.fiveFutures.most_likely.organization_experiences}
 
-**Pattern across futures:** Teams get movement when you step in, but movement increasingly depends on your interpretation of what should happen next. At 2x scale, your pace may confuse new team members. You leave people to work independently so their creative side shows up — but sometimes they stall until you re-enter and redirect. Initiative becomes uneven: strong contributors run, unclear contributors wait.
+**Pattern across futures:** The synthetic team benefits from thoughtful context but slows when quality standards and decision rights stay implicit. Clear acceptance criteria let contributors act without repeated owner review.
 
-**Tension point:** When someone interprets your model and makes it work for them instead of using it as designed, friction rises. Doubts may stay hidden too long.`,
+**Tension point:** Careful judgment becomes a bottleneck when the team cannot distinguish an autonomous decision from an escalation.`,
     evidenceNote: 'From Five Futures organization_experiences — customer BOS layer.',
   },
   {
     id: 'scaling-constraint',
     title: 'Scaling Constraint',
-    preview: 'At 5x scale the business needs external structure — decision frameworks, escalation paths, and clearer accountability.',
+    preview: 'At larger scale the fictional business needs visible standards, decision windows, and clearer accountability.',
     badge: PREMIUM_SECTION_BADGES.scaling,
     defaultOpen: false,
     type: 'content',
-    content: `The limit is not your drive. It is scale without scaffolding. As the business grows, your pace can confuse newer team members. Progress can start depending on you personally stepping in to clarify, restart, or redirect the work.
+    content: `The fictional limit is quality judgment that has not yet been converted into acceptance criteria. As work grows, contributors may wait for review because the proof condition is unclear.
 
-At 5x scale, the business will need decision frameworks, escalation paths, and clearer structure around your momentum. Vector plus velocity creates strong personal motion; low Framework (0.17) and Horizon (0.00) leave the broader system less able to carry that motion without you.
+At larger scale, the business needs compact standards, explicit escalation thresholds, and a weekly inspection rhythm that another owner can run.
 
-**Future risk:** Revenue or opportunity can grow faster than operating independence. That threatens your goal of a subscription-based or saleable business. Instead of becoming a residual asset, the company risks becoming founder-responsive.`,
-    evidenceNote: 'From scaling_constraint grounding in GPT-5.5 technical BOS and customer executive summary.',
+**Future risk:** Demand grows while delegation readiness stays flat, increasing delays and owner review load.`,
+    evidenceNote: 'From the synthetic scaling constraint and fictional executive summary.',
   },
   {
     id: 'five-futures',
@@ -126,7 +126,7 @@ At 5x scale, the business will need decision frameworks, escalation paths, and c
     defaultOpen: false,
     type: 'content',
     content: formatCustomerSectionContent('fiveFutures', sections.fiveFutures),
-    evidenceNote: 'Full Five Futures from customer BOS — same depth as MMB11 technical source.',
+    evidenceNote: 'Five structurally complete fictional futures retained for lab rendering.',
   },
   {
     id: 'one-move',
@@ -136,7 +136,7 @@ At 5x scale, the business will need decision frameworks, escalation paths, and c
     defaultOpen: false,
     type: 'content',
     content: formatCustomerSectionContent('recommendedNextStep', sections.recommendedNextStep),
-    evidenceNote: 'Recommended Next Step / One Move — transfer judgment intervention with first 30 days and proof signals.',
+    evidenceNote: 'Synthetic One Move with a 30-day plan and observable proof signals.',
   },
   {
     id: 'facilitator-notes',

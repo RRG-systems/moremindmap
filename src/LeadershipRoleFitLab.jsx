@@ -788,7 +788,7 @@ export default function LeadershipRoleFitLab() {
 
               {status === 'idle' && (
                 <div className="mt-4 text-xs text-white/35">
-                  Local test IDs (examples): mm-20260708-2uajy2x1 · mm-20260708-39r8j0vd · mm-20260708-dsst020z · mm-20260708-bqccs6wf
+                  Local synthetic IDs (examples): mm-20990105-labsyn05 · mm-20990106-labsyn06 · mm-20990107-labsyn07 · mm-20990108-labsyn08
                 </div>
               )}
             </section>

@@ -4,9 +4,9 @@
  */
 
 import { useState } from 'react';
-import { bosRegressionDataDarrenMmb9 as regressionData } from './bosRegressionData.darren.mmb9.js';
+import { bosRegressionDataSynthetic as regressionData } from './bosRegressionData.darren.mmb9.js';
 import {
-  customerBosSectionsDarrenMmb11,
+  customerBosSectionsSynthetic,
   formatCustomerSectionContent,
 } from './customerBosRenderer.js';
 import { PlainTextBlock, ScoresRevealContent } from './PremiumCustomerBOSShell.jsx';
@@ -152,7 +152,7 @@ function ExpandableSectionList({ sections, essentialsIds = [] }) {
 }
 
 function OneMoveTab() {
-  const step = customerBosSectionsDarrenMmb11.recommendedNextStep;
+  const step = customerBosSectionsSynthetic.recommendedNextStep;
   return (
     <section className="space-y-6">
       <article className="rounded-2xl border border-orange-400/35 bg-gradient-to-br from-orange-500/15 to-black/40 p-6 shadow-[0_0_32px_rgba(251,146,60,0.12)]">
@@ -179,7 +179,7 @@ function OneMoveTab() {
 function TeamFitTab() {
   const text = formatCustomerSectionContent(
     'facilitatorNotes',
-    customerBosSectionsDarrenMmb11.facilitatorNotes,
+    customerBosSectionsSynthetic.facilitatorNotes,
   );
   return (
     <section className="space-y-4">
