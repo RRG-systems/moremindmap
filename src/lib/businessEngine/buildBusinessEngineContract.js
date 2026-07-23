@@ -814,7 +814,6 @@ function buildRelationshipLake({
   });
   const currentTrue =
     metrics?.currentTrueRelationships ??
-    targetModel?.current_true_relationships ??
     null;
   const targetTrue =
     metrics?.relationshipTarget ??

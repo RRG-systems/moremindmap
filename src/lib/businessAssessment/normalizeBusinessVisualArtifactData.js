@@ -200,14 +200,6 @@ function metricsFromRelationshipDraft(draft) {
     if (Number.isFinite(total)) totalContacts = makeMetric(total, false, { source: 'Extracted' });
   }
 
-  if (!trueRelationships && mentions.length >= 3) {
-    const low = Number(String(mentions[1]).replace(/,/g, ''));
-    const high = Number(String(mentions[2]).replace(/,/g, ''));
-    if (Number.isFinite(low) && Number.isFinite(high)) {
-      trueRelationships = makeRangeMetric(low, high, false, { source: 'Extracted' });
-    }
-  }
-
   return { totalContacts, trueRelationships };
 }
 

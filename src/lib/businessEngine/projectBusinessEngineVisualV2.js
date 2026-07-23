@@ -793,7 +793,7 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
     })(),
     relationship_lake: (() => {
       const currentTrue =
-        lake.current_true_relationships != null ? lake.current_true_relationships : lake.current_size;
+        lake.current_true_relationships ?? lake.current_size;
       const targetTrue =
         lake.target_true_relationships != null ? lake.target_true_relationships : lake.target_size;
       const currentDisplay = formatMetricValue(currentTrue);

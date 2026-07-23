@@ -270,19 +270,6 @@ function metricsFromRelationshipDraft(draft) {
     const totalN = metricNumber(totalContacts);
     if (isPlausibleTrueRelationshipRange(low, high, totalN)) {
       trueRelationships = makeRangeMetric(low, high, false, { source: 'Extracted' });
-    } else if (Number.isFinite(low) && (!Number.isFinite(totalN) || low !== totalN)) {
-      trueRelationships = makeMetric(low, true, {
-        source: 'Extracted',
-        basis: 'mentions_true_relationship_point_after_range_reject',
-      });
-    }
-  } else if (!trueRelationships && mentions.length === 2) {
-    // [total, true] or [true, true-alt] — prefer second as TR when first is larger.
-    const a = Number(String(mentions[0]).replace(/,/g, ''));
-    const b = Number(String(mentions[1]).replace(/,/g, ''));
-    if (Number.isFinite(a) && Number.isFinite(b) && b < a) {
-      if (!totalContacts) totalContacts = makeMetric(a, false, { source: 'Extracted' });
-      trueRelationships = makeMetric(b, false, { source: 'Extracted' });
     }
   }
 

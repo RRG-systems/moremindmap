@@ -344,9 +344,9 @@ function PillarCard({ item, tone }) {
 function LakeSection({ lake }) {
   if (!lake) return null;
   const currentDisplay =
-    lake.flow?.current_true_relationships || lake.current_true_relationships || lake.current_size || '—';
+    lake.flow?.current_true_relationships ?? lake.current_true_relationships ?? lake.current_size ?? '—';
   const targetDisplay =
-    lake.flow?.target_true_relationships || lake.target_true_relationships || lake.target_size || '—';
+    lake.flow?.target_true_relationships ?? lake.target_true_relationships ?? lake.target_size ?? '—';
   const gapDisplay = lake.flow?.gap || lake.gap || '—';
   const unitLabel = lake.center_unit_label || lake.label || 'TRUE RELATIONSHIPS';
   return (
