@@ -65,6 +65,16 @@ const OUTFLOW_ALIASES = [
   { match: /pipeline|conversion/i, name: 'Pipeline Conversion' },
 ];
 
+export const OUTFLOW_TEMPORAL_CLASSES = Object.freeze({
+  CURRENT_OBSERVED: 'CURRENT_OBSERVED',
+  CURRENT_INFERRED: 'CURRENT_INFERRED',
+  FUTURE_MODELED: 'FUTURE_MODELED',
+  FUTURE_TARGET: 'FUTURE_TARGET',
+  ONE_MOVE_SUCCESS_INDICATOR: 'ONE_MOVE_SUCCESS_INDICATOR',
+  ONE_MOVE_EXPECTED_SHIFT: 'ONE_MOVE_EXPECTED_SHIFT',
+  UNKNOWN_TEMPORAL_STATE: 'UNKNOWN_TEMPORAL_STATE',
+});
+
 /** Labels that look like issue diagnoses or clipped prose — never valid outflow. */
 const INVALID_OUTFLOW_NAME_RE =
   /lead shortage|shortage possible|all known contacts|\.\.\.|overdue follow-up|weekly inspection|can state how many|new leads are not|not just contacted/i;
@@ -209,11 +219,12 @@ export function deriveRealEstateStreams({ draft, briefing, answers }) {
 }
 
 /**
- * Build outflow candidates that represent actual business outcomes.
- * Rejects conversion-issue labels and clipped One Move success-indicator prose.
+ * Build current outflow candidates from current business intelligence only.
+ * One Move and Five Futures are intentionally outside this adapter because they
+ * describe interventions and modeled futures, not what the lake produces now.
  * All results are deterministic inference — not canonical domain intelligence.
  */
-export function deriveRealEstateOutflow({ draft, oneMove, briefing }) {
+export function deriveRealEstateOutflow({ draft, briefing }) {
   const conversion = draft?.lead_conversion_reality || {};
   const production = draft?.business_reality?.current_production_reality || draft?.business_reality || {};
   const sources = [];
@@ -221,44 +232,15 @@ export function deriveRealEstateOutflow({ draft, oneMove, briefing }) {
   // Do NOT promote conversion.likely_issue (e.g. "Lead Shortage Possible") to outflow.
   // Conversion issues are constraint signals, not business outcomes.
 
-  // Only alias-matched outcome names from success indicators — never clipName(prose).
-  const success = asArray(oneMove?.success_indicators);
-  for (const item of success) {
-    const text = textFrom(item);
-    if (!text) continue;
-    const alias = OUTFLOW_ALIASES.find((entry) => entry.match.test(text));
-    if (!alias) continue;
-    sources.push({
-      name: alias.name,
-      role: 'one_move_success_indicator_alias',
-      current_state: 'modeled_target',
-      conversion_implication: text,
-      evidence: [
-        {
-          path: 'one_move_v1.success_indicators',
-          snippet: text.slice(0, 160),
-          derivation: 'alias_regex_match_only',
-        },
-      ],
-      confidence: 'inferred',
-      derivation: 'deterministic_alias_from_success_indicators',
-    });
-  }
-
-  const shiftText = textFrom(oneMove?.expected_probability_shift?.explanation || oneMove?.expected_probability_shift);
-  sources.push(
-    ...extractNamesFromText(shiftText, OUTFLOW_ALIASES, 'one_move_v1.expected_probability_shift').map((item) => ({
-      ...item,
-      role: 'modeled_shift_outcome_alias',
-      current_state: 'modeled',
-      conversion_implication: shiftText,
-      confidence: 'inferred',
-    }))
-  );
-
   const productionText = textFrom(production.summary || production.diagnostic_summary);
   sources.push(
-    ...extractNamesFromText(productionText, OUTFLOW_ALIASES, 'business_reality.production')
+    ...extractNamesFromText(productionText, OUTFLOW_ALIASES, 'business_reality.production').map(
+      (item) => ({
+        ...item,
+        role: 'current_production_outcome_alias',
+        temporal_class: OUTFLOW_TEMPORAL_CLASSES.CURRENT_INFERRED,
+      })
+    )
   );
 
   const sectionBody = (() => {
@@ -269,7 +251,15 @@ export function deriveRealEstateOutflow({ draft, oneMove, briefing }) {
     return section?.body || '';
   })();
   sources.push(
-    ...extractNamesFromText(sectionBody, OUTFLOW_ALIASES, 'briefing.conversion_or_production_section')
+    ...extractNamesFromText(
+      sectionBody,
+      OUTFLOW_ALIASES,
+      'briefing.conversion_or_production_section'
+    ).map((item) => ({
+      ...item,
+      role: 'current_briefing_outcome_alias',
+      temporal_class: OUTFLOW_TEMPORAL_CLASSES.CURRENT_INFERRED,
+    }))
   );
 
   // Structured conversion discipline → pipeline conversion when present
@@ -277,6 +267,7 @@ export function deriveRealEstateOutflow({ draft, oneMove, briefing }) {
     sources.push({
       name: 'Pipeline Conversion',
       role: 'conversion_system_signal',
+      temporal_class: OUTFLOW_TEMPORAL_CLASSES.CURRENT_INFERRED,
       current_state: textFrom(conversion.conversion_discipline) || 'unclear',
       conversion_implication: textFrom(conversion.follow_up_system_strength)
         ? `Follow-up system strength: ${textFrom(conversion.follow_up_system_strength)}`
@@ -296,6 +287,18 @@ export function deriveRealEstateOutflow({ draft, oneMove, briefing }) {
   return unique;
 }
 
+export function isCurrentOutflowItem(item) {
+  return Boolean(
+    item &&
+      !item.fallback &&
+      [
+        OUTFLOW_TEMPORAL_CLASSES.CURRENT_OBSERVED,
+        OUTFLOW_TEMPORAL_CLASSES.CURRENT_INFERRED,
+      ].includes(item.temporal_class) &&
+      hasMeaningfulValue(item.name)
+  );
+}
+
 export function legacyStreamFallback() {
   return REAL_ESTATE_LEGACY_STREAMS.map((name) => ({
     name,
@@ -313,6 +316,7 @@ export function legacyOutflowFallback() {
   return REAL_ESTATE_LEGACY_OUTFLOW.map((name) => ({
     name,
     role: 'legacy_real_estate_default',
+    temporal_class: OUTFLOW_TEMPORAL_CLASSES.UNKNOWN_TEMPORAL_STATE,
     current_state: null,
     conversion_implication: null,
     evidence: [],
@@ -339,8 +343,8 @@ export function isDeterministicStreamOrOutflowDerivation(items) {
       item?.role === 'legacy_real_estate_default' ||
       item?.role === 'detected_from_intelligence_text' ||
       item?.role === 'stated_or_inferred_lead_source' ||
-      item?.role === 'one_move_success_indicator_alias' ||
-      item?.role === 'modeled_shift_outcome_alias' ||
+      item?.role === 'current_production_outcome_alias' ||
+      item?.role === 'current_briefing_outcome_alias' ||
       item?.role === 'conversion_system_signal'
   );
 }

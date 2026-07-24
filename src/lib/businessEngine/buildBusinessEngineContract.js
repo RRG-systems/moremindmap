@@ -32,10 +32,11 @@ import {
   deriveRealEstateOutflow,
   deriveRealEstateStreams,
   hasPersonalizedStreams,
+  isCurrentOutflowItem,
   isDeterministicStreamOrOutflowDerivation,
   isRealEstateAssessment,
-  legacyOutflowFallback,
   legacyStreamFallback,
+  OUTFLOW_TEMPORAL_CLASSES,
 } from './realEstateVerticalAdapter.js';
 import {
   buildCurrentRealityDisplayRows,
@@ -698,7 +699,6 @@ function collectStreamEvidence(streams) {
 function buildRelationshipLake({
   draft,
   briefing,
-  oneMove,
   answers,
   assessmentType,
   lastUpdated,
@@ -708,7 +708,8 @@ function buildRelationshipLake({
 }) {
   const realEstate = isRealEstateAssessment(assessmentType, answers);
   const personalizedStreams = realEstate ? deriveRealEstateStreams({ draft, briefing, answers }) : [];
-  const personalizedOutflow = realEstate ? deriveRealEstateOutflow({ draft, oneMove, briefing }) : [];
+  const personalizedOutflow = realEstate ? deriveRealEstateOutflow({ draft, briefing }) : [];
+  const currentOutflow = personalizedOutflow.filter(isCurrentOutflowItem);
 
   let streamsNode;
   if (hasPersonalizedStreams(personalizedStreams)) {
@@ -762,38 +763,39 @@ function buildRelationshipLake({
   }
 
   let outflowNode;
-  if (hasPersonalizedStreams(personalizedOutflow)) {
+  if (hasPersonalizedStreams(currentOutflow)) {
     // Alias-matched outcomes are profile-scoped deterministic inference, not
     // a shared real-estate fallback list.
     outflowNode = makeIntelligenceNode({
-      current: personalizedOutflow,
+      current: currentOutflow,
       last_updated: lastUpdated,
       source_type: SOURCE_TYPES.DETERMINISTIC_NORMALIZED,
       intelligence_status: INTELLIGENCE_STATUS.PARTIAL,
       fallback_used: false,
       provenance: makeProvenance({
         source_artifact: 'real_estate_vertical_adapter',
-        source_path: 'deriveRealEstateOutflow(conversion|one_move_aliases|briefing)',
+        source_path: 'deriveRealEstateOutflow(current_conversion|current_production|briefing)',
         source_rank: 2,
         notes:
-          'Deterministic individualized outcome extraction; clipped success-indicator prose and issue labels excluded',
+          'Current-only deterministic individualized outcome extraction; future and intervention sources excluded',
       }),
-      evidence_sources: collectStreamEvidence(personalizedOutflow),
+      evidence_sources: collectStreamEvidence(currentOutflow),
       confidence: 'inferred',
     });
   } else if (realEstate) {
     outflowNode = makeIntelligenceNode({
-      current: legacyOutflowFallback(),
+      current: [],
       last_updated: lastUpdated,
-      source_type: SOURCE_TYPES.LEGACY_FALLBACK,
-      intelligence_status: INTELLIGENCE_STATUS.FALLBACK,
-      fallback_used: true,
-      fallback_reason: 'personalized_outflow_intelligence_unavailable_using_real_estate_legacy_defaults',
+      source_type: SOURCE_TYPES.HONEST_ABSENCE,
+      intelligence_status: INTELLIGENCE_STATUS.ABSENT,
+      fallback_used: false,
+      fallback_reason: null,
       provenance: makeProvenance({
         source_artifact: 'real_estate_vertical_adapter',
-        source_path: 'REAL_ESTATE_LEGACY_OUTFLOW',
-        source_rank: 4,
-        notes: 'Explicit legacy fallback — not personalized intelligence',
+        source_path: 'deriveRealEstateOutflow(current_sources_only)',
+        source_rank: null,
+        notes:
+          'No current outflow evidence was available; modeled and unknown-temporal items fail closed',
       }),
       evidence_sources: [],
       confidence: null,
@@ -1227,6 +1229,8 @@ function buildOneMove({ oneMove, briefing, lastUpdated }) {
         behavioral_fit: textFrom(oneMove.behavior_fit),
         structural_fit: textFrom(oneMove.structural_fit || oneMove.root_constraint),
         proof_target: asArray(oneMove.success_indicators).map((item) => textFrom(item)).filter(Boolean),
+        proof_target_temporal_class:
+          OUTFLOW_TEMPORAL_CLASSES.ONE_MOVE_SUCCESS_INDICATOR,
         // Review period is a time box — prefer explicit review window over first step text.
         review_period:
           textFrom(oneMove.review_period) ||
@@ -1236,6 +1240,8 @@ function buildOneMove({ oneMove, briefing, lastUpdated }) {
         expected_downstream_effects: textFrom(
           oneMove.expected_probability_shift?.explanation || oneMove.expected_probability_shift
         ),
+        expected_downstream_effects_temporal_class:
+          OUTFLOW_TEMPORAL_CLASSES.ONE_MOVE_EXPECTED_SHIFT,
         implementation,
         first_30_days: first30,
         intervention_category: textFrom(oneMove.intervention_category),
@@ -1269,8 +1275,12 @@ function buildOneMove({ oneMove, briefing, lastUpdated }) {
         behavioral_fit: null,
         structural_fit: null,
         proof_target: [],
+        proof_target_temporal_class:
+          OUTFLOW_TEMPORAL_CLASSES.ONE_MOVE_SUCCESS_INDICATOR,
         review_period: null,
         expected_downstream_effects: null,
+        expected_downstream_effects_temporal_class:
+          OUTFLOW_TEMPORAL_CLASSES.ONE_MOVE_EXPECTED_SHIFT,
         implementation: null,
       },
       last_updated: lastUpdated,
@@ -2289,7 +2299,6 @@ export function buildBusinessEngineContract(record, options = {}) {
   const relationship_lake = buildRelationshipLake({
     draft,
     briefing,
-    oneMove,
     answers,
     assessmentType,
     lastUpdated,

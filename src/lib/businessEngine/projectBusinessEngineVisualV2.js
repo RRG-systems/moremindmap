@@ -17,6 +17,7 @@
 
 import { hasMeaningfulValue, textFrom } from './intelligenceField.js';
 import { formatContractDisplayRows } from './contractDisplaySemantics.js';
+import { isCurrentOutflowItem } from './realEstateVerticalAdapter.js';
 
 const UNAVAILABLE = 'Not available for this assessment';
 const STRUCTURAL = {
@@ -514,6 +515,21 @@ function lakeItems(node) {
     .slice(0, 8);
 }
 
+function currentOutflowItems(node) {
+  const items = Array.isArray(node?.current) ? node.current : [];
+  return items
+    .filter(isCurrentOutflowItem)
+    .map((item) => ({
+      label: textFrom(item.name || item.label),
+      temporal_class: item.temporal_class,
+      source_role: item.role || null,
+      source_path: item.evidence?.[0]?.path || null,
+      confidence: item.confidence || null,
+    }))
+    .filter((item) => item.label)
+    .slice(0, 8);
+}
+
 /**
  * @param {object} contract - Business Engine Contract (sole semantic source)
  * @param {object} [options]
@@ -841,7 +857,7 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
         label: displayText(lake.label, 48) || centerLabel,
         center_unit_label: centerLabel,
         streams: lakeItems(lake.streams),
-        outflow: lakeItems(lake.outflow),
+        outflow: currentOutflowItems(lake.outflow),
         streams_fallback: streamsFallback,
         outflow_fallback: outflowFallback,
         streams_note: streamsFallback ? STRUCTURAL.fallback_streams_note : null,
@@ -1096,8 +1112,12 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
         structural_fit: structuralPack.text,
         structural_fit_expansion: structuralPack.expansion,
         proof_target: listFrom(oneMove?.proof_target, 8),
+        proof_target_temporal_class:
+          displayText(oneMove?.proof_target_temporal_class, 48),
         review_period: displayText(oneMove?.review_period, 80),
         expected_downstream_effects: effectsPack.text,
+        expected_downstream_effects_temporal_class:
+          displayText(oneMove?.expected_downstream_effects_temporal_class, 48),
         expected_downstream_effects_expansion: effectsPack.expansion,
         implementation: implPack.text,
         implementation_expansion: implPack.expansion,

@@ -423,12 +423,20 @@ function LakeSection({ lake }) {
         </div>
         <div className="bev2-outflow">
           <strong>Outflow</strong>
-          <span>What the lake produces</span>
+          <span>What the lake currently produces</span>
           {lake.outflow_fallback ? <em className="bev2-fallback-note">{lake.outflow_note}</em> : null}
           {(lake.outflow || []).length ? (
-            lake.outflow.map((item, index) => <p key={`${item}-${index}`}>{item}</p>)
+            lake.outflow.map((item, index) => (
+              <p
+                key={`${item.label}-${item.temporal_class}-${index}`}
+                data-temporal-class={item.temporal_class}
+                data-source-role={item.source_role || undefined}
+              >
+                {item.label}
+              </p>
+            ))
           ) : (
-            <p className="bev2-muted">No outflow intelligence available</p>
+            <p className="bev2-muted">No current outflow evidence available</p>
           )}
         </div>
       </div>
@@ -647,7 +655,12 @@ function OneMovePanel({ oneMove }) {
               </div>
             ) : null}
             {oneMove.expected_downstream_effects ? (
-              <div className="bev2-one-move-cell priority wide">
+              <div
+                className="bev2-one-move-cell priority wide"
+                data-temporal-class={
+                  oneMove.expected_downstream_effects_temporal_class || undefined
+                }
+              >
                 <span>Expected Downstream Effects</span>
                 <ExpandableProse
                   text={oneMove.expected_downstream_effects}
@@ -656,7 +669,10 @@ function OneMovePanel({ oneMove }) {
               </div>
             ) : null}
             {oneMove.proof_target?.length ? (
-              <div className="bev2-one-move-cell">
+              <div
+                className="bev2-one-move-cell"
+                data-temporal-class={oneMove.proof_target_temporal_class || undefined}
+              >
                 <span>Proof Target</span>
                 <ul>
                   {oneMove.proof_target.map((item) => (

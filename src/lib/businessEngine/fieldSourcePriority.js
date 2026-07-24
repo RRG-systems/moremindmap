@@ -48,9 +48,7 @@ export const FIELD_SOURCE_PRIORITY = Object.freeze({
   ],
   relationship_lake_outflow: [
     'draft.lead_conversion_reality + business_reality production signals',
-    'one_move_v1.expected_probability_shift / success_indicators outcomes',
     'briefing conversion/production sections',
-    'real-estate legacy default outflow list (explicit fallback)',
     'honest absence (empty list)',
   ],
   primary_constraint: [

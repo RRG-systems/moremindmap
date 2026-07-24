@@ -164,6 +164,11 @@ function buildFixture(config) {
     canonicalProfile: config.canonical,
     realEstateBusinessModel: REAL_ESTATE_BUSINESS_MODEL_V1,
   });
+  draft.business_reality = draft.business_reality || {};
+  draft.business_reality.current_production_reality = {
+    ...(draft.business_reality.current_production_reality || {}),
+    summary: config.currentOutflowEvidence,
+  };
 
   assessment.output = {
     business_intelligence_draft: draft,
@@ -251,6 +256,8 @@ const configs = [
     persistenceRisk: 'The owner remains the control system and qualified referrals decay.',
     strategicInterpretation: 'Atlas has demand and team capacity, but unmanaged buyer conversion keeps authority concentrated in the owner.',
     leadGenerationBriefing: 'Past clients, referrals, and open houses are the active lead streams.',
+    currentOutflowEvidence:
+      'Current referrals produce buyer appointments and listings.',
     oneMoveTitle: 'Install the Buyer Conversion Scorecard',
     recommendation: 'Run one owner-assigned buyer conversion scorecard every Friday.',
     behaviorFit: 'This uses Atlas command strength while forcing decisions into a transferable weekly inspection.',
@@ -303,6 +310,8 @@ const configs = [
     persistenceRisk: 'Growth remains dependent on fresh effort and memory.',
     strategicInterpretation: 'Beacon has a meaningful relationship asset, but no active CRM or segmentation converts it into an inspectable engine.',
     leadGenerationBriefing: 'Sphere conversations, direct mail, and personal networking are the active streams.',
+    currentOutflowEvidence:
+      'Current referrals and repeat business produce GCI.',
     oneMoveTitle: 'Activate the Segmented SOI Cadence',
     recommendation: 'Move the 392-person SOI into one CRM and inspect completed relationship touches weekly.',
     behaviorFit: 'This preserves Beacon relational style while adding the minimum structure needed for consistent follow-up.',
@@ -355,6 +364,8 @@ const configs = [
     persistenceRisk: 'Paid and relationship leads decay when pressure rises.',
     strategicInterpretation: 'Cedar has relational accuracy and real opportunity, but calm is protected by improvisation instead of a light operating system.',
     leadGenerationBriefing: 'Paid online leads, builder partners, and community events are the active streams.',
+    currentOutflowEvidence:
+      'Current buyer appointments and pipeline conversion produce GCI.',
     oneMoveTitle: 'Install the Calm Next-Action System',
     recommendation: 'Use one simple CRM to assign a next action to every paid, builder, and relationship lead.',
     behaviorFit: 'This protects Cedar calm and precision while externalizing follow-through before pressure rises.',
@@ -499,7 +510,7 @@ console.log(JSON.stringify({
   assertions: [
     'canonical BOS plus BA inputs produce distinct drafts and BA Visual DNA projections',
     'governing pattern and behavioral modifier use persisted individualized fused intelligence',
-    'streams and outflow are individualized when evidence exists',
+    'streams and current outflow are individualized when current evidence exists',
     'true relationships and production remain evidence-bound',
     'pillar scores are deterministic individualized projection, not shared fallback',
     'segmentation negation overrides keyword presence',
