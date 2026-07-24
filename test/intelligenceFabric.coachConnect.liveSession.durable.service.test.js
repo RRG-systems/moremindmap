@@ -15,5 +15,5 @@ test('registry is injected, non-global, one-engine, and rejection produces zero 
   const service = createDurableLiveSessionService(registry);
   const result = await service.promote({ scope, proposal: { proposal_id: 'p', base_business_engine_version: 1 }, confirmation: { proposal_id: 'p', response_state: 'REJECTED', response_actor_id: scope.subscriber_id }, business_engine: { version: 1 }, event: {} });
   assert.equal(result.canonical_append_count, 0); assert.equal(appends, 0);
-  assert.deepEqual(service.inspect(), { default_off: false, synthetic_only: true, one_business_engine: true, coach_canonical_mutation_authority: false, production_traffic: false });
+  assert.deepEqual(service.inspect(), { default_off: false, synthetic_only: true, one_business_engine: true, coach_canonical_mutation_authority: false, production_traffic: false, deletion_epoch_enforced: true, local_jsonl_physical_deletion_proven: false });
 });

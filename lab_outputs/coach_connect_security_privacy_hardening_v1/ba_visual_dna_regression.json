@@ -1,0 +1,17 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "two read-only protected scripts plus source inspection of two fixture generators",
+  "status": "PASS_WITH_BLOCKED_GENERATORS",
+  "results": [
+    {"command": "node scripts/testBaVisualIndividualization.mjs", "status": "PASS", "fixture_count": 3},
+    {"command": "node scripts/testTrueRelationshipProvenance.mjs", "status": "PASS", "terminal": "TRUE_RELATIONSHIP_PROVENANCE_REGRESSION_OK"},
+    {"command": "node lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs", "status": "BLOCKED_BY_UNRELATED_DIRTY_WORK", "reason": "source contains mkdirSync and writeFileSync into an unrelated dirty/untracked lab root"},
+    {"command": "node lab_outputs/mmm8_contract_visualization_semantics/run_fixture_validation.mjs", "status": "BLOCKED_BY_UNRELATED_DIRTY_WORK", "reason": "source contains mkdirSync and writeFileSync into unrelated local and sibling bridge lab roots"}
+  ],
+  "limitations": ["The blocked generators were not executed, rewritten, staged, or treated as campaign changes"]
+}

@@ -1,0 +1,369 @@
+{
+  "index_version": "1.0.0",
+  "artifact_id": "MORE_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_EXPANSION_INDEX_V1",
+  "campaign": "Coach Connect Security and Privacy Hardening V1",
+  "status": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_AFW_EXPANSION_COMPLETE_WITH_EXPLICIT_IMPLEMENTATION_BLOCKERS",
+  "generated_date": "2026-07-24",
+  "repository": "/Users/rrg/.openclaw/workspace/moremindmap-live",
+  "repository_grounding": {
+    "head": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+    "head_subject": "feat coach connect production persistence and service wiring v1",
+    "branch": "main",
+    "remote_relation_at_expansion_start": {
+      "ahead": 8,
+      "behind": 1
+    },
+    "worktree_clean": false,
+    "unrelated_work_preserved": true,
+    "branch_sync_authorized": false
+  },
+  "source_packet": {
+    "artifact_id": "MORE_CAMPAIGN_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+    "status": "AUTHORIZED_FOR_CODEX_EXPANSION",
+    "implementation_authority": false,
+    "commit_authority": false,
+    "push_authority": false,
+    "deployment_authority": false,
+    "production_activation_authority": false
+  },
+  "documents": [
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_PART_1_V1.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_PART_2_V1.md",
+    "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_PART_3_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_CROSS_PART_CONSISTENCY_V1.md",
+    "docs/intelligence_fabric/MORE_COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_EXPANSION_INDEX_V1.json"
+  ],
+  "predecessor_evidence": {
+    "evidence_class": "observed_predecessor_not_current_campaign_validation",
+    "focused_durable_tests": {
+      "passed": 13,
+      "failed": 0
+    },
+    "coach_connect_and_entitlement_tests": {
+      "passed": 51,
+      "failed": 0
+    },
+    "intelligence_fabric_tests": {
+      "passed": 235,
+      "failed": 0
+    },
+    "eslint": "PASS",
+    "build": "PASS",
+    "diff_check": "PASS",
+    "client_secret_scan": "PASS",
+    "restart_durability_proven": true,
+    "canonical_promotion_exactly_once_proven": true,
+    "production_ready_claim": false,
+    "known_limits": [
+      "local JSONL driver is internal and single-host only",
+      "developer throttling and revocation are process-local",
+      "production Redis, providers, migration, and traffic were not tested by design"
+    ]
+  },
+  "repository_truth": [
+    {
+      "surface": "api/internal/developer-access-security.js",
+      "finding": "server-side code check, timing-safe comparison, signed short-lived capability, environment gating, process-local throttling and revocation"
+    },
+    {
+      "surface": "api/internal/developer-access.js",
+      "finding": "GET POST DELETE internal handler with no-store but no explicit Origin or CSRF validation"
+    },
+    {
+      "surface": "api/internal/subscription-entitlement.js",
+      "finding": "temporary monthly-intelligence entitlement with no billing, admin, coach, or canonical authority"
+    },
+    {
+      "surface": "src/lib/intelligenceFabric/auth",
+      "finding": "session expiry, rotation, revocation, security version, and browser-bound pending-context architecture"
+    },
+    {
+      "surface": "src/lib/intelligenceFabric/coachConnect",
+      "finding": "exact subscriber scope, governed relationship and entitlement, coach proposal, subscriber confirmation, no coach canonical authority"
+    },
+    {
+      "surface": "src/lib/intelligenceFabric/coachConnect/liveSession",
+      "finding": "granular consent, privacy classes, sequence, transcript references, review, proposal, confirmation, recovery, and default-off activation"
+    },
+    {
+      "surface": "src/lib/intelligenceFabric/coachConnect/liveSession/durable",
+      "finding": "exact five-key scope, integrity hashes, optimistic versions, local restart durability, and idempotent promotion"
+    },
+    {
+      "surface": "src/lib/intelligenceFabric/production/security.js",
+      "finding": "exact-scope role checks, redaction and audit helpers, destructive workflows blocked, retention NOT_CONFIGURED"
+    },
+    {
+      "surface": "vercel.json",
+      "finding": "rewrites and function duration only; no grounded security-header policy"
+    }
+  ],
+  "security_layers": [
+    "threat_model",
+    "identity_and_session_hardening",
+    "authorization_policy",
+    "consent_enforcement",
+    "tenant_and_relationship_isolation",
+    "developer_capability_security",
+    "csrf_and_request_integrity",
+    "rate_limiting_and_abuse_controls",
+    "privacy_classification_enforcement",
+    "redaction_and_minimization",
+    "secure_logging_and_audit",
+    "retention_and_deletion",
+    "secret_management",
+    "security_headers",
+    "security_observability"
+  ],
+  "privacy_classes": [
+    "SUBSCRIBER_PRIVATE",
+    "COACH_SHARED",
+    "BUSINESS_ENGINE_ELIGIBLE",
+    "RESTRICTED_SENSITIVE",
+    "REDACTED",
+    "LEARNING_INELIGIBLE",
+    "LEARNING_CANDIDATE"
+  ],
+  "failure_taxonomy": [
+    "AUTHENTICATION_FAILED",
+    "SESSION_EXPIRED",
+    "SESSION_REVOKED",
+    "SESSION_FIXATION_DETECTED",
+    "AUTHORIZATION_DENIED",
+    "RELATIONSHIP_INVALID",
+    "ENTITLEMENT_INVALID",
+    "CONSENT_MISSING",
+    "CONSENT_REVOKED",
+    "TENANT_SCOPE_VIOLATION",
+    "CSRF_VALIDATION_FAILED",
+    "ORIGIN_VALIDATION_FAILED",
+    "REQUEST_REPLAY_DETECTED",
+    "RATE_LIMITED",
+    "CAPABILITY_INVALID",
+    "CAPABILITY_EXPIRED",
+    "CAPABILITY_REVOKED",
+    "CAPABILITY_ENVIRONMENT_DENIED",
+    "SECRET_EXPOSURE_DETECTED",
+    "REDACTION_FAILED",
+    "RETENTION_EXPIRED",
+    "DELETION_REQUIRED",
+    "DELETION_FAILED",
+    "LOG_SAFETY_VIOLATION",
+    "SECURITY_HEADER_MISSING"
+  ],
+  "phases": [
+    {
+      "number": 1,
+      "name": "threat model and repository grounding",
+      "gate": "human policy decisions and exact allowlist required"
+    },
+    {
+      "number": 2,
+      "name": "identity session and capability hardening",
+      "gate": "subject scope browser environment binding and restart-safe revocation"
+    },
+    {
+      "number": 3,
+      "name": "authorization and tenant isolation",
+      "gate": "exact object ownership and current relationship entitlement"
+    },
+    {
+      "number": 4,
+      "name": "consent csrf and replay protection",
+      "gate": "use-time consent same-origin csrf nonce version deletion epoch"
+    },
+    {
+      "number": 5,
+      "name": "rate limiting and abuse detection",
+      "gate": "atomic synthetic proof; deployment claim requires approved shared store"
+    },
+    {
+      "number": 6,
+      "name": "privacy classification and redaction",
+      "gate": "field allowlists and no sensitive output log error or evidence"
+    },
+    {
+      "number": 7,
+      "name": "retention and deletion execution",
+      "gate": "human policy approval and honest logical versus physical deletion proof"
+    },
+    {
+      "number": 8,
+      "name": "security headers and secret scanning",
+      "gate": "route compatibility no-store secret-safe scans production-only HSTS disposition"
+    },
+    {
+      "number": 9,
+      "name": "end-to-end adversarial proof",
+      "gate": "all scenarios regressions manifests handoffs and review archive"
+    }
+  ],
+  "required_threat_scenarios": [
+    "guessed_session_id",
+    "coach_accesses_another_subscriber",
+    "subscriber_attempts_coach_action",
+    "coach_attempts_canonical_write",
+    "copied_developer_capability",
+    "expired_capability_replay",
+    "developer_capability_used_in_production",
+    "csrf_against_unlock_or_confirmation",
+    "stale_relationship",
+    "revoked_consent_replay",
+    "sequence_replay",
+    "confirmation_replay",
+    "projection_cache_leakage",
+    "transcript_leakage_through_logs",
+    "client_bundle_secret_exposure",
+    "cross_tenant_artifact_lookup",
+    "brute_force_unlock",
+    "session_fixation",
+    "replay_after_deletion",
+    "sensitive_error_leakage"
+  ],
+  "candidate_new_modules": [
+    "src/lib/intelligenceFabric/coachConnect/security/constants.js",
+    "src/lib/intelligenceFabric/coachConnect/security/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/security/policy.js",
+    "src/lib/intelligenceFabric/coachConnect/security/requestIntegrity.js",
+    "src/lib/intelligenceFabric/coachConnect/security/abuseControls.js",
+    "src/lib/intelligenceFabric/coachConnect/security/privacy.js",
+    "src/lib/intelligenceFabric/coachConnect/security/retention.js",
+    "src/lib/intelligenceFabric/coachConnect/security/audit.js",
+    "src/lib/intelligenceFabric/coachConnect/security/ports.js",
+    "src/lib/intelligenceFabric/coachConnect/security/inMemorySecurityStateStore.js",
+    "src/lib/intelligenceFabric/coachConnect/security/index.js"
+  ],
+  "candidate_existing_files": [
+    "api/internal/developer-access-security.js",
+    "api/internal/developer-access.js",
+    "api/internal/subscription-entitlement.js",
+    "src/components/businessAssessment/DeveloperAccessPanel.jsx",
+    "src/lib/intelligenceFabric/auth/contracts.js",
+    "src/lib/intelligenceFabric/auth/service.js",
+    "src/lib/intelligenceFabric/coachConnect/constants.js",
+    "src/lib/intelligenceFabric/coachConnect/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/service.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/constants.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/service.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/businessEngine.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/extraction.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/review.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/projections.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/recovery.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/adapter.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/checkpointReplay.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/localJsonlDriver.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/service.js",
+    "src/lib/intelligenceFabric/coachConnect/liveSession/durable/serviceRegistry.js",
+    "src/lib/intelligenceFabric/index.js",
+    "vercel.json"
+  ],
+  "candidate_new_tests_and_proof": [
+    "test/intelligenceFabric.coachConnect.security.contracts.test.js",
+    "test/intelligenceFabric.coachConnect.security.policy.test.js",
+    "test/intelligenceFabric.coachConnect.security.requestIntegrity.test.js",
+    "test/intelligenceFabric.coachConnect.security.abuse.test.js",
+    "test/intelligenceFabric.coachConnect.security.privacy.test.js",
+    "test/intelligenceFabric.coachConnect.security.retention.test.js",
+    "test/intelligenceFabric.coachConnect.security.adversarial.test.js",
+    "test/api.internal.developerAccess.security.test.js",
+    "scripts/verifyCoachConnectSecurityHardening.mjs",
+    "lab_outputs/coach_connect_security_privacy_hardening_v1/"
+  ],
+  "retention_policy": {
+    "status": "PROPOSED_NOT_AUTHORIZED",
+    "destructive_execution_authorized": false,
+    "human_approval_required": true,
+    "logical_deletion_is_not_physical_erasure": true,
+    "local_jsonl_physical_erasure_proven": false
+  },
+  "unresolved_architecture_conflicts": [
+    {
+      "id": "RETENTION_POLICY_AUTHORITY",
+      "status": "UNRESOLVED",
+      "blocks": "destructive retention and deletion execution",
+      "required_disposition": "human approval or replacement of durations legal hold backup and audit policy"
+    },
+    {
+      "id": "SUBSCRIBER_SUBJECT_BINDING",
+      "status": "UNRESOLVED",
+      "blocks": "safe subject-bound developer entitlement issuance",
+      "required_disposition": "ground and authorize server-side subscriber identity and session contract"
+    },
+    {
+      "id": "SHARED_SECURITY_STATE",
+      "status": "UNRESOLVED",
+      "blocks": "multi-instance revocation nonce rate-limit and deletion-epoch claims",
+      "required_disposition": "approve shared-store adapter contract and later environment-specific certification"
+    },
+    {
+      "id": "LOCAL_JSONL_PHYSICAL_DELETION",
+      "status": "UNRESOLVED",
+      "blocks": "physical erasure claim for append-only full snapshots",
+      "required_disposition": "approve cryptographic erasure verified compaction or deletion-capable store"
+    },
+    {
+      "id": "TRANSCRIPT_BACKING_STORE",
+      "status": "UNRESOLVED",
+      "blocks": "end-to-end transcript content deletion proof",
+      "required_disposition": "identify backing store deletion adapter ownership keys and backup behavior"
+    },
+    {
+      "id": "PRODUCTION_ONLY_HSTS",
+      "status": "UNRESOLVED",
+      "blocks": "complete security-header verdict",
+      "required_disposition": "ground production-only header mechanism or retain limited blocked header status"
+    },
+    {
+      "id": "TRUSTED_CLIENT_ADDRESS",
+      "status": "UNRESOLVED",
+      "blocks": "trusted network-dimension abuse signal",
+      "required_disposition": "document hosting-attested address contract or use reduced-signal policy"
+    },
+    {
+      "id": "OPERATOR_IDENTITY_AND_AUDIT_ENTITLEMENT",
+      "status": "UNRESOLVED",
+      "blocks": "audit inspection exposure",
+      "required_disposition": "define strong operator identity and least-privilege audit capability"
+    }
+  ],
+  "stop_conditions": [
+    "tenant ownership or subject binding cannot be proven",
+    "retention or legal hold remains unresolved at destructive execution",
+    "public route behavior must change materially",
+    "protected intelligence or canonical state must be rewritten",
+    "secret exposure requires broad redesign",
+    "production credentials data or live services are required",
+    "physical deletion is claimed without proof",
+    "two bounded repair cycles fail"
+  ],
+  "non_authorizations": [
+    "implementation",
+    "destructive deletion",
+    "commit",
+    "push",
+    "branch synchronization",
+    "deployment",
+    "promotion",
+    "production activation",
+    "public access",
+    "Stripe activation or record creation",
+    "production Redis",
+    "live auth provider",
+    "live model provider",
+    "live media provider",
+    "production migration",
+    "production data access",
+    "external penetration testing",
+    "legal or compliance certification"
+  ],
+  "afw_review_zip": "~/Desktop/COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_AFW_REVIEW_V1.zip",
+  "afw_review_zip_expected_file_count": 5,
+  "afw_review_zip_layout": "flat_exact_five_expansion_artifacts",
+  "implementation_review_zip": "~/Desktop/COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_IMPLEMENTATION_REVIEW_V1.zip",
+  "implementation_review_zip_authorized_now": false,
+  "final_expansion_verdict": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_AFW_EXPANSION_COMPLETE_WITH_EXPLICIT_IMPLEMENTATION_BLOCKERS",
+  "deployment_authorized": false
+}

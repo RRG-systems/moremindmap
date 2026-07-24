@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "policy tests and adversarial scenarios 01-04, 09, 13, 16, 18",
+  "status": "PASS",
+  "proof": ["tenant, profile, business, and subscriber scope must match exactly", "owner actor and owner session are checked", "foreign objects receive non-enumerating denial", "coach relationship must be active, current, exact-scope, and assigned to the coach", "coach canonical promotion and subscriber coach actions deny"],
+  "limitations": ["Synthetic identifiers and local in-memory state only"]
+}

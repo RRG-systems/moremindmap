@@ -1,0 +1,15 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "npm run build with four configured synthetic scan canaries",
+  "status": "PASS",
+  "vite_version": "8.0.3",
+  "modules_transformed": 128,
+  "outputs": [{"path": "dist/index.html", "bytes": 460}, {"path": "dist/assets/index-DgRnxoqx.css", "bytes": 82210}, {"path": "dist/assets/index-C_yAl4of.js", "bytes": 1693550}],
+  "warnings": ["Existing chunk-size warning above 500 kB"],
+  "limitations": ["dist is scan input only and is excluded from the review ZIP", "Build success is not deployment readiness"]
+}

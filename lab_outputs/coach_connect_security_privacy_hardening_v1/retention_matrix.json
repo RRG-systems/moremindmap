@@ -1,0 +1,18 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "security/retention.js; Part 1 section 9",
+  "status": "BLOCKED",
+  "policy_version": "coach-connect-retention-proposal-v1",
+  "policy_status": "PROPOSED_NOT_AUTHORIZED",
+  "destructive_execution_authorized": false,
+  "logical_denial_proven": true,
+  "backing_content_deletion_proven": false,
+  "local_jsonl_physical_deletion_proven": false,
+  "records": ["unlock_attempt", "capability_metadata", "auth_session_metadata", "relationship_entitlement_snapshot", "live_session_event", "raw_transcript_reference", "unreviewed_artifact", "reviewed_structured_intelligence", "private_coach_artifact", "proposal_confirmation_promotion", "projection_cache", "security_audit_event", "deletion_tombstone", "test_proof_artifact"],
+  "limitations": ["RETENTION_POLICY_AUTHORITY", "TRANSCRIPT_BACKING_STORE", "BACKUP_RESTORE_HORIZON", "LOCAL_JSONL_PHYSICAL_DELETION"]
+}

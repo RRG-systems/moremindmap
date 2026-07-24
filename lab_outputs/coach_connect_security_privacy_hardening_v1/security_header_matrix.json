@@ -1,0 +1,19 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "test/api.internal.developerAccess.security.test.js; vercel.json parse inspection",
+  "status": "BLOCKED",
+  "rows": [
+    {"route_class": "internal_developer_access", "method": "GET", "status_class": "denial_or_status", "environment": "synthetic_local", "cache_control": "no-store, max-age=0", "pragma": "no-cache", "content_type_options": "nosniff", "referrer_policy": "no-referrer", "permissions_policy": "camera=(), microphone=(), geolocation=()", "frame_policy": "DENY", "csp": "default-src none; frame-ancestors none; base-uri none; form-action self", "hsts": "absent", "result": "PASS_LOCAL"},
+    {"route_class": "internal_developer_access", "method": "POST", "status_class": "success_or_denial", "environment": "synthetic_local", "cache_control": "no-store, max-age=0", "pragma": "no-cache", "content_type_options": "nosniff", "referrer_policy": "no-referrer", "permissions_policy": "camera=(), microphone=(), geolocation=()", "frame_policy": "DENY", "csp": "default-src none; frame-ancestors none; base-uri none; form-action self", "hsts": "absent", "result": "PASS_LOCAL"},
+    {"route_class": "internal_developer_access", "method": "DELETE", "status_class": "success_or_denial", "environment": "synthetic_local", "cache_control": "no-store, max-age=0", "pragma": "no-cache", "content_type_options": "nosniff", "referrer_policy": "no-referrer", "permissions_policy": "camera=(), microphone=(), geolocation=()", "frame_policy": "DENY", "csp": "default-src none; frame-ancestors none; base-uri none; form-action self", "hsts": "absent", "result": "PASS_LOCAL"},
+    {"route_class": "production_boundary", "method": "ALL", "status_class": "not_exercised", "environment": "production", "hsts": "unresolved", "result": "SECURITY_HEADER_MISSING"}
+  ],
+  "wildcard_cors_introduced": false,
+  "vercel_json_changed": false,
+  "limitations": ["PRODUCTION_ONLY_HSTS", "No production route/header certification"]
+}

@@ -1,0 +1,26 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "exact allowlist comparison, git status, SHA-256, and protected regression commands",
+  "status": "PASS_WITH_LIMITATION",
+  "campaign_changes_outside_authorized_allowlist": [],
+  "protected_hashes_at_validation": {
+    "api/engine/businessAssessment/buildBusinessIntelligenceDraft.js": "5ce7dcecce4d98e4817e0c658462010b0d6e06bbe4ac188ea388e8fc48411555",
+    "lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs": "f8ae2d3676f3c3cdfdc149218a6961d6e4fdfc93ec6e2930f8cb9233e3c0ffe9",
+    "lab_outputs/mmm8_contract_visualization_semantics/run_fixture_validation.mjs": "ee8d14f0f6679688dfb6442af9daaf233891d092222c5b25569af37d0d596273",
+    "src/components/businessAssessment/BusinessEngineVisualV2.jsx": "ed08a6ee671c938d35c7b92a44f7186202fb454a591ec3ba81d1702841156077",
+    "src/lib/businessAssessment/inferEToPScores.js": "0dfa32fe8984d133325b0fcdc558096130d4d64cf8fa39795a678305c019fedc",
+    "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js": "a94ee63ddbdee0c31cb320fb3eadb60a6af11e5720649d775c8178319fb2bbb9",
+    "src/lib/businessEngine/buildBusinessEngineContract.js": "a793b14effe7dea2fc76c40666c93935498b48d2682e62a968f9d14f89770f97",
+    "src/lib/businessEngine/contractDisplaySemantics.js": "f913c4f8176e7bd220ecbc23de549049bace8fd62aae577901dd2dc42665fd8b",
+    "src/lib/businessEngine/contractVersion.js": "aa3c9c52117920bc1be292778bde6e17c2bfba8a046e4609d268f4a6dcae1e72",
+    "src/lib/businessEngine/projectBusinessEngineVisualV2.js": "97f6bd4713daac3354682deae4219666ec8b197601b41bba70ba42e5dd22d7e7",
+    "src/lib/businessEngine/relationshipEvidence.js": "ab5969b2a29d5e4f8e525355fa38ae7c4985a54fd32501169976b38c2614a753"
+  },
+  "protected_tests": ["BA individualization PASS", "true relationship provenance PASS", "two writing fixture generators BLOCKED_BY_UNRELATED_DIRTY_WORK"],
+  "limitations": ["Preexisting protected dirty work was not created, repaired, staged, or attributed to this campaign", "Before-byte hashes for those already-dirty files were not captured; exact campaign allowlisting is the attribution control"]
+}

@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "node --test test/intelligenceFabric.auth*.test.js test/intelligenceFabric.coachConnect.security.*.test.js",
+  "status": "PASS_WITH_BLOCKER",
+  "proof": ["actor and session subject bindings must match", "security version, status, and instant expiry are checked", "session fixation and role substitution deny", "default developer handler denies because subject binding is unresolved"],
+  "limitations": ["SUBSCRIBER_SUBJECT_BINDING", "No production identity provider exercised"]
+}

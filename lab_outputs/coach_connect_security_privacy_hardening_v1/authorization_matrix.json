@@ -1,0 +1,20 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "security/policy.js; test/intelligenceFabric.coachConnect.security.policy.test.js",
+  "status": "PASS",
+  "rules": {
+    "subscriber": ["read own projection/transcript", "create session", "confirm own proposal", "revoke consent", "close session", "revoke own capability"],
+    "coach": ["read exact active-relationship projection/transcript", "authorize/connect/ingest/capture/extract/review/propose/request confirmation", "never canonical promotion"],
+    "service_process": ["bounded processing and confirmed promotion only after full context"],
+    "recovery_operator": ["replay/recover/close only"],
+    "internal_operator": ["audit and retention planning; synthetic logical deletion only when separately approved"],
+    "developer_unlocked_subscriber": ["same subject-bound subscriber permissions only; no coach/admin/operator/canonical/billing authority"]
+  },
+  "mandatory_inputs": ["actor", "session", "exact composite scope", "resource owner/version/deletion epoch", "relationship where required", "entitlement where required", "use-time consent", "request integrity for mutation"],
+  "limitations": ["Operator identity and audit entitlement are unresolved", "Default developer endpoint has no authorized subject-binding resolver"]
+}

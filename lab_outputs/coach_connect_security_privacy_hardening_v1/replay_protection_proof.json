@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "requestIntegrity tests; adversarial scenarios 10-12; complete Intelligence Fabric glob",
+  "status": "PASS_WITH_BLOCKER",
+  "proof": ["timestamp window is enforced", "nonce and idempotency claims are atomic in the synthetic store", "identical completed retry returns the prior reference", "conflicting fingerprint denies", "revoked consent is re-evaluated during recovery", "canonical append remains at most once in predecessor tests"],
+  "limitations": ["SHARED_SECURITY_STATE", "Distributed concurrent replay is not proven"]
+}

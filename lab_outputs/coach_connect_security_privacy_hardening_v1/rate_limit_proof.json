@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "test/intelligenceFabric.coachConnect.security.abuse.test.js; adversarial scenario 17",
+  "status": "PASS_WITH_BLOCKER",
+  "proof": ["exact boundary then throttle", "rolling window and cooldown", "atomic synchronous increments", "keyed dimensions with no raw subject/browser/network value in state", "store outage fails protected control closed"],
+  "limitations": ["SHARED_SECURITY_STATE", "TRUSTED_CLIENT_ADDRESS", "Synthetic policy values are not approved deployment policy"]
+}

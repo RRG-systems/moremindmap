@@ -1,0 +1,31 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "Part 3 sections 6-8",
+  "status": "PASS_WITH_BLOCKED_PROTECTED_GENERATORS",
+  "commands": [
+    "node --test test/intelligenceFabric.coachConnect.security.*.test.js",
+    "node --test test/api.internal.developerAccess.security.test.js",
+    "node --test test/intelligenceFabric.auth*.test.js",
+    "node --test test/intelligenceFabric.coachConnect*.test.js",
+    "node --test test/intelligenceFabric.production*.test.js",
+    "node --test test/intelligenceFabric.runtime*.test.js test/intelligenceFabric.predictive*.test.js test/intelligenceFabric.subscriber*.test.js",
+    "node --test test/intelligenceFabric*.test.js",
+    "node scripts/testBaVisualIndividualization.mjs",
+    "node scripts/testTrueRelationshipProvenance.mjs",
+    "focused ESLint on exact 33-file implementation allowlist",
+    "npm run build",
+    "git diff --check",
+    "security import/export and local module-cycle checks",
+    "source, client, proof staging, and ZIP scans"
+  ],
+  "blocked_commands": [
+    "node lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs",
+    "node lab_outputs/mmm8_contract_visualization_semantics/run_fixture_validation.mjs"
+  ],
+  "limitations": ["BLOCKED_BY_UNRELATED_DIRTY_WORK for two file-writing protected fixture generators", "No bare repository-wide node --test"]
+}

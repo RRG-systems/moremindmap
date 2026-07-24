@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "policy, privacy, and API developer-access security tests",
+  "status": "PASS_WITH_BLOCKER",
+  "proof": ["policy decisions append allowed/denied audit events", "capability issue, denial, revocation, Origin denial, CSRF denial, and rate limiting append safe events", "events carry policy version and RESTRICTED_SENSITIVE class", "actor/session/scope/resource references are keyed", "raw tokens, access codes, cookies, transcript content, and private identifiers are absent"],
+  "limitations": ["OPERATOR_IDENTITY_AND_AUDIT_ENTITLEMENT", "No production log sink or alerting integration"]
+}

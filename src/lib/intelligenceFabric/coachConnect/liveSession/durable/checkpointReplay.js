@@ -1,7 +1,11 @@
 import { hashCanonicalJson } from '../../../hashing.js';
 import { deepFreeze } from '../../../validation.js';
 
-export async function replayAndCheckpoint({ adapter, scope, events, reducer, initial_state, checkpoint_id = scope.session_id }) {
+export async function replayAndCheckpoint({ adapter, scope, events, reducer, initial_state, checkpoint_id = scope.session_id, record_epoch = 0 }) {
+  const currentEpoch = adapter.currentDeletionEpoch?.(scope) ?? 0;
+  if (!Number.isInteger(currentEpoch) || record_epoch < currentEpoch) {
+    return deepFreeze({ ok: false, code: 'DELETION_REQUIRED', state: 'RETENTION_EXPIRED', unresolved: true, current_deletion_epoch: currentEpoch });
+  }
   let state = structuredClone(initial_state), lastSequence = 0, lastHash = null;
   try {
     for (const envelope of events) {

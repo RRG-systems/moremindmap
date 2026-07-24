@@ -23,11 +23,17 @@ export class LocalJsonlDurableLiveSessionDriver extends InMemoryDurableLiveSessi
     super(readLastSnapshot(filePath));
     this.filePath = filePath;
     this.lockPath = `${filePath}.lock`;
+    this.deletionCapability = Object.freeze({
+      logical_tombstone_supported: true,
+      deletion_epoch_supported: true,
+      physical_deletion_supported: false,
+      physical_deletion_claim: 'NOT_PROVEN_APPEND_ONLY_FULL_SNAPSHOTS',
+    });
   }
   persist() {
     const line = `${JSON.stringify({ journal_version: '1.0.0', operation: 'SNAPSHOT', snapshot: this.completeSnapshot() })}\n`;
     const descriptor = fs.openSync(this.filePath, fs.constants.O_CREAT | fs.constants.O_APPEND | fs.constants.O_WRONLY, 0o600);
-    try { fs.writeSync(descriptor, line, null, 'utf8'); fs.fsyncSync(descriptor); } finally { fs.closeSync(descriptor); }
+    try { fs.fchmodSync(descriptor, 0o600); fs.writeSync(descriptor, line, null, 'utf8'); fs.fsyncSync(descriptor); } finally { fs.closeSync(descriptor); }
   }
   async withJournalLock(operation, shouldPersist) {
     let lock;
@@ -41,4 +47,5 @@ export class LocalJsonlDurableLiveSessionDriver extends InMemoryDurableLiveSessi
   async writeDerived(input) { return this.withJournalLock(() => super.writeDerived(input), (result) => result.ok); }
   async quarantine(input) { return this.withJournalLock(() => super.quarantine(input), (result) => result.ok); }
   async writeDurable(input) { return this.withJournalLock(() => super.writeDurable(input), (result) => result.ok); }
+  inspectDeletionCapability() { return this.deletionCapability; }
 }

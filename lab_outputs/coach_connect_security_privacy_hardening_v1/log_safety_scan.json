@@ -1,0 +1,14 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "privacy, adversarial, and API audit tests plus proof-root configured-value scan",
+  "status": "PASS",
+  "captured_audit_surfaces": ["central policy decisions", "capability issue/deny/revoke", "Origin denial", "CSRF denial", "rate limit"],
+  "forbidden_material_findings": 0,
+  "raw_log_files_created": 0,
+  "limitations": ["No production log sink was contacted", "Final proof-root scan is recorded separately"]
+}

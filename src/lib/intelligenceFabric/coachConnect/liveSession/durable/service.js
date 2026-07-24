@@ -22,6 +22,14 @@ export function createDurableLiveSessionService(registry) {
     teardownFailed: (input) => recordTeardownFailure({ adapter: registry.adapter, ...input }),
     rebuildProjection: (input) => rebuildDurableProjection({ adapter: registry.adapter, ...input }),
     migrateSynthetic: (input) => runSyntheticMigrationDryRun({ adapter: registry.adapter, ...input }),
-    inspect: () => deepFreeze({ default_off: !registry.adapter.active(), synthetic_only: registry.adapter.capability.synthetic_only === true, one_business_engine: true, coach_canonical_mutation_authority: false, production_traffic: false }),
+    inspect: () => deepFreeze({
+      default_off: !registry.adapter.active(),
+      synthetic_only: registry.adapter.capability.synthetic_only === true,
+      one_business_engine: true,
+      coach_canonical_mutation_authority: false,
+      production_traffic: false,
+      deletion_epoch_enforced: typeof registry.adapter.currentDeletionEpoch === 'function',
+      local_jsonl_physical_deletion_proven: false,
+    }),
   });
 }

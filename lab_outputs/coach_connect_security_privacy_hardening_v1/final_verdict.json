@@ -1,0 +1,31 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "Part 3 section 15 verdict logic applied to final validation",
+  "status": "BLOCKED",
+  "verdict": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_BLOCKED",
+  "implementation_scope_status": "AUTHORIZED_DEFAULT_OFF_SYNTHETIC_CONTROLS_IMPLEMENTED_AND_VALIDATED",
+  "blocking_conditions": [
+    "RETENTION_POLICY_AUTHORITY",
+    "SUBSCRIBER_SUBJECT_BINDING",
+    "SHARED_SECURITY_STATE",
+    "LOCAL_JSONL_PHYSICAL_DELETION",
+    "TRANSCRIPT_BACKING_STORE",
+    "BACKUP_RESTORE_HORIZON",
+    "PRODUCTION_ONLY_HSTS",
+    "TRUSTED_CLIENT_ADDRESS",
+    "OPERATOR_IDENTITY_AND_AUDIT_ENTITLEMENT"
+  ],
+  "logical_deletion_proven": true,
+  "backing_content_deletion_proven": false,
+  "physical_local_jsonl_deletion_proven": false,
+  "deployment_readiness_claimed": false,
+  "production_certification_claimed": false,
+  "commit_created": false,
+  "mandatory_non_authorization": "Deployment, push, production activation, public access, Stripe activation, production Redis, live providers/models/media, production migration, and destructive production deletion are not authorized by this campaign result.",
+  "limitations": ["Green tests do not override explicit AFW stop conditions", "Two protected file-writing fixture generators were not run against unrelated dirty roots"]
+}

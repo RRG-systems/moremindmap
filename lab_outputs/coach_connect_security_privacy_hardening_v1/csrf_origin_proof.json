@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "requestIntegrity tests, API tests, adversarial scenario 08",
+  "status": "PASS",
+  "proof": ["Origin comparison is exact", "missing-Origin fallback requires allowed Referer plus same-origin fetch metadata", "CSRF proof is method, route, browser, and environment bound", "CSRF proof is one-time and expires", "Origin and CSRF denials produce safe audit events"],
+  "limitations": ["No cross-site browser automation or external penetration test"]
+}

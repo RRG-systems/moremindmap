@@ -1,0 +1,21 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "Part 1 sections 4-6; repository source inspection",
+  "status": "PASS_WITH_BLOCKERS",
+  "assets": [
+    {"asset": "subscriber_identity_and_scope", "protection": "exact server binding required", "deployment_state": "SUBJECT_BINDING_UNRESOLVED"},
+    {"asset": "developer_capability", "protection": "opaque browser value and keyed server hash", "deployment_state": "SYNTHETIC_ONLY"},
+    {"asset": "coach_relationship_and_consent", "protection": "use-time policy decision", "deployment_state": "DEFAULT_OFF"},
+    {"asset": "transcript_and_artifact_references", "protection": "restricted class and allowlist shaping", "deployment_state": "BACKING_STORE_UNRESOLVED"},
+    {"asset": "canonical_business_engine", "protection": "subscriber confirmation and zero coach authority", "deployment_state": "PROTECTED"},
+    {"asset": "security_state", "protection": "injected atomic port", "deployment_state": "IN_MEMORY_NOT_DEPLOYMENT_GRADE"},
+    {"asset": "local_jsonl_journal", "protection": "0600 file mode and deletion-epoch read denial", "deployment_state": "PHYSICAL_DELETION_UNPROVEN"},
+    {"asset": "audit_and_evidence", "protection": "keyed references, redaction, secret scans", "deployment_state": "SYNTHETIC_STATIC_PROOF_ONLY"}
+  ],
+  "limitations": ["No production data or credentials inspected", "No live service or external target exercised"]
+}

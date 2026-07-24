@@ -1,0 +1,16 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "test/intelligenceFabric.coachConnect.security.retention.test.js; durable driver inspection",
+  "status": "BLOCKED",
+  "logical_denial_proven": true,
+  "tombstone_and_epoch_proven": true,
+  "backing_content_deletion_proven": false,
+  "physical_local_jsonl_deletion_proven": false,
+  "destructive_execution_authorized": false,
+  "limitations": ["RETENTION_POLICY_AUTHORITY", "TRANSCRIPT_BACKING_STORE", "BACKUP_RESTORE_HORIZON", "LOCAL_JSONL_PHYSICAL_DELETION"]
+}

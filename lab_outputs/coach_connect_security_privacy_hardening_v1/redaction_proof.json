@@ -1,0 +1,12 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "SYNTHETIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "test/intelligenceFabric.coachConnect.security.privacy.test.js",
+  "status": "PASS",
+  "proof": ["blocked keys redact at every tested depth", "configured canary values are removed", "arrays, Error/cause, circular values, long strings, and nested objects are bounded", "response shaping builds from explicit allowlists", "unknown response fields are omitted"],
+  "limitations": ["Deterministic unit coverage is not a proof against every future object shape"]
+}

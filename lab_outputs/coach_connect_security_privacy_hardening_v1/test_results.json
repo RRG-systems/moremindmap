@@ -1,0 +1,27 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "OBSERVED",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "final exact Part 3 test sequence",
+  "status": "PASS",
+  "results": [
+    {"suite": "security", "tests": 46, "pass": 46, "fail": 0},
+    {"suite": "developer_access_api", "tests": 5, "pass": 5, "fail": 0},
+    {"suite": "auth", "tests": 13, "pass": 13, "fail": 0},
+    {"suite": "coach_connect", "tests": 97, "pass": 97, "fail": 0},
+    {"suite": "production_foundation", "tests": 29, "pass": 29, "fail": 0},
+    {"suite": "runtime_predictive_subscriber", "tests": 98, "pass": 98, "fail": 0},
+    {"suite": "complete_safe_intelligence_fabric_glob", "tests": 281, "pass": 281, "fail": 0}
+  ],
+  "overlap_note": "Focused suite totals overlap the complete safe glob and must not be summed.",
+  "repair_ledger": [
+    {"gate": "predecessor_live_session_expectations", "bounded_repairs": 1, "result": "PASS"},
+    {"gate": "complete_safe_glob_export_collision", "bounded_repairs": 1, "result": "PASS"},
+    {"gate": "import_export_verifier", "verifier_corrections": 2, "source_repairs": 0, "result": "PASS"},
+    {"gate": "changed_file_allowlist", "bounded_repairs": 1, "result": "PASS"}
+  ],
+  "limitations": ["Synthetic/local tests only", "Passing tests do not imply production certification"]
+}

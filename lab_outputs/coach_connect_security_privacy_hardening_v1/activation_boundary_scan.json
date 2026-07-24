@@ -1,0 +1,20 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "default flag import and exact changed-source negative scan",
+  "status": "PASS",
+  "default_flags": {"security_hardening_enabled": false, "synthetic_only": true, "production_traffic_enabled": false, "shared_security_state_required": false, "retention_policy_approved": false, "deletion_execution_enabled": false, "emergency_disabled": true},
+  "empty_environment_decision": "DEVELOPER_ACCESS_DISABLED",
+  "production_environment_allowed": false,
+  "redis_client_imports": 0,
+  "live_provider_imports": 0,
+  "stripe_mutation_calls": 0,
+  "new_public_api_files": [],
+  "vercel_json_changed": false,
+  "coach_connect_index_changed": false,
+  "limitations": ["Static/local proof only", "Existing paid entitlement behavior was preserved and no Stripe operation was performed"]
+}

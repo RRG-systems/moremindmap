@@ -1,0 +1,21 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "security/policy.js SECURITY_CONSENT_PURPOSES; Live Session service use-time assertions",
+  "status": "PASS",
+  "purposes": {
+    "PARTICIPATION": ["authorize", "connect", "replay", "recover"],
+    "RECORDING": ["separate purpose remains required; live media excluded"],
+    "TRANSCRIPTION": ["capture and transcript reads"],
+    "STRUCTURED_EXTRACTION": ["extract and coach review"],
+    "COACH_SHARING": ["coach projection read"],
+    "BUSINESS_ENGINE_EVALUATION": ["propose", "request confirmation", "confirm", "promote", "refresh"],
+    "LEARNING": ["not inferred from any generic consent"]
+  },
+  "revocation_behavior": "blocks new use and replay processing while allowing safe teardown and deletion planning",
+  "limitations": ["No live recording, media, or provider processing is authorized"]
+}

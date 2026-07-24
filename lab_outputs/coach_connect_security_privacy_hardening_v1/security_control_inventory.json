@@ -1,0 +1,24 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "COACH_CONNECT_SECURITY_AND_PRIVACY_HARDENING_V1",
+  "evidence_class": "STATIC",
+  "privacy_class": "REDACTED",
+  "generated_at": "2026-07-24T16:14:00Z",
+  "source_commit": "fe1f24e6c2119c2d94c6451189a217db1e915469",
+  "command_or_test_reference": "authorized changed-source inventory and focused tests",
+  "status": "PASS_WITH_BLOCKERS",
+  "controls": [
+    {"id": "IDENTITY_SESSION", "implementation": "contracts and centralized policy", "state": "IMPLEMENTED_DEFAULT_OFF"},
+    {"id": "OPAQUE_CAPABILITY", "implementation": "keyed server record and strict cookie", "state": "IMPLEMENTED_SYNTHETIC_ONLY"},
+    {"id": "TENANT_AUTHORIZATION", "implementation": "exact composite scope and ownership", "state": "IMPLEMENTED_DEFAULT_OFF"},
+    {"id": "CONSENT", "implementation": "use-time purpose checks including replay", "state": "IMPLEMENTED_DEFAULT_OFF"},
+    {"id": "REQUEST_INTEGRITY", "implementation": "Origin, CSRF, timestamp, nonce, idempotency", "state": "IMPLEMENTED_SYNTHETIC_ONLY"},
+    {"id": "ABUSE_CONTROL", "implementation": "keyed atomic limiter port", "state": "IN_MEMORY_SYNTHETIC_ONLY"},
+    {"id": "PRIVACY", "implementation": "classification, allowlist shaping, recursive redaction", "state": "IMPLEMENTED_DEFAULT_OFF"},
+    {"id": "AUDIT", "implementation": "safe keyed content-free events", "state": "IMPLEMENTED_SYNTHETIC_ONLY"},
+    {"id": "RETENTION", "implementation": "planning, deletion epoch, logical replay denial", "state": "DESTRUCTIVE_EXECUTION_BLOCKED"},
+    {"id": "HEADERS", "implementation": "sensitive endpoint no-store and browser defenses", "state": "PRODUCTION_HSTS_BLOCKED"},
+    {"id": "SECRET_SCAN", "implementation": "configured-value and archive scanner", "state": "STATIC_LOCAL_PROOF"}
+  ],
+  "limitations": ["No deployment-grade shared state", "No production subject binding", "No physical local journal deletion", "No production-only HSTS"]
+}

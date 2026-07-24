@@ -3,25 +3,31 @@ import { useCallback, useEffect, useState } from 'react';
 export default function DeveloperAccessPanel({ endpoint = '/api/internal/developer-access', onUnlocked = null }) {
   const [accessCode, setAccessCode] = useState('');
   const [state, setState] = useState({ loading: false, error: '', unlocked: false });
-  const refreshEntitlement = useCallback(async () => {
+  const [csrfToken, setCsrfToken] = useState('');
+  const refreshEntitlement = useCallback(async (csrfIntent = 'POST') => {
     try {
-      const response = await fetch(endpoint, { method: 'GET', credentials: 'include' });
+      const response = await fetch(endpoint, { method: 'GET', credentials: 'include', headers: { 'X-Coach-Connect-CSRF-Intent': csrfIntent } });
       const result = await response.json();
+      setCsrfToken(typeof result.csrf_token === 'string' ? result.csrf_token : '');
       const unlocked = response.ok && result.allowed === true && result.entitlement?.access_type === 'more_monthly_intelligence';
       setState({ loading: false, error: '', unlocked });
       onUnlocked?.(unlocked ? result.entitlement : null);
-      return unlocked;
-    } catch { setState({ loading: false, error: '', unlocked: false }); return false; }
+      return { unlocked, csrf_token: typeof result.csrf_token === 'string' ? result.csrf_token : '' };
+    } catch { setState({ loading: false, error: '', unlocked: false }); return { unlocked: false, csrf_token: '' }; }
   }, [endpoint, onUnlocked]);
   useEffect(() => { void Promise.resolve().then(refreshEntitlement); }, [refreshEntitlement]);
   async function unlock(event) {
     event.preventDefault(); setState({ loading: true, error: '', unlocked: false });
     try {
-      const response = await fetch(endpoint, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ access_code: accessCode }) });
+      let activeProof = csrfToken;
+      if (!activeProof) activeProof = (await refreshEntitlement('POST')).csrf_token;
+      if (!activeProof) { setAccessCode(''); setState({ loading: false, error: 'Developer access is unavailable.', unlocked: false }); return; }
+      const response = await fetch(endpoint, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json', 'X-Coach-Connect-CSRF': activeProof }, body: JSON.stringify({ access_code: accessCode }) });
       const result = await response.json(); setAccessCode('');
+      setCsrfToken('');
       if (!response.ok || !result.ok) { setState({ loading: false, error: 'Developer access was not granted.', unlocked: false }); return; }
-      const unlocked = await refreshEntitlement();
-      if (!unlocked) setState({ loading: false, error: 'Subscription entitlement could not be verified.', unlocked: false });
+      const refreshed = await refreshEntitlement();
+      if (!refreshed.unlocked) setState({ loading: false, error: 'Subscription entitlement could not be verified.', unlocked: false });
     } catch { setAccessCode(''); setState({ loading: false, error: 'Developer access is unavailable.', unlocked: false }); }
   }
   return (
