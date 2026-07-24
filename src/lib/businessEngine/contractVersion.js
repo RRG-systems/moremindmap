@@ -8,6 +8,8 @@ export const CONTRACT_VERSION = 'business-engine-contract-v1';
 export const VERTICAL_ADAPTER_VERSION_REAL_ESTATE = 'real-estate-vertical-adapter-v1';
 export const COMPATIBILITY_MODE_BA_SNAPSHOT = 'ba_snapshot_v1';
 export const BA_VISUAL_PROJECTION_VERSION = 'ba-visual-individualized-v2';
+export const TRUE_RELATIONSHIP_PROVENANCE_VERSION =
+  'true-relationships-provenance-v1';
 
 export const SNAPSHOT_TREND = 'baseline';
 export const SNAPSHOT_REASON_FOR_CHANGE = 'initial assessment snapshot';

@@ -347,7 +347,15 @@ function LakeSection({ lake }) {
     lake.flow?.current_true_relationships ?? lake.current_true_relationships ?? lake.current_size ?? '—';
   const targetDisplay =
     lake.flow?.target_true_relationships ?? lake.target_true_relationships ?? lake.target_size ?? '—';
-  const gapDisplay = lake.flow?.gap || lake.gap || '—';
+  const gapDisplay = lake.flow?.gap ?? lake.gap ?? '—';
+  const currentProvenance =
+    lake.flow?.current_true_relationships_provenance ??
+    lake.current_true_relationships_provenance ??
+    'UNKNOWN';
+  const currentNote =
+    lake.flow?.current_true_relationships_note ??
+    lake.current_true_relationships_note ??
+    null;
   const unitLabel = lake.center_unit_label || lake.label || 'TRUE RELATIONSHIPS';
   return (
     <section className="bev2-lake" data-region="relationship-lake">
@@ -356,9 +364,15 @@ function LakeSection({ lake }) {
         <p>{lake.subtitle}</p>
       </div>
       <div className="bev2-lake-flow" aria-label="Current True Relationships to Target to Gap">
-        <div className="bev2-lake-flow-step">
+        <div
+          className="bev2-lake-flow-step"
+          data-provenance-state={currentProvenance}
+        >
           <span>Current True Relationships</span>
           <strong>{currentDisplay}</strong>
+          {currentNote ? (
+            <small className="bev2-lake-provenance">{currentNote}</small>
+          ) : null}
         </div>
         <i className="bev2-lake-flow-arrow" aria-hidden="true">
           ↓
@@ -391,6 +405,9 @@ function LakeSection({ lake }) {
           <div className="bev2-lake-water">
             <span>Current True</span>
             <strong>{currentDisplay}</strong>
+            {currentNote ? (
+              <small className="bev2-lake-provenance">{currentNote}</small>
+            ) : null}
             <em>{unitLabel}</em>
             {lake.quality ? <p className="bev2-quality">{lake.quality}</p> : <p>{lake.subtitle}</p>}
           </div>
@@ -1786,6 +1803,15 @@ const styles = `
   font-weight: 700;
   color: #fff;
   line-height: 1.1;
+}
+.bev2-lake-provenance {
+  display: block;
+  margin-top: 4px;
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  color: rgba(186,230,253,0.72);
 }
 .bev2-lake-flow-step.gap strong { color: #fdba74; }
 .bev2-lake-flow-arrow {

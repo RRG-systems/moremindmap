@@ -4,6 +4,10 @@ import {
   projectBusinessMapFromContract,
   validateBusinessEngineContract,
 } from '../businessEngine/index.js';
+import {
+  resolveCurrentTrueRelationshipEvidence,
+  trueRelationshipMetricFromEvidence,
+} from '../businessEngine/relationshipEvidence.js';
 
 const REAL_ESTATE_GROSS_COMMISSION_RATE_ASSUMPTION = 0.0265;
 
@@ -129,6 +133,12 @@ function parseMoneyMetric(text, patterns, estimated = false) {
 }
 
 function compactNumber(value) {
+  if (value && typeof value === 'object') {
+    const preservedDisplay = value.display_value || value.display;
+    if (preservedDisplay !== null && preservedDisplay !== undefined && preservedDisplay !== '') {
+      return String(preservedDisplay);
+    }
+  }
   if (value && typeof value === 'object' && value.range && Number.isFinite(value.low) && Number.isFinite(value.high)) {
     const prefix = value.estimated ? 'Approx. ' : '';
     const low = new Intl.NumberFormat('en-US').format(Math.round(value.low));
@@ -180,19 +190,10 @@ function metricsFromRelationshipDraft(draft) {
   const q3Evidence = rel.evidence?.q3 || '';
 
   let totalContacts = null;
-  let trueRelationships = null;
 
   const totalFromQ3 = parseNumberNear(q3Evidence, [/maybe\s+(\d+)/i, /but maybe\s+(\d+)/i]);
   if (Number.isFinite(totalFromQ3)) {
     totalContacts = makeMetric(totalFromQ3, false, { source: 'User provided' });
-  }
-
-  const rangeFromQ3 = parseRangeNear(q3Evidence, [
-    /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)/i,
-    /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)/i,
-  ]);
-  if (rangeFromQ3) {
-    trueRelationships = { ...rangeFromQ3, source: 'User provided' };
   }
 
   if (!totalContacts && mentions.length >= 1) {
@@ -200,7 +201,7 @@ function metricsFromRelationshipDraft(draft) {
     if (Number.isFinite(total)) totalContacts = makeMetric(total, false, { source: 'Extracted' });
   }
 
-  return { totalContacts, trueRelationships };
+  return { totalContacts };
 }
 
 function metricsFromProductionDraft(draft) {
@@ -246,25 +247,12 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
     sectionText(financialSection)
   );
   const all = textBlock(answers.q1, answers.q2, answers.q3, answers.q5, answers.q8, answers.q9, answers.q10, answers.q12, relationshipText);
-  const currentTrueRelationships = firstMetric(
-    parseRangeNear(answers.q3, [
-      /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)/i,
-      /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)/i,
-    ]),
-    parseNumberMetric(answers.q3, [
-      /about\s+([\d,]+)\s+are\s+true relationships/i,
-      /approximately\s+([\d,]+)\s+are\s+true relationships/i,
-      /([\d,]+)\s+are\s+true relationships/i,
-      /true relationship(?:s)?(?: database)?(?: is|:)?\s+(?:probably\s+)?([\d,]+)/i,
-    ]),
-    draftRelationshipMetrics.trueRelationships,
-    parseNumberMetric(relationshipText, [
-      /about\s+([\d,]+)\s+strong relationships/i,
-      /([\d,]+)\s+strong relationships/i,
-      /([\d,]+)\s+of\s+those\s+are\s+friends,\s*good relationships/i,
-      /([\d,]+)\s+friends,\s*good relationships/i,
-      /with\s+about\s+([\d,]+)\s+strong relationships/i,
-    ], true)
+  const trueRelationshipEvidence = resolveCurrentTrueRelationshipEvidence({
+    answers,
+    draft,
+  });
+  const currentTrueRelationships = trueRelationshipMetricFromEvidence(
+    trueRelationshipEvidence
   );
   const totalContacts = firstMetric(
     parseNumberMetric(answers.q3 + '\n' + answers.q5, [
@@ -373,7 +361,11 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
   ]);
   const goalNet = makeMetric(goalNetValue, false, { source: 'Extracted' });
   const currentTrueRelationshipValue = metricNumber(currentTrueRelationships);
-  const modelRelationshipTarget = !relationshipTarget && goalUnits >= 20 && currentTrueRelationshipValue && currentTrueRelationshipValue < 500
+  const modelRelationshipTarget =
+    !relationshipTarget &&
+    goalUnits >= 20 &&
+    Number.isFinite(currentTrueRelationshipValue) &&
+    currentTrueRelationshipValue < 500
     ? makeMetric(500, true, {
         source: 'Model estimate',
         unit: 'true relationships',
@@ -388,6 +380,7 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
 
   return {
     currentTrueRelationships,
+    trueRelationshipEvidence,
     totalContacts,
     currentUnits,
     currentVolume,
@@ -398,7 +391,9 @@ function extractBusinessMetrics({ answers, draft, briefing, oneMove }) {
     goalGci,
     goalNet,
     relationshipTarget: resolvedRelationshipTarget,
-    relationshipGap: relationshipTargetValue && currentTrueRelationshipValue
+    relationshipGap:
+      Number.isFinite(relationshipTargetValue) &&
+      Number.isFinite(currentTrueRelationshipValue)
       ? makeMetric(Math.max(0, relationshipTargetValue - currentTrueRelationshipValue), resolvedRelationshipTarget?.estimated || currentTrueRelationships?.estimated, {
           source: resolvedRelationshipTarget?.source,
           basis: resolvedRelationshipTarget?.basis
@@ -843,6 +838,7 @@ export function normalizeBusinessVisualArtifactData(record) {
     eToP,
     metrics: {
       currentTrueRelationships: metrics.currentTrueRelationships,
+      trueRelationshipEvidence: metrics.trueRelationshipEvidence,
       relationshipTarget: metrics.relationshipTarget,
       relationshipGap: metrics.relationshipGap,
     },

@@ -4,6 +4,8 @@
  */
 
 import { CONTRACT_NAME, CONTRACT_VERSION } from './contractVersion.js';
+import { hasMeaningfulValue } from './intelligenceField.js';
+import { TRUE_RELATIONSHIP_PROVENANCE } from './relationshipEvidence.js';
 
 export const REQUIRED_TOP_LEVEL_DOMAINS = Object.freeze([
   'contract_metadata',
@@ -189,6 +191,61 @@ export function validateBusinessEngineContract(contract) {
 
   const lake = contract.relationship_lake;
   if (isPlainObject(lake)) {
+    const trueRelationships = lake.true_relationships;
+    if (!isPlainObject(trueRelationships)) {
+      warnings.push(
+        'relationship_lake.true_relationships missing structured provenance (legacy compatibility contract)'
+      );
+    } else {
+      const acceptedProvenance = Object.values(
+        TRUE_RELATIONSHIP_PROVENANCE
+      );
+      if (!acceptedProvenance.includes(trueRelationships.provenance)) {
+        errors.push(
+          'relationship_lake.true_relationships.provenance must be EXPLICIT, ESTIMATED, or UNKNOWN'
+        );
+      }
+      if (trueRelationships.temporal_state !== 'CURRENT') {
+        errors.push(
+          'relationship_lake.true_relationships.temporal_state must be CURRENT'
+        );
+      }
+      if (
+        trueRelationships.provenance ===
+        TRUE_RELATIONSHIP_PROVENANCE.UNKNOWN
+      ) {
+        if (
+          Number.isFinite(trueRelationships.value) ||
+          hasMeaningfulValue(trueRelationships.display_value)
+        ) {
+          errors.push(
+            'relationship_lake.true_relationships UNKNOWN state must not carry a numeric or display value'
+          );
+        }
+      } else {
+        if (!Number.isFinite(trueRelationships.value)) {
+          errors.push(
+            'relationship_lake.true_relationships known state requires a numeric value'
+          );
+        }
+        if (!hasMeaningfulValue(trueRelationships.display_value)) {
+          errors.push(
+            'relationship_lake.true_relationships known state requires display_value'
+          );
+        }
+      }
+      if (
+        trueRelationships.provenance ===
+          TRUE_RELATIONSHIP_PROVENANCE.ESTIMATED &&
+        !hasMeaningfulValue(
+          trueRelationships.estimate_method || trueRelationships.basis
+        )
+      ) {
+        errors.push(
+          'relationship_lake.true_relationships ESTIMATED state requires estimate_method or basis'
+        );
+      }
+    }
     if (looksLikeIntelligenceNode(lake.streams)) {
       validateIntelligenceNode(lake.streams, 'relationship_lake.streams', errors, warnings);
     } else {

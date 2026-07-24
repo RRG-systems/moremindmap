@@ -18,6 +18,10 @@
 import { hasMeaningfulValue, textFrom } from './intelligenceField.js';
 import { formatContractDisplayRows } from './contractDisplaySemantics.js';
 import { isCurrentOutflowItem } from './realEstateVerticalAdapter.js';
+import {
+  normalizeCurrentTrueRelationshipMetric,
+  TRUE_RELATIONSHIP_PROVENANCE,
+} from './relationshipEvidence.js';
 
 const UNAVAILABLE = 'Not available for this assessment';
 const STRUCTURAL = {
@@ -808,11 +812,29 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
       };
     })(),
     relationship_lake: (() => {
-      const currentTrue =
-        lake.current_true_relationships ?? lake.current_size;
+      const trueRelationshipEvidence = normalizeCurrentTrueRelationshipMetric(
+        lake.true_relationships ??
+          lake.current_true_relationships ??
+          lake.current_size,
+        { sourceField: 'contract.relationship_lake.true_relationships' }
+      );
       const targetTrue =
         lake.target_true_relationships != null ? lake.target_true_relationships : lake.target_size;
-      const currentDisplay = formatMetricValue(currentTrue);
+      const currentDisplay =
+        trueRelationshipEvidence.provenance ===
+        TRUE_RELATIONSHIP_PROVENANCE.UNKNOWN
+          ? '—'
+          : trueRelationshipEvidence.display_value;
+      const currentNote =
+        trueRelationshipEvidence.provenance ===
+        TRUE_RELATIONSHIP_PROVENANCE.UNKNOWN
+          ? 'Not yet measured'
+          : trueRelationshipEvidence.provenance ===
+              TRUE_RELATIONSHIP_PROVENANCE.ESTIMATED
+            ? 'Estimated'
+            : trueRelationshipEvidence.approximate
+              ? 'Customer reported'
+              : null;
       const targetDisplay = formatMetricValue(targetTrue);
       // Never present a merged true-relationships × total-contacts range as the center.
       const centerLabel = isRealEstate ? 'TRUE RELATIONSHIPS' : 'RELATIONSHIPS';
@@ -833,6 +855,9 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
         // Explicit doctrine flow: Current True → Target True → Gap
         flow: {
           current_true_relationships: currentDisplay,
+          current_true_relationships_provenance:
+            trueRelationshipEvidence.provenance,
+          current_true_relationships_note: currentNote,
           target_true_relationships: targetDisplay,
           gap: formatMetricValue(lake.gap),
         },
@@ -840,6 +865,12 @@ export function projectBusinessEngineVisualV2(contract, options = {}) {
         target_size: targetDisplay,
         gap: formatMetricValue(lake.gap),
         current_true_relationships: currentDisplay,
+        current_true_relationships_provenance:
+          trueRelationshipEvidence.provenance,
+        current_true_relationships_source_class:
+          trueRelationshipEvidence.source_class,
+        current_true_relationships_note: currentNote,
+        true_relationships: trueRelationshipEvidence,
         target_true_relationships: targetDisplay,
         // Supporting context only — never merged into lake center.
         total_contacts: formatMetricValue(lake.total_contacts),

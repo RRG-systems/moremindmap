@@ -11,6 +11,7 @@ import {
   CONTRACT_VERSION,
   COMPATIBILITY_MODE_BA_SNAPSHOT,
   BA_VISUAL_PROJECTION_VERSION,
+  TRUE_RELATIONSHIP_PROVENANCE_VERSION,
   SOURCE_TYPES,
   INTELLIGENCE_STATUS,
   SNAPSHOT_TREND,
@@ -50,7 +51,26 @@ import {
   buildRealEstateTargetModel,
   computeRelationshipGap,
 } from './realEstateTargetModel.js';
-import { deriveRelationshipStructureEvidence } from './relationshipEvidence.js';
+import {
+  deriveRelationshipStructureEvidence,
+  resolveCurrentTrueRelationshipEvidence,
+  trueRelationshipMetricFromEvidence,
+} from './relationshipEvidence.js';
+
+function hasMetricValue(metric) {
+  if (Number.isFinite(metric)) return true;
+  if (!metric || typeof metric !== 'object') return false;
+  if (Number.isFinite(metric.value)) return true;
+  return (
+    metric.range === true &&
+    Number.isFinite(metric.low) &&
+    Number.isFinite(metric.high)
+  );
+}
+
+function firstMetricValue(...metrics) {
+  return metrics.find(hasMetricValue) ?? null;
+}
 
 function resolveTimestamp(assessment, draft, briefing, fiveFutures, oneMove) {
   return (
@@ -814,9 +834,17 @@ function buildRelationshipLake({
     q3: answers?.q3,
     q5: answers?.q5,
   });
-  const currentTrue =
-    metrics?.currentTrueRelationships ??
-    null;
+  const trueRelationshipEvidence = resolveCurrentTrueRelationshipEvidence({
+    answers,
+    draft,
+    metricOption:
+      metrics?.trueRelationshipEvidence ??
+      metrics?.currentTrueRelationships ??
+      null,
+  });
+  const currentTrue = trueRelationshipMetricFromEvidence(
+    trueRelationshipEvidence
+  );
   const targetTrue =
     metrics?.relationshipTarget ??
     targetModel?.target_true_relationships ??
@@ -825,8 +853,8 @@ function buildRelationshipLake({
     metrics?.relationshipGap ??
     computeRelationshipGap(currentTrue, targetTrue);
   const totalContacts = metrics?.totalContacts ?? null;
-  const lakeFallback = !currentTrue && !targetTrue;
-  const lakeFallbackReason = !currentTrue && !targetTrue
+  const lakeFallback = !hasMetricValue(currentTrue) && !hasMetricValue(targetTrue);
+  const lakeFallbackReason = !hasMetricValue(currentTrue) && !hasMetricValue(targetTrue)
     ? 'relationship_lake_metrics_unavailable'
     : null;
   const derivedLakeHealth =
@@ -846,6 +874,7 @@ function buildRelationshipLake({
     target_size: targetTrue,
     gap,
     // Render-ready doctrine fields
+    true_relationships: trueRelationshipEvidence,
     current_true_relationships: currentTrue,
     target_true_relationships: targetTrue,
     total_contacts: totalContacts,
@@ -864,7 +893,7 @@ function buildRelationshipLake({
     vertical_specific: realEstate,
     confidence:
       goal?.goal_confidence ||
-      (currentTrue || targetTrue ? 'medium' : null),
+      (hasMetricValue(currentTrue) || hasMetricValue(targetTrue) ? 'medium' : null),
     provenance: makeProvenance({
       source_artifact: 'relationship_lake|goal_intelligence|real_estate_target_model',
       source_path: 'buildRelationshipLake',
@@ -2259,13 +2288,30 @@ export function buildBusinessEngineContract(record, options = {}) {
   // Explicit relationship target from intake language may still win for target model;
   // income goals supply doctrine-based true-relationship targets when no explicit TR target.
   const baseMetrics = {
-    currentTrueRelationships:
-      options.metrics?.currentTrueRelationships || extractedMetrics.currentTrueRelationships || null,
-    relationshipTarget:
-      options.metrics?.relationshipTarget || extractedMetrics.relationshipTarget || null,
-    totalContacts: options.metrics?.totalContacts || extractedMetrics.totalContacts || null,
-    relationshipGap: options.metrics?.relationshipGap || null,
+    trueRelationshipEvidence: resolveCurrentTrueRelationshipEvidence({
+      answers,
+      draft,
+      metricOption:
+        options.metrics?.trueRelationshipEvidence ??
+        options.metrics?.currentTrueRelationships ??
+        extractedMetrics.trueRelationshipEvidence ??
+        extractedMetrics.currentTrueRelationships ??
+        null,
+    }),
+    currentTrueRelationships: null,
+    relationshipTarget: firstMetricValue(
+      options.metrics?.relationshipTarget,
+      extractedMetrics.relationshipTarget
+    ),
+    totalContacts: firstMetricValue(
+      options.metrics?.totalContacts,
+      extractedMetrics.totalContacts
+    ),
+    relationshipGap: firstMetricValue(options.metrics?.relationshipGap),
   };
+  baseMetrics.currentTrueRelationships = trueRelationshipMetricFromEvidence(
+    baseMetrics.trueRelationshipEvidence
+  );
 
   const real_estate_target_model = isRealEstateAssessment(assessmentType, answers)
     ? buildRealEstateTargetModel({
@@ -2278,16 +2324,17 @@ export function buildBusinessEngineContract(record, options = {}) {
 
   // Prefer doctrine/goal target when explicit relationship target missing.
   const resolvedTarget =
-    baseMetrics.relationshipTarget ||
-    real_estate_target_model?.target_true_relationships ||
-    null;
+    firstMetricValue(
+      baseMetrics.relationshipTarget,
+      real_estate_target_model?.target_true_relationships
+    );
 
   const lakeMetrics = {
     ...baseMetrics,
     relationshipTarget: resolvedTarget,
-    relationshipGap: baseMetrics.relationshipGap || null,
+    relationshipGap: firstMetricValue(baseMetrics.relationshipGap),
   };
-  if (!lakeMetrics.relationshipGap) {
+  if (!hasMetricValue(lakeMetrics.relationshipGap)) {
     lakeMetrics.relationshipGap = computeRelationshipGap(
       lakeMetrics.currentTrueRelationships,
       lakeMetrics.relationshipTarget
@@ -2341,6 +2388,8 @@ export function buildBusinessEngineContract(record, options = {}) {
         assessment.assessment_id || briefing.assessment_id || fiveFutures.assessment_id || oneMove.assessment_id || null,
       compatibility_mode: COMPATIBILITY_MODE_BA_SNAPSHOT,
       compatibility_projection_version: BA_VISUAL_PROJECTION_VERSION,
+      true_relationships_provenance_version:
+        TRUE_RELATIONSHIP_PROVENANCE_VERSION,
       compatibility_projection_strategy: 'deterministic_read_time_from_preserved_ba_artifacts',
       legacy_fallbacks_used: [],
       snapshot_mode: true,

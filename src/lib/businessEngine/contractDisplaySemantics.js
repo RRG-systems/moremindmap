@@ -17,6 +17,10 @@ import {
   makeProvenance,
   textFrom,
 } from './intelligenceField.js';
+import {
+  resolveCurrentTrueRelationshipEvidence,
+  trueRelationshipMetricFromEvidence,
+} from './relationshipEvidence.js';
 
 export const TRAJECTORY_DIRECTIONS = Object.freeze([
   'rising',
@@ -133,6 +137,10 @@ function textBlock(...values) {
 }
 
 function compactNumber(value) {
+  if (value && typeof value === 'object') {
+    const preservedDisplay = value.display_value || value.display;
+    if (hasMeaningfulValue(preservedDisplay)) return String(preservedDisplay);
+  }
   if (value && typeof value === 'object' && value.range && Number.isFinite(value.low) && Number.isFinite(value.high)) {
     const prefix = value.estimated ? 'Approx. ' : '';
     const low = new Intl.NumberFormat('en-US').format(Math.round(value.low));
@@ -168,66 +176,12 @@ function metricBasis(metric, fallback = null) {
   return metric?.basis || fallback;
 }
 
-/**
- * Accept a true-relationship range only when both ends are plausible TR counts
- * (not total-contacts conflation). Reject spans where high/low > 5 or high looks
- * like a total-contact inventory versus a tight TR estimate.
- */
-function isPlausibleTrueRelationshipRange(low, high, totalContacts = null) {
-  if (!Number.isFinite(low) || !Number.isFinite(high)) return false;
-  const a = Math.min(low, high);
-  const b = Math.max(low, high);
-  if (a <= 0 || b <= 0) return false;
-  if (b / a > 5) return false;
-  if (Number.isFinite(totalContacts)) {
-    // Never treat total contacts as the high end of true relationships.
-    if (b === totalContacts && a < totalContacts * 0.5) return false;
-    if (b >= totalContacts && totalContacts > a) return false;
-  }
-  // True relationships are a relationship quality subset — multi-thousand spans are suspect.
-  if (b > 2000 && b / a > 3) return false;
-  return true;
-}
-
-function sanitizeTrueRelationshipMetric(metric, totalContactsMetric = null) {
-  if (!metric) return null;
-  const totalN = metricNumber(totalContactsMetric);
-  if (metric.range && Number.isFinite(metric.low) && Number.isFinite(metric.high)) {
-    if (!isPlausibleTrueRelationshipRange(metric.low, metric.high, totalN)) {
-      // Prefer the low end when it looks like TR and high looks like total contacts.
-      if (
-        Number.isFinite(totalN) &&
-        (metric.high === totalN || metric.high > totalN * 0.9) &&
-        metric.low < totalN * 0.5
-      ) {
-        return makeMetric(metric.low, metric.estimated, {
-          source: metric.source || 'Extracted',
-          basis: 'true_relationships_low_end_after_rejecting_total_contacts_range',
-        });
-      }
-      // Prefer mid only if span is modest; otherwise drop.
-      if (metric.high / metric.low <= 5) {
-        return makeMetric(metric.value ?? (metric.low + metric.high) / 2, true, {
-          source: metric.source || 'Extracted',
-          basis: 'range_collapsed_to_point_estimate',
-        });
-      }
-      return makeMetric(metric.low, true, {
-        source: metric.source || 'Extracted',
-        basis: 'implausible_range_collapsed_to_low',
-      });
-    }
-  }
-  return metric;
-}
-
 function metricsFromRelationshipDraft(draft) {
   const rel = draft?.relationship_reality || {};
   const mentions = Array.isArray(rel.database_size_mentions) ? rel.database_size_mentions : [];
   const q3Evidence = rel.evidence?.q3 || '';
 
   let totalContacts = null;
-  let trueRelationships = null;
 
   // Prefer total-before-true phrasing: "maybe 65 and true relationships are maybe 15-20"
   const totalFromQ3 = parseNumberNear(q3Evidence, [
@@ -239,42 +193,12 @@ function metricsFromRelationshipDraft(draft) {
     totalContacts = makeMetric(totalFromQ3, false, { source: 'User provided' });
   }
 
-  const rangeFromQ3 = parseRangeNear(q3Evidence, [
-    /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)(?!\s*(?:total|contacts?|people|in\s+my))/i,
-    /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)(?!\d)/i,
-  ]);
-  if (rangeFromQ3 && isPlausibleTrueRelationshipRange(rangeFromQ3.low, rangeFromQ3.high, metricNumber(totalContacts))) {
-    trueRelationships = { ...rangeFromQ3, source: 'User provided' };
-  } else if (rangeFromQ3) {
-    trueRelationships = sanitizeTrueRelationshipMetric(rangeFromQ3, totalContacts);
-  }
-
-  const singleTrue = parseNumberNear(q3Evidence, [
-    /true relationships are maybe\s+(\d+)(?!\s*[-–])/i,
-    /true relationships(?: are)?(?: maybe)?\s+(\d+)(?!\s*[-–])/i,
-    /about\s+([\d,]+)\s+are\s+true relationships/i,
-  ]);
-  if (!trueRelationships && Number.isFinite(singleTrue)) {
-    trueRelationships = makeMetric(singleTrue, false, { source: 'User provided' });
-  }
-
   if (!totalContacts && mentions.length >= 1) {
     const total = Number(String(mentions[0]).replace(/,/g, ''));
     if (Number.isFinite(total)) totalContacts = makeMetric(total, false, { source: 'Extracted' });
   }
 
-  // Mentions pattern used by draft: [total, trueLow, trueHigh] — only accept plausible TR ranges.
-  if (!trueRelationships && mentions.length >= 3) {
-    const low = Number(String(mentions[1]).replace(/,/g, ''));
-    const high = Number(String(mentions[2]).replace(/,/g, ''));
-    const totalN = metricNumber(totalContacts);
-    if (isPlausibleTrueRelationshipRange(low, high, totalN)) {
-      trueRelationships = makeRangeMetric(low, high, false, { source: 'Extracted' });
-    }
-  }
-
-  trueRelationships = sanitizeTrueRelationshipMetric(trueRelationships, totalContacts);
-  return { totalContacts, trueRelationships };
+  return { totalContacts };
 }
 
 function metricsFromProductionDraft(draft) {
@@ -300,18 +224,16 @@ function metricsFromProductionDraft(draft) {
  * Not Intelligence Layer interpretation — evidence normalization for contract rows only.
  * Does not invent missing financial values.
  */
-export function extractAssessmentMetricSources({ answers = {}, draft = {}, briefing = {}, oneMove = {} } = {}) {
+export function extractAssessmentMetricSources({ answers = {}, draft = {}, briefing = {} } = {}) {
   const relationshipDraftEvidence = draft?.relationship_reality?.evidence || {};
   const financialDraftEvidence = draft?.financial_reality?.evidence || {};
   const draftRelationshipMetrics = metricsFromRelationshipDraft(draft);
   const draftProductionMetrics = metricsFromProductionDraft(draft);
-  const relationshipText = textBlock(
+  const relationshipTargetText = textBlock(
     answers.q3,
     answers.q5,
     relationshipDraftEvidence.q3,
-    relationshipDraftEvidence.q5,
-    oneMove?.recommendation,
-    oneMove?.why_this_move
+    relationshipDraftEvidence.q5
   );
   const financialText = textBlock(
     answers.q9,
@@ -332,40 +254,12 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
     draftRelationshipMetrics.totalContacts
   );
 
-  const rawTrueRange = parseRangeNear(answers.q3, [
-    /true relationships are maybe\s+(\d+)\s*[-–]\s*(\d+)(?!\s*(?:total|contacts?))/i,
-    /true relationships(?: are)?(?: maybe)?\s+(\d+)\s*[-–]\s*(\d+)(?!\d)/i,
-  ]);
-  const totalN = metricNumber(totalContacts);
-  const safeTrueRange =
-    rawTrueRange && isPlausibleTrueRelationshipRange(rawTrueRange.low, rawTrueRange.high, totalN)
-      ? rawTrueRange
-      : rawTrueRange
-        ? sanitizeTrueRelationshipMetric(rawTrueRange, totalContacts)
-        : null;
-
-  const currentTrueRelationships = sanitizeTrueRelationshipMetric(
-    firstMetric(
-      safeTrueRange,
-      parseNumberMetric(answers.q3, [
-        /about\s+([\d,]+)\s+are\s+true relationships/i,
-        /approximately\s+([\d,]+)\s+are\s+true relationships/i,
-        /([\d,]+)\s+are\s+true relationships/i,
-        /true relationships are maybe\s+(\d+)(?!\s*[-–])/i,
-        /true relationship(?:s)?(?: database)?(?: is|:)?\s+(?:probably\s+|maybe\s+)?([\d,]+)/i,
-      ]),
-      draftRelationshipMetrics.trueRelationships,
-      parseNumberMetric(
-        relationshipText,
-        [
-          /about\s+([\d,]+)\s+strong relationships/i,
-          /([\d,]+)\s+strong relationships/i,
-          /([\d,]+)\s+of\s+those\s+are\s+friends,\s*good relationships/i,
-        ],
-        true
-      )
-    ),
-    totalContacts
+  const trueRelationshipEvidence = resolveCurrentTrueRelationshipEvidence({
+    answers,
+    draft,
+  });
+  const currentTrueRelationships = trueRelationshipMetricFromEvidence(
+    trueRelationshipEvidence
   );
 
   const relationshipTarget = firstMetric(
@@ -378,9 +272,9 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
       ],
       false
     ),
-    parseRangeNear(relationshipText, [/database to\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i], true),
+    parseRangeNear(relationshipTargetText, [/database to\s+(\d+)[.\-–]?\s*[-–]?\s*(\d+)/i], true),
     parseNumberMetric(
-      relationshipText,
+      relationshipTargetText,
       [
         /grow\s+true relationships\s+toward\s+([\d,]+)/i,
         /true relationships\s+toward\s+([\d,]+)/i,
@@ -476,6 +370,7 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
 
   return {
     currentTrueRelationships,
+    trueRelationshipEvidence,
     totalContacts,
     currentUnits,
     currentVolume,
@@ -491,7 +386,7 @@ export function extractAssessmentMetricSources({ answers = {}, draft = {}, brief
 }
 
 function rawValueFromMetric(metric) {
-  if (!metric) return null;
+  if (metric === null || metric === undefined || metric === '') return null;
   if (typeof metric === 'number' && Number.isFinite(metric)) return metric;
   if (metric && typeof metric === 'object') {
     if (metric.range && Number.isFinite(metric.low) && Number.isFinite(metric.high)) {
@@ -558,6 +453,14 @@ export function makeDisplayRow({
     intelligence_status: estimated ? INTELLIGENCE_STATUS.FALLBACK : INTELLIGENCE_STATUS.PARTIAL,
     last_updated: last_updated || null,
     source_label: source,
+    provenance_state:
+      metric && typeof metric === 'object'
+        ? metric.provenance || metric.provenance_state || null
+        : null,
+    source_class:
+      metric && typeof metric === 'object' ? metric.source_class || null : null,
+    temporal_state:
+      metric && typeof metric === 'object' ? metric.temporal_state || null : null,
   };
 }
 
@@ -575,7 +478,12 @@ export function buildCurrentRealityDisplayRows({
   const extracted = extractAssessmentMetricSources({ answers, draft, briefing, oneMove });
   // Prefer explicit options only when they are complete metric objects (lake path);
   // never accept parallel normalized panel arrays.
-  const trueRel = metricsOption?.currentTrueRelationships || extracted.currentTrueRelationships;
+  const trueRelationshipEvidence = resolveCurrentTrueRelationshipEvidence({
+    answers,
+    draft,
+    metricOption: metricsOption?.currentTrueRelationships,
+  });
+  const trueRel = trueRelationshipMetricFromEvidence(trueRelationshipEvidence);
 
   const candidates = [
     makeDisplayRow({
@@ -633,6 +541,7 @@ export function buildCurrentRealityDisplayRows({
     availability: candidates.length > 0 ? 'available' : 'absent',
     extracted_for_lake: {
       currentTrueRelationships: trueRel,
+      trueRelationshipEvidence,
       relationshipTarget: extracted.relationshipTarget,
     },
   };
@@ -651,7 +560,7 @@ export function buildPotentialFutureDisplayRows({
   metricsOption = null,
 } = {}) {
   const extracted = extractAssessmentMetricSources({ answers, draft, briefing, oneMove });
-  const target = metricsOption?.relationshipTarget || extracted.relationshipTarget;
+  const target = metricsOption?.relationshipTarget ?? extracted.relationshipTarget;
 
   const relationshipDisplay = target
     ? (() => {
