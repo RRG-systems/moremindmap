@@ -8,6 +8,9 @@ import {
   safeSecurityClientError,
   validateCapabilityRecord,
 } from '../../src/lib/intelligenceFabric/coachConnect/security/index.js';
+import {
+  canonicalSubjectToDeveloperBindingInput,
+} from '../../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
 
 const runtimeEnvironment = globalThis.process?.env || {};
 const RuntimeBuffer = globalThis.Buffer;
@@ -100,6 +103,17 @@ export function createDeveloperBinding({ subject_id, scope, browser_id, security
     scope: structuredClone(scope),
     security_version,
   };
+}
+
+export function createDeveloperBindingFromCanonicalContext({
+  subject,
+  authenticated_session,
+}, env = runtimeEnvironment) {
+  const input = canonicalSubjectToDeveloperBindingInput({
+    subject,
+    session: authenticated_session,
+  });
+  return input ? createDeveloperBinding(input, env) : null;
 }
 
 function tokenHash(token, env) {

@@ -1,0 +1,32 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "STATIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": "productionSecurity index import/export validation",
+  "status": "PASS",
+  "limitations": [],
+  "policy_versions": {
+    "subject_binding": "subscriber-subject-binding-v1",
+    "session_elevation": "subscriber-session-elevation-v1",
+    "shared_state": "shared-security-state-v1",
+    "retention_authority": "retention-authority-v1",
+    "deletion_lifecycle": "deletion-lifecycle-v1",
+    "erasure_strategy": "governed-erasure-v1",
+    "transport_trust": "production-transport-trust-v1",
+    "operator_entitlement": "operator-entitlement-v1"
+  },
+  "contract_families": [
+    "activation and verdict",
+    "audit",
+    "subscriber subject binding",
+    "session elevation",
+    "shared security state port and synthetic adapter",
+    "retention authority and legal hold",
+    "deletion lifecycle and restore denial",
+    "erasure capability and synthetic verification",
+    "trusted proxy and transport policy",
+    "operator identity and entitlement"
+  ]
+}

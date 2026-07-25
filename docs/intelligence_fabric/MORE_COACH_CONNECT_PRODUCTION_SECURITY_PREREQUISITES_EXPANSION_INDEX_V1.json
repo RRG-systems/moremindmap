@@ -1,0 +1,409 @@
+{
+  "schema": "more.coach_connect.production_security_prerequisites.afw_expansion_index",
+  "version": "2.0.0",
+  "generated_at": "2026-07-24",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "authority": "PRODUCTION_SECURITY_PREREQUISITES_ARCHITECTURE_AUTHORIZED_FOR_AFW_EXPANSION_ONLY",
+  "repair_mission": "MORE_REPAIR_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_DECISION_AUTHORITY_001",
+  "repository": {
+    "path": "/Users/rrg/.openclaw/workspace/moremindmap-live",
+    "baseline_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+    "source_packet": {
+      "name": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1.md",
+      "sha256": "c35b9bcc57d44eb7b8369ae97ef371d3a3abcd5c457877d1d7cd1f57ceef834a",
+      "included_in_archive": false
+    },
+    "unrelated_dirty_worktree_preserved": true,
+    "protected_roots_modified_by_expansion": false,
+    "source_implementation_modified_by_expansion": false,
+    "staging_performed": false,
+    "commit_performed": false
+  },
+  "expansion_verdict": "COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_AFW_EXPANSION_COMPLETE_WITH_EXPLICIT_BLOCKERS",
+  "decision_authority_repair_verdict": "COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_AFW_DECISION_AUTHORITY_REPAIRED",
+  "human_decision_packet": {
+    "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_HUMAN_DECISION_PACKET_V1.md",
+    "status": "RECOMMENDATIONS_READY_NO_HUMAN_APPROVAL_RECORDED",
+    "recommendation_is_approval": false,
+    "approval_rule": "ONLY_EXPLICIT_APPROVED_WITH_COMPLETE_HUMAN_FIELDS_AND_REQUIRED_ATTACHMENTS",
+    "deferred_scope": "AFFECTED_SPRINTS_AND_DEPENDENT_COMPLETION_ONLY"
+  },
+  "implementation_verdict_issued": false,
+  "implementation_authorized": false,
+  "default_off_required": true,
+  "deployment_readiness_claimed": false,
+  "production_certification_claimed": false,
+  "production_actions": {
+    "deployment": false,
+    "production_activation": false,
+    "production_redis_or_live_shared_state": false,
+    "live_providers_models_or_media": false,
+    "credentials_or_secrets": false,
+    "production_migration": false,
+    "destructive_production_deletion": false,
+    "stripe_activation": false
+  },
+  "physical_deletion_truth": {
+    "local_append_only_jsonl": "LOGICAL_DENIAL_ONLY",
+    "physical_deletion_claimed": false,
+    "transcript_backing_store_verified": false
+  },
+  "prerequisites": [
+    {
+      "id": "CANONICAL_SUBSCRIBER_SUBJECT_BINDING",
+      "status": "BLOCKED",
+      "human_decisions": ["SUBSCRIBER_AUTHORITY_SOURCE"],
+      "sprints": [1, 7]
+    },
+    {
+      "id": "PRE_AUTH_SESSION_ROTATION",
+      "status": "BLOCKED",
+      "human_decisions": ["SUBSCRIBER_SESSION_OWNER"],
+      "sprints": [1, 7]
+    },
+    {
+      "id": "DEPLOYMENT_GRADE_SHARED_SECURITY_STATE",
+      "status": "BLOCKED",
+      "human_decisions": ["SHARED_STATE_PLATFORM"],
+      "sprints": [2, 7]
+    },
+    {
+      "id": "AUTHORITATIVE_RETENTION_POLICY",
+      "status": "BLOCKED",
+      "human_decisions": ["RETENTION_POLICY_AUTHORITY"],
+      "sprints": [3, 4, 7]
+    },
+    {
+      "id": "TRANSCRIPT_BACKING_STORE_DELETION",
+      "status": "BLOCKED",
+      "human_decisions": [
+        "TRANSCRIPT_BACKING_STORE",
+        "BACKUP_RESTORE_HORIZON"
+      ],
+      "sprints": [4, 7]
+    },
+    {
+      "id": "APPEND_ONLY_HISTORY_ERASURE",
+      "status": "BLOCKED",
+      "human_decisions": ["HISTORICAL_ERASURE_STRATEGY"],
+      "sprints": [4, 7]
+    },
+    {
+      "id": "PRODUCTION_ONLY_HSTS",
+      "status": "BLOCKED",
+      "human_decisions": [
+        "PRODUCTION_HOSTING_TRUST",
+        "HSTS_DIRECTIVES"
+      ],
+      "sprints": [5, 7]
+    },
+    {
+      "id": "TRUSTED_PROXY_CLIENT_ADDRESS",
+      "status": "BLOCKED",
+      "human_decisions": ["PRODUCTION_HOSTING_TRUST"],
+      "sprints": [5, 7]
+    },
+    {
+      "id": "OPERATOR_IDENTITY_AUDIT_ENTITLEMENT",
+      "status": "BLOCKED",
+      "human_decisions": [
+        "OPERATOR_IDENTITY_AUTHORITY",
+        "OPERATOR_ENTITLEMENT_POLICY"
+      ],
+      "sprints": [6, 7]
+    }
+  ],
+  "human_decisions": [
+    {
+      "id": "SUBSCRIBER_AUTHORITY_SOURCE",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "DEDICATED_AUTH0_SUBSCRIBER_OIDC_IMMUTABLE_SUBJECT_MAPPING",
+      "owner_class": "product_security_privacy",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "SUBSCRIBER_SESSION_OWNER",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "SERVER_OWNED_OPAQUE_ROTATING_BFF_SESSION",
+      "owner_class": "authentication_application_security",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "SHARED_STATE_PLATFORM",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "DEDICATED_PAID_SINGLE_PRIMARY_UPSTASH_REDIS_SECURITY_STORE",
+      "owner_class": "infrastructure_security_budget",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "RETENTION_POLICY_AUTHORITY",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "PRIVACY_OWNED_LEGAL_PRODUCT_APPROVED_SCHEDULE_STORAGE_OFF_UNTIL_COMPLETE",
+      "owner_class": "business_legal_privacy_security_operations",
+      "required_attachments": ["SIGNED_DATA_CLASS_RETENTION_SCHEDULE"],
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "TRANSCRIPT_BACKING_STORE",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "ENCRYPTED_UNVERSIONED_S3_PAYLOADS_TRANSACTIONAL_METADATA_DELETION_EPOCHS",
+      "owner_class": "product_provider_data_security_privacy_infrastructure",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "BACKUP_RESTORE_HORIZON",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "PROPOSED_30_DAY_MAXIMUM_ROLLING_HORIZON_RESTORE_DELETION_REPLAY",
+      "owner_class": "infrastructure_privacy_legal_product",
+      "required_attachments": ["APPROVED_HORIZON_OR_REPLACEMENT"],
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "HISTORICAL_ERASURE_STRATEGY",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "PRODUCTION_STORE_REPLACEMENT_WITH_SCOPED_CRYPTOGRAPHIC_ERASURE",
+      "owner_class": "security_privacy_architecture_infrastructure_product",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "PRODUCTION_HOSTING_TRUST",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "ONE_EXACT_VERCEL_PRODUCTION_EDGE_NO_UPSTREAM_PROXY_ATTESTED_METADATA",
+      "owner_class": "infrastructure_security_privacy_hosting",
+      "required_attachments": ["EXACT_PROJECT_AND_HOST_REFERENCES"],
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "HSTS_DIRECTIVES",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "PRODUCTION_ONLY_STAGED_300_86400_31536000_NO_SUBDOMAINS_NO_PRELOAD",
+      "owner_class": "security_operations_domain",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "OPERATOR_IDENTITY_AUTHORITY",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "SEPARATE_INVITE_ONLY_AUTH0_OPERATOR_AUTHORITY_WEBAUTHN_MFA",
+      "owner_class": "security_operations_workforce_identity_privacy",
+      "required_attachments": ["WORKFORCE_IDENTITY_SOURCE"],
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    },
+    {
+      "id": "OPERATOR_ENTITLEMENT_POLICY",
+      "status": "RECOMMENDED_PENDING_HUMAN_DECISION",
+      "recommended_architecture": "DENY_DEFAULT_RBAC_ABAC_REASON_AUDIT_DESTRUCTIVE_DUAL_CONTROL",
+      "owner_class": "product_security_privacy_operations_legal",
+      "human_choice": null,
+      "approved_by": null,
+      "approval_date": null,
+      "approval_status": null
+    }
+  ],
+  "allowed_human_approval_statuses": [
+    "APPROVED",
+    "REJECTED",
+    "DEFERRED"
+  ],
+  "sprints": [
+    {
+      "number": 1,
+      "name": "Identity and Session Elevation",
+      "depends_on": [],
+      "entry_decisions": [
+        "SUBSCRIBER_AUTHORITY_SOURCE",
+        "SUBSCRIBER_SESSION_OWNER"
+      ]
+    },
+    {
+      "number": 2,
+      "name": "Shared Security State",
+      "depends_on": [],
+      "entry_decisions": ["SHARED_STATE_PLATFORM"]
+    },
+    {
+      "number": 3,
+      "name": "Retention Authority and Deletion State Machine",
+      "depends_on": [2],
+      "entry_decisions": [
+        "RETENTION_POLICY_AUTHORITY",
+        "BACKUP_RESTORE_HORIZON"
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Transcript and Historical Record Erasure Strategy",
+      "depends_on": [2, 3],
+      "entry_decisions": [
+        "RETENTION_POLICY_AUTHORITY",
+        "TRANSCRIPT_BACKING_STORE",
+        "BACKUP_RESTORE_HORIZON",
+        "HISTORICAL_ERASURE_STRATEGY"
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Production Transport and Network Trust",
+      "depends_on": [],
+      "entry_decisions": [
+        "PRODUCTION_HOSTING_TRUST",
+        "HSTS_DIRECTIVES"
+      ]
+    },
+    {
+      "number": 6,
+      "name": "Operator Identity and Audit Entitlement",
+      "depends_on": [2],
+      "entry_decisions": [
+        "OPERATOR_IDENTITY_AUTHORITY",
+        "OPERATOR_ENTITLEMENT_POLICY"
+      ]
+    },
+    {
+      "number": 7,
+      "name": "Cross-Sprint Integration and Production-Prerequisite Verdict",
+      "depends_on": [1, 2, 3, 4, 5, 6],
+      "entry_decisions": [
+        "SUBSCRIBER_AUTHORITY_SOURCE",
+        "SUBSCRIBER_SESSION_OWNER",
+        "SHARED_STATE_PLATFORM",
+        "RETENTION_POLICY_AUTHORITY",
+        "TRANSCRIPT_BACKING_STORE",
+        "BACKUP_RESTORE_HORIZON",
+        "HISTORICAL_ERASURE_STRATEGY",
+        "PRODUCTION_HOSTING_TRUST",
+        "HSTS_DIRECTIVES",
+        "OPERATOR_IDENTITY_AUTHORITY",
+        "OPERATOR_ENTITLEMENT_POLICY"
+      ]
+    }
+  ],
+  "bounded_repair": {
+    "maximum_cycles_per_failed_gate": 2,
+    "scope_change_allowed": false,
+    "repair_receipt_required": true,
+    "exhaustion_action": "STOP_FOR_HUMAN_REVIEW"
+  },
+  "archive": {
+    "name": "COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_AFW_REVIEW_V2.zip",
+    "expected_artifact_count": 14,
+    "artifact_order": [
+      "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_1_V1.md",
+      "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_2_V1.md",
+      "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_3_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_CROSS_PART_CONSISTENCY_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_EXPANSION_INDEX_V1.json",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_1_IDENTITY_SESSION_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_2_SHARED_SECURITY_STATE_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_3_RETENTION_DELETION_STATE_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_4_TRANSCRIPT_HISTORICAL_ERASURE_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_5_TRANSPORT_NETWORK_TRUST_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_6_OPERATOR_IDENTITY_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_7_INTEGRATION_VERDICT_AFW_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_HUMAN_DECISION_PACKET_V1.md",
+      "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_AFW_DECISION_AUTHORITY_REPAIR_RECEIPT_V1.md"
+    ],
+    "artifacts": [
+      {
+        "name": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_1_V1.md",
+        "role": "part_1",
+        "sha256": "7270aa905977490fb72b91847be88a0c5cb447f33f06dfe9dab47c9df2560ef8"
+      },
+      {
+        "name": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_2_V1.md",
+        "role": "part_2",
+        "sha256": "1a4d68dc8964aa7e34349db6a5dd36bbb1b70e896e2f210d647daae0268f19a6"
+      },
+      {
+        "name": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_PART_3_V1.md",
+        "role": "part_3",
+        "sha256": "63cdf96c81d2c8add823e82c0f3d7f35a72da85bc59756a7187c4227e3cefd17"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_CROSS_PART_CONSISTENCY_V1.md",
+        "role": "cross_part_consistency",
+        "sha256": "8a198ed6fead0c8178e5aef8b130fd43ec33273300d2f537e6549b676870c155"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_EXPANSION_INDEX_V1.json",
+        "role": "expansion_index",
+        "sha256": null,
+        "self_hash_excluded": true
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_1_IDENTITY_SESSION_AFW_V1.md",
+        "role": "sprint_1",
+        "sha256": "0279b3c27454258d59d3636e2d28b2193de86b475cc03ab696eea35389dff2b8"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_2_SHARED_SECURITY_STATE_AFW_V1.md",
+        "role": "sprint_2",
+        "sha256": "26610b1cf29dce533360a7ae76ec5a8119503e8fcf1984c6a62a8859da76d454"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_3_RETENTION_DELETION_STATE_AFW_V1.md",
+        "role": "sprint_3",
+        "sha256": "dba5187e2d506073c7f15500d94b4d38472fb51e6eedf52db89f172e6789568b"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_4_TRANSCRIPT_HISTORICAL_ERASURE_AFW_V1.md",
+        "role": "sprint_4",
+        "sha256": "dd37aa650f800624131167f0c50ad613f1df7e2f63086f5657e4a29aed10c6dc"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_5_TRANSPORT_NETWORK_TRUST_AFW_V1.md",
+        "role": "sprint_5",
+        "sha256": "59a4e784e9bbe639bf0cf0671a6f2ab977445886baf7388be3ca0c0d9af2c80b"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_6_OPERATOR_IDENTITY_AFW_V1.md",
+        "role": "sprint_6",
+        "sha256": "ff471c6b9bb45099ac8f7f153edab0d179c01a89628d650a1d4b0417e31bc314"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_SPRINT_7_INTEGRATION_VERDICT_AFW_V1.md",
+        "role": "sprint_7",
+        "sha256": "397b36fb0de1d0859fcb1216ff7f716fe7deb2b3e8c3622aabf4314071dc355e"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_HUMAN_DECISION_PACKET_V1.md",
+        "role": "human_decision_packet",
+        "sha256": "de181e87821eff6e95a90e1a4ce221ed08c01bd226250988da56d2412c076908"
+      },
+      {
+        "name": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_AFW_DECISION_AUTHORITY_REPAIR_RECEIPT_V1.md",
+        "role": "repair_receipt",
+        "sha256": "68407a35ec5427bde85954f21ae96e032d121bb73f0d0eb0aed105c1a1861b78"
+      }
+    ]
+  }
+}

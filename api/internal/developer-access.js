@@ -2,6 +2,7 @@ import {
   allowedDeveloperAccessOrigins,
   capabilityCookie,
   createDeveloperBinding,
+  createDeveloperBindingFromCanonicalContext,
   developerAccessEnvironmentDecision,
   developerCapabilityFromCookie,
   evaluateDeveloperAccess,
@@ -64,6 +65,7 @@ function auditEndpointDenial({ store, req, binding, code, event_type, now }) {
 export function createDeveloperAccessHandler({
   store = getDefaultDeveloperSecurityStore(),
   resolveSubjectBinding = () => null,
+  resolveCanonicalSubjectContext = null,
   randomToken = () => crypto.randomBytes(32).toString('base64url'),
   clock = () => Date.now(),
 } = {}) {
@@ -77,8 +79,17 @@ export function createDeveloperAccessHandler({
       return respondFailure(res, environment.code, { status: environment.status });
     }
     if (!['GET', 'POST', 'DELETE'].includes(req.method)) return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-    const rawBinding = resolveSubjectBinding(req);
-    const binding = rawBinding ? createDeveloperBinding(rawBinding, env) : null;
+    const canonicalContext = typeof resolveCanonicalSubjectContext === 'function'
+      ? resolveCanonicalSubjectContext(req)
+      : null;
+    const rawBinding = typeof resolveCanonicalSubjectContext === 'function'
+      ? null
+      : resolveSubjectBinding(req);
+    const binding = canonicalContext
+      ? createDeveloperBindingFromCanonicalContext(canonicalContext, env)
+      : rawBinding
+        ? createDeveloperBinding(rawBinding, env)
+        : null;
     if (!binding) {
       auditEndpointDenial({ store, req, binding: null, code: 'AUTHENTICATION_FAILED', event_type: 'AUTHENTICATION_DENIED', now });
       return respondFailure(res, 'AUTHENTICATION_FAILED');

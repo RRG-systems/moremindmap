@@ -1,0 +1,58 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "HUMAN_APPROVED_AND_STATIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": null,
+  "status": "PASS",
+  "limitations": [],
+  "implementation_paths": [
+    "api/internal/developer-access-security.js",
+    "api/internal/developer-access.js",
+    "src/lib/intelligenceFabric/coachConnect/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/activation.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/audit.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/constants.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/deletionLifecycle.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/erasureStrategy.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/inMemorySharedSecurityState.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/operatorIdentity.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/retentionAuthority.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/sessionElevation.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/sharedSecurityStatePorts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/subjectBinding.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/transportPolicy.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/trustedProxy.js"
+  ],
+  "test_paths": [
+    "test/api.internal.developerAccess.productionSecurity.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.deletion.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.operator.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.retention.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.sessionElevation.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.sharedState.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.subjectBinding.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.transport.test.js"
+  ],
+  "helper_paths": [
+    "scripts/verifyCoachConnectProductionSecurityPrerequisites.mjs"
+  ],
+  "proof_root": "lab_outputs/coach_connect_production_security_prerequisites_v1",
+  "protected_roots": [
+    "api/engine/businessAssessment",
+    "api/engine/canonical",
+    "api/engine/vault",
+    "api/stripe",
+    "src/lib/businessAssessment",
+    "src/lib/businessEngine",
+    "src/lib/intelligenceFabric/runtime",
+    "src/lib/intelligenceFabric/bootstrap",
+    "src/lib/intelligenceFabric/subscriber",
+    "src/lib/stripe",
+    "src/lib/stripeCheckout.js"
+  ]
+}

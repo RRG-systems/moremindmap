@@ -1,0 +1,18 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "SYNTHETIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": "test/intelligenceFabric.coachConnect.productionSecurity.transport.test.js",
+  "status": "PASS",
+  "limitations": [],
+  "scenario": 39,
+  "attack": "Production label lacks verified HTTPS",
+  "negative_attack_status": "DENIED_OR_FAIL_CLOSED",
+  "positive_control_status": "PASS",
+  "central_decision_status": "PASS",
+  "privacy_safe_audit_status": "PASS",
+  "protected_side_effects_on_denial": 0,
+  "production_certification": false
+}

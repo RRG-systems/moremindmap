@@ -1,0 +1,20 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "SYNTHETIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": [
+    "test/intelligenceFabric.coachConnect.productionSecurity.sharedState.test.js"
+  ],
+  "status": "PASS",
+  "limitations": [],
+  "sprint": 2,
+  "assertions": [
+    "nonce replay rate revocation epoch lease sharing",
+    "read-after-eviction"
+  ],
+  "repair_cycles": 0,
+  "production_action": false,
+  "activation_performed": false
+}

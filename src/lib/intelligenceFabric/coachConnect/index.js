@@ -6,3 +6,4 @@ export * from './projections.js';
 export * from './service.js';
 export * from './stateMachines.js';
 export * from './liveSession/index.js';
+export * from './productionSecurity/index.js';

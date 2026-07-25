@@ -1,0 +1,28 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "STATIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": null,
+  "status": "PASS",
+  "limitations": [],
+  "protected_roots": [
+    "api/engine/businessAssessment",
+    "api/engine/canonical",
+    "api/engine/vault",
+    "api/stripe",
+    "src/lib/businessAssessment",
+    "src/lib/businessEngine",
+    "src/lib/intelligenceFabric/runtime",
+    "src/lib/intelligenceFabric/bootstrap",
+    "src/lib/intelligenceFabric/subscriber",
+    "src/lib/stripe",
+    "src/lib/stripeCheckout.js"
+  ],
+  "before_aggregate_sha256": "234f748afdd8e043f050cdf3795f15e8d0f03ea9446ab50b2812be9ccfa2e35d",
+  "after_aggregate_sha256": "234f748afdd8e043f050cdf3795f15e8d0f03ea9446ab50b2812be9ccfa2e35d",
+  "unchanged_during_campaign_validation": true,
+  "campaign_allowlist_overlap": [],
+  "unrelated_dirty_work_preserved": true
+}

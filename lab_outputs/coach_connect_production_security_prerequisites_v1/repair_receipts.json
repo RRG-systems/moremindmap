@@ -1,0 +1,35 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "STATIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": null,
+  "status": "PASS_AFTER_BOUNDED_REPAIR",
+  "limitations": [],
+  "repair_count": 1,
+  "receipts": [
+    {
+      "receipt_id": "package-order-repair-cycle-1",
+      "sprint": 7,
+      "failed_gate": "ZIP_ENTRY_LIST_SORTED",
+      "evidence_reference": "COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_IMPLEMENTATION_REVIEW_V1.zip",
+      "root_cause": "Archive staging inventory used locale ordering while verification required bytewise lexical ordering.",
+      "files_touched": [
+        "scripts/verifyCoachConnectProductionSecurityPrerequisites.mjs",
+        "repair_receipts.json",
+        "lint_result.json",
+        "changed_files.json",
+        "artifact_index.json",
+        "evidence_manifest.json"
+      ],
+      "contracts_affected": [],
+      "tests_affected": [],
+      "scope_changed": false,
+      "risk_changed": false,
+      "repair_cycle": 1,
+      "result": "PASS"
+    }
+  ],
+  "statement": "One packaging-only repair made ZIP entry ordering deterministic; implementation semantics were unchanged."
+}

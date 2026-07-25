@@ -1,0 +1,23 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "STATIC_AND_SYNTHETIC",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": null,
+  "status": "PASS",
+  "limitations": [],
+  "default_off": true,
+  "synthetic_only": true,
+  "live_provider_imports": [],
+  "live_adapter_calls": 0,
+  "deployment_actions": 0,
+  "production_redis_actions": 0,
+  "credential_changes": 0,
+  "production_migrations": 0,
+  "destructive_deletion_actions": 0,
+  "stripe_actions": 0,
+  "transcript_persistence_activation": false,
+  "local_jsonl_truth": "LOGICAL_DENIAL_ONLY",
+  "local_jsonl_physical_deletion_claimed": false
+}

@@ -1,0 +1,74 @@
+{
+  "artifact_version": "1.0.0",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_V1",
+  "evidence_class": "HUMAN_APPROVED",
+  "generated_at": "2026-07-25T06:39:29.013Z",
+  "source_commit": "d42b52a27e8dae0ea4f53a444ee073a752fcdecd",
+  "command_test_reference": "MORE_COACH_CONNECT_PRODUCTION_SECURITY_PREREQUISITES_HUMAN_DECISION_RATIFICATION_V1.md",
+  "status": "PASS",
+  "limitations": [],
+  "ratification_sha256": "53f0f58d79e2de25b58022772b554f40daba27be3933ef2e09ee09da1414938e",
+  "ratification_status": "APPROVED_WITH_RATIFIED_REFINEMENTS",
+  "human_choice": "APPROVE_RECOMMENDED_ARCHITECTURE_WITH_RATIFIED_REFINEMENTS",
+  "approved_by": "D.J. — Founder / Product Owner",
+  "approval_date": "2026-07-24",
+  "architecture_reviewer": "Spock",
+  "decisions": [
+    {
+      "decision_id": "SUBSCRIBER_AUTHORITY_SOURCE",
+      "choice": "AUTH0_OIDC_PROVIDER_NEUTRAL_CONTRACT",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "SUBSCRIBER_SESSION_OWNER",
+      "choice": "SERVER_OWNED_OPAQUE_ROTATING_BFF_SESSION",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "SHARED_STATE_PLATFORM",
+      "choice": "UPSTASH_REDIS_CONDITIONAL_CAPABILITY_ADAPTER",
+      "status": "APPROVED_WITH_REFINEMENT"
+    },
+    {
+      "decision_id": "RETENTION_POLICY_AUTHORITY",
+      "choice": "PRIVACY_PRODUCT_LEGAL_REVIEWED_ACTIVATION_GATED",
+      "status": "APPROVED_WITH_ACTIVATION_GATE"
+    },
+    {
+      "decision_id": "TRANSCRIPT_BACKING_STORE",
+      "choice": "PRIVATE_UNVERSIONED_S3_SCOPED_ENCRYPTION",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "BACKUP_RESTORE_HORIZON",
+      "choice": "CONTROL_METADATA_MAX_30_DAYS_NO_TRANSCRIPT_BACKUP",
+      "status": "APPROVED_WITH_REFINEMENT"
+    },
+    {
+      "decision_id": "HISTORICAL_ERASURE_STRATEGY",
+      "choice": "PRODUCTION_STORE_REPLACEMENT_SCOPED_CRYPTO_ERASURE",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "PRODUCTION_HOSTING_TRUST",
+      "choice": "ONE_EXACT_VERCEL_EDGE_NO_UPSTREAM_PROXY",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "HSTS_DIRECTIVES",
+      "choice": "STAGED_300_86400_31536000_NO_SUBDOMAINS_NO_PRELOAD",
+      "status": "APPROVED"
+    },
+    {
+      "decision_id": "OPERATOR_IDENTITY_AUTHORITY",
+      "choice": "ISOLATED_AUTH0_NAMED_WEBAUTHN_IDENTITIES",
+      "status": "APPROVED_WITH_REFINEMENT"
+    },
+    {
+      "decision_id": "OPERATOR_ENTITLEMENT_POLICY",
+      "choice": "DENY_DEFAULT_RBAC_ABAC_DUAL_CONTROL",
+      "status": "APPROVED"
+    }
+  ],
+  "retention_activation_gate": "SIGNED_DATA_CLASS_SCHEDULE_AND_OUTSIDE_PRIVACY_LEGAL_REVIEW_REQUIRED"
+}
