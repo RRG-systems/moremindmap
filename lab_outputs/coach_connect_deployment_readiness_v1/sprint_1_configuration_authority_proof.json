@@ -1,0 +1,74 @@
+{
+  "proof_contract_version": "coach-connect-deployment-proof-v1",
+  "proof_id": "sprint-1-configuration",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "sprint": 1,
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba",
+  "environment_id": "offline-readiness",
+  "command_or_test_ref": "sprint-1-validation",
+  "assertions": [
+    "DEFAULT_OFF",
+    "EMERGENCY_DISABLE_TRUE",
+    "CONFIGURATION_DIGEST_VALID"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "details": {
+    "configuration": {
+      "configuration_contract_version": "coach-connect-deployment-configuration-v1",
+      "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+      "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "artifact_manifest_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "environment_id": "offline-readiness",
+      "policy_versions": {
+        "deployment_readiness": "1.0.0"
+      },
+      "application_flags": {
+        "coach_connect": false,
+        "subscriber_actions": false,
+        "provider_calls": false,
+        "production_traffic": false,
+        "stripe": false,
+        "transcript_persistence": false,
+        "migration": false,
+        "destructive_deletion": false,
+        "production_shared_state": false
+      },
+      "live_dependency_flags": {
+        "coach_connect": false,
+        "subscriber_actions": false,
+        "provider_calls": false,
+        "production_traffic": false,
+        "stripe": false,
+        "transcript_persistence": false,
+        "migration": false,
+        "destructive_deletion": false,
+        "production_shared_state": false
+      },
+      "emergency_disabled": true,
+      "read_only": true,
+      "synthetic_only": true,
+      "public_access_permitted": false,
+      "activation_permitted": false,
+      "deployment_permitted": false,
+      "rollback_plan_ref": "rollback-plan-offline",
+      "monitoring_plan_ref": "monitoring-plan-offline",
+      "issued_at": "2026-07-25T00:00:00.000Z",
+      "expires_at": "2099-01-01T00:00:00.000Z",
+      "approver_refs": [],
+      "status": "VALIDATED_OFFLINE",
+      "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba"
+    }
+  }
+}

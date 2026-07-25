@@ -1,0 +1,43 @@
+{
+  "proof_contract_version": "coach-connect-deployment-proof-v1",
+  "proof_id": "scenario-45",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "sprint": 6,
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba",
+  "environment_id": "offline-readiness",
+  "command_or_test_ref": "sprint-6-validation",
+  "assertions": [
+    "ATTACK_DENIED_OR_VALID_INACTIVE_CONTROL",
+    "ZERO_EXTERNAL_SIDE_EFFECTS"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "details": {
+    "scenario_result": {
+      "scenario_id": "SUBDEV1_ASSIGNED_OPERATOR_AUTHORITY",
+      "status": "PASS",
+      "attack_denied": true,
+      "positive_control_accepted_inactive": false,
+      "activation_permitted": false,
+      "public_access_permitted": false,
+      "provider_call_count": 0,
+      "persistence_connection_count": 0,
+      "persistence_write_count": 0,
+      "stripe_call_count": 0,
+      "transcript_record_count": 0,
+      "production_action": false,
+      "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE"
+    }
+  }
+}

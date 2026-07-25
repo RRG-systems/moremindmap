@@ -1,0 +1,537 @@
+{
+  "evidence_record_version": "coach-connect-deployment-readiness-evidence-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "command_or_test_ref": "runbook manifest",
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "runbook_count": 11,
+  "runbooks": [
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "deploy",
+      "title": "deploy",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "verify",
+      "title": "verify",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "rollback",
+      "title": "rollback",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "emergency_disable",
+      "title": "emergency disable",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "restart_recovery",
+      "title": "restart recovery",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "security_incident",
+      "title": "security incident",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "privacy_incident",
+      "title": "privacy incident",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "retention_failure",
+      "title": "retention failure",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "transcript_handling_failure",
+      "title": "transcript handling failure",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "operator_access_review",
+      "title": "operator access review",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    },
+    {
+      "runbook_contract_version": "coach-connect-deployment-runbook-v1",
+      "runbook_id": "post_deployment_validation",
+      "title": "post deployment validation",
+      "version": "1.0.0",
+      "purpose": "Offline readiness procedure; execution authority is withheld.",
+      "authority_roles": [
+        "HUMAN_DEPLOYMENT_GOVERNOR"
+      ],
+      "prerequisites": [
+        "APPROVED_EVIDENCE_PACKAGE",
+        "EMERGENCY_DISABLE_TRUE"
+      ],
+      "inputs": [
+        "CONTENT_FREE_RECEIPT_REFERENCES"
+      ],
+      "ordered_steps": [
+        "VERIFY_AUTHORITY",
+        "VERIFY_DEFAULT_OFF",
+        "STOP_WITHOUT_EXECUTION"
+      ],
+      "verification": [
+        "ACTIVATION_REMAINS_INACTIVE",
+        "NO_EXTERNAL_CALLS"
+      ],
+      "evidence_outputs": [
+        "CONTENT_FREE_VALIDATION_RECEIPT"
+      ],
+      "rollback": [
+        "KEEP_EMERGENCY_DISABLE_TRUE",
+        "RETURN_FOR_ARCHITECTURE_REVIEW"
+      ],
+      "stop_conditions": [
+        "STOP_IF_CREDENTIAL_OR_PLATFORM_AUTHORITY_REQUIRED"
+      ],
+      "escalation": [
+        "HUMAN_ARCHITECTURE_AND_SECURITY_REVIEW"
+      ],
+      "prohibited_actions": [
+        "NO_DEPLOYMENT_OR_PLATFORM_ACTION",
+        "NO_PUBLIC_ACCESS",
+        "NO_LIVE_PROVIDER_OR_PERSISTENCE",
+        "NO_MIGRATION_DELETION_OR_STRIPE"
+      ],
+      "credential_required": false,
+      "production_action_required": false
+    }
+  ]
+}

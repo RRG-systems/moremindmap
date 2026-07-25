@@ -1,0 +1,99 @@
+{
+  "index_version": "more-coach-connect-deployment-readiness-expansion-index-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "architecture_packet": {
+    "path": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1.md",
+    "sha256": "800d2689b5587657b57a802b2bcf6057fcfb7e2dcd237228a0864b42eac0b1e1",
+    "review_verdict": "APPROVED_FOR_AFW_EXPANSION"
+  },
+  "authority": "AFW_EXPANSION_ONLY",
+  "artifact_count": 12,
+  "archive_entry_order": [
+    "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_1_V1.md",
+    "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_2_V1.md",
+    "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_3_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_CROSS_PART_CONSISTENCY_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_EXPANSION_INDEX_V1.json",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_1_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_2_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_3_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_4_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_5_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_6_AFW_V1.md",
+    "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_7_AFW_V1.md"
+  ],
+  "artifacts": [
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_1_V1.md",
+      "sha256": "b6debc0815e23bc33ccbd08cac39c01b8fbeedacd3114b3a4beaaa9ec917ce19",
+      "role": "repository-grounded doctrine"
+    },
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_2_V1.md",
+      "sha256": "09785aba3d3e0c0567e633b826847b55eed373f541b796e4793d9307a3f9cdda",
+      "role": "implementation contracts and schemas"
+    },
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_3_V1.md",
+      "sha256": "3fbd04f6bcb5a3a962186ef229d3caeb56488b731bb2af4cdf391db128465219",
+      "role": "validation and handoff"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_CROSS_PART_CONSISTENCY_V1.md",
+      "sha256": "fe77a9557849ef0c84441e22dd098128c5fe051f2afba30dcfae625f8b427241",
+      "role": "cross-part and cross-sprint review"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_1_AFW_V1.md",
+      "sha256": "1dd9a7fa3a9f38289bd614f7d44869e362c3ecd142d6b1e1a714f2bdc6f8f0dd",
+      "role": "sprint 1 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_2_AFW_V1.md",
+      "sha256": "edfe6604450fcd33b95726489d21b0e14d334b41dddbfc27725f6190f3db89bb",
+      "role": "sprint 2 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_3_AFW_V1.md",
+      "sha256": "76a93d4dba70f2c1deaea00cd151bbb5deb9b884fcefd02e72e7f2c98e43dd77",
+      "role": "sprint 3 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_4_AFW_V1.md",
+      "sha256": "d60c14d43341c972f9768f6ae2e0c204fb61617d8bf6741777520a7a19b14e50",
+      "role": "sprint 4 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_5_AFW_V1.md",
+      "sha256": "e18395a1478e6ae3d09a82449f00b455538540cd609e14d92a45d7592c4623c2",
+      "role": "sprint 5 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_6_AFW_V1.md",
+      "sha256": "0092c1c25639ef2ec9c2e6e781859ff9dbaaa06010691ae9f4ddf82e58b1c9ed",
+      "role": "sprint 6 AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_7_AFW_V1.md",
+      "sha256": "29119498393e3ae14b98d9b8f01945023ece63c0e27bdd944fc3813e65a581bf",
+      "role": "sprint 7 AFW"
+    }
+  ],
+  "self_hash": {
+    "path": "MORE_COACH_CONNECT_DEPLOYMENT_READINESS_EXPANSION_INDEX_V1.json",
+    "rule": "SELF_EXCLUDED_TO_AVOID_RECURSIVE_DIGEST",
+    "verification": "The exact final index SHA-256 is computed by package validation and verified again after decompression."
+  },
+  "evidence_classes": [
+    "STATIC",
+    "SYNTHETIC",
+    "DEPLOYMENT_SHAPED_OFFLINE",
+    "INTERNAL_LIVE"
+  ],
+  "implementation_authorized": false,
+  "deployment_authorized": false,
+  "activation_authorized": false,
+  "default_off_required": true,
+  "next_campaign": "MORE_CAMPAIGN_COACH_CONNECT_INTERNAL_DEFAULT_OFF_DEPLOYMENT_V1",
+  "expansion_verdict": "COACH_CONNECT_DEPLOYMENT_READINESS_AFW_EXPANSION_COMPLETE"
+}

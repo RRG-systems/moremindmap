@@ -1,0 +1,31 @@
+{
+  "evidence_record_version": "coach-connect-deployment-readiness-evidence-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "command_or_test_ref": "next campaign handoff",
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "next_campaign": "MORE_CAMPAIGN_COACH_CONNECT_INTERNAL_DEFAULT_OFF_DEPLOYMENT_V1",
+  "authorized": false,
+  "required_human_approvals": [
+    "DEPLOYMENT_GOVERNOR",
+    "SECURITY_GOVERNOR",
+    "PRIVACY_GOVERNOR",
+    "OPERATIONS_GOVERNOR"
+  ],
+  "required_future_evidence": [
+    "INTERNAL_LIVE_EDGE_ACCESS",
+    "INTERNAL_LIVE_ROLLBACK",
+    "INTERNAL_LIVE_MONITORING"
+  ],
+  "activation_remains_prohibited": true
+}

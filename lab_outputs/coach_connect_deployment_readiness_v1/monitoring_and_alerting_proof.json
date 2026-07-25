@@ -1,0 +1,49 @@
+{
+  "proof_contract_version": "coach-connect-deployment-proof-v1",
+  "proof_id": "monitoring-alerting-proof",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "sprint": 4,
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba",
+  "environment_id": "offline-readiness",
+  "command_or_test_ref": "sprint-4-validation",
+  "assertions": [
+    "CRITICAL_FAILURES_DETECTED",
+    "SYNTHETIC_P0_ACKNOWLEDGED",
+    "PRIVACY_SAFE"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "details": {
+    "coverage": {
+      "healthy": true,
+      "missing": [],
+      "activation_permitted": false
+    },
+    "alert_receipt": {
+      "alert_receipt_version": "coach-connect-deployment-alert-v1",
+      "alert_receipt_id": "alert-event-synthetic-p0",
+      "monitoring_event_ref": "event-synthetic-p0",
+      "severity": "P0",
+      "owner_role": "SECURITY_INCIDENT_COMMANDER",
+      "delivery_adapter_class": "SYNTHETIC_PROVIDER_NEUTRAL_ALERT_ADAPTER",
+      "delivery_mode": "SYNTHETIC",
+      "injected_at": "2026-07-25T00:00:00.000Z",
+      "acknowledged_at": "2026-07-25T00:00:00.000Z",
+      "latency_ms": 0,
+      "deduplication_key": "ACTIVATION_GATE_VIOLATION:ACTIVATION_BYPASS_DETECTED",
+      "status": "ACKNOWLEDGED",
+      "contains_sensitive_material": false
+    }
+  }
+}

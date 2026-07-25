@@ -1,0 +1,56 @@
+{
+  "evidence_record_version": "coach-connect-deployment-readiness-evidence-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "command_or_test_ref": "AFW exact allowlists",
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "implementation_files": [
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/constants.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/environmentMatrix.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/configurationAuthority.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/topology.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/activationGates.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/rollback.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/recovery.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/monitoring.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/runbooks.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/proofHarness.js",
+    "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/index.js"
+  ],
+  "test_files": [
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.environment.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.topology.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.rollback.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.monitoring.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.runbooks.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.adversarial.test.js",
+    "test/intelligenceFabric.coachConnect.deploymentReadiness.integration.test.js"
+  ],
+  "validator_files": [
+    "scripts/verifyCoachConnectDeploymentReadinessEvidence.mjs"
+  ],
+  "runbook_files": [
+    "docs/runbooks/coach_connect/deployment_readiness/deploy.md",
+    "docs/runbooks/coach_connect/deployment_readiness/verify.md",
+    "docs/runbooks/coach_connect/deployment_readiness/rollback.md",
+    "docs/runbooks/coach_connect/deployment_readiness/emergency_disable.md",
+    "docs/runbooks/coach_connect/deployment_readiness/restart_recovery.md",
+    "docs/runbooks/coach_connect/deployment_readiness/security_incident.md",
+    "docs/runbooks/coach_connect/deployment_readiness/privacy_incident.md",
+    "docs/runbooks/coach_connect/deployment_readiness/retention_failure.md",
+    "docs/runbooks/coach_connect/deployment_readiness/transcript_handling_failure.md",
+    "docs/runbooks/coach_connect/deployment_readiness/operator_access_review.md",
+    "docs/runbooks/coach_connect/deployment_readiness/post_deployment_validation.md"
+  ]
+}

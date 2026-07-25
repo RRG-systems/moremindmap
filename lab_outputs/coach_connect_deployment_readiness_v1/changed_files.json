@@ -1,0 +1,145 @@
+{
+  "evidence_record_version": "coach-connect-deployment-readiness-evidence-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "command_or_test_ref": "exact AFW allowlist validation",
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "changed_file_count": 31,
+  "files": [
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/deploy.md",
+      "sha256": "eba21bb93685bcff8fb2e273bc6fc67a327a2a01e01328efa295d0e8ceb691fa"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/emergency_disable.md",
+      "sha256": "1124de45041158c3787dfe3ccfa40c89d749f9e8263c76dc37a03629af4809c9"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/operator_access_review.md",
+      "sha256": "124e17f176852111ca84f3607f715ff961f2c1fc6c37949e037d8673dfc53af9"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/post_deployment_validation.md",
+      "sha256": "57349a20316658cec9ecff664589e5788fd8e513c1fa91b66095732f8670e514"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/privacy_incident.md",
+      "sha256": "7f39511a120b2432a4058142eae65877425288a579b5ccfd26bdd28fa30b4be5"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/restart_recovery.md",
+      "sha256": "2526725cd59e6c977c72f2e4bbc623e959ee4d5321ab39b0e9c8d57cc9cefbbf"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/retention_failure.md",
+      "sha256": "a2d87fa88b4c31d2937b00be7e3bdf5c21d7532b93e477b868219e2b74a2d433"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/rollback.md",
+      "sha256": "3bd7ffe1fb07e90bd44676e63193f0846c71409da5b311bf5db7b18fa046bde5"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/security_incident.md",
+      "sha256": "9845bb5fd79e43874453990e4d302618b134e8aed947fbe4bbe8fa050786422e"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/transcript_handling_failure.md",
+      "sha256": "7b42b7e33df31760f122a2b7c840132934ce779ae721138f669ad583b253399e"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/verify.md",
+      "sha256": "39346000711f8791d91dabe29bf3d8ea4bbe469c251b756eff74e82f568cd726"
+    },
+    {
+      "path": "scripts/verifyCoachConnectDeploymentReadinessEvidence.mjs",
+      "sha256": "1a59b98d5317f469de8bd246650cb5b821948887c09e6cd2761ee8cf7dcffa4c"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/activationGates.js",
+      "sha256": "45c572cd1c9e0c736818bbd3f94bd6a40dcc52f62fc0e9dd5a56d7b2e1c245af"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/configurationAuthority.js",
+      "sha256": "ff93605785555c56e8bc579e33641c132ca5ab821ad3a2c5cbe364a1a79336f0"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/constants.js",
+      "sha256": "fb259cee42be0c17ba65b007536306ab4dd9736ea62835e4edae903269dda0f0"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/contracts.js",
+      "sha256": "9a8559b1c9f31a091c4dbda70ec2df3f024ea7e99931503b1c429426898a5f56"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/environmentMatrix.js",
+      "sha256": "7f1d5eeb4cbc80d4ed4df32a508cd6cb27c0013439354b091c178ef57348b7de"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/index.js",
+      "sha256": "ec4c11b58be82fcc6302673ff79a2d52da38aeb09a2bb31b3e13bb0a25f8f38c"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/monitoring.js",
+      "sha256": "e51b1c662e07b4ce8aec3a179b9c4d77e8e3885aa9654d1fdbf106d4167c9498"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/proofHarness.js",
+      "sha256": "18a1875b133d6ac97d94369c7b2f661cd7b5e3e05f15096d94e02ea38ecedba5"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/recovery.js",
+      "sha256": "bc29c6a866d890728ec0eb1ce9a652aa04ee2af1212587e6faf9c4f7791ac570"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/rollback.js",
+      "sha256": "41cb5a1fb97b6f611efba8fa1033e12d3a6c4744b38bff9e0b2a2cbcdc1b1e0f"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/runbooks.js",
+      "sha256": "e76a1bf69d680df34ca6dd5e1f0d9d87b4c01adef31538cdff042d6c8d2b2653"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/topology.js",
+      "sha256": "67e6b62f5099ca9ac7d1949de11ea69cbb7fe7e35b61a8c78817fee78a2e28da"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.adversarial.test.js",
+      "sha256": "c20ef3b8ed73535db895295fe8f154db834cc67b4ffcdf5cb8ff47924b4e1951"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.environment.test.js",
+      "sha256": "eea6d369fb9158018e60235c44c7e3dd343ef98265529ea3ab98b9b5773539ca"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.integration.test.js",
+      "sha256": "f758ee401676957f285e64f73b8b593d63d1a6ae82cafac49f648c77e7dc3fa9"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.monitoring.test.js",
+      "sha256": "d1fd7bb43605fcb00fbdc25a7e9dbf1730142fb2c1d065cf5ce9d8d64e0e9583"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.rollback.test.js",
+      "sha256": "52bf2d6a84786117ef71a049a531e59bcc8eae76ed209e989ff21185ece1d7aa"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.runbooks.test.js",
+      "sha256": "574aee8fde1d0de4fe6c622f6b7dd9f75123b800310ea1fc2c051896472ed6aa"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.topology.test.js",
+      "sha256": "9027fb0a8a79e892a69e16e74cacef7726fb63ddfcd7398afd9177e46d1ebd06"
+    }
+  ],
+  "unrelated_files_included": false
+}

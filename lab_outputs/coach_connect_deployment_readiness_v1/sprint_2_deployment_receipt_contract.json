@@ -1,0 +1,26 @@
+{
+  "proof_contract_version": "coach-connect-deployment-proof-v1",
+  "proof_id": "sprint-2-receipt-afw",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "sprint": 2,
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba",
+  "environment_id": "offline-readiness",
+  "command_or_test_ref": "sprint-2-validation",
+  "assertions": [
+    "RECEIPT_CONTRACT_PASS"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "details": {}
+}

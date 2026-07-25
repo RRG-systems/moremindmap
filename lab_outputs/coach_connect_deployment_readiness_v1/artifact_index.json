@@ -1,0 +1,861 @@
+{
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "status": "PASS",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION"
+  ],
+  "artifact_index_version": "coach-connect-deployment-readiness-implementation-review-index-v1",
+  "archive_name": "COACH_CONNECT_DEPLOYMENT_READINESS_IMPLEMENTATION_REVIEW_V1.zip",
+  "package_entry_count_including_self": 168,
+  "indexed_entry_count": 167,
+  "entries": [
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1.md",
+      "sha256": "800d2689b5587657b57a802b2bcf6057fcfb7e2dcd237228a0864b42eac0b1e1",
+      "bytes": 60027
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_1_V1.md",
+      "sha256": "b6debc0815e23bc33ccbd08cac39c01b8fbeedacd3114b3a4beaaa9ec917ce19",
+      "bytes": 14214
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_2_V1.md",
+      "sha256": "09785aba3d3e0c0567e633b826847b55eed373f541b796e4793d9307a3f9cdda",
+      "bytes": 16837
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_PART_3_V1.md",
+      "sha256": "3fbd04f6bcb5a3a962186ef229d3caeb56488b731bb2af4cdf391db128465219",
+      "bytes": 13070
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_CROSS_PART_CONSISTENCY_V1.md",
+      "sha256": "fe77a9557849ef0c84441e22dd098128c5fe051f2afba30dcfae625f8b427241",
+      "bytes": 5491
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_EXPANSION_INDEX_V1.json",
+      "sha256": "cb7d5827d10a5d4d64df77c003209fc399bac7274f8fe9e04e963e510222f4ea",
+      "bytes": 4335
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_1_AFW_V1.md",
+      "sha256": "1dd9a7fa3a9f38289bd614f7d44869e362c3ecd142d6b1e1a714f2bdc6f8f0dd",
+      "bytes": 4630
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_2_AFW_V1.md",
+      "sha256": "edfe6604450fcd33b95726489d21b0e14d334b41dddbfc27725f6190f3db89bb",
+      "bytes": 4401
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_3_AFW_V1.md",
+      "sha256": "76a93d4dba70f2c1deaea00cd151bbb5deb9b884fcefd02e72e7f2c98e43dd77",
+      "bytes": 4093
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_4_AFW_V1.md",
+      "sha256": "d60c14d43341c972f9768f6ae2e0c204fb61617d8bf6741777520a7a19b14e50",
+      "bytes": 4021
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_5_AFW_V1.md",
+      "sha256": "e18395a1478e6ae3d09a82449f00b455538540cd609e14d92a45d7592c4623c2",
+      "bytes": 4536
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_6_AFW_V1.md",
+      "sha256": "0092c1c25639ef2ec9c2e6e781859ff9dbaaa06010691ae9f4ddf82e58b1c9ed",
+      "bytes": 4291
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_COACH_CONNECT_DEPLOYMENT_READINESS_SPRINT_7_AFW_V1.md",
+      "sha256": "29119498393e3ae14b98d9b8f01945023ece63c0e27bdd944fc3813e65a581bf",
+      "bytes": 5854
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/deploy.md",
+      "sha256": "eba21bb93685bcff8fb2e273bc6fc67a327a2a01e01328efa295d0e8ceb691fa",
+      "bytes": 1476
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/emergency_disable.md",
+      "sha256": "1124de45041158c3787dfe3ccfa40c89d749f9e8263c76dc37a03629af4809c9",
+      "bytes": 1068
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/operator_access_review.md",
+      "sha256": "124e17f176852111ca84f3607f715ff961f2c1fc6c37949e037d8673dfc53af9",
+      "bytes": 1087
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/post_deployment_validation.md",
+      "sha256": "57349a20316658cec9ecff664589e5788fd8e513c1fa91b66095732f8670e514",
+      "bytes": 1178
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/privacy_incident.md",
+      "sha256": "7f39511a120b2432a4058142eae65877425288a579b5ccfd26bdd28fa30b4be5",
+      "bytes": 1041
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/restart_recovery.md",
+      "sha256": "2526725cd59e6c977c72f2e4bbc623e959ee4d5321ab39b0e9c8d57cc9cefbbf",
+      "bytes": 1068
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/retention_failure.md",
+      "sha256": "a2d87fa88b4c31d2937b00be7e3bdf5c21d7532b93e477b868219e2b74a2d433",
+      "bytes": 1061
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/rollback.md",
+      "sha256": "3bd7ffe1fb07e90bd44676e63193f0846c71409da5b311bf5db7b18fa046bde5",
+      "bytes": 1121
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/security_incident.md",
+      "sha256": "9845bb5fd79e43874453990e4d302618b134e8aed947fbe4bbe8fa050786422e",
+      "bytes": 1089
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/transcript_handling_failure.md",
+      "sha256": "7b42b7e33df31760f122a2b7c840132934ce779ae721138f669ad583b253399e",
+      "bytes": 1075
+    },
+    {
+      "path": "docs/runbooks/coach_connect/deployment_readiness/verify.md",
+      "sha256": "39346000711f8791d91dabe29bf3d8ea4bbe469c251b756eff74e82f568cd726",
+      "bytes": 1090
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/activation_boundary_scan.json",
+      "sha256": "ad4093bfbdd282755bd094d95f17de63380e8cf093ee70806f25abd89c56b7dc",
+      "bytes": 787
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/activation_gate_proof.json",
+      "sha256": "ce2ee1ae9f4251e3df58587aa030178f8a88e42546dda1604b40368faef731d4",
+      "bytes": 1018
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/ai_handoff.json",
+      "sha256": "2392b3ff5dd0794be2629ebdb6fbc4b375ea342a7f86bc34158215b2aed5ff7d",
+      "bytes": 892
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/ai_handoff.md",
+      "sha256": "84187080ce7687f9e44dba7a229abc62eddee2988e4f2f89191f1e87f8a2f39e",
+      "bytes": 322
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/approved_file_plan.json",
+      "sha256": "8f8f434779607c8fa18f3785071af977830984b6225c95eb31fb9da0e70594c6",
+      "bytes": 3179
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/architecture_packet_verification.json",
+      "sha256": "d17ad0e6aae8eeb432beb2182ddc6e8997355adae259760da5d2f1ca047aae36",
+      "bytes": 868
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/attack_simulation_report.md",
+      "sha256": "cb3be9473fca682272ddc423c08d71fa73e8b95767a13981ba2324e234ea3f24",
+      "bytes": 350
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/authority_register.json",
+      "sha256": "50a5824dbc4ae472b3334012313274ac5b1b84f71a618cd383a33d1890725545",
+      "bytes": 859
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/build_result.json",
+      "sha256": "4f2be4edcff9cf2b3d7cca52e5f29d5f4b94b8498af07f4795bcbf86a77ee8b8",
+      "bytes": 732
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/changed_files.json",
+      "sha256": "2eb5f03dff39256a6170c4def9566ff7175178a03bc363b3e1ba38f44fea0783",
+      "bytes": 6451
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/configuration_matrix.json",
+      "sha256": "a1dddc222be024377aa4f4c70ef1d42f1df4edc49b02270caf46267f237bbb73",
+      "bytes": 6103
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/contract_inventory.json",
+      "sha256": "638a0362c7d405b7708926753460982d8e96ad386d84ecd185a5457f3cb97557",
+      "bytes": 1265
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/dependency_graph.json",
+      "sha256": "b6adcfb0b383799432c185815cfd5ca91598450bb3178b946694989dfcf511a4",
+      "bytes": 689
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/deployment_receipt_proof.json",
+      "sha256": "917313b23b2f96c5df04e57d98ea075e6bfe5b8e3fd2d8617478980f2c4f18df",
+      "bytes": 2689
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/deployment_topology_proof.json",
+      "sha256": "2e48bef5875f7bc1d674084026ad5483215dfd2c538dcaa6f4f93b6cf37b9e17",
+      "bytes": 2163
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/environment_matrix.json",
+      "sha256": "eeabe0bc336e79605b15dc1af43ee44b12d780eb681778cf49f3a01812ae6468",
+      "bytes": 4224
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/evidence_manifest.json",
+      "sha256": "ca2d592686838dfc99c5226ef34df39d78f1c718ef1f6c2cf52230b356d93d6b",
+      "bytes": 25984
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/executive_handoff.md",
+      "sha256": "67d282aaa66b5b554960c9a2e21ca054f048cad629903c2af839d3ddd4d85814",
+      "bytes": 424
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/failure_taxonomy.json",
+      "sha256": "6ecf55258942c41b772f284210a4855c009346891d2e8715071969df468615b0",
+      "bytes": 1680
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/final_verdict.json",
+      "sha256": "18f05725b4d126dd6565563c18d3672a44b4fd76f0ed53612303ea58755cf18b",
+      "bytes": 964
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/implementation_report.md",
+      "sha256": "4ca5ef6bfa45c55e23419821520c842bed715ceb8523f543b81aa87deabd150d",
+      "bytes": 660
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/import_export_result.json",
+      "sha256": "402ad57cf81692c234f87dc5cd6ad9b4fcffab16a33eed0716b6c6ebcf96e724",
+      "bytes": 727
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/internal_default_off_deployment_handoff.json",
+      "sha256": "d5921bafe75aff21f82943422b39e15b893d9e006ddb390f83697de2ad1bdfd5",
+      "bytes": 1029
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/lint_result.json",
+      "sha256": "e228cc3fc48a89bf380cf4fc60992edfcc0a5bf0df29db69cbe76ecb1084c862",
+      "bytes": 681
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/monitoring_and_alerting_proof.json",
+      "sha256": "94768db2efb1f55ad0987aa4ea4869cf66f990c7a59be8afa7301a82387f0d25",
+      "bytes": 1780
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/no_live_provider_proof.json",
+      "sha256": "4cd1e08949bf780b34a399d0f1161e6f21d1a5903cd651e20de62332ba533c41",
+      "bytes": 993
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/no_production_action.json",
+      "sha256": "bdbd3f3ccbecf9944feb11514349782d8798604af91eb7f8640bfc87867a027d",
+      "bytes": 827
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/no_production_persistence_proof.json",
+      "sha256": "f708fdbc52c09327c64f333222b7527e4b438a477b1fdd24bbce0f1485b1176f",
+      "bytes": 1052
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/no_public_access_architecture_proof.json",
+      "sha256": "14f3cdd4d33c17c65f678c0e554ad4c17e335a283f6faee7ba077c158b753dde",
+      "bytes": 1033
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/no_stripe_proof.json",
+      "sha256": "837f4fa152915ccc7c4b76eb5c44c3d39b9823e3515c37ec792b9d6e0747041b",
+      "bytes": 979
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/protected_root_before.json",
+      "sha256": "1fb6d26c8d0f2254d3798973bb974ef1ccd91d62283d3eec20710cff56dbe9d2",
+      "bytes": 1345
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/protected_root_verification.json",
+      "sha256": "28da409fabe17e70d5fccde23e0db226c95eef8fe4ee232fa2fd56387ae7c1c7",
+      "bytes": 746
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/provider_call_scan.json",
+      "sha256": "9b4b62f5e527c344cff14ef7aa16189dcba4883881b60d10909b883a7fc61294",
+      "bytes": 783
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/repair_receipts.json",
+      "sha256": "5aab8adee35201b09b91b54d312b373eae764a65889e6c9a868b4dd13a1af8f3",
+      "bytes": 1524
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/repository_grounding_report.md",
+      "sha256": "9a2238830431f18b9224f2ae678d7234ecdd41f33b638d6d2ac09a7c715d49b4",
+      "bytes": 431
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/restart_and_recovery_proof.json",
+      "sha256": "ac92e9368c1b7a00aba90145b16832bea2c69eb5d86f4e093daef69cd0c1d526",
+      "bytes": 2092
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/rollback_and_compatibility_proof.json",
+      "sha256": "9a657e04f588674f660ce3e90d36d889bb4fe3d62f97cce2437deaad5b5ea1d9",
+      "bytes": 2113
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/route_policy_scan.json",
+      "sha256": "1350b347582ff562dd0466649960a40591eb9fc2cf178d51e8c94ee89b0f15f9",
+      "bytes": 747
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/runbook_manifest.json",
+      "sha256": "18192e0a476bdf1adc99d420b465d6a6a1debf272c015aac0b341a26fa3cf2a5",
+      "bytes": 15799
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/runbook_validation.json",
+      "sha256": "de4b81ce2a0b088108c5f19c46944bd0c5f725f08ae2830f8069c54266212b4b",
+      "bytes": 722
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_01.json",
+      "sha256": "fd5fe0943eb8ac5bde3c761fd65f7c47d683115b475395c7a967e2c00be2cb01",
+      "bytes": 1505
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_02.json",
+      "sha256": "b0939757f1077c748f9252127f48ef3e2134492f521f4d2239bc794387e87da8",
+      "bytes": 1519
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_03.json",
+      "sha256": "c24a1a8e5de16ed31ae862ee452d770fc4305ffb550d8781d0800e7056ff052b",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_04.json",
+      "sha256": "5e7cf01d83540091c4801e7a02539bfdb0a549a91a5e9c67a39a20c136047e57",
+      "bytes": 1510
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_05.json",
+      "sha256": "19dc6a9d5388155b1161814060cf95284b76317a40a95cee367cf7a8784ae873",
+      "bytes": 1503
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_06.json",
+      "sha256": "8f0a2220a6102e5dd74f5f8ef950a42139c4300e908cebc4db09cfad832e350f",
+      "bytes": 1506
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_07.json",
+      "sha256": "b9327640887ea8797933e2b2cafa259ef2fd594522e027913ced352049ac6783",
+      "bytes": 1494
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_08.json",
+      "sha256": "5728300aa42b0f4934fd75199c9a98943fc3f0b36b65f386b1fb164202f880ae",
+      "bytes": 1520
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_09.json",
+      "sha256": "1e3491d37a6dd45e23775b80807b9752f69e6291594431620711a818064d3488",
+      "bytes": 1521
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_10.json",
+      "sha256": "c96ade43df6b10633851a10e90fdae89ad26320ea107c9a8ca857753a32b8a87",
+      "bytes": 1509
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_11.json",
+      "sha256": "96321435ba82c5781722f9922459d55e9646034c2c1d262e20033fefa7494d15",
+      "bytes": 1511
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_12.json",
+      "sha256": "5e7e76dbdf2eb12bd26b9a1b5519a91fa639b5124503d1f0bc4a104db816d3ad",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_13.json",
+      "sha256": "88129216a47a676b1c755cfa494cd029b96d0baed56342f28527ccb08ab7a50e",
+      "bytes": 1514
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_14.json",
+      "sha256": "195d1545e7af47faf5ece752085c23f4e2ed5fc395fc1839714387851cbef1cd",
+      "bytes": 1531
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_15.json",
+      "sha256": "b0134682a7616218ff8ed2a156996f87ef7f4565d5f410272998dfd46f29b436",
+      "bytes": 1518
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_16.json",
+      "sha256": "0c3ac0a8d2dc5b935d40a9564cf0aee3599ae273a35c69193f63768acdf8b740",
+      "bytes": 1517
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_17.json",
+      "sha256": "85661f55f305484f61c812d1ff3bd9007432be6779989251be1e0336ac6624bd",
+      "bytes": 1506
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_18.json",
+      "sha256": "ce14a9d59b582e8a9acf0f98cb050a330e226d4fe64b9eae68748e225031c72b",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_19.json",
+      "sha256": "0940f7fd33f3c2118fcc3e8eb5d22e4a2281f21f156748e4e746559d035b5a15",
+      "bytes": 1514
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_20.json",
+      "sha256": "006f2b15163a49cb91a1effcf1cf9c4bd03480f42bb39aea9a8b38410443fdc4",
+      "bytes": 1502
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_21.json",
+      "sha256": "ced9ac2563c31a6b7f7eac3cc2714627836b770830976d587031ea87a360dc3a",
+      "bytes": 1529
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_22.json",
+      "sha256": "4196c9103c05e7b036b917358d1aea4795bfe347951919e7268c9fc8ad5f2247",
+      "bytes": 1505
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_23.json",
+      "sha256": "4e1d75280dbfc37e0ea91a776d28e6b84c6449099a9d714f38dd87d3a952211d",
+      "bytes": 1521
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_24.json",
+      "sha256": "81528eb8841e5621db9c4e4474518f01da6d880a9d671dfd045845d2b5e653fa",
+      "bytes": 1522
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_25.json",
+      "sha256": "f49d703d6becd41a522b4eb6e6b68322555f0a213fe78a5c843e240deefb81f5",
+      "bytes": 1526
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_26.json",
+      "sha256": "be30fdaefad4458a0e14e9b3a5ba89f48b9e36e70d7d18033a66c0fe0436464a",
+      "bytes": 1516
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_27.json",
+      "sha256": "3da7bad511a1532be1be80aa6aff23256935a98fa312b54fb2b54bed63906062",
+      "bytes": 1511
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_28.json",
+      "sha256": "e816595fb32baf743ba41e0c84b1977669afc74b2b3a22c7581960f9d3b76ef9",
+      "bytes": 1516
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_29.json",
+      "sha256": "5f8aa668ffcbd539e3fff32a0f4cfd9188971a9b4404c8a3106a7519ec24fa2d",
+      "bytes": 1524
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_30.json",
+      "sha256": "6baed288fc08bfe92582874635d6da8f5aa9cb076521cf1303234ee8e3d14031",
+      "bytes": 1506
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_31.json",
+      "sha256": "4b0cc08a37fe596c9275c721e02c9f61e615d55624035938a14171710bfc647c",
+      "bytes": 1521
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_32.json",
+      "sha256": "2102a9c3a27d2a0a400da1a93905bd6baf3380acf09f84e1ef571eae0f49c8a3",
+      "bytes": 1517
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_33.json",
+      "sha256": "cd8b80c7fb3a4938240dda2f2a60c087b2608637432b4e6637767a0e834368dd",
+      "bytes": 1524
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_34.json",
+      "sha256": "cee77a4ba748c7dc672bb3b337d3dc4306faf5d9f0bc454e89d72f564e734d91",
+      "bytes": 1524
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_35.json",
+      "sha256": "bf67f4f0279d4d1612e75c4381be3d04398c037d8f80a72d7be4fe3bdf11d60b",
+      "bytes": 1510
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_36.json",
+      "sha256": "5d5daf0c923bdb48ec59e4601e9b0362c8d73c2a0a3e1dacdedd332f7ec666a7",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_37.json",
+      "sha256": "10e96cd14d391877abd4f1505f17cfebd4cbec4f6588d3adda0c80481037d5ef",
+      "bytes": 1511
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_38.json",
+      "sha256": "b1cd72159a9bf2900963bdc3ea8b14fec7f04f24769d3eac203614c9c67c5c93",
+      "bytes": 1511
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_39.json",
+      "sha256": "0b71610f37cf54578991188dbc9f09c4bd3a702851ba63017db2d6c756ec4113",
+      "bytes": 1516
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_40.json",
+      "sha256": "75718c524e904df9702d327b75dd6f56ddb6aa3ade018dab51559d153660df7e",
+      "bytes": 1507
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_41.json",
+      "sha256": "4892a39f90eff696b07a1b37c6488ea5fb86d3d7b6138413f5ffafc1810f3522",
+      "bytes": 1518
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_42.json",
+      "sha256": "eddbb04b52557e30ba2db0753660434cf842756f0903d14cea3ac7686e1c2e4b",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_43.json",
+      "sha256": "cd8242acf228edac7d143a76873a5a40c059ca6f23c6f213a5eeeb529af994b2",
+      "bytes": 1511
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_44.json",
+      "sha256": "ab21939daa56e642845ef1f1c92cd7e9f87b38d8094e74bf6d94936ae12a124a",
+      "bytes": 1528
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_45.json",
+      "sha256": "25ec7079c51471117dec7ce66eb7458bc5b077f8362c147ae29935f6a0922285",
+      "bytes": 1515
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_46.json",
+      "sha256": "df77ccc2d27dbd6a619f3efd7201e9a5047c4c7920c0824d9792107ad66fa371",
+      "bytes": 1502
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_47.json",
+      "sha256": "bbaa4d9881b28a2ce3dcca5637f98df5efb0de615dbe15367dafebe5a0f1a885",
+      "bytes": 1509
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_48.json",
+      "sha256": "30c61e8699ee9070df86c64bba017dcaa4f0d5c1346ec3d47dcc343d036d9382",
+      "bytes": 1512
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_49.json",
+      "sha256": "d8875f91c7d28da86958cc21ce1a7459e4ce33d7dcb41981649c1f83561b7bb8",
+      "bytes": 1513
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/scenario_50.json",
+      "sha256": "451ff426f91dcccca5b6c4d867a349b37c0a0822ddd6af9c1b32837bb8592b1b",
+      "bytes": 1524
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/secret_scan.json",
+      "sha256": "5f43179f232337ba8b8129c1e18b53f27f57f36ea62033beadb53751628c6e43",
+      "bytes": 730
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_1_configuration_authority_proof.json",
+      "sha256": "0b21ac3e32b2cb09a5abed2cf25a0899817ddb4db7628bc4737dddcbf4f8c9c5",
+      "bytes": 2771
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_1_configuration_proof.json",
+      "sha256": "199152620053f437b3a13fdff5cee013753b790cb827bc43deeb517e07f09350",
+      "bytes": 942
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_1_environment_contract_proof.json",
+      "sha256": "75a27d2a20624cd7ed9aec6511fc85ead71e28c6cefb648f058b0c47e2be4636",
+      "bytes": 4762
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_1_environment_proof.json",
+      "sha256": "e0b014a0f7039580b9677801f3af583b116b93b692dc0a23949e9a2117b7e122",
+      "bytes": 942
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_1_validation.json",
+      "sha256": "c5465cb3464eed99a6b5c632aa292502bed1f48aeb8e0f1867eae4528f1b2f73",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_activation_gate_proof.json",
+      "sha256": "bd2139d40a5dffb6c45da2b6b9fa69abd4091eff38ab000c8c064d3cbb79ef6a",
+      "bytes": 974
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_deployment_receipt_contract.json",
+      "sha256": "de64ea173649fdc69e22d7dec0794ab80bf8bfb39fc6a4ddba02eedb56e4c5fc",
+      "bytes": 936
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_deployment_receipt_contract_proof.json",
+      "sha256": "b2fec55f6637d23cc94a451603b9986da081ab93124ea8ef985b075c0a1f7602",
+      "bytes": 2657
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_topology_contract_proof.json",
+      "sha256": "00ee3bd819f90302b34caf0f815c718781f889d8c1184dc6b0968639e1bceae8",
+      "bytes": 2213
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_topology_proof.json",
+      "sha256": "9281274b4635396a827725a8ed7d29d0dd6ea03f6202d211633b6b6c08704969",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_2_validation.json",
+      "sha256": "e5b70b86762e422aa41edb8cf2e5943042a8cece1b6ca39738b23316981b9910",
+      "bytes": 928
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_3_compatibility_proof.json",
+      "sha256": "008214f118a996503fdea5611c8206d4cd612aa629ef8b3ec1e1e5b0a9ba8cdb",
+      "bytes": 976
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_3_recovery_proof.json",
+      "sha256": "b78bce27ce2807c6ec53a11a16713502d28213816bf0c0c099ebfd955852f706",
+      "bytes": 2072
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_3_rollback_proof.json",
+      "sha256": "e28a1b03f72fd210e65a457dbd14408fcf4d657fc090862e511282b87234fbcf",
+      "bytes": 2064
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_3_validation.json",
+      "sha256": "3aef17d712f1d5e6ddb6dc1bdaef9ff0591f16e0d41d2d6640bbdba029bb72ed",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_4_alerting_proof.json",
+      "sha256": "257d4a350031f750fac739cbf6bef5c994cb4baa3e2f65fad43bf749daf7549d",
+      "bytes": 927
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_4_monitoring_proof.json",
+      "sha256": "e18725aa83188ab51de207bdcc27d06d6feaa2f904fea01547590d4f7225a0d7",
+      "bytes": 9732
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_4_privacy_safe_logging_proof.json",
+      "sha256": "9bf8e8d64a7dc9e85f0cf3285c4b56cd7f5cea7b21168461c540f4f5037b516b",
+      "bytes": 932
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_4_privacy_safe_operations_proof.json",
+      "sha256": "a6c38df42672a39d737e9021fb11f4848fda7c49c45a498342bbd02cefabcb1a",
+      "bytes": 965
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_4_validation.json",
+      "sha256": "80b359c15229848a698a4b5d6dacd5eafd9931ca0173e5b24a3e70370e6298ac",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_5_runbook_validation_proof.json",
+      "sha256": "ba700180c11f54258fc13ee2cae4674d04c2cd99195cad04fc2318f085bf033e",
+      "bytes": 1002
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_5_validation.json",
+      "sha256": "07a89aafaa60b12f729fc5eabe48031a2519b89f6eac0e6674109324089a5ed5",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_adversarial_proof.json",
+      "sha256": "1750bcdbff91ccfe0b1bc777398c90ebd75f07fb948d4f06aefabaa68d664094",
+      "bytes": 939
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_default_off_proof.json",
+      "sha256": "3e16248c289f02ee3155d5362b324a414cd67243bda2023b61f01ea0a847013f",
+      "bytes": 930
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_no_public_access_proof.json",
+      "sha256": "23d6f1497e8b2dea4fea09c0eb9c41649e7369dfc7516654e0d3c5b64bd67e47",
+      "bytes": 932
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_proof_harness_report.json",
+      "sha256": "3b13c7c8dadce4797caba051fa32c685c92671dc93ab170394a457afc88ed96f",
+      "bytes": 29865
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_secret_scan_proof.json",
+      "sha256": "da3afa8a172713a598232e96ea7f2850561bffc488fc4d28d2c2db022a287198",
+      "bytes": 920
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_6_validation.json",
+      "sha256": "f46a19d265a8fecb37785f2420939918ac5d00b0b89fde7fcb67267bd236ee59",
+      "bytes": 929
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_7_integration_proof.json",
+      "sha256": "b5adb17b8a3dd00f17f01958f33edd75260fdc4fb58a072c101c44bd6802f467",
+      "bytes": 996
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/sprint_7_integration_validation.json",
+      "sha256": "c47bfe50e91b406785fb7c30a208710e1639c6a03e5c120225875b8db0ab766d",
+      "bytes": 930
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/test_manifest.json",
+      "sha256": "0070fb3675881a07e02fe76b767ed4184bdafeb1cada9bf87800c50acf36756e",
+      "bytes": 1038
+    },
+    {
+      "path": "lab_outputs/coach_connect_deployment_readiness_v1/test_results.json",
+      "sha256": "363498af2abbbf925b1690b957b25bed39462d78be0fcac93a5ab4436862f904",
+      "bytes": 802
+    },
+    {
+      "path": "scripts/verifyCoachConnectDeploymentReadinessEvidence.mjs",
+      "sha256": "1a59b98d5317f469de8bd246650cb5b821948887c09e6cd2761ee8cf7dcffa4c",
+      "bytes": 1777
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/activationGates.js",
+      "sha256": "45c572cd1c9e0c736818bbd3f94bd6a40dcc52f62fc0e9dd5a56d7b2e1c245af",
+      "bytes": 6676
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/configurationAuthority.js",
+      "sha256": "ff93605785555c56e8bc579e33641c132ca5ab821ad3a2c5cbe364a1a79336f0",
+      "bytes": 4025
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/constants.js",
+      "sha256": "fb259cee42be0c17ba65b007536306ab4dd9736ea62835e4edae903269dda0f0",
+      "bytes": 3468
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/contracts.js",
+      "sha256": "9a8559b1c9f31a091c4dbda70ec2df3f024ea7e99931503b1c429426898a5f56",
+      "bytes": 2282
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/environmentMatrix.js",
+      "sha256": "7f1d5eeb4cbc80d4ed4df32a508cd6cb27c0013439354b091c178ef57348b7de",
+      "bytes": 3403
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/index.js",
+      "sha256": "ec4c11b58be82fcc6302673ff79a2d52da38aeb09a2bb31b3e13bb0a25f8f38c",
+      "bytes": 379
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/monitoring.js",
+      "sha256": "e51b1c662e07b4ce8aec3a179b9c4d77e8e3885aa9654d1fdbf106d4167c9498",
+      "bytes": 5084
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/proofHarness.js",
+      "sha256": "18a1875b133d6ac97d94369c7b2f661cd7b5e3e05f15096d94e02ea38ecedba5",
+      "bytes": 5658
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/recovery.js",
+      "sha256": "bc29c6a866d890728ec0eb1ce9a652aa04ee2af1212587e6faf9c4f7791ac570",
+      "bytes": 3819
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/rollback.js",
+      "sha256": "41cb5a1fb97b6f611efba8fa1033e12d3a6c4744b38bff9e0b2a2cbcdc1b1e0f",
+      "bytes": 3764
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/runbooks.js",
+      "sha256": "e76a1bf69d680df34ca6dd5e1f0d9d87b4c01adef31538cdff042d6c8d2b2653",
+      "bytes": 3606
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness/topology.js",
+      "sha256": "67e6b62f5099ca9ac7d1949de11ea69cbb7fe7e35b61a8c78817fee78a2e28da",
+      "bytes": 3131
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.adversarial.test.js",
+      "sha256": "c20ef3b8ed73535db895295fe8f154db834cc67b4ffcdf5cb8ff47924b4e1951",
+      "bytes": 2220
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.environment.test.js",
+      "sha256": "eea6d369fb9158018e60235c44c7e3dd343ef98265529ea3ab98b9b5773539ca",
+      "bytes": 2824
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.integration.test.js",
+      "sha256": "f758ee401676957f285e64f73b8b593d63d1a6ae82cafac49f648c77e7dc3fa9",
+      "bytes": 2803
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.monitoring.test.js",
+      "sha256": "d1fd7bb43605fcb00fbdc25a7e9dbf1730142fb2c1d065cf5ce9d8d64e0e9583",
+      "bytes": 2107
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.rollback.test.js",
+      "sha256": "52bf2d6a84786117ef71a049a531e59bcc8eae76ed209e989ff21185ece1d7aa",
+      "bytes": 2367
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.runbooks.test.js",
+      "sha256": "574aee8fde1d0de4fe6c622f6b7dd9f75123b800310ea1fc2c051896472ed6aa",
+      "bytes": 2132
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.deploymentReadiness.topology.test.js",
+      "sha256": "9027fb0a8a79e892a69e16e74cacef7726fb63ddfcd7398afd9177e46d1ebd06",
+      "bytes": 3820
+    }
+  ],
+  "self": {
+    "path": "lab_outputs/coach_connect_deployment_readiness_v1/artifact_index.json",
+    "sha256_rule": "SELF_EXCLUDED_TO_AVOID_RECURSIVE_DIGEST",
+    "verification": "Exact index hash is verified independently before and after archive extraction."
+  },
+  "verdict": "COACH_CONNECT_DEPLOYMENT_READINESS_IMPLEMENTED_WITH_INTERNAL_LIVE_PROOFS_PENDING"
+}

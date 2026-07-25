@@ -1,0 +1,29 @@
+{
+  "evidence_record_version": "coach-connect-deployment-readiness-evidence-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "command_or_test_ref": "mission-entry-git-status-and-allowlist-boundary",
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "comparison_method": "campaign_changed_paths_must_not_intersect_protected_roots",
+  "preexisting_tracked_dirty_paths_preserved": [
+    "api/engine/businessAssessment/buildBusinessIntelligenceDraft.js",
+    "lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs",
+    "src/components/businessAssessment/BusinessEngineVisualV2.jsx",
+    "src/lib/businessAssessment/inferEToPScores.js",
+    "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+    "src/lib/businessEngine/buildBusinessEngineContract.js",
+    "src/lib/businessEngine/contractDisplaySemantics.js",
+    "src/lib/businessEngine/contractVersion.js",
+    "src/lib/businessEngine/projectBusinessEngineVisualV2.js"
+  ]
+}

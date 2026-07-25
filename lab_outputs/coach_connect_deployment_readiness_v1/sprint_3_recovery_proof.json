@@ -1,0 +1,52 @@
+{
+  "proof_contract_version": "coach-connect-deployment-proof-v1",
+  "proof_id": "sprint-3-recovery",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_DEPLOYMENT_READINESS_V1",
+  "sprint": 3,
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "configuration_digest": "f2428cb838136114bf773efa857634fb95b68db843d676b693ef003bf2787aba",
+  "environment_id": "offline-readiness",
+  "command_or_test_ref": "sprint-3-validation",
+  "assertions": [
+    "RESTART_RECOVERED_INACTIVE",
+    "NO_LOCAL_FALLBACK",
+    "NO_DUPLICATE_PROMOTION"
+  ],
+  "status": "PASS",
+  "limitations": [
+    "NO_DEPLOYMENT_PERFORMED",
+    "NO_INTERNAL_LIVE_PROOF",
+    "NO_PRODUCTION_CERTIFICATION",
+    "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+  ],
+  "generated_at": "2026-07-25T00:00:00.000Z",
+  "source_commit": "36fe72a01d34f64e3cd15d94018579da5bc02a1c",
+  "contains_sensitive_material": false,
+  "production_action": false,
+  "details": {
+    "recovery": {
+      "recovery_contract_version": "coach-connect-deployment-recovery-v1",
+      "recovery_receipt_id": "recovery-receipt-offline",
+      "environment_id": "offline-readiness",
+      "artifact_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "config_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "failure_class": "SYNTHETIC_RESTART",
+      "recovery_action": "SIMULATE_RESTART_WITH_ACTIVATION_DISABLED",
+      "idempotency_key_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "prior_state_ref": "synthetic-prior-state",
+      "result_state": "HEALTHY_INACTIVE",
+      "replayed_event_count": 1,
+      "duplicate_promotion_count": 0,
+      "provider_call_count": 0,
+      "persistence_write_count": 0,
+      "started_at": "2026-07-25T00:00:00.000Z",
+      "completed_at": "2026-07-25T00:00:01.000Z",
+      "result": "RECOVERED_OFFLINE",
+      "limitations": [
+        "NO_PRODUCTION_PERSISTENCE_PROOF",
+        "LOCAL_JSONL_LOGICAL_DENIAL_ONLY"
+      ]
+    }
+  }
+}
