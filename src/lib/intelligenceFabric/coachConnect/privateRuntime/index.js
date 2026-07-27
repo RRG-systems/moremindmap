@@ -8,10 +8,14 @@ import { validateCompleteAttachmentSet } from './evidence.js';
 export * from './activation.js';
 export * from './attachments.js';
 export * from './authority.js';
+export * from './canonicalAsyncSecurityService.js';
 export * from './composition.js';
 export * from './contracts.js';
+export * from './developerAccessSecurityFacade.js';
+export * from './eligibility.js';
 export * from './evidence.js';
 export * from './failureCodes.js';
+export * from './liveComposition.js';
 export * from './sessionResolver.js';
 export * from './subjectRegistryPort.js';
 

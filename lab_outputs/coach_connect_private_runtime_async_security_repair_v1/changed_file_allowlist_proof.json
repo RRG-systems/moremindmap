@@ -1,0 +1,10 @@
+{
+  "proof_version": "changed-file-allowlist-proof-v1",
+  "campaign_code_files": 24,
+  "campaign_files_outside_union": 0,
+  "protected_files_changed_by_campaign": 0,
+  "preexisting_dirty_paths_reverted": 0,
+  "preexisting_dirty_paths_packaged": 0,
+  "git_index_empty": true,
+  "result": "PASS"
+}

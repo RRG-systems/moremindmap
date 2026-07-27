@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-async-security-build-determinism-v1",
+  "command": "npm run build",
+  "builds": 2,
+  "build_1_sha256": "6ca58109047a44185b211a612fd2b52943e40753f59042e350051894325503f2",
+  "build_2_sha256": "6ca58109047a44185b211a612fd2b52943e40753f59042e350051894325503f2",
+  "byte_deterministic": true,
+  "result": "PASS"
+}

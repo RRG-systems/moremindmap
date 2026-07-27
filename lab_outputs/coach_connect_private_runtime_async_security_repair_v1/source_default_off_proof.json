@@ -1,0 +1,9 @@
+{
+  "proof_version": "source-default-off-proof-v1",
+  "composition_version": "private-runtime-live-composition-v2",
+  "default_state": "UNCONFIGURED",
+  "default_handler_allows": 0,
+  "provider_registry_entries": 0,
+  "remote_adapter_present": false,
+  "result": "PASS"
+}

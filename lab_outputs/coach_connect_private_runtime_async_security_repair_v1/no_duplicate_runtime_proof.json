@@ -1,0 +1,9 @@
+{
+  "proof_version": "no-duplicate-runtime-proof-v1",
+  "concurrent_bootstrap_requests": 2,
+  "bridge_attachment_calls": 1,
+  "duplicate_business_engines": 0,
+  "duplicate_subscription_runtimes": 0,
+  "duplicate_coach_connect_runtimes": 0,
+  "result": "PASS"
+}

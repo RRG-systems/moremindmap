@@ -1,0 +1,13 @@
+{
+  "proof_version": "emergency-disable-outage-proof-v1",
+  "sprint": 5,
+  "emergency_login_allowed": false,
+  "emergency_continuation_allowed": false,
+  "emergency_entitlement_allowed": false,
+  "emergency_runtime_allowed": false,
+  "outage_logout_client_cleared": true,
+  "outage_server_revocation_confirmed": false,
+  "outage_local_queue_created": false,
+  "outage_runtime_allowed": false,
+  "result": "PASS"
+}

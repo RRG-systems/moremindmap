@@ -1,0 +1,13 @@
+{
+  "proof_version": "developer-access-security-facade-proof-v1",
+  "sprint": 2,
+  "get_uses_canonical_service": true,
+  "post_uses_canonical_service": true,
+  "delete_uses_canonical_service": true,
+  "owns_capability_state": false,
+  "owns_csrf_state": false,
+  "owns_replay_state": false,
+  "owns_rate_limit_state": false,
+  "owns_audit_state": false,
+  "result": "PASS"
+}

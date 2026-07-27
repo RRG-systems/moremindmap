@@ -1,0 +1,10 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 7,
+  "implementation_and_test_files": [
+    "scripts/verifyCoachConnectPrivateRuntimeAsyncSecurityRepair.mjs",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.integration.test.js"
+  ],
+  "outside_sprint_allowlist": [],
+  "result": "PASS"
+}

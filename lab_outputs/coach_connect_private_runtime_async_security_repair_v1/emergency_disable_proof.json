@@ -1,0 +1,9 @@
+{
+  "proof_version": "emergency-disable-proof-v1",
+  "login_allowed": false,
+  "session_continuation_allowed": false,
+  "entitlement_allowed": false,
+  "runtime_authority_allowed": false,
+  "attachment_allowed": false,
+  "result": "PASS"
+}

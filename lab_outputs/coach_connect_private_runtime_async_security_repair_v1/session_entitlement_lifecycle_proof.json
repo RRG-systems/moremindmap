@@ -1,0 +1,14 @@
+{
+  "proof_version": "session-entitlement-lifecycle-proof-v1",
+  "pre_auth_rotation": "PASS",
+  "authenticated_session_rotation": "PASS",
+  "csrf_invalidation": "PASS",
+  "temporary_entitlement_issue": "PASS",
+  "explicit_revocation": "PASS",
+  "logout_atomic_revocation": "PASS",
+  "security_epoch_advance": "PASS",
+  "outage_logout_honesty": "PASS",
+  "restart_recovery": "SYNTHETIC_PASS",
+  "deployment_grade": false,
+  "result": "PASS"
+}

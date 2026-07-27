@@ -1,0 +1,12 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 5,
+  "implementation_and_test_files": [
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/canonicalAsyncSecurityService.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/syntheticAsyncSecurityStateAdapter.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.recovery.test.js"
+  ],
+  "continuation_refinement_receipt": "change_receipt.json",
+  "outside_campaign_allowlist": [],
+  "result": "PASS"
+}

@@ -1,0 +1,792 @@
+{
+  "manifest_version": "private-runtime-async-security-evidence-manifest-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "archive_name": "PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_IMPLEMENTATION_REVIEW_V1.zip",
+  "entry_order": "UTF-8 lexical ascending",
+  "manifest_self_rule": "evidence_manifest.json is included in the archive but excluded from its own recursive file digest inventory",
+  "source_entry_count": 156,
+  "archive_entry_count": 157,
+  "files": [
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_ARCHITECTURE_REPAIR_V1.md",
+      "bytes": 59285,
+      "sha256": "8c117ab7e40fde69536d67d43558e69dfa3d078f10eaeb0ff88105cfa9117046"
+    },
+    {
+      "path": "api/internal/developer-access.js",
+      "bytes": 9463,
+      "sha256": "77f7f2f5ade091d9cce555fce51c2fb9c48a13e9fc9605268ec6ef9ffcef69c7"
+    },
+    {
+      "path": "api/internal/private-runtime-bootstrap.js",
+      "bytes": 2256,
+      "sha256": "4055fe0d5449be26b306e3c00cf3eb7f9351d8e9a9f8a72bb520e4ec23f05cf6"
+    },
+    {
+      "path": "api/internal/private-runtime-callback.js",
+      "bytes": 1979,
+      "sha256": "291dc7005083c0192714f40ff00df562cbef0e0d355a2f4f72262963d436741a"
+    },
+    {
+      "path": "api/internal/private-runtime-login.js",
+      "bytes": 2418,
+      "sha256": "a427cdb88a0264445bb57aab0c80ae801eed4ed98d9e48fe52afe0024d4e2f73"
+    },
+    {
+      "path": "api/internal/private-runtime-logout.js",
+      "bytes": 2245,
+      "sha256": "1418b7a4a4f37ce82c6e5a9d3ceead9043c50d7890614d3fefed5bca1c0e204a"
+    },
+    {
+      "path": "api/internal/private-runtime-session.js",
+      "bytes": 1611,
+      "sha256": "8115839d7eeb4e2b482c9a3d010c6d1082b2544154f546ce42fed728ba815969"
+    },
+    {
+      "path": "api/internal/subscription-entitlement.js",
+      "bytes": 6800,
+      "sha256": "5c07dea310679a76f212eafcec1c2c63822021da5355e38a0463ed1155a544fa"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_1_V1.md",
+      "bytes": 20241,
+      "sha256": "014571eac61fcbd70c91fe77c04f41e89823d184878b41e5764755b3b7c312b9"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_2_V1.md",
+      "bytes": 24332,
+      "sha256": "ca1c37c5302bffee02069dc6fe55ebbe33d7af026f9b972a081a6f5fe9ba1b86"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_3_V1.md",
+      "bytes": 18621,
+      "sha256": "2a4004673d14facbdd620792029f24a6aa0cd223cc9f5378584788f55f6b61b5"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_CROSS_PART_CONSISTENCY_V1.md",
+      "bytes": 11711,
+      "sha256": "a3eea17659e6ed30721efd1e96901eb74a4563ab2b86fc65df3916f2e74c68b6"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_EXPANSION_INDEX_V1.json",
+      "bytes": 8127,
+      "sha256": "585b9d9155e98a5f6d3eb3c85b1218ac0a4423e5137f8625df253c2b24b94a68"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_1_AFW_V1.md",
+      "bytes": 7344,
+      "sha256": "34049deff7cc66ad2e6e86078d58ddf8e5768a73abae6893703b194d3f3be875"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_2_AFW_V1.md",
+      "bytes": 6614,
+      "sha256": "b4c061ed5fee25f863d8319113e62e7b08e4ad0191303866126d82a40c7de2ce"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_3_AFW_V1.md",
+      "bytes": 7216,
+      "sha256": "2a0f09479a5e36fbcde9732cbff9ca8e3585f7f24fd86911a4f8bb0ad8255161"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_4_AFW_V1.md",
+      "bytes": 7501,
+      "sha256": "35d6166616ca62a402964c16d1ba3ab755a77d0ca0b14d292b9990ddb2e637cb"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_5_AFW_V1.md",
+      "bytes": 6918,
+      "sha256": "6629e95e29f90ae3a0885a2f19b802a8ba009da0fefa50d79f7ebb60a07d7834"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_6_AFW_V1.md",
+      "bytes": 8122,
+      "sha256": "0684f3a07b77578e3e076522ede6b34452d055374c6aed6284304b20cadb3a83"
+    },
+    {
+      "path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_7_AFW_V1.md",
+      "bytes": 12063,
+      "sha256": "b05a09520f6515df17efdba1b76e201b5a1696d0bf2ce986f61e118bb6b488a0"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/ai_handoff.json",
+      "bytes": 1065,
+      "sha256": "755b803e7d6403ae88b267154c104647ee1ccec4505c1698d37c1afd1f225bb3"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/architecture_hash_receipt.json",
+      "bytes": 361,
+      "sha256": "1d2c8f2430942b16d2c1d351712fb67ddde001c20a6e00e0861cfa6b499bbc5a"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/archive_integrity_proof.json",
+      "bytes": 522,
+      "sha256": "10e260b5b16be4f8715a831652684d94721bce3ecb296ea5686e3dfb84c80a77"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/atomicity_race_proof.json",
+      "bytes": 365,
+      "sha256": "0edbde133dcf98080fb7b6ac0c41a76a9818abbbf90b0874a60a55be6eea7411"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/authority_order_proof.json",
+      "bytes": 413,
+      "sha256": "e5ec383ff97bb9dc781754199920270bfa7688f2c6fb9e0c01a2713403922483"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/build_determinism_proof.json",
+      "bytes": 348,
+      "sha256": "5a6dfb4a43eec5ef3d35b0e26580db9c3683dfc6237dc08774648e0915be88ee"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/business_engine_attachment_proof.json",
+      "bytes": 302,
+      "sha256": "5bb5920104e0904e4332085b02b4c690f7623c4c7e1dc422d1956c5014ebc90c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/campaign_receipt.json",
+      "bytes": 525,
+      "sha256": "99a444ea02a3b4942d1a45e6ca67117135c22ecc91514c100a021f72f784c5af"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/canonical_security_truth_proof.json",
+      "bytes": 291,
+      "sha256": "65671c72b6eee4ab28566eeb881460492e1ebc701ca55ce14b7e4bb3837fe3ea"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/canonical_subject_proof.json",
+      "bytes": 262,
+      "sha256": "7aa7c271b91c27ae69f9c11f169802161492b53d5b757fce47dcf3bc1a596c6b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/change_receipts.json",
+      "bytes": 563,
+      "sha256": "75488c029d78086edd4169b5971f1307fa10f2a2e3fb200a524435798d96dffb"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/changed_file_allowlist_proof.json",
+      "bytes": 296,
+      "sha256": "2c31a209fa19381d300383dabca7b0b14ca25bce2b8147ed119ca756223e2eb0"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/changed_files_inventory.json",
+      "bytes": 2099,
+      "sha256": "ab010172c1ec2a27f0b25cd194f8eb5564b7bd9741d7e9f07597b31ca77a02c5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/coach_connect_attachment_proof.json",
+      "bytes": 284,
+      "sha256": "58d14f8aa2501047d02f64e7b0a6036a2fc1f0379cc78ae2e840f60363c436fc"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/dependency_cycle_proof.json",
+      "bytes": 207,
+      "sha256": "a1bf60d17954d58d42bcb396f5bd30e9be93590b238b6bf024b46c9c0d73b1d0"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/emergency_disable_proof.json",
+      "bytes": 240,
+      "sha256": "a1b8f88c130ce9e992a272e7a700530389e6e0a9a5b60d4cef07803f37d86682"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/executive_handoff.md",
+      "bytes": 1456,
+      "sha256": "ace7a3b01f2fec96610f4c5c44d47cc6c803fd6b02067a088e883d30b75a476a"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/failure_matrix_proof.json",
+      "bytes": 425,
+      "sha256": "c65a0b2c00755c37e284e50a3b48a28e368be4ee36fd067fdf6853ad6253f91c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/final_verdict.json",
+      "bytes": 778,
+      "sha256": "a6c8ce4bf215fa71e4001832d2e58d8f48dacfa90d7ef5c423ed59560fc5afb2"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/handler_await_settlement_proof.json",
+      "bytes": 219,
+      "sha256": "31aea732154c952aa022c103a4493a3b5573e0eae3e57930d5f4bf955ff8afc8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/import_export_proof.json",
+      "bytes": 295,
+      "sha256": "aebcebd80ef3f050e1178b92b48bd95e6225fbd98eea73e89d69161f760fbaad"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/no_duplicate_runtime_proof.json",
+      "bytes": 261,
+      "sha256": "330b928c81a4e98c1343bdad81753d64c798641f55fc89aba9581a43b7bacd8d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/no_production_persistence_proof.json",
+      "bytes": 248,
+      "sha256": "c743c8c1de4c38b51d5d43d5be92c2aefa78e83134d5f952455fbdf45e87b88f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/no_stripe_proof.json",
+      "bytes": 221,
+      "sha256": "695eff958796ccc4c58ca7e002d978f53c66402fa8451ecde0a782292a329636"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/no_voice_luna_transcript_proof.json",
+      "bytes": 212,
+      "sha256": "918056d4eb111d081683f8cdcbb29577469dfc81efcb43b119697f06a3f21173"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/one_subject_one_engine_proof.json",
+      "bytes": 246,
+      "sha256": "66a7cb6e2ecd13d1d81064ce636acc6d46543c7d4abc5db7427b6836c5643153"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/promise_conformance_proof.json",
+      "bytes": 332,
+      "sha256": "07d0eb8387de953706e9ad4f5f8bf0ed3053d60d993171fac7b449a4100ed52b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/protected_root_proof.json",
+      "bytes": 374,
+      "sha256": "7449abe4ff5adc8608e12f85f55b4af8dadcc734c7967061e96d4ef543260ccb"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/provider_adapter_handoff.json",
+      "bytes": 831,
+      "sha256": "b91e4fbaf81c375ae7a971a30cd84f37b920ea047530c61a7e900c322b21317d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/regression_manifest.json",
+      "bytes": 359,
+      "sha256": "63192b0252f5e58a2a57a360ea32e35b854347841eed7594fd8762b0a00eb80b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/repair_receipts.json",
+      "bytes": 566,
+      "sha256": "ef4e0a9e2523570957c0268851989aaed80de9d12be6b9ea4e699ab346b9c8a5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/restart_recovery_proof.json",
+      "bytes": 262,
+      "sha256": "f449d9dda2a28eab4581c882f75086b76e47bd732132131c500a619b522c87d1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/schema_validation_proof.json",
+      "bytes": 287,
+      "sha256": "08ed3d0af8e1f5dd3acac1ec16c346f69d3c5ed282f16fcb8c6a886adca09a56"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/secret_scan.json",
+      "bytes": 279,
+      "sha256": "31e18ffe1da76d6b870d2e1dedf41079a87a8c9a7303554f7c8af5d4d5334a2c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sensitive_content_scan.json",
+      "bytes": 414,
+      "sha256": "c101ba23ba1583f24293977a45146c8a1a55b42f2189710ee3db15057a43c5de"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/session_entitlement_lifecycle_proof.json",
+      "bytes": 442,
+      "sha256": "906fdef581c4150e3b316f05c18ee95fa7f484fdbff8010500871852c93f776e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/source_default_off_proof.json",
+      "bytes": 272,
+      "sha256": "8cb3b42dbaa5354050ac5517041d4ae6bd500c474b7294f990fd20f2ccc7599f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/changed_files.json",
+      "bytes": 682,
+      "sha256": "b27ee52573fcaf3b7b7e95149aafe90c154c8e926ff7e905fff6c2f3bf68ee26"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/contract_proof.json",
+      "bytes": 434,
+      "sha256": "2a7e1b2304cef3700ae808d8b838831b8fb4ec470f60f7f368254f5cc8868817"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/focused_tests.json",
+      "bytes": 268,
+      "sha256": "447274f5c86fbeddf54c3e7771c3cb1e93f9156b2510667a573a7f285a77b2af"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/promise_port_conformance.json",
+      "bytes": 332,
+      "sha256": "e06a2dca6b09aa654196c0ea0d425d8c85252c07b4ed3f32880e035ee3036fd8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/protected_root_proof.json",
+      "bytes": 399,
+      "sha256": "0c940f500b39598c2bcd2a4170fb49c9606d1df6e5e7ece022b61cc6fc256f96"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/race_failure_tests.json",
+      "bytes": 418,
+      "sha256": "df9787ec5abceb9b132b7158cb5108446f2cac9c3e1fd84c6030441cffcd085d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/secret_scan.json",
+      "bytes": 270,
+      "sha256": "b4579e99f596a940b733dcc0cc9aa68be9f06ff346a8aca90ba5bbdc804d6768"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/sprint_receipt.json",
+      "bytes": 690,
+      "sha256": "b8dda090409c7976eeb704e6c0d9e9eb2bbd1f79f724d78b41ff6eb7cbe7ca40"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/synthetic_adapter_rejection.json",
+      "bytes": 334,
+      "sha256": "29715080db2f3d4e581f90a27b12e4896408ab8a231894eb8dabfffd405c953b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_1/zero_provider_call_proof.json",
+      "bytes": 314,
+      "sha256": "e721d67ac2214801b7ea2bd4b15c45137901b2aa539478ab8d1869a7d7fb1e95"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/canonical_security_path_proof.json",
+      "bytes": 283,
+      "sha256": "1a6b5e7d4137a134a12b0c57471da6beeefc6d676e8642c77f4c5f66dc6bc8df"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/changed_files.json",
+      "bytes": 385,
+      "sha256": "d5632e457fca8e3a6badf5d28b709f7431953ff18f1e51d107c944fee832113c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/contract_proof.json",
+      "bytes": 390,
+      "sha256": "1d80d2ce28ba8e7db5efe08c51017c2dfefd1fe9f60065d5450ab52721486521"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/developer_access_facade_proof.json",
+      "bytes": 375,
+      "sha256": "afd84eed880b624a4c409bba168e7b417bcfbbf70225a725ad7aabedff115d42"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/focused_tests.json",
+      "bytes": 274,
+      "sha256": "f5cedb01b726bf2b854ba086ad706d01f22565920dc604e1065c52b209f7ee08"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/protected_root_proof.json",
+      "bytes": 314,
+      "sha256": "9c91cac0eb3aed33a1a89cc96c28de30433d97ee86a3a2ad40be4aacaeee34d1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/race_failure_tests.json",
+      "bytes": 309,
+      "sha256": "f6bd41e0904d68340091392890bfc4b16e7610a36cad00c057b49f72f8ecf712"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/secret_scan.json",
+      "bytes": 238,
+      "sha256": "ccaac60732a9b2997fbca1399fd1945146853f02b9de9b9e1b5d5b4a83effce3"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/sprint_receipt.json",
+      "bytes": 590,
+      "sha256": "bca9686fb3fc26c700e1ed50a35f7fe5500fa497b08159d9f3975665a12352e5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_2/zero_provider_call_proof.json",
+      "bytes": 231,
+      "sha256": "dc1ac3225ffbc56f15113e7955641b8fd98cbcd232603e404d98e7c3004fdfa2"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/canonical_subject_uniqueness_proof.json",
+      "bytes": 343,
+      "sha256": "c02716d6bbf016e19517efa36ac25db93e7e6064b86938e1fceba264c19619c4"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/changed_files.json",
+      "bytes": 529,
+      "sha256": "2c9479837075397074fef38dd8dd7a741c68ceb55e5fe01f01dfbf85a0384729"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/contract_proof.json",
+      "bytes": 438,
+      "sha256": "eec4d873938c8156d72c8d5248ae7501f2abef23032ff1d340e19dbc9f24e376"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/focused_tests.json",
+      "bytes": 270,
+      "sha256": "2afd4865029e9a9d6a2ce858720140949d5d87f0cdd9a7be09eb174102e1339f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/private_test_eligibility_proof.json",
+      "bytes": 451,
+      "sha256": "dd35fc39c8716495d69dee6706bc4738197afa837c96d9f95274e642129f2c9e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/protected_root_proof.json",
+      "bytes": 335,
+      "sha256": "715b733d6eedba67d813f19839adef926f906da3d1d01afb19081607f817c3cf"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/race_failure_tests.json",
+      "bytes": 328,
+      "sha256": "2cfe547c62b48d8a359a5b68115fc40f2a55f52d91a47447ade6ef4d1b5ab451"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/secret_scan.json",
+      "bytes": 238,
+      "sha256": "73eeb328e1605944aa3e4de5ace82efdfc14642c37f184487faca687dd508fd8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/sprint_receipt.json",
+      "bytes": 652,
+      "sha256": "721f3f62830025a1b480d4902ee7e83f6fbc57bc54ffdf5be0a58c18218f899b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_3/zero_provider_call_proof.json",
+      "bytes": 231,
+      "sha256": "d801f618ae1a929bd4873e9852a892d36db2e8f0dab93ccd2ae83a56650776fe"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/authority_order_proof.json",
+      "bytes": 430,
+      "sha256": "a93f1ae658f5ac8afc16041007f398f9e6e14206d127bb9f8a9dd6077609fa13"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/change_receipt.json",
+      "bytes": 674,
+      "sha256": "c75669be754b388ed8d44910ae8f07f998e300931f91bc8cb0d24c3a452da31f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/changed_files.json",
+      "bytes": 584,
+      "sha256": "d9102a39244989796fb04a61be78cb160b4e85426614bef4b431be99b889dd7c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/contract_proof.json",
+      "bytes": 447,
+      "sha256": "35acc20ddc6c276f76d720394d2c6aabaa844bd0dbf94dd8b408dab95fdfd5ad"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/focused_tests.json",
+      "bytes": 270,
+      "sha256": "80a8b42499d46f90207c623fefe5173154ccbe6bbce5d81470b28d4c1927bbb5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/protected_root_proof.json",
+      "bytes": 335,
+      "sha256": "5429c174d4da989dc522b5c253b1cfc82e5bd5387ccb66deca815d49f28a2c23"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/race_failure_tests.json",
+      "bytes": 402,
+      "sha256": "eff6269f437080178541feb5abce6ce1273371371be76b3d7e3cb869f12fba38"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/repair_receipt_1.json",
+      "bytes": 789,
+      "sha256": "1684cd3ca45cc3a0207041743baf503bed6700ad55285cecc3c2106431418f20"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/secret_scan.json",
+      "bytes": 238,
+      "sha256": "12823682126945a00639bbdec6b477a1bac6d296acd3ce6ce94040ff214723d8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/sprint_receipt.json",
+      "bytes": 661,
+      "sha256": "a035529ffc8e4c5448de955431d487e2bf4a49f7ba97adfe6faef18523d29ba2"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/temporary_entitlement_proof.json",
+      "bytes": 547,
+      "sha256": "cbef8cbacdcdba7ea2a30e42dd68e87a6fb687b45a15cdda2cbbe27129c2af6e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_4/zero_provider_call_proof.json",
+      "bytes": 285,
+      "sha256": "a0f79f2145d291762e526bea649f0b7a5405afa129a31505e3804366c2077751"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/change_receipt.json",
+      "bytes": 760,
+      "sha256": "e4083c2216a87de5515b4d420e8bfdb859381110bd83af8ad495c41bac0229c8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/changed_files.json",
+      "bytes": 544,
+      "sha256": "9636acc5ffe4c43e387f011551d7f55301965546668555d39c3f2273c75ef4b0"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/contract_proof.json",
+      "bytes": 458,
+      "sha256": "245f605e6ee9498af565eed6049e1cc61278a4f65882535d057296b9b83a06bd"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/emergency_disable_outage_proof.json",
+      "bytes": 414,
+      "sha256": "7c8cc55c971338e6ac90c38796b6cb60d0774820580ce26d6adbffc4aed3d134"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/focused_tests.json",
+      "bytes": 269,
+      "sha256": "8291b6417ec695d7eb67d917da144109c06e10089231e169ef1541a0e6c7e7b3"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/protected_root_proof.json",
+      "bytes": 335,
+      "sha256": "dad88983e0b42553bc92b398fd51407844384eb39696746097b155f4c6e8440b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/race_failure_tests.json",
+      "bytes": 350,
+      "sha256": "47e78a1e25f9d80315e361f909242a6fe3686af109fcf984e4d8c110b81300e8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/repair_receipt_1.json",
+      "bytes": 829,
+      "sha256": "dabee3e80b2d851ae3394ca0797b303e5e0313e1f079e86f63dbd7683b96ce82"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/secret_scan.json",
+      "bytes": 238,
+      "sha256": "44d6364a8bd12a37b2deb6716c488ecfe327317f5588a5bf8ea35d94af2195ab"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/session_revocation_recovery_proof.json",
+      "bytes": 502,
+      "sha256": "635f75554f09f96bb0bc222b17cf51109c29da2e3648e9ceb66d228f0e662a6b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/sprint_receipt.json",
+      "bytes": 640,
+      "sha256": "9848ba1f3d0fbb1f5d76549dba943baf2fc83f258ce2ba8e899827d92fcd6b8c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_5/zero_provider_call_proof.json",
+      "bytes": 268,
+      "sha256": "1f6bdbd8230e7c24823dae2407e6c23f5adbc0819047678ef976406bea987f36"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/change_receipt.json",
+      "bytes": 844,
+      "sha256": "7b3bbb428b6d42db23e91715c7390abdf4f3fc004e75a2d3f40b8b9d0be29086"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/changed_files.json",
+      "bytes": 758,
+      "sha256": "0d88c3a37ad6258c049f225503c4e6bbb80e9e720f611c89463bf9106c331a6c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/contract_proof.json",
+      "bytes": 324,
+      "sha256": "a35870a592e04f9cda7ba4b4903c3979db88e5d73ee18344f3d9c87247efd873"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/focused_tests.json",
+      "bytes": 269,
+      "sha256": "a34a10f7ebee56a5a5176d5b2019a5b93c907e5d28bfe9cbcab096dba88dc692"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/handler_await_settlement_proof.json",
+      "bytes": 431,
+      "sha256": "e1e2c828c29d023791e821f0ea200f223071bc11e5b8db3884980271d1cc6b6d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/handler_binding_proof.json",
+      "bytes": 407,
+      "sha256": "5bc439770046de4e0c1d154872b13eb74864b43c9c9f866b1495ed9b746b73ec"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/protected_root_proof.json",
+      "bytes": 335,
+      "sha256": "08ec6b529230b1272ffa7ce97235e7270292c1157713215644aac39d2cce8553"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/race_failure_tests.json",
+      "bytes": 455,
+      "sha256": "ced15bae2dab6a571fa15121d20de58e42f6c9a117e75a911bbadad6d92168cb"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/repair_receipt_1.json",
+      "bytes": 818,
+      "sha256": "fd20bdff60ce79404955428875b43ce47ffb19de5c4286b2d9a25ed9b30964c1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/secret_scan.json",
+      "bytes": 238,
+      "sha256": "feb59e672c0c649df5498968ed1a9cc7fedad0aaf71d2c4853d9a0a813757fc8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/sprint_receipt.json",
+      "bytes": 631,
+      "sha256": "f07dca1a87a078dde11a9a6c6e054056650db831a35201ad3f7e33e95b98a46b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_6/zero_provider_call_proof.json",
+      "bytes": 295,
+      "sha256": "d7c9d51a4f9efe642989922067d2a09d75631ea2d790c8b3110bfa45fbb4c188"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/change_receipt.json",
+      "bytes": 893,
+      "sha256": "9b37f2f4e22e57bebe479970e211d8a815abe6de0674e1640e7393fc0687067f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/changed_files.json",
+      "bytes": 357,
+      "sha256": "de348cd4eaf2861b65e98b8c7f4d4b7faa4f146310c4e9ce1b3783582c10149a"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/contract_proof.json",
+      "bytes": 408,
+      "sha256": "0340495c16897a4afcaebdf7ceaab767d0dd0aec38f3ac6b51b3589b3739f1f3"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/cross_system_integration_proof.json",
+      "bytes": 523,
+      "sha256": "ce7a8cc0f82f0a43fe0e454a34bbdf4b4337b2d5323e9874802eca60d29b5b87"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/focused_tests.json",
+      "bytes": 297,
+      "sha256": "1efb0c2101d7099342ac9028830f8e29c7bde9a1233bc8b8c176654eef22aae7"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/no_duplicate_security_truth_proof.json",
+      "bytes": 314,
+      "sha256": "ab3f0a968faa6bef6cb282dc5558a9ddd3d8771b40428fa2a1e56bde760d7bba"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/one_subject_one_engine_proof.json",
+      "bytes": 330,
+      "sha256": "efa9d6f8724f1095ade9e6113f890a869da91d2b407e2fda6399e20ab2d62d84"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/protected_root_proof.json",
+      "bytes": 335,
+      "sha256": "7aaeda9a59131196a8437a45bc54e99d9b78aa3755b1921149ff147420896bcc"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/race_failure_tests.json",
+      "bytes": 297,
+      "sha256": "ef549d1f679e5fcdec556d43c58e42b836a81e5468ec22dc3c29c3cc1d1ae985"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/repair_receipt_1.json",
+      "bytes": 842,
+      "sha256": "6d3a40989b7fe586832517431aa71f11b45e14fa7d8d3f395836e3777d411a2a"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/secret_scan.json",
+      "bytes": 246,
+      "sha256": "5c9cff39c83b6595f105969c7de02a5b9dad9af6a02009424e4ada4922bd424f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/sprint_receipt.json",
+      "bytes": 650,
+      "sha256": "253aaade0ab4467c0ae822cd33f59c703730cd94a9d79e02cecd37fdd41ca8e5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/sprint_7/zero_provider_call_proof.json",
+      "bytes": 328,
+      "sha256": "9a1eae88136b1d40b40c80bb28f7d408e3c40e9b8a0daaf8f3c974713d2abf0e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/subscription_runtime_attachment_proof.json",
+      "bytes": 261,
+      "sha256": "99cf497cd0d58320e42e12237aa71446833e4d9058c26267b17b4fbd8f64ce85"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/test_manifest.json",
+      "bytes": 1111,
+      "sha256": "ea6a91b8150ba8e47bc104a4df96552eca2fa39cdc58b65a604709519a3979ba"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_async_security_repair_v1/zero_external_call_proof.json",
+      "bytes": 229,
+      "sha256": "ea3692ba6a0ab96296247f18ed0d8265f1fe33719db98c698eae1aa88e2c6210"
+    },
+    {
+      "path": "scripts/verifyCoachConnectPrivateRuntimeAsyncSecurityRepair.mjs",
+      "bytes": 13969,
+      "sha256": "d3df1a00a0962f9aeded13ee0e672638dd7bfb32fae245f0b6743878a16617b4"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/canonicalAsyncSecurityService.js",
+      "bytes": 50881,
+      "sha256": "bb690a1c1bb738d78cae8513e89f0b2fddeef2efd4bf7523d101185ec3b0353c"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/developerAccessSecurityFacade.js",
+      "bytes": 5745,
+      "sha256": "84c0540731108eb072ee835ffd021ca9de74f35c04ce47400334d1145f57ad43"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/eligibility.js",
+      "bytes": 6279,
+      "sha256": "61533e947a2f88cd05e2c27ad7d47a94a497b5276e30bb5d519a209210ebcd2d"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+      "bytes": 4870,
+      "sha256": "77ce7226c9a0905ffab03f55ccc41cdb414d0f0a132a7885bd81642753c5ff59"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+      "bytes": 11752,
+      "sha256": "077629579e056b2ff46e3d9eed63e8533f0497f519f548f2f9796d213404a58d"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js",
+      "bytes": 17796,
+      "sha256": "068a3e159a7bd576a9ccab08a870e900755485ec09845d0097da427575afe495"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSharedSecurityStatePort.js",
+      "bytes": 4661,
+      "sha256": "2216de05e18a3fb365eee7d2af5d042ffd5174584d680730c10d5e7d7c98d0d0"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+      "bytes": 682,
+      "sha256": "ff01925b3b67a51e8114aa17feae91a14d1615a184606f541befadc2a1789d6f"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/syntheticAsyncSecurityStateAdapter.js",
+      "bytes": 38137,
+      "sha256": "558f74a02de328f3670d704071ff85ad4bef8d0e2ef0bb56238bac6fceda9436"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js",
+      "bytes": 11142,
+      "sha256": "0954a4c1e35f86d6d943f8c60fb6291081dfef78e9e901db42005886773ae6c6"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.contracts.test.js",
+      "bytes": 12567,
+      "sha256": "063e838a9f5de6f950a68c52b911da217be45d9b345ee95ce3eb12e797ece8a8"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.developerAccess.test.js",
+      "bytes": 9086,
+      "sha256": "6710c755f1f885a312fc3fc7564db8c0d50cec4a6a9e4ad7a8ee8d591c7219e2"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.entitlement.test.js",
+      "bytes": 14717,
+      "sha256": "b67e990ab75bb9a2421245af325ac82877b36f58684a6db46f1893d694f62328"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.handlers.test.js",
+      "bytes": 14736,
+      "sha256": "04f06e2ad959f9a93ae09c232b3fe936ed2ef12b0b0cb1018cf033ec864fdeaa"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.integration.test.js",
+      "bytes": 20852,
+      "sha256": "d85b26951a33b9c1b92024c1e45855163ca762d1412476e8da4b0d1b1d6056be"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.recovery.test.js",
+      "bytes": 15616,
+      "sha256": "15ffd359da99a07b38010a5e414a4d78ca27369bb0b451acda348cca6007206d"
+    }
+  ],
+  "result": "PASS"
+}

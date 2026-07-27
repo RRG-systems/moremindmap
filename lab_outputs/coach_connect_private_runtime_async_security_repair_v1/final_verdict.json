@@ -1,0 +1,17 @@
+{
+  "verdict_version": "private-runtime-async-security-implementation-verdict-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "mission_verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_IMPLEMENTED_WITH_LIMITS",
+  "afw_verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_ENTITLEMENT_BOOTSTRAP_IMPLEMENTED_WITH_REMOTE_ADAPTER_PENDING",
+  "source_default_off": true,
+  "offline_synthetic_validated": true,
+  "remote_adapter_present": false,
+  "provider_qualified": false,
+  "deployment_ready_claimed": false,
+  "private_live_ready_claimed": false,
+  "provider_calls": 0,
+  "deployment_calls": 0,
+  "staging_actions": 0,
+  "commit_actions": 0,
+  "next_campaign": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1"
+}

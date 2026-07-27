@@ -1,0 +1,14 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 1,
+  "implementation_and_test_files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSharedSecurityStatePort.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/syntheticAsyncSecurityStateAdapter.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.contracts.test.js"
+  ],
+  "v1_semantic_changes": [],
+  "outside_sprint_allowlist": [],
+  "result": "PASS"
+}

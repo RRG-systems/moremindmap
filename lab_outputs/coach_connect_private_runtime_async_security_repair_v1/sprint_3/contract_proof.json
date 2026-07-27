@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 3,
+  "service_version": "private-runtime-canonical-security-service-v2",
+  "canonical_subject_decision_version": "canonical-subject-decision-v2",
+  "eligibility_decision_version": "private-test-bootstrap-eligibility-v1",
+  "promise_only": true,
+  "authoritative_queries_only": true,
+  "runtime_enrollment_command_available": false,
+  "result": "PASS"
+}

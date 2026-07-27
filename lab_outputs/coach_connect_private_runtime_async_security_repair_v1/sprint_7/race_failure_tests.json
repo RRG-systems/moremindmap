@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 7,
+  "race_matrix_cases": 15,
+  "failure_matrix_domains": 31,
+  "surviving_duplicate_authority_count": 0,
+  "surviving_duplicate_runtime_count": 0,
+  "partial_attachment_publication_count": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,36 @@
+{
+  "manifest_version": "private-runtime-async-security-changed-files-v1",
+  "implementation_files": [
+    "api/internal/developer-access.js",
+    "api/internal/private-runtime-bootstrap.js",
+    "api/internal/private-runtime-callback.js",
+    "api/internal/private-runtime-login.js",
+    "api/internal/private-runtime-logout.js",
+    "api/internal/private-runtime-session.js",
+    "api/internal/subscription-entitlement.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/canonicalAsyncSecurityService.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/developerAccessSecurityFacade.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/eligibility.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSharedSecurityStatePort.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/syntheticAsyncSecurityStateAdapter.js"
+  ],
+  "test_files": [
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.contracts.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.developerAccess.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.entitlement.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.handlers.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.recovery.test.js"
+  ],
+  "verifier_files": [
+    "scripts/verifyCoachConnectPrivateRuntimeAsyncSecurityRepair.mjs"
+  ],
+  "campaign_code_file_count": 24,
+  "unrelated_preexisting_worktree_changes_preserved": true,
+  "result": "PASS"
+}

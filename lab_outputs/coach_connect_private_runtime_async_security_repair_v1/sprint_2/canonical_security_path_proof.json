@@ -1,0 +1,12 @@
+{
+  "proof_version": "private-runtime-canonical-security-path-v1",
+  "sprint": 2,
+  "path": [
+    "DeveloperAccessSecurityFacadeV2",
+    "CanonicalAsyncSecurityServiceV2"
+  ],
+  "independent_store_count": 0,
+  "v1_fallback_count": 0,
+  "provider_edge_count": 0,
+  "result": "PASS"
+}

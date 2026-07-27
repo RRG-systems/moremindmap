@@ -22,15 +22,19 @@ const applyHeaders = (res) => {
 
 export function createPrivateRuntimeBootstrapHandler({
   bootstrap = null,
-  enabled = () => false,
+  enabled = null,
+  compositionAccessor = getPrivateRuntimeLiveCompositionV2,
 } = {}) {
   return async function privateRuntimeBootstrapHandler(req, res) {
     applyHeaders(res);
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-    if (!enabled(req) || typeof bootstrap !== 'function') {
+    if (typeof enabled === 'function' && enabled(req) !== true) {
       return res.status(404).json({ ok: false, error: 'request_denied' });
     }
-    const result = await bootstrap(req);
+    const operation = typeof bootstrap === 'function'
+      ? bootstrap
+      : compositionAccessor()?.operations?.bootstrap;
+    const result = await settlePrivateRuntimeLiveOperation(operation, [req]);
     if (!result?.ok || containsForbidden(result)) {
       return res.status(result?.status || 403).json({ ok: false, error: 'request_denied' });
     }
@@ -47,3 +51,7 @@ export function createPrivateRuntimeBootstrapHandler({
 }
 
 export default createPrivateRuntimeBootstrapHandler();
+import {
+  getPrivateRuntimeLiveCompositionV2,
+  settlePrivateRuntimeLiveOperation,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';

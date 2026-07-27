@@ -1,0 +1,15 @@
+{
+  "receipt_version": "private-runtime-async-security-repair-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 5,
+  "repair": 1,
+  "failed_gate": "SPRINT_5_FOCUSED_SESSION_ROTATION",
+  "failure_class": "SYNTHETIC_ATOMIC_MODEL_INCOMPLETE",
+  "observed_failure": "ELEVATE_AUTHENTICATED_SESSION rotated pre-auth, CSRF, and entitlement state but retained the parent authenticated session as ACTIVE.",
+  "bounded_change": "Rotate the parent authenticated session and compare the current security epoch inside the same serialized synthetic command.",
+  "invariant_weakened": false,
+  "allowlist_basis": "campaign-union Sprint 1 adapter plus Sprint 5 repair and change receipts",
+  "provider_activity": false,
+  "deployment_activity": false,
+  "status": "APPLIED"
+}

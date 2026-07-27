@@ -1,0 +1,14 @@
+{
+  "receipt_version": "private-runtime-async-security-change-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 5,
+  "change_class": "EVIDENCE_DRIVEN_CONTINUATION_REFINEMENT",
+  "changed_path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/syntheticAsyncSecurityStateAdapter.js",
+  "reason": "Sprint 5 lifecycle evidence required the already-ratified ELEVATE_AUTHENTICATED_SESSION atomic effects to invalidate the parent authenticated session as well as its CSRF and entitlement state.",
+  "architecture_change": false,
+  "provider_adapter_change": false,
+  "authority_order_change": false,
+  "privacy_change": false,
+  "protected_root_change": false,
+  "result": "ACCEPTED"
+}

@@ -1,0 +1,14 @@
+{
+  "receipt_version": "private-runtime-async-security-change-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "source_sprint": 7,
+  "affected_future_sprint": null,
+  "evidence": "Archive-wide classification found one address only in the adversarial test suite and only under the reserved example.invalid domain.",
+  "prior_assumption": "Only the initial synthetic-domain allowlist would occur in package text.",
+  "refined_assumption": "Reserved .invalid fixture domains are synthetic evidence and are not real identities; unexpected registrable domains remain failures.",
+  "architecture_invariants_preserved": true,
+  "allowlist_unchanged": true,
+  "authority_unchanged": true,
+  "validation_added": "Re-run the full archive secret and sensitive-content scan with reserved-domain classification.",
+  "review_result": "ACCEPTED"
+}

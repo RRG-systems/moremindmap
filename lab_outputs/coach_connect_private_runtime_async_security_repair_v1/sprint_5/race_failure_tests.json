@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 5,
+  "concurrent_callback_active_session_count": 1,
+  "rotated_parent_authority_survived": false,
+  "logout_race_surviving_authority": false,
+  "stale_epoch_allowed": false,
+  "outage_revocation_claimed": false,
+  "local_mutation_queued": false,
+  "result": "PASS"
+}

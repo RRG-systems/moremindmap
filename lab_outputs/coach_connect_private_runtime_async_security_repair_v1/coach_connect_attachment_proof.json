@@ -1,0 +1,11 @@
+{
+  "proof_version": "coach-connect-attachment-proof-v1",
+  "existing_runtime": true,
+  "attachment_count": 1,
+  "text_only": true,
+  "voice_media": false,
+  "transcript_persistence": false,
+  "canonical_mutation_authority": false,
+  "runtime_redesigned": false,
+  "result": "PASS"
+}

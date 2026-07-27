@@ -1,0 +1,9 @@
+{
+  "test_result_version": "private-runtime-async-security-test-result-v1",
+  "sprint": 1,
+  "command": "node --test test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.contracts.test.js",
+  "tests": 7,
+  "passed": 7,
+  "failed": 0,
+  "result": "PASS"
+}

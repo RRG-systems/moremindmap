@@ -7,25 +7,40 @@ const deny = (res, status = 404) => res.status(status).json({ ok: false, error: 
 
 export function createPrivateRuntimeCallbackHandler({
   completeLogin = null,
-  enabled = () => false,
+  enabled = null,
+  compositionAccessor = getPrivateRuntimeLiveCompositionV2,
 } = {}) {
   return async function privateRuntimeCallbackHandler(req, res) {
     applyHeaders(res);
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
-    if (!enabled(req) || typeof completeLogin !== 'function') return deny(res);
-    const result = await completeLogin(req);
+    if (typeof enabled === 'function' && enabled(req) !== true) return deny(res);
+    const operation = typeof completeLogin === 'function'
+      ? completeLogin
+      : compositionAccessor()?.operations?.completeLogin;
+    const result = await settlePrivateRuntimeLiveOperation(operation, [req]);
+    const sessionCookie = typeof result?.session_cookie === 'string'
+      ? result.session_cookie
+      : typeof result?.session_cookie_value === 'string'
+        ? `__Host-more_session=${result.session_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Lax`
+        : null;
     if (!result?.ok
-      || typeof result.session_cookie !== 'string'
+      || typeof sessionCookie !== 'string'
       || result.raw_assertion_present === true
       || result.raw_token_persisted === true) return deny(res, result?.status || 401);
-    res.setHeader('Set-Cookie', result.session_cookie);
+    res.setHeader('Set-Cookie', sessionCookie);
     return res.status(200).json({
       ok: true,
       authenticated: true,
-      session_receipt: result.session_receipt,
+      session_receipt: result.session_receipt
+        || result.canonical_subject?.receipt_ref
+        || result.audit_receipt_ref,
       entitlement_active: false,
     });
   };
 }
 
 export default createPrivateRuntimeCallbackHandler();
+import {
+  getPrivateRuntimeLiveCompositionV2,
+  settlePrivateRuntimeLiveOperation,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';

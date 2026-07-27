@@ -1,0 +1,16 @@
+{
+  "proof_version": "private-runtime-failure-matrix-proof-v1",
+  "domains_checked": 31,
+  "health_states_denied": [
+    "UNCONFIGURED",
+    "DEGRADED",
+    "UNAVAILABLE",
+    "PARTITIONED",
+    "RECOVERING"
+  ],
+  "identity_scope_session_entitlement_mismatches_allowed": 0,
+  "provider_or_product_boundary_attempts_allowed": 0,
+  "partial_attachments_published": 0,
+  "fallback_authorities_created": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,13 @@
+{
+  "manifest_version": "private-runtime-async-security-change-receipts-v1",
+  "changes": [
+    { "sprint": 4, "path": "sprint_4/change_receipt.json", "architecture_change": false },
+    { "sprint": 5, "path": "sprint_5/change_receipt.json", "architecture_change": false },
+    { "sprint": 6, "path": "sprint_6/change_receipt.json", "architecture_change": false },
+    { "sprint": 7, "path": "sprint_7/change_receipt.json", "architecture_change": false }
+  ],
+  "authority_changes": 0,
+  "provider_changes": 0,
+  "protected_root_changes": 0,
+  "result": "PASS"
+}

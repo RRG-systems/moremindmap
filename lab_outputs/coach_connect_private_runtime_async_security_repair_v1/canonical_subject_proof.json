@@ -1,0 +1,10 @@
+{
+  "proof_version": "canonical-subject-proof-v1",
+  "canonical_subject_count": 1,
+  "exact_scope_count": 1,
+  "mapping_directions_validated": 2,
+  "auto_enrollment_count": 0,
+  "ambiguous_mapping_allows": 0,
+  "cross_subscriber_allows": 0,
+  "result": "PASS"
+}

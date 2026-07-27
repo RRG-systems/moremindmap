@@ -1,0 +1,10 @@
+{
+  "proof_version": "business-engine-attachment-proof-v1",
+  "canonical_lookup_count": 1,
+  "canonical_attachment_count": 1,
+  "business_engine_build_count": 0,
+  "business_engine_write_count": 0,
+  "duplicate_engine_created": false,
+  "protected_business_engine_changed": false,
+  "result": "PASS"
+}

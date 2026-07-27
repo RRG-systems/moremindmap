@@ -1,0 +1,9 @@
+{
+  "proof_version": "handler-await-settlement-proof-v1",
+  "handler_surfaces": 7,
+  "delayed_promise_surfaces": 7,
+  "early_responses": 0,
+  "double_responses": 0,
+  "handler_to_adapter_edges": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,15 @@
+{
+  "receipt_version": "private-runtime-async-security-repair-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 7,
+  "repair": 1,
+  "failed_gate": "PACKAGE_SENSITIVE_CONTENT_CLASSIFICATION",
+  "failure_class": "RESERVED_SYNTHETIC_DOMAIN_FALSE_POSITIVE",
+  "observed_failure": "The first package scan treated one test-only address under the reserved example.invalid domain as an unexpected identity domain.",
+  "bounded_change": "Recognize example.invalid as a reserved synthetic fixture domain while preserving all secret, credential, token, Profile ID, and customer-content checks.",
+  "invariant_weakened": false,
+  "allowlist_basis": "Sprint 7 evidence and validation receipts only",
+  "provider_activity": false,
+  "deployment_activity": false,
+  "status": "APPLIED"
+}

@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 3,
+  "unknown_subject_auto_enrolled": false,
+  "ambiguous_mapping_allowed": false,
+  "scope_collision_allowed": false,
+  "revoked_approval_allowed": false,
+  "stale_epoch_allowed": false,
+  "unhealthy_state_allowed": false,
+  "result": "PASS"
+}

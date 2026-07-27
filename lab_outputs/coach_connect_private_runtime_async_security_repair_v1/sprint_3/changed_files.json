@@ -1,0 +1,12 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 3,
+  "implementation_and_test_files": [
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/canonicalAsyncSecurityService.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/eligibility.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js"
+  ],
+  "outside_sprint_allowlist": [],
+  "result": "PASS"
+}

@@ -1,0 +1,11 @@
+{
+  "proof_version": "canonical-subject-uniqueness-proof-v1",
+  "sprint": 3,
+  "external_to_canonical_mapping_count": 1,
+  "exact_scope_to_canonical_mapping_count": 1,
+  "two_subjects_one_scope_allowed": false,
+  "one_subject_two_scopes_allowed": false,
+  "auto_enrollment_count": 0,
+  "runtime_binding_command_count": 0,
+  "result": "PASS"
+}

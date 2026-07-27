@@ -1,0 +1,13 @@
+{
+  "proof_version": "zero-external-call-proof-v1",
+  "auth0": 0,
+  "redis": 0,
+  "upstash": 0,
+  "database": 0,
+  "vercel": 0,
+  "model_provider": 0,
+  "media_provider": 0,
+  "stripe": 0,
+  "deployment": 0,
+  "result": "PASS"
+}

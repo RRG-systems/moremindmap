@@ -1,0 +1,17 @@
+{
+  "proof_version": "private-runtime-async-security-cross-system-integration-v1",
+  "sprint": 7,
+  "ordered_path": [
+    "EDGE_ATTESTED",
+    "AUTHENTICATED",
+    "CANONICAL_SUBJECT_RESOLVED",
+    "BOOTSTRAP_ELIGIBLE",
+    "TEMPORARY_ENTITLEMENT_ACTIVE",
+    "PRIVATE_RUNTIME_AUTHORIZED",
+    "OFFLINE_EXISTING_RUNTIME_ATTACHMENTS"
+  ],
+  "existing_live_bridge_gate_open": false,
+  "live_bridge_gate_reason": "REMOTE_DEPLOYMENT_GRADE_SHARED_SECURITY_ADAPTER_PENDING",
+  "synthetic_relabeling": false,
+  "result": "PASS"
+}

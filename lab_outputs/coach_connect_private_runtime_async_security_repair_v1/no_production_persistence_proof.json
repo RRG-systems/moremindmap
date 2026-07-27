@@ -1,0 +1,9 @@
+{
+  "proof_version": "no-production-persistence-proof-v1",
+  "production_persistence_calls": 0,
+  "migration_calls": 0,
+  "destructive_deletion_calls": 0,
+  "synthetic_process_memory_only": true,
+  "durability_claimed": false,
+  "result": "PASS"
+}

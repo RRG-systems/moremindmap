@@ -1,0 +1,16 @@
+{
+  "manifest_version": "private-runtime-async-security-test-manifest-v1",
+  "focused_suites": [
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.contracts.test.js", "passed": 7, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.developerAccess.test.js", "passed": 6, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js", "passed": 9, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.entitlement.test.js", "passed": 9, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.recovery.test.js", "passed": 10, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.handlers.test.js", "passed": 11, "failed": 0 },
+    { "path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.integration.test.js", "passed": 6, "failed": 0 }
+  ],
+  "individual_total": 58,
+  "combined_total": 58,
+  "combined_failed": 0,
+  "result": "PASS"
+}

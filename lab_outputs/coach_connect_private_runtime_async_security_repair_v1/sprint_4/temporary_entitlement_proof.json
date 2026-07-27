@@ -1,0 +1,18 @@
+{
+  "proof_version": "temporary-private-entitlement-proof-v1",
+  "sprint": 4,
+  "record_version": "temporary-private-entitlement-v2",
+  "temporary": true,
+  "paid_entitlement": false,
+  "billing_evidence": false,
+  "stripe_subscription_created": false,
+  "admin_authority": false,
+  "operator_authority": false,
+  "deployment_authority": false,
+  "billing_authority": false,
+  "coach_authority": false,
+  "canonical_mutation_authority": false,
+  "raw_access_code_persisted": false,
+  "raw_entitlement_token_persisted": false,
+  "result": "PASS"
+}

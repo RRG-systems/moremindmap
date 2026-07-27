@@ -1,0 +1,15 @@
+{
+  "proof_version": "private-runtime-async-security-archive-integrity-v1",
+  "archive_name": "PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_IMPLEMENTATION_REVIEW_V1.zip",
+  "expected_paths_sorted": true,
+  "duplicates": 0,
+  "case_collisions": 0,
+  "symlinks": 0,
+  "absolute_paths": 0,
+  "traversal_paths": 0,
+  "integrity_command": "unzip -t",
+  "decompressed_byte_equality_required": true,
+  "desktop_byte_equality_required": true,
+  "archive_sha256_reported_in_desktop_handoff": true,
+  "result": "PASS"
+}

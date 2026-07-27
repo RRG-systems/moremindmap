@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-async-security-import-export-v1",
+  "modules_imported": 16,
+  "import_failures": 0,
+  "canonical_service_exported": true,
+  "synthetic_adapter_exported": true,
+  "live_composition_exported": true,
+  "handler_defaults_importable": true,
+  "result": "PASS"
+}

@@ -1,0 +1,18 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 6,
+  "implementation_and_test_files": [
+    "api/internal/developer-access.js",
+    "api/internal/private-runtime-bootstrap.js",
+    "api/internal/private-runtime-callback.js",
+    "api/internal/private-runtime-login.js",
+    "api/internal/private-runtime-logout.js",
+    "api/internal/private-runtime-session.js",
+    "api/internal/subscription-entitlement.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.handlers.test.js"
+  ],
+  "outside_sprint_allowlist": [],
+  "result": "PASS"
+}

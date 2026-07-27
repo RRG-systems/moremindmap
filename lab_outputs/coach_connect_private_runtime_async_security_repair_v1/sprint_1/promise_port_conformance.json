@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-promise-port-conformance-v1",
+  "sprint": 1,
+  "method_count": 5,
+  "all_return_native_promises": true,
+  "synchronous_return_rejected": true,
+  "synchronous_throw_rejected": true,
+  "settled_schema_validated": true,
+  "promise_truthiness_authority": false,
+  "result": "PASS"
+}

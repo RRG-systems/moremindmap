@@ -1,0 +1,13 @@
+{
+  "receipt_version": "private-runtime-async-security-change-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 4,
+  "change_class": "EVIDENCE_DRIVEN_CONTINUATION_REFINEMENT",
+  "changed_path": "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js",
+  "reason": "The original static scan described the Sprint 3 service before later reviewed service methods existed; method-local scoping preserves its intended proof.",
+  "architecture_change": false,
+  "authority_order_change": false,
+  "privacy_change": false,
+  "protected_root_change": false,
+  "result": "ACCEPTED"
+}

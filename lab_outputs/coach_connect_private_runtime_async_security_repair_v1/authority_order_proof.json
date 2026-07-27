@@ -1,0 +1,16 @@
+{
+  "proof_version": "private-runtime-authority-order-proof-v1",
+  "order": [
+    "EDGE_ATTESTED",
+    "AUTHENTICATED",
+    "CANONICAL_SUBJECT_RESOLVED",
+    "BOOTSTRAP_ELIGIBLE",
+    "TEMPORARY_ENTITLEMENT_ACTIVE",
+    "PRIVATE_RUNTIME_AUTHORIZED",
+    "OFFLINE_EXISTING_RUNTIME_ATTACHMENTS"
+  ],
+  "skip_edges_allowed": 0,
+  "authority_cycles": 0,
+  "non_subscription_authority_grants": 0,
+  "result": "PASS"
+}

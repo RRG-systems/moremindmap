@@ -1,0 +1,9 @@
+{
+  "proof_version": "one-subject-one-engine-proof-v1",
+  "canonical_subject_count": 1,
+  "exact_scope_count": 1,
+  "canonical_business_engine_count": 1,
+  "subscription_runtime_count": 1,
+  "coach_connect_runtime_count": 1,
+  "result": "PASS"
+}

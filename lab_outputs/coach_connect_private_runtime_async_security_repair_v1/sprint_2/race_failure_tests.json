@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 2,
+  "delayed_promise_projects_early": false,
+  "synchronous_service_allowed": false,
+  "malformed_service_allowed": false,
+  "rejected_service_allowed": false,
+  "concurrent_facade_state_created": false,
+  "result": "PASS"
+}

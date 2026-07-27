@@ -1,0 +1,27 @@
+{
+  "handoff_version": "private-runtime-async-security-ai-handoff-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "repository_head": "46308958085fb84cd3ff6f2f081b8f2944774ecd",
+  "implemented": [
+    "shared-security-state-async-v2",
+    "private-runtime-canonical-security-service-v2",
+    "synthetic-async-security-adapter",
+    "developer-access-security-facade-v2",
+    "canonical-subject-and-eligibility",
+    "temporary-entitlement-bootstrap",
+    "session-revocation-recovery",
+    "source-default-off-live-composition"
+  ],
+  "not_implemented": [
+    "remote-provider-adapter",
+    "provider-credentials",
+    "provider-activation",
+    "deployment"
+  ],
+  "repairs": 4,
+  "focused_tests_passed": 58,
+  "safe_regressions_passed": 504,
+  "protected_root_sha256": "46fc2b3f8346c7ec3c584c1c5ed46818dc97fa5c52d1ba89f10c0a0ed1ad2a12",
+  "next_campaign": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1",
+  "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_IMPLEMENTED_WITH_LIMITS"
+}

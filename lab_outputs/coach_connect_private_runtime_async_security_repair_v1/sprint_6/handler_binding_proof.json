@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-handler-binding-proof-v1",
+  "sprint": 6,
+  "composition_accessor_count": 1,
+  "bound_surfaces": [
+    "login",
+    "callback",
+    "session",
+    "developer_access",
+    "subscription_entitlement",
+    "bootstrap",
+    "logout"
+  ],
+  "default_unbound_surface_count": 0,
+  "default_allowed_surface_count": 0,
+  "handler_to_adapter_edge_count": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,14 @@
+{
+  "receipt_version": "private-runtime-async-security-campaign-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "repository_head": "46308958085fb84cd3ff6f2f081b8f2944774ecd",
+  "sprints_complete": 7,
+  "focused_tests_passed": 58,
+  "safe_regression_tests_passed": 504,
+  "bounded_repairs": 4,
+  "provider_calls": 0,
+  "deployments": 0,
+  "staging_actions": 0,
+  "commits": 0,
+  "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_IMPLEMENTED_WITH_LIMITS"
+}

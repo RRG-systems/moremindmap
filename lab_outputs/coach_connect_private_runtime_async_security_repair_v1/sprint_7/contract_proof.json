@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 7,
+  "shared_state_contract": "shared-security-state-async-v2",
+  "canonical_service": "private-runtime-canonical-security-service-v2",
+  "live_composition": "private-runtime-live-composition-v2",
+  "security_truth_count": 1,
+  "runtime_bridge_live_gate_open": false,
+  "remote_adapter_pending": true,
+  "result": "PASS"
+}

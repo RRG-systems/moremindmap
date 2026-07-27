@@ -1,0 +1,11 @@
+{
+  "manifest_version": "private-runtime-async-security-regression-manifest-v1",
+  "command_scope": "all safe test/intelligenceFabric*.test.js plus two developer-access suites",
+  "intelligence_fabric_suites": 82,
+  "developer_access_suites": 2,
+  "tests_passed": 504,
+  "tests_failed": 0,
+  "provider_calls": 0,
+  "deployment_calls": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 1,
+  "contract_version": "shared-security-state-async-v2",
+  "methods": [
+    "describeCapability",
+    "health",
+    "serverTime",
+    "queryAuthoritative",
+    "executeAtomic"
+  ],
+  "promise_only": true,
+  "query_types_closed": true,
+  "command_types_closed": true,
+  "exact_result_validation": true,
+  "v1_fallback": false,
+  "result": "PASS"
+}

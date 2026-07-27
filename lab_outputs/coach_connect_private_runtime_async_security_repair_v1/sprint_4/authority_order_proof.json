@@ -1,0 +1,17 @@
+{
+  "proof_version": "private-runtime-authority-order-proof-v1",
+  "sprint": 4,
+  "order": [
+    "AUTHENTICATION",
+    "CANONICAL_SUBJECT",
+    "PRIVATE_TEST_ELIGIBILITY",
+    "CSRF_AND_RATE_LIMIT",
+    "TEMPORARY_ENTITLEMENT",
+    "PRIVATE_RUNTIME_AUTHORITY"
+  ],
+  "authentication_skip_allowed": false,
+  "eligibility_skip_allowed": false,
+  "entitlement_skip_allowed": false,
+  "authority_cycle_count": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-async-security-dependency-cycle-v1",
+  "campaign_code_nodes": 24,
+  "dependency_cycles": 0,
+  "handler_to_adapter_edges": 0,
+  "provider_edges": 0,
+  "result": "PASS"
+}

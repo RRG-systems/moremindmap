@@ -5,8 +5,127 @@ import {
   verifyDeveloperCapability,
 } from './developer-access-security.js';
 import { shapePrivacyResponse } from '../../src/lib/intelligenceFabric/coachConnect/security/privacy.js';
+import { isThenable } from '../../src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSharedSecurityStatePort.js';
 
 export const MONTHLY_INTELLIGENCE_ACCESS_TYPE = 'more_monthly_intelligence';
+
+async function resolveAsyncPrivateSubscriptionEntitlement({
+  canonicalSecurityServiceV2,
+  requestContext,
+  requestedAction,
+}) {
+  if (typeof canonicalSecurityServiceV2?.evaluatePrivateRuntimeAuthority !== 'function'
+    || typeof canonicalSecurityServiceV2?.inspectTemporaryEntitlement !== 'function') {
+    return { allowed: false, code: 'ASYNC_SECURITY_UNCONFIGURED' };
+  }
+  let authorityPromise;
+  try {
+    authorityPromise = canonicalSecurityServiceV2.evaluatePrivateRuntimeAuthority({
+      request_context: requestContext,
+      requested_runtime: 'SUBSCRIPTION_RUNTIME',
+      requested_action: requestedAction,
+    });
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  if (!isThenable(authorityPromise)) {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  let authority;
+  try {
+    authority = await authorityPromise;
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_REJECTED' };
+  }
+  if (authority?.allowed !== true) {
+    return { allowed: false, code: authority?.code || 'RUNTIME_AUTHORITY_DENIED' };
+  }
+  let entitlementPromise;
+  try {
+    entitlementPromise = canonicalSecurityServiceV2.inspectTemporaryEntitlement(requestContext);
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  if (!isThenable(entitlementPromise)) {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  let inspected;
+  try {
+    inspected = await entitlementPromise;
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_REJECTED' };
+  }
+  if (inspected?.allowed !== true
+    || inspected.entitlement?.temporary !== true
+    || inspected.entitlement?.paid_entitlement !== false
+    || inspected.entitlement?.stripe_subscription_created !== false) {
+    return { allowed: false, code: inspected?.code || 'ENTITLEMENT_INVALID' };
+  }
+  const entitlement = {
+    access_type: MONTHLY_INTELLIGENCE_ACCESS_TYPE,
+    status: 'active',
+    source: 'temporary_internal_subscription_entitlement',
+    temporary: true,
+    expires_at: inspected.entitlement.expires_at,
+    billing_evidence: false,
+    stripe_subscription_created: false,
+    admin_authority: false,
+    coach_authority: false,
+    operator_authority: false,
+    canonical_mutation_authority: false,
+  };
+  const shaped = shapePrivacyResponse('entitlement', entitlement);
+  return shaped.ok
+    ? { allowed: true, entitlement: shaped.value, authority }
+    : { allowed: false, code: shaped.code };
+}
+
+async function resolveComposedPrivateSubscriptionEntitlement({
+  liveCompositionV2,
+  req,
+}) {
+  const operation = liveCompositionV2?.operations?.resolveSubscriptionEntitlement;
+  if (typeof operation !== 'function') {
+    return { allowed: false, code: 'ASYNC_SECURITY_UNCONFIGURED' };
+  }
+  let returned;
+  try {
+    returned = operation(req);
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  if (!isThenable(returned)) {
+    return { allowed: false, code: 'ASYNC_SECURITY_CONTRACT_VIOLATION' };
+  }
+  let decision;
+  try {
+    decision = await returned;
+  } catch {
+    return { allowed: false, code: 'ASYNC_SECURITY_REJECTED' };
+  }
+  if (decision?.allowed !== true
+    || decision.entitlement?.temporary !== true
+    || decision.entitlement?.paid_entitlement !== false) {
+    return { allowed: false, code: decision?.code || 'ENTITLEMENT_INVALID' };
+  }
+  const entitlement = {
+    access_type: MONTHLY_INTELLIGENCE_ACCESS_TYPE,
+    status: 'active',
+    source: 'temporary_internal_subscription_entitlement',
+    temporary: true,
+    expires_at: decision.entitlement.expires_at,
+    billing_evidence: false,
+    stripe_subscription_created: false,
+    admin_authority: false,
+    coach_authority: false,
+    operator_authority: false,
+    canonical_mutation_authority: false,
+  };
+  const shaped = shapePrivacyResponse('entitlement', entitlement);
+  return shaped.ok
+    ? { allowed: true, entitlement: shaped.value, authority: decision.authority }
+    : { allowed: false, code: shaped.code };
+}
 
 export function resolveSubscriptionEntitlement({
   req,
@@ -16,7 +135,24 @@ export function resolveSubscriptionEntitlement({
   store = getDefaultDeveloperSecurityStore(),
   subject_binding = null,
   privateRuntimeDecision = null,
+  canonicalSecurityServiceV2 = null,
+  requestContext = null,
+  requestedAction = 'inspect_private_subscription_entitlement',
+  liveCompositionV2 = null,
 }) {
+  if (liveCompositionV2) {
+    return resolveComposedPrivateSubscriptionEntitlement({
+      liveCompositionV2,
+      req,
+    });
+  }
+  if (canonicalSecurityServiceV2) {
+    return resolveAsyncPrivateSubscriptionEntitlement({
+      canonicalSecurityServiceV2,
+      requestContext,
+      requestedAction,
+    });
+  }
   if (!privateRuntimeDecision
     && paidAccessGrant?.access_type === MONTHLY_INTELLIGENCE_ACCESS_TYPE
     && paidAccessGrant.status === 'active') {

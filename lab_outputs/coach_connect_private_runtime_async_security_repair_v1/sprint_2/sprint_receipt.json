@@ -1,0 +1,14 @@
+{
+  "receipt_version": "private-runtime-async-security-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 2,
+  "name": "Developer-Access Security Unification",
+  "predecessor_verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_SPRINT_1_COMPLETE",
+  "evidence_class": "SYNTHETIC",
+  "focused_tests": { "passed": 6, "failed": 0 },
+  "predecessor_tests": { "passed": 16, "failed": 0 },
+  "repair_count": 0,
+  "provider_call_count": 0,
+  "git_index_empty": true,
+  "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_SPRINT_2_COMPLETE"
+}

@@ -1,0 +1,15 @@
+{
+  "receipt_version": "private-runtime-async-security-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 6,
+  "name": "Live Handler Composition",
+  "predecessor_verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_SPRINT_5_COMPLETE",
+  "evidence_class": "SYNTHETIC",
+  "focused_tests": { "passed": 11, "failed": 0 },
+  "predecessor_tests": { "passed": 41, "failed": 0 },
+  "regression_tests": { "passed": 75, "failed": 0 },
+  "repair_count": 1,
+  "provider_call_count": 0,
+  "git_index_empty": true,
+  "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_SPRINT_6_COMPLETE"
+}

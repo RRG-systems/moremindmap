@@ -1,0 +1,10 @@
+{
+  "proof_version": "restart-recovery-proof-v1",
+  "service_instances": 2,
+  "shared_backend_model": true,
+  "authority_fingerprint_equal": true,
+  "local_fallback_used": false,
+  "evidence_class": "SYNTHETIC",
+  "deployment_grade": false,
+  "result": "PASS"
+}

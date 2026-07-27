@@ -1,4 +1,6 @@
 export * from './activation.js';
+export * from './asyncSecurityContracts.js';
+export * from './asyncSharedSecurityStatePort.js';
 export * from './audit.js';
 export * from './constants.js';
 export * from './contracts.js';
@@ -10,5 +12,6 @@ export * from './retentionAuthority.js';
 export * from './sessionElevation.js';
 export * from './sharedSecurityStatePorts.js';
 export * from './subjectBinding.js';
+export * from './syntheticAsyncSecurityStateAdapter.js';
 export * from './transportPolicy.js';
 export * from './trustedProxy.js';

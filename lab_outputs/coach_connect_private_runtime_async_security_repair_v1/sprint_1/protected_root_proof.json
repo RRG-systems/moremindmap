@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-async-security-protected-root-proof-v1",
+  "sprint": 1,
+  "algorithm": "sha256(sorted(relative_path+NUL+file_sha256))",
+  "file_count": 182,
+  "before_sha256": "46fc2b3f8346c7ec3c584c1c5ed46818dc97fa5c52d1ba89f10c0a0ed1ad2a12",
+  "after_sha256": "46fc2b3f8346c7ec3c584c1c5ed46818dc97fa5c52d1ba89f10c0a0ed1ad2a12",
+  "byte_identical": true,
+  "result": "PASS"
+}

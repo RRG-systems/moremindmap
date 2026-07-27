@@ -1,0 +1,186 @@
+{
+  "index_version": "more-private-runtime-async-security-entitlement-bootstrap-expansion-index-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "architecture_packet": {
+    "source_path": "/Users/rrg/Desktop/MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_ARCHITECTURE_REPAIR_V1.md",
+    "sha256": "8c117ab7e40fde69536d67d43558e69dfa3d078f10eaeb0ff88105cfa9117046",
+    "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_ENTITLEMENT_ARCHITECTURE_REPAIRED"
+  },
+  "repository_baseline": "46308958085fb84cd3ff6f2f081b8f2944774ecd",
+  "authority_boundaries": {
+    "afw_expansion": true,
+    "source_implementation": false,
+    "provider_adapter_implementation": false,
+    "auth0": false,
+    "redis_upstash": false,
+    "provider_credentials": false,
+    "environment_changes": false,
+    "vercel_inspection": false,
+    "deployment": false,
+    "production_persistence": false,
+    "transcript_persistence": false,
+    "stripe": false,
+    "voice": false,
+    "luna": false,
+    "staging": false,
+    "commit": false,
+    "push": false
+  },
+  "architecture_invariants": {
+    "canonical_security_service_count": 1,
+    "authoritative_v2_record_set_count": 1,
+    "v1_fallback_permitted": false,
+    "mixed_sync_async_default_composition_permitted": false,
+    "auto_enrollment_permitted": false,
+    "authentication_precedes_eligibility": true,
+    "eligibility_precedes_entitlement": true,
+    "entitlement_precedes_runtime_authority": true,
+    "canonical_subject_count_per_exact_scope": 1,
+    "canonical_business_engine_count": 1,
+    "existing_subscription_runtime_only": true,
+    "existing_text_coach_connect_only": true,
+    "emergency_disable_dominant": true,
+    "outage_fail_closed": true,
+    "source_default_off": true,
+    "synthetic_adapter_deployment_grade": false,
+    "synthetic_adapter_permitted_in_preview_or_production": false
+  },
+  "sprints": [
+    {
+      "number": 1,
+      "name": "Async Shared-Security Contract",
+      "depends_on": []
+    },
+    {
+      "number": 2,
+      "name": "Developer-Access Security Unification",
+      "depends_on": [1]
+    },
+    {
+      "number": 3,
+      "name": "Canonical Subject and Private-Test Eligibility",
+      "depends_on": [1, 2]
+    },
+    {
+      "number": 4,
+      "name": "SUBDEV1 Entitlement Bootstrap",
+      "depends_on": [1, 2, 3]
+    },
+    {
+      "number": 5,
+      "name": "Session, Revocation, and Recovery",
+      "depends_on": [1, 2, 3, 4]
+    },
+    {
+      "number": 6,
+      "name": "Live Handler Composition",
+      "depends_on": [1, 2, 3, 4, 5]
+    },
+    {
+      "number": 7,
+      "name": "Cross-System Validation",
+      "depends_on": [1, 2, 3, 4, 5, 6]
+    }
+  ],
+  "artifact_count": 12,
+  "archive_entries": [
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_1_V1.md",
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_2_V1.md",
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_3_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_CROSS_PART_CONSISTENCY_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_EXPANSION_INDEX_V1.json",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_1_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_2_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_3_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_4_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_5_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_6_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_7_AFW_V1.md"
+  ],
+  "artifacts": [
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_1_V1.md",
+      "sha256": "014571eac61fcbd70c91fe77c04f41e89823d184878b41e5764755b3b7c312b9",
+      "role": "grounding, authority, call graphs, architecture, allowlists, protected roots, compatibility"
+    },
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_2_V1.md",
+      "sha256": "ca1c37c5302bffee02069dc6fe55ebbe33d7af026f9b972a081a6f5fe9ba1b86",
+      "role": "V2 contracts, schemas, service, facade, state machines, composition"
+    },
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_PART_3_V1.md",
+      "sha256": "2a4004673d14facbdd620792029f24a6aa0cd223cc9f5378584788f55f6b61b5",
+      "role": "validation, races, failures, regressions, evidence, repair, handoff"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_CROSS_PART_CONSISTENCY_V1.md",
+      "sha256": "a3eea17659e6ed30721efd1e96901eb74a4563ab2b86fc65df3916f2e74c68b6",
+      "role": "cross-part and cross-sprint consistency"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_1_AFW_V1.md",
+      "sha256": "34049deff7cc66ad2e6e86078d58ddf8e5768a73abae6893703b194d3f3be875",
+      "role": "Sprint 1 Async Shared-Security Contract AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_2_AFW_V1.md",
+      "sha256": "b4c061ed5fee25f863d8319113e62e7b08e4ad0191303866126d82a40c7de2ce",
+      "role": "Sprint 2 Developer-Access Security Unification AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_3_AFW_V1.md",
+      "sha256": "2a0f09479a5e36fbcde9732cbff9ca8e3585f7f24fd86911a4f8bb0ad8255161",
+      "role": "Sprint 3 Canonical Subject and Private-Test Eligibility AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_4_AFW_V1.md",
+      "sha256": "35d6166616ca62a402964c16d1ba3ab755a77d0ca0b14d292b9990ddb2e637cb",
+      "role": "Sprint 4 SUBDEV1 Entitlement Bootstrap AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_5_AFW_V1.md",
+      "sha256": "6629e95e29f90ae3a0885a2f19b802a8ba009da0fefa50d79f7ebb60a07d7834",
+      "role": "Sprint 5 Session, Revocation, and Recovery AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_6_AFW_V1.md",
+      "sha256": "0684f3a07b77578e3e076522ede6b34452d055374c6aed6284304b20cadb3a83",
+      "role": "Sprint 6 Live Handler Composition AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_SPRINT_7_AFW_V1.md",
+      "sha256": "b05a09520f6515df17efdba1b76e201b5a1696d0bf2ce986f61e118bb6b488a0",
+      "role": "Sprint 7 Cross-System Validation AFW"
+    }
+  ],
+  "self_hash": {
+    "path": "MORE_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_EXPANSION_INDEX_V1.json",
+    "rule": "SELF_EXCLUDED_TO_AVOID_RECURSIVE_DIGEST",
+    "verification": "Compute and verify the final index hash externally and after archive extraction."
+  },
+  "validation_results": {
+    "architecture_hash": "PASS",
+    "architecture_verdict": "PASS",
+    "seven_sprints_one_architecture": "PASS",
+    "each_sprint_required_sections": "PASS",
+    "promise_native_v2": "PASS",
+    "synchronous_returns_fail": "PASS",
+    "all_security_operations_awaited": "PASS",
+    "handler_response_after_security_settlement": "PASS",
+    "no_authority_cycle": "PASS",
+    "no_duplicate_security_truth": "PASS",
+    "no_v1_fallback": "PASS",
+    "no_product_redesign": "PASS",
+    "exact_allowlists": "PASS",
+    "protected_roots_preserved": "PASS",
+    "provider_adapter_unauthorized": "PASS",
+    "provider_activity_zero": "PASS",
+    "deployment_unauthorized": "PASS",
+    "credential_and_environment_changes_unauthorized": "PASS",
+    "no_source_implementation_changes": "PASS",
+    "no_staging_commit_or_push": "PASS"
+  },
+  "next_required_campaign": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1",
+  "final_expansion_verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_ENTITLEMENT_AFW_EXPANSION_COMPLETE"
+}

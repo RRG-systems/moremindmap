@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 4,
+  "temporary_entitlement_version": "temporary-private-entitlement-v2",
+  "runtime_authority_version": "private-runtime-authority-decision-v2",
+  "csrf_grant_version": "csrf-grant-v2",
+  "atomic_issue_command": "CONSUME_CSRF_AND_ISSUE_TEMPORARY_ENTITLEMENT",
+  "runtime_authority_query": "READ_AUTHORITY_SNAPSHOT",
+  "promise_only": true,
+  "result": "PASS"
+}

@@ -1,0 +1,10 @@
+{
+  "proof_version": "canonical-security-truth-proof-v1",
+  "canonical_service_count": 1,
+  "authoritative_v2_record_set_count": 1,
+  "developer_access_facade_count": 1,
+  "developer_access_independent_store_count": 0,
+  "v1_fallback_count": 0,
+  "dual_write_count": 0,
+  "result": "PASS"
+}

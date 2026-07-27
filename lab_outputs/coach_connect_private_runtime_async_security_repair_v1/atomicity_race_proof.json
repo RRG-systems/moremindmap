@@ -1,0 +1,12 @@
+{
+  "proof_version": "private-runtime-atomicity-race-proof-v1",
+  "matrix_cases": 15,
+  "serialized_command_model": true,
+  "canonical_mapping_winners": 1,
+  "callback_rotation_winners": 1,
+  "csrf_consume_winners": 1,
+  "active_entitlement_winners": 1,
+  "bootstrap_bridge_calls_for_concurrent_scope": 1,
+  "duplicate_authority_survivors": 0,
+  "result": "PASS"
+}

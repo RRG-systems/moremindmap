@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-handler-await-settlement-proof-v1",
+  "sprint": 6,
+  "delayed_operations_tested": [
+    "login",
+    "callback",
+    "session",
+    "developer_access",
+    "subscription_entitlement",
+    "bootstrap",
+    "logout"
+  ],
+  "response_before_settlement_count": 0,
+  "promise_mistaken_for_allow_count": 0,
+  "synchronous_result_allowed_count": 0,
+  "double_response_count": 0,
+  "result": "PASS"
+}

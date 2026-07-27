@@ -1,0 +1,10 @@
+{
+  "proof_version": "subscription-runtime-attachment-proof-v1",
+  "existing_runtime": true,
+  "attachment_count": 1,
+  "temporary_entitlement": true,
+  "paid_entitlement": false,
+  "stripe_authority": false,
+  "runtime_redesigned": false,
+  "result": "PASS"
+}

@@ -1,0 +1,15 @@
+{
+  "receipt_version": "private-runtime-async-security-repair-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 6,
+  "repair": 1,
+  "failed_gate": "SPRINT_7_CROSS_SYSTEM_EXISTING_RUNTIME_ATTACHMENT",
+  "failure_class": "SETTLED_RESULT_HANDLE_CLONE_INCOMPATIBILITY",
+  "observed_failure": "The generic settlement wrapper attempted to structured-clone valid existing runtime handles containing functions.",
+  "bounded_change": "Shallow-freeze the settled internal operation result; HTTP handlers continue explicit allowlisted projections.",
+  "invariant_weakened": false,
+  "allowlist_basis": "Sprint 6 liveComposition.js plus Sprint 6 repair and change receipts",
+  "provider_activity": false,
+  "deployment_activity": false,
+  "status": "APPLIED"
+}

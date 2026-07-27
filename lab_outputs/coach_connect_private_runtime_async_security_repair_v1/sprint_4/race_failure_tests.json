@@ -1,0 +1,13 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 4,
+  "concurrent_active_entitlement_count": 1,
+  "csrf_second_consume_created_record": false,
+  "wrong_binding_allowed": false,
+  "invalid_code_allowed": false,
+  "approval_revocation_race_allowed": false,
+  "epoch_race_allowed": false,
+  "audit_failure_allowed": false,
+  "outage_allowed": false,
+  "result": "PASS"
+}

@@ -1,0 +1,16 @@
+{
+  "proof_version": "private-test-eligibility-proof-v1",
+  "sprint": 3,
+  "authentication_required": true,
+  "exact_activation_required": true,
+  "active_approval_required": true,
+  "may_attempt_subdev1": true,
+  "runtime_access": false,
+  "admin_authority": false,
+  "operator_authority": false,
+  "deployment_authority": false,
+  "billing_authority": false,
+  "coach_authority": false,
+  "canonical_mutation_authority": false,
+  "result": "PASS"
+}

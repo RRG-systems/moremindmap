@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-async-security-zero-provider-call-v1",
+  "sprint": 2,
+  "external_call_count": 0,
+  "provider_import_count": 0,
+  "credential_read_count": 0,
+  "deployment_call_count": 0,
+  "result": "PASS"
+}

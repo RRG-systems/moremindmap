@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 6,
+  "composition_version": "private-runtime-live-composition-v2",
+  "default_state": "UNCONFIGURED",
+  "source_default_off": true,
+  "handler_to_adapter_edges": 0,
+  "v1_fallback": false,
+  "mixed_sync_async": false,
+  "result": "PASS"
+}

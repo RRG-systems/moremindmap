@@ -1,0 +1,13 @@
+{
+  "scan_version": "private-runtime-async-security-sensitive-content-v1",
+  "real_identity_values": 0,
+  "real_profile_ids": 0,
+  "customer_content_records": 0,
+  "raw_assertions_persisted": 0,
+  "raw_session_tokens_persisted": 0,
+  "raw_entitlement_tokens_persisted": 0,
+  "raw_access_codes_in_evidence": 0,
+  "transcripts_prompts_model_outputs": 0,
+  "synthetic_fixture_values_only": true,
+  "result": "PASS"
+}

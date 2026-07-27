@@ -1,0 +1,13 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 6,
+  "concurrent_bootstrap_bridge_call_count": 1,
+  "duplicate_runtime_published": false,
+  "logout_race_attachment_published": false,
+  "partial_attachment_published": false,
+  "synchronous_security_decision_allowed": false,
+  "rejected_security_decision_allowed": false,
+  "malformed_security_decision_allowed": false,
+  "double_response_count": 0,
+  "result": "PASS"
+}

@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-no-duplicate-security-truth-v1",
+  "sprint": 7,
+  "canonical_security_service_count": 1,
+  "authoritative_v2_record_set_count": 1,
+  "developer_access_store_count": 0,
+  "v1_fallback_count": 0,
+  "dual_write_count": 0,
+  "local_authority_cache_count": 0,
+  "result": "PASS"
+}

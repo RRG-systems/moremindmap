@@ -9,6 +9,7 @@ import {
   getDefaultDeveloperSecurityStore,
   revokeCapabilityCookie,
   revokeDeveloperCapability,
+  SECURE_CAPABILITY_COOKIE_NAME,
 } from './developer-access-security.js';
 import { resolveSubscriptionEntitlement } from './subscription-entitlement.js';
 import {
@@ -18,6 +19,10 @@ import {
   issueCsrfGrant,
   safeSecurityClientError,
 } from '../../src/lib/intelligenceFabric/coachConnect/security/index.js';
+import {
+  getPrivateRuntimeLiveCompositionV2,
+  settlePrivateRuntimeLiveOperation,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';
 import crypto from 'node:crypto';
 
 const ROUTE = '/api/internal/developer-access';
@@ -62,7 +67,7 @@ function auditEndpointDenial({ store, req, binding, code, event_type, now }) {
   });
 }
 
-export function createDeveloperAccessHandler({
+function createLegacyDeveloperAccessHandler({
   store = getDefaultDeveloperSecurityStore(),
   resolveSubjectBinding = () => null,
   resolveCanonicalSubjectContext = null,
@@ -183,6 +188,68 @@ export function createDeveloperAccessHandler({
       entitlement_scope: 'subject_bound_temporary_monthly_intelligence',
     });
   };
+}
+
+function createV2DeveloperAccessHandler({
+  liveCompositionV2 = null,
+  compositionAccessor = getPrivateRuntimeLiveCompositionV2,
+} = {}) {
+  return async function developerAccessV2Handler(req, res) {
+    securityHeaders(res);
+    if (!['GET', 'POST', 'DELETE'].includes(req.method)) {
+      return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+    }
+    const composition = liveCompositionV2 || compositionAccessor();
+    const result = await settlePrivateRuntimeLiveOperation(
+      composition?.operations?.developerAccess,
+      [req],
+    );
+    if (!result?.ok) {
+      return respondFailure(res, result?.code || 'CAPABILITY_INVALID', {
+        status: result?.status || 404,
+      });
+    }
+    if (req.method === 'GET') {
+      return res.status(result.status || (result.allowed ? 200 : 403)).json({
+        ok: result.allowed === true,
+        allowed: result.allowed === true,
+        entitlement: result.entitlement || null,
+        csrf_token: result.csrf_proof,
+        csrf_method: result.csrf_method,
+      });
+    }
+    if (req.method === 'DELETE') {
+      res.setHeader('Set-Cookie', revokeCapabilityCookie({ req }));
+      return res.status(200).json({ ok: true, revoked: true });
+    }
+    if (typeof result.entitlement_cookie_value !== 'string') {
+      return respondFailure(res, 'CAPABILITY_INVALID', { status: 503 });
+    }
+    res.setHeader(
+      'Set-Cookie',
+      `${SECURE_CAPABILITY_COOKIE_NAME}=${result.entitlement_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Strict`,
+    );
+    return res.status(200).json({
+      ok: true,
+      capability_issued: true,
+      expires_at: result.entitlement?.expires_at,
+      entitlement_scope: 'subject_bound_temporary_monthly_intelligence',
+    });
+  };
+}
+
+export function createDeveloperAccessHandler(options = {}) {
+  const legacyKeys = [
+    'store',
+    'resolveSubjectBinding',
+    'resolveCanonicalSubjectContext',
+    'resolvePrivateRuntimeAuthority',
+    'randomToken',
+    'clock',
+  ];
+  return options.legacyV1 === true || legacyKeys.some((key) => Object.hasOwn(options, key))
+    ? createLegacyDeveloperAccessHandler(options)
+    : createV2DeveloperAccessHandler(options);
 }
 
 export default createDeveloperAccessHandler();

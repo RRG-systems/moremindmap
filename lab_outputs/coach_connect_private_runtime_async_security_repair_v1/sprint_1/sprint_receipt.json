@@ -1,0 +1,21 @@
+{
+  "receipt_version": "private-runtime-async-security-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 1,
+  "name": "Async Shared-Security Contract",
+  "architecture_sha256": "8c117ab7e40fde69536d67d43558e69dfa3d078f10eaeb0ff88105cfa9117046",
+  "repository_head": "46308958085fb84cd3ff6f2f081b8f2944774ecd",
+  "evidence_class": "SYNTHETIC",
+  "focused_tests": {
+    "passed": 7,
+    "failed": 0
+  },
+  "predecessor_regressions": {
+    "passed": 13,
+    "failed": 0
+  },
+  "repair_count": 0,
+  "provider_call_count": 0,
+  "git_index_empty": true,
+  "verdict": "PRIVATE_RUNTIME_ASYNC_SECURITY_SPRINT_1_COMPLETE"
+}

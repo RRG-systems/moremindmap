@@ -1,0 +1,9 @@
+{
+  "proof_version": "no-voice-luna-transcript-proof-v1",
+  "voice_calls": 0,
+  "media_calls": 0,
+  "luna_calls": 0,
+  "transcript_persistence_calls": 0,
+  "coach_connect_mode": "TEXT_ONLY",
+  "result": "PASS"
+}

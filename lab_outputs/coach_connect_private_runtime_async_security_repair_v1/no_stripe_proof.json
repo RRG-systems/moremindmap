@@ -1,0 +1,9 @@
+{
+  "proof_version": "no-stripe-proof-v1",
+  "stripe_import_count": 0,
+  "stripe_call_count": 0,
+  "paid_entitlement_count": 0,
+  "billing_authority_count": 0,
+  "stripe_subscription_created": false,
+  "result": "PASS"
+}

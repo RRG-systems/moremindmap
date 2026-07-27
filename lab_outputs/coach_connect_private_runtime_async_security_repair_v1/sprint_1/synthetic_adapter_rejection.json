@@ -1,0 +1,12 @@
+{
+  "proof_version": "private-runtime-async-security-synthetic-rejection-v1",
+  "sprint": 1,
+  "provider_class": "SYNTHETIC",
+  "deployment_grade": false,
+  "live_connection_verified": false,
+  "durable_security_records": false,
+  "restart_safe": false,
+  "preview_allowed": false,
+  "production_allowed": false,
+  "result": "PASS"
+}

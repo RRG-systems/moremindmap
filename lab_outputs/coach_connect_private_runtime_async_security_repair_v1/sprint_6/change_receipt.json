@@ -1,0 +1,14 @@
+{
+  "receipt_version": "private-runtime-async-security-change-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "source_sprint": 6,
+  "affected_future_sprint": 7,
+  "evidence": "Cross-system integration supplied the existing non-cloneable runtime handles returned by the reviewed attachment contracts.",
+  "prior_assumption": "Every settled internal operation result was structured-cloneable.",
+  "refined_assumption": "Security decisions remain cloneable, while existing runtime handles require an internal shallow-frozen carrier and explicit HTTP projection.",
+  "architecture_invariants_preserved": true,
+  "allowlist_unchanged": true,
+  "authority_unchanged": true,
+  "validation_added": "Cross-system attachment test plus complete Sprint 6 rerun",
+  "review_result": "ACCEPTED"
+}

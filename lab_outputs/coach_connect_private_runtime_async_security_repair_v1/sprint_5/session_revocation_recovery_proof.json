@@ -1,0 +1,17 @@
+{
+  "proof_version": "session-revocation-recovery-proof-v1",
+  "sprint": 5,
+  "pre_auth_rotated": true,
+  "parent_session_rotated": true,
+  "csrf_rotated": true,
+  "entitlement_rotated": true,
+  "explicit_entitlement_revocation": true,
+  "logout_session_revocation": true,
+  "logout_entitlement_revocation": true,
+  "logout_epoch_advance": true,
+  "restart_instances": 2,
+  "restart_authority_fingerprint_equal": true,
+  "evidence_class": "SYNTHETIC",
+  "deployment_grade": false,
+  "result": "PASS"
+}

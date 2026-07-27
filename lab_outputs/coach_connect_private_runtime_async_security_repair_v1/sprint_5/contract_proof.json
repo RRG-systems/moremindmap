@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 5,
+  "promise_native_methods": [
+    "beginPreAuth",
+    "completeAuthentication",
+    "resolveAuthenticatedContext",
+    "inspectTemporaryEntitlement",
+    "revokeTemporaryEntitlement",
+    "logout",
+    "inspectRecovery"
+  ],
+  "atomic_rotation": true,
+  "atomic_logout": true,
+  "authoritative_server_time": true,
+  "local_revocation_queue": false,
+  "result": "PASS"
+}

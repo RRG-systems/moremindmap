@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-async-security-schema-validation-v1",
+  "query_types": 8,
+  "command_types": 12,
+  "closed_envelopes": true,
+  "unknown_versions_allowed": false,
+  "unknown_authority_fields_allowed": false,
+  "json_evidence_parse_failures": 0,
+  "result": "PASS"
+}

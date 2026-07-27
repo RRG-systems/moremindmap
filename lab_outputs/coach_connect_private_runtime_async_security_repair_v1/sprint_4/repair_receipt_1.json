@@ -1,0 +1,15 @@
+{
+  "receipt_version": "private-runtime-async-security-repair-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_ASYNC_SECURITY_AND_ENTITLEMENT_BOOTSTRAP_V1",
+  "sprint": 4,
+  "repair": 1,
+  "failed_gate": "SPRINT_1_TO_4_COMBINED_PREDECESSOR_TESTS",
+  "failure_class": "PREDECESSOR_STATIC_ASSERTION_SCOPE",
+  "observed_failure": "Sprint 3 searched the complete canonical service source for executeAtomic after Sprint 4 added reviewed atomic entitlement methods.",
+  "bounded_change": "Limit the no-enrollment static assertion to resolveAuthenticatedContext only.",
+  "invariant_weakened": false,
+  "allowlist_basis": "campaign-union predecessor test plus Sprint 4 repair and change receipts",
+  "provider_activity": false,
+  "deployment_activity": false,
+  "status": "APPLIED"
+}

@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-promise-conformance-v1",
+  "port_methods_checked": 5,
+  "service_methods_checked": 13,
+  "handler_surfaces_checked": 7,
+  "synchronous_returns_allowed": 0,
+  "promise_objects_mistaken_for_allow": 0,
+  "responses_before_settlement": 0,
+  "malformed_settlements_allowed": 0,
+  "result": "PASS"
+}

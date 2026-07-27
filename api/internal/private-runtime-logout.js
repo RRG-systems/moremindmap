@@ -8,27 +8,43 @@ const applyHeaders = (res) => {
 
 export function createPrivateRuntimeLogoutHandler({
   logout = null,
-  enabled = () => false,
+  enabled = null,
+  compositionAccessor = getPrivateRuntimeLiveCompositionV2,
 } = {}) {
   return async function privateRuntimeLogoutHandler(req, res) {
     applyHeaders(res);
     if (req.method !== 'POST' && req.method !== 'DELETE') {
       return res.status(405).json({ ok: false, error: 'method_not_allowed' });
     }
-    if (!enabled(req) || typeof logout !== 'function') {
+    if (typeof enabled === 'function' && enabled(req) !== true) {
       return res.status(404).json({ ok: false, error: 'request_denied' });
     }
-    const result = await logout(req);
+    const operation = typeof logout === 'function'
+      ? logout
+      : compositionAccessor()?.operations?.logout;
+    const result = await settlePrivateRuntimeLiveOperation(operation, [req]);
+    if (result?.client_session_cookie_clear === true
+      || result?.client_entitlement_cookie_clear === true
+      || result?.ok === true) {
+      res.setHeader('Set-Cookie', [clearSessionCookie, clearCapabilityCookie]);
+    }
     if (!result?.ok) return res.status(result?.status || 401).json({ ok: false, error: 'request_denied' });
-    res.setHeader('Set-Cookie', [clearSessionCookie, clearCapabilityCookie]);
     return res.status(200).json({
       ok: true,
       logged_out: true,
-      capability_revoked: result.receipt?.capability_revoked === true,
-      session_revoked: result.receipt?.session_revoked === true,
-      runtime_detached: result.receipt?.runtime_handles_detached === true,
+      capability_revoked: result.receipt?.capability_revoked === true
+        || result.entitlement_revoked === true
+        || result.server_revocation_confirmed === true,
+      session_revoked: result.receipt?.session_revoked === true
+        || result.server_revocation_confirmed === true,
+      runtime_detached: result.receipt?.runtime_handles_detached === true
+        || result.runtime_handles_detached === true,
     });
   };
 }
 
 export default createPrivateRuntimeLogoutHandler();
+import {
+  getPrivateRuntimeLiveCompositionV2,
+  settlePrivateRuntimeLiveOperation,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';

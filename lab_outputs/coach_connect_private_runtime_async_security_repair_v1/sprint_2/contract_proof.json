@@ -1,0 +1,16 @@
+{
+  "proof_version": "private-runtime-async-security-contract-proof-v1",
+  "sprint": 2,
+  "facade_version": "developer-access-security-facade-v2",
+  "methods": [
+    "describe",
+    "resolveAuthenticatedContext",
+    "evaluateBootstrapEligibility",
+    "issueCsrf",
+    "issueEntitlement",
+    "inspectEntitlement",
+    "revokeEntitlement"
+  ],
+  "promise_only": true,
+  "result": "PASS"
+}

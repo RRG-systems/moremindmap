@@ -1,0 +1,15 @@
+{
+  "proof_version": "private-runtime-async-security-race-failure-v1",
+  "sprint": 1,
+  "cases": {
+    "canonical_subject_scope_race": "ONE_WINNER",
+    "csrf_entitlement_race": "ONE_WINNER",
+    "conflicting_replay_fingerprint": "DENIED",
+    "audit_failure": "MUTATION_ABORTED",
+    "degraded": "DENIED",
+    "unavailable": "DENIED",
+    "partitioned": "DENIED",
+    "recovering": "DENIED"
+  },
+  "result": "PASS"
+}

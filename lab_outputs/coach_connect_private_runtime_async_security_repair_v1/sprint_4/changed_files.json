@@ -1,0 +1,13 @@
+{
+  "manifest_version": "private-runtime-async-security-sprint-changed-files-v1",
+  "sprint": 4,
+  "implementation_and_test_files": [
+    "api/internal/subscription-entitlement.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/canonicalAsyncSecurityService.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.adversarial.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.asyncSecurity.entitlement.test.js"
+  ],
+  "continuation_refinement_receipt": "change_receipt.json",
+  "outside_campaign_allowlist": [],
+  "result": "PASS"
+}

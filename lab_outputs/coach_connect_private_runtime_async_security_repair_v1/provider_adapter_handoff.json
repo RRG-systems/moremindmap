@@ -1,0 +1,27 @@
+{
+  "handoff_version": "private-runtime-remote-adapter-handoff-v1",
+  "next_campaign": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1",
+  "required_contract": "shared-security-state-async-v2",
+  "required_methods": [
+    "describeCapability",
+    "health",
+    "serverTime",
+    "queryAuthoritative",
+    "executeAtomic"
+  ],
+  "required_properties": [
+    "deployment_grade",
+    "durable_security_records",
+    "durable_privacy_safe_audit",
+    "restart_safe",
+    "live_connection_verified",
+    "primary_or_linearizable_reads",
+    "atomic_commands",
+    "no_local_fallback"
+  ],
+  "current_synthetic_adapter_qualifies": false,
+  "provider_implementation_authorized_here": false,
+  "provider_activation_authorized_here": false,
+  "deployment_authorized_here": false,
+  "status": "PENDING_SEPARATE_CAMPAIGN"
+}
