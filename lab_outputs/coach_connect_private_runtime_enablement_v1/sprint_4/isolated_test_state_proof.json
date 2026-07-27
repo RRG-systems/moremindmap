@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-isolated-test-state-proof-v1",
+  "namespace": "SYNTHETIC_PRIVATE_TEST_ONLY",
+  "production_namespace": false,
+  "customer_data": false,
+  "migration": false,
+  "production_persistence_calls": 0
+}

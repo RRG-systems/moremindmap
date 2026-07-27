@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-partial-attachment-rollback-proof-v1",
+  "missing_coach_receipt_denied": true,
+  "cross_scope_receipt_denied": true,
+  "duplicate_engine_denied": true,
+  "stale_expiry_denied": true,
+  "partial_handles_discarded": true,
+  "runtime_ready_published": false
+}

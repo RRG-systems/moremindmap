@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-runbook-validation-v1",
+  "runbook_count": 8,
+  "required_sections_present": true,
+  "live_commands_present": false,
+  "passed": 8,
+  "failed": 0
+}

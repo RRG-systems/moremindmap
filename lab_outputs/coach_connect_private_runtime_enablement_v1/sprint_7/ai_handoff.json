@@ -1,0 +1,65 @@
+{
+  "handoff_version": "coach-connect-private-runtime-ai-handoff-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "verdict": "PRIVATE_RUNTIME_ENABLEMENT_IMPLEMENTED_WITH_PRIVATE_LIVE_DEPLOYMENT_PENDING",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "review_next": "Spock implementation review",
+  "do_not_infer": [
+    "private live deployment",
+    "production persistence",
+    "live provider connectivity",
+    "Stripe activation",
+    "public availability"
+  ],
+  "invariants": {
+    "one_canonical_subject": true,
+    "one_canonical_business_engine": true,
+    "existing_subscription_runtime_only": true,
+    "existing_coach_connect_runtime_only": true,
+    "subdev1_temporary_entitlement_only": true,
+    "default_off": true,
+    "emergency_disabled": true
+  },
+  "validation": {
+    "results_version": "coach-connect-private-runtime-test-results-v1",
+    "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+    "generated_at": "2026-07-27T16:05:00.000Z",
+    "valid": true,
+    "focused": {
+      "passed": 54,
+      "failed": 0
+    },
+    "safe_complete_intelligence_fabric": {
+      "passed": 446,
+      "failed": 0
+    },
+    "deterministic_build": {
+      "runs": 2,
+      "byte_identical": true,
+      "file_count_each": 24,
+      "aggregate_sha256": "15ec7ad5911f9e51a60df58e06cb448debd02d97af2c2916ac792a783d3c8f89",
+      "assets": [
+        "index-BpafgKdz.css",
+        "index-DQPXPGOK.js"
+      ],
+      "advisory": "Existing Vite chunk-size advisory only"
+    },
+    "focused_lint": "PASS",
+    "diff_check": "PASS",
+    "imports": {
+      "checked": 18,
+      "valid": true
+    },
+    "dependency_graph": {
+      "valid": true,
+      "module_count": 10,
+      "internal_edge_count": 22,
+      "cycle_count": 0,
+      "cycles": []
+    },
+    "verifier": {
+      "valid": true,
+      "failures": []
+    }
+  }
+}

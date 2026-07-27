@@ -9,6 +9,7 @@ import BusinessEngineVisualV2, {
 } from './components/businessAssessment/BusinessEngineVisualV2.jsx';
 import MakeYourMapAlivePanel from './components/businessAssessment/MakeYourMapAlivePanel.jsx';
 import DeveloperAccessPanel from './components/businessAssessment/DeveloperAccessPanel.jsx';
+import PrivateRuntimeAttachmentHost from './components/businessAssessment/PrivateRuntimeAttachmentHost.jsx';
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
 import { projectBusinessEngineVisualV2 } from './lib/businessEngine/projectBusinessEngineVisualV2.js';
 import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessmentVisualRecord.js';
@@ -114,6 +115,7 @@ export default function BusinessAssessmentVisualMap() {
   const returnTo = resolveReturnTo(searchParams, profileId);
   const [state, setState] = useState({ status: 'loading', error: '', record: null });
   const [checkoutState, setCheckoutState] = useState({ loading: '', error: '' });
+  const [privateRuntimeEntitlement, setPrivateRuntimeEntitlement] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -210,7 +212,8 @@ export default function BusinessAssessmentVisualMap() {
               onStartCheckout={startMapAliveCheckout}
               temporalMeta={temporalMeta}
             />
-            <DeveloperAccessPanel />
+            <DeveloperAccessPanel onUnlocked={setPrivateRuntimeEntitlement} />
+            <PrivateRuntimeAttachmentHost entitlement={privateRuntimeEntitlement} />
           </>
         }
       >

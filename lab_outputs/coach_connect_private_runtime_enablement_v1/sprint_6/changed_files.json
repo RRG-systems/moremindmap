@@ -1,0 +1,18 @@
+{
+  "manifest_version": "private-runtime-changed-files-v1",
+  "sprint": 6,
+  "allowlist_compliant": true,
+  "files": [
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/evidence.js", "sha256": "c3502235d19b07580163f57406028075b1cb4f0e9e8a8423cc6edf259a780ab2"},
+    {"path": "scripts/verifyCoachConnectPrivateRuntimeEnablement.mjs", "sha256": "ad4b4b2dbaeac39f9f1312376f601d313867da262e22ae9c76ad11f4d2d92013"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/emergency_disable.md", "sha256": "bfaf7e85d6df6b2750f54d37bd640db19861448adaac61b15fa055e19d103f4c"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/incident_response.md", "sha256": "7db49b2dbbfbc419e353d32bc32375e00feb11932b3274dc11911a3ed8191a5c"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/login_session.md", "sha256": "271a3c3d291967a02178bfd2ebedd8aa2568ac0e3bbb1dd607fa073f41bedf92"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/logout_revocation.md", "sha256": "9b1d6d35577ac9908c01f0c671b8bba8814b84628ec41868fda5884d67898b3c"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/post_enablement_validation.md", "sha256": "fa306629d34576ee711e0e41ec30986569cae8e51bf858fd2d336cf2dbd794d4"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/restart_recovery.md", "sha256": "cceea8dab9c82ca3c8b649366204629b487f1accbdd3ec348208824a56650d29"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/runtime_attach.md", "sha256": "f88afff6a0eea17c3ef34d95573cb7e4d629d93d9a77dd6bb3ad34095436b7e9"},
+    {"path": "docs/runbooks/coach_connect/private_runtime_enablement/subject_enrollment.md", "sha256": "ae8e1c3e8aaceb730dee4896e0958c2a44f70eeb0eeaee5fc37bc5cec2887115"},
+    {"path": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js", "sha256": "51a8e065f4fd7276372e4f6c29694d65776a6fa79080ce35d201a7af19a426ce"}
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-subscription-action-allowlist-proof-v1",
+  "approved_query_uses_existing_service": true,
+  "stateful_action_requires_idempotency": true,
+  "same_semantics_replay_safe": true,
+  "changed_semantics_replay_denied": true,
+  "unknown_actions_denied": true,
+  "automatic_canonical_write_denied": true
+}

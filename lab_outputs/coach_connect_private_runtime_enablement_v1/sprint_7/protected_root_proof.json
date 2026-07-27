@@ -1,0 +1,151 @@
+{
+  "proof_version": "private-runtime-protected-root-proof-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "validated_root_count": 20,
+  "roots": [
+    {
+      "path": "src/lib/businessAssessment",
+      "expected_sha256": "63e36ccfac3b5250d8f2112580a211e098b383a26c777edf63cbc2bb608c8594",
+      "files": 5,
+      "sha256": "63e36ccfac3b5250d8f2112580a211e098b383a26c777edf63cbc2bb608c8594",
+      "valid": true
+    },
+    {
+      "path": "src/components/businessAssessment/BusinessEngineVisualV2.jsx",
+      "expected_sha256": "04c0e3026d40c9988f04d5586b9c3d88261aafc4ee89b1a1084e81937d3b0fcb",
+      "files": 1,
+      "sha256": "04c0e3026d40c9988f04d5586b9c3d88261aafc4ee89b1a1084e81937d3b0fcb",
+      "valid": true
+    },
+    {
+      "path": "api/engine",
+      "expected_sha256": "9a4ccb7f2702c0b4e9420ce39f0bfc21fc80f7146b26c92261b6e181ccdfed28",
+      "files": 74,
+      "sha256": "9a4ccb7f2702c0b4e9420ce39f0bfc21fc80f7146b26c92261b6e181ccdfed28",
+      "valid": true
+    },
+    {
+      "path": "api/business-assessment",
+      "expected_sha256": "4432baf5243a772003ff8d1151138bf8a76a085411f4bb3fc67e059d14061872",
+      "files": 7,
+      "sha256": "4432baf5243a772003ff8d1151138bf8a76a085411f4bb3fc67e059d14061872",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/production",
+      "expected_sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+      "files": 7,
+      "sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/activation.js",
+      "expected_sha256": "a0ac598846ff24f63c24941b5636458137f70f2316dff5c63c20757fff33135b",
+      "files": 1,
+      "sha256": "a0ac598846ff24f63c24941b5636458137f70f2316dff5c63c20757fff33135b",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/contracts.js",
+      "expected_sha256": "8aa6a16dc13877f396bcf3f0cfd42623b96337402cf107b88a32a4db1fd08a8c",
+      "files": 1,
+      "sha256": "8aa6a16dc13877f396bcf3f0cfd42623b96337402cf107b88a32a4db1fd08a8c",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity",
+      "expected_sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+      "files": 15,
+      "sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/service.js",
+      "expected_sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+      "files": 1,
+      "sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/stateMachines.js",
+      "expected_sha256": "3af3f60007bee589ef36a6ab8a4ef33dd03a8d9e40ad66571ed2fb1afd9557b2",
+      "files": 1,
+      "sha256": "3af3f60007bee589ef36a6ab8a4ef33dd03a8d9e40ad66571ed2fb1afd9557b2",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/projections.js",
+      "expected_sha256": "d299c86b5570283f8c34a489754d80f1215dd6dd5d6ddbe08bd12131d79bf7b2",
+      "files": 1,
+      "sha256": "d299c86b5570283f8c34a489754d80f1215dd6dd5d6ddbe08bd12131d79bf7b2",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/internalDeployment",
+      "expected_sha256": "070b7cb547bc3f9d9473738b63a11c61a1c028be0c0ab671f59c23c8c9e8af94",
+      "files": 16,
+      "sha256": "070b7cb547bc3f9d9473738b63a11c61a1c028be0c0ab671f59c23c8c9e8af94",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness",
+      "expected_sha256": "c9326d3312260e330703f25ec6e1af34850dafd4138a7bde177a9a029a49f2a5",
+      "files": 12,
+      "sha256": "c9326d3312260e330703f25ec6e1af34850dafd4138a7bde177a9a029a49f2a5",
+      "valid": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/liveSession",
+      "expected_sha256": "427c3f0f23e6a98699e3b0ec4f4f9f7d48de3760ba9a2d8a2aa08292c62fb22e",
+      "files": 22,
+      "sha256": "427c3f0f23e6a98699e3b0ec4f4f9f7d48de3760ba9a2d8a2aa08292c62fb22e",
+      "valid": true
+    },
+    {
+      "path": "src/lib/businessEngine",
+      "expected_sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+      "files": 13,
+      "sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+      "valid": true
+    },
+    {
+      "path": "api/stripe",
+      "expected_sha256": "2526b89e3457c37ccc4f40dfcd5b9663606060425fd8b86a36330c0c9d3c825a",
+      "files": 4,
+      "sha256": "2526b89e3457c37ccc4f40dfcd5b9663606060425fd8b86a36330c0c9d3c825a",
+      "valid": true
+    },
+    {
+      "path": "src/lib/stripe",
+      "expected_sha256": "35970525679c6f8729a263453409197009cd5980da336bedb114b990d0c3c55e",
+      "files": 1,
+      "sha256": "35970525679c6f8729a263453409197009cd5980da336bedb114b990d0c3c55e",
+      "valid": true
+    },
+    {
+      "path": "vercel.json",
+      "expected_sha256": "cbe715f6794d6d823fe1a180c40da2f2cfd5feafd396e874a2066b0fdd8f8158",
+      "files": 1,
+      "sha256": "cbe715f6794d6d823fe1a180c40da2f2cfd5feafd396e874a2066b0fdd8f8158",
+      "valid": true
+    },
+    {
+      "path": "package.json",
+      "expected_sha256": "30b66497f4441a179a79b219cb1f2be47b57ae884b4ae0a95b50c73c65f3cb18",
+      "files": 1,
+      "sha256": "30b66497f4441a179a79b219cb1f2be47b57ae884b4ae0a95b50c73c65f3cb18",
+      "valid": true
+    },
+    {
+      "path": "package-lock.json",
+      "expected_sha256": "55302d799b4c9a31a855ef85ce5d96c5ab830d070cc67ca6c4bc9b7aaf4a03ae",
+      "files": 1,
+      "sha256": "55302d799b4c9a31a855ef85ce5d96c5ab830d070cc67ca6c4bc9b7aaf4a03ae",
+      "valid": true
+    }
+  ],
+  "all_starting_hashes_match": true,
+  "protected_semantics_changed": false,
+  "preserved": true
+}

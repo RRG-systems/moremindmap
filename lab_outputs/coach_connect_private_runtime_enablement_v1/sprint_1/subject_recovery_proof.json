@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-subject-recovery-proof-v1",
+  "snapshot_restart_resolves": true,
+  "recovery_pending_denies": true,
+  "mapping_version_incremented": true,
+  "security_version_incremented": true,
+  "stale_assertion_denies": true,
+  "disabled_subject_denies": true
+}

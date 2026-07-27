@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 2,
+  "default_off_activation": true,
+  "emergency_disable_dominant": true,
+  "shared_state_port_reused": true,
+  "server_owned_session_reused": true,
+  "capability_version": "private-runtime-capability-v1",
+  "session_receipt_version": "private-runtime-session-receipt-v1",
+  "private_live_requires_future_live_evidence": true
+}

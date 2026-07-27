@@ -1,0 +1,19 @@
+{
+  "receipt_collection_version": "private-runtime-change-receipts-v1",
+  "sprint": 7,
+  "changes": [
+    {
+      "change_receipt_version": "private-runtime-change-receipt-v1",
+      "sprint": 7,
+      "reason": "Evidence-driven dependency-cycle verifier refinement",
+      "observation": "A basename-only diagnostic incorrectly treated external productionSecurity/index.js imports as the privateRuntime barrel",
+      "refinement": "Resolve relative imports to absolute paths before limiting the graph to privateRuntime modules",
+      "implementation_semantics_changed": false,
+      "result": {
+        "module_count": 10,
+        "internal_edge_count": 22,
+        "cycle_count": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-protected-root-proof-v1",
+  "sprint": 4,
+  "subscription_runtime_before_sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+  "subscription_runtime_after_sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+  "protected_semantics_changed": false,
+  "preserved": true
+}

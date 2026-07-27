@@ -1,0 +1,16 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "sprint": 5,
+  "repairs": [
+    {
+      "repair": 1,
+      "failed_gate": "focused_coach_connect_tests",
+      "cause": "Negative test attempted to override a frozen non-configurable service inspection method through a Proxy",
+      "changed_files": [
+        "test/intelligenceFabric.coachConnect.privateRuntime.coachConnect.test.js"
+      ],
+      "repair": "Replaced the invalid Proxy with a plain inspection-only negative stub",
+      "result": "PASS"
+    }
+  ]
+}

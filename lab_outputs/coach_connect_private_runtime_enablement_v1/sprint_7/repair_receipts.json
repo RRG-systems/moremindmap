@@ -1,0 +1,13 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "sprint": 7,
+  "repairs": [
+    {
+      "sprint": 7,
+      "repair": 1,
+      "failed_gate": "focused_lint",
+      "cause": "Integration test contained three unnecessary quote escapes",
+      "result": "PASS"
+    }
+  ]
+}

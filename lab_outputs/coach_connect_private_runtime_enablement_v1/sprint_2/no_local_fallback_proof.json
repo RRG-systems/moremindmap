@@ -1,0 +1,7 @@
+{
+  "proof_version": "private-runtime-no-local-fallback-proof-v1",
+  "synthetic_in_memory_hosted_authority_denied": true,
+  "unavailable_state_denied": true,
+  "partitioned_state_denied": true,
+  "stale_process_handle_authorizes": false
+}

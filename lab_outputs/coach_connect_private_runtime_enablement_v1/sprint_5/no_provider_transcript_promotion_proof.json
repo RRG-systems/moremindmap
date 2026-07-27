@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-no-provider-transcript-promotion-proof-v1",
+  "live_provider_calls": 0,
+  "media_voice_video_calls": 0,
+  "transcript_persistence_calls": 0,
+  "promotion_calls": 0,
+  "canonical_mutation_calls": 0,
+  "stripe_calls": 0
+}

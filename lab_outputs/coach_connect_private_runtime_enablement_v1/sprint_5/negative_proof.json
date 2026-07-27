@@ -1,0 +1,21 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 5,
+  "denials_proven": [
+    "cross_scope",
+    "mismatched_business_engine_receipt",
+    "second_business_engine",
+    "live_media_dependency",
+    "missing_relationship",
+    "missing_consent",
+    "missing_coach_authentication",
+    "missing_coach_entitlement",
+    "invitation_action",
+    "cockpit_action",
+    "billing_action",
+    "promotion_action",
+    "provider_action",
+    "transcript_action"
+  ],
+  "fabricated_coach_state": false
+}

@@ -1,0 +1,18 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "sprint": 1,
+  "repairs": [
+    {
+      "repair": 1,
+      "failed_gate": "focused_subject_tests",
+      "cause": "SUBDEV1 literal was accepted as an opaque external subject identifier",
+      "changed_files": [
+        "src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js"
+      ],
+      "repair": "Explicitly deny SUBDEV1 as assertion subject identity",
+      "result": "PASS",
+      "tests_passed": 7,
+      "tests_failed": 0
+    }
+  ]
+}

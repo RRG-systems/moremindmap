@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-session-rotation-proof-v1",
+  "pre_auth_id_reused": false,
+  "csrf_generation_rotated": true,
+  "pre_auth_status_after": "ROTATED",
+  "conflicting_replay_denied": true,
+  "raw_session_material_present": false
+}

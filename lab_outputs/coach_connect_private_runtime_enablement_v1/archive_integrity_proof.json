@@ -1,0 +1,15 @@
+{
+  "proof_version": "coach-connect-private-runtime-campaign-proof-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "assertions": {
+    "verification_protocol": "sorted entry inventory, unzip CRC test, traversal/collision checks, isolated extraction, byte comparison, detached outer SHA-256",
+    "self_referential_outer_hash_embedded": false,
+    "outer_hash_reported_out_of_band": true
+  },
+  "references": [],
+  "customer_data_used": false,
+  "live_external_calls": 0
+}

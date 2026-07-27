@@ -1,0 +1,9 @@
+{
+  "contract_version": "coach-connect-attachment-v1",
+  "runtime_source": "EXISTING_COACH_CONNECT_SERVICE",
+  "exact_scope_required": true,
+  "business_engine_attachment_required": true,
+  "subscription_attachment_required": true,
+  "text_only": true,
+  "second_business_engine": false
+}

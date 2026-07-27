@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-business-engine-hash-binding-proof-v1",
+  "exact_scope_bound": true,
+  "version_bound": true,
+  "contract_hash_bound": true,
+  "wrong_scope_version_or_hash_denied": true,
+  "repeat_attachment_deterministic": true
+}

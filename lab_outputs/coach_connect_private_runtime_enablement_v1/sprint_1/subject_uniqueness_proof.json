@@ -1,0 +1,11 @@
+{
+  "proof_version": "private-runtime-subject-uniqueness-proof-v1",
+  "active_external_subject_count": 1,
+  "active_canonical_subject_count": 1,
+  "active_exact_scope_count": 1,
+  "bidirectional_lookup_agrees": true,
+  "identical_rebind_result": "IDEMPOTENT_BINDING",
+  "subject_conflict_result": "SUBJECT_MAPPING_AMBIGUOUS",
+  "scope_conflict_result": "SUBJECT_MAPPING_AMBIGUOUS",
+  "auto_enrollment": false
+}

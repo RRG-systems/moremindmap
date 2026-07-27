@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-sensitive-canary-proof-v1",
+  "email_canary_rejected": true,
+  "token_canary_rejected": true,
+  "cookie_canary_rejected": true,
+  "credential_canary_rejected": true,
+  "business_engine_content_canary_rejected": true,
+  "coach_note_canary_rejected": true,
+  "transcript_canary_rejected": true
+}

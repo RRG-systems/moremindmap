@@ -1,0 +1,18 @@
+{
+  "receipt_version": "private-runtime-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint": 1,
+  "architecture_sha256": "42291cdc467a7895b65f2e313d81751febf55ca7ab90bec6dce0a3d538401765",
+  "baseline_head": "d5a93c81d509b3ca71c398f78747018bd8125f62",
+  "evidence_class": "SYNTHETIC",
+  "verdict": "PRIVATE_RUNTIME_SPRINT_1_SUBJECT_RESOLUTION_COMPLETE",
+  "focused_tests": {
+    "passed": 7,
+    "failed": 0
+  },
+  "repair_count": 1,
+  "external_call_count": 0,
+  "deployment_performed": false,
+  "staging_performed": false,
+  "commit_performed": false
+}

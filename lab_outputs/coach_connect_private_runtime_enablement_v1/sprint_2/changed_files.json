@@ -1,0 +1,17 @@
+{
+  "manifest_version": "private-runtime-changed-files-v1",
+  "sprint": 2,
+  "allowlist_compliant": true,
+  "files": [
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/activation.js", "sha256": "03e0d9069ebad1806f97bcf23c4b382aa1a04d732f3940691eb4c05e581e0fcb"},
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/authority.js", "sha256": "efb6b445ca5431aff0bdfe855a7d39abc75e9a9f19212698c246d9c849a59d11"},
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/sessionResolver.js", "sha256": "887c3a8b270d988992241065e9c4250918ad4dedc48826bdff9d416fa5695909"},
+    {"path": "api/internal/developer-access-security.js", "sha256": "ee3275aab6d3e217b9ea16635eaef7289592dd742c74c0092bf2ae84a790b26c"},
+    {"path": "api/internal/developer-access.js", "sha256": "387c23acaff78f82297a367f5d97f8b5b3e4333a725d1dbfb6b81c813db78416"},
+    {"path": "api/internal/private-runtime-login.js", "sha256": "e290b453836f5d7778a56d33afd458bacb165b9e58c788c717ed2382d5cefccc"},
+    {"path": "api/internal/private-runtime-callback.js", "sha256": "eccc8110d696a976811e04f45011b45d7302ba672c06d4a1e71a3000a9836f0a"},
+    {"path": "api/internal/private-runtime-session.js", "sha256": "8312214dc748fbb5f14ca7a7447ea1b1bc63d3b3183ccef75fcda6bfa52f1c5b"},
+    {"path": "api/internal/private-runtime-logout.js", "sha256": "7ae1261f91c7e8538f27fce209b30e98232b18f22d6f0e94d67d73bc7eae38bc"},
+    {"path": "test/intelligenceFabric.coachConnect.privateRuntime.security.test.js", "sha256": "0625d654f0ad7f4c354ea17a765082b3ee8319dc2c3460e0d7926bacea37c9f4"}
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "results_version": "coach-connect-private-runtime-test-results-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "focused": {
+    "passed": 54,
+    "failed": 0
+  },
+  "safe_complete_intelligence_fabric": {
+    "passed": 446,
+    "failed": 0
+  },
+  "deterministic_build": {
+    "runs": 2,
+    "byte_identical": true,
+    "file_count_each": 24,
+    "aggregate_sha256": "15ec7ad5911f9e51a60df58e06cb448debd02d97af2c2916ac792a783d3c8f89",
+    "assets": [
+      "index-BpafgKdz.css",
+      "index-DQPXPGOK.js"
+    ],
+    "advisory": "Existing Vite chunk-size advisory only"
+  },
+  "focused_lint": "PASS",
+  "diff_check": "PASS",
+  "imports": {
+    "checked": 18,
+    "valid": true
+  },
+  "dependency_graph": {
+    "valid": true,
+    "module_count": 10,
+    "internal_edge_count": 22,
+    "cycle_count": 0,
+    "cycles": []
+  },
+  "verifier": {
+    "valid": true,
+    "failures": []
+  }
+}

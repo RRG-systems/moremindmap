@@ -1,0 +1,8 @@
+{
+  "test_result_version": "private-runtime-test-result-v1",
+  "sprint": 5,
+  "focused": {"tests": 7, "passed": 7, "failed": 0},
+  "coach_connect_auth_privacy_live_session_regressions": {"tests": 68, "passed": 68, "failed": 0},
+  "lint_passed": true,
+  "import_export_check_passed": true
+}

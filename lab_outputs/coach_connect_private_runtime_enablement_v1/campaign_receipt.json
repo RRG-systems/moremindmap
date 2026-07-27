@@ -1,0 +1,16 @@
+{
+  "receipt_version": "coach-connect-private-runtime-campaign-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint_order": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "all_sprint_gates_passed": true,
+  "campaign_review_passed": true,
+  "verdict": "PRIVATE_RUNTIME_ENABLEMENT_IMPLEMENTED_WITH_PRIVATE_LIVE_DEPLOYMENT_PENDING"
+}

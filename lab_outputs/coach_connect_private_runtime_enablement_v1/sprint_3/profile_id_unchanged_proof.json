@@ -1,0 +1,7 @@
+{
+  "proof_version": "private-runtime-profile-id-unchanged-proof-v1",
+  "profile_id_is_scope_input_only": true,
+  "profile_id_generation_present": false,
+  "profile_id_mutation_present": false,
+  "canonical_promotion_authority": false
+}

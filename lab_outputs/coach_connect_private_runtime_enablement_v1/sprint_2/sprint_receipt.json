@@ -1,0 +1,22 @@
+{
+  "receipt_version": "private-runtime-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint": 2,
+  "predecessor_verdict": "PRIVATE_RUNTIME_SPRINT_1_SUBJECT_RESOLUTION_COMPLETE",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "verdict": "PRIVATE_RUNTIME_SPRINT_2_SECURITY_RUNTIME_COMPLETE",
+  "focused_tests": {
+    "passed": 10,
+    "failed": 0
+  },
+  "regression_tests": {
+    "passed": 13,
+    "failed": 0
+  },
+  "repair_count": 0,
+  "external_call_count": 0,
+  "private_live_capability_proven": false,
+  "deployment_performed": false,
+  "staging_performed": false,
+  "commit_performed": false
+}

@@ -1,0 +1,19 @@
+{
+  "proof_version": "coach-connect-private-runtime-campaign-proof-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "assertions": {
+    "exact_scope_attachment": true,
+    "canonical_ref_version_hash_bound": true,
+    "developer_owned_engine": false,
+    "business_engine_payload_copied": false,
+    "canonical_profile_id_semantics_changed": false
+  },
+  "references": [
+    "test/intelligenceFabric.coachConnect.privateRuntime.businessEngine.test.js"
+  ],
+  "customer_data_used": false,
+  "live_external_calls": 0
+}

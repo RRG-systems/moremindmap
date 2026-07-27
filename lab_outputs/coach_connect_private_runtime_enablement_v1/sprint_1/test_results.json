@@ -1,0 +1,10 @@
+{
+  "test_result_version": "private-runtime-test-result-v1",
+  "sprint": 1,
+  "command": "node --test test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+  "tests": 7,
+  "passed": 7,
+  "failed": 0,
+  "lint_passed": true,
+  "import_export_check_passed": true
+}

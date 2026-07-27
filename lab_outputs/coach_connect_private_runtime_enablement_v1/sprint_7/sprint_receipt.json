@@ -1,0 +1,16 @@
+{
+  "receipt_version": "private-runtime-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint": 7,
+  "verdict": "PRIVATE_RUNTIME_SPRINT_7_INTEGRATION_COMPLETE",
+  "focused_tests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "campaign_regression_tests": {
+    "passed": 446,
+    "failed": 0
+  },
+  "bounded_repairs_used": 1,
+  "live_actions": 0
+}

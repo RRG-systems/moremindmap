@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-restart-recovery-proof-v1",
+  "fresh_instance": true,
+  "authoritative_shared_state_revalidated": true,
+  "subject_session_capability_revalidated": true,
+  "attachments_rebuilt_from_existing_runtimes": true,
+  "stale_process_handles_authorize": false,
+  "local_fallback_used": false
+}

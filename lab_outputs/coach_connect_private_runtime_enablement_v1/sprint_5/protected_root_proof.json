@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-protected-root-proof-v1",
+  "sprint": 5,
+  "coach_connect_service_before_sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+  "coach_connect_service_after_sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+  "coach_connect_semantics_changed": false,
+  "preserved": true
+}

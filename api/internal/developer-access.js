@@ -66,6 +66,7 @@ export function createDeveloperAccessHandler({
   store = getDefaultDeveloperSecurityStore(),
   resolveSubjectBinding = () => null,
   resolveCanonicalSubjectContext = null,
+  resolvePrivateRuntimeAuthority = null,
   randomToken = () => crypto.randomBytes(32).toString('base64url'),
   clock = () => Date.now(),
 } = {}) {
@@ -73,7 +74,10 @@ export function createDeveloperAccessHandler({
     securityHeaders(res);
     const env = globalThis.process?.env || {};
     const now = clock();
-    const environment = developerAccessEnvironmentDecision(env, store);
+    const privateRuntimeDecision = typeof resolvePrivateRuntimeAuthority === 'function'
+      ? resolvePrivateRuntimeAuthority(req)
+      : null;
+    const environment = developerAccessEnvironmentDecision(env, store, privateRuntimeDecision);
     if (!environment.ok) {
       auditEndpointDenial({ store, req, binding: null, code: environment.code, event_type: 'CAPABILITY_DENIED', now });
       return respondFailure(res, environment.code, { status: environment.status });
@@ -113,7 +117,14 @@ export function createDeveloperAccessHandler({
         now,
       });
       if (!issued.ok) return respondFailure(res, issued.code);
-      const access = resolveSubscriptionEntitlement({ req, env, now, store, subject_binding: binding });
+      const access = resolveSubscriptionEntitlement({
+        req,
+        env,
+        now,
+        store,
+        subject_binding: binding,
+        privateRuntimeDecision,
+      });
       return res.status(access.allowed ? 200 : 403).json({
         ok: access.allowed,
         ...access,
@@ -138,7 +149,14 @@ export function createDeveloperAccessHandler({
 
     if (req.method === 'DELETE') {
       const token = developerCapabilityFromCookie(req.headers?.cookie);
-      const revoked = revokeDeveloperCapability({ token, env, now, store, subject_binding: binding });
+      const revoked = revokeDeveloperCapability({
+        token,
+        env,
+        now,
+        store,
+        subject_binding: binding,
+        private_runtime_decision: privateRuntimeDecision,
+      });
       if (!revoked.ok) return respondFailure(res, revoked.code);
       res.setHeader('Set-Cookie', revokeCapabilityCookie({ req, env }));
       return res.status(200).json({ ok: true, revoked: true });
@@ -153,6 +171,7 @@ export function createDeveloperAccessHandler({
       subject_binding: binding,
       origin_decision: origin,
       csrf_decision: csrf,
+      private_runtime_decision: privateRuntimeDecision,
       random_token: randomToken,
     });
     if (!decision.ok) return respondFailure(res, decision.code, { status: decision.status, retry_after_ms: decision.retry_after_ms });

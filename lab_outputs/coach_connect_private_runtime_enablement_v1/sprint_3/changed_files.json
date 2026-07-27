@@ -1,0 +1,10 @@
+{
+  "manifest_version": "private-runtime-changed-files-v1",
+  "sprint": 3,
+  "allowlist_compliant": true,
+  "files": [
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/attachments.js", "sha256": "fb276c0c0de89a0e1c0a41502e971f140042bc52f1821b46ae7d5514cfec74df"},
+    {"path": "test/intelligenceFabric.coachConnect.privateRuntime.businessEngine.test.js", "sha256": "ae77af372d8a155a295fa7ad8f72933560e024c5682dfb2d2163820b8c15b31e"}
+  ],
+  "out_of_allowlist_residual_changes": []
+}

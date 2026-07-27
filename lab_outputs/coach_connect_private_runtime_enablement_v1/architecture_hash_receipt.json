@@ -1,0 +1,16 @@
+{
+  "receipt_version": "private-runtime-authoritative-input-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "predecessor_commit": "d5a93c81d509b3ca71c398f78747018bd8125f62",
+  "architecture": {
+    "path": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1.md",
+    "sha256": "42291cdc467a7895b65f2e313d81751febf55ca7ab90bec6dce0a3d538401765",
+    "valid": true
+  },
+  "afw_review": {
+    "path": "COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_AFW_REVIEW_V1.zip",
+    "sha256": "1caf6840c3e9a1ba91ef28d053dc47620fe59762133a9da8f0baaa5abd9a5709",
+    "valid": true
+  },
+  "afw_review_verdict": "APPROVED_FOR_IMPLEMENTATION"
+}

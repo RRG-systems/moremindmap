@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-restart-revocation-proof-v1",
+  "authoritative_restart_read": true,
+  "capability_revalidated_after_restart": true,
+  "logout_capability_revoked": true,
+  "logout_session_revoked": true,
+  "security_epoch_advanced": true,
+  "runtime_handles_detached": true
+}

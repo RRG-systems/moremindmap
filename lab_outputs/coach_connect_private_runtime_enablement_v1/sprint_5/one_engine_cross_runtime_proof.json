@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-one-engine-cross-runtime-proof-v1",
+  "subject_scope_equals_engine_scope": true,
+  "subscription_scope_equals_engine_scope": true,
+  "coach_connect_scope_equals_engine_scope": true,
+  "business_engine_count": 1,
+  "second_business_engine": false
+}

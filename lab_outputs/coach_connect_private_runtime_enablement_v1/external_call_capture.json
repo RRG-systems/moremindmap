@@ -1,0 +1,17 @@
+{
+  "capture_version": "coach-connect-private-runtime-zero-external-call-capture-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "calls": {
+    "auth0": 0,
+    "redis": 0,
+    "upstash": 0,
+    "stripe": 0,
+    "live_media_provider": 0,
+    "live_model_provider": 0,
+    "production_persistence": 0,
+    "transcript_persistence": 0,
+    "deployment_platform": 0
+  },
+  "valid": true
+}

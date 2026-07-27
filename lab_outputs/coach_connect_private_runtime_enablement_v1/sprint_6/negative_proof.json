@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 6,
+  "adversarial_scenario_count": 47,
+  "all_fail_closed": true,
+  "all_leave_no_partial_attachment": true,
+  "all_preserve_canonical_business_engine": true,
+  "sensitive_canaries_rejected": true
+}

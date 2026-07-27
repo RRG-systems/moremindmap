@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-emergency-disable-proof-v1",
+  "dominates_new_work": true,
+  "dominates_in_flight_work": true,
+  "environment_epoch_advanced": true,
+  "prior_envelopes_stale": true,
+  "canonical_business_engine_preserved": true
+}

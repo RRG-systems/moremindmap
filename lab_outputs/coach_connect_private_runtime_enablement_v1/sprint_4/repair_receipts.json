@@ -1,0 +1,16 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "sprint": 4,
+  "repairs": [
+    {
+      "repair": 1,
+      "failed_gate": "focused_lint",
+      "cause": "Attachment host synchronously reset loading state inside a React effect",
+      "changed_files": [
+        "src/components/businessAssessment/PrivateRuntimeAttachmentHost.jsx"
+      ],
+      "repair": "Derived eligibility and initial attaching display during render; retained asynchronous state updates only",
+      "result": "PASS"
+    }
+  ]
+}

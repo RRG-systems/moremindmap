@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-logout-revocation-proof-v1",
+  "capability_revoked": true,
+  "session_revoked": true,
+  "csrf_invalidated": true,
+  "epoch_advanced": true,
+  "cookies_cleared": true,
+  "runtime_handles_detached": true,
+  "surviving_authority": false
+}

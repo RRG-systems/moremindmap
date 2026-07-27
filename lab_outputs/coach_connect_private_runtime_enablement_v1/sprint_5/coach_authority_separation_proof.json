@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-coach-authority-separation-proof-v1",
+  "subdev1_is_coach_authority": false,
+  "subdev1_is_operator_authority": false,
+  "subdev1_is_billing_authority": false,
+  "subdev1_is_canonical_authority": false,
+  "existing_coach_auth_required": true
+}

@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-temporary-entitlement-binding-proof-v1",
+  "session_bound": true,
+  "scope_bound": true,
+  "expires": true,
+  "paid_entitlement": false,
+  "stripe_subscription_created": false,
+  "admin_coach_operator_authority": false
+}

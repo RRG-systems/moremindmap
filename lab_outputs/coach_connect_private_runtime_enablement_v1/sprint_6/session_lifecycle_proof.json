@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-session-lifecycle-proof-v1",
+  "states_proven": [
+    "NO_SESSION",
+    "PRE_AUTH",
+    "AUTHENTICATED_NO_ENTITLEMENT",
+    "PRIVATE_ENTITLED",
+    "ATTACHING",
+    "ATTACHED",
+    "EXPIRED",
+    "REVOKED",
+    "EMERGENCY_DISABLED",
+    "LOGGED_OUT"
+  ],
+  "pre_auth_rotated": true,
+  "csrf_rotated": true,
+  "raw_session_material_present": false
+}

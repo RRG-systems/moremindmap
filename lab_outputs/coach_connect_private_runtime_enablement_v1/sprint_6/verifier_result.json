@@ -1,0 +1,319 @@
+{
+  "verifier_version": "verify-coach-connect-private-runtime-enablement-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "failures": [],
+  "checks": {
+    "required_files": {
+      "valid": true,
+      "count": 36,
+      "missing": []
+    },
+    "architecture_hash": {
+      "valid": true,
+      "expected": "42291cdc467a7895b65f2e313d81751febf55ca7ab90bec6dce0a3d538401765",
+      "observed": "42291cdc467a7895b65f2e313d81751febf55ca7ab90bec6dce0a3d538401765"
+    },
+    "afw_review_hash": {
+      "valid": true,
+      "expected": "1caf6840c3e9a1ba91ef28d053dc47620fe59762133a9da8f0baaa5abd9a5709",
+      "observed": "1caf6840c3e9a1ba91ef28d053dc47620fe59762133a9da8f0baaa5abd9a5709"
+    },
+    "contract_versions": {
+      "valid": true,
+      "versions": [
+        "private-runtime-verified-assertion-v1",
+        "private-runtime-tester-approval-v1",
+        "private-runtime-subject-receipt-v1",
+        "private-runtime-capability-v1",
+        "private-runtime-session-receipt-v1",
+        "private-runtime-attachment-request-v1",
+        "business-engine-attachment-v1",
+        "subscription-runtime-attachment-v1",
+        "coach-connect-attachment-v1",
+        "private-runtime-attachment-set-v1",
+        "private-runtime-interaction-receipt-v1",
+        "private-runtime-evidence-index-v1"
+      ]
+    },
+    "default_off": {
+      "valid": true
+    },
+    "adversarial_matrix": {
+      "valid": true,
+      "scenario_count": 47
+    },
+    "external_calls": {
+      "valid": true,
+      "counts": {
+        "auth0_call_count": 0,
+        "redis_upstash_call_count": 0,
+        "production_persistence_call_count": 0,
+        "transcript_persistence_call_count": 0,
+        "live_model_call_count": 0,
+        "live_media_call_count": 0,
+        "object_store_call_count": 0,
+        "stripe_call_count": 0,
+        "deployment_call_count": 0
+      }
+    },
+    "runbooks": {
+      "valid": true,
+      "count": 8,
+      "results": [
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/subject_enrollment.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/login_session.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/runtime_attach.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/restart_recovery.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/logout_revocation.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/emergency_disable.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/incident_response.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        },
+        {
+          "file": "docs/runbooks/coach_connect/private_runtime_enablement/post_enablement_validation.md",
+          "valid": true,
+          "missing": [],
+          "live_commands": []
+        }
+      ]
+    },
+    "evidence_json": {
+      "valid": true,
+      "parsed_count": 83,
+      "invalid": []
+    },
+    "forbidden_imports": {
+      "valid": true,
+      "files": []
+    },
+    "dependency_cycles": {
+      "valid": true,
+      "module_count": 10,
+      "internal_edge_count": 22,
+      "cycle_count": 0,
+      "cycles": []
+    },
+    "secret_scan": {
+      "valid": true,
+      "scanned_file_count": 37,
+      "findings": [],
+      "synthetic_canary_count": 3
+    },
+    "sensitive_content_scan": {
+      "valid": true,
+      "production_data_used": false,
+      "findings": [],
+      "synthetic_canaries": [
+        {
+          "file": "test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+          "pattern": "email",
+          "value_sha256": "8b451223192ebf35acfbc3cad93f43de6e1bb40d76cdf56060693112e90bd9c3"
+        },
+        {
+          "file": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+          "pattern": "stripe_live_key",
+          "value_sha256": "d093c2ab91acf825788a0a79281370da2893da766426324fe1d08d5ad5296510"
+        },
+        {
+          "file": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+          "pattern": "email",
+          "value_sha256": "5bd5e5789c16d896ca8c9325becee4d9c33b9b05b9ef5a13fbfdb8bb90896c6f"
+        }
+      ]
+    },
+    "changed_file_allowlist": {
+      "valid": true,
+      "expected_changed_file_count": 36,
+      "observed_campaign_path_count": 119,
+      "missing": [],
+      "unexpected": [],
+      "preexisting_out_of_scope_changes_ignored": true
+    },
+    "no_staged_changes": {
+      "valid": true,
+      "staged_files": []
+    },
+    "protected_roots": {
+      "valid": true,
+      "roots": [
+        {
+          "path": "src/lib/businessAssessment",
+          "expected_sha256": "63e36ccfac3b5250d8f2112580a211e098b383a26c777edf63cbc2bb608c8594",
+          "files": 5,
+          "sha256": "63e36ccfac3b5250d8f2112580a211e098b383a26c777edf63cbc2bb608c8594",
+          "valid": true
+        },
+        {
+          "path": "src/components/businessAssessment/BusinessEngineVisualV2.jsx",
+          "expected_sha256": "04c0e3026d40c9988f04d5586b9c3d88261aafc4ee89b1a1084e81937d3b0fcb",
+          "files": 1,
+          "sha256": "04c0e3026d40c9988f04d5586b9c3d88261aafc4ee89b1a1084e81937d3b0fcb",
+          "valid": true
+        },
+        {
+          "path": "api/engine",
+          "expected_sha256": "9a4ccb7f2702c0b4e9420ce39f0bfc21fc80f7146b26c92261b6e181ccdfed28",
+          "files": 74,
+          "sha256": "9a4ccb7f2702c0b4e9420ce39f0bfc21fc80f7146b26c92261b6e181ccdfed28",
+          "valid": true
+        },
+        {
+          "path": "api/business-assessment",
+          "expected_sha256": "4432baf5243a772003ff8d1151138bf8a76a085411f4bb3fc67e059d14061872",
+          "files": 7,
+          "sha256": "4432baf5243a772003ff8d1151138bf8a76a085411f4bb3fc67e059d14061872",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/production",
+          "expected_sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+          "files": 7,
+          "sha256": "c96e43b288cba23ab2eb2fa08b6c09f3b6517f2c72c8071952d791461ba90971",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/activation.js",
+          "expected_sha256": "a0ac598846ff24f63c24941b5636458137f70f2316dff5c63c20757fff33135b",
+          "files": 1,
+          "sha256": "a0ac598846ff24f63c24941b5636458137f70f2316dff5c63c20757fff33135b",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/contracts.js",
+          "expected_sha256": "8aa6a16dc13877f396bcf3f0cfd42623b96337402cf107b88a32a4db1fd08a8c",
+          "files": 1,
+          "sha256": "8aa6a16dc13877f396bcf3f0cfd42623b96337402cf107b88a32a4db1fd08a8c",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity",
+          "expected_sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+          "files": 15,
+          "sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/service.js",
+          "expected_sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+          "files": 1,
+          "sha256": "48ec355352e0d27f1a7ac1fbb1131b21faf83da08c689e57bf3e69ea64168bd7",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/stateMachines.js",
+          "expected_sha256": "3af3f60007bee589ef36a6ab8a4ef33dd03a8d9e40ad66571ed2fb1afd9557b2",
+          "files": 1,
+          "sha256": "3af3f60007bee589ef36a6ab8a4ef33dd03a8d9e40ad66571ed2fb1afd9557b2",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/projections.js",
+          "expected_sha256": "d299c86b5570283f8c34a489754d80f1215dd6dd5d6ddbe08bd12131d79bf7b2",
+          "files": 1,
+          "sha256": "d299c86b5570283f8c34a489754d80f1215dd6dd5d6ddbe08bd12131d79bf7b2",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/internalDeployment",
+          "expected_sha256": "070b7cb547bc3f9d9473738b63a11c61a1c028be0c0ab671f59c23c8c9e8af94",
+          "files": 16,
+          "sha256": "070b7cb547bc3f9d9473738b63a11c61a1c028be0c0ab671f59c23c8c9e8af94",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/deploymentReadiness",
+          "expected_sha256": "c9326d3312260e330703f25ec6e1af34850dafd4138a7bde177a9a029a49f2a5",
+          "files": 12,
+          "sha256": "c9326d3312260e330703f25ec6e1af34850dafd4138a7bde177a9a029a49f2a5",
+          "valid": true
+        },
+        {
+          "path": "src/lib/intelligenceFabric/coachConnect/liveSession",
+          "expected_sha256": "427c3f0f23e6a98699e3b0ec4f4f9f7d48de3760ba9a2d8a2aa08292c62fb22e",
+          "files": 22,
+          "sha256": "427c3f0f23e6a98699e3b0ec4f4f9f7d48de3760ba9a2d8a2aa08292c62fb22e",
+          "valid": true
+        },
+        {
+          "path": "src/lib/businessEngine",
+          "expected_sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+          "files": 13,
+          "sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+          "valid": true
+        },
+        {
+          "path": "api/stripe",
+          "expected_sha256": "2526b89e3457c37ccc4f40dfcd5b9663606060425fd8b86a36330c0c9d3c825a",
+          "files": 4,
+          "sha256": "2526b89e3457c37ccc4f40dfcd5b9663606060425fd8b86a36330c0c9d3c825a",
+          "valid": true
+        },
+        {
+          "path": "src/lib/stripe",
+          "expected_sha256": "35970525679c6f8729a263453409197009cd5980da336bedb114b990d0c3c55e",
+          "files": 1,
+          "sha256": "35970525679c6f8729a263453409197009cd5980da336bedb114b990d0c3c55e",
+          "valid": true
+        },
+        {
+          "path": "vercel.json",
+          "expected_sha256": "cbe715f6794d6d823fe1a180c40da2f2cfd5feafd396e874a2066b0fdd8f8158",
+          "files": 1,
+          "sha256": "cbe715f6794d6d823fe1a180c40da2f2cfd5feafd396e874a2066b0fdd8f8158",
+          "valid": true
+        },
+        {
+          "path": "package.json",
+          "expected_sha256": "30b66497f4441a179a79b219cb1f2be47b57ae884b4ae0a95b50c73c65f3cb18",
+          "files": 1,
+          "sha256": "30b66497f4441a179a79b219cb1f2be47b57ae884b4ae0a95b50c73c65f3cb18",
+          "valid": true
+        },
+        {
+          "path": "package-lock.json",
+          "expected_sha256": "55302d799b4c9a31a855ef85ce5d96c5ab830d070cc67ca6c4bc9b7aaf4a03ae",
+          "files": 1,
+          "sha256": "55302d799b4c9a31a855ef85ce5d96c5ab830d070cc67ca6c4bc9b7aaf4a03ae",
+          "valid": true
+        }
+      ]
+    }
+  },
+  "final_verdict": "PRIVATE_RUNTIME_VALIDATION_COMPLETE"
+}

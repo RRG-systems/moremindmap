@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-relationship-consent-privacy-proof-v1",
+  "existing_relationship_required": true,
+  "existing_consent_required": true,
+  "existing_entitlement_required": true,
+  "private_coach_content_exposed": false,
+  "subscriber_projection_governed": true
+}

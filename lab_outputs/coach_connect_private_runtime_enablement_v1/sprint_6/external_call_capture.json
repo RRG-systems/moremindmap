@@ -1,0 +1,11 @@
+{
+  "auth0_call_count": 0,
+  "redis_upstash_call_count": 0,
+  "production_persistence_call_count": 0,
+  "transcript_persistence_call_count": 0,
+  "live_model_call_count": 0,
+  "live_media_call_count": 0,
+  "object_store_call_count": 0,
+  "stripe_call_count": 0,
+  "deployment_call_count": 0
+}

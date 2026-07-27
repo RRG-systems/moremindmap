@@ -1,0 +1,85 @@
+{
+  "manifest_version": "coach-connect-private-runtime-test-manifest-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "focused_suites": [
+    {
+      "sprint": 1,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "sprint": 2,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.security.test.js",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "sprint": 3,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.businessEngine.test.js",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "sprint": 4,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.subscription.test.js",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "sprint": 5,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.coachConnect.test.js",
+      "passed": 7,
+      "failed": 0
+    },
+    {
+      "sprint": 6,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+      "passed": 8,
+      "failed": 0
+    },
+    {
+      "sprint": 7,
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.integration.test.js",
+      "passed": 8,
+      "failed": 0
+    }
+  ],
+  "focused_total": {
+    "passed": 54,
+    "failed": 0
+  },
+  "regression_groups": [
+    {
+      "name": "developer_access",
+      "passed": 13,
+      "failed": 0
+    },
+    {
+      "name": "business_engine_contract",
+      "passed": 22,
+      "failed": 0
+    },
+    {
+      "name": "subscription_production_security_deployment_readiness",
+      "passed": 42,
+      "failed": 0
+    },
+    {
+      "name": "coach_connect_auth_privacy_live_session",
+      "passed": 68,
+      "failed": 0
+    },
+    {
+      "name": "safe_complete_intelligence_fabric",
+      "passed": 446,
+      "failed": 0
+    }
+  ],
+  "deterministic_builds": 2,
+  "focused_lint": "PASS",
+  "import_export_modules": 18,
+  "dependency_cycles": 0,
+  "schema_validation": "PASS"
+}

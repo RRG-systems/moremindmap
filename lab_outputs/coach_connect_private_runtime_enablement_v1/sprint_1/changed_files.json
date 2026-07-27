@@ -1,0 +1,23 @@
+{
+  "manifest_version": "private-runtime-changed-files-v1",
+  "sprint": 1,
+  "allowlist_compliant": true,
+  "files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js",
+      "sha256": "72b4aa03d73d704e53fe2a7a8037dc1e1af8ce803cfa98d010ecb0b2c214f724"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/failureCodes.js",
+      "sha256": "f88cac3e08dc4a8dda4e134ef1fccf587fad030ebd12a5a6048963af685a0457"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/subjectRegistryPort.js",
+      "sha256": "e1b0e3c762c1c1cd75476f9018c6f36893f87fa66e324a20e70d007eb2b41c10"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+      "sha256": "520faf2deebb2d502bace4fcd43cd4596e21a9b65f0eecd82ca83151119f946d"
+    }
+  ]
+}

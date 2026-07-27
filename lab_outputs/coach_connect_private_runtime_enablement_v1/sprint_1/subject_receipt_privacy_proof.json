@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-subject-receipt-privacy-proof-v1",
+  "raw_assertion_present": false,
+  "raw_token_present": false,
+  "cookie_present": false,
+  "credential_present": false,
+  "identity_profile_value_present": false,
+  "business_engine_content_present": false,
+  "opaque_references_and_hashes_only": true
+}

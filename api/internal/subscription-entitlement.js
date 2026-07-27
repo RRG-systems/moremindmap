@@ -15,8 +15,11 @@ export function resolveSubscriptionEntitlement({
   paidAccessGrant = null,
   store = getDefaultDeveloperSecurityStore(),
   subject_binding = null,
+  privateRuntimeDecision = null,
 }) {
-  if (paidAccessGrant?.access_type === MONTHLY_INTELLIGENCE_ACCESS_TYPE && paidAccessGrant.status === 'active') {
+  if (!privateRuntimeDecision
+    && paidAccessGrant?.access_type === MONTHLY_INTELLIGENCE_ACCESS_TYPE
+    && paidAccessGrant.status === 'active') {
     return {
       allowed: true,
       entitlement: {
@@ -28,10 +31,17 @@ export function resolveSubscriptionEntitlement({
       },
     };
   }
-  const environment = developerAccessEnvironmentDecision(env, store);
+  const environment = developerAccessEnvironmentDecision(env, store, privateRuntimeDecision);
   if (!environment.ok) return { allowed: false, code: environment.code };
   const token = developerCapabilityFromCookie(req?.headers?.cookie);
-  const verified = verifyDeveloperCapability({ token, env, now, store, subject_binding });
+  const verified = verifyDeveloperCapability({
+    token,
+    env,
+    now,
+    store,
+    subject_binding,
+    private_runtime_decision: privateRuntimeDecision,
+  });
   if (!verified.valid) return { allowed: false, code: verified.code || 'CAPABILITY_INVALID' };
   const entitlement = {
     access_type: MONTHLY_INTELLIGENCE_ACCESS_TYPE,

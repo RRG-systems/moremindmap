@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-one-business-engine-proof-v1",
+  "zero_engine_result": "BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND",
+  "one_engine_result": "ATTACHED_READ_ONLY",
+  "two_engine_result": "BUSINESS_ENGINE_ATTACHMENT_AMBIGUOUS",
+  "business_engine_count": 1,
+  "duplicate_engine_created": false
+}

@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 2,
+  "denials_proven": [
+    "source_defaults",
+    "production_classification_alone",
+    "in_memory_hosted_authority",
+    "incomplete_deployment_attestation",
+    "unavailable_shared_state",
+    "degraded_shared_state",
+    "partitioned_shared_state",
+    "conflicting_pre_auth_replay",
+    "cross_browser_capability",
+    "stale_emergency_epoch",
+    "default_handlers_without_composition"
+  ],
+  "local_fallback_used": false
+}

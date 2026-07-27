@@ -1,0 +1,8 @@
+{
+  "contract_version": "subscription-runtime-attachment-v1",
+  "runtime_source": "EXISTING_SUBSCRIBER_RUNTIME_SERVICE",
+  "exact_scope_required": true,
+  "business_engine_receipt_required": true,
+  "temporary_entitlement_required": true,
+  "allowed_interaction_count": 9
+}

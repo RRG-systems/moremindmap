@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-shared-state-contract-proof-v1",
+  "in_memory_deployment_grade": false,
+  "deployment_shaped_offline_conformance": true,
+  "deployment_shaped_offline_is_private_live_proof": false,
+  "future_private_live_requires_live_connection_verification": true,
+  "no_local_fallback": true
+}

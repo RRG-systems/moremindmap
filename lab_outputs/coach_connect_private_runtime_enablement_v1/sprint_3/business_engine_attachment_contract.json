@@ -1,0 +1,12 @@
+{
+  "contract_version": "business-engine-attachment-v1",
+  "required_source": "CANONICAL_BUSINESS_ENGINE",
+  "required_engine_count": 1,
+  "retained_fields": [
+    "business_engine_ref",
+    "business_engine_version",
+    "business_engine_contract_hash"
+  ],
+  "write_authorized": false,
+  "duplicate_engine_created": false
+}

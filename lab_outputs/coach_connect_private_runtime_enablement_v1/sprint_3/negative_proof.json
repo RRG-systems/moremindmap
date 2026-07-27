@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 3,
+  "denials_proven": [
+    "missing_authority",
+    "missing_or_invalid_session_reference",
+    "subject_scope_mismatch",
+    "zero_engine",
+    "two_engines",
+    "wrong_source",
+    "wrong_version",
+    "wrong_hash",
+    "payload_copy",
+    "write_authority",
+    "persistence_capable_port"
+  ],
+  "partial_handle_published": false
+}

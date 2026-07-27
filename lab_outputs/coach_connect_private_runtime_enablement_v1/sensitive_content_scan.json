@@ -1,0 +1,25 @@
+{
+  "proof_version": "private-runtime-sensitive-content-scan-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "production_data_used": false,
+  "findings": [],
+  "synthetic_canaries": [
+    {
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+      "pattern": "email",
+      "value_sha256": "8b451223192ebf35acfbc3cad93f43de6e1bb40d76cdf56060693112e90bd9c3"
+    },
+    {
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+      "pattern": "stripe_live_key",
+      "value_sha256": "d093c2ab91acf825788a0a79281370da2893da766426324fe1d08d5ad5296510"
+    },
+    {
+      "file": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+      "pattern": "email",
+      "value_sha256": "5bd5e5789c16d896ca8c9325becee4d9c33b9b05b9ef5a13fbfdb8bb90896c6f"
+    }
+  ]
+}

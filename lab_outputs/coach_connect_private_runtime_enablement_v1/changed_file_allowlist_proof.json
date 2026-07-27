@@ -1,0 +1,18 @@
+{
+  "proof_version": "coach-connect-private-runtime-campaign-proof-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "valid": true,
+  "assertions": {
+    "exact_allowlist_compliance": true,
+    "expected_changed_file_count": 36,
+    "unexpected_campaign_changes": 0,
+    "staged_changes": 0
+  },
+  "references": [
+    "lab_outputs/coach_connect_private_runtime_enablement_v1/changed_files_inventory.json"
+  ],
+  "customer_data_used": false,
+  "live_external_calls": 0
+}

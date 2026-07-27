@@ -1,0 +1,16 @@
+{
+  "receipt_version": "private-runtime-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint": 3,
+  "predecessor_verdict": "PRIVATE_RUNTIME_SPRINT_2_SECURITY_RUNTIME_COMPLETE",
+  "evidence_class": "SYNTHETIC",
+  "verdict": "PRIVATE_RUNTIME_SPRINT_3_BUSINESS_ENGINE_ATTACHMENT_COMPLETE",
+  "focused_tests": {"passed": 7, "failed": 0},
+  "contract_regressions": {"passed": 22, "failed": 0},
+  "repair_count": 1,
+  "business_engine_count": 1,
+  "external_call_count": 0,
+  "deployment_performed": false,
+  "staging_performed": false,
+  "commit_performed": false
+}

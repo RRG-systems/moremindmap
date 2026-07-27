@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 3,
+  "attachment_request_version": "private-runtime-attachment-request-v1",
+  "business_engine_attachment_version": "business-engine-attachment-v1",
+  "canonical_source_only": true,
+  "read_only": true,
+  "payload_retained": false,
+  "provider_connection": false
+}

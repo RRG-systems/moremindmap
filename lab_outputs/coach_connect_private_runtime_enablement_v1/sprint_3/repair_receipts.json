@@ -1,0 +1,17 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "sprint": 3,
+  "repairs": [
+    {
+      "repair": 1,
+      "failed_gate": "exact_changed_file_allowlist",
+      "cause": "Legacy Business Engine fixture verifier rewrote its tracked result JSON while validating against pre-existing dirty Business Engine work",
+      "changed_files": [
+        "lab_outputs/mmm8_business_engine_contract/mmm8_business_engine_fixture_validation.json"
+      ],
+      "repair": "Restored the verifier-generated file byte-for-byte to its pre-run HEAD state and retained only read-only regression execution",
+      "result": "PASS",
+      "residual_diff": false
+    }
+  ]
+}

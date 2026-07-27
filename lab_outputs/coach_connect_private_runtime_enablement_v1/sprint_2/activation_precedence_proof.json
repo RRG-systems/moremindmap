@@ -1,0 +1,7 @@
+{
+  "proof_version": "private-runtime-activation-precedence-proof-v1",
+  "first_gate": "EMERGENCY_DISABLED",
+  "last_gate": "REQUESTED_RUNTIME_AND_ACTION",
+  "unsafe_live_capability_overrides_permitted": false,
+  "source_defaults_deny": true
+}

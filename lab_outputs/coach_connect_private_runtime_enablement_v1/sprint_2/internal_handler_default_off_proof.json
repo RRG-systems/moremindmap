@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-handler-default-off-proof-v1",
+  "developer_access_default_denied": true,
+  "login_default_denied": true,
+  "callback_default_denied": true,
+  "session_default_denied": true,
+  "logout_default_denied": true,
+  "provider_calls": 0,
+  "deployment_calls": 0
+}

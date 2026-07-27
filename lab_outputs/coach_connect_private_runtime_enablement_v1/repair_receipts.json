@@ -1,0 +1,42 @@
+{
+  "receipt_collection_version": "private-runtime-repair-receipts-v1",
+  "repair_count": 5,
+  "repairs": [
+    {
+      "sprint": 1,
+      "repair": 1,
+      "failed_gate": "focused_subject_tests",
+      "cause": "SUBDEV1 literal was accepted as an opaque external subject identifier",
+      "result": "PASS"
+    },
+    {
+      "sprint": 3,
+      "repair": 1,
+      "failed_gate": "exact_changed_file_allowlist",
+      "cause": "Legacy fixture verifier rewrote a tracked result while validating pre-existing dirty work",
+      "result": "PASS_AFTER_BYTE_IDENTICAL_RESTORE"
+    },
+    {
+      "sprint": 4,
+      "repair": 1,
+      "failed_gate": "focused_lint",
+      "cause": "Receipt host synchronously reset loading state inside a React effect",
+      "result": "PASS"
+    },
+    {
+      "sprint": 5,
+      "repair": 1,
+      "failed_gate": "focused_coach_connect_tests",
+      "cause": "Negative test attempted to override a frozen service method",
+      "result": "PASS"
+    },
+    {
+      "sprint": 7,
+      "repair": 1,
+      "failed_gate": "focused_lint",
+      "cause": "Integration test contained three unnecessary quote escapes",
+      "result": "PASS"
+    }
+  ],
+  "maximum_repairs_per_sprint_respected": true
+}

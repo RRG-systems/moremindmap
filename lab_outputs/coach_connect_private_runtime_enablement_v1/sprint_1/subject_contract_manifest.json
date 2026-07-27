@@ -1,0 +1,8 @@
+{
+  "manifest_version": "private-runtime-subject-contract-manifest-v1",
+  "verified_assertion": "private-runtime-verified-assertion-v1",
+  "tester_approval": "private-runtime-tester-approval-v1",
+  "subject_receipt": "private-runtime-subject-receipt-v1",
+  "registry_method_count": 9,
+  "strict_unknown_field_rejection": true
+}

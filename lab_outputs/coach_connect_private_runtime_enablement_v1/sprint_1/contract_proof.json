@@ -1,0 +1,19 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 1,
+  "contracts": [
+    "private-runtime-verified-assertion-v1",
+    "private-runtime-tester-approval-v1",
+    "private-runtime-subject-receipt-v1"
+  ],
+  "exact_scope_fields": [
+    "tenant_id",
+    "profile_id",
+    "business_id",
+    "subscriber_id"
+  ],
+  "provider_neutral_registry_port": true,
+  "atomic_one_to_one_required": true,
+  "auto_enrollment": false,
+  "production_connection": false
+}

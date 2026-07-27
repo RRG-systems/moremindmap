@@ -1,0 +1,16 @@
+{
+  "receipt_version": "private-runtime-sprint-receipt-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "sprint": 6,
+  "predecessor_verdict": "PRIVATE_RUNTIME_SPRINT_5_COACH_CONNECT_ATTACHMENT_COMPLETE",
+  "evidence_class": "DEPLOYMENT_SHAPED_OFFLINE",
+  "verdict": "PRIVATE_RUNTIME_SPRINT_6_VALIDATION_COMPLETE",
+  "focused_tests": {"passed": 8, "failed": 0},
+  "adversarial_scenarios": {"passed": 47, "failed": 0},
+  "runbooks_validated": 8,
+  "repair_count": 0,
+  "external_call_count": 0,
+  "deployment_performed": false,
+  "staging_performed": false,
+  "commit_performed": false
+}

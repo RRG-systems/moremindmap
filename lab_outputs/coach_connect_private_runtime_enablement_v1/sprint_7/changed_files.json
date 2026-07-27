@@ -1,0 +1,29 @@
+{
+  "sprint": 7,
+  "files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+      "sha256": "76b18c0362b1d3b722fb4fb7c08b215cbd8ac2a466a847b0d70c990922d37fda"
+    },
+    {
+      "path": "src/components/businessAssessment/PrivateRuntimeAttachmentHost.jsx",
+      "sha256": "c3b0594ed7de74e4d2092af06a90b5916c292051379bba173467afa8d78066c4"
+    },
+    {
+      "path": "src/BusinessAssessmentVisualMap.jsx",
+      "sha256": "048b255a53cc8fdc8bfd31d10bcc24e9ff702c1557cde5f05eae263c527dfbda"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.integration.test.js",
+      "sha256": "ace2337f4303e6b93cf99b5278fe686e63fbca18ad82b181aec1934290358059"
+    },
+    {
+      "path": "scripts/verifyCoachConnectPrivateRuntimeEnablement.mjs",
+      "sha256": "eaeaaacb300166bfb33dfbf26698b5c4cb44eab00c7ea93b20f2de5f6ad41c10"
+    }
+  ],
+  "reviewed_unchanged": [
+    "src/components/businessAssessment/DeveloperAccessPanel.jsx"
+  ],
+  "exact_allowlist_compliance": true
+}

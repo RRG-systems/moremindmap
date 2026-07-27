@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 6,
+  "evidence_shaping_strict": true,
+  "attachment_set_validation": true,
+  "partial_publication": false,
+  "stable_failure_codes": true,
+  "runbook_schema": true,
+  "repair_receipt_schema": true
+}

@@ -1,0 +1,12 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 5,
+  "coach_connect_attachment_version": "coach-connect-attachment-v1",
+  "existing_runtime_injected": true,
+  "allowed_capabilities": [
+    "SUBSCRIBER_PROJECTION",
+    "STRUCTURED_NON_VOICE_SESSION_WHEN_ALREADY_AUTHORIZED"
+  ],
+  "second_business_engine": false,
+  "canonical_mutation_authority": false
+}

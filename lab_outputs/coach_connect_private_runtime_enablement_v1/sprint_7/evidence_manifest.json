@@ -1,0 +1,107 @@
+{
+  "manifest_version": "coach-connect-private-runtime-evidence-manifest-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "entry_count": 19,
+  "entries": [
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/ai_handoff.json",
+      "bytes": 1895,
+      "sha256": "6b00578d1e0fe8c6cb57b94aa31e923aa646a3b014d7b1701089bdf2e788ab74"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/campaign_regression_results.json",
+      "bytes": 985,
+      "sha256": "c6ef508a71b793722cc6239cce15a05727ad2b92e98bb0de1b84c5ca4cf28c06"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/change_receipts.json",
+      "bytes": 706,
+      "sha256": "3cf47372002cebb66fb6273a8d21edc0a6b8de5e46b177282a7a54c06b09e465"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/changed_files_inventory.json",
+      "bytes": 8456,
+      "sha256": "21db0b7d3dc8d1ae5e30daf2e9c2dea570c8cf9a19a4038527b64fe4324ba4ad"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/changed_files.json",
+      "bytes": 1028,
+      "sha256": "6352fe89c7c62648ad63fb765efe9da06dd8a5a919c15523222377e47ccf836f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/contract_proof.json",
+      "bytes": 744,
+      "sha256": "7ae695074527a09cdbc45c13de8754467f084ffe362420b33c3a70a97095cc49"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/cross_system_integration_proof.json",
+      "bytes": 744,
+      "sha256": "7ae695074527a09cdbc45c13de8754467f084ffe362420b33c3a70a97095cc49"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/executive_handoff.md",
+      "bytes": 1049,
+      "sha256": "73c6da4178683d7de8ebb0cdd2a6d11431444dbef084426bc9d1250ed487bc61"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/final_verdict.json",
+      "bytes": 191,
+      "sha256": "677b15e535c4bc4e387e7ddac6138e90a73cb0bc35a22dcd0b6c980f21171934"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/negative_proof.json",
+      "bytes": 546,
+      "sha256": "76d532126059a8dc15769858b16c73f490db357fdec3868c7102344aede078e9"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/no_duplicate_runtime_proof.json",
+      "bytes": 512,
+      "sha256": "08f845411b01f6829aa206e51a0c2e36e670b3ed7a680f2e815e7ae19eb6e24e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/one_subject_one_engine_proof.json",
+      "bytes": 517,
+      "sha256": "8de1e6ad0fd599fd8566a2ba21391d7d35be5da2504cd91a4abd655b04192d64"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/protected_root_proof.json",
+      "bytes": 5993,
+      "sha256": "0bb85f8deb89028fbeeae90dde1aaa9ee9a1cf88d26bca12e09b03c5aba17ef4"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/repair_receipts.json",
+      "bytes": 295,
+      "sha256": "d2f0f892b5fe8dd57a628f6d544741954fecf02a708fbb97bbaeede8d6100a80"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/secret_scan.json",
+      "bytes": 274,
+      "sha256": "902477adfbe7296291fb9e6853a6d33008c636e1f1e4c8ea6161158533536cb6"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/sprint_receipt.json",
+      "bytes": 398,
+      "sha256": "84756ec1ba3d46b375516f132b5872c8825329a7ec80e72c2a6e3b0bd55a953f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/test_manifest.json",
+      "bytes": 2072,
+      "sha256": "bda38a8c1ebfbc8ddeb8b40215ddde8b5de2e52e5baf7d6121c5f3e286c6dd91"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/test_results.json",
+      "bytes": 324,
+      "sha256": "c90f1677f94f8c8324f91c9e271f99413c4bf6d55dcc433e325149c9531505a1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/ui_authority_separation_proof.json",
+      "bytes": 552,
+      "sha256": "80fc9a196d6efee923584589c4f926389e6e71d79ad6a35f7f93dc5ea6d980d0"
+    }
+  ],
+  "exclusions": [
+    "lab_outputs/coach_connect_private_runtime_enablement_v1/sprint_7/evidence_manifest.json"
+  ],
+  "valid": true
+}

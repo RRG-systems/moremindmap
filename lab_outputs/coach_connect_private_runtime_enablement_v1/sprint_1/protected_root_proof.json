@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-protected-root-proof-v1",
+  "sprint": 1,
+  "comparison": "CURRENT_WORKTREE_BEFORE_SPRINT_TO_AFTER_SPRINT",
+  "production_security_before_sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+  "production_security_after_sha256": "64744e0e73602cb2249ee46c1e3b6b386c088bb31699d44784a8566472237496",
+  "business_engine_before_sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+  "business_engine_after_sha256": "9bd80660f172aa29b31eece6b68cc64da2b84b32cbea5e7ef3ab1af7edac2fc5",
+  "preserved": true
+}

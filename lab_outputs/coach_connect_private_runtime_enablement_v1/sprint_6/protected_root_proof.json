@@ -1,0 +1,8 @@
+{
+  "proof_version": "private-runtime-protected-root-proof-v1",
+  "sprint": 6,
+  "validated_root_count": 5,
+  "all_starting_hashes_match": true,
+  "protected_semantics_changed": false,
+  "preserved": true
+}

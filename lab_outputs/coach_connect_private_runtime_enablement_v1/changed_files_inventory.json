@@ -1,0 +1,227 @@
+{
+  "inventory_version": "coach-connect-private-runtime-changed-files-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "exact_allowlist_compliance": true,
+  "file_count": 36,
+  "files": [
+    {
+      "path": "api/internal/developer-access-security.js",
+      "bytes": 16741,
+      "sha256": "ee3275aab6d3e217b9ea16635eaef7289592dd742c74c0092bf2ae84a790b26c",
+      "status": "modified"
+    },
+    {
+      "path": "api/internal/developer-access.js",
+      "bytes": 7073,
+      "sha256": "387c23acaff78f82297a367f5d97f8b5b3e4333a725d1dbfb6b81c813db78416",
+      "status": "modified"
+    },
+    {
+      "path": "api/internal/private-runtime-bootstrap.js",
+      "bytes": 1860,
+      "sha256": "04f296bf82cecdf83078f27fbe2f9bc276857e833f06085081cf3ddf610fbf41",
+      "status": "added"
+    },
+    {
+      "path": "api/internal/private-runtime-callback.js",
+      "bytes": 1235,
+      "sha256": "eccc8110d696a976811e04f45011b45d7302ba672c06d4a1e71a3000a9836f0a",
+      "status": "added"
+    },
+    {
+      "path": "api/internal/private-runtime-login.js",
+      "bytes": 1497,
+      "sha256": "e290b453836f5d7778a56d33afd458bacb165b9e58c788c717ed2382d5cefccc",
+      "status": "added"
+    },
+    {
+      "path": "api/internal/private-runtime-logout.js",
+      "bytes": 1492,
+      "sha256": "7ae1261f91c7e8538f27fce209b30e98232b18f22d6f0e94d67d73bc7eae38bc",
+      "status": "added"
+    },
+    {
+      "path": "api/internal/private-runtime-session.js",
+      "bytes": 1210,
+      "sha256": "8312214dc748fbb5f14ca7a7447ea1b1bc63d3b3183ccef75fcda6bfa52f1c5b",
+      "status": "added"
+    },
+    {
+      "path": "api/internal/subscription-entitlement.js",
+      "bytes": 2139,
+      "sha256": "e9232160a5f58850ab9800b3e880dba6531aab0ba5c392da89c5513bf4f358a2",
+      "status": "modified"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/emergency_disable.md",
+      "bytes": 1409,
+      "sha256": "bfaf7e85d6df6b2750f54d37bd640db19861448adaac61b15fa055e19d103f4c",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/incident_response.md",
+      "bytes": 1541,
+      "sha256": "7db49b2dbbfbc419e353d32bc32375e00feb11932b3274dc11911a3ed8191a5c",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/login_session.md",
+      "bytes": 1607,
+      "sha256": "271a3c3d291967a02178bfd2ebedd8aa2568ac0e3bbb1dd607fa073f41bedf92",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/logout_revocation.md",
+      "bytes": 1288,
+      "sha256": "9b1d6d35577ac9908c01f0c671b8bba8814b84628ec41868fda5884d67898b3c",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/post_enablement_validation.md",
+      "bytes": 1783,
+      "sha256": "fa306629d34576ee711e0e41ec30986569cae8e51bf858fd2d336cf2dbd794d4",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/restart_recovery.md",
+      "bytes": 1538,
+      "sha256": "cceea8dab9c82ca3c8b649366204629b487f1accbdd3ec348208824a56650d29",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/runtime_attach.md",
+      "bytes": 1681,
+      "sha256": "f88afff6a0eea17c3ef34d95573cb7e4d629d93d9a77dd6bb3ad34095436b7e9",
+      "status": "added"
+    },
+    {
+      "path": "docs/runbooks/coach_connect/private_runtime_enablement/subject_enrollment.md",
+      "bytes": 1655,
+      "sha256": "ae8e1c3e8aaceb730dee4896e0958c2a44f70eeb0eeaee5fc37bc5cec2887115",
+      "status": "added"
+    },
+    {
+      "path": "scripts/verifyCoachConnectPrivateRuntimeEnablement.mjs",
+      "bytes": 41777,
+      "sha256": "eaeaaacb300166bfb33dfbf26698b5c4cb44eab00c7ea93b20f2de5f6ad41c10",
+      "status": "added"
+    },
+    {
+      "path": "src/BusinessAssessmentVisualMap.jsx",
+      "bytes": 8945,
+      "sha256": "048b255a53cc8fdc8bfd31d10bcc24e9ff702c1557cde5f05eae263c527dfbda",
+      "status": "modified"
+    },
+    {
+      "path": "src/components/businessAssessment/PrivateRuntimeAttachmentHost.jsx",
+      "bytes": 2457,
+      "sha256": "c3b0594ed7de74e4d2092af06a90b5916c292051379bba173467afa8d78066c4",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/activation.js",
+      "bytes": 2836,
+      "sha256": "03e0d9069ebad1806f97bcf23c4b382aa1a04d732f3940691eb4c05e581e0fcb",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/attachments.js",
+      "bytes": 14167,
+      "sha256": "0b5a233671bea79f68ca3a517805cd296e4f9f6de7f79b82de3d9625df0f8106",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/authority.js",
+      "bytes": 11162,
+      "sha256": "efb6b445ca5431aff0bdfe855a7d39abc75e9a9f19212698c246d9c849a59d11",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/composition.js",
+      "bytes": 5487,
+      "sha256": "d689f21b384c4ae1665c008a974af4c7146c0e09203d346d0cfde76fb5cba00c",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js",
+      "bytes": 10841,
+      "sha256": "72b4aa03d73d704e53fe2a7a8037dc1e1af8ce803cfa98d010ecb0b2c214f724",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/evidence.js",
+      "bytes": 12616,
+      "sha256": "c3502235d19b07580163f57406028075b1cb4f0e9e8a8423cc6edf259a780ab2",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/failureCodes.js",
+      "bytes": 1253,
+      "sha256": "f88cac3e08dc4a8dda4e134ef1fccf587fad030ebd12a5a6048963af685a0457",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+      "bytes": 4694,
+      "sha256": "76b18c0362b1d3b722fb4fb7c08b215cbd8ac2a466a847b0d70c990922d37fda",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/sessionResolver.js",
+      "bytes": 6490,
+      "sha256": "887c3a8b270d988992241065e9c4250918ad4dedc48826bdff9d416fa5695909",
+      "status": "added"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/subjectRegistryPort.js",
+      "bytes": 6523,
+      "sha256": "e1b0e3c762c1c1cd75476f9018c6f36893f87fa66e324a20e70d007eb2b41c10",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.businessEngine.test.js",
+      "bytes": 6283,
+      "sha256": "ae77af372d8a155a295fa7ad8f72933560e024c5682dfb2d2163820b8c15b31e",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.coachConnect.test.js",
+      "bytes": 10859,
+      "sha256": "9bfec7b20fed2648559b8c462a7142a83bc3fbf02c247a198b9a9c8d4216888a",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.integration.test.js",
+      "bytes": 13701,
+      "sha256": "ace2337f4303e6b93cf99b5278fe686e63fbca18ad82b181aec1934290358059",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.security.test.js",
+      "bytes": 19256,
+      "sha256": "0625d654f0ad7f4c354ea17a765082b3ee8319dc2c3460e0d7926bacea37c9f4",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.subject.test.js",
+      "bytes": 14419,
+      "sha256": "520faf2deebb2d502bace4fcd43cd4596e21a9b65f0eecd82ca83151119f946d",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.subscription.test.js",
+      "bytes": 9602,
+      "sha256": "2c142931ad89efb837c2d20d90a2c594cff4758d40af1d9c9156b4563f5c33c9",
+      "status": "added"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.validation.test.js",
+      "bytes": 8572,
+      "sha256": "51a8e065f4fd7276372e4f6c29694d65776a6fa79080ce35d201a7af19a426ce",
+      "status": "added"
+    }
+  ],
+  "reviewed_unchanged_dependency": "src/components/businessAssessment/DeveloperAccessPanel.jsx",
+  "preexisting_out_of_scope_changes_preserved": true
+}

@@ -1,0 +1,9 @@
+{
+  "proof_version": "private-runtime-no-paid-entitlement-stripe-proof-v1",
+  "paid_grant_can_upgrade_private_runtime": false,
+  "paid_entitlement": false,
+  "stripe_authority": false,
+  "stripe_calls": 0,
+  "checkout_calls": 0,
+  "billing_event_calls": 0
+}

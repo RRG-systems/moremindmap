@@ -1,0 +1,10 @@
+{
+  "proof_version": "private-runtime-contract-proof-v1",
+  "sprint": 4,
+  "subscription_attachment_version": "subscription-runtime-attachment-v1",
+  "existing_runtime_injected": true,
+  "server_built_envelope": true,
+  "temporary_entitlement_only": true,
+  "paid_entitlement": false,
+  "canonical_write_authority": false
+}

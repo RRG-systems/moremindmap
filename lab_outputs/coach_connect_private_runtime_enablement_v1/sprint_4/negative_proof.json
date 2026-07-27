@@ -1,0 +1,16 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 4,
+  "denials_proven": [
+    "emergency_disabled",
+    "invalid_session_reference",
+    "expired_entitlement",
+    "revoked_entitlement",
+    "cross_scope_subscription",
+    "business_engine_scope_mismatch",
+    "unknown_action",
+    "canonical_write_action",
+    "paid_stripe_upgrade"
+  ],
+  "alternate_subscription_runtime_created": false
+}

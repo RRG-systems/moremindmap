@@ -1,0 +1,18 @@
+{
+  "proof_version": "private-runtime-negative-proof-v1",
+  "sprint": 1,
+  "denials_proven": [
+    "wrong_issuer",
+    "wrong_audience",
+    "unverified_assertion",
+    "stale_security_version",
+    "expired_approval",
+    "subject_to_two_scopes",
+    "two_subjects_to_one_scope",
+    "unknown_subject_no_auto_enrollment",
+    "recovery_pending_subject",
+    "disabled_subject",
+    "identity_from_email_name_url_profile_or_subdev1"
+  ],
+  "partial_state_published": false
+}

@@ -1,0 +1,61 @@
+{
+  "manifest_version": "coach-connect-private-runtime-contract-manifest-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "generated_at": "2026-07-27T16:05:00.000Z",
+  "contracts": [
+    {
+      "name": "verifiedAssertion",
+      "version": "private-runtime-verified-assertion-v1"
+    },
+    {
+      "name": "testerApproval",
+      "version": "private-runtime-tester-approval-v1"
+    },
+    {
+      "name": "subjectReceipt",
+      "version": "private-runtime-subject-receipt-v1"
+    },
+    {
+      "name": "capability",
+      "version": "private-runtime-capability-v1"
+    },
+    {
+      "name": "sessionReceipt",
+      "version": "private-runtime-session-receipt-v1"
+    },
+    {
+      "name": "attachmentRequest",
+      "version": "private-runtime-attachment-request-v1"
+    },
+    {
+      "name": "businessEngineAttachment",
+      "version": "business-engine-attachment-v1"
+    },
+    {
+      "name": "subscriptionAttachment",
+      "version": "subscription-runtime-attachment-v1"
+    },
+    {
+      "name": "coachConnectAttachment",
+      "version": "coach-connect-attachment-v1"
+    },
+    {
+      "name": "attachmentSet",
+      "version": "private-runtime-attachment-set-v1"
+    },
+    {
+      "name": "interactionReceipt",
+      "version": "private-runtime-interaction-receipt-v1"
+    },
+    {
+      "name": "evidenceIndex",
+      "version": "private-runtime-evidence-index-v1"
+    }
+  ],
+  "canonical_subject_per_exact_scope": 1,
+  "canonical_business_engine_per_exact_scope": 1,
+  "subscription_runtime": "existing_injected_runtime_only",
+  "coach_connect_runtime": "existing_injected_runtime_only",
+  "subdev1_semantics": "temporary_entitlement_only",
+  "default_enabled": false
+}

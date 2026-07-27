@@ -1,0 +1,136 @@
+{
+  "index_version": "more-coach-connect-private-runtime-enablement-expansion-index-v1",
+  "campaign_id": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1",
+  "architecture_packet": {
+    "source_path": "/Users/rrg/Desktop/MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_V1.md",
+    "sha256": "42291cdc467a7895b65f2e313d81751febf55ca7ab90bec6dce0a3d538401765",
+    "verdict": "PRIVATE_RUNTIME_ENABLEMENT_ARCHITECTURE_COMPLETE"
+  },
+  "repository_baseline": "d5a93c81d509b3ca71c398f78747018bd8125f62",
+  "authority_boundaries": {
+    "afw_expansion": true,
+    "implementation": false,
+    "deployment": false,
+    "provider_wiring": false,
+    "auth0_activation": false,
+    "redis_upstash_activation": false,
+    "production_persistence": false,
+    "transcript_persistence": false,
+    "live_media_model_providers": false,
+    "stripe": false,
+    "staging": false,
+    "commit": false,
+    "push": false
+  },
+  "architecture_invariants": {
+    "canonical_subject_count_per_exact_scope": 1,
+    "canonical_business_engine_count": 1,
+    "duplicate_runtime_permitted": false,
+    "subdev1_is_authentication": false,
+    "subdev1_is_paid_entitlement": false,
+    "subdev1_is_operator_or_canonical_authority": false,
+    "default_off": true,
+    "emergency_disable_dominant": true,
+    "local_fallback_permitted": false,
+    "implementation_remains_unauthorized": true,
+    "deployment_remains_unauthorized": true
+  },
+  "artifact_count": 12,
+  "archive_entries": [
+    "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_1_V1.md",
+    "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_2_V1.md",
+    "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_3_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_CROSS_PART_CONSISTENCY_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_EXPANSION_INDEX_V1.json",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_1_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_2_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_3_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_4_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_5_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_6_AFW_V1.md",
+    "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_7_AFW_V1.md"
+  ],
+  "artifacts": [
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_1_V1.md",
+      "sha256": "289040d204b5fc1d0a3928dc06781793d276b7a2dc842ca5df477c1cd9460c20",
+      "role": "repository grounding, authority, exact allowlists, protected roots"
+    },
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_2_V1.md",
+      "sha256": "85ca1e651aae49f0bb23c551c92859765822802ad0b8e830b5199e04314f9ed1",
+      "role": "contracts, schemas, state machines, and interfaces"
+    },
+    {
+      "path": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_PART_3_V1.md",
+      "sha256": "b39826559affce5fa90fecdcfd12276782fbd64093d99ff3a2eeed1ec9e6015d",
+      "role": "validation, evidence, bounded repair, integration, and handoff"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_CROSS_PART_CONSISTENCY_V1.md",
+      "sha256": "062f0a16c2fadfe4902e8e2c0b35dd684c9b18ae915b7cd501dce0b2d3ab24a3",
+      "role": "cross-part and cross-sprint architecture consistency"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_1_AFW_V1.md",
+      "sha256": "964bb5189c90962b0845ce2e1f3a668517b694629a3f8b91ea0dae904ea4d0a6",
+      "role": "Sprint 1 canonical subject resolution AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_2_AFW_V1.md",
+      "sha256": "980e8d56eccf1c5e04d4f7b848daaf794f3e512d4943ae985d3ac0d2f3c87b14",
+      "role": "Sprint 2 deployment-grade security runtime AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_3_AFW_V1.md",
+      "sha256": "445b3a6f4a9853d18ebd1543f534d8aea8b756a9e3cd663d96df7b8ec3fbbc61",
+      "role": "Sprint 3 Business Engine attachment AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_4_AFW_V1.md",
+      "sha256": "57393c3ae3609d087badd2e398cbd6373357824a9203aa3527b53780a4f52396",
+      "role": "Sprint 4 Subscription Runtime attachment AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_5_AFW_V1.md",
+      "sha256": "ddeeca798134f7a11ec95f14f39d211a8372ea301417c5bb847f5f60f2bb2282",
+      "role": "Sprint 5 Coach Connect attachment AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_6_AFW_V1.md",
+      "sha256": "db2622d8b406c2c4cb3d535ee7c5f7847416da546f7ea315c1e3aced0e740d62",
+      "role": "Sprint 6 runtime validation AFW"
+    },
+    {
+      "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_SPRINT_7_AFW_V1.md",
+      "sha256": "075d37343deedc68575f98aabbefe6464daa86f0bc53c6adcdce12640483ea8a",
+      "role": "Sprint 7 cross-system integration AFW"
+    }
+  ],
+  "self_hash": {
+    "path": "MORE_COACH_CONNECT_PRIVATE_RUNTIME_ENABLEMENT_EXPANSION_INDEX_V1.json",
+    "rule": "SELF_EXCLUDED_TO_AVOID_RECURSIVE_DIGEST",
+    "verification": "Compute and verify the final index hash externally and after archive extraction."
+  },
+  "validation_results": {
+    "architecture_hash": "PASS",
+    "architecture_consistency": "PASS",
+    "seven_sprints_one_architecture": "PASS",
+    "each_sprint_required_sections": "PASS",
+    "exact_allowlists": "PASS",
+    "exact_prohibited_files": "PASS",
+    "protected_roots_preserved": "PASS",
+    "one_canonical_subject": "PASS",
+    "one_canonical_business_engine": "PASS",
+    "no_duplicate_runtime": "PASS",
+    "implementation_unauthorized": "PASS",
+    "deployment_unauthorized": "PASS",
+    "provider_activation_prohibited": "PASS",
+    "persistence_activation_prohibited": "PASS",
+    "transcript_activation_prohibited": "PASS",
+    "stripe_prohibited": "PASS",
+    "no_source_implementation_changes": "PASS",
+    "no_staging_or_commit": "PASS"
+  },
+  "final_expansion_verdict": "PRIVATE_RUNTIME_ENABLEMENT_AFW_EXPANSION_COMPLETE"
+}

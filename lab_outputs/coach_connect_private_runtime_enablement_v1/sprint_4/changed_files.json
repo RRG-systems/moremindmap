@@ -1,0 +1,13 @@
+{
+  "manifest_version": "private-runtime-changed-files-v1",
+  "sprint": 4,
+  "allowlist_compliant": true,
+  "files": [
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/composition.js", "sha256": "e3c6d143df280d5c9c4f42efee1b3f0424246ebd143954475c6e60626367edb3"},
+    {"path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/attachments.js", "sha256": "6df973d51b9ab2d9f4331ac38d8d7c72209004729da74c7dfe3ebe9f960e3e46"},
+    {"path": "api/internal/subscription-entitlement.js", "sha256": "e9232160a5f58850ab9800b3e880dba6531aab0ba5c392da89c5513bf4f358a2"},
+    {"path": "api/internal/private-runtime-bootstrap.js", "sha256": "04f296bf82cecdf83078f27fbe2f9bc276857e833f06085081cf3ddf610fbf41"},
+    {"path": "src/components/businessAssessment/PrivateRuntimeAttachmentHost.jsx", "sha256": "1858e612061b387d8822e5b6c75de4311aa0299883cdc9393fe55fdb30ca0601"},
+    {"path": "test/intelligenceFabric.coachConnect.privateRuntime.subscription.test.js", "sha256": "2c142931ad89efb837c2d20d90a2c594cff4758d40af1d9c9156b4563f5c33c9"}
+  ]
+}

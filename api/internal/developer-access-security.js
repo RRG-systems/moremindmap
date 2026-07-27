@@ -65,7 +65,30 @@ export function enabledEnvironment(env) {
   return allowed.includes(runtime);
 }
 
-export function developerAccessEnvironmentDecision(env = runtimeEnvironment, store = defaultSecurityStore) {
+export function developerAccessEnvironmentDecision(
+  env = runtimeEnvironment,
+  store = defaultSecurityStore,
+  privateRuntimeDecision = null,
+) {
+  const runtime = runtimeName(env);
+  if (runtime === 'production') {
+    if (privateRuntimeDecision?.allowed !== true
+      || privateRuntimeDecision.shared_state_evidence_class !== 'FUTURE_PRIVATE_LIVE'
+      || privateRuntimeDecision.deployment_grade_security_state !== true
+      || privateRuntimeDecision.no_local_fallback !== true) {
+      return deny('CAPABILITY_ENVIRONMENT_DENIED', 403, { reason: 'PRIVATE_RUNTIME_AUTHORITY_REQUIRED' });
+    }
+    return {
+      ok: true,
+      runtime,
+      description: {
+        available: true,
+        deployment_grade: true,
+        no_local_fallback: true,
+        authority_source: 'PRIVATE_RUNTIME_BRIDGE',
+      },
+    };
+  }
   if (env.COACH_CONNECT_DEVELOPER_ACCESS_ENABLED !== 'true') return deny('CAPABILITY_INVALID', 404, { reason: 'DEVELOPER_ACCESS_DISABLED' });
   if (env.COACH_CONNECT_SECURITY_HARDENING_ENABLED !== 'true'
     || env.COACH_CONNECT_SECURITY_SYNTHETIC_ONLY !== 'true'
@@ -82,8 +105,8 @@ export function developerAccessEnvironmentDecision(env = runtimeEnvironment, sto
   return { ok: true, runtime: runtimeName(env), description };
 }
 
-export function developerAccessEnabled(env = runtimeEnvironment, store = defaultSecurityStore) {
-  return developerAccessEnvironmentDecision(env, store).ok === true;
+export function developerAccessEnabled(env = runtimeEnvironment, store = defaultSecurityStore, privateRuntimeDecision = null) {
+  return developerAccessEnvironmentDecision(env, store, privateRuntimeDecision).ok === true;
 }
 
 export function allowedDeveloperAccessOrigins(env = runtimeEnvironment) {
@@ -168,9 +191,10 @@ export function evaluateDeveloperAccess({
   subject_binding,
   origin_decision,
   csrf_decision,
+  private_runtime_decision = null,
   random_token = () => crypto.randomBytes(32).toString('base64url'),
 }) {
-  const environment = developerAccessEnvironmentDecision(env, store);
+  const environment = developerAccessEnvironmentDecision(env, store, private_runtime_decision);
   if (!environment.ok) return auditCapabilityResult({ result: environment, store, now, subject_binding });
   if (origin_decision?.allowed !== true) return auditCapabilityResult({ result: deny('ORIGIN_VALIDATION_FAILED', 403), store, now, subject_binding, event_type: 'ORIGIN_DENIED' });
   if (csrf_decision?.allowed !== true) return auditCapabilityResult({ result: deny('CSRF_VALIDATION_FAILED', 403), store, now, subject_binding, event_type: 'CSRF_DENIED' });
@@ -247,8 +271,9 @@ export function verifyDeveloperCapability({
   now = Date.now(),
   store = defaultSecurityStore,
   subject_binding,
+  private_runtime_decision = null,
 }) {
-  const environment = developerAccessEnvironmentDecision(env, store);
+  const environment = developerAccessEnvironmentDecision(env, store, private_runtime_decision);
   if (!environment.ok) return auditCapabilityResult({ result: { valid: false, code: environment.code }, store, now, subject_binding });
   if (!subject_binding?.subject_binding_hash || !subject_binding?.scope_binding_hash || !subject_binding?.browser_binding_hash) {
     return auditCapabilityResult({ result: { valid: false, code: 'AUTHENTICATION_FAILED' }, store, now, subject_binding });
@@ -295,8 +320,16 @@ export function revokeDeveloperCapability({
   store = defaultSecurityStore,
   subject_binding,
   reason_code = 'USER_REVOKED',
+  private_runtime_decision = null,
 }) {
-  const verified = verifyDeveloperCapability({ token, env, now, store, subject_binding });
+  const verified = verifyDeveloperCapability({
+    token,
+    env,
+    now,
+    store,
+    subject_binding,
+    private_runtime_decision,
+  });
   if (!verified.valid) return { ok: false, code: verified.code };
   const revoked = store.revokeCapability({ token_hash: verified.record.token_hash, revoked_at: nowIso(now), reason_code });
   const result = revoked.ok ? { ok: true, capability_id: verified.record.capability_id } : { ok: false, code: revoked.code || 'CAPABILITY_INVALID' };
