@@ -1,0 +1,16 @@
+{
+  "status": "NOT_RUN_CREDENTIAL_GATE",
+  "provider_calls": 0,
+  "offline_simulator_calls_are_provider_calls": false,
+  "credential_values_inspected": 0,
+  "required_references": [
+    "qualification_authority_receipt_ref",
+    "provider_endpoint_ref",
+    "provider_credential_ref",
+    "disposable_namespace_digest"
+  ],
+  "live_latency": "NOT_MEASURED",
+  "live_cost": "NOT_MEASURED",
+  "backup_restore": "NOT_RUN",
+  "teardown": "NOT_RUN"
+}

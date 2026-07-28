@@ -1,0 +1,257 @@
+{
+  "index_version": "more-private-runtime-remote-shared-security-adapter-expansion-index-v1",
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1",
+  "mission_type": "TIER_1_AFW_EXPANSION_ONLY",
+  "architecture": {
+    "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ARCHITECTURE_V1.md",
+    "sha256": "dbca624bf46540d1aae7b698dcffc81a845a10f43a28df70e8f7e22a1c4a0c8a",
+    "verdict": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ARCHITECTURE_COMPLETE"
+  },
+  "prerequisite": {
+    "commit": "d0bde035a0519f8e89135204e88cd428ca0d5800",
+    "subject": "feat(private-runtime): add async security and entitlement bootstrap v1",
+    "v2_baseline_sha256": "651e12449ea767a527363463e87453d46a7efe306a8c5c82fb5aa6eabc990bd9",
+    "dependency_status": "IMPLEMENTED_REVIEWED_COMMITTED"
+  },
+  "provider_decision": {
+    "initial_candidate": "UPSTASH_REDIS_DEDICATED_REGIONAL_PAID",
+    "conditional": true,
+    "primary_write_routed_lua_required": true,
+    "ordinary_authority_reads_prohibited": true,
+    "provider_activation_authorized": false
+  },
+  "authority_boundaries": {
+    "source_implementation": false,
+    "offline_validation": false,
+    "disposable_provider_qualification": false,
+    "credential_binding": false,
+    "deployment": false,
+    "environment_activation": false,
+    "tester_authorization": false,
+    "staging": false,
+    "commit": false,
+    "push": false
+  },
+  "architecture_invariants": {
+    "canonical_security_service_count": 1,
+    "async_security_state_port_v2_count": 1,
+    "remote_adapter_count": 1,
+    "authoritative_record_set_count": 1,
+    "v1_fallback": false,
+    "in_memory_live_fallback": false,
+    "dual_writes": false,
+    "local_cache_authority": false,
+    "application_layer_fake_transactions": false,
+    "internally_consistent_authority_snapshot": true,
+    "outage_partition_fail_closed": true,
+    "emergency_disable_dominant": true,
+    "source_default_off": true,
+    "raw_token_or_secret_persistence": false,
+    "customer_or_product_content": false
+  },
+  "implementation_allowlist": {
+    "new_provider_neutral_files": [
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/contracts.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/health.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js"
+    ],
+    "new_provider_specific_files": [
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js"
+    ],
+    "existing_editable_files": [
+      "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js"
+    ],
+    "test_files": [
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.contract.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.queries.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.races.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.recovery.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+      "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js"
+    ],
+    "qualification_tools": [
+      "scripts/verifyCoachConnectPrivateRuntimeRemoteSharedSecurityAdapter.mjs"
+    ],
+    "evidence_root": "lab_outputs/coach_connect_private_runtime_remote_shared_security_adapter_v1/"
+  },
+  "sprints": [
+    {
+      "number": 1,
+      "name": "Provider-Neutral Adapter Contract and Schemas",
+      "depends_on": []
+    },
+    {
+      "number": 2,
+      "name": "Record and Keyspace Architecture",
+      "depends_on": [
+        1
+      ]
+    },
+    {
+      "number": 3,
+      "name": "Atomic Command Implementation",
+      "depends_on": [
+        1,
+        2
+      ]
+    },
+    {
+      "number": 4,
+      "name": "Authoritative Query and Snapshot Design",
+      "depends_on": [
+        1,
+        2,
+        3
+      ]
+    },
+    {
+      "number": 5,
+      "name": "Health, Recovery, Retry, and Idempotency",
+      "depends_on": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "number": 6,
+      "name": "Audit, Retention, Backup, and Environment Isolation",
+      "depends_on": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ]
+    },
+    {
+      "number": 7,
+      "name": "Provider Qualification and Cross-System Validation",
+      "depends_on": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ]
+    }
+  ],
+  "artifact_count": 12,
+  "archive_entries": [
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_1_V1.md",
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_2_V1.md",
+    "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_3_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_CROSS_PART_CONSISTENCY_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_EXPANSION_INDEX_V1.json",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_1_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_2_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_3_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_4_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_5_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_6_AFW_V1.md",
+    "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_7_AFW_V1.md"
+  ],
+  "artifacts": [
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_1_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_1_V1.md",
+      "sha256": "91d6d407a8fac109033318b801d98c871df452ecbbb0026c7be1a56bf2604c38",
+      "role": "grounding, dependency, provider decision, exact allowlist, records, isolation"
+    },
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_2_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_2_V1.md",
+      "sha256": "ef2dafdf97c71353308e19e88486e69a79f495aa97c4847c38053809fadcf25c",
+      "role": "contracts, commands, queries, health, audit, retention, backup, qualification requirements"
+    },
+    {
+      "path": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_3_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_PART_3_V1.md",
+      "sha256": "19250bcdf83086f0d175a0fa3677691e715e70aef733c60dfa5343baf79d391f",
+      "role": "validation, race/failure matrices, evidence, repair, packaging, activation stop"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_CROSS_PART_CONSISTENCY_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_CROSS_PART_CONSISTENCY_V1.md",
+      "sha256": "3f5dffe28d69fe0b6e77953a6d550004504d689e511e8eb7a4b2843f7e258214",
+      "role": "cross-part and cross-sprint invariant review"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_1_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_1_AFW_V1.md",
+      "sha256": "b93c02616ad3eda0dcf25c4738a0be7a2e8ea291361659837f21fbff71baee18",
+      "role": "Sprint 1 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_2_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_2_AFW_V1.md",
+      "sha256": "a261ca33cf3b6abe141ecab5b769869a507902fe310f98818b6978ffb47a74ba",
+      "role": "Sprint 2 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_3_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_3_AFW_V1.md",
+      "sha256": "a4a8cf89b955182fba744e649e1668f138ae72055624addb3138a667c8f7a988",
+      "role": "Sprint 3 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_4_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_4_AFW_V1.md",
+      "sha256": "f57a9c0fcf05cf5ed6f85124224415e2ab788bf63f00ad215d8b35b7f7b19e47",
+      "role": "Sprint 4 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_5_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_5_AFW_V1.md",
+      "sha256": "0fc8289b670501d20f01b70491ebaf6dcf3fe3b55828d16b7b6799d2f46bdb43",
+      "role": "Sprint 5 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_6_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_6_AFW_V1.md",
+      "sha256": "4ce03a16ea688571ef78180693285b3fab50ba741602a1191b15dd3990ca39d4",
+      "role": "Sprint 6 AFW"
+    },
+    {
+      "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_7_AFW_V1.md",
+      "source_path": "docs/intelligence_fabric/MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_SPRINT_7_AFW_V1.md",
+      "sha256": "9a425d6d365188f1dd5f3072c42027c20493b382fa1ac81bfbe21bfaea384c90",
+      "role": "Sprint 7 AFW"
+    }
+  ],
+  "self_hash": {
+    "path": "MORE_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_EXPANSION_INDEX_V1.json",
+    "rule": "SELF_EXCLUDED_TO_AVOID_RECURSIVE_DIGEST",
+    "verification": "Hash the final index externally and verify after archive extraction."
+  },
+  "validation_requirements": {
+    "seven_sprints_one_architecture": true,
+    "exact_committed_v2_compatibility": true,
+    "no_contract_drift": true,
+    "promise_native": true,
+    "internally_consistent_snapshot": true,
+    "truthful_atomicity": true,
+    "safe_retry_idempotency": true,
+    "cross_instance_rate_limiting": true,
+    "restart_recovery": true,
+    "fail_closed_outage_partition": true,
+    "backup_restore_evidence": true,
+    "namespace_isolation": true,
+    "no_secrets_or_customer_data": true,
+    "protected_roots_unchanged": true,
+    "no_deployment_or_activation": true
+  },
+  "package_name": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_AFW_REVIEW_V1.zip",
+  "final_expansion_verdict": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_AFW_EXPANSION_COMPLETE"
+}

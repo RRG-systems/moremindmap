@@ -1,0 +1,9 @@
+{
+  "repair": "SPRINT_7_REPAIR_001",
+  "cause": "NEGATIVE_CONTROL_STATIC_SCAN_FALSE_POSITIVE",
+  "paths": [
+    "scripts/verifyCoachConnectPrivateRuntimeRemoteSharedSecurityAdapter.mjs"
+  ],
+  "bounded": true,
+  "resolved": true
+}

@@ -1,0 +1,10 @@
+{
+  "vercel_calls": 0,
+  "deployment_calls": 0,
+  "environment_changes": 0,
+  "adapter_activation": false,
+  "named_testers_enabled": false,
+  "staging_actions": 0,
+  "commit_actions": 0,
+  "push_actions": 0
+}

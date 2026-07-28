@@ -1,0 +1,10 @@
+{
+  "sprint": 1,
+  "count": 3,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/contracts.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.contract.test.js"
+  ],
+  "allowlist_compliant": true
+}

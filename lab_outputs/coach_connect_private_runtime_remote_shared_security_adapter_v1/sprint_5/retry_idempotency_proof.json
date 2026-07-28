@@ -1,0 +1,5 @@
+{
+  "sprint": 5,
+  "maximum_attempts": 2,
+  "unsafe_retry_allowed": false
+}

@@ -1,0 +1,9 @@
+{
+  "repair": "SPRINT_2_REPAIR_001",
+  "cause": "FUNCTION_TABLE_STRUCTURED_CLONE",
+  "paths": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js"
+  ],
+  "bounded": true,
+  "resolved": true
+}

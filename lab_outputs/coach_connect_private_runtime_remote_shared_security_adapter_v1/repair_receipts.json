@@ -1,0 +1,11 @@
+{
+  "repairs": [
+    "sprint_1/repair_receipt_1.json",
+    "sprint_1/repair_receipt_2.json",
+    "sprint_2/repair_receipt_1.json",
+    "sprint_7/repair_receipt_1.json",
+    "sprint_7/repair_receipt_2.json"
+  ],
+  "unresolved": 0,
+  "maximum_two_per_sprint_respected": true
+}

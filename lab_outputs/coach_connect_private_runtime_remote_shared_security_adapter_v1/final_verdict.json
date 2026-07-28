@@ -1,0 +1,8 @@
+{
+  "verdict": "REMOTE_SHARED_SECURITY_ADAPTER_IMPLEMENTED_OFFLINE_QUALIFICATION_CREDENTIALS_REQUIRED",
+  "implementation": "PASS",
+  "offline_validation": "PASS",
+  "provider_qualification": "NOT_RUN_CREDENTIAL_GATE",
+  "technical_blocker": null,
+  "credential_gate_respected": true
+}

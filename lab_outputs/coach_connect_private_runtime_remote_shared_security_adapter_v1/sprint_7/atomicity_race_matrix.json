@@ -1,0 +1,5 @@
+{
+  "sprint": 7,
+  "tested_offline": true,
+  "live_provider_race_test": "NOT_RUN_CREDENTIAL_GATE"
+}

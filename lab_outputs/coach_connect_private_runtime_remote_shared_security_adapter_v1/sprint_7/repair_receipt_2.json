@@ -1,0 +1,11 @@
+{
+  "repair": "SPRINT_7_REPAIR_002",
+  "cause": "FOCUSED_LINT_STATIC_DEFECTS",
+  "paths": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/health.js"
+  ],
+  "bounded": true,
+  "resolved": true
+}

@@ -1,0 +1,10 @@
+{
+  "change": "SPRINT_3_CONTINUATION_REFINEMENT_001",
+  "cause": "ONE_SCRIPT_QUERY_REQUIRES_OPAQUE_SAME_SLOT_LINKS",
+  "contract_drift": false,
+  "authority_change": false,
+  "paths": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js"
+  ],
+  "validated": true
+}

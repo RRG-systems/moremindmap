@@ -1,0 +1,9 @@
+{
+  "repair": "SPRINT_1_REPAIR_002",
+  "cause": "FROZEN_CLONE_STRUCTURAL_ASSERTION",
+  "paths": [
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js"
+  ],
+  "bounded": true,
+  "resolved": true
+}

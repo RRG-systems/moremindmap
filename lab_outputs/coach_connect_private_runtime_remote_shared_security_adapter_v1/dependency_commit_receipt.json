@@ -1,0 +1,6 @@
+{
+  "expected_head": "d0bde035a0519f8e89135204e88cd428ca0d5800",
+  "actual_head": "d0bde035a0519f8e89135204e88cd428ca0d5800",
+  "subject": "feat(private-runtime): add async security and entitlement bootstrap v1",
+  "matched": true
+}

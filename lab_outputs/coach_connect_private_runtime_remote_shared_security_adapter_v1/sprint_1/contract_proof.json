@@ -1,0 +1,7 @@
+{
+  "sprint": 1,
+  "v2_contract": "shared-security-state-async-v2",
+  "contract_drift": false,
+  "canonical_security_service_count": 1,
+  "remote_adapter_count": 1
+}

@@ -1,0 +1,5 @@
+{
+  "sprint": 5,
+  "monotonic_canaries_required": 3,
+  "restart_state": "RECOVERING"
+}

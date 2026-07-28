@@ -1,0 +1,11 @@
+{
+  "sprint": 7,
+  "count": 4,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+    "scripts/verifyCoachConnectPrivateRuntimeRemoteSharedSecurityAdapter.mjs"
+  ],
+  "allowlist_compliant": true
+}

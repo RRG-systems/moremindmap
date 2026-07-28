@@ -1,0 +1,12 @@
+{
+  "safe_intelligence_fabric_test_files": 91,
+  "safe_intelligence_fabric_tests_passed": 538,
+  "safe_intelligence_fabric_tests_failed": 0,
+  "focused_tests_included": 43,
+  "existing_regressions_beyond_focused": 495,
+  "deterministic_build_sha256": "00b19c755a952342c2e07c0bcb5d7c747947af1fdbd4d9037acc6abbff00efe4",
+  "deterministic_build_match": true,
+  "focused_lint": "PASS",
+  "import_export_check": "PASS",
+  "dependency_cycles": 0
+}

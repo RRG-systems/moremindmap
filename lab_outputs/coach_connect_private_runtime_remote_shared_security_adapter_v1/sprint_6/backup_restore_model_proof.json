@@ -1,0 +1,6 @@
+{
+  "sprint": 6,
+  "live_restore_run": false,
+  "status": "NOT_RUN_CREDENTIAL_GATE",
+  "isolated_empty_restore_required": true
+}

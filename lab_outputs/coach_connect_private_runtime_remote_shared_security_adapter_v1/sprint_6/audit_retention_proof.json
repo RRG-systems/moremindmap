@@ -1,0 +1,6 @@
+{
+  "sprint": 6,
+  "xadd_same_script": true,
+  "xtrim_minid_provider_time": true,
+  "maximum_days": 30
+}

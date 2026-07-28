@@ -1,0 +1,6 @@
+{
+  "sprint": 2,
+  "record_families": 10,
+  "keyed_digest_keys": true,
+  "one_hash_slot_per_environment": true
+}

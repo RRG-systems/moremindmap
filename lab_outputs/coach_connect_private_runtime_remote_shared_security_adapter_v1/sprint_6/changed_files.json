@@ -1,0 +1,13 @@
+{
+  "sprint": 6,
+  "count": 6,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js"
+  ],
+  "allowlist_compliant": true
+}

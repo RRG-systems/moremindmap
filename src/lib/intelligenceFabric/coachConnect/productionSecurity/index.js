@@ -8,6 +8,7 @@ export * from './deletionLifecycle.js';
 export * from './erasureStrategy.js';
 export * from './inMemorySharedSecurityState.js';
 export * from './operatorIdentity.js';
+export * from './remoteSharedSecurity/index.js';
 export * from './retentionAuthority.js';
 export * from './sessionElevation.js';
 export * from './sharedSecurityStatePorts.js';

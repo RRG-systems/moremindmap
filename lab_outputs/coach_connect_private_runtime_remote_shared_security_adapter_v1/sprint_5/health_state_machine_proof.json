@@ -1,0 +1,6 @@
+{
+  "sprint": 5,
+  "states": 6,
+  "only_healthy_allows": true,
+  "emergency_disable_dominates": true
+}

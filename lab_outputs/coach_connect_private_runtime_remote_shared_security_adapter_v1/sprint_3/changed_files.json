@@ -1,0 +1,11 @@
+{
+  "sprint": 3,
+  "count": 4,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.races.test.js"
+  ],
+  "allowlist_compliant": true
+}

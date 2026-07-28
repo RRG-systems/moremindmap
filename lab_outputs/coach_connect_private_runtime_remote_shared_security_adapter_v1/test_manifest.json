@@ -1,0 +1,17 @@
+{
+  "focused_test_files": [
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.contract.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.queries.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.races.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.recovery.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js"
+  ],
+  "focused_tests_passed": 43,
+  "focused_tests_failed": 0,
+  "promise_conformance": "PASS",
+  "race_failure_tests": "PASS"
+}

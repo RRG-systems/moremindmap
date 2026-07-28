@@ -1,0 +1,6 @@
+{
+  "sprint": 3,
+  "concurrent_attempts": 32,
+  "durable_effects": 1,
+  "divergent_fingerprint_denied": true
+}

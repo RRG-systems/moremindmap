@@ -1,0 +1,11 @@
+{
+  "sprint": 5,
+  "count": 4,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/health.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.recovery.test.js"
+  ],
+  "allowlist_compliant": true
+}

@@ -1,0 +1,90 @@
+{
+  "implementation_file_count": 21,
+  "files": [
+    {
+      "path": "scripts/verifyCoachConnectPrivateRuntimeRemoteSharedSecurityAdapter.mjs",
+      "sha256": "5b44613d9dd921646ff5194d714b6ef798414747540a3629deb0939a08411162"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+      "sha256": "4ac7d1e77d1bdb36ea39bedbd8b6055715bc931ba9a634d3c4eae8f942f523af"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "sha256": "55cd4489bc26e9884025c72e4b8aedee28fa5d6a329e2e78da99064eef808816"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+      "sha256": "d85fa893f2b781e2b810cea9fd76d5c8ef5cc8701fcf1bca3143fdf55d2e41f0"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+      "sha256": "fd1fde43d47caa351feaadf3713b7b3351b63f55f4c4ea728c60a92bd12c1145"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/contracts.js",
+      "sha256": "809565a18a0fcb353c9aba07b808307e406a3cc7bb319693c84c3b40dfadca23"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/health.js",
+      "sha256": "a21c7737882c3bf4268e5709860b7b57d19cff40ecba70b97e43f4fb4b9ace66"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+      "sha256": "b8613fe5df3fb03adbcdad399b06b58639b5c454983384a4be760974beacda7f"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js",
+      "sha256": "79d4fb280120d2d57615064206ec37c7904479b58ec1ed6b3bd72aa58b7907c6"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js",
+      "sha256": "baf7cf400f75474934fd996cac400be4454cec0c19b31e6d9b00bcd99a042c64"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "sha256": "b2b388d577d35fe60b162dc5701cdbe3059962b9e806fb0c2e03248e5d100ac5"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+      "sha256": "de1ae7b205f9df41443ad1b3f46c7015ed2750e74093c6d9ce9f1b343be19ee1"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+      "sha256": "9729e4a8305d4948087db684b3428b02af90bec0e08118f63f47596ce445c623"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.contract.test.js",
+      "sha256": "c3508915711aaf1142bc485469aee54ce2a996385fb328e0eb30b65880fbdcaa"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+      "sha256": "df0192027fc2416ebd9f90001c9b9331c4cc76cbf9889f48919d508ef66756b7"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+      "sha256": "3ad2ab36c867232e8d527eceafe580062d0156c6e6653d265a2931fe592cc343"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js",
+      "sha256": "5f77e33cf195e09fde2f7629f83aa41b043701a68c19edceee0dfd8ad0e54938"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+      "sha256": "b07e094b63b1a04705f8c9f64ef908d01606849172ba767ac6faa75014513f8e"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.queries.test.js",
+      "sha256": "9c406f46d277d8ad31f142818dbc7be638cec2f6b0964e3030198d56aa79243d"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.races.test.js",
+      "sha256": "612216f271157410bb6e8dd485acd535a551d03b6df31e448fefae8db811ae20"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.recovery.test.js",
+      "sha256": "44d8c50b604aa68743980025e94f78d2db52820dc60e2df6b60eefab7bcf0bec"
+    }
+  ],
+  "evidence_files_excluded_from_implementation_count": true
+}

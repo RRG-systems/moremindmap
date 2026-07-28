@@ -1,0 +1,6 @@
+{
+  "sprint": 5,
+  "timeout_fail_closed": true,
+  "partition_fail_closed": true,
+  "malformed_fail_closed": true
+}

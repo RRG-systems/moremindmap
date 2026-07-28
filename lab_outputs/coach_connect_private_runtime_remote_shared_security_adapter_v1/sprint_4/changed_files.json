@@ -1,0 +1,9 @@
+{
+  "sprint": 4,
+  "count": 2,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.queries.test.js"
+  ],
+  "allowlist_compliant": true
+}

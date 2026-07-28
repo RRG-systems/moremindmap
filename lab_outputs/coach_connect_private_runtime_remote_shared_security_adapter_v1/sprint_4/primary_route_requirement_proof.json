@@ -1,0 +1,5 @@
+{
+  "sprint": 4,
+  "required_consistency": "PRIMARY_OR_LINEARIZABLE",
+  "eval_ro_allowed": false
+}

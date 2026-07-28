@@ -1,0 +1,5 @@
+{
+  "sprint": 1,
+  "promise_native_methods": 5,
+  "synchronous_returns_fail_closed": true
+}

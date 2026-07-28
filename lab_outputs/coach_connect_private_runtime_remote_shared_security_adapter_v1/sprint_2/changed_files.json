@@ -1,0 +1,11 @@
+{
+  "sprint": 2,
+  "count": 4,
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js"
+  ],
+  "allowlist_compliant": true
+}

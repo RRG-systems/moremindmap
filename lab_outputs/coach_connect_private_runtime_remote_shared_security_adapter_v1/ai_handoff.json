@@ -1,0 +1,22 @@
+{
+  "campaign_id": "MORE_CAMPAIGN_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_V1",
+  "prerequisite_commit": "d0bde035a0519f8e89135204e88cd428ca0d5800",
+  "evidence_class": "OFFLINE_IMPLEMENTATION",
+  "provider_calls": 0,
+  "credentials_inspected": false,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "customer_data_records": 0,
+  "qualification_status": "CREDENTIALS_REQUIRED",
+  "implementation_complete": true,
+  "offline_validation_complete": true,
+  "provider_qualification_complete": false,
+  "next_action": "SUPPLY_EXPLICIT_TEMPORARY_QUALIFICATION_AUTHORITY_AND_REFERENCES_IN_A_SEPARATE_REVIEWED_RUN",
+  "prohibited_next_actions": [
+    "DEPLOYMENT",
+    "VERCEL_BINDING",
+    "LIVE_ACTIVATION",
+    "TESTER_ENABLEMENT"
+  ],
+  "verdict": "REMOTE_SHARED_SECURITY_ADAPTER_IMPLEMENTED_OFFLINE_QUALIFICATION_CREDENTIALS_REQUIRED"
+}

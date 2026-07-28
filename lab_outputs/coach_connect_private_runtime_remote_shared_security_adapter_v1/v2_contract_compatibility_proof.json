@@ -1,0 +1,8 @@
+{
+  "contract": "shared-security-state-async-v2",
+  "committed_v2_files_changed": 0,
+  "method_count": 5,
+  "promise_native": true,
+  "no_v1_fallback": true,
+  "no_second_authority": true
+}

@@ -1,0 +1,28 @@
+{
+  "expected_count": 21,
+  "actual_count": 21,
+  "exact_match": true,
+  "paths": [
+    "scripts/verifyCoachConnectPrivateRuntimeRemoteSharedSecurityAdapter.mjs",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/health.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.contract.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.keyspace.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.queries.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.races.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.recovery.test.js"
+  ]
+}
