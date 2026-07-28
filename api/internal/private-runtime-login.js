@@ -27,9 +27,14 @@ export function createPrivateRuntimeLoginHandler({
     const operation = typeof beginLogin === 'function'
       ? beginLogin
       : composition?.operations?.beginLogin;
-    if (composition?.configured === false) {
-      const unconfigured = await settlePrivateRuntimeLiveOperation(operation, [{}, req]);
-      return deny(res, unconfigured.status || 404);
+    if (composition?.configured === false && typeof composition?.describe === 'function') {
+      const description = await settlePrivateRuntimeLiveOperation(
+        composition.describe.bind(composition),
+      );
+      if (description.configured !== true) {
+        const unconfigured = await settlePrivateRuntimeLiveOperation(operation, [{}, req]);
+        return deny(res, unconfigured.status || 404);
+      }
     }
     const input = body(req);
     if (typeof input.browser_binding_reference !== 'string'
@@ -42,16 +47,24 @@ export function createPrivateRuntimeLoginHandler({
       correlation_id: input.correlation_id,
     }, req]);
     if (!result?.ok) return deny(res, result?.status || 401);
+    const cookies = [];
     if (typeof result.pre_auth_cookie_value === 'string') {
-      res.setHeader(
-        'Set-Cookie',
-        `__Host-more_session=${result.pre_auth_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Lax`,
-      );
+      cookies.push(`__Host-more_session=${result.pre_auth_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+    }
+    if (typeof result.browser_binding_cookie_value === 'string') {
+      cookies.push(`__Host-more_browser_binding=${result.browser_binding_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+    }
+    if (typeof result.transaction_cookie_value === 'string') {
+      cookies.push(`__Host-more_oidc_transaction=${result.transaction_cookie_value}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+    }
+    if (cookies.length) {
+      res.setHeader('Set-Cookie', cookies);
     }
     return res.status(200).json({
       ok: true,
       login_reference: result.login_reference || result.pre_auth_session_ref,
       expires_at: result.expires_at,
+      authorization_url: result.authorization_url || null,
     });
   };
 }

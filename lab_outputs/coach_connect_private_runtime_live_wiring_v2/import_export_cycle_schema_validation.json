@@ -1,0 +1,24 @@
+{
+  "import_export": {
+    "passed": true,
+    "required_private_runtime_exports": [
+      "buildPrivateRuntimeLiveCompositionRootV2",
+      "createCanonicalBusinessEngineLiveAttachmentAdapterV1",
+      "createExistingCoachConnectLiveAttachmentAdapterV1",
+      "createExistingSubscriptionRuntimeLiveAttachmentAdapterV1",
+      "createPrivateRuntimeLiveAttachmentCoordinatorV1",
+      "getPrivateRuntimeLiveCompositionV2"
+    ],
+    "required_production_security_exports": [
+      "createAuth0LiveSubscriberAssertionAdapterV1"
+    ],
+    "missing_exports": []
+  },
+  "dependency_cycles": {
+    "module_count": 125,
+    "internal_edge_count": 302,
+    "cycle_count": 0,
+    "cycles": []
+  },
+  "schema_validation_passed": true
+}

@@ -1,0 +1,15 @@
+{
+  "handler_count": 7,
+  "handlers": [
+    "api/internal/private-runtime-login.js",
+    "api/internal/private-runtime-callback.js",
+    "api/internal/private-runtime-session.js",
+    "api/internal/private-runtime-bootstrap.js",
+    "api/internal/private-runtime-logout.js",
+    "api/internal/developer-access.js",
+    "api/internal/subscription-entitlement.js"
+  ],
+  "accessor_count": 7,
+  "direct_adapter_calls": 0,
+  "responses_before_security_settles": 0
+}

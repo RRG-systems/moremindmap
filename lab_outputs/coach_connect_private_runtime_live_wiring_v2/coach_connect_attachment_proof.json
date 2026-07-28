@@ -1,0 +1,10 @@
+{
+  "existing_reference_only": true,
+  "creates_coach_connect_runtime": false,
+  "text_only": true,
+  "voice_calls": 0,
+  "media_calls": 0,
+  "transcript_persistence_calls": 0,
+  "canonical_mutation_authority": false,
+  "exactly_one": true
+}

@@ -1,0 +1,135 @@
+{
+  "current": [
+    {
+      "handler": "api/internal/private-runtime-login.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/private-runtime-callback.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/private-runtime-session.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/private-runtime-bootstrap.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/private-runtime-logout.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/developer-access.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    },
+    {
+      "handler": "api/internal/subscription-entitlement.js",
+      "graph": "handler -> frozen UNCONFIGURED composition -> asynchronous deny"
+    }
+  ],
+  "repaired": [
+    {
+      "handler": "api/internal/private-runtime-login.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/private-runtime-callback.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/private-runtime-session.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/private-runtime-bootstrap.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/private-runtime-logout.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/developer-access.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    },
+    {
+      "handler": "api/internal/subscription-entitlement.js",
+      "graph": [
+        "getPrivateRuntimeLiveCompositionV2",
+        "protected-edge identity verification",
+        "subscriber assertion verification",
+        "Canonical Async Security Service V2",
+        "qualified PRIVATE_LIVE remote shared-security adapter",
+        "Developer Access Security Facade V2",
+        "existing Private Runtime bridge",
+        "attested existing product runtime references",
+        "authority revalidation"
+      ]
+    }
+  ],
+  "direct_handler_adapter_calls": 0,
+  "v1_handler_imports": 0,
+  "synthetic_live_paths": 0
+}

@@ -1,0 +1,34 @@
+{
+  "baseline_dirty_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "current_dirty_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "unchanged_by_campaign": true,
+  "qualified_adapter_files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "baseline_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "current_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+      "baseline_sha256": "d85fa893f2b781e2b810cea9fd76d5c8ef5cc8701fcf1bca3143fdf55d2e41f0",
+      "current_sha256": "d85fa893f2b781e2b810cea9fd76d5c8ef5cc8701fcf1bca3143fdf55d2e41f0",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "baseline_sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "current_sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js",
+      "baseline_sha256": "068a3e159a7bd576a9ccab08a870e900755485ec09845d0097da427575afe495",
+      "current_sha256": "068a3e159a7bd576a9ccab08a870e900755485ec09845d0097da427575afe495",
+      "unchanged": true
+    }
+  ],
+  "package_manifest_changed": false,
+  "lockfile_changed": false,
+  "vercel_configuration_changed": false
+}

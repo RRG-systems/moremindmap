@@ -6,6 +6,9 @@ import {
 } from './developer-access-security.js';
 import { shapePrivacyResponse } from '../../src/lib/intelligenceFabric/coachConnect/security/privacy.js';
 import { isThenable } from '../../src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSharedSecurityStatePort.js';
+import {
+  getPrivateRuntimeLiveCompositionV2,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';
 
 export const MONTHLY_INTELLIGENCE_ACCESS_TYPE = 'more_monthly_intelligence';
 
@@ -139,10 +142,19 @@ export function resolveSubscriptionEntitlement({
   requestContext = null,
   requestedAction = 'inspect_private_subscription_entitlement',
   liveCompositionV2 = null,
+  compositionAccessor = getPrivateRuntimeLiveCompositionV2,
 }) {
-  if (liveCompositionV2) {
+  const explicitLegacy = canonicalSecurityServiceV2 != null
+    || privateRuntimeDecision != null
+    || paidAccessGrant != null
+    || subject_binding != null;
+  const composed = liveCompositionV2
+    || (!explicitLegacy && typeof compositionAccessor === 'function'
+      ? compositionAccessor()
+      : null);
+  if (composed) {
     return resolveComposedPrivateSubscriptionEntitlement({
-      liveCompositionV2,
+      liveCompositionV2: composed,
       req,
     });
   }

@@ -1,0 +1,11 @@
+{
+  "missing_configuration_denies": true,
+  "provider_timeout_denies": true,
+  "provider_outage_denies": true,
+  "malformed_provider_response_denies": true,
+  "stale_epoch_denies": true,
+  "revocation_denies": true,
+  "emergency_disable_denies": true,
+  "public_and_unauthenticated_requests_deny": true,
+  "local_or_v1_fallback": false
+}

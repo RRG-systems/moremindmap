@@ -4,6 +4,10 @@ import {
   createDeveloperAccessSecurityFacadeV2,
   validateCanonicalAsyncSecurityServiceShape,
 } from './developerAccessSecurityFacade.js';
+import {
+  buildPrivateRuntimeLiveCompositionRootV2,
+  createDeferredPrivateRuntimeLiveCompositionV2,
+} from './liveBindings/compositionRoot.js';
 
 export const PRIVATE_RUNTIME_LIVE_COMPOSITION_VERSION = 'private-runtime-live-composition-v2';
 
@@ -69,8 +73,12 @@ const UNCONFIGURED_COMPOSITION = Object.freeze({
   operations: UNCONFIGURED_OPERATIONS,
 });
 
-export function getPrivateRuntimeLiveCompositionV2() {
-  return UNCONFIGURED_COMPOSITION;
+let sourceBoundComposition = null;
+
+export function resetPrivateRuntimeLiveCompositionV2ForTests() {
+  if (globalThis.process?.env?.NODE_ENV !== 'test') return false;
+  sourceBoundComposition = null;
+  return true;
 }
 
 function requestBody(req) {
@@ -91,7 +99,9 @@ export function createPrivateRuntimeLiveCompositionV2({
   privateRuntimeBridge = null,
   resolveRequestContext = null,
   resolveBridgeInput = null,
+  serializeAuthenticatedSession = null,
   activationDecision = async () => false,
+  providerAdapterBound = false,
 } = {}) {
   const serviceValidation = validateCanonicalAsyncSecurityServiceShape(canonicalSecurityService);
   if (!serviceValidation.valid) {
@@ -131,7 +141,31 @@ export function createPrivateRuntimeLiveCompositionV2({
       if (!activation.allowed) return activation;
       const context = await contextFor('login', req, { input });
       if (!context.ok) return context;
-      return invokeService('beginPreAuth', [context.value]);
+      const begun = await invokeService('beginPreAuth', [context.value]);
+      if (!begun.allowed) return begun;
+      if (typeof assertionPort?.beginAuthorization !== 'function') {
+        return denial('SUBJECT_ASSERTION_REQUIRED', 401);
+      }
+      const authorization = await settlePrivateRuntimeLiveOperation(
+        assertionPort.beginAuthorization.bind(assertionPort),
+        [{
+          pre_auth_session_ref: begun.pre_auth_session_ref,
+          browser_binding_hash: context.value.browser_binding_hash,
+          correlation_ref: context.value.correlation_ref,
+          edge_attestation: context.value.edge_attestation,
+          rotation_parent_session_token_hash:
+            context.value.rotation_parent_session_token_hash,
+          rotation_parent_reference: context.value.rotation_parent_reference,
+        }],
+      );
+      if (!authorization.ok) return authorization;
+      return frozen({
+        ...begun,
+        authorization_url: authorization.authorization_url,
+        transaction_cookie_value: authorization.transaction_cookie_value,
+        browser_binding_cookie_value: context.value.browser_binding_reference,
+        authority_granted: false,
+      });
     },
 
     async completeLogin(req) {
@@ -147,10 +181,30 @@ export function createPrivateRuntimeLiveCompositionV2({
       if (!assertion.ok || assertion.verified_assertion?.verification_status !== 'VERIFIED') {
         return denial(assertion.code || 'SUBJECT_ASSERTION_INVALID', 401);
       }
-      return invokeService('completeAuthentication', [{
+      const authenticated = await invokeService('completeAuthentication', [{
         ...context.value,
         verified_assertion: assertion.verified_assertion,
+        rotation_parent_session_token_hash:
+          assertion.rotation_parent_session_token_hash,
+        rotation_parent_reference: assertion.rotation_parent_reference,
       }]);
+      if (!authenticated.allowed) return authenticated;
+      if (typeof serializeAuthenticatedSession !== 'function') {
+        return denial('SESSION_ELEVATION_REQUIRED', 503);
+      }
+      const serialized = await settlePrivateRuntimeLiveOperation(
+        serializeAuthenticatedSession,
+        [{ result: authenticated, context: context.value }],
+      );
+      if (!serialized.ok || typeof serialized.value !== 'string') {
+        return denial(serialized.code || 'SESSION_ELEVATION_REQUIRED', 503);
+      }
+      return frozen({
+        ...authenticated,
+        session_cookie_value: serialized.value,
+        raw_assertion_present: false,
+        raw_token_persisted: false,
+      });
     },
 
     async inspectSession(req) {
@@ -300,7 +354,7 @@ export function createPrivateRuntimeLiveCompositionV2({
     composition_version: PRIVATE_RUNTIME_LIVE_COMPOSITION_VERSION,
     configured: true,
     source_default_off: true,
-    provider_adapter: false,
+    provider_adapter: providerAdapterBound === true,
     provider_connection: false,
     v1_fallback: false,
     mixed_sync_async: false,
@@ -314,11 +368,22 @@ export function createPrivateRuntimeLiveCompositionV2({
         configured: true,
         state: service.ok ? 'CONFIGURED_DEFAULT_OFF' : 'INVALID',
         source_default_off: true,
-        provider_adapter: false,
+        provider_adapter: providerAdapterBound === true,
         provider_connection: service.capability?.live_connection_verified === true,
         v1_fallback: false,
       });
     },
     operations: Object.freeze(operations),
   });
+}
+
+export function getPrivateRuntimeLiveCompositionV2() {
+  if (!sourceBoundComposition) {
+    sourceBoundComposition = createDeferredPrivateRuntimeLiveCompositionV2({
+      build: () => buildPrivateRuntimeLiveCompositionRootV2({
+        createLiveComposition: createPrivateRuntimeLiveCompositionV2,
+      }),
+    });
+  }
+  return sourceBoundComposition || UNCONFIGURED_COMPOSITION;
 }

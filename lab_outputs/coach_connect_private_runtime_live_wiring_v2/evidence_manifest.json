@@ -1,0 +1,386 @@
+{
+  "manifest_version": "private-runtime-live-wiring-v2-evidence-manifest-v2",
+  "entry_count_excluding_self": 76,
+  "entries": [
+    {
+      "path": "api/internal/developer-access.js",
+      "sha256": "77f7f2f5ade091d9cce555fce51c2fb9c48a13e9fc9605268ec6ef9ffcef69c7",
+      "bytes": 9463
+    },
+    {
+      "path": "api/internal/private-runtime-bootstrap.js",
+      "sha256": "4055fe0d5449be26b306e3c00cf3eb7f9351d8e9a9f8a72bb520e4ec23f05cf6",
+      "bytes": 2256
+    },
+    {
+      "path": "api/internal/private-runtime-callback.js",
+      "sha256": "491d2d326c7c5b3f6c7107f9f191f8c15c2f3adce6aad2c8ae90b4a83ba971a4",
+      "bytes": 2122
+    },
+    {
+      "path": "api/internal/private-runtime-login.js",
+      "sha256": "f2c4479b8126f0b18f1a6f24dd9b9cb4b7768edd529e69a1da3d964e59f4f301",
+      "bytes": 3164
+    },
+    {
+      "path": "api/internal/private-runtime-logout.js",
+      "sha256": "2add4cfad62e393e6a33f51e7c60367570ddb1f6f60b83a73132253602389b35",
+      "bytes": 2094
+    },
+    {
+      "path": "api/internal/private-runtime-session.js",
+      "sha256": "8115839d7eeb4e2b482c9a3d010c6d1082b2544154f546ce42fed728ba815969",
+      "bytes": 1611
+    },
+    {
+      "path": "api/internal/subscription-entitlement.js",
+      "sha256": "f521124586e7ae8cfe2c6d8930c5cd257c8edc2688d05a1ff23204a964464fd7",
+      "bytes": 7310
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/ai_handoff.json",
+      "sha256": "a63e7cca10c78b9485ec1d6ae4abe33aa3bac02a62cd026395654c2fbf0a8bd1",
+      "bytes": 346
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/artifact_index.json",
+      "sha256": "5261f279218385237181d766cfdfc7f2cb468b5e0bba0c2465a3c2ab52b131b8",
+      "bytes": 7011
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/business_engine_attachment_proof.json",
+      "sha256": "cb6e2a7cd83094d1f11db7d606006d41e291dc5697aadabcabf8ba366e96c151",
+      "bytes": 216
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/change_receipts.json",
+      "sha256": "25a4eea59b3ed4325e4ff9d2712597a9b0db5c49fefeeb177faf53cc310e2922",
+      "bytes": 560
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/changed_file_manifest.json",
+      "sha256": "a1506998aea284f8e395baebcb8b33fa74f02a3e13c04a533f76332d4634ef1c",
+      "bytes": 3351
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/coach_connect_attachment_proof.json",
+      "sha256": "3a89af02972bde7912bae215690e489c86acc74e4c667c4f810e5c8e0e044253",
+      "bytes": 242
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/configuration_contract.json",
+      "sha256": "441ad88f593f09790101a6b0059507da370380e59e8a117cd46e20fb6738fd9c",
+      "bytes": 2812
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/current_and_repaired_call_graphs.json",
+      "sha256": "25f2f05f3681bf7fb087691eeba03b9412c367f048b3ac6718e09abe6f842873",
+      "bytes": 4897
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/deployment_call_ledger.json",
+      "sha256": "d978d1d6140ec8aeb67e67737b8d6a51dc65aee3c94cb5d8d40b0ea2246f533a",
+      "bytes": 122
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/deterministic_build_proof.json",
+      "sha256": "8a03a8219fb80adfcce086ec2110bb8630675b37b2fcd082c3e127a06daa1718",
+      "bytes": 318
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/developer_access_and_subdev1_proof.json",
+      "sha256": "7610ab017777375eab2082cf97bdcaa0a5d3530741a0beee0eebaeeeb14d1a21",
+      "bytes": 446
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/developer_access_subdev1_proof.json",
+      "sha256": "dfba979e227a4446ceaeb6235b7fde959c6ffa62fba0a2ac41a8cb1795542cba",
+      "bytes": 342
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/environment_change_ledger.json",
+      "sha256": "c8e01a535d57dcd1fe1af1c5a5d662b3f5bc4a8d576fc196e1fa8bf4dc25c83c",
+      "bytes": 84
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/exact_allowlist.json",
+      "sha256": "d4258b7126528a4ab5efd0b6afb4199d9e1e4d96495535a1ffe0b88631a3760d",
+      "bytes": 2927
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/exact_changed_file_manifest.json",
+      "sha256": "4b10aaf979701fcee23470bfd0bdce35894966640a8aff7484d4c057825a4bf5",
+      "bytes": 8239
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/exact_source_diff.patch",
+      "sha256": "5962a320464a090cba859abac3e26be44682fe0e7cad1ccd64976a67a10493ed",
+      "bytes": 229573
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/executive_handoff.md",
+      "sha256": "54747ae72e75da6177862fe5de97c61cec7cdc8254b361cb947ebc2f70a57b81",
+      "bytes": 256
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/executive_summary.md",
+      "sha256": "82e2144fdf6c6fb839b8ad75ecaf80eb37a58d314e4f5908c5a3a39cb891f6bb",
+      "bytes": 374
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/failure_recovery_public_lockout_proof.json",
+      "sha256": "afaf645a3aa41f2cb9f32673b6121dfccb24c65436a209129669580039f9a7e4",
+      "bytes": 338
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/final_verdict.json",
+      "sha256": "ef8e0714f409c3d28a774819e6114f9c2ead6333d4d7a2bf9ca2b60d898c8014",
+      "bytes": 333
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/handler_wiring_report.json",
+      "sha256": "cacb87074edc2c62fd347d44ba12807047f4d49709f311ebc1437bdcfda61587",
+      "bytes": 462
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/import_export_cycle_schema_validation.json",
+      "sha256": "fedb33c9449dee4b8b856d1d05709ae9580a350101272e8472554e9c600f6b01",
+      "bytes": 728
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/live_composition_report.json",
+      "sha256": "22c4cded8f41fceccdd484946ab26fea84bcffad6a9917939074f6ed541e187e",
+      "bytes": 352
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/login_session_logout_proof.json",
+      "sha256": "15642d74b86fa442926ab61cabbbc3b681fc71345e6a1f144faa0e3b430bd9f5",
+      "bytes": 605
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/mandatory_suite_coverage.json",
+      "sha256": "ab6f99fafd7f6d8fd166098d540ec2d90a599251ba4af71cf6f2b46f20f3d363",
+      "bytes": 494
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/outage_and_emergency_disable_proof.json",
+      "sha256": "1b7cac50f7171031b0cda9300d8a4a02366b661a244b51f88706526c565a1d5d",
+      "bytes": 208
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/package_validation.json",
+      "sha256": "ef151f66c048e83a3cf34f8c6ca34278fc2fae1be4f6de556af8800192bf71de",
+      "bytes": 570
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/prerequisite_and_qualification_identity.json",
+      "sha256": "dafb116931678f37a879c2db408a447077e2cbc33297da6dac727aa4c1720076",
+      "bytes": 450
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/prerequisite_validation.json",
+      "sha256": "e00a9cf6bc1f34a81d9e5e3a09a04c4809c308e0b7f6de5282e228f778429ef7",
+      "bytes": 883
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/private_runtime_attachment_proof.json",
+      "sha256": "adcdb31aa50f3d80fe03cba16f97bb517d6652b2439729a63538f288f50cd29b",
+      "bytes": 287
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/private_runtime_authority_proof.json",
+      "sha256": "48ac2636b1d11f746eaac24c9d3599362348aaffa307cf5387b3c9c2c8ea9a20",
+      "bytes": 272
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/protected_root_report.json",
+      "sha256": "94a480be91aaf2c639c5685b002ffed9c647d47dd073620193e3a0aed0b8d638",
+      "bytes": 1718
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/provider_activity_ledger.json",
+      "sha256": "3fedc32fd9816d7eef4a314fa4134701923213b9d414ced19a363973da815716",
+      "bytes": 163
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/public_lockout_proof.json",
+      "sha256": "34171244325db002bd8d2d5f907c5bc5302cd80d6b26c0a212a93646c4b7ac87",
+      "bytes": 196
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/regression_summary.json",
+      "sha256": "4421ce08e0a8017a5f26ae34696a515d9129e0f37bb0a29bcd5fdb50a9721967",
+      "bytes": 352
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/repair_receipts.json",
+      "sha256": "38fa5e557526ed1c8557065c09778e28c8671e21a3d3c3a504bcc1061d315f6b",
+      "bytes": 1067
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/restart_recovery_proof.json",
+      "sha256": "84dad7d987de3d21f39f825f2c8a87965b631350b62f8387a85716caed9804d3",
+      "bytes": 167
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/root_cause_receipt.json",
+      "sha256": "e10304d0d287b3413bc245f7ff260b1917759f3cd4c61e2c95d63d2d10510d82",
+      "bytes": 608
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/secret_and_sensitive_content_scans.json",
+      "sha256": "f6ee87000930b20efcd9ea693482365317806205c89f75dbb4623491642064e6",
+      "bytes": 418
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/secret_scan.json",
+      "sha256": "93137b793c34309a4c3cffff4a4f61ff6102bd6e769fc2b3163d94f9c961e806",
+      "bytes": 119
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/sensitive_content_scan.json",
+      "sha256": "20fea8cb26afbfd3ab75243e708f00b81551c334356ec07ff74c8d81222ed5c8",
+      "bytes": 118
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/subscription_runtime_attachment_proof.json",
+      "sha256": "ba0f94c09e24ebc196ff9f71e3122d62d7ec3314ed57edc5562c06a4bf6f0fe0",
+      "bytes": 186
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_live_wiring_v2/verifier_result.json",
+      "sha256": "58d89698f530df282ff740634a1a933b90b7fc3e2b939841a41e66cfcc6d19a8",
+      "bytes": 11402
+    },
+    {
+      "path": "scripts/verifyPrivateRuntimeLiveBindingsAndEnvironmentAuthority.mjs",
+      "sha256": "7a7f5b7faaf1c07213bb54b3285b74dd122176a7ff19bc36d96188d074b9902f",
+      "bytes": 35971
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+      "sha256": "e6bd277098190c7b7cfdeefbc22e44fd91ef50e918f4306b6ea892b76b43a5d8",
+      "bytes": 528
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/attachmentCoordinator.js",
+      "sha256": "0a68a5a44cf93130a772afb78dc287ff9a82ff23aed3fdefe9a84a04a12b56a8",
+      "bytes": 7810
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/businessEngineAttachmentAdapter.js",
+      "sha256": "eac0f96733a127343cc29137e5ebcefcde96a3f21edc3700be66a78f03dadbde",
+      "bytes": 1934
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/coachConnectAttachmentAdapter.js",
+      "sha256": "cf50fd12e851faf83ec692542731af3e639fc1d5c07d65684135dc739a0d96a5",
+      "bytes": 2635
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js",
+      "sha256": "6d49f3824b0f9687dabdb5a51479b5dcf79001177fdab8b9a601642d40e4f92a",
+      "bytes": 24110
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+      "sha256": "25cbdb7b0ac36aeaaacd1bb86679fa33d75b6fef75e06066db28479e990879b5",
+      "bytes": 7598
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/contracts.js",
+      "sha256": "dc92f3143ec7f89c9a73a37ea12038497eeed480000a92640f0dd6b3a905e732",
+      "bytes": 12141
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/environmentAttestation.js",
+      "sha256": "7386a889ba450dcdca2efab831e2da69d7c7c35034d67c445078165277207d73",
+      "bytes": 6001
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js",
+      "sha256": "30bae8d8d08cc8ae952755500b42e4336be797ff78ab0b90f54d5ef524063d2a",
+      "bytes": 369
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/subscriptionRuntimeAttachmentAdapter.js",
+      "sha256": "ade0954989ac3ab601312569ff5bf9cb768df5788a6e01156a959df095e8a814",
+      "bytes": 2609
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+      "sha256": "19807a76a46ea781265d8ebe363ad43f7aa6cbbaff2b9ea4126c327bd98f5454",
+      "bytes": 14545
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+      "sha256": "ee327f827e447f8a9f2d8341462e1806c42f93243f5404fc274d9c4c4e78199c",
+      "bytes": 783
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/auth0Adapter.js",
+      "sha256": "2aab1887338cb7763c84ac696e6c21292127a6e99eaf7c460733ce087d133790",
+      "bytes": 13185
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/contracts.js",
+      "sha256": "3bfe14a05e48596a894fece396b1b92e54467f9389e783207f6b560608caecb7",
+      "bytes": 5758
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/index.js",
+      "sha256": "885efcccdb6c50c1e78ed84d272c054d572d47188d6562e77e85bb99a8baccea",
+      "bytes": 105
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/oidcTransaction.js",
+      "sha256": "fcdecbee8b7b69c4b48c8987a96c0212dab0ec7fe914f173d3bf5aafd921c891",
+      "bytes": 3589
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.assertion.test.js",
+      "sha256": "290dddd8b6e6bf68227181790ff581f6c339877066c597fc3fdf156d74a962f7",
+      "bytes": 10004
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.businessEngine.test.js",
+      "sha256": "3d82831ccf707de08bb56fd86f6d7e3c19af8f5163585b0f51f7e2d74374b4e5",
+      "bytes": 4746
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.coachConnect.test.js",
+      "sha256": "ce90220df5cf6f28870a6bd4d9e4b54734c5f6d74052f9fb8660d0a182e0bad8",
+      "bytes": 4554
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.composition.test.js",
+      "sha256": "e7e9da613e760872b9eebebef7bd8cd2695cf2702507345a22e49b99fc842303",
+      "bytes": 9129
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js",
+      "sha256": "5d536e260a3f007673e8057ba14e627a33425cf27e4ab11293b5a7433c4fff80",
+      "bytes": 18200
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.failureRecovery.test.js",
+      "sha256": "1544d64bc17f443a92ef7221269cbefdcdda697565a6580802abb7988fd90175",
+      "bytes": 4820
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.handlers.test.js",
+      "sha256": "8c6c9c71f6154d523e5763359e98add236dc279deab485a0986947563bf02b16",
+      "bytes": 5135
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.integration.test.js",
+      "sha256": "3160756e9669e7bfce63ef33323fe150c7ab6c9a3e740b53332ba91f8cd44f69",
+      "bytes": 12928
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.subscription.test.js",
+      "sha256": "d615e89b50155b3b1e3830f5f38e9857e4028b6c6c495aeeb4e95ba641bfadc4",
+      "bytes": 4453
+    }
+  ]
+}

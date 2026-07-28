@@ -1,0 +1,17 @@
+{
+  "validation_version": "private-runtime-live-wiring-v2-package-validation-v2",
+  "archive_name": "COACH_CONNECT_PRIVATE_RUNTIME_LIVE_WIRING_V2_IMPLEMENTATION_REVIEW.zip",
+  "expected_entry_count": 77,
+  "sorted_paths": true,
+  "duplicate_entries": false,
+  "case_collisions": false,
+  "symlinks": false,
+  "absolute_paths": false,
+  "traversal_paths": false,
+  "decompressed_byte_equality_required": true,
+  "secret_scan_passed": true,
+  "sensitive_content_scan_passed": true,
+  "no_credentials": true,
+  "no_customer_data": true,
+  "no_deployment_artifacts": true
+}

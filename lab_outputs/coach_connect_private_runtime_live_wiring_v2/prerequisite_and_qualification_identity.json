@@ -1,0 +1,8 @@
+{
+  "live_attestation_review_sha256": "4545be94544cdaf29940a45968ef2ac52b6865ed901aac87b84c265bf69f1b45",
+  "live_attestation_receipt_sha256": "97bace9167d6c2473762ad3ac27a472988924857afc4d630186daa5608c3d549",
+  "qualification_review_sha256": "28b42df527bea92dce9a0ccfab9b72a933f8975529e3f02a64853b289f0c47ac",
+  "qualification_certificate_required": true,
+  "live_environment_attestation_required": true,
+  "qualification_namespace_reuse": false
+}

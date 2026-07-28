@@ -7,6 +7,7 @@ export * from './contracts.js';
 export * from './deletionLifecycle.js';
 export * from './erasureStrategy.js';
 export * from './inMemorySharedSecurityState.js';
+export * from './liveSubscriberAssertion/index.js';
 export * from './operatorIdentity.js';
 export * from './remoteSharedSecurity/index.js';
 export * from './retentionAuthority.js';

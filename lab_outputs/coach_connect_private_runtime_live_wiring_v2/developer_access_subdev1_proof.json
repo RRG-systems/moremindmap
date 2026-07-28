@@ -1,0 +1,10 @@
+{
+  "canonical_async_security_service_only": true,
+  "developer_access_facade_only": true,
+  "authentication_precedes_eligibility": true,
+  "eligibility_precedes_entitlement": true,
+  "entitlement_precedes_runtime_authority": true,
+  "raw_access_code_persisted": false,
+  "raw_access_code_logged": false,
+  "paid_private_path_bleed": false
+}

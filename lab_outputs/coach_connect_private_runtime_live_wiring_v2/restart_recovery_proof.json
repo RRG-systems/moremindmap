@@ -1,0 +1,6 @@
+{
+  "process_local_authority": false,
+  "authoritative_remote_state_required": true,
+  "restart_recovery_tested": true,
+  "recovery_requires_full_health_gate": true
+}

@@ -12,7 +12,9 @@ export function createPrivateRuntimeCallbackHandler({
 } = {}) {
   return async function privateRuntimeCallbackHandler(req, res) {
     applyHeaders(res);
-    if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+    if (req.method !== 'GET' && req.method !== 'POST') {
+      return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+    }
     if (typeof enabled === 'function' && enabled(req) !== true) return deny(res);
     const operation = typeof completeLogin === 'function'
       ? completeLogin
@@ -27,7 +29,10 @@ export function createPrivateRuntimeCallbackHandler({
       || typeof sessionCookie !== 'string'
       || result.raw_assertion_present === true
       || result.raw_token_persisted === true) return deny(res, result?.status || 401);
-    res.setHeader('Set-Cookie', sessionCookie);
+    res.setHeader('Set-Cookie', [
+      sessionCookie,
+      '__Host-more_oidc_transaction=; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=0',
+    ]);
     return res.status(200).json({
       ok: true,
       authenticated: true,

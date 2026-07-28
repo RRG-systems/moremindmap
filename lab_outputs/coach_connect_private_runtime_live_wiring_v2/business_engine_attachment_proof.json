@@ -1,0 +1,8 @@
+{
+  "existing_reference_only": true,
+  "creates_business_engine": false,
+  "mutates_business_engine": false,
+  "exact_scope_required": true,
+  "version_hash_reference_receipt_required": true,
+  "exactly_one": true
+}

@@ -1,0 +1,17 @@
+{
+  "receipt_version": "private-runtime-live-wiring-v2-root-cause-receipt-v2",
+  "original_state": "LIVE_RUNTIME_DEFAULT_BINDINGS_UNAVAILABLE",
+  "resolved_blockers": [
+    "LIVE_SUBSCRIBER_ASSERTION_VERIFIER",
+    "CANONICAL_BUSINESS_ENGINE_REFERENCE_ADAPTER",
+    "EXISTING_SUBSCRIPTION_RUNTIME_REFERENCE_ADAPTER",
+    "EXISTING_COACH_CONNECT_REFERENCE_ADAPTER",
+    "PRIVATE_LIVE_ENVIRONMENT_AND_NAMESPACE_AUTHORITY"
+  ],
+  "repair_is_bounded": true,
+  "architecture_redesign": false,
+  "qualification_namespace_reused": false,
+  "provider_calls": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0
+}

@@ -1,0 +1,20 @@
+{
+  "encompassing_suite": "test/intelligenceFabric*.test.js",
+  "passed": 598,
+  "total": 598,
+  "covered_domains": [
+    "PRIVATE_RUNTIME_V2",
+    "ASYNC_SECURITY_V2",
+    "REMOTE_SHARED_SECURITY_ADAPTER",
+    "DEVELOPER_ACCESS",
+    "SESSION_LOGOUT",
+    "SUBDEV1_ENTITLEMENT",
+    "LIVE_HANDLER_INTEGRATION",
+    "BUSINESS_ENGINE_ATTACHMENT",
+    "SUBSCRIPTION_RUNTIME",
+    "COACH_CONNECT",
+    "PRODUCTION_SECURITY",
+    "DEPLOYMENT_READINESS",
+    "INTERNAL_DEFAULT_OFF_DEPLOYMENT"
+  ]
+}

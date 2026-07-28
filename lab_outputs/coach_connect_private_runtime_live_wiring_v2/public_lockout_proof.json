@@ -1,0 +1,8 @@
+{
+  "protected_edge_required": true,
+  "unauthenticated_denies": true,
+  "public_access": false,
+  "public_routes_created": 0,
+  "public_onboarding_changed": false,
+  "named_testers_enabled": 0
+}

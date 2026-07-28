@@ -1,0 +1,9 @@
+{
+  "one_canonical_subject": true,
+  "one_canonical_business_engine": true,
+  "one_existing_subscription_runtime": true,
+  "one_existing_coach_connect_runtime": true,
+  "partial_attachment_fails_closed": true,
+  "duplicate_runtime_created": false,
+  "product_semantics_changed": false
+}

@@ -1,0 +1,8 @@
+{
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_LIVE_WIRING_V2",
+  "repository_head": "2faf462ddaac6ae4ec4c2bae49fe773579a5ca71",
+  "verdict": "PRIVATE_RUNTIME_LIVE_WIRING_IMPLEMENTED_DEPLOYMENT_AUTHORIZATION_REQUIRED",
+  "deployment_authorized": false,
+  "environment_bound": false,
+  "next_action": "SPOCK_IMPLEMENTATION_REVIEW"
+}

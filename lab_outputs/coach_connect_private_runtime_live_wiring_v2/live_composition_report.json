@@ -1,0 +1,11 @@
+{
+  "composition_accessor": "getPrivateRuntimeLiveCompositionV2",
+  "one_shared_deferred_composition": true,
+  "never_returns_null": true,
+  "explicit_async_unconfigured_denial": true,
+  "provider_client_above_adapter": false,
+  "v1_fallback": false,
+  "synthetic_live_fallback": false,
+  "local_cache_authority": false,
+  "source_default_off": true
+}

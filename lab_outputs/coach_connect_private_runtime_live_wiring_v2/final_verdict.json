@@ -1,0 +1,9 @@
+{
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_LIVE_WIRING_V2",
+  "verdict": "PRIVATE_RUNTIME_LIVE_WIRING_IMPLEMENTED_DEPLOYMENT_AUTHORIZATION_REQUIRED",
+  "implementation_complete": true,
+  "deployment_pending_separate_authorization": true,
+  "provider_calls": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0
+}

@@ -1,0 +1,15 @@
+{
+  "receipts": [
+    {
+      "id": "CHANGE_001",
+      "reason": "evidence-driven completion of the mission-required live session rotation path",
+      "change": "carry only the prior opaque session reference and token hash through the sealed OIDC re-verification transaction",
+      "authority_order_changed": false,
+      "architecture_changed": false,
+      "allowlist_changed": false,
+      "provider_behavior_changed": false,
+      "deployment_required": false,
+      "validation": "45/45 focused, 215/215 targeted, 598/598 safe regressions"
+    }
+  ]
+}

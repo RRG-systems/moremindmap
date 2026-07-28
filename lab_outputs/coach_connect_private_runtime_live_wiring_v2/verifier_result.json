@@ -1,0 +1,226 @@
+{
+  "verifier_version": "private-runtime-live-bindings-environment-authority-verifier-v2",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PRIVATE_RUNTIME_LIVE_WIRING_V2",
+  "ok": true,
+  "full_validation": true,
+  "repository_head": "2faf462ddaac6ae4ec4c2bae49fe773579a5ca71",
+  "repository_subject": "fix(private-runtime): separate qualification and live attestation authority",
+  "git_index_empty": true,
+  "prerequisites": {
+    "live_attestation_review_sha256": "4545be94544cdaf29940a45968ef2ac52b6865ed901aac87b84c265bf69f1b45",
+    "live_attestation_receipt_sha256": "97bace9167d6c2473762ad3ac27a472988924857afc4d630186daa5608c3d549",
+    "qualification_review_sha256": "28b42df527bea92dce9a0ccfab9b72a933f8975529e3f02a64853b289f0c47ac",
+    "qualification_certificate_required": true,
+    "live_environment_attestation_required": true,
+    "qualification_namespace_reuse": false
+  },
+  "exact_allowlist_count": 33,
+  "exact_allowlist": [
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/environmentAttestation.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/businessEngineAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/subscriptionRuntimeAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/coachConnectAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/attachmentCoordinator.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/oidcTransaction.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/auth0Adapter.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/index.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "api/internal/private-runtime-login.js",
+    "api/internal/private-runtime-callback.js",
+    "api/internal/private-runtime-session.js",
+    "api/internal/private-runtime-bootstrap.js",
+    "api/internal/private-runtime-logout.js",
+    "api/internal/developer-access.js",
+    "api/internal/subscription-entitlement.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.assertion.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.businessEngine.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.subscription.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.coachConnect.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.composition.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.handlers.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.failureRecovery.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.integration.test.js",
+    "scripts/verifyPrivateRuntimeLiveBindingsAndEnvironmentAuthority.mjs"
+  ],
+  "changed_campaign_file_count": 30,
+  "changed_campaign_files": [
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/environmentAttestation.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/businessEngineAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/subscriptionRuntimeAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/coachConnectAttachmentAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/attachmentCoordinator.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/contracts.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/oidcTransaction.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/auth0Adapter.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/index.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js",
+    "src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js",
+    "api/internal/private-runtime-login.js",
+    "api/internal/private-runtime-callback.js",
+    "api/internal/private-runtime-logout.js",
+    "api/internal/subscription-entitlement.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.assertion.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.businessEngine.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.subscription.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.coachConnect.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.composition.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.handlers.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.failureRecovery.test.js",
+    "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.integration.test.js",
+    "scripts/verifyPrivateRuntimeLiveBindingsAndEnvironmentAuthority.mjs"
+  ],
+  "missing_allowlist_files": [],
+  "unexpected_tracked_changes": [],
+  "preserved_preexisting_tracked_changes": [
+    "api/engine/businessAssessment/buildBusinessIntelligenceDraft.js",
+    "lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs",
+    "src/components/businessAssessment/BusinessEngineVisualV2.jsx",
+    "src/lib/businessAssessment/inferEToPScores.js",
+    "src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js",
+    "src/lib/businessEngine/buildBusinessEngineContract.js",
+    "src/lib/businessEngine/contractDisplaySemantics.js",
+    "src/lib/businessEngine/contractVersion.js",
+    "src/lib/businessEngine/projectBusinessEngineVisualV2.js"
+  ],
+  "handler_accessor_count": 7,
+  "handler_count": 7,
+  "prohibited_handler_imports": [],
+  "prohibited_composition_fallbacks": [],
+  "private_live_authority": {
+    "mode": "PRIVATE_LIVE",
+    "persistent_namespace": true,
+    "disposable_namespace": false,
+    "private_live_only": true,
+    "public_access": false,
+    "production_customer_rollout": false,
+    "source_default_off": true,
+    "emergency_disable_required": true
+  },
+  "focused_tests": {
+    "total": 45,
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "targeted_tests": {
+    "total": 215,
+    "passed": 215,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "safe_intelligence_fabric_tests": {
+    "total": 598,
+    "passed": 598,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0
+  },
+  "deterministic_build": {
+    "run_1_exit_code": 0,
+    "run_2_exit_code": 0,
+    "run_1": {
+      "file_count": 24,
+      "sha256": "8aebd5aa11687714e9c05d6701e39ece0edb0f486c4bd924fd2feea8ccde2ff9"
+    },
+    "run_2": {
+      "file_count": 24,
+      "sha256": "8aebd5aa11687714e9c05d6701e39ece0edb0f486c4bd924fd2feea8ccde2ff9"
+    },
+    "deterministic": true
+  },
+  "lint": {
+    "exit_code": 0,
+    "passed": true,
+    "output": ""
+  },
+  "import_export_validation": {
+    "passed": true,
+    "required_private_runtime_exports": [
+      "buildPrivateRuntimeLiveCompositionRootV2",
+      "createCanonicalBusinessEngineLiveAttachmentAdapterV1",
+      "createExistingCoachConnectLiveAttachmentAdapterV1",
+      "createExistingSubscriptionRuntimeLiveAttachmentAdapterV1",
+      "createPrivateRuntimeLiveAttachmentCoordinatorV1",
+      "getPrivateRuntimeLiveCompositionV2"
+    ],
+    "required_production_security_exports": [
+      "createAuth0LiveSubscriberAssertionAdapterV1"
+    ],
+    "missing_exports": []
+  },
+  "dependency_cycle_validation": {
+    "module_count": 125,
+    "internal_edge_count": 302,
+    "cycle_count": 0,
+    "cycles": []
+  },
+  "schema_validation_passed": true,
+  "qualified_adapter_files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "baseline_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "current_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js",
+      "baseline_sha256": "d85fa893f2b781e2b810cea9fd76d5c8ef5cc8701fcf1bca3143fdf55d2e41f0",
+      "current_sha256": "d85fa893f2b781e2b810cea9fd76d5c8ef5cc8701fcf1bca3143fdf55d2e41f0",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "baseline_sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "current_sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "unchanged": true
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js",
+      "baseline_sha256": "068a3e159a7bd576a9ccab08a870e900755485ec09845d0097da427575afe495",
+      "current_sha256": "068a3e159a7bd576a9ccab08a870e900755485ec09845d0097da427575afe495",
+      "unchanged": true
+    }
+  ],
+  "protected_root_baseline_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "protected_root_current_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "protected_roots_unchanged_by_campaign": true,
+  "secret_scan": {
+    "passed": true,
+    "private_keys": false,
+    "openai_keys": false,
+    "redis_urls": false,
+    "bearer_values": false
+  },
+  "sensitive_content_scan": {
+    "passed": true,
+    "email_addresses": false,
+    "live_profile_ids": false,
+    "hardcoded_access_code_value": false
+  },
+  "provider_calls": 0,
+  "credential_values_inspected": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "runtime_activation": false,
+  "named_tester_activation": false,
+  "staging_actions": 0,
+  "commit_actions": 0,
+  "push_actions": 0,
+  "final_verdict": "PRIVATE_RUNTIME_LIVE_WIRING_IMPLEMENTED_DEPLOYMENT_AUTHORIZATION_REQUIRED"
+}

@@ -23,11 +23,7 @@ export function createPrivateRuntimeLogoutHandler({
       ? logout
       : compositionAccessor()?.operations?.logout;
     const result = await settlePrivateRuntimeLiveOperation(operation, [req]);
-    if (result?.client_session_cookie_clear === true
-      || result?.client_entitlement_cookie_clear === true
-      || result?.ok === true) {
-      res.setHeader('Set-Cookie', [clearSessionCookie, clearCapabilityCookie]);
-    }
+    res.setHeader('Set-Cookie', [clearSessionCookie, clearCapabilityCookie]);
     if (!result?.ok) return res.status(result?.status || 401).json({ ok: false, error: 'request_denied' });
     return res.status(200).json({
       ok: true,

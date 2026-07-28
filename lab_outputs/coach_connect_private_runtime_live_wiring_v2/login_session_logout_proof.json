@@ -1,0 +1,13 @@
+{
+  "verified_protected_edge_precedes_login": true,
+  "oidc_authorization_code_pkce": true,
+  "issuer_audience_signature_nonce_expiry_mfa_verified": true,
+  "assertion_projects_only_opaque_subject_reference": true,
+  "canonical_mapping_is_authoritative_and_no_auto_enrollment": true,
+  "session_rotation_requires_oidc_reverification": true,
+  "rotation_parent_is_sealed_and_server_derived": true,
+  "rotation_invalidates_the_prior_session_atomically": true,
+  "session_state_remote_and_restart_safe": true,
+  "logout_clears_client_cookies": true,
+  "logout_never_falsely_claims_remote_revocation": true
+}

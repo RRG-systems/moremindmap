@@ -1,0 +1,9 @@
+{
+  "one_authoritative_snapshot": true,
+  "one_canonical_security_service": true,
+  "one_authoritative_record_set": true,
+  "cross_subject_scope_mismatch_denies": true,
+  "stale_epoch_denies": true,
+  "revoked_session_denies": true,
+  "revoked_entitlement_denies": true
+}

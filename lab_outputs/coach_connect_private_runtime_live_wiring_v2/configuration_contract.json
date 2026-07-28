@@ -1,0 +1,70 @@
+{
+  "variables": [
+    {
+      "name": "MORE_PRIVATE_RUNTIME_LIVE_ENABLED",
+      "purpose": "source-default-off activation projection",
+      "secret": false,
+      "authority": "configuration authority packet plus separate activation receipt",
+      "rollback": "set false and revoke activation receipt"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED",
+      "purpose": "dominant emergency disable projection",
+      "secret": false,
+      "authority": "configuration authority packet",
+      "rollback": "requires reviewed recovery authority before false"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_QUALIFIED_ADAPTER_SOURCE_SHA256",
+      "purpose": "bind committed adapter implementation to Qualification Certificate",
+      "secret": false,
+      "authority": "reviewed adapter source manifest",
+      "rollback": "restore reviewed digest and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_CONFIG_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_QUALIFICATION_CERTIFICATE_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_ATTESTATION_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_ATTESTATION_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    },
+    {
+      "name": "MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF",
+      "purpose": "server-side authority document reference",
+      "secret": false,
+      "authority": "named operator controlled private-live configuration",
+      "rollback": "remove reference and disable runtime"
+    }
+  ],
+  "secret_values_present": false,
+  "values_resolved_during_campaign": false,
+  "environment_changes": 0
+}

@@ -1,0 +1,17 @@
+{
+  "order": [
+    "AUTHENTICATION",
+    "CANONICAL_SUBJECT",
+    "PRIVATE_TEST_ELIGIBILITY",
+    "CSRF_AND_RATE_LIMIT",
+    "TEMPORARY_SUBDEV1_ENTITLEMENT",
+    "PRIVATE_RUNTIME_AUTHORITY_SNAPSHOT"
+  ],
+  "subdev1_authenticates": false,
+  "administrative_authority": false,
+  "operator_authority": false,
+  "billing_authority": false,
+  "deployment_authority": false,
+  "canonical_truth_authority": false,
+  "paid_entitlement_fallback": false
+}

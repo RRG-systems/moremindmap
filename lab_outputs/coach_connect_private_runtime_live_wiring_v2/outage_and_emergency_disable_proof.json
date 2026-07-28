@@ -1,0 +1,9 @@
+{
+  "timeout_denies": true,
+  "outage_denies": true,
+  "malformed_response_denies": true,
+  "partition_denies": true,
+  "recovering_denies": true,
+  "emergency_disable_dominates": true,
+  "fallback": false
+}

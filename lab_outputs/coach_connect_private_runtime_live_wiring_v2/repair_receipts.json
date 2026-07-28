@@ -1,0 +1,30 @@
+{
+  "receipts": [
+    {
+      "id": "PHASE_2_REPAIR_001",
+      "issue": "deferred accessor metadata broke default-off compatibility",
+      "bounded_change": "restore static configured false metadata while lazily resolving",
+      "gate_result": "PASS"
+    },
+    {
+      "id": "PHASE_2_REPAIR_002",
+      "issue": "configuration authority omitted exact certificate capability bindings",
+      "bounded_change": "validate provider class and script digest",
+      "gate_result": "PASS"
+    },
+    {
+      "id": "PHASE_7_DEPENDENCY_REPAIR_001",
+      "issue": "barrel import introduced a coordinator cycle and mechanical receipt drift",
+      "bounded_change": "move existing bridge factory and preserve its historical denial receipt",
+      "gate_result": "PASS"
+    },
+    {
+      "id": "PHASE_7_LINT_REPAIR_001",
+      "issue": "repository ESLint profile does not declare Node Buffer as a global",
+      "bounded_change": "add explicit node:buffer imports",
+      "gate_result": "PASS"
+    }
+  ],
+  "architecture_expansion": false,
+  "allowlist_expansion": false
+}
