@@ -1,0 +1,198 @@
+{
+  "manifest_version": "remote-security-live-attestation-evidence-manifest-v1",
+  "entry_count": 39,
+  "hashed_entry_count": 38,
+  "self_hash_excluded": true,
+  "entries": [
+    {
+      "path": "MORE_PRIVATE_RUNTIME_LIVE_BINDINGS_AND_ENVIRONMENT_AUTHORITY_ARCHITECTURE_V1.md",
+      "sha256": "6e634d025e48cba5506d11e447f2a01a30f97392341c3112f292fd9a650f7544",
+      "bytes": 59397
+    },
+    {
+      "path": "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_AFW_V1.md",
+      "sha256": "3a22cc3763bf37c3a671b59bf9d8692010ad5d2254349bfd2f3ff8fb75a840c8",
+      "bytes": 6736
+    },
+    {
+      "path": "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_ARCHITECTURE_V1.md",
+      "sha256": "135ce69affce4a508be3c16709cb66bf92ec9e2dd853ae47edce40933bb19daa",
+      "bytes": 13537
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/activity_ledgers.json",
+      "sha256": "f1e9e3a6b60f373fc8db31a7f47abbaa7085adf592d537503036afd12e6737c0",
+      "bytes": 136
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/ai_handoff.json",
+      "sha256": "8fd71c885664d97aa8d608d337918d4e8335bb2ac94f842c5674304d9685abba",
+      "bytes": 947
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/artifact_index.json",
+      "sha256": "5b258a4615798cc58d9a22d3da27c5286b35777a63a105e082051f4162bc6124",
+      "bytes": 4703
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/campaign_file_hashes.json",
+      "sha256": "6e2be21c5def710873cf5e87d892dea32348335cd6b2e8bf7dea84fc6f2ec39b",
+      "bytes": 2601
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/changed_file_manifest.json",
+      "sha256": "89c56c05cd5178e2cf39f667ba3cdeeef7a23a0d2922021bd902d43eb206d6c2",
+      "bytes": 2340
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/current_attestation_model.json",
+      "sha256": "6df80f153080aabafb91bfba2c0ce71f4f806117387dea72867bed6afc153366",
+      "bytes": 179
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/deterministic_build_proof.json",
+      "sha256": "e079987c6de81ffcfa6839c29021d17bad24f603980db6806e6062f916e26385",
+      "bytes": 423
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/exact_source_diff.patch",
+      "sha256": "2611145021e8d7d7890c9553c2fae340fa454794af7a2d0369ab3b0327add1ad",
+      "bytes": 92394
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/executive_handoff.md",
+      "sha256": "d4e719bd077befe17f6ec87589d8b0fbc836fbf08ff9530b72bcc86fc48c5add",
+      "bytes": 1061
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/executive_summary.md",
+      "sha256": "e421040c5432c61c9c7c8d1cce9144519bdd8aa2bdfbbbf8ebfb8152afbb88a9",
+      "bytes": 1244
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/final_verdict.json",
+      "sha256": "d0e090dd4fb118ab2182d8f1c0fe3c14039060943f325568d62aadea393357d1",
+      "bytes": 568
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/focused_test_summary.json",
+      "sha256": "a2cfa5d8240908b20f326f88ae877adec8dae56ee67bbd6d034be4cb81d51fb4",
+      "bytes": 67
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/import_export_cycle_schema_validation.json",
+      "sha256": "e34aaca5eb60f2e599776d6f6d3c4f97706778da537eb149cb8c775ed5f40760",
+      "bytes": 463
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/live_environment_attestation_schema.json",
+      "sha256": "03122e317cb06b940790b60704e354fd090059ff937e683e76abff6fca445594",
+      "bytes": 1394
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/mismatch_denial_tests.json",
+      "sha256": "18a6cda6cd80fcd95e5dd758e7f09c69b22cc82041617b0ec4f82321840411f3",
+      "bytes": 266
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/private_live_mode_tests.json",
+      "sha256": "4798a3ccc81b8403aeaf4a4525c5d90917adb91ff341eb9971e7adfa4be42ffa",
+      "bytes": 205
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/protected_root_report.json",
+      "sha256": "2e716b63730c890af59d01e0c08067dcec80d57b30a5cf0bcf719cdcef0b2fad",
+      "bytes": 1599
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/qualification_certificate_schema.json",
+      "sha256": "be051621c76bb18ffe6e0af09da08f3a4e0de3a8229c86be2e2ea2a9c9826548",
+      "bytes": 813
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/qualification_mode_tests.json",
+      "sha256": "0809c5cf7101857ac1791d86fed557d45a62509cc6d25c2c70378a8dfff1bcd3",
+      "bytes": 176
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/regression_summary.json",
+      "sha256": "f038f6aeea786d92e50a8ac4ffeae8f2cf2b501d2d045451911a4b6b58620db9",
+      "bytes": 565
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/repair_receipts.json",
+      "sha256": "8ef955914621ecd44b1abbbbbefa76631815166dd33bd4c5eef167125da0f953",
+      "bytes": 223
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/repaired_attestation_model.json",
+      "sha256": "08c174beb87ae5502a7177d7225c99e1c4e56ee81ef869833d67a324525805f0",
+      "bytes": 343
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/root_cause_analysis.json",
+      "sha256": "78ea20cb7a5061c9439c564dfbe7800450141051241c6ea3870eda2959f59eb9",
+      "bytes": 521
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/secret_scan.json",
+      "sha256": "c024645da9564cf3fb3f194451d7ff85757cf8033b7fb039226d5bd39933cf86",
+      "bytes": 114
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/sensitive_content_scan.json",
+      "sha256": "460ad5da84b5c9320152b14b7192f1031da3ba70bec27c31a748431651675e9b",
+      "bytes": 138
+    },
+    {
+      "path": "lab_outputs/coach_connect_private_runtime_remote_security_adapter_live_attestation_repair_v1/verifier_result.json",
+      "sha256": "23f91fa715a3d78cd6386141f1976a003aab6dec9ac3b9340815dd0bdfb751aa",
+      "bytes": 3198
+    },
+    {
+      "path": "scripts/verifyPrivateRuntimeRemoteSecurityAdapterLiveAttestationRepair.mjs",
+      "sha256": "c742c06a0169cb5586b4fbb8c2a36479dd1c9f47f7ed769e58cdfa774af3cce9",
+      "bytes": 17380
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/attestations.js",
+      "sha256": "8faa4990326e24f58d381302cac73b87985de81eacf4ff3899fd584c79caee20",
+      "bytes": 18958
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+      "sha256": "0241d847f4d39f83c8e9ffe0476cfcdea71bab5986837b477be28ee3cfbc0a28",
+      "bytes": 11141
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+      "sha256": "dad94deba0418e40be67448a1db6863c1dc8d5f7efb50a5ba632ad8b110e3e3c",
+      "bytes": 358
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+      "sha256": "cb9217106ce312cd26d1c8943efef2924a464b8ca536133d5e3de919292e63ab",
+      "bytes": 20997
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+      "sha256": "06ab6f491bb1abe85cf68627b5b7e35ce8e371a7433184234a5c2bf23f14ed96",
+      "bytes": 4676
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+      "sha256": "efcfc36dd8925e03ab9e826f26fcc0d6c8d97ad2f4f2f8b8f49859c681889aed",
+      "bytes": 7570
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.liveAttestation.test.js",
+      "sha256": "89e53fbc3bb69b9b1433ebaa4400c94cab39dc6b50b24d6fcb8b9c78e002bc5f",
+      "bytes": 19044
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+      "sha256": "bfbee4e3cda23188103bb39c217366ab6c88889ddcba4090b6428d53c71ca235",
+      "bytes": 7910
+    }
+  ]
+}

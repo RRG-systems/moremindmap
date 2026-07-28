@@ -1,0 +1,34 @@
+{
+  "exact_allowlist_count": 11,
+  "exact_allowlist": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/attestations.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.liveAttestation.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_ARCHITECTURE_V1.md",
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_AFW_V1.md",
+    "scripts/verifyPrivateRuntimeRemoteSecurityAdapterLiveAttestationRepair.mjs"
+  ],
+  "implementation_test_file_count": 8,
+  "source_files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/attestations.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js"
+  ],
+  "test_files": [
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.liveAttestation.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js"
+  ],
+  "governance_files": [
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_ARCHITECTURE_V1.md",
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_AFW_V1.md",
+    "scripts/verifyPrivateRuntimeRemoteSecurityAdapterLiveAttestationRepair.mjs"
+  ]
+}

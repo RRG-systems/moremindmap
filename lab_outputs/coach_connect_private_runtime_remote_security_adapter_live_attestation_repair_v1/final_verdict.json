@@ -1,0 +1,13 @@
+{
+  "mission_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_001",
+  "verdict": "PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_REPAIR_COMPLETE",
+  "qualification_disposable_only": true,
+  "private_live_persistent_only": true,
+  "qualification_certificate_implementation_bound": true,
+  "live_attestation_environment_namespace_bound": true,
+  "atomic_commands_changed": false,
+  "authoritative_queries_changed": false,
+  "async_security_v2_changed": false,
+  "public_activation_authorized": false,
+  "deployment_occurred": false
+}

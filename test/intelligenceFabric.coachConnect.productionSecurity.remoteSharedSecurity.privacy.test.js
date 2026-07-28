@@ -171,6 +171,7 @@ test('deletion proof does not confuse TTL, teardown, or backups with erasure', (
 
 test('teardown construction is namespace-bounded and never flushes a database', () => {
   const invocation = buildDisposableQualificationTeardownInvocation({
+    operating_mode: 'QUALIFICATION',
     namespace_digest: 'a'.repeat(64),
     cursor: '0',
     authority_receipt_ref: 'future_qualification_authority',

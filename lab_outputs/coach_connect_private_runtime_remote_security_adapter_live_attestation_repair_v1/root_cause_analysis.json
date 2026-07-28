@@ -1,0 +1,10 @@
+{
+  "enforcement_field": "qualification_attestation.disposable_namespace",
+  "enforcing_function_before_repair": "qualificationMatches",
+  "enforcing_file": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+  "gate_class": "adapter_configuration_and_capability_authorization",
+  "live_handler_gate": false,
+  "atomic_command_defect": false,
+  "authoritative_query_defect": false,
+  "minimum_repair": "EXPLICIT_MODE_PLUS_SEPARATE_CERTIFICATE_AND_LIVE_ATTESTATION"
+}

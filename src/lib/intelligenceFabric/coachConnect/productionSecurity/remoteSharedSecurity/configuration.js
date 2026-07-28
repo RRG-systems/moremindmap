@@ -131,6 +131,7 @@ export function defaultRemoteSharedSecurityConfiguration() {
 
 export function validateRemoteSharedSecurityConfiguration(configuration, {
   qualification_authorized = false,
+  operating_authorized = false,
   expected_script_manifest_digest = null,
 } = {}) {
   const errors = [];
@@ -201,8 +202,9 @@ export function validateRemoteSharedSecurityConfiguration(configuration, {
     errors.push(issue('CONFIGURATION_INVALID', 'retention_authority'));
   }
   if (configuration.enabled === true
-    && (configuration.emergency_disabled !== false || qualification_authorized !== true)) {
-    errors.push(issue('UNCONFIGURED', 'qualification_authority'));
+    && (configuration.emergency_disabled !== false
+      || (operating_authorized !== true && qualification_authorized !== true))) {
+    errors.push(issue('UNCONFIGURED', 'operating_authority'));
   }
   if (expected_script_manifest_digest
     && configuration.script_manifest_digest !== expected_script_manifest_digest) {

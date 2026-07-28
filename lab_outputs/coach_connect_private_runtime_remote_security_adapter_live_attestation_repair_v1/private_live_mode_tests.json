@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "certificate_required": true,
+  "live_attestation_required": true,
+  "persistent_namespace_required": true,
+  "disposable_namespace_rejected": true,
+  "health_gate_preserved": true
+}

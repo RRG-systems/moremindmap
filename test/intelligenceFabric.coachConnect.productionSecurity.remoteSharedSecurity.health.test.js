@@ -112,6 +112,7 @@ test('emergency disable dominates even with complete injected dependencies', asy
   let fetches = 0;
   const adapter = createUpstashRedisRemoteSharedSecurityAdapter({
     configuration,
+    operating_mode: 'QUALIFICATION',
     offline_transport_test: true,
     keyed_digest: createQualificationDigestFunction('emergency-fixture-key-material-value'),
     resolve_secret_reference: async () => 'fixture-reference',
@@ -125,4 +126,3 @@ test('emergency disable dominates even with complete injected dependencies', asy
   assert.equal(health.state, 'UNCONFIGURED');
   assert.equal(fetches, 0);
 });
-

@@ -1,0 +1,27 @@
+{
+  "schema_version": "remote-security-qualification-certificate-v1",
+  "exact_fields": [
+    "certificate_version",
+    "adapter_implementation_id",
+    "adapter_source_sha256",
+    "contract_version",
+    "adapter_contract_version",
+    "provider_class",
+    "qualification_review_package_name",
+    "qualification_review_package_sha256",
+    "attestation_repair_review_package_name",
+    "attestation_repair_review_package_sha256",
+    "qualified_script_manifest_sha256",
+    "qualification_verdict",
+    "qualified_at",
+    "review_due_at",
+    "capabilities",
+    "known_limits",
+    "zero_customer_data",
+    "qualification_namespace_teardown_proven",
+    "certificate_sha256"
+  ],
+  "namespace_fields_allowed": false,
+  "environment_fields_allowed": false,
+  "digest_excludes_only": "certificate_sha256"
+}

@@ -1,0 +1,19 @@
+{
+  "handoff_version": "remote-security-live-attestation-ai-handoff-v1",
+  "mission_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_001",
+  "repository_head": "5a93d6124c4282acd685904f6e2e05a0582e3549",
+  "verdict": "PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_REPAIR_COMPLETE",
+  "implementation_test_file_count": 8,
+  "code_governance_file_count": 11,
+  "focused_tests": "58/58_PASS",
+  "targeted_regressions": "240/240_PASS",
+  "safe_regressions": "553/553_PASS",
+  "deterministic_build_sha256": "1c2d509101a0ea4665b53cead921493b04bfce69dbd23886d55240c18fc4350c",
+  "protected_root_sha256": "8c4ded81cb5f815f05514464522641dcafd69e594fc3bd6419f36be43f1ecfe0",
+  "provider_calls": 0,
+  "credential_values_inspected": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "runtime_activation": false,
+  "next_boundary": "REVIEW_AND_REAUTHORIZE_PRIVATE_RUNTIME_LIVE_BINDINGS_AND_ENVIRONMENT_AUTHORITY"
+}

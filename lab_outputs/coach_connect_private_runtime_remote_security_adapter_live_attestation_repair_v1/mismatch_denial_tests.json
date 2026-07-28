@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "covered": [
+    "EXPIRED_CERTIFICATE",
+    "SOURCE_DIGEST",
+    "ENVIRONMENT_ID",
+    "NAMESPACE",
+    "CONTRACT_VERSION",
+    "PUBLIC_EXPOSURE",
+    "DEFAULT_ON",
+    "EMERGENCY_STATE",
+    "UNKNOWN_MODE",
+    "MIXED_AUTHORITY_BUNDLES"
+  ]
+}

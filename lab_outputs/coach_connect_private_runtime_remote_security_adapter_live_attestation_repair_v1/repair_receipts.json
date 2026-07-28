@@ -1,0 +1,8 @@
+{
+  "receipt_version": "remote-security-live-attestation-bounded-repair-v1",
+  "repair_iterations_used": 0,
+  "maximum_authorized": 2,
+  "failed_phase_gates": 0,
+  "architecture_conflicts": 0,
+  "allowlist_expansions": 0
+}

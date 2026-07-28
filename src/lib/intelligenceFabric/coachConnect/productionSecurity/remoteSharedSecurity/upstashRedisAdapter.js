@@ -6,6 +6,9 @@ import {
   remoteAtomicCommandRetryDecision,
 } from './atomicCommands.js';
 import {
+  evaluateRemoteSharedSecurityOperatingAuthority,
+} from './attestations.js';
+import {
   buildRemoteAuthoritativeQueryInvocation,
   parseRemoteAuthoritativeQueryReply,
   remoteAuthoritativeQueryRetryDecision,
@@ -96,33 +99,12 @@ export function remoteSharedSecurityCompleteScriptManifestDigest() {
   });
 }
 
-function qualificationMatches(attestation, {
-  configuration,
-  configurationDigest,
-  scriptManifestDigest,
-}) {
-  return attestation?.attestation_version === 'remote-shared-security-qualification-attestation-v1'
-    && attestation.adapter_id === configuration.adapter_id
-    && attestation.environment_id === configuration.environment_id
-    && attestation.namespace_digest === configuration.namespace_digest
-    && attestation.configuration_digest === configurationDigest
-    && attestation.script_manifest_digest === scriptManifestDigest
-    && attestation.primary_authority_proven === true
-    && attestation.atomic_script_proven === true
-    && attestation.live_connection_verified === true
-    && attestation.zero_customer_data === true
-    && attestation.disposable_namespace === true
-    && Number.isFinite(Date.parse(attestation.qualified_at))
-    && Number.isFinite(Date.parse(attestation.expires_at))
-    && Date.parse(attestation.expires_at) > Date.now();
-}
-
 export class UpstashRedisRemoteSharedSecurityAdapter {
   #configuration;
   #configurationDigest;
   #scriptManifestDigest;
-  #qualificationAttestation;
-  #qualificationMatched;
+  #operatingMode;
+  #operatingAuthority;
   #offlineTransportTest;
   #resolveSecretReference;
   #fetch;
@@ -132,7 +114,13 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
 
   constructor({
     configuration = defaultRemoteSharedSecurityConfiguration(),
+    operating_mode = null,
     qualification_attestation = null,
+    qualification_certificate = null,
+    live_environment_attestation = null,
+    expected_adapter_source_sha256 = null,
+    expected_qualification_review_package_sha256 = null,
+    expected_attestation_repair_review_package_sha256 = null,
     offline_transport_test = false,
     resolve_secret_reference = null,
     keyed_digest = null,
@@ -142,19 +130,27 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
     this.#configuration = frozen(configuration);
     this.#scriptManifestDigest = remoteSharedSecurityCompleteScriptManifestDigest();
     this.#configurationDigest = remoteSharedSecurityConfigurationDigest(this.#configuration);
-    this.#qualificationAttestation = qualification_attestation
-      ? frozen(qualification_attestation)
-      : null;
+    this.#operatingMode = operating_mode;
     this.#offlineTransportTest = offline_transport_test === true
+      && operating_mode === 'QUALIFICATION'
       && configuration.environment_id === 'TEST'
       && typeof fetch_impl === 'function';
-    this.#qualificationMatched = qualificationMatches(this.#qualificationAttestation, {
+    this.#operatingAuthority = evaluateRemoteSharedSecurityOperatingAuthority({
+      operating_mode,
       configuration: this.#configuration,
-      configurationDigest: this.#configurationDigest,
-      scriptManifestDigest: this.#scriptManifestDigest,
+      configuration_digest: this.#configurationDigest,
+      script_manifest_digest: this.#scriptManifestDigest,
+      qualification_attestation,
+      qualification_certificate,
+      live_environment_attestation,
+      expected_adapter_implementation_id: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+      expected_adapter_source_sha256,
+      expected_qualification_review_package_sha256,
+      expected_attestation_repair_review_package_sha256,
+      now_ms: clock(),
     });
     const checked = validateRemoteSharedSecurityConfiguration(this.#configuration, {
-      qualification_authorized: this.#qualificationMatched || this.#offlineTransportTest,
+      operating_authorized: this.#operatingAuthority.valid || this.#offlineTransportTest,
       expected_script_manifest_digest: this.#configuration.enabled
         ? this.#scriptManifestDigest
         : null,
@@ -174,7 +170,7 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
       && this.#keyspace != null
       && typeof resolve_secret_reference === 'function'
       && typeof fetch_impl === 'function'
-      && (this.#qualificationMatched || this.#offlineTransportTest);
+      && (this.#operatingAuthority.valid || this.#offlineTransportTest);
     this.#healthController = createRemoteSharedSecurityHealthController({
       configured,
       emergency_disabled: configuration.emergency_disabled,
@@ -193,7 +189,7 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
 
   async describeCapability() {
     const health = this.#healthController.snapshot();
-    const qualifiedHealthy = this.#qualificationMatched && health.state === 'HEALTHY';
+    const qualifiedHealthy = this.#operatingAuthority.valid && health.state === 'HEALTHY';
     return projectRemoteCapabilityToV2({
       adapter_id: this.#configuration.adapter_id,
       environment_id: this.#configuration.environment_id,
@@ -350,7 +346,7 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
       && this.#configuration.enabled === true
       && this.#configuration.emergency_disabled === false
       && this.#keyspace != null
-      && (this.#qualificationMatched || this.#offlineTransportTest);
+      && (this.#operatingAuthority.valid || this.#offlineTransportTest);
   }
 
   #projectHealth(state) {
@@ -359,8 +355,8 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
       allowed_for_security: state.allowed_for_security,
       environment_id: this.#configuration.environment_id,
       adapter_id: this.#configuration.adapter_id,
-      deployment_grade: this.#qualificationMatched && state.state === 'HEALTHY',
-      live_connection_verified: this.#qualificationMatched && state.state === 'HEALTHY',
+      deployment_grade: this.#operatingAuthority.valid && state.state === 'HEALTHY',
+      live_connection_verified: this.#operatingAuthority.valid && state.state === 'HEALTHY',
       server_time_ms: state.last_provider_time_ms || 0,
       failure_code: state.failure_code,
       receipt_ref: state.receipt_ref,
@@ -471,7 +467,9 @@ export class UpstashRedisRemoteSharedSecurityAdapter {
       activity_version: 'remote-provider-activity-v1',
       transport_class: this.#offlineTransportTest
         ? 'OFFLINE_SIMULATOR'
-        : 'AUTHORIZED_DISPOSABLE_PROVIDER',
+        : this.#operatingMode === 'PRIVATE_LIVE'
+          ? 'AUTHORIZED_PRIVATE_LIVE_PROVIDER'
+          : 'AUTHORIZED_DISPOSABLE_PROVIDER',
       purpose,
       primitive: 'EVAL',
       attempt,
@@ -539,11 +537,13 @@ end
 return cjson.encode({ cursor = result[1], removed = removed, namespace_digest = envelope.namespace_digest })`;
 
 export function buildDisposableQualificationTeardownInvocation({
+  operating_mode,
   namespace_digest,
   cursor = '0',
   authority_receipt_ref,
 } = {}) {
-  if (!sha256(namespace_digest)
+  if (operating_mode !== 'QUALIFICATION'
+    || !sha256(namespace_digest)
     || typeof cursor !== 'string'
     || !/^[0-9]+$/.test(cursor)
     || typeof authority_receipt_ref !== 'string'

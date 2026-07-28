@@ -1,0 +1,15 @@
+{
+  "model": [
+    "QUALIFIED_ADAPTER_IMPLEMENTATION",
+    "QUALIFICATION_CERTIFICATE",
+    "LIVE_ENVIRONMENT_ATTESTATION",
+    "PERSISTENT_PRIVATE_SECURITY_NAMESPACE",
+    "SEPARATE_RUNTIME_ACTIVATION"
+  ],
+  "modes": [
+    "QUALIFICATION",
+    "PRIVATE_LIVE"
+  ],
+  "inferred_mode_allowed": false,
+  "qualification_namespace_reuse": false
+}

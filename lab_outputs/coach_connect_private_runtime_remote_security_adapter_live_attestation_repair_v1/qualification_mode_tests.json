@@ -1,0 +1,7 @@
+{
+  "passed": true,
+  "explicit_mode": true,
+  "disposable_namespace_required": true,
+  "persistent_namespace_rejected": true,
+  "teardown_requires_qualification_mode": true
+}

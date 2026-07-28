@@ -1,0 +1,61 @@
+{
+  "manifest_version": "remote-security-live-attestation-campaign-files-v1",
+  "file_count": 11,
+  "files": [
+    {
+      "path": "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_ARCHITECTURE_V1.md",
+      "sha256": "135ce69affce4a508be3c16709cb66bf92ec9e2dd853ae47edce40933bb19daa",
+      "bytes": 13537
+    },
+    {
+      "path": "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_AFW_V1.md",
+      "sha256": "3a22cc3763bf37c3a671b59bf9d8692010ad5d2254349bfd2f3ff8fb75a840c8",
+      "bytes": 6736
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/attestations.js",
+      "sha256": "8faa4990326e24f58d381302cac73b87985de81eacf4ff3899fd584c79caee20",
+      "bytes": 18958
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+      "sha256": "0241d847f4d39f83c8e9ffe0476cfcdea71bab5986837b477be28ee3cfbc0a28",
+      "bytes": 11141
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+      "sha256": "cb9217106ce312cd26d1c8943efef2924a464b8ca536133d5e3de919292e63ab",
+      "bytes": 20997
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+      "sha256": "dad94deba0418e40be67448a1db6863c1dc8d5f7efb50a5ba632ad8b110e3e3c",
+      "bytes": 358
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.liveAttestation.test.js",
+      "sha256": "89e53fbc3bb69b9b1433ebaa4400c94cab39dc6b50b24d6fcb8b9c78e002bc5f",
+      "bytes": 19044
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+      "sha256": "06ab6f491bb1abe85cf68627b5b7e35ce8e371a7433184234a5c2bf23f14ed96",
+      "bytes": 4676
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+      "sha256": "efcfc36dd8925e03ab9e826f26fcc0d6c8d97ad2f4f2f8b8f49859c681889aed",
+      "bytes": 7570
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+      "sha256": "bfbee4e3cda23188103bb39c217366ab6c88889ddcba4090b6428d53c71ca235",
+      "bytes": 7910
+    },
+    {
+      "path": "scripts/verifyPrivateRuntimeRemoteSecurityAdapterLiveAttestationRepair.mjs",
+      "sha256": "c742c06a0169cb5586b4fbb8c2a36479dd1c9f47f7ed769e58cdfa774af3cce9",
+      "bytes": 17380
+    }
+  ]
+}

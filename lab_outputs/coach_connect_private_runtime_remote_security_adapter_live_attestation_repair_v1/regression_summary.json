@@ -1,0 +1,23 @@
+{
+  "summary_version": "remote-security-live-attestation-regression-v1",
+  "focused_remote_adapter": {
+    "passed": 58,
+    "total": 58
+  },
+  "targeted_private_runtime_async_security_production_security_deployment_readiness": {
+    "passed": 240,
+    "total": 240
+  },
+  "safe_intelligence_fabric": {
+    "passed": 553,
+    "total": 553
+  },
+  "focused_lint": "PASS",
+  "import_export": "PASS",
+  "schema_validation": "PASS",
+  "dependency_cycles": 0,
+  "protected_roots": "UNCHANGED",
+  "provider_calls": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0
+}

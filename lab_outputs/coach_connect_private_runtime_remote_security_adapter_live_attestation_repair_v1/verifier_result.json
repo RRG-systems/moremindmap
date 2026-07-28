@@ -1,0 +1,69 @@
+{
+  "verifier_version": "remote-security-live-attestation-repair-verifier-v1",
+  "mission_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_001",
+  "ok": true,
+  "repository_head": "5a93d6124c4282acd685904f6e2e05a0582e3549",
+  "architecture_sha256": "6e634d025e48cba5506d11e447f2a01a30f97392341c3112f292fd9a650f7544",
+  "git_index_empty": true,
+  "exact_allowlist_count": 11,
+  "exact_allowlist": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/attestations.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/configuration.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/index.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.liveAttestation.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.health.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.integration.test.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.privacy.test.js",
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_ARCHITECTURE_V1.md",
+    "MORE_REMOTE_SECURITY_ADAPTER_QUALIFICATION_LIVE_ATTESTATION_REPAIR_AFW_V1.md",
+    "scripts/verifyPrivateRuntimeRemoteSecurityAdapterLiveAttestationRepair.mjs"
+  ],
+  "missing_files": [],
+  "focused_tests": {
+    "total": 58,
+    "passed": 58,
+    "failed": 0,
+    "exit_code": 0
+  },
+  "qualification_mode_disposable_only": true,
+  "private_live_mode_persistent_only": true,
+  "mode_explicit_no_namespace_inference": true,
+  "qualification_certificate_implementation_bound": true,
+  "live_attestation_environment_namespace_bound": true,
+  "async_security_v2_unchanged": true,
+  "atomic_commands_unchanged": true,
+  "authoritative_queries_unchanged": true,
+  "script_manifest_unchanged": true,
+  "import_export_validation": {
+    "passed": true,
+    "required_exports": [
+      "evaluateRemoteSharedSecurityOperatingAuthority",
+      "privateLiveEnvironmentAttestationDigest",
+      "remoteSecurityQualificationCertificateDigest",
+      "createUpstashRedisRemoteSharedSecurityAdapter"
+    ],
+    "missing_exports": []
+  },
+  "dependency_cycle_validation": {
+    "module_count": 29,
+    "internal_edge_count": 75,
+    "cycle_count": 0
+  },
+  "schema_validation_passed": true,
+  "no_v1_local_or_synthetic_live_fallback": true,
+  "protected_root_file_count": 202,
+  "protected_root_baseline_sha256": "8c4ded81cb5f815f05514464522641dcafd69e594fc3bd6419f36be43f1ecfe0",
+  "protected_root_current_sha256": "8c4ded81cb5f815f05514464522641dcafd69e594fc3bd6419f36be43f1ecfe0",
+  "protected_roots_unchanged": true,
+  "secret_scan_passed": true,
+  "sensitive_content_scan_passed": true,
+  "provider_calls": 0,
+  "credential_values_inspected": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "staging_actions": 0,
+  "commit_actions": 0,
+  "push_actions": 0,
+  "final_verdict": "PRIVATE_RUNTIME_REMOTE_SECURITY_ADAPTER_LIVE_ATTESTATION_REPAIR_COMPLETE"
+}

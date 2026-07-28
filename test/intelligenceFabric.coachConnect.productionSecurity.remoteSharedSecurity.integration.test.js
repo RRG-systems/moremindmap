@@ -100,6 +100,7 @@ function configuredOfflineAdapter() {
   };
   const adapter = createUpstashRedisRemoteSharedSecurityAdapter({
     configuration,
+    operating_mode: 'QUALIFICATION',
     offline_transport_test: true,
     keyed_digest: createQualificationDigestFunction(
       'offline-integration-keyed-digest-material',
@@ -197,4 +198,3 @@ test('provider activity evidence contains no endpoint, credential, token, or cus
   const serialized = JSON.stringify(adapter.providerActivityLedger());
   assert.doesNotMatch(serialized, /offline-provider|credential-fixture|Bearer|token|customer_data":true/);
 });
-
