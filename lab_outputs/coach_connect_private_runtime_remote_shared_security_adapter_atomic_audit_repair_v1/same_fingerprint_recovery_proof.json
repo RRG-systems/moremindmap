@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "failure_removed": true,
+  "same_fingerprint_reused": true,
+  "recovered_command_ok": true,
+  "recovered_command_committed": true,
+  "authority_mutation_count": 1,
+  "command_result_count": 1,
+  "matching_mandatory_audit_records": 1,
+  "audit_marker_receipt_and_fingerprint_valid": true,
+  "authoritative_mapping_query_ok": true,
+  "mapping_version": 1
+}

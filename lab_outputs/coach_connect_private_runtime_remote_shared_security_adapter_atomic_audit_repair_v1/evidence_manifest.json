@@ -1,0 +1,194 @@
+{
+  "manifest_version": "atomic-audit-repair-evidence-manifest-v1",
+  "campaign_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ATOMIC_AUDIT_RETRY_001",
+  "repository_head": "d21ff84272afc93c829063007bb4ecbb9031dedd",
+  "entries": [
+    {
+      "path": "ai_handoff.json",
+      "sha256": "799ba9f894c5f5d28979af375a47270968fd53170c3b302e779020565f6d9601",
+      "bytes": 1086
+    },
+    {
+      "path": "artifact_index.json",
+      "sha256": "e8814465ca0548a83a8c75ae0ac9173ad3d80a3aca449bfb08fcdcdadb136c9a",
+      "bytes": 6217
+    },
+    {
+      "path": "atomic_command_report.json",
+      "sha256": "746eded3f2e09729371ffe4bd221f09db41f42e74f9908a05d7c02944edc742b",
+      "bytes": 240
+    },
+    {
+      "path": "authoritative_query_report.json",
+      "sha256": "b37537cf5f08c6956e96d8315d950dc11f02ced930d02c988b2f6497a26aee0e",
+      "bytes": 179
+    },
+    {
+      "path": "changed_files_manifest.json",
+      "sha256": "b7e3533dad08003874d865adbb7df1389f22b5cf16ca4460df678c89e1824720",
+      "bytes": 1539
+    },
+    {
+      "path": "credential_handling_receipt.json",
+      "sha256": "d59afb4f369ef8e7f88169c843b2f2f750b84e445dde24dee79b301566bb088f",
+      "bytes": 324
+    },
+    {
+      "path": "deterministic_build_proof.json",
+      "sha256": "c928979e06aaf3cf3650349582fd106a3a4b7315531e5504f24157d48bbe24d2",
+      "bytes": 363
+    },
+    {
+      "path": "divergent_fingerprint_denial_proof.json",
+      "sha256": "cbcb3496cad89f7adf9ee231ce7fa2abb77ab6c43ea5ec37dd593fba07042cc8",
+      "bytes": 218
+    },
+    {
+      "path": "exact_source_diff.patch",
+      "sha256": "e07ff2cabecb0f8268773992e9904098389a5e48d4f475259ed2fa92d86923ef",
+      "bytes": 18273
+    },
+    {
+      "path": "executive_handoff.md",
+      "sha256": "5100d43371ca8680e7738d8f6a41c5627456a03db82282c691270323d307f2c9",
+      "bytes": 1072
+    },
+    {
+      "path": "executive_summary.md",
+      "sha256": "31f1c33a3a8f825d79610cb414a517fb7bb72e22b43a3deb0b8e1ebda7f2aff0",
+      "bytes": 1087
+    },
+    {
+      "path": "final_verdict.json",
+      "sha256": "7edc738316dcf785e434d889e0871741deb66fe6b66d55bebaf95f719036786b",
+      "bytes": 773
+    },
+    {
+      "path": "focused_test_summary.json",
+      "sha256": "b8b8e9a46fab861fd5ccc3e5114544edb2f78adcbf1581f95cf1156517cfc807",
+      "bytes": 167
+    },
+    {
+      "path": "idempotent_replay_proof.json",
+      "sha256": "e245837d63f23ecf866afcaf6b8dafd08eada8dca12ccdd3820c14a0afbd1fca",
+      "bytes": 309
+    },
+    {
+      "path": "implementation_files/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "bytes": 10167
+    },
+    {
+      "path": "implementation_files/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "bytes": 23130
+    },
+    {
+      "path": "implementation_files/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+      "sha256": "1b667b18e99c5c0d89b8a3d5969ab49f69215d70a2050f07d789cd5417c6d8ae",
+      "bytes": 9857
+    },
+    {
+      "path": "import_export_cycle_schema_proof.json",
+      "sha256": "08f581f848f1c2c2681dfd4a71f6295e68fe1dc1450f3d40514ed9617170d8c8",
+      "bytes": 414
+    },
+    {
+      "path": "live_audit_failure_proof.json",
+      "sha256": "8f9e1ac69319d2127000053677b90c15b639ea8bd93bc6f8e4094a565ffab681",
+      "bytes": 855
+    },
+    {
+      "path": "namespace_empty_preflight_proof.json",
+      "sha256": "d196b1099b7b6620877b8b781ff3fda06477630b952d5e644931be03e3fa2b3b",
+      "bytes": 190
+    },
+    {
+      "path": "no_partial_grant_proof.json",
+      "sha256": "17166a0902b058ca870ce9d4f2915e08444af0513842239680651b0609a25da0",
+      "bytes": 420
+    },
+    {
+      "path": "offline_audit_retry_tests.json",
+      "sha256": "b3b51bf38024cdcc963b5e2e8935c295e6fe8588cd005c89b2997f97b75b479c",
+      "bytes": 619
+    },
+    {
+      "path": "post_teardown_zero_key_proof.json",
+      "sha256": "5f438bb0aa32f209ae33e160b1bef68abedd33ea7c27a7f501878cbeae86743b",
+      "bytes": 159
+    },
+    {
+      "path": "protected_root_report.json",
+      "sha256": "93526ed91d9e9c0ff393fe15f2c1ff68c9b4bf04d6189a58259f2f3adee0eed4",
+      "bytes": 399
+    },
+    {
+      "path": "provider_activity_ledger.json",
+      "sha256": "4469adb9795be358367cee15c91e14e0d1c750be81789a888422bbf373360484",
+      "bytes": 709
+    },
+    {
+      "path": "race_failure_report.json",
+      "sha256": "a3b42ad50bea9a3d30b39701ef5659a5ffac17ffe469c413eeca71d7b9e0138d",
+      "bytes": 233
+    },
+    {
+      "path": "regression_summary.json",
+      "sha256": "1a03d2d4bbe8be5c17f68400edca28c32e79f1c4675dd3e363ab4c599733121d",
+      "bytes": 472
+    },
+    {
+      "path": "repair_001_preservation_review.json",
+      "sha256": "dc2cb8be620830c109182e57048de31348f173968ce85fc9c77db54b75ccad5f",
+      "bytes": 519
+    },
+    {
+      "path": "repair_receipt_001.json",
+      "sha256": "5a571153cb69a08d088ec737066db3c5253b90ed4e8d710c695dae22e32f7936",
+      "bytes": 707
+    },
+    {
+      "path": "repair_receipt_002.json",
+      "sha256": "2f18724ff1df620d0401134538a072976e17c4c95a38b497807b844b9d53fef2",
+      "bytes": 565
+    },
+    {
+      "path": "revoke_temporary_entitlement_live_proof.json",
+      "sha256": "1510794ffbf6ba0e4833fec7dc4b7f1485e8a2d04b5b2e7959d870235c65259f",
+      "bytes": 870
+    },
+    {
+      "path": "root_cause_diagnosis.json",
+      "sha256": "21ab285c0a155661c744194c03861aec269b7b8f449bb619c3128936fd99a8b0",
+      "bytes": 1858
+    },
+    {
+      "path": "same_fingerprint_recovery_proof.json",
+      "sha256": "fd7ececaa278db36ddf2ebc2c5963e007d9216d021dc2da0d899eb2a39ee02da",
+      "bytes": 379
+    },
+    {
+      "path": "secret_scan.json",
+      "sha256": "26e76c8c320d207429cf4718518c38e0b731efba391cb15117d1e15c3e688f88",
+      "bytes": 178
+    },
+    {
+      "path": "sensitive_content_scan.json",
+      "sha256": "550af422305c83de56407dce75f714573790f118c352967f3e0573f603524203",
+      "bytes": 240
+    },
+    {
+      "path": "teardown_proof.json",
+      "sha256": "59c0085631eaff1e05c9c711774463a1507cd6e14734312b97118fe0e7e6ef96",
+      "bytes": 400
+    }
+  ],
+  "exact_source_change_count": 3,
+  "focused_tests_passed": 45,
+  "safe_regressions_passed": 540,
+  "provider_calls": 65,
+  "final_namespace_key_count": 0,
+  "deployment_calls": 0,
+  "verdict": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_QUALIFIED_WITH_LIMITS"
+}

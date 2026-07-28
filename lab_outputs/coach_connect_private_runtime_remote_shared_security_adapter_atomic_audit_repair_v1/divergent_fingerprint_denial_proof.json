@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "same_idempotency_key": true,
+  "fingerprint_changed": true,
+  "denied": true,
+  "failure_class": "IDEMPOTENCY_FINGERPRINT_CONFLICT",
+  "authority_changed": false,
+  "audit_duplicated": false
+}

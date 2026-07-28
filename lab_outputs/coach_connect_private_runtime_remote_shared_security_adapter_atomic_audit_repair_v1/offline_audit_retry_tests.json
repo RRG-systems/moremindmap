@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "focused_atomic_command_file": "6/6",
+  "full_remote_adapter_suite": "45/45",
+  "assertions": {
+    "first_audit_failure_no_authority": true,
+    "first_audit_failure_no_completion_marker": true,
+    "identical_retry_fails_while_audit_fails": true,
+    "recovery_retry_succeeds_once": true,
+    "successful_retry_audit_count": 1,
+    "completed_retry_idempotent": true,
+    "divergent_fingerprint_denied": true,
+    "duplicate_subject_mapping": 0,
+    "duplicate_command_result": 0,
+    "duplicate_audit": 0,
+    "non_empty_provider_array_rejected": true,
+    "repair_001_preserved": true
+  }
+}

@@ -1,0 +1,398 @@
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js
+index 55664e0..61be464 100644
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js
+@@ -35,6 +35,10 @@ function required(value) {
+   return value;
+ }
+ 
++function normalizeProviderMap(value) {
++  return Array.isArray(value) && value.length === 0 ? {} : (value || {});
++}
++
+ function buildOperationKeys(command, keyspace) {
+   const args = command.arguments;
+   switch (command.command_type) {
+@@ -203,8 +207,8 @@ export function parseRemoteAtomicCommandReply(reply, expectedType) {
+     committed: internal.committed === true,
+     idempotent_replay: internal.idempotent_replay === true,
+     server_time: new Date(internal.server_time_ms).toISOString(),
+-    new_versions: internal.new_versions || {},
+-    result_refs: internal.result_refs || {},
++    new_versions: normalizeProviderMap(internal.new_versions),
++    result_refs: normalizeProviderMap(internal.result_refs),
+     failure_code: internal.failure_code ?? null,
+     audit_receipt_ref: internal.audit_receipt_ref ?? null,
+   };
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js
+index 02c332e..9b993f6 100644
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js
+@@ -66,50 +66,87 @@ local function set_json(label, value, expiry)
+     redis.call('SET', k(label), encoded)
+   end
+ end
++local function decode_audit_marker(raw)
++  if raw == false or raw == nil then return nil end
++  local ok, marker = pcall(cjson.decode, raw)
++  if not ok or type(marker) ~= 'table' then return nil end
++  return marker
++end
++local function audit_entry_matches(marker, audit_ref)
++  if marker == nil or marker.marker_version ~= 'audit-completion-marker-v2'
++    or marker.fingerprint ~= command.fingerprint
++    or marker.receipt_ref ~= audit_ref
++    or type(marker.stream_id) ~= 'string' then
++    return false
++  end
++  local entries = redis.call(
++    'XRANGE',
++    k('audit_stream'),
++    marker.stream_id,
++    marker.stream_id,
++    'COUNT',
++    1
++  )
++  if #entries ~= 1 or type(entries[1][2]) ~= 'table' then return false end
++  local fields = entries[1][2]
++  local receipt = nil
++  local fingerprint = nil
++  for index = 1, #fields, 2 do
++    if fields[index] == 'receipt_ref' then receipt = fields[index + 1] end
++    if fields[index] == 'fingerprint' then fingerprint = fields[index + 1] end
++  end
++  return receipt == audit_ref and fingerprint == command.fingerprint
++end
+ local function audit(now, decision, failure)
+   local audit_ref = envelope.audit_receipt_ref
+-  local created = redis.call(
++  local prior_raw = redis.call('GET', k('audit_unique'))
++  if prior_raw ~= false then
++    local prior = decode_audit_marker(prior_raw)
++    if prior == nil or prior.fingerprint ~= command.fingerprint then return nil end
++    redis.call('DEL', k('audit_unique'))
++  end
++  local stream_id = redis.call(
++    'XADD',
++    k('audit_stream'),
++    'MAXLEN',
++    '~',
++    tostring(envelope.audit_max_entries),
++    '*',
++    'receipt_ref', audit_ref,
++    'fingerprint', command.fingerprint,
++    'event_type', command.command_type,
++    'decision', decision,
++    'failure_code', failure or '',
++    'environment_digest', envelope.environment_digest,
++    'correlation_ref', command.correlation_ref,
++    'occurred_at_ms', tostring(now),
++    'configuration_digest', envelope.configuration_digest,
++    'script_digest', envelope.script_digest
++  )
++  redis.call(
++    'XTRIM',
++    k('audit_stream'),
++    'MINID',
++    '~',
++    tostring(now - envelope.audit_retention_ms) .. '-0'
++  )
++  redis.call(
+     'SET',
+     k('audit_unique'),
+-    command.fingerprint,
+-    'NX',
++    cjson.encode({
++      marker_version = 'audit-completion-marker-v2',
++      fingerprint = command.fingerprint,
++      receipt_ref = audit_ref,
++      stream_id = stream_id
++    }),
+     'PX',
+     tostring(envelope.audit_retention_ms)
+   )
+-  if created == false then
+-    local prior = redis.call('GET', k('audit_unique'))
+-    if prior ~= command.fingerprint then return nil end
+-  else
+-    redis.call(
+-      'XADD',
+-      k('audit_stream'),
+-      'MAXLEN',
+-      '~',
+-      tostring(envelope.audit_max_entries),
+-      '*',
+-      'receipt_ref', audit_ref,
+-      'event_type', command.command_type,
+-      'decision', decision,
+-      'failure_code', failure or '',
+-      'environment_digest', envelope.environment_digest,
+-      'correlation_ref', command.correlation_ref,
+-      'occurred_at_ms', tostring(now),
+-      'configuration_digest', envelope.configuration_digest,
+-      'script_digest', envelope.script_digest
+-    )
+-    redis.call(
+-      'XTRIM',
+-      k('audit_stream'),
+-      'MINID',
+-      '~',
+-      tostring(now - envelope.audit_retention_ms) .. '-0'
+-    )
+-  end
+   return audit_ref
+ end
+ local function success(now, refs, versions)
+   local audit_ref = audit(now, 'ALLOWED', nil)
+-  if audit_ref == nil then return deny('AUDIT_APPEND_FAILED', now) end
++  if audit_ref == nil then return deny('AUDIT_APPEND_FAILED', now), false end
+   return cjson.encode({
+     ok = true,
+     command_type = command.command_type,
+@@ -120,7 +157,7 @@ local function success(now, refs, versions)
+     result_refs = refs or {},
+     failure_code = cjson.null,
+     audit_receipt_ref = audit_ref
+-  })
++  }), true
+ end
+ local now = now_ms()
+ local prior_raw = redis.call('GET', k('command_result'))
+@@ -129,6 +166,14 @@ if prior_raw ~= false then
+   if prior.fingerprint ~= command.fingerprint then
+     return deny('IDEMPOTENCY_FINGERPRINT_CONFLICT', now)
+   end
++  if prior.result == nil or prior.result.ok ~= true or prior.result.committed ~= true
++    or type(prior.result.audit_receipt_ref) ~= 'string'
++    or not audit_entry_matches(
++      decode_audit_marker(redis.call('GET', k('audit_unique'))),
++      prior.result.audit_receipt_ref
++    ) then
++    return deny('AUDIT_APPEND_FAILED', now)
++  end
+   prior.result.idempotent_replay = true
+   return cjson.encode(prior.result)
+ end
+@@ -157,8 +202,9 @@ if forward ~= nil or inverse ~= nil then
+   if forward ~= nil and inverse ~= nil
+     and forward.subscriber_subject_ref == mapping.subscriber_subject_ref
+     and inverse.subscriber_subject_ref == mapping.subscriber_subject_ref then
+-    local result = success(now, { subscriber_subject_ref = mapping.subscriber_subject_ref },
++    local result, audit_ok = success(now, { subscriber_subject_ref = mapping.subscriber_subject_ref },
+       { mapping_version = tonumber(forward.mapping_version or 1) })
++    if not audit_ok then return result end
+     redis.call('SET', k('command_result'), cjson.encode({
+       fingerprint = command.fingerprint, result = cjson.decode(result)
+     }), 'PX', tostring(envelope.idempotency_retention_ms))
+@@ -186,8 +232,9 @@ local inverse_record = {
+   status = 'ACTIVE',
+   forward_key = k('subject_forward')
+ }
+-local result = success(now, { subscriber_subject_ref = stored.subscriber_subject_ref },
++local result, audit_ok = success(now, { subscriber_subject_ref = stored.subscriber_subject_ref },
+   { mapping_version = 1 })
++if not audit_ok then return result end
+ set_json('subject_forward', stored, nil)
+ set_json('subject_inverse', inverse_record, nil)
+ redis.call('SET', k('command_result'), cjson.encode({
+@@ -207,8 +254,9 @@ session.expires_at_ms = expiry
+ session.issued_at_ms = now
+ session.record_version = 'pre-auth-private-session-v2'
+ session.session_class = 'PRE_AUTH'
+-local result = success(now, { pre_auth_session_ref = session.pre_auth_session_ref },
++local result, audit_ok = success(now, { pre_auth_session_ref = session.pre_auth_session_ref },
+   { session_epoch = tonumber(session.session_epoch or 1) })
++if not audit_ok then return result end
+ set_json('session_token', session, expiry)
+ set_json('session_ref', session, expiry)
+ redis.call('SET', k('command_result'), cjson.encode({
+@@ -241,8 +289,9 @@ session.record_version = 'authenticated-private-session-v2'
+ session.session_class = 'AUTHENTICATED'
+ session.mapping_inverse_key = k('subject_inverse')
+ session.scope_epoch_key = k('scope_epoch')
+-local result = success(now, { authenticated_session_ref = session.authenticated_session_ref },
++local result, audit_ok = success(now, { authenticated_session_ref = session.authenticated_session_ref },
+   { session_epoch = tonumber(session.session_epoch or 1) })
++if not audit_ok then return result end
+ set_json('preauth_ref', preauth, tonumber(preauth.expires_at_ms or expiry))
+ set_json('preauth_token', preauth, tonumber(preauth.expires_at_ms or expiry))
+ if k('prior_session_ref') ~= nil and redis.call('EXISTS', k('prior_session_ref')) == 1 then
+@@ -270,7 +319,8 @@ if not active(session, now) or grant == nil or grant.status ~= 'ACTIVE'
+ end
+ grant.expires_at_ms = expiry
+ grant.issued_at_ms = now
+-local result = success(now, { csrf_grant_ref = grant.csrf_grant_ref }, {})
++local result, audit_ok = success(now, { csrf_grant_ref = grant.csrf_grant_ref }, {})
++if not audit_ok then return result end
+ set_json('csrf', grant, expiry)
+ redis.call('SADD', k('csrf_index'), k('csrf'))
+ redis.call('PEXPIREAT', k('csrf_index'), expiry)
+@@ -306,8 +356,9 @@ entitlement.issued_at_ms = now
+ entitlement.session_key = k('session_ref')
+ entitlement.approval_key = k('approval')
+ entitlement.scope_epoch_key = k('scope_epoch')
+-local result = success(now, { entitlement_ref = entitlement.entitlement_ref },
++local result, audit_ok = success(now, { entitlement_ref = entitlement.entitlement_ref },
+   { security_epoch = tonumber(session.security_epoch) })
++if not audit_ok then return result end
+ set_json('csrf', grant, tonumber(grant.expires_at_ms or expiry))
+ set_json('entitlement_token', entitlement, expiry)
+ set_json('entitlement_ref', entitlement, expiry)
+@@ -333,7 +384,8 @@ local value = replay or {
+   result_reference = cjson.null,
+   expires_at_ms = expiry
+ }
+-local result = success(now, { replay_key_hash = value.replay_key_hash }, {})
++local result, audit_ok = success(now, { replay_key_hash = value.replay_key_hash }, {})
++if not audit_ok then return result end
+ set_json('replay', value, expiry)
+ redis.call('SET', k('command_result'), cjson.encode({
+   fingerprint = command.fingerprint, result = cjson.decode(result)
+@@ -351,7 +403,8 @@ end
+ replay.status = 'COMPLETED'
+ replay.result_reference = args.result_reference
+ replay.completed_at_ms = now
+-local result = success(now, { result_reference = replay.result_reference }, {})
++local result, audit_ok = success(now, { result_reference = replay.result_reference }, {})
++if not audit_ok then return result end
+ set_json('replay', replay, tonumber(replay.expires_at_ms))
+ redis.call('SET', k('command_result'), cjson.encode({
+   fingerprint = command.fingerprint, result = cjson.decode(result)
+@@ -363,7 +416,8 @@ local entitlement = decode_key('entitlement_ref')
+ if entitlement == nil then return deny('ENTITLEMENT_REQUIRED', now) end
+ entitlement.status = args.emergency == true and 'EMERGENCY_REVOKED' or 'REVOKED'
+ entitlement.revoked_at_ms = now
+-local result = success(now, { entitlement_ref = entitlement.entitlement_ref }, {})
++local result, audit_ok = success(now, { entitlement_ref = entitlement.entitlement_ref }, {})
++if not audit_ok then return result end
+ set_json('entitlement_ref', entitlement, tonumber(entitlement.expires_at_ms or now + envelope.terminal_retention_ms))
+ if k('entitlement_token') ~= nil then
+   set_json('entitlement_token', entitlement, tonumber(entitlement.expires_at_ms or now + envelope.terminal_retention_ms))
+@@ -390,10 +444,11 @@ if entitlement ~= nil then
+   entitlement.status = args.emergency == true and 'EMERGENCY_REVOKED' or 'REVOKED'
+   entitlement.revoked_at_ms = now
+ end
+-local result = success(now, {
++local result, audit_ok = success(now, {
+   authenticated_session_ref = session.authenticated_session_ref,
+   entitlement_revoked = entitlement ~= nil
+ }, { security_epoch = next_epoch })
++if not audit_ok then return result end
+ set_json('session_ref', session, tonumber(session.expires_at_ms or now + envelope.terminal_retention_ms))
+ if k('session_token') ~= nil then
+   set_json('session_token', session, tonumber(session.expires_at_ms or now + envelope.terminal_retention_ms))
+@@ -424,7 +479,8 @@ value.epoch = next_epoch
+ value.status = args.emergency == true and 'EMERGENCY_DISABLED' or value.status
+ value.reason_code = args.reason_code or 'GOVERNED_ADVANCE'
+ value.updated_at_ms = now
+-local result = success(now, {}, { security_epoch = next_epoch })
++local result, audit_ok = success(now, {}, { security_epoch = next_epoch })
++if not audit_ok then return result end
+ set_json('scope_epoch', value, nil)
+ redis.call('SET', k('command_result'), cjson.encode({
+   fingerprint = command.fingerprint, result = cjson.decode(result)
+@@ -444,10 +500,11 @@ end
+ if tonumber(rate.count) >= limit then return deny('RATE_LIMITED', now) end
+ rate.count = tonumber(rate.count) + 1
+ rate.updated_at_ms = now
+-local result = success(now, {
++local result, audit_ok = success(now, {
+   remaining = limit - rate.count,
+   resets_at = rate.resets_at_ms
+ }, {})
++if not audit_ok then return result end
+ set_json('rate', rate, rate.resets_at_ms + tonumber(envelope.rate_cooldown_ms))
+ redis.call('SET', k('command_result'), cjson.encode({
+   fingerprint = command.fingerprint, result = cjson.decode(result)
+@@ -455,7 +512,8 @@ redis.call('SET', k('command_result'), cjson.encode({
+ return result
+ `,
+   APPEND_SECURITY_AUDIT: String.raw`
+-local result = success(now, { audit_receipt_ref = envelope.audit_receipt_ref }, {})
++local result, audit_ok = success(now, { audit_receipt_ref = envelope.audit_receipt_ref }, {})
++if not audit_ok then return result end
+ redis.call('SET', k('command_result'), cjson.encode({
+   fingerprint = command.fingerprint, result = cjson.decode(result)
+ }), 'PX', tostring(envelope.idempotency_retention_ms))
+diff --git a/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js b/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js
+index bddd6aa..299655d 100644
+--- a/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js
+@@ -145,6 +145,32 @@ test('provider command result normalizes to exact committed V2', () => {
+   assert.equal(result.audit_receipt_ref, 'audit_fixture');
+ });
+ 
++test('provider-native empty Lua maps normalize without accepting non-empty arrays', () => {
++  const result = parseRemoteAtomicCommandReply(JSON.stringify({
++    ok: true,
++    command_type: 'ADVANCE_SECURITY_EPOCH',
++    committed: true,
++    idempotent_replay: false,
++    server_time_ms: Date.parse('2026-07-27T20:00:00.000Z'),
++    new_versions: { security_epoch: 2 },
++    result_refs: [],
++    failure_code: null,
++    audit_receipt_ref: 'audit_fixture_empty_map',
++  }), 'ADVANCE_SECURITY_EPOCH');
++  assert.deepEqual(result.result_refs, {});
++  assert.throws(() => parseRemoteAtomicCommandReply(JSON.stringify({
++    ok: true,
++    command_type: 'ADVANCE_SECURITY_EPOCH',
++    committed: true,
++    idempotent_replay: false,
++    server_time_ms: Date.parse('2026-07-27T20:00:00.000Z'),
++    new_versions: [],
++    result_refs: ['unexpected'],
++    failure_code: null,
++    audit_receipt_ref: 'audit_fixture_nonempty_array',
++  }), 'ADVANCE_SECURITY_EPOCH'));
++});
++
+ test('unsafe retries are prohibited and ambiguous exact retries are bounded', () => {
+   assert.equal(remoteAtomicCommandRetryDecision({
+     attempt: 0,
+@@ -177,3 +203,44 @@ test('mandatory audit, provider time, TTL, and idempotency are inside scripts',
+   }
+ });
+ 
++test('audit completion marker cannot authorize a retry without a verified audit record', () => {
++  const manifest = remoteSharedSecurityCommandScriptManifest();
++  for (const entry of manifest) {
++    const source = entry.source;
++    const auditAppend = source.indexOf("local stream_id = redis.call(\n    'XADD'");
++    const markerWrite = source.indexOf(
++      "marker_version = 'audit-completion-marker-v2'",
++      auditAppend,
++    );
++    const commandResultRead = source.indexOf(
++      "local prior_raw = redis.call('GET', k('command_result'))",
++    );
++    const operationBoundary = source.indexOf('if command.command_type ~= EXPECTED_COMMAND');
++    assert.equal(auditAppend >= 0, true);
++    assert.equal(markerWrite > auditAppend, true);
++    assert.equal(commandResultRead >= 0 && commandResultRead < operationBoundary, true);
++    assert.match(source, /'fingerprint', command\.fingerprint/);
++    assert.match(source, /audit_entry_matches\(/);
++    assert.match(source, /marker\.receipt_ref ~= audit_ref/);
++    assert.match(source, /marker\.fingerprint ~= command\.fingerprint/);
++    assert.match(source, /prior\.result\.committed ~= true/);
++    assert.match(source, /if not audit_ok then return result end/);
++    assert.doesNotMatch(source, /local created = redis\.call\(/);
++  }
++
++  const bind = manifest.find(
++    (entry) => entry.operation_type === 'BIND_APPROVED_CANONICAL_SUBJECT',
++  ).source;
++  const newMapping = bind.indexOf('local stored = {');
++  const auditGuard = bind.indexOf('if not audit_ok then return result end', newMapping);
++  const forwardMutation = bind.indexOf("set_json('subject_forward'", newMapping);
++  const commandResultMutation = bind.indexOf(
++    "redis.call('SET', k('command_result')",
++    newMapping,
++  );
++  assert.equal(newMapping >= 0, true);
++  assert.equal(auditGuard > newMapping && auditGuard < forwardMutation, true);
++  assert.equal(forwardMutation < commandResultMutation, true);
++  assert.match(bind, /prior\.result\.idempotent_replay = true/);
++  assert.match(bind, /IDEMPOTENCY_FINGERPRINT_CONFLICT/);
++});

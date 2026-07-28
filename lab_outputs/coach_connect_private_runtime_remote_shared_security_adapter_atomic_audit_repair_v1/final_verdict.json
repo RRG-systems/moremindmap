@@ -1,0 +1,20 @@
+{
+  "campaign_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ATOMIC_AUDIT_RETRY_001",
+  "verdict": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_QUALIFIED_WITH_LIMITS",
+  "audit_failure_zero_partial_grant": true,
+  "stale_marker_authorizes_retry": false,
+  "recovery_retry_succeeds_exactly_once": true,
+  "genuine_replay_idempotent": true,
+  "divergent_fingerprint_denied": true,
+  "mandatory_audit_skipped": false,
+  "revoke_temporary_entitlement_live_qualified": true,
+  "atomic_commands": "12/12",
+  "authoritative_queries": "8/8",
+  "race_failure_scenarios": "11/11",
+  "final_namespace_key_count": 0,
+  "architecture_drift": false,
+  "v2_contract_drift": false,
+  "second_authority": false,
+  "v1_or_local_fallback": false,
+  "deployment": false
+}

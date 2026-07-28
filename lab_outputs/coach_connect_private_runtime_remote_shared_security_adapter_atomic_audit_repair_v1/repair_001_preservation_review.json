@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "file": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+  "reviewed_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+  "current_sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+  "byte_identity_preserved": true,
+  "empty_provider_array_normalizes_only_to_empty_map": true,
+  "non_empty_array_rejected": true,
+  "fail_closed_behavior_preserved": true,
+  "canonical_authority_count": 1
+}

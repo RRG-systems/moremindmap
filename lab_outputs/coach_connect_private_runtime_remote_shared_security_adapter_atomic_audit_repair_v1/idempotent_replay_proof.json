@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "original_completed_result_required": true,
+  "exact_fingerprint_required": true,
+  "exact_audit_stream_entry_verified": true,
+  "idempotent_replay": true,
+  "authority_mutation_count_after_replay": 1,
+  "command_result_count_after_replay": 1,
+  "audit_record_count_after_replay": 1
+}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "failed_audit_attempts": 2,
+  "session_grants": 0,
+  "entitlement_grants": 0,
+  "approval_mutations": 0,
+  "capability_grants": 0,
+  "epoch_grants": 0,
+  "canonical_subject_mappings": 0,
+  "command_results": 0,
+  "reusable_completion_markers": 0,
+  "provider_rejected_before_execution": false,
+  "script_executed_and_failed_at_xadd": true,
+  "all_authority_mutations_guarded_by_audit_ok": true
+}

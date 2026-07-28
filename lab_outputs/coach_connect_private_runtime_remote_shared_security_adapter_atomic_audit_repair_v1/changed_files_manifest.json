@@ -1,0 +1,26 @@
+{
+  "campaign_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ATOMIC_AUDIT_RETRY_001",
+  "repository_head": "d21ff84272afc93c829063007bb4ecbb9031dedd",
+  "source_change_count": 3,
+  "exact_allowlist_match": true,
+  "files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+      "sha256": "b4db3000327495fffb5341cfd117de994538f51cad19e345ce99ed06e9071df8",
+      "evidence_copy": "implementation_files/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+      "sha256": "fd204748034c03297a7082803f8109ee8691f592117c0be8b4113f0e93be0986",
+      "evidence_copy": "implementation_files/src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js",
+      "sha256": "1b667b18e99c5c0d89b8a3d5969ab49f69215d70a2050f07d789cd5417c6d8ae",
+      "evidence_copy": "implementation_files/test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js"
+    }
+  ],
+  "existing_repair_001_file_retained": "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+  "evidence_files_excluded_from_source_count": true,
+  "unrelated_dirty_files_touched": 0
+}

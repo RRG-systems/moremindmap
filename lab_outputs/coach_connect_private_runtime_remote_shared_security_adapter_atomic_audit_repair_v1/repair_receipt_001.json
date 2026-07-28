@@ -1,0 +1,16 @@
+{
+  "repair_id": "ATOMIC_AUDIT_RETRY_REPAIR_001",
+  "bounded": true,
+  "status": "PASS",
+  "files": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js"
+  ],
+  "defect": "audit uniqueness marker survived mandatory audit failure and could authorize identical retry",
+  "correction": "completion marker is written after XADD and replay is tied to a valid committed result and exact audit stream receipt",
+  "provider_native": true,
+  "single_script": true,
+  "application_layer_transaction": false,
+  "second_authority_added": false,
+  "resolved": true
+}

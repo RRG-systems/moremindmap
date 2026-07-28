@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "official_command": "BIND_APPROVED_CANONICAL_SUBJECT",
+  "official_script_digest": "484e6ebcab4d580d1f3ce7d6cef4cab09a049fa37c288f6bd84a2a679c63dac9",
+  "official_key_count": 6,
+  "sentinel": "provider-supported wrong-type audit stream",
+  "provider_reached_script_boundary": true,
+  "mandatory_audit_failed_deliberately": true,
+  "first_attempt": {
+    "failed_closed": true,
+    "subject_mapping_persisted": false,
+    "command_result_persisted": false,
+    "completion_marker_persisted": false,
+    "success_receipt_returned": false
+  },
+  "same_fingerprint_retry_while_failed": {
+    "failed_closed": true,
+    "subject_mapping_persisted": false,
+    "command_result_persisted": false,
+    "completion_marker_persisted": false
+  },
+  "authoritative_state_unchanged_after_failures": true,
+  "local_or_v1_fallback_used": false
+}

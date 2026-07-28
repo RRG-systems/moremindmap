@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "qualified": 12,
+  "total": 12,
+  "provider_native": true,
+  "mandatory_audit_coupling": "PASS",
+  "atomic_audit_retry": "PASS",
+  "revoke_temporary_entitlement": "PASS",
+  "application_layer_fake_transactions": 0
+}

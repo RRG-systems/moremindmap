@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "each_live_phase_torn_down": true,
+  "audit_repair_failed_sanitized_run_keys_removed": 6,
+  "audit_repair_pass_keys_removed": 9,
+  "entitlement_revoke_pass_keys_removed": 44,
+  "synthetic_sessions_and_entitlements_terminalized": true,
+  "synthetic_epochs_advanced": true,
+  "exact_prefix_only": true,
+  "provider_database_deleted": false,
+  "unrelated_resources_touched": 0
+}

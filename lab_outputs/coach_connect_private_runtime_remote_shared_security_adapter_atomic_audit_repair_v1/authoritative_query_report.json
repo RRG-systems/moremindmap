@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "qualified": 8,
+  "total": 8,
+  "read_authority_snapshot_internally_consistent": true,
+  "primary_authoritative": true,
+  "local_cache_authority": false
+}

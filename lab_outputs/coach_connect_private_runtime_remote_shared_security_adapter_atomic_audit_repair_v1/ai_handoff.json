@@ -1,0 +1,20 @@
+{
+  "campaign_id": "MORE_REPAIR_PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_ATOMIC_AUDIT_RETRY_001",
+  "repository_head": "d21ff84272afc93c829063007bb4ecbb9031dedd",
+  "verdict": "PRIVATE_RUNTIME_REMOTE_SHARED_SECURITY_ADAPTER_QUALIFIED_WITH_LIMITS",
+  "exact_source_changes": [
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js",
+    "src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js",
+    "test/intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.commands.test.js"
+  ],
+  "focused_tests": "45/45_PASS",
+  "safe_regressions": "540/540_PASS",
+  "atomic_commands": "12/12_QUALIFIED",
+  "authoritative_queries": "8/8_QUALIFIED",
+  "race_failure_scenarios": "11/11_QUALIFIED",
+  "provider_calls": 65,
+  "final_namespace_key_count": 0,
+  "protected_root_digest": "8c4ded81cb5f815f05514464522641dcafd69e594fc3bd6419f36be43f1ecfe0",
+  "deployment_calls": 0,
+  "next_boundary": "separate reviewed credential binding and private-live deployment activation authority"
+}

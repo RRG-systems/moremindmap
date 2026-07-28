@@ -1,0 +1,12 @@
+{
+  "repair_id": "QUALIFICATION_HARNESS_REPAIR_002",
+  "bounded": true,
+  "status": "PASS",
+  "repository_files_changed": 0,
+  "temporary_file": "/private/tmp/more_remote_shared_security_qualification_v1.mjs",
+  "defect": "sanitized proof inspection did not normalize provider TYPE response and omitted seeded epoch control state",
+  "correction": "normalize table or string TYPE response and seed synthetic control state before authoritative proof queries",
+  "production_adapter_behavior_changed": false,
+  "credential_values_logged": false,
+  "resolved": true
+}

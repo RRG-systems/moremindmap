@@ -1,0 +1,9 @@
+{
+  "status": "PASS",
+  "build_runs": 2,
+  "artifact_files": 24,
+  "digest_algorithm": "sorted relative path, NUL, file SHA-256, newline; aggregate SHA-256",
+  "first_sha256": "0ce0189334df5c517a686f3b171e53e309a9a298562c7f22fbf385753d9ced76",
+  "second_sha256": "0ce0189334df5c517a686f3b171e53e309a9a298562c7f22fbf385753d9ced76",
+  "deterministic_match": true
+}

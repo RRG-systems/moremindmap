@@ -1,0 +1,31 @@
+{
+  "provider": "Upstash Redis",
+  "provider_calls": 65,
+  "provider_resources_touched": 1,
+  "unrelated_provider_resources_listed": 0,
+  "unrelated_provider_resources_inspected": 0,
+  "unrelated_provider_resources_modified": 0,
+  "phases": [
+    {
+      "phase": "EMPTY_NAMESPACE_PREFLIGHT",
+      "calls": 1
+    },
+    {
+      "phase": "AUDIT_REPAIR_FIRST_SANITIZED_RUN",
+      "calls": 16
+    },
+    {
+      "phase": "AUDIT_REPAIR_LIVE_PASS",
+      "calls": 17
+    },
+    {
+      "phase": "REVOKE_TEMPORARY_ENTITLEMENT_LIVE_PASS",
+      "calls": 31
+    }
+  ],
+  "synthetic_records_only": true,
+  "customer_records": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "runtime_activation_calls": 0
+}

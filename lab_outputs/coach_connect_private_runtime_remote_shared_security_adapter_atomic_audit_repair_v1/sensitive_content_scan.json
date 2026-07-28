@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "campaign_source_files_scanned": 3,
+  "sensitive_findings": 0,
+  "raw_identity_material": 0,
+  "raw_tokens": 0,
+  "raw_credentials": 0,
+  "customer_data": 0,
+  "transcripts": 0,
+  "prompts": 0,
+  "model_output": 0
+}

@@ -1,0 +1,29 @@
+{
+  "status": "PASS",
+  "official_command": "REVOKE_TEMPORARY_ENTITLEMENT",
+  "official_script_digest": "a47ff4b1157f3c41953698cd7de57645246591aa8a50e302591caa52dd8fecdd",
+  "active_entitlement_query_before": {
+    "ok": true,
+    "consistency_proven": true,
+    "record_version": 2
+  },
+  "authority_snapshot_before": {
+    "ok": true,
+    "consistency_proven": true,
+    "record_version": 2
+  },
+  "first_invocation": {
+    "ok": true,
+    "committed": true,
+    "idempotent_replay": false
+  },
+  "status_after": "REVOKED",
+  "authority_snapshot_after_denied": true,
+  "identical_retry_idempotent": true,
+  "divergent_fingerprint_denied": true,
+  "matching_mandatory_audit_records": 1,
+  "unrelated_session_subject_approval_unchanged": true,
+  "record_version": "temporary-private-entitlement-v2",
+  "positive_ttl_preserved": true,
+  "no_local_or_v1_fallback": true
+}

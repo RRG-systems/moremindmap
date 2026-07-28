@@ -1,0 +1,14 @@
+{
+  "status": "PASS",
+  "imported_modules": 4,
+  "export_surfaces_nonempty": true,
+  "dependency_graph_modules": 11,
+  "dependency_graph_internal_edges": 21,
+  "dependency_cycles": 0,
+  "atomic_command_schemas": 12,
+  "unique_atomic_command_types": 12,
+  "provider_primitive": "EVAL",
+  "same_script_audit_required": true,
+  "application_layer_transactions": 0,
+  "v2_contract": "shared-security-state-async-v2"
+}

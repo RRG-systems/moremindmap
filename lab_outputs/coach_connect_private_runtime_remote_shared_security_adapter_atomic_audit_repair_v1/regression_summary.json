@@ -1,0 +1,19 @@
+{
+  "status": "PASS",
+  "safe_intelligence_fabric_test_files": 91,
+  "safe_intelligence_fabric_tests_passed": 540,
+  "safe_intelligence_fabric_tests_failed": 0,
+  "covers": [
+    "Async Security V2",
+    "Private Runtime",
+    "Developer Access",
+    "Production Security",
+    "Deployment Readiness",
+    "Subscription Runtime",
+    "Coach Connect"
+  ],
+  "focused_lint": "PASS",
+  "import_export_check": "PASS",
+  "dependency_cycles": 0,
+  "schema_validation": "PASS"
+}
