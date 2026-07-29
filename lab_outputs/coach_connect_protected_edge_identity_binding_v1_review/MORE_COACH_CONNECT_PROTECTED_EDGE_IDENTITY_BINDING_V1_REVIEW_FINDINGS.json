@@ -1,0 +1,155 @@
+{
+  "review_version": "protected-edge-identity-binding-v1-review-findings-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "reviewed_package": {
+    "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1/COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_IMPLEMENTATION_REVIEW.zip",
+    "sha256": "34de85f86eee354fbf579d5e3a8ab7af3248f393c55f3b79696281603667731e"
+  },
+  "counts": {
+    "critical": 0,
+    "high": 2,
+    "medium": 1,
+    "low": 0,
+    "informational": 0
+  },
+  "findings": [
+    {
+      "finding_id": "PEIB-RV-001",
+      "severity": "HIGH",
+      "title": "Project reference is substituted for immutable deployment identity",
+      "affected_files": [
+        "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js",
+        "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js"
+      ],
+      "exact_defect": "validatePrivateRuntimeLiveEnvironmentAuthorityV1 passes liveEnvironmentAttestation.vercel_project_reference as deploymentId. Protected-edge configuration, internal assertions, and replay fingerprints therefore bind to a project reference rather than the exact immutable deployment or artifact.",
+      "security_effect": "Cross-deployment authority ambiguity remains for deployments sharing the same Vercel project, configuration, and signing material.",
+      "evidence": {
+        "configuration_authority_line": 131,
+        "internal_assertion_payload_line": 72,
+        "internal_assertion_validation_line": 141,
+        "test_configuration_line": 223
+      },
+      "required_behavior": [
+        "Use a reviewed immutable deployment identity from the exact live environment attestation, separate from the Vercel project reference.",
+        "Require configuration deployment_id to equal the immutable attested deployment identity.",
+        "Keep the immutable identity in internal assertions and replay fingerprints.",
+        "Deny same-project but different-deployment, stale-deployment, and missing-deployment cases."
+      ],
+      "permitted_repair_boundary": [
+        "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+        "protected-edge configuration and attestation validation files explicitly authorized by a repair campaign",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js only if the existing field cannot be preserved",
+        "existing environment, contract, assertion, and integration tests"
+      ],
+      "required_tests": [
+        "same project and exact deployment allows",
+        "same project and different immutable deployment denies",
+        "missing immutable deployment identity denies",
+        "stale deployment attestation denies",
+        "cross-deployment internal assertion replay denies"
+      ],
+      "stop_conditions": [
+        "Vercel inspection or deployment is required",
+        "credential access is required",
+        "a second identity authority is introduced",
+        "protected roots must change",
+        "attestation schema expansion lacks separate architecture authority"
+      ]
+    },
+    {
+      "finding_id": "PEIB-RV-002",
+      "severity": "HIGH",
+      "title": "SESSION_BOUND mode has no trusted session binding",
+      "affected_files": [
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js",
+        "test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js"
+      ],
+      "exact_defect": "The replay fingerprint contains token_identifier_ref, canonical_subject_ref, environment_id, and deployment_id only. In SESSION_BOUND mode, an idempotent CLAIM_REPLAY result is accepted without a trusted server session, transaction, browser binding, or request-context binding.",
+      "security_effect": "A stolen upstream bearer token can be reused until expiry from another request context, with each reuse minting a fresh one-time internal assertion.",
+      "evidence": {
+        "replay_fingerprint_lines": "225-233",
+        "idempotent_acceptance_lines": "74-82",
+        "focused_test_lines": "269-282",
+        "independent_adversarial_probe": {
+          "first_login_allowed": true,
+          "same_token_different_route_allowed": true
+        }
+      },
+      "required_behavior": [
+        "Fail closed for SESSION_BOUND until a trusted binding exists, or bind reuse to a cryptographically established server-derived session or transaction identifier.",
+        "Include the trusted binding in the authoritative atomic replay fingerprint.",
+        "Reject absent, mismatched, cross-session, concurrent, and post-logout reuse.",
+        "Preserve outage fail-closed behavior and no local fallback."
+      ],
+      "permitted_repair_boundary": [
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js",
+        "existing protected-edge focused, configuration, and integration tests"
+      ],
+      "required_tests": [
+        "same token and same trusted session follows the reviewed policy",
+        "same token and different trusted session denies",
+        "same token and attacker-controlled binding denies",
+        "concurrent reuse has one valid winner where exclusivity is required",
+        "post-logout reuse denies",
+        "replay-store outage denies"
+      ],
+      "stop_conditions": [
+        "binding would be client asserted or inferred from an untrusted header or cookie",
+        "unqualified provider behavior must be trusted",
+        "identity becomes coupled to entitlement",
+        "architecture change is required",
+        "protected roots must change"
+      ]
+    },
+    {
+      "finding_id": "PEIB-RV-003",
+      "severity": "MEDIUM",
+      "title": "Contradictory temporal claims are accepted",
+      "affected_files": [
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js",
+        "test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js"
+      ],
+      "exact_defect": "The upstream verifier does not require exp to be later than iat, and the internal assertion verifier does not explicitly require expires_at to be later than issued_at. Clock skew can therefore admit internally contradictory signed time claims.",
+      "security_effect": "Malformed but cryptographically valid claim sets can establish protected-edge identity, contradicting the fail-closed temporal doctrine and producing inconsistent audit semantics.",
+      "evidence": {
+        "jwt_temporal_validation_lines": "101-113",
+        "internal_assertion_temporal_validation_lines": "153-157",
+        "independent_adversarial_probe": {
+          "claims": "iat=now+10s, exp=now+5s, clock_skew=30s",
+          "accepted": true
+        }
+      },
+      "required_behavior": [
+        "Require coherent ordering among nbf, iat, auth_time, and exp.",
+        "Require internal assertion expires_at to be strictly later than issued_at.",
+        "Apply clock skew to server-time comparisons only, not to contradictory intra-token ordering."
+      ],
+      "permitted_repair_boundary": [
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js",
+        "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js",
+        "existing protected-edge focused tests"
+      ],
+      "required_tests": [
+        "exp equal to iat denies",
+        "exp earlier than iat denies",
+        "nbf later than exp denies",
+        "auth_time later than iat or exp denies under the reviewed policy",
+        "valid skew boundary still allows"
+      ],
+      "stop_conditions": [
+        "provider-specific temporal semantics are required",
+        "contract widening is required",
+        "protected roots must change"
+      ]
+    }
+  ],
+  "commit_authorized": false,
+  "review_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIR_REQUIRED"
+}

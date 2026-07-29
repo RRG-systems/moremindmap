@@ -1,0 +1,56 @@
+{
+  "resolution_version": "protected-edge-identity-binding-v1-repair-001-findings-resolution-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "findings": [
+    {
+      "finding_id": "PEIB-RV-001",
+      "prior_severity": "HIGH",
+      "status": "RESOLVED",
+      "resolution": "deployment_id is a mandatory immutable SHA-256 supplied through the separate server-side MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256 contract and matched against the protected-edge configuration; project reference remains separate",
+      "proofs": [
+        "project reference alone rejects",
+        "missing deployment SHA rejects",
+        "mismatched deployment SHA rejects",
+        "same-project project identity and immutable deployment identity remain distinct",
+        "cross-deployment and cross-environment assertion replay reject",
+        "browser authority-binding headers reject"
+      ]
+    },
+    {
+      "finding_id": "PEIB-RV-002",
+      "prior_severity": "HIGH",
+      "status": "RESOLVED",
+      "resolution": "SESSION_BOUND uses a cryptographically random server-generated transaction reference, HMAC-pseudonymized into the request binding context, and all upstream replay claims remain strict one-time and atomic",
+      "proofs": [
+        "first intended transaction succeeds",
+        "same token across route rejects",
+        "different transaction rejects",
+        "missing or malformed transaction generation rejects",
+        "browser-spoofed transaction or session binding rejects",
+        "concurrent replay has one winner",
+        "post-use and invalidated reuse reject",
+        "replay-state outage rejects"
+      ]
+    },
+    {
+      "finding_id": "PEIB-RV-003",
+      "prior_severity": "MEDIUM",
+      "status": "RESOLVED",
+      "resolution": "upstream and internal assertion temporal ordering is checked independently of clock skew and malformed NumericDate values fail closed",
+      "proofs": [
+        "exp less than or equal to iat rejects",
+        "exp less than or equal to nbf rejects",
+        "auth_time later than iat or not earlier than exp rejects",
+        "malformed and non-finite NumericDate values reject",
+        "valid verifier-clock skew remains accepted",
+        "internal expires_at not later than issued_at rejects"
+      ]
+    }
+  ],
+  "unresolved_findings": [],
+  "architecture_changed": false,
+  "authority_broadened": false,
+  "provider_configuration_required": true,
+  "final_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIRED_PROVIDER_CONFIGURATION_REQUIRED"
+}

@@ -1,0 +1,710 @@
+--- a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js
++++ b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js
+@@ -24,8 +24,11 @@
+   'MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF',
+   'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF',
+ ]);
++export const PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE =
++  'MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256';
+ 
+ const frozen = (value) => deepFreeze(structuredClone(value));
++const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+ const deny = (code, field = null) => frozen({
+   ok: false,
+   allowed: false,
+@@ -75,6 +78,14 @@
+   if (typeof resolveReference !== 'function') {
+     return deny('ASYNC_SECURITY_UNCONFIGURED', 'resolveReference');
+   }
++  const immutableDeploymentIdentity =
++    env[PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE];
++  if (!sha256(immutableDeploymentIdentity)) {
++    return deny(
++      'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED',
++      PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
++    );
++  }
+ 
+   const documents = {};
+   try {
+@@ -128,7 +139,7 @@
+     protectedEdgeConfiguration,
+     {
+       environmentId: remoteConfiguration?.environment_id,
+-      deploymentId: liveEnvironmentAttestation?.vercel_project_reference,
++      deploymentId: immutableDeploymentIdentity,
+       policyDigest: authorityPacket?.protected_edge_policy_digest,
+       internalSigningKeyRef: authorityPacket?.edge_assertion_key_ref,
+     },
+@@ -213,6 +224,8 @@
+     remote_configuration: remoteConfiguration,
+     qualification_certificate: qualificationCertificate,
+     live_environment_attestation: liveEnvironmentAttestation,
++    immutable_deployment_identity: immutableDeploymentIdentity,
++    project_reference: liveEnvironmentAttestation.vercel_project_reference,
+     product_binding_attestation: productBindingAttestation,
+     assertion_configuration: assertionConfiguration,
+     protected_edge_configuration: protectedEdgeConfiguration,
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js
+@@ -57,7 +57,7 @@
+   }
+ }
+ 
+-function bindingContextHash(req, configuration) {
++function bindingContextHash(req, configuration, trustedTransactionRef = null) {
+   const route = typeof req?.url === 'string' ? req.url.split('?')[0] : '/';
+   const method = typeof req?.method === 'string' ? req.method.toUpperCase() : 'GET';
+   return hashCanonicalJson({
+@@ -65,7 +65,44 @@
+     deployment_id: configuration.deployment_id,
+     method,
+     route,
++    trusted_transaction_ref: trustedTransactionRef,
+   });
++}
++
++function hasBrowserSuppliedAuthorityBinding(req) {
++  const prohibited = new Set([
++    'x-more-deployment-id',
++    'x-more-immutable-deployment-id',
++    'x-more-protected-edge-session',
++    'x-more-protected-edge-transaction',
++  ]);
++  return Object.keys(req?.headers || {})
++    .some((name) => prohibited.has(name.toLowerCase()));
++}
++
++function trustedTransactionReference({
++  configuration,
++  identityHashKey,
++  transactionIdFactory,
++} = {}) {
++  if (configuration.replay_mode !== 'SESSION_BOUND') return null;
++  let rawReference;
++  try {
++    rawReference = transactionIdFactory();
++  } catch {
++    return null;
++  }
++  if (typeof rawReference !== 'string'
++    || rawReference.length < 16
++    || rawReference.length > 256
++    || !/^[A-Za-z0-9:_-]+$/.test(rawReference)) {
++    return null;
++  }
++  return `edge_transaction_${hmac(
++    identityHashKey,
++    'protected_edge_server_transaction',
++    rawReference,
++  )}`;
+ }
+ 
+ function normalizeVerifiedIdentity({
+@@ -131,6 +168,7 @@
+   statePort,
+   clock = () => Date.now(),
+   assertionIdFactory,
++  transactionIdFactory = () => `edge_transaction_${crypto.randomUUID().replaceAll('-', '')}`,
+ } = {}) {
+   const checked = validateProtectedEdgeIdentityConfigurationV1(configuration);
+   if (!checked.valid
+@@ -193,6 +231,9 @@
+       if (configuration.emergency_disabled === true) {
+         return deny('EMERGENCY_DISABLED', 503);
+       }
++      if (hasBrowserSuppliedAuthorityBinding(req)) {
++        return deny('PROTECTED_EDGE_AUTHORITY_BINDING_SPOOFED');
++      }
+       const extracted = extractProtectedEdgeUpstreamTokenV1(req, {
+         tokenSource: configuration.token_source,
+       });
+@@ -215,7 +256,19 @@
+         Date.parse(identity.expires_at),
+         clock() + configuration.replay_ttl_seconds * 1000,
+       );
+-      const contextHash = bindingContextHash(req, configuration);
++      const trustedTransactionRef = trustedTransactionReference({
++        configuration,
++        identityHashKey,
++        transactionIdFactory,
++      });
++      if (configuration.replay_mode === 'SESSION_BOUND' && trustedTransactionRef == null) {
++        return deny('PROTECTED_EDGE_TRUSTED_TRANSACTION_REQUIRED');
++      }
++      const contextHash = bindingContextHash(
++        req,
++        configuration,
++        trustedTransactionRef,
++      );
+       const upstreamReplay = await replayProtector.claim({
+         replayKeyHash: hmac(
+           identityHashKey,
+@@ -226,11 +279,12 @@
+           identityHashKey,
+           'protected_edge_upstream_replay_fingerprint',
+           `${identity.token_identifier_ref}\0${identity.canonical_subject_ref}`
+-            + `\0${configuration.environment_id}\0${configuration.deployment_id}`,
++            + `\0${configuration.environment_id}\0${configuration.deployment_id}`
++            + `\0${contextHash}`,
+         ),
+         correlationRef,
+         expiresAtMs: upstreamExpiresAtMs,
+-        strictOneTime: configuration.replay_mode === 'ONE_TIME',
++        strictOneTime: true,
+       });
+       if (!upstreamReplay.allowed) return deny(upstreamReplay.code);
+ 
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js
+@@ -177,7 +177,6 @@
+   }
+   for (const field of [
+     'environment_id',
+-    'deployment_id',
+     'identity_hash_key_ref',
+     'internal_signing_key_ref',
+   ]) {
+@@ -185,6 +184,12 @@
+       errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', field));
+     }
+   }
++  if (!sha256(configuration.deployment_id)) {
++    errors.push(issue(
++      'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED',
++      'deployment_id',
++    ));
++  }
+   if ((environmentId != null && configuration.environment_id !== environmentId)
+     || (deploymentId != null && configuration.deployment_id !== deploymentId)
+     || (policyDigest != null
+@@ -253,6 +258,8 @@
+     entitlement_authority: false,
+     tester_authority: false,
+     profile_id_authority: false,
++    immutable_deployment_identity: true,
++    trusted_server_transaction_binding: true,
+     source_default_off: true,
+   });
+ }
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js
+@@ -46,12 +46,16 @@
+ } = {}) {
+   const now = clock();
+   const identityExpiryMs = Date.parse(identity?.expires_at);
++  const identityAuthenticatedAtMs = Date.parse(identity?.authenticated_at);
+   if (typeof signingKey !== 'string'
+     || signingKey.length < 32
+     || !sha256(bindingContextHash)
+     || !Number.isFinite(now)
+     || !Number.isFinite(identityExpiryMs)
++    || !Number.isFinite(identityAuthenticatedAtMs)
+     || identityExpiryMs <= now
++    || identityAuthenticatedAtMs > now
++    || identityAuthenticatedAtMs >= identityExpiryMs
+     || identity?.mfa_verified !== true
+     || identity?.named_identity_verified !== true
+     || !opaque(identity?.canonical_subject_ref)
+@@ -136,6 +140,7 @@
+   const now = clock();
+   const issuedAtMs = Date.parse(payload?.issued_at);
+   const expiresAtMs = Date.parse(payload?.expires_at);
++  const authenticatedAtMs = Date.parse(payload?.authenticated_at);
+   if (payload?.assertion_version !== PROTECTED_EDGE_INTERNAL_ASSERTION_VERSION
+     || payload.environment_id !== configuration.environment_id
+     || payload.deployment_id !== configuration.deployment_id
+@@ -152,8 +157,12 @@
+     || !opaque(payload.assertion_id)
+     || !Number.isFinite(issuedAtMs)
+     || !Number.isFinite(expiresAtMs)
++    || !Number.isFinite(authenticatedAtMs)
+     || issuedAtMs > now + configuration.clock_skew_seconds * 1000
+     || expiresAtMs <= now
++    || expiresAtMs <= issuedAtMs
++    || authenticatedAtMs > issuedAtMs
++    || authenticatedAtMs >= expiresAtMs
+     || expiresAtMs - issuedAtMs > configuration.internal_assertion_ttl_seconds * 1000) {
+     return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
+   }
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js
+@@ -100,12 +100,18 @@
+   const skew = configuration.clock_skew_seconds;
+   if (!Number.isInteger(claims.exp)
+     || !Number.isInteger(claims.iat)
+-    || claims.exp + skew < nowSeconds) {
++    || (claims.nbf != null && !Number.isInteger(claims.nbf))) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  if (claims.exp <= claims.iat
++    || (claims.nbf != null && claims.exp <= claims.nbf)) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  if (claims.exp + skew < nowSeconds) {
+     return deny('PROTECTED_EDGE_TOKEN_EXPIRED');
+   }
+   if (claims.iat - skew > nowSeconds
+-    || (claims.nbf != null
+-      && (!Number.isInteger(claims.nbf) || claims.nbf - skew > nowSeconds))) {
++    || (claims.nbf != null && claims.nbf - skew > nowSeconds)) {
+     return deny('PROTECTED_EDGE_TOKEN_NOT_YET_VALID');
+   }
+   if (nowSeconds - claims.iat > configuration.max_token_age_seconds + skew
+@@ -124,9 +130,16 @@
+     return deny('PROTECTED_EDGE_MFA_REQUIRED');
+   }
+   const authenticationTimeValue = claims[configuration.authentication_time_claim];
++  if (authenticationTimeValue != null && !Number.isInteger(authenticationTimeValue)) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
+   const authenticationTimeSeconds = Number.isInteger(authenticationTimeValue)
+     ? authenticationTimeValue
+     : claims.iat;
++  if (authenticationTimeSeconds > claims.iat
++    || authenticationTimeSeconds >= claims.exp) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
+   if (authenticationTimeSeconds - skew > nowSeconds) {
+     return deny('PROTECTED_EDGE_TOKEN_NOT_YET_VALID');
+   }
+--- a/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js
++++ b/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js
+@@ -197,6 +197,7 @@
+ 
+ function protectedEdgeConfiguration(live, {
+   emergencyDisabled = false,
++  deploymentId = '8'.repeat(64),
+ } = {}) {
+   const value = {
+     config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
+@@ -220,7 +221,7 @@
+     accepted_acr_values: ['urn:more:mfa'],
+     mfa_required: true,
+     environment_id: 'PRIVATE_PRODUCTION_CLASSIFIED',
+-    deployment_id: live.vercel_project_reference,
++    deployment_id: deploymentId,
+     protected_edge_policy_digest: '0'.repeat(64),
+     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+     internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
+@@ -320,6 +321,8 @@
+   return {
+     MORE_PRIVATE_RUNTIME_LIVE_ENABLED: String(documents.packet.live_enabled),
+     MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED: String(documents.packet.emergency_disabled),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
++      documents.protectedEdge.deployment_id,
+     MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF: 'MORE_PRIVATE_RUNTIME_PACKET_VALUE',
+     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_CONFIG_REF: 'MORE_PRIVATE_RUNTIME_REMOTE_CONFIG_VALUE',
+     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_QUALIFICATION_CERTIFICATE_REF:
+@@ -357,9 +360,53 @@
+   assert.equal(result.state, 'CONFIGURED_DISABLED');
+   assert.equal(result.live_authority.persistent_namespace, true);
+   assert.equal(result.live_authority.disposable_namespace, false);
++  assert.equal(result.immutable_deployment_identity, documents.protectedEdge.deployment_id);
++  assert.equal(result.project_reference, documents.live.vercel_project_reference);
++  assert.notEqual(result.immutable_deployment_identity, result.project_reference);
+   assert.equal(result.provider_call_required, false);
+ });
++
++test('immutable deployment identity is mandatory and project identity never substitutes', async () => {
++  const documents = authorityDocuments();
++  const missingEnv = environment(documents);
++  delete missingEnv.MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256;
++  const missing = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: missingEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(missingEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(missing.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
+ 
++  const projectOnlyEnv = {
++    ...environment(documents),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
++      documents.live.vercel_project_reference,
++  };
++  const projectOnly = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: projectOnlyEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(projectOnlyEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(projectOnly.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
++
++  const mismatchEnv = {
++    ...environment(documents),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256: '9'.repeat(64),
++  };
++  const mismatch = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: mismatchEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(mismatchEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(mismatch.code, 'PROTECTED_EDGE_CONFIGURATION_MISMATCH');
++});
++
+ test('public exposure, disposable live namespace, and namespace mismatch deny', () => {
+   for (const liveOverrides of [
+     { public_access: true },
+--- a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js
+@@ -57,7 +57,7 @@
+     accepted_acr_values: ['urn:more:mfa'],
+     mfa_required: true,
+     environment_id: 'private_live_synthetic',
+-    deployment_id: 'private_project_synthetic',
++    deployment_id: 'd'.repeat(64),
+     protected_edge_policy_digest: '0'.repeat(64),
+     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+     internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
+@@ -154,6 +154,7 @@
+       statePort: security.port,
+       clock: () => now,
+       assertionIdFactory: options.assertionIdFactory,
++      transactionIdFactory: options.transactionIdFactory,
+     }),
+   };
+ }
+@@ -212,8 +213,20 @@
+   const cases = [
+     [jwt({ claims: { iss: 'https://wrong.synthetic.example/' } }), 'PROTECTED_EDGE_ISSUER_MISMATCH'],
+     [jwt({ claims: { aud: 'wrong-audience' } }), 'PROTECTED_EDGE_AUDIENCE_MISMATCH'],
+-    [jwt({ claims: { exp: nowSeconds - 60 } }), 'PROTECTED_EDGE_TOKEN_EXPIRED'],
+-    [jwt({ claims: { nbf: nowSeconds + 300 } }), 'PROTECTED_EDGE_TOKEN_NOT_YET_VALID'],
++    [jwt({
++      claims: {
++        iat: nowSeconds - 120,
++        nbf: nowSeconds - 120,
++        exp: nowSeconds - 60,
++        auth_time: nowSeconds - 130,
++      },
++    }), 'PROTECTED_EDGE_TOKEN_EXPIRED'],
++    [jwt({
++      claims: {
++        nbf: nowSeconds + 300,
++        exp: nowSeconds + 600,
++      },
++    }), 'PROTECTED_EDGE_TOKEN_NOT_YET_VALID'],
+     [jwt({ claims: { iat: nowSeconds - 900 } }), 'PROTECTED_EDGE_TOKEN_STALE'],
+     [jwt({ claims: { sub: '' } }), 'PROTECTED_EDGE_SUBJECT_MISSING'],
+     [jwt({ header: { kid: 'unknown-key' } }), 'PROTECTED_EDGE_KEY_ID_UNKNOWN'],
+@@ -235,6 +248,8 @@
+     request(raw, { 'x-vercel-oidc-passport-token': raw }),
+     { ...request(raw), url: '/api/internal/private-runtime-login?token=forbidden' },
+     request(raw, { 'x-more-protected-edge-assertion': 'browser-spoof' }),
++    request(raw, { 'x-more-protected-edge-session': 'browser-spoof' }),
++    request(raw, { 'x-more-deployment-id': 'browser-spoof' }),
+   ];
+   for (const req of requests) {
+     const { adapter } = await binding();
+@@ -266,21 +281,77 @@
+   assert.equal(outage.code, 'PROTECTED_EDGE_REPLAY_STATE_UNAVAILABLE');
+ });
+ 
+-test('session-bound replay mode allows only identical durable fingerprint reuse', async () => {
++test('session-bound replay is one-use and bound to a server-generated transaction', async () => {
++  let transaction = 0;
+   const { adapter } = await binding({
+     configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => `trusted_server_transaction_${transaction += 1}`,
+   });
+   const raw = jwt({ claims: { jti: 'session-bound-token-id' } });
+   const first = await adapter.bindRequest(request(raw), {
+     correlationRef: 'correlation_session_bound_first',
+   });
+-  const second = await adapter.bindRequest(request(raw), {
++  const crossRoute = await adapter.bindRequest({
++    ...request(raw),
++    method: 'GET',
++    url: '/api/internal/private-runtime-session',
++  }, {
+     correlationRef: 'correlation_session_bound_second',
+   });
+   assert.equal(first.allowed, true);
+-  assert.equal(second.allowed, true);
++  assert.equal(crossRoute.allowed, false);
++});
++
++test('session-bound mode rejects missing, malformed, and browser-spoofed bindings', async () => {
++  for (const transactionIdFactory of [
++    () => null,
++    () => 'short',
++    () => 'browser supplied value',
++  ]) {
++    const { adapter } = await binding({
++      configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++      transactionIdFactory,
++    });
++    const result = await adapter.bindRequest(request(jwt({
++      claims: { jti: `binding-${String(transactionIdFactory()).replaceAll(' ', '-')}` },
++    })));
++    assert.equal(result.code, 'PROTECTED_EDGE_TRUSTED_TRANSACTION_REQUIRED');
++  }
++
++  const { adapter } = await binding({
++    configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => 'trusted_server_transaction_browser_spoof',
++  });
++  const spoofed = await adapter.bindRequest(request(jwt({
++    claims: { jti: 'browser-spoofed-session-binding' },
++  }), {
++    'x-more-protected-edge-transaction': 'browser-controlled-transaction',
++  }));
++  assert.equal(spoofed.code, 'PROTECTED_EDGE_AUTHORITY_BINDING_SPOOFED');
+ });
+ 
++test('session-bound concurrent replay has one winner and invalidated reuse denies', async () => {
++  let transaction = 0;
++  const { adapter } = await binding({
++    configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => `trusted_server_transaction_race_${transaction += 1}`,
++  });
++  const raw = jwt({ claims: { jti: 'session-bound-race-token-id' } });
++  const raced = await Promise.all([
++    adapter.bindRequest(request(raw), {
++      correlationRef: 'correlation_session_bound_race_a',
++    }),
++    adapter.bindRequest(request(raw), {
++      correlationRef: 'correlation_session_bound_race_b',
++    }),
++  ]);
++  assert.equal(raced.filter((result) => result.allowed).length, 1);
++  const afterInvalidation = await adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_session_bound_after_invalidation',
++  });
++  assert.equal(afterInvalidation.allowed, false);
++});
++
+ test('internal assertion is short-lived, environment-bound, deployment-bound, and one-time', async () => {
+   const config = configuration();
+   const security = state();
+@@ -328,7 +399,7 @@
+   });
+   const mismatch = await verifyProtectedEdgeInternalAssertionV1({
+     serialized: issued.serialized,
+-    configuration: configuration({ deployment_id: 'different_deployment' }),
++    configuration: configuration({ deployment_id: 'e'.repeat(64) }),
+     signingKey,
+     replayProtector,
+     correlationRef: 'correlation_internal_mismatch',
+@@ -338,8 +409,155 @@
+   assert.equal(first.allowed, true);
+   assert.equal(replay.code, 'PROTECTED_EDGE_REPLAY_DETECTED');
+   assert.equal(mismatch.allowed, false);
++});
++
++test('cross-deployment and cross-environment assertion replay deny', async () => {
++  const security = state();
++  const raw = jwt({ claims: { jti: 'cross-deployment-token-id' } });
++  const firstBinding = await binding({
++    security,
++    configuration: configuration({ deployment_id: '1'.repeat(64) }),
++  });
++  const secondBinding = await binding({
++    security,
++    configuration: configuration({ deployment_id: '2'.repeat(64) }),
++  });
++  const first = await firstBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_cross_deployment_first',
++  });
++  const crossDeployment = await secondBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_cross_deployment_second',
++  });
++  assert.equal(first.allowed, true);
++  assert.equal(crossDeployment.allowed, false);
++
++  const config = configuration({ deployment_id: '3'.repeat(64) });
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort: security.port,
++    environmentId: config.environment_id,
++    clock: () => now,
++  });
++  const identity = {
++    canonical_subject_ref: 'edge_subject_cross_environment',
++    issuer_provenance_ref: 'edge_issuer_cross_environment',
++    audience_policy_ref: 'edge_audience_cross_environment',
++    token_identifier_ref: 'edge_token_cross_environment',
++    authenticated_at: new Date(now - 1000).toISOString(),
++    expires_at: new Date(now + 300_000).toISOString(),
++    mfa_verified: true,
++    named_identity_verified: true,
++  };
++  const issued = issueProtectedEdgeInternalAssertionV1({
++    identity,
++    configuration: config,
++    signingKey,
++    bindingContextHash: 'c'.repeat(64),
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_cross_environment',
++  });
++  const crossEnvironment = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: issued.serialized,
++    configuration: configuration({
++      environment_id: 'other_private_environment',
++      deployment_id: config.deployment_id,
++    }),
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_cross_environment',
++    bindingContextHash: 'c'.repeat(64),
++    clock: () => now,
++  });
++  assert.equal(crossEnvironment.allowed, false);
+ });
+ 
++test('temporal contradictions and malformed NumericDate claims deny independent of skew', () => {
++  const invalidClaims = [
++    { iat: nowSeconds + 10, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, nbf: nowSeconds + 5, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, nbf: nowSeconds + 10, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, exp: nowSeconds + 5, auth_time: nowSeconds + 6 },
++    { iat: 'not-a-number' },
++    { exp: Number.NaN },
++    { nbf: [] },
++    { auth_time: {} },
++  ];
++  for (const [index, claims] of invalidClaims.entries()) {
++    const result = verifyProtectedEdgeUpstreamJwtV1({
++      serialized: jwt({
++        claims: {
++          ...claims,
++          jti: `temporal-invalid-${index}`,
++        },
++      }),
++      configuration: configuration(),
++      jwks,
++      clock: () => now,
++    });
++    assert.equal(result.code, 'PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++
++  const validSkew = verifyProtectedEdgeUpstreamJwtV1({
++    serialized: jwt({
++      claims: {
++        jti: 'temporal-valid-skew',
++        iat: nowSeconds + 20,
++        nbf: nowSeconds + 20,
++        exp: nowSeconds + 60,
++        auth_time: nowSeconds,
++      },
++    }),
++    configuration: configuration(),
++    jwks,
++    clock: () => now,
++  });
++  assert.equal(validSkew.ok, true);
++});
++
++test('internal assertion temporal ordering fails closed', async () => {
++  const config = configuration();
++  const security = state();
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort: security.port,
++    environmentId: config.environment_id,
++    clock: () => now,
++  });
++  const issued = issueProtectedEdgeInternalAssertionV1({
++    identity: {
++      canonical_subject_ref: 'edge_subject_internal_temporal',
++      issuer_provenance_ref: 'edge_issuer_internal_temporal',
++      audience_policy_ref: 'edge_audience_internal_temporal',
++      token_identifier_ref: 'edge_token_internal_temporal',
++      authenticated_at: new Date(now - 1000).toISOString(),
++      expires_at: new Date(now + 300_000).toISOString(),
++      mfa_verified: true,
++      named_identity_verified: true,
++    },
++    configuration: config,
++    signingKey,
++    bindingContextHash: 'a'.repeat(64),
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_internal_temporal',
++  });
++  const [payloadPart] = issued.serialized.split('.');
++  const payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
++  payload.issued_at = new Date(now + 10_000).toISOString();
++  payload.expires_at = new Date(now + 5_000).toISOString();
++  const contradictoryPayload = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
++  const contradictorySignature = crypto.createHmac('sha256', signingKey)
++    .update(contradictoryPayload)
++    .digest('base64url');
++  const result = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: `${contradictoryPayload}.${contradictorySignature}`,
++    configuration: config,
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_internal_temporal',
++    bindingContextHash: 'a'.repeat(64),
++    clock: () => now,
++  });
++  assert.equal(result.allowed, false);
++});
++
+ test('JWKS and signing material resolution is static, required, and fail closed', async () => {
+   for (const options of [
+     { jwksValue: JSON.stringify({ keys: [] }) },
+--- a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js
+@@ -34,7 +34,7 @@
+     accepted_acr_values: ['urn:more:mfa'],
+     mfa_required: true,
+     environment_id: 'private_live_synthetic',
+-    deployment_id: 'private_project_synthetic',
++    deployment_id: 'd'.repeat(64),
+     protected_edge_policy_digest: '0'.repeat(64),
+     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+     internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
+@@ -76,6 +76,8 @@
+   assert.equal(capability.entitlement_authority, false);
+   assert.equal(capability.tester_authority, false);
+   assert.equal(capability.profile_id_authority, false);
++  assert.equal(capability.immutable_deployment_identity, true);
++  assert.equal(capability.trusted_server_transaction_binding, true);
+ });
+ 
+ test('configuration and policy digest drift fail closed', () => {
+@@ -123,7 +125,7 @@
+   const value = configuration();
+   for (const expected of [
+     { environmentId: 'other_environment' },
+-    { deploymentId: 'other_deployment' },
++    { deploymentId: 'e'.repeat(64) },
+     { policyDigest: 'f'.repeat(64) },
+     { internalSigningKeyRef: 'MORE_PRIVATE_RUNTIME_OTHER_SIGNING_KEY' },
+   ]) {
+@@ -133,3 +135,20 @@
+     );
+   }
+ });
++
++test('deployment identity is an immutable digest and never a project reference or alias', () => {
++  assert.equal(validateProtectedEdgeIdentityConfigurationV1(
++    configuration({ deployment_id: 'd'.repeat(64) }),
++  ).valid, true);
++  for (const deploymentId of [
++    '',
++    'private_project_synthetic',
++    'main',
++    'private.example.invalid',
++    'd'.repeat(63),
++  ]) {
++    assert.equal(validateProtectedEdgeIdentityConfigurationV1(
++      configuration({ deployment_id: deploymentId }),
++    ).valid, false);
++  }
++});
+--- a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js
+@@ -54,7 +54,7 @@
+     accepted_acr_values: ['urn:more:mfa'],
+     mfa_required: true,
+     environment_id: 'private_live_integration',
+-    deployment_id: 'private_project_integration',
++    deployment_id: 'd'.repeat(64),
+     protected_edge_policy_digest: '0'.repeat(64),
+     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+     internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',

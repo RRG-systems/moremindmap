@@ -1,0 +1,39 @@
+{
+  "handoff_version": "protected-edge-identity-binding-v1-repaired-review-ai-handoff-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "reviewed_package_sha256": "4ce74bb8d81d0d4677f628f040026df3d4d7208b7059a8afefd8132c72046897",
+  "verdict": "PROTECTED_EDGE_IDENTITY_BINDING_APPROVED_FOR_COMMIT",
+  "commit_authorized": true,
+  "resolved_findings": [
+    "PEIB-RV-001",
+    "PEIB-RV-002",
+    "PEIB-RV-003"
+  ],
+  "new_critical_or_high_findings": 0,
+  "validation": {
+    "repair_specific": "7/7",
+    "protected_edge_implementation": "25/25",
+    "combined_focused": "71/71",
+    "targeted": "241/241",
+    "safe_regressions": "624/624",
+    "deterministic_build_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+    "dependency_cycles": 0,
+    "protected_roots_unchanged": true,
+    "qualified_adapter_unchanged": true
+  },
+  "commit_scope": "Only the exact reviewed Protected Edge Identity Binding V1 source, tests, verifier, and approved campaign evidence.",
+  "still_unauthorized": [
+    "provider configuration",
+    "credentials",
+    "environment changes",
+    "deployment",
+    "runtime activation",
+    "tester activation",
+    "Profile ID activation",
+    "public access",
+    "push"
+  ],
+  "provider_configuration_limit": "The immutable deployment digest and provider token identifier behavior must be operator-bound and qualified before activation; failure remains deny-only.",
+  "next_action": "AUTHORIZE_CLEAN_COMMIT_OF_REPAIRED_PROTECTED_EDGE_IDENTITY_BINDING_V1"
+}

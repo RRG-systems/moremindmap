@@ -1,0 +1,9 @@
+{
+  "baseline_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "current_diff_sha256": "49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd",
+  "unchanged": true,
+  "package_manifest_changed": false,
+  "lockfile_changed": false,
+  "vercel_configuration_changed": false,
+  "stripe_changed": false
+}

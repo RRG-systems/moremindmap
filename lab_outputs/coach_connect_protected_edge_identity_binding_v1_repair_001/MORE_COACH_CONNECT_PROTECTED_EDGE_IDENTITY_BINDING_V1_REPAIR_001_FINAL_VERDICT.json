@@ -1,0 +1,22 @@
+{
+  "verdict_version": "protected-edge-identity-binding-v1-repair-001-final-verdict-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIRED_PROVIDER_CONFIGURATION_REQUIRED",
+  "peib_rv_001": "RESOLVED",
+  "peib_rv_002": "RESOLVED",
+  "peib_rv_003": "RESOLVED",
+  "new_critical_or_high_findings": 0,
+  "architecture_changed": false,
+  "identity_authority_broadened": false,
+  "provider_calls": 0,
+  "environment_changes": 0,
+  "deployment_calls": 0,
+  "commit_actions": 0,
+  "push_actions": 0,
+  "runtime_activation": false,
+  "tester_activation": false,
+  "profile_id_activation": false,
+  "provider_configuration_required": true,
+  "next_action": "REPEAT_INDEPENDENT_IMPLEMENTATION_REVIEW"
+}

@@ -1,0 +1,9 @@
+{
+  "suite": "safe Intelligence Fabric",
+  "passed": 624,
+  "total": 624,
+  "failed": 0,
+  "skipped": 0,
+  "prior_baseline": 617,
+  "regressed": false
+}

@@ -9,6 +9,7 @@ export * from './erasureStrategy.js';
 export * from './inMemorySharedSecurityState.js';
 export * from './liveSubscriberAssertion/index.js';
 export * from './operatorIdentity.js';
+export * from './protectedEdgeIdentity/index.js';
 export * from './remoteSharedSecurity/index.js';
 export * from './retentionAuthority.js';
 export * from './sessionElevation.js';

@@ -1,0 +1,15 @@
+{
+  "test_result_version": "protected-edge-identity-binding-v1-repair-specific-tests-v1",
+  "passed": 7,
+  "total": 7,
+  "failed": 0,
+  "cases": [
+    "deployment identity is an immutable digest and never a project reference or alias",
+    "immutable deployment identity is mandatory and project identity never substitutes",
+    "session-bound replay is one-use and bound to a server-generated transaction",
+    "session-bound mode rejects missing, malformed, and browser-spoofed bindings",
+    "session-bound concurrent replay has one winner and invalidated reuse denies",
+    "cross-deployment and cross-environment assertion replay deny",
+    "temporal contradictions, malformed NumericDate claims, and internal assertion ordering deny"
+  ]
+}

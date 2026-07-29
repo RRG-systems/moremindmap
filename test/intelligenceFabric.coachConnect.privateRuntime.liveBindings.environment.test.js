@@ -2,6 +2,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   ASYNC_SECURITY_STATE_CONTRACT_VERSION,
+  PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
+  PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
+  PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
   REMOTE_SHARED_SECURITY_ADAPTER_CONTRACT_VERSION,
   UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
   defaultRemoteSharedSecurityConfiguration,
@@ -9,6 +12,8 @@ import {
   remoteSecurityQualificationCertificateDigest,
   remoteSharedSecurityCompleteScriptManifestDigest,
   remoteSharedSecurityConfigurationDigest,
+  protectedEdgeIdentityConfigurationDigest,
+  protectedEdgeIdentityPolicyDigest,
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
 import {
   liveSubscriberAssertionConfigurationDigest,
@@ -190,7 +195,55 @@ function productBinding() {
   return { ...value, binding_sha256: privateRuntimeProductBindingDigest(value) };
 }
 
-function assertionConfiguration() {
+function protectedEdgeConfiguration(live, {
+  emergencyDisabled = false,
+  deploymentId = '8'.repeat(64),
+} = {}) {
+  const value = {
+    config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
+    enabled: true,
+    emergency_disabled: emergencyDisabled,
+    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
+    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
+    provider_type: 'AUTH0_OIDC_JWT',
+    token_source: 'AUTHORIZATION_BEARER',
+    issuer: 'https://identity.private.example/',
+    audiences: ['https://private.edge.example/'],
+    jwks_ref: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE',
+    jwks_sha256: '7'.repeat(64),
+    allowed_algorithms: ['RS256'],
+    subject_claim: 'sub',
+    token_id_claim: 'jti',
+    authentication_time_claim: 'auth_time',
+    mfa_claim: 'amr',
+    acr_claim: 'acr',
+    accepted_mfa_values: ['mfa'],
+    accepted_acr_values: ['urn:more:mfa'],
+    mfa_required: true,
+    environment_id: 'PRIVATE_PRODUCTION_CLASSIFIED',
+    deployment_id: deploymentId,
+    protected_edge_policy_digest: '0'.repeat(64),
+    identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+    internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
+    clock_skew_seconds: 30,
+    max_token_age_seconds: 600,
+    internal_assertion_ttl_seconds: 60,
+    replay_mode: 'SESSION_BOUND',
+    replay_ttl_seconds: 600,
+    replay_store_contract: ASYNC_SECURITY_STATE_CONTRACT_VERSION,
+    configuration_sha256: '0'.repeat(64),
+  };
+  const policy = {
+    ...value,
+    protected_edge_policy_digest: protectedEdgeIdentityPolicyDigest(value),
+  };
+  return {
+    ...policy,
+    configuration_sha256: protectedEdgeIdentityConfigurationDigest(policy),
+  };
+}
+
+function assertionConfiguration(protectedEdgePolicyDigest) {
   const value = {
     config_version: 'live-subscriber-assertion-configuration-v1',
     enabled: true,
@@ -208,7 +261,7 @@ function assertionConfiguration() {
     transaction_key_ref: 'MORE_PRIVATE_RUNTIME_OIDC_TRANSACTION_KEY_VALUE',
     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
     exact_scope_hash: scopeHash,
-    protected_edge_policy_digest: '1'.repeat(64),
+    protected_edge_policy_digest: protectedEdgePolicyDigest,
     allowed_algorithms: ['RS256'],
     mfa_required: true,
     clock_skew_seconds: 30,
@@ -256,15 +309,20 @@ function authorityDocuments({ packetOverrides = {}, liveOverrides = {} } = {}) {
   const qual = certificate();
   const live = liveAttestation(config, qual, liveOverrides);
   const product = productBinding();
-  const assertion = assertionConfiguration();
+  const protectedEdge = protectedEdgeConfiguration(live, {
+    emergencyDisabled: packetOverrides.emergency_disabled === true,
+  });
+  const assertion = assertionConfiguration(protectedEdge.protected_edge_policy_digest);
   const packet = authorityPacket(config, qual, live, product, assertion, packetOverrides);
-  return { config, qual, live, product, assertion, packet };
+  return { config, qual, live, product, assertion, protectedEdge, packet };
 }
 
 function environment(documents) {
   return {
     MORE_PRIVATE_RUNTIME_LIVE_ENABLED: String(documents.packet.live_enabled),
     MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED: String(documents.packet.emergency_disabled),
+    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
+      documents.protectedEdge.deployment_id,
     MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF: 'MORE_PRIVATE_RUNTIME_PACKET_VALUE',
     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_CONFIG_REF: 'MORE_PRIVATE_RUNTIME_REMOTE_CONFIG_VALUE',
     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_QUALIFICATION_CERTIFICATE_REF:
@@ -275,12 +333,16 @@ function environment(documents) {
       'MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_VALUE',
     MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF:
       'MORE_PRIVATE_RUNTIME_ASSERTION_CONFIG_VALUE',
+    MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF:
+      'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIG_VALUE',
     MORE_PRIVATE_RUNTIME_PACKET_VALUE: JSON.stringify(documents.packet),
     MORE_PRIVATE_RUNTIME_REMOTE_CONFIG_VALUE: JSON.stringify(documents.config),
     MORE_PRIVATE_RUNTIME_CERTIFICATE_VALUE: JSON.stringify(documents.qual),
     MORE_PRIVATE_RUNTIME_LIVE_ATTESTATION_VALUE: JSON.stringify(documents.live),
     MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_VALUE: JSON.stringify(documents.product),
     MORE_PRIVATE_RUNTIME_ASSERTION_CONFIG_VALUE: JSON.stringify(documents.assertion),
+    MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIG_VALUE:
+      JSON.stringify(documents.protectedEdge),
   };
 }
 
@@ -298,7 +360,51 @@ test('exact persistent PRIVATE_LIVE authority validates source-default-off', asy
   assert.equal(result.state, 'CONFIGURED_DISABLED');
   assert.equal(result.live_authority.persistent_namespace, true);
   assert.equal(result.live_authority.disposable_namespace, false);
+  assert.equal(result.immutable_deployment_identity, documents.protectedEdge.deployment_id);
+  assert.equal(result.project_reference, documents.live.vercel_project_reference);
+  assert.notEqual(result.immutable_deployment_identity, result.project_reference);
   assert.equal(result.provider_call_required, false);
+});
+
+test('immutable deployment identity is mandatory and project identity never substitutes', async () => {
+  const documents = authorityDocuments();
+  const missingEnv = environment(documents);
+  delete missingEnv.MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256;
+  const missing = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: missingEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(missingEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(missing.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
+
+  const projectOnlyEnv = {
+    ...environment(documents),
+    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
+      documents.live.vercel_project_reference,
+  };
+  const projectOnly = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: projectOnlyEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(projectOnlyEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(projectOnly.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
+
+  const mismatchEnv = {
+    ...environment(documents),
+    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256: '9'.repeat(64),
+  };
+  const mismatch = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: mismatchEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(mismatchEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(mismatch.code, 'PROTECTED_EDGE_CONFIGURATION_MISMATCH');
 });
 
 test('public exposure, disposable live namespace, and namespace mismatch deny', () => {

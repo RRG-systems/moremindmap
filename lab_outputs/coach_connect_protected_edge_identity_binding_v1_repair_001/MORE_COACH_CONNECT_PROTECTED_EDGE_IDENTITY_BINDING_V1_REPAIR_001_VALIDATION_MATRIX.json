@@ -1,0 +1,58 @@
+{
+  "matrix_version": "protected-edge-identity-binding-v1-repair-001-validation-matrix-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001",
+  "results": {
+    "repair_specific": {
+      "passed": 7,
+      "total": 7
+    },
+    "protected_edge_implementation": {
+      "passed": 25,
+      "total": 25
+    },
+    "direct_affected_suites": {
+      "passed": 31,
+      "total": 31
+    },
+    "combined_focused": {
+      "passed": 71,
+      "total": 71
+    },
+    "targeted": {
+      "passed": 241,
+      "total": 241
+    },
+    "safe_regressions": {
+      "passed": 624,
+      "total": 624
+    },
+    "deterministic_build": {
+      "run_1_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+      "run_2_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+      "deterministic": true
+    },
+    "lint": "PASS",
+    "import_export": "PASS",
+    "schema": "PASS",
+    "dependency_cycles": 0,
+    "protected_roots_unchanged": true,
+    "qualified_adapter_unchanged": true,
+    "exact_repair_allowlist": true,
+    "secret_scan": "PASS",
+    "browser_bundle_secret_scan": "PASS",
+    "evidence_privacy_scan": "PASS"
+  },
+  "security_cases": [
+    { "case": "immutable deployment accepted", "result": "PASS" },
+    { "case": "project-only deployment rejected", "result": "PASS" },
+    { "case": "missing and mismatched deployment rejected", "result": "PASS" },
+    { "case": "cross-deployment and cross-environment replay rejected", "result": "PASS" },
+    { "case": "server transaction one-use", "result": "PASS" },
+    { "case": "cross-route and cross-session reuse rejected", "result": "PASS" },
+    { "case": "browser binding spoof rejected", "result": "PASS" },
+    { "case": "concurrent replay one winner", "result": "PASS" },
+    { "case": "replay outage fail closed", "result": "PASS" },
+    { "case": "temporal contradictions rejected independent of skew", "result": "PASS" },
+    { "case": "valid skew against verifier clock accepted", "result": "PASS" }
+  ]
+}

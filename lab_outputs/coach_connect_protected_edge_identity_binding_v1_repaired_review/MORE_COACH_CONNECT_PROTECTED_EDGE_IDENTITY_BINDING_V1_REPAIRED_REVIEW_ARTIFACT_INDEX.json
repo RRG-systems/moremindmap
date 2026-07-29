@@ -1,0 +1,29 @@
+{
+  "index_version": "protected-edge-identity-binding-v1-repaired-review-artifact-index-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "reviewed_package": {
+    "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_IMPLEMENTATION_REVIEW.zip",
+    "sha256": "4ce74bb8d81d0d4677f628f040026df3d4d7208b7059a8afefd8132c72046897"
+  },
+  "artifact_count": 5,
+  "archive_entry_count": 5,
+  "artifacts": [
+    "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW.md",
+    "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW_AI_HANDOFF.json",
+    "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW_ARTIFACT_INDEX.json",
+    "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW_FINDINGS.json",
+    "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW_VERDICT.json"
+  ],
+  "archive": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repaired_review/COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW.zip",
+  "archive_rules": {
+    "sorted_paths": true,
+    "duplicate_paths": false,
+    "case_collisions": false,
+    "symlinks": false,
+    "absolute_paths": false,
+    "traversal_paths": false,
+    "fixed_timestamp": "1980-01-02T12:00:00.000Z"
+  },
+  "verdict": "PROTECTED_EDGE_IDENTITY_BINDING_APPROVED_FOR_COMMIT"
+}

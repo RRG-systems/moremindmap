@@ -1,0 +1,13 @@
+{
+  "run_1": {
+    "exit_code": 0,
+    "file_count": 24,
+    "sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75"
+  },
+  "run_2": {
+    "exit_code": 0,
+    "file_count": 24,
+    "sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75"
+  },
+  "deterministic": true
+}

@@ -1,0 +1,85 @@
+{
+  "verdict_version": "protected-edge-identity-binding-v1-repaired-review-verdict-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "repaired_implementation_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIRED_PROVIDER_CONFIGURATION_REQUIRED",
+  "independent_review_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_APPROVED_FOR_COMMIT",
+  "commit_authorized": true,
+  "prior_finding_resolution": {
+    "PEIB-RV-001": "RESOLVED",
+    "PEIB-RV-002": "RESOLVED",
+    "PEIB-RV-003": "RESOLVED"
+  },
+  "new_findings": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "validation": {
+    "repair_specific": {
+      "passed": 7,
+      "total": 7
+    },
+    "protected_edge_implementation": {
+      "passed": 25,
+      "total": 25
+    },
+    "combined_focused": {
+      "passed": 71,
+      "total": 71
+    },
+    "targeted": {
+      "passed": 241,
+      "total": 241
+    },
+    "safe_regressions": {
+      "passed": 624,
+      "total": 624
+    },
+    "deterministic_build_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+    "lint": "PASS",
+    "import_export": "PASS",
+    "schema": "PASS",
+    "dependency_cycles": 0,
+    "protected_roots_unchanged": true,
+    "qualified_remote_adapter_unchanged": true,
+    "exact_allowlist": true,
+    "privacy_scans": "PASS"
+  },
+  "package_integrity": {
+    "repaired_package_sha256_verified": true,
+    "repository_desktop_byte_identical": true,
+    "entry_count": 54,
+    "sorted_entries": true,
+    "duplicates": 0,
+    "case_collisions": 0,
+    "symlinks": 0,
+    "unsafe_paths": 0,
+    "archive_integrity": "PASS",
+    "repository_file_mismatches": 0,
+    "evidence_manifest_mismatches": 0
+  },
+  "activity": {
+    "provider_calls": 0,
+    "environment_changes": 0,
+    "deployment_calls": 0,
+    "runtime_activation": false,
+    "tester_activation": false,
+    "profile_id_activation": false,
+    "commit_actions": 0,
+    "push_actions": 0
+  },
+  "remaining_authority_boundary": [
+    "provider configuration",
+    "credential binding",
+    "environment binding",
+    "deployment",
+    "runtime activation",
+    "tester authorization",
+    "Profile ID authorization",
+    "public activation",
+    "push"
+  ],
+  "next_action": "AUTHORIZE_CLEAN_COMMIT_OF_REPAIRED_PROTECTED_EDGE_IDENTITY_BINDING_V1"
+}

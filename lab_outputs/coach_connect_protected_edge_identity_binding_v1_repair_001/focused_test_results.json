@@ -1,0 +1,7 @@
+{
+  "protected_edge_implementation": { "passed": 25, "total": 25, "failed": 0 },
+  "direct_affected_suites": { "passed": 31, "total": 31, "failed": 0 },
+  "combined_focused": { "passed": 71, "total": 71, "failed": 0 },
+  "prior_combined_baseline": { "passed": 64, "total": 64 },
+  "regressed": false
+}

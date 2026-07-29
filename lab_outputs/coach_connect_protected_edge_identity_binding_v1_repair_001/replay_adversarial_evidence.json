@@ -1,0 +1,19 @@
+{
+  "evidence_version": "protected-edge-identity-binding-v1-repair-replay-evidence-v1",
+  "server_generated_transaction": true,
+  "raw_transaction_persisted": false,
+  "raw_transaction_logged": false,
+  "atomic_claim_replay": true,
+  "strict_one_time": true,
+  "first_valid_use": "PASS",
+  "same_route_reuse_denied": "PASS",
+  "cross_route_reuse_denied": "PASS",
+  "different_transaction_reuse_denied": "PASS",
+  "missing_binding_denied": "PASS",
+  "malformed_binding_denied": "PASS",
+  "browser_spoof_denied": "PASS",
+  "concurrent_winner_count": 1,
+  "post_use_reuse_denied": "PASS",
+  "replay_store_outage_denied": "PASS",
+  "local_fallback": false
+}

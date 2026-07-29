@@ -1,0 +1,54 @@
+{
+  "manifest_version": "protected-edge-identity-binding-v1-repair-001-changed-files-v1",
+  "comparison_source": "COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_IMPLEMENTATION_REVIEW.zip",
+  "comparison_source_sha256": "34de85f86eee354fbf579d5e3a8ab7af3248f393c55f3b79696281603667731e",
+  "changed_file_count": 9,
+  "allowlist_exact_match": true,
+  "files": [
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js",
+      "before_sha256": "443694918b0856db9e03c6ae70a5af23b72c35cff949ffc88c831a33e715363a",
+      "after_sha256": "ca12138ac931d3e934860db0849ab1b03c7f5b17df37a4ffffe08e53b336fcdd"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js",
+      "before_sha256": "44498523761e9cfbff624e03a605098b18042884559b4e0c12761c19216f257b",
+      "after_sha256": "46ff8fce2396371f820c70b6f5702b3aa76ae05238afec03218f2238a77b0204"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js",
+      "before_sha256": "64384830a41aeb6da5a3ecbc86184bdc0b4201e1902567874eb438fa959bf928",
+      "after_sha256": "131337645e92a988d92b9374fff7f07d575aa684ae856d259f3b8a0e2496473b"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js",
+      "before_sha256": "35d072862ab8ab2260b6ab9ce2257f521f8caa2c63dee1d2b37af46352a7b0ab",
+      "after_sha256": "4c55012c773680c674ee1c6a15fe8c6643da8e16b4b617566b26fc00c4ca6e15"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js",
+      "before_sha256": "b14fadecc3e1c64b72efaacdb5a5038e184e81d4c3acfb0fb93d082bdc7c9bc9",
+      "after_sha256": "a5b59908be1c54c5cddefbaab64256e3b6c4c33d3ac24a2651275c42b0b4f1b6"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js",
+      "before_sha256": "ec67d3f2362de57e69913e6ac250fe4d774d20896adcebab08b5fec83770174f",
+      "after_sha256": "5bf718580cfa42a219655e66f6a6a163926621fa7cc03eec27057e90942673e1"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js",
+      "before_sha256": "effd6aab61f59c154832c1d03ca27aefe1bcbc3a170de0c6a8d2f25f91c67bf2",
+      "after_sha256": "97e6bcc0963317036a4cb9684f340b3e265efad6b516d118fbe0e250d1627691"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js",
+      "before_sha256": "047370d7653902af46ad649113c476f90ad5d69b1ce139acb6c3338528a113a3",
+      "after_sha256": "b13da2f5f04d03c13fc51cc46c70d09cc233ec8a31d88acc757086fe8a30f2e3"
+    },
+    {
+      "path": "test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js",
+      "before_sha256": "f520df02fc98cf9f9c60a0e78e7d4298f66583be41316a884f0406d4cb7df7b1",
+      "after_sha256": "33242e254d693d198011358da7d72e6250efb02e196ca4d671618b0079e9bf12"
+    }
+  ]
+}

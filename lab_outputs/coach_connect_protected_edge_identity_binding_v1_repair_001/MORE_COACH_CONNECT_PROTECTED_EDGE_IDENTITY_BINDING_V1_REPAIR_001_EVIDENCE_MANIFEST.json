@@ -1,0 +1,168 @@
+{
+  "manifest_version": "protected-edge-identity-binding-v1-repair-001-evidence-manifest-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001",
+  "evidence_count": 32,
+  "evidence": [
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001.md",
+      "bytes": 4208,
+      "sha256": "27cf745f414d42d8cab8f8e79b9c34db024048f413a4dfe7df4a98fd55dbf829"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001_AI_HANDOFF.json",
+      "bytes": 1568,
+      "sha256": "af0bb3cde3aac6f694eb3348600a1e81465a8c6fa895a6f33ad5db142570402d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001_FINAL_VERDICT.json",
+      "bytes": 853,
+      "sha256": "039dd16a3849d93bee2e94120ef333b615e8ac8cd899313767768c340e9997d6"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001_FINDINGS_RESOLUTION.json",
+      "bytes": 2636,
+      "sha256": "f48c48034bf1503bb23e5b608c3d2729f318e02053b7da37ae1af863c1cf1558"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001_PRIVACY_REVIEW.md",
+      "bytes": 1382,
+      "sha256": "7ef03b47ba64bcd5b6e6cb521b0098358f8a71f66f84a2fcfa0d794170faf92b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001_VALIDATION_MATRIX.json",
+      "bytes": 2054,
+      "sha256": "a743e3acc263fd3422dd9f73c4451b5d265d7a12b595196d7cfd078806636f8d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/browser_bundle_secret_scan.json",
+      "bytes": 201,
+      "sha256": "1166f17f3c052b202bc718f2f21ee1c554c864569e9126d86c65e85fada124e3"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/complete_source_diff_from_required_head.patch",
+      "bytes": 145384,
+      "sha256": "a3bdd1ee24d6bf617b7717f7086f2152ac88622b001dee84b8df313e70d5c673"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/configuration_contract.json",
+      "bytes": 852,
+      "sha256": "77c40c54f24a7d68c4a2bfacf32e230d1eeff20ae129c6378ae830e3e2da790c"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/dependency_cycle_report.json",
+      "bytes": 92,
+      "sha256": "c8fca6a50ba3de938dbbd9675f7b7e234c9a0e8e6353b15b17f9694f15d4d7b8"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/deployment_activity_ledger.json",
+      "bytes": 181,
+      "sha256": "bfb5062c053ed89a71d41f3f96315fcd2d5cc59861ae4272b0a2f723b8415899"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/deterministic_build_evidence.json",
+      "bytes": 310,
+      "sha256": "0fb4bfec623e1cf27135aff8adb5ddb08237444bcc7b44024c0b4ca0bb098bc1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/environment_activity_ledger.json",
+      "bytes": 103,
+      "sha256": "08597047837d0d1cb8540bf77032a54aa3b5c65478e1d98e0ddc4fba54ac9bf6"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/evidence_privacy_scan.json",
+      "bytes": 280,
+      "sha256": "35e5cc5fc6dfd0d47cd9c57c88771ae23c1c8d4a23ffd01da9d1e7920efd13e5"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/exact_changed_file_manifest.json",
+      "bytes": 3108,
+      "sha256": "0d06b27cb7881d67ccb1f38d52fd546aa3adbe5b5b23b239c47af38cfd0e4b57"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/executive_handoff.md",
+      "bytes": 752,
+      "sha256": "a8fd2886d55b2b30f23fdd124ce610b11553dc602911a1913c88af7a837edc0e"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/focused_test_results.json",
+      "bytes": 302,
+      "sha256": "fbac6c6f9fb2b2a313ac7eb5eeba2dea652e75a31c863c31e5dd76ef4f89ad55"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/git_status_after.txt",
+      "bytes": 11716,
+      "sha256": "5895e5c79110688980a2f817ba4493a75727622bd3c89bafe33c7af6e76244b9"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/git_status_before.txt",
+      "bytes": 366,
+      "sha256": "6969c8e8c02e200876fa5ea95a46af54e991b3bf4d87e86612ba938cd5773e33"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/identity_contract.json",
+      "bytes": 618,
+      "sha256": "f1b4830ef7b45e8746f7a854402c32667a2976e7d67e286195c85e6438e80cc1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/protected_root_report.json",
+      "bytes": 345,
+      "sha256": "9ec0bf05c36156ebf8575a43d11653a9be01f7041662d8580fb5e9e41361cf83"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/provider_activity_ledger.json",
+      "bytes": 148,
+      "sha256": "13ce29748cb0a29123e8891144d9051df69ac5d9fb3bcf051291b7c0a4bb105f"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/qualified_adapter_fingerprint_report.json",
+      "bytes": 878,
+      "sha256": "dc199eca803831e342f66326a85c6180ae434079b6d8db16228e5ab6b0ee8000"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/raw_token_and_secret_scan.json",
+      "bytes": 251,
+      "sha256": "8d7a05bae904388c37521342455c72c3f72a84dbc188e39cc8bdd52f43d83552"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/repair_delta_from_reviewed_implementation.patch",
+      "bytes": 28943,
+      "sha256": "7844a17488f2d28896b10099754da3adec61cdc4714d30019efe7b543a201721"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/repair_receipts.json",
+      "bytes": 662,
+      "sha256": "8b5f879e886c75f2669652c1215e3214ce2e4c7591790c082ea062d8ffd9bd1b"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/repair_specific_test_results.json",
+      "bytes": 746,
+      "sha256": "31caec979445496e6e188c284ecd70f984402c281d52c2cdf97f98e1615794c1"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/replay_adversarial_evidence.json",
+      "bytes": 654,
+      "sha256": "3447a822ece82feccc7059219a9edb7bce4aa61081cf964ea67bc56134c9aea9"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/safe_regression_results.json",
+      "bytes": 153,
+      "sha256": "412468e4b93b1b27b0f48d2ae6677c30fc81c02e8aca20a99066ddd66ce60212"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/targeted_regression_results.json",
+      "bytes": 114,
+      "sha256": "3e363220cf045be42a164d5e78efcfc731b1b5330e403178b257446754bf5034"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/temporal_validation_evidence.json",
+      "bytes": 559,
+      "sha256": "3a188f4fc087d988f840e59ad96dab16b16b5f0e63f3c871cc12e8b71039e69d"
+    },
+    {
+      "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/verifier_result.json",
+      "bytes": 894,
+      "sha256": "2de27448f518d4090852903e2c7ed52f9f64a4f8a9bdff613ca5c9bf58b11639"
+    }
+  ],
+  "self_hash_excluded": true
+}

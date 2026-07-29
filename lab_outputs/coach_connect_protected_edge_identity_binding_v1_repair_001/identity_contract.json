@@ -1,0 +1,18 @@
+{
+  "contract_version": "protected-edge-identity-binding-v1",
+  "internal_assertion_version": "protected-edge-identity-v1",
+  "contract_version_changed": false,
+  "identity_authority_only": true,
+  "environment_bound": true,
+  "immutable_deployment_bound": true,
+  "project_identity_separate": true,
+  "server_transaction_bound": true,
+  "atomic_replay": true,
+  "strict_one_time_upstream_use": true,
+  "temporal_ordering_fail_closed": true,
+  "entitlement_authority": false,
+  "tester_authority": false,
+  "profile_id_authority": false,
+  "subscription_runtime_authority": false,
+  "coach_connect_authority": false
+}

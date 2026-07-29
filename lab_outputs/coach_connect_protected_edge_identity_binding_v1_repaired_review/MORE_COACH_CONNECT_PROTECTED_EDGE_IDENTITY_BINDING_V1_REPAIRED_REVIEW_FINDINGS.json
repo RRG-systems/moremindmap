@@ -1,0 +1,47 @@
+{
+  "review_version": "protected-edge-identity-binding-v1-repaired-review-findings-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIRED_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "reviewed_package": {
+    "path": "lab_outputs/coach_connect_protected_edge_identity_binding_v1_repair_001/COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_IMPLEMENTATION_REVIEW.zip",
+    "sha256": "4ce74bb8d81d0d4677f628f040026df3d4d7208b7059a8afefd8132c72046897"
+  },
+  "prior_findings": [
+    {
+      "finding_id": "PEIB-RV-001",
+      "prior_severity": "HIGH",
+      "status": "RESOLVED",
+      "proof": "A separate server-side immutable deployment SHA-256 is mandatory, exact-matched to protected-edge configuration, distinct from project reference, and bound through assertion issuance, verification, context, and replay."
+    },
+    {
+      "finding_id": "PEIB-RV-002",
+      "prior_severity": "HIGH",
+      "status": "RESOLVED",
+      "proof": "SESSION_BOUND requires a bounded server-created transaction reference; its HMAC-derived context participates in a strict one-time atomic replay fingerprint and browser binding headers deny."
+    },
+    {
+      "finding_id": "PEIB-RV-003",
+      "prior_severity": "MEDIUM",
+      "status": "RESOLVED",
+      "proof": "Upstream and internal temporal ordering is validated independently of clock skew and malformed NumericDate values fail closed."
+    }
+  ],
+  "new_finding_counts": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 0
+  },
+  "new_findings": [],
+  "informational_limits": [
+    {
+      "observation_id": "PEIB-RV-INFO-001",
+      "title": "Provider configuration and compatibility qualification remain required",
+      "effect": "No access is granted until an operator binds the exact immutable deployment digest, issuer, audience, pinned JWKS, secrets, and shared replay state. The selected upstream provider must supply token identifiers compatible with strict one-time replay; incompatibility denies.",
+      "security_severity": "INFORMATIONAL",
+      "commit_blocking": false
+    }
+  ],
+  "commit_authorized": true,
+  "review_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_APPROVED_FOR_COMMIT"
+}

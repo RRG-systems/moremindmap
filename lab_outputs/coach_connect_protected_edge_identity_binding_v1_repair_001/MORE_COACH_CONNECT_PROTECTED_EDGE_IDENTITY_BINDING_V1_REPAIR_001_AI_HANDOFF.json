@@ -1,0 +1,45 @@
+{
+  "handoff_version": "protected-edge-identity-binding-v1-repair-001-ai-handoff-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REPAIR_001",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "final_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIRED_PROVIDER_CONFIGURATION_REQUIRED",
+  "resolved_findings": [
+    "PEIB-RV-001",
+    "PEIB-RV-002",
+    "PEIB-RV-003"
+  ],
+  "repair_file_count": 9,
+  "security_posture": {
+    "identity_only": true,
+    "entitlement_authority": false,
+    "tester_authority": false,
+    "profile_id_authority": false,
+    "public_access": false,
+    "source_default_off": true,
+    "immutable_deployment_sha_required": true,
+    "server_transaction_one_use": true,
+    "atomic_replay": true,
+    "temporal_ordering_fail_closed": true
+  },
+  "validation": {
+    "repair_specific": "7/7",
+    "protected_edge_implementation": "25/25",
+    "combined_focused": "71/71",
+    "targeted": "241/241",
+    "safe_regressions": "624/624",
+    "deterministic_build_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+    "dependency_cycles": 0,
+    "protected_roots_unchanged": true,
+    "qualified_adapter_unchanged": true
+  },
+  "remaining_authority_boundary": [
+    "provider configuration",
+    "actual immutable deployment SHA binding",
+    "upstream issuer and JWKS binding",
+    "internal signing-key binding",
+    "deployment",
+    "runtime activation",
+    "tester and Profile ID authorization"
+  ],
+  "next_action": "REPEAT_INDEPENDENT_IMPLEMENTATION_REVIEW"
+}

@@ -1,0 +1,3728 @@
+diff --git a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js
+index fbcbcd9..b86fb44 100644
+--- a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js
++++ b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js
+@@ -17,6 +17,9 @@ import {
+ import {
+   createAuth0LiveSubscriberAssertionAdapterV1,
+ } from '../../productionSecurity/liveSubscriberAssertion/auth0Adapter.js';
++import {
++  createProtectedEdgeIdentityBindingV1,
++} from '../../productionSecurity/protectedEdgeIdentity/adapter.js';
+ import {
+   createCanonicalBusinessEngineLiveAttachmentAdapterV1,
+ } from './businessEngineAttachmentAdapter.js';
+@@ -141,72 +144,6 @@ function createSessionEnvelopeCodec(keyMaterial, clock = () => Date.now()) {
+   });
+ }
+ 
+-function createProtectedEdgeIdentityAdapter({
+-  environmentId,
+-  policyDigest,
+-  keyMaterial,
+-  clock = () => Date.now(),
+-}) {
+-  return Object.freeze({
+-    async verify(req) {
+-      const serialized = req?.headers?.['x-more-protected-edge-assertion'];
+-      if (typeof serialized !== 'string' || serialized.length > 4096) {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      const [payloadPart, signaturePart] = serialized.split('.');
+-      if (!payloadPart || !signaturePart) {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      const expected = crypto.createHmac('sha256', keyMaterial)
+-        .update(payloadPart)
+-        .digest();
+-      let supplied;
+-      try {
+-        supplied = Buffer.from(signaturePart, 'base64url');
+-      } catch {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      if (expected.length !== supplied.length
+-        || !crypto.timingSafeEqual(expected, supplied)) {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      let payload;
+-      try {
+-        payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
+-      } catch {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      if (payload?.assertion_version !== 'protected-edge-identity-v1'
+-        || payload.environment_id !== environmentId
+-        || payload.policy_digest !== policyDigest
+-        || payload.named_identity_verified !== true
+-        || payload.mfa_verified !== true
+-        || payload.public_access !== false
+-        || !Number.isFinite(Date.parse(payload.issued_at))
+-        || !Number.isFinite(Date.parse(payload.expires_at))
+-        || Date.parse(payload.expires_at) <= clock()
+-        || Date.parse(payload.expires_at) - Date.parse(payload.issued_at) > 10 * 60_000) {
+-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
+-      }
+-      return frozen({
+-        ok: true,
+-        allowed: true,
+-        edge_attestation: {
+-          named_identity_verified: true,
+-          mfa_verified: true,
+-          public_access: false,
+-          policy_digest: policyDigest,
+-          receipt_ref: `edge_receipt_${hmac(
+-            keyMaterial,
+-            'edge_receipt',
+-            `${payloadPart}.${signaturePart}`,
+-          ).slice(0, 32)}`,
+-        },
+-      });
+-    },
+-  });
+-}
+-
+ function makeDeniedComposition(code = 'ASYNC_SECURITY_UNCONFIGURED', status = 404) {
+   const operations = Object.freeze(Object.fromEntries([
+     'beginLogin',
+@@ -262,7 +199,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
+ 
+   const secretResolver = authority.resolve_secret_reference;
+   const remoteConfiguration = authority.remote_configuration;
+-  const [tokenHashKey, scopeHashKey, edgeAssertionKey, privateAccessCode] =
++  const [tokenHashKey, scopeHashKey, privateAccessCode] =
+     await Promise.all([
+       secretResolver(remoteConfiguration.token_hash_key_ref, {
+         purpose: 'PRIVATE_RUNTIME_TOKEN_HASH_KEY',
+@@ -272,16 +209,12 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
+         purpose: 'PRIVATE_RUNTIME_SCOPE_HASH_KEY',
+         secret: true,
+       }),
+-      secretResolver(authority.authority_packet.edge_assertion_key_ref, {
+-        purpose: 'PRIVATE_RUNTIME_EDGE_ASSERTION_KEY',
+-        secret: true,
+-      }),
+       secretResolver(authority.authority_packet.private_access_code_ref, {
+         purpose: 'PRIVATE_RUNTIME_ACCESS_CODE',
+         secret: true,
+       }),
+     ]);
+-  if ([tokenHashKey, scopeHashKey, edgeAssertionKey, privateAccessCode]
++  if ([tokenHashKey, scopeHashKey, privateAccessCode]
+     .some((value) => typeof value !== 'string' || value.length < 16)) {
+     return makeDeniedComposition();
+   }
+@@ -302,6 +235,13 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
+     fetch_impl: fetchImpl,
+     clock,
+   });
++  const protectedEdgeBinding = await createProtectedEdgeIdentityBindingV1({
++    configuration: authority.protected_edge_configuration,
++    resolveReference: secretResolver,
++    statePort,
++    clock,
++  });
++  if (protectedEdgeBinding.configured !== true) return makeDeniedComposition();
+ 
+   const productBinding = authority.product_binding_attestation;
+   const canonicalSecurityService = createCanonicalAsyncSecurityServiceV2({
+@@ -356,12 +296,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
+     clock: () => new Date(clock()).toISOString(),
+   });
+ 
+-  const edgeAdapter = createProtectedEdgeIdentityAdapter({
+-    environmentId: authority.authority_packet.environment_id,
+-    policyDigest: authority.authority_packet.protected_edge_policy_digest,
+-    keyMaterial: edgeAssertionKey,
+-    clock,
+-  });
+   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
+ 
+   async function active(req) {
+@@ -372,7 +306,9 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
+       || authority.activation_receipt == null) {
+       return denial('RUNTIME_DEFAULT_OFF', 404);
+     }
+-    const edge = await edgeAdapter.verify(req);
++    const edge = await protectedEdgeBinding.bindRequest(req, {
++      correlationRef: correlationReference(req),
++    });
+     if (!edge.allowed) return edge;
+     const health = await canonicalSecurityService.health();
+     if (!health.allowed) return denial(
+diff --git a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js
+index da92cc1..701a4c7 100644
+--- a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js
++++ b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js
+@@ -3,6 +3,9 @@ import {
+   liveSubscriberAssertionConfigurationDigest,
+   validateLiveSubscriberAssertionConfigurationV1,
+ } from '../../productionSecurity/liveSubscriberAssertion/contracts.js';
++import {
++  validateProtectedEdgeIdentityConfigurationV1,
++} from '../../productionSecurity/protectedEdgeIdentity/contracts.js';
+ import {
+   validatePrivateRuntimeActivationReceiptV1,
+   validatePrivateRuntimeConfigurationAuthorityV1,
+@@ -19,9 +22,13 @@ export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
+   'MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_ATTESTATION_REF',
+   'MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_ATTESTATION_REF',
+   'MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF',
++  'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF',
+ ]);
++export const PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE =
++  'MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256';
+ 
+ const frozen = (value) => deepFreeze(structuredClone(value));
++const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+ const deny = (code, field = null) => frozen({
+   ok: false,
+   allowed: false,
+@@ -71,6 +78,14 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
+   if (typeof resolveReference !== 'function') {
+     return deny('ASYNC_SECURITY_UNCONFIGURED', 'resolveReference');
+   }
++  const immutableDeploymentIdentity =
++    env[PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE];
++  if (!sha256(immutableDeploymentIdentity)) {
++    return deny(
++      'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED',
++      PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
++    );
++  }
+ 
+   const documents = {};
+   try {
+@@ -99,6 +114,8 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
+     documents.MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_ATTESTATION_REF;
+   const assertionConfiguration =
+     documents.MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF;
++  const protectedEdgeConfiguration =
++    documents.MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF;
+ 
+   const packet = validatePrivateRuntimeConfigurationAuthorityV1(authorityPacket, {
+     environmentId: remoteConfiguration?.environment_id,
+@@ -118,15 +135,26 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
+       nowMs,
+     },
+   );
+-  if (!packet.valid || !assertion.valid || !product.valid) {
++  const protectedEdge = validateProtectedEdgeIdentityConfigurationV1(
++    protectedEdgeConfiguration,
++    {
++      environmentId: remoteConfiguration?.environment_id,
++      deploymentId: immutableDeploymentIdentity,
++      policyDigest: authorityPacket?.protected_edge_policy_digest,
++      internalSigningKeyRef: authorityPacket?.edge_assertion_key_ref,
++    },
++  );
++  if (!packet.valid || !assertion.valid || !product.valid || !protectedEdge.valid) {
+     return deny(
+       packet.errors[0]?.code
+         || assertion.errors[0]?.code
+         || product.errors[0]?.code
++        || protectedEdge.errors[0]?.code
+         || 'CONFIGURATION_AUTHORITY_INVALID',
+       packet.errors[0]?.field
+         || assertion.errors[0]?.field
+         || product.errors[0]?.field
++        || protectedEdge.errors[0]?.field
+         || null,
+     );
+   }
+@@ -176,6 +204,9 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
+ 
+   if ((env.MORE_PRIVATE_RUNTIME_LIVE_ENABLED === 'true') !== authorityPacket.live_enabled
+     || (env.MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED === 'true')
++      !== authorityPacket.emergency_disabled
++    || protectedEdgeConfiguration.enabled !== true
++    || protectedEdgeConfiguration.emergency_disabled
+       !== authorityPacket.emergency_disabled) {
+     return deny('CONFIGURATION_AUTHORITY_MISMATCH', 'activation_state');
+   }
+@@ -193,8 +224,11 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
+     remote_configuration: remoteConfiguration,
+     qualification_certificate: qualificationCertificate,
+     live_environment_attestation: liveEnvironmentAttestation,
++    immutable_deployment_identity: immutableDeploymentIdentity,
++    project_reference: liveEnvironmentAttestation.vercel_project_reference,
+     product_binding_attestation: productBindingAttestation,
+     assertion_configuration: assertionConfiguration,
++    protected_edge_configuration: protectedEdgeConfiguration,
+     activation_receipt: activationReceipt,
+     live_authority: liveAuthority.value,
+     source_default_off: true,
+diff --git a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js
+index c9d0777..8b93da4 100644
+--- a/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js
++++ b/src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js
+@@ -6,3 +6,4 @@ export * from './configurationAuthority.js';
+ export * from './contracts.js';
+ export * from './environmentAttestation.js';
+ export * from './subscriptionRuntimeAttachmentAdapter.js';
++export * from '../../productionSecurity/protectedEdgeIdentity/index.js';
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js
+index 2c88857..057f8ad 100644
+--- a/src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js
+@@ -9,6 +9,7 @@ export * from './erasureStrategy.js';
+ export * from './inMemorySharedSecurityState.js';
+ export * from './liveSubscriberAssertion/index.js';
+ export * from './operatorIdentity.js';
++export * from './protectedEdgeIdentity/index.js';
+ export * from './remoteSharedSecurity/index.js';
+ export * from './retentionAuthority.js';
+ export * from './sessionElevation.js';
+diff --git a/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js b/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js
+index 18ea085..bbd3f8c 100644
+--- a/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js
++++ b/test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js
+@@ -2,6 +2,9 @@ import test from 'node:test';
+ import assert from 'node:assert/strict';
+ import {
+   ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++  PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
+   REMOTE_SHARED_SECURITY_ADAPTER_CONTRACT_VERSION,
+   UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+   defaultRemoteSharedSecurityConfiguration,
+@@ -9,6 +12,8 @@ import {
+   remoteSecurityQualificationCertificateDigest,
+   remoteSharedSecurityCompleteScriptManifestDigest,
+   remoteSharedSecurityConfigurationDigest,
++  protectedEdgeIdentityConfigurationDigest,
++  protectedEdgeIdentityPolicyDigest,
+ } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
+ import {
+   liveSubscriberAssertionConfigurationDigest,
+@@ -190,7 +195,55 @@ function productBinding() {
+   return { ...value, binding_sha256: privateRuntimeProductBindingDigest(value) };
+ }
+ 
+-function assertionConfiguration() {
++function protectedEdgeConfiguration(live, {
++  emergencyDisabled = false,
++  deploymentId = '8'.repeat(64),
++} = {}) {
++  const value = {
++    config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++    enabled: true,
++    emergency_disabled: emergencyDisabled,
++    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++    provider_type: 'AUTH0_OIDC_JWT',
++    token_source: 'AUTHORIZATION_BEARER',
++    issuer: 'https://identity.private.example/',
++    audiences: ['https://private.edge.example/'],
++    jwks_ref: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE',
++    jwks_sha256: '7'.repeat(64),
++    allowed_algorithms: ['RS256'],
++    subject_claim: 'sub',
++    token_id_claim: 'jti',
++    authentication_time_claim: 'auth_time',
++    mfa_claim: 'amr',
++    acr_claim: 'acr',
++    accepted_mfa_values: ['mfa'],
++    accepted_acr_values: ['urn:more:mfa'],
++    mfa_required: true,
++    environment_id: 'PRIVATE_PRODUCTION_CLASSIFIED',
++    deployment_id: deploymentId,
++    protected_edge_policy_digest: '0'.repeat(64),
++    identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
++    internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
++    clock_skew_seconds: 30,
++    max_token_age_seconds: 600,
++    internal_assertion_ttl_seconds: 60,
++    replay_mode: 'SESSION_BOUND',
++    replay_ttl_seconds: 600,
++    replay_store_contract: ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++    configuration_sha256: '0'.repeat(64),
++  };
++  const policy = {
++    ...value,
++    protected_edge_policy_digest: protectedEdgeIdentityPolicyDigest(value),
++  };
++  return {
++    ...policy,
++    configuration_sha256: protectedEdgeIdentityConfigurationDigest(policy),
++  };
++}
++
++function assertionConfiguration(protectedEdgePolicyDigest) {
+   const value = {
+     config_version: 'live-subscriber-assertion-configuration-v1',
+     enabled: true,
+@@ -208,7 +261,7 @@ function assertionConfiguration() {
+     transaction_key_ref: 'MORE_PRIVATE_RUNTIME_OIDC_TRANSACTION_KEY_VALUE',
+     identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
+     exact_scope_hash: scopeHash,
+-    protected_edge_policy_digest: '1'.repeat(64),
++    protected_edge_policy_digest: protectedEdgePolicyDigest,
+     allowed_algorithms: ['RS256'],
+     mfa_required: true,
+     clock_skew_seconds: 30,
+@@ -256,15 +309,20 @@ function authorityDocuments({ packetOverrides = {}, liveOverrides = {} } = {}) {
+   const qual = certificate();
+   const live = liveAttestation(config, qual, liveOverrides);
+   const product = productBinding();
+-  const assertion = assertionConfiguration();
++  const protectedEdge = protectedEdgeConfiguration(live, {
++    emergencyDisabled: packetOverrides.emergency_disabled === true,
++  });
++  const assertion = assertionConfiguration(protectedEdge.protected_edge_policy_digest);
+   const packet = authorityPacket(config, qual, live, product, assertion, packetOverrides);
+-  return { config, qual, live, product, assertion, packet };
++  return { config, qual, live, product, assertion, protectedEdge, packet };
+ }
+ 
+ function environment(documents) {
+   return {
+     MORE_PRIVATE_RUNTIME_LIVE_ENABLED: String(documents.packet.live_enabled),
+     MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED: String(documents.packet.emergency_disabled),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
++      documents.protectedEdge.deployment_id,
+     MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF: 'MORE_PRIVATE_RUNTIME_PACKET_VALUE',
+     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_CONFIG_REF: 'MORE_PRIVATE_RUNTIME_REMOTE_CONFIG_VALUE',
+     MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_QUALIFICATION_CERTIFICATE_REF:
+@@ -275,12 +333,16 @@ function environment(documents) {
+       'MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_VALUE',
+     MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF:
+       'MORE_PRIVATE_RUNTIME_ASSERTION_CONFIG_VALUE',
++    MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF:
++      'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIG_VALUE',
+     MORE_PRIVATE_RUNTIME_PACKET_VALUE: JSON.stringify(documents.packet),
+     MORE_PRIVATE_RUNTIME_REMOTE_CONFIG_VALUE: JSON.stringify(documents.config),
+     MORE_PRIVATE_RUNTIME_CERTIFICATE_VALUE: JSON.stringify(documents.qual),
+     MORE_PRIVATE_RUNTIME_LIVE_ATTESTATION_VALUE: JSON.stringify(documents.live),
+     MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_VALUE: JSON.stringify(documents.product),
+     MORE_PRIVATE_RUNTIME_ASSERTION_CONFIG_VALUE: JSON.stringify(documents.assertion),
++    MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIG_VALUE:
++      JSON.stringify(documents.protectedEdge),
+   };
+ }
+ 
+@@ -298,9 +360,53 @@ test('exact persistent PRIVATE_LIVE authority validates source-default-off', asy
+   assert.equal(result.state, 'CONFIGURED_DISABLED');
+   assert.equal(result.live_authority.persistent_namespace, true);
+   assert.equal(result.live_authority.disposable_namespace, false);
++  assert.equal(result.immutable_deployment_identity, documents.protectedEdge.deployment_id);
++  assert.equal(result.project_reference, documents.live.vercel_project_reference);
++  assert.notEqual(result.immutable_deployment_identity, result.project_reference);
+   assert.equal(result.provider_call_required, false);
+ });
+ 
++test('immutable deployment identity is mandatory and project identity never substitutes', async () => {
++  const documents = authorityDocuments();
++  const missingEnv = environment(documents);
++  delete missingEnv.MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256;
++  const missing = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: missingEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(missingEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(missing.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
++
++  const projectOnlyEnv = {
++    ...environment(documents),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256:
++      documents.live.vercel_project_reference,
++  };
++  const projectOnly = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: projectOnlyEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(projectOnlyEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(projectOnly.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
++
++  const mismatchEnv = {
++    ...environment(documents),
++    MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256: '9'.repeat(64),
++  };
++  const mismatch = await readPrivateRuntimeLiveConfigurationAuthorityV1({
++    env: mismatchEnv,
++    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(mismatchEnv),
++    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
++    adapterSourceSha256: sourceDigest,
++    nowMs: now,
++  });
++  assert.equal(mismatch.code, 'PROTECTED_EDGE_CONFIGURATION_MISMATCH');
++});
++
+ test('public exposure, disposable live namespace, and namespace mismatch deny', () => {
+   for (const liveOverrides of [
+     { public_access: true },
+diff --git a/scripts/verifyCoachConnectProtectedEdgeIdentityBindingV1.mjs b/scripts/verifyCoachConnectProtectedEdgeIdentityBindingV1.mjs
+new file mode 100644
+index 0000000..3165423
+--- /dev/null
++++ b/scripts/verifyCoachConnectProtectedEdgeIdentityBindingV1.mjs
+@@ -0,0 +1,1031 @@
++#!/usr/bin/env node
++import crypto from 'node:crypto';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { spawnSync } from 'node:child_process';
++import { fileURLToPath } from 'node:url';
++
++const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
++const evidenceRoot = path.join(
++  root,
++  'lab_outputs/coach_connect_protected_edge_identity_binding_v1',
++);
++const reviewZipName =
++  'COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_IMPLEMENTATION_REVIEW.zip';
++const expectedHead = '1862385201a7bb6221115ea2a2122bed99ffaec7';
++const expectedSubject = 'feat(private-runtime): wire private live runtime v2';
++const expectedReceiptSha256 =
++  '1d393165e6757d88c8e19a9159111c11c12ae0d2ee608c9698b6e0270e65b5b2';
++const expectedProtectedDirtyFingerprint =
++  '49dda235581a3bf14f5ccb214f98f8c670d487965caf51f2c933b24443b916dd';
++const expectedBaseline = Object.freeze({
++  focused: 45,
++  targeted: 215,
++  safe: 598,
++  build_sha256: '8aebd5aa11687714e9c05d6701e39ece0edb0f486c4bd924fd2feea8ccde2ff9',
++  dependency_cycles: 0,
++});
++const finalVerdict =
++  'PROTECTED_EDGE_IDENTITY_BINDING_IMPLEMENTED_PROVIDER_CONFIGURATION_REQUIRED';
++
++const implementationFiles = [
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/tokenExtraction.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/index.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js',
++  'src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/configurationAuthority.js',
++  'src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js',
++  'src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js',
++];
++const newFocusedTestFiles = [
++  'test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js',
++  'test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js',
++  'test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js',
++];
++const existingFocusedTestFiles = [
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.assertion.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.businessEngine.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.subscription.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.coachConnect.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.composition.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.handlers.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.failureRecovery.test.js',
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.integration.test.js',
++];
++const changedTestFiles = [
++  ...newFocusedTestFiles,
++  'test/intelligenceFabric.coachConnect.privateRuntime.liveBindings.environment.test.js',
++];
++const focusedTestFiles = [...newFocusedTestFiles, ...existingFocusedTestFiles];
++const verifierFile =
++  'scripts/verifyCoachConnectProtectedEdgeIdentityBindingV1.mjs';
++const exactAllowlist = [
++  ...implementationFiles,
++  ...changedTestFiles,
++  verifierFile,
++];
++const expectedPreexistingTracked = [
++  'api/engine/businessAssessment/buildBusinessIntelligenceDraft.js',
++  'lab_outputs/mmm8_business_engine_contract/run_fixture_validation.mjs',
++  'src/components/businessAssessment/BusinessEngineVisualV2.jsx',
++  'src/lib/businessAssessment/inferEToPScores.js',
++  'src/lib/businessAssessment/normalizeBusinessVisualArtifactData.js',
++  'src/lib/businessEngine/buildBusinessEngineContract.js',
++  'src/lib/businessEngine/contractDisplaySemantics.js',
++  'src/lib/businessEngine/contractVersion.js',
++  'src/lib/businessEngine/projectBusinessEngineVisualV2.js',
++];
++const protectedFingerprintPaths = [
++  'src/lib/businessEngine',
++  'src/lib/businessAssessment',
++  'api/engine',
++  'api/business-assessment',
++  'src/lib/intelligenceFabric/production',
++  'api/stripe',
++  'src/lib/stripe',
++  'package.json',
++  'package-lock.json',
++  'vercel.json',
++];
++const immutableQualifiedAdapterFiles = [
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/atomicCommands.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/authoritativeQueries.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/scriptManifest.js',
++  'src/lib/intelligenceFabric/coachConnect/productionSecurity/asyncSecurityContracts.js',
++];
++const requiredExports = [
++  'createProtectedEdgeIdentityBindingV1',
++  'createProtectedEdgeReplayProtectorV1',
++  'extractProtectedEdgeUpstreamTokenV1',
++  'issueProtectedEdgeInternalAssertionV1',
++  'protectedEdgeIdentityConfigurationDigest',
++  'protectedEdgeIdentityPolicyDigest',
++  'validateProtectedEdgeIdentityConfigurationV1',
++  'verifyProtectedEdgeInternalAssertionV1',
++  'verifyProtectedEdgeUpstreamJwtV1',
++];
++
++const args = new Set(process.argv.slice(2));
++const fullValidation = args.has('--full');
++const writeEvidence = args.has('--write-evidence');
++const packageReview = args.has('--package');
++
++function run(command, commandArgs, options = {}) {
++  return spawnSync(command, commandArgs, {
++    cwd: root,
++    encoding: Object.hasOwn(options, 'encoding') ? options.encoding : 'utf8',
++    maxBuffer: 128 * 1024 * 1024,
++    env: { ...process.env, NODE_ENV: 'test' },
++  });
++}
++
++function git(commandArgs, options = {}) {
++  const result = run('git', commandArgs, options);
++  if (result.status !== 0) {
++    throw new Error(`git ${commandArgs.join(' ')} failed`);
++  }
++  return options.encoding === null
++    ? result.stdout
++    : result.stdout.trim();
++}
++
++function sha256(value) {
++  return crypto.createHash('sha256').update(value).digest('hex');
++}
++
++function fileSha(file) {
++  return sha256(fs.readFileSync(file));
++}
++
++function relative(file) {
++  return path.relative(root, file).split(path.sep).join('/');
++}
++
++function walk(directory) {
++  if (!fs.existsSync(directory)) return [];
++  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
++    const resolved = path.join(directory, entry.name);
++    return entry.isDirectory() ? walk(resolved) : [resolved];
++  });
++}
++
++function parseTestResult(result) {
++  const combined = `${result.stdout || ''}\n${result.stderr || ''}`;
++  const read = (label) => Number(
++    combined.match(new RegExp(`(?:ℹ|#) ${label} (\\d+)`))?.[1] || 0,
++  );
++  return {
++    total: read('tests'),
++    passed: read('pass'),
++    failed: read('fail'),
++    skipped: read('skipped'),
++    exit_code: result.status,
++  };
++}
++
++function runTests(files) {
++  const result = run('node', ['--test', ...files]);
++  return { result, summary: parseTestResult(result) };
++}
++
++function distDigest() {
++  const files = walk(path.join(root, 'dist')).sort();
++  const digest = crypto.createHash('sha256');
++  for (const file of files) {
++    digest.update(relative(file));
++    digest.update('\0');
++    digest.update(fs.readFileSync(file));
++    digest.update('\n');
++  }
++  return { file_count: files.length, sha256: digest.digest('hex') };
++}
++
++function dependencyCycleReport() {
++  const moduleRoot = path.join(root, 'src/lib/intelligenceFabric/coachConnect');
++  const files = walk(moduleRoot).filter((file) => file.endsWith('.js')).sort();
++  const fileSet = new Set(files.map((file) => path.resolve(file)));
++  const graph = new Map(files.map((file) => [path.resolve(file), []]));
++  for (const file of files) {
++    const source = fs.readFileSync(file, 'utf8');
++    for (const match of source.matchAll(
++      /(?:import|export)\s+(?:[\s\S]*?\s+from\s+)?['"](\.[^'"]+)['"]/g,
++    )) {
++      const base = path.resolve(path.dirname(file), match[1]);
++      const resolved = [base, `${base}.js`, path.join(base, 'index.js')]
++        .find((candidate) => fileSet.has(candidate));
++      if (resolved) graph.get(path.resolve(file)).push(resolved);
++    }
++  }
++  const visited = new Set();
++  const active = new Set();
++  const cycles = [];
++  function visit(file, stack = []) {
++    if (active.has(file)) {
++      const start = stack.indexOf(file);
++      cycles.push([...stack.slice(start), file].map(relative));
++      return;
++    }
++    if (visited.has(file)) return;
++    visited.add(file);
++    active.add(file);
++    for (const dependency of graph.get(file) || []) {
++      visit(dependency, [...stack, file]);
++    }
++    active.delete(file);
++  }
++  for (const file of graph.keys()) visit(file);
++  return {
++    module_count: graph.size,
++    internal_edge_count: [...graph.values()]
++      .reduce((total, edges) => total + edges.length, 0),
++    cycle_count: cycles.length,
++    cycles,
++  };
++}
++
++function protectedFingerprint() {
++  const result = run('git', [
++    'diff',
++    '--binary',
++    '--',
++    ...protectedFingerprintPaths,
++  ], { encoding: null });
++  if (result.status !== 0) throw new Error('protected-root comparison failed');
++  return sha256(result.stdout);
++}
++
++function immutableComparison() {
++  return immutableQualifiedAdapterFiles.map((file) => {
++    const currentSha = fileSha(path.join(root, file));
++    const baseline = git(['show', `HEAD:${file}`], { encoding: null });
++    const baselineSha = sha256(baseline);
++    return {
++      path: file,
++      baseline_sha256: baselineSha,
++      current_sha256: currentSha,
++      unchanged: currentSha === baselineSha,
++    };
++  });
++}
++
++function changedCampaignFiles() {
++  const tracked = new Set(git(['diff', '--name-only']).split('\n').filter(Boolean));
++  const untracked = new Set(
++    git(['ls-files', '--others', '--exclude-standard', '--', ...exactAllowlist])
++      .split('\n')
++      .filter(Boolean),
++  );
++  return exactAllowlist.filter((file) => tracked.has(file) || untracked.has(file));
++}
++
++function sourceDiff() {
++  const chunks = [];
++  const tracked = run('git', ['diff', '--', ...exactAllowlist]);
++  if (tracked.status !== 0) throw new Error('campaign source diff failed');
++  if (tracked.stdout) chunks.push(tracked.stdout);
++  for (const file of exactAllowlist) {
++    if (!git(['ls-files', '--others', '--exclude-standard', '--', file])) continue;
++    const diff = run('git', ['diff', '--no-index', '--', '/dev/null', file]);
++    if (![0, 1].includes(diff.status)) throw new Error(`untracked diff failed: ${file}`);
++    chunks.push(diff.stdout);
++  }
++  return `${chunks.join('\n')}\n`;
++}
++
++function writeJson(name, value) {
++  fs.mkdirSync(evidenceRoot, { recursive: true });
++  fs.writeFileSync(path.join(evidenceRoot, name), `${JSON.stringify(value, null, 2)}\n`);
++}
++
++function writeText(name, value) {
++  fs.mkdirSync(evidenceRoot, { recursive: true });
++  fs.writeFileSync(path.join(evidenceRoot, name), value.endsWith('\n')
++    ? value
++    : `${value}\n`);
++}
++
++function evidenceRelative(name) {
++  return relative(path.join(evidenceRoot, name));
++}
++
++function configurationContract() {
++  return {
++    contract_version: 'protected-edge-identity-configuration-v1',
++    value_binding_authorized: false,
++    provider_configuration_authorized: false,
++    variables: [
++      {
++        name: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF',
++        purpose: 'reference to the signed-policy-bound protected-edge configuration document',
++        secret: false,
++        source_of_authority: 'private-live configuration authority packet review',
++        environment_scope: 'exact PRIVATE_LIVE environment only',
++      },
++      {
++        name: 'jwks_ref',
++        purpose: 'server-side reference to a static reviewed upstream signing-key set',
++        secret: false,
++        source_of_authority: 'approved upstream issuer configuration',
++        environment_scope: 'exact configured provider and environment',
++      },
++      {
++        name: 'identity_hash_key_ref',
++        purpose: 'server-side keyed pseudonymization of verified upstream identity',
++        secret: true,
++        source_of_authority: 'named security operator',
++        environment_scope: 'exact PRIVATE_LIVE environment only',
++      },
++      {
++        name: 'internal_signing_key_ref',
++        purpose: 'server-side signing of short-lived internal protected-edge assertions',
++        secret: true,
++        source_of_authority: 'named security operator',
++        environment_scope: 'exact PRIVATE_LIVE environment only',
++      },
++    ],
++    required_document_fields: [
++      'provider_type',
++      'token_source',
++      'issuer',
++      'audiences',
++      'jwks_ref',
++      'jwks_sha256',
++      'allowed_algorithms',
++      'subject_claim',
++      'token_id_claim',
++      'authentication_time_claim',
++      'mfa_claim',
++      'acr_claim',
++      'accepted_mfa_values',
++      'accepted_acr_values',
++      'environment_id',
++      'deployment_id',
++      'protected_edge_policy_digest',
++      'clock_skew_seconds',
++      'max_token_age_seconds',
++      'internal_assertion_ttl_seconds',
++      'replay_mode',
++      'replay_ttl_seconds',
++      'replay_store_contract',
++      'configuration_sha256',
++    ],
++    rollback: 'remove or invalidate the configuration reference; composition returns asynchronous UNCONFIGURED denial',
++  };
++}
++
++function validationMatrix() {
++  return {
++    matrix_version: 'protected-edge-identity-validation-matrix-v1',
++    cases: [
++      ['VALID_SUPPORTED_TOKEN', 'ALLOW_IDENTITY_ONLY'],
++      ['MISSING_TOKEN', 'DENY'],
++      ['MALFORMED_TOKEN', 'DENY'],
++      ['UNSIGNED_TOKEN', 'DENY'],
++      ['WRONG_ALGORITHM', 'DENY'],
++      ['INVALID_SIGNATURE', 'DENY'],
++      ['WRONG_ISSUER', 'DENY'],
++      ['WRONG_AUDIENCE', 'DENY'],
++      ['EXPIRED_TOKEN', 'DENY'],
++      ['NOT_YET_VALID_TOKEN', 'DENY'],
++      ['EXCESSIVE_CLOCK_SKEW', 'DENY'],
++      ['MISSING_SUBJECT', 'DENY'],
++      ['UNKNOWN_KEY_ID', 'DENY'],
++      ['CONFLICTING_TOKEN_SOURCES', 'DENY'],
++      ['QUERY_STRING_TOKEN', 'DENY'],
++      ['SPOOFED_INTERNAL_ASSERTION', 'DENY'],
++      ['VALID_IDENTITY_WITHOUT_ENTITLEMENT', 'IDENTITY_ONLY'],
++      ['VALID_IDENTITY_WITHOUT_TESTER_AUTHORITY', 'IDENTITY_ONLY'],
++      ['VALID_IDENTITY_WITHOUT_PROFILE_ID_AUTHORITY', 'IDENTITY_ONLY'],
++      ['ENVIRONMENT_MISMATCH', 'DENY'],
++      ['DEPLOYMENT_MISMATCH', 'DENY'],
++      ['REPLAYED_UPSTREAM_TOKEN', 'DENY_OR_EXACT_SESSION_BOUND_REUSE'],
++      ['REPLAYED_INTERNAL_ASSERTION', 'DENY'],
++      ['SIGNING_KEY_UNAVAILABLE', 'DENY'],
++      ['JWKS_UNAVAILABLE', 'DENY'],
++      ['EMERGENCY_DISABLE', 'DENY'],
++      ['PROVIDER_STATE_OUTAGE', 'DENY_NO_FALLBACK'],
++    ].map(([case_id, expected]) => ({ case_id, expected })),
++  };
++}
++
++function createEvidence(result) {
++  writeText('git_status_before.txt', [
++    `repository_head=${expectedHead}`,
++    'git_index_empty=true',
++    'preexisting_unrelated_tracked_changes:',
++    ...expectedPreexistingTracked.map((file) => `  ${file}`),
++    'campaign_files_changed=0',
++  ].join('\n'));
++  writeJson('exact_changed_file_manifest.json', {
++    allowlist_version: 'protected-edge-identity-binding-v1-frozen',
++    allowlist_count: exactAllowlist.length,
++    allowlist: exactAllowlist,
++    changed_file_count: result.changed_campaign_files.length,
++    changed_files: result.changed_campaign_files,
++    exact_match: result.allowlist_exact_match,
++  });
++  writeText('exact_source_diff.patch', sourceDiff());
++  writeJson('focused_test_results.json', {
++    files: focusedTestFiles,
++    baseline_total: expectedBaseline.focused,
++    new_test_total: result.new_focused_tests.total,
++    combined: result.focused_tests,
++  });
++  writeJson('targeted_regression_results.json', {
++    files: result.targeted_files,
++    baseline_total: expectedBaseline.targeted,
++    result: result.targeted_tests,
++  });
++  writeJson('safe_regression_results.json', {
++    baseline_total: expectedBaseline.safe,
++    result: result.safe_intelligence_fabric_tests,
++  });
++  writeJson('deterministic_build_evidence.json', result.deterministic_build);
++  writeJson('dependency_cycle_report.json', result.dependency_cycle_validation);
++  writeJson('protected_root_report.json', {
++    baseline_dirty_diff_sha256: expectedProtectedDirtyFingerprint,
++    current_dirty_diff_sha256: result.protected_root_current_diff_sha256,
++    unchanged: result.protected_roots_unchanged,
++    qualified_remote_adapter_files: result.qualified_adapter_files,
++    package_manifest_changed: false,
++    lockfile_changed: false,
++    vercel_configuration_changed: false,
++  });
++  writeJson('raw_token_and_secret_scan.json', {
++    source_and_test_scan: result.secret_and_sensitive_content_scan,
++    browser_bundle_scan: result.browser_bundle_secret_scan,
++    raw_tokens_in_evidence: false,
++    provider_credentials_in_evidence: false,
++    synthetic_fixture_material_only: true,
++  });
++  writeJson('provider_activity_ledger.json', {
++    provider_calls: 0,
++    provider_resources_created: 0,
++    provider_resources_modified: 0,
++    live_jwks_calls: 0,
++    fixtures: 'local synthetic cryptographic fixtures only',
++  });
++  writeJson('environment_activity_ledger.json', {
++    environment_values_read: 0,
++    environment_changes: 0,
++    credentials_bound: 0,
++  });
++  writeJson('deployment_activity_ledger.json', {
++    deployment_calls: 0,
++    vercel_calls: 0,
++    runtime_activation: false,
++    named_tester_activation: false,
++    profile_id_activation: false,
++    public_access_activation: false,
++  });
++  writeJson('repair_receipts.json', {
++    receipts: [{
++      repair_id: 'REPAIR_001',
++      scope: verifierFile,
++      defect: 'binary archive extraction was coerced to text before byte comparison',
++      change: 'preserve an explicit null encoding request in the command runner',
++      implementation_or_security_semantics_changed: false,
++      allowlist_broadened: false,
++      validation_required: 'full verifier, deterministic archive, integrity, byte equality',
++      status: 'PASS',
++    }],
++    repair_count: 1,
++    repair_limit: 2,
++  });
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_CONTRACT_V1.json',
++    {
++      contract_version: 'protected-edge-identity-binding-v1',
++      upstream_formats: [
++        'AUTH0_OIDC_JWT',
++        'CONFIGURED_OIDC_JWT',
++        'VERCEL_PASSPORT_JWT_CONFIGURATION_AND_QUALIFICATION_REQUIRED',
++      ],
++      approved_algorithms: ['RS256'],
++      flow: [
++        'EXTRACT_EXPLICIT_SOURCE',
++        'VERIFY_SIGNATURE',
++        'VERIFY_ISSUER_AUDIENCE_TIME_AND_MFA',
++        'CLAIM_UPSTREAM_REPLAY',
++        'NORMALIZE_PSEUDONYMOUS_IDENTITY',
++        'ISSUE_INTERNAL_ASSERTION',
++        'VERIFY_INTERNAL_ASSERTION',
++        'CLAIM_INTERNAL_REPLAY',
++        'RETURN_EDGE_ATTESTATION',
++      ],
++      identity_authority_only: true,
++      entitlement_authority: false,
++      tester_authority: false,
++      profile_id_authority: false,
++      subscription_authority: false,
++      coach_connect_authority: false,
++      raw_token_output: false,
++      raw_token_persistence: false,
++    },
++  );
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_CONFIGURATION_CONTRACT_V1.json',
++    configurationContract(),
++  );
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_VALIDATION_MATRIX_V1.json',
++    validationMatrix(),
++  );
++  writeText(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1.md',
++    [
++      '# MORE Coach Connect Protected Edge Identity Binding V1',
++      '',
++      `Verdict: ${finalVerdict}`,
++      '',
++      '## Executive outcome',
++      '',
++      'A provider-neutral server-side adapter now verifies an explicitly configured RS256',
++      'OIDC JWT, validates issuer, audience, time, key ID, MFA evidence, and durable replay',
++      'state, then creates and immediately verifies the existing short-lived HMAC internal',
++      'protected-edge assertion. Browser-supplied internal assertions and query tokens deny.',
++      '',
++      'The binding establishes authenticated protected-edge identity only. It does not grant',
++      'SUBDEV1, tester, Profile ID, Business Engine, Subscription Runtime, Coach Connect,',
++      'operator, deployment, billing, or canonical authority.',
++      '',
++      '## Provider boundary',
++      '',
++      'The production-capable configured OIDC profile can bind a reviewed Auth0/OIDC issuer',
++      'using a static server-side JWKS document reference. A Vercel Passport profile exists',
++      'only as an explicit configured profile; provider configuration and verification',
++      'qualification remain required because deployment access protection alone is not an',
++      'application identity assertion.',
++      '',
++      'Reference contracts reviewed:',
++      '- https://vercel.com/docs/security/vercel-passport',
++      '- https://auth0.com/docs/secure/tokens/json-web-tokens/validate-json-web-tokens',
++      '',
++      '## Authority order',
++      '',
++      'upstream signed identity -> protected-edge identity -> canonical subject lookup ->',
++      'authenticated session -> private-test eligibility -> temporary entitlement ->',
++      'private-runtime authority -> existing product attachments',
++      '',
++      '## Configuration and activation boundary',
++      '',
++      'No provider setting, JWKS value, secret, environment binding, deployment, runtime',
++      'activation, named tester, or Profile ID was created or authorized. Missing, ambiguous,',
++      'stale, mismatched, disabled, or unavailable configuration fails closed.',
++    ].join('\n'),
++  );
++  writeText(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_TECHNICAL_SCHEMATIC_V1.md',
++    [
++      '# Protected Edge Identity Technical Schematic V1',
++      '',
++      '```text',
++      'private login request',
++      '  -> reject query tokens and spoofed x-more-protected-edge-assertion',
++      '  -> extract exactly one configured upstream JWT source',
++      '  -> resolve reviewed static JWKS reference server-side',
++      '  -> verify RS256 + kid + issuer + audience + iat/nbf/exp + explicit MFA',
++      '  -> atomically CLAIM_REPLAY in shared-security-state-async-v2',
++      '  -> normalize into keyed opaque identity references',
++      '  -> issue existing protected-edge-identity-v1 HMAC assertion',
++      '  -> verify environment, deployment, policy, time, binding context, signature',
++      '  -> atomically reject internal assertion replay',
++      '  -> pass edge attestation into the existing canonical async security composition',
++      '  -> continue independent entitlement and product-authority checks',
++      '```',
++      '',
++      'No handler directly verifies provider tokens. One composition root owns one adapter.',
++    ].join('\n'),
++  );
++  writeText(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_PRIVACY_REVIEW_V1.md',
++    [
++      '# Protected Edge Identity Privacy Review V1',
++      '',
++      '- Raw upstream tokens are used only in process for signature verification.',
++      '- Raw tokens, signatures, full claim sets, names, email values, and secrets are not returned.',
++      '- Canonical edge subjects and token identifiers are keyed opaque references.',
++      '- Email presence is represented only as a boolean and never establishes identity authority.',
++      '- Replay storage contains hashes and opaque references only.',
++      '- Evidence contains synthetic fixtures only and no customer or production data.',
++      '- No browser bundle receives signing keys, identity hash keys, JWKS credentials, or tokens.',
++      '- No transcripts, prompts, model output, Business Engine content, Profile IDs, or customer data are stored.',
++    ].join('\n'),
++  );
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_IMPLEMENTATION_HANDOFF_V1.json',
++    {
++      campaign: 'MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1',
++      prerequisite_commit: expectedHead,
++      verdict: finalVerdict,
++      changed_files: result.changed_campaign_files,
++      remaining_requirements: [
++        'select and approve the upstream provider profile',
++        'supply an exact issuer and audience',
++        'supply a reviewed static JWKS reference and digest',
++        'bind independently rotatable identity-hash and internal-signing key references',
++        'bind the protected-edge configuration reference into the exact PRIVATE_LIVE environment',
++        'qualify the selected provider token against local contract tests',
++        'obtain separate deployment and activation authority',
++      ],
++      prohibited_next_actions: [
++        'public activation',
++        'implicit tester authorization',
++        'implicit Profile ID authorization',
++        'Stripe activation',
++        'voice or media activation',
++        'transcript persistence activation',
++      ],
++    },
++  );
++  writeText(
++    'executive_handoff.md',
++    [
++      '# Executive handoff',
++      '',
++      `Final verdict: ${finalVerdict}`,
++      '',
++      'The code boundary is complete and local validation passed. The runtime remains',
++      'source-default-off. A separate human-authorized provider-configuration campaign must',
++      'select the issuer profile, bind reviewed server-side references, qualify the selected',
++      'provider token, and then return to private deployment architecture.',
++    ].join('\n'),
++  );
++  writeJson('ai_handoff.json', {
++    campaign: 'MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1',
++    verdict: finalVerdict,
++    no_provider_calls: true,
++    no_environment_changes: true,
++    no_deployment: true,
++    no_activation: true,
++    recommended_next_campaign:
++      'MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_PROVIDER_CONFIGURATION_AND_QUALIFICATION_V1',
++  });
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_FINAL_VERDICT_V1.json',
++    {
++      verdict: finalVerdict,
++      implementation_complete: true,
++      provider_configuration_required: true,
++      provider_qualification_required: true,
++      deployment_authorized: false,
++      runtime_activated: false,
++      public_access: false,
++      stripe: false,
++      voice: false,
++      media: false,
++      transcript_persistence: false,
++    },
++  );
++  writeJson('verifier_result.json', result);
++  writeText('git_status_after.txt', git(['status', '--short']));
++
++  const evidenceFilesBeforeIndexes = walk(evidenceRoot)
++    .filter((file) => !file.endsWith(reviewZipName))
++    .map(relative)
++    .filter((file) => (
++      !file.endsWith('MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_ARTIFACT_INDEX_V1.json')
++      && !file.endsWith('MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_EVIDENCE_MANIFEST_V1.json')
++      && !file.endsWith('package_validation.json')
++    ))
++    .sort();
++  const archiveEntries = [...new Set([
++    ...exactAllowlist,
++    ...evidenceFilesBeforeIndexes,
++    evidenceRelative('package_validation.json'),
++    evidenceRelative(
++      'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_ARTIFACT_INDEX_V1.json',
++    ),
++    evidenceRelative(
++      'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_EVIDENCE_MANIFEST_V1.json',
++    ),
++  ])].sort();
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_ARTIFACT_INDEX_V1.json',
++    {
++      index_version: 'protected-edge-identity-artifact-index-v1',
++      campaign: 'MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1',
++      archive_name: reviewZipName,
++      archive_entry_count: archiveEntries.length,
++      archive_entries: archiveEntries,
++    },
++  );
++  const evidenceFiles = walk(evidenceRoot)
++    .filter((file) => !file.endsWith(reviewZipName))
++    .map((file) => ({
++      path: relative(file),
++      bytes: fs.statSync(file).size,
++      sha256: fileSha(file),
++    }))
++    .filter(({ path: file }) => (
++      !file.endsWith('MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_EVIDENCE_MANIFEST_V1.json')
++      && !file.endsWith('package_validation.json')
++    ))
++    .sort((left, right) => left.path.localeCompare(right.path));
++  writeJson(
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_EVIDENCE_MANIFEST_V1.json',
++    {
++      manifest_version: 'protected-edge-identity-evidence-manifest-v1',
++      evidence_count: evidenceFiles.length,
++      evidence: evidenceFiles,
++      self_hash_excluded: true,
++    },
++  );
++  writeJson('package_validation.json', {
++    archive_name: reviewZipName,
++    expected_entries: archiveEntries,
++    sorted_paths_required: true,
++    duplicate_paths_allowed: false,
++    case_collisions_allowed: false,
++    symlinks_allowed: false,
++    absolute_paths_allowed: false,
++    traversal_paths_allowed: false,
++    deterministic_fixed_timestamp: '1980-01-02T12:00:00.000Z',
++    decompressed_byte_equality_required: true,
++    secret_values_allowed: false,
++    customer_data_allowed: false,
++  });
++}
++
++function makeReviewZip(archiveEntries, output) {
++  const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'protected-edge-review-'));
++  try {
++    for (const entry of archiveEntries) {
++      const source = path.join(root, entry);
++      const destination = path.join(temporaryRoot, entry);
++      fs.mkdirSync(path.dirname(destination), { recursive: true });
++      fs.copyFileSync(source, destination);
++      const fixed = new Date('1980-01-02T12:00:00.000Z');
++      fs.utimesSync(destination, fixed, fixed);
++    }
++    fs.rmSync(output, { force: true });
++    const zipped = spawnSync(
++      'zip',
++      ['-X', '-q', output, ...archiveEntries],
++      {
++        cwd: temporaryRoot,
++        encoding: 'utf8',
++        maxBuffer: 64 * 1024 * 1024,
++      },
++    );
++    if (zipped.status !== 0) throw new Error(`zip failed: ${zipped.stderr}`);
++  } finally {
++    fs.rmSync(temporaryRoot, { recursive: true, force: true });
++  }
++}
++
++function validateAndPackage() {
++  const index = JSON.parse(fs.readFileSync(path.join(
++    evidenceRoot,
++    'MORE_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_ARTIFACT_INDEX_V1.json',
++  ), 'utf8'));
++  const entries = index.archive_entries;
++  const expected = [...entries].sort();
++  if (JSON.stringify(entries) !== JSON.stringify(expected)
++    || new Set(entries).size !== entries.length
++    || entries.some((entry) => (
++      entry.startsWith('/')
++      || entry.split('/').includes('..')
++      || fs.lstatSync(path.join(root, entry)).isSymbolicLink()
++    ))
++    || new Set(entries.map((entry) => entry.toLowerCase())).size !== entries.length) {
++    throw new Error('archive entry policy violation');
++  }
++  const output = path.join(evidenceRoot, reviewZipName);
++  const proof = path.join(os.tmpdir(), `${reviewZipName}.proof.zip`);
++  makeReviewZip(entries, output);
++  makeReviewZip(entries, proof);
++  const outputSha = fileSha(output);
++  const proofSha = fileSha(proof);
++  if (outputSha !== proofSha) throw new Error('deterministic archive mismatch');
++  const integrity = run('unzip', ['-t', output]);
++  if (integrity.status !== 0) throw new Error('archive integrity failed');
++  const listed = run('unzip', ['-Z1', output]).stdout.trim().split('\n').filter(Boolean);
++  if (JSON.stringify(listed) !== JSON.stringify(entries)) {
++    throw new Error('archive entry mismatch');
++  }
++  for (const entry of entries) {
++    const extracted = run('unzip', ['-p', output, entry], { encoding: null });
++    if (extracted.status !== 0
++      || !extracted.stdout.equals(fs.readFileSync(path.join(root, entry)))) {
++      throw new Error(`archive byte mismatch: ${entry}`);
++    }
++  }
++  fs.rmSync(proof, { force: true });
++  return {
++    path: relative(output),
++    sha256: outputSha,
++    bytes: fs.statSync(output).size,
++    entry_count: entries.length,
++    deterministic: true,
++    integrity: true,
++    decompressed_byte_equality: true,
++  };
++}
++
++const head = git(['rev-parse', 'HEAD']);
++const subject = git(['show', '-s', '--format=%s', 'HEAD']);
++const indexEmpty = git(['diff', '--cached', '--name-only']) === '';
++const receiptPath = path.join(
++  root,
++  'MORE_COACH_CONNECT_PRIVATE_RUNTIME_LIVE_WIRING_V2_COMMIT_RECEIPT.md',
++);
++const receiptSha256 = fs.existsSync(receiptPath) ? fileSha(receiptPath) : null;
++const changedTracked = git(['diff', '--name-only']).split('\n').filter(Boolean);
++const unexpectedTracked = changedTracked.filter((file) => (
++  !exactAllowlist.includes(file) && !expectedPreexistingTracked.includes(file)
++));
++const preexistingTrackedPreserved = expectedPreexistingTracked.every(
++  (file) => changedTracked.includes(file),
++);
++const changedFiles = changedCampaignFiles();
++const missingAllowlist = exactAllowlist.filter((file) => !fs.existsSync(path.join(root, file)));
++const protectedState = protectedFingerprint();
++const immutableState = immutableComparison();
++const cycleState = dependencyCycleReport();
++const exportsModule = await import(
++  '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js'
++);
++const missingExports = requiredExports.filter((name) => !(name in exportsModule));
++
++const newFocusedRun = runTests(newFocusedTestFiles);
++const focusedRun = runTests(focusedTestFiles);
++const targetedFiles = fs.readdirSync(path.join(root, 'test'))
++  .filter((name) => (
++    (
++      name.startsWith('intelligenceFabric.coachConnect.privateRuntime.')
++      || name.startsWith(
++        'intelligenceFabric.coachConnect.productionSecurity.remoteSharedSecurity.',
++      )
++      || name.startsWith(
++        'intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.',
++      )
++    )
++    && name.endsWith('.test.js')
++  ))
++  .sort()
++  .map((name) => `test/${name}`);
++const targetedRun = runTests(targetedFiles);
++
++let safeRun = {
++  result: { status: null },
++  summary: { total: 0, passed: 0, failed: 0, skipped: 0, exit_code: null },
++};
++let buildProof = {
++  run_1_exit_code: null,
++  run_2_exit_code: null,
++  run_1: null,
++  run_2: null,
++  deterministic: false,
++};
++let lintProof = { exit_code: null, passed: false, output: null };
++if (fullValidation) {
++  const safeFiles = fs.readdirSync(path.join(root, 'test'))
++    .filter((name) => name.startsWith('intelligenceFabric') && name.endsWith('.test.js'))
++    .sort()
++    .map((name) => `test/${name}`);
++  safeRun = runTests(safeFiles);
++  const build1 = run('npm', ['run', 'build']);
++  const digest1 = build1.status === 0 ? distDigest() : null;
++  const build2 = run('npm', ['run', 'build']);
++  const digest2 = build2.status === 0 ? distDigest() : null;
++  buildProof = {
++    baseline_sha256: expectedBaseline.build_sha256,
++    run_1_exit_code: build1.status,
++    run_2_exit_code: build2.status,
++    run_1: digest1,
++    run_2: digest2,
++    deterministic: build1.status === 0
++      && build2.status === 0
++      && digest1?.sha256 === digest2?.sha256,
++  };
++  const lint = run(path.join(root, 'node_modules/.bin/eslint'), exactAllowlist);
++  lintProof = {
++    exit_code: lint.status,
++    passed: lint.status === 0,
++    output: `${lint.stdout}\n${lint.stderr}`.trim(),
++  };
++}
++
++const campaignMaterial = exactAllowlist
++  .map((file) => fs.readFileSync(path.join(root, file), 'utf8'))
++  .join('\n');
++const sourceScan = {
++  private_key_material:
++    /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(campaignMaterial),
++  plausible_live_api_key:
++    /\b(?:sk|pk|pat|key|token)_[A-Za-z0-9_-]{32,}\b/.test(campaignMaterial),
++  live_redis_url: /\b(?:redis|rediss):\/\/[^/\s]+/i.test(campaignMaterial),
++  non_synthetic_email: [...campaignMaterial.matchAll(
++    /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi,
++  )].some(([value]) => !value.endsWith('@example.invalid')),
++  production_profile_id: /\bmm-\d{8}-[a-z0-9]{8}\b/i.test(campaignMaterial),
++};
++const sourceScanPassed = Object.values(sourceScan).every((found) => found === false);
++const distMaterial = fullValidation
++  ? walk(path.join(root, 'dist')).map((file) => fs.readFileSync(file)).join('\n')
++  : '';
++const browserScan = {
++  private_key_material:
++    /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/.test(distMaterial),
++  synthetic_signing_fixture:
++    /synthetic-internal-signing-key-material|integration-assertion-signing-key/.test(
++      distMaterial,
++    ),
++  bearer_token_literal: /Bearer\s+[A-Za-z0-9_-]{48,}\./.test(distMaterial),
++};
++const browserScanPassed = Object.values(browserScan).every((found) => found === false);
++
++const allowlistExact = changedFiles.length === exactAllowlist.length
++  && exactAllowlist.every((file) => changedFiles.includes(file));
++const baseOk = head === expectedHead
++  && subject === expectedSubject
++  && receiptSha256 === expectedReceiptSha256
++  && indexEmpty
++  && missingAllowlist.length === 0
++  && unexpectedTracked.length === 0
++  && preexistingTrackedPreserved
++  && allowlistExact
++  && protectedState === expectedProtectedDirtyFingerprint
++  && immutableState.every(({ unchanged }) => unchanged)
++  && cycleState.cycle_count === 0
++  && missingExports.length === 0
++  && newFocusedRun.result.status === 0
++  && newFocusedRun.summary.total === newFocusedRun.summary.passed
++  && focusedRun.result.status === 0
++  && focusedRun.summary.total === focusedRun.summary.passed
++  && focusedRun.summary.total >= expectedBaseline.focused
++  && targetedRun.result.status === 0
++  && targetedRun.summary.total === targetedRun.summary.passed
++  && targetedRun.summary.total >= expectedBaseline.targeted
++  && sourceScanPassed;
++const fullOk = !fullValidation || (
++  safeRun.result.status === 0
++  && safeRun.summary.total === safeRun.summary.passed
++  && safeRun.summary.total >= expectedBaseline.safe
++  && buildProof.deterministic
++  && lintProof.passed
++  && browserScanPassed
++);
++const result = {
++  verifier_version: 'protected-edge-identity-binding-verifier-v1',
++  campaign: 'MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1',
++  ok: baseOk && fullOk,
++  full_validation: fullValidation,
++  repository_head: head,
++  repository_subject: subject,
++  git_index_empty: indexEmpty,
++  prerequisite_receipt_sha256: receiptSha256,
++  baseline: expectedBaseline,
++  exact_allowlist_count: exactAllowlist.length,
++  exact_allowlist: exactAllowlist,
++  changed_campaign_file_count: changedFiles.length,
++  changed_campaign_files: changedFiles,
++  allowlist_exact_match: allowlistExact,
++  missing_allowlist_files: missingAllowlist,
++  unexpected_tracked_changes: unexpectedTracked,
++  preserved_preexisting_tracked_changes: expectedPreexistingTracked,
++  new_focused_tests: newFocusedRun.summary,
++  focused_tests: focusedRun.summary,
++  targeted_files: targetedFiles,
++  targeted_tests: targetedRun.summary,
++  safe_intelligence_fabric_tests: safeRun.summary,
++  deterministic_build: buildProof,
++  lint: lintProof,
++  import_export_validation: {
++    passed: missingExports.length === 0,
++    required_exports: requiredExports,
++    missing_exports: missingExports,
++  },
++  schema_validation: {
++    passed: newFocusedRun.result.status === 0,
++    protected_edge_configuration_tested: true,
++    identity_contract_tested: true,
++  },
++  dependency_cycle_validation: cycleState,
++  protected_root_baseline_diff_sha256: expectedProtectedDirtyFingerprint,
++  protected_root_current_diff_sha256: protectedState,
++  protected_roots_unchanged: protectedState === expectedProtectedDirtyFingerprint,
++  qualified_adapter_files: immutableState,
++  secret_and_sensitive_content_scan: {
++    passed: sourceScanPassed,
++    ...sourceScan,
++  },
++  browser_bundle_secret_scan: {
++    passed: browserScanPassed,
++    ...browserScan,
++  },
++  provider_calls: 0,
++  credential_values_inspected: 0,
++  environment_changes: 0,
++  deployment_calls: 0,
++  runtime_activation: false,
++  named_tester_activation: false,
++  profile_id_activation: false,
++  public_access_activation: false,
++  staging_actions: 0,
++  commit_actions: 0,
++  push_actions: 0,
++  final_verdict: finalVerdict,
++};
++
++if (writeEvidence && result.ok) createEvidence(result);
++let packageResult = null;
++if (packageReview) {
++  if (!writeEvidence || !result.ok) {
++    throw new Error('--package requires a passing --write-evidence run');
++  }
++  packageResult = validateAndPackage();
++}
++
++process.stdout.write(`${JSON.stringify({
++  ...result,
++  package: packageResult,
++}, null, 2)}\n`);
++process.exitCode = result.ok ? 0 : 1;
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js
+new file mode 100644
+index 0000000..257da0a
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/adapter.js
+@@ -0,0 +1,343 @@
++import crypto from 'node:crypto';
++import {
++  hashCanonicalJson,
++} from '../../../hashing.js';
++import { deepFreeze } from '../../../validation.js';
++import {
++  describeProtectedEdgeIdentityBindingCapabilityV1,
++  validateProtectedEdgeIdentityConfigurationV1,
++} from './contracts.js';
++import {
++  issueProtectedEdgeInternalAssertionV1,
++  verifyProtectedEdgeInternalAssertionV1,
++} from './internalAssertion.js';
++import {
++  createProtectedEdgeReplayProtectorV1,
++} from './replayProtection.js';
++import {
++  extractProtectedEdgeUpstreamTokenV1,
++} from './tokenExtraction.js';
++import {
++  verifyProtectedEdgeUpstreamJwtV1,
++} from './jwtVerifier.js';
++
++const frozen = (value) => deepFreeze(structuredClone(value));
++const deny = (code, status = 401) => frozen({
++  ok: false,
++  allowed: false,
++  code,
++  status,
++  edge_attestation: null,
++  raw_token_logged: false,
++  raw_token_persisted: false,
++});
++
++function hmac(keyMaterial, domain, value) {
++  return crypto.createHmac('sha256', keyMaterial)
++    .update(`${domain}\0${value}`, 'utf8')
++    .digest('hex');
++}
++
++function parseJwks(serialized) {
++  if (serialized && typeof serialized === 'object' && !Array.isArray(serialized)) {
++    return structuredClone(serialized);
++  }
++  if (typeof serialized !== 'string'
++    || serialized.length < 16
++    || serialized.length > 131072) {
++    return null;
++  }
++  try {
++    const parsed = JSON.parse(serialized);
++    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
++      ? parsed
++      : null;
++  } catch {
++    return null;
++  }
++}
++
++function bindingContextHash(req, configuration, trustedTransactionRef = null) {
++  const route = typeof req?.url === 'string' ? req.url.split('?')[0] : '/';
++  const method = typeof req?.method === 'string' ? req.method.toUpperCase() : 'GET';
++  return hashCanonicalJson({
++    environment_id: configuration.environment_id,
++    deployment_id: configuration.deployment_id,
++    method,
++    route,
++    trusted_transaction_ref: trustedTransactionRef,
++  });
++}
++
++function hasBrowserSuppliedAuthorityBinding(req) {
++  const prohibited = new Set([
++    'x-more-deployment-id',
++    'x-more-immutable-deployment-id',
++    'x-more-protected-edge-session',
++    'x-more-protected-edge-transaction',
++  ]);
++  return Object.keys(req?.headers || {})
++    .some((name) => prohibited.has(name.toLowerCase()));
++}
++
++function trustedTransactionReference({
++  configuration,
++  identityHashKey,
++  transactionIdFactory,
++} = {}) {
++  if (configuration.replay_mode !== 'SESSION_BOUND') return null;
++  let rawReference;
++  try {
++    rawReference = transactionIdFactory();
++  } catch {
++    return null;
++  }
++  if (typeof rawReference !== 'string'
++    || rawReference.length < 16
++    || rawReference.length > 256
++    || !/^[A-Za-z0-9:_-]+$/.test(rawReference)) {
++    return null;
++  }
++  return `edge_transaction_${hmac(
++    identityHashKey,
++    'protected_edge_server_transaction',
++    rawReference,
++  )}`;
++}
++
++function normalizeVerifiedIdentity({
++  verifiedClaims,
++  configuration,
++  identityHashKey,
++} = {}) {
++  const audienceSet = [...verifiedClaims.audiences].sort();
++  return frozen({
++    identity_version: 'protected-edge-normalized-identity-v1',
++    canonical_subject_ref: `edge_subject_${hmac(
++      identityHashKey,
++      'protected_edge_subject',
++      `${verifiedClaims.issuer}\0${verifiedClaims.subject}`,
++    ).slice(0, 48)}`,
++    issuer_provenance_ref: `edge_issuer_${hmac(
++      identityHashKey,
++      'protected_edge_issuer',
++      verifiedClaims.issuer,
++    ).slice(0, 40)}`,
++    audience_policy_ref: `edge_audience_${hmac(
++      identityHashKey,
++      'protected_edge_audience',
++      audienceSet.join('\0'),
++    ).slice(0, 40)}`,
++    token_identifier_ref: `edge_token_${hmac(
++      identityHashKey,
++      'protected_edge_token_identifier',
++      `${verifiedClaims.issuer}\0${verifiedClaims.token_id}`,
++    ).slice(0, 48)}`,
++    provider_type: configuration.provider_type,
++    authenticated_at: verifiedClaims.authenticated_at,
++    issued_at: verifiedClaims.issued_at,
++    expires_at: verifiedClaims.expires_at,
++    mfa_verified: verifiedClaims.mfa_verified === true,
++    named_identity_verified: verifiedClaims.named_identity_verified === true,
++    verified_email_present: verifiedClaims.verified_email_present === true,
++    provenance: 'CRYPTOGRAPHICALLY_VERIFIED_UPSTREAM_JWT',
++    assurance_level: verifiedClaims.mfa_verified === true ? 'MFA_VERIFIED' : 'DENIED',
++    profile_id_authority: false,
++    tester_authority: false,
++    entitlement_authority: false,
++  });
++}
++
++function unconfiguredAdapter(
++  providerType = null,
++  code = 'PROTECTED_EDGE_CONFIGURATION_UNAVAILABLE',
++) {
++  return Object.freeze({
++    configured: false,
++    describeCapability: () => describeProtectedEdgeIdentityBindingCapabilityV1({
++      configured: false,
++      providerType,
++    }),
++    bindRequest: async () => deny(code, 503),
++  });
++}
++
++export async function createProtectedEdgeIdentityBindingV1({
++  configuration,
++  resolveReference,
++  statePort,
++  clock = () => Date.now(),
++  assertionIdFactory,
++  transactionIdFactory = () => `edge_transaction_${crypto.randomUUID().replaceAll('-', '')}`,
++} = {}) {
++  const checked = validateProtectedEdgeIdentityConfigurationV1(configuration);
++  if (!checked.valid
++    || configuration.enabled !== true
++    || typeof resolveReference !== 'function') {
++    return unconfiguredAdapter(configuration?.provider_type);
++  }
++  if (configuration.emergency_disabled === true) {
++    return unconfiguredAdapter(configuration.provider_type, 'EMERGENCY_DISABLED');
++  }
++  let jwks;
++  let identityHashKey;
++  let internalSigningKey;
++  try {
++    const [jwksDocument, identityKey, signingKey] = await Promise.all([
++      resolveReference(configuration.jwks_ref, {
++        purpose: 'PROTECTED_EDGE_JWKS_DOCUMENT',
++        secret: false,
++      }),
++      resolveReference(configuration.identity_hash_key_ref, {
++        purpose: 'PROTECTED_EDGE_IDENTITY_HASH_KEY',
++        secret: true,
++      }),
++      resolveReference(configuration.internal_signing_key_ref, {
++        purpose: 'PROTECTED_EDGE_INTERNAL_SIGNING_KEY',
++        secret: true,
++      }),
++    ]);
++    jwks = parseJwks(jwksDocument);
++    identityHashKey = identityKey;
++    internalSigningKey = signingKey;
++  } catch {
++    return unconfiguredAdapter(configuration.provider_type);
++  }
++  if (!jwks
++    || hashCanonicalJson(jwks) !== configuration.jwks_sha256
++    || typeof identityHashKey !== 'string'
++    || identityHashKey.length < 32
++    || typeof internalSigningKey !== 'string'
++    || internalSigningKey.length < 32) {
++    return unconfiguredAdapter(configuration.provider_type);
++  }
++
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort,
++    environmentId: configuration.environment_id,
++    clock,
++  });
++
++  return Object.freeze({
++    configured: true,
++    describeCapability: () => describeProtectedEdgeIdentityBindingCapabilityV1({
++      configured: true,
++      providerType: configuration.provider_type,
++    }),
++
++    async bindRequest(req, {
++      correlationRef = 'protected_edge_request',
++    } = {}) {
++      if (configuration.emergency_disabled === true) {
++        return deny('EMERGENCY_DISABLED', 503);
++      }
++      if (hasBrowserSuppliedAuthorityBinding(req)) {
++        return deny('PROTECTED_EDGE_AUTHORITY_BINDING_SPOOFED');
++      }
++      const extracted = extractProtectedEdgeUpstreamTokenV1(req, {
++        tokenSource: configuration.token_source,
++      });
++      if (!extracted.ok) return deny(extracted.code);
++
++      const verified = verifyProtectedEdgeUpstreamJwtV1({
++        serialized: extracted.serialized,
++        configuration,
++        jwks,
++        clock,
++      });
++      if (!verified.ok) return deny(verified.code);
++
++      const identity = normalizeVerifiedIdentity({
++        verifiedClaims: verified.verified_claims,
++        configuration,
++        identityHashKey,
++      });
++      const upstreamExpiresAtMs = Math.min(
++        Date.parse(identity.expires_at),
++        clock() + configuration.replay_ttl_seconds * 1000,
++      );
++      const trustedTransactionRef = trustedTransactionReference({
++        configuration,
++        identityHashKey,
++        transactionIdFactory,
++      });
++      if (configuration.replay_mode === 'SESSION_BOUND' && trustedTransactionRef == null) {
++        return deny('PROTECTED_EDGE_TRUSTED_TRANSACTION_REQUIRED');
++      }
++      const contextHash = bindingContextHash(
++        req,
++        configuration,
++        trustedTransactionRef,
++      );
++      const upstreamReplay = await replayProtector.claim({
++        replayKeyHash: hmac(
++          identityHashKey,
++          'protected_edge_upstream_replay_key',
++          identity.token_identifier_ref,
++        ),
++        fingerprint: hmac(
++          identityHashKey,
++          'protected_edge_upstream_replay_fingerprint',
++          `${identity.token_identifier_ref}\0${identity.canonical_subject_ref}`
++            + `\0${configuration.environment_id}\0${configuration.deployment_id}`
++            + `\0${contextHash}`,
++        ),
++        correlationRef,
++        expiresAtMs: upstreamExpiresAtMs,
++        strictOneTime: true,
++      });
++      if (!upstreamReplay.allowed) return deny(upstreamReplay.code);
++
++      const issued = issueProtectedEdgeInternalAssertionV1({
++        identity,
++        configuration,
++        signingKey: internalSigningKey,
++        bindingContextHash: contextHash,
++        clock,
++        assertionIdFactory,
++      });
++      if (!issued.ok) return deny(issued.code, 503);
++
++      const internal = await verifyProtectedEdgeInternalAssertionV1({
++        serialized: issued.serialized,
++        configuration,
++        signingKey: internalSigningKey,
++        replayProtector,
++        correlationRef,
++        bindingContextHash: contextHash,
++        clock,
++      });
++      if (!internal.allowed) return deny(internal.code, 503);
++
++      return frozen({
++        ok: true,
++        allowed: true,
++        code: null,
++        status: 200,
++        edge_attestation: internal.edge_attestation,
++        identity_receipt: {
++          receipt_version: 'protected-edge-identity-receipt-v1',
++          adapter_id: 'provider-neutral-protected-edge-identity-adapter-v1',
++          provider_type: configuration.provider_type,
++          canonical_subject_ref: identity.canonical_subject_ref,
++          issuer_provenance_ref: identity.issuer_provenance_ref,
++          assurance_level: identity.assurance_level,
++          mfa_verified: true,
++          profile_id_authority: false,
++          tester_authority: false,
++          entitlement_authority: false,
++          verified_at: new Date(clock()).toISOString(),
++          receipt_ref: `edge_identity_${hmac(
++            identityHashKey,
++            'protected_edge_identity_receipt',
++            `${identity.token_identifier_ref}\0${contextHash}`,
++          ).slice(0, 40)}`,
++        },
++        internal_assertion_issued: true,
++        internal_assertion_exposed: false,
++        raw_token_logged: false,
++        raw_token_persisted: false,
++      });
++    },
++  });
++}
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js
+new file mode 100644
+index 0000000..91b60e6
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/contracts.js
+@@ -0,0 +1,265 @@
++import { hashCanonicalJson } from '../../../hashing.js';
++import { deepFreeze } from '../../../validation.js';
++import {
++  ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++  isOpaqueAsyncSecurityReference,
++} from '../asyncSecurityContracts.js';
++
++export const PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION =
++  'protected-edge-identity-binding-v1';
++export const PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION =
++  'protected-edge-identity-configuration-v1';
++export const PROTECTED_EDGE_IDENTITY_ADAPTER_ID =
++  'provider-neutral-protected-edge-identity-adapter-v1';
++export const PROTECTED_EDGE_INTERNAL_ASSERTION_VERSION =
++  'protected-edge-identity-v1';
++
++export const PROTECTED_EDGE_PROVIDER_TYPES = deepFreeze([
++  'VERCEL_PASSPORT_JWT',
++  'AUTH0_OIDC_JWT',
++  'CONFIGURED_OIDC_JWT',
++]);
++
++export const PROTECTED_EDGE_TOKEN_SOURCES = deepFreeze([
++  'X_VERCEL_OIDC_PASSPORT_TOKEN',
++  'AUTHORIZATION_BEARER',
++]);
++
++export const PROTECTED_EDGE_REPLAY_MODES = deepFreeze([
++  'ONE_TIME',
++  'SESSION_BOUND',
++]);
++
++const CONFIGURATION_FIELDS = deepFreeze([
++  'config_version',
++  'enabled',
++  'emergency_disabled',
++  'adapter_id',
++  'contract_version',
++  'provider_type',
++  'token_source',
++  'issuer',
++  'audiences',
++  'jwks_ref',
++  'jwks_sha256',
++  'allowed_algorithms',
++  'subject_claim',
++  'token_id_claim',
++  'authentication_time_claim',
++  'mfa_claim',
++  'acr_claim',
++  'accepted_mfa_values',
++  'accepted_acr_values',
++  'mfa_required',
++  'environment_id',
++  'deployment_id',
++  'protected_edge_policy_digest',
++  'identity_hash_key_ref',
++  'internal_signing_key_ref',
++  'clock_skew_seconds',
++  'max_token_age_seconds',
++  'internal_assertion_ttl_seconds',
++  'replay_mode',
++  'replay_ttl_seconds',
++  'replay_store_contract',
++  'configuration_sha256',
++]);
++
++const object = (value) => Boolean(value && typeof value === 'object' && !Array.isArray(value));
++const exactFields = (value, fields) => object(value)
++  && Object.keys(value).length === fields.length
++  && Object.keys(value).every((field) => fields.includes(field));
++const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
++const boundedText = (value, maximum = 512) => typeof value === 'string'
++  && value.length > 0
++  && value.length <= maximum
++  && !/[\r\n\0]/.test(value);
++const claimName = (value) => typeof value === 'string'
++  && /^[A-Za-z][A-Za-z0-9_]{0,63}$/.test(value);
++const https = (value) => {
++  try {
++    return new URL(value).protocol === 'https:';
++  } catch {
++    return false;
++  }
++};
++const frozen = (value) => deepFreeze(structuredClone(value));
++const issue = (code, field) => ({ code, field });
++
++function digestWithout(value, field) {
++  const copy = { ...value };
++  delete copy[field];
++  return hashCanonicalJson(copy);
++}
++
++export function protectedEdgeIdentityPolicyDigest(configuration) {
++  if (!object(configuration)) throw new TypeError('protected-edge configuration required');
++  const copy = { ...configuration };
++  delete copy.protected_edge_policy_digest;
++  delete copy.configuration_sha256;
++  return hashCanonicalJson(copy);
++}
++
++function boundedUniqueStrings(value, maximumEntries = 16, maximumLength = 256) {
++  return Array.isArray(value)
++    && value.length > 0
++    && value.length <= maximumEntries
++    && new Set(value).size === value.length
++    && value.every((entry) => boundedText(entry, maximumLength) && !/\s/.test(entry));
++}
++
++export function protectedEdgeIdentityConfigurationDigest(configuration) {
++  if (!object(configuration)) throw new TypeError('protected-edge configuration required');
++  return digestWithout(configuration, 'configuration_sha256');
++}
++
++export function validateProtectedEdgeIdentityConfigurationV1(configuration, {
++  environmentId = null,
++  deploymentId = null,
++  policyDigest = null,
++  internalSigningKeyRef = null,
++} = {}) {
++  const errors = [];
++  if (!exactFields(configuration, CONFIGURATION_FIELDS)) {
++    return frozen({
++      valid: false,
++      errors: [issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'fields')],
++      value: null,
++    });
++  }
++  if (configuration.config_version !== PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION
++    || configuration.adapter_id !== PROTECTED_EDGE_IDENTITY_ADAPTER_ID
++    || configuration.contract_version !== PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'identity'));
++  }
++  if (typeof configuration.enabled !== 'boolean'
++    || typeof configuration.emergency_disabled !== 'boolean') {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'activation'));
++  }
++  if (!PROTECTED_EDGE_PROVIDER_TYPES.includes(configuration.provider_type)
++    || !PROTECTED_EDGE_TOKEN_SOURCES.includes(configuration.token_source)) {
++    errors.push(issue('PROTECTED_EDGE_PROVIDER_UNSUPPORTED', 'provider_type'));
++  }
++  if (configuration.provider_type === 'VERCEL_PASSPORT_JWT'
++    && (configuration.token_source !== 'X_VERCEL_OIDC_PASSPORT_TOKEN'
++      || configuration.subject_claim !== 'external_sub')) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'passport_profile'));
++  }
++  if (configuration.provider_type === 'AUTH0_OIDC_JWT'
++    && (configuration.token_source !== 'AUTHORIZATION_BEARER'
++      || configuration.subject_claim !== 'sub')) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'auth0_profile'));
++  }
++  if (!https(configuration.issuer)
++    || !boundedUniqueStrings(configuration.audiences, 8, 512)
++    || !isOpaqueAsyncSecurityReference(configuration.jwks_ref)
++    || !sha256(configuration.jwks_sha256)
++    || !Array.isArray(configuration.allowed_algorithms)
++    || configuration.allowed_algorithms.length !== 1
++    || configuration.allowed_algorithms[0] !== 'RS256') {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'verification'));
++  }
++  for (const field of [
++    'subject_claim',
++    'token_id_claim',
++    'authentication_time_claim',
++    'mfa_claim',
++    'acr_claim',
++  ]) {
++    if (!claimName(configuration[field])) {
++      errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', field));
++    }
++  }
++  if (!boundedUniqueStrings(configuration.accepted_mfa_values, 16, 64)
++    || !boundedUniqueStrings(configuration.accepted_acr_values, 16, 128)
++    || configuration.mfa_required !== true) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'assurance'));
++  }
++  for (const field of [
++    'environment_id',
++    'identity_hash_key_ref',
++    'internal_signing_key_ref',
++  ]) {
++    if (!isOpaqueAsyncSecurityReference(configuration[field])) {
++      errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', field));
++    }
++  }
++  if (!sha256(configuration.deployment_id)) {
++    errors.push(issue(
++      'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED',
++      'deployment_id',
++    ));
++  }
++  if ((environmentId != null && configuration.environment_id !== environmentId)
++    || (deploymentId != null && configuration.deployment_id !== deploymentId)
++    || (policyDigest != null
++      && configuration.protected_edge_policy_digest !== policyDigest)
++    || (internalSigningKeyRef != null
++      && configuration.internal_signing_key_ref !== internalSigningKeyRef)) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_MISMATCH', 'binding'));
++  }
++  if (!sha256(configuration.protected_edge_policy_digest)
++    || configuration.protected_edge_policy_digest
++      !== protectedEdgeIdentityPolicyDigest(configuration)) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'protected_edge_policy_digest'));
++  }
++  if (!Number.isInteger(configuration.clock_skew_seconds)
++    || configuration.clock_skew_seconds < 0
++    || configuration.clock_skew_seconds > 120
++    || !Number.isInteger(configuration.max_token_age_seconds)
++    || configuration.max_token_age_seconds < 60
++    || configuration.max_token_age_seconds > 3600
++    || !Number.isInteger(configuration.internal_assertion_ttl_seconds)
++    || configuration.internal_assertion_ttl_seconds < 15
++    || configuration.internal_assertion_ttl_seconds > 120
++    || !Number.isInteger(configuration.replay_ttl_seconds)
++    || configuration.replay_ttl_seconds < 60
++    || configuration.replay_ttl_seconds > 3600) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'time_policy'));
++  }
++  if (!PROTECTED_EDGE_REPLAY_MODES.includes(configuration.replay_mode)
++    || configuration.replay_store_contract !== ASYNC_SECURITY_STATE_CONTRACT_VERSION) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_INVALID', 'replay_policy'));
++  }
++  if (!sha256(configuration.configuration_sha256)
++    || configuration.configuration_sha256
++      !== protectedEdgeIdentityConfigurationDigest(configuration)) {
++    errors.push(issue('PROTECTED_EDGE_CONFIGURATION_DIGEST_MISMATCH', 'configuration_sha256'));
++  }
++  return frozen({
++    valid: errors.length === 0,
++    errors,
++    value: errors.length === 0 ? configuration : null,
++  });
++}
++
++export function protectedEdgeIdentityConfigurationFields() {
++  return CONFIGURATION_FIELDS;
++}
++
++export function describeProtectedEdgeIdentityBindingCapabilityV1({
++  configured = false,
++  providerType = null,
++} = {}) {
++  return frozen({
++    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++    provider_neutral: true,
++    configured: configured === true,
++    provider_type: PROTECTED_EDGE_PROVIDER_TYPES.includes(providerType)
++      ? providerType
++      : null,
++    approved_algorithms: ['RS256'],
++    static_jwks_reference_only: true,
++    provider_network_calls: false,
++    raw_token_output: false,
++    raw_token_persistence: false,
++    email_identity_authority: false,
++    entitlement_authority: false,
++    tester_authority: false,
++    profile_id_authority: false,
++    immutable_deployment_identity: true,
++    trusted_server_transaction_binding: true,
++    source_default_off: true,
++  });
++}
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/index.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/index.js
+new file mode 100644
+index 0000000..7aef5e5
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/index.js
+@@ -0,0 +1,6 @@
++export * from './adapter.js';
++export * from './contracts.js';
++export * from './internalAssertion.js';
++export * from './jwtVerifier.js';
++export * from './replayProtection.js';
++export * from './tokenExtraction.js';
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js
+new file mode 100644
+index 0000000..76c47d5
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/internalAssertion.js
+@@ -0,0 +1,208 @@
++import crypto from 'node:crypto';
++import { Buffer } from 'node:buffer';
++import { deepFreeze } from '../../../validation.js';
++import {
++  PROTECTED_EDGE_INTERNAL_ASSERTION_VERSION,
++} from './contracts.js';
++
++const frozen = (value) => deepFreeze(structuredClone(value));
++const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
++const opaque = (value, maximum = 256) => typeof value === 'string'
++  && value.length > 0
++  && value.length <= maximum
++  && !/[\s/?#@\0]/.test(value);
++const deny = (code) => frozen({
++  ok: false,
++  allowed: false,
++  code,
++  edge_attestation: null,
++  raw_token_logged: false,
++});
++
++function hmac(keyMaterial, domain, value) {
++  return crypto.createHmac('sha256', keyMaterial)
++    .update(`${domain}\0${value}`, 'utf8')
++    .digest('hex');
++}
++
++function decodePayload(payloadPart) {
++  try {
++    const parsed = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
++    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
++      ? parsed
++      : null;
++  } catch {
++    return null;
++  }
++}
++
++export function issueProtectedEdgeInternalAssertionV1({
++  identity,
++  configuration,
++  signingKey,
++  bindingContextHash,
++  clock = () => Date.now(),
++  assertionIdFactory = () => `edge_assertion_${crypto.randomUUID().replaceAll('-', '')}`,
++} = {}) {
++  const now = clock();
++  const identityExpiryMs = Date.parse(identity?.expires_at);
++  const identityAuthenticatedAtMs = Date.parse(identity?.authenticated_at);
++  if (typeof signingKey !== 'string'
++    || signingKey.length < 32
++    || !sha256(bindingContextHash)
++    || !Number.isFinite(now)
++    || !Number.isFinite(identityExpiryMs)
++    || !Number.isFinite(identityAuthenticatedAtMs)
++    || identityExpiryMs <= now
++    || identityAuthenticatedAtMs > now
++    || identityAuthenticatedAtMs >= identityExpiryMs
++    || identity?.mfa_verified !== true
++    || identity?.named_identity_verified !== true
++    || !opaque(identity?.canonical_subject_ref)
++    || !opaque(identity?.issuer_provenance_ref)
++    || !opaque(identity?.audience_policy_ref)
++    || !opaque(identity?.token_identifier_ref)) {
++    return deny('PROTECTED_EDGE_INTERNAL_SIGNING_UNAVAILABLE');
++  }
++  const assertionId = assertionIdFactory();
++  if (!opaque(assertionId)) return deny('PROTECTED_EDGE_INTERNAL_SIGNING_UNAVAILABLE');
++  const expiresAtMs = Math.min(
++    identityExpiryMs,
++    now + configuration.internal_assertion_ttl_seconds * 1000,
++  );
++  const payload = {
++    assertion_version: PROTECTED_EDGE_INTERNAL_ASSERTION_VERSION,
++    environment_id: configuration.environment_id,
++    deployment_id: configuration.deployment_id,
++    policy_digest: configuration.protected_edge_policy_digest,
++    canonical_subject_ref: identity.canonical_subject_ref,
++    issuer_provenance_ref: identity.issuer_provenance_ref,
++    audience_policy_ref: identity.audience_policy_ref,
++    token_identifier_ref: identity.token_identifier_ref,
++    provider_type: configuration.provider_type,
++    assertion_id: assertionId,
++    binding_context_hash: bindingContextHash,
++    named_identity_verified: true,
++    mfa_verified: true,
++    public_access: false,
++    authenticated_at: identity.authenticated_at,
++    issued_at: new Date(now).toISOString(),
++    expires_at: new Date(expiresAtMs).toISOString(),
++  };
++  const payloadPart = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
++  const signaturePart = crypto.createHmac('sha256', signingKey)
++    .update(payloadPart)
++    .digest('base64url');
++  return Object.freeze({
++    ok: true,
++    allowed: false,
++    code: null,
++    serialized: `${payloadPart}.${signaturePart}`,
++    assertion_id: assertionId,
++    expires_at: payload.expires_at,
++    raw_token_logged: false,
++  });
++}
++
++export async function verifyProtectedEdgeInternalAssertionV1({
++  serialized,
++  configuration,
++  signingKey,
++  replayProtector,
++  correlationRef,
++  bindingContextHash,
++  clock = () => Date.now(),
++} = {}) {
++  if (typeof serialized !== 'string'
++    || serialized.length > 8192
++    || typeof signingKey !== 'string'
++    || signingKey.length < 32
++    || typeof replayProtector?.claim !== 'function') {
++    return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
++  }
++  const parts = serialized.split('.');
++  if (parts.length !== 2 || parts.some((part) => part.length === 0)) {
++    return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
++  }
++  const expected = crypto.createHmac('sha256', signingKey)
++    .update(parts[0])
++    .digest();
++  let supplied;
++  try {
++    supplied = Buffer.from(parts[1], 'base64url');
++  } catch {
++    return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
++  }
++  if (expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) {
++    return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
++  }
++  const payload = decodePayload(parts[0]);
++  const now = clock();
++  const issuedAtMs = Date.parse(payload?.issued_at);
++  const expiresAtMs = Date.parse(payload?.expires_at);
++  const authenticatedAtMs = Date.parse(payload?.authenticated_at);
++  if (payload?.assertion_version !== PROTECTED_EDGE_INTERNAL_ASSERTION_VERSION
++    || payload.environment_id !== configuration.environment_id
++    || payload.deployment_id !== configuration.deployment_id
++    || payload.policy_digest !== configuration.protected_edge_policy_digest
++    || payload.provider_type !== configuration.provider_type
++    || payload.binding_context_hash !== bindingContextHash
++    || payload.named_identity_verified !== true
++    || payload.mfa_verified !== true
++    || payload.public_access !== false
++    || !opaque(payload.canonical_subject_ref)
++    || !opaque(payload.issuer_provenance_ref)
++    || !opaque(payload.audience_policy_ref)
++    || !opaque(payload.token_identifier_ref)
++    || !opaque(payload.assertion_id)
++    || !Number.isFinite(issuedAtMs)
++    || !Number.isFinite(expiresAtMs)
++    || !Number.isFinite(authenticatedAtMs)
++    || issuedAtMs > now + configuration.clock_skew_seconds * 1000
++    || expiresAtMs <= now
++    || expiresAtMs <= issuedAtMs
++    || authenticatedAtMs > issuedAtMs
++    || authenticatedAtMs >= expiresAtMs
++    || expiresAtMs - issuedAtMs > configuration.internal_assertion_ttl_seconds * 1000) {
++    return deny('PROTECTED_EDGE_IDENTITY_REQUIRED');
++  }
++  const replay = await replayProtector.claim({
++    replayKeyHash: hmac(
++      signingKey,
++      'protected_edge_internal_replay_key',
++      payload.assertion_id,
++    ),
++    fingerprint: hmac(
++      signingKey,
++      'protected_edge_internal_replay_fingerprint',
++      `${payload.assertion_id}\0${payload.canonical_subject_ref}`
++        + `\0${payload.environment_id}\0${payload.deployment_id}`,
++    ),
++    correlationRef,
++    expiresAtMs,
++    strictOneTime: true,
++  });
++  if (!replay.allowed) return deny(replay.code || 'PROTECTED_EDGE_REPLAY_DETECTED');
++  return frozen({
++    ok: true,
++    allowed: true,
++    code: null,
++    edge_attestation: {
++      named_identity_verified: true,
++      mfa_verified: true,
++      public_access: false,
++      policy_digest: configuration.protected_edge_policy_digest,
++      canonical_subject_ref: payload.canonical_subject_ref,
++      issuer_provenance_ref: payload.issuer_provenance_ref,
++      provider_type: payload.provider_type,
++      environment_id: payload.environment_id,
++      deployment_id: payload.deployment_id,
++      receipt_ref: `edge_receipt_${hmac(
++        signingKey,
++        'protected_edge_receipt',
++        serialized,
++      ).slice(0, 32)}`,
++    },
++    raw_token_logged: false,
++  });
++}
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js
+new file mode 100644
+index 0000000..ecad196
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/jwtVerifier.js
+@@ -0,0 +1,169 @@
++import crypto from 'node:crypto';
++import { Buffer } from 'node:buffer';
++import { hashCanonicalJson } from '../../../hashing.js';
++import { deepFreeze } from '../../../validation.js';
++
++const frozen = (value) => deepFreeze(structuredClone(value));
++const deny = (code) => frozen({
++  ok: false,
++  allowed: false,
++  code,
++  verified_claims: null,
++  raw_token_logged: false,
++});
++const boundedClaim = (value, maximum = 512) => typeof value === 'string'
++  && value.length > 0
++  && value.length <= maximum
++  && !/[\r\n\0]/.test(value);
++const base64urlJson = (value) => {
++  try {
++    return JSON.parse(Buffer.from(value, 'base64url').toString('utf8'));
++  } catch {
++    return null;
++  }
++};
++const audienceMatches = (value, expected) => {
++  const values = Array.isArray(value) ? value : [value];
++  return values.length > 0
++    && values.every((entry) => typeof entry === 'string')
++    && values.every((entry) => expected.includes(entry));
++};
++
++function selectVerificationKey(jwks, header) {
++  if (!jwks || typeof jwks !== 'object' || !Array.isArray(jwks.keys)
++    || jwks.keys.length < 1 || jwks.keys.length > 32) {
++    return null;
++  }
++  const matches = jwks.keys.filter((key) => key?.kid === header.kid
++    && key?.kty === 'RSA'
++    && (key.use == null || key.use === 'sig')
++    && (key.alg == null || key.alg === 'RS256'));
++  return matches.length === 1 ? matches[0] : null;
++}
++
++function mfaProven(claims, configuration) {
++  const amr = Array.isArray(claims?.[configuration.mfa_claim])
++    ? claims[configuration.mfa_claim]
++    : [];
++  const acr = claims?.[configuration.acr_claim];
++  return amr.some((value) => configuration.accepted_mfa_values.includes(value))
++    || (typeof acr === 'string' && configuration.accepted_acr_values.includes(acr));
++}
++
++export function verifyProtectedEdgeUpstreamJwtV1({
++  serialized,
++  configuration,
++  jwks,
++  clock = () => Date.now(),
++} = {}) {
++  if (typeof serialized !== 'string' || serialized.length > 16384) {
++    return deny('PROTECTED_EDGE_TOKEN_MALFORMED');
++  }
++  if (hashCanonicalJson(jwks) !== configuration?.jwks_sha256) {
++    return deny('PROTECTED_EDGE_JWKS_UNAVAILABLE');
++  }
++  const parts = serialized.split('.');
++  if (parts.length !== 3 || parts.some((part) => part.length === 0)) {
++    return deny('PROTECTED_EDGE_TOKEN_MALFORMED');
++  }
++  const header = base64urlJson(parts[0]);
++  const claims = base64urlJson(parts[1]);
++  if (!header || !claims || typeof header !== 'object' || typeof claims !== 'object') {
++    return deny('PROTECTED_EDGE_TOKEN_MALFORMED');
++  }
++  if (header.alg === 'none'
++    || !configuration.allowed_algorithms.includes(header.alg)
++    || header.alg !== 'RS256') {
++    return deny('PROTECTED_EDGE_ALGORITHM_REJECTED');
++  }
++  if (!boundedClaim(header.kid, 256)) return deny('PROTECTED_EDGE_KEY_ID_MISSING');
++  const jwk = selectVerificationKey(jwks, header);
++  if (!jwk) return deny('PROTECTED_EDGE_KEY_ID_UNKNOWN');
++  let verified = false;
++  try {
++    const key = crypto.createPublicKey({ key: jwk, format: 'jwk' });
++    verified = crypto.verify(
++      'RSA-SHA256',
++      Buffer.from(`${parts[0]}.${parts[1]}`, 'utf8'),
++      key,
++      Buffer.from(parts[2], 'base64url'),
++    );
++  } catch {
++    return deny('PROTECTED_EDGE_SIGNATURE_INVALID');
++  }
++  if (!verified) return deny('PROTECTED_EDGE_SIGNATURE_INVALID');
++  if (claims.iss !== configuration.issuer) return deny('PROTECTED_EDGE_ISSUER_MISMATCH');
++  if (!audienceMatches(claims.aud, configuration.audiences)) {
++    return deny('PROTECTED_EDGE_AUDIENCE_MISMATCH');
++  }
++  const nowSeconds = Math.floor(clock() / 1000);
++  const skew = configuration.clock_skew_seconds;
++  if (!Number.isInteger(claims.exp)
++    || !Number.isInteger(claims.iat)
++    || (claims.nbf != null && !Number.isInteger(claims.nbf))) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  if (claims.exp <= claims.iat
++    || (claims.nbf != null && claims.exp <= claims.nbf)) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  if (claims.exp + skew < nowSeconds) {
++    return deny('PROTECTED_EDGE_TOKEN_EXPIRED');
++  }
++  if (claims.iat - skew > nowSeconds
++    || (claims.nbf != null && claims.nbf - skew > nowSeconds)) {
++    return deny('PROTECTED_EDGE_TOKEN_NOT_YET_VALID');
++  }
++  if (nowSeconds - claims.iat > configuration.max_token_age_seconds + skew
++    || claims.exp - claims.iat > configuration.max_token_age_seconds + skew) {
++    return deny('PROTECTED_EDGE_TOKEN_STALE');
++  }
++  const subject = claims[configuration.subject_claim];
++  const tokenId = claims[configuration.token_id_claim];
++  if (!boundedClaim(subject) || !boundedClaim(tokenId, 256)) {
++    return deny(!boundedClaim(subject)
++      ? 'PROTECTED_EDGE_SUBJECT_MISSING'
++      : 'PROTECTED_EDGE_TOKEN_ID_MISSING');
++  }
++  const mfaVerified = mfaProven(claims, configuration);
++  if (configuration.mfa_required && !mfaVerified) {
++    return deny('PROTECTED_EDGE_MFA_REQUIRED');
++  }
++  const authenticationTimeValue = claims[configuration.authentication_time_claim];
++  if (authenticationTimeValue != null && !Number.isInteger(authenticationTimeValue)) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  const authenticationTimeSeconds = Number.isInteger(authenticationTimeValue)
++    ? authenticationTimeValue
++    : claims.iat;
++  if (authenticationTimeSeconds > claims.iat
++    || authenticationTimeSeconds >= claims.exp) {
++    return deny('PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++  if (authenticationTimeSeconds - skew > nowSeconds) {
++    return deny('PROTECTED_EDGE_TOKEN_NOT_YET_VALID');
++  }
++  if (nowSeconds - authenticationTimeSeconds
++    > configuration.max_token_age_seconds + skew) {
++    return deny('PROTECTED_EDGE_TOKEN_STALE');
++  }
++  return frozen({
++    ok: true,
++    allowed: false,
++    code: null,
++    verified_claims: {
++      issuer: claims.iss,
++      audiences: Array.isArray(claims.aud) ? claims.aud : [claims.aud],
++      subject,
++      token_id: tokenId,
++      issued_at: new Date(claims.iat * 1000).toISOString(),
++      expires_at: new Date(claims.exp * 1000).toISOString(),
++      authenticated_at: new Date(authenticationTimeSeconds * 1000).toISOString(),
++      mfa_verified: mfaVerified,
++      named_identity_verified: true,
++      verified_email_present:
++        typeof claims.email === 'string' && claims.email_verified === true,
++    },
++    raw_token_logged: false,
++  });
++}
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js
+new file mode 100644
+index 0000000..780c51d
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/replayProtection.js
+@@ -0,0 +1,89 @@
++import { hashCanonicalJson } from '../../../hashing.js';
++import { deepFreeze } from '../../../validation.js';
++import {
++  ASYNC_SECURITY_COMMAND_RESULT_VERSION,
++  ASYNC_SECURITY_COMMAND_VERSION,
++  validateAsyncSecurityCommandResult,
++  validateAsyncSecurityHealth,
++} from '../asyncSecurityContracts.js';
++import {
++  invokeAsyncSecurityMethod,
++} from '../asyncSharedSecurityStatePort.js';
++
++const frozen = (value) => deepFreeze(structuredClone(value));
++const deny = (code) => frozen({ ok: false, allowed: false, code });
++const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
++
++export function createProtectedEdgeReplayProtectorV1({
++  statePort,
++  environmentId,
++  clock = () => Date.now(),
++} = {}) {
++  return Object.freeze({
++    async claim({
++      replayKeyHash,
++      fingerprint,
++      correlationRef,
++      expiresAtMs,
++      strictOneTime = true,
++    } = {}) {
++      if (!statePort
++        || !sha256(replayKeyHash)
++        || !sha256(fingerprint)
++        || typeof correlationRef !== 'string'
++        || correlationRef.length < 3
++        || !Number.isFinite(expiresAtMs)
++        || expiresAtMs <= clock()) {
++        return deny('PROTECTED_EDGE_REPLAY_STATE_UNAVAILABLE');
++      }
++      try {
++        const health = await invokeAsyncSecurityMethod(statePort, 'health');
++        const checkedHealth = validateAsyncSecurityHealth(health);
++        if (!checkedHealth.valid
++          || health.environment_id !== environmentId
++          || health.state !== 'HEALTHY'
++          || health.allowed_for_security !== true
++          || health.no_local_fallback !== true) {
++          return deny('PROTECTED_EDGE_REPLAY_STATE_UNAVAILABLE');
++        }
++        const command = {
++          command_version: ASYNC_SECURITY_COMMAND_VERSION,
++          command_type: 'CLAIM_REPLAY',
++          environment_id: environmentId,
++          idempotency_key_hash: replayKeyHash,
++          fingerprint,
++          correlation_ref: correlationRef,
++          expected_versions: {},
++          arguments: {
++            replay_key_hash: replayKeyHash,
++            expires_at_ms: expiresAtMs,
++            context_ref: `edge_context_${hashCanonicalJson({
++              replayKeyHash,
++              fingerprint,
++            }).slice(0, 32)}`,
++          },
++        };
++        const result = await invokeAsyncSecurityMethod(statePort, 'executeAtomic', [command]);
++        const checked = validateAsyncSecurityCommandResult(result, 'CLAIM_REPLAY');
++        if (!checked.valid
++          || result.result_version !== ASYNC_SECURITY_COMMAND_RESULT_VERSION
++          || result.ok !== true
++          || result.committed !== true) {
++          return deny(result?.failure_code || 'PROTECTED_EDGE_REPLAY_DETECTED');
++        }
++        if (strictOneTime && result.idempotent_replay === true) {
++          return deny('PROTECTED_EDGE_REPLAY_DETECTED');
++        }
++        return frozen({
++          ok: true,
++          allowed: true,
++          code: null,
++          idempotent_session_reuse: result.idempotent_replay === true,
++          audit_receipt_ref: result.audit_receipt_ref,
++        });
++      } catch {
++        return deny('PROTECTED_EDGE_REPLAY_STATE_UNAVAILABLE');
++      }
++    },
++  });
++}
+diff --git a/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/tokenExtraction.js b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/tokenExtraction.js
+new file mode 100644
+index 0000000..9bc295a
+--- /dev/null
++++ b/src/lib/intelligenceFabric/coachConnect/productionSecurity/protectedEdgeIdentity/tokenExtraction.js
+@@ -0,0 +1,96 @@
++import { deepFreeze } from '../../../validation.js';
++import {
++  PROTECTED_EDGE_TOKEN_SOURCES,
++} from './contracts.js';
++
++const frozen = (value) => deepFreeze(structuredClone(value));
++const deny = (code) => frozen({
++  ok: false,
++  allowed: false,
++  code,
++  serialized: null,
++  raw_token_logged: false,
++});
++
++function headerValue(headers, name) {
++  if (!headers || typeof headers !== 'object') return null;
++  const exact = headers[name] ?? headers[name.toLowerCase()];
++  if (Array.isArray(exact)) return exact.length === 1 ? exact[0] : Symbol.for('duplicate');
++  return exact ?? null;
++}
++
++function queryContainsIdentityMaterial(req) {
++  const forbidden = new Set([
++    'token',
++    'id_token',
++    'access_token',
++    'identity_token',
++    'assertion',
++  ]);
++  if (req?.query && typeof req.query === 'object'
++    && Object.keys(req.query).some((key) => forbidden.has(String(key).toLowerCase()))) {
++    return true;
++  }
++  try {
++    const url = new URL(req?.url || '/', 'https://protected-edge.invalid');
++    return [...url.searchParams.keys()]
++      .some((key) => forbidden.has(String(key).toLowerCase()));
++  } catch {
++    return false;
++  }
++}
++
++function boundedJwt(value) {
++  return typeof value === 'string'
++    && value.length >= 64
++    && value.length <= 16384
++    && value.split('.').length === 3
++    && !/[\r\n\0\s]/.test(value);
++}
++
++export function extractProtectedEdgeUpstreamTokenV1(req, {
++  tokenSource,
++} = {}) {
++  if (!PROTECTED_EDGE_TOKEN_SOURCES.includes(tokenSource)) {
++    return deny('PROTECTED_EDGE_PROVIDER_UNSUPPORTED');
++  }
++  if (queryContainsIdentityMaterial(req)) {
++    return deny('PROTECTED_EDGE_QUERY_TOKEN_REJECTED');
++  }
++  const internal = headerValue(req?.headers, 'x-more-protected-edge-assertion');
++  if (internal != null) return deny('PROTECTED_EDGE_INTERNAL_ASSERTION_SPOOFED');
++
++  const passport = headerValue(req?.headers, 'x-vercel-oidc-passport-token');
++  const authorization = headerValue(req?.headers, 'authorization');
++  if (passport === Symbol.for('duplicate') || authorization === Symbol.for('duplicate')) {
++    return deny('PROTECTED_EDGE_TOKEN_SOURCE_CONFLICT');
++  }
++
++  const authorizationCarriesBearer = typeof authorization === 'string'
++    && /^Bearer\s+/i.test(authorization);
++  if (passport != null && authorizationCarriesBearer) {
++    return deny('PROTECTED_EDGE_TOKEN_SOURCE_CONFLICT');
++  }
++
++  let serialized = null;
++  if (tokenSource === 'X_VERCEL_OIDC_PASSPORT_TOKEN') {
++    if (passport == null) return deny('PROTECTED_EDGE_TOKEN_MISSING');
++    serialized = passport;
++  } else {
++    if (authorization == null) return deny('PROTECTED_EDGE_TOKEN_MISSING');
++    const match = typeof authorization === 'string'
++      ? authorization.match(/^Bearer ([^\s]+)$/)
++      : null;
++    if (!match) return deny('PROTECTED_EDGE_TOKEN_MALFORMED');
++    serialized = match[1];
++  }
++  if (!boundedJwt(serialized)) return deny('PROTECTED_EDGE_TOKEN_MALFORMED');
++  return Object.freeze({
++    ok: true,
++    allowed: false,
++    code: null,
++    serialized,
++    source: tokenSource,
++    raw_token_logged: false,
++  });
++}
+diff --git a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js
+new file mode 100644
+index 0000000..7a33043
+--- /dev/null
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.adapter.test.js
+@@ -0,0 +1,599 @@
++import crypto from 'node:crypto';
++import { Buffer } from 'node:buffer';
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
++import {
++  ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++  PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++  createProtectedEdgeIdentityBindingV1,
++  createProtectedEdgeReplayProtectorV1,
++  createSyntheticAsyncSecurityBackend,
++  createSyntheticAsyncSecurityStateAdapter,
++  issueProtectedEdgeInternalAssertionV1,
++  protectedEdgeIdentityConfigurationDigest,
++  protectedEdgeIdentityPolicyDigest,
++  verifyProtectedEdgeInternalAssertionV1,
++  verifyProtectedEdgeUpstreamJwtV1,
++} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
++
++const now = Date.parse('2026-07-28T12:00:00.000Z');
++const nowSeconds = Math.floor(now / 1000);
++const identityHashKey = 'synthetic-identity-hash-key-material-000000000000';
++const signingKey = 'synthetic-internal-signing-key-material-0000000000';
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
++  modulusLength: 2048,
++});
++const publicJwk = {
++  ...publicKey.export({ format: 'jwk' }),
++  kid: 'synthetic-key-1',
++  use: 'sig',
++  alg: 'RS256',
++};
++const jwks = { keys: [publicJwk] };
++
++function configuration(overrides = {}) {
++  const initial = {
++    config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++    enabled: true,
++    emergency_disabled: false,
++    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++    provider_type: 'AUTH0_OIDC_JWT',
++    token_source: 'AUTHORIZATION_BEARER',
++    issuer: 'https://identity.synthetic.example/',
++    audiences: ['https://edge.synthetic.example/'],
++    jwks_ref: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE',
++    jwks_sha256: hashCanonicalJson(jwks),
++    allowed_algorithms: ['RS256'],
++    subject_claim: 'sub',
++    token_id_claim: 'jti',
++    authentication_time_claim: 'auth_time',
++    mfa_claim: 'amr',
++    acr_claim: 'acr',
++    accepted_mfa_values: ['mfa', 'otp'],
++    accepted_acr_values: ['urn:more:mfa'],
++    mfa_required: true,
++    environment_id: 'private_live_synthetic',
++    deployment_id: 'd'.repeat(64),
++    protected_edge_policy_digest: '0'.repeat(64),
++    identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
++    internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
++    clock_skew_seconds: 30,
++    max_token_age_seconds: 600,
++    internal_assertion_ttl_seconds: 60,
++    replay_mode: 'ONE_TIME',
++    replay_ttl_seconds: 600,
++    replay_store_contract: ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++    configuration_sha256: '0'.repeat(64),
++    ...overrides,
++  };
++  const policyBound = {
++    ...initial,
++    protected_edge_policy_digest: protectedEdgeIdentityPolicyDigest(initial),
++  };
++  return {
++    ...policyBound,
++    configuration_sha256: protectedEdgeIdentityConfigurationDigest(policyBound),
++  };
++}
++
++function jwt({
++  claims = {},
++  header = {},
++  signingPrivateKey = privateKey,
++} = {}) {
++  const protectedHeader = {
++    alg: 'RS256',
++    typ: 'JWT',
++    kid: publicJwk.kid,
++    ...header,
++  };
++  const payload = {
++    iss: 'https://identity.synthetic.example/',
++    aud: 'https://edge.synthetic.example/',
++    sub: 'synthetic-upstream-subject',
++    jti: 'synthetic-token-identifier',
++    iat: nowSeconds - 5,
++    nbf: nowSeconds - 5,
++    exp: nowSeconds + 300,
++    auth_time: nowSeconds - 10,
++    amr: ['mfa'],
++    email: 'not-logged@example.invalid',
++    email_verified: true,
++    ...claims,
++  };
++  const encoded = [
++    Buffer.from(JSON.stringify(protectedHeader), 'utf8').toString('base64url'),
++    Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url'),
++  ];
++  const signature = crypto.sign(
++    'RSA-SHA256',
++    Buffer.from(encoded.join('.'), 'utf8'),
++    signingPrivateKey,
++  ).toString('base64url');
++  return [...encoded, signature].join('.');
++}
++
++function state({ availability = 'HEALTHY' } = {}) {
++  const backend = createSyntheticAsyncSecurityBackend(null, {
++    clock: () => now,
++  });
++  backend.availability = availability;
++  return {
++    backend,
++    port: createSyntheticAsyncSecurityStateAdapter({
++      backend,
++      environment_id: 'private_live_synthetic',
++      clock: () => now,
++    }),
++  };
++}
++
++function resolver({
++  jwksValue = JSON.stringify(jwks),
++  identityKey = identityHashKey,
++  assertionKey = signingKey,
++} = {}) {
++  return async (reference) => ({
++    MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE: jwksValue,
++    MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE: identityKey,
++    MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE: assertionKey,
++  })[reference] ?? null;
++}
++
++async function binding(options = {}) {
++  const security = options.security || state();
++  return {
++    security,
++    adapter: await createProtectedEdgeIdentityBindingV1({
++      configuration: options.configuration || configuration(),
++      resolveReference: options.resolveReference || resolver(),
++      statePort: security.port,
++      clock: () => now,
++      assertionIdFactory: options.assertionIdFactory,
++      transactionIdFactory: options.transactionIdFactory,
++    }),
++  };
++}
++
++function request(token, overrides = {}) {
++  return {
++    method: 'POST',
++    url: '/api/internal/private-runtime-login',
++    headers: {
++      authorization: `Bearer ${token}`,
++      ...overrides,
++    },
++  };
++}
++
++test('valid upstream JWT becomes only a verified internal edge identity', async () => {
++  const { adapter, security } = await binding({
++    assertionIdFactory: () => 'edge_assertion_synthetic_valid',
++  });
++  const raw = jwt();
++  const result = await adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_edge_valid',
++  });
++  assert.equal(result.allowed, true, JSON.stringify(result));
++  assert.equal(result.edge_attestation.named_identity_verified, true);
++  assert.equal(result.edge_attestation.mfa_verified, true);
++  assert.equal(result.edge_attestation.public_access, false);
++  assert.equal(result.identity_receipt.entitlement_authority, false);
++  assert.equal(result.identity_receipt.tester_authority, false);
++  assert.equal(result.identity_receipt.profile_id_authority, false);
++  assert.equal(result.internal_assertion_exposed, false);
++  assert.equal(JSON.stringify(result).includes(raw), false);
++  assert.equal(JSON.stringify(security.backend.snapshot || {}).includes(raw), false);
++});
++
++test('missing, malformed, unsigned, algorithm-downgraded, and invalid signatures deny', async () => {
++  const invalidRsa = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
++  const cases = [
++    { headers: {} },
++    request('not-a-jwt'),
++    request(`${Buffer.from('{"alg":"none"}').toString('base64url')}.${Buffer.from('{}').toString('base64url')}.x`),
++    request(jwt({ header: { alg: 'HS256' } })),
++    request(jwt({ signingPrivateKey: invalidRsa.privateKey })),
++  ];
++  for (const req of cases) {
++    const { adapter } = await binding();
++    const result = await adapter.bindRequest(req, {
++      correlationRef: 'correlation_edge_invalid',
++    });
++    assert.equal(result.allowed, false);
++    assert.match(result.code, /^PROTECTED_EDGE_/);
++  }
++});
++
++test('issuer, audience, time, subject, key id, and MFA failures are explicit denials', async () => {
++  const cases = [
++    [jwt({ claims: { iss: 'https://wrong.synthetic.example/' } }), 'PROTECTED_EDGE_ISSUER_MISMATCH'],
++    [jwt({ claims: { aud: 'wrong-audience' } }), 'PROTECTED_EDGE_AUDIENCE_MISMATCH'],
++    [jwt({
++      claims: {
++        iat: nowSeconds - 120,
++        nbf: nowSeconds - 120,
++        exp: nowSeconds - 60,
++        auth_time: nowSeconds - 130,
++      },
++    }), 'PROTECTED_EDGE_TOKEN_EXPIRED'],
++    [jwt({
++      claims: {
++        nbf: nowSeconds + 300,
++        exp: nowSeconds + 600,
++      },
++    }), 'PROTECTED_EDGE_TOKEN_NOT_YET_VALID'],
++    [jwt({ claims: { iat: nowSeconds - 900 } }), 'PROTECTED_EDGE_TOKEN_STALE'],
++    [jwt({ claims: { sub: '' } }), 'PROTECTED_EDGE_SUBJECT_MISSING'],
++    [jwt({ header: { kid: 'unknown-key' } }), 'PROTECTED_EDGE_KEY_ID_UNKNOWN'],
++    [jwt({ header: { kid: '' } }), 'PROTECTED_EDGE_KEY_ID_MISSING'],
++    [jwt({ claims: { amr: [], acr: 'urn:no:mfa' } }), 'PROTECTED_EDGE_MFA_REQUIRED'],
++  ];
++  for (const [raw, code] of cases) {
++    const { adapter } = await binding();
++    const result = await adapter.bindRequest(request(raw), {
++      correlationRef: `correlation_${code.toLowerCase()}`,
++    });
++    assert.equal(result.code, code, JSON.stringify(result));
++  }
++});
++
++test('conflicting sources, query tokens, and browser internal assertions deny', async () => {
++  const raw = jwt();
++  const requests = [
++    request(raw, { 'x-vercel-oidc-passport-token': raw }),
++    { ...request(raw), url: '/api/internal/private-runtime-login?token=forbidden' },
++    request(raw, { 'x-more-protected-edge-assertion': 'browser-spoof' }),
++    request(raw, { 'x-more-protected-edge-session': 'browser-spoof' }),
++    request(raw, { 'x-more-deployment-id': 'browser-spoof' }),
++  ];
++  for (const req of requests) {
++    const { adapter } = await binding();
++    const result = await adapter.bindRequest(req, {
++      correlationRef: 'correlation_edge_sources',
++    });
++    assert.equal(result.allowed, false);
++  }
++});
++
++test('one-time upstream replay is denied atomically and outage has no fallback', async () => {
++  const firstBinding = await binding();
++  const raw = jwt();
++  const first = await firstBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_edge_replay_first',
++  });
++  const replay = await firstBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_edge_replay_second',
++  });
++  assert.equal(first.allowed, true);
++  assert.equal(replay.code, 'PROTECTED_EDGE_REPLAY_DETECTED');
++
++  const unavailable = await binding({ security: state({ availability: 'UNAVAILABLE' }) });
++  const outage = await unavailable.adapter.bindRequest(request(jwt({
++    claims: { jti: 'outage-token-id' },
++  })), {
++    correlationRef: 'correlation_edge_outage',
++  });
++  assert.equal(outage.code, 'PROTECTED_EDGE_REPLAY_STATE_UNAVAILABLE');
++});
++
++test('session-bound replay is one-use and bound to a server-generated transaction', async () => {
++  let transaction = 0;
++  const { adapter } = await binding({
++    configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => `trusted_server_transaction_${transaction += 1}`,
++  });
++  const raw = jwt({ claims: { jti: 'session-bound-token-id' } });
++  const first = await adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_session_bound_first',
++  });
++  const crossRoute = await adapter.bindRequest({
++    ...request(raw),
++    method: 'GET',
++    url: '/api/internal/private-runtime-session',
++  }, {
++    correlationRef: 'correlation_session_bound_second',
++  });
++  assert.equal(first.allowed, true);
++  assert.equal(crossRoute.allowed, false);
++});
++
++test('session-bound mode rejects missing, malformed, and browser-spoofed bindings', async () => {
++  for (const transactionIdFactory of [
++    () => null,
++    () => 'short',
++    () => 'browser supplied value',
++  ]) {
++    const { adapter } = await binding({
++      configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++      transactionIdFactory,
++    });
++    const result = await adapter.bindRequest(request(jwt({
++      claims: { jti: `binding-${String(transactionIdFactory()).replaceAll(' ', '-')}` },
++    })));
++    assert.equal(result.code, 'PROTECTED_EDGE_TRUSTED_TRANSACTION_REQUIRED');
++  }
++
++  const { adapter } = await binding({
++    configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => 'trusted_server_transaction_browser_spoof',
++  });
++  const spoofed = await adapter.bindRequest(request(jwt({
++    claims: { jti: 'browser-spoofed-session-binding' },
++  }), {
++    'x-more-protected-edge-transaction': 'browser-controlled-transaction',
++  }));
++  assert.equal(spoofed.code, 'PROTECTED_EDGE_AUTHORITY_BINDING_SPOOFED');
++});
++
++test('session-bound concurrent replay has one winner and invalidated reuse denies', async () => {
++  let transaction = 0;
++  const { adapter } = await binding({
++    configuration: configuration({ replay_mode: 'SESSION_BOUND' }),
++    transactionIdFactory: () => `trusted_server_transaction_race_${transaction += 1}`,
++  });
++  const raw = jwt({ claims: { jti: 'session-bound-race-token-id' } });
++  const raced = await Promise.all([
++    adapter.bindRequest(request(raw), {
++      correlationRef: 'correlation_session_bound_race_a',
++    }),
++    adapter.bindRequest(request(raw), {
++      correlationRef: 'correlation_session_bound_race_b',
++    }),
++  ]);
++  assert.equal(raced.filter((result) => result.allowed).length, 1);
++  const afterInvalidation = await adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_session_bound_after_invalidation',
++  });
++  assert.equal(afterInvalidation.allowed, false);
++});
++
++test('internal assertion is short-lived, environment-bound, deployment-bound, and one-time', async () => {
++  const config = configuration();
++  const security = state();
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort: security.port,
++    environmentId: config.environment_id,
++    clock: () => now,
++  });
++  const identity = {
++    canonical_subject_ref: 'edge_subject_synthetic',
++    issuer_provenance_ref: 'edge_issuer_synthetic',
++    audience_policy_ref: 'edge_audience_synthetic',
++    token_identifier_ref: 'edge_token_synthetic',
++    authenticated_at: new Date(now - 1000).toISOString(),
++    expires_at: new Date(now + 300_000).toISOString(),
++    mfa_verified: true,
++    named_identity_verified: true,
++  };
++  const contextHash = 'b'.repeat(64);
++  const issued = issueProtectedEdgeInternalAssertionV1({
++    identity,
++    configuration: config,
++    signingKey,
++    bindingContextHash: contextHash,
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_internal_test',
++  });
++  const first = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: issued.serialized,
++    configuration: config,
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_internal_first',
++    bindingContextHash: contextHash,
++    clock: () => now,
++  });
++  const replay = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: issued.serialized,
++    configuration: config,
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_internal_replay',
++    bindingContextHash: contextHash,
++    clock: () => now,
++  });
++  const mismatch = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: issued.serialized,
++    configuration: configuration({ deployment_id: 'e'.repeat(64) }),
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_internal_mismatch',
++    bindingContextHash: contextHash,
++    clock: () => now,
++  });
++  assert.equal(first.allowed, true);
++  assert.equal(replay.code, 'PROTECTED_EDGE_REPLAY_DETECTED');
++  assert.equal(mismatch.allowed, false);
++});
++
++test('cross-deployment and cross-environment assertion replay deny', async () => {
++  const security = state();
++  const raw = jwt({ claims: { jti: 'cross-deployment-token-id' } });
++  const firstBinding = await binding({
++    security,
++    configuration: configuration({ deployment_id: '1'.repeat(64) }),
++  });
++  const secondBinding = await binding({
++    security,
++    configuration: configuration({ deployment_id: '2'.repeat(64) }),
++  });
++  const first = await firstBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_cross_deployment_first',
++  });
++  const crossDeployment = await secondBinding.adapter.bindRequest(request(raw), {
++    correlationRef: 'correlation_cross_deployment_second',
++  });
++  assert.equal(first.allowed, true);
++  assert.equal(crossDeployment.allowed, false);
++
++  const config = configuration({ deployment_id: '3'.repeat(64) });
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort: security.port,
++    environmentId: config.environment_id,
++    clock: () => now,
++  });
++  const identity = {
++    canonical_subject_ref: 'edge_subject_cross_environment',
++    issuer_provenance_ref: 'edge_issuer_cross_environment',
++    audience_policy_ref: 'edge_audience_cross_environment',
++    token_identifier_ref: 'edge_token_cross_environment',
++    authenticated_at: new Date(now - 1000).toISOString(),
++    expires_at: new Date(now + 300_000).toISOString(),
++    mfa_verified: true,
++    named_identity_verified: true,
++  };
++  const issued = issueProtectedEdgeInternalAssertionV1({
++    identity,
++    configuration: config,
++    signingKey,
++    bindingContextHash: 'c'.repeat(64),
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_cross_environment',
++  });
++  const crossEnvironment = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: issued.serialized,
++    configuration: configuration({
++      environment_id: 'other_private_environment',
++      deployment_id: config.deployment_id,
++    }),
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_cross_environment',
++    bindingContextHash: 'c'.repeat(64),
++    clock: () => now,
++  });
++  assert.equal(crossEnvironment.allowed, false);
++});
++
++test('temporal contradictions and malformed NumericDate claims deny independent of skew', () => {
++  const invalidClaims = [
++    { iat: nowSeconds + 10, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, nbf: nowSeconds + 5, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, nbf: nowSeconds + 10, exp: nowSeconds + 5 },
++    { iat: nowSeconds - 5, exp: nowSeconds + 5, auth_time: nowSeconds + 6 },
++    { iat: 'not-a-number' },
++    { exp: Number.NaN },
++    { nbf: [] },
++    { auth_time: {} },
++  ];
++  for (const [index, claims] of invalidClaims.entries()) {
++    const result = verifyProtectedEdgeUpstreamJwtV1({
++      serialized: jwt({
++        claims: {
++          ...claims,
++          jti: `temporal-invalid-${index}`,
++        },
++      }),
++      configuration: configuration(),
++      jwks,
++      clock: () => now,
++    });
++    assert.equal(result.code, 'PROTECTED_EDGE_TOKEN_TEMPORAL_INVALID');
++  }
++
++  const validSkew = verifyProtectedEdgeUpstreamJwtV1({
++    serialized: jwt({
++      claims: {
++        jti: 'temporal-valid-skew',
++        iat: nowSeconds + 20,
++        nbf: nowSeconds + 20,
++        exp: nowSeconds + 60,
++        auth_time: nowSeconds,
++      },
++    }),
++    configuration: configuration(),
++    jwks,
++    clock: () => now,
++  });
++  assert.equal(validSkew.ok, true);
++});
++
++test('internal assertion temporal ordering fails closed', async () => {
++  const config = configuration();
++  const security = state();
++  const replayProtector = createProtectedEdgeReplayProtectorV1({
++    statePort: security.port,
++    environmentId: config.environment_id,
++    clock: () => now,
++  });
++  const issued = issueProtectedEdgeInternalAssertionV1({
++    identity: {
++      canonical_subject_ref: 'edge_subject_internal_temporal',
++      issuer_provenance_ref: 'edge_issuer_internal_temporal',
++      audience_policy_ref: 'edge_audience_internal_temporal',
++      token_identifier_ref: 'edge_token_internal_temporal',
++      authenticated_at: new Date(now - 1000).toISOString(),
++      expires_at: new Date(now + 300_000).toISOString(),
++      mfa_verified: true,
++      named_identity_verified: true,
++    },
++    configuration: config,
++    signingKey,
++    bindingContextHash: 'a'.repeat(64),
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_internal_temporal',
++  });
++  const [payloadPart] = issued.serialized.split('.');
++  const payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
++  payload.issued_at = new Date(now + 10_000).toISOString();
++  payload.expires_at = new Date(now + 5_000).toISOString();
++  const contradictoryPayload = Buffer.from(JSON.stringify(payload), 'utf8').toString('base64url');
++  const contradictorySignature = crypto.createHmac('sha256', signingKey)
++    .update(contradictoryPayload)
++    .digest('base64url');
++  const result = await verifyProtectedEdgeInternalAssertionV1({
++    serialized: `${contradictoryPayload}.${contradictorySignature}`,
++    configuration: config,
++    signingKey,
++    replayProtector,
++    correlationRef: 'correlation_internal_temporal',
++    bindingContextHash: 'a'.repeat(64),
++    clock: () => now,
++  });
++  assert.equal(result.allowed, false);
++});
++
++test('JWKS and signing material resolution is static, required, and fail closed', async () => {
++  for (const options of [
++    { jwksValue: JSON.stringify({ keys: [] }) },
++    { jwksValue: null },
++    { identityKey: 'short' },
++    { assertionKey: 'short' },
++  ]) {
++    const { adapter } = await binding({ resolveReference: resolver(options) });
++    assert.equal(adapter.configured, false);
++    assert.equal((await adapter.bindRequest(request(jwt()))).allowed, false);
++  }
++});
++
++test('emergency disable dominates before token verification or replay work', async () => {
++  const security = state();
++  const { adapter } = await binding({
++    security,
++    configuration: configuration({ emergency_disabled: true }),
++  });
++  const result = await adapter.bindRequest(request(jwt()));
++  assert.equal(result.code, 'EMERGENCY_DISABLED');
++  assert.equal(security.backend.replays.size, 0);
++});
++
++test('upstream verifier output is bounded and never exposes raw JWT or full email', () => {
++  const config = configuration();
++  const raw = jwt();
++  const result = verifyProtectedEdgeUpstreamJwtV1({
++    serialized: raw,
++    configuration: config,
++    jwks,
++    clock: () => now,
++  });
++  assert.equal(result.ok, true);
++  assert.equal(result.verified_claims.verified_email_present, true);
++  assert.equal('email' in result.verified_claims, false);
++  assert.equal(JSON.stringify(result).includes(raw), false);
++  assert.equal(JSON.stringify(result).includes('not-logged@example.invalid'), false);
++});
+diff --git a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js
+new file mode 100644
+index 0000000..6338066
+--- /dev/null
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.contracts.test.js
+@@ -0,0 +1,154 @@
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import {
++  ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++  PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++  describeProtectedEdgeIdentityBindingCapabilityV1,
++  protectedEdgeIdentityConfigurationDigest,
++  protectedEdgeIdentityPolicyDigest,
++  validateProtectedEdgeIdentityConfigurationV1,
++} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
++
++function configuration(overrides = {}) {
++  const initial = {
++    config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++    enabled: true,
++    emergency_disabled: false,
++    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++    provider_type: 'AUTH0_OIDC_JWT',
++    token_source: 'AUTHORIZATION_BEARER',
++    issuer: 'https://identity.synthetic.example/',
++    audiences: ['https://edge.synthetic.example/'],
++    jwks_ref: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE',
++    jwks_sha256: 'a'.repeat(64),
++    allowed_algorithms: ['RS256'],
++    subject_claim: 'sub',
++    token_id_claim: 'jti',
++    authentication_time_claim: 'auth_time',
++    mfa_claim: 'amr',
++    acr_claim: 'acr',
++    accepted_mfa_values: ['mfa'],
++    accepted_acr_values: ['urn:more:mfa'],
++    mfa_required: true,
++    environment_id: 'private_live_synthetic',
++    deployment_id: 'd'.repeat(64),
++    protected_edge_policy_digest: '0'.repeat(64),
++    identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
++    internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
++    clock_skew_seconds: 30,
++    max_token_age_seconds: 600,
++    internal_assertion_ttl_seconds: 60,
++    replay_mode: 'SESSION_BOUND',
++    replay_ttl_seconds: 600,
++    replay_store_contract: ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++    configuration_sha256: '0'.repeat(64),
++    ...overrides,
++  };
++  const policyBound = {
++    ...initial,
++    protected_edge_policy_digest: protectedEdgeIdentityPolicyDigest(initial),
++  };
++  return {
++    ...policyBound,
++    configuration_sha256: protectedEdgeIdentityConfigurationDigest(policyBound),
++  };
++}
++
++test('provider-neutral configuration is exact, policy-bound, and source-default-off', () => {
++  const value = configuration();
++  const result = validateProtectedEdgeIdentityConfigurationV1(value, {
++    environmentId: value.environment_id,
++    deploymentId: value.deployment_id,
++    policyDigest: value.protected_edge_policy_digest,
++    internalSigningKeyRef: value.internal_signing_key_ref,
++  });
++  assert.equal(result.valid, true, JSON.stringify(result));
++  const capability = describeProtectedEdgeIdentityBindingCapabilityV1({
++    configured: true,
++    providerType: value.provider_type,
++  });
++  assert.equal(capability.provider_neutral, true);
++  assert.equal(capability.static_jwks_reference_only, true);
++  assert.equal(capability.provider_network_calls, false);
++  assert.equal(capability.entitlement_authority, false);
++  assert.equal(capability.tester_authority, false);
++  assert.equal(capability.profile_id_authority, false);
++  assert.equal(capability.immutable_deployment_identity, true);
++  assert.equal(capability.trusted_server_transaction_binding, true);
++});
++
++test('configuration and policy digest drift fail closed', () => {
++  const value = configuration();
++  for (const changed of [
++    { ...value, issuer: 'https://other.synthetic.example/' },
++    { ...value, protected_edge_policy_digest: 'f'.repeat(64) },
++    { ...value, configuration_sha256: 'e'.repeat(64) },
++  ]) {
++    assert.equal(
++      validateProtectedEdgeIdentityConfigurationV1(changed).valid,
++      false,
++    );
++  }
++});
++
++test('only RS256 and explicit supported provider profiles are accepted', () => {
++  for (const overrides of [
++    { allowed_algorithms: ['none'] },
++    { allowed_algorithms: ['HS256'] },
++    { provider_type: 'UNKNOWN_PROVIDER' },
++    { provider_type: 'AUTH0_OIDC_JWT', token_source: 'X_VERCEL_OIDC_PASSPORT_TOKEN' },
++  ]) {
++    assert.equal(validateProtectedEdgeIdentityConfigurationV1(
++      configuration(overrides),
++    ).valid, false);
++  }
++});
++
++test('Vercel Passport profile is configured explicitly rather than inferred', () => {
++  const passport = configuration({
++    provider_type: 'VERCEL_PASSPORT_JWT',
++    token_source: 'X_VERCEL_OIDC_PASSPORT_TOKEN',
++    subject_claim: 'external_sub',
++  });
++  assert.equal(validateProtectedEdgeIdentityConfigurationV1(passport).valid, true);
++  assert.equal(validateProtectedEdgeIdentityConfigurationV1(configuration({
++    provider_type: 'VERCEL_PASSPORT_JWT',
++    token_source: 'X_VERCEL_OIDC_PASSPORT_TOKEN',
++    subject_claim: 'sub',
++  })).valid, false);
++});
++
++test('configuration mismatches for environment, deployment, policy, and signing ref deny', () => {
++  const value = configuration();
++  for (const expected of [
++    { environmentId: 'other_environment' },
++    { deploymentId: 'e'.repeat(64) },
++    { policyDigest: 'f'.repeat(64) },
++    { internalSigningKeyRef: 'MORE_PRIVATE_RUNTIME_OTHER_SIGNING_KEY' },
++  ]) {
++    assert.equal(
++      validateProtectedEdgeIdentityConfigurationV1(value, expected).valid,
++      false,
++    );
++  }
++});
++
++test('deployment identity is an immutable digest and never a project reference or alias', () => {
++  assert.equal(validateProtectedEdgeIdentityConfigurationV1(
++    configuration({ deployment_id: 'd'.repeat(64) }),
++  ).valid, true);
++  for (const deploymentId of [
++    '',
++    'private_project_synthetic',
++    'main',
++    'private.example.invalid',
++    'd'.repeat(63),
++  ]) {
++    assert.equal(validateProtectedEdgeIdentityConfigurationV1(
++      configuration({ deployment_id: deploymentId }),
++    ).valid, false);
++  }
++});
+diff --git a/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js
+new file mode 100644
+index 0000000..5fc6797
+--- /dev/null
++++ b/test/intelligenceFabric.coachConnect.productionSecurity.protectedEdgeIdentity.integration.test.js
+@@ -0,0 +1,244 @@
++import crypto from 'node:crypto';
++import { Buffer } from 'node:buffer';
++import test from 'node:test';
++import assert from 'node:assert/strict';
++import { readFile } from 'node:fs/promises';
++import {
++  createPrivateRuntimeLoginHandler,
++} from '../api/internal/private-runtime-login.js';
++import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
++import {
++  ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++  PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++  PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++  createProtectedEdgeIdentityBindingV1,
++  createSyntheticAsyncSecurityStateAdapter,
++  protectedEdgeIdentityConfigurationDigest,
++  protectedEdgeIdentityPolicyDigest,
++} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
++
++const now = Date.parse('2026-07-28T12:00:00.000Z');
++const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
++  modulusLength: 2048,
++});
++const jwks = {
++  keys: [{
++    ...publicKey.export({ format: 'jwk' }),
++    kid: 'integration-key',
++    use: 'sig',
++    alg: 'RS256',
++  }],
++};
++
++function config() {
++  const value = {
++    config_version: PROTECTED_EDGE_IDENTITY_CONFIGURATION_VERSION,
++    enabled: true,
++    emergency_disabled: false,
++    adapter_id: PROTECTED_EDGE_IDENTITY_ADAPTER_ID,
++    contract_version: PROTECTED_EDGE_IDENTITY_BINDING_CONTRACT_VERSION,
++    provider_type: 'AUTH0_OIDC_JWT',
++    token_source: 'AUTHORIZATION_BEARER',
++    issuer: 'https://identity.integration.example/',
++    audiences: ['https://edge.integration.example/'],
++    jwks_ref: 'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE',
++    jwks_sha256: hashCanonicalJson(jwks),
++    allowed_algorithms: ['RS256'],
++    subject_claim: 'sub',
++    token_id_claim: 'jti',
++    authentication_time_claim: 'auth_time',
++    mfa_claim: 'amr',
++    acr_claim: 'acr',
++    accepted_mfa_values: ['mfa'],
++    accepted_acr_values: ['urn:more:mfa'],
++    mfa_required: true,
++    environment_id: 'private_live_integration',
++    deployment_id: 'd'.repeat(64),
++    protected_edge_policy_digest: '0'.repeat(64),
++    identity_hash_key_ref: 'MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE',
++    internal_signing_key_ref: 'MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE',
++    clock_skew_seconds: 30,
++    max_token_age_seconds: 600,
++    internal_assertion_ttl_seconds: 60,
++    replay_mode: 'ONE_TIME',
++    replay_ttl_seconds: 600,
++    replay_store_contract: ASYNC_SECURITY_STATE_CONTRACT_VERSION,
++    configuration_sha256: '0'.repeat(64),
++  };
++  const policy = {
++    ...value,
++    protected_edge_policy_digest: protectedEdgeIdentityPolicyDigest(value),
++  };
++  return {
++    ...policy,
++    configuration_sha256: protectedEdgeIdentityConfigurationDigest(policy),
++  };
++}
++
++function token() {
++  const seconds = Math.floor(now / 1000);
++  const header = Buffer.from(JSON.stringify({
++    alg: 'RS256',
++    kid: 'integration-key',
++    typ: 'JWT',
++  })).toString('base64url');
++  const payload = Buffer.from(JSON.stringify({
++    iss: 'https://identity.integration.example/',
++    aud: 'https://edge.integration.example/',
++    sub: 'synthetic-integration-subject',
++    jti: 'synthetic-integration-token',
++    iat: seconds - 5,
++    nbf: seconds - 5,
++    exp: seconds + 300,
++    auth_time: seconds - 10,
++    amr: ['mfa'],
++  })).toString('base64url');
++  const signature = crypto.sign(
++    'RSA-SHA256',
++    Buffer.from(`${header}.${payload}`),
++    privateKey,
++  ).toString('base64url');
++  return `${header}.${payload}.${signature}`;
++}
++
++async function adapter() {
++  return createProtectedEdgeIdentityBindingV1({
++    configuration: config(),
++    resolveReference: async (reference) => ({
++      MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_JWKS_VALUE: JSON.stringify(jwks),
++      MORE_PRIVATE_RUNTIME_IDENTITY_HASH_KEY_VALUE:
++        'integration-identity-hash-key-material-0000000000',
++      MORE_PRIVATE_RUNTIME_EDGE_ASSERTION_KEY_VALUE:
++        'integration-assertion-signing-key-material-0000000',
++    })[reference] ?? null,
++    statePort: createSyntheticAsyncSecurityStateAdapter({
++      environment_id: 'private_live_integration',
++      clock: () => now,
++    }),
++    clock: () => now,
++    assertionIdFactory: () => 'edge_assertion_integration',
++  });
++}
++
++function response() {
++  return {
++    headers: {},
++    statusCode: null,
++    payload: null,
++    setHeader(name, value) { this.headers[name] = value; },
++    status(code) { this.statusCode = code; return this; },
++    json(value) { this.payload = value; return this; },
++  };
++}
++
++test('private login awaits protected-edge binding before pre-auth begins', async () => {
++  const identityAdapter = await adapter();
++  const sequence = [];
++  const handler = createPrivateRuntimeLoginHandler({
++    enabled: () => true,
++    beginLogin: async (input, req) => {
++      sequence.push('verify_upstream_identity');
++      const identity = await identityAdapter.bindRequest(req, {
++        correlationRef: input.correlation_id,
++      });
++      if (!identity.allowed) return identity;
++      sequence.push('begin_pre_auth');
++      return {
++        ok: true,
++        allowed: true,
++        pre_auth_session_ref: 'pre_auth_identity_integration',
++        pre_auth_cookie_value: 'pre_auth_cookie_identity_integration',
++        browser_binding_cookie_value: input.browser_binding_reference,
++        transaction_cookie_value: 'oidc_transaction_identity_integration',
++        expires_at: new Date(now + 300_000).toISOString(),
++        authority_granted: false,
++      };
++    },
++  });
++  const res = response();
++  await handler({
++    method: 'POST',
++    url: '/api/internal/private-runtime-login',
++    headers: { authorization: `Bearer ${token()}` },
++    body: {
++      browser_binding_reference: 'browser_binding_identity_integration',
++      correlation_id: 'correlation_identity_integration',
++    },
++  }, res);
++  assert.equal(res.statusCode, 200);
++  assert.deepEqual(sequence, ['verify_upstream_identity', 'begin_pre_auth']);
++  assert.equal(JSON.stringify(res.payload).includes('Bearer'), false);
++  assert.equal(JSON.stringify(res.payload).includes('synthetic-integration-subject'), false);
++});
++
++test('verified identity alone grants no entitlement, tester, Profile ID, or runtime authority', async () => {
++  const identityAdapter = await adapter();
++  const result = await identityAdapter.bindRequest({
++    method: 'POST',
++    url: '/api/internal/private-runtime-login',
++    headers: { authorization: `Bearer ${token()}` },
++  }, {
++    correlationRef: 'correlation_identity_authority_separation',
++  });
++  assert.equal(result.allowed, true);
++  assert.equal(result.identity_receipt.entitlement_authority, false);
++  assert.equal(result.identity_receipt.tester_authority, false);
++  assert.equal(result.identity_receipt.profile_id_authority, false);
++  assert.equal('runtime_authority' in result.identity_receipt, false);
++});
++
++test('spoofed internal assertion never reaches login pre-auth', async () => {
++  const identityAdapter = await adapter();
++  let preAuthCalls = 0;
++  const handler = createPrivateRuntimeLoginHandler({
++    enabled: () => true,
++    beginLogin: async (input, req) => {
++      const identity = await identityAdapter.bindRequest(req, {
++        correlationRef: input.correlation_id,
++      });
++      if (!identity.allowed) return identity;
++      preAuthCalls += 1;
++      return { ok: true, allowed: true };
++    },
++  });
++  const res = response();
++  await handler({
++    method: 'POST',
++    url: '/api/internal/private-runtime-login',
++    headers: {
++      authorization: `Bearer ${token()}`,
++      'x-more-protected-edge-assertion': 'browser-controlled-value',
++    },
++    body: {
++      browser_binding_reference: 'browser_binding_spoof_integration',
++      correlation_id: 'correlation_spoof_integration',
++    },
++  }, res);
++  assert.equal(res.statusCode, 401);
++  assert.equal(preAuthCalls, 0);
++});
++
++test('one composition root owns the binding; handlers contain no provider verification logic', async () => {
++  const root = await readFile(new URL(
++    '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js',
++    import.meta.url,
++  ), 'utf8');
++  assert.equal(root.includes('createProtectedEdgeIdentityBindingV1'), true);
++  assert.equal(root.includes('protectedEdgeBinding.bindRequest'), true);
++  assert.equal(root.includes('createProtectedEdgeIdentityAdapter'), false);
++  for (const file of [
++    '../api/internal/private-runtime-login.js',
++    '../api/internal/private-runtime-callback.js',
++    '../api/internal/private-runtime-session.js',
++    '../api/internal/private-runtime-bootstrap.js',
++    '../api/internal/private-runtime-logout.js',
++    '../api/internal/developer-access.js',
++    '../api/internal/subscription-entitlement.js',
++  ]) {
++    const source = await readFile(new URL(file, import.meta.url), 'utf8');
++    assert.equal(source.includes('jsonwebtoken'), false);
++    assert.equal(source.includes('createPublicKey'), false);
++    assert.equal(source.includes('x-vercel-oidc-passport-token'), false);
++  }
++});

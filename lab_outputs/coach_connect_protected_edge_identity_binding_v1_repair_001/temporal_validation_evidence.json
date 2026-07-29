@@ -1,0 +1,17 @@
+{
+  "evidence_version": "protected-edge-identity-binding-v1-repair-temporal-evidence-v1",
+  "exp_less_than_iat": "DENIED",
+  "exp_equal_iat": "DENIED",
+  "exp_less_than_nbf": "DENIED",
+  "exp_equal_nbf": "DENIED",
+  "auth_time_after_iat": "DENIED",
+  "auth_time_at_or_after_exp": "DENIED",
+  "malformed_string": "DENIED",
+  "array": "DENIED",
+  "object": "DENIED",
+  "nan_or_infinity_after_json": "DENIED",
+  "future_beyond_skew": "DENIED",
+  "expired_beyond_skew": "DENIED",
+  "valid_clock_skew": "ALLOWED",
+  "internal_expires_not_after_issued": "DENIED"
+}

@@ -18,6 +18,9 @@ import {
   createAuth0LiveSubscriberAssertionAdapterV1,
 } from '../../productionSecurity/liveSubscriberAssertion/auth0Adapter.js';
 import {
+  createProtectedEdgeIdentityBindingV1,
+} from '../../productionSecurity/protectedEdgeIdentity/adapter.js';
+import {
   createCanonicalBusinessEngineLiveAttachmentAdapterV1,
 } from './businessEngineAttachmentAdapter.js';
 import {
@@ -141,72 +144,6 @@ function createSessionEnvelopeCodec(keyMaterial, clock = () => Date.now()) {
   });
 }
 
-function createProtectedEdgeIdentityAdapter({
-  environmentId,
-  policyDigest,
-  keyMaterial,
-  clock = () => Date.now(),
-}) {
-  return Object.freeze({
-    async verify(req) {
-      const serialized = req?.headers?.['x-more-protected-edge-assertion'];
-      if (typeof serialized !== 'string' || serialized.length > 4096) {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      const [payloadPart, signaturePart] = serialized.split('.');
-      if (!payloadPart || !signaturePart) {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      const expected = crypto.createHmac('sha256', keyMaterial)
-        .update(payloadPart)
-        .digest();
-      let supplied;
-      try {
-        supplied = Buffer.from(signaturePart, 'base64url');
-      } catch {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      if (expected.length !== supplied.length
-        || !crypto.timingSafeEqual(expected, supplied)) {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      let payload;
-      try {
-        payload = JSON.parse(Buffer.from(payloadPart, 'base64url').toString('utf8'));
-      } catch {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      if (payload?.assertion_version !== 'protected-edge-identity-v1'
-        || payload.environment_id !== environmentId
-        || payload.policy_digest !== policyDigest
-        || payload.named_identity_verified !== true
-        || payload.mfa_verified !== true
-        || payload.public_access !== false
-        || !Number.isFinite(Date.parse(payload.issued_at))
-        || !Number.isFinite(Date.parse(payload.expires_at))
-        || Date.parse(payload.expires_at) <= clock()
-        || Date.parse(payload.expires_at) - Date.parse(payload.issued_at) > 10 * 60_000) {
-        return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 401);
-      }
-      return frozen({
-        ok: true,
-        allowed: true,
-        edge_attestation: {
-          named_identity_verified: true,
-          mfa_verified: true,
-          public_access: false,
-          policy_digest: policyDigest,
-          receipt_ref: `edge_receipt_${hmac(
-            keyMaterial,
-            'edge_receipt',
-            `${payloadPart}.${signaturePart}`,
-          ).slice(0, 32)}`,
-        },
-      });
-    },
-  });
-}
-
 function makeDeniedComposition(code = 'ASYNC_SECURITY_UNCONFIGURED', status = 404) {
   const operations = Object.freeze(Object.fromEntries([
     'beginLogin',
@@ -262,7 +199,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
 
   const secretResolver = authority.resolve_secret_reference;
   const remoteConfiguration = authority.remote_configuration;
-  const [tokenHashKey, scopeHashKey, edgeAssertionKey, privateAccessCode] =
+  const [tokenHashKey, scopeHashKey, privateAccessCode] =
     await Promise.all([
       secretResolver(remoteConfiguration.token_hash_key_ref, {
         purpose: 'PRIVATE_RUNTIME_TOKEN_HASH_KEY',
@@ -272,16 +209,12 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
         purpose: 'PRIVATE_RUNTIME_SCOPE_HASH_KEY',
         secret: true,
       }),
-      secretResolver(authority.authority_packet.edge_assertion_key_ref, {
-        purpose: 'PRIVATE_RUNTIME_EDGE_ASSERTION_KEY',
-        secret: true,
-      }),
       secretResolver(authority.authority_packet.private_access_code_ref, {
         purpose: 'PRIVATE_RUNTIME_ACCESS_CODE',
         secret: true,
       }),
     ]);
-  if ([tokenHashKey, scopeHashKey, edgeAssertionKey, privateAccessCode]
+  if ([tokenHashKey, scopeHashKey, privateAccessCode]
     .some((value) => typeof value !== 'string' || value.length < 16)) {
     return makeDeniedComposition();
   }
@@ -302,6 +235,13 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     fetch_impl: fetchImpl,
     clock,
   });
+  const protectedEdgeBinding = await createProtectedEdgeIdentityBindingV1({
+    configuration: authority.protected_edge_configuration,
+    resolveReference: secretResolver,
+    statePort,
+    clock,
+  });
+  if (protectedEdgeBinding.configured !== true) return makeDeniedComposition();
 
   const productBinding = authority.product_binding_attestation;
   const canonicalSecurityService = createCanonicalAsyncSecurityServiceV2({
@@ -356,12 +296,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     clock: () => new Date(clock()).toISOString(),
   });
 
-  const edgeAdapter = createProtectedEdgeIdentityAdapter({
-    environmentId: authority.authority_packet.environment_id,
-    policyDigest: authority.authority_packet.protected_edge_policy_digest,
-    keyMaterial: edgeAssertionKey,
-    clock,
-  });
   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
 
   async function active(req) {
@@ -372,7 +306,9 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
       || authority.activation_receipt == null) {
       return denial('RUNTIME_DEFAULT_OFF', 404);
     }
-    const edge = await edgeAdapter.verify(req);
+    const edge = await protectedEdgeBinding.bindRequest(req, {
+      correlationRef: correlationReference(req),
+    });
     if (!edge.allowed) return edge;
     const health = await canonicalSecurityService.health();
     if (!health.allowed) return denial(

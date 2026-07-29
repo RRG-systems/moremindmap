@@ -1,0 +1,64 @@
+{
+  "verdict_version": "protected-edge-identity-binding-v1-review-verdict-v1",
+  "campaign": "MORE_CAMPAIGN_COACH_CONNECT_PROTECTED_EDGE_IDENTITY_BINDING_V1_REVIEW",
+  "repository_head": "1862385201a7bb6221115ea2a2122bed99ffaec7",
+  "reviewed_implementation_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_IMPLEMENTED_PROVIDER_CONFIGURATION_REQUIRED",
+  "independent_review_verdict": "PROTECTED_EDGE_IDENTITY_BINDING_REPAIR_REQUIRED",
+  "commit_authorized": false,
+  "rationale": [
+    "Two high-severity identity-boundary findings remain.",
+    "The implementation does not bind assertions to an immutable deployment identity.",
+    "SESSION_BOUND permits bearer-token reuse without a trusted session binding.",
+    "Contradictory temporal claims are accepted under skew."
+  ],
+  "validation": {
+    "new_tests": {
+      "passed": 19,
+      "total": 19
+    },
+    "combined_focused": {
+      "passed": 64,
+      "total": 64
+    },
+    "targeted": {
+      "passed": 234,
+      "total": 234
+    },
+    "safe_regressions": {
+      "passed": 617,
+      "total": 617
+    },
+    "deterministic_build_sha256": "d13d0be2df339946c93e92fb658d6dbb5c1498c17966a395d98a72ffdb2d5d75",
+    "lint": "PASS",
+    "import_export": "PASS",
+    "schema": "PASS",
+    "dependency_cycles": 0,
+    "protected_roots_unchanged": true,
+    "qualified_remote_adapter_unchanged": true
+  },
+  "package_integrity": {
+    "sha256_verified": true,
+    "desktop_byte_identical": true,
+    "entry_count": 45,
+    "sorted_entries": true,
+    "duplicates": 0,
+    "case_collisions": 0,
+    "symlinks": 0,
+    "absolute_or_traversal_paths": 0,
+    "archive_integrity": "PASS",
+    "decompressed_repository_mismatches": 0,
+    "evidence_manifest_mismatches": 0,
+    "repair_001_packaging_only": true
+  },
+  "activity": {
+    "provider_calls": 0,
+    "environment_changes": 0,
+    "deployment_calls": 0,
+    "commit_actions": 0,
+    "push_actions": 0,
+    "runtime_activation": false,
+    "tester_activation": false,
+    "profile_id_activation": false
+  },
+  "next_action": "Authorize a bounded repair campaign for PEIB-RV-001, PEIB-RV-002, and PEIB-RV-003, regenerate the implementation review package, and repeat independent review."
+}

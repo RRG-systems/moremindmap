@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "credential_value": false,
+  "raw_token": false,
+  "token_fragment": false,
+  "raw_session_identifier": false,
+  "raw_transaction_identifier": false,
+  "customer_data": false,
+  "profile_id": false,
+  "transcript": false,
+  "prompt_or_model_output": false
+}

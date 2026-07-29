@@ -1,0 +1,20 @@
+{
+  "repair_limit": 2,
+  "repairs": [
+    {
+      "repair_id": "REPAIR_001",
+      "scope": "PEIB-RV-001, PEIB-RV-002, and PEIB-RV-003 production source and corresponding tests",
+      "status": "PASS",
+      "architecture_changed": false,
+      "authority_broadened": false
+    },
+    {
+      "repair_id": "REPAIR_002",
+      "scope": "two legacy temporal test fixtures",
+      "defect": "expired and not-yet-valid fixtures also encoded newly prohibited contradictory ordering",
+      "change": "make the fixtures temporally coherent while preserving their intended denial cases",
+      "production_semantics_changed": false,
+      "status": "PASS"
+    }
+  ]
+}

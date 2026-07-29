@@ -1,0 +1,21 @@
+{
+  "contract_version": "protected-edge-identity-repair-configuration-contract-v1",
+  "immutable_deployment_variable": {
+    "name": "MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256",
+    "secret": false,
+    "scope": "server-side private-live environment only",
+    "format": "64 lowercase hexadecimal SHA-256 characters",
+    "purpose": "identify the exact immutable deployed artifact or deployment instance",
+    "must_equal": "protected-edge configuration deployment_id",
+    "browser_source_allowed": false,
+    "project_reference_fallback": false,
+    "missing_behavior": "DENY",
+    "mismatch_behavior": "DENY"
+  },
+  "project_identity": {
+    "source": "live environment attestation vercel_project_reference",
+    "distinct_from_deployment_identity": true,
+    "authority_for_deployment_identity": false
+  },
+  "provider_value_bound": false
+}

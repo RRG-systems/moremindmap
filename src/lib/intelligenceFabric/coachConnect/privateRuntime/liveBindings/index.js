@@ -6,3 +6,4 @@ export * from './configurationAuthority.js';
 export * from './contracts.js';
 export * from './environmentAttestation.js';
 export * from './subscriptionRuntimeAttachmentAdapter.js';
+export * from '../../productionSecurity/protectedEdgeIdentity/index.js';

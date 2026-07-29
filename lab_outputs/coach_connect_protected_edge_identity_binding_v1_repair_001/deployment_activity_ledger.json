@@ -1,0 +1,8 @@
+{
+  "deployment_calls": 0,
+  "vercel_calls": 0,
+  "runtime_activation": false,
+  "public_access_activation": false,
+  "tester_activation": false,
+  "profile_id_activation": false
+}

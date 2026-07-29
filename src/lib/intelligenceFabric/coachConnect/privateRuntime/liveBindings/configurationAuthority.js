@@ -4,6 +4,9 @@ import {
   validateLiveSubscriberAssertionConfigurationV1,
 } from '../../productionSecurity/liveSubscriberAssertion/contracts.js';
 import {
+  validateProtectedEdgeIdentityConfigurationV1,
+} from '../../productionSecurity/protectedEdgeIdentity/contracts.js';
+import {
   validatePrivateRuntimeActivationReceiptV1,
   validatePrivateRuntimeConfigurationAuthorityV1,
   validatePrivateRuntimeProductBindingAttestationV1,
@@ -19,9 +22,13 @@ export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
   'MORE_PRIVATE_RUNTIME_REMOTE_SECURITY_ATTESTATION_REF',
   'MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_ATTESTATION_REF',
   'MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF',
+  'MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF',
 ]);
+export const PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE =
+  'MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256';
 
 const frozen = (value) => deepFreeze(structuredClone(value));
+const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const deny = (code, field = null) => frozen({
   ok: false,
   allowed: false,
@@ -71,6 +78,14 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
   if (typeof resolveReference !== 'function') {
     return deny('ASYNC_SECURITY_UNCONFIGURED', 'resolveReference');
   }
+  const immutableDeploymentIdentity =
+    env[PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE];
+  if (!sha256(immutableDeploymentIdentity)) {
+    return deny(
+      'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED',
+      PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
+    );
+  }
 
   const documents = {};
   try {
@@ -99,6 +114,8 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
     documents.MORE_PRIVATE_RUNTIME_PRODUCT_BINDING_ATTESTATION_REF;
   const assertionConfiguration =
     documents.MORE_PRIVATE_RUNTIME_ASSERTION_CONFIGURATION_REF;
+  const protectedEdgeConfiguration =
+    documents.MORE_PRIVATE_RUNTIME_PROTECTED_EDGE_CONFIGURATION_REF;
 
   const packet = validatePrivateRuntimeConfigurationAuthorityV1(authorityPacket, {
     environmentId: remoteConfiguration?.environment_id,
@@ -118,15 +135,26 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
       nowMs,
     },
   );
-  if (!packet.valid || !assertion.valid || !product.valid) {
+  const protectedEdge = validateProtectedEdgeIdentityConfigurationV1(
+    protectedEdgeConfiguration,
+    {
+      environmentId: remoteConfiguration?.environment_id,
+      deploymentId: immutableDeploymentIdentity,
+      policyDigest: authorityPacket?.protected_edge_policy_digest,
+      internalSigningKeyRef: authorityPacket?.edge_assertion_key_ref,
+    },
+  );
+  if (!packet.valid || !assertion.valid || !product.valid || !protectedEdge.valid) {
     return deny(
       packet.errors[0]?.code
         || assertion.errors[0]?.code
         || product.errors[0]?.code
+        || protectedEdge.errors[0]?.code
         || 'CONFIGURATION_AUTHORITY_INVALID',
       packet.errors[0]?.field
         || assertion.errors[0]?.field
         || product.errors[0]?.field
+        || protectedEdge.errors[0]?.field
         || null,
     );
   }
@@ -176,6 +204,9 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
 
   if ((env.MORE_PRIVATE_RUNTIME_LIVE_ENABLED === 'true') !== authorityPacket.live_enabled
     || (env.MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED === 'true')
+      !== authorityPacket.emergency_disabled
+    || protectedEdgeConfiguration.enabled !== true
+    || protectedEdgeConfiguration.emergency_disabled
       !== authorityPacket.emergency_disabled) {
     return deny('CONFIGURATION_AUTHORITY_MISMATCH', 'activation_state');
   }
@@ -193,8 +224,11 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
     remote_configuration: remoteConfiguration,
     qualification_certificate: qualificationCertificate,
     live_environment_attestation: liveEnvironmentAttestation,
+    immutable_deployment_identity: immutableDeploymentIdentity,
+    project_reference: liveEnvironmentAttestation.vercel_project_reference,
     product_binding_attestation: productBindingAttestation,
     assertion_configuration: assertionConfiguration,
+    protected_edge_configuration: protectedEdgeConfiguration,
     activation_receipt: activationReceipt,
     live_authority: liveAuthority.value,
     source_default_off: true,
