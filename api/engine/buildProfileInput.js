@@ -4,6 +4,30 @@
 
 import { QUESTION_MAP } from './questionMap.js';
 import { DIMENSIONS, DIMENSION_LABELS, DIMENSION_TRADEOFFS } from './dimensionMap.js';
+import { normalizeAssessmentAnswers } from './normalizeAssessmentAnswers.js';
+
+function getSelectedKeys(choice) {
+  return String(choice || '')
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean);
+}
+
+function hasValidSelections(question, selectedKeys, expectedCount) {
+  const validKeys = new Set(question.answers?.map((option) => option.key) || []);
+  return selectedKeys.length === expectedCount
+    && new Set(selectedKeys).size === expectedCount
+    && selectedKeys.every((key) => validKeys.has(key));
+}
+
+function combineNormalizedDimensions(question, selectedKeys) {
+  return selectedKeys.reduce((combined, key) => {
+    Object.entries(question.normalized_dimensions?.[key] || {}).forEach(([dimension, score]) => {
+      combined[dimension] = (combined[dimension] || 0) + score;
+    });
+    return combined;
+  }, {});
+}
 
 /**
  * BuildProfileInput
@@ -116,8 +140,10 @@ export class BuildProfileInput {
       return rawAnswers; // Return empty answers (safe fallback - triggers neutral scores)
     }
 
+    const normalizedAnswers = normalizeAssessmentAnswers(rawAssessment.answers);
+
     questions.forEach(question => {
-      const answer = rawAssessment.answers[`q${question.id}`];
+      const answer = normalizedAnswers[`q${question.id}`];
       
       // GUARD: Skip if answer is missing (don't crash on undefined.property)
       if (!answer) {
@@ -125,10 +151,10 @@ export class BuildProfileInput {
         return; // Continue loop
       }
       
-      if (question.type === 'mc' || question.type === 'ranking') {
-        // GUARD: MC/ranking answer must have choice property
+      if (question.type === 'mc') {
+        // GUARD: MC answer must have choice property
         if (!answer.choice) {
-          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} missing choice`);
+          console.warn(`[buildRawAnswers] GUARD: MC q${question.id} missing choice`);
           return; // Skip this answer
         }
         
@@ -145,6 +171,40 @@ export class BuildProfileInput {
           question_text: question.text,
           answer_choice: answer.choice,
           answer_text: answerText,
+          normalized_dimensions: normalizedDims
+        };
+      } else if (question.type === 'ranking' || question.type === 'choose_two') {
+        if (!answer.choice) {
+          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} missing choice`);
+          return;
+        }
+
+        const selectedKeys = getSelectedKeys(answer.choice);
+        const expectedCount = question.type === 'ranking'
+          ? question.answers?.length || 0
+          : 2;
+
+        if (!hasValidSelections(question, selectedKeys, expectedCount)) {
+          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} invalid choice`);
+          return;
+        }
+
+        const answerTexts = selectedKeys.map((key) =>
+          question.answers.find((option) => option.key === key)?.text || 'Unknown'
+        );
+        const normalizedDims = question.type === 'ranking'
+          // Existing ranking semantics identify what matters most; no new
+          // positional weighting contract is introduced here.
+          ? question.normalized_dimensions?.[selectedKeys[0]] || {}
+          : combineNormalizedDimensions(question, selectedKeys);
+
+        rawAnswers[`q${question.id}`] = {
+          question_id: question.id,
+          question_type: question.type,
+          question_text: question.text,
+          answer_choice: selectedKeys.join(','),
+          answer_choices: selectedKeys,
+          answer_text: answerTexts.join(question.type === 'ranking' ? ' > ' : ' | '),
           normalized_dimensions: normalizedDims
         };
       } else if (question.type === 'written') {

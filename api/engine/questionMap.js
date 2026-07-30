@@ -1,8 +1,9 @@
 // questionMap.js - COMPLETE MoreMindMap Scoring Map
 // Locked dimension scoring for all 28 frontend questions
-// 14 MC single_choice (Q1,Q3,Q5,Q7,Q8,Q9,Q10,Q11,Q13,Q15,Q16,Q19,Q21,Q23)
+// 14 MC single_choice (Q1,Q3,Q4,Q5,Q7,Q8,Q9,Q10,Q11,Q15,Q16,Q19,Q21,Q23)
 // 3 ranking (Q6,Q12,Q18)
-// 11 written_response (Q2,Q14,Q17,Q20,Q22,Q24,Q25,Q26,Q27,Q28)
+// 1 choose_two (Q13)
+// 10 written_response (Q2,Q14,Q17,Q20,Q22,Q24,Q25,Q26,Q27,Q28)
 // Version: canonical-v2-guarded
 // Updated: May 26, 2026
 
@@ -245,7 +246,7 @@ export const QUESTION_MAP = {
       // Q13 - Choose two: Dinner party positioning
       {
         id: 13,
-        type: 'mc',
+        type: 'choose_two',
         text: 'You are at a private dinner with people you do not know well. The conversation is intelligent, but there is an underlying sense of positioning. People are listening, but also subtly competing. (Choose TWO)',
         answers: [
           { key: 'F', text: 'Stay quiet at first and read the room' },
@@ -464,8 +465,10 @@ export const VALIDATION = {
   createdAt: '2026-05-09',
   updatedAt: '2026-05-26',
   questionCount: 28,
-  mcQuestionCount: 17,  // 14 single_choice + 3 ranking
-  writtenQuestionCount: 11,
+  mcQuestionCount: 14,
+  rankingQuestionCount: 3,
+  chooseTwoQuestionCount: 1,
+  writtenQuestionCount: 10,
   dimensionsRequired: ['vector', 'signal', 'fidelity', 'velocity', 'leverage', 'flex', 'framework', 'horizon']
 };
 

@@ -6,6 +6,7 @@
  */
 
 import { createJob } from '../engine/miniV2JobManager.js'
+import { normalizeAssessmentAnswers } from '../engine/normalizeAssessmentAnswers.js'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -43,26 +44,9 @@ export default async function handler(req, res) {
       })
     }
 
-    // Format answers for backend compatibility
-    // Backend expects: { qN: { choice: 'A' } } or { qN: { text: 'written response' } }
-    // Frontend may send: { N: 'A' } or { N: 'written response' }
-    const formattedAnswers = {}
-    Object.keys(answers).forEach(key => {
-      const qKey = key.startsWith('q') ? key : `q${key}`
-      const value = answers[key]
-      
-      // Detect if it's a written response (long text) or multiple choice (single letter)
-      if (typeof value === 'string' && value.length === 1 && /[A-E]/i.test(value)) {
-        // Multiple choice
-        formattedAnswers[qKey] = { choice: value.toUpperCase() }
-      } else if (typeof value === 'object' && (value.choice || value.text)) {
-        // Already formatted
-        formattedAnswers[qKey] = value
-      } else {
-        // Written response
-        formattedAnswers[qKey] = { text: String(value) }
-      }
-    })
+    // Format answers using question metadata so ordered selection responses
+    // are not mistaken for written text.
+    const formattedAnswers = normalizeAssessmentAnswers(answers)
 
     // Create job in Redis (queued, no execution yet)
     const jobId = await createJob({ answers: formattedAnswers, metadata })
