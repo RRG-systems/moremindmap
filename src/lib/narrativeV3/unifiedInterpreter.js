@@ -288,19 +288,26 @@ function extractWrittenSignals(intake_answers) {
     if (count > 0) emotionCounts[emotion] = count;
   });
 
-  signals.dominant_emotion = Object.keys(emotionCounts).reduce((a, b) =>
-    emotionCounts[a] > emotionCounts[b] ? a : b
-  ) || "neutral";
+  const emotionKeys = Object.keys(emotionCounts);
 
-  // DETECT INTENSITY
-  if (signals.all_text.includes("devastated") || signals.all_text.includes("crushing")) {
-    signals.emotional_intensity = "acute";
-  } else if (emotionCounts[signals.dominant_emotion] > 3) {
-    signals.emotional_intensity = "high";
-  } else if (emotionCounts[signals.dominant_emotion] > 1) {
-    signals.emotional_intensity = "moderate";
-  } else {
+  if (emotionKeys.length === 0) {
+    signals.dominant_emotion = "neutral";
     signals.emotional_intensity = "low";
+  } else {
+    signals.dominant_emotion = emotionKeys.reduce((a, b) =>
+      emotionCounts[a] > emotionCounts[b] ? a : b
+    );
+
+    // DETECT INTENSITY
+    if (signals.all_text.includes("devastated") || signals.all_text.includes("crushing")) {
+      signals.emotional_intensity = "acute";
+    } else if (emotionCounts[signals.dominant_emotion] > 3) {
+      signals.emotional_intensity = "high";
+    } else if (emotionCounts[signals.dominant_emotion] > 1) {
+      signals.emotional_intensity = "moderate";
+    } else {
+      signals.emotional_intensity = "low";
+    }
   }
 
   // DETECT INTERNAL STATE
