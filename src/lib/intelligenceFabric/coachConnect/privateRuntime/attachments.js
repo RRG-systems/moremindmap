@@ -50,8 +50,13 @@ export function validatePrivateRuntimeAttachmentRequest(value) {
   if (!exactPrivateRuntimeScope(value.exact_scope)) {
     errors.push({ code: 'ATTACHMENT_PARTIAL_FAILURE', field: 'exact_scope' });
   }
-  if (!Array.isArray(value.requested_attachments)
-    || value.requested_attachments.join(',') !== 'BUSINESS_ENGINE,SUBSCRIPTION_RUNTIME,COACH_CONNECT') {
+  const requestedAttachments = Array.isArray(value.requested_attachments)
+    ? value.requested_attachments.join(',')
+    : '';
+  if (![
+    'BUSINESS_ENGINE,SUBSCRIPTION_RUNTIME',
+    'BUSINESS_ENGINE,SUBSCRIPTION_RUNTIME,COACH_CONNECT',
+  ].includes(requestedAttachments)) {
     errors.push({ code: 'ATTACHMENT_PARTIAL_FAILURE', field: 'requested_attachments' });
   }
   if (!timestamp(value.requested_at)) errors.push({ code: 'ATTACHMENT_PARTIAL_FAILURE', field: 'requested_at' });
@@ -169,11 +174,17 @@ export const PRIVATE_RUNTIME_SUBSCRIPTION_INTERACTIONS = deepFreeze([
   'DECIDE_EXTRACTION',
 ]);
 
+export const PRIVATE_RUNTIME_SUBSCRIPTION_AUTHORITY_SOURCES = deepFreeze([
+  'temporary_internal_subscription_entitlement',
+  'temporary_internal_beta_operator_context',
+]);
+
 export function attachExistingSubscriptionRuntime({
   request,
   authority,
   businessEngineReceipt,
   entitlement,
+  operatorContext = null,
   runtime,
   subscription,
   attachedAt,
@@ -191,13 +202,24 @@ export function attachExistingSubscriptionRuntime({
   }
   if (entitlement?.access_type !== 'more_monthly_intelligence'
     || entitlement.status !== 'active'
-    || entitlement.source !== 'temporary_internal_subscription_entitlement'
+    || !PRIVATE_RUNTIME_SUBSCRIPTION_AUTHORITY_SOURCES.includes(entitlement.source)
     || entitlement.temporary !== true
     || entitlement.billing_evidence !== false
     || entitlement.stripe_subscription_created !== false
     || entitlement.canonical_mutation_authority !== false
     || !timestamp(entitlement.expires_at)
     || Date.parse(entitlement.expires_at) <= Date.parse(attachedAt)) {
+    return frozen({ ok: false, code: 'PRIVATE_ENTITLEMENT_REQUIRED' });
+  }
+  if (entitlement.source === 'temporary_internal_beta_operator_context'
+    && (operatorContext?.source !== entitlement.source
+      || operatorContext.allowed !== true
+      || operatorContext.profile_state !== 'PROFILE_ACTIVE'
+      || operatorContext.subscriber_subject_ref !== request.subscriber_subject_ref
+      || !samePrivateRuntimeScope(operatorContext.exact_scope, request.exact_scope)
+      || operatorContext.paid_entitlement !== false
+      || operatorContext.coach_authority !== false
+      || operatorContext.canonical_identity_authority !== false)) {
     return frozen({ ok: false, code: 'PRIVATE_ENTITLEMENT_REQUIRED' });
   }
   const contract = runtime?.inspect_contract?.();
@@ -234,7 +256,7 @@ export function attachExistingSubscriptionRuntime({
       business_engine_attachment_ref: businessEngineReceipt.attachment_id,
       subscription_ref: subscription.subscription_ref,
       runtime_contract_version: subscription.runtime_contract_version,
-      entitlement_source: 'temporary_internal_subscription_entitlement',
+      entitlement_source: entitlement.source,
       allowed_interactions: [...PRIVATE_RUNTIME_SUBSCRIPTION_INTERACTIONS],
       paid_entitlement: false,
       stripe_authority: false,

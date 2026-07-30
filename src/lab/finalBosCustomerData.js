@@ -1,77 +1,28 @@
 /**
  * MMB13 lab-only — Final BOS customer experience metadata and section definitions.
- * Customer-facing prototype for Darren Kirkland; no production mutation.
+ * Customer-facing prototype for Avery North; no production mutation.
  */
 
-import { customerBosSectionsDarrenMmb11, formatCustomerSectionContent } from './customerBosRenderer.js';
-import { DARREN_OPERATING_SCORES, SCORES_REVEAL_META } from './customerBosScoreMeaning.js';
+import { customerBosSectionsSynthetic, formatCustomerSectionContent } from './customerBosRenderer.js';
+import { SYNTHETIC_OPERATING_SCORES, SCORES_REVEAL_META } from './customerBosScoreMeaning.js';
 
 export const FINAL_BOS_META = {
-  profileName: 'Darren Kirkland',
+  profileName: 'Avery North',
   title: 'Behavioral Operating System',
   subtitle:
     'A clear map of how you think, decide, communicate, lead, and respond under pressure.',
-  profileId: 'mm-20260527-6zshuaao',
+  profileId: 'mm-20990102-labsyn02',
 };
 
-/** All eight operating scores from canonical dossier (MMB9 readonly snapshot). */
+/** Eight fictional operating scores retained to exercise the complete score layout. */
 export const ALL_OPERATING_SCORES = [
-  {
-    dimension: 'Vector',
-    score: 0.88,
-    classification: 'high',
-    oneLine:
-      'Direction and path-setting are dominant — you stabilize where things should go.',
-  },
-  {
-    dimension: 'Velocity',
-    score: 0.75,
-    classification: 'strong',
-    oneLine:
-      'You move from thought to action quickly once direction forms.',
-  },
-  {
-    dimension: 'Signal',
-    score: 0.6,
-    classification: 'moderate',
-    oneLine:
-      'You read relational and contextual cues with reasonable awareness.',
-  },
-  {
-    dimension: 'Fidelity',
-    score: 0.5,
-    classification: 'moderate',
-    oneLine:
-      'Detail fidelity is balanced — you can hold precision when it matters.',
-  },
-  {
-    dimension: 'Leverage',
-    score: 0.5,
-    classification: 'moderate',
-    oneLine:
-      'You use leverage points moderately — opportunity and timing awareness.',
-  },
-  {
-    dimension: 'Flex',
-    score: 0.42,
-    classification: 'moderate',
-    oneLine:
-      'Adaptability is present but not your primary operating mode.',
-  },
-  {
-    dimension: 'Framework',
-    score: 0.17,
-    classification: 'low',
-    oneLine:
-      'Structure is not your first instinct — you prefer action and correction in motion.',
-  },
-  {
-    dimension: 'Horizon',
-    score: 0.0,
-    classification: 'very low',
-    oneLine:
-      'Near-term, practical wins dominate over distant future architecture.',
-  },
+  ...SYNTHETIC_OPERATING_SCORES.map(({ dimension, score, classification, whatItMeans }) => ({
+    dimension, score, classification, oneLine: whatItMeans,
+  })),
+  { dimension: 'Vector', score: 0.58, classification: 'moderate', oneLine: 'Direction forms through evidence synthesis and explicit decision points.' },
+  { dimension: 'Velocity', score: 0.47, classification: 'moderate', oneLine: 'Pace is deliberate until the proof condition is clear.' },
+  { dimension: 'Leverage', score: 0.72, classification: 'strong', oneLine: 'The operator notices where a small system change can remove repeated work.' },
+  { dimension: 'Flex', score: 0.66, classification: 'strong', oneLine: 'Plans can adapt without losing the agreed outcome or review rhythm.' },
 ];
 
 export const SCORE_CLASSIFICATION_COLORS = {
@@ -93,7 +44,7 @@ export const FINAL_BOS_TABS = [
   { id: 'advanced-source', label: 'Advanced Source', internal: true },
 ];
 
-const sections = customerBosSectionsDarrenMmb11;
+const sections = customerBosSectionsSynthetic;
 
 export const OVERVIEW_SECTION_BADGES = {
   executive: 'Core Insight',
@@ -118,19 +69,19 @@ export const OVERVIEW_EXPANDABLE_SECTIONS = [
     preview: SCORES_REVEAL_META.patternSummary.headline,
     badge: OVERVIEW_SECTION_BADGES.pattern,
     defaultOpen: true,
-    content: `**${SCORES_REVEAL_META.patternSummary.headline}**\n\n${SCORES_REVEAL_META.patternSummary.meaning}\n\nUnder pressure, you double down: more decisive, faster, less reading of detail. Prolonged load is your break point. You are built to set direction, create opportunity, and define the model — especially for a business you want to become subscription-based, residual, and eventually able to operate mostly on its own.`,
+    content: `**${SCORES_REVEAL_META.patternSummary.headline}**\n\n${SCORES_REVEAL_META.patternSummary.meaning}\n\nUnder pressure, the fictional operator gathers more context and may delay a decision. A short decision window and visible owner preserve both care and momentum.`,
   },
   {
     id: 'key-advantage',
     title: 'Key Advantage',
-    preview: 'Rainmaking, unblocking stalled initiatives, and giving teams a clear next move.',
+    preview: 'Reading context, protecting quality, and translating evidence into a clear next move.',
     badge: OVERVIEW_SECTION_BADGES.advantage,
     defaultOpen: false,
-    content: `Your combination of high Vector (0.88) and strong Velocity (0.75) makes you exceptionally effective at creating forward motion. You are at your best in rainmaking roles — unblocking initiatives, restarting momentum, and leading early-stage movement where the next step matters more than perfect process.
+    content: `The fictional combination of strong Signal and Fidelity supports thoughtful client work and early risk detection. The advantage becomes transferable when quality judgment is written as acceptance criteria.
 
-${DARREN_OPERATING_SCORES[0].howItHelps}
+${SYNTHETIC_OPERATING_SCORES[0].howItHelps}
 
-${DARREN_OPERATING_SCORES[1].howItHelps}`,
+${SYNTHETIC_OPERATING_SCORES[1].howItHelps}`,
   },
   {
     id: 'main-scaling-risk',
@@ -140,9 +91,9 @@ ${DARREN_OPERATING_SCORES[1].howItHelps}`,
     defaultOpen: false,
     content: `**${sections.executiveSummary.key_warning}**
 
-At 5x scale, the business will need decision frameworks, escalation paths, and clearer structure around your momentum. Vector plus velocity creates strong personal motion; low Framework (0.17) and Horizon (0.00) leave the broader system less able to carry that motion without you.
+At larger scale, the synthetic business needs explicit acceptance criteria, decision windows, and escalation rules. Otherwise careful judgment remains concentrated with the owner.
 
-Revenue or opportunity can grow faster than operating independence. That threatens your goal of a subscription-based or saleable business. Instead of becoming a residual asset, the company risks becoming founder-responsive: teams wait for your read, your model, or your permission.`,
+Demand can grow faster than delegation readiness. The lab scenario therefore tests whether the interface clearly separates behavioral strength from operating-system maturity.`,
   },
   {
     id: 'best-next-move',

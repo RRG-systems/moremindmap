@@ -33,7 +33,7 @@ const edgeAttestation = {
   public_access: false,
 };
 
-function productBinding() {
+function productBinding({ includeCoach = true } = {}) {
   const value = {
     binding_version: 'private-runtime-product-binding-attestation-v1',
     environment_id: environmentId,
@@ -57,7 +57,7 @@ function productBinding() {
       customer_data: false,
       migration: false,
     },
-    coach_connect_runtime: {
+    coach_connect_runtime: includeCoach ? {
       existing_runtime: true,
       runtime_ref: 'coach_connect_integration_live',
       exact_scope: scope,
@@ -71,7 +71,7 @@ function productBinding() {
       live_media_provider: false,
       stripe: false,
       canonical_mutation_authority: false,
-    },
+    } : null,
     issued_at: '2026-07-28T10:00:00.000Z',
     review_due_at: '2026-08-28T10:00:00.000Z',
     binding_sha256: '0'.repeat(64),
@@ -167,7 +167,7 @@ function service({ currentAuthority = authority() } = {}) {
   };
 }
 
-function bridgeInput(authorityDecision) {
+function bridgeInput(authorityDecision, { includeCoach = true } = {}) {
   return {
     request: {
       request_version: 'private-runtime-attachment-request-v1',
@@ -179,7 +179,7 @@ function bridgeInput(authorityDecision) {
       requested_attachments: [
         'BUSINESS_ENGINE',
         'SUBSCRIPTION_RUNTIME',
-        'COACH_CONNECT',
+        ...(includeCoach ? ['COACH_CONNECT'] : []),
       ],
       correlation_id: 'correlation_integration_live',
       requested_at: evaluatedAt,
@@ -247,10 +247,12 @@ function coordinator(binding = productBinding()) {
         productBindingAttestation: binding,
         nowMs: Date.parse(evaluatedAt),
       }),
-    coachConnectAdapter: createExistingCoachConnectLiveAttachmentAdapterV1({
-      productBindingAttestation: binding,
-      nowMs: Date.parse(evaluatedAt),
-    }),
+    coachConnectAdapter: binding.coach_connect_runtime
+      ? createExistingCoachConnectLiveAttachmentAdapterV1({
+        productBindingAttestation: binding,
+        nowMs: Date.parse(evaluatedAt),
+      })
+      : null,
     clock: () => '2026-07-28T12:00:01.000Z',
   });
 }
@@ -283,6 +285,46 @@ test('one authorized bootstrap attaches one engine and both existing runtimes', 
   assert.equal(result.coach_connect_attachment.live_voice_video, false);
   assert.equal(result.coach_connect_attachment.transcript_persistence, false);
   assert.equal(bridgeInputs, 1);
+});
+
+test('subscriber runtime attaches and becomes ready without Coach Connect', async () => {
+  const binding = productBinding({ includeCoach: false });
+  const composition = createPrivateRuntimeLiveCompositionV2({
+    canonicalSecurityService: service(),
+    privateRuntimeBridge: coordinator(binding),
+    activationDecision: async () => ({ ok: true, allowed: true }),
+    resolveRequestContext: async () => ({
+      ok: true,
+      allowed: false,
+      value: {
+        correlation_ref: 'correlation_subscriber_only',
+        edge_attestation: edgeAttestation,
+      },
+    }),
+    resolveBridgeInput: async ({ authority: decision }) => ({
+      ok: true,
+      allowed: false,
+      value: bridgeInput(decision, { includeCoach: false }),
+    }),
+  });
+  const result = await composition.operations.bootstrap({ method: 'POST' });
+  assert.equal(result.ok, true);
+  assert.equal(result.runtime_ready, true);
+  assert.equal(result.business_engine_attachment.duplicate_engine_created, false);
+  assert.equal(result.subscription_runtime_attachment.paid_entitlement, false);
+  assert.equal(result.coach_connect_attachment, null);
+  assert.equal(result.coach_connect_attached, false);
+  assert.equal(result.attachment_set.coach_connect_attachment_ref, null);
+  assert.equal(result.attachment_set.coach_connect_attached, false);
+});
+
+test('requesting Coach Connect without a configured Coach adapter fails closed', async () => {
+  const binding = productBinding({ includeCoach: false });
+  const result = await coordinator(binding).attach(bridgeInput(authority()));
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'COACH_CONNECT_STATE_MISSING');
+  assert.equal(result.runtime_ready, false);
+  assert.equal(result.partial_handles_discarded, true);
 });
 
 test('concurrent exact-authority bootstraps publish one attachment result', async () => {

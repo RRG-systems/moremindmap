@@ -2,7 +2,7 @@ import { retrieveBusinessAssessment } from '../lib/businessAssessment/retrieveBu
 
 /**
  * Load Business Assessment retrieve payload for visual artifact routes.
- * Uses shared retrieve helper (live API first; DEV-only Tammy fixture fallback when retrieval fails).
+ * Uses shared retrieve helper (live API first; DEV-only synthetic fixture fallback when retrieval fails).
  */
 export async function loadBusinessAssessmentVisualRecord(profileId, buildApiUrl) {
   try {

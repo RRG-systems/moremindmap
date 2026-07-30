@@ -111,9 +111,20 @@ test('complete attachment set publishes only after every receipt and cross-refer
   assert.equal(result.receipt.production_customer_data, false);
 });
 
+test('subscriber attachment set is complete without optional Coach Connect', () => {
+  const result = validateCompleteAttachmentSet({
+    ...input,
+    coachConnectReceipt: null,
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.receipt.runtime_ready, true);
+  assert.equal(result.receipt.business_engine_count, 1);
+  assert.equal(result.receipt.coach_connect_attached, false);
+  assert.equal(result.receipt.coach_connect_attachment_ref, null);
+});
+
 test('partial, mismatched, stale, or duplicate attachment is discarded and never published', () => {
   const candidates = [
-    { ...input, coachConnectReceipt: null },
     {
       ...input,
       subscriptionReceipt: { ...subscriptionReceipt, exact_scope_hash: 'b'.repeat(64) },

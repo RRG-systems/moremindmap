@@ -201,7 +201,7 @@ export function validatePrivateRuntimeProductBindingAttestationV1(value, {
   }
 
   const coach = value.coach_connect_runtime;
-  if (!exactFields(coach, COACH_CONNECT_FIELDS)
+  if (coach != null && (!exactFields(coach, COACH_CONNECT_FIELDS)
     || coach.existing_runtime !== true
     || !samePrivateRuntimeScope(coach.exact_scope, value.exact_scope)
     || !isOpaquePrivateRuntimeReference(coach.runtime_ref)
@@ -214,7 +214,7 @@ export function validatePrivateRuntimeProductBindingAttestationV1(value, {
     || coach.live_model_provider !== false
     || coach.live_media_provider !== false
     || coach.stripe !== false
-    || coach.canonical_mutation_authority !== false) {
+    || coach.canonical_mutation_authority !== false)) {
     errors.push(issue('COACH_CONNECT_STATE_MISSING', 'coach_connect_runtime'));
   }
 

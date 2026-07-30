@@ -97,10 +97,15 @@ export function createPrivateRuntimeLiveCompositionV2({
   developerAccessFacade = null,
   assertionPort = null,
   privateRuntimeBridge = null,
+  intelligenceExecution = null,
   resolveRequestContext = null,
   resolveBridgeInput = null,
+  operatorContextBridge = null,
+  resolveOperatorContext = null,
+  resolveOperatorBridgeInput = null,
   serializeAuthenticatedSession = null,
   activationDecision = async () => false,
+  operatorActivationDecision = async () => false,
   providerAdapterBound = false,
 } = {}) {
   const serviceValidation = validateCanonicalAsyncSecurityServiceShape(canonicalSecurityService);
@@ -133,6 +138,125 @@ export function createPrivateRuntimeLiveCompositionV2({
       canonicalSecurityService?.[method]?.bind(canonicalSecurityService),
       args,
     );
+  }
+
+  async function bootstrapOperatorContext(req, body) {
+    if (typeof operatorContextBridge?.inspect !== 'function'
+      || typeof operatorContextBridge?.consume !== 'function'
+      || typeof privateRuntimeBridge?.attach !== 'function'
+      || typeof resolveOperatorContext !== 'function'
+      || typeof resolveOperatorBridgeInput !== 'function') {
+      return null;
+    }
+    const resolved = await settlePrivateRuntimeLiveOperation(
+      resolveOperatorContext,
+      [{ req, body }],
+    );
+    if (!resolved.ok) return resolved;
+    if (resolved.value?.operator_present !== true) return null;
+
+    const activation = await settlePrivateRuntimeLiveOperation(
+      operatorActivationDecision,
+      [req],
+    );
+    if (!activation.allowed) {
+      return denial(activation.code || 'OPERATOR_BRIDGE_DISABLED', activation.status || 404);
+    }
+    const tokens = {
+      contextToken: resolved.value.context_token,
+      browserToken: resolved.value.browser_token,
+    };
+    const inspected = await settlePrivateRuntimeLiveOperation(
+      operatorContextBridge.inspect.bind(operatorContextBridge),
+      [tokens],
+    );
+    if (!inspected.allowed
+      || inspected.active !== true
+      || inspected.profile_state !== 'PROFILE_ACTIVE'
+      || !inspected.profile_receipt) {
+      return denial(inspected.code || 'PROFILE_RESOLUTION_DENIED', 403);
+    }
+    const intelligenceOperation = body.intelligence_operation || null;
+    const action = intelligenceOperation == null
+      ? 'OPEN_SUBSCRIPTION'
+      : 'SUBSCRIPTION_INTERACTION';
+    const consumed = await settlePrivateRuntimeLiveOperation(
+      operatorContextBridge.consume.bind(operatorContextBridge),
+      [{
+        ...tokens,
+        action,
+        profileReceipt: inspected.profile_receipt,
+      }],
+    );
+    if (!consumed.allowed) return consumed;
+
+    const bridgeInput = await settlePrivateRuntimeLiveOperation(
+      resolveOperatorBridgeInput,
+      [{
+        req,
+        request_context: resolved.value,
+        operator_context: consumed,
+      }],
+    );
+    if (!bridgeInput.ok) return bridgeInput;
+    const attached = await settlePrivateRuntimeLiveOperation(
+      privateRuntimeBridge.attach.bind(privateRuntimeBridge),
+      [bridgeInput.value],
+    );
+    if (!attached.ok) return attached;
+
+    const current = await settlePrivateRuntimeLiveOperation(
+      operatorContextBridge.consume.bind(operatorContextBridge),
+      [{
+        ...tokens,
+        action,
+        profileReceipt: inspected.profile_receipt,
+      }],
+    );
+    if (!current.allowed
+      || current.context_id !== consumed.context_id
+      || current.profile_generation !== consumed.profile_generation
+      || current.exact_scope_hash !== consumed.exact_scope_hash) {
+      return denial(current.code || 'PROFILE_RECEIPT_STALE', 403);
+    }
+    if (intelligenceOperation == null) {
+      return Object.freeze({
+        ...attached,
+        operator_context_verified: true,
+        authority_source: 'temporary_internal_beta_operator_context',
+        canonical_identity_authority: false,
+        coach_authority: false,
+        stripe_authority: false,
+      });
+    }
+    if (typeof intelligenceExecution?.execute !== 'function') {
+      return denial('PRIVATE_LIVE_PRODUCT_EXECUTION_UNCONFIGURED', 404);
+    }
+    const executed = await settlePrivateRuntimeLiveOperation(
+      intelligenceExecution.execute.bind(intelligenceExecution),
+      [{
+        operation: intelligenceOperation,
+        request: {
+          ...bridgeInput.value.request,
+          intelligence_input: body.intelligence_input || null,
+        },
+        requestContext: bridgeInput.value.requestContext,
+        authority: bridgeInput.value.authority,
+        attachmentSet: attached,
+      }],
+    );
+    if (!executed.ok) return executed;
+    return Object.freeze({
+      ...attached,
+      ...executed,
+      runtime_ready: attached.runtime_ready === true
+        && executed.runtime_ready === true,
+      operator_context_verified: true,
+      authority_source: 'temporary_internal_beta_operator_context',
+      canonical_identity_authority: false,
+      coach_authority: false,
+      stripe_authority: false,
+    });
   }
 
   const operations = {
@@ -299,6 +423,9 @@ export function createPrivateRuntimeLiveCompositionV2({
     },
 
     async bootstrap(req) {
+      const body = requestBody(req);
+      const operatorResult = await bootstrapOperatorContext(req, body);
+      if (operatorResult != null) return operatorResult;
       const activation = await active(req);
       if (!activation.allowed) return activation;
       if (typeof privateRuntimeBridge?.attach !== 'function'
@@ -311,7 +438,12 @@ export function createPrivateRuntimeLiveCompositionV2({
         requested_action: 'attach_existing_private_runtime',
       }]);
       if (!authority.allowed) return authority;
-      const bridgeKey = authority.authority_fingerprint;
+      const intelligenceOperation = body.intelligence_operation || null;
+      const bridgeKey = [
+        authority.authority_fingerprint,
+        intelligenceOperation || 'ATTACH_ONLY',
+        context.value.idempotency_ref || 'NO_IDEMPOTENCY_REFERENCE',
+      ].join(':');
       if (!inFlightBootstrap.has(bridgeKey)) {
         const pending = (async () => {
           const bridgeInput = await settlePrivateRuntimeLiveOperation(
@@ -333,7 +465,30 @@ export function createPrivateRuntimeLiveCompositionV2({
             || revalidated.authority_fingerprint !== authority.authority_fingerprint) {
             return denial('RUNTIME_AUTHORITY_DENIED', 403);
           }
-          return attached;
+          if (intelligenceOperation == null) return attached;
+          if (typeof intelligenceExecution?.execute !== 'function') {
+            return denial('PRIVATE_LIVE_PRODUCT_EXECUTION_UNCONFIGURED', 404);
+          }
+          const executed = await settlePrivateRuntimeLiveOperation(
+            intelligenceExecution.execute.bind(intelligenceExecution),
+            [{
+              operation: intelligenceOperation,
+              request: {
+                ...bridgeInput.value.request,
+                intelligence_input: body.intelligence_input || null,
+              },
+              requestContext: context.value,
+              authority: revalidated,
+              attachmentSet: attached,
+            }],
+          );
+          if (!executed.ok) return executed;
+          return frozen({
+            ...attached,
+            ...executed,
+            runtime_ready: attached.runtime_ready === true
+              && executed.runtime_ready === true,
+          });
         })();
         inFlightBootstrap.set(bridgeKey, pending);
         pending.finally(() => inFlightBootstrap.delete(bridgeKey));

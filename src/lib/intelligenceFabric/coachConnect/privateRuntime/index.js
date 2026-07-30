@@ -9,6 +9,7 @@ export * from './eligibility.js';
 export * from './evidence.js';
 export * from './failureCodes.js';
 export * from './liveComposition.js';
+export * from './intelligenceExecution.js';
 export * from './liveBindings/index.js';
 export * from './sessionResolver.js';
 export * from './subjectRegistryPort.js';

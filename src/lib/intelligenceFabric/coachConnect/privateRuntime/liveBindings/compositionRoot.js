@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { Buffer } from 'node:buffer';
+import Redis from 'ioredis';
 import { deepFreeze } from '../../../validation.js';
 import {
   createCanonicalAsyncSecurityServiceV2,
@@ -35,6 +36,15 @@ import {
 import {
   readPrivateRuntimeLiveConfigurationAuthorityV1,
 } from './configurationAuthority.js';
+import {
+  readPrivateLiveProductExecutionBindingV1,
+} from './productExecutionBinding.js';
+import {
+  createPrivateLiveProductStoreV1,
+} from './privateLiveProductStore.js';
+import {
+  createPrivateRuntimeIntelligenceExecutionV1,
+} from '../intelligenceExecution.js';
 import {
   PRIVATE_RUNTIME_APPROVED_CAPABILITIES,
   PRIVATE_RUNTIME_CONTRACT_VERSIONS,
@@ -181,6 +191,18 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   resolveReference,
   fetchImpl = globalThis.fetch,
   clock = () => Date.now(),
+  operatorContextBridge = null,
+  resolveOperatorContext = null,
+  resolveOperatorBridgeInput = null,
+  operatorActivationDecision = async () => false,
+  createProductStoreClient = (url) => new Redis(url, {
+    lazyConnect: true,
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: 1,
+    connectTimeout: 5_000,
+    commandTimeout: 5_000,
+    tls: {},
+  }),
 } = {}) {
   if (typeof createLiveComposition !== 'function') return makeDeniedComposition();
   const adapterSourceSha256 = env.MORE_PRIVATE_RUNTIME_QUALIFIED_ADAPTER_SOURCE_SHA256;
@@ -284,17 +306,60 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
       productBindingAttestation: productBinding,
       nowMs: clock(),
     });
-  const coachConnectAdapter =
-    createExistingCoachConnectLiveAttachmentAdapterV1({
+  const coachConnectAdapter = productBinding.coach_connect_runtime
+    ? createExistingCoachConnectLiveAttachmentAdapterV1({
       productBindingAttestation: productBinding,
       nowMs: clock(),
-    });
+    })
+    : null;
   const privateRuntimeBridge = createPrivateRuntimeLiveAttachmentCoordinatorV1({
     businessEngineAdapter,
     subscriptionRuntimeAdapter,
     coachConnectAdapter,
     clock: () => new Date(clock()).toISOString(),
   });
+  let intelligenceExecution = null;
+  const productExecutionBinding = await readPrivateLiveProductExecutionBindingV1({
+    env,
+    resolveReference: secretResolver,
+    environmentId: authority.authority_packet.environment_id,
+    configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
+    productBindingAttestation: productBinding,
+    nowMs: clock(),
+  });
+  if (productExecutionBinding.ok) {
+    const productStoreUrl = await secretResolver(
+      productExecutionBinding.binding.product_store_connection_ref,
+      {
+        purpose: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_CONNECTION',
+        secret: true,
+      },
+    );
+    if (typeof productStoreUrl !== 'string'
+      || !productStoreUrl.startsWith('rediss://')) {
+      return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
+    }
+    let productClient;
+    try {
+      productClient = createProductStoreClient(productStoreUrl);
+      intelligenceExecution = createPrivateRuntimeIntelligenceExecutionV1({
+        productStore: createPrivateLiveProductStoreV1({
+          client: productClient,
+          namespacePrefix:
+            productExecutionBinding.binding.persistence_namespace_prefix,
+          exactScope: productExecutionBinding.binding.exact_scope,
+          clock: () => new Date(clock()).toISOString(),
+        }),
+        binding: productExecutionBinding.binding,
+        productBindingAttestation: productBinding,
+        clock: () => new Date(clock()).toISOString(),
+      });
+    } catch {
+      return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
+    }
+  } else if (env.MORE_PRIVATE_RUNTIME_PRODUCT_EXECUTION_BINDING_REF != null) {
+    return makeDeniedComposition(productExecutionBinding.code, 503);
+  }
 
   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
 
@@ -481,7 +546,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
       requested_attachments: [
         'BUSINESS_ENGINE',
         'SUBSCRIPTION_RUNTIME',
-        'COACH_CONNECT',
+        ...(productBinding.coach_connect_runtime ? ['COACH_CONNECT'] : []),
       ],
       correlation_id: requestContext.correlation_ref,
       requested_at: authorityDecision.evaluated_at,
@@ -536,10 +601,15 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     developerAccessFacade,
     assertionPort,
     privateRuntimeBridge,
+    intelligenceExecution,
     resolveRequestContext: contextFor,
     resolveBridgeInput: bridgeInput,
+    operatorContextBridge,
+    resolveOperatorContext,
+    resolveOperatorBridgeInput,
     serializeAuthenticatedSession,
     activationDecision: active,
+    operatorActivationDecision,
     providerAdapterBound: true,
   });
   return Object.freeze({

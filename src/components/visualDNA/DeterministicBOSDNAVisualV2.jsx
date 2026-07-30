@@ -59,7 +59,7 @@ function isPrebuiltViewModel(source) {
 /**
  * Resolve a display view model without inventing personal facts.
  * Prefers prebuilt viewModel; rebuilds from profile/narrative when needed.
- * Avoids silent Wally-sample substitution for empty customer data.
+ * Avoids silent synthetic-sample substitution for empty customer data.
  */
 function resolveViewModel({ viewModel, profile, narrative, allowSampleFallback = false }) {
   const preferred = viewModel || (isPrebuiltViewModel(profile) ? profile : null);
@@ -70,15 +70,15 @@ function resolveViewModel({ viewModel, profile, narrative, allowSampleFallback =
   const raw = preferred || profile || {};
   const built = buildVisualDNAViewModel(raw, narrative || {});
   const hasDimensions = Array.isArray(built.topDimensions) && built.topDimensions.length > 0;
-  const looksLikeWally = built.profileId === 'mm-20260531-asovnjz4' && built.name === 'Wally Malesh';
+  const isSyntheticSample = built.profileId === 'mm-20990103-labsyn03' && built.name === 'Rowan Field';
 
-  if (!hasDimensions || (looksLikeWally && !allowSampleFallback && !isPrebuiltViewModel(raw))) {
+  if (!hasDimensions || (isSyntheticSample && !allowSampleFallback && !isPrebuiltViewModel(raw))) {
     return {
       ...built,
-      topDimensions: hasDimensions && !looksLikeWally ? built.topDimensions : [],
-      primaryDimension: looksLikeWally && !allowSampleFallback ? null : built.primaryDimension,
-      secondaryDimension: looksLikeWally && !allowSampleFallback ? null : built.secondaryDimension,
-      tertiaryDimension: looksLikeWally && !allowSampleFallback ? null : built.tertiaryDimension,
+      topDimensions: hasDimensions && !isSyntheticSample ? built.topDimensions : [],
+      primaryDimension: isSyntheticSample && !allowSampleFallback ? null : built.primaryDimension,
+      secondaryDimension: isSyntheticSample && !allowSampleFallback ? null : built.secondaryDimension,
+      tertiaryDimension: isSyntheticSample && !allowSampleFallback ? null : built.tertiaryDimension,
       name: firstLine(raw.person_name, raw.name, built.name, 'Profile Subject'),
       company: firstLine(raw.company_name, raw.company, built.company, '—'),
       profileId: firstLine(raw.profileId, raw.profile_id, built.profileId, '—'),
