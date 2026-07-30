@@ -7,6 +7,9 @@ import {
   subdev1BrowserCookie,
   subdev1ContextCookie,
 } from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/operatorBridge/index.js';
+import {
+  buildPrivateRuntimeOperatorBridgeDeploymentBindingV1,
+} from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/operatorBridgeBinding.js';
 
 const defaultStore = new InMemorySubdev1OperatorBridgeStore();
 
@@ -222,4 +225,57 @@ export function createSubdev1OperatorHandler({
   };
 }
 
-export default createSubdev1OperatorHandler();
+export function createSubdev1OperatorDeploymentHandler({
+  env = globalThis.process?.env || {},
+  buildBinding = buildPrivateRuntimeOperatorBridgeDeploymentBindingV1,
+} = {}) {
+  let resolvedHandler = null;
+  let pending = null;
+
+  return async function subdev1OperatorDeploymentHandler(req, res) {
+    if (env.MORE_PRIVATE_RUNTIME_LIVE_ENABLED !== 'true'
+      || env.MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED !== 'false'
+      || env.MORE_SUBDEV1_OPERATOR_ENABLED !== 'true') {
+      return createSubdev1OperatorHandler({
+        env: {
+          ...env,
+          MORE_SUBDEV1_OPERATOR_ENABLED: 'false',
+        },
+        store: null,
+        profileRepository: null,
+      })(req, res);
+    }
+    if (resolvedHandler == null) {
+      if (pending == null) {
+        pending = Promise.resolve(buildBinding({ env }))
+          .then((binding) => {
+            if (binding?.ok !== true
+              || binding?.operatorStore == null
+              || binding?.profileRepository == null) {
+              return null;
+            }
+            return createSubdev1OperatorHandler({
+              env,
+              store: binding.operatorStore,
+              profileRepository: binding.profileRepository,
+            });
+          })
+          .catch(() => null)
+          .finally(() => {
+            pending = null;
+          });
+      }
+      resolvedHandler = await pending;
+    }
+    if (resolvedHandler == null) {
+      return createSubdev1OperatorHandler({
+        env,
+        store: null,
+        profileRepository: null,
+      })(req, res);
+    }
+    return resolvedHandler(req, res);
+  };
+}
+
+export default createSubdev1OperatorDeploymentHandler();

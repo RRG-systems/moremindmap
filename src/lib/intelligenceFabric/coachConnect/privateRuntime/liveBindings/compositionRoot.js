@@ -46,6 +46,14 @@ import {
   createPrivateRuntimeIntelligenceExecutionV1,
 } from '../intelligenceExecution.js';
 import {
+  createExactVaultProfileReader,
+  createSubdev1CanonicalExactProfileRepository,
+  createUpstashSubdev1OperatorBridgeStore,
+} from '../operatorBridge/index.js';
+import {
+  createPrivateRuntimeOperatorBridgeLiveBindingV1,
+} from './operatorBridgeBinding.js';
+import {
   PRIVATE_RUNTIME_APPROVED_CAPABILITIES,
   PRIVATE_RUNTIME_CONTRACT_VERSIONS,
 } from '../contracts.js';
@@ -194,7 +202,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   operatorContextBridge = null,
   resolveOperatorContext = null,
   resolveOperatorBridgeInput = null,
-  operatorActivationDecision = async () => false,
+  operatorActivationDecision = null,
   createProductStoreClient = (url) => new Redis(url, {
     lazyConnect: true,
     enableOfflineQueue: false,
@@ -319,6 +327,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     clock: () => new Date(clock()).toISOString(),
   });
   let intelligenceExecution = null;
+  let productClient = null;
   const productExecutionBinding = await readPrivateLiveProductExecutionBindingV1({
     env,
     resolveReference: secretResolver,
@@ -339,7 +348,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
       || !productStoreUrl.startsWith('rediss://')) {
       return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
     }
-    let productClient;
     try {
       productClient = createProductStoreClient(productStoreUrl);
       intelligenceExecution = createPrivateRuntimeIntelligenceExecutionV1({
@@ -359,6 +367,44 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     }
   } else if (env.MORE_PRIVATE_RUNTIME_PRODUCT_EXECUTION_BINDING_REF != null) {
     return makeDeniedComposition(productExecutionBinding.code, 503);
+  }
+
+  let resolvedOperatorContextBridge = operatorContextBridge;
+  let resolvedOperatorContext = resolveOperatorContext;
+  let resolvedOperatorBridgeInput = resolveOperatorBridgeInput;
+  let resolvedOperatorActivationDecision = operatorActivationDecision;
+  if (resolvedOperatorContextBridge == null
+    && resolvedOperatorContext == null
+    && resolvedOperatorBridgeInput == null
+    && resolvedOperatorActivationDecision == null
+    && productExecutionBinding.ok
+    && productClient != null) {
+    const deploymentStore = createUpstashSubdev1OperatorBridgeStore({
+      configuration: remoteConfiguration,
+      resolveSecretReference: secretResolver,
+      fetchImpl,
+    });
+    const profileRepository = createSubdev1CanonicalExactProfileRepository({
+      readCanonicalProfile: createExactVaultProfileReader({ client: productClient }),
+      productBindingAttestation: productBinding,
+      productExecutionBinding: productExecutionBinding.binding,
+      statePort,
+      environmentId: authority.authority_packet.environment_id,
+    });
+    const operatorBinding = createPrivateRuntimeOperatorBridgeLiveBindingV1({
+      env,
+      store: deploymentStore,
+      profileRepository,
+      authority,
+      productBindingAttestation: productBinding,
+      productExecutionBinding: productExecutionBinding.binding,
+      clock,
+    });
+    resolvedOperatorContextBridge = operatorBinding.operatorContextBridge;
+    resolvedOperatorContext = operatorBinding.resolveOperatorContext;
+    resolvedOperatorBridgeInput = operatorBinding.resolveOperatorBridgeInput;
+    resolvedOperatorActivationDecision =
+      operatorBinding.operatorActivationDecision;
   }
 
   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
@@ -604,12 +650,13 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     intelligenceExecution,
     resolveRequestContext: contextFor,
     resolveBridgeInput: bridgeInput,
-    operatorContextBridge,
-    resolveOperatorContext,
-    resolveOperatorBridgeInput,
+    operatorContextBridge: resolvedOperatorContextBridge,
+    resolveOperatorContext: resolvedOperatorContext,
+    resolveOperatorBridgeInput: resolvedOperatorBridgeInput,
     serializeAuthenticatedSession,
     activationDecision: active,
-    operatorActivationDecision,
+    operatorActivationDecision:
+      resolvedOperatorActivationDecision || (async () => false),
     providerAdapterBound: true,
   });
   return Object.freeze({
