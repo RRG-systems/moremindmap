@@ -25,6 +25,8 @@ import {
   buildBehavioralDNAInterpretation,
   buildExecutiveIntelligencePacket,
 } from '../behavioralDNAInterpretation.js';
+import { getOrBuildBosTruthfulnessLayer } from '../bosTruthfulness/buildTruthfulnessLayer.js';
+import { applyTruthfulnessGate } from './truthfulnessGate.js';
 
 /**
  * Main entry point for V3 narrative expansion.
@@ -53,6 +55,9 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   // UNIFIED INTERPRETER: Produces ONE shared interpretation artifact
   // All 7 sections render FROM this shared interpretation (not independent reinvention)
   const unified = buildUnifiedInterpretation(canonical);
+  // Layer 2 is a deterministic, non-persisted projection. It does not alter
+  // Layer 1 scores, canonical contracts, or the payload sent to GPT.
+  const truthfulness = getOrBuildBosTruthfulnessLayer(canonical);
   
   // Keep old structured interpreter for backward compat with buildMicroScenario
   const interpreted = interpretCanonical(canonical);
@@ -96,6 +101,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     fallback_used: false,
     openai_error_message: null,
     generation_time_ms: 0,
+    truthfulness_version: truthfulness.version,
+    truthfulness_summary: truthfulness.summary,
+    // Additive render-time contract only. This is not persisted to the
+    // canonical dossier and is not included in the Layer 3 GPT request.
+    truthfulness,
   };
 
   const startTime = performance.now();
@@ -210,6 +220,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
       rendering.violations = violations;
       rendering.groundingUsed = extractGroundingUsed(section, interpreted);
       rendering = normalizeStructuredSection(section, rendering) || getDefaultSection(section);
+      rendering = applyTruthfulnessGate(section, rendering, truthfulness);
     } catch (error) {
       console.error(`[V3 SECTION FAILURE] section: ${section}`, error);
       rendering = getDefaultSection(section);

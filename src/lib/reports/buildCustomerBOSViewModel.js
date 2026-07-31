@@ -354,6 +354,65 @@ function presentScoreMeaningForCustomer(scoreMeaning) {
   };
 }
 
+const TRUTHFULNESS_INSUFFICIENT = 'Insufficient Evidence';
+
+function dimensionClaimForScore(narrative, score) {
+  const raw = String(score?.dimensionTechnical || score?.dimension || '').trim().toLowerCase();
+  const aliases = {
+    command: 'vector',
+    tempo: 'velocity',
+    'relational awareness': 'signal',
+    precision: 'fidelity',
+    influence: 'leverage',
+    adaptability: 'flex',
+    structure: 'framework',
+    perspective: 'horizon',
+  };
+  const key = aliases[raw] || raw;
+  return narrative?.truthfulness?.claims_by_id?.[`dimension_${key}`] || null;
+}
+
+function truthfulnessClaimText(claim) {
+  if (!claim || claim.evidence_sufficiency?.status !== 'sufficient') {
+    return TRUTHFULNESS_INSUFFICIENT;
+  }
+  const confidence = String(claim.confidence?.band || 'very_low').replace(/_/g, ' ');
+  return `${claim.claim} Confidence: ${confidence}.`;
+}
+
+function applyTruthfulnessToScoreCards(cards, narrative) {
+  return (cards || []).map((card) => {
+    const claimContract = dimensionClaimForScore(narrative, card);
+    return {
+      ...card,
+      oneLine: truthfulnessClaimText(claimContract),
+      claimContract,
+      evidenceSufficiency: claimContract?.evidence_sufficiency?.status || 'insufficient',
+      confidence: claimContract?.confidence || null,
+    };
+  });
+}
+
+function applyTruthfulnessToScoreMeaning(scoreMeaning, narrative) {
+  if (!scoreMeaning) return scoreMeaning;
+  return {
+    ...scoreMeaning,
+    scores: (scoreMeaning.scores || []).map((score) => {
+      const claimContract = dimensionClaimForScore(narrative, score);
+      return {
+        ...score,
+        whatItMeans: truthfulnessClaimText(claimContract),
+        howItHelps: TRUTHFULNESS_INSUFFICIENT,
+        howItWorksAgainst: TRUTHFULNESS_INSUFFICIENT,
+        bestUse: TRUTHFULNESS_INSUFFICIENT,
+        claimContract,
+        evidenceSufficiency: claimContract?.evidence_sufficiency?.status || 'insufficient',
+        confidence: claimContract?.confidence || null,
+      };
+    }),
+  };
+}
+
 /**
  * Overview expandable cards — bind customer section bodies only.
  * Raw executive/profileDNA/scaling narrative bodies are not used as content.
@@ -377,6 +436,7 @@ function buildOverviewSections(customerBodies) {
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(exec.content || exec.body || ''),
       ),
+      claimContracts: exec.claimContracts || [],
     },
     {
       id: 'core-operating-pattern',
@@ -387,6 +447,7 @@ function buildOverviewSections(customerBodies) {
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(core.content || core.body || ''),
       ),
+      claimContracts: core.claimContracts || [],
     },
     {
       id: 'key-advantage',
@@ -397,6 +458,7 @@ function buildOverviewSections(customerBodies) {
       badge: 'Strength',
       defaultOpen: false,
       content: stripCustomerMarkdown(advantage.content || advantage.body || ''),
+      claimContracts: advantage.claimContracts || [],
     },
     {
       id: 'main-scaling-risk',
@@ -407,6 +469,7 @@ function buildOverviewSections(customerBodies) {
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(risk.content || risk.body || ''),
       ),
+      claimContracts: risk.claimContracts || [],
     },
     {
       id: 'main-constraint',
@@ -420,6 +483,7 @@ function buildOverviewSections(customerBodies) {
           mainConstraint?.content || mainConstraint?.body || '',
         ),
       ),
+      claimContracts: mainConstraint?.claimContracts || [],
     },
   ];
 }
@@ -446,6 +510,7 @@ function buildFiveFuturesSections(customerFutureLandscape) {
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(customerFutureLandscape.content || ''),
       ),
+      claimContracts: customerFutureLandscape.claimContracts || [],
     },
     ...(customerFutureLandscape.futures || []).map((future, index) => ({
       id: `future-${index + 1}`,
@@ -456,6 +521,7 @@ function buildFiveFuturesSections(customerFutureLandscape) {
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(future.content || ''),
       ),
+      claimContracts: customerFutureLandscape.claimContracts || [],
     })),
   ];
 
@@ -502,6 +568,32 @@ function buildHowToUseThis(personName, operatingScores) {
       {
         title: 'Revisit when evidence changes',
         body: `This BOS reflects ${personName === 'You' ? 'your' : `${personName}'s`} assessment at a point in time. Revisit after major role changes, team growth, or when new friction patterns appear.`,
+      },
+    ],
+  };
+}
+
+function buildTruthfulHowToUseThis(personName) {
+  return {
+    title: 'How to Use This',
+    intro:
+      'This BOS separates measured scores, inferences, hypotheses, and insufficient evidence. Treat it as an evidence-labeled assessment view, not a fixed type or prediction.',
+    steps: [
+      {
+        title: 'Start with measured scores',
+        body: 'Use score claims only when their evidence contract is sufficient. A score order does not by itself prove a strength, risk, or workplace outcome.',
+      },
+      {
+        title: 'Treat One Move as a hypothesis',
+        body: 'Test the proposed move through observed follow-through before treating it as effective.',
+      },
+      {
+        title: 'Do not treat Five Futures as predictions',
+        body: TRUTHFULNESS_INSUFFICIENT,
+      },
+      {
+        title: 'Revisit when evidence changes',
+        body: `This BOS reflects ${personName === 'You' ? 'your' : `${personName}'s`} submitted assessment at a point in time. New observations can confirm, revise, or reject its inferences.`,
       },
     ],
   };
@@ -579,8 +671,13 @@ export function buildCustomerBOSViewModel({
   });
 
   // Customer presentation layer (display-time only; does not mutate source objects)
-  const operatingScores = presentOperatingScoresForCustomer(operatingScoresRaw);
-  const scoreMeaning = presentScoreMeaningForCustomer(scoreMeaningRaw);
+  const truthfulnessActive = narrative?.truthfulness_version === 'bos_truthfulness_v1';
+  let operatingScores = presentOperatingScoresForCustomer(operatingScoresRaw);
+  let scoreMeaning = presentScoreMeaningForCustomer(scoreMeaningRaw);
+  if (truthfulnessActive) {
+    operatingScores = applyTruthfulnessToScoreCards(operatingScores, narrative);
+    scoreMeaning = applyTruthfulnessToScoreMeaning(scoreMeaning, narrative);
+  }
 
   // L3R: customer-only section bodies from structured facts (not cleaned raw narrative)
   const customerBodies = buildCustomerSectionBodies({
@@ -610,7 +707,9 @@ export function buildCustomerBOSViewModel({
       mainConstraintPreview: mainConstraintBody.preview || mainConstraintBody.body || '',
     });
   const teamFitBody = customerBodies.customerTeamFit;
-  const howToUseThis = buildHowToUseThis(displayName || 'You', operatingScores);
+  const howToUseThis = truthfulnessActive
+    ? buildTruthfulHowToUseThis(displayName || 'You')
+    : buildHowToUseThis(displayName || 'You', operatingScores);
   const advancedSource = buildAdvancedSourceText(canonical, narrative);
   const technicalSource = buildTechnicalSourceBundle(canonical, narrative);
 
@@ -625,6 +724,7 @@ export function buildCustomerBOSViewModel({
     interventionType: oneMoveBody.interventionType || '',
     interventionTypeRaw: oneMoveBody.interventionTypeRaw || '',
     role: 'one_move',
+    claimContracts: oneMoveBody.claimContracts || [],
   };
 
   const customerMainConstraint = {
@@ -634,6 +734,7 @@ export function buildCustomerBOSViewModel({
       collapseDuplicateCustomerPhrasing(mainConstraintBody.content || mainConstraintBody.body || ''),
     ),
     role: 'main_constraint',
+    claimContracts: mainConstraintBody.claimContracts || [],
   };
 
   const customerSummary = {
@@ -651,7 +752,9 @@ export function buildCustomerBOSViewModel({
       profileName: displayName || 'Your Behavioral Operating System',
       title: 'Behavioral Operating System',
       subtitle:
-        'A clear map of how you think, decide, communicate, lead, and respond under pressure.',
+        truthfulnessActive
+          ? 'An evidence-labeled view of measured scores, bounded inferences, hypotheses, and abstentions.'
+          : 'A clear map of how you think, decide, communicate, lead, and respond under pressure.',
       profileId: profileId || data?.profile_id || canonical?.profile_id || '',
       company,
     },
@@ -667,6 +770,7 @@ export function buildCustomerBOSViewModel({
       content: stripCustomerMarkdown(
         collapseDuplicateCustomerPhrasing(teamFitBody?.content || teamFitBody?.body || ''),
       ),
+      claimContracts: teamFitBody?.claimContracts || [],
     },
     howToUseThis,
     advancedSource,
@@ -692,6 +796,7 @@ export function buildCustomerBOSViewModel({
     // Technical operating/score meaning before customer presentation (for audits)
     technicalOperatingScores: operatingScoresRaw,
     technicalScoreMeaning: scoreMeaningRaw,
+    truthfulness: truthfulnessActive ? narrative.truthfulness : null,
   };
 }
 
