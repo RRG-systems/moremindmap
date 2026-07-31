@@ -65,7 +65,7 @@ function detectSelfPerceptionMismatch(systemsAccountability, stallPatterns, vect
   
   // Claims coachable but high rigidity signals
   const claimsCoachable = systemsAccountability.coachability === 'claimed_yes';
-  const highRigidity = (vectorScores.framework || 0) > 6.5 && (vectorScores.flex || 0) < 4.0;
+  const highRigidity = (vectorScores.framework || 0) > 0.65 && (vectorScores.flex || 0) < 0.40;
   
   if (claimsCoachable && highRigidity) {
     mismatches.push({
@@ -212,7 +212,7 @@ function detectDelegationTension(stallPatterns, businessReality, vectorScores) {
   const delegationGap = stallPatterns?.avoidance_patterns?.includes('delegation') ||
                         stallPatterns?.attention_direction === 'execution_gaps';
   const hasTeam = businessReality?.leadership_scope !== null;
-  const highControl = vectorScores.vector > 6.5;
+  const highControl = vectorScores.vector > 0.65;
   
   if (delegationGap && hasTeam && highControl) {
     tensions.push({
@@ -235,8 +235,8 @@ function detectRelationalExecutionTension(stallPatterns, vectorScores, lifeDirec
   const tensions = [];
   
   const relationalFrustration = stallPatterns?.frustrations?.includes('relational');
-  const lowSignal = vectorScores.signal < 3.5;
-  const highVector = vectorScores.vector > 6.5;
+  const lowSignal = vectorScores.signal < 0.35;
+  const highVector = vectorScores.vector > 0.65;
   const claimsRelationships = lifeDirection?.stated_priorities?.includes('family') ||
                                lifeDirection?.stated_priorities?.includes('relationships');
   

@@ -1,3 +1,9 @@
+import { resolveCanonicalBehavioralData } from './canonicalBehavioralResolver.js';
+import {
+  BOS_BEHAVIORAL_EVIDENCE_PATHS,
+  serializePromptPacket,
+} from './promptPacketIntegrity.js';
+
 const FIVE_FUTURES_VERSION = 'five_futures_v1';
 const ONE_MOVE_VERSION = 'one_move_v1';
 
@@ -31,47 +37,10 @@ function truncate(value, maxLength = 12000) {
   return `${body.slice(0, maxLength)}\n[TRUNCATED ${body.length - maxLength} CHARACTERS]`;
 }
 
-function compactJson(value, maxLength = 70000) {
-  return truncate(JSON.stringify(value ?? null, null, 2), maxLength);
-}
-
-function unwrapCanonical(canonicalProfile) {
-  return (
-    canonicalProfile?.canonical_profile_json ||
-    canonicalProfile?.canonical_dossier?.canonical_profile_json ||
-    canonicalProfile?.canonical_dossier ||
-    canonicalProfile ||
-    {}
-  );
-}
-
-function rankedDimensions(canonical) {
-  const ranked =
-    canonical?.rescoring_gpt?.ranked_dimensions ||
-    canonical?.rescoring_v1?.ranked_dimensions ||
-    canonical?.ranked_dimensions ||
-    canonical?.dimension_scores ||
-    [];
-
-  if (!Array.isArray(ranked)) return [];
-  return ranked.slice(0, 8).map((item) => ({
-    dimension: item.dimension || item.name || item.key || item.label || null,
-    score:
-      item.display_score ??
-      item.support_adjusted_score ??
-      item.gpt_rescored_score ??
-      item.raw_score ??
-      item.score ??
-      null,
-    evidence_count: item.evidence_count ?? item.contributing_answer_count ?? null,
-    confidence: item.confidence ?? null,
-    evidence_band: item.evidence_band ?? null,
-    intensity_band: item.intensity_band ?? null
-  }));
-}
-
 function compactCanonicalProfile(canonicalProfile) {
-  const canonical = unwrapCanonical(canonicalProfile);
+  const resolved = resolveCanonicalBehavioralData(canonicalProfile);
+  const canonical = resolved.canonical;
+
   return {
     person_name:
       canonicalProfile?.person_name ||
@@ -87,7 +56,14 @@ function compactCanonicalProfile(canonicalProfile) {
       canonical?.behavioral_profile?.profile_type ||
       canonical?.render_ready?.profile_dna ||
       null,
-    ranked_dimensions: rankedDimensions(canonical),
+    ranked_dimensions: resolved.ranked_dimensions.slice(0, 8).map((item) => ({
+      dimension: item.dimension,
+      score: item.score,
+      evidence_count: item.evidence_count,
+      confidence: item.confidence,
+      evidence_band: item.evidence_band,
+      intensity_band: item.intensity_band,
+    })),
     behavioral_dna_interpretation:
       canonical?.behavioral_dna_interpretation ||
       canonical?.behavioral_dna ||
@@ -322,13 +298,20 @@ export function buildFiveFuturesPrompt({
     real_estate_business_model_snapshot: modelSnapshot(realEstateBusinessModel)
   };
 
+  const packet = serializePromptPacket(userPayload, {
+    maxCharacters: 60000,
+    requiredTopLevelKeys: Object.keys(userPayload),
+    preservedPaths: BOS_BEHAVIORAL_EVIDENCE_PATHS,
+  });
+
   return {
     version: FIVE_FUTURES_VERSION,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: compactJson(userPayload, 60000) }
+      { role: 'user', content: packet.json }
     ],
-    prompt_text: `${system}\n\n${compactJson(userPayload, 60000)}`,
+    prompt_text: `${system}\n\n${packet.json}`,
+    prompt_packet_integrity: packet.diagnostics,
     required_future_keys: REQUIRED_FUTURE_KEYS,
     required_future_labels: REQUIRED_FUTURE_LABELS
   };
@@ -455,13 +438,20 @@ export function buildFiveFuturesOnlyPrompt({
     real_estate_business_model_snapshot: modelSnapshot(realEstateBusinessModel)
   };
 
+  const packet = serializePromptPacket(userPayload, {
+    maxCharacters: 52000,
+    requiredTopLevelKeys: Object.keys(userPayload),
+    preservedPaths: BOS_BEHAVIORAL_EVIDENCE_PATHS,
+  });
+
   return {
     version: FIVE_FUTURES_VERSION,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: compactJson(userPayload, 52000) }
+      { role: 'user', content: packet.json }
     ],
-    prompt_text: `${system}\n\n${compactJson(userPayload, 52000)}`,
+    prompt_text: `${system}\n\n${packet.json}`,
+    prompt_packet_integrity: packet.diagnostics,
     required_future_keys: REQUIRED_FUTURE_KEYS,
     required_future_labels: REQUIRED_FUTURE_LABELS
   };
@@ -553,13 +543,20 @@ export function buildOneMovePrompt({
     }
   };
 
+  const packet = serializePromptPacket(userPayload, {
+    maxCharacters: 42000,
+    requiredTopLevelKeys: Object.keys(userPayload),
+    preservedPaths: BOS_BEHAVIORAL_EVIDENCE_PATHS,
+  });
+
   return {
     version: ONE_MOVE_VERSION,
     messages: [
       { role: 'system', content: system },
-      { role: 'user', content: compactJson(userPayload, 42000) }
+      { role: 'user', content: packet.json }
     ],
-    prompt_text: `${system}\n\n${compactJson(userPayload, 42000)}`
+    prompt_text: `${system}\n\n${packet.json}`,
+    prompt_packet_integrity: packet.diagnostics,
   };
 }
 

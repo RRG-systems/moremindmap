@@ -5,7 +5,7 @@
  * 
  * DESIGN:
  * - Accepts valid profileInput with partial or complete dimension_scores
- * - Uses real scores when available, defaults (2.0) when missing
+ * - Uses real scores when available, defaults to no-evidence topology (0.0) when missing
  * - Generates full canonical with generation_mode: "normal"
  * - Never generates emergency_inline skeleton
  * - If generation_mode becomes emergency_inline, job fails
@@ -48,10 +48,10 @@ function buildFullCanonical(profileInput, jobId) {
   // All 8 dimensions - required for canonical structure
   const requiredDims = ['vector', 'signal', 'fidelity', 'velocity', 'leverage', 'flex', 'framework', 'horizon']
   
-  // Build vector_scores: use real scores where available, fallback to 2.0 (neutral) if missing
+  // Build vector_scores: zero plus missing evidence is the canonical no-evidence state.
   const vector_scores = {}
   requiredDims.forEach(dim => {
-    vector_scores[dim] = dimensionScores[dim]?.raw_score ?? 2.0
+    vector_scores[dim] = dimensionScores[dim]?.raw_score ?? 0.0
   })
   
   // Build ranked_dimensions from vector_scores

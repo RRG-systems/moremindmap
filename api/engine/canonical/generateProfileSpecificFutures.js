@@ -148,7 +148,7 @@ function buildProtectedStrengthFuture(primary_dim, secondary_dim, scores, canoni
   let likelihood = 'possible';
   
   // Tailored by primary + secondary combination
-  if (primary_dim === 'vector' && scores.vector > 6.5) {
+  if (primary_dim === 'vector' && scores.vector > 0.65) {
     if (secondary_dim === 'framework') {
       title = 'Strategic Operator Commander';
       trajectory = 'Vector channeled through systems. Rapid decisions + structured execution = force multiplier. Organization scales systematically.';
@@ -159,7 +159,7 @@ function buildProtectedStrengthFuture(primary_dim, secondary_dim, scores, canoni
       title = 'Momentum Builder';
       trajectory = 'Vector energy invested in team development. Organization learns to move with clarity and purpose.';
     }
-  } else if (primary_dim === 'signal' && scores.signal > 6.5) {
+  } else if (primary_dim === 'signal' && scores.signal > 0.65) {
     if (secondary_dim === 'framework') {
       title = 'Systems-Informed Insights';
       trajectory = 'Pattern recognition grounded in structure. Operator becomes architect + seer. Strategic clarity increases.';
@@ -170,7 +170,7 @@ function buildProtectedStrengthFuture(primary_dim, secondary_dim, scores, canoni
       title = 'Trusted Advisor';
       trajectory = 'Pattern insights valued + acted on. Organization adapts based on operator perception. Resilience increases.';
     }
-  } else if (primary_dim === 'fidelity' && scores.fidelity > 6.5) {
+  } else if (primary_dim === 'fidelity' && scores.fidelity > 0.65) {
     if (secondary_dim === 'vector') {
       title = 'Precision Executor';
       trajectory = 'Detail mastery + direction clarity. Quality + speed both high. Organization becomes known for excellence.';
@@ -181,7 +181,7 @@ function buildProtectedStrengthFuture(primary_dim, secondary_dim, scores, canoni
       title = 'Craftsmanship Culture';
       trajectory = 'Quality standards become org culture. Team adopts precision focus. Product/service excellence compounds.';
     }
-  } else if (primary_dim === 'framework' && scores.framework > 6.5) {
+  } else if (primary_dim === 'framework' && scores.framework > 0.65) {
     title = 'Architect of Scale';
     trajectory = 'Structural thinking scaled into org design. Systems become repeatable, scalable. Organization grows coherently.';
   } else {

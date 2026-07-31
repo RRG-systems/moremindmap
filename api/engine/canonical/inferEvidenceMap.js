@@ -55,7 +55,7 @@ function mapDelegationEvidence(analyzedResponses, vectorScores, contradictions) 
   }
   
   const dimension_support = {};
-  if (vectorScores.vector > 6.5) {
+  if (vectorScores.vector > 0.65) {
     dimension_support.vector = `High (${vectorScores.vector.toFixed(1)}) - Control tendency from command preference`;
   }
   
@@ -102,10 +102,10 @@ function mapRelationalFrictionEvidence(analyzedResponses, vectorScores, contradi
   }
   
   const dimension_support = {};
-  if (vectorScores.signal < 3.5) {
+  if (vectorScores.signal < 0.35) {
     dimension_support.signal = `Low (${vectorScores.signal.toFixed(1)}) - Limited relational awareness capacity`;
   }
-  if (vectorScores.vector > 6.5) {
+  if (vectorScores.vector > 0.65) {
     dimension_support.vector = `High (${vectorScores.vector.toFixed(1)}) - Directive tendency may bypass calibration`;
   }
   
@@ -151,10 +151,10 @@ function mapSystemsWeaknessEvidence(analyzedResponses, vectorScores) {
   }
   
   const dimension_support = {};
-  if (vectorScores.framework < 4.5) {
+  if (vectorScores.framework < 0.45) {
     dimension_support.framework = `Low-Moderate (${vectorScores.framework.toFixed(1)}) - Limited process orientation`;
   }
-  if (vectorScores.velocity > 6.5) {
+  if (vectorScores.velocity > 0.65) {
     dimension_support.velocity = `High (${vectorScores.velocity.toFixed(1)}) - Speed may bypass systems building`;
   }
   

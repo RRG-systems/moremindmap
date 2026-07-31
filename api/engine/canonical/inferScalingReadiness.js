@@ -44,9 +44,9 @@ export function inferScalingReadiness(vectorScores, analyzedResponses, leadershi
     : 'Moderate - Supports people but inconsistent development investment';
   
   // Process thinking
-  let process_thinking = (vectorScores.framework > 6.0 && vectorScores.fidelity > 5.5)
+  let process_thinking = (vectorScores.framework > 0.60 && vectorScores.fidelity > 0.55)
     ? 'Strong - Thinks in systems and processes naturally'
-    : (vectorScores.framework < 4.0 || systems_accountability?.systems_thinking === 'low')
+    : (vectorScores.framework < 0.40 || systems_accountability?.systems_thinking === 'low')
     ? 'Weak - Ad-hoc executor, process-averse'
     : 'Moderate - Can build process when needed';
   

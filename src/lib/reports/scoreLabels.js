@@ -46,7 +46,7 @@ const DIMENSION_ONE_LINE = {
 export function normalizeOperatingScore(raw) {
   const value = Number(raw);
   if (!Number.isFinite(value)) return null;
-  return Math.min(1, Math.max(0, Math.abs(value)));
+  return Math.min(1, Math.max(0, value));
 }
 
 export function classifyOperatingScore(score) {
@@ -65,14 +65,16 @@ export function getDimensionOneLine(dimension) {
 export function getScoreFromProfile(dimension, data = {}, ranked = []) {
   const key = dimension.toLowerCase();
   const vectorScores = data.vector_scores || {};
+  const rankedEntry = (ranked || []).find(
+    (entry) => String(entry?.dimension || '').toLowerCase() === key,
+  );
+
+  const evidenceCount = rankedEntry?.evidence_count ?? rankedEntry?.contributing_answer_count;
+  if (evidenceCount === 0) return null;
 
   if (vectorScores[key] !== undefined && vectorScores[key] !== null) {
     return normalizeOperatingScore(vectorScores[key]);
   }
-
-  const rankedEntry = (ranked || []).find(
-    (entry) => String(entry?.dimension || '').toLowerCase() === key,
-  );
 
   if (!rankedEntry) return null;
 

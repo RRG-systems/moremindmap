@@ -1,3 +1,5 @@
+import { getQuestionByEvidenceRole } from '../questionEvidenceRegistry.js';
+
 /**
  * analyzeLongFormAnswers.js
  * 
@@ -221,25 +223,29 @@ export function analyzeSystemsAccountability(answerText) {
  */
 export function analyzeLongFormAnswers(profileInput) {
   const rawAnswers = profileInput.raw_answers || {};
+  const answerForRole = (role) => {
+    const question = getQuestionByEvidenceRole(role);
+    return question ? rawAnswers[`q${question.id}`] : null;
+  };
   
-  // Analyze Q2 (life direction)
-  const q2 = rawAnswers.q2;
+  // Analyze life direction evidence.
+  const q2 = answerForRole('life_direction');
   const life_direction = q2 ? analyzeLifeDirection(q2.answer_text) : null;
   
-  // Analyze Q24 (stall patterns)
-  const q24 = rawAnswers.q24;
+  // Analyze sustained-pressure and stall-pattern evidence.
+  const q24 = answerForRole('sustained_pressure');
   const stall_patterns = q24 ? analyzeStallPatterns(q24.answer_text) : null;
   
-  // Analyze Q26 (business reality)
-  const q26 = rawAnswers.q26;
+  // Analyze business operating-reality evidence.
+  const q26 = answerForRole('business_operating_reality');
   const business_reality = q26 ? analyzeBusinessReality(q26.answer_text) : null;
   
-  // Analyze Q27 (growth tension)
-  const q27 = rawAnswers.q27;
+  // Analyze growth-tension evidence.
+  const q27 = answerForRole('growth_tension');
   const growth_tension = q27 ? analyzeGrowthTension(q27.answer_text) : null;
   
-  // Analyze Q28 (systems/accountability)
-  const q28 = rawAnswers.q28;
+  // Analyze systems/accountability evidence.
+  const q28 = answerForRole('systems_accountability');
   const systems_accountability = q28 ? analyzeSystemsAccountability(q28.answer_text) : null;
   
   return {

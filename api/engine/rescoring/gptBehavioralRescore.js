@@ -246,6 +246,7 @@ CORE PRINCIPLES:
 
 SCORING CALIBRATION:
 - Scores are behavioral topology coordinates, NOT talent, competence, leadership quality, intelligence, or capability ratings.
+- Use the exact same topology unit as the supplied baseline and deterministic scores. Never convert scores to a 0-10 scale.
 - Default to preserving baseline and deterministic V1 numeric scores unless strong dossier evidence proves the topology is misweighted.
 - Numeric changes over 0.3 require explicit evidence in the rationale.
 - Numeric changes over 0.75 require multiple independent evidence sources.
@@ -436,8 +437,12 @@ function validateGPTRescoreOutput(output, canonical, selectedModel = getModelFor
     }
     foundDimensions.add(dim.dimension);
 
-    if (typeof dim.gpt_rescored_score !== 'number' || dim.gpt_rescored_score < -10 || dim.gpt_rescored_score > 10) {
+    const baselineDim = (canonical.ranked_dimensions || []).find((item) => item.dimension === dim.dimension);
+    const baselineScore = baselineDim?.score;
+    if (!Number.isFinite(dim.gpt_rescored_score)) {
       errors.push(`Invalid gpt_rescored_score for ${dim.dimension}: ${dim.gpt_rescored_score}`);
+    } else if (Number.isFinite(baselineScore) && Math.abs(dim.gpt_rescored_score - baselineScore) > 1.5) {
+      errors.push(`GPT score for ${dim.dimension} is outside the canonical topology unit`);
     }
 
     if (typeof dim.confidence !== 'number' || dim.confidence < 0 || dim.confidence > 1) {
@@ -502,13 +507,9 @@ function normalizeGPTScores(rescoring_gpt, canonical) {
     if (!baselineDim) return;
 
     // Ensure display_score equals gpt_rescored_score
-    if (!dim.display_score) {
+    if (!Number.isFinite(dim.display_score)) {
       dim.display_score = dim.gpt_rescored_score;
     }
-
-    // Ensure scores are bounded
-    dim.gpt_rescored_score = Math.max(-10, Math.min(10, dim.gpt_rescored_score));
-    dim.display_score = Math.max(-10, Math.min(10, dim.display_score));
 
     // Preserve baseline for audit
     dim.baseline_score = baselineDim.score;

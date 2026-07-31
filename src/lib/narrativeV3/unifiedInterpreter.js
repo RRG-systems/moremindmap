@@ -416,7 +416,7 @@ function detectActionPattern(vectorScores, writtenSignals, operatingMode, primar
     pattern.consequence = "momentum loss, accumulating debt";
     pattern.speed = "decelerating";
     pattern.evidence = ["avoidance explicitly mentioned"];
-  } else if (primaryScore > 1.5) {
+  } else if (primaryScore > 0.15) {
     pattern.pattern = "action-driven";
     pattern.trigger = "opportunity, urgency";
     pattern.consequence = "high execution speed but may miss details";
