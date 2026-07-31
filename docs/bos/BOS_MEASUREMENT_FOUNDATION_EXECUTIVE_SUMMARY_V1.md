@@ -34,4 +34,4 @@ The remaining 20 points are deliberately not claimed. They require work outside 
 
 ## Deployment status
 
-Pending the final clean commit and production deployment gate. See `BOS_DEPLOYMENT_EVIDENCE_V1.md` for the final receipt.
+The focused patch was fast-forwarded to `main` and deployed to production from commit `b6265144d2c6c8a23ff229b261b24a1a54219ea6`. Vercel reports the immutable deployment `READY`, the production alias responds normally, and read-only root, bundle, and retrieval-route smoke checks passed. See `BOS_DEPLOYMENT_EVIDENCE_V1.md` for the complete receipt.
