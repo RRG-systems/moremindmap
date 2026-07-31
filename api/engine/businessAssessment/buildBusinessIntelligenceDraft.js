@@ -1,3 +1,5 @@
+import { resolveCanonicalBehavioralData } from './canonicalBehavioralResolver.js';
+
 const DRAFT_VERSION = 'business_intelligence_draft_v1';
 
 const DIMENSION_LABELS = {
@@ -92,16 +94,6 @@ function maturityFromText(value, systemTerms = []) {
   };
 }
 
-function unwrapCanonical(canonicalProfile) {
-  return (
-    canonicalProfile?.canonical_profile_json ||
-    canonicalProfile?.canonical_dossier?.canonical_profile_json ||
-    canonicalProfile?.canonical_dossier ||
-    canonicalProfile ||
-    {}
-  );
-}
-
 function normalizeDimensionName(value) {
   const raw = lower(value);
   if (raw.includes('vector') || raw.includes('command')) return 'vector';
@@ -120,38 +112,17 @@ function dimensionLabel(value) {
   return DIMENSION_LABELS[key] || text(value) || 'Profile';
 }
 
-function rankedDimensions(canonical) {
-  const ranked =
-    canonical?.rescoring_gpt?.ranked_dimensions ||
-    canonical?.rescoring_v1?.ranked_dimensions ||
-    canonical?.ranked_dimensions ||
-    canonical?.dimension_scores ||
-    [];
-
-  if (!Array.isArray(ranked)) return [];
-  return ranked.map((item) => {
-    const dimension = item.dimension || item.name || item.key || item.label;
-    const value =
-      item.display_score ??
-      item.gpt_rescored_score ??
-      item.support_adjusted_score ??
-      item.raw_score ??
-      item.score ??
-      null;
-    return {
-      dimension: normalizeDimensionName(dimension),
-      label: dimensionLabel(dimension),
-      score: typeof value === 'number' ? value : Number(value),
-      evidence_count: item.evidence_count ?? item.contributing_answer_count ?? null,
-      confidence: item.confidence ?? null,
-      intensity_band: item.intensity_band ?? null
-    };
-  });
-}
-
 function extractBehavioralReality(canonicalProfile) {
-  const canonical = unwrapCanonical(canonicalProfile);
-  const ranked = rankedDimensions(canonical);
+  const resolved = resolveCanonicalBehavioralData(canonicalProfile);
+  const canonical = resolved.canonical;
+  const ranked = resolved.ranked_dimensions.map((item) => ({
+    dimension: normalizeDimensionName(item.dimension),
+    label: dimensionLabel(item.dimension),
+    score: item.score,
+    evidence_count: item.evidence_count,
+    confidence: item.confidence,
+    intensity_band: item.intensity_band,
+  }));
   const renderReady = canonical?.render_ready || {};
   const dna =
     canonical?.behavioral_dna_interpretation ||

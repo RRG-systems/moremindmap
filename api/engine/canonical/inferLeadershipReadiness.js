@@ -23,22 +23,22 @@ function assessScaleCapacity(vectorScores, leadershipArchitecture, systemsAccoun
   const signal = vectorScores.signal || 0;
   
   // High vector + horizon = can see and drive scale
-  if (vector > 6.5 && horizon > 6.5) {
+  if (vector > 0.65 && horizon > 0.65) {
     return 'High - Naturally thinks multi-level and drives organizational direction';
   }
   
   // High vector, low horizon = execution strong but limited strategic depth
-  if (vector > 6.5 && horizon < 5.0) {
+  if (vector > 0.65 && horizon < 0.50) {
     return 'Moderate - Strong execution but may hit ceiling without strategic scaffolding';
   }
   
   // Low vector = struggles to establish direction at scale
-  if (vector < 4.0) {
+  if (vector < 0.40) {
     return 'Low - Direction-setting becomes bottleneck as complexity increases';
   }
   
   // High framework + low flex = process-bound, struggles with scale chaos
-  if (framework > 7.0 && vectorScores.flex < 4.0) {
+  if (framework > 0.70 && vectorScores.flex < 0.40) {
     return 'Moderate - Process-oriented but rigidity limits adaptive scaling';
   }
   
@@ -54,22 +54,22 @@ function assessClarityGeneration(vectorScores, communicationStyle, leadershipArc
   const signal = vectorScores.signal || 0;
   
   // High vector + framework = clear direction + process
-  if (vector > 6.0 && framework > 6.0) {
+  if (vector > 0.60 && framework > 0.60) {
     return 'High - Establishes clear direction within structured process';
   }
   
   // High vector, low framework = direction clear but execution ambiguous
-  if (vector > 6.5 && framework < 4.0) {
+  if (vector > 0.65 && framework < 0.40) {
     return 'Moderate - Sets direction clearly but process ambiguity creates confusion';
   }
   
   // Low vector + low framework = ambiguity compounds
-  if (vector < 4.0 && framework < 4.0) {
+  if (vector < 0.40 && framework < 0.40) {
     return 'Low - Direction and process both unclear, team operates in fog';
   }
   
   // High signal + moderate vector = adjusts for clarity
-  if (signal > 6.0 && vector > 4.5) {
+  if (signal > 0.60 && vector > 0.45) {
     return 'High - Reads when clarity is missing and adjusts communication';
   }
   
@@ -88,22 +88,22 @@ function assessFollowershipQuality(vectorScores, leadershipArchitecture, stallPa
   const resistancePattern = stallPatterns?.attention_direction === 'people_problems';
   
   // High vector + low signal + relational friction = compliance, not willingness
-  if (vector > 6.5 && signal < 3.5 && relationalFriction) {
+  if (vector > 0.65 && signal < 0.35 && relationalFriction) {
     return 'Compliance-based - People follow directives but not leader; relationship erosion likely';
   }
   
   // High vector + high signal = willing followers
-  if (vector > 6.0 && signal > 6.0) {
+  if (vector > 0.60 && signal > 0.60) {
     return 'Willing - Commands direction while maintaining relational connection';
   }
   
   // High leverage + moderate vector = influence-based followership
-  if (leverage > 6.0 && vector > 4.5) {
+  if (leverage > 0.60 && vector > 0.45) {
     return 'Influence-based - People follow through positioning and persuasion';
   }
   
   // Low vector + high signal = supportive but lacks directional pull
-  if (vector < 4.0 && signal > 6.0) {
+  if (vector < 0.40 && signal > 0.60) {
     return 'Supportive but weak direction - People like them but unclear where to go';
   }
   
@@ -126,17 +126,17 @@ function assessRelationalCollapseRisk(vectorScores, stressPatterns, stallPattern
   const stressNarrows = stressPatterns?.pattern_type === 'narrowing';
   
   // Low signal + stress narrows + relational frustration = high risk
-  if (signal < 3.5 && stressNarrows && relationalFriction) {
+  if (signal < 0.35 && stressNarrows && relationalFriction) {
     return 'High - Under pressure, relational awareness disappears; repairs relationships after damage done';
   }
   
   // Low signal + low flex = rigidity under relational resistance
-  if (signal < 3.5 && flex < 3.5) {
+  if (signal < 0.35 && flex < 0.35) {
     return 'Moderate-High - Limited relational bandwidth; resists adjusting when pushed back';
   }
   
   // High signal = resilient to relational pressure
-  if (signal > 6.5) {
+  if (signal > 0.65) {
     return 'Low - Maintains relational calibration even under resistance';
   }
   
@@ -159,17 +159,17 @@ function assessControlTendency(vectorScores, systemsAccountability, businessReal
   const trustIssue = businessReality?.word_count > 150 && businessReality?.gap_awareness;
   
   // High vector + high framework + delegation gap = over-control
-  if (vector > 6.5 && framework > 6.0 && delegationGap) {
+  if (vector > 0.65 && framework > 0.60 && delegationGap) {
     return 'High - Tends to over-control; struggles to trust others with execution standards';
   }
   
   // High vector + low signal = directive without calibration
-  if (vector > 6.5 && signal < 3.5) {
+  if (vector > 0.65 && signal < 0.35) {
     return 'Moderate-High - Commands direction without reading when to release control';
   }
   
   // Low vector = under-control risk
-  if (vector < 3.5) {
+  if (vector < 0.35) {
     return 'Low - May under-direct; control too loose for accountability';
   }
   
@@ -193,22 +193,22 @@ function assessDevelopmentCapability(vectorScores, systemsAccountability, stallP
                             stallPatterns?.avoidance_patterns?.includes('development');
   
   // High signal + high horizon = sees potential and invests
-  if (signal > 6.0 && horizon > 6.0) {
+  if (signal > 0.60 && horizon > 0.60) {
     return 'High - Reads people dynamics and invests in long-term development';
   }
   
   // High signal, low horizon = supportive but no development depth
-  if (signal > 6.0 && horizon < 4.0) {
+  if (signal > 0.60 && horizon < 0.40) {
     return 'Moderate - Supportive in moment but lacks long-term development thinking';
   }
   
   // Low signal = blind to development needs
-  if (signal < 3.5) {
+  if (signal < 0.35) {
     return 'Low - Limited bandwidth for reading individual development needs';
   }
   
   // High framework + low signal = process-based development (training vs coaching)
-  if (framework > 6.5 && signal < 4.0) {
+  if (framework > 0.65 && signal < 0.40) {
     return 'Moderate - Develops through process/training, not personalized coaching';
   }
   

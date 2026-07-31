@@ -15,7 +15,7 @@ export function inferFutureConstraints(vectorScores, analyzedResponses, contradi
   const at_5x_scale = [];
   
   // Delegation bottleneck
-  if (vectorScores.vector > 6.5 && (systems_accountability?.system_confidence === 'low' || stall_patterns?.avoidance_admitted)) {
+  if (vectorScores.vector > 0.65 && (systems_accountability?.system_confidence === 'low' || stall_patterns?.avoidance_admitted)) {
     at_2x_scale.push('Delegation bottleneck - Will try to maintain control, become execution ceiling');
   }
   
@@ -26,18 +26,18 @@ export function inferFutureConstraints(vectorScores, analyzedResponses, contradi
   }
   
   // Relational bandwidth
-  if (vectorScores.signal < 4.0) {
+  if (vectorScores.signal < 0.40) {
     at_2x_scale.push('Relational bandwidth - Limited capacity for relationship management at scale');
     at_5x_scale.push('Team fragmentation - Relationship gaps create organizational silos');
   }
   
   // Decision overload
-  if (vectorScores.vector > 6.5 && vectorScores.leverage < 4.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.leverage < 0.40) {
     at_5x_scale.push('Decision bottleneck - All decisions flow through single point, creates delays');
   }
   
   // Strategic drift
-  if (vectorScores.horizon < 4.5 && vectorScores.velocity > 6.0) {
+  if (vectorScores.horizon < 0.45 && vectorScores.velocity > 0.60) {
     at_5x_scale.push('Strategic drift - High execution speed without long-range thinking loses direction');
   }
   
@@ -49,11 +49,11 @@ export function inferFutureConstraints(vectorScores, analyzedResponses, contradi
     ? 'High - Weak systems create fragile operations dependent on key people'
     : 'Moderate - Some operational dependencies exist';
   
-  const relational_fragility = (vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational'))
+  const relational_fragility = (vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational'))
     ? 'High - Relational friction already present, will compound at scale'
     : 'Low-Moderate - Relational dynamics stable';
   
-  const decision_overload_risk = (vectorScores.vector > 6.5 && business_reality?.gap_awareness)
+  const decision_overload_risk = (vectorScores.vector > 0.65 && business_reality?.gap_awareness)
     ? 'High - Centralized decision-making will become bottleneck'
     : 'Moderate - Some decision distribution exists';
   

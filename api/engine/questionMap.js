@@ -35,6 +35,7 @@ export const QUESTION_MAP = {
       {
         id: 2,
         type: 'written',
+        evidence_role: 'life_direction',
         text: 'What matters most to you in life right now? Describe in detail: family, relationships, children, career, freedom, money, stability, legacy, purpose, health, impact, personal growth. What are you ultimately trying to build, protect, or become? Where do you want your personal life and work to go over the next 5–10 years? What would a meaningful life actually look like for you if things worked?',
         normalized_dimensions: {}
       },
@@ -270,6 +271,7 @@ export const QUESTION_MAP = {
       {
         id: 14,
         type: 'written',
+        evidence_role: 'setback_response',
         text: 'Think about a recent situation where something did not go your way. It could be a deal, a conversation, or a decision that did not land how you expected. Where were you, what happened, and what did you do next? (3–5 sentences)',
         normalized_dimensions: {}
       },
@@ -316,6 +318,7 @@ export const QUESTION_MAP = {
       {
         id: 17,
         type: 'written',
+        evidence_role: 'immediate_pressure',
         text: 'When things get intense, deadlines are tight, or expectations are high, how would someone who knows you well describe you? (Be honest. 3–5 sentences)',
         normalized_dimensions: {}
       },
@@ -364,6 +367,7 @@ export const QUESTION_MAP = {
       {
         id: 20,
         type: 'written',
+        evidence_role: 'ambiguity_response',
         text: 'Describe a time when you had to make a decision without having all the information you wanted. What did you do, and how did you feel about it after? (3–5 sentences)',
         normalized_dimensions: {}
       },
@@ -391,6 +395,7 @@ export const QUESTION_MAP = {
       {
         id: 22,
         type: 'written',
+        evidence_role: 'leadership_self_assessment',
         text: 'You are leading people in some capacity. Think about how you actually show up, not how you would like to. On a scale from 1 to 10, how would you rate yourself as a leader, and why? (Be specific. 3–5 sentences)',
         normalized_dimensions: {}
       },
@@ -420,6 +425,7 @@ export const QUESTION_MAP = {
       {
         id: 24,
         type: 'written',
+        evidence_role: 'sustained_pressure',
         text: 'When momentum stalls, pressure rises, or people resist your direction, what do you usually do first? Describe what frustrates you most, what kinds of people energize or drain you, what you avoid dealing with longer than you should, and what pattern you keep repeating even though you know it slows you down. Do not worry about sounding impressive, strategic, or self-aware. Write naturally and answer the way you actually think about these situations in real life.',
         normalized_dimensions: {}
       },
@@ -428,6 +434,7 @@ export const QUESTION_MAP = {
       {
         id: 25,
         type: 'written',
+        evidence_role: 'misunderstanding_response',
         text: 'When someone misunderstands your intentions, how do you usually respond?',
         normalized_dimensions: {}
       },
@@ -436,6 +443,7 @@ export const QUESTION_MAP = {
       {
         id: 26,
         type: 'written',
+        evidence_role: 'business_operating_reality',
         text: 'When working on or inside your business, whether independently or with a team, what role do you naturally take on, and where does tension usually appear?',
         normalized_dimensions: {}
       },
@@ -444,6 +452,7 @@ export const QUESTION_MAP = {
       {
         id: 27,
         type: 'written',
+        evidence_role: 'growth_tension',
         text: 'What are you trying to build long-term, and what values drive the way you operate?',
         normalized_dimensions: {}
       },
@@ -452,6 +461,7 @@ export const QUESTION_MAP = {
       {
         id: 28,
         type: 'written',
+        evidence_role: 'systems_accountability',
         text: 'What currently keeps your life or work organized, and where do you think future strain or scaling problems could appear?',
         normalized_dimensions: {}
       }

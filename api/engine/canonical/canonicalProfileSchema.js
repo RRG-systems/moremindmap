@@ -22,7 +22,7 @@
  * @property {string} metadata.person_name - Optional person name
  * @property {string} metadata.email - Optional contact email
  * 
- * @property {Object} vector_scores - Raw dimension scores (0-10 scale)
+ * @property {Object} vector_scores - Signed behavioral-topology coordinates
  * @property {number} vector_scores.vector - Command/Direction
  * @property {number} vector_scores.signal - Relational Awareness
  * @property {number} vector_scores.fidelity - Precision
@@ -192,14 +192,14 @@ export const CANONICAL_PROFILE_SCHEMA = {
     email: 'string (optional)'
   },
   vector_scores: {
-    vector: 'number (0-10)',
-    signal: 'number (0-10)',
-    fidelity: 'number (0-10)',
-    velocity: 'number (0-10)',
-    leverage: 'number (0-10)',
-    flex: 'number (0-10)',
-    framework: 'number (0-10)',
-    horizon: 'number (0-10)'
+    vector: 'number (signed topology coordinate)',
+    signal: 'number (signed topology coordinate)',
+    fidelity: 'number (signed topology coordinate)',
+    velocity: 'number (signed topology coordinate)',
+    leverage: 'number (signed topology coordinate)',
+    flex: 'number (signed topology coordinate)',
+    framework: 'number (signed topology coordinate)',
+    horizon: 'number (signed topology coordinate)'
   },
   ranked_dimensions: [
     {

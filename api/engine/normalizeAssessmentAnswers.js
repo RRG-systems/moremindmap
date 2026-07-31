@@ -1,7 +1,4 @@
-import { QUESTION_MAP } from './questionMap.js';
-
-const QUESTIONS = QUESTION_MAP.set_1.v1;
-const QUESTION_BY_ID = new Map(QUESTIONS.map((question) => [question.id, question]));
+import { QUESTION_BY_ID } from './questionEvidenceRegistry.js';
 
 function getQuestionId(key) {
   const match = String(key).match(/^q?(\d+)$/i);

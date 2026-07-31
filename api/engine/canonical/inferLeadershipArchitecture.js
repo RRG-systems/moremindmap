@@ -35,13 +35,13 @@ export function inferLeadershipArchitecture(vectorScores, rankedDimensions) {
   
   // Primary leadership mode
   let primary_mode = '';
-  if (vectorScore > 6.5) {
+  if (vectorScore > 0.65) {
     primary_mode = "Directive — establishes direction before building consensus";
-  } else if (leverageScore > 6.5) {
+  } else if (leverageScore > 0.65) {
     primary_mode = "Influence-positioning — shapes outcomes through stakeholder alignment";
-  } else if (frameworkScore > 6.5) {
+  } else if (frameworkScore > 0.65) {
     primary_mode = "Process-driven — leads through structure and defined methodology";
-  } else if (signalScore > 6.5) {
+  } else if (signalScore > 0.65) {
     primary_mode = "Relational — reads dynamics and calibrates approach to team state";
   } else {
     primary_mode = `${DIMENSION_LABELS[primary]}-driven leadership`;
@@ -52,13 +52,13 @@ export function inferLeadershipArchitecture(vectorScores, rankedDimensions) {
   
   // Team experience (what it's like to be led by them)
   let team_experience = '';
-  if (vectorScore > 6.5 && signalScore < 4.0) {
+  if (vectorScore > 0.65 && signalScore < 0.40) {
     team_experience = "Clear direction, high momentum — may feel hard to slow down or redirect once moving";
-  } else if (vectorScore > 6.5 && signalScore > 5.0) {
+  } else if (vectorScore > 0.65 && signalScore > 0.50) {
     team_experience = "Clear direction with relational calibration — knows where to go AND senses team state";
-  } else if (frameworkScore > 6.5 && vectorScores.flex < 4.0) {
+  } else if (frameworkScore > 0.65 && vectorScores.flex < 0.40) {
     team_experience = "Clear process and structure — may feel rigid when pivot needed";
-  } else if (signalScore > 6.5 && vectorScore < 4.0) {
+  } else if (signalScore > 0.65 && vectorScore < 0.40) {
     team_experience = "Highly calibrated to team dynamics — may delay action waiting for alignment";
   } else {
     team_experience = `Team experiences ${DIMENSION_LABELS[primary]} as primary organizing force`;
@@ -66,11 +66,11 @@ export function inferLeadershipArchitecture(vectorScores, rankedDimensions) {
   
   // Challenge surface (where leadership creates friction)
   let challenge_surface = '';
-  if (vectorScore > 6.5 && signalScore < 4.0) {
+  if (vectorScore > 0.65 && signalScore < 0.40) {
     challenge_surface = "Speed outpaces shared context — team may struggle to keep up or feel unheard";
-  } else if (frameworkScore > 6.5 && vectorScores.flex < 4.0) {
+  } else if (frameworkScore > 0.65 && vectorScores.flex < 0.40) {
     challenge_surface = "Process rigidity when environment shifts — team may need permission to deviate";
-  } else if (signalScore > 6.5 && vectorScore < 4.0) {
+  } else if (signalScore > 0.65 && vectorScore < 0.40) {
     challenge_surface = "Relational calibration can slow decision-making — team may want clearer direction";
   } else {
     challenge_surface = `${DIMENSION_LABELS[primary]} dominance can suppress ${DIMENSION_LABELS[opposing1]} — creates blind spot`;
@@ -78,21 +78,21 @@ export function inferLeadershipArchitecture(vectorScores, rankedDimensions) {
   
   // Dissent tolerance
   let dissent_tolerance = 'moderate';
-  if (vectorScore > 7.0 && signalScore < 3.5) {
+  if (vectorScore > 0.70 && signalScore < 0.35) {
     dissent_tolerance = 'low'; // directive dominance suppresses challenge
-  } else if (signalScore > 6.5 || vectorScores.flex > 6.5) {
+  } else if (signalScore > 0.65 || vectorScores.flex > 0.65) {
     dissent_tolerance = 'high'; // relational/adaptive profiles welcome input
-  } else if (frameworkScore > 7.0) {
+  } else if (frameworkScore > 0.70) {
     dissent_tolerance = 'process-dependent'; // challenge process = harder than challenge content
   }
   
   // Development orientation
   let development_orientation = '';
-  if (vectorScore > 6.5) {
+  if (vectorScore > 0.65) {
     development_orientation = "Develops people through challenge and stretch assignments";
-  } else if (signalScore > 6.5) {
+  } else if (signalScore > 0.65) {
     development_orientation = "Develops people through relational support and calibrated feedback";
-  } else if (frameworkScore > 6.5) {
+  } else if (frameworkScore > 0.65) {
     development_orientation = "Develops people through structured skill-building and clear expectations";
   } else {
     development_orientation = `Development approach reflects ${DIMENSION_LABELS[primary]} priority`;
@@ -100,11 +100,11 @@ export function inferLeadershipArchitecture(vectorScores, rankedDimensions) {
   
   // Calibrations
   const calibrations = [];
-  if (vectorScore > 6.5 && signalScore < 4.0) {
+  if (vectorScore > 0.65 && signalScore < 0.40) {
     calibrations.push("Build explicit permission for team to slow you down");
     calibrations.push("Create forced dissent windows before locking direction");
   }
-  if (frameworkScore > 6.5 && vectorScores.flex < 4.0) {
+  if (frameworkScore > 0.65 && vectorScores.flex < 0.40) {
     calibrations.push("Pre-authorize deviation paths when pivot signals appear");
   }
   

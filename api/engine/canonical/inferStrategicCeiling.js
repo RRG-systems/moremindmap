@@ -16,7 +16,7 @@ export function inferStrategicCeiling(vectorScores, analyzedResponses, contradic
   let current_ceiling = 'No immediate ceiling visible';
   
   // Delegation ceiling
-  if (vectorScores.vector > 6.5 && (stall_patterns?.avoidance_patterns?.includes('delegation') || business_reality?.gap_awareness)) {
+  if (vectorScores.vector > 0.65 && (stall_patterns?.avoidance_patterns?.includes('delegation') || business_reality?.gap_awareness)) {
     current_ceiling = 'Personal execution capacity - Cannot scale without delegation, currently trying to control too much';
   }
   
@@ -26,12 +26,12 @@ export function inferStrategicCeiling(vectorScores, analyzedResponses, contradic
   }
   
   // Leadership ceiling
-  if (vectorScores.signal < 3.5 && business_reality?.leadership_scope) {
+  if (vectorScores.signal < 0.35 && business_reality?.leadership_scope) {
     current_ceiling = 'Leadership bandwidth - Relational limitations constrain team effectiveness';
   }
   
   // Strategic ceiling
-  if (vectorScores.horizon < 4.0 && vectorScores.velocity > 6.5) {
+  if (vectorScores.horizon < 0.40 && vectorScores.velocity > 0.65) {
     current_ceiling = 'Strategic vision - High execution without long-range thinking creates direction uncertainty at scale';
   }
   

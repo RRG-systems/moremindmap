@@ -71,7 +71,7 @@ export function inferSelfDeceptionPatterns(vectorScores, analyzedResponses, cont
   }
   
   // Busyness as strategic avoidance
-  if (vectorScores.velocity > 6.5 && systems_accountability?.systems_thinking === 'low') {
+  if (vectorScores.velocity > 0.65 && systems_accountability?.systems_thinking === 'low') {
     patterns.push({
       pattern_type: 'Tactical busyness prevents strategic discomfort',
       manifestation: 'Continuous execution prevents pausing to confront infrastructure gaps',

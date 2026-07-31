@@ -11,19 +11,19 @@ export function inferExecutionIdentity(vectorScores, analyzedResponses, contradi
   // True default (what actually happens under pressure)
   let true_default = 'Execution-focused operator';
   
-  if (vectorScores.vector > 6.5 && vectorScores.velocity > 6.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.velocity > 0.60) {
     true_default = 'High-speed executor - Defaults to action over deliberation, moves before consensus';
   }
   
-  if (vectorScores.framework > 6.5 && vectorScores.fidelity > 6.0) {
+  if (vectorScores.framework > 0.65 && vectorScores.fidelity > 0.60) {
     true_default = 'Process-driven executor - Defaults to structured execution within defined systems';
   }
   
-  if (vectorScores.horizon > 6.5 && vectorScores.vector < 5.0) {
+  if (vectorScores.horizon > 0.65 && vectorScores.vector < 0.50) {
     true_default = 'Strategic thinker - Defaults to planning and analysis before execution';
   }
   
-  if (vectorScores.signal > 6.0 && vectorScores.vector > 5.5) {
+  if (vectorScores.signal > 0.60 && vectorScores.vector > 0.55) {
     true_default = 'Relational operator - Defaults to reading dynamics before acting';
   }
   
@@ -62,7 +62,7 @@ export function inferExecutionIdentity(vectorScores, analyzedResponses, contradi
   // Operational truth
   let operational_truth = 'Standard operational baseline';
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational')) {
     operational_truth = 'Operates as high-control, low-relational-bandwidth executor despite claims of collaboration';
   }
   
@@ -70,7 +70,7 @@ export function inferExecutionIdentity(vectorScores, analyzedResponses, contradi
     operational_truth = 'Operates ad-hoc despite strategic ambitions; avoids building infrastructure';
   }
   
-  if (vectorScores.velocity > 6.5 && systems_accountability?.systems_thinking === 'low') {
+  if (vectorScores.velocity > 0.65 && systems_accountability?.systems_thinking === 'low') {
     operational_truth = 'Operates in firefighting mode; speed compensates for lack of systems';
   }
   

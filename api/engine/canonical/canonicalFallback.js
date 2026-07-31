@@ -44,7 +44,7 @@ export function generateFallbackCanonical(profileInput, reportContent = null) {
   let rank = 1;
 
   Object.entries(dimension_scores).forEach(([dimension, data]) => {
-    const score = data?.raw_score || 5;
+    const score = data?.raw_score ?? 0;
     vector_scores[dimension] = score;
     ranked_dimensions.push({
       dimension,
@@ -57,8 +57,8 @@ export function generateFallbackCanonical(profileInput, reportContent = null) {
   // Ensure all 8 dimensions exist
   const dimensions = ['vector', 'signal', 'fidelity', 'velocity', 'leverage', 'flex', 'framework', 'horizon'];
   dimensions.forEach(dim => {
-    if (!vector_scores[dim]) {
-      vector_scores[dim] = 5;
+    if (vector_scores[dim] === undefined || vector_scores[dim] === null) {
+      vector_scores[dim] = 0;
     }
   });
 
@@ -68,10 +68,10 @@ export function generateFallbackCanonical(profileInput, reportContent = null) {
   // Build top_systems
   const sorted = [...ranked_dimensions].sort((a, b) => b.score - a.score);
   const top_systems = {
-    primary_driver: sorted[0] || { dimension: 'vector', score: 5, rank: 1 },
-    secondary_stabilizer: sorted[1] || { dimension: 'horizon', score: 5, rank: 2 },
-    opposing_pattern_1: sorted[sorted.length - 2] || { dimension: 'fidelity', score: 5, rank: 7 },
-    opposing_pattern_2: sorted[sorted.length - 1] || { dimension: 'framework', score: 5, rank: 8 }
+    primary_driver: sorted[0] || { dimension: 'vector', score: 0, rank: 1 },
+    secondary_stabilizer: sorted[1] || { dimension: 'horizon', score: 0, rank: 2 },
+    opposing_pattern_1: sorted[sorted.length - 2] || { dimension: 'fidelity', score: 0, rank: 7 },
+    opposing_pattern_2: sorted[sorted.length - 1] || { dimension: 'framework', score: 0, rank: 8 }
   };
 
   // Build inferred patterns from answers

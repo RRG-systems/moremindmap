@@ -247,9 +247,9 @@ function extractWorldExperience(canonical) {
     perception_filter: {
       signal: 'What you notice first',
       score: signal_score,
-      interpretation: signal_score > 6.5 
+      interpretation: signal_score > 0.65
         ? 'High perceptual acuity—notices patterns, shifts, unspoken dynamics first.'
-        : signal_score > 4.5
+        : signal_score > 0.45
         ? 'Balanced perception—notices both action and context.'
         : 'Action-focused perception—notices results, momentum, forward movement first.'
     },
@@ -267,18 +267,18 @@ function extractWorldExperience(canonical) {
     decision_formation: {
       primary_path: primary.operating_manifestation || 'Standard decision path',
       structure_bias: framework_score,
-      interpretation: vector_score > 6.5
+      interpretation: vector_score > 0.65
         ? `Decisions form through directional action: ${primary.operating_manifestation || 'moves immediately'}.`
-        : framework_score > 6.5
+        : framework_score > 0.65
         ? 'Decisions form through structured analysis and planning.'
         : 'Decisions form through balanced assessment of options.'
     },
     
     time_horizon: {
       score: horizon_score,
-      interpretation: horizon_score > 7
+      interpretation: horizon_score > 0.70
         ? 'Extended time horizon—thinks in quarters and years, strategic planning emphasis.'
-        : horizon_score > 5
+        : horizon_score > 0.50
         ? 'Balanced time horizon—plans ahead but stays present-focused.'
         : 'Near-term time horizon—focuses on immediate next steps and short cycles.'
     },
@@ -286,9 +286,9 @@ function extractWorldExperience(canonical) {
     risk_calibration: {
       flex_score: flex_score,
       vector_score: vector_score,
-      interpretation: vector_score > 6.5 && flex_score < 4.5
+      interpretation: vector_score > 0.65 && flex_score < 0.45
         ? 'Higher risk tolerance—moves with conviction, less concerned with reversibility.'
-        : flex_score > 6.5
+        : flex_score > 0.65
         ? 'Measured risk approach—maintains optionality, adapts as information changes.'
         : 'Moderate risk calibration—situational assessment drives risk decisions.'
     },
@@ -527,9 +527,9 @@ function buildWorldExperienceSummary(scores, primary) {
   const velocity = scores.velocity || 0;
   const horizon = scores.horizon || 0;
   
-  const perceptual = signal > 6.5 ? 'High perceptual acuity' : signal < 4 ? 'Action-focused perception' : 'Balanced perception';
-  const processing = velocity > 6.5 ? 'rapid processing' : 'thorough processing';
-  const planning = horizon > 7 ? 'extended time horizon' : 'near-term focus';
+  const perceptual = signal > 0.65 ? 'High perceptual acuity' : signal < 0.40 ? 'Action-focused perception' : 'Balanced perception';
+  const processing = velocity > 0.65 ? 'rapid processing' : 'thorough processing';
+  const planning = horizon > 0.70 ? 'extended time horizon' : 'near-term focus';
   
   return `${perceptual}, ${processing}, ${planning}. World experienced through ${primary.dimension || 'primary'} lens.`;
 }
@@ -539,9 +539,9 @@ function buildOthersExperienceSummary(primary, scores) {
   const vector = scores.vector || 0;
   const signal = scores.signal || 0;
   
-  const impression = dimension === 'vector' && vector > 6.5
+  const impression = dimension === 'vector' && vector > 0.65
     ? 'commanding presence'
-    : dimension === 'signal' && signal > 6.5
+    : dimension === 'signal' && signal > 0.65
     ? 'perceptive awareness'
     : 'balanced approach';
   
@@ -551,12 +551,12 @@ function buildOthersExperienceSummary(primary, scores) {
 function buildFirstImpressionInterpretation(dimension, vector_score, signal_score) {
   switch (dimension) {
     case 'vector':
-      return vector_score > 6.5
+      return vector_score > 0.65
         ? 'Others experience commanding, directional presence first—clarity of purpose is immediately visible.'
         : 'Others experience purposeful energy, though less intensely directive.';
     
     case 'signal':
-      return signal_score > 6.5
+      return signal_score > 0.65
         ? 'Others experience perceptive awareness first—feels "seen" and understood quickly.'
         : 'Others experience attentiveness, though may not feel deeply read.';
     
@@ -633,15 +633,15 @@ function buildOthersExperienceSummaryEnhanced(primary, communication_style, team
 }
 
 function buildCommunicationInterpretation(fidelity, velocity, directness) {
-  if (fidelity > 6.5) {
+  if (fidelity > 0.65) {
     return `Communication prioritizes precision and completeness—detailed, thorough. Directness: ${directness}.`;
   }
   
-  if (velocity > 6.5) {
+  if (velocity > 0.65) {
     return `Communication prioritizes speed and direction—concise, action-oriented. Directness: ${directness}.`;
   }
   
-  if (velocity > fidelity + 2) {
+  if (velocity > fidelity + 0.20) {
     return `Communication leans brevity over detail—moves quickly, may skip context. Directness: ${directness}.`;
   }
   
@@ -649,19 +649,19 @@ function buildCommunicationInterpretation(fidelity, velocity, directness) {
 }
 
 function buildListeningInterpretation(signal, vector) {
-  if (signal > 6.5) {
+  if (signal > 0.65) {
     return 'Attentive listener—tracks unspoken dynamics, tone, relational context.';
   }
   
-  if (vector > 6.5 && signal < 3) {
+  if (vector > 0.65 && signal < 0.30) {
     return 'Goal-oriented listening—focuses on actionable information, filters relational cues.';
   }
   
-  if (vector > signal + 2) {
+  if (vector > signal + 0.20) {
     return 'Listening prioritizes direction and outcome—relational signals secondary to task.';
   }
   
-  if (signal > 4) {
+  if (signal > 0.40) {
     return 'Balanced listening—adjusts attention between task and relational dynamics.';
   }
   
@@ -1084,7 +1084,7 @@ function buildDecisionArchitectureSummary(speed, claimed_model, gap) {
 }
 
 function buildDecisionVelocityInterpretation(speed, data_reqs, vector_score) {
-  if (speed === 'fast') return `Quick decisions. Data: ${data_reqs || 'minimal'}. Vector ${vector_score > 6 ? 'high' : 'variable'}.`;
+  if (speed === 'fast') return `Quick decisions. Data: ${data_reqs || 'minimal'}. Vector ${vector_score > 0.60 ? 'high' : 'variable'}.`;
   if (speed === 'slow') return `Deliberate. Data: ${data_reqs || 'thorough'}. Org must assemble context.`;
   return `Speed: ${speed}. Data: ${data_reqs || 'context-dependent'}.`;
 }

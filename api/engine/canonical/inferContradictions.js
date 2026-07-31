@@ -27,7 +27,7 @@ const DIMENSION_LABELS = {
 /**
  * Detect high-high conflicts (both dimensions strong but create tension)
  */
-function detectHighHighConflicts(vectorScores, threshold = 6.0) {
+function detectHighHighConflicts(vectorScores, threshold = 0.60) {
   const conflicts = [];
   
   // Vector + Framework = directive rigidity
@@ -81,9 +81,9 @@ function detectHighLowTensions(vectorScores, rankedDimensions) {
   const opposing2Score = vectorScores[opposing2] || 0;
   
   // High primary + Low opposing = blind spot
-  if (primaryScore > 6.0 && opposing1Score < 4.0) {
+  if (primaryScore > 0.60 && opposing1Score < 0.40) {
     const gap = primaryScore - opposing1Score;
-    const severity = gap > 5.0 ? 'high' : gap > 3.5 ? 'moderate' : 'mild';
+    const severity = gap > 0.50 ? 'high' : gap > 0.35 ? 'moderate' : 'mild';
     
     tensions.push({
       tension: `High ${DIMENSION_LABELS[primary]} suppresses ${DIMENSION_LABELS[opposing1]}`,
@@ -95,7 +95,7 @@ function detectHighLowTensions(vectorScores, rankedDimensions) {
   }
   
   // Capability vs prioritization gap
-  if (primaryScore > 7.0 && opposing2Score < 3.5) {
+  if (primaryScore > 0.70 && opposing2Score < 0.35) {
     tensions.push({
       tension: `Capable of ${DIMENSION_LABELS[opposing2]} but doesn't prioritize it`,
       dimensions_in_conflict: [primary, opposing2],
@@ -123,7 +123,7 @@ function detectClaimedVsOperational(profileInput, vectorScores) {
     .toLowerCase();
   
   // Claims flexibility but low flex score
-  if ((writtenResponses.includes('flexible') || writtenResponses.includes('adapt')) && vectorScores.flex < 4.0) {
+  if ((writtenResponses.includes('flexible') || writtenResponses.includes('adapt')) && vectorScores.flex < 0.40) {
     contradictions.push({
       tension: "Values flexibility but defaults to directional consistency",
       dimensions_in_conflict: ['vector', 'flex'],
@@ -135,7 +135,7 @@ function detectClaimedVsOperational(profileInput, vectorScores) {
   
   // Claims collaboration but high vector + low signal
   if ((writtenResponses.includes('collaborat') || writtenResponses.includes('team')) && 
-      vectorScores.vector > 6.0 && vectorScores.signal < 4.0) {
+      vectorScores.vector > 0.60 && vectorScores.signal < 0.40) {
     contradictions.push({
       tension: "Values collaboration but defaults to directive action",
       dimensions_in_conflict: ['vector', 'signal'],

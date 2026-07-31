@@ -11,7 +11,7 @@ export function inferHiddenCosts(vectorScores, analyzedResponses, behavioralCons
   const { stall_patterns, systems_accountability, business_reality } = analyzedResponses;
   
   // Emotional costs
-  if (vectorScores.vector > 6.5 && vectorScores.velocity > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.velocity > 0.65 && vectorScores.signal < 0.35) {
     costs.push({
       cost_category: 'Emotional compression',
       description: 'Speed creates clarity initially, but emotional compression delays conflict until stakes are higher; resolution becomes more expensive',
@@ -21,7 +21,7 @@ export function inferHiddenCosts(vectorScores, analyzedResponses, behavioralCons
   }
   
   // Organizational costs
-  if (vectorScores.vector > 6.5 && business_reality?.gap_awareness) {
+  if (vectorScores.vector > 0.65 && business_reality?.gap_awareness) {
     costs.push({
       cost_category: 'Competence dependency',
       description: 'Competence becomes expensive because others unconsciously defer instead of developing; organizational capability concentrates rather than distributes',
@@ -31,7 +31,7 @@ export function inferHiddenCosts(vectorScores, analyzedResponses, behavioralCons
   }
   
   // Relationship costs
-  if (vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational')) {
     costs.push({
       cost_category: 'Relational maintenance tax',
       description: 'Relationships require active repair rather than natural maintenance; time spent fixing what speed/directness damaged',
@@ -51,7 +51,7 @@ export function inferHiddenCosts(vectorScores, analyzedResponses, behavioralCons
   }
   
   // Identity costs
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 4.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.40) {
     costs.push({
       cost_category: 'Self-reliance preservation cost',
       description: 'Self-reliance creates operational stability while simultaneously reducing collaborative resilience; when operator is unavailable, organization fragility surfaces',
@@ -61,7 +61,7 @@ export function inferHiddenCosts(vectorScores, analyzedResponses, behavioralCons
   }
   
   // Psychological safety costs
-  if (vectorScores.fidelity > 6.5 || (vectorScores.vector > 6.5 && vectorScores.signal < 4.0)) {
+  if (vectorScores.fidelity > 0.65 || (vectorScores.vector > 0.65 && vectorScores.signal < 0.40)) {
     costs.push({
       cost_category: 'Psychological safety erosion',
       description: 'High standards improve execution while slowly shrinking psychological safety; experimentation decreases invisibly',
