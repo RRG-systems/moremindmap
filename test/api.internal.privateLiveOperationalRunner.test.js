@@ -149,6 +149,51 @@ test('protected route returns only the runner privacy-safe projection', async ()
   assert.equal(/credential|endpoint|cookie|token|profile_id|subscriber_subject/.test(serialized), false);
 });
 
+test('protected route permits the reviewed fixed-fixture operation without exposing its fixed identity', async () => {
+  const fixtureRequest = req();
+  fixtureRequest.body = {
+    operation: 'CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE',
+    request_id: 'request_api_create_fixed_fixture',
+    scope: { ...PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE },
+  };
+  const safeResult = {
+    ok: true,
+    operation: 'CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE',
+    status: 'CREATED',
+    code: null,
+    provider_states: null,
+    provider_timestamps: [],
+    receipt_hashes: ['e'.repeat(64)],
+    scope_hash: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash,
+    namespace_hash: 'b'.repeat(64),
+    approval_status: null,
+    expires_at: null,
+    epoch: null,
+    deployment_hash: deployment,
+    rollback_status: 'RUNNER_DEFAULT_OFF_DISABLE_FIXTURE_OPERATION',
+    records_created: 2,
+    keys_created: 3,
+    idempotent: false,
+    customer_data: false,
+    arbitrary_profile_input: false,
+  };
+  const res = response();
+  await createPrivateLiveOperationalRunnerHandler({
+    env: env(),
+    clock: () => now,
+    buildRunner: async () => ({
+      ok: true,
+      execute: async () => safeResult,
+    }),
+  })(fixtureRequest, res);
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.payload, safeResult);
+  assert.equal(JSON.stringify(res.payload).includes('mm-'), false);
+  assert.equal(/credential|endpoint|cookie|token|profile_id/.test(
+    JSON.stringify(res.payload),
+  ), false);
+});
+
 test('runner construction and execution failures do not expose details', async () => {
   for (const buildRunner of [
     async () => {

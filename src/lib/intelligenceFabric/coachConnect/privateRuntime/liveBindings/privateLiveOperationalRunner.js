@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import { Buffer } from 'node:buffer';
+import Redis from 'ioredis';
 import { hashCanonicalJson } from '../../../hashing.js';
 import {
   createQualificationDigestFunction,
@@ -13,6 +14,14 @@ import {
   readPrivateRuntimeLiveConfigurationAuthorityV1,
 } from './configurationAuthority.js';
 import {
+  readPrivateLiveProductExecutionBindingV1,
+} from './productExecutionBinding.js';
+import {
+  createFixedSyntheticProfileAndBaFixtureV1,
+  FIXED_SYNTHETIC_BUSINESS_ENGINE_CONTRACT_SHA256,
+  FIXED_SYNTHETIC_PRODUCT_FIXTURE_PROFILE_ID,
+} from './fixedSyntheticProductFixture.js';
+import {
   validateAsyncSecurityHealth,
 } from '../../productionSecurity/asyncSecurityContracts.js';
 
@@ -25,6 +34,7 @@ export const PRIVATE_LIVE_OPERATIONAL_RUNNER_AUTHORITY_VARIABLE =
 
 export const PRIVATE_LIVE_OPERATIONAL_RUNNER_OPERATIONS = Object.freeze([
   'PROVIDER_HEALTH_CANARY',
+  'CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE',
   'CREATE_SYNTHETIC_APPROVAL',
   'READ_SYNTHETIC_APPROVAL',
   'REVOKE_SYNTHETIC_APPROVAL',
@@ -689,8 +699,17 @@ export async function buildPrivateLiveOperationalRunnerV1({
   fetchImpl = globalThis.fetch,
   clock = () => Date.now(),
   authorityReader = readPrivateRuntimeLiveConfigurationAuthorityV1,
+  productExecutionBindingReader = readPrivateLiveProductExecutionBindingV1,
   adapterFactory = createUpstashRedisRemoteSharedSecurityAdapter,
   providerCommandExecutor = null,
+  createProductStoreClient = (url) => new Redis(url, {
+    lazyConnect: true,
+    enableOfflineQueue: false,
+    maxRetriesPerRequest: 1,
+    connectTimeout: 5_000,
+    commandTimeout: 5_000,
+    tls: {},
+  }),
 } = {}) {
   if (serverContextLocked(env)) return denied('OPERATIONAL_RUNNER_CONFIGURATION_INVALID');
   const runnerAuthority = parseAuthority(env, clock());
@@ -785,6 +804,93 @@ export async function buildPrivateLiveOperationalRunnerV1({
     }
   }
 
+  async function runFixedSyntheticProductFixture() {
+    const productExecution = await productExecutionBindingReader({
+      env,
+      resolveReference: authority.resolve_secret_reference,
+      environmentId: authority.authority_packet.environment_id,
+      configurationAuthorityPacketSha256:
+        authority.authority_packet.packet_sha256,
+      productBindingAttestation: productBinding,
+      nowMs: clock(),
+    });
+    const binding = productExecution?.binding;
+    if (!productExecution?.ok
+      || binding?.business_engine_execution_contract_sha256
+        !== FIXED_SYNTHETIC_BUSINESS_ENGINE_CONTRACT_SHA256
+      || binding?.exact_scope?.profile_id
+        !== FIXED_SYNTHETIC_PRODUCT_FIXTURE_PROFILE_ID
+      || !binding?.approved_profile_ids?.includes(
+        FIXED_SYNTHETIC_PRODUCT_FIXTURE_PROFILE_ID,
+      )
+      || binding?.execution_enabled !== true
+      || binding?.source_default_off !== true
+      || binding?.private_beta_only !== true
+      || binding?.public_access !== false
+      || binding?.append_only !== true
+      || binding?.immutable_history !== true
+      || binding?.destructive_updates !== false) {
+      return denied('FIXED_SYNTHETIC_FIXTURE_BINDING_MISMATCH');
+    }
+    let productStoreUrl;
+    try {
+      productStoreUrl = await authority.resolve_secret_reference(
+        binding.product_store_connection_ref,
+        { purpose: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_CONNECTION', secret: true },
+      );
+    } catch {
+      return denied('FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
+    }
+    if (typeof productStoreUrl !== 'string'
+      || !productStoreUrl.startsWith('rediss://')) {
+      return denied('FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
+    }
+    let client;
+    try {
+      client = createProductStoreClient(productStoreUrl);
+      if (typeof client?.connect !== 'function') throw new TypeError();
+      await client.connect();
+    } catch {
+      client?.disconnect?.();
+      return denied('FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
+    }
+    try {
+      const fixture = await createFixedSyntheticProfileAndBaFixtureV1({ client });
+      if (!fixture.ok) return denied(fixture.code);
+      return frozen({
+        ok: true,
+        operation: 'CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE',
+        status: fixture.status,
+        code: null,
+        provider_states: null,
+        provider_timestamps: [],
+        receipt_hashes: [fixture.fixture_digest],
+        scope_hash: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash,
+        namespace_hash: hashCanonicalJson(binding.persistence_namespace_prefix),
+        approval_status: null,
+        expires_at: null,
+        epoch: null,
+        deployment_hash: authority.immutable_deployment_identity,
+        rollback_status: 'RUNNER_DEFAULT_OFF_DISABLE_FIXTURE_OPERATION',
+        fixture_version: fixture.fixture_version,
+        fixture_status: fixture.status,
+        fixture_digest: fixture.fixture_digest,
+        vault_record_hash: fixture.vault_record_hash,
+        assessment_record_hash: fixture.assessment_record_hash,
+        assessment_pointer_hash: fixture.assessment_pointer_hash,
+        business_engine_contract_sha256:
+          fixture.business_engine_contract_sha256,
+        records_created: fixture.records_created,
+        keys_created: fixture.keys_created,
+        idempotent: fixture.idempotent,
+        customer_data: false,
+        arbitrary_profile_input: false,
+      });
+    } finally {
+      client?.disconnect?.();
+    }
+  }
+
   return Object.freeze({
     runner_version: PRIVATE_LIVE_OPERATIONAL_RUNNER_VERSION,
     ok: true,
@@ -833,6 +939,9 @@ export async function buildPrivateLiveOperationalRunnerV1({
             (decision) => hashCanonicalJson(decision.receipt_ref),
           ),
         });
+      }
+      if (checked.value.operation === 'CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE') {
+        return runFixedSyntheticProductFixture();
       }
       return runProviderOperation(checked.value.operation, checked.value);
     },

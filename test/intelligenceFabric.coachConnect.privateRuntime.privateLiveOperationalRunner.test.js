@@ -15,6 +15,13 @@ import {
 import {
   validateRemoteSecurityRecord,
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js';
+import {
+  FIXED_SYNTHETIC_BUSINESS_ENGINE_CONTRACT_SHA256,
+  FIXED_SYNTHETIC_PRODUCT_FIXTURE_ASSESSMENT_ID,
+  FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS,
+  FIXED_SYNTHETIC_VAULT_RECORD,
+  FIXED_SYNTHETIC_BUSINESS_ASSESSMENT,
+} from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/fixedSyntheticProductFixture.js';
 
 const deployment = 'd'.repeat(64);
 const authorization = 'synthetic-operational-authorization-material-v1';
@@ -66,6 +73,7 @@ function authorityFixture(env) {
       environment_id: 'PRIVATE_LIVE',
       live_enabled: false,
       emergency_disabled: false,
+      packet_sha256: 'f'.repeat(64),
     },
     activation_receipt: null,
     immutable_deployment_identity: env.MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256,
@@ -87,8 +95,75 @@ function authorityFixture(env) {
     resolve_secret_reference: async (reference) => (
       reference === 'MORE_PRIVATE_RUNTIME_SCOPE_HASH_KEY_VALUE'
         ? 'synthetic-scope-hash-key-material-at-least-32-bytes'
-        : null
+        : reference === 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL'
+          ? 'rediss://synthetic.invalid:6380'
+          : null
     ),
+  };
+}
+
+function productExecutionBinding(overrides = {}) {
+  return {
+    ok: true,
+    binding: {
+      business_engine_execution_contract_sha256:
+        FIXED_SYNTHETIC_BUSINESS_ENGINE_CONTRACT_SHA256,
+      exact_scope: {
+        tenant_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.tenant_id,
+        profile_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.profile_id,
+        business_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.business_id,
+        subscriber_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.subscriber_id,
+      },
+      approved_profile_ids: [PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.profile_id],
+      execution_enabled: true,
+      source_default_off: true,
+      private_beta_only: true,
+      public_access: false,
+      append_only: true,
+      immutable_history: true,
+      destructive_updates: false,
+      product_store_connection_ref:
+        'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL',
+      persistence_namespace_prefix:
+        'more:private-live:product:fixed-synthetic',
+      ...overrides,
+    },
+  };
+}
+
+function fixedFixtureProductClient(initial = {}) {
+  const values = new Map(Object.entries(initial));
+  const calls = [];
+  let connections = 0;
+  let disconnects = 0;
+  return {
+    values,
+    calls,
+    connections: () => connections,
+    disconnects: () => disconnects,
+    async connect() {
+      connections += 1;
+    },
+    async eval(script, numberOfKeys, ...parameters) {
+      assert.match(script, /fixed-synthetic-profile-and-ba-fixture-v1/);
+      const keys = parameters.slice(0, numberOfKeys);
+      const args = parameters.slice(numberOfKeys);
+      calls.push(keys);
+      const existing = keys.map((key) => values.get(key));
+      const present = existing.filter((value) => value !== undefined).length;
+      if (present === 0) {
+        keys.forEach((key, index) => values.set(key, args[index]));
+        return ['CREATED', '', '3'];
+      }
+      if (present === 3
+        && existing.every((value, index) => value === args[index])) {
+        return ['ALREADY_EXISTS_VALID', '', '0'];
+      }
+      return ['CONFLICT', 'FIXED_SYNTHETIC_FIXTURE_CONFLICT', '0'];
+    },
+    disconnect() {
+      disconnects += 1;
+    },
   };
 }
 
@@ -338,6 +413,8 @@ function adapterSequence(sequence, calls) {
 async function runnerFixture({
   env = environment(),
   sequence = ['RECOVERING', 'RECOVERING', 'HEALTHY'],
+  productBinding = productExecutionBinding(),
+  productClient = fixedFixtureProductClient(),
 } = {}) {
   const provider = simulatedProvider();
   const healthCalls = { count: 0 };
@@ -351,12 +428,15 @@ async function runnerFixture({
       return adapterSequence(sequence, healthCalls);
     },
     providerCommandExecutor: provider.execute,
+    productExecutionBindingReader: async () => productBinding,
+    createProductStoreClient: () => productClient,
   });
   return {
     runner,
     provider,
     healthCalls,
     adapterConstructions,
+    productClient,
   };
 }
 
@@ -403,6 +483,9 @@ test('request contract is exact, fixed-scope, bounded, and rejects client author
       duration_minutes: 90,
     },
   )).ok, true);
+  assert.equal(validatePrivateLiveOperationalRunnerRequestV1(
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+  ).ok, true);
   for (const input of [
     request('UNKNOWN'),
     request('READ_SYNTHETIC_EPOCH', { profile_id: 'other' }),
@@ -424,8 +507,126 @@ test('request contract is exact, fixed-scope, bounded, and rejects client author
     }),
     request('READ_SYNTHETIC_EPOCH', { canonical_authority: true }),
     request('ADVANCE_SYNTHETIC_EPOCH_1_TO_2', { target_epoch: 5 }),
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE', {
+      profile_id: 'mm-20990101-aaaaaaaa',
+    }),
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE', {
+      customer_input: { name: 'not accepted' },
+    }),
   ]) {
     assert.equal(validatePrivateLiveOperationalRunnerRequestV1(input).ok, false);
+  }
+});
+
+test('fixed product fixture uses only the exact product store keys and never calls the security provider', async () => {
+  const fixture = await runnerFixture();
+  const created = await fixture.runner.execute(
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+  );
+  assert.equal(created.ok, true, JSON.stringify(created));
+  assert.equal(created.status, 'CREATED');
+  assert.equal(created.records_created, 2);
+  assert.equal(created.keys_created, 3);
+  assert.equal(created.customer_data, false);
+  assert.equal(created.arbitrary_profile_input, false);
+  assert.equal(fixture.healthCalls.count, 0);
+  assert.deepEqual(fixture.provider.state.calls, []);
+  assert.deepEqual(fixture.productClient.calls[0], [
+    FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.vault_profile,
+    FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.business_assessment_by_profile,
+    FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.business_assessment,
+  ]);
+  assert.equal(
+    fixture.productClient.values.get(
+      FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.vault_profile,
+    ),
+    JSON.stringify(FIXED_SYNTHETIC_VAULT_RECORD),
+  );
+  assert.equal(
+    fixture.productClient.values.get(
+      FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.business_assessment_by_profile,
+    ),
+    FIXED_SYNTHETIC_PRODUCT_FIXTURE_ASSESSMENT_ID,
+  );
+  assert.equal(
+    fixture.productClient.values.get(
+      FIXED_SYNTHETIC_PRODUCT_FIXTURE_KEYS.business_assessment,
+    ),
+    JSON.stringify(FIXED_SYNTHETIC_BUSINESS_ASSESSMENT),
+  );
+  assert.equal(fixture.productClient.connections(), 1);
+  assert.equal(fixture.productClient.disconnects(), 1);
+  assert.equal(JSON.stringify(created).includes('mm-'), false);
+
+  const replay = await fixture.runner.execute({
+    ...request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+    request_id: 'request_fixed_fixture_replay',
+  });
+  assert.equal(replay.ok, true);
+  assert.equal(replay.status, 'ALREADY_EXISTS_VALID');
+  assert.equal(replay.idempotent, true);
+  assert.equal(replay.keys_created, 0);
+  assert.equal(fixture.productClient.values.size, 3);
+  assert.equal(fixture.productClient.connections(), 2);
+  assert.equal(fixture.productClient.disconnects(), 2);
+});
+
+test('fixed product fixture fails closed before EVAL when the product store cannot connect', async () => {
+  let evalCalls = 0;
+  let disconnects = 0;
+  const fixture = await runnerFixture({
+    productClient: {
+      async connect() {
+        throw new Error('synthetic connection failure');
+      },
+      async eval() {
+        evalCalls += 1;
+      },
+      disconnect() {
+        disconnects += 1;
+      },
+    },
+  });
+  const result = await fixture.runner.execute(
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
+  assert.equal(evalCalls, 0);
+  assert.equal(disconnects, 1);
+});
+
+test('fixed product fixture fails before product-store construction on binding drift', async () => {
+  for (const binding of [
+    productExecutionBinding({
+      business_engine_execution_contract_sha256: '0'.repeat(64),
+    }),
+    productExecutionBinding({ approved_profile_ids: [] }),
+    productExecutionBinding({ public_access: true }),
+    productExecutionBinding({ append_only: false }),
+  ]) {
+    let productClients = 0;
+    const provider = simulatedProvider();
+    const healthCalls = { count: 0 };
+    const runner = await buildPrivateLiveOperationalRunnerV1({
+      env: environment(),
+      clock: () => now,
+      authorityReader: async () => authorityFixture(environment()),
+      adapterFactory: () => adapterSequence([], healthCalls),
+      providerCommandExecutor: provider.execute,
+      productExecutionBindingReader: async () => binding,
+      createProductStoreClient: () => {
+        productClients += 1;
+        return fixedFixtureProductClient();
+      },
+    });
+    const result = await runner.execute(
+      request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+    );
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'FIXED_SYNTHETIC_FIXTURE_BINDING_MISMATCH');
+    assert.equal(productClients, 0);
+    assert.deepEqual(provider.state.calls, []);
   }
 });
 
