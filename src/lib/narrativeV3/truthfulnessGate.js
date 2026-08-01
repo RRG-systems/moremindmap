@@ -14,7 +14,9 @@ function sectionClaims(section, truthfulness) {
 
 function groundingFromClaims(claims) {
   return [...new Set(claims.flatMap((claim) =>
-    claim.provenance.map(({ path }) => path).filter(Boolean)
+    (Array.isArray(claim?.provenance) ? claim.provenance : [])
+      .map(({ path }) => path)
+      .filter(Boolean)
   ))];
 }
 
@@ -173,14 +175,32 @@ function buildFacilitatorNotes(section, rendering, claims) {
   }, claims);
 }
 
-export function applyTruthfulnessGate(section, rendering, truthfulness) {
+export function buildInsufficientEvidenceSection(section) {
+  if (section === 'teamExperience') {
+    return buildTeamExperience(section, {}, []);
+  }
+  if (section === 'fiveFutures') {
+    return buildFiveFutures(section, {}, []);
+  }
+  if (section === 'recommendedNextStep') {
+    return buildRecommendation(section, {}, []);
+  }
+  if (section === 'facilitatorNotes') {
+    return buildFacilitatorNotes(section, {}, []);
+  }
+
+  return common(section, {
+    headline: INSUFFICIENT,
+    body: INSUFFICIENT,
+    micro_scenario: null,
+    key_warning: INSUFFICIENT,
+  }, []);
+}
+
+function applyTruthfulnessGateInternal(section, rendering, truthfulness) {
   const claims = sectionClaims(section, truthfulness);
   if (claims.length === 0) {
-    return common(section, {
-      ...rendering,
-      body: INSUFFICIENT,
-      key_warning: INSUFFICIENT,
-    }, []);
+    return buildInsufficientEvidenceSection(section);
   }
 
   if (section === 'teamExperience') {
@@ -204,6 +224,15 @@ export function applyTruthfulnessGate(section, rendering, truthfulness) {
     micro_scenario: null,
     key_warning: body === INSUFFICIENT ? INSUFFICIENT : null,
   }, claims);
+}
+
+export function applyTruthfulnessGate(section, rendering, truthfulness) {
+  try {
+    return applyTruthfulnessGateInternal(section, rendering, truthfulness);
+  } catch (error) {
+    console.error(`[BOS TRUTHFULNESS FAIL CLOSED] section: ${section}`, error);
+    return buildInsufficientEvidenceSection(section);
+  }
 }
 
 export default applyTruthfulnessGate;

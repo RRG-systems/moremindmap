@@ -17,6 +17,7 @@ import { refineExtraction } from './extractIntelligenceRefinement.js'
 import { generateCanonicalProfile } from './canonicalProfileGenerator.js'
 import { buildBehaviorProfileNotification, sendFormspreeNotification } from '../notifications/formspreeNotifications.js'
 import { queueBosCompletedContactSync, splitContactName } from '../../integrations/gohighlevel/completionHooks.js'
+import { assessProfileInputCompleteness } from '../assessmentCompleteness.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -206,6 +207,7 @@ export async function executeCanonicalGeneration(job) {
     vault_keys_created: [],
     profile_signature: null,
     quality_score: 0,
+    assessment_completeness: null,
     job_persisted: false
   }
   
@@ -225,6 +227,10 @@ export async function executeCanonicalGeneration(job) {
       trace.push(`HARD_FAIL_profileInput_missing`)
       throw new Error(errorMsg)
     }
+
+    const assessmentCompleteness = assessProfileInputCompleteness(job.profileInput)
+    canonical_diagnostics.assessment_completeness = assessmentCompleteness
+    trace.push(`assessment_completeness=${assessmentCompleteness.status}:${assessmentCompleteness.valid_answer_count}/${assessmentCompleteness.expected_answer_count}`)
     
     trace.push('profileInput_validated_attempting_frontier_orchestrator')
     
@@ -277,7 +283,7 @@ export async function executeCanonicalGeneration(job) {
     canonical_diagnostics.generation_time_ms = Date.now() - startTime
     canonical_diagnostics.success = true
     canonical_diagnostics.profile_id = profile_id
-    canonical_diagnostics.quality_score = 100
+    canonical_diagnostics.quality_score = assessmentCompleteness.quality_score
     
     trace.push('canonical_built_successfully_with_generation_mode=' + canonical_profile.metadata.generation_mode)
     trace.push('before_job_update')

@@ -5,6 +5,7 @@
 import { QUESTION_MAP } from './questionMap.js';
 import { DIMENSIONS, DIMENSION_LABELS, DIMENSION_TRADEOFFS } from './dimensionMap.js';
 import { normalizeAssessmentAnswers } from './normalizeAssessmentAnswers.js';
+import { assessAssessmentCompleteness } from './assessmentCompleteness.js';
 import {
   WRITTEN_QUESTION_IDS,
   getQuestionByEvidenceRole,
@@ -87,6 +88,7 @@ export class BuildProfileInput {
   }
 
   buildMetadata(rawAssessment) {
+    const assessmentCompleteness = assessAssessmentCompleteness(rawAssessment?.answers);
     return {
       assessment_id: rawAssessment.assessment_id || `ast_${Date.now()}`,
       generated_at: new Date().toISOString(),
@@ -98,11 +100,16 @@ export class BuildProfileInput {
       confidence_score: 0.75, // Will be refined by confidence engine
       assessment_duration_seconds: rawAssessment.duration_seconds || 0,
       completion_date: new Date().toISOString(),
-      data_quality: this.assessDataQuality(rawAssessment)
+      data_quality: this.assessDataQuality(rawAssessment, assessmentCompleteness),
+      assessment_completeness: assessmentCompleteness
     };
   }
 
-  assessDataQuality(rawAssessment) {
+  assessDataQuality(rawAssessment, assessmentCompleteness = null) {
+    const completeness = assessmentCompleteness
+      || assessAssessmentCompleteness(rawAssessment?.answers);
+    if (!completeness.is_complete) return 'low';
+
     let quality = 'high';
     let penalties = 0;
 
