@@ -11,6 +11,7 @@ import {
   UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
 } from '../../productionSecurity/remoteSharedSecurity/upstashRedisAdapter.js';
 import {
+  privateRuntimeProductStoreConnectionAllowedV1,
   readPrivateRuntimeLiveConfigurationAuthorityV1,
 } from './configurationAuthority.js';
 import {
@@ -708,7 +709,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
     maxRetriesPerRequest: 1,
     connectTimeout: 5_000,
     commandTimeout: 5_000,
-    tls: {},
+    ...(url.startsWith('rediss://') ? { tls: {} } : {}),
   }),
 } = {}) {
   if (serverContextLocked(env)) return denied('OPERATIONAL_RUNNER_CONFIGURATION_INVALID');
@@ -841,8 +842,11 @@ export async function buildPrivateLiveOperationalRunnerV1({
     } catch {
       return denied('FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
     }
-    if (typeof productStoreUrl !== 'string'
-      || !productStoreUrl.startsWith('rediss://')) {
+    if (!privateRuntimeProductStoreConnectionAllowedV1({
+      reference: binding.product_store_connection_ref,
+      value: productStoreUrl,
+      env,
+    })) {
       return denied('FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
     }
     let client;

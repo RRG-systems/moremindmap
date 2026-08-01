@@ -20,6 +20,7 @@ import {
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/index.js';
 import {
   createPrivateRuntimeEnvironmentReferenceResolver,
+  privateRuntimeProductStoreConnectionAllowedV1,
   privateRuntimeActivationReceiptDigest,
   privateRuntimeConfigurationAuthorityDigest,
   privateRuntimeProductBindingDigest,
@@ -345,6 +346,55 @@ function environment(documents) {
       JSON.stringify(documents.protectedEdge),
   };
 }
+
+test('product-store authority aliases only the exact protected reference to server REDIS_URL', async () => {
+  const env = {
+    REDIS_URL: 'redis://synthetic-marketplace.invalid:6379',
+    MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL: 'must-not-shadow-the-reviewed-alias',
+    MORE_PRIVATE_RUNTIME_OTHER_VALUE: 'other-private-runtime-value',
+  };
+  const resolve = createPrivateRuntimeEnvironmentReferenceResolver(env);
+  assert.equal(
+    await resolve('MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL'),
+    env.REDIS_URL,
+  );
+  assert.equal(await resolve('REDIS_URL'), null);
+  assert.equal(
+    await resolve('MORE_PRIVATE_RUNTIME_OTHER_VALUE'),
+    env.MORE_PRIVATE_RUNTIME_OTHER_VALUE,
+  );
+  assert.equal(await resolve('MORE_OTHER_PRODUCT_STORE_REDIS_URL'), null);
+});
+
+test('Marketplace redis transport is limited to the exact server-side product-store alias', () => {
+  const env = { REDIS_URL: 'redis://synthetic-marketplace.invalid:6379' };
+  assert.equal(privateRuntimeProductStoreConnectionAllowedV1({
+    reference: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL',
+    value: env.REDIS_URL,
+    env,
+  }), true);
+  assert.equal(privateRuntimeProductStoreConnectionAllowedV1({
+    reference: 'MORE_PRIVATE_RUNTIME_DEDICATED_STORE_URL',
+    value: 'rediss://synthetic-dedicated.invalid:6380',
+    env,
+  }), true);
+  for (const denied of [
+    {
+      reference: 'MORE_PRIVATE_RUNTIME_OTHER_REDIS_URL',
+      value: env.REDIS_URL,
+    },
+    {
+      reference: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL',
+      value: 'redis://different.invalid:6379',
+    },
+    {
+      reference: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL',
+      value: 'https://synthetic-marketplace.invalid',
+    },
+  ]) {
+    assert.equal(privateRuntimeProductStoreConnectionAllowedV1({ ...denied, env }), false);
+  }
+});
 
 test('exact persistent PRIVATE_LIVE authority validates source-default-off', async () => {
   const documents = authorityDocuments();

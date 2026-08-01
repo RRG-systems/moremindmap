@@ -22,6 +22,7 @@ import {
   samePrivateRuntimeScope,
 } from '../contracts.js';
 import {
+  privateRuntimeProductStoreConnectionAllowedV1,
   readPrivateRuntimeLiveConfigurationAuthorityV1,
 } from './configurationAuthority.js';
 import {
@@ -275,7 +276,7 @@ export async function buildPrivateRuntimeOperatorBridgeDeploymentBindingV1({
     maxRetriesPerRequest: 1,
     connectTimeout: 5_000,
     commandTimeout: 5_000,
-    tls: {},
+    ...(url.startsWith('rediss://') ? { tls: {} } : {}),
   }),
   commandExecutor = null,
   randomToken,
@@ -330,7 +331,11 @@ export async function buildPrivateRuntimeOperatorBridgeDeploymentBindingV1({
     productExecution.binding.product_store_connection_ref,
     { purpose: 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_CONNECTION', secret: true },
   );
-  if (typeof productStoreUrl !== 'string' || !productStoreUrl.startsWith('rediss://')) {
+  if (!privateRuntimeProductStoreConnectionAllowedV1({
+    reference: productExecution.binding.product_store_connection_ref,
+    value: productStoreUrl,
+    env,
+  })) {
     return denial('PRODUCT_STORE_CONNECTION_REQUIRED');
   }
   let productClient;

@@ -60,7 +60,7 @@ function request(operation, extra = {}) {
   };
 }
 
-function authorityFixture(env) {
+function authorityFixture(env, productStoreUrl = 'rediss://synthetic.invalid:6380') {
   const exactScope = {
     tenant_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.tenant_id,
     profile_id: PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.profile_id,
@@ -96,7 +96,7 @@ function authorityFixture(env) {
       reference === 'MORE_PRIVATE_RUNTIME_SCOPE_HASH_KEY_VALUE'
         ? 'synthetic-scope-hash-key-material-at-least-32-bytes'
         : reference === 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL'
-          ? 'rediss://synthetic.invalid:6380'
+          ? productStoreUrl
           : null
     ),
   };
@@ -628,6 +628,47 @@ test('fixed product fixture fails before product-store construction on binding d
     assert.equal(productClients, 0);
     assert.deepEqual(provider.state.calls, []);
   }
+});
+
+test('fixed product fixture accepts only the exact Marketplace product-store alias transport', async () => {
+  const marketplaceUrl = 'redis://synthetic-marketplace.invalid:6379';
+  const env = environment({ REDIS_URL: marketplaceUrl });
+  const productClient = fixedFixtureProductClient();
+  let receivedUrl = null;
+  const runner = await buildPrivateLiveOperationalRunnerV1({
+    env,
+    clock: () => now,
+    authorityReader: async () => authorityFixture(env, marketplaceUrl),
+    adapterFactory: () => adapterSequence([], { count: 0 }),
+    providerCommandExecutor: simulatedProvider().execute,
+    productExecutionBindingReader: async () => productExecutionBinding(),
+    createProductStoreClient: (url) => {
+      receivedUrl = url;
+      return productClient;
+    },
+  });
+  const accepted = await runner.execute(request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'));
+  assert.equal(accepted.ok, true, JSON.stringify(accepted));
+  assert.equal(receivedUrl, marketplaceUrl);
+
+  const wrongReferenceRunner = await buildPrivateLiveOperationalRunnerV1({
+    env,
+    clock: () => now,
+    authorityReader: async () => authorityFixture(env, marketplaceUrl),
+    adapterFactory: () => adapterSequence([], { count: 0 }),
+    providerCommandExecutor: simulatedProvider().execute,
+    productExecutionBindingReader: async () => productExecutionBinding({
+      product_store_connection_ref: 'MORE_PRIVATE_RUNTIME_OTHER_REDIS_URL',
+    }),
+    createProductStoreClient: () => {
+      throw new Error('must not construct a product client');
+    },
+  });
+  const denied = await wrongReferenceRunner.execute(
+    request('CREATE_FIXED_SYNTHETIC_PRODUCT_FIXTURE'),
+  );
+  assert.equal(denied.ok, false);
+  assert.equal(denied.code, 'FIXED_SYNTHETIC_FIXTURE_STORE_UNAVAILABLE');
 });
 
 test('runner constructs the committed adapter once and performs exactly the required canary sequence', async () => {

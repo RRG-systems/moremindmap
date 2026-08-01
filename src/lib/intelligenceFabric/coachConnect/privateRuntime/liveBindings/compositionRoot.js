@@ -34,6 +34,7 @@ import {
   createPrivateRuntimeLiveAttachmentCoordinatorV1,
 } from './attachmentCoordinator.js';
 import {
+  privateRuntimeProductStoreConnectionAllowedV1,
   readPrivateRuntimeLiveConfigurationAuthorityV1,
 } from './configurationAuthority.js';
 import {
@@ -209,7 +210,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     maxRetriesPerRequest: 1,
     connectTimeout: 5_000,
     commandTimeout: 5_000,
-    tls: {},
+    ...(url.startsWith('rediss://') ? { tls: {} } : {}),
   }),
 } = {}) {
   if (typeof createLiveComposition !== 'function') return makeDeniedComposition();
@@ -344,8 +345,11 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
         secret: true,
       },
     );
-    if (typeof productStoreUrl !== 'string'
-      || !productStoreUrl.startsWith('rediss://')) {
+    if (!privateRuntimeProductStoreConnectionAllowedV1({
+      reference: productExecutionBinding.binding.product_store_connection_ref,
+      value: productStoreUrl,
+      env,
+    })) {
       return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
     }
     try {
