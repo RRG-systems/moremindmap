@@ -15,8 +15,10 @@ The code-level Layer 3 blockers identified in the architecture audit now have bo
 
 The repairs do not alter the BOS questions, eight dimensions, Layer 1 score meanings, Layer 2 claim policy, canonical dossier, or downstream product contracts.
 
-## Recommendation
+## Final recommendation
 
-The full repository tests, build, focused lint, lint-debt comparison, and direct sanitized proof pass. Proceed to Layer 3 after the remaining clean commit, production deployment, and read-only production smoke verification complete.
+The full repository tests, build, focused lint, lint-debt comparison, direct sanitized proof, clean deployment, and read-only production smoke verification pass.
+
+Proceed to Layer 3 Customer Intelligence Translation. Layer 3 must consume the existing truthfulness-aware customer projection and must not bypass, reinterpret, or weaken Layer 1 or Layer 2 contracts.
 
 Scientific validation remains separate future work and is not treated as an engineering implementation failure.
