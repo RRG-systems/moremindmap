@@ -1,18 +1,17 @@
 /**
  * cache.js
- * 
+ *
  * Cache layer for V3 narrative outputs.
- * Prevents regeneration on refresh.
- * 
- * Current implementation: In-memory cache (browser) + localStorage fallback
- * Production: Redis recommended, but this works for MVP.
+ * Prevents regeneration on refresh while enforcing the active Layer 2
+ * truthfulness contract.
  */
 
-// In-memory cache
+import { BOS_TRUTHFULNESS_VERSION } from '../bosTruthfulness/evidenceContract.js';
+
 const memoryCache = new Map();
 
-// Version tracking: invalidate old cache when schema changes
-const CACHE_VERSION = 8;  // Bumped to 8 for structured future-bottleneck One Move
+export const NARRATIVE_CACHE_VERSION = 9;
+export const NARRATIVE_CACHE_TTL_HOURS = 24;
 
 function isValidCachedSection(section, value) {
   if (section === 'fiveFutures') {
@@ -20,7 +19,7 @@ function isValidCachedSection(section, value) {
   }
 
   if (section === 'facilitatorNotes') {
-    return Array.isArray(value?.notes) && value.notes.length >= 1;
+    return Array.isArray(value?.notes);
   }
 
   if (section === 'teamExperience') {
@@ -29,7 +28,7 @@ function isValidCachedSection(section, value) {
       value?.communication_pattern?.interpretation,
       value?.listening_pattern?.interpretation,
       value?.relational_friction?.interpretation,
-      Array.isArray(value?.key_signals) && value.key_signals.length >= 2,
+      Array.isArray(value?.key_signals),
       value?.causal_interpretation,
     ].filter(Boolean).length;
 
@@ -44,68 +43,123 @@ function isValidCachedSection(section, value) {
   return value != null;
 }
 
-/**
- * Generate cache key from profile ID.
- * Format: v3_narrative_PROFILEID
- */
 function getCacheKey(profileId) {
   return `v3_narrative_${profileId}`;
 }
 
+function getBrowserStorage() {
+  const storage = globalThis?.localStorage;
+  return storage
+    && typeof storage.getItem === 'function'
+    && typeof storage.setItem === 'function'
+    && typeof storage.removeItem === 'function'
+    ? storage
+    : null;
+}
+
+function hasActiveTruthfulnessContract(narrative) {
+  return narrative?.truthfulness_version === BOS_TRUTHFULNESS_VERSION
+    && narrative?.truthfulness?.version === BOS_TRUTHFULNESS_VERSION
+    && narrative?.truthfulness?.authority === 'deterministic_layer_2'
+    && Array.isArray(narrative?.truthfulness?.claims)
+    && typeof narrative?.truthfulness?.claims_by_id === 'object'
+    && typeof narrative?.truthfulness?.section_claim_map === 'object'
+    && typeof narrative?.truthfulness?.summary === 'object';
+}
+
+function isCacheEntryCurrent(entry, nowMs = Date.now()) {
+  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) return false;
+  if (entry.cacheVersion !== NARRATIVE_CACHE_VERSION) return false;
+  if (entry.truthfulnessVersion !== BOS_TRUTHFULNESS_VERSION) return false;
+
+  const cachedAtMs = Date.parse(entry.cachedAt);
+  const requestedTtl = Number(entry.ttlHours);
+  if (!Number.isFinite(cachedAtMs) || !Number.isFinite(requestedTtl) || requestedTtl <= 0) {
+    return false;
+  }
+
+  const ttlHours = Math.min(requestedTtl, NARRATIVE_CACHE_TTL_HOURS);
+  const ageMs = nowMs - cachedAtMs;
+  return ageMs >= 0 && ageMs <= ttlHours * 60 * 60 * 1000;
+}
+
+function validateCacheEntry(entry, nowMs = Date.now()) {
+  if (!isCacheEntryCurrent(entry, nowMs)) return null;
+
+  const narrative = entry.data;
+  if (!hasActiveTruthfulnessContract(narrative)) return null;
+
+  const requiredSections = [
+    'profileDNA',
+    'communicationStyle',
+    'hiddenContradictions',
+    'strategicCeiling',
+    'coachingLeverage',
+    'teamExperience',
+    'facilitatorNotes',
+    'fiveFutures',
+    'recommendedNextStep',
+    'executiveSummary',
+  ];
+  const invalidSection = requiredSections.find((section) =>
+    !isValidCachedSection(section, narrative?.[section])
+  );
+
+  return invalidSection ? null : narrative;
+}
+
+function createCacheEntry(narrativeObj) {
+  return {
+    data: narrativeObj,
+    cacheVersion: NARRATIVE_CACHE_VERSION,
+    truthfulnessVersion: BOS_TRUTHFULNESS_VERSION,
+    cachedAt: new Date().toISOString(),
+    ttlHours: NARRATIVE_CACHE_TTL_HOURS,
+  };
+}
+
 /**
- * Get cached narrative from memory or localStorage.
+ * Get a cache entry only when its schema, TTL, required sections, and active
+ * truthfulness contract all validate. Legacy entries fail closed.
  */
 export function getCachedNarrative(profileId) {
   if (!profileId) return null;
 
   const cacheKey = getCacheKey(profileId);
-
-  // Check memory first (fastest)
   if (memoryCache.has(cacheKey)) {
-    console.log(`[V3 CACHE HIT] Memory: ${profileId}`);
-    return memoryCache.get(cacheKey);
+    const cached = validateCacheEntry(memoryCache.get(cacheKey));
+    if (cached) {
+      console.log(`[V3 CACHE HIT] Memory: ${profileId}`);
+      return cached;
+    }
+    memoryCache.delete(cacheKey);
+    console.log(`[V3 CACHE INVALIDATED] ${profileId} - memory invariant failed`);
   }
 
-  // Check localStorage (browser persistence)
-  if (typeof localStorage !== 'undefined') {
+  const storage = getBrowserStorage();
+  if (storage) {
     try {
-      const stored = localStorage.getItem(cacheKey);
+      const stored = storage.getItem(cacheKey);
       if (stored) {
-        const wrapped = JSON.parse(stored);
-        
-        // Check cache version to invalidate old schemas
-        if (wrapped.cacheVersion && wrapped.cacheVersion !== CACHE_VERSION) {
-          console.log(`[V3 CACHE INVALIDATED] ${profileId} - version mismatch (${wrapped.cacheVersion} vs ${CACHE_VERSION})`);
-          localStorage.removeItem(cacheKey);
+        const entry = JSON.parse(stored);
+        const cached = validateCacheEntry(entry);
+        if (!cached) {
+          console.log(`[V3 CACHE INVALIDATED] ${profileId} - storage invariant failed`);
+          storage.removeItem(cacheKey);
           return null;
         }
-        
-        // Unwrap if stored with metadata (old format had: { data: {...}, cachedAt, ttlHours })
-        const cached = wrapped.data || wrapped;
-        
-        // Validate that cached narrative has all required sections
-        const requiredSections = [
-          'coachingLeverage',
-          'recommendedNextStep',
-          'teamExperience',
-          'facilitatorNotes',
-          'fiveFutures',
-        ];
-        const invalidSection = requiredSections.find((section) =>
-          !isValidCachedSection(section, cached[section])
-        );
-        if (invalidSection) {
-          console.log(`[V3 CACHE INVALIDATED] ${profileId} - invalid or missing section: ${invalidSection}`);
-          localStorage.removeItem(cacheKey);
-          return null;
-        }
-        
-        memoryCache.set(cacheKey, cached); // Reload into memory
+
+        memoryCache.set(cacheKey, entry);
         console.log(`[V3 CACHE HIT] Storage: ${profileId}`);
         return cached;
       }
-    } catch (e) {
-      console.warn(`[V3 CACHE] Storage read failed:`, e);
+    } catch (error) {
+      console.warn('[V3 CACHE] Storage read failed:', error);
+      try {
+        storage.removeItem(cacheKey);
+      } catch {
+        // Storage is optional; the validated memory cache remains available.
+      }
     }
   }
 
@@ -114,58 +168,58 @@ export function getCachedNarrative(profileId) {
 }
 
 /**
- * Store narrative in cache (memory + localStorage).
+ * Store only narratives that already satisfy the active Layer 2 contract.
  */
 export function cacheNarrative(profileId, narrativeObj) {
-  if (!profileId || !narrativeObj) return;
+  if (!profileId || !hasActiveTruthfulnessContract(narrativeObj)) return false;
 
   const cacheKey = getCacheKey(profileId);
+  const cacheEntry = createCacheEntry(narrativeObj);
+  memoryCache.set(cacheKey, cacheEntry);
 
-  // Store in memory
-  memoryCache.set(cacheKey, narrativeObj);
-
-  // Store in localStorage (with version + TTL metadata)
-  if (typeof localStorage !== 'undefined') {
+  const storage = getBrowserStorage();
+  if (storage) {
     try {
-      const cacheEntry = {
-        data: narrativeObj,
-        cacheVersion: CACHE_VERSION,
-        cachedAt: new Date().toISOString(),
-        ttlHours: 24,
-      };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+      storage.setItem(cacheKey, JSON.stringify(cacheEntry));
       console.log(`[V3 CACHE STORED] ${profileId}`);
-    } catch (e) {
-      console.warn(`[V3 CACHE] Storage write failed:`, e);
+    } catch (error) {
+      console.warn('[V3 CACHE] Storage write failed:', error);
     }
   }
+
+  return true;
 }
 
-/**
- * Clear cache for a profile (force refresh).
- */
 export function clearCache(profileId) {
   if (profileId) {
     const cacheKey = getCacheKey(profileId);
     memoryCache.delete(cacheKey);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.removeItem(cacheKey);
+    const storage = getBrowserStorage();
+    if (storage) {
+      storage.removeItem(cacheKey);
     }
     console.log(`[V3 CACHE CLEARED] ${profileId}`);
-  } else {
-    // Clear all
-    memoryCache.clear();
-    if (typeof localStorage !== 'undefined') {
-      const keys = Object.keys(localStorage);
-      keys.forEach((key) => {
-        if (key.startsWith('v3_narrative_')) {
-          localStorage.removeItem(key);
-        }
-      });
-    }
-    console.log(`[V3 CACHE CLEARED ALL]`);
+    return;
   }
+
+  memoryCache.clear();
+  const storage = getBrowserStorage();
+  if (storage) {
+    const keys = Object.keys(storage);
+    keys.forEach((key) => {
+      if (key.startsWith('v3_narrative_')) {
+        storage.removeItem(key);
+      }
+    });
+  }
+  console.log('[V3 CACHE CLEARED ALL]');
 }
+
+export const cacheInvariants = Object.freeze({
+  cache_version: NARRATIVE_CACHE_VERSION,
+  truthfulness_version: BOS_TRUTHFULNESS_VERSION,
+  ttl_hours: NARRATIVE_CACHE_TTL_HOURS,
+});
 
 export default {
   getCachedNarrative,

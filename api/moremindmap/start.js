@@ -7,6 +7,7 @@
 
 import { createJob } from '../engine/miniV2JobManager.js'
 import { normalizeAssessmentAnswers } from '../engine/normalizeAssessmentAnswers.js'
+import { assessAssessmentCompleteness } from '../engine/assessmentCompleteness.js'
 
 export default async function handler(req, res) {
   // CORS headers
@@ -47,15 +48,23 @@ export default async function handler(req, res) {
     // Format answers using question metadata so ordered selection responses
     // are not mistaken for written text.
     const formattedAnswers = normalizeAssessmentAnswers(answers)
+    const assessmentCompleteness = assessAssessmentCompleteness(formattedAnswers)
 
     // Create job in Redis (queued, no execution yet)
-    const jobId = await createJob({ answers: formattedAnswers, metadata })
+    const jobId = await createJob({
+      answers: formattedAnswers,
+      metadata: {
+        ...metadata,
+        assessment_completeness: assessmentCompleteness
+      }
+    })
 
     // Return immediately - status endpoint will drive execution
     return res.status(200).json({
       success: true,
       job_id: jobId,
       status: 'queued',
+      assessment_status: assessmentCompleteness.status,
       message: 'Report generation queued. Poll /api/moremindmap/status?job_id=' + jobId
     })
   } catch (error) {

@@ -5,6 +5,10 @@
  * Communication = dimension priorities + operational framing + calibration patterns
  */
 
+import { topologyThreshold } from '../measurement/measurementContract.js';
+
+const HIGH_EMOTIONAL_SMOOTHING_THRESHOLD = topologyThreshold(12.0);
+
 const DIMENSION_LABELS = {
   vector: 'Command',
   signal: 'Relational Awareness',
@@ -67,7 +71,7 @@ export function inferCommunicationStyle(vectorScores, rankedDimensions) {
   // Emotional smoothing (signal + flex)
   const emotionalSmoothing = signalScore + vectorScores.flex;
   let emotional_calibration = '';
-  if (emotionalSmoothing > 12.0) {
+  if (emotionalSmoothing > HIGH_EMOTIONAL_SMOOTHING_THRESHOLD) {
     emotional_calibration = "High emotional smoothing — adjusts tone and delivery based on perceived reception";
   } else if (emotionalSmoothing < 0.70) {
     emotional_calibration = "Low emotional smoothing — message delivery prioritizes clarity over reception management";
