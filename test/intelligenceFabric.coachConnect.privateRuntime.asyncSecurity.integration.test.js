@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import crypto from 'node:crypto';
 import {
   SyntheticAsyncSecurityStateAdapter,
+  createRemoteSecurityRecord,
   createSyntheticAsyncSecurityBackend,
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
 import {
@@ -47,6 +48,31 @@ const scope = {
 const scopeHash = hashPrivateRuntimeScope(scope);
 const hash = (value) => crypto.createHash('sha256').update(value).digest('hex');
 
+function canonicalApprovalRecord() {
+  const issuedAtMs = Date.parse('2026-07-27T20:00:00.000Z');
+  const expiresAtMs = Date.parse('2026-07-27T22:00:00.000Z');
+  return createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: 'd'.repeat(64),
+    provider_time_ms: issuedAtMs,
+    fields: {
+      approval_ref: 'private_test_approval_integration',
+      environment_id: environmentId,
+      subscriber_subject_ref: subscriberSubjectRef,
+      exact_scope_hash: scopeHash,
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: 'e'.repeat(64),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 1,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+    },
+  });
+}
+
 function initialSnapshot() {
   const mapping = {
     record_version: 'canonical-subject-mapping-v1',
@@ -69,18 +95,7 @@ function initialSnapshot() {
       mapping_version: 1,
       status: 'ACTIVE',
     }]],
-    approvals: [[`${subscriberSubjectRef}|${scopeHash}`, {
-      record_version: 'private-test-approval-v1',
-      approval_ref: 'private_test_approval_integration',
-      environment_id: environmentId,
-      subscriber_subject_ref: subscriberSubjectRef,
-      exact_scope_hash: scopeHash,
-      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
-      status: 'ACTIVE',
-      issued_at: '2026-07-27T20:00:00.000Z',
-      expires_at: '2026-07-27T22:00:00.000Z',
-      security_epoch: 1,
-    }]],
+    approvals: [[`${subscriberSubjectRef}|${scopeHash}`, canonicalApprovalRecord()]],
     security_epochs: [[scopeHash, 1]],
   };
 }
@@ -573,4 +588,3 @@ test('source default stays off and all prohibited external/runtime counters rema
     productionPersistence: 0,
   });
 });
-

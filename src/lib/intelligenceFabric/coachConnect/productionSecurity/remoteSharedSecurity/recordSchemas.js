@@ -18,7 +18,7 @@ export const REMOTE_SECURITY_RECORD_SCHEMAS = deepFreeze({
     record_type: 'private-test-approval-v1',
     record_version: 1,
     ttl_class: 'EXACT_APPROVAL_EXPIRY',
-    mutable_fields: ['status', 'approval_epoch', 'security_epoch', 'updated_at_ms', 'record_etag'],
+    mutable_fields: ['status', 'approval_epoch', 'security_epoch', 'revoked_at_ms', 'updated_at_ms', 'record_etag'],
   },
   TemporaryPrivateEntitlementV2: {
     record_type: 'temporary-private-entitlement-v2',
@@ -90,7 +90,113 @@ export const REMOTE_SECURITY_FORBIDDEN_FIELD_FRAGMENTS = deepFreeze([
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const object = (value) => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 const timestampMs = (value) => Number.isSafeInteger(value) && value >= 0;
+const boundedRef = (value) => typeof value === 'string'
+  && value.length >= 3
+  && value.length <= 256
+  && /^[A-Za-z0-9:_-]+$/.test(value);
 const frozen = (value) => deepFreeze(structuredClone(value));
+
+const REMOTE_SECURITY_PRODUCER_OWNED_FIELDS = deepFreeze([
+  'record_type',
+  'record_version',
+  'environment_digest',
+  'created_at_ms',
+  'updated_at_ms',
+  'record_etag',
+]);
+
+export const PRIVATE_TEST_APPROVAL_RECORD_TYPE = 'private-test-approval-v1';
+export const PRIVATE_TEST_APPROVAL_RECORD_VERSION = 1;
+
+const PRIVATE_TEST_APPROVAL_ACTIVE_FIELDS = deepFreeze([
+  'record_type',
+  'record_version',
+  'environment_digest',
+  'approval_ref',
+  'environment_id',
+  'subscriber_subject_ref',
+  'exact_scope_hash',
+  'purpose',
+  'provenance_ref',
+  'status',
+  'approval_epoch',
+  'security_epoch',
+  'issued_at',
+  'expires_at',
+  'issued_at_ms',
+  'expires_at_ms',
+  'created_at_ms',
+  'updated_at_ms',
+  'record_etag',
+]);
+const PRIVATE_TEST_APPROVAL_REVOKED_FIELDS = deepFreeze([
+  ...PRIVATE_TEST_APPROVAL_ACTIVE_FIELDS,
+  'revoked_at_ms',
+]);
+
+function exactFieldSet(value, fields) {
+  return object(value)
+    && Object.keys(value).length === fields.length
+    && Object.keys(value).every((field) => fields.includes(field));
+}
+
+function canonicalTimestamp(value, milliseconds) {
+  if (typeof value !== 'string' || !timestampMs(milliseconds)) return false;
+  try {
+    return new Date(milliseconds).toISOString() === value;
+  } catch {
+    return false;
+  }
+}
+
+export function validateCanonicalPrivateTestApprovalRecordV1(record) {
+  const errors = [];
+  if (!object(record)) {
+    return frozen({ valid: false, errors: ['RECORD_CORRUPT'], value: null });
+  }
+  if (record.record_type !== PRIVATE_TEST_APPROVAL_RECORD_TYPE) {
+    errors.push('RECORD_TYPE_MISMATCH');
+  }
+  if (record.record_version !== PRIVATE_TEST_APPROVAL_RECORD_VERSION) {
+    errors.push('RECORD_VERSION_MISMATCH');
+  }
+  const fields = record.status === 'REVOKED'
+    ? PRIVATE_TEST_APPROVAL_REVOKED_FIELDS
+    : PRIVATE_TEST_APPROVAL_ACTIVE_FIELDS;
+  if (!exactFieldSet(record, fields)
+    || !sha256(record.environment_digest)
+    || !boundedRef(record.approval_ref)
+    || !boundedRef(record.environment_id)
+    || !boundedRef(record.subscriber_subject_ref)
+    || !sha256(record.exact_scope_hash)
+    || record.purpose !== 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST'
+    || !sha256(record.provenance_ref)
+    || !['ACTIVE', 'REVOKED'].includes(record.status)
+    || !Number.isInteger(record.approval_epoch)
+    || record.approval_epoch < 1
+    || !Number.isInteger(record.security_epoch)
+    || record.security_epoch < 1
+    || !canonicalTimestamp(record.issued_at, record.issued_at_ms)
+    || !canonicalTimestamp(record.expires_at, record.expires_at_ms)
+    || record.expires_at_ms <= record.issued_at_ms
+    || !timestampMs(record.created_at_ms)
+    || !timestampMs(record.updated_at_ms)
+    || record.updated_at_ms < record.created_at_ms
+    || !sha256(record.record_etag)) {
+    errors.push('RECORD_CORRUPT');
+  }
+  if (record.status === 'REVOKED'
+    && (!timestampMs(record.revoked_at_ms)
+      || record.revoked_at_ms < record.issued_at_ms
+      || record.updated_at_ms < record.revoked_at_ms)) {
+    errors.push('RECORD_CORRUPT');
+  }
+  return frozen({
+    valid: errors.length === 0,
+    errors: [...new Set(errors)],
+    value: errors.length ? null : record,
+  });
+}
 
 export function containsForbiddenRemoteSecurityMaterial(value, seen = new Set()) {
   if (!value || typeof value !== 'object' || seen.has(value)) return false;
@@ -138,6 +244,10 @@ export function validateRemoteSecurityRecord(record, {
   if (containsForbiddenRemoteSecurityMaterial(record)) {
     errors.push('RECORD_CORRUPT');
   }
+  if (record.record_type === PRIVATE_TEST_APPROVAL_RECORD_TYPE) {
+    const approval = validateCanonicalPrivateTestApprovalRecordV1(record);
+    errors.push(...approval.errors);
+  }
   if (require_active_ttl) {
     if (!timestampMs(provider_time_ms)
       || !timestampMs(record.expires_at_ms)
@@ -161,6 +271,11 @@ export function createRemoteSecurityRecord({
   const schema = REMOTE_SECURITY_RECORD_SCHEMAS[schema_name];
   if (!schema || !sha256(environment_digest) || !timestampMs(provider_time_ms) || !object(fields)) {
     throw new TypeError('remote security record input is invalid');
+  }
+  if (REMOTE_SECURITY_PRODUCER_OWNED_FIELDS.some((field) => (
+    Object.prototype.hasOwnProperty.call(fields, field)
+  ))) {
+    throw new TypeError('remote security record fields contain producer-owned field');
   }
   const base = {
     record_type: schema.record_type,

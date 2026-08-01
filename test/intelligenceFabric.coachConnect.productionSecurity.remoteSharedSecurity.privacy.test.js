@@ -29,6 +29,32 @@ import {
 const environmentDigest = 'a'.repeat(64);
 const now = Date.parse('2026-07-27T20:00:00.000Z');
 
+function canonicalApproval(fields = {}) {
+  const issuedAtMs = now;
+  const expiresAtMs = now + 60 * 60_000;
+  return createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: environmentDigest,
+    provider_time_ms: now,
+    fields: {
+      approval_ref: 'approval_remote_schema_fixture',
+      environment_id: 'DISPOSABLE_QUALIFICATION',
+      subscriber_subject_ref: 'subscriber_remote_schema_fixture',
+      exact_scope_hash: 'b'.repeat(64),
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: 'c'.repeat(64),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 1,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+      ...fields,
+    },
+  });
+}
+
 test('record manifest contains the ten reviewed record families', () => {
   const manifest = remoteSecurityRecordManifest();
   assert.equal(manifest.length, 10);
@@ -54,6 +80,101 @@ test('record creation is versioned, provider-timed, and deterministic', () => {
   assert.equal(record.record_version, 1);
   assert.match(record.record_etag, /^[a-f0-9]{64}$/);
   assert.equal(validateRemoteSecurityRecord(record, { environment_digest: environmentDigest }).valid, true);
+});
+
+test('record creation rejects every producer-owned schema and integrity field', () => {
+  for (const field of [
+    'record_type',
+    'record_version',
+    'environment_digest',
+    'created_at_ms',
+    'updated_at_ms',
+    'record_etag',
+  ]) {
+    assert.throws(() => createRemoteSecurityRecord({
+      schema_name: 'SecurityEpochV1',
+      environment_digest: environmentDigest,
+      provider_time_ms: now,
+      fields: {
+        scope_digest: 'b'.repeat(64),
+        epoch: 1,
+        status: 'ACTIVE',
+        reason_code: 'INITIALIZED',
+        last_audit_receipt_ref: 'audit_fixture',
+        [field]: field === 'record_version' ? 999 : 'caller_override',
+      },
+    }), /producer-owned field/);
+  }
+});
+
+test('producer-owned rejection occurs before record validation or emission', () => {
+  const fields = {
+    record_type: 'security-epoch-v1',
+    record_version: 1,
+    environment_digest: environmentDigest,
+    created_at_ms: now,
+    updated_at_ms: now,
+    record_etag: 'f'.repeat(64),
+  };
+  assert.throws(() => createRemoteSecurityRecord({
+    schema_name: 'SecurityEpochV1',
+    environment_digest: environmentDigest,
+    provider_time_ms: now,
+    fields,
+  }), /^TypeError: remote security record fields contain producer-owned field$/);
+  assert.deepEqual(fields, {
+    record_type: 'security-epoch-v1',
+    record_version: 1,
+    environment_digest: environmentDigest,
+    created_at_ms: now,
+    updated_at_ms: now,
+    record_etag: 'f'.repeat(64),
+  });
+});
+
+test('producer-owned inherited properties do not override canonical record identity', () => {
+  const fields = Object.create({ record_type: 'attacker-controlled' });
+  Object.assign(fields, {
+    scope_digest: 'b'.repeat(64),
+    epoch: 1,
+    status: 'ACTIVE',
+    reason_code: 'INITIALIZED',
+    last_audit_receipt_ref: 'audit_fixture',
+  });
+  const record = createRemoteSecurityRecord({
+    schema_name: 'SecurityEpochV1',
+    environment_digest: environmentDigest,
+    provider_time_ms: now,
+    fields,
+  });
+  assert.equal(record.record_type, 'security-epoch-v1');
+  assert.equal(record.record_version, 1);
+});
+
+test('private-test approval uses one exact numeric canonical record contract', () => {
+  const approval = canonicalApproval();
+  assert.equal(approval.record_type, 'private-test-approval-v1');
+  assert.equal(approval.record_version, 1);
+  assert.equal(validateRemoteSecurityRecord(approval, {
+    environment_digest: environmentDigest,
+    provider_time_ms: now,
+    require_active_ttl: true,
+  }).valid, true);
+
+  for (const malformed of [
+    { ...approval, record_version: 'private-test-approval-v1' },
+    { ...approval, record_version: 2 },
+    Object.fromEntries(Object.entries(approval).filter(([field]) => field !== 'record_type')),
+    { ...approval, record_type: 'private-test-approval' },
+    { ...approval, incompatible_extra_field: true },
+  ]) {
+    assert.equal(validateRemoteSecurityRecord(malformed, {
+      environment_digest: environmentDigest,
+      provider_time_ms: now,
+      require_active_ttl: true,
+    }).valid, false);
+  }
+  assert.throws(() => canonicalApproval({ incompatible_extra_field: true }), /invalid/);
 });
 
 test('forbidden identity, credential, product, and transcript material is rejected', () => {

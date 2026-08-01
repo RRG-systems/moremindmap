@@ -1,6 +1,12 @@
 import { deepFreeze } from '../../validation.js';
+import {
+  PRIVATE_TEST_APPROVAL_RECORD_TYPE,
+  PRIVATE_TEST_APPROVAL_RECORD_VERSION,
+  validateCanonicalPrivateTestApprovalRecordV1,
+} from '../productionSecurity/remoteSharedSecurity/recordSchemas.js';
 
-export const PRIVATE_TEST_APPROVAL_VERSION = 'private-test-approval-v1';
+export const PRIVATE_TEST_APPROVAL_VERSION = PRIVATE_TEST_APPROVAL_RECORD_VERSION;
+export const PRIVATE_TEST_APPROVAL_TYPE = PRIVATE_TEST_APPROVAL_RECORD_TYPE;
 export const PRIVATE_TEST_ELIGIBILITY_VERSION = 'private-test-bootstrap-eligibility-v1';
 export const AUTHENTICATED_PRIVATE_CONTEXT_VERSION = 'authenticated-private-context-v2';
 
@@ -85,7 +91,11 @@ export function validatePrivateTestApprovalV1(value, {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     return frozen({ valid: false, errors: [{ code: 'PRIVATE_TEST_APPROVAL_REQUIRED', field: '$' }] });
   }
+  if (value.record_type !== PRIVATE_TEST_APPROVAL_TYPE) errors.push({ code: 'PRIVATE_TEST_APPROVAL_REQUIRED', field: 'record_type' });
   if (value.record_version !== PRIVATE_TEST_APPROVAL_VERSION) errors.push({ code: 'PRIVATE_TEST_APPROVAL_REQUIRED', field: 'record_version' });
+  if (!validateCanonicalPrivateTestApprovalRecordV1(value).valid) {
+    errors.push({ code: 'PRIVATE_TEST_APPROVAL_REQUIRED', field: 'record' });
+  }
   if (!text(value.approval_ref)
     || !text(value.environment_id)
     || !text(value.subscriber_subject_ref)
@@ -119,12 +129,15 @@ export function createPrivateTestEligibilityDecision({
   securityEpoch,
   evaluatedAt,
 }) {
+  const canonicalApproval = validateCanonicalPrivateTestApprovalRecordV1(approval);
   if (!text(environmentId)
     || authenticatedContext?.context_version !== AUTHENTICATED_PRIVATE_CONTEXT_VERSION
     || !text(authenticatedContext.subscriber_subject_ref)
     || !text(authenticatedContext.authenticated_session_ref)
     || !sha256(authenticatedContext.exact_scope_hash)
-    || approval?.record_version !== PRIVATE_TEST_APPROVAL_VERSION
+    || !canonicalApproval.valid
+    || approval.record_type !== PRIVATE_TEST_APPROVAL_TYPE
+    || approval.record_version !== PRIVATE_TEST_APPROVAL_VERSION
     || approval.approval_ref == null
     || approval.security_epoch !== securityEpoch
     || !timestamp(evaluatedAt)

@@ -14,12 +14,40 @@ import {
   createQualificationDigestFunction,
   createRemoteSharedSecurityKeyspace,
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/keyspace.js';
+import {
+  createRemoteSecurityRecord,
+} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js';
 
 const sha = (character) => character.repeat(64);
 const keyspace = createRemoteSharedSecurityKeyspace({
   namespace_digest: sha('a'),
   digest: createQualificationDigestFunction('offline-query-fixture-secret-material'),
 });
+
+function canonicalApproval() {
+  const issuedAtMs = Date.parse('2026-07-27T19:00:00.000Z');
+  const expiresAtMs = Date.parse('2026-07-27T21:00:00.000Z');
+  return createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: sha('a'),
+    provider_time_ms: issuedAtMs,
+    fields: {
+      approval_ref: 'approval_query_fixture',
+      environment_id: 'TEST',
+      subscriber_subject_ref: 'subscriber_fixture',
+      exact_scope_hash: sha('d'),
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: sha('e'),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 1,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+    },
+  });
+}
 
 function query(type) {
   return {
@@ -91,6 +119,42 @@ test('READ_AUTHORITY_SNAPSHOT compares all authority records inside one script',
   assert.doesNotMatch(entry.source, /EVAL_RO|EVALSHA_RO/);
 });
 
+test('approval queries require the canonical numeric type and reject malformed provider records', () => {
+  const source = remoteSharedSecurityQueryScriptManifest()
+    .find((entry) => entry.operation_type === 'GET_PRIVATE_TEST_APPROVAL').source;
+  assert.match(source, /record_type == 'private-test-approval-v1'/);
+  assert.match(source, /type\(record\.record_version\) == 'number'/);
+  assert.match(source, /record\.record_version == 1/);
+
+  const record = canonicalApproval();
+  const reply = (approval) => JSON.stringify({
+    ok: true,
+    query_type: 'GET_PRIVATE_TEST_APPROVAL',
+    consistency_proven: true,
+    server_time_ms: Date.parse('2026-07-27T20:00:00.000Z'),
+    record_version: 1,
+    record: approval,
+    failure_code: null,
+    receipt_ref: 'query_approval_fixture',
+  });
+  assert.equal(parseRemoteAuthoritativeQueryReply(
+    reply(record),
+    'GET_PRIVATE_TEST_APPROVAL',
+  ).record.record_version, 1);
+  for (const malformed of [
+    { ...record, record_version: 'private-test-approval-v1' },
+    { ...record, record_version: 2 },
+    { ...record, record_type: 'private-test-approval' },
+    { ...record, record_type: 'security-epoch-v1' },
+    { ...record, incompatible_extra_field: true },
+  ]) {
+    assert.throws(
+      () => parseRemoteAuthoritativeQueryReply(reply(malformed), 'GET_PRIVATE_TEST_APPROVAL'),
+      /PROVIDER_RESPONSE_MALFORMED/,
+    );
+  }
+});
+
 test('query result normalizes to exact committed V2 schema', () => {
   const result = parseRemoteAuthoritativeQueryReply(JSON.stringify({
     ok: true,
@@ -125,4 +189,3 @@ test('query retries never change primary path or fall back to cache', () => {
     error_code: 'PROVIDER_RATE_LIMITED',
   }).retry, false);
 });
-

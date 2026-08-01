@@ -11,6 +11,9 @@ import {
   validateAsyncSecurityCommand,
   validateAsyncSecurityQuery,
 } from './asyncSecurityContracts.js';
+import {
+  validateCanonicalPrivateTestApprovalRecordV1,
+} from './remoteSharedSecurity/recordSchemas.js';
 
 const clone = (value) => value == null ? value : structuredClone(value);
 const frozen = (value) => deepFreeze(clone(value));
@@ -274,6 +277,14 @@ export class SyntheticAsyncSecurityStateAdapter {
       case 'GET_PRIVATE_TEST_APPROVAL': {
         const approval = this.backend.approvals.get(key(query.subject_ref, query.exact_scope_hash));
         if (!approval) return queryFailure(query.query_type, 'PRIVATE_TEST_APPROVAL_REQUIRED', now);
+        if (!validateCanonicalPrivateTestApprovalRecordV1(approval).valid) {
+          return queryFailure(query.query_type, 'PRIVATE_TEST_APPROVAL_REQUIRED', now);
+        }
+        if (!activeAt(approval, now)) {
+          return queryFailure(query.query_type, approval.status === 'REVOKED'
+            ? 'PRIVATE_TEST_APPROVAL_REVOKED'
+            : 'PRIVATE_TEST_APPROVAL_EXPIRED', now);
+        }
         return querySuccess(query.query_type, approval, now);
       }
       case 'GET_SECURITY_EPOCH': {
@@ -323,7 +334,10 @@ export class SyntheticAsyncSecurityStateAdapter {
           : 'SESSION_EXPIRED';
       return queryFailure(query.query_type, code, now);
     }
-    if (!approval || !activeAt(approval, now)) {
+    if (!approval || !validateCanonicalPrivateTestApprovalRecordV1(approval).valid) {
+      return queryFailure(query.query_type, 'PRIVATE_TEST_APPROVAL_REQUIRED', now);
+    }
+    if (!activeAt(approval, now)) {
       return queryFailure(query.query_type, approval?.status === 'REVOKED'
         ? 'PRIVATE_TEST_APPROVAL_REVOKED'
         : 'PRIVATE_TEST_APPROVAL_EXPIRED', now);

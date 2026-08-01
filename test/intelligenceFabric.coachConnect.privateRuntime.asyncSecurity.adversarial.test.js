@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import {
   SyntheticAsyncSecurityStateAdapter,
+  createRemoteSecurityRecord,
   createSyntheticAsyncSecurityBackend,
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/index.js';
 import {
   createCanonicalAsyncSecurityServiceV2,
+  validatePrivateTestApprovalV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/index.js';
 
 const now = Date.parse('2026-07-27T21:00:00.000Z');
@@ -16,6 +18,32 @@ const subscriberSubjectRef = 'canonical_subscriber_alpha';
 const scopeHash = 'a'.repeat(64);
 const sessionHash = 'b'.repeat(64);
 const browserHash = 'c'.repeat(64);
+
+function canonicalApprovalRecord(overrides = {}) {
+  const issuedAtMs = Date.parse('2026-07-27T20:00:00.000Z');
+  const expiresAtMs = Date.parse('2026-07-27T21:30:00.000Z');
+  return createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: 'd'.repeat(64),
+    provider_time_ms: issuedAtMs,
+    fields: {
+      approval_ref: 'private_test_approval_alpha',
+      environment_id: environmentId,
+      subscriber_subject_ref: subscriberSubjectRef,
+      exact_scope_hash: scopeHash,
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: 'e'.repeat(64),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 1,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+      ...overrides,
+    },
+  });
+}
 
 function activeSnapshot(overrides = {}) {
   const mapping = {
@@ -53,18 +81,7 @@ function activeSnapshot(overrides = {}) {
     issued_at: '2026-07-27T20:00:00.000Z',
     expires_at: '2026-07-27T22:00:00.000Z',
   };
-  const approval = {
-    record_version: 'private-test-approval-v1',
-    approval_ref: 'private_test_approval_alpha',
-    environment_id: environmentId,
-    subscriber_subject_ref: subscriberSubjectRef,
-    exact_scope_hash: scopeHash,
-    purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
-    status: 'ACTIVE',
-    issued_at: '2026-07-27T20:00:00.000Z',
-    expires_at: '2026-07-27T21:30:00.000Z',
-    security_epoch: 1,
-  };
+  const approval = canonicalApprovalRecord();
   return {
     canonical_by_external: [[externalSubjectRef, mapping]],
     canonical_by_scope: [[scopeHash, inverse]],
@@ -75,6 +92,48 @@ function activeSnapshot(overrides = {}) {
     ...overrides,
   };
 }
+
+test('eligibility consumes only the exact numeric canonical approval record', () => {
+  const valid = canonicalApprovalRecord();
+  const check = (record, options = {}) => validatePrivateTestApprovalV1(record, {
+    environmentId,
+    subscriberSubjectRef,
+    exactScopeHash: scopeHash,
+    securityEpoch: 1,
+    now,
+    ...options,
+  });
+  assert.equal(check(valid).valid, true);
+  for (const invalid of [
+    { ...valid, record_version: 'private-test-approval-v1' },
+    { ...valid, record_version: 2 },
+    { ...valid, record_type: 'private-test-approval' },
+    Object.fromEntries(Object.entries(valid).filter(([field]) => field !== 'provenance_ref')),
+    { ...valid, incompatible_extra_field: true },
+  ]) {
+    assert.equal(check(invalid).valid, false);
+  }
+  assert.equal(check(valid, { exactScopeHash: 'f'.repeat(64) }).valid, false);
+  assert.equal(check(valid, { securityEpoch: 2 }).valid, false);
+
+  const revokedAtMs = valid.issued_at_ms + 1000;
+  const revoked = {
+    ...canonicalApprovalRecord(),
+    status: 'REVOKED',
+    revoked_at_ms: revokedAtMs,
+    updated_at_ms: revokedAtMs,
+  };
+  assert.equal(check(revoked).errors[0].code, 'PRIVATE_TEST_APPROVAL_REVOKED');
+
+  const expiredAtMs = valid.issued_at_ms + 60_000;
+  const expired = canonicalApprovalRecord({
+    expires_at_ms: expiredAtMs,
+    expires_at: new Date(expiredAtMs).toISOString(),
+  });
+  assert.equal(check(expired).errors.some((error) => (
+    error.code === 'PRIVATE_TEST_APPROVAL_EXPIRED'
+  )), true);
+});
 
 function context(overrides = {}) {
   return {

@@ -9,8 +9,36 @@ import {
 import {
   hashPrivateRuntimeScope,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js';
+import {
+  createRemoteSecurityRecord,
+} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js';
 
 const now = '2099-01-01T00:00:00.000Z';
+
+function canonicalApprovalRecord({ approvalRef, subject, exactScopeHash }) {
+  const issuedAtMs = Date.parse('2098-12-01T00:00:00.000Z');
+  const expiresAtMs = Date.parse('2099-02-01T00:00:00.000Z');
+  return createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: 'd'.repeat(64),
+    provider_time_ms: issuedAtMs,
+    fields: {
+      approval_ref: approvalRef,
+      environment_id: 'private_beta_test',
+      subscriber_subject_ref: subject,
+      exact_scope_hash: exactScopeHash,
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: 'e'.repeat(64),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 3,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+    },
+  });
+}
 
 function result(queryType, record) {
   return {
@@ -60,18 +88,11 @@ function authority(profileId, suffix) {
             security_epoch: 3,
           });
         }
-        return result(query.query_type, {
-          record_version: 'private-test-approval-v1',
-          approval_ref: `approval_${suffix}`,
-          environment_id: 'private_beta_test',
-          subscriber_subject_ref: subject,
-          exact_scope_hash: exactScopeHash,
-          purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
-          status: 'ACTIVE',
-          issued_at: '2098-12-01T00:00:00.000Z',
-          expires_at: '2099-02-01T00:00:00.000Z',
-          security_epoch: 3,
-        });
+        return result(query.query_type, canonicalApprovalRecord({
+          approvalRef: `approval_${suffix}`,
+          subject,
+          exactScopeHash,
+        }));
       },
     },
   };

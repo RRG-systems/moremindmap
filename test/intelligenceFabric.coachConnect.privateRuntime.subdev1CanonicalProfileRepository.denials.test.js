@@ -8,6 +8,9 @@ import {
 import {
   hashPrivateRuntimeScope,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js';
+import {
+  createRemoteSecurityRecord,
+} from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/remoteSharedSecurity/recordSchemas.js';
 
 const profileId = 'mm-20990101-aaaaaaaa';
 const exactScope = {
@@ -17,6 +20,47 @@ const exactScope = {
   subscriber_id: 'subscriber_a',
 };
 const exactScopeHash = hashPrivateRuntimeScope(exactScope);
+
+function canonicalApprovalRecord({
+  scopeHash,
+  status,
+  purpose,
+  securityEpoch,
+}) {
+  const issuedAtMs = Date.parse('2098-12-01T00:00:00.000Z');
+  const expiresAtMs = Date.parse('2099-02-01T00:00:00.000Z');
+  const base = createRemoteSecurityRecord({
+    schema_name: 'PrivateTestApprovalV1',
+    environment_digest: 'd'.repeat(64),
+    provider_time_ms: issuedAtMs,
+    fields: {
+      approval_ref: 'approval_a',
+      environment_id: 'private_beta_test',
+      subscriber_subject_ref: 'subject_a',
+      exact_scope_hash: scopeHash,
+      purpose: 'TEMPORARY_PRIVATE_SUBSCRIPTION_TEST',
+      provenance_ref: 'e'.repeat(64),
+      status: 'ACTIVE',
+      approval_epoch: 1,
+      security_epoch: 2,
+      issued_at: new Date(issuedAtMs).toISOString(),
+      expires_at: new Date(expiresAtMs).toISOString(),
+      issued_at_ms: issuedAtMs,
+      expires_at_ms: expiresAtMs,
+    },
+  });
+  const changed = {
+    ...base,
+    purpose,
+    status,
+    security_epoch: securityEpoch,
+  };
+  if (status === 'REVOKED') {
+    changed.revoked_at_ms = issuedAtMs + 1000;
+    changed.updated_at_ms = issuedAtMs + 1000;
+  }
+  return changed;
+}
 
 function queryResult(queryType, {
   ok = true,
@@ -80,18 +124,12 @@ function fixture({
           });
         }
         return queryResult(query.query_type, {
-          record: {
-            record_version: 'private-test-approval-v1',
-            approval_ref: 'approval_a',
-            environment_id: 'private_beta_test',
-            subscriber_subject_ref: 'subject_a',
-            exact_scope_hash: scopeHash,
-            purpose: approvalPurpose,
+          record: canonicalApprovalRecord({
+            scopeHash,
             status: approvalStatus,
-            issued_at: '2098-12-01T00:00:00.000Z',
-            expires_at: '2099-02-01T00:00:00.000Z',
-            security_epoch: approvalEpoch,
-          },
+            purpose: approvalPurpose,
+            securityEpoch: approvalEpoch,
+          }),
         });
       },
     },
