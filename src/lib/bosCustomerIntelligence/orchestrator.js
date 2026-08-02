@@ -1,8 +1,8 @@
 import {
+  BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS,
   BOS_CUSTOMER_INTELLIGENCE_MODEL,
   BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS,
 } from './contracts.js';
-import { buildDeterministicLayer3Translation } from './deterministicFallback.js';
 import { buildLayer3TranslationRequest } from './modelContract.js';
 import {
   cacheLayer3Translation,
@@ -13,7 +13,14 @@ import {
   validateLayer3TranslationBundle,
 } from './translationValidator.js';
 
-function receipt({ source, packet, reason = null, model = null }) {
+function receipt({
+  source,
+  packet,
+  reason = null,
+  model = null,
+  latencyMs = 0,
+  usage = null,
+}) {
   return Object.freeze({
     source,
     source_hash: packet.semantic_hash,
@@ -21,14 +28,43 @@ function receipt({ source, packet, reason = null, model = null }) {
     translation_only: true,
     semantics_modified: false,
     reason,
+    latency_ms: Math.max(0, Math.round(latencyMs)),
+    usage: usage ? Object.freeze({ ...usage }) : null,
+    estimated_cost_usd: null,
+    cost_basis: 'not_configured',
   });
 }
 
 function parseTransportOutput(value) {
-  if (typeof value === 'string') return JSON.parse(value);
-  if (typeof value?.output_text === 'string') return JSON.parse(value.output_text);
-  if (value?.version && Array.isArray(value?.translations)) return value;
+  if (typeof value === 'string') {
+    if (value.length > BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS) {
+      throw new Error('layer3_model_output_too_large');
+    }
+    return JSON.parse(value);
+  }
+  if (typeof value?.output_text === 'string') {
+    if (value.output_text.length > BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS) {
+      throw new Error('layer3_model_output_too_large');
+    }
+    return JSON.parse(value.output_text);
+  }
+  if (value?.version && Array.isArray(value?.translations)) {
+    if (JSON.stringify(value).length > BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS) {
+      throw new Error('layer3_model_output_too_large');
+    }
+    return value;
+  }
   throw new Error('layer3_empty_or_invalid_model_output');
+}
+
+function normalizeUsage(output) {
+  const usage = output?.usage;
+  if (!usage || typeof usage !== 'object') return null;
+  return {
+    input_tokens: Number.isFinite(Number(usage.input_tokens)) ? Number(usage.input_tokens) : null,
+    output_tokens: Number.isFinite(Number(usage.output_tokens)) ? Number(usage.output_tokens) : null,
+    total_tokens: Number.isFinite(Number(usage.total_tokens)) ? Number(usage.total_tokens) : null,
+  };
 }
 
 function safeFailureReason(error) {
@@ -61,6 +97,7 @@ export async function translateLayer3SemanticPacket({
   timeoutMs = BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS,
   cacheOptions = {},
 } = {}) {
+  const startedAt = Date.now();
   const packetValidation = validateLayer3SemanticPacket(packet);
   if (!packetValidation.valid) {
     const error = new Error('layer3_semantic_packet_rejected');
@@ -72,21 +109,30 @@ export async function translateLayer3SemanticPacket({
   if (cached) {
     return {
       bundle: cached,
-      receipt: receipt({ source: 'cache', packet }),
+      receipt: receipt({ source: 'cache', packet, latencyMs: Date.now() - startedAt }),
     };
   }
 
-  const fallback = buildDeterministicLayer3Translation(packet);
   if (!enabled) {
     return {
-      bundle: fallback,
-      receipt: receipt({ source: 'deterministic_fallback', packet, reason: 'feature_disabled' }),
+      bundle: null,
+      receipt: receipt({
+        source: 'layer2_fallback',
+        packet,
+        reason: 'feature_disabled',
+        latencyMs: Date.now() - startedAt,
+      }),
     };
   }
   if (typeof transport !== 'function') {
     return {
-      bundle: fallback,
-      receipt: receipt({ source: 'deterministic_fallback', packet, reason: 'transport_unavailable' }),
+      bundle: null,
+      receipt: receipt({
+        source: 'layer2_fallback',
+        packet,
+        reason: 'transport_unavailable',
+        latencyMs: Date.now() - startedAt,
+      }),
     };
   }
 
@@ -106,15 +152,22 @@ export async function translateLayer3SemanticPacket({
     cacheLayer3Translation(packet, bundle, cacheOptions);
     return {
       bundle,
-      receipt: receipt({ source: 'gpt_translation', packet, model: BOS_CUSTOMER_INTELLIGENCE_MODEL }),
+      receipt: receipt({
+        source: 'gpt_translation',
+        packet,
+        model: BOS_CUSTOMER_INTELLIGENCE_MODEL,
+        latencyMs: Date.now() - startedAt,
+        usage: normalizeUsage(output),
+      }),
     };
   } catch (error) {
     return {
-      bundle: fallback,
+      bundle: null,
       receipt: receipt({
-        source: 'deterministic_fallback',
+        source: 'layer2_fallback',
         packet,
         reason: safeFailureReason(error),
+        latencyMs: Date.now() - startedAt,
       }),
     };
   }

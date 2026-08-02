@@ -149,6 +149,12 @@ export function applyLayer3Translations(viewModel, packet, bundle, receipt = nul
     teamFit: applyTeam(viewModel, translations),
     visualDNA: {
       ...viewModel.visualDNA,
+      approved: viewModel.visualDNA?.approved
+        ? {
+            ...viewModel.visualDNA.approved,
+            layer3_translation_status: 'stored_visual_not_translated',
+          }
+        : viewModel.visualDNA?.approved,
       deterministic: buildLayer3VisualDNAViewModel(
         viewModel.visualDNA?.deterministic,
         bundle,

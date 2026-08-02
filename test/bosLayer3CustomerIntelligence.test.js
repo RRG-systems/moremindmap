@@ -7,10 +7,17 @@ import { generateCanonicalProfile } from '../api/engine/canonical/canonicalProfi
 import { normalizeAssessmentAnswers } from '../api/engine/normalizeAssessmentAnswers.js';
 import customerIntelligenceHandler from '../api/moremindmap/customer-intelligence.js';
 import {
+  BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT,
+  BOS_CUSTOMER_INTELLIGENCE_PROMPT_VERSION,
+  BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
+  BOS_CUSTOMER_INTELLIGENCE_VALIDATOR_VERSION,
   BOS_CUSTOMER_INTELLIGENCE_MODEL,
+  BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS,
   BOS_CUSTOMER_INTELLIGENCE_VERSION,
+  BOS_LAYER2_VERSION,
   INSUFFICIENT_EVIDENCE,
 } from '../src/lib/bosCustomerIntelligence/contracts.js';
+import { resolveLayer3CustomerViewModel } from '../src/lib/bosCustomerIntelligence/customerViewModelOverlay.js';
 import { buildDeterministicLayer3Translation } from '../src/lib/bosCustomerIntelligence/deterministicFallback.js';
 import { buildLayer3TranslationRequest } from '../src/lib/bosCustomerIntelligence/modelContract.js';
 import { translateLayer3SemanticPacket } from '../src/lib/bosCustomerIntelligence/orchestrator.js';
@@ -21,6 +28,7 @@ import {
   packetWithoutSemanticHash,
 } from '../src/lib/bosCustomerIntelligence/semanticPacket.js';
 import {
+  buildLayer3CacheIdentity,
   clearLayer3TranslationCache,
 } from '../src/lib/bosCustomerIntelligence/translationCache.js';
 import {
@@ -101,6 +109,10 @@ test('immutable semantic packet contains only Layer 2 claims and protected displ
   const packet = buildLayer3SemanticPacket(viewModel);
 
   assert.equal(packet.version, BOS_CUSTOMER_INTELLIGENCE_VERSION);
+  assert.equal(packet.layer2_version, BOS_LAYER2_VERSION);
+  assert.equal(packet.output_variant, BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT);
+  assert.equal(packet.translation_variant, BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT);
+  assert.match(packet.surface_manifest_hash, /^fnv1a64:/);
   assert.equal(packet.source_authority, 'deterministic_layer_2');
   assert.equal(packet.translation_only, true);
   assert.equal(packet.protected_contract.layer_1_scores_modified, false);
@@ -212,7 +224,8 @@ test('orchestrator is feature-gated, validates GPT output, caches by hash, and f
     },
     cacheOptions: { storage: null },
   });
-  assert.equal(disabled.receipt.source, 'deterministic_fallback');
+  assert.equal(disabled.receipt.source, 'layer2_fallback');
+  assert.equal(disabled.bundle, null);
   assert.equal(disabled.receipt.reason, 'feature_disabled');
   assert.equal(transportCalls, 0);
 
@@ -250,7 +263,8 @@ test('orchestrator is feature-gated, validates GPT output, caches by hash, and f
     transport: async () => ({ output_text: JSON.stringify(invalidBundle) }),
     cacheOptions: { storage: null },
   });
-  assert.equal(rejected.receipt.source, 'deterministic_fallback');
+  assert.equal(rejected.receipt.source, 'layer2_fallback');
+  assert.equal(rejected.bundle, null);
   assert.equal(rejected.receipt.reason, 'layer3_model_translation_rejected');
 
   const timedOut = await translateLayer3SemanticPacket({
@@ -260,8 +274,68 @@ test('orchestrator is feature-gated, validates GPT output, caches by hash, and f
     timeoutMs: 5,
     cacheOptions: { storage: null },
   });
-  assert.equal(timedOut.receipt.source, 'deterministic_fallback');
+  assert.equal(timedOut.receipt.source, 'layer2_fallback');
+  assert.equal(timedOut.bundle, null);
   assert.equal(timedOut.receipt.reason, 'layer3_translation_timeout');
+
+  const oversizedObject = await translateLayer3SemanticPacket({
+    packet,
+    enabled: true,
+    transport: async () => ({
+      ...validBundle,
+      padding: 'x'.repeat(BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS),
+    }),
+    cacheOptions: { storage: null },
+  });
+  assert.equal(oversizedObject.receipt.source, 'layer2_fallback');
+  assert.equal(oversizedObject.bundle, null);
+  assert.equal(oversizedObject.receipt.reason, 'layer3_model_output_too_large');
+});
+
+test('exact Layer 2 object is retained for every non-approved Layer 3 result', async () => {
+  const { viewModel } = await buildLayer3Fixture();
+  const packet = buildLayer3SemanticPacket(viewModel);
+  const validBundle = buildDeterministicLayer3Translation(packet);
+  const fallbackReasons = [
+    'feature_disabled',
+    'transport_unavailable',
+    'layer3_translation_timeout',
+    'layer3_model_translation_rejected',
+    'durable_cache_unavailable',
+  ];
+
+  for (const reason of fallbackReasons) {
+    const resolved = resolveLayer3CustomerViewModel(viewModel, packet, {
+      bundle: null,
+      receipt: { source: 'layer2_fallback', reason },
+    });
+    assert.equal(resolved, viewModel);
+    assert.equal(JSON.stringify(resolved), JSON.stringify(viewModel));
+  }
+
+  const unapproved = resolveLayer3CustomerViewModel(viewModel, packet, {
+    bundle: validBundle,
+    receipt: { source: 'deterministic_fallback' },
+  });
+  assert.equal(unapproved, viewModel);
+});
+
+test('cache identity binds every semantic and policy version dimension', async () => {
+  const { viewModel } = await buildLayer3Fixture();
+  const packet = buildLayer3SemanticPacket(viewModel);
+  const identity = buildLayer3CacheIdentity(packet);
+  assert.deepEqual(identity, {
+    cache_version: 'bos_l3_translation_cache_v2',
+    layer2_version: BOS_LAYER2_VERSION,
+    semantic_hash: packet.semantic_hash,
+    surface_manifest_hash: packet.surface_manifest_hash,
+    model_version: BOS_CUSTOMER_INTELLIGENCE_MODEL,
+    prompt_version: BOS_CUSTOMER_INTELLIGENCE_PROMPT_VERSION,
+    validator_version: BOS_CUSTOMER_INTELLIGENCE_VALIDATOR_VERSION,
+    output_variant: BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT,
+    layer3_translation_version: BOS_CUSTOMER_INTELLIGENCE_VERSION,
+    translation_variant: BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
+  });
 });
 
 test('premium adapter changes customer copy only and preserves technical sources byte-for-byte', async () => {
@@ -310,6 +384,24 @@ test('Visual DNA adapter preserves score topology and removes unsupported defaul
   assert.equal(visual.futureCards.length, 5);
   assert.equal(visual.futureCards.every(({ summary }) => summary === INSUFFICIENT_EVIDENCE), true);
   assert.equal(visual.customer_intelligence.translation_only, true);
+});
+
+test('stored Visual DNA is explicitly marked as preserved and not Layer 3 translated', async () => {
+  const { viewModel } = await buildLayer3Fixture();
+  viewModel.visualDNA.approved = {
+    image_url: '/synthetic/approved-visual.png',
+    status: 'approved',
+  };
+  const packet = buildLayer3SemanticPacket(viewModel);
+  const bundle = buildDeterministicLayer3Translation(packet);
+  const translated = applyLayer3Translations(viewModel, packet, bundle, {
+    source: 'gpt_translation',
+  });
+  assert.equal(
+    translated.visualDNA.approved.layer3_translation_status,
+    'stored_visual_not_translated',
+  );
+  assert.equal(viewModel.visualDNA.approved.layer3_translation_status, undefined);
 });
 
 test('sparse Layer 2 input remains a complete explicit-abstention customer experience', async () => {

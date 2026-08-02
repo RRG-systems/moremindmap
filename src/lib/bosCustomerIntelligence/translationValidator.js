@@ -1,7 +1,10 @@
 import { containsUnsupportedNarrativeClaim } from '../bosTruthfulness/claimValidator.js';
 import {
   ALLOWED_CLASSIFICATIONS,
+  BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT,
+  BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
   BOS_CUSTOMER_INTELLIGENCE_VERSION,
+  BOS_LAYER2_VERSION,
   CUSTOMER_COPY_FIELDS,
   INSUFFICIENT_EVIDENCE,
   TRANSLATION_STATUS,
@@ -106,6 +109,13 @@ export function validateLayer3SemanticPacket(packet) {
   const failures = [];
   if (!packet || typeof packet !== 'object') return validationResult(['invalid_packet']);
   if (packet.version !== BOS_CUSTOMER_INTELLIGENCE_VERSION) failures.push('invalid_version');
+  if (packet.layer2_version !== BOS_LAYER2_VERSION) failures.push('invalid_layer2_version');
+  if (packet.output_variant !== BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT) {
+    failures.push('invalid_output_variant');
+  }
+  if (packet.translation_variant !== BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT) {
+    failures.push('invalid_translation_variant');
+  }
   if (packet.source_authority !== 'deterministic_layer_2') failures.push('invalid_authority');
   if (packet.translation_only !== true) failures.push('translation_only_required');
   if (packet.protected_contract?.layer_1_scores_modified !== false
@@ -124,6 +134,14 @@ export function validateLayer3SemanticPacket(packet) {
     if (surfaceIds.has(surface?.surface_id)) failures.push(`surfaces[${index}]:duplicate_surface_id`);
     surfaceIds.add(surface?.surface_id);
   });
+  const expectedManifestHash = hashSemanticValue((packet.surfaces || []).map((surface) => ({
+    surface_id: surface.surface_id,
+    role: surface.role,
+    claim_ids: (surface.claims || []).map(({ claim_id }) => claim_id),
+  })));
+  if (packet.surface_manifest_hash !== expectedManifestHash) {
+    failures.push('surface_manifest_hash_mismatch');
+  }
   const expectedHash = hashSemanticValue(packetWithoutSemanticHash(packet));
   if (packet.semantic_hash !== expectedHash) failures.push('semantic_hash_mismatch');
   const serialized = stableStringify(packet);

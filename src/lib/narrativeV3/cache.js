@@ -10,7 +10,7 @@ import { BOS_TRUTHFULNESS_VERSION } from '../bosTruthfulness/evidenceContract.js
 
 const memoryCache = new Map();
 
-export const NARRATIVE_CACHE_VERSION = 9;
+export const NARRATIVE_CACHE_VERSION = 10;
 export const NARRATIVE_CACHE_TTL_HOURS = 24;
 
 function isValidCachedSection(section, value) {
@@ -45,6 +45,41 @@ function isValidCachedSection(section, value) {
 
 function getCacheKey(profileId) {
   return `v3_narrative_${profileId}`;
+}
+
+function stableValue(value) {
+  if (Array.isArray(value)) return value.map(stableValue);
+  if (!value || typeof value !== 'object') return value;
+  return Object.keys(value).sort().reduce((result, key) => {
+    result[key] = stableValue(value[key]);
+    return result;
+  }, {});
+}
+
+function hashValue(value) {
+  const text = JSON.stringify(stableValue(value));
+  let hash = 0xcbf29ce484222325n;
+  const prime = 0x100000001b3n;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= BigInt(text.charCodeAt(index));
+    hash = BigInt.asUintN(64, hash * prime);
+  }
+  return `fnv1a64:${hash.toString(16).padStart(16, '0')}`;
+}
+
+export function buildNarrativeCanonicalSemanticHash(canonical) {
+  const canonicalProfile = canonical?.canonical_profile_json
+    || canonical?.canonical_dossier?.canonical_profile_json
+    || canonical
+    || {};
+  const retainedAnswers = canonical?.intake_answers
+    || canonical?.answers
+    || canonicalProfile?.intake_answers
+    || {};
+  return hashValue({
+    canonical_profile_json: canonicalProfile,
+    retained_answers: retainedAnswers,
+  });
 }
 
 function getBrowserStorage() {
@@ -83,8 +118,9 @@ function isCacheEntryCurrent(entry, nowMs = Date.now()) {
   return ageMs >= 0 && ageMs <= ttlHours * 60 * 60 * 1000;
 }
 
-function validateCacheEntry(entry, nowMs = Date.now()) {
+function validateCacheEntry(entry, canonicalSemanticHash, nowMs = Date.now()) {
   if (!isCacheEntryCurrent(entry, nowMs)) return null;
+  if (!canonicalSemanticHash || entry.canonicalSemanticHash !== canonicalSemanticHash) return null;
 
   const narrative = entry.data;
   if (!hasActiveTruthfulnessContract(narrative)) return null;
@@ -108,11 +144,12 @@ function validateCacheEntry(entry, nowMs = Date.now()) {
   return invalidSection ? null : narrative;
 }
 
-function createCacheEntry(narrativeObj) {
+function createCacheEntry(narrativeObj, canonicalSemanticHash) {
   return {
     data: narrativeObj,
     cacheVersion: NARRATIVE_CACHE_VERSION,
     truthfulnessVersion: BOS_TRUTHFULNESS_VERSION,
+    canonicalSemanticHash,
     cachedAt: new Date().toISOString(),
     ttlHours: NARRATIVE_CACHE_TTL_HOURS,
   };
@@ -122,12 +159,13 @@ function createCacheEntry(narrativeObj) {
  * Get a cache entry only when its schema, TTL, required sections, and active
  * truthfulness contract all validate. Legacy entries fail closed.
  */
-export function getCachedNarrative(profileId) {
-  if (!profileId) return null;
+export function getCachedNarrative(profileId, canonical) {
+  if (!profileId || !canonical) return null;
 
   const cacheKey = getCacheKey(profileId);
+  const canonicalSemanticHash = buildNarrativeCanonicalSemanticHash(canonical);
   if (memoryCache.has(cacheKey)) {
-    const cached = validateCacheEntry(memoryCache.get(cacheKey));
+    const cached = validateCacheEntry(memoryCache.get(cacheKey), canonicalSemanticHash);
     if (cached) {
       console.log(`[V3 CACHE HIT] Memory: ${profileId}`);
       return cached;
@@ -142,7 +180,7 @@ export function getCachedNarrative(profileId) {
       const stored = storage.getItem(cacheKey);
       if (stored) {
         const entry = JSON.parse(stored);
-        const cached = validateCacheEntry(entry);
+        const cached = validateCacheEntry(entry, canonicalSemanticHash);
         if (!cached) {
           console.log(`[V3 CACHE INVALIDATED] ${profileId} - storage invariant failed`);
           storage.removeItem(cacheKey);
@@ -170,11 +208,14 @@ export function getCachedNarrative(profileId) {
 /**
  * Store only narratives that already satisfy the active Layer 2 contract.
  */
-export function cacheNarrative(profileId, narrativeObj) {
-  if (!profileId || !hasActiveTruthfulnessContract(narrativeObj)) return false;
+export function cacheNarrative(profileId, narrativeObj, canonical) {
+  if (!profileId || !canonical || !hasActiveTruthfulnessContract(narrativeObj)) return false;
 
   const cacheKey = getCacheKey(profileId);
-  const cacheEntry = createCacheEntry(narrativeObj);
+  const cacheEntry = createCacheEntry(
+    narrativeObj,
+    buildNarrativeCanonicalSemanticHash(canonical),
+  );
   memoryCache.set(cacheKey, cacheEntry);
 
   const storage = getBrowserStorage();

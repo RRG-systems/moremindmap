@@ -78,7 +78,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   // Check cache first (unless disabled for forensic test)
   let cacheHit = false;
   if (profileId && !disableCache) {
-    const cached = getCachedNarrative(profileId);
+    const cached = getCachedNarrative(profileId, canonical);
     if (cached) {
       cacheHit = true;
       console.log('[V3 CACHE HIT]', profileId, '| render_source:', cached.render_source);
@@ -276,7 +276,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
 
   // Cache the result (unless disabled for forensic test)
   if (profileId && !disableCache) {
-    cacheNarrative(profileId, narrative);
+    cacheNarrative(profileId, narrative, canonical);
     console.log('[V3] Cached narrative for', profileId);
   }
 

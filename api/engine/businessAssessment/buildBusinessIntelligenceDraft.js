@@ -165,7 +165,9 @@ function extractBehavioralReality(canonicalProfile) {
 }
 
 function inferAgentStage(answers, assessmentType, model) {
+  const q1 = answers.q1;
   const q2 = answers.q2;
+  const q6 = answers.q6;
   const q8 = answers.q8;
   const q9 = answers.q9;
   const q11 = answers.q11;

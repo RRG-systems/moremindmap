@@ -9,6 +9,12 @@ function ApprovedVisualPanel({ visualDNA }) {
       <p className="mt-3 text-sm leading-relaxed text-white/80">
         A visual representation of your Behavioral Operating System.
       </p>
+      {visualDNA?.layer3_translation_status === 'stored_visual_not_translated' ? (
+        <p className="mt-3 rounded-lg border border-amber-300/20 bg-amber-400/5 px-3 py-2 text-xs leading-relaxed text-amber-100/75">
+          This stored image is preserved from its approved version. Any text embedded in the image
+          was not rewritten or revalidated by the current customer-intelligence translation.
+        </p>
+      ) : null}
       {visualDNA?.image_url ? (
         <img
           src={visualDNA.image_url}

@@ -14,6 +14,7 @@ import { buildNarrativeV3 } from '../src/lib/narrativeV3/buildNarrativeV3.js';
 import {
   NARRATIVE_CACHE_TTL_HOURS,
   NARRATIVE_CACHE_VERSION,
+  buildNarrativeCanonicalSemanticHash,
   cacheNarrative,
   clearCache,
   getCachedNarrative,
@@ -142,34 +143,41 @@ async function buildCompleteCanonicalRecord() {
 test('cache enforces schema version TTL and active truthfulness version', () => {
   const storage = installMemoryLocalStorage();
   const narrative = buildCacheableNarrative();
+  const canonical = buildSparseCanonicalRecord();
+  const canonicalSemanticHash = buildNarrativeCanonicalSemanticHash(canonical);
   try {
     const legacyId = 'legacy-cache';
     storage.localStorage.setItem(`v3_narrative_${legacyId}`, JSON.stringify(narrative));
-    assert.equal(getCachedNarrative(legacyId), null);
+    assert.equal(getCachedNarrative(legacyId, canonical), null);
 
     const expiredId = 'expired-cache';
     storage.localStorage.setItem(`v3_narrative_${expiredId}`, JSON.stringify({
       data: narrative,
       cacheVersion: NARRATIVE_CACHE_VERSION,
       truthfulnessVersion: TRUTHFULNESS_VERSION,
+      canonicalSemanticHash,
       cachedAt: new Date(Date.now() - (NARRATIVE_CACHE_TTL_HOURS + 1) * 60 * 60 * 1000).toISOString(),
       ttlHours: NARRATIVE_CACHE_TTL_HOURS,
     }));
-    assert.equal(getCachedNarrative(expiredId), null);
+    assert.equal(getCachedNarrative(expiredId, canonical), null);
 
     const oldVersionId = 'old-version-cache';
     storage.localStorage.setItem(`v3_narrative_${oldVersionId}`, JSON.stringify({
       data: narrative,
       cacheVersion: NARRATIVE_CACHE_VERSION - 1,
       truthfulnessVersion: TRUTHFULNESS_VERSION,
+      canonicalSemanticHash,
       cachedAt: new Date().toISOString(),
       ttlHours: NARRATIVE_CACHE_TTL_HOURS,
     }));
-    assert.equal(getCachedNarrative(oldVersionId), null);
+    assert.equal(getCachedNarrative(oldVersionId, canonical), null);
 
-    assert.equal(cacheNarrative('legacy-write', { render_source: 'legacy' }), false);
-    assert.equal(cacheNarrative('active-write', narrative), true);
-    assert.equal(getCachedNarrative('active-write'), narrative);
+    assert.equal(cacheNarrative('legacy-write', { render_source: 'legacy' }, canonical), false);
+    assert.equal(cacheNarrative('active-write', narrative, canonical), true);
+    assert.equal(getCachedNarrative('active-write', canonical), narrative);
+    const changedCanonical = structuredClone(canonical);
+    changedCanonical.canonical_profile_json.vector_scores.signal = 0.5;
+    assert.equal(getCachedNarrative('active-write', changedCanonical), null);
   } finally {
     clearCache('active-write');
     storage.restore();
@@ -177,16 +185,17 @@ test('cache enforces schema version TTL and active truthfulness version', () => 
 });
 
 test('cache treats a non-Storage localStorage placeholder as unavailable', () => {
+  const canonical = buildSparseCanonicalRecord();
   const previous = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
   Object.defineProperty(globalThis, 'localStorage', {
     configurable: true,
     value: {},
   });
   try {
-    assert.equal(getCachedNarrative('non-storage-placeholder'), null);
-    assert.equal(cacheNarrative('non-storage-active', buildCacheableNarrative()), true);
+    assert.equal(getCachedNarrative('non-storage-placeholder', canonical), null);
+    assert.equal(cacheNarrative('non-storage-active', buildCacheableNarrative(), canonical), true);
     assert.equal(
-      getCachedNarrative('non-storage-active').truthfulness_version,
+      getCachedNarrative('non-storage-active', canonical).truthfulness_version,
       TRUTHFULNESS_VERSION,
     );
   } finally {

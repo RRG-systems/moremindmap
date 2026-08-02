@@ -1,6 +1,9 @@
 import {
   ALLOWED_CLASSIFICATIONS,
+  BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT,
+  BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
   BOS_CUSTOMER_INTELLIGENCE_VERSION,
+  BOS_LAYER2_VERSION,
   INSUFFICIENT_EVIDENCE,
   LAYER3_SURFACE_ROLES,
 } from './contracts.js';
@@ -205,8 +208,11 @@ function buildFixedSurfaces(viewModel) {
   ];
 }
 
-export function buildLayer3SemanticPacket(viewModel) {
-  if (viewModel?.truthfulness?.version !== 'bos_truthfulness_v1'
+export function buildLayer3SemanticPacket(viewModel, {
+  outputVariant = BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT,
+  translationVariant = BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
+} = {}) {
+  if (viewModel?.truthfulness?.version !== BOS_LAYER2_VERSION
       || viewModel?.truthfulness?.authority !== 'deterministic_layer_2') {
     throw new Error('layer3_requires_active_layer2_truthfulness');
   }
@@ -217,8 +223,19 @@ export function buildLayer3SemanticPacket(viewModel) {
     ...buildFixedSurfaces(viewModel),
   ].filter((item) => item.claims.length > 0);
 
+  const surfaceManifest = surfaces.map((item) => ({
+    surface_id: item.surface_id,
+    role: item.role,
+    claim_ids: item.claims.map(({ claim_id }) => claim_id),
+  }));
   const packetWithoutHash = {
     version: BOS_CUSTOMER_INTELLIGENCE_VERSION,
+    layer2_version: BOS_LAYER2_VERSION,
+    output_variant: cleanString(outputVariant, BOS_CUSTOMER_INTELLIGENCE_OUTPUT_VARIANT),
+    translation_variant: cleanString(
+      translationVariant,
+      BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
+    ),
     source_authority: 'deterministic_layer_2',
     translation_only: true,
     protected_contract: {
@@ -228,6 +245,7 @@ export function buildLayer3SemanticPacket(viewModel) {
       downstream_contracts_modified: false,
       confidence_calibration_claimed: false,
     },
+    surface_manifest_hash: hashSemanticValue(surfaceManifest),
     surfaces,
   };
   const packet = {
