@@ -20,6 +20,7 @@ function receipt({
   model = null,
   latencyMs = 0,
   usage = null,
+  validationFailures = null,
 }) {
   return Object.freeze({
     source,
@@ -32,6 +33,9 @@ function receipt({
     usage: usage ? Object.freeze({ ...usage }) : null,
     estimated_cost_usd: null,
     cost_basis: 'not_configured',
+    ...(Array.isArray(validationFailures) && validationFailures.length > 0
+      ? { validation_failures: Object.freeze([...validationFailures]) }
+      : {}),
   });
 }
 
@@ -168,6 +172,7 @@ export async function translateLayer3SemanticPacket({
         packet,
         reason: safeFailureReason(error),
         latencyMs: Date.now() - startedAt,
+        validationFailures: error?.failures,
       }),
     };
   }

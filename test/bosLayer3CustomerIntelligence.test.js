@@ -298,6 +298,8 @@ test('orchestrator is feature-gated, validates GPT output, caches by hash, and f
   assert.equal(rejected.receipt.source, 'layer2_fallback');
   assert.equal(rejected.bundle, null);
   assert.equal(rejected.receipt.reason, 'layer3_model_translation_rejected');
+  assert.equal(rejected.receipt.validation_failures.length > 0, true);
+  assert.match(rejected.receipt.validation_failures[0], /semantic_contract_changed/);
 
   const timedOut = await translateLayer3SemanticPacket({
     packet,
