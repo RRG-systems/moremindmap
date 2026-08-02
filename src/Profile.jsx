@@ -371,10 +371,8 @@ export default function Profile() {
     
     setProfileIdLoading(true)
     try {
-      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`)
-      console.log('[VALIDATE] VITE_API_URL:', import.meta.env.VITE_API_URL)
-      console.log('[VALIDATE] API base:', API)
+      const fullUrl =
+        `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`
       console.log('[VALIDATE] Full URL:', fullUrl)
       const res = await fetch(fullUrl)
       console.log('[VALIDATE] Response status:', res.status)

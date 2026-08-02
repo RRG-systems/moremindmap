@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { transformWithOxc } from 'vite';
 
 import {
   buildAuthoritativeLayer3Packet,
@@ -24,6 +26,32 @@ import { validateLayer3TranslationBundle } from '../src/lib/bosCustomerIntellige
 import { verifyHistoricalProfiles } from '../scripts/verifyBosUniversalHistoricalCompatibility.js';
 
 const PROFILE_ID = 'mm-20990101-upgrade1';
+
+test('compiled historical premium profile retrieval uses a same-origin relative API URL', async () => {
+  const source = readFileSync(new URL('../src/Profile.jsx', import.meta.url), 'utf8');
+  const compiled = await transformWithOxc(source, 'src/Profile.jsx', { lang: 'jsx' });
+  const start = source.indexOf('async function validateProfileId()');
+  const end = source.indexOf('async function handleStartAssessment()', start);
+  const retrievalPath = source.slice(start, end);
+  const compiledStart = compiled.code.indexOf('async function validateProfileId()');
+  const compiledEnd = compiled.code.indexOf('async function handleStartAssessment()', compiledStart);
+  const compiledRetrievalPath = compiled.code.slice(compiledStart, compiledEnd);
+
+  assert.notEqual(start, -1);
+  assert.notEqual(end, -1);
+  assert.notEqual(compiledStart, -1);
+  assert.notEqual(compiledEnd, -1);
+  assert.match(
+    retrievalPath,
+    /const fullUrl\s*=\s*`\/api\/moremindmap\/retrieve-profile\?id=\$\{encodeURIComponent\(id\)\}`/,
+  );
+  assert.match(
+    compiledRetrievalPath,
+    /const fullUrl\s*=\s*`\/api\/moremindmap\/retrieve-profile\?id=\$\{encodeURIComponent\(id\)\}`/,
+  );
+  assert.doesNotMatch(compiledRetrievalPath, /VITE_API_URL/);
+  assert.doesNotMatch(compiledRetrievalPath, /https?:\/\//);
+});
 
 class FakeRedis {
   constructor(entries = {}) {
