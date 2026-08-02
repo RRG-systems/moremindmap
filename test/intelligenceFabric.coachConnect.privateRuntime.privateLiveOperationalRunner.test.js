@@ -442,6 +442,62 @@ async function runnerFixture({
   };
 }
 
+function providerAuthorityFixture(env) {
+  const fixture = authorityFixture(env);
+  const resolveFixtureReference = fixture.resolve_secret_reference;
+  fixture.resolve_secret_reference = async (reference, options) => {
+    if (reference === 'MORE_PRIVATE_RUNTIME_PROVIDER_ENDPOINT_VALUE') {
+      return 'https://synthetic-provider.invalid';
+    }
+    if (reference === 'MORE_PRIVATE_RUNTIME_PROVIDER_CREDENTIAL_VALUE') {
+      return 'synthetic-provider-credential-material';
+    }
+    return resolveFixtureReference(reference, options);
+  };
+  return fixture;
+}
+
+async function runClassifiedCanaryFailure({
+  fetchImpl = globalThis.fetch,
+  providerCommandExecutor = null,
+  proofInvocationTransform = null,
+} = {}) {
+  const env = environment();
+  const healthCalls = { count: 0 };
+  const runner = await buildPrivateLiveOperationalRunnerV1({
+    env,
+    clock: () => now,
+    authorityReader: async () => providerAuthorityFixture(env),
+    adapterFactory: () => adapterSequence(
+      ['RECOVERING', 'RECOVERING', 'HEALTHY'],
+      healthCalls,
+    ),
+    fetchImpl,
+    providerCommandExecutor,
+    proofInvocationTransform,
+  });
+  const result = await runner.execute(request('PROVIDER_HEALTH_CANARY'));
+  return { result, healthCalls };
+}
+
+function assertProofFailureClassification(result, stopCode) {
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE');
+  assert.equal(validatePrivateBetaLaunchStageReceiptV1(result.stage_receipt), true);
+  assert.deepEqual(result.stage_receipt, {
+    receipt_version: 'private-beta-launch-stage-receipt-v1',
+    stage: 'PROOF_STORAGE',
+    status: 'FAILED',
+    stop_code: stopCode,
+    provider_health_call_count: 3,
+    expected_provider_state: 'HEALTHY',
+    observed_provider_state: 'HEALTHY',
+    provider_failure_code: stopCode,
+    proof_storage_attempted: true,
+    proof_storage_succeeded: false,
+  });
+}
+
 test('authority gate is production-only, default-off, deployment-bound, non-browser, and constant-time validated', () => {
   const env = environment();
   const baseRequest = {
@@ -809,7 +865,152 @@ test('provider-controlled strings, fields, and result combinations fail without 
     const result = await runner.execute(request('PROVIDER_HEALTH_CANARY'));
     assert.equal(result.ok, false);
     assert.equal(result.code, 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE');
+    assert.equal(
+      result.stage_receipt.stop_code,
+      'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    );
     assert.equal(JSON.stringify(result).includes(sentinel), false);
+  }
+});
+
+test('STORE_CANARY_PROOF failures receive bounded privacy-safe classifications', async (t) => {
+  const validReceipt = {
+    ok: true,
+    status: 'HEALTHY',
+    code: '',
+    provider_time_ms: now,
+    receipt_hash: 'e'.repeat(64),
+    epoch: null,
+    approval_status: null,
+    expires_at_ms: now + 60_000,
+    idempotent_replay: false,
+  };
+  const cases = [
+    {
+      name: 'provider HTTP 4xx',
+      stopCode: 'CANARY_PROOF_PROVIDER_HTTP_4XX',
+      options: {
+        fetchImpl: async () => ({ ok: false, status: 403 }),
+      },
+    },
+    {
+      name: 'provider HTTP 5xx',
+      stopCode: 'CANARY_PROOF_PROVIDER_HTTP_5XX',
+      options: {
+        fetchImpl: async () => ({ ok: false, status: 503 }),
+      },
+    },
+    {
+      name: 'timeout',
+      stopCode: 'CANARY_PROOF_PROVIDER_TIMEOUT',
+      options: {
+        providerCommandExecutor: async () => {
+          const error = new Error('synthetic timeout detail must not escape');
+          error.name = 'AbortError';
+          throw error;
+        },
+      },
+    },
+    {
+      name: 'transport',
+      stopCode: 'CANARY_PROOF_PROVIDER_TRANSPORT_FAILURE',
+      options: {
+        fetchImpl: async () => {
+          throw new TypeError('synthetic transport detail must not escape');
+        },
+      },
+    },
+    {
+      name: 'provider error envelope',
+      stopCode: 'CANARY_PROOF_PROVIDER_ERROR_ENVELOPE',
+      options: {
+        fetchImpl: async () => ({
+          ok: true,
+          status: 200,
+          json: async () => ({ error: 'synthetic provider detail must not escape' }),
+        }),
+      },
+    },
+    {
+      name: 'invalid JSON',
+      stopCode: 'CANARY_PROOF_PROVIDER_INVALID_JSON',
+      options: {
+        fetchImpl: async () => ({
+          ok: true,
+          status: 200,
+          json: async () => {
+            throw new SyntaxError('synthetic JSON detail must not escape');
+          },
+        }),
+      },
+    },
+    {
+      name: 'proof payload validation',
+      stopCode: 'CANARY_PROOF_PAYLOAD_VALIDATION_FAILED',
+      options: {
+        providerCommandExecutor: async () => {
+          throw new Error('executor must not be reached');
+        },
+        proofInvocationTransform: (invocation) => ({
+          ...invocation,
+          command: [...invocation.command.slice(0, 9), '{'],
+        }),
+      },
+    },
+    {
+      name: 'namespace and key construction',
+      stopCode: 'CANARY_PROOF_NAMESPACE_KEY_CONSTRUCTION_FAILED',
+      options: {
+        providerCommandExecutor: async () => {
+          throw new Error('executor must not be reached');
+        },
+        proofInvocationTransform: (invocation) => ({
+          ...invocation,
+          command: invocation.command.map((value, index) => (
+            index === 3 ? 'synthetic:wrong-namespace:key' : value
+          )),
+        }),
+      },
+    },
+    {
+      name: 'proof receipt validation',
+      stopCode: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+      options: {
+        providerCommandExecutor: async () => JSON.stringify({
+          ...validReceipt,
+          unexpected: 'synthetic detail must not escape',
+        }),
+      },
+    },
+    {
+      name: 'receipt projection',
+      stopCode: 'CANARY_PROOF_RECEIPT_PROJECTION_FAILED',
+      options: {
+        providerCommandExecutor: async () => JSON.stringify({
+          ...validReceipt,
+          provider_time_ms: 8_640_000_000_000_001,
+          expires_at_ms: 8_640_000_000_060_001,
+        }),
+      },
+    },
+    {
+      name: 'unexpected executor exception',
+      stopCode: 'CANARY_PROOF_EXECUTOR_EXCEPTION',
+      options: {
+        providerCommandExecutor: async () => {
+          throw new Error('synthetic executor detail must not escape');
+        },
+      },
+    },
+  ];
+  for (const entry of cases) {
+    await t.test(entry.name, async () => {
+      const { result, healthCalls } = await runClassifiedCanaryFailure(entry.options);
+      assertProofFailureClassification(result, entry.stopCode);
+      assert.equal(healthCalls.count, 3);
+      const serialized = JSON.stringify(result);
+      assert.equal(/synthetic .* detail|credential|endpoint|token/i.test(serialized), false);
+    });
   }
 });
 

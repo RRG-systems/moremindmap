@@ -5,6 +5,7 @@ import {
   createPrivateLiveOperationalRunnerHandler,
 } from '../api/internal/private-live-operational-runner.js';
 import {
+  createPrivateBetaLaunchStageReceiptV1,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_AUTHORITY_VERSION,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_OPERATIONS,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE,
@@ -241,4 +242,42 @@ test('authorized runner failures expose only bounded stage receipts', async () =
     const serialized = JSON.stringify(res.payload);
     assert.equal(/credential|endpoint|cookie|token|profile_id|subscriber_subject/.test(serialized), false);
   }
+});
+
+test('protected route preserves a bounded STORE_CANARY_PROOF failure classification', async () => {
+  const stageReceipt = createPrivateBetaLaunchStageReceiptV1({
+    stage: 'PROOF_STORAGE',
+    stop_code: 'CANARY_PROOF_PROVIDER_HTTP_5XX',
+    provider_health_call_count: 3,
+    expected_provider_state: 'HEALTHY',
+    observed_provider_state: 'HEALTHY',
+    provider_failure_code: 'CANARY_PROOF_PROVIDER_HTTP_5XX',
+    proof_storage_attempted: true,
+    proof_storage_succeeded: false,
+  });
+  const res = response();
+  await createPrivateLiveOperationalRunnerHandler({
+    env: env(),
+    clock: () => now,
+    buildRunner: async () => ({
+      ok: true,
+      execute: async () => ({
+        ok: false,
+        code: 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+        stage_receipt: stageReceipt,
+      }),
+    }),
+  })(req(), res);
+  assert.equal(res.statusCode, 403);
+  assert.deepEqual(res.payload, {
+    ok: false,
+    error: 'request_denied',
+    stage_receipt: stageReceipt,
+  });
+  assert.equal(
+    /credential|endpoint|cookie|token|profile_id|subscriber_subject/.test(
+      JSON.stringify(res.payload),
+    ),
+    false,
+  );
 });

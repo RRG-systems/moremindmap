@@ -105,6 +105,46 @@ const APPROVAL_STATUSES = Object.freeze([
   'REVOKED',
   'STALE',
 ]);
+const STORE_CANARY_PROOF_FAILURE_CODES = Object.freeze({
+  HTTP_4XX: 'CANARY_PROOF_PROVIDER_HTTP_4XX',
+  HTTP_5XX: 'CANARY_PROOF_PROVIDER_HTTP_5XX',
+  HTTP_OTHER: 'CANARY_PROOF_PROVIDER_HTTP_OTHER',
+  TIMEOUT: 'CANARY_PROOF_PROVIDER_TIMEOUT',
+  TRANSPORT: 'CANARY_PROOF_PROVIDER_TRANSPORT_FAILURE',
+  ERROR_ENVELOPE: 'CANARY_PROOF_PROVIDER_ERROR_ENVELOPE',
+  INVALID_JSON: 'CANARY_PROOF_PROVIDER_INVALID_JSON',
+  PAYLOAD: 'CANARY_PROOF_PAYLOAD_VALIDATION_FAILED',
+  NAMESPACE: 'CANARY_PROOF_NAMESPACE_KEY_CONSTRUCTION_FAILED',
+  RECEIPT: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+  PROJECTION: 'CANARY_PROOF_RECEIPT_PROJECTION_FAILED',
+  EXECUTOR: 'CANARY_PROOF_EXECUTOR_EXCEPTION',
+});
+const OPERATIONAL_ENVELOPE_FIELDS = Object.freeze([
+  'operation',
+  'fingerprint',
+  'receipt_hash',
+  'namespace_prefix',
+  'environment_digest',
+  'environment_id',
+  'deployment_sha256',
+  'exact_scope_hash',
+  'subscriber_subject_ref',
+  'purpose',
+  'provenance_ref',
+  'duration_ms',
+  'maximum_approval_duration_ms',
+  'maximum_clock_skew_ms',
+  'issued_at_ms',
+  'issued_at',
+  'expires_at',
+  'approval_ref',
+  'record_etag',
+  'environment_record_etag',
+  'sequence_digest',
+  'canary_proof_ttl_ms',
+  'audit_retention_ms',
+  'command_retention_ms',
+]);
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const object = (value) => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 const exactFields = (value, fields) => object(value)
@@ -118,6 +158,18 @@ const timestamp = (value) => typeof value === 'string' && Number.isFinite(Date.p
 const jsonClone = (value) => JSON.parse(JSON.stringify(value));
 const frozen = (value) => Object.freeze(jsonClone(value));
 const hashText = (value) => crypto.createHash('sha256').update(String(value)).digest('hex');
+
+class ProviderCommandDiagnosticError extends Error {
+  constructor(diagnosticCode) {
+    super('provider command failed');
+    this.name = 'ProviderCommandDiagnosticError';
+    this.diagnosticCode = diagnosticCode;
+  }
+}
+
+function providerCommandFailure(diagnosticCode) {
+  return new ProviderCommandDiagnosticError(diagnosticCode);
+}
 
 const OPERATIONAL_SCRIPT = String.raw`-- private-live-operational-runner-v1
 local input = cjson.decode(ARGV[1])
@@ -579,19 +631,44 @@ async function createProviderExecutor({
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);
     try {
-      const response = await fetchImpl(endpoint, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${credential}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(command),
-        signal: controller.signal,
-      });
-      if (!response?.ok) throw new Error('provider unavailable');
-      const body = await response.json();
+      let response;
+      try {
+        response = await fetchImpl(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${credential}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(command),
+          signal: controller.signal,
+        });
+      } catch (error) {
+        throw providerCommandFailure(
+          controller.signal.aborted || error?.name === 'AbortError'
+            ? STORE_CANARY_PROOF_FAILURE_CODES.TIMEOUT
+            : STORE_CANARY_PROOF_FAILURE_CODES.TRANSPORT,
+        );
+      }
+      if (!response?.ok) {
+        const status = Number(response?.status);
+        throw providerCommandFailure(
+          status >= 400 && status <= 499
+            ? STORE_CANARY_PROOF_FAILURE_CODES.HTTP_4XX
+            : status >= 500 && status <= 599
+              ? STORE_CANARY_PROOF_FAILURE_CODES.HTTP_5XX
+              : STORE_CANARY_PROOF_FAILURE_CODES.HTTP_OTHER,
+        );
+      }
+      let body;
+      try {
+        body = await response.json();
+      } catch {
+        throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.INVALID_JSON);
+      }
       if (!body || Object.hasOwn(body, 'error') || !Object.hasOwn(body, 'result')) {
-        throw new Error('provider unavailable');
+        throw providerCommandFailure(
+          STORE_CANARY_PROOF_FAILURE_CODES.ERROR_ENVELOPE,
+        );
       }
       return body.result;
     } finally {
@@ -687,6 +764,64 @@ function operationalInvocation({
   };
 }
 
+function parseProofInvocationEnvelope(invocation) {
+  if (!object(invocation)
+    || !Array.isArray(invocation.command)
+    || invocation.command.length !== 10
+    || typeof invocation.command[9] !== 'string') {
+    return null;
+  }
+  let envelope;
+  try {
+    envelope = JSON.parse(invocation.command[9]);
+  } catch {
+    return null;
+  }
+  return envelope;
+}
+
+function validProofInvocationPayload(invocation, envelope) {
+  return exactFields(envelope, OPERATIONAL_ENVELOPE_FIELDS)
+    && envelope.operation === 'STORE_CANARY_PROOF'
+    && sha256(invocation.receiptHash)
+    && envelope.receipt_hash === invocation.receiptHash
+    && sha256(envelope.fingerprint)
+    && sha256(envelope.environment_digest)
+    && safeRef(envelope.environment_id)
+    && sha256(envelope.deployment_sha256)
+    && sha256(envelope.exact_scope_hash)
+    && safeRef(envelope.subscriber_subject_ref)
+    && envelope.purpose === APPROVAL_PURPOSE
+    && sha256(envelope.provenance_ref)
+    && envelope.duration_ms === 0
+    && envelope.maximum_approval_duration_ms === MAX_APPROVAL_MINUTES * 60 * 1000
+    && envelope.maximum_clock_skew_ms === 5 * 60 * 1000
+    && Number.isSafeInteger(envelope.issued_at_ms)
+    && envelope.issued_at_ms >= 0
+    && timestamp(envelope.issued_at)
+    && envelope.expires_at === null
+    && safeRef(envelope.approval_ref)
+    && sha256(envelope.record_etag)
+    && sha256(envelope.environment_record_etag)
+    && sha256(envelope.sequence_digest)
+    && envelope.canary_proof_ttl_ms === CANARY_PROOF_TTL_MS
+    && envelope.audit_retention_ms === 30 * 24 * 60 * 60 * 1000
+    && envelope.command_retention_ms === 90 * 60 * 1000;
+}
+
+function validProofInvocationNamespace(invocation, envelope, keyspace) {
+  const command = invocation.command;
+  const expectedPrefix = `${keyspace.prefix}:{${keyspace.namespace_digest}}:`;
+  const keys = command.slice(3, 9);
+  return command[0] === 'EVAL'
+    && command[1] === OPERATIONAL_SCRIPT
+    && command[2] === 6
+    && envelope.namespace_prefix === expectedPrefix
+    && keys.length === 6
+    && keys.every((key) => typeof key === 'string' && key.startsWith(expectedPrefix))
+    && new Set(keys).size === keys.length;
+}
+
 function validProviderResultForOperation(value, operation) {
   if (!exactFields(value, PROVIDER_RESULT_FIELDS)
     || typeof value.ok !== 'boolean'
@@ -751,9 +886,14 @@ function validProviderResultForOperation(value, operation) {
 
 function parseProviderResult(raw, operation) {
   const payload = Array.isArray(raw) && raw.length === 1 ? raw[0] : raw;
-  const value = typeof payload === 'string' ? JSON.parse(payload) : payload;
+  let value;
+  try {
+    value = typeof payload === 'string' ? JSON.parse(payload) : payload;
+  } catch {
+    throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.INVALID_JSON);
+  }
   if (!validProviderResultForOperation(value, operation)) {
-    throw new TypeError('provider result invalid');
+    throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT);
   }
   return value;
 }
@@ -789,6 +929,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
   productExecutionBindingReader = readPrivateLiveProductExecutionBindingV1,
   adapterFactory = createUpstashRedisRemoteSharedSecurityAdapter,
   providerCommandExecutor = null,
+  proofInvocationTransform = null,
   createProductStoreClient = (url) => new Redis(url, {
     lazyConnect: true,
     enableOfflineQueue: false,
@@ -908,24 +1049,69 @@ export async function buildPrivateLiveOperationalRunnerV1({
   }
 
   async function runProviderOperation(operation, request, sequenceDigest = null) {
-    const invocation = operationalInvocation({
-      operation,
-      request,
-      authority,
-      keyspace,
-      sequenceDigest,
-      nowMs: clock(),
-    });
+    const proofFailure = (stopCode) => denied(
+      'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+      operation === 'STORE_CANARY_PROOF'
+        ? createPrivateBetaLaunchStageReceiptV1({
+          stage: 'PROOF_STORAGE',
+          stop_code: stopCode,
+          provider_failure_code: stopCode,
+          proof_storage_attempted: true,
+          proof_storage_succeeded: false,
+        })
+        : null,
+    );
+    let invocation;
     try {
-      const raw = await executeProviderCommand(invocation.command);
-      return projectResult(
-        request.operation,
-        parseProviderResult(raw, operation),
+      invocation = operationalInvocation({
+        operation,
+        request,
         authority,
         keyspace,
-      );
+        sequenceDigest,
+        nowMs: clock(),
+      });
+      if (operation === 'STORE_CANARY_PROOF'
+        && typeof proofInvocationTransform === 'function') {
+        invocation = proofInvocationTransform(invocation);
+      }
     } catch {
-      return denied('OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE');
+      return proofFailure(STORE_CANARY_PROOF_FAILURE_CODES.PAYLOAD);
+    }
+    if (operation === 'STORE_CANARY_PROOF') {
+      const envelope = parseProofInvocationEnvelope(invocation);
+      if (!validProofInvocationPayload(invocation, envelope)) {
+        return proofFailure(STORE_CANARY_PROOF_FAILURE_CODES.PAYLOAD);
+      }
+      if (!validProofInvocationNamespace(invocation, envelope, keyspace)) {
+        return proofFailure(STORE_CANARY_PROOF_FAILURE_CODES.NAMESPACE);
+      }
+    }
+    let raw;
+    try {
+      raw = await executeProviderCommand(invocation.command);
+    } catch (error) {
+      const stopCode = error instanceof ProviderCommandDiagnosticError
+        ? error.diagnosticCode
+        : error?.name === 'AbortError'
+          ? STORE_CANARY_PROOF_FAILURE_CODES.TIMEOUT
+          : STORE_CANARY_PROOF_FAILURE_CODES.EXECUTOR;
+      return proofFailure(stopCode);
+    }
+    let parsed;
+    try {
+      parsed = parseProviderResult(raw, operation);
+    } catch (error) {
+      return proofFailure(
+        error instanceof ProviderCommandDiagnosticError
+          ? error.diagnosticCode
+          : STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT,
+      );
+    }
+    try {
+      return projectResult(request.operation, parsed, authority, keyspace);
+    } catch {
+      return proofFailure(STORE_CANARY_PROOF_FAILURE_CODES.PROJECTION);
     }
   }
 
@@ -1087,16 +1273,22 @@ export async function buildPrivateLiveOperationalRunnerV1({
           sequenceDigest,
         );
         if (!stored.ok) {
+          const proofFailureCode = validatePrivateBetaLaunchStageReceiptV1(
+            stored.stage_receipt,
+          )
+            ? stored.stage_receipt.stop_code
+            : safeDiagnosticCode(stored.code)
+              ? stored.code
+              : 'CANARY_PROOF_STORAGE_FAILED';
           return denied(
             stored.code || 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
             createPrivateBetaLaunchStageReceiptV1({
               stage: 'PROOF_STORAGE',
-              stop_code: safeDiagnosticCode(stored.code)
-                ? stored.code
-                : 'CANARY_PROOF_STORAGE_FAILED',
+              stop_code: proofFailureCode,
               provider_health_call_count: 3,
               expected_provider_state: 'HEALTHY',
               observed_provider_state: 'HEALTHY',
+              provider_failure_code: proofFailureCode,
               proof_storage_attempted: true,
               proof_storage_succeeded: false,
             }),
