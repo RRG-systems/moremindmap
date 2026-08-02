@@ -25,6 +25,10 @@ export const PRIVATE_BETA_LAUNCH_CHECKPOINT_VERSION =
   'private-beta-launch-checkpoint-v1';
 export const PRIVATE_BETA_LAUNCH_CUSTODY_VERSION =
   'private-beta-launch-custody-v1';
+export const PRIVATE_BETA_PROTECTED_ATTESTATION_VERSION =
+  'private-beta-protected-configuration-attestation-v1';
+export const PRIVATE_BETA_SUBDEV1_BINDINGS_VERSION =
+  'private-beta-subdev1-protected-bindings-v1';
 export const PRIVATE_BETA_LAUNCH_STATUSES = Object.freeze([
   'PENDING',
   'STARTED',
@@ -52,6 +56,7 @@ const SAFE_RECEIPT_KEY = /^[a-z][a-z0-9_]{1,63}$/;
 const SAFE_CODE = /^[A-Z][A-Z0-9_]{2,95}$/;
 const SHA256 = /^[a-f0-9]{64}$/;
 const GIT_SHA = /^[a-f0-9]{40}$/;
+const HTTPS_ORIGIN = /^https:\/\/[a-z0-9.-]+(?::[0-9]{2,5})?$/u;
 const SENSITIVE_KEY = /(authorization|credential|password|secret|token|cookie|connection|string|private_key)/i;
 const SENSITIVE_VALUE = /(bearer\s+|redis(?:s)?:\/\/|-----BEGIN [A-Z ]+PRIVATE KEY-----|sk_(?:live|test)_)/i;
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -64,6 +69,284 @@ const canonical = (value) => {
   return value;
 };
 const canonicalJson = (value) => JSON.stringify(canonical(value));
+const exactFields = (value, fields) => Boolean(
+  value
+  && typeof value === 'object'
+  && !Array.isArray(value)
+  && Object.keys(value).length === fields.length
+  && Object.keys(value).every((field) => fields.includes(field)),
+);
+
+const PROTECTED_DOCUMENT_DIGEST_FIELDS = Object.freeze([
+  'configuration_authority_packet',
+  'remote_security_configuration',
+  'qualification_certificate',
+  'live_environment_attestation',
+  'product_binding_attestation',
+  'assertion_configuration',
+  'protected_edge_configuration',
+  'product_execution_binding',
+  'qualified_adapter_source',
+]);
+const PROTECTED_ATTESTATION_FIELDS = Object.freeze([
+  'attestation_version',
+  'expected_commit',
+  'expected_tree',
+  'expected_project',
+  'expected_default_off_flags',
+  'expected_immutable_deployment_identity',
+  'expected_protected_document_digests',
+  'expected_namespace',
+  'expected_product_store_reference',
+  'expected_provider_endpoint_reference',
+  'expected_provider_credential_reference',
+  'subdev1_binding_set_sha256',
+  'expected_optional_ttl_seconds',
+  'issued_at',
+  'expires_at',
+  'attestation_sha256',
+]);
+const SUBDEV1_BINDING_FIELDS = Object.freeze([
+  'binding_version',
+  'operator_code',
+  'signing_secret',
+  'allowed_origins',
+  'environment_id',
+]);
+const REQUIRED_SUBDEV1_VARIABLES = Object.freeze([
+  'MORE_SUBDEV1_OPERATOR_CODE',
+  'MORE_SUBDEV1_OPERATOR_SIGNING_SECRET',
+  'MORE_SUBDEV1_OPERATOR_ALLOWED_ORIGINS',
+  'MORE_SUBDEV1_OPERATOR_ENVIRONMENT_ID',
+]);
+const OPTIONAL_SUBDEV1_TTL_VARIABLE = 'MORE_SUBDEV1_OPERATOR_TTL_SECONDS';
+
+function secureExternalFile(filePath, repositoryRoot, missingCode) {
+  if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) {
+    throw new Error(missingCode);
+  }
+  const target = path.normalize(filePath);
+  if (target.startsWith(`${path.normalize(repositoryRoot)}${path.sep}`)
+    || !fs.existsSync(target)) {
+    throw new Error(missingCode);
+  }
+  const metadata = fs.lstatSync(target);
+  let targetReal;
+  let repositoryReal;
+  try {
+    targetReal = fs.realpathSync(target);
+    repositoryReal = fs.realpathSync(repositoryRoot);
+  } catch {
+    throw new Error(`${missingCode.replace(/_MISSING$/u, '')}_INVALID`);
+  }
+  if (!metadata.isFile()
+    || metadata.isSymbolicLink()
+    || (metadata.mode & 0o777) !== 0o600
+    || targetReal === repositoryReal
+    || targetReal.startsWith(`${repositoryReal}${path.sep}`)) {
+    throw new Error(`${missingCode.replace(/_MISSING$/u, '')}_INVALID`);
+  }
+  return target;
+}
+
+function removeProtectedInput(filePath, repositoryRoot) {
+  if (typeof filePath !== 'string' || !path.isAbsolute(filePath)) return false;
+  const target = path.normalize(filePath);
+  if (target.startsWith(`${path.normalize(repositoryRoot)}${path.sep}`)) return false;
+  try {
+    const metadata = fs.lstatSync(target);
+    if (metadata.isDirectory()) return false;
+    if (!metadata.isSymbolicLink()) {
+      const targetReal = fs.realpathSync(target);
+      const repositoryReal = fs.realpathSync(repositoryRoot);
+      if (targetReal === repositoryReal
+        || targetReal.startsWith(`${repositoryReal}${path.sep}`)) return false;
+    }
+    fs.unlinkSync(target);
+    return true;
+  } catch (error) {
+    if (error?.code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+function projectBinding(repositoryRoot) {
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(path.join(repositoryRoot, '.vercel', 'repo.json'), 'utf8'));
+  } catch {
+    throw new Error('VERCEL_PROJECT_BINDING_INVALID');
+  }
+  const candidates = Array.isArray(parsed?.projects)
+    ? parsed.projects.filter((entry) => entry?.directory === '.')
+    : [];
+  if (candidates.length !== 1
+    || typeof candidates[0].id !== 'string'
+    || typeof candidates[0].name !== 'string'
+    || typeof candidates[0].orgId !== 'string') {
+    throw new Error('VERCEL_PROJECT_BINDING_INVALID');
+  }
+  return Object.freeze({
+    project_id: candidates[0].id,
+    project_name: candidates[0].name,
+    team_id: candidates[0].orgId,
+  });
+}
+
+function parseProtectedEnvironmentMetadata(source) {
+  let parsed;
+  try {
+    parsed = JSON.parse(String(source));
+  } catch {
+    throw new Error('PROTECTED_CONFIGURATION_METADATA_INVALID');
+  }
+  if (!Array.isArray(parsed?.envs)) {
+    throw new Error('PROTECTED_CONFIGURATION_METADATA_INVALID');
+  }
+  return parsed.envs.map((entry) => Object.freeze({
+    name: entry?.key,
+    type: entry?.type,
+    targets: Array.isArray(entry?.target) ? [...entry.target] : [],
+  }));
+}
+
+function protectedMetadataEntry(entries, name) {
+  const matches = entries.filter((entry) => entry.name === name);
+  if (matches.length !== 1) return null;
+  const [entry] = matches;
+  if (entry.type !== 'sensitive' || !entry.targets.includes('production')) return null;
+  return entry;
+}
+
+export function privateBetaSubdev1BindingSetDigestV1(value) {
+  return digest(canonicalJson(value));
+}
+
+export function validatePrivateBetaSubdev1BindingsV1(value) {
+  if (!exactFields(value, SUBDEV1_BINDING_FIELDS)
+    || value.binding_version !== PRIVATE_BETA_SUBDEV1_BINDINGS_VERSION
+    || typeof value.operator_code !== 'string'
+    || value.operator_code.length < 1
+    || value.operator_code.length > 128
+    || typeof value.signing_secret !== 'string'
+    || value.signing_secret.length < 32
+    || typeof value.allowed_origins !== 'string'
+    || value.allowed_origins.length > 1024
+    || typeof value.environment_id !== 'string'
+    || !/^[A-Z][A-Z0-9_]{2,95}$/u.test(value.environment_id)) {
+    return false;
+  }
+  const origins = value.allowed_origins.split(',').map((entry) => entry.trim());
+  return origins.length >= 1
+    && origins.length <= 8
+    && origins.every((origin) => HTTPS_ORIGIN.test(origin))
+    && new Set(origins).size === origins.length;
+}
+
+export function privateBetaProtectedAttestationDigestV1(value) {
+  const copy = { ...value };
+  delete copy.attestation_sha256;
+  return digest(canonicalJson(copy));
+}
+
+export function validatePrivateBetaProtectedAttestationV1(value, {
+  expectedCommit,
+  expectedTree,
+  expectedProject,
+  nowMs = Date.now(),
+} = {}) {
+  if (!Number.isFinite(nowMs)
+    || !exactFields(value, PROTECTED_ATTESTATION_FIELDS)
+    || value.attestation_version !== PRIVATE_BETA_PROTECTED_ATTESTATION_VERSION
+    || !GIT_SHA.test(value.expected_commit || '')
+    || value.expected_commit !== expectedCommit
+    || !GIT_SHA.test(value.expected_tree || '')
+    || value.expected_tree !== expectedTree
+    || !exactFields(value.expected_project, ['project_id', 'project_name', 'team_id'])
+    || value.expected_project.project_id !== expectedProject?.project_id
+    || value.expected_project.project_name !== expectedProject?.project_name
+    || value.expected_project.team_id !== expectedProject?.team_id
+    || !exactFields(value.expected_default_off_flags, [
+      'private_runtime_live_enabled',
+      'private_runtime_emergency_disabled',
+      'subdev1_operator_enabled',
+    ])
+    || value.expected_default_off_flags.private_runtime_live_enabled !== false
+    || value.expected_default_off_flags.private_runtime_emergency_disabled !== false
+    || value.expected_default_off_flags.subdev1_operator_enabled !== false
+    || !SHA256.test(value.expected_immutable_deployment_identity || '')
+    || !exactFields(value.expected_protected_document_digests, PROTECTED_DOCUMENT_DIGEST_FIELDS)
+    || !PROTECTED_DOCUMENT_DIGEST_FIELDS.every(
+      (field) => SHA256.test(value.expected_protected_document_digests[field] || ''),
+    )
+    || typeof value.expected_namespace !== 'string'
+    || !/^[a-zA-Z0-9:_-]{3,160}$/u.test(value.expected_namespace)
+    || value.expected_product_store_reference !== 'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL'
+    || value.expected_provider_endpoint_reference !== 'MORE_PRIVATE_RUNTIME_PROVIDER_ENDPOINT_VALUE'
+    || value.expected_provider_credential_reference !== 'MORE_PRIVATE_RUNTIME_PROVIDER_CREDENTIAL_VALUE'
+    || !SHA256.test(value.subdev1_binding_set_sha256 || '')
+    || (value.expected_optional_ttl_seconds !== null
+      && (!Number.isInteger(value.expected_optional_ttl_seconds)
+        || value.expected_optional_ttl_seconds < 60
+        || value.expected_optional_ttl_seconds > 1800))
+    || !Number.isFinite(Date.parse(value.issued_at))
+    || !Number.isFinite(Date.parse(value.expires_at))
+    || Date.parse(value.expires_at) <= Date.parse(value.issued_at)
+    || Date.parse(value.issued_at) > nowMs + 5 * 60 * 1000
+    || Date.parse(value.expires_at) <= nowMs
+    || Date.parse(value.expires_at) - Date.parse(value.issued_at) > 90 * 60 * 1000
+    || !SHA256.test(value.attestation_sha256 || '')
+    || value.attestation_sha256 !== privateBetaProtectedAttestationDigestV1(value)) {
+    return false;
+  }
+  return true;
+}
+
+export function readPrivateBetaProtectedAttestationV1(filePath, options) {
+  const target = secureExternalFile(
+    filePath,
+    options.repositoryRoot,
+    'PROTECTED_ATTESTATION_MISSING',
+  );
+  let value;
+  try {
+    value = JSON.parse(fs.readFileSync(target, 'utf8'));
+  } catch {
+    throw new Error('PROTECTED_ATTESTATION_INVALID');
+  }
+  if (Number.isFinite(Date.parse(value?.expires_at))
+    && Date.parse(value.expires_at) <= options.nowMs) {
+    throw new Error('PROTECTED_ATTESTATION_EXPIRED');
+  }
+  const bindingFieldsMatch = value?.expected_commit === options.expectedCommit
+    && value?.expected_tree === options.expectedTree
+    && canonicalJson(value?.expected_project) === canonicalJson(options.expectedProject);
+  if (!bindingFieldsMatch) {
+    throw new Error('PROTECTED_ATTESTATION_BINDING_MISMATCH');
+  }
+  if (!validatePrivateBetaProtectedAttestationV1(value, options)) {
+    throw new Error('PROTECTED_ATTESTATION_INVALID');
+  }
+  return value;
+}
+
+export function readPrivateBetaSubdev1BindingsV1(filePath, { repositoryRoot } = {}) {
+  const target = secureExternalFile(
+    filePath,
+    repositoryRoot,
+    'SUBDEV1_PROTECTED_BINDINGS_MISSING',
+  );
+  let value;
+  try {
+    value = JSON.parse(fs.readFileSync(target, 'utf8'));
+  } catch {
+    throw new Error('SUBDEV1_PROTECTED_BINDINGS_INVALID');
+  }
+  if (!validatePrivateBetaSubdev1BindingsV1(value)) {
+    throw new Error('SUBDEV1_PROTECTED_BINDINGS_INVALID');
+  }
+  return value;
+}
 
 function assertAbsoluteStatePath(value) {
   if (typeof value !== 'string' || !path.isAbsolute(value)) {
@@ -528,6 +811,8 @@ export function createProductionPrivateBetaLaunchDriverV1({
   repositoryRoot,
   expectedCommit,
   custodyPath,
+  protectedAttestationPath = null,
+  subdev1BindingsPath = null,
   baseUrl = 'https://moremindmap.com',
   projectName = 'moremindmap',
   controlledEnablement = null,
@@ -541,6 +826,21 @@ export function createProductionPrivateBetaLaunchDriverV1({
     throw new Error('PRODUCTION_DRIVER_CONFIGURATION_INVALID');
   }
   const endpoint = `${baseUrl.replace(/\/$/u, '')}/api/internal/private-live-operational-runner`;
+  const expectedProject = projectBinding(repositoryRoot);
+  if (expectedProject.project_name !== projectName) {
+    throw new Error('VERCEL_PROJECT_BINDING_MISMATCH');
+  }
+  const protectedMetadataNames = Object.freeze([
+    'MORE_PRIVATE_RUNTIME_OPERATIONAL_RUNNER_AUTHORITY',
+    'MORE_PRIVATE_RUNTIME_QUALIFIED_ADAPTER_SOURCE_SHA256',
+    PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
+    ...PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES,
+    PRIVATE_LIVE_PRODUCT_EXECUTION_REFERENCE_VARIABLE,
+    'REDIS_URL',
+    'MORE_PRIVATE_RUNTIME_LIVE_ENABLED',
+    'MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED',
+    'MORE_SUBDEV1_OPERATOR_ENABLED',
+  ]);
   const runState = {
     protected: null,
     runnerAuthorization: null,
@@ -550,6 +850,7 @@ export function createProductionPrivateBetaLaunchDriverV1({
     readiness: null,
     invocationPrefix: null,
     custodyLoaded: false,
+    stage2EnvironmentChangeCount: 0,
   };
   if (fs.existsSync(custodyPath)) {
     const custody = readPrivateBetaLaunchCustodyV1(custodyPath, {
@@ -573,7 +874,16 @@ export function createProductionPrivateBetaLaunchDriverV1({
     });
   }
 
-  async function readProductionEnvironment() {
+  async function readProtectedEnvironmentMetadata() {
+    const { stdout } = await commandRunner(
+      'vercel',
+      ['env', 'ls', 'production', '--format', 'json'],
+      { cwd: repositoryRoot },
+    );
+    return parseProtectedEnvironmentMetadata(stdout);
+  }
+
+  async function readRunnerAuthorityEnvironment() {
     const temporaryRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'mmm-launch-env-'));
     const environmentPath = path.join(temporaryRoot, 'production.env');
     try {
@@ -585,6 +895,64 @@ export function createProductionPrivateBetaLaunchDriverV1({
     } finally {
       fs.rmSync(temporaryRoot, { recursive: true, force: true });
     }
+  }
+
+  async function writeMissingSubdev1Bindings(entries, attestation) {
+    const missing = REQUIRED_SUBDEV1_VARIABLES.filter(
+      (name) => !protectedMetadataEntry(entries, name),
+    );
+    if (missing.length === 0) {
+      return {
+        outcome: 'SUBDEV1_REQUIRED_BINDINGS_PRESENT',
+        environmentChangeCount: 0,
+      };
+    }
+    if (missing.length !== REQUIRED_SUBDEV1_VARIABLES.length) {
+      throw new Error('SUBDEV1_REQUIRED_BINDINGS_PARTIAL');
+    }
+    const values = readPrivateBetaSubdev1BindingsV1(subdev1BindingsPath, { repositoryRoot });
+    if (privateBetaSubdev1BindingSetDigestV1(values) !== attestation.subdev1_binding_set_sha256) {
+      throw new Error('PROTECTED_ATTESTATION_BINDING_MISMATCH');
+    }
+    const writes = [
+      ['MORE_SUBDEV1_OPERATOR_CODE', values.operator_code],
+      ['MORE_SUBDEV1_OPERATOR_SIGNING_SECRET', values.signing_secret],
+      ['MORE_SUBDEV1_OPERATOR_ALLOWED_ORIGINS', values.allowed_origins],
+      ['MORE_SUBDEV1_OPERATOR_ENVIRONMENT_ID', values.environment_id],
+    ];
+    if (writes.length !== 4
+      || writes.some(([name]) => !REQUIRED_SUBDEV1_VARIABLES.includes(name))
+      || attestation.expected_default_off_flags.private_runtime_live_enabled !== false
+      || attestation.expected_default_off_flags.private_runtime_emergency_disabled !== false
+      || attestation.expected_default_off_flags.subdev1_operator_enabled !== false) {
+      throw new Error('SUBDEV1_ENVIRONMENT_WRITE_BOUNDARY_INVALID');
+    }
+    for (const [name, value] of writes) {
+      if (runState.stage2EnvironmentChangeCount >= 4) {
+        throw new Error('SUBDEV1_ENVIRONMENT_WRITE_BOUNDARY_INVALID');
+      }
+      try {
+        await commandRunner('vercel', [
+          'env', 'add', name, 'production', '--sensitive', '--force', '--yes',
+        ], { cwd: repositoryRoot, input: `${value}\n` });
+      } catch {
+        throw new Error('SUBDEV1_REQUIRED_BINDINGS_WRITE_FAILED');
+      }
+      runState.stage2EnvironmentChangeCount += 1;
+    }
+    if (runState.stage2EnvironmentChangeCount !== 4) {
+      throw new Error('SUBDEV1_ENVIRONMENT_WRITE_BOUNDARY_INVALID');
+    }
+    const verified = await readProtectedEnvironmentMetadata();
+    if (!REQUIRED_SUBDEV1_VARIABLES.every(
+      (name) => Boolean(protectedMetadataEntry(verified, name)),
+    )) {
+      throw new Error('SUBDEV1_REQUIRED_BINDINGS_WRITE_NOT_VERIFIED');
+    }
+    return {
+      outcome: 'SUBDEV1_REQUIRED_BINDINGS_PRESENT',
+      environmentChangeCount: 4,
+    };
   }
 
   async function invokeRunner(operation, suffix) {
@@ -634,62 +1002,115 @@ export function createProductionPrivateBetaLaunchDriverV1({
           };
         }
         case 'PROTECTED_CONFIGURATION_VERIFICATION': {
-          let values;
+          let attestation = null;
           try {
-            values = await readProductionEnvironment();
-          } catch {
-            return { ok: false, stop_code: 'PROTECTED_CONFIGURATION_PULL_FAILED' };
-          }
-          try {
-            const required = [
-              'MORE_PRIVATE_RUNTIME_OPERATIONAL_RUNNER_AUTHORITY',
-              'MORE_PRIVATE_RUNTIME_QUALIFIED_ADAPTER_SOURCE_SHA256',
-              PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
-              ...PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES,
-              PRIVATE_LIVE_PRODUCT_EXECUTION_REFERENCE_VARIABLE,
-              'REDIS_URL',
-              'MORE_PRIVATE_RUNTIME_LIVE_ENABLED',
-              'MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED',
-              'MORE_SUBDEV1_OPERATOR_ENABLED',
-              'MORE_SUBDEV1_OPERATOR_CODE',
-              'MORE_SUBDEV1_OPERATOR_SIGNING_SECRET',
-              'MORE_SUBDEV1_OPERATOR_ALLOWED_ORIGINS',
-              'MORE_SUBDEV1_OPERATOR_ENVIRONMENT_ID',
-              'MORE_SUBDEV1_OPERATOR_TTL_SECONDS',
-            ];
-            const missing = required.filter((name) => !values[name]);
+            const [{ stdout: tree }, entries] = await Promise.all([
+              commandRunner('git', ['rev-parse', 'HEAD^{tree}'], { cwd: repositoryRoot }),
+              readProtectedEnvironmentMetadata(),
+            ]);
+            const missing = protectedMetadataNames.filter(
+              (name) => !protectedMetadataEntry(entries, name),
+            );
             if (missing.length) {
               return {
                 ok: false,
-                stop_code: 'PROTECTED_CONFIGURATION_REFERENCE_MISSING',
+                stop_code: 'PROTECTED_CONFIGURATION_METADATA_MISSING',
                 receipt: { missing_reference_count: missing.length },
               };
             }
-            if (values.MORE_PRIVATE_RUNTIME_LIVE_ENABLED !== 'false'
-              || values.MORE_PRIVATE_RUNTIME_EMERGENCY_DISABLED !== 'false'
-              || values.MORE_SUBDEV1_OPERATOR_ENABLED !== 'false') {
+            attestation = readPrivateBetaProtectedAttestationV1(protectedAttestationPath, {
+              repositoryRoot,
+              expectedCommit,
+              expectedTree: tree.trim(),
+              expectedProject,
+              nowMs: now(),
+            });
+            const subdev1Missing = REQUIRED_SUBDEV1_VARIABLES.filter(
+              (name) => !protectedMetadataEntry(entries, name),
+            );
+            if (subdev1Missing.length > 0 && subdev1Missing.length < 4) {
+              return {
+                ok: false,
+                stop_code: 'SUBDEV1_REQUIRED_BINDINGS_PARTIAL',
+                receipt: {
+                  subdev1_required_binding_result: 'SUBDEV1_REQUIRED_BINDINGS_MISSING',
+                  missing_binding_names: subdev1Missing,
+                  environment_change_count: 0,
+                  attestation_sha256: attestation.attestation_sha256,
+                },
+              };
+            }
+            if (subdev1Missing.length === 4 && !subdev1BindingsPath) {
+              return {
+                ok: false,
+                stop_code: 'SUBDEV1_REQUIRED_BINDINGS_MISSING',
+                receipt: {
+                  subdev1_required_binding_result: 'SUBDEV1_REQUIRED_BINDINGS_MISSING',
+                  missing_binding_names: subdev1Missing,
+                  environment_change_count: 0,
+                  attestation_sha256: attestation.attestation_sha256,
+                },
+              };
+            }
+            if (attestation.expected_default_off_flags.private_runtime_live_enabled !== false
+              || attestation.expected_default_off_flags.private_runtime_emergency_disabled !== false
+              || attestation.expected_default_off_flags.subdev1_operator_enabled !== false) {
               return { ok: false, stop_code: 'DEFAULT_OFF_CONFIGURATION_MISMATCH' };
             }
-            if (!SHA256.test(values[PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE])) {
-              return { ok: false, stop_code: 'IMMUTABLE_DEPLOYMENT_IDENTITY_INVALID' };
+            const ttlEntries = entries.filter(
+              (entry) => entry.name === OPTIONAL_SUBDEV1_TTL_VARIABLE,
+            );
+            if (ttlEntries.length > 0
+              && !protectedMetadataEntry(entries, OPTIONAL_SUBDEV1_TTL_VARIABLE)) {
+              return { ok: false, stop_code: 'OPTIONAL_TTL_METADATA_INVALID' };
             }
+            const ttlPresent = ttlEntries.length === 1;
+            if (ttlPresent && attestation.expected_optional_ttl_seconds === null) {
+              return { ok: false, stop_code: 'OPTIONAL_TTL_ATTESTATION_REQUIRED' };
+            }
+            if (!ttlPresent && attestation.expected_optional_ttl_seconds !== null) {
+              return { ok: false, stop_code: 'OPTIONAL_TTL_METADATA_MISSING' };
+            }
+            const bindingResult = await writeMissingSubdev1Bindings(entries, attestation);
             runState.protected = {
-              immutableDeployment: values[PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE],
-              requiredCount: required.length,
+              immutableDeployment: attestation.expected_immutable_deployment_identity,
+              requiredCount: protectedMetadataNames.length,
+              attestationSha256: attestation.attestation_sha256,
             };
             return {
               ok: true,
               receipt: {
-                required_reference_count: required.length,
+                protected_configuration_metadata_result: 'PROTECTED_CONFIGURATION_METADATA_PRESENT',
+                protected_configuration_attestation_result: 'PROTECTED_CONFIGURATION_ATTESTATION_VALID',
+                subdev1_required_binding_result: bindingResult.outcome,
+                optional_ttl_result: ttlPresent
+                  ? 'OPTIONAL_TTL_PRESENT_VALID'
+                  : 'OPTIONAL_TTL_ABSENT_ACCEPTED',
+                required_reference_count: protectedMetadataNames.length,
                 missing_reference_count: 0,
+                subdev1_required_reference_count: REQUIRED_SUBDEV1_VARIABLES.length,
+                environment_change_count: bindingResult.environmentChangeCount,
+                project_context_verified: true,
                 runtime_default_off: true,
                 operator_default_off: true,
                 emergency_disabled: false,
                 immutable_deployment_hash: digest(runState.protected.immutableDeployment),
+                attestation_sha256: attestation.attestation_sha256,
               },
             };
-          } catch {
-            return { ok: false, stop_code: 'PROTECTED_CONFIGURATION_VALIDATION_FAILED' };
+          } catch (error) {
+            return {
+              ok: false,
+              stop_code: SAFE_CODE.test(error?.message || '')
+                ? error.message
+                : 'PROTECTED_CONFIGURATION_VALIDATION_FAILED',
+              receipt: runState.stage2EnvironmentChangeCount > 0
+                ? { environment_change_count: runState.stage2EnvironmentChangeCount }
+                : undefined,
+            };
+          } finally {
+            removeProtectedInput(protectedAttestationPath, repositoryRoot);
+            removeProtectedInput(subdev1BindingsPath, repositoryRoot);
           }
         }
         case 'RUNNER_AUTHORITY_REFRESH': {
@@ -697,7 +1118,7 @@ export function createProductionPrivateBetaLaunchDriverV1({
           if (runState.custodyLoaded) {
             let current;
             try {
-              const values = await readProductionEnvironment();
+              const values = await readRunnerAuthorityEnvironment();
               current = JSON.parse(values.MORE_PRIVATE_RUNTIME_OPERATIONAL_RUNNER_AUTHORITY);
             } catch {
               return { ok: false, stop_code: 'RUNNER_CUSTODY_BINDING_NOT_VERIFIED' };
@@ -1056,6 +1477,8 @@ function parseArguments(argv) {
     checkpointPath: null,
     expectedCommit: null,
     failureStage: null,
+    protectedAttestationPath: null,
+    subdev1BindingsPath: null,
   };
   for (let index = 0; index < argv.length; index += 1) {
     const argument = argv[index];
@@ -1065,6 +1488,11 @@ function parseArguments(argv) {
     else if (argument === '--checkpoint') options.checkpointPath = argv[++index];
     else if (argument === '--expected-commit') options.expectedCommit = argv[++index];
     else if (argument === '--fail-stage') options.failureStage = argv[++index];
+    else if (argument === '--protected-attestation') {
+      options.protectedAttestationPath = argv[++index];
+    } else if (argument === '--subdev1-bindings') {
+      options.subdev1BindingsPath = argv[++index];
+    }
     else throw new Error('ARGUMENT_INVALID');
   }
   if (!options.mode || !options.checkpointPath || !options.expectedCommit) {
@@ -1082,9 +1510,22 @@ async function main() {
     && options.resume
     && fs.existsSync(path.resolve(options.checkpointPath))) {
     resumeCheckpoint = readPrivateBetaLaunchCheckpointV1(options.checkpointPath);
+    const protectedRecord = resumeCheckpoint.stages.find(
+      (record) => record.stage_id === 'PROTECTED_CONFIGURATION_VERIFICATION',
+    );
     const refreshRecord = resumeCheckpoint.stages.find(
       (record) => record.stage_id === 'RUNNER_AUTHORITY_REFRESH',
     );
+    if (previouslyPassed(protectedRecord)
+      && !previouslyPassed(refreshRecord)
+      && !fs.existsSync(custodyPath)) {
+      resumeCheckpoint = resetPrivateBetaLaunchCheckpointFromStageV1(
+        resumeCheckpoint,
+        'PROTECTED_CONFIGURATION_VERIFICATION',
+        { stopCode: 'PROTECTED_ATTESTATION_REISSUE_REQUIRED' },
+      );
+      writePrivateBetaLaunchCheckpointV1(options.checkpointPath, resumeCheckpoint);
+    }
     if (previouslyPassed(refreshRecord)) {
       let resetReason = null;
       if (!fs.existsSync(custodyPath)) {
@@ -1104,8 +1545,8 @@ async function main() {
       if (resetReason) {
         resumeCheckpoint = resetPrivateBetaLaunchCheckpointFromStageV1(
           resumeCheckpoint,
-          'RUNNER_AUTHORITY_REFRESH',
-          { stopCode: resetReason },
+          'PROTECTED_CONFIGURATION_VERIFICATION',
+          { stopCode: 'PROTECTED_ATTESTATION_REISSUE_REQUIRED' },
         );
         writePrivateBetaLaunchCheckpointV1(options.checkpointPath, resumeCheckpoint);
       }
@@ -1117,6 +1558,8 @@ async function main() {
       repositoryRoot,
       expectedCommit: options.expectedCommit,
       custodyPath,
+      protectedAttestationPath: options.protectedAttestationPath,
+      subdev1BindingsPath: options.subdev1BindingsPath,
     });
   let result;
   try {
