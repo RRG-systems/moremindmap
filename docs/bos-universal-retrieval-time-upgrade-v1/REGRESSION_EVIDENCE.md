@@ -8,6 +8,10 @@
 - production build: pass
 - historical public-route compatibility: 50/50 pass
 - diff check: pass
+- real `gpt-5.6-sol` structured translations: 3/3 pass
+- deterministic translation validation: 3/3 pass, zero failures
+- durable preview cache replay: 3/3 pass
+- before/after canonical SHA-256 equality: 3/3 pass
 
 The first full-suite run found two BOS-to-BA failures caused by the mechanical lineage conflict omitting existing `q1`/`q6` locals. The bounded reconciliation restored those declarations. The affected focused tests then passed 10/10, and the final full-suite rerun passed 779/779.
 
@@ -25,3 +29,6 @@ The first full-suite run found two BOS-to-BA failures caused by the mechanical l
 - historical retrieval without regeneration or mutation
 - Visual DNA topology and abstentions preserved
 - BOS-to-BA shared canonical semantics preserved
+- real provider outputs preserve exact semantic hashes and claim contracts
+- real provider outputs preserve One Move hypothesis and Team/Five Futures abstentions
+- translated customer view models retain 8 tabs and 5 Overview sections
