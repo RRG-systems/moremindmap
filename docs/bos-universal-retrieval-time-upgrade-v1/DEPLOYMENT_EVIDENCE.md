@@ -4,8 +4,8 @@ Status: `PREVIEW_BLOCKED_BEFORE_HUMAN_REVIEW`
 
 ## Current production observed during campaign
 
-- active deployment: `dpl_BktCCVYwkh1PkQLLAX3XLAgGLUjz`
-- immutable URL: `https://moremindmap-lp5xabgrj-rrg-systems-projects.vercel.app`
+- active deployment at final audit: `dpl_9dYhnA6f3LnChjCTbaD4QfNhQiyA`
+- immutable URL: `https://moremindmap-or7i0l5s6-rrg-systems-projects.vercel.app`
 - production alias: `https://moremindmap.com`
 - state: READY
 - reconciled source: `88e54de6c767ec7ff63b21219775c959967344b5`
