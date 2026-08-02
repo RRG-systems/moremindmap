@@ -5,8 +5,10 @@ import {
   BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
   BOS_CUSTOMER_INTELLIGENCE_VERSION,
   BOS_LAYER2_VERSION,
-  CUSTOMER_COPY_FIELDS,
+  CUSTOMER_COPY_BLOCK_KINDS,
+  CUSTOMER_COPY_KEYS,
   INSUFFICIENT_EVIDENCE,
+  TRANSLATION_FORMATS,
   TRANSLATION_STATUS,
 } from './contracts.js';
 import {
@@ -18,6 +20,7 @@ import {
 
 const DIRECT_QUOTATION = /[“”"]|(?:^|\s)'[^']{3,}'(?:\s|$)/;
 const NUMERIC_TOKEN = /\b\d+(?:\.\d+)?(?:%|x)?\b/gi;
+const TECHNICAL_CUSTOMER_LANGUAGE = /\b(?:layer\s*1|topology(?:\s+score)?|contributing\s+answer\s+signals?|evidence\s+contracts?|uncalibrated\s+assessment|semantic\s+packets?|validators?|provenance\s+paths?)\b/i;
 
 function validationResult(failures) {
   return Object.freeze({
@@ -42,10 +45,10 @@ function sourceNumbers(surface) {
 }
 
 function outputText(translation) {
-  return CUSTOMER_COPY_FIELDS
-    .map((field) => translation?.customer_copy?.[field] || '')
-    .join(' ')
-    .trim();
+  return [
+    translation?.customer_copy?.headline,
+    ...(translation?.customer_copy?.blocks || []).map(({ text }) => text),
+  ].filter(Boolean).join(' ').trim();
 }
 
 function expectedSemanticContracts(surface) {
@@ -73,6 +76,19 @@ function validateSurface(surface, index, failures) {
   if (!surface.role) failures.push(`${prefix}:missing_role`);
   if (!Array.isArray(surface.claims) || surface.claims.length === 0) {
     failures.push(`${prefix}:missing_claims`);
+  }
+  if (!surface.translation_guidance
+      || !Object.values(TRANSLATION_FORMATS).includes(
+        surface.translation_guidance.output_format,
+      )) {
+    failures.push(`${prefix}:invalid_translation_guidance`);
+  }
+  if (!Array.isArray(surface.translation_guidance?.allowed_block_kinds)
+      || surface.translation_guidance.allowed_block_kinds.length === 0
+      || surface.translation_guidance.allowed_block_kinds.some(
+        (kind) => !CUSTOMER_COPY_BLOCK_KINDS.includes(kind),
+      )) {
+    failures.push(`${prefix}:invalid_allowed_block_kinds`);
   }
   const claimIds = new Set();
   (surface.claims || []).forEach((claim, claimIndex) => {
@@ -129,10 +145,20 @@ export function validateLayer3SemanticPacket(packet) {
     failures.push('missing_surfaces');
   }
   const surfaceIds = new Set();
+  const insufficientClaimSets = new Set();
   (packet.surfaces || []).forEach((surface, index) => {
     validateSurface(surface, index, failures);
     if (surfaceIds.has(surface?.surface_id)) failures.push(`surfaces[${index}]:duplicate_surface_id`);
     surfaceIds.add(surface?.surface_id);
+    const allInsufficient = (surface?.claims || []).length > 0
+      && surface.claims.every((claim) => !isSufficientProjectedClaim(claim));
+    const claimSet = (surface?.claims || []).map(({ claim_id: claimId }) => claimId).sort().join('|');
+    if (allInsufficient && claimSet) {
+      if (insufficientClaimSets.has(claimSet)) {
+        failures.push(`surfaces[${index}]:duplicate_insufficient_claim_surface`);
+      }
+      insufficientClaimSets.add(claimSet);
+    }
   });
   const expectedManifestHash = hashSemanticValue((packet.surfaces || []).map((surface) => ({
     surface_id: surface.surface_id,
@@ -166,51 +192,62 @@ function validateTranslation(surface, translation, failures) {
       !== stableStringify(expectedSemanticContracts(surface))) {
     failures.push(`${prefix}:semantic_contract_changed`);
   }
-  if (!exactKeys(translation.customer_copy, CUSTOMER_COPY_FIELDS)) {
+  const expectedFormat = surface.translation_guidance?.output_format;
+  if (translation.format !== expectedFormat) failures.push(`${prefix}:format_changed`);
+  if (!exactKeys(translation.customer_copy, CUSTOMER_COPY_KEYS)) {
     failures.push(`${prefix}:invalid_customer_copy_shape`);
     return;
   }
-  for (const field of CUSTOMER_COPY_FIELDS) {
-    const value = translation.customer_copy[field];
-    if (typeof value !== 'string' || value.length > 1200) {
-      failures.push(`${prefix}:invalid_${field}`);
-    }
+  const headline = translation.customer_copy.headline;
+  if (typeof headline !== 'string' || !headline.trim() || headline.length > 180) {
+    failures.push(`${prefix}:invalid_headline`);
   }
+  const blocks = translation.customer_copy.blocks;
+  if (!Array.isArray(blocks) || blocks.length < 1 || blocks.length > 3) {
+    failures.push(`${prefix}:invalid_blocks`);
+    return;
+  }
+  const seenKinds = new Set();
+  blocks.forEach((block, blockIndex) => {
+    const blockPrefix = `${prefix}.blocks[${blockIndex}]`;
+    if (!exactKeys(block, ['kind', 'text'])) failures.push(`${blockPrefix}:invalid_shape`);
+    if (!surface.translation_guidance.allowed_block_kinds.includes(block?.kind)) {
+      failures.push(`${blockPrefix}:kind_not_allowed`);
+    }
+    if (seenKinds.has(block?.kind)) failures.push(`${blockPrefix}:duplicate_kind`);
+    seenKinds.add(block?.kind);
+    if (typeof block?.text !== 'string' || !block.text.trim() || block.text.length > 1200) {
+      failures.push(`${blockPrefix}:invalid_text`);
+    }
+  });
 
   const sufficient = (surface.claims || []).filter(isSufficientProjectedClaim);
   if (sufficient.length === 0) {
     if (translation.status !== TRANSLATION_STATUS.ABSTAINED
-        || translation.customer_copy.headline !== INSUFFICIENT_EVIDENCE
-        || translation.customer_copy.explanation !== INSUFFICIENT_EVIDENCE
-        || translation.customer_copy.recognizable_pattern !== '') {
+        || translation.format !== TRANSLATION_FORMATS.ABSTENTION
+        || blocks.length !== 1
+        || blocks[0]?.kind !== 'limitation') {
       failures.push(`${prefix}:abstention_weakened`);
     }
   } else if (translation.status !== TRANSLATION_STATUS.TRANSLATED) {
     failures.push(`${prefix}:supported_surface_not_translated`);
   }
 
+  const hypothesis = sufficient.some(({ classification }) => classification === 'Hypothesis');
+  if (hypothesis && !blocks.some(({ kind }) => kind === 'limitation')) {
+    failures.push(`${prefix}:hypothesis_limitation_missing`);
+  }
+
   const text = outputText(translation);
   if (containsUnsupportedNarrativeClaim(text)) failures.push(`${prefix}:unsupported_claim_language`);
   if (DIRECT_QUOTATION.test(text)) failures.push(`${prefix}:direct_quotation_not_allowed`);
+  if (TECHNICAL_CUSTOMER_LANGUAGE.test(text)) failures.push(`${prefix}:technical_language_leakage`);
+  if (text.includes(INSUFFICIENT_EVIDENCE)) failures.push(`${prefix}:raw_abstention_phrase_exposed`);
   const allowedNumbers = sourceNumbers(surface);
   for (const match of text.matchAll(NUMERIC_TOKEN)) {
     if (!allowedNumbers.has(match[0].toLowerCase())) {
       failures.push(`${prefix}:new_numeric_claim:${match[0]}`);
     }
-  }
-  if (translation.customer_copy.recognizable_pattern
-      && !translation.customer_copy.recognizable_pattern.startsWith('You may notice')) {
-    failures.push(`${prefix}:recognizable_pattern_not_bounded`);
-  }
-  if (translation.customer_copy.practical_use
-      && !/^(Use|Treat) this as\b/.test(translation.customer_copy.practical_use)) {
-    failures.push(`${prefix}:practical_use_not_bounded`);
-  }
-  if (sufficient.length > 0
-      && !/\b(not proof|does not establish|hypothesis|uncalibrated|may not)\b/i.test(
-        translation.customer_copy.evidence_boundary,
-      )) {
-    failures.push(`${prefix}:missing_uncertainty_boundary`);
   }
 }
 
@@ -231,6 +268,21 @@ export function validateLayer3TranslationBundle(packet, bundle) {
     failures.push('translation_count_mismatch');
   }
   for (const surface of packet.surfaces) validateTranslation(surface, byId.get(surface.surface_id), failures);
+
+  const seenCustomerBlocks = new Map();
+  for (const translation of bundle.translations || []) {
+    for (const block of translation?.customer_copy?.blocks || []) {
+      const normalized = String(block?.text || '').toLowerCase().replace(/\s+/g, ' ').trim();
+      if (normalized.length < 32) continue;
+      if (seenCustomerBlocks.has(normalized)) {
+        failures.push(
+          `translations.${translation.surface_id}:repeated_customer_copy:${seenCustomerBlocks.get(normalized)}`,
+        );
+      } else {
+        seenCustomerBlocks.set(normalized, translation.surface_id);
+      }
+    }
+  }
   return validationResult(failures);
 }
 

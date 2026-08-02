@@ -90,7 +90,7 @@ function resolveViewModel({ viewModel, profile, narrative, allowSampleFallback =
   return built;
 }
 
-function DimensionRow({ item, index }) {
+function DimensionRow({ item, index, showEvidence = true }) {
   const abs = Math.abs(Number(item?.value) || 0);
   const width = Math.max(8, Math.min(100, abs * 100));
   const evidenceLabel = item?.evidence != null
@@ -112,7 +112,7 @@ function DimensionRow({ item, index }) {
         <span className="bos-dna-v2__dim-bar">
           <i style={{ width: `${width}%`, background: swatch }} />
         </span>
-        {(evidenceLabel || confidenceLabel) ? (
+        {showEvidence && (evidenceLabel || confidenceLabel) ? (
           <div className="bos-dna-v2__dim-chips">
             {evidenceLabel ? <em>{evidenceLabel}</em> : null}
             {confidenceLabel ? <em>{confidenceLabel}</em> : null}
@@ -137,14 +137,14 @@ function CompactList({ items, empty = 'Not available for this profile' }) {
   );
 }
 
-function TraitBadge({ rank, item, fallbackLabel, tone }) {
+function TraitBadge({ rank, item, fallbackLabel, tone, showEvidence = true }) {
   const evidence = item?.evidence != null ? `EV ${item.evidence}` : null;
   return (
     <div className={`bos-dna-v2__badge bos-dna-v2__badge--${tone}`}>
       <span>{rank}</span>
       <strong>{item?.label || fallbackLabel || '—'}</strong>
       <em>{item ? formatScore(item.value) : '—'}</em>
-      {evidence ? <small>{evidence}</small> : null}
+      {showEvidence && evidence ? <small>{evidence}</small> : null}
     </div>
   );
 }
@@ -237,7 +237,15 @@ function defaultFutureCards(vm) {
  * Premium compact poster for tab embed.
  * Intentionally reduced detail — not a squeezed full dashboard.
  */
-function PreviewPoster({ vm, displayProfileId, futureCards }) {
+function PreviewPoster({
+  vm,
+  displayProfileId,
+  futureCards,
+  showDimensionEvidence = true,
+  showFutureCards = true,
+  showOneMove = true,
+  limitation = '',
+}) {
   // Keep One Move short enough for a teaser poster — never a multi-line jam into the engine.
   const oneMoveHeadline = shortChip(
     firstLine(vm.oneMove, 'Open full screen for the highest-leverage move'),
@@ -279,9 +287,9 @@ function PreviewPoster({ vm, displayProfileId, futureCards }) {
 
         {/* 2. Trait cards */}
         <div className="bos-dna-v2__preview-traits">
-          <TraitBadge rank="Primary" item={vm.primaryDimension} fallbackLabel={vm.primaryEngine} tone="p" />
-          <TraitBadge rank="Secondary" item={vm.secondaryDimension} fallbackLabel={vm.secondaryEngine} tone="s" />
-          <TraitBadge rank="Tertiary" item={vm.tertiaryDimension} fallbackLabel="Support" tone="t" />
+          <TraitBadge rank="Primary" item={vm.primaryDimension} fallbackLabel={vm.primaryEngine} tone="p" showEvidence={showDimensionEvidence} />
+          <TraitBadge rank="Secondary" item={vm.secondaryDimension} fallbackLabel={vm.secondaryEngine} tone="s" showEvidence={showDimensionEvidence} />
+          <TraitBadge rank="Tertiary" item={vm.tertiaryDimension} fallbackLabel="Support" tone="t" showEvidence={showDimensionEvidence} />
         </div>
 
         {/* 3. Central engine — isolated band; never shares space with One Move */}
@@ -301,26 +309,32 @@ function PreviewPoster({ vm, displayProfileId, futureCards }) {
         </div>
 
         {/* 4. One Move — separate lower band below engine (no absolute overlap) */}
-        <section className="bos-dna-v2__preview-move">
-          <span className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · Highest Leverage</span>
-          <h2>{oneMoveHeadline}</h2>
-        </section>
+        {showOneMove ? (
+          <section className="bos-dna-v2__preview-move">
+            <span className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · A Test to Try</span>
+            <h2>{oneMoveHeadline}</h2>
+          </section>
+        ) : null}
 
         {/* 5. Compact futures strip */}
-        <section className="bos-dna-v2__preview-futures" aria-label="Five Futures preview">
-          {futureCards.map((future, index) => (
-            <article
-              key={`${future.title || 'future'}-${index}`}
-              className={`bos-dna-v2__preview-future bos-dna-v2__future--${index + 1}`}
-            >
-              <span>{future?.likelihood && future.likelihood !== '—' ? future.likelihood : `F${index + 1}`}</span>
-              <strong>{shortChip(future?.title, `Future ${index + 1}`, 18)}</strong>
-            </article>
-          ))}
-        </section>
+        {showFutureCards ? (
+          <section className="bos-dna-v2__preview-futures" aria-label="Five Futures preview">
+            {futureCards.map((future, index) => (
+              <article
+                key={`${future.title || 'future'}-${index}`}
+                className={`bos-dna-v2__preview-future bos-dna-v2__future--${index + 1}`}
+              >
+                <span>{future?.likelihood && future.likelihood !== '—' ? future.likelihood : `F${index + 1}`}</span>
+                <strong>{shortChip(future?.title, `Future ${index + 1}`, 18)}</strong>
+              </article>
+            ))}
+          </section>
+        ) : null}
 
         {/* 6. Footer CTA hint */}
-        <p className="bos-dna-v2__preview-hint">Preview · Open Full Screen for the full command center</p>
+        <p className="bos-dna-v2__preview-hint">
+          {limitation || 'Preview · Open Full Screen for the full command center'}
+        </p>
       </div>
     </div>
   );
@@ -367,6 +381,10 @@ export default function DeterministicBOSDNAVisualV2({
     detail: vm.futureBottleneck || 'Operating pattern needs clearer handoff rules.',
   };
   const futureCards = defaultFutureCards(vm);
+  const customerPresentation = vm.customerPresentation || null;
+  const visibility = customerPresentation?.visibility || {};
+  const show = (key) => !customerPresentation || visibility[key] === true;
+  const globalLimitation = customerPresentation?.globalLimitation || '';
 
   const evidence = vm.evidenceSummary || {};
   const amplitude = vm.amplitude || { score: null, label: '—' };
@@ -395,6 +413,10 @@ export default function DeterministicBOSDNAVisualV2({
           vm={vm}
           displayProfileId={displayProfileId}
           futureCards={futureCards}
+          showDimensionEvidence={show('dimensionEvidence')}
+          showFutureCards={show('futureCards')}
+          showOneMove={show('oneMove')}
+          limitation={globalLimitation}
         />
       ) : (
       <div className="bos-dna-v2__frame" aria-label="Behavioral Operating System Visual Map">
@@ -428,13 +450,19 @@ export default function DeterministicBOSDNAVisualV2({
               <div className="bos-dna-v2__label">Dimension Scorecard</div>
               {topDimensions.length ? (
                 topDimensions.map((item, index) => (
-                  <DimensionRow key={`${item.key || item.label}-${index}`} item={item} index={index} />
+                  <DimensionRow
+                    key={`${item.key || item.label}-${index}`}
+                    item={item}
+                    index={index}
+                    showEvidence={show('dimensionEvidence')}
+                  />
                 ))
               ) : (
                 <p className="bos-dna-v2__empty">Dimension scores are not available for this profile record.</p>
               )}
             </section>
 
+            {show('evidenceAmplitude') ? (
             <section className="bos-dna-v2__panel">
               <div className="bos-dna-v2__label">Evidence &amp; Amplitude</div>
               <div className="bos-dna-v2__evidence">
@@ -463,30 +491,39 @@ export default function DeterministicBOSDNAVisualV2({
                 </div>
               </div>
             </section>
+            ) : null}
 
+            {show('energySource') || show('fatigueSource') ? (
             <div className="bos-dna-v2__dual">
+              {show('energySource') ? (
               <section className="bos-dna-v2__panel">
                 <div className="bos-dna-v2__label bos-dna-v2__label--cyan">Energy Source</div>
                 <CompactList items={vm.energySource} />
               </section>
+              ) : null}
+              {show('fatigueSource') ? (
               <section className="bos-dna-v2__panel">
                 <div className="bos-dna-v2__label bos-dna-v2__label--orange">Fatigue Source</div>
                 <CompactList items={vm.fatigueSource} />
               </section>
+              ) : null}
             </div>
+            ) : null}
           </aside>
 
           <main className="bos-dna-v2__engine">
             <div className="bos-dna-v2__badges">
-              <TraitBadge rank="Primary" item={vm.primaryDimension} fallbackLabel={vm.primaryEngine} tone="p" />
-              <TraitBadge rank="Secondary" item={vm.secondaryDimension} fallbackLabel={vm.secondaryEngine} tone="s" />
-              <TraitBadge rank="Tertiary" item={vm.tertiaryDimension} fallbackLabel="Support" tone="t" />
+              <TraitBadge rank="Primary" item={vm.primaryDimension} fallbackLabel={vm.primaryEngine} tone="p" showEvidence={show('dimensionEvidence')} />
+              <TraitBadge rank="Secondary" item={vm.secondaryDimension} fallbackLabel={vm.secondaryEngine} tone="s" showEvidence={show('dimensionEvidence')} />
+              <TraitBadge rank="Tertiary" item={vm.tertiaryDimension} fallbackLabel="Support" tone="t" showEvidence={show('dimensionEvidence')} />
             </div>
 
+            {show('inputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--left bos-dna-v2__panel">
               <div className="bos-dna-v2__label">Inputs</div>
               <CompactList items={vm.inputs} empty="—" />
             </div>
+            ) : null}
 
             <div className="bos-dna-v2__reactor" aria-hidden={false}>
               <div className="bos-dna-v2__ring bos-dna-v2__ring--halo" />
@@ -501,11 +538,14 @@ export default function DeterministicBOSDNAVisualV2({
               </div>
             </div>
 
+            {show('outputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--right bos-dna-v2__panel">
               <div className="bos-dna-v2__label">Outputs</div>
               <CompactList items={vm.outputs} empty="—" />
             </div>
+            ) : null}
 
+            {show('operatingLoop') ? (
             <section className="bos-dna-v2__loop">
               <div className="bos-dna-v2__label bos-dna-v2__label--cyan">Operating Loop</div>
               <div className="bos-dna-v2__loop-row">
@@ -514,9 +554,11 @@ export default function DeterministicBOSDNAVisualV2({
                 ))}
               </div>
             </section>
+            ) : null}
           </main>
 
           <aside className="bos-dna-v2__right">
+            {show('coreTension') ? (
             <section className="bos-dna-v2__panel">
               <div className="bos-dna-v2__label">Core Tension</div>
               <div className="bos-dna-v2__tension-row">
@@ -527,17 +569,25 @@ export default function DeterministicBOSDNAVisualV2({
               <h3 className="bos-dna-v2__panel-title">{tension.label || '—'}</h3>
               <p className="bos-dna-v2__panel-body">{tension.detail || vm.futureBottleneck || '—'}</p>
             </section>
+            ) : null}
 
+            {show('wrongSeatRisk') || show('futureBottleneck') ? (
             <section className={`bos-dna-v2__panel bos-dna-v2__risk ${riskClass(vm.wrongSeatRisk)}`}>
-              <div className="bos-dna-v2__label">Wrong-Seat Risk</div>
-              <p className="bos-dna-v2__risk-level">{firstLine(vm.wrongSeatRisk, 'Moderate')}</p>
-              {vm.futureBottleneck ? (
+              <div className="bos-dna-v2__label">
+                {show('wrongSeatRisk') ? 'Wrong-Seat Risk' : 'Scaling Pattern'}
+              </div>
+              {show('wrongSeatRisk') ? (
+                <p className="bos-dna-v2__risk-level">{firstLine(vm.wrongSeatRisk, 'Moderate')}</p>
+              ) : null}
+              {show('futureBottleneck') && vm.futureBottleneck ? (
                 <p className="bos-dna-v2__panel-body">{vm.futureBottleneck}</p>
               ) : (
-                <p className="bos-dna-v2__empty">Constraint detail not available</p>
+                null
               )}
             </section>
+            ) : null}
 
+            {show('environments') ? (
             <div className="bos-dna-v2__env">
               <section className="bos-dna-v2__panel">
                 <div className="bos-dna-v2__label bos-dna-v2__label--green">Best Environment</div>
@@ -548,25 +598,37 @@ export default function DeterministicBOSDNAVisualV2({
                 <CompactList items={vm.worstEnvironment} />
               </section>
             </div>
+            ) : null}
 
+            {show('oneMove') ? (
             <section className="bos-dna-v2__panel bos-dna-v2__one-move">
-              <div className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · Highest Leverage</div>
+              <div className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · A Test to Try</div>
               <h3 className="bos-dna-v2__one-move-title">{firstLine(vm.oneMove, '—')}</h3>
               <p className="bos-dna-v2__panel-body bos-dna-v2__one-move-body">{firstLine(vm.roleTruth, vm.evolutionPath, '—')}</p>
             </section>
+            ) : null}
           </aside>
 
+          {show('futureCards') ? (
           <section className="bos-dna-v2__futures">
             {futureCards.map((future, index) => (
               <FutureCard key={`${future.title}-${index}`} item={future} index={index} />
             ))}
           </section>
+          ) : null}
 
-          <section className="bos-dna-v2__panel bos-dna-v2__signals">
+          {show('keySignals') ? (
+          <section className={`bos-dna-v2__panel bos-dna-v2__signals ${show('futureCards') ? '' : 'bos-dna-v2__signals--wide'}`}>
             <div className="bos-dna-v2__label">Key Signals</div>
             <CompactList items={vm.keySignals} empty="Key signals not available for this profile." />
           </section>
+          ) : null}
 
+          {globalLimitation ? (
+            <footer className="bos-dna-v2__footer bos-dna-v2__footer--limitation bos-dna-v2__panel">
+              <p>{globalLimitation}</p>
+            </footer>
+          ) : show('footer') ? (
           <footer className="bos-dna-v2__footer bos-dna-v2__panel">
             <FooterChip label="Natural Advantage" value={vm.naturalAdvantage} />
             <FooterChip label="Natural Risk" value={vm.naturalRisk} />
@@ -575,6 +637,7 @@ export default function DeterministicBOSDNAVisualV2({
             <FooterChip label="Role Fit" value={roleFitSummary} />
             <FooterChip label="Wrong-Seat Risk" value={vm.wrongSeatRisk || '—'} />
           </footer>
+          ) : null}
         </div>
       </div>
       )}
@@ -1427,6 +1490,10 @@ const styles = `
   flex-direction: column;
 }
 
+.bos-dna-v2__signals--wide {
+  grid-column: 1 / -1;
+}
+
 .bos-dna-v2__signals .bos-dna-v2__list {
   flex: 1;
   min-height: 0;
@@ -1443,6 +1510,21 @@ const styles = `
   border-color: rgba(255,138,0,0.28);
   background:
     linear-gradient(180deg, rgba(255,138,0,0.08), rgba(255,255,255,0.02) 40%, rgba(0,0,0,0.25));
+}
+
+.bos-dna-v2__footer--limitation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bos-dna-v2__footer--limitation p {
+  margin: 0;
+  max-width: 82%;
+  color: var(--bos-muted);
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .bos-dna-v2__footer-chip {

@@ -15,7 +15,7 @@ import {
   BOS_CUSTOMER_INTELLIGENCE_MAX_OUTPUT_CHARACTERS,
   BOS_CUSTOMER_INTELLIGENCE_VERSION,
   BOS_LAYER2_VERSION,
-  INSUFFICIENT_EVIDENCE,
+  TRANSLATION_FORMATS,
 } from '../src/lib/bosCustomerIntelligence/contracts.js';
 import { resolveLayer3CustomerViewModel } from '../src/lib/bosCustomerIntelligence/customerViewModelOverlay.js';
 import { buildDeterministicLayer3Translation } from '../src/lib/bosCustomerIntelligence/deterministicFallback.js';
@@ -33,6 +33,7 @@ import {
 import {
   buildLayer3CacheIdentity,
   clearLayer3TranslationCache,
+  layer3CacheKey,
 } from '../src/lib/bosCustomerIntelligence/translationCache.js';
 import {
   validateLayer3SemanticPacket,
@@ -123,7 +124,18 @@ test('immutable semantic packet contains only Layer 2 claims and protected displ
   assert.equal(packet.protected_contract.canonical_bos_modified, false);
   assert.equal(packet.protected_contract.downstream_contracts_modified, false);
   assert.equal(packet.protected_contract.confidence_calibration_claimed, false);
-  assert.equal(packet.surfaces.length, 17);
+  assert.equal(packet.surfaces.length, 16);
+  assert.equal(
+    packet.surfaces.filter(({ claims }) => (
+      claims.length === 1 && claims[0].claim_id === 'strategic_ceiling'
+    )).length,
+    1,
+  );
+  assert.equal(packet.surfaces.every(({ translation_guidance: guidance }) => (
+    Object.values(TRANSLATION_FORMATS).includes(guidance.output_format)
+    && guidance.allowed_block_kinds.length > 0
+    && guidance.customer_goal.length > 0
+  )), true);
   assert.equal(Object.isFrozen(packet), true);
   assert.equal(Object.isFrozen(packet.surfaces[0].claims[0]), true);
   assert.equal(validateLayer3SemanticPacket(packet).valid, true);
@@ -164,9 +176,10 @@ test('deterministic fallback preserves every claim contract and abstains explici
   const team = bundle.translations.find(({ surface_id }) => surface_id === 'team.primary');
   for (const translation of [future, team]) {
     assert.equal(translation.status, 'abstained');
-    assert.equal(translation.customer_copy.headline, INSUFFICIENT_EVIDENCE);
-    assert.equal(translation.customer_copy.explanation, INSUFFICIENT_EVIDENCE);
-    assert.equal(translation.customer_copy.recognizable_pattern, '');
+    assert.equal(translation.format, TRANSLATION_FORMATS.ABSTENTION);
+    assert.equal(translation.customer_copy.blocks.length, 1);
+    assert.equal(translation.customer_copy.blocks[0].kind, 'limitation');
+    assert.doesNotMatch(JSON.stringify(translation.customer_copy), /Insufficient Evidence/);
   }
 });
 
@@ -181,19 +194,29 @@ test('validator rejects semantic drift, false certainty, new numbers, and fabric
 
   const translatedIndex = fallback.translations.findIndex(({ status }) => status === 'translated');
   const certainty = clone(fallback);
-  certainty.translations[translatedIndex].customer_copy.recognizable_pattern =
-    'You may notice this will always transform your results.';
+  certainty.translations[translatedIndex].customer_copy.blocks[0].text =
+    'This will always transform your results.';
   assert.equal(validateLayer3TranslationBundle(packet, certainty).valid, false);
 
   const number = clone(fallback);
-  number.translations[translatedIndex].customer_copy.recognizable_pattern =
-    'You may notice performance improves by 25%.';
+  number.translations[translatedIndex].customer_copy.blocks[0].text =
+    'Performance may improve by 25%.';
   assert.equal(validateLayer3TranslationBundle(packet, number).valid, false);
 
   const quotation = clone(fallback);
-  quotation.translations[translatedIndex].customer_copy.recognizable_pattern =
-    'You may notice teammates saying “this is exactly how you work”.';
+  quotation.translations[translatedIndex].customer_copy.blocks[0].text =
+    'Teammates may say “this is exactly how you work”.';
   assert.equal(validateLayer3TranslationBundle(packet, quotation).valid, false);
+
+  const technical = clone(fallback);
+  technical.translations[translatedIndex].customer_copy.blocks[0].text =
+    'The Layer 1 topology score supports this conclusion.';
+  assert.equal(validateLayer3TranslationBundle(packet, technical).valid, false);
+
+  const repeated = clone(fallback);
+  repeated.translations[translatedIndex + 1].customer_copy.blocks[0].text =
+    repeated.translations[translatedIndex].customer_copy.blocks[0].text;
+  assert.equal(validateLayer3TranslationBundle(packet, repeated).valid, false);
 });
 
 test('GPT-5.6 request is Responses structured output and receives only the semantic packet', async () => {
@@ -213,6 +236,8 @@ test('GPT-5.6 request is Responses structured output and receives only the seman
     LAYER3_TRANSLATION_SYSTEM_PROMPT,
     /Never use the certainty tokens.*even inside a negated sentence/i,
   );
+  assert.doesNotMatch(LAYER3_TRANSLATION_SYSTEM_PROMPT, /must begin with|required sentence stem/i);
+  assert.match(LAYER3_TRANSLATION_SYSTEM_PROMPT, /plain, recognizable language/i);
 });
 
 test('orchestrator is feature-gated, validates GPT output, caches by hash, and fails closed', async () => {
@@ -343,6 +368,19 @@ test('cache identity binds every semantic and policy version dimension', async (
     layer3_translation_version: BOS_CUSTOMER_INTELLIGENCE_VERSION,
     translation_variant: BOS_CUSTOMER_INTELLIGENCE_TRANSLATION_VARIANT,
   });
+  const oldPacket = {
+    ...packet,
+    version: 'bos_customer_intelligence_v1',
+    output_variant: 'premium-web-v1',
+    translation_variant: 'standard',
+  };
+  assert.notEqual(
+    layer3CacheKey(packet),
+    layer3CacheKey(oldPacket, {
+      promptVersion: 'prompt-v1',
+      validatorVersion: 'validator-v1',
+    }),
+  );
 });
 
 test('premium adapter changes customer copy only and preserves technical sources byte-for-byte', async () => {
@@ -357,9 +395,32 @@ test('premium adapter changes customer copy only and preserves technical sources
     source: 'deterministic_fallback',
   });
 
-  assert.equal(translated.tabs.length, 8);
-  assert.equal(translated.overviewSections.length, 5);
+  assert.deepEqual(
+    translated.tabs.map(({ id }) => id),
+    ['overview', 'scores-reveal', 'visual-dna', 'one-move', 'how-to-use'],
+  );
+  assert.equal(translated.overviewSections.length, 3);
+  assert.equal(
+    translated.overviewSections.filter(({ id }) => id === 'main-scaling-risk').length,
+    0,
+  );
+  assert.equal(
+    translated.overviewSections.filter(({ id }) => id === 'main-constraint').length,
+    0,
+  );
+  assert.equal(
+    translated.overviewSections.find(({ id }) => id === 'key-advantage').title,
+    'What Stands Out',
+  );
   assert.equal(translated.scoreMeaning.customerIntelligenceActive, true);
+  assert.deepEqual(
+    translated.operatingScores.map(({ score, rank, dimensionTechnical }) => ({
+      score, rank, dimensionTechnical,
+    })),
+    viewModel.operatingScores.map(({ score, rank, dimensionTechnical }) => ({
+      score, rank, dimensionTechnical,
+    })),
+  );
   assert.equal(translated.customer_intelligence.translation_only, true);
   assert.equal(translated.customer_intelligence.technical_source_unchanged, true);
   assert.equal(translated.truthfulness, viewModel.truthfulness);
@@ -367,14 +428,44 @@ test('premium adapter changes customer copy only and preserves technical sources
   assert.equal(JSON.stringify(translated.advancedSource), advancedSourceBefore);
   assert.equal(JSON.stringify(canonical), canonicalBefore);
   assert.equal(JSON.stringify(narrative), narrativeBefore);
-  assert.equal(translated.teamFit.content.includes(INSUFFICIENT_EVIDENCE), true);
-  assert.equal(translated.fiveFuturesSections.every(({ content }) => (
-    content.includes(INSUFFICIENT_EVIDENCE)
+  assert.equal(translated.teamFit.available, false);
+  assert.deepEqual(translated.fiveFuturesSections, []);
+  assert.equal(translated.reviewerTabs.length, 1);
+  assert.equal(translated.reviewerTabs[0].id, 'advanced-source');
+  assert.equal(translated.limitations.length, 3);
+  const defaultCustomerCopy = {
+    tabs: translated.tabs.map(({ id, label }) => ({ id, label })),
+    overviewSections: translated.overviewSections.map(({
+      id, title, preview, content,
+    }) => ({ id, title, preview, content })),
+    scoreMeaning: {
+      subtitle: translated.scoreMeaning.subtitle,
+      scores: translated.scoreMeaning.scores.map(({
+        displayName, customerRecognition, customerSelfCheck,
+      }) => ({ displayName, customerRecognition, customerSelfCheck })),
+      patternSummary: translated.scoreMeaning.patternSummary,
+    },
+    oneMove: {
+      headline: translated.oneMove.headline,
+      blocks: translated.oneMove.blocks,
+    },
+    howToUseThis: translated.howToUseThis,
+    limitations: translated.limitations.map(({ headline, text }) => ({ headline, text })),
+  };
+  assert.doesNotMatch(
+    JSON.stringify(defaultCustomerCopy),
+    /Layer 1|topology score|contributing answer signals|evidence contract|semantic packet|validator|provenance path|Insufficient Evidence/i,
+  );
+  assert.equal(translated.scoreMeaning.scores.every((score) => (
+    score.whatItMeans === score.customerRecognition
+    && score.howItHelps === ''
+    && score.howItWorksAgainst === ''
+    && score.bestUse === ''
   )), true);
   assert.equal(translated.oneMove.claimContracts, viewModel.oneMove.claimContracts);
 });
 
-test('Visual DNA adapter preserves score topology and removes unsupported defaults', async () => {
+test('Visual DNA adapter preserves the technical model and conditionally omits unsupported panels', async () => {
   const { viewModel, deterministicVisualDNA } = await buildLayer3Fixture();
   const sourceBefore = JSON.stringify(deterministicVisualDNA);
   const dimensionsBefore = JSON.stringify(deterministicVisualDNA.topDimensions);
@@ -384,13 +475,56 @@ test('Visual DNA adapter preserves score topology and removes unsupported defaul
 
   assert.equal(JSON.stringify(deterministicVisualDNA), sourceBefore);
   assert.equal(JSON.stringify(visual.topDimensions), dimensionsBefore);
-  assert.equal(visual.futureBottleneck, INSUFFICIENT_EVIDENCE);
-  assert.equal(visual.wrongSeatRisk, INSUFFICIENT_EVIDENCE);
-  assert.deepEqual(visual.energySource, [INSUFFICIENT_EVIDENCE]);
-  assert.deepEqual(visual.roleFitSignals, [INSUFFICIENT_EVIDENCE]);
-  assert.equal(visual.futureCards.length, 5);
-  assert.equal(visual.futureCards.every(({ summary }) => summary === INSUFFICIENT_EVIDENCE), true);
+  for (const field of [
+    'wrongSeatRisk',
+    'energySource',
+    'fatigueSource',
+    'inputs',
+    'outputs',
+    'operatingLoop',
+    'bestEnvironment',
+    'worstEnvironment',
+    'roleFitSignals',
+    'futureCards',
+  ]) {
+    assert.equal(JSON.stringify(visual[field]), JSON.stringify(deterministicVisualDNA[field]));
+  }
+  assert.equal(visual.customerPresentation.visibility.futureCards, false);
+  assert.equal(visual.customerPresentation.visibility.wrongSeatRisk, false);
+  assert.equal(visual.customerPresentation.visibility.energySource, false);
+  assert.equal(visual.customerPresentation.visibility.oneMove, true);
+  assert.match(visual.customerPresentation.globalLimitation, /supported score pattern/i);
+  assert.doesNotMatch(JSON.stringify(visual.customerPresentation), /Insufficient Evidence/);
   assert.equal(visual.customer_intelligence.translation_only, true);
+});
+
+test('a Visual DNA panel automatically returns when its Layer 2 claim becomes sufficient', async () => {
+  const { viewModel, deterministicVisualDNA } = await buildLayer3Fixture();
+  const packet = clone(buildLayer3SemanticPacket(viewModel));
+  const future = packet.surfaces.find(({ surface_id: surfaceId }) => (
+    surfaceId === 'five_futures.summary'
+  ));
+  future.claims[0].claim = 'The current answers support a bounded future-oriented pattern for review.';
+  future.claims[0].classification = 'Inferred';
+  future.claims[0].evidence_sufficiency.status = 'sufficient';
+  future.claims[0].evidence_sufficiency.evidence_count = 1;
+  future.claims[0].evidence_sufficiency.minimum_required = 1;
+  future.claims[0].abstention.abstained = false;
+  future.claims[0].abstention.reason = null;
+  future.translation_guidance = {
+    output_format: TRANSLATION_FORMATS.FIVE_FUTURES,
+    allowed_block_kinds: ['summary', 'recognition', 'limitation'],
+    customer_goal: 'Explain only the supported future-oriented pattern.',
+    recognition_cues: ['the current direction of travel'],
+  };
+  packet.semantic_hash = hashSemanticValue(packetWithoutSemanticHash(packet));
+
+  const bundle = buildDeterministicLayer3Translation(packet);
+  assert.equal(validateLayer3SemanticPacket(packet).valid, true);
+  assert.equal(validateLayer3TranslationBundle(packet, bundle).valid, true);
+  const visual = buildLayer3VisualDNAViewModel(deterministicVisualDNA, bundle);
+  assert.equal(visual.customerPresentation.visibility.futureCards, true);
+  assert.deepEqual(visual.futureCards, deterministicVisualDNA.futureCards);
 });
 
 test('stored Visual DNA is explicitly marked as preserved and not Layer 3 translated', async () => {
@@ -411,7 +545,7 @@ test('stored Visual DNA is explicitly marked as preserved and not Layer 3 transl
   assert.equal(viewModel.visualDNA.approved.layer3_translation_status, undefined);
 });
 
-test('sparse Layer 2 input remains a complete explicit-abstention customer experience', async () => {
+test('sparse Layer 2 input remains available without empty tabs or a refusal wall', async () => {
   const narrative = await buildNarrativeV3({}, false, null, true);
   const viewModel = buildCustomerBOSViewModel({
     canonical: {},
@@ -425,11 +559,15 @@ test('sparse Layer 2 input remains a complete explicit-abstention customer exper
   assert.equal(validateLayer3SemanticPacket(packet).valid, true);
   assert.equal(validateLayer3TranslationBundle(packet, bundle).valid, true);
   assert.equal(bundle.translations.every(({ status }) => status === 'abstained'), true);
-  assert.equal(translated.tabs.length, 8);
-  assert.equal(translated.overviewSections.length, 5);
-  assert.equal(translated.overviewSections.every(({ content }) => (
-    content.includes(INSUFFICIENT_EVIDENCE)
-  )), true);
+  assert.deepEqual(translated.tabs.map(({ id }) => id), ['overview', 'how-to-use']);
+  assert.equal(translated.overviewSections.length, 0);
+  assert.equal(translated.limitations.length, 1);
+  assert.equal(translated.limitations[0].claim_ids.length > 0, true);
+  assert.doesNotMatch(JSON.stringify({
+    overviewSections: translated.overviewSections,
+    limitations: translated.limitations,
+    tabs: translated.tabs,
+  }), /Insufficient Evidence/);
 });
 
 test('production translation route is unavailable by default and performs no model call', async () => {

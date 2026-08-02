@@ -1,20 +1,17 @@
-import { INSUFFICIENT_EVIDENCE } from './contracts.js';
-
 function translationById(bundle, surfaceId) {
   return bundle?.translations?.find((item) => item.surface_id === surfaceId) || null;
 }
 
-function translatedExplanation(bundle, surfaceId, fallback = INSUFFICIENT_EVIDENCE) {
-  const value = translationById(bundle, surfaceId)?.customer_copy?.explanation;
-  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+function isTranslated(translation) {
+  return translation?.status === 'translated';
 }
 
-function insufficientFuture(title) {
-  return {
-    title,
-    likelihood: INSUFFICIENT_EVIDENCE,
-    summary: INSUFFICIENT_EVIDENCE,
-  };
+function blockText(translation, kinds) {
+  const allowed = new Set(kinds);
+  return (translation?.customer_copy?.blocks || [])
+    .filter(({ kind, text }) => allowed.has(kind) && text)
+    .map(({ text }) => text)
+    .join(' ');
 }
 
 /**
@@ -24,19 +21,19 @@ function insufficientFuture(title) {
  */
 export function buildLayer3VisualDNAViewModel(sourceViewModel, bundle) {
   if (!sourceViewModel) return sourceViewModel;
-  const primaryLabel = sourceViewModel.primaryDimension?.label
-    || sourceViewModel.primaryEngine
-    || 'Primary';
-  const secondaryLabel = sourceViewModel.secondaryDimension?.label
-    || sourceViewModel.secondaryEngine
-    || 'Secondary';
-  const visualExplanation = translatedExplanation(bundle, 'visual_dna.primary');
-  const oneMoveExplanation = translatedExplanation(bundle, 'one_move.primary');
+  const visual = translationById(bundle, 'visual_dna.primary');
+  const oneMove = translationById(bundle, 'one_move.primary');
+  const strategic = translationById(bundle, 'overview.main-scaling-risk')
+    || translationById(bundle, 'overview.main-constraint');
+  const futures = translationById(bundle, 'five_futures.summary');
+  const team = translationById(bundle, 'team.primary');
+  const visualSummary = blockText(visual, ['summary', 'recognition']);
+  const oneMoveAction = blockText(oneMove, ['action']);
+  const oneMoveLimitation = blockText(oneMove, ['limitation']);
+  const strategicSummary = blockText(strategic, ['summary', 'recognition']);
 
   return {
     ...sourceViewModel,
-    type: `${primaryLabel} + ${secondaryLabel} measured score pattern`,
-    systemType: 'Behavioral Operating System',
     topDimensions: Array.isArray(sourceViewModel.topDimensions)
       ? sourceViewModel.topDimensions.map((item) => ({ ...item }))
       : [],
@@ -52,39 +49,40 @@ export function buildLayer3VisualDNAViewModel(sourceViewModel, bundle) {
     lowestDimension: sourceViewModel.lowestDimension
       ? { ...sourceViewModel.lowestDimension }
       : null,
-    futureBottleneck: INSUFFICIENT_EVIDENCE,
-    oneMove: oneMoveExplanation,
-    roleTruth: translationById(bundle, 'one_move.primary')?.customer_copy?.evidence_boundary
-      || INSUFFICIENT_EVIDENCE,
-    wrongSeatRisk: INSUFFICIENT_EVIDENCE,
-    inputs: [INSUFFICIENT_EVIDENCE],
-    operatingLoop: [INSUFFICIENT_EVIDENCE],
-    outputs: [INSUFFICIENT_EVIDENCE],
-    evolutionPath: INSUFFICIENT_EVIDENCE,
-    confidence: 'Uncalibrated',
-    tension: {
-      left: primaryLabel,
-      right: secondaryLabel,
-      label: 'Evidence boundary',
-      detail: INSUFFICIENT_EVIDENCE,
+    futureBottleneck: isTranslated(strategic) && strategicSummary
+      ? strategicSummary
+      : sourceViewModel.futureBottleneck,
+    oneMove: isTranslated(oneMove) && oneMoveAction
+      ? oneMoveAction
+      : sourceViewModel.oneMove,
+    roleTruth: isTranslated(oneMove) && oneMoveLimitation
+      ? oneMoveLimitation
+      : sourceViewModel.roleTruth,
+    keySignals: isTranslated(visual) && visualSummary
+      ? [visualSummary]
+      : sourceViewModel.keySignals,
+    customerPresentation: {
+      globalLimitation:
+        'This visual shows your supported score pattern. It does not infer team reactions, future outcomes, ideal environments, or role fit unless the assessment contains enough evidence to support them.',
+      visibility: {
+        dimensionEvidence: false,
+        evidenceAmplitude: false,
+        energySource: false,
+        fatigueSource: false,
+        inputs: false,
+        outputs: false,
+        operatingLoop: false,
+        coreTension: false,
+        futureBottleneck: isTranslated(strategic),
+        wrongSeatRisk: false,
+        environments: false,
+        oneMove: isTranslated(oneMove),
+        futureCards: isTranslated(futures),
+        keySignals: isTranslated(visual),
+        footer: false,
+        roleFit: isTranslated(team),
+      },
     },
-    naturalAdvantage: INSUFFICIENT_EVIDENCE,
-    naturalRisk: INSUFFICIENT_EVIDENCE,
-    energySource: [INSUFFICIENT_EVIDENCE],
-    fatigueSource: [INSUFFICIENT_EVIDENCE],
-    bestEnvironment: [INSUFFICIENT_EVIDENCE],
-    worstEnvironment: [INSUFFICIENT_EVIDENCE],
-    roleFitSignals: [INSUFFICIENT_EVIDENCE],
-    keySignals: [visualExplanation],
-    futureCards: [
-      insufficientFuture('Current Trajectory'),
-      insufficientFuture('Optimized Trajectory'),
-      insufficientFuture('Burnout Trajectory'),
-      insufficientFuture('Leadership Trajectory'),
-      insufficientFuture('Constraint Trajectory'),
-    ],
-    supportSystems: [INSUFFICIENT_EVIDENCE],
-    scalingConstraint: INSUFFICIENT_EVIDENCE,
     customer_intelligence: {
       version: bundle.version,
       source_hash: bundle.source_hash,

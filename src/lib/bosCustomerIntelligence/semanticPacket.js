@@ -6,7 +6,30 @@ import {
   BOS_LAYER2_VERSION,
   INSUFFICIENT_EVIDENCE,
   LAYER3_SURFACE_ROLES,
+  TRANSLATION_FORMATS,
 } from './contracts.js';
+
+const DIMENSION_RECOGNITION_CUES = Object.freeze({
+  dimension_vector: 'orienting toward clear direction',
+  dimension_velocity: 'maintaining pace and forward movement',
+  dimension_signal: 'noticing relational signals and shifts between people',
+  dimension_fidelity: 'checking detail and precision',
+  dimension_leverage: 'shaping attention, positioning, or influence',
+  dimension_flex: 'adjusting as conditions change',
+  dimension_framework: 'creating structure, sequence, and repeatable process',
+  dimension_horizon: 'holding the longer-term view while deciding',
+});
+
+const FORMAT_BLOCK_KINDS = Object.freeze({
+  [TRANSLATION_FORMATS.EXECUTIVE]: ['summary', 'recognition', 'self_check'],
+  [TRANSLATION_FORMATS.OVERVIEW]: ['summary', 'recognition', 'self_check'],
+  [TRANSLATION_FORMATS.SCORE]: ['recognition', 'self_check'],
+  [TRANSLATION_FORMATS.ONE_MOVE]: ['action', 'observation', 'limitation'],
+  [TRANSLATION_FORMATS.ABSTENTION]: ['limitation'],
+  [TRANSLATION_FORMATS.VISUAL_DNA]: ['summary', 'limitation'],
+  [TRANSLATION_FORMATS.FIVE_FUTURES]: ['summary', 'recognition', 'limitation'],
+  [TRANSLATION_FORMATS.TEAM]: ['summary', 'recognition', 'limitation'],
+});
 
 function stableValue(value) {
   if (Array.isArray(value)) return value.map(stableValue);
@@ -137,13 +160,69 @@ function protectedScoreValues(score, rank) {
   };
 }
 
-function surface({ id, role, label, claims, protectedValues = {} }) {
+function hasSufficientClaim(claims) {
+  return (claims || []).some(isSufficientProjectedClaim);
+}
+
+function outputFormat(id, role, claims) {
+  if (!hasSufficientClaim(claims)) return TRANSLATION_FORMATS.ABSTENTION;
+  if (id === 'overview.executive-summary') return TRANSLATION_FORMATS.EXECUTIVE;
+  if (role === LAYER3_SURFACE_ROLES.SCORE) return TRANSLATION_FORMATS.SCORE;
+  if (role === LAYER3_SURFACE_ROLES.ONE_MOVE) return TRANSLATION_FORMATS.ONE_MOVE;
+  if (role === LAYER3_SURFACE_ROLES.FIVE_FUTURES) return TRANSLATION_FORMATS.FIVE_FUTURES;
+  if (role === LAYER3_SURFACE_ROLES.TEAM) return TRANSLATION_FORMATS.TEAM;
+  if (role === LAYER3_SURFACE_ROLES.VISUAL_DNA) return TRANSLATION_FORMATS.VISUAL_DNA;
+  return TRANSLATION_FORMATS.OVERVIEW;
+}
+
+function customerGoal(id, format) {
+  if (format === TRANSLATION_FORMATS.ABSTENTION) {
+    return 'Explain once, in ordinary language, what this assessment cannot establish and why it remains open.';
+  }
+  if (format === TRANSLATION_FORMATS.SCORE) {
+    return 'Help the customer recognize how this measured tendency may show up without narrating measurement mechanics.';
+  }
+  if (format === TRANSLATION_FORMATS.ONE_MOVE) {
+    return 'Turn the supported hypothesis into one concrete test and one thing to observe.';
+  }
+  if (format === TRANSLATION_FORMATS.VISUAL_DNA) {
+    return 'Summarize the relative score pattern in clear language without inferring unsupported risks or outcomes.';
+  }
+  if (id === 'overview.executive-summary') {
+    return 'Give the customer a concise, recognizable account of the strongest supported pattern and pressure response.';
+  }
+  return 'Explain the supported pattern in recognizable, non-technical language and invite honest self-checking.';
+}
+
+function recognitionCuesForClaims(claims, additionalCues = []) {
+  const claimCues = (claims || [])
+    .map(({ claim_id: claimId }) => DIMENSION_RECOGNITION_CUES[claimId])
+    .filter(Boolean);
+  return [...new Set([...additionalCues, ...claimCues])];
+}
+
+function surface({
+  id,
+  role,
+  label,
+  claims,
+  protectedValues = {},
+  recognitionCues = [],
+}) {
+  const projectedClaims = uniqueClaims(claims);
+  const format = outputFormat(id, role, projectedClaims);
   return {
     surface_id: id,
     role,
     label,
-    claims: uniqueClaims(claims),
+    claims: projectedClaims,
     protected_values: stableValue(protectedValues),
+    translation_guidance: {
+      output_format: format,
+      allowed_block_kinds: FORMAT_BLOCK_KINDS[format],
+      customer_goal: customerGoal(id, format),
+      recognition_cues: recognitionCuesForClaims(projectedClaims, recognitionCues),
+    },
   };
 }
 
@@ -152,12 +231,28 @@ function scoreClaimId(score) {
     || `dimension_${cleanString(score?.dimensionTechnical || score?.dimension).toLowerCase()}`;
 }
 
+function cueForScore(score) {
+  return DIMENSION_RECOGNITION_CUES[scoreClaimId(score)] || '';
+}
+
+function strongestScoreCues(viewModel, count = 2) {
+  return (viewModel?.operatingScores || [])
+    .filter((score) => score?.claimContract && Number.isFinite(Number(score.score)))
+    .slice()
+    .sort((left, right) => Number(right.score) - Number(left.score))
+    .slice(0, count)
+    .map(cueForScore)
+    .filter(Boolean);
+}
+
 function buildOverviewSurfaces(viewModel) {
+  const strongestCues = strongestScoreCues(viewModel);
   return (viewModel?.overviewSections || []).map((section) => surface({
     id: `overview.${section.id}`,
     role: LAYER3_SURFACE_ROLES.OVERVIEW,
     label: section.title || section.id,
     claims: section.claimContracts,
+    recognitionCues: strongestCues,
   }));
 }
 
@@ -168,6 +263,7 @@ function buildScoreSurfaces(viewModel) {
     label: score.displayName || score.dimension || `Score ${index + 1}`,
     claims: score.claimContract ? [score.claimContract] : [],
     protectedValues: protectedScoreValues(score, index + 1),
+    recognitionCues: [cueForScore(score)].filter(Boolean),
   }));
 }
 
@@ -204,8 +300,22 @@ function buildFixedSurfaces(viewModel) {
           protectedScoreValues(score, index + 1)
         )),
       },
+      recognitionCues: strongestScoreCues(viewModel),
     }),
   ];
+}
+
+function omitDuplicateInsufficientSurfaces(surfaces) {
+  const seen = new Set();
+  return surfaces.filter((item) => {
+    if (hasSufficientClaim(item.claims)) return true;
+    const signature = item.claims.map(({ claim_id: claimId }) => claimId).sort().join('|');
+    if (!signature || !seen.has(signature)) {
+      if (signature) seen.add(signature);
+      return true;
+    }
+    return false;
+  });
 }
 
 export function buildLayer3SemanticPacket(viewModel, {
@@ -217,11 +327,11 @@ export function buildLayer3SemanticPacket(viewModel, {
     throw new Error('layer3_requires_active_layer2_truthfulness');
   }
 
-  const surfaces = [
+  const surfaces = omitDuplicateInsufficientSurfaces([
     ...buildOverviewSurfaces(viewModel),
     ...buildScoreSurfaces(viewModel),
     ...buildFixedSurfaces(viewModel),
-  ].filter((item) => item.claims.length > 0);
+  ].filter((item) => item.claims.length > 0));
 
   const surfaceManifest = surfaces.map((item) => ({
     surface_id: item.surface_id,

@@ -240,6 +240,8 @@ export default function FinalBOSCustomerReport({ viewModel }) {
     howToUseThis,
     advancedSource,
     visualDNA,
+    limitations = [],
+    evidenceNote = '',
     customer_intelligence: customerIntelligence,
   } = viewModel;
 
@@ -285,10 +287,29 @@ export default function FinalBOSCustomerReport({ viewModel }) {
 
       <div className="px-6 py-6">
         {activeTab === 'overview' && (
-          <ExpandableSectionList
-            sections={overviewSections}
-            essentialsIds={['executive-summary', 'core-operating-pattern']}
-          />
+          <div className="space-y-5">
+            {overviewSections.length > 0 ? (
+              <ExpandableSectionList
+                sections={overviewSections}
+                essentialsIds={['executive-summary', 'core-operating-pattern']}
+              />
+            ) : null}
+            {customerIntelligence && limitations.length > 0 ? (
+              <aside className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                <p className="text-[0.62rem] font-bold uppercase tracking-[0.2em] text-white/50">
+                  What this assessment leaves open
+                </p>
+                {evidenceNote ? (
+                  <p className="mt-2 text-sm leading-relaxed text-white/70">{evidenceNote}</p>
+                ) : null}
+                <ul className="mt-3 space-y-2 text-xs leading-relaxed text-white/60">
+                  {limitations.map((limitation) => (
+                    <li key={limitation.claim_ids.join('|')}>{limitation.text}</li>
+                  ))}
+                </ul>
+              </aside>
+            ) : null}
+          </div>
         )}
 
         {activeTab === 'scores-reveal' && (
@@ -335,7 +356,7 @@ export default function FinalBOSCustomerReport({ viewModel }) {
               <h2 className="text-xl font-bold text-white">Team / Leadership Fit</h2>
               <p className="mt-2 text-sm text-white/70">
                 {customerIntelligence
-                  ? 'What the validated assessment can and cannot support about team or leadership fit.'
+                  ? 'What this assessment supports about your leadership pattern.'
                   : 'How to design the environment around your operating pattern — for coaches, operators, and leadership partners.'}
               </p>
             </div>
