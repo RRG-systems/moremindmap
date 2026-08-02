@@ -240,6 +240,7 @@ export default function FinalBOSCustomerReport({ viewModel }) {
     howToUseThis,
     advancedSource,
     visualDNA,
+    customer_intelligence: customerIntelligence,
   } = viewModel;
 
   return (
@@ -294,7 +295,10 @@ export default function FinalBOSCustomerReport({ viewModel }) {
           <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/5 p-5">
             <h2 className="text-xl font-bold text-white">What Your Scores Reveal</h2>
             <div className="mt-4">
-              <ScoreMeaningSection scoreMeaning={scoreMeaning} />
+              <ScoreMeaningSection
+                scoreMeaning={scoreMeaning}
+                customerIntelligenceActive={Boolean(customerIntelligence)}
+              />
             </div>
           </div>
         )}
@@ -330,7 +334,9 @@ export default function FinalBOSCustomerReport({ viewModel }) {
             <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/5 p-5">
               <h2 className="text-xl font-bold text-white">Team / Leadership Fit</h2>
               <p className="mt-2 text-sm text-white/70">
-                How to design the environment around your operating pattern — for coaches, operators, and leadership partners.
+                {customerIntelligence
+                  ? 'What the validated assessment can and cannot support about team or leadership fit.'
+                  : 'How to design the environment around your operating pattern — for coaches, operators, and leadership partners.'}
               </p>
             </div>
             <article className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">

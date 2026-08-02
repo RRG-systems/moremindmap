@@ -1,4 +1,7 @@
-export default function ScoreMeaningSection({ scoreMeaning }) {
+export default function ScoreMeaningSection({
+  scoreMeaning,
+  customerIntelligenceActive = false,
+}) {
   if (!scoreMeaning) return null;
 
   return (
@@ -24,15 +27,21 @@ export default function ScoreMeaningSection({ scoreMeaning }) {
             </p>
             <div className="mt-3 grid gap-2 md:grid-cols-3">
               <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-emerald-200/70">How it helps</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-emerald-200/70">
+                  {customerIntelligenceActive ? 'How to use this' : 'How it helps'}
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.howItHelps}</p>
               </div>
               <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-amber-200/70">How it can work against you</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-amber-200/70">
+                  {customerIntelligenceActive ? 'Evidence boundary' : 'How it can work against you'}
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.howItWorksAgainst}</p>
               </div>
               <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-sky-200/70">Best use</p>
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-sky-200/70">
+                  {customerIntelligenceActive ? 'Practical use' : 'Best use'}
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.bestUse}</p>
               </div>
             </div>
