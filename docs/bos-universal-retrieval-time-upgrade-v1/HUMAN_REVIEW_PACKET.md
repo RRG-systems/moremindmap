@@ -1,8 +1,10 @@
 # Human Review Packet
 
-Status: `PENDING_PREVIEW_REVIEW`
+Status: `BLOCKED_MODEL_ACCESS_BEFORE_PREVIEW_REVIEW`
 
 Production activation is prohibited until this packet is completed.
+
+The feature-enabled preview is mechanically healthy and preserves exact Layer 2, but the configured OpenAI project does not have access to `gpt-5.6-sol`. No translated review artifact exists yet, so no recognition or fidelity ratings may be recorded.
 
 Review each profile independently. Do not compare profiles.
 
