@@ -4,6 +4,7 @@ import {
   BOS_CUSTOMER_INTELLIGENCE_CACHE_TTL_HOURS,
   BOS_CUSTOMER_INTELLIGENCE_RATE_LIMIT,
   BOS_CUSTOMER_INTELLIGENCE_RATE_WINDOW_SECONDS,
+  BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS,
 } from '../../../src/lib/bosCustomerIntelligence/contracts.js';
 import {
   buildLayer3CacheIdentity,
@@ -12,7 +13,7 @@ import {
 import { stableStringify } from '../../../src/lib/bosCustomerIntelligence/semanticPacket.js';
 import { validateLayer3TranslationBundle } from '../../../src/lib/bosCustomerIntelligence/translationValidator.js';
 
-const LOCK_TTL_MS = 20000;
+const LOCK_TTL_MS = BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS + 10000;
 
 function lockKey(packet) {
   return `${layer3CacheKey(packet)}:lock`;

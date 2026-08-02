@@ -19,7 +19,10 @@ import {
 } from '../src/lib/bosCustomerIntelligence/contracts.js';
 import { resolveLayer3CustomerViewModel } from '../src/lib/bosCustomerIntelligence/customerViewModelOverlay.js';
 import { buildDeterministicLayer3Translation } from '../src/lib/bosCustomerIntelligence/deterministicFallback.js';
-import { buildLayer3TranslationRequest } from '../src/lib/bosCustomerIntelligence/modelContract.js';
+import {
+  LAYER3_TRANSLATION_SYSTEM_PROMPT,
+  buildLayer3TranslationRequest,
+} from '../src/lib/bosCustomerIntelligence/modelContract.js';
 import { translateLayer3SemanticPacket } from '../src/lib/bosCustomerIntelligence/orchestrator.js';
 import { applyLayer3Translations } from '../src/lib/bosCustomerIntelligence/premiumSurfaceAdapter.js';
 import {
@@ -206,6 +209,10 @@ test('GPT-5.6 request is Responses structured output and receives only the seman
   assert.match(request.input[0].content[0].text, /translation only/i);
   assert.deepEqual(JSON.parse(request.input[1].content[0].text), packet);
   assert.doesNotMatch(request.input[1].content[0].text, /intake_answers|answer_text/);
+  assert.match(
+    LAYER3_TRANSLATION_SYSTEM_PROMPT,
+    /Never use the certainty tokens.*even inside a negated sentence/i,
+  );
 });
 
 test('orchestrator is feature-gated, validates GPT output, caches by hash, and fails closed', async () => {

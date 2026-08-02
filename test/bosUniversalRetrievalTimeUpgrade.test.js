@@ -12,6 +12,7 @@ import {
   writeDurableLayer3Translation,
 } from '../api/engine/bosCustomerIntelligence/redisTranslationStore.js';
 import { getOrGenerateLayer3Translation } from '../api/engine/bosCustomerIntelligence/translationService.js';
+import { BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS } from '../src/lib/bosCustomerIntelligence/contracts.js';
 import { resolveLayer3CustomerViewModel } from '../src/lib/bosCustomerIntelligence/customerViewModelOverlay.js';
 import { buildDeterministicLayer3Translation } from '../src/lib/bosCustomerIntelligence/deterministicFallback.js';
 import { buildLayer3SemanticPacket } from '../src/lib/bosCustomerIntelligence/semanticPacket.js';
@@ -142,6 +143,8 @@ test('durable cache uses isolated namespace and validates every cached bundle', 
   const { packet, bundle } = buildPacketAndBundle();
   const redis = new FakeRedis();
   assert.equal(durableCacheInvariants.vault_namespace_used, false);
+  assert.equal(BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS, 60000);
+  assert.equal(durableCacheInvariants.lock_ttl_ms > BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS, true);
   assert.equal(layer3CacheKey(packet).startsWith('bos:l3:'), true);
   assert.equal(layer3CacheKey(packet).startsWith('vault:profile:'), false);
   assert.equal(await writeDurableLayer3Translation(redis, packet, bundle), true);

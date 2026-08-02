@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { resolveLayer3CustomerViewModel } from '../../lib/bosCustomerIntelligence/customerViewModelOverlay.js';
+import { BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS } from '../../lib/bosCustomerIntelligence/contracts.js';
 import { buildLayer3SemanticPacket } from '../../lib/bosCustomerIntelligence/semanticPacket.js';
 import {
   cacheLayer3Translation,
@@ -8,6 +9,8 @@ import {
 } from '../../lib/bosCustomerIntelligence/translationCache.js';
 import { validateLayer3TranslationBundle } from '../../lib/bosCustomerIntelligence/translationValidator.js';
 import FinalBOSCustomerReport from './FinalBOSCustomerReport.jsx';
+
+const CLIENT_TRANSLATION_TIMEOUT_MS = BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS + 5000;
 
 function layer3Enabled() {
   return import.meta.env.VITE_BOS_LAYER3_CUSTOMER_INTELLIGENCE_ENABLED === 'true';
@@ -40,7 +43,7 @@ export default function Layer3CustomerIntelligenceReport({ viewModel }) {
 
     setRemoteTranslation(null);
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
+    const timeout = setTimeout(() => controller.abort(), CLIENT_TRANSLATION_TIMEOUT_MS);
     (async () => {
       try {
         const response = await fetch('/api/moremindmap/customer-intelligence', {

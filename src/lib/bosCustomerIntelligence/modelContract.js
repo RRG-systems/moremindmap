@@ -95,6 +95,7 @@ Hard rules:
 - Never change claim text, classification, evidence sufficiency, confidence band, confidence calibration, or abstention.
 - If a surface has no sufficient claim, set status to "abstained", headline and explanation to "${INSUFFICIENT_EVIDENCE}", and recognizable_pattern to an empty string.
 - Never invent a lived event, team reaction, motive, strength, risk, future, outcome, quotation, number, or timeline.
+- Never use the certainty tokens always, never, inevitably, definitely, certainly, guarantee, prove, or will in customer_copy, even inside a negated sentence. Prefer "does not establish," "not proof," and "may."
 - Use "You may notice" for recognizable_pattern. It must remain a tentative invitation to self-check, not a factual assertion.
 - Use "Use this as" or "Treat this as" for practical_use.
 - State the evidence boundary plainly. For supported content, explicitly say it is not proof, does not establish an outcome, is uncalibrated, or is a hypothesis.
