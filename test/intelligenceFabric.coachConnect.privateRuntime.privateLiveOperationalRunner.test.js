@@ -4,9 +4,11 @@ import test from 'node:test';
 import {
   authorizePrivateLiveOperationalRunnerRequestV1,
   buildPrivateLiveOperationalRunnerV1,
+  createPrivateBetaLaunchStageReceiptV1,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_AUTHORITY_VERSION,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_OPERATIONS,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE,
+  validatePrivateBetaLaunchStageReceiptV1,
   validatePrivateLiveOperationalRunnerRequestV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
 import {
@@ -678,6 +680,8 @@ test('runner constructs the committed adapter once and performs exactly the requ
   const result = await fixture.runner.execute(request('PROVIDER_HEALTH_CANARY'));
   assert.equal(result.ok, true);
   assert.deepEqual(result.provider_states, ['RECOVERING', 'RECOVERING', 'HEALTHY']);
+  assert.equal(result.proof_storage_succeeded, true);
+  assert.match(result.proof_storage_receipt_hash, /^[a-f0-9]{64}$/);
   assert.equal(fixture.healthCalls.count, 3);
   assert.deepEqual(fixture.provider.state.calls, ['STORE_CANARY_PROOF']);
   assert.equal(result.scope_hash, PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash);
@@ -695,6 +699,37 @@ test('unexpected canary state stops immediately and never performs a fourth call
   assert.equal(result.code, 'OPERATIONAL_RUNNER_CANARY_SEQUENCE_INVALID');
   assert.equal(fixture.healthCalls.count, 2);
   assert.equal(fixture.provider.state.calls.length, 0);
+  assert.equal(validatePrivateBetaLaunchStageReceiptV1(result.stage_receipt), true);
+  assert.deepEqual(result.stage_receipt, {
+    receipt_version: 'private-beta-launch-stage-receipt-v1',
+    stage: 'PROVIDER_EXECUTION',
+    status: 'FAILED',
+    stop_code: 'PROVIDER_HEALTH_SEQUENCE_INVALID',
+    provider_health_call_count: 2,
+    expected_provider_state: 'RECOVERING',
+    observed_provider_state: 'UNAVAILABLE',
+    provider_failure_code: 'SHARED_SECURITY_STATE_RECOVERING',
+    proof_storage_attempted: false,
+    proof_storage_succeeded: false,
+  });
+});
+
+test('privacy-safe launch stage receipt contract rejects extra fields and sensitive values', () => {
+  const receipt = createPrivateBetaLaunchStageReceiptV1({
+    stage: 'PROVIDER_EXECUTION',
+    stop_code: 'PROVIDER_HEALTH_CALL_FAILED',
+    provider_health_call_count: 1,
+    expected_provider_state: 'RECOVERING',
+  });
+  assert.equal(validatePrivateBetaLaunchStageReceiptV1(receipt), true);
+  assert.equal(validatePrivateBetaLaunchStageReceiptV1({
+    ...receipt,
+    provider_endpoint: 'must-not-escape',
+  }), false);
+  assert.equal(createPrivateBetaLaunchStageReceiptV1({
+    stage: 'PROVIDER_EXECUTION',
+    stop_code: 'unsafe provider detail',
+  }), null);
 });
 
 test('fixed synthetic product attestation is required before secrets, adapter, or provider work', async () => {

@@ -363,8 +363,94 @@ function locked() {
   });
 }
 
-function denied(code = 'OPERATIONAL_RUNNER_REQUEST_DENIED') {
-  return frozen({ ok: false, allowed: false, code });
+export const PRIVATE_BETA_LAUNCH_STAGE_RECEIPT_VERSION =
+  'private-beta-launch-stage-receipt-v1';
+export const PRIVATE_BETA_LAUNCH_DIAGNOSTIC_STAGES = Object.freeze([
+  'RUNNER_AUTHORIZATION',
+  'DEPLOYMENT_BINDING',
+  'PROVIDER_CONFIGURATION',
+  'PROVIDER_EXECUTION',
+  'PROOF_STORAGE',
+  'RUNTIME_ENABLEMENT',
+]);
+const PRIVATE_BETA_LAUNCH_STAGE_RECEIPT_FIELDS = Object.freeze([
+  'receipt_version',
+  'stage',
+  'status',
+  'stop_code',
+  'provider_health_call_count',
+  'expected_provider_state',
+  'observed_provider_state',
+  'provider_failure_code',
+  'proof_storage_attempted',
+  'proof_storage_succeeded',
+]);
+const PRIVATE_BETA_PROVIDER_STATES = Object.freeze([
+  'UNCONFIGURED',
+  'HEALTHY',
+  'DEGRADED',
+  'UNAVAILABLE',
+  'PARTITIONED',
+  'RECOVERING',
+]);
+
+const safeDiagnosticCode = (value) => typeof value === 'string'
+  && /^[A-Z][A-Z0-9_]{2,95}$/.test(value);
+
+export function validatePrivateBetaLaunchStageReceiptV1(value) {
+  return exactFields(value, PRIVATE_BETA_LAUNCH_STAGE_RECEIPT_FIELDS)
+    && value.receipt_version === PRIVATE_BETA_LAUNCH_STAGE_RECEIPT_VERSION
+    && PRIVATE_BETA_LAUNCH_DIAGNOSTIC_STAGES.includes(value.stage)
+    && value.status === 'FAILED'
+    && safeDiagnosticCode(value.stop_code)
+    && Number.isInteger(value.provider_health_call_count)
+    && value.provider_health_call_count >= 0
+    && value.provider_health_call_count <= 3
+    && (value.expected_provider_state === null
+      || PRIVATE_BETA_PROVIDER_STATES.includes(value.expected_provider_state))
+    && (value.observed_provider_state === null
+      || PRIVATE_BETA_PROVIDER_STATES.includes(value.observed_provider_state))
+    && (value.provider_failure_code === null
+      || safeDiagnosticCode(value.provider_failure_code))
+    && typeof value.proof_storage_attempted === 'boolean'
+    && typeof value.proof_storage_succeeded === 'boolean'
+    && (!value.proof_storage_succeeded || value.proof_storage_attempted);
+}
+
+export function createPrivateBetaLaunchStageReceiptV1({
+  stage,
+  stop_code,
+  provider_health_call_count = 0,
+  expected_provider_state = null,
+  observed_provider_state = null,
+  provider_failure_code = null,
+  proof_storage_attempted = false,
+  proof_storage_succeeded = false,
+} = {}) {
+  const value = {
+    receipt_version: PRIVATE_BETA_LAUNCH_STAGE_RECEIPT_VERSION,
+    stage,
+    status: 'FAILED',
+    stop_code,
+    provider_health_call_count,
+    expected_provider_state,
+    observed_provider_state,
+    provider_failure_code,
+    proof_storage_attempted,
+    proof_storage_succeeded,
+  };
+  return validatePrivateBetaLaunchStageReceiptV1(value) ? frozen(value) : null;
+}
+
+function denied(code = 'OPERATIONAL_RUNNER_REQUEST_DENIED', stageReceipt = null) {
+  return frozen({
+    ok: false,
+    allowed: false,
+    code,
+    stage_receipt: validatePrivateBetaLaunchStageReceiptV1(stageReceipt)
+      ? stageReceipt
+      : null,
+  });
 }
 
 function parseAuthority(env, nowMs) {
@@ -712,11 +798,25 @@ export async function buildPrivateLiveOperationalRunnerV1({
     ...(url.startsWith('rediss://') ? { tls: {} } : {}),
   }),
 } = {}) {
-  if (serverContextLocked(env)) return denied('OPERATIONAL_RUNNER_CONFIGURATION_INVALID');
+  if (serverContextLocked(env)) {
+    return denied(
+      'OPERATIONAL_RUNNER_CONFIGURATION_INVALID',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'RUNNER_AUTHORIZATION',
+        stop_code: 'RUNNER_CONFIGURATION_INVALID',
+      }),
+    );
+  }
   const runnerAuthority = parseAuthority(env, clock());
   const adapterSourceSha256 = env.MORE_PRIVATE_RUNTIME_QUALIFIED_ADAPTER_SOURCE_SHA256;
   if (!runnerAuthority || !sha256(adapterSourceSha256)) {
-    return denied('OPERATIONAL_RUNNER_CONFIGURATION_INVALID');
+    return denied(
+      'OPERATIONAL_RUNNER_CONFIGURATION_INVALID',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'RUNNER_AUTHORIZATION',
+        stop_code: 'RUNNER_CONFIGURATION_INVALID',
+      }),
+    );
   }
   const authority = await authorityReader({
     env,
@@ -742,14 +842,26 @@ export async function buildPrivateLiveOperationalRunnerV1({
     ))
     || productBinding?.exact_scope_hash
       !== PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash) {
-    return denied('OPERATIONAL_RUNNER_AUTHORITY_INVALID');
+    return denied(
+      'OPERATIONAL_RUNNER_AUTHORITY_INVALID',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'DEPLOYMENT_BINDING',
+        stop_code: 'DEPLOYMENT_BINDING_INVALID',
+      }),
+    );
   }
   const scopeHashKey = await authority.resolve_secret_reference(
     authority.remote_configuration.scope_hash_key_ref,
     { purpose: 'PRIVATE_RUNTIME_SCOPE_HASH_KEY', secret: true },
   );
   if (typeof scopeHashKey !== 'string' || scopeHashKey.length < 32) {
-    return denied('OPERATIONAL_RUNNER_AUTHORITY_INVALID');
+    return denied(
+      'OPERATIONAL_RUNNER_AUTHORITY_INVALID',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'PROVIDER_CONFIGURATION',
+        stop_code: 'SCOPE_HASH_KEY_REFERENCE_INVALID',
+      }),
+    );
   }
   const keyedDigest = createQualificationDigestFunction(scopeHashKey);
   const keyspace = createRemoteSharedSecurityKeyspace({
@@ -772,7 +884,13 @@ export async function buildPrivateLiveOperationalRunnerV1({
     clock,
   });
   if (!adapter || typeof adapter.health !== 'function') {
-    return denied('OPERATIONAL_RUNNER_AUTHORITY_INVALID');
+    return denied(
+      'OPERATIONAL_RUNNER_AUTHORITY_INVALID',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'PROVIDER_CONFIGURATION',
+        stop_code: 'PROVIDER_ADAPTER_INVALID',
+      }),
+    );
   }
   const executeProviderCommand = await createProviderExecutor({
     authority,
@@ -780,7 +898,13 @@ export async function buildPrivateLiveOperationalRunnerV1({
     providerCommandExecutor,
   });
   if (typeof executeProviderCommand !== 'function') {
-    return denied('OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE');
+    return denied(
+      'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+      createPrivateBetaLaunchStageReceiptV1({
+        stage: 'PROVIDER_CONFIGURATION',
+        stop_code: 'PROVIDER_EXECUTOR_UNAVAILABLE',
+      }),
+    );
   }
 
   async function runProviderOperation(operation, request, sequenceDigest = null) {
@@ -916,12 +1040,40 @@ export async function buildPrivateLiveOperationalRunnerV1({
       if (checked.value.operation === 'PROVIDER_HEALTH_CANARY') {
         const decisions = [];
         for (let index = 0; index < 3; index += 1) {
-          const decision = await adapter.health();
-          decisions.push(decision);
           const expected = index < 2 ? 'RECOVERING' : 'HEALTHY';
-          if (!validateAsyncSecurityHealth(decision).valid
-            || decision.state !== expected) {
-            return denied('OPERATIONAL_RUNNER_CANARY_SEQUENCE_INVALID');
+          let decision;
+          try {
+            decision = await adapter.health();
+          } catch {
+            return denied(
+              'OPERATIONAL_RUNNER_CANARY_SEQUENCE_INVALID',
+              createPrivateBetaLaunchStageReceiptV1({
+                stage: 'PROVIDER_EXECUTION',
+                stop_code: 'PROVIDER_HEALTH_CALL_FAILED',
+                provider_health_call_count: index + 1,
+                expected_provider_state: expected,
+              }),
+            );
+          }
+          decisions.push(decision);
+          const validation = validateAsyncSecurityHealth(decision);
+          if (!validation.valid || decision.state !== expected) {
+            return denied(
+              'OPERATIONAL_RUNNER_CANARY_SEQUENCE_INVALID',
+              createPrivateBetaLaunchStageReceiptV1({
+                stage: 'PROVIDER_EXECUTION',
+                stop_code: 'PROVIDER_HEALTH_SEQUENCE_INVALID',
+                provider_health_call_count: decisions.length,
+                expected_provider_state: expected,
+                observed_provider_state:
+                  PRIVATE_BETA_PROVIDER_STATES.includes(decision?.state)
+                    ? decision.state
+                    : null,
+                provider_failure_code: safeDiagnosticCode(decision?.failure_code)
+                  ? decision.failure_code
+                  : null,
+              }),
+            );
           }
         }
         const sequenceDigest = hashCanonicalJson(decisions.map((decision) => ({
@@ -934,9 +1086,26 @@ export async function buildPrivateLiveOperationalRunnerV1({
           checked.value,
           sequenceDigest,
         );
-        if (!stored.ok) return stored;
+        if (!stored.ok) {
+          return denied(
+            stored.code || 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+            createPrivateBetaLaunchStageReceiptV1({
+              stage: 'PROOF_STORAGE',
+              stop_code: safeDiagnosticCode(stored.code)
+                ? stored.code
+                : 'CANARY_PROOF_STORAGE_FAILED',
+              provider_health_call_count: 3,
+              expected_provider_state: 'HEALTHY',
+              observed_provider_state: 'HEALTHY',
+              proof_storage_attempted: true,
+              proof_storage_succeeded: false,
+            }),
+          );
+        }
         return frozen({
           ...stored,
+          proof_storage_succeeded: true,
+          proof_storage_receipt_hash: stored.receipt_hashes[0],
           provider_states: decisions.map((decision) => decision.state),
           provider_timestamps: decisions.map((decision) => decision.server_time),
           receipt_hashes: decisions.map(

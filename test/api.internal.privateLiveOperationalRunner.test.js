@@ -112,7 +112,10 @@ test('protected route denies invalid scope before runner construction', async ()
     },
   })(input, res);
   assert.equal(res.statusCode, 403);
-  assert.deepEqual(res.payload, { ok: false, error: 'request_denied' });
+  assert.equal(res.payload.ok, false);
+  assert.equal(res.payload.error, 'request_denied');
+  assert.equal(res.payload.stage_receipt.stage, 'RUNNER_AUTHORIZATION');
+  assert.equal(res.payload.stage_receipt.stop_code, 'REQUEST_VALIDATION_FAILED');
   assert.equal(builds, 0);
 });
 
@@ -194,33 +197,48 @@ test('protected route permits the reviewed fixed-fixture operation without expos
   ), false);
 });
 
-test('runner construction and execution failures do not expose details', async () => {
-  for (const buildRunner of [
-    async () => {
-      throw new Error('synthetic provider credential must not escape');
-    },
-    async () => ({
-      ok: true,
-      execute: async () => ({
-        ok: false,
-        code: 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
-      }),
-    }),
-    async () => ({
-      ok: true,
-      execute: async () => {
-        throw new Error('synthetic provider response must not escape');
+test('authorized runner failures expose only bounded stage receipts', async () => {
+  const cases = [
+    {
+      buildRunner: async () => {
+        throw new Error('synthetic provider credential must not escape');
       },
-    }),
-  ]) {
+      stage: 'PROVIDER_CONFIGURATION',
+      stopCode: 'RUNNER_CONSTRUCTION_FAILED',
+    },
+    {
+      buildRunner: async () => ({
+        ok: true,
+        execute: async () => ({
+          ok: false,
+          code: 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+        }),
+      }),
+      stage: 'PROVIDER_EXECUTION',
+      stopCode: 'RUNNER_REQUEST_DENIED',
+    },
+    {
+      buildRunner: async () => ({
+        ok: true,
+        execute: async () => {
+          throw new Error('synthetic provider response must not escape');
+        },
+      }),
+      stage: 'PROVIDER_EXECUTION',
+      stopCode: 'RUNNER_EXECUTION_FAILED',
+    },
+  ];
+  for (const entry of cases) {
     const res = response();
     await createPrivateLiveOperationalRunnerHandler({
       env: env(),
       clock: () => now,
-      buildRunner,
+      buildRunner: entry.buildRunner,
     })(req(), res);
-    assert.equal([404, 403].includes(res.statusCode), true);
-    assert.equal(JSON.stringify(res.payload).includes('credential'), false);
-    assert.equal(JSON.stringify(res.payload).includes('provider'), false);
+    assert.equal(res.statusCode, 403);
+    assert.equal(res.payload.stage_receipt.stage, entry.stage);
+    assert.equal(res.payload.stage_receipt.stop_code, entry.stopCode);
+    const serialized = JSON.stringify(res.payload);
+    assert.equal(/credential|endpoint|cookie|token|profile_id|subscriber_subject/.test(serialized), false);
   }
 });

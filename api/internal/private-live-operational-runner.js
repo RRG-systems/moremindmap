@@ -1,7 +1,9 @@
 import {
   authorizePrivateLiveOperationalRunnerRequestV1,
   buildPrivateLiveOperationalRunnerV1,
+  createPrivateBetaLaunchStageReceiptV1,
   validatePrivateLiveOperationalRunnerRequestV1,
+  validatePrivateBetaLaunchStageReceiptV1,
 } from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
 
 function headers(res) {
@@ -22,8 +24,12 @@ function locked(res) {
   return res.status(404).json({ ok: false, error: 'feature_unavailable' });
 }
 
-function denied(res) {
-  return res.status(403).json({ ok: false, error: 'request_denied' });
+function denied(res, stageReceipt = null) {
+  const payload = { ok: false, error: 'request_denied' };
+  if (validatePrivateBetaLaunchStageReceiptV1(stageReceipt)) {
+    payload.stage_receipt = stageReceipt;
+  }
+  return res.status(403).json(payload);
 }
 
 function body(req) {
@@ -58,21 +64,52 @@ export function createPrivateLiveOperationalRunnerHandler({
     if (!authorized.ok) return locked(res);
     const input = body(req);
     const checked = validatePrivateLiveOperationalRunnerRequestV1(input);
-    if (!checked.ok) return denied(res);
+    if (!checked.ok) {
+      return denied(res, createPrivateBetaLaunchStageReceiptV1({
+        stage: 'RUNNER_AUTHORIZATION',
+        stop_code: 'REQUEST_VALIDATION_FAILED',
+      }));
+    }
     let runner;
     try {
       runner = await buildRunner({ env, clock });
     } catch {
-      return locked(res);
+      return denied(res, createPrivateBetaLaunchStageReceiptV1({
+        stage: 'PROVIDER_CONFIGURATION',
+        stop_code: 'RUNNER_CONSTRUCTION_FAILED',
+      }));
     }
-    if (!runner?.ok || typeof runner.execute !== 'function') return locked(res);
+    if (!runner?.ok || typeof runner.execute !== 'function') {
+      return denied(
+        res,
+        validatePrivateBetaLaunchStageReceiptV1(runner?.stage_receipt)
+          ? runner.stage_receipt
+          : createPrivateBetaLaunchStageReceiptV1({
+            stage: 'RUNNER_AUTHORIZATION',
+            stop_code: 'RUNNER_UNAVAILABLE',
+          }),
+      );
+    }
     let result;
     try {
       result = await runner.execute(checked.value);
     } catch {
-      return denied(res);
+      return denied(res, createPrivateBetaLaunchStageReceiptV1({
+        stage: 'PROVIDER_EXECUTION',
+        stop_code: 'RUNNER_EXECUTION_FAILED',
+      }));
     }
-    if (!result?.ok) return denied(res);
+    if (!result?.ok) {
+      return denied(
+        res,
+        validatePrivateBetaLaunchStageReceiptV1(result?.stage_receipt)
+          ? result.stage_receipt
+          : createPrivateBetaLaunchStageReceiptV1({
+            stage: 'PROVIDER_EXECUTION',
+            stop_code: 'RUNNER_REQUEST_DENIED',
+          }),
+      );
+    }
     return res.status(200).json(result);
   };
 }
