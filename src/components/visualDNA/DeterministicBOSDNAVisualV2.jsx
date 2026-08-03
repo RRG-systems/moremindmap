@@ -247,122 +247,14 @@ function defaultFutureCards(vm) {
 }
 
 /**
- * Premium compact poster for tab embed.
- * Intentionally reduced detail — not a squeezed full dashboard.
- */
-function PreviewPoster({
-  vm,
-  displayProfileId,
-  futureCards,
-  showDimensionEvidence = true,
-  showFutureCards = true,
-  showOneMove = true,
-  limitation = '',
-}) {
-  // Keep One Move short enough for a teaser poster — never a multi-line jam into the engine.
-  const oneMoveHeadline = shortChip(
-    firstLine(vm.oneMove, 'Open full screen for the highest-leverage move'),
-    'Open full screen for the highest-leverage move',
-    72,
-  );
-  const engineHeadline = shortChip(
-    firstLine(vm.engineLabel, `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`),
-    `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`,
-    36,
-  );
-  const engineSub = shortChip(
-    firstLine(vm.systemType, 'Behavioral Operating System'),
-    'Behavioral Operating System',
-    40,
-  );
-
-  return (
-    <div className="bos-dna-v2__frame bos-dna-v2__frame--preview" aria-label="BOS DNA Visual preview">
-      <div className="bos-dna-v2__preview">
-        <div className="bos-dna-v2__preview-glow" aria-hidden="true" />
-        <CircuitLayer />
-
-        {/* 1. Header */}
-        <header className="bos-dna-v2__preview-header">
-          <div className="bos-dna-v2__preview-identity">
-            <p className="bos-dna-v2__preview-eyebrow">Behavioral Operating System</p>
-            <h1>{firstLine(vm.name, 'Profile Subject')}</h1>
-            <p className="bos-dna-v2__preview-sub">
-              {firstLine(vm.type, vm.systemType, 'Visual DNA Map')}
-              {vm.company && vm.company !== '—' ? ` · ${vm.company}` : ''}
-            </p>
-          </div>
-          <div className="bos-dna-v2__preview-id" title={displayProfileId}>
-            <span>Profile ID</span>
-            <strong>{shortChip(displayProfileId, '—', 22)}</strong>
-          </div>
-        </header>
-
-        {/* 2. Trait cards */}
-        <div className="bos-dna-v2__preview-traits">
-          <TraitBadge rank="Primary" item={vm.primaryDimension} fallbackLabel={vm.primaryEngine} tone="p" showEvidence={showDimensionEvidence} />
-          <TraitBadge rank="Secondary" item={vm.secondaryDimension} fallbackLabel={vm.secondaryEngine} tone="s" showEvidence={showDimensionEvidence} />
-          <TraitBadge rank="Tertiary" item={vm.tertiaryDimension} fallbackLabel="Support" tone="t" showEvidence={showDimensionEvidence} />
-        </div>
-
-        {/* 3. Central engine — isolated band; never shares space with One Move */}
-        <div className="bos-dna-v2__preview-engine" aria-hidden={false}>
-          <div className="bos-dna-v2__reactor bos-dna-v2__reactor--preview">
-            <div className="bos-dna-v2__ring bos-dna-v2__ring--halo" />
-            <div className="bos-dna-v2__ring bos-dna-v2__ring--outer" />
-            <div className="bos-dna-v2__ring bos-dna-v2__ring--middle" />
-            <div className="bos-dna-v2__ring bos-dna-v2__ring--inner" />
-            <div className="bos-dna-v2__reactor-core" aria-hidden="true" />
-            <div className="bos-dna-v2__reactor-label">
-              <span>Primary Engine · Assessment-derived</span>
-              <strong>{engineHeadline}</strong>
-              <em>{engineSub}</em>
-              {vm.centerInterpretation ? <small>{vm.centerInterpretation}</small> : null}
-            </div>
-          </div>
-        </div>
-
-        {/* 4. One Move — separate lower band below engine (no absolute overlap) */}
-        {showOneMove ? (
-          <section className="bos-dna-v2__preview-move">
-            <span className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · A Test to Try</span>
-            <h2>{oneMoveHeadline}</h2>
-          </section>
-        ) : null}
-
-        {/* 5. Compact futures strip */}
-        {showFutureCards ? (
-          <section className="bos-dna-v2__preview-futures" aria-label="Five Futures preview">
-            {futureCards.map((future, index) => (
-              <article
-                key={`${future.title || 'future'}-${index}`}
-                className={`bos-dna-v2__preview-future bos-dna-v2__future--${index + 1}`}
-              >
-                <span>{future?.likelihood && future.likelihood !== '—' ? future.likelihood : `F${index + 1}`}</span>
-                <strong>{shortChip(future?.title, `Future ${index + 1}`, 18)}</strong>
-              </article>
-            ))}
-          </section>
-        ) : null}
-
-        {/* 6. Footer CTA hint */}
-        <p className="bos-dna-v2__preview-hint">
-          {limitation || 'Preview · Open Full Screen for the full command center'}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/**
  * DeterministicBOSDNAVisualV2
- * Premium black / neon command-center BOS DNA poster.
+ * Premium black / neon BOS DNA artifact.
  * Pure presentational + deterministic view-model resolution.
  * No storage, no network, no mutation.
  *
  * Modes:
- * - preview (default for tab embed): clean premium hero poster
- * - fullscreen (modal): dense full command-center dashboard
+ * - preview (default for tab embed): responsive shared artifact
+ * - fullscreen (modal): fixed-size rendering of the same shared artifact
  */
 export default function DeterministicBOSDNAVisualV2({
   viewModel = null,
@@ -376,7 +268,6 @@ export default function DeterministicBOSDNAVisualV2({
   allowSampleFallback = false,
 }) {
   const displayMode = resolveDisplayMode({ mode, variant });
-  const isPreview = displayMode === 'preview';
   const isFullscreen = displayMode === 'fullscreen';
 
   const sourceProfile = profile || customerViewModel || null;
@@ -422,20 +313,9 @@ export default function DeterministicBOSDNAVisualV2({
       data-poster-width={POSTER_WIDTH}
       data-poster-height={POSTER_HEIGHT}
       data-visual-dna-projection={customerPresentation?.version || 'deterministic-layer2'}
+      data-visual-dna-layout="shared-premium-artifact"
     >
       <style>{styles}</style>
-
-      {isPreview ? (
-        <PreviewPoster
-          vm={vm}
-          displayProfileId={displayProfileId}
-          futureCards={futureCards}
-          showDimensionEvidence={show('dimensionEvidence')}
-          showFutureCards={show('futureCards')}
-          showOneMove={show('oneMove')}
-          limitation={customerPresentation?.previewLimitation || globalLimitation}
-        />
-      ) : (
       <div className="bos-dna-v2__frame" aria-label="Behavioral Operating System Visual Map">
         <div className="bos-dna-v2__grid">
           <CircuitLayer />
@@ -444,7 +324,7 @@ export default function DeterministicBOSDNAVisualV2({
             <div className="bos-dna-v2__panel bos-dna-v2__identity">
               <h1>{firstLine(vm.name, 'Profile Subject')}</h1>
               <p className="bos-dna-v2__role">{firstLine(vm.company, '—')}</p>
-              <p className="bos-dna-v2__kicker">Founder operating map · Visual DNA</p>
+              <p className="bos-dna-v2__kicker">Your operating system · Visual DNA</p>
             </div>
             <div className="bos-dna-v2__title-block">
               <h2>Behavioral Operating System</h2>
@@ -463,8 +343,8 @@ export default function DeterministicBOSDNAVisualV2({
           </header>
 
           <aside className="bos-dna-v2__left">
-            <section className="bos-dna-v2__panel">
-              <PanelLabel classification={classifications.dimensionScorecard}>Dimension Scorecard</PanelLabel>
+            <section className="bos-dna-v2__panel bos-dna-v2__scorecard">
+              <PanelLabel classification={classifications.dimensionScorecard}>Your Measured Pattern</PanelLabel>
               {topDimensions.length ? (
                 topDimensions.map((item, index) => (
                   <DimensionRow
@@ -480,7 +360,7 @@ export default function DeterministicBOSDNAVisualV2({
             </section>
 
             {show('evidenceAmplitude') ? (
-            <section className="bos-dna-v2__panel">
+            <section className="bos-dna-v2__panel bos-dna-v2__evidence-panel">
               <PanelLabel classification={classifications.evidenceAmplitude}>Evidence &amp; Amplitude</PanelLabel>
               <div className="bos-dna-v2__evidence">
                 <div>
@@ -511,16 +391,16 @@ export default function DeterministicBOSDNAVisualV2({
             ) : null}
 
             {show('energySource') || show('fatigueSource') ? (
-            <div className="bos-dna-v2__dual">
+            <div className="bos-dna-v2__dual bos-dna-v2__energy-fatigue">
               {show('energySource') ? (
               <section className="bos-dna-v2__panel">
-                <PanelLabel tone="cyan" classification={classifications.energySource}>Possible Energy Source</PanelLabel>
+                <PanelLabel tone="cyan" classification={classifications.energySource}>What May Energize You</PanelLabel>
                 <CompactList items={vm.energySource} />
               </section>
               ) : null}
               {show('fatigueSource') ? (
               <section className="bos-dna-v2__panel">
-                <PanelLabel tone="orange" classification={classifications.fatigueSource}>Possible Fatigue Source</PanelLabel>
+                <PanelLabel tone="orange" classification={classifications.fatigueSource}>What May Drain You</PanelLabel>
                 <CompactList items={vm.fatigueSource} />
               </section>
               ) : null}
@@ -537,7 +417,7 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('inputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--left bos-dna-v2__panel">
-              <PanelLabel classification={classifications.inputs}>Inputs</PanelLabel>
+              <PanelLabel classification={classifications.inputs}>Inputs That May Guide You</PanelLabel>
               <CompactList items={vm.inputs} empty="—" />
             </div>
             ) : null}
@@ -549,23 +429,31 @@ export default function DeterministicBOSDNAVisualV2({
               <div className="bos-dna-v2__ring bos-dna-v2__ring--inner" />
               <div className="bos-dna-v2__reactor-core" aria-hidden="true" />
               <div className="bos-dna-v2__reactor-label">
-                <span>Primary Engine · Assessment-derived</span>
+                <span>Your Operating Core</span>
+                {classifications.centerEngine?.label ? (
+                  <i data-classification={classifications.centerEngine.kind}>
+                    {classifications.centerEngine.label}
+                  </i>
+                ) : null}
                 <strong>{firstLine(vm.engineLabel, `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`)}</strong>
                 <em>{firstLine(vm.systemType, `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`)}</em>
-                {vm.centerInterpretation ? <small>{vm.centerInterpretation}</small> : null}
               </div>
             </div>
 
+            {vm.centerInterpretation ? (
+              <p className="bos-dna-v2__engine-story">{vm.centerInterpretation}</p>
+            ) : null}
+
             {show('outputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--right bos-dna-v2__panel">
-              <PanelLabel classification={classifications.outputs}>Possible Outputs</PanelLabel>
+              <PanelLabel classification={classifications.outputs}>Patterns You May Put Into Motion</PanelLabel>
               <CompactList items={vm.outputs} empty="—" />
             </div>
             ) : null}
 
             {show('operatingLoop') ? (
             <section className="bos-dna-v2__loop">
-              <PanelLabel tone="cyan" classification={classifications.operatingLoop}>Operating Loop</PanelLabel>
+              <PanelLabel tone="cyan" classification={classifications.operatingLoop}>How Your Pattern Tends to Move</PanelLabel>
               <div className="bos-dna-v2__loop-row">
                 {(loop.length ? loop : ['Sense', 'Decide', 'Move', 'Measure', 'Adapt']).map((step) => (
                   <span key={step}>{step}</span>
@@ -578,7 +466,7 @@ export default function DeterministicBOSDNAVisualV2({
           <aside className="bos-dna-v2__right">
             {show('coreTension') ? (
             <section className="bos-dna-v2__panel">
-              <PanelLabel classification={classifications.coreTension}>Core Tension</PanelLabel>
+              <PanelLabel classification={classifications.coreTension}>A Tension to Notice</PanelLabel>
               <div className="bos-dna-v2__tension-row">
                 <strong>{tension.left || '—'}</strong>
                 <span className="bos-dna-v2__vs">VS</span>
@@ -620,7 +508,7 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('oneMove') ? (
             <section className="bos-dna-v2__panel bos-dna-v2__one-move">
-              <PanelLabel tone="orange" classification={classifications.oneMove}>One Move</PanelLabel>
+              <PanelLabel tone="orange" classification={classifications.oneMove}>One Move to Test</PanelLabel>
               <h3 className="bos-dna-v2__one-move-title">{firstLine(vm.oneMove, '—')}</h3>
               <p className="bos-dna-v2__panel-body bos-dna-v2__one-move-body">{firstLine(vm.roleTruth, vm.evolutionPath, '—')}</p>
             </section>
@@ -629,6 +517,10 @@ export default function DeterministicBOSDNAVisualV2({
 
           {show('futureCards') ? (
           <section className="bos-dna-v2__futures">
+            <div className="bos-dna-v2__futures-title">
+              <strong>Trajectories to Observe</strong>
+              <span>Questions, not predictions</span>
+            </div>
             {futureCards.map((future, index) => (
               <FutureCard key={`${future.title}-${index}`} item={future} index={index} />
             ))}
@@ -637,7 +529,7 @@ export default function DeterministicBOSDNAVisualV2({
 
           {show('keySignals') ? (
           <section className={`bos-dna-v2__panel bos-dna-v2__signals ${show('futureCards') ? '' : 'bos-dna-v2__signals--wide'}`}>
-            <PanelLabel classification={classifications.keySignals}>Key Signals</PanelLabel>
+            <PanelLabel classification={classifications.keySignals}>Patterns to Notice</PanelLabel>
             <CompactList items={vm.keySignals} empty="Key signals not available for this profile." />
           </section>
           ) : null}
@@ -658,7 +550,6 @@ export default function DeterministicBOSDNAVisualV2({
           ) : null}
         </div>
       </div>
-      )}
     </div>
   );
 }
@@ -668,14 +559,14 @@ export { POSTER_WIDTH as BOS_DNA_V2_POSTER_WIDTH, POSTER_HEIGHT as BOS_DNA_V2_PO
 const styles = `
 .bos-dna-v2 {
   --bos-bg: #020203;
-  --bos-panel: rgba(255,255,255,0.045);
-  --bos-border: rgba(255,255,255,0.13);
-  --bos-text: #f7f7f2;
-  --bos-muted: rgba(247,247,242,0.72);
-  --bos-dim: rgba(247,247,242,0.46);
-  --bos-orange: #ff8a00;
-  --bos-cyan: #00d4ff;
-  --bos-purple: #a66bff;
+  --bos-panel: rgba(255,255,255,0.052);
+  --bos-border: rgba(255,255,255,0.15);
+  --bos-text: #fffdf7;
+  --bos-muted: rgba(255,253,247,0.76);
+  --bos-dim: rgba(255,253,247,0.5);
+  --bos-orange: #ff982b;
+  --bos-cyan: #35d9f4;
+  --bos-purple: #b585ff;
   --bos-green: #b8ff35;
   --bos-risk: #ff4d2e;
   width: 100%;
@@ -704,21 +595,22 @@ const styles = `
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-columns: 23.5% minmax(0, 1fr) 23.5%;
-  grid-template-rows: 84px minmax(0, 1fr) 124px 58px;
-  gap: 12px;
-  padding: 16px 18px 14px;
-  border: 1px solid rgba(255,138,0,0.38);
-  border-radius: 10px;
+  grid-template-columns: 21.5% minmax(0, 1fr) 21.5%;
+  grid-template-rows: 86px minmax(0, 1fr) 148px 62px;
+  gap: 14px;
+  padding: 18px 20px 16px;
+  border: 1px solid rgba(255,152,43,0.42);
+  border-radius: 14px;
   background:
-    radial-gradient(circle at 50% 40%, rgba(255,138,0,0.16), transparent 28%),
-    radial-gradient(circle at 64% 46%, rgba(0,212,255,0.12), transparent 26%),
-    radial-gradient(circle at 36% 54%, rgba(166,107,255,0.12), transparent 30%),
-    linear-gradient(145deg, #030405 0%, #07090e 42%, #020203 100%);
+    radial-gradient(circle at 50% 42%, rgba(255,152,43,0.2), transparent 27%),
+    radial-gradient(circle at 66% 44%, rgba(53,217,244,0.1), transparent 27%),
+    radial-gradient(circle at 34% 54%, rgba(181,133,255,0.1), transparent 31%),
+    linear-gradient(145deg, #020304 0%, #090b11 46%, #020203 100%);
   box-shadow:
-    0 0 60px rgba(255,138,0,0.1),
-    inset 0 0 120px rgba(0,0,0,0.78),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+    0 28px 90px rgba(0,0,0,0.52),
+    0 0 64px rgba(255,152,43,0.11),
+    inset 0 0 140px rgba(0,0,0,0.76),
+    inset 0 1px 0 rgba(255,255,255,0.055);
   overflow: hidden;
 }
 
@@ -736,22 +628,22 @@ const styles = `
   position: relative;
   z-index: 1;
   border: 1px solid var(--bos-border);
-  border-radius: 9px;
+  border-radius: 12px;
   background:
-    linear-gradient(160deg, rgba(255,255,255,0.075), rgba(255,255,255,0.018) 55%, rgba(0,0,0,0.18));
+    linear-gradient(155deg, rgba(255,255,255,0.085), rgba(255,255,255,0.022) 52%, rgba(0,0,0,0.22));
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,0.05),
-    inset 0 0 28px rgba(255,255,255,0.015),
-    0 8px 22px rgba(0,0,0,0.28);
-  backdrop-filter: blur(10px);
-  padding: 10px 12px;
+    inset 0 1px 0 rgba(255,255,255,0.065),
+    inset 0 0 32px rgba(255,255,255,0.018),
+    0 10px 28px rgba(0,0,0,0.32);
+  backdrop-filter: blur(12px);
+  padding: 11px 13px;
   min-height: 0;
   overflow: hidden;
 }
 
 .bos-dna-v2__label {
   color: var(--bos-purple);
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -779,8 +671,8 @@ const styles = `
 .bos-dna-v2__header {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: 23.5% minmax(0, 1fr) 23.5%;
-  gap: 12px;
+  grid-template-columns: 21.5% minmax(0, 1fr) 21.5%;
+  gap: 14px;
   z-index: 1;
   min-height: 0;
   align-items: stretch;
@@ -903,23 +795,30 @@ const styles = `
 }
 
 .bos-dna-v2__left {
-  display: grid;
-  grid-template-rows: 1.42fr 0.78fr 0.88fr;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
 
 .bos-dna-v2__right {
-  display: grid;
-  grid-template-rows: 0.82fr 0.78fr 0.82fr 1.05fr;
+  display: flex;
+  flex-direction: column;
   gap: 10px;
 }
+
+.bos-dna-v2__scorecard { flex: 1.38 1 0; }
+.bos-dna-v2__evidence-panel { flex: 0.76 1 0; }
+.bos-dna-v2__energy-fatigue { flex: 0.86 1 0; }
+.bos-dna-v2__right > * { flex: 1 1 0; }
+.bos-dna-v2__right > .bos-dna-v2__env { flex: 1.1 1 0; }
+.bos-dna-v2__right > .bos-dna-v2__one-move { flex: 1.08 1 0; }
 
 .bos-dna-v2__engine {
   position: relative;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
   place-items: center;
-  gap: 10px;
+  gap: 7px;
   min-width: 0;
   padding: 0 4px;
 }
@@ -1083,8 +982,8 @@ const styles = `
   margin: 7px 0 0;
   padding: 0 0 0 13px;
   color: var(--bos-muted);
-  font-size: 10px;
-  line-height: 1.38;
+  font-size: 10.5px;
+  line-height: 1.42;
 }
 
 .bos-dna-v2__list li {
@@ -1103,14 +1002,14 @@ const styles = `
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
-  width: min(94%, 460px);
+  width: min(92%, 500px);
   z-index: 2;
 }
 
 .bos-dna-v2__badge {
   text-align: center;
   padding: 9px 7px 8px;
-  border-radius: 10px;
+  border-radius: 12px;
   border: 1px solid var(--bos-border);
   background:
     linear-gradient(165deg, rgba(8,10,16,0.88), rgba(0,0,0,0.55));
@@ -1157,21 +1056,24 @@ const styles = `
 }
 
 .bos-dna-v2__badge--p {
-  border-color: rgba(166,107,255,0.62);
-  box-shadow: 0 0 18px rgba(166,107,255,0.16), inset 0 0 16px rgba(166,107,255,0.06);
+  border-color: rgba(181,133,255,0.72);
+  background: linear-gradient(165deg, rgba(181,133,255,0.14), rgba(0,0,0,0.58));
+  box-shadow: 0 0 24px rgba(181,133,255,0.2), inset 0 0 18px rgba(181,133,255,0.08);
 }
 .bos-dna-v2__badge--s {
-  border-color: rgba(255,138,0,0.62);
-  box-shadow: 0 0 18px rgba(255,138,0,0.16), inset 0 0 16px rgba(255,138,0,0.06);
+  border-color: rgba(255,152,43,0.72);
+  background: linear-gradient(165deg, rgba(255,152,43,0.13), rgba(0,0,0,0.58));
+  box-shadow: 0 0 24px rgba(255,152,43,0.2), inset 0 0 18px rgba(255,152,43,0.08);
 }
 .bos-dna-v2__badge--t {
-  border-color: rgba(0,212,255,0.62);
-  box-shadow: 0 0 18px rgba(0,212,255,0.16), inset 0 0 16px rgba(0,212,255,0.06);
+  border-color: rgba(53,217,244,0.66);
+  background: linear-gradient(165deg, rgba(53,217,244,0.11), rgba(0,0,0,0.58));
+  box-shadow: 0 0 24px rgba(53,217,244,0.17), inset 0 0 18px rgba(53,217,244,0.07);
 }
 
 .bos-dna-v2__reactor {
   position: relative;
-  width: min(78%, 360px);
+  width: min(82%, 420px);
   aspect-ratio: 1;
   display: grid;
   place-items: center;
@@ -1186,27 +1088,27 @@ const styles = `
 }
 
 .bos-dna-v2__ring--halo {
-  inset: -7%;
-  border: 1px solid rgba(255,138,0,0.18);
+  inset: -8%;
+  border: 1px solid rgba(255,152,43,0.2);
   box-shadow:
-    0 0 48px rgba(255,138,0,0.18),
-    0 0 90px rgba(0,212,255,0.08);
-  background: radial-gradient(circle, rgba(255,138,0,0.08), transparent 68%);
+    0 0 62px rgba(255,152,43,0.23),
+    0 0 110px rgba(53,217,244,0.09);
+  background: radial-gradient(circle, rgba(255,152,43,0.1), transparent 68%);
 }
 
 .bos-dna-v2__ring--outer {
   inset: 0;
-  border-color: rgba(255,138,0,0.72);
+  border-color: rgba(255,152,43,0.82);
   box-shadow:
-    0 0 46px rgba(255,138,0,0.32),
-    inset 0 0 34px rgba(0,212,255,0.1),
-    0 0 0 1px rgba(166,107,255,0.18);
+    0 0 58px rgba(255,152,43,0.36),
+    inset 0 0 38px rgba(53,217,244,0.11),
+    0 0 0 1px rgba(181,133,255,0.2);
   background:
     conic-gradient(from 200deg,
-      rgba(0,212,255,0.2),
-      rgba(166,107,255,0.14),
-      rgba(255,138,0,0.26),
-      rgba(0,212,255,0.2));
+      rgba(53,217,244,0.2),
+      rgba(181,133,255,0.16),
+      rgba(255,152,43,0.3),
+      rgba(53,217,244,0.2));
 }
 
 .bos-dna-v2__ring--middle {
@@ -1243,14 +1145,14 @@ const styles = `
   z-index: 3;
   text-align: center;
   padding: 10px;
-  max-width: 74%;
+  max-width: 76%;
 }
 
 .bos-dna-v2__reactor-label span {
   display: block;
   color: var(--bos-orange);
-  font-size: 9.5px;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
   font-weight: 800;
   text-shadow: 0 0 12px rgba(255,138,0,0.35);
@@ -1259,7 +1161,7 @@ const styles = `
 .bos-dna-v2__reactor-label strong {
   display: block;
   margin-top: 7px;
-  font-size: 17px;
+  font-size: 23px;
   line-height: 1.12;
   text-transform: uppercase;
   letter-spacing: 0.02em;
@@ -1273,44 +1175,55 @@ const styles = `
   margin-top: 7px;
   font-style: normal;
   color: var(--bos-cyan);
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
 }
 
-.bos-dna-v2__reactor-label small {
-  display: -webkit-box;
-  margin-top: 7px;
-  overflow: hidden;
-  color: var(--bos-muted);
+.bos-dna-v2__reactor-label i {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 2px 7px;
+  border: 1px solid rgba(255,152,43,0.38);
+  border-radius: 999px;
+  color: rgba(255,253,247,0.62);
+  background: rgba(0,0,0,0.32);
   font-size: 7.5px;
-  font-weight: 500;
+  font-weight: 700;
   font-style: normal;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
-  text-transform: none;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
 }
 
-.bos-dna-v2__reactor--preview .bos-dna-v2__reactor-label small {
-  font-size: clamp(0.45rem, 0.78vw, 0.54rem);
-  -webkit-line-clamp: 3;
+.bos-dna-v2__engine-story {
+  position: relative;
+  z-index: 2;
+  width: min(88%, 560px);
+  margin: -1px auto 0;
+  color: var(--bos-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .bos-dna-v2__io {
   position: absolute;
-  top: 40%;
-  width: 104px;
+  top: 42%;
+  width: 138px;
   z-index: 2;
   padding: 9px 10px;
   background:
     linear-gradient(160deg, rgba(8,12,18,0.82), rgba(0,0,0,0.55));
 }
 
-.bos-dna-v2__io--left { left: 0.5%; }
-.bos-dna-v2__io--right { right: 0.5%; text-align: right; }
+.bos-dna-v2__io--left { left: -0.5%; }
+.bos-dna-v2__io--right { right: -0.5%; text-align: right; }
 .bos-dna-v2__io--right .bos-dna-v2__list {
   padding: 0 12px 0 0;
   list-style-position: inside;
@@ -1322,7 +1235,7 @@ const styles = `
 }
 
 .bos-dna-v2__loop {
-  width: min(94%, 540px);
+  width: min(92%, 600px);
   z-index: 2;
   text-align: center;
   padding: 2px 0 0;
@@ -1465,13 +1378,40 @@ const styles = `
   grid-column: 1 / 3;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 9px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 7px 9px;
   z-index: 1;
   min-height: 0;
 }
 
+.bos-dna-v2__futures-title {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 2px;
+  min-width: 0;
+}
+
+.bos-dna-v2__futures-title strong {
+  color: var(--bos-purple);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.bos-dna-v2__futures-title span {
+  color: var(--bos-dim);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .bos-dna-v2__future {
-  padding: 10px 10px 9px;
+  padding: 9px 10px 8px;
   border: 1px solid var(--bos-border);
   border-radius: 9px;
   background:
@@ -1514,7 +1454,7 @@ const styles = `
   display: block;
   margin-top: 7px;
   color: var(--bos-text);
-  font-size: 10.5px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.03em;
   line-height: 1.2;
@@ -1526,8 +1466,8 @@ const styles = `
 .bos-dna-v2__future p {
   margin: 6px 0 0;
   color: var(--bos-muted);
-  font-size: 10px;
-  line-height: 1.28;
+  font-size: 9.75px;
+  line-height: 1.32;
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
@@ -1539,6 +1479,8 @@ const styles = `
   z-index: 1;
   display: flex;
   flex-direction: column;
+  border-color: rgba(181,133,255,0.34);
+  background: linear-gradient(155deg, rgba(181,133,255,0.085), rgba(255,255,255,0.02) 52%, rgba(0,0,0,0.22));
 }
 
 .bos-dna-v2__signals--wide {
@@ -1572,10 +1514,10 @@ const styles = `
 
 .bos-dna-v2__footer--limitation p {
   margin: 0;
-  max-width: 82%;
+  max-width: 88%;
   color: var(--bos-muted);
-  font-size: 10px;
-  line-height: 1.35;
+  font-size: 10.5px;
+  line-height: 1.4;
 }
 
 .bos-dna-v2__footer-chip {

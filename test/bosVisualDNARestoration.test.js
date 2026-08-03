@@ -172,7 +172,7 @@ test('all five trajectories become bounded observation questions rather than pre
   }
 });
 
-test('preview and fullscreen consume one shared customer projection with no legacy labels', async () => {
+test('preview and fullscreen consume one shared customer projection and one shared artifact layout', async () => {
   const source = visualFixture();
   const sourceBefore = structuredClone(source);
   const projection = buildCustomerVisualDNAProjection(source);
@@ -188,12 +188,36 @@ test('preview and fullscreen consume one shared customer projection with no lega
     renderer.match(/const vm = buildCustomerVisualDNAProjection\(resolvedViewModel\);/g)?.length,
     1,
   );
-  assert.match(renderer, /isPreview \? \(\s*<PreviewPoster\s+vm=\{vm\}/);
+  assert.doesNotMatch(renderer, /function PreviewPoster/);
+  assert.doesNotMatch(renderer, /isPreview\s*\?/);
+  assert.equal(renderer.match(/className="bos-dna-v2__grid"/g)?.length, 1);
+  assert.match(renderer, /data-visual-dna-layout="shared-premium-artifact"/);
   assert.match(renderer, /<DimensionRow[\s\S]*item=\{item\}/);
   assert.match(renderer, /data-visual-dna-projection=\{customerPresentation\?\.version/);
-  assert.match(renderer, /Possible Energy Source/);
+  assert.match(renderer, /What May Energize You/);
   assert.match(renderer, /Environment to Test/);
-  assert.match(renderer, /Key Signals/);
+  assert.match(renderer, /Patterns to Notice/);
+});
+
+test('premium hierarchy makes the operating core the anchor without changing supported content', async () => {
+  const renderer = await readFile(
+    new URL('../src/components/visualDNA/DeterministicBOSDNAVisualV2.jsx', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(renderer, /Your Operating Core/);
+  assert.match(renderer, /className="bos-dna-v2__engine-story"/);
+  assert.match(renderer, /width: min\(82%, 420px\)/);
+  assert.match(renderer, /Your Measured Pattern/);
+  assert.match(renderer, /Inputs That May Guide You/);
+  assert.match(renderer, /Patterns You May Put Into Motion/);
+  assert.match(renderer, /What May Drain You/);
+  assert.match(renderer, /A Tension to Notice/);
+  assert.match(renderer, /Trajectories to Observe/);
+  assert.match(renderer, /Questions, not predictions/);
+  assert.match(renderer, /Environment to Test/);
+  assert.match(renderer, /Context to Watch/);
+  assert.match(renderer, /One Move to Test/);
 });
 
 test('exact Layer 2 fallback remains source-identical while customer labels are translated at render time', () => {
