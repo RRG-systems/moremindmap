@@ -524,6 +524,50 @@ test('attachment diagnostic receipt requires the fully validated deployment-boun
   assert.equal(JSON.stringify(diagnosticAudit).includes(accessCode), false);
 });
 
+test('protected diagnostic log remains available when audit persistence is unavailable', async () => {
+  const emitted = [];
+  const operatorBinding = binding({ diagnosticSink: (receipt) => emitted.push(receipt) });
+  const session = await activateAndSelect(operatorBinding);
+  const req = request(
+    {},
+    `more_subdev1_browser=${session.browser.browser_token}; `
+      + `more_subdev1_operator=${session.activated.context_token}`,
+  );
+  const resolved = await operatorBinding.resolveOperatorContext({ req, body: {} });
+  const consumed = await operatorBinding.operatorContextBridge.consume({
+    contextToken: resolved.value.context_token,
+    browserToken: resolved.value.browser_token,
+    action: 'OPEN_SUBSCRIPTION',
+    profileReceipt: session.selected.profile_receipt,
+  });
+  const mapped = await operatorBinding.resolveOperatorBridgeInput({
+    req,
+    request_context: resolved.value,
+    operator_context: consumed,
+  });
+  const appendAudit = operatorBinding.operatorStore.appendAudit.bind(
+    operatorBinding.operatorStore,
+  );
+  operatorBinding.operatorStore.appendAudit = (event) => (
+    event?.event_type === 'PRIVATE_BETA_OPERATOR_ATTACHMENT_DIAGNOSTIC_RECORDED'
+      ? { ok: false, code: 'OPERATOR_STORE_UNAVAILABLE' }
+      : appendAudit(event)
+  );
+
+  const recorded = await operatorBinding.recordOperatorAttachmentDiagnostic({
+    operator_context: consumed,
+    bridge_input: mapped.value,
+    predicate_code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
+    stage: 'ATTACHMENT_COORDINATOR',
+  });
+  assert.equal(recorded.ok, true);
+  assert.equal(recorded.protected_log_emitted, true);
+  assert.equal(recorded.protected_audit_persisted, false);
+  assert.equal(emitted.length, 1);
+  assert.equal(JSON.stringify(emitted[0]).includes(profileId), false);
+  assert.equal(JSON.stringify(emitted[0]).includes(accessCode), false);
+});
+
 test('forged missing inactive and unselected operator requests emit no attachment receipt', async () => {
   const emitted = [];
   const operatorBinding = binding({ diagnosticSink: (receipt) => emitted.push(receipt) });

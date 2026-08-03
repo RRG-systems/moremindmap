@@ -48,8 +48,12 @@ export const SUBDEV1_POST_PROFILE_ATTACHMENT_DENIAL_CODES = Object.freeze([
   'SUBSCRIPTION_RUNTIME_UNAVAILABLE',
   'SUBSCRIPTION_RUNTIME_ATTACHMENT_MISMATCH',
   'COACH_CONNECT_STATE_MISSING',
+  'COACH_CONNECT_ATTACHMENT_MISMATCH',
+  'OPERATOR_ACTION_DENIED',
   'PRIVATE_ENTITLEMENT_REQUIRED',
   'ATTACHMENT_PARTIAL_FAILURE',
+  'ACTION_NOT_ALLOWLISTED',
+  'SENSITIVE_EVIDENCE_REJECTED',
   'ASYNC_SECURITY_CONTRACT_VIOLATION',
   'ASYNC_SECURITY_RESULT_INVALID',
   'ASYNC_SECURITY_REJECTED',
@@ -386,6 +390,15 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
       outcome: 'DENIED',
     });
     const receiptRef = `subdev1_attachment_diagnostic_${hashCanonicalJson(receipt).slice(0, 32)}`;
+    let emitted = false;
+    if (typeof diagnosticSink === 'function') {
+      try {
+        await diagnosticSink(receipt);
+        emitted = true;
+      } catch {
+        emitted = false;
+      }
+    }
     let stored;
     try {
       stored = await store?.appendAudit?.({
@@ -399,17 +412,14 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
     } catch {
       stored = null;
     }
-    if (stored?.ok !== true) return denial('OPERATOR_STORE_UNAVAILABLE', 503);
-    try {
-      await diagnosticSink?.(receipt);
-    } catch {
-      // The protected audit record remains authoritative if the server log sink is unavailable.
-    }
+    if (!emitted && stored?.ok !== true) return denial('OPERATOR_STORE_UNAVAILABLE', 503);
     return frozen({
       ok: true,
       allowed: false,
       recorded: true,
       receipt_ref: receiptRef,
+      protected_log_emitted: emitted,
+      protected_audit_persisted: stored?.ok === true,
     });
   }
 
