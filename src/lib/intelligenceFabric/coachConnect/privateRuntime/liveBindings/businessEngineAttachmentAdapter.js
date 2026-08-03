@@ -14,19 +14,19 @@ const frozen = (value) => deepFreeze(structuredClone(value));
 
 export function createCanonicalBusinessEngineLiveAttachmentAdapterV1({
   productBindingAttestation,
+  resolveProductBindingAttestation = null,
   nowMs = Date.now(),
 } = {}) {
   const checked = validatePrivateRuntimeProductBindingAttestationV1(
     productBindingAttestation,
     { nowMs },
   );
-  const engine = checked.value?.business_engine || null;
 
   return Object.freeze({
     describeCapability() {
       return frozen({
         adapter_version: CANONICAL_BUSINESS_ENGINE_LIVE_ATTACHMENT_ADAPTER_VERSION,
-        configured: checked.valid,
+        configured: checked.valid || typeof resolveProductBindingAttestation === 'function',
         canonical_source_only: true,
         read_only: true,
         can_build_engine: false,
@@ -38,10 +38,20 @@ export function createCanonicalBusinessEngineLiveAttachmentAdapterV1({
     },
 
     async lookupCanonicalBusinessEngine(exactScope) {
-      if (!checked.valid
-        || !samePrivateRuntimeScope(exactScope, productBindingAttestation.exact_scope)
+      let selectedBinding = productBindingAttestation;
+      let selectedValidation = checked;
+      if (typeof resolveProductBindingAttestation === 'function') {
+        selectedBinding = await resolveProductBindingAttestation(exactScope);
+        selectedValidation = validatePrivateRuntimeProductBindingAttestationV1(
+          selectedBinding,
+          { nowMs },
+        );
+      }
+      const selectedEngine = selectedValidation.value?.business_engine || null;
+      if (!selectedValidation.valid
+        || !samePrivateRuntimeScope(exactScope, selectedBinding.exact_scope)
         || hashPrivateRuntimeScope(exactScope)
-          !== productBindingAttestation.exact_scope_hash) {
+          !== selectedBinding.exact_scope_hash) {
         return frozen({
           ok: false,
           engines: [],
@@ -51,13 +61,13 @@ export function createCanonicalBusinessEngineLiveAttachmentAdapterV1({
       return frozen({
         ok: true,
         engines: [{
-          ...engine,
+          ...selectedEngine,
           write_authorized: false,
         }],
         count: 1,
         duplicate_engine_created: false,
         attestation_ref:
-          `product_binding_${productBindingAttestation.binding_sha256.slice(0, 32)}`,
+          `product_binding_${selectedBinding.binding_sha256.slice(0, 32)}`,
       });
     },
   });

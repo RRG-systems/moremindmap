@@ -7,5 +7,7 @@ export * from './contracts.js';
 export * from './environmentAttestation.js';
 export * from './privateLiveProductStore.js';
 export * from './productExecutionBinding.js';
+export * from './profileCohort.js';
+export * from './cohortIntelligenceExecution.js';
 export * from './subscriptionRuntimeAttachmentAdapter.js';
 export * from '../../productionSecurity/protectedEdgeIdentity/index.js';

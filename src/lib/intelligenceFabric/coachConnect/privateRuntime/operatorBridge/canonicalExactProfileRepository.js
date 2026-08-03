@@ -15,6 +15,10 @@ import {
   SUBDEV1_PROFILE_RECORD_VERSION,
 } from './contracts.js';
 import { validSubdev1ProfileId } from './resolver.js';
+import {
+  PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_PURPOSE,
+  validatePrivateRuntimeApprovedProfileCohortV1,
+} from '../liveBindings/profileCohort.js';
 
 export const SUBDEV1_CANONICAL_PROFILE_REPOSITORY_VERSION =
   'subdev1-canonical-exact-profile-repository-v1';
@@ -92,12 +96,46 @@ export function createExactVaultProfileReader({ client } = {}) {
   };
 }
 
+export function createExactBusinessAssessmentReader({ client } = {}) {
+  return async function readExactBusinessAssessment(profileId) {
+    if (!validSubdev1ProfileId(profileId) || typeof client?.get !== 'function') {
+      return frozen({ status: 'UNAVAILABLE', record: null });
+    }
+    try {
+      const assessmentId = await client.get(
+        `business_assessment_by_profile:${profileId.toLowerCase()}`,
+      );
+      if (typeof assessmentId !== 'string' || assessmentId.length < 3) {
+        return frozen({ status: 'NOT_FOUND', record: null });
+      }
+      const serialized = await client.get(`business_assessment:${assessmentId}`);
+      if (serialized == null) return frozen({ status: 'NOT_FOUND', record: null });
+      const record = typeof serialized === 'string' ? JSON.parse(serialized) : serialized;
+      const ownerProfileId = String(
+        record?.profile_id
+          || record?.assessment?.profile_id
+          || record?.owner_profile_id
+          || '',
+      ).toLowerCase();
+      if (!object(record) || ownerProfileId !== profileId.toLowerCase()) {
+        return frozen({ status: 'INCOMPLETE', record: null });
+      }
+      return frozen({ status: 'FOUND', assessment_id: assessmentId, record });
+    } catch {
+      return frozen({ status: 'UNAVAILABLE', record: null });
+    }
+  };
+}
+
 export function createSubdev1CanonicalExactProfileRepository({
   readCanonicalProfile,
+  readBusinessAssessment = null,
   productBindingAttestation,
   productExecutionBinding,
+  approvedProfileCohort = null,
   statePort,
   environmentId,
+  clock = () => Date.now(),
 } = {}) {
   const exactScope = productBindingAttestation?.exact_scope;
   const exactScopeHash = productBindingAttestation?.exact_scope_hash;
@@ -119,19 +157,43 @@ export function createSubdev1CanonicalExactProfileRepository({
       || options.enumeration_allowed !== false) {
       return frozen({ status: 'DENIED', record: null });
     }
-    if (!object(exactScope)
-      || exactScope.profile_id !== profileId
-      || exactScopeHash !== hashPrivateRuntimeScope(exactScope)
-      || productBindingAttestation?.environment_id !== environmentId
-      || productExecutionBinding?.environment_id !== environmentId
-      || !samePrivateRuntimeScope(productExecutionBinding?.exact_scope, exactScope)
-      || productExecutionBinding?.exact_scope_hash !== exactScopeHash
-      || productExecutionBinding?.private_beta_only !== true
-      || productExecutionBinding?.public_access !== false
-      || productExecutionBinding?.execution_enabled !== true
-      || !Array.isArray(productExecutionBinding?.approved_profile_ids)
-      || !productExecutionBinding.approved_profile_ids.includes(profileId)
-      || typeof subscriberSubjectRef !== 'string') {
+    const cohortValidation = approvedProfileCohort == null
+      ? null
+      : validatePrivateRuntimeApprovedProfileCohortV1(approvedProfileCohort, {
+          environmentId,
+          nowMs: clock(),
+        });
+    if (approvedProfileCohort != null && !cohortValidation?.valid) {
+      return frozen({ status: 'NOT_FOUND', record: null });
+    }
+    const cohortMember = cohortValidation?.valid
+      ? approvedProfileCohort.members.find((member) => member.profile_id === profileId)
+      : null;
+    const resolvedScope = cohortMember?.exact_scope || exactScope;
+    const resolvedScopeHash = cohortMember?.exact_scope_hash || exactScopeHash;
+    const resolvedSubjectRef = cohortMember?.subscriber_subject_ref || subscriberSubjectRef;
+    const legacyBindingValid = approvedProfileCohort == null
+      && object(exactScope)
+      && exactScope.profile_id === profileId
+      && exactScopeHash === hashPrivateRuntimeScope(exactScope)
+      && productBindingAttestation?.environment_id === environmentId
+      && productExecutionBinding?.environment_id === environmentId
+      && samePrivateRuntimeScope(productExecutionBinding?.exact_scope, exactScope)
+      && productExecutionBinding?.exact_scope_hash === exactScopeHash
+      && productExecutionBinding?.private_beta_only === true
+      && productExecutionBinding?.public_access === false
+      && productExecutionBinding?.execution_enabled === true
+      && Array.isArray(productExecutionBinding?.approved_profile_ids)
+      && productExecutionBinding.approved_profile_ids.includes(profileId)
+      && typeof subscriberSubjectRef === 'string';
+    const cohortBindingValid = cohortMember != null
+      && cohortMember.revoked === false
+      && cohortMember.approval_status === 'ACTIVE'
+      && cohortMember.approval_purpose === PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_PURPOSE
+      && resolvedScope?.profile_id === profileId
+      && resolvedScopeHash === hashPrivateRuntimeScope(resolvedScope)
+      && typeof resolvedSubjectRef === 'string';
+    if (!legacyBindingValid && !cohortBindingValid) {
       return frozen({ status: 'NOT_FOUND', record: null });
     }
 
@@ -148,57 +210,83 @@ export function createSubdev1CanonicalExactProfileRepository({
       return frozen({ status: vault?.status || 'NOT_FOUND', record: null });
     }
 
-    const correlationRef =
-      `subdev1_profile_${crypto.randomBytes(16).toString('hex')}`;
-    const [approvalResult, epochResult] = await Promise.all([
-      authoritativeQuery(statePort, queryEnvelope({
-        queryType: 'GET_PRIVATE_TEST_APPROVAL',
-        environmentId,
-        correlationRef,
-        subjectRef: subscriberSubjectRef,
-        exactScopeHash,
-      })),
-      authoritativeQuery(statePort, queryEnvelope({
-        queryType: 'GET_SECURITY_EPOCH',
-        environmentId,
-        correlationRef,
-        exactScopeHash,
-      })),
-    ]);
-    if (!approvalResult.ok || !epochResult.ok) {
-      return frozen({ status: 'NOT_FOUND', record: null });
+    let assessment = null;
+    if (typeof readBusinessAssessment === 'function') {
+      try {
+        assessment = await readBusinessAssessment(profileId);
+      } catch {
+        return frozen({ status: 'UNAVAILABLE', record: null });
+      }
+      if (assessment?.status !== 'FOUND' || !object(assessment.record)) {
+        return frozen({ status: assessment?.status || 'NOT_FOUND', record: null });
+      }
+    } else if (cohortMember != null) {
+      return frozen({ status: 'UNAVAILABLE', record: null });
     }
-    const securityEpoch = epochResult.record?.security_epoch;
-    if (!Number.isInteger(securityEpoch)
-      || epochResult.record?.exact_scope_hash !== exactScopeHash) {
-      return frozen({ status: 'INCOMPLETE', record: null });
+
+    let consentRef = cohortMember?.approval_ref || null;
+    let approvalReceiptRef = cohortMember?.member_sha256 || null;
+    if (cohortMember == null) {
+      const correlationRef =
+        `subdev1_profile_${crypto.randomBytes(16).toString('hex')}`;
+      const [approvalResult, epochResult] = await Promise.all([
+        authoritativeQuery(statePort, queryEnvelope({
+          queryType: 'GET_PRIVATE_TEST_APPROVAL',
+          environmentId,
+          correlationRef,
+          subjectRef: resolvedSubjectRef,
+          exactScopeHash: resolvedScopeHash,
+        })),
+        authoritativeQuery(statePort, queryEnvelope({
+          queryType: 'GET_SECURITY_EPOCH',
+          environmentId,
+          correlationRef,
+          exactScopeHash: resolvedScopeHash,
+        })),
+      ]);
+      if (!approvalResult.ok || !epochResult.ok) {
+        return frozen({ status: 'NOT_FOUND', record: null });
+      }
+      const securityEpoch = epochResult.record?.security_epoch;
+      if (!Number.isInteger(securityEpoch)
+        || epochResult.record?.exact_scope_hash !== resolvedScopeHash) {
+        return frozen({ status: 'INCOMPLETE', record: null });
+      }
+      const approval = validatePrivateTestApprovalV1(approvalResult.record, {
+        environmentId,
+        subscriberSubjectRef: resolvedSubjectRef,
+        exactScopeHash: resolvedScopeHash,
+        securityEpoch,
+        now: Date.parse(approvalResult.server_time),
+      });
+      if (!approval.valid) return frozen({ status: 'NOT_FOUND', record: null });
+      consentRef = approval.value.approval_ref;
+      approvalReceiptRef = approvalResult.receipt_ref;
     }
-    const approval = validatePrivateTestApprovalV1(approvalResult.record, {
-      environmentId,
-      subscriberSubjectRef,
-      exactScopeHash,
-      securityEpoch,
-      now: Date.parse(approvalResult.server_time),
-    });
-    if (!approval.valid) return frozen({ status: 'NOT_FOUND', record: null });
 
     const vaultDigest = hashCanonicalJson(vault.record);
+    const assessmentDigest = assessment == null ? null : hashCanonicalJson(assessment.record);
+    const revisionDigest = hashCanonicalJson({
+      vault_digest: vaultDigest,
+      assessment_digest: assessmentDigest,
+      cohort_member_digest: cohortMember?.member_sha256 || null,
+    });
     return frozen({
       status: 'FOUND',
       record: {
         record_version: SUBDEV1_PROFILE_RECORD_VERSION,
         profile_id: profileId,
-        subscriber_subject_ref: subscriberSubjectRef,
-        exact_scope: exactScope,
-        profile_revision: `vault_revision_${vaultDigest}`,
-        consent_ref: approval.value.approval_ref,
+        subscriber_subject_ref: resolvedSubjectRef,
+        exact_scope: resolvedScope,
+        profile_revision: `vault_revision_${revisionDigest}`,
+        consent_ref: consentRef,
         consent_purpose: SUBDEV1_PROFILE_CONSENT_PURPOSE,
         consent_status: 'ACTIVE',
         provenance: {
           source: 'CANONICAL_PROFILE_REPOSITORY',
           record_ref:
-            `vault_private_test_${vaultDigest.slice(0, 32)}_${hashCanonicalJson(
-              approvalResult.receipt_ref,
+            `vault_private_test_${vaultDigest.slice(0, 24)}_${hashCanonicalJson(
+              approvalReceiptRef,
             ).slice(0, 16)}`,
         },
       },

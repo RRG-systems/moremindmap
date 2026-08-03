@@ -44,10 +44,17 @@ import {
   createPrivateLiveProductStoreV1,
 } from './privateLiveProductStore.js';
 import {
+  createPrivateRuntimeCohortIntelligenceExecutionV1,
+} from './cohortIntelligenceExecution.js';
+import {
+  projectPrivateRuntimeCohortMemberBindingsV1,
+} from './profileCohort.js';
+import {
   createPrivateRuntimeIntelligenceExecutionV1,
 } from '../intelligenceExecution.js';
 import {
   createExactVaultProfileReader,
+  createExactBusinessAssessmentReader,
   createSubdev1CanonicalExactProfileRepository,
   createUpstashSubdev1OperatorBridgeStore,
 } from '../operatorBridge/index.js';
@@ -305,14 +312,24 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   });
   if (assertionPort.configured !== true) return makeDeniedComposition();
 
+  let resolveCohortMemberBindings = null;
+  const resolveCohortProductBinding = authority.approved_profile_cohort == null
+    ? null
+    : async (exactScope) => {
+        const resolved = await resolveCohortMemberBindings?.(exactScope?.profile_id);
+        return resolved?.valid ? resolved.value.product_binding_attestation : null;
+      };
+
   const businessEngineAdapter =
     createCanonicalBusinessEngineLiveAttachmentAdapterV1({
       productBindingAttestation: productBinding,
+      resolveProductBindingAttestation: resolveCohortProductBinding,
       nowMs: clock(),
     });
   const subscriptionRuntimeAdapter =
     createExistingSubscriptionRuntimeLiveAttachmentAdapterV1({
       productBindingAttestation: productBinding,
+      resolveProductBindingAttestation: resolveCohortProductBinding,
       nowMs: clock(),
     });
   const coachConnectAdapter = productBinding.coach_connect_runtime
@@ -338,6 +355,17 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     nowMs: clock(),
   });
   if (productExecutionBinding.ok) {
+    if (authority.approved_profile_cohort != null) {
+      resolveCohortMemberBindings = async (profileId) =>
+        projectPrivateRuntimeCohortMemberBindingsV1({
+          cohort: authority.approved_profile_cohort,
+          profileId,
+          rootProductBindingAttestation: productBinding,
+          rootProductExecutionBinding: productExecutionBinding.binding,
+          configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
+          nowMs: clock(),
+        });
+    }
     const productStoreUrl = await secretResolver(
       productExecutionBinding.binding.product_store_connection_ref,
       {
@@ -354,18 +382,26 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     }
     try {
       productClient = createProductStoreClient(productStoreUrl);
-      intelligenceExecution = createPrivateRuntimeIntelligenceExecutionV1({
-        productStore: createPrivateLiveProductStoreV1({
-          client: productClient,
-          namespacePrefix:
-            productExecutionBinding.binding.persistence_namespace_prefix,
-          exactScope: productExecutionBinding.binding.exact_scope,
-          clock: () => new Date(clock()).toISOString(),
-        }),
-        binding: productExecutionBinding.binding,
-        productBindingAttestation: productBinding,
-        clock: () => new Date(clock()).toISOString(),
-      });
+      intelligenceExecution = resolveCohortMemberBindings == null
+        ? createPrivateRuntimeIntelligenceExecutionV1({
+            productStore: createPrivateLiveProductStoreV1({
+              client: productClient,
+              namespacePrefix:
+                productExecutionBinding.binding.persistence_namespace_prefix,
+              exactScope: productExecutionBinding.binding.exact_scope,
+              clock: () => new Date(clock()).toISOString(),
+            }),
+            binding: productExecutionBinding.binding,
+            productBindingAttestation: productBinding,
+            clock: () => new Date(clock()).toISOString(),
+          })
+        : createPrivateRuntimeCohortIntelligenceExecutionV1({
+            client: productClient,
+            namespacePrefix:
+              productExecutionBinding.binding.persistence_namespace_prefix,
+            resolveMemberBindings: resolveCohortMemberBindings,
+            clock: () => new Date(clock()).toISOString(),
+          });
     } catch {
       return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
     }
@@ -390,10 +426,13 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     });
     const profileRepository = createSubdev1CanonicalExactProfileRepository({
       readCanonicalProfile: createExactVaultProfileReader({ client: productClient }),
+      readBusinessAssessment: createExactBusinessAssessmentReader({ client: productClient }),
       productBindingAttestation: productBinding,
       productExecutionBinding: productExecutionBinding.binding,
+      approvedProfileCohort: authority.approved_profile_cohort,
       statePort,
       environmentId: authority.authority_packet.environment_id,
+      clock,
     });
     const operatorBinding = createPrivateRuntimeOperatorBridgeLiveBindingV1({
       env,
@@ -402,6 +441,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
       authority,
       productBindingAttestation: productBinding,
       productExecutionBinding: productExecutionBinding.binding,
+      resolveMemberBindings: resolveCohortMemberBindings,
       clock,
     });
     resolvedOperatorContextBridge = operatorBinding.operatorContextBridge;

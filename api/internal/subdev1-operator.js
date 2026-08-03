@@ -218,6 +218,7 @@ export function createSubdev1OperatorHandler({
         active: true,
         profile_state: selected.profile_state,
         profile_receipt: selected.profile_receipt,
+        profile_switch_receipt: selected.profile_switch_receipt,
       });
     }
 

@@ -15,6 +15,11 @@ export const PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_VERSION =
   'private-runtime-configuration-authority-v1';
 export const PRIVATE_RUNTIME_ACTIVATION_RECEIPT_VERSION =
   'private-runtime-activation-receipt-v1';
+export const PRIVATE_RUNTIME_COHORT_ACTIVATION_RECEIPT_VERSION =
+  'private-runtime-cohort-activation-receipt-v2';
+export const PRIVATE_RUNTIME_ROLLBACK_RECEIPT_VERSION =
+  'private-runtime-rollback-receipt-v1';
+const PRIVATE_RUNTIME_COHORT_ACTIVATION_COUNT = 4;
 
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const timestamp = (value) => typeof value === 'string' && Number.isFinite(Date.parse(value));
@@ -122,6 +127,51 @@ const ACTIVATION_FIELDS = deepFreeze([
   'receipt_sha256',
 ]);
 
+const COHORT_ACTIVATION_FIELDS = deepFreeze([
+  'receipt_version',
+  'environment_id',
+  'configuration_authority_packet_digest',
+  'approved_profile_cohort_digest',
+  'cohort_count',
+  'deployment_commit_sha',
+  'deployment_tree_sha',
+  'vercel_project_reference',
+  'product_binding_attestation_digest',
+  'approved',
+  'controlled_internal_beta',
+  'private_live_only',
+  'public_access',
+  'source_default_off',
+  'named_tester_scope',
+  'production_customer_rollout',
+  'activation_owner_ref',
+  'rollback_owner_ref',
+  'rollback_receipt_ref',
+  'rollback_receipt_digest',
+  'emergency_disable_ready',
+  'issued_at',
+  'expires_at',
+  'receipt_sha256',
+]);
+
+const ROLLBACK_FIELDS = deepFreeze([
+  'receipt_version',
+  'environment_id',
+  'configuration_authority_packet_digest',
+  'approved_profile_cohort_digest',
+  'runtime_live_enabled_target',
+  'subdev1_operator_enabled_target',
+  'activation_receipt_invalidated_target',
+  'cohort_revoked_target',
+  'public_access',
+  'append_only_history_preserved',
+  'source_revert_required',
+  'rollback_owner_ref',
+  'issued_at',
+  'expires_at',
+  'receipt_sha256',
+]);
+
 function digestWithout(value, digestField) {
   if (!object(value)) throw new TypeError('attested object required');
   const copy = { ...value };
@@ -145,6 +195,10 @@ export function privateRuntimeConfigurationAuthorityDigest(value) {
 }
 
 export function privateRuntimeActivationReceiptDigest(value) {
+  return digestWithout(value, 'receipt_sha256');
+}
+
+export function privateRuntimeRollbackReceiptDigest(value) {
   return digestWithout(value, 'receipt_sha256');
 }
 
@@ -324,6 +378,106 @@ export function validatePrivateRuntimeActivationReceiptV1(value, {
   return result(errors, value);
 }
 
+export function validatePrivateRuntimeRollbackReceiptV1(value, {
+  environmentId,
+  configurationAuthorityPacketDigest,
+  approvedProfileCohortDigest,
+  rollbackOwnerRef,
+  nowMs = Date.now(),
+} = {}) {
+  const errors = [];
+  if (!exactFields(value, ROLLBACK_FIELDS)) {
+    return result([issue('ROLLBACK_AUTHORITY_REQUIRED', 'fields')]);
+  }
+  if (value.receipt_version !== PRIVATE_RUNTIME_ROLLBACK_RECEIPT_VERSION
+    || value.environment_id !== environmentId
+    || value.configuration_authority_packet_digest !== configurationAuthorityPacketDigest
+    || value.approved_profile_cohort_digest !== approvedProfileCohortDigest
+    || value.rollback_owner_ref !== rollbackOwnerRef) {
+    errors.push(issue('ROLLBACK_AUTHORITY_MISMATCH', 'binding'));
+  }
+  if (value.runtime_live_enabled_target !== false
+    || value.subdev1_operator_enabled_target !== false
+    || value.activation_receipt_invalidated_target !== true
+    || value.cohort_revoked_target !== true
+    || value.public_access !== false
+    || value.append_only_history_preserved !== true
+    || value.source_revert_required !== false) {
+    errors.push(issue('ROLLBACK_AUTHORITY_REQUIRED', 'target'));
+  }
+  if (!datesValid(value.issued_at, value.expires_at, nowMs)) {
+    errors.push(issue('ROLLBACK_AUTHORITY_EXPIRED', 'expires_at'));
+  }
+  if (!sha256(value.receipt_sha256)
+    || value.receipt_sha256 !== privateRuntimeRollbackReceiptDigest(value)) {
+    errors.push(issue('ROLLBACK_AUTHORITY_DIGEST_MISMATCH', 'receipt_sha256'));
+  }
+  return result(errors, value);
+}
+
+export function validatePrivateRuntimeCohortActivationReceiptV2(value, {
+  environmentId,
+  configurationAuthorityPacketDigest,
+  approvedProfileCohortDigest,
+  cohortCount,
+  deploymentCommitSha = null,
+  vercelProjectReference,
+  productBindingAttestationDigest,
+  activationOwnerRef,
+  rollbackOwnerRef,
+  rollbackReceiptDigest,
+  nowMs = Date.now(),
+} = {}) {
+  const errors = [];
+  if (!exactFields(value, COHORT_ACTIVATION_FIELDS)) {
+    return result([issue('ACTIVATION_AUTHORITY_REQUIRED', 'fields')]);
+  }
+  if (value.receipt_version !== PRIVATE_RUNTIME_COHORT_ACTIVATION_RECEIPT_VERSION
+    || value.environment_id !== environmentId
+    || value.configuration_authority_packet_digest !== configurationAuthorityPacketDigest
+    || value.approved_profile_cohort_digest !== approvedProfileCohortDigest
+    || value.cohort_count !== cohortCount
+    || !/^[a-f0-9]{40}$/.test(deploymentCommitSha || '')
+    || value.deployment_commit_sha !== deploymentCommitSha
+    || value.vercel_project_reference !== vercelProjectReference
+    || value.product_binding_attestation_digest !== productBindingAttestationDigest
+    || value.activation_owner_ref !== activationOwnerRef
+    || value.rollback_owner_ref !== rollbackOwnerRef
+    || value.rollback_receipt_digest !== rollbackReceiptDigest) {
+    errors.push(issue('ACTIVATION_AUTHORITY_MISMATCH', 'binding'));
+  }
+  if (!/^[a-f0-9]{40}$/.test(value.deployment_commit_sha)
+    || !/^[a-f0-9]{40}$/.test(value.deployment_tree_sha)
+    || !isOpaquePrivateRuntimeReference(value.vercel_project_reference)
+    || !isOpaquePrivateRuntimeReference(value.rollback_receipt_ref)
+    || !sha256(value.approved_profile_cohort_digest)
+    || !sha256(value.product_binding_attestation_digest)
+    || !sha256(value.rollback_receipt_digest)
+    || !Number.isInteger(value.cohort_count)
+    || value.cohort_count !== PRIVATE_RUNTIME_COHORT_ACTIVATION_COUNT
+    || cohortCount !== PRIVATE_RUNTIME_COHORT_ACTIVATION_COUNT) {
+    errors.push(issue('ACTIVATION_AUTHORITY_MISMATCH', 'identity'));
+  }
+  if (value.approved !== true
+    || value.controlled_internal_beta !== true
+    || value.private_live_only !== true
+    || value.public_access !== false
+    || value.source_default_off !== true
+    || value.named_tester_scope !== 'EXACT_APPROVED_COHORT_ONLY'
+    || value.production_customer_rollout !== false
+    || value.emergency_disable_ready !== true) {
+    errors.push(issue('ACTIVATION_AUTHORITY_REQUIRED', 'authority'));
+  }
+  if (!datesValid(value.issued_at, value.expires_at, nowMs)) {
+    errors.push(issue('ACTIVATION_AUTHORITY_EXPIRED', 'expires_at'));
+  }
+  if (!sha256(value.receipt_sha256)
+    || value.receipt_sha256 !== privateRuntimeActivationReceiptDigest(value)) {
+    errors.push(issue('ACTIVATION_AUTHORITY_DIGEST_MISMATCH', 'receipt_sha256'));
+  }
+  return result(errors, value);
+}
+
 export function privateRuntimeLiveBindingContractFields() {
   return frozen({
     product_binding: PRODUCT_BINDING_FIELDS,
@@ -332,5 +486,7 @@ export function privateRuntimeLiveBindingContractFields() {
     coach_connect_runtime: COACH_CONNECT_FIELDS,
     configuration_authority: AUTHORITY_PACKET_FIELDS,
     activation_receipt: ACTIVATION_FIELDS,
+    cohort_activation_receipt: COHORT_ACTIVATION_FIELDS,
+    rollback_receipt: ROLLBACK_FIELDS,
   });
 }

@@ -11,6 +11,7 @@ import {
 } from '../../productionSecurity/remoteSharedSecurity/keyspace.js';
 import {
   createExactVaultProfileReader,
+  createExactBusinessAssessmentReader,
   createSubdev1CanonicalExactProfileRepository,
   createSubdev1OperatorBridge,
   createUpstashSubdev1OperatorBridgeStore,
@@ -28,6 +29,9 @@ import {
 import {
   readPrivateLiveProductExecutionBindingV1,
 } from './productExecutionBinding.js';
+import {
+  projectPrivateRuntimeCohortMemberBindingsV1,
+} from './profileCohort.js';
 
 export const PRIVATE_RUNTIME_OPERATOR_BRIDGE_BINDING_VERSION =
   'private-runtime-operator-bridge-live-binding-v1';
@@ -75,6 +79,7 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
   authority,
   productBindingAttestation,
   productExecutionBinding,
+  resolveMemberBindings = null,
   clock = () => Date.now(),
   randomToken,
 } = {}) {
@@ -109,19 +114,29 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
       return denial('COACH_CONNECT_STATE_MISSING', 403);
     }
     const exactScope = operatorContext?.exact_scope;
+    const memberResolution = typeof resolveMemberBindings === 'function'
+      ? await resolveMemberBindings(exactScope?.profile_id)
+      : null;
+    const selectedProductBinding = memberResolution?.valid
+      ? memberResolution.value.product_binding_attestation
+      : productBindingAttestation;
+    const selectedExecutionBinding = memberResolution?.valid
+      ? memberResolution.value.product_execution_binding
+      : productExecutionBinding;
     if (!operatorContext?.allowed
+      || (typeof resolveMemberBindings === 'function' && !memberResolution?.valid)
       || operatorContext.capability_scope !== 'SUBSCRIPTION_PRIVATE_BETA'
       || operatorContext.coach_authority !== false
       || operatorContext.stripe_authority !== false
       || operatorContext.canonical_identity_authority !== false
       || operatorContext.canonical_mutation_authority !== false
-      || !samePrivateRuntimeScope(exactScope, productBindingAttestation?.exact_scope)
-      || !samePrivateRuntimeScope(exactScope, productExecutionBinding?.exact_scope)
+      || !samePrivateRuntimeScope(exactScope, selectedProductBinding?.exact_scope)
+      || !samePrivateRuntimeScope(exactScope, selectedExecutionBinding?.exact_scope)
       || operatorContext.subscriber_subject_ref
-        !== productBindingAttestation?.subscriber_subject_ref
+        !== selectedProductBinding?.subscriber_subject_ref
       || operatorContext.exact_scope_hash !== hashPrivateRuntimeScope(exactScope)
-      || operatorContext.exact_scope_hash !== productBindingAttestation?.exact_scope_hash
-      || !productExecutionBinding?.approved_profile_ids?.includes(exactScope?.profile_id)) {
+      || operatorContext.exact_scope_hash !== selectedProductBinding?.exact_scope_hash
+      || !selectedExecutionBinding?.approved_profile_ids?.includes(exactScope?.profile_id)) {
       return denial('EXACT_SCOPE_MISMATCH', 403);
     }
     const now = new Date(clock()).toISOString();
@@ -238,6 +253,14 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
           ...requestContext,
           exact_scope_hash: operatorContext.exact_scope_hash,
         },
+        cohort_binding_receipt: memberResolution?.valid
+          ? {
+              cohort_digest: memberResolution.value.cohort_digest,
+              member_digest: memberResolution.value.member.member_sha256,
+              exact_scope_hash: operatorContext.exact_scope_hash,
+              process_local_profile_cache: false,
+            }
+          : null,
       },
     });
   }
@@ -350,12 +373,25 @@ export async function buildPrivateRuntimeOperatorBridgeDeploymentBindingV1({
     fetchImpl,
     commandExecutor,
   });
+  const resolveCohortMemberBindings = authority.approved_profile_cohort == null
+    ? null
+    : async (profileId) => projectPrivateRuntimeCohortMemberBindingsV1({
+        cohort: authority.approved_profile_cohort,
+        profileId,
+        rootProductBindingAttestation: productBindingAttestation,
+        rootProductExecutionBinding: productExecution.binding,
+        configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
+        nowMs: clock(),
+      });
   const profileRepository = createSubdev1CanonicalExactProfileRepository({
     readCanonicalProfile: createExactVaultProfileReader({ client: productClient }),
+    readBusinessAssessment: createExactBusinessAssessmentReader({ client: productClient }),
     productBindingAttestation,
     productExecutionBinding: productExecution.binding,
+    approvedProfileCohort: authority.approved_profile_cohort,
     statePort,
     environmentId: authority.authority_packet.environment_id,
+    clock,
   });
   return createPrivateRuntimeOperatorBridgeLiveBindingV1({
     env,
@@ -364,6 +400,7 @@ export async function buildPrivateRuntimeOperatorBridgeDeploymentBindingV1({
     authority,
     productBindingAttestation,
     productExecutionBinding: productExecution.binding,
+    resolveMemberBindings: resolveCohortMemberBindings,
     clock,
     randomToken,
   });

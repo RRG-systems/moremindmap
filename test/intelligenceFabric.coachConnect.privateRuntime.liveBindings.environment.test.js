@@ -20,8 +20,12 @@ import {
 } from '../src/lib/intelligenceFabric/coachConnect/productionSecurity/liveSubscriberAssertion/index.js';
 import {
   createPrivateRuntimeEnvironmentReferenceResolver,
+  createPrivateRuntimeApprovedProfileCohortV1,
+  privateRuntimeApprovedProfileCohortDigest,
+  privateRuntimeApprovedProfileCohortMemberDigest,
   privateRuntimeProductStoreConnectionAllowedV1,
   privateRuntimeActivationReceiptDigest,
+  privateRuntimeRollbackReceiptDigest,
   privateRuntimeConfigurationAuthorityDigest,
   privateRuntimeProductBindingDigest,
   readPrivateRuntimeLiveConfigurationAuthorityV1,
@@ -33,7 +37,7 @@ const now = Date.parse('2026-07-28T12:00:00.000Z');
 const sourceDigest = 'a'.repeat(64);
 const scope = {
   tenant_id: 'tenant_environment',
-  profile_id: 'profile_environment',
+  profile_id: 'mm-20260728-00000000',
   business_id: 'business_environment',
   subscriber_id: 'subscriber_environment',
 };
@@ -560,6 +564,191 @@ test('activation requires an exact separate receipt and cannot come from environ
     nowMs: now,
   });
   assert.equal(denied.ok, false);
+});
+
+test('cohort activation binds exact deployment, protected cohort, rollback, and matching operator flag', async () => {
+  const initial = authorityDocuments({
+    packetOverrides: {
+      live_enabled: true,
+      activation_receipt_ref: 'MORE_PRIVATE_RUNTIME_ACTIVATION_RECEIPT_VALUE',
+    },
+  });
+  const cohort = createPrivateRuntimeApprovedProfileCohortV1({
+    environmentId: initial.config.environment_id,
+    cohortId: 'private_beta_test_cohort',
+    cohortRevision: 'private_beta_test_cohort_revision',
+    issuedAt: '2026-07-28T10:00:00.000Z',
+    expiresAt: '2026-07-29T10:00:00.000Z',
+    members: [0, 1, 2, 3].map((index) => index === 0
+      ? {
+          profile_id: initial.product.exact_scope.profile_id,
+          subscriber_subject_ref: initial.product.subscriber_subject_ref,
+          exact_scope: initial.product.exact_scope,
+          business_engine_execution_contract_sha256:
+            initial.product.business_engine.business_engine_contract_hash,
+          approval_ref: 'private_beta_approval_root',
+        }
+      : {
+          profile_id: `mm-20260728-${String(index).repeat(8)}`,
+          subscriber_subject_ref: `private_beta_subject_${index}`,
+          exact_scope: {
+            tenant_id: `private_beta_tenant_${index}`,
+            profile_id: `mm-20260728-${String(index).repeat(8)}`,
+            business_id: `private_beta_business_${index}`,
+            subscriber_id: `private_beta_subscriber_${index}`,
+          },
+          business_engine_execution_contract_sha256: String(index).repeat(64),
+          approval_ref: `private_beta_approval_${index}`,
+        }),
+  });
+  const rollbackValue = {
+    receipt_version: 'private-runtime-rollback-receipt-v1',
+    environment_id: initial.config.environment_id,
+    configuration_authority_packet_digest: initial.packet.packet_sha256,
+    approved_profile_cohort_digest: cohort.cohort_sha256,
+    runtime_live_enabled_target: false,
+    subdev1_operator_enabled_target: false,
+    activation_receipt_invalidated_target: true,
+    cohort_revoked_target: true,
+    public_access: false,
+    append_only_history_preserved: true,
+    source_revert_required: false,
+    rollback_owner_ref: initial.packet.rollback_owner_ref,
+    issued_at: '2026-07-28T10:00:00.000Z',
+    expires_at: '2026-07-29T10:00:00.000Z',
+  };
+  const rollback = {
+    ...rollbackValue,
+    receipt_sha256: privateRuntimeRollbackReceiptDigest(rollbackValue),
+  };
+  const receiptValue = {
+    receipt_version: 'private-runtime-cohort-activation-receipt-v2',
+    environment_id: initial.config.environment_id,
+    configuration_authority_packet_digest: initial.packet.packet_sha256,
+    approved_profile_cohort_digest: cohort.cohort_sha256,
+    cohort_count: 4,
+    deployment_commit_sha: '1'.repeat(40),
+    deployment_tree_sha: '2'.repeat(40),
+    vercel_project_reference: initial.live.vercel_project_reference,
+    product_binding_attestation_digest: initial.product.binding_sha256,
+    approved: true,
+    controlled_internal_beta: true,
+    private_live_only: true,
+    public_access: false,
+    source_default_off: true,
+    named_tester_scope: 'EXACT_APPROVED_COHORT_ONLY',
+    production_customer_rollout: false,
+    activation_owner_ref: initial.packet.activation_owner_ref,
+    rollback_owner_ref: initial.packet.rollback_owner_ref,
+    rollback_receipt_ref: 'MORE_PRIVATE_RUNTIME_ROLLBACK_RECEIPT_VALUE',
+    rollback_receipt_digest: rollback.receipt_sha256,
+    emergency_disable_ready: true,
+    issued_at: '2026-07-28T10:00:00.000Z',
+    expires_at: '2026-07-29T10:00:00.000Z',
+  };
+  const receipt = {
+    ...receiptValue,
+    receipt_sha256: privateRuntimeActivationReceiptDigest(receiptValue),
+  };
+  const env = {
+    ...environment(initial),
+    VERCEL_GIT_COMMIT_SHA: receipt.deployment_commit_sha,
+    MORE_SUBDEV1_OPERATOR_ENABLED: 'true',
+    MORE_PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_REF:
+      'MORE_PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_VALUE',
+    MORE_PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_VALUE: JSON.stringify(cohort),
+    MORE_PRIVATE_RUNTIME_ROLLBACK_RECEIPT_VALUE: JSON.stringify(rollback),
+    MORE_PRIVATE_RUNTIME_ACTIVATION_RECEIPT_VALUE: JSON.stringify(receipt),
+  };
+  const accepted = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(env),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(accepted.ok, true, JSON.stringify(accepted));
+  assert.equal(accepted.approved_profile_cohort.member_count, 4);
+  assert.equal(accepted.rollback_receipt.receipt_sha256, rollback.receipt_sha256);
+
+  const legacyReceiptValue = {
+    receipt_version: 'private-runtime-activation-receipt-v1',
+    environment_id: initial.config.environment_id,
+    configuration_authority_packet_digest: initial.packet.packet_sha256,
+    exact_scope_hash: initial.product.exact_scope_hash,
+    approved: true,
+    private_live_only: true,
+    public_access: false,
+    named_tester_scope: 'EXACT_APPROVED_COHORT_ONLY',
+    production_customer_rollout: false,
+    activation_owner_ref: initial.packet.activation_owner_ref,
+    rollback_owner_ref: initial.packet.rollback_owner_ref,
+    emergency_disable_ready: true,
+    issued_at: '2026-07-28T10:00:00.000Z',
+    expires_at: '2026-07-29T10:00:00.000Z',
+  };
+  const legacyReceipt = {
+    ...legacyReceiptValue,
+    receipt_sha256: privateRuntimeActivationReceiptDigest(legacyReceiptValue),
+  };
+  const legacyEnv = {
+    ...env,
+    MORE_PRIVATE_RUNTIME_ACTIVATION_RECEIPT_VALUE: JSON.stringify(legacyReceipt),
+  };
+  const legacyDenied = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: legacyEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(legacyEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(legacyDenied.code, 'COHORT_ACTIVATION_RECEIPT_REQUIRED');
+
+  for (const runtimeCommit of [null, 'not-a-commit', '3'.repeat(40)]) {
+    const commitEnv = { ...env };
+    if (runtimeCommit == null) delete commitEnv.VERCEL_GIT_COMMIT_SHA;
+    else commitEnv.VERCEL_GIT_COMMIT_SHA = runtimeCommit;
+    const commitDenied = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+      env: commitEnv,
+      resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(commitEnv),
+      adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+      adapterSourceSha256: sourceDigest,
+      nowMs: now,
+    });
+    assert.equal(commitDenied.code, 'ACTIVATION_AUTHORITY_MISMATCH');
+  }
+
+  const missingRoot = structuredClone(cohort);
+  missingRoot.members[0].profile_id = 'mm-20260728-99999999';
+  missingRoot.members[0].exact_scope.profile_id = 'mm-20260728-99999999';
+  missingRoot.members[0].exact_scope_hash = hashPrivateRuntimeScope(
+    missingRoot.members[0].exact_scope,
+  );
+  missingRoot.members[0].member_sha256 =
+    privateRuntimeApprovedProfileCohortMemberDigest(missingRoot.members[0]);
+  missingRoot.cohort_sha256 = privateRuntimeApprovedProfileCohortDigest(missingRoot);
+  const missingRootEnv = {
+    ...env,
+    MORE_PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_VALUE: JSON.stringify(missingRoot),
+  };
+  const missingRootDenied = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: missingRootEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(missingRootEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(missingRootDenied.code, 'APPROVED_PROFILE_COHORT_ROOT_BINDING_MISMATCH');
+
+  env.MORE_SUBDEV1_OPERATOR_ENABLED = 'false';
+  const denied = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(env),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(denied.code, 'CONFIGURATION_AUTHORITY_MISMATCH');
 });
 
 test('emergency disable remains a distinct dominant configuration state', async () => {

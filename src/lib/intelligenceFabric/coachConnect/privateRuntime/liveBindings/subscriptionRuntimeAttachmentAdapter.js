@@ -37,14 +37,13 @@ function createExistingSubscriptionRuntimeReference(binding) {
 
 export function createExistingSubscriptionRuntimeLiveAttachmentAdapterV1({
   productBindingAttestation,
+  resolveProductBindingAttestation = null,
   nowMs = Date.now(),
 } = {}) {
   const checked = validatePrivateRuntimeProductBindingAttestationV1(
     productBindingAttestation,
     { nowMs },
   );
-  const binding = checked.value?.subscription_runtime || null;
-  const runtime = binding ? createExistingSubscriptionRuntimeReference(binding) : null;
 
   return Object.freeze({
     describeCapability() {
@@ -62,8 +61,21 @@ export function createExistingSubscriptionRuntimeLiveAttachmentAdapterV1({
     },
 
     async resolveExistingSubscriptionRuntime({ exact_scope } = {}) {
-      if (!checked.valid
-        || !samePrivateRuntimeScope(exact_scope, productBindingAttestation.exact_scope)) {
+      let selectedBinding = productBindingAttestation;
+      let selectedValidation = checked;
+      if (typeof resolveProductBindingAttestation === 'function') {
+        selectedBinding = await resolveProductBindingAttestation(exact_scope);
+        selectedValidation = validatePrivateRuntimeProductBindingAttestationV1(
+          selectedBinding,
+          { nowMs },
+        );
+      }
+      const selectedDescriptor = selectedValidation.value?.subscription_runtime || null;
+      const selectedRuntime = selectedDescriptor
+        ? createExistingSubscriptionRuntimeReference(selectedDescriptor)
+        : null;
+      if (!selectedValidation.valid
+        || !samePrivateRuntimeScope(exact_scope, selectedBinding.exact_scope)) {
         return frozen({
           ok: false,
           code: 'SUBSCRIPTION_RUNTIME_UNAVAILABLE',
@@ -71,8 +83,8 @@ export function createExistingSubscriptionRuntimeLiveAttachmentAdapterV1({
       }
       return Object.freeze({
         ok: true,
-        runtime,
-        descriptor: frozen(binding),
+        runtime: selectedRuntime,
+        descriptor: frozen(selectedDescriptor),
         duplicate_runtime_created: false,
         production_persistence_activated: false,
         stripe_call_required: false,

@@ -294,6 +294,23 @@ function sameAuthoritativeProfile(record, receipt) {
     && canonicalJson(record?.provenance) === canonicalJson(receipt?.provenance);
 }
 
+function profileSwitchReceipt({ prior, next, occurredAt }) {
+  const receipt = {
+    receipt_version: 'subdev1-profile-switch-receipt-v1',
+    prior_exact_scope_hash: prior?.active_profile?.exact_scope_hash || null,
+    next_exact_scope_hash: next.exact_scope_hash,
+    prior_profile_session_closed: prior?.active_profile != null,
+    profile_scoped_state_cleared_before_resolution: true,
+    process_local_profile_cache_used: false,
+    profile_generation: next.profile_generation,
+    occurred_at: occurredAt,
+  };
+  return frozen({
+    ...receipt,
+    receipt_digest: hashCanonicalJson(receipt),
+  });
+}
+
 export function createSubdev1OperatorBridge({
   env = globalThis.process?.env || {},
   store = new InMemorySubdev1OperatorBridgeStore(),
@@ -671,6 +688,11 @@ export function createSubdev1OperatorBridge({
       context_id: prior.context_id,
       profile_state: 'PROFILE_ACTIVE',
       profile_receipt: privacySafeProfile(receiptResult.receipt),
+      profile_switch_receipt: profileSwitchReceipt({
+        prior,
+        next: receiptResult.receipt,
+        occurredAt: receiptResult.receipt.resolved_at,
+      }),
     });
   }
 

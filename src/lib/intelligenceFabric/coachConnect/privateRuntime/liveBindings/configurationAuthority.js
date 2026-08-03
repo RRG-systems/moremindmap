@@ -7,13 +7,19 @@ import {
   validateProtectedEdgeIdentityConfigurationV1,
 } from '../../productionSecurity/protectedEdgeIdentity/contracts.js';
 import {
+  PRIVATE_RUNTIME_COHORT_ACTIVATION_RECEIPT_VERSION,
+  validatePrivateRuntimeCohortActivationReceiptV2,
   validatePrivateRuntimeActivationReceiptV1,
   validatePrivateRuntimeConfigurationAuthorityV1,
   validatePrivateRuntimeProductBindingAttestationV1,
+  validatePrivateRuntimeRollbackReceiptV1,
 } from './contracts.js';
 import {
   validatePrivateRuntimeLiveEnvironmentAuthorityV1,
 } from './environmentAttestation.js';
+import {
+  readPrivateRuntimeApprovedProfileCohortV1,
+} from './profileCohort.js';
 
 export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
   'MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF',
@@ -199,7 +205,36 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
     );
   }
 
+  const cohortConfigured =
+    typeof env.MORE_PRIVATE_RUNTIME_APPROVED_PROFILE_COHORT_REF === 'string';
+  let approvedProfileCohort = null;
+  let approvedProfileCohortReference = null;
+  if (cohortConfigured) {
+    const cohortResult = await readPrivateRuntimeApprovedProfileCohortV1({
+      env,
+      resolveReference,
+      environmentId: authorityPacket.environment_id,
+      nowMs,
+    });
+    if (!cohortResult.ok) {
+      return deny(cohortResult.code || 'APPROVED_PROFILE_COHORT_UNCONFIGURED');
+    }
+    approvedProfileCohort = cohortResult.cohort;
+    approvedProfileCohortReference = cohortResult.reference;
+    const rootMember = approvedProfileCohort.members.find((member) =>
+      member.profile_id === productBindingAttestation.exact_scope.profile_id);
+    if (rootMember == null
+      || rootMember.subscriber_subject_ref
+        !== productBindingAttestation.subscriber_subject_ref
+      || rootMember.exact_scope_hash !== productBindingAttestation.exact_scope_hash
+      || rootMember.business_engine_execution_contract_sha256
+        !== productBindingAttestation.business_engine.business_engine_contract_hash) {
+      return deny('APPROVED_PROFILE_COHORT_ROOT_BINDING_MISMATCH');
+    }
+  }
+
   let activationReceipt = null;
+  let rollbackReceipt = null;
   if (authorityPacket.live_enabled === true) {
     try {
       const serialized = await resolveReference(authorityPacket.activation_receipt_ref, {
@@ -210,14 +245,56 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
     } catch {
       return deny('ACTIVATION_AUTHORITY_REQUIRED', 'activation_receipt_ref');
     }
-    const activation = validatePrivateRuntimeActivationReceiptV1(activationReceipt, {
-      environmentId: authorityPacket.environment_id,
-      configurationAuthorityPacketDigest: authorityPacket.packet_sha256,
-      exactScopeHash: productBindingAttestation.exact_scope_hash,
-      activationOwnerRef: authorityPacket.activation_owner_ref,
-      rollbackOwnerRef: authorityPacket.rollback_owner_ref,
-      nowMs,
-    });
+    let activation;
+    if (approvedProfileCohort != null) {
+      if (activationReceipt?.receipt_version
+        !== PRIVATE_RUNTIME_COHORT_ACTIVATION_RECEIPT_VERSION) {
+        return deny('COHORT_ACTIVATION_RECEIPT_REQUIRED');
+      }
+      try {
+        const serialized = await resolveReference(activationReceipt.rollback_receipt_ref, {
+          purpose: 'MORE_PRIVATE_RUNTIME_ROLLBACK_RECEIPT',
+          secret: false,
+        });
+        rollbackReceipt = parseDocument(serialized, 'rollback_receipt');
+      } catch {
+        return deny('ROLLBACK_AUTHORITY_REQUIRED', 'rollback_receipt_ref');
+      }
+      const rollback = validatePrivateRuntimeRollbackReceiptV1(rollbackReceipt, {
+        environmentId: authorityPacket.environment_id,
+        configurationAuthorityPacketDigest: authorityPacket.packet_sha256,
+        approvedProfileCohortDigest: approvedProfileCohort.cohort_sha256,
+        rollbackOwnerRef: authorityPacket.rollback_owner_ref,
+        nowMs,
+      });
+      if (!rollback.valid) {
+        return deny(rollback.errors[0]?.code || 'ROLLBACK_AUTHORITY_REQUIRED');
+      }
+      activation = validatePrivateRuntimeCohortActivationReceiptV2(activationReceipt, {
+        environmentId: authorityPacket.environment_id,
+        configurationAuthorityPacketDigest: authorityPacket.packet_sha256,
+        approvedProfileCohortDigest: approvedProfileCohort.cohort_sha256,
+        cohortCount: approvedProfileCohort.member_count,
+        deploymentCommitSha: typeof env.VERCEL_GIT_COMMIT_SHA === 'string'
+          ? env.VERCEL_GIT_COMMIT_SHA
+          : null,
+        vercelProjectReference: liveEnvironmentAttestation.vercel_project_reference,
+        productBindingAttestationDigest: productBindingAttestation.binding_sha256,
+        activationOwnerRef: authorityPacket.activation_owner_ref,
+        rollbackOwnerRef: authorityPacket.rollback_owner_ref,
+        rollbackReceiptDigest: rollbackReceipt.receipt_sha256,
+        nowMs,
+      });
+    } else {
+      activation = validatePrivateRuntimeActivationReceiptV1(activationReceipt, {
+        environmentId: authorityPacket.environment_id,
+        configurationAuthorityPacketDigest: authorityPacket.packet_sha256,
+        exactScopeHash: productBindingAttestation.exact_scope_hash,
+        activationOwnerRef: authorityPacket.activation_owner_ref,
+        rollbackOwnerRef: authorityPacket.rollback_owner_ref,
+        nowMs,
+      });
+    }
     if (!activation.valid) {
       return deny(activation.errors[0]?.code || 'ACTIVATION_AUTHORITY_REQUIRED');
     }
@@ -228,7 +305,10 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
       !== authorityPacket.emergency_disabled
     || protectedEdgeConfiguration.enabled !== true
     || protectedEdgeConfiguration.emergency_disabled
-      !== authorityPacket.emergency_disabled) {
+      !== authorityPacket.emergency_disabled
+    || (approvedProfileCohort != null
+      && (env.MORE_SUBDEV1_OPERATOR_ENABLED === 'true')
+        !== authorityPacket.live_enabled)) {
     return deny('CONFIGURATION_AUTHORITY_MISMATCH', 'activation_state');
   }
 
@@ -251,6 +331,9 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
     assertion_configuration: assertionConfiguration,
     protected_edge_configuration: protectedEdgeConfiguration,
     activation_receipt: activationReceipt,
+    rollback_receipt: rollbackReceipt,
+    approved_profile_cohort: approvedProfileCohort,
+    approved_profile_cohort_reference: approvedProfileCohortReference,
     live_authority: liveAuthority.value,
     source_default_off: true,
     public_access: false,
