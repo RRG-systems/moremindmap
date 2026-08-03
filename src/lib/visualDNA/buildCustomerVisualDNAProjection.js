@@ -51,7 +51,11 @@ function mapText(value) {
 
 function mapDimension(item) {
   return item && typeof item === 'object'
-    ? { ...item, label: mapText(item.label) }
+    ? {
+        ...item,
+        label: mapText(item.label),
+        rationale: mapText(item.rationale),
+      }
     : item;
 }
 

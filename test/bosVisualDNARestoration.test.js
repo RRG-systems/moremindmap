@@ -10,7 +10,9 @@ import {
 
 function visualFixture() {
   const topDimensions = [
-    { label: 'Vector', key: 'VEC', value: 0.91, evidence: 4 },
+    {
+      label: 'Vector', key: 'VEC', value: 0.91, evidence: 4, rationale: 'Vector is the leading measured tendency.',
+    },
     { label: 'Flex', key: 'FLE', value: 0.76, evidence: 3 },
     { label: 'Signal', key: 'SIG', value: 0.63, evidence: 2 },
     { label: 'Fidelity', key: 'FID', value: 0.54, evidence: 2 },
@@ -114,6 +116,7 @@ test('customer projection restores supported depth without mutating score topolo
   ]);
   assert.equal(projection.type, 'Command / Perspective');
   assert.equal(projection.primaryDimension.key, 'VEC');
+  assert.equal(projection.primaryDimension.rationale, 'Command is the leading measured tendency.');
   assert.equal(projection.customerPresentation.version, 'visual-dna-restoration-v1');
   assert.deepEqual(
     projection.customerPresentation.panelClassifications,
@@ -180,7 +183,7 @@ test('preview and fullscreen consume one shared customer projection with no lega
 
   assert.deepEqual(source, sourceBefore);
   assert.equal(projection.primaryDimension.label, 'Command');
-  assert.doesNotMatch(JSON.stringify(projection), /"Vector"/);
+  assert.doesNotMatch(JSON.stringify(projection), /\bVector\b/);
   assert.equal(
     renderer.match(/const vm = buildCustomerVisualDNAProjection\(resolvedViewModel\);/g)?.length,
     1,
