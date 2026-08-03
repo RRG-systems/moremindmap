@@ -278,6 +278,7 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
         deploymentCommitSha: typeof env.VERCEL_GIT_COMMIT_SHA === 'string'
           ? env.VERCEL_GIT_COMMIT_SHA
           : null,
+        immutableDeploymentIdentity,
         vercelProjectReference: liveEnvironmentAttestation.vercel_project_reference,
         productBindingAttestationDigest: productBindingAttestation.binding_sha256,
         activationOwnerRef: authorityPacket.activation_owner_ref,

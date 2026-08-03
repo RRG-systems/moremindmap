@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { hashCanonicalJson } from '../../../hashing.js';
 import { deepFreeze } from '../../../validation.js';
 import {
@@ -22,6 +23,7 @@ export const PRIVATE_RUNTIME_ROLLBACK_RECEIPT_VERSION =
 const PRIVATE_RUNTIME_COHORT_ACTIVATION_COUNT = 4;
 
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
+const sha256Text = (value) => createHash('sha256').update(String(value)).digest('hex');
 const timestamp = (value) => typeof value === 'string' && Number.isFinite(Date.parse(value));
 const object = (value) => Boolean(value && typeof value === 'object' && !Array.isArray(value));
 const frozen = (value) => deepFreeze(structuredClone(value));
@@ -421,6 +423,7 @@ export function validatePrivateRuntimeCohortActivationReceiptV2(value, {
   approvedProfileCohortDigest,
   cohortCount,
   deploymentCommitSha = null,
+  immutableDeploymentIdentity = null,
   vercelProjectReference,
   productBindingAttestationDigest,
   activationOwnerRef,
@@ -437,8 +440,11 @@ export function validatePrivateRuntimeCohortActivationReceiptV2(value, {
     || value.configuration_authority_packet_digest !== configurationAuthorityPacketDigest
     || value.approved_profile_cohort_digest !== approvedProfileCohortDigest
     || value.cohort_count !== cohortCount
-    || !/^[a-f0-9]{40}$/.test(deploymentCommitSha || '')
-    || value.deployment_commit_sha !== deploymentCommitSha
+    || (deploymentCommitSha != null
+      && (!/^[a-f0-9]{40}$/.test(deploymentCommitSha)
+        || value.deployment_commit_sha !== deploymentCommitSha))
+    || !sha256(immutableDeploymentIdentity)
+    || sha256Text(value.deployment_commit_sha) !== immutableDeploymentIdentity
     || value.vercel_project_reference !== vercelProjectReference
     || value.product_binding_attestation_digest !== productBindingAttestationDigest
     || value.activation_owner_ref !== activationOwnerRef

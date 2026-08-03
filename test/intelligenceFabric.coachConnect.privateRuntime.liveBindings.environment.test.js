@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
@@ -309,13 +310,18 @@ function authorityPacket(config, qual, live, product, assertion, overrides = {})
   return { ...value, packet_sha256: privateRuntimeConfigurationAuthorityDigest(value) };
 }
 
-function authorityDocuments({ packetOverrides = {}, liveOverrides = {} } = {}) {
+function authorityDocuments({
+  packetOverrides = {},
+  liveOverrides = {},
+  deploymentId = '8'.repeat(64),
+} = {}) {
   const config = configuration();
   const qual = certificate();
   const live = liveAttestation(config, qual, liveOverrides);
   const product = productBinding();
   const protectedEdge = protectedEdgeConfiguration(live, {
     emergencyDisabled: packetOverrides.emergency_disabled === true,
+    deploymentId,
   });
   const assertion = assertionConfiguration(protectedEdge.protected_edge_policy_digest);
   const packet = authorityPacket(config, qual, live, product, assertion, packetOverrides);
@@ -567,11 +573,13 @@ test('activation requires an exact separate receipt and cannot come from environ
 });
 
 test('cohort activation binds exact deployment, protected cohort, rollback, and matching operator flag', async () => {
+  const deploymentCommit = '1'.repeat(40);
   const initial = authorityDocuments({
     packetOverrides: {
       live_enabled: true,
       activation_receipt_ref: 'MORE_PRIVATE_RUNTIME_ACTIVATION_RECEIPT_VALUE',
     },
+    deploymentId: crypto.createHash('sha256').update(deploymentCommit).digest('hex'),
   });
   const cohort = createPrivateRuntimeApprovedProfileCohortV1({
     environmentId: initial.config.environment_id,
@@ -627,7 +635,7 @@ test('cohort activation binds exact deployment, protected cohort, rollback, and 
     configuration_authority_packet_digest: initial.packet.packet_sha256,
     approved_profile_cohort_digest: cohort.cohort_sha256,
     cohort_count: 4,
-    deployment_commit_sha: '1'.repeat(40),
+    deployment_commit_sha: deploymentCommit,
     deployment_tree_sha: '2'.repeat(40),
     vercel_project_reference: initial.live.vercel_project_reference,
     product_binding_attestation_digest: initial.product.binding_sha256,
@@ -704,10 +712,20 @@ test('cohort activation binds exact deployment, protected cohort, rollback, and 
   });
   assert.equal(legacyDenied.code, 'COHORT_ACTIVATION_RECEIPT_REQUIRED');
 
-  for (const runtimeCommit of [null, 'not-a-commit', '3'.repeat(40)]) {
+  const noRuntimeCommitEnv = { ...env };
+  delete noRuntimeCommitEnv.VERCEL_GIT_COMMIT_SHA;
+  const noRuntimeCommitAccepted = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: noRuntimeCommitEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(noRuntimeCommitEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(noRuntimeCommitAccepted.ok, true, JSON.stringify(noRuntimeCommitAccepted));
+
+  for (const runtimeCommit of ['not-a-commit', '3'.repeat(40)]) {
     const commitEnv = { ...env };
-    if (runtimeCommit == null) delete commitEnv.VERCEL_GIT_COMMIT_SHA;
-    else commitEnv.VERCEL_GIT_COMMIT_SHA = runtimeCommit;
+    commitEnv.VERCEL_GIT_COMMIT_SHA = runtimeCommit;
     const commitDenied = await readPrivateRuntimeLiveConfigurationAuthorityV1({
       env: commitEnv,
       resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(commitEnv),
