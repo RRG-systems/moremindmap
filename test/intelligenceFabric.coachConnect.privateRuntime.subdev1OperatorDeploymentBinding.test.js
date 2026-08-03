@@ -568,6 +568,46 @@ test('protected diagnostic log remains available when audit persistence is unava
   assert.equal(JSON.stringify(emitted[0]).includes(accessCode), false);
 });
 
+test('default protected diagnostic sink emits the restricted receipt at server error level', async () => {
+  const emitted = [];
+  const priorError = console.error;
+  console.error = (...args) => emitted.push(args);
+  try {
+    const operatorBinding = binding();
+    const session = await activateAndSelect(operatorBinding);
+    const req = request(
+      {},
+      `more_subdev1_browser=${session.browser.browser_token}; `
+        + `more_subdev1_operator=${session.activated.context_token}`,
+    );
+    const resolved = await operatorBinding.resolveOperatorContext({ req, body: {} });
+    const consumed = await operatorBinding.operatorContextBridge.consume({
+      contextToken: resolved.value.context_token,
+      browserToken: resolved.value.browser_token,
+      action: 'OPEN_SUBSCRIPTION',
+      profileReceipt: session.selected.profile_receipt,
+    });
+    const mapped = await operatorBinding.resolveOperatorBridgeInput({
+      req,
+      request_context: resolved.value,
+      operator_context: consumed,
+    });
+    const recorded = await operatorBinding.recordOperatorAttachmentDiagnostic({
+      operator_context: consumed,
+      bridge_input: mapped.value,
+      predicate_code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
+      stage: 'ATTACHMENT_COORDINATOR',
+    });
+    assert.equal(recorded.ok, true);
+    assert.equal(emitted.length, 1);
+    assert.equal(emitted[0][0], 'PRIVATE_BETA_OPERATOR_ATTACHMENT_DIAGNOSTIC_RECEIPT');
+    assert.equal(JSON.stringify(emitted).includes(profileId), false);
+    assert.equal(JSON.stringify(emitted).includes(accessCode), false);
+  } finally {
+    console.error = priorError;
+  }
+});
+
 test('forged missing inactive and unselected operator requests emit no attachment receipt', async () => {
   const emitted = [];
   const operatorBinding = binding({ diagnosticSink: (receipt) => emitted.push(receipt) });

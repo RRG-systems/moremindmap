@@ -175,7 +175,7 @@ export function createPrivateRuntimeOperatorBridgeLiveBindingV1({
   clock = () => Date.now(),
   randomToken,
   diagnosticSink = (receipt) => {
-    globalThis.console?.info?.(
+    globalThis.console?.error?.(
       'PRIVATE_BETA_OPERATOR_ATTACHMENT_DIAGNOSTIC_RECEIPT',
       JSON.stringify(receipt),
     );
