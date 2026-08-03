@@ -4,6 +4,10 @@ import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
 import {
+  PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE,
+} from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
+import {
+  createDefaultOffControlledPrivateBetaReadinessV1,
   createDeterministicDryRunDriverV1,
   createProductionPrivateBetaLaunchDriverV1,
   createPrivateBetaLaunchCheckpointV1,
@@ -1119,6 +1123,72 @@ test('production driver executes all thirteen stages with one curl transport and
   )), false);
   driver.clearSecrets({ destroy: true });
   assert.equal(fs.existsSync(custodyPath), false);
+});
+
+test('default-off controlled readiness accepts exact green scope and rejects authority drift', async () => {
+  const expectedCommit = '7'.repeat(40);
+  const scopeHash = PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash;
+  const verify = createDefaultOffControlledPrivateBetaReadinessV1({ expectedCommit });
+  const green = await verify({
+    expectedCommit,
+    baseUrl: 'https://moremindmap.com',
+    readiness: [
+      { ok: true, epoch: 1, approval_status: null, scope_hash: scopeHash },
+      { ok: true, epoch: null, approval_status: 'ACTIVE', scope_hash: scopeHash },
+    ],
+  });
+  assert.deepEqual(green, {
+    ok: true,
+    receipt: {
+      runtime_ready: true,
+      public_access: false,
+      source_default_off: true,
+    },
+  });
+
+  const summary = await verify({
+    expectedCommit,
+    baseUrl: 'https://moremindmap.com',
+    readiness: {
+      completed_operation_count: 6,
+      security_epoch: 1,
+      approval_status: 'ACTIVE',
+      exact_scope_hash: scopeHash,
+    },
+  });
+  assert.equal(summary.ok, true);
+
+  for (const candidate of [
+    {
+      expectedCommit: '8'.repeat(40),
+      baseUrl: 'https://moremindmap.com',
+      readiness: summary.receipt,
+    },
+    {
+      expectedCommit,
+      baseUrl: 'https://preview.example.test',
+      readiness: summary.receipt,
+    },
+    {
+      expectedCommit,
+      baseUrl: 'https://moremindmap.com',
+      readiness: {
+        completed_operation_count: 6,
+        security_epoch: 1,
+        approval_status: 'ACTIVE',
+        exact_scope_hash: '0'.repeat(64),
+      },
+    },
+  ]) {
+    const denied = await verify(candidate);
+    assert.equal(denied.ok, false);
+    assert.equal(denied.stop_code, 'CONTROLLED_ENABLEMENT_READINESS_INVALID');
+    assert.deepEqual(denied.receipt, {
+      runtime_ready: false,
+      public_access: false,
+      source_default_off: true,
+    });
+  }
 });
 
 test('production driver resume verifies the exact prior deployment instead of selecting a stale commit match', async (t) => {

@@ -808,6 +808,67 @@ function parseCurlResponse(stdout) {
   return { status, payload };
 }
 
+export function createDefaultOffControlledPrivateBetaReadinessV1({
+  expectedCommit,
+  expectedBaseUrl = 'https://moremindmap.com',
+} = {}) {
+  if (!GIT_SHA.test(expectedCommit || '')
+    || typeof expectedBaseUrl !== 'string'
+    || !HTTPS_ORIGIN.test(expectedBaseUrl)) {
+    throw new Error('CONTROLLED_ENABLEMENT_CONFIGURATION_INVALID');
+  }
+  return async function controlledPrivateBetaReadiness({
+    expectedCommit: observedCommit,
+    baseUrl,
+    readiness,
+  } = {}) {
+    const expectedScopeHash = PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE.exact_scope_hash;
+    let validReadiness = false;
+    if (Array.isArray(readiness) && readiness.length >= 2 && readiness.length <= 6) {
+      const finalEpoch = readiness.findLast(
+        (entry) => Number.isInteger(entry?.epoch),
+      )?.epoch;
+      const finalApproval = readiness.findLast(
+        (entry) => entry?.approval_status != null,
+      )?.approval_status;
+      validReadiness = readiness.every((entry) => (
+        entry?.ok === true && entry?.scope_hash === expectedScopeHash
+      )) && finalEpoch === 1 && finalApproval === 'ACTIVE';
+    } else {
+      validReadiness = Boolean(
+        readiness
+        && Number.isInteger(readiness.completed_operation_count)
+        && readiness.completed_operation_count >= 2
+        && readiness.completed_operation_count <= 6
+        && readiness.security_epoch === 1
+        && readiness.approval_status === 'ACTIVE'
+        && readiness.exact_scope_hash === expectedScopeHash,
+      );
+    }
+    if (observedCommit !== expectedCommit
+      || baseUrl !== expectedBaseUrl
+      || !validReadiness) {
+      return {
+        ok: false,
+        stop_code: 'CONTROLLED_ENABLEMENT_READINESS_INVALID',
+        receipt: {
+          runtime_ready: false,
+          public_access: false,
+          source_default_off: true,
+        },
+      };
+    }
+    return {
+      ok: true,
+      receipt: {
+        runtime_ready: true,
+        public_access: false,
+        source_default_off: true,
+      },
+    };
+  };
+}
+
 export function createProductionPrivateBetaLaunchDriverV1({
   repositoryRoot,
   expectedCommit,
@@ -1567,6 +1628,9 @@ async function main() {
       custodyPath,
       protectedAttestationPath: options.protectedAttestationPath,
       subdev1BindingsPath: options.subdev1BindingsPath,
+      controlledEnablement: createDefaultOffControlledPrivateBetaReadinessV1({
+        expectedCommit: options.expectedCommit,
+      }),
     });
   let result;
   try {
