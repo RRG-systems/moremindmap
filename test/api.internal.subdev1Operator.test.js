@@ -104,6 +104,7 @@ function request({
   contentType = 'application/json',
   csrfProof = '',
   csrfIntent = '',
+  diagnostic = false,
 } = {}) {
   return {
     method,
@@ -114,6 +115,7 @@ function request({
       'content-type': contentType,
       'x-subdev1-csrf': csrfProof,
       'x-subdev1-csrf-intent': csrfIntent,
+      'x-more-private-context-diagnostic': diagnostic ? 'predicate-v1' : '',
     },
   };
 }
@@ -279,6 +281,44 @@ test('copied operator cookie without browser binding cannot activate authority',
   copiedJar.set(...operatorEntry);
   const inspected = await bootstrap(route, copiedJar);
   assert.equal(inspected.response.body.active, false);
+});
+
+test('privacy-safe diagnostic distinguishes lookup miss from validated context', async () => {
+  const { route } = handlerFixture();
+  const initial = await bootstrap(route);
+  const missJar = new Map(initial.jar);
+  missJar.set('more_subdev1_operator', 'missing-context-token-with-sufficient-length-000000');
+  const missed = await call(route, {
+    method: 'GET',
+    cookie: cookieHeader(missJar),
+    diagnostic: true,
+  });
+  assert.equal(missed.statusCode, 200);
+  assert.equal(missed.body.active, false);
+  assert.deepEqual(missed.body.context_diagnostic, {
+    browser_cookie_present: true,
+    context_cookie_present: true,
+    persistence_lookup: 'MISS',
+    context_integrity: 'NOT_EVALUATED',
+    failed_predicate_identifier: 'CONTEXT_LOOKUP_MISS',
+  });
+
+  const activated = await activate(route, initial);
+  const found = await call(route, {
+    method: 'GET',
+    cookie: cookieHeader(activated.jar),
+    diagnostic: true,
+  });
+  assert.equal(found.statusCode, 200);
+  assert.equal(found.body.active, true);
+  assert.deepEqual(found.body.context_diagnostic, {
+    browser_cookie_present: true,
+    context_cookie_present: true,
+    persistence_lookup: 'HIT',
+    context_integrity: 'PASS',
+    failed_predicate_identifier: null,
+  });
+  assert.equal('context_diagnostic' in initial.response.body, false);
 });
 
 test('profile selection resolves exact scope and rejects client-supplied authority claims', async () => {

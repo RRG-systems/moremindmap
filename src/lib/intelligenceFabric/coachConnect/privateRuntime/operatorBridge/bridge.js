@@ -445,7 +445,15 @@ export function createSubdev1OperatorBridge({
     if (!config.ok) return config;
     const tokenHash = contextTokenHash(contextToken, config);
     const bindingHash = browserBindingHash(browserToken, config);
-    if (!tokenHash || !bindingHash) return denial('OPERATOR_CONTEXT_INVALID', 401);
+    if (!tokenHash || !bindingHash) {
+      return denial('OPERATOR_CONTEXT_INVALID', 401, {
+        diagnostic: {
+          persistence_lookup: 'NOT_ATTEMPTED',
+          failed_predicate_identifier: 'TOKEN_OR_BROWSER_HASH_INVALID',
+          context_integrity: 'NOT_EVALUATED',
+        },
+      });
+    }
     const lookup = await storeCall(store, 'getContextByTokenHash', tokenHash);
     const found = lookup.value;
     if (!lookup.ok || !found?.ok || found.status !== 'FOUND') {
@@ -453,6 +461,17 @@ export function createSubdev1OperatorBridge({
       return denial(
         unavailable ? 'OPERATOR_STORE_UNAVAILABLE' : 'OPERATOR_CONTEXT_INVALID',
         unavailable ? 503 : 401,
+        {
+          diagnostic: {
+            persistence_lookup: unavailable
+              ? 'UNAVAILABLE'
+              : found?.status === 'NOT_FOUND' ? 'MISS' : 'INVALID_RESPONSE',
+            failed_predicate_identifier: unavailable
+              ? 'OPERATOR_STORE_UNAVAILABLE'
+              : 'CONTEXT_LOOKUP_MISS',
+            context_integrity: 'NOT_EVALUATED',
+          },
+        },
       );
     }
     const checked = validateSubdev1OperatorContext(found.context, {
@@ -466,7 +485,15 @@ export function createSubdev1OperatorBridge({
       suppliedProfileReceipt,
     });
     if (!checked.valid) {
-      return denial(checked.errors[0]?.code || 'OPERATOR_CONTEXT_INVALID', 401);
+      const firstError = checked.errors[0] || {};
+      return denial(firstError.code || 'OPERATOR_CONTEXT_INVALID', 401, {
+        diagnostic: {
+          persistence_lookup: 'HIT',
+          failed_predicate_identifier:
+            `${firstError.code || 'OPERATOR_CONTEXT_INVALID'}:${firstError.field || 'unknown'}`,
+          context_integrity: firstError.field === 'integrity_digest' ? 'FAIL' : 'NOT_PROVEN',
+        },
+      });
     }
     return frozen({
       ok: true,
@@ -475,6 +502,11 @@ export function createSubdev1OperatorBridge({
       context: checked.value,
       token_hash: tokenHash,
       browser_binding_hash: bindingHash,
+      diagnostic: {
+        persistence_lookup: 'HIT',
+        failed_predicate_identifier: null,
+        context_integrity: 'PASS',
+      },
     });
   }
 
@@ -709,6 +741,7 @@ export function createSubdev1OperatorBridge({
         code: verified.code,
         profile_state: 'NO_PROFILE',
         profile_receipt: null,
+        diagnostic: verified.diagnostic || null,
       });
     }
     return frozen({
@@ -724,6 +757,7 @@ export function createSubdev1OperatorBridge({
       stripe_authority: false,
       coach_authority: false,
       canonical_identity_authority: false,
+      diagnostic: verified.diagnostic || null,
     });
   }
 

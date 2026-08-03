@@ -110,6 +110,8 @@ export function createSubdev1OperatorHandler({
     const existingCookies = readSubdev1OperatorCookies(req?.headers?.cookie);
 
     if (req.method === 'GET') {
+      const diagnosticRequested = req?.headers?.['x-more-private-context-diagnostic']
+        === 'predicate-v1';
       const browser = await bridge.establishBrowser(
         existingCookies.browser_valid ? existingCookies.browser : '',
       );
@@ -148,6 +150,16 @@ export function createSubdev1OperatorHandler({
         profile_receipt: status.profile_receipt || null,
         csrf_token: csrf.csrf_proof,
         csrf_method: intent,
+        ...(diagnosticRequested ? {
+          context_diagnostic: {
+            browser_cookie_present: existingCookies.browser_valid,
+            context_cookie_present: existingCookies.context_valid,
+            persistence_lookup: status.diagnostic?.persistence_lookup || 'NOT_ATTEMPTED',
+            context_integrity: status.diagnostic?.context_integrity || 'NOT_EVALUATED',
+            failed_predicate_identifier:
+              status.diagnostic?.failed_predicate_identifier || null,
+          },
+        } : {}),
       });
     }
 
