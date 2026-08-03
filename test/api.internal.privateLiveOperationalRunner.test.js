@@ -281,3 +281,66 @@ test('protected route preserves a bounded STORE_CANARY_PROOF failure classificat
     false,
   );
 });
+
+test('protected route exposes only a validated four-field response-shape diagnostic', async () => {
+  const diagnostic = {
+    field_count: 9,
+    field_name_digest: 'a'.repeat(64),
+    field_type_classes: [
+      'null',
+      'string',
+      'null',
+      'number',
+      'boolean',
+      'boolean',
+      'number',
+      'string',
+      'string',
+    ],
+    failed_predicate_id: 'FIELD_TYPE_MISMATCH',
+  };
+  const stageReceipt = createPrivateBetaLaunchStageReceiptV1({
+    stage: 'PROOF_STORAGE',
+    stop_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    provider_health_call_count: 3,
+    expected_provider_state: 'HEALTHY',
+    observed_provider_state: 'HEALTHY',
+    provider_failure_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    proof_storage_attempted: true,
+    proof_storage_succeeded: false,
+  });
+  const run = async (providerProofDiagnostic) => {
+    const res = response();
+    await createPrivateLiveOperationalRunnerHandler({
+      env: env(),
+      clock: () => now,
+      buildRunner: async () => ({
+        ok: true,
+        execute: async () => ({
+          ok: false,
+          code: 'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
+          stage_receipt: stageReceipt,
+          provider_proof_diagnostic: providerProofDiagnostic,
+        }),
+      }),
+    })(req(), res);
+    return res;
+  };
+  const accepted = await run(diagnostic);
+  assert.equal(accepted.statusCode, 403);
+  assert.deepEqual(accepted.payload.provider_proof_diagnostic, diagnostic);
+  assert.equal(JSON.stringify(accepted.payload).includes('provider response body'), false);
+
+  const rejected = await run({ ...diagnostic, raw_payload: 'must-not-escape' });
+  assert.equal(rejected.statusCode, 403);
+  assert.equal(Object.hasOwn(rejected.payload, 'provider_proof_diagnostic'), false);
+  assert.equal(JSON.stringify(rejected.payload).includes('must-not-escape'), false);
+
+  const tooWide = await run({
+    ...diagnostic,
+    field_count: 33,
+    field_type_classes: Array.from({ length: 33 }, () => 'string'),
+  });
+  assert.equal(tooWide.statusCode, 403);
+  assert.equal(Object.hasOwn(tooWide.payload, 'provider_proof_diagnostic'), false);
+});

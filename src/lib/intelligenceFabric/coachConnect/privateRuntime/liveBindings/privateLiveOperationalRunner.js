@@ -88,6 +88,34 @@ const PROVIDER_RESULT_FIELDS = Object.freeze([
   'expires_at_ms',
   'idempotent_replay',
 ]);
+export const PROVIDER_PROOF_RESPONSE_SHAPE_DIAGNOSTIC_FIELDS = Object.freeze([
+  'field_count',
+  'field_name_digest',
+  'field_type_classes',
+  'failed_predicate_id',
+]);
+export const PROVIDER_PROOF_RESPONSE_SHAPE_PREDICATE_IDS = Object.freeze([
+  'EXACT_FIELD_SET_MISMATCH',
+  'FIELD_TYPE_MISMATCH',
+  'STATUS_ENUM_MISMATCH',
+  'CODE_VALUE_CLASS_MISMATCH',
+  'RECEIPT_HASH_FORMAT_MISMATCH',
+  'TIMESTAMP_RANGE_MISMATCH',
+  'EXPIRY_ORDER_MISMATCH',
+  'IDEMPOTENCY_FLAG_MISMATCH',
+  'NULLABILITY_MISMATCH',
+  'OPERATION_RESULT_MISMATCH',
+  'UNEXPECTED_RESULT_SHAPE',
+]);
+const PROVIDER_PROOF_RESPONSE_TYPE_CLASSES = Object.freeze([
+  'null',
+  'boolean',
+  'number',
+  'string',
+  'array',
+  'object',
+  'unknown',
+]);
 const PROVIDER_RESULT_CODES = Object.freeze([
   '',
   'REQUEST_REPLAY_DETECTED',
@@ -160,15 +188,20 @@ const frozen = (value) => Object.freeze(jsonClone(value));
 const hashText = (value) => crypto.createHash('sha256').update(String(value)).digest('hex');
 
 class ProviderCommandDiagnosticError extends Error {
-  constructor(diagnosticCode) {
+  constructor(diagnosticCode, responseShapeDiagnostic = null) {
     super('provider command failed');
     this.name = 'ProviderCommandDiagnosticError';
     this.diagnosticCode = diagnosticCode;
+    this.responseShapeDiagnostic = validateProviderProofResponseShapeDiagnosticV1(
+      responseShapeDiagnostic,
+    )
+      ? responseShapeDiagnostic
+      : null;
   }
 }
 
-function providerCommandFailure(diagnosticCode) {
-  return new ProviderCommandDiagnosticError(diagnosticCode);
+function providerCommandFailure(diagnosticCode, responseShapeDiagnostic = null) {
+  return new ProviderCommandDiagnosticError(diagnosticCode, responseShapeDiagnostic);
 }
 
 const OPERATIONAL_SCRIPT = String.raw`-- private-live-operational-runner-v1
@@ -494,15 +527,39 @@ export function createPrivateBetaLaunchStageReceiptV1({
   return validatePrivateBetaLaunchStageReceiptV1(value) ? frozen(value) : null;
 }
 
-function denied(code = 'OPERATIONAL_RUNNER_REQUEST_DENIED', stageReceipt = null) {
-  return frozen({
+export function validateProviderProofResponseShapeDiagnosticV1(value) {
+  return exactFields(value, PROVIDER_PROOF_RESPONSE_SHAPE_DIAGNOSTIC_FIELDS)
+    && Number.isInteger(value.field_count)
+    && value.field_count >= 0
+    && value.field_count <= 32
+    && sha256(value.field_name_digest)
+    && Array.isArray(value.field_type_classes)
+    && value.field_type_classes.length === value.field_count
+    && value.field_type_classes.every(
+      (entry) => PROVIDER_PROOF_RESPONSE_TYPE_CLASSES.includes(entry),
+    )
+    && PROVIDER_PROOF_RESPONSE_SHAPE_PREDICATE_IDS.includes(
+      value.failed_predicate_id,
+    );
+}
+
+function denied(
+  code = 'OPERATIONAL_RUNNER_REQUEST_DENIED',
+  stageReceipt = null,
+  responseShapeDiagnostic = null,
+) {
+  const value = {
     ok: false,
     allowed: false,
     code,
     stage_receipt: validatePrivateBetaLaunchStageReceiptV1(stageReceipt)
       ? stageReceipt
       : null,
-  });
+  };
+  if (validateProviderProofResponseShapeDiagnosticV1(responseShapeDiagnostic)) {
+    value.provider_proof_diagnostic = responseShapeDiagnostic;
+  }
+  return frozen(value);
 }
 
 function parseAuthority(env, nowMs) {
@@ -884,6 +941,136 @@ function validProviderResultForOperation(value, operation) {
   }
 }
 
+function providerResultTypeClass(value) {
+  if (value === null) return 'null';
+  if (Array.isArray(value)) return 'array';
+  if (typeof value === 'boolean') return 'boolean';
+  if (typeof value === 'number') return 'number';
+  if (typeof value === 'string') return 'string';
+  if (value && typeof value === 'object') return 'object';
+  return 'unknown';
+}
+
+function failedProviderResultPredicate(value, operation) {
+  if (!object(value)) return 'UNEXPECTED_RESULT_SHAPE';
+  if (!exactFields(value, PROVIDER_RESULT_FIELDS)) return 'EXACT_FIELD_SET_MISMATCH';
+  if (value.ok === null
+    || value.status === null
+    || value.code === null
+    || value.provider_time_ms === null
+    || value.receipt_hash === null
+    || value.idempotent_replay === null) {
+    return 'NULLABILITY_MISMATCH';
+  }
+  if (typeof value.ok !== 'boolean'
+    || typeof value.status !== 'string'
+    || typeof value.code !== 'string'
+    || typeof value.provider_time_ms !== 'number'
+    || typeof value.receipt_hash !== 'string'
+    || (value.epoch !== null && typeof value.epoch !== 'number')
+    || (value.approval_status !== null && typeof value.approval_status !== 'string')
+    || (value.expires_at_ms !== null && typeof value.expires_at_ms !== 'number')
+    || typeof value.idempotent_replay !== 'boolean') {
+    return 'FIELD_TYPE_MISMATCH';
+  }
+  if (!['HEALTHY', 'ACTIVE', 'ABSENT', 'EXPIRED', 'REVOKED', 'STALE', 'DENIED']
+    .includes(value.status)) {
+    return 'STATUS_ENUM_MISMATCH';
+  }
+  if (!PROVIDER_RESULT_CODES.includes(value.code)
+    || (!value.ok && value.code === '')
+    || (value.ok && value.code !== '')) {
+    return 'CODE_VALUE_CLASS_MISMATCH';
+  }
+  if (!Number.isSafeInteger(value.provider_time_ms) || value.provider_time_ms < 0
+    || (value.expires_at_ms !== null
+      && (!Number.isSafeInteger(value.expires_at_ms) || value.expires_at_ms <= 0))) {
+    return 'TIMESTAMP_RANGE_MISMATCH';
+  }
+  if (!sha256(value.receipt_hash)) return 'RECEIPT_HASH_FORMAT_MISMATCH';
+  if (value.epoch !== null && (!Number.isInteger(value.epoch) || value.epoch < 0)) {
+    return 'FIELD_TYPE_MISMATCH';
+  }
+  if (value.approval_status !== null
+    && !APPROVAL_STATUSES.includes(value.approval_status)) {
+    return 'STATUS_ENUM_MISMATCH';
+  }
+  if (value.idempotent_replay !== false) return 'IDEMPOTENCY_FLAG_MISMATCH';
+  if (!value.ok) {
+    return value.status === 'DENIED'
+      ? 'OPERATION_RESULT_MISMATCH'
+      : 'STATUS_ENUM_MISMATCH';
+  }
+  switch (operation) {
+    case 'STORE_CANARY_PROOF':
+      if (value.status !== 'HEALTHY') return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch !== null
+        || value.approval_status !== null
+        || value.expires_at_ms === null) return 'NULLABILITY_MISMATCH';
+      return value.expires_at_ms > value.provider_time_ms
+        ? 'OPERATION_RESULT_MISMATCH'
+        : 'EXPIRY_ORDER_MISMATCH';
+    case 'CREATE_SYNTHETIC_EPOCH_1':
+      if (value.status !== 'ACTIVE') return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null
+        || value.approval_status !== null
+        || value.expires_at_ms !== null) return 'NULLABILITY_MISMATCH';
+      return 'OPERATION_RESULT_MISMATCH';
+    case 'READ_SYNTHETIC_EPOCH':
+      if (!['ABSENT', 'ACTIVE'].includes(value.status)) return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null
+        || value.approval_status !== null
+        || value.expires_at_ms !== null) return 'NULLABILITY_MISMATCH';
+      return 'OPERATION_RESULT_MISMATCH';
+    case 'ADVANCE_SYNTHETIC_EPOCH_1_TO_2':
+      if (value.status !== 'ACTIVE') return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null
+        || value.approval_status !== null
+        || value.expires_at_ms !== null) return 'NULLABILITY_MISMATCH';
+      return 'OPERATION_RESULT_MISMATCH';
+    case 'CREATE_SYNTHETIC_APPROVAL':
+      if (value.status !== 'ACTIVE') return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null
+        || value.approval_status === null
+        || value.expires_at_ms === null) return 'NULLABILITY_MISMATCH';
+      return value.expires_at_ms > value.provider_time_ms
+        ? 'OPERATION_RESULT_MISMATCH'
+        : 'EXPIRY_ORDER_MISMATCH';
+    case 'READ_SYNTHETIC_APPROVAL':
+      if (!APPROVAL_STATUSES.includes(value.status)) return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null || value.approval_status === null) {
+        return 'NULLABILITY_MISMATCH';
+      }
+      if ((value.status === 'ABSENT' && value.expires_at_ms !== null)
+        || (value.status !== 'ABSENT' && value.expires_at_ms === null)) {
+        return 'NULLABILITY_MISMATCH';
+      }
+      return 'OPERATION_RESULT_MISMATCH';
+    case 'REVOKE_SYNTHETIC_APPROVAL':
+      if (value.status !== 'REVOKED') return 'STATUS_ENUM_MISMATCH';
+      if (value.epoch === null
+        || value.approval_status === null
+        || value.expires_at_ms === null) return 'NULLABILITY_MISMATCH';
+      return 'OPERATION_RESULT_MISMATCH';
+    default:
+      return 'OPERATION_RESULT_MISMATCH';
+  }
+}
+
+function createProviderProofResponseShapeDiagnostic(value, operation) {
+  const fieldNames = object(value) ? Object.keys(value).sort() : [];
+  if (fieldNames.length > 32) return null;
+  const diagnostic = {
+    field_count: fieldNames.length,
+    field_name_digest: hashText(JSON.stringify(fieldNames)),
+    field_type_classes: fieldNames.map((field) => providerResultTypeClass(value[field])),
+    failed_predicate_id: failedProviderResultPredicate(value, operation),
+  };
+  return validateProviderProofResponseShapeDiagnosticV1(diagnostic)
+    ? frozen(diagnostic)
+    : null;
+}
+
 function parseProviderResult(raw, operation) {
   const payload = Array.isArray(raw) && raw.length === 1 ? raw[0] : raw;
   let value;
@@ -893,7 +1080,10 @@ function parseProviderResult(raw, operation) {
     throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.INVALID_JSON);
   }
   if (!validProviderResultForOperation(value, operation)) {
-    throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT);
+    throw providerCommandFailure(
+      STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT,
+      createProviderProofResponseShapeDiagnostic(value, operation),
+    );
   }
   return value;
 }
@@ -1049,7 +1239,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
   }
 
   async function runProviderOperation(operation, request, sequenceDigest = null) {
-    const proofFailure = (stopCode) => denied(
+    const proofFailure = (stopCode, responseShapeDiagnostic = null) => denied(
       'OPERATIONAL_RUNNER_PROVIDER_UNAVAILABLE',
       operation === 'STORE_CANARY_PROOF'
         ? createPrivateBetaLaunchStageReceiptV1({
@@ -1060,6 +1250,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
           proof_storage_succeeded: false,
         })
         : null,
+      operation === 'STORE_CANARY_PROOF' ? responseShapeDiagnostic : null,
     );
     let invocation;
     try {
@@ -1096,7 +1287,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
         : error?.name === 'AbortError'
           ? STORE_CANARY_PROOF_FAILURE_CODES.TIMEOUT
           : STORE_CANARY_PROOF_FAILURE_CODES.EXECUTOR;
-      return proofFailure(stopCode);
+      return proofFailure(stopCode, error?.responseShapeDiagnostic);
     }
     let parsed;
     try {
@@ -1106,6 +1297,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
         error instanceof ProviderCommandDiagnosticError
           ? error.diagnosticCode
           : STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT,
+        error?.responseShapeDiagnostic,
       );
     }
     try {
@@ -1292,6 +1484,7 @@ export async function buildPrivateLiveOperationalRunnerV1({
               proof_storage_attempted: true,
               proof_storage_succeeded: false,
             }),
+            stored.provider_proof_diagnostic,
           );
         }
         return frozen({

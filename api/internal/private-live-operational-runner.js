@@ -4,6 +4,7 @@ import {
   createPrivateBetaLaunchStageReceiptV1,
   validatePrivateLiveOperationalRunnerRequestV1,
   validatePrivateBetaLaunchStageReceiptV1,
+  validateProviderProofResponseShapeDiagnosticV1,
 } from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
 
 function headers(res) {
@@ -24,10 +25,13 @@ function locked(res) {
   return res.status(404).json({ ok: false, error: 'feature_unavailable' });
 }
 
-function denied(res, stageReceipt = null) {
+function denied(res, stageReceipt = null, responseShapeDiagnostic = null) {
   const payload = { ok: false, error: 'request_denied' };
   if (validatePrivateBetaLaunchStageReceiptV1(stageReceipt)) {
     payload.stage_receipt = stageReceipt;
+  }
+  if (validateProviderProofResponseShapeDiagnosticV1(responseShapeDiagnostic)) {
+    payload.provider_proof_diagnostic = responseShapeDiagnostic;
   }
   return res.status(403).json(payload);
 }
@@ -108,6 +112,7 @@ export function createPrivateLiveOperationalRunnerHandler({
             stage: 'PROVIDER_EXECUTION',
             stop_code: 'RUNNER_REQUEST_DENIED',
           }),
+        result?.provider_proof_diagnostic,
       );
     }
     return res.status(200).json(result);

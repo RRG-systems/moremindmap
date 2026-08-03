@@ -10,6 +10,7 @@ import {
   PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE,
   validatePrivateBetaLaunchStageReceiptV1,
   validatePrivateLiveOperationalRunnerRequestV1,
+  validateProviderProofResponseShapeDiagnosticV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
 import {
   validatePrivateTestApprovalV1,
@@ -871,6 +872,149 @@ test('provider-controlled strings, fields, and result combinations fail without 
     );
     assert.equal(JSON.stringify(result).includes(sentinel), false);
   }
+});
+
+test('provider proof response-shape diagnostic is deterministic, value-free, and predicate-specific', async (t) => {
+  const sentinel = 'synthetic_provider_value_must_never_escape';
+  const validReceipt = {
+    ok: true,
+    status: 'HEALTHY',
+    code: '',
+    provider_time_ms: now,
+    receipt_hash: 'e'.repeat(64),
+    epoch: null,
+    approval_status: null,
+    expires_at_ms: now + 60_000,
+    idempotent_replay: false,
+  };
+  const expectedDiagnostic = (value, failedPredicateId) => {
+    const fieldNames = Object.keys(value).sort();
+    return {
+      field_count: fieldNames.length,
+      field_name_digest: crypto.createHash('sha256')
+        .update(JSON.stringify(fieldNames))
+        .digest('hex'),
+      field_type_classes: fieldNames.map((field) => {
+        const entry = value[field];
+        if (entry === null) return 'null';
+        if (Array.isArray(entry)) return 'array';
+        if (['boolean', 'number', 'string'].includes(typeof entry)) return typeof entry;
+        if (entry && typeof entry === 'object') return 'object';
+        return 'unknown';
+      }),
+      failed_predicate_id: failedPredicateId,
+    };
+  };
+  const valid = await runClassifiedCanaryFailure({
+    providerCommandExecutor: async () => JSON.stringify(validReceipt),
+  });
+  assert.equal(valid.result.ok, true);
+  assert.equal(Object.hasOwn(valid.result, 'provider_proof_diagnostic'), false);
+
+  const cases = [
+    {
+      name: 'missing field',
+      value: (() => {
+        const value = { ...validReceipt };
+        delete value.epoch;
+        return value;
+      })(),
+      predicate: 'EXACT_FIELD_SET_MISMATCH',
+    },
+    {
+      name: 'extra field with secret-like value',
+      value: { ...validReceipt, unexpected: sentinel },
+      predicate: 'EXACT_FIELD_SET_MISMATCH',
+    },
+    {
+      name: 'wrong field name',
+      value: (() => {
+        const value = { ...validReceipt, provider_clock_ms: now };
+        delete value.provider_time_ms;
+        return value;
+      })(),
+      predicate: 'EXACT_FIELD_SET_MISMATCH',
+    },
+    {
+      name: 'wrong type',
+      value: { ...validReceipt, provider_time_ms: String(now) },
+      predicate: 'FIELD_TYPE_MISMATCH',
+    },
+    {
+      name: 'wrong enum',
+      value: { ...validReceipt, status: sentinel },
+      predicate: 'STATUS_ENUM_MISMATCH',
+    },
+    {
+      name: 'nullability mismatch',
+      value: { ...validReceipt, epoch: 0 },
+      predicate: 'NULLABILITY_MISMATCH',
+    },
+    {
+      name: 'timestamp range mismatch',
+      value: { ...validReceipt, provider_time_ms: -1 },
+      predicate: 'TIMESTAMP_RANGE_MISMATCH',
+    },
+    {
+      name: 'expiry order mismatch',
+      value: { ...validReceipt, expires_at_ms: now },
+      predicate: 'EXPIRY_ORDER_MISMATCH',
+    },
+    {
+      name: 'receipt hash mismatch',
+      value: { ...validReceipt, receipt_hash: sentinel },
+      predicate: 'RECEIPT_HASH_FORMAT_MISMATCH',
+    },
+    {
+      name: 'idempotency mismatch',
+      value: { ...validReceipt, idempotent_replay: true },
+      predicate: 'IDEMPOTENCY_FLAG_MISMATCH',
+    },
+  ];
+  for (const entry of cases) {
+    await t.test(entry.name, async () => {
+      const { result } = await runClassifiedCanaryFailure({
+        providerCommandExecutor: async () => JSON.stringify(entry.value),
+      });
+      assertProofFailureClassification(
+        result,
+        'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+      );
+      assert.deepEqual(
+        result.provider_proof_diagnostic,
+        expectedDiagnostic(entry.value, entry.predicate),
+      );
+      assert.equal(
+        validateProviderProofResponseShapeDiagnosticV1(
+          result.provider_proof_diagnostic,
+        ),
+        true,
+      );
+      const serialized = JSON.stringify(result);
+      assert.equal(serialized.includes(sentinel), false);
+      assert.equal(serialized.includes(JSON.stringify(entry.value)), false);
+      assert.deepEqual(
+        Object.keys(result.provider_proof_diagnostic).sort(),
+        [
+          'failed_predicate_id',
+          'field_count',
+          'field_name_digest',
+          'field_type_classes',
+        ],
+      );
+    });
+  }
+});
+
+test('provider proof response-shape diagnostic matches the 32-entry checkpoint bound', () => {
+  const diagnostic = (fieldCount) => ({
+    field_count: fieldCount,
+    field_name_digest: 'a'.repeat(64),
+    field_type_classes: Array.from({ length: fieldCount }, () => 'string'),
+    failed_predicate_id: 'EXACT_FIELD_SET_MISMATCH',
+  });
+  assert.equal(validateProviderProofResponseShapeDiagnosticV1(diagnostic(32)), true);
+  assert.equal(validateProviderProofResponseShapeDiagnosticV1(diagnostic(33)), false);
 });
 
 test('STORE_CANARY_PROOF failures receive bounded privacy-safe classifications', async (t) => {

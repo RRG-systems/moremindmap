@@ -10,6 +10,7 @@ import {
   PRIVATE_LIVE_OPERATIONAL_RUNNER_AUTHORITY_VERSION,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_OPERATIONS,
   PRIVATE_LIVE_OPERATIONAL_RUNNER_SCOPE,
+  validateProviderProofResponseShapeDiagnosticV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveOperationalRunner.js';
 import {
   PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE,
@@ -1338,14 +1339,20 @@ export function createProductionPrivateBetaLaunchDriverV1({
         case 'PROVIDER_CANARY': {
           const response = await invokeRunner('PROVIDER_HEALTH_CANARY', 'provider_canary');
           if (response.status !== 200 || response.payload?.ok !== true) {
+            const stageReceipt = validatePrivacySafeLaunchReceiptV1(
+              response.payload?.stage_receipt,
+            )
+              ? response.payload.stage_receipt
+              : { http_status: response.status };
+            const diagnostic = response.payload?.provider_proof_diagnostic;
             return {
               ok: false,
               stop_code: SAFE_CODE.test(response.payload?.stage_receipt?.stop_code || '')
                 ? response.payload.stage_receipt.stop_code
                 : 'PROVIDER_CANARY_FAILED',
-              receipt: validatePrivacySafeLaunchReceiptV1(response.payload?.stage_receipt)
-                ? response.payload.stage_receipt
-                : { http_status: response.status },
+              receipt: validateProviderProofResponseShapeDiagnosticV1(diagnostic)
+                ? { ...stageReceipt, provider_proof_diagnostic: diagnostic }
+                : stageReceipt,
             };
           }
           if (canonicalJson(response.payload.provider_states)

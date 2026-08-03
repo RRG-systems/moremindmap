@@ -179,6 +179,7 @@ function productionCommandFixture({
   omittedMetadata = [],
   metadataOverrides = {},
   failSubdev1WriteAt = null,
+  providerCanaryPayload = null,
 } = {}) {
   const calls = [];
   const metadataNames = new Set(
@@ -268,6 +269,7 @@ function productionCommandFixture({
       });
     }
     if (runnerCall === 3) {
+      if (providerCanaryPayload) return curlResponse(providerCanaryPayload, 403);
       return curlResponse({
         ok: true,
         provider_states: ['RECOVERING', 'RECOVERING', 'HEALTHY'],
@@ -288,6 +290,135 @@ function productionCommandFixture({
   };
   return { calls, commandRunner, deploymentUrl };
 }
+
+test('production driver checkpoints only the approved provider response-shape diagnostic', async (t) => {
+  const checkpointPath = temporaryCheckpoint(t);
+  const custodyPath = `${checkpointPath}.custody`;
+  const expectedCommit = '4'.repeat(40);
+  const diagnostic = {
+    field_count: 9,
+    field_name_digest: 'a'.repeat(64),
+    field_type_classes: [
+      'null',
+      'string',
+      'null',
+      'number',
+      'boolean',
+      'boolean',
+      'number',
+      'string',
+      'string',
+    ],
+    failed_predicate_id: 'FIELD_TYPE_MISMATCH',
+  };
+  const stageReceipt = {
+    receipt_version: 'private-beta-launch-stage-receipt-v1',
+    stage: 'PROOF_STORAGE',
+    status: 'FAILED',
+    stop_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    provider_health_call_count: 3,
+    expected_provider_state: 'HEALTHY',
+    observed_provider_state: 'HEALTHY',
+    provider_failure_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    proof_storage_attempted: true,
+    proof_storage_succeeded: false,
+  };
+  const fixture = productionCommandFixture({
+    expectedCommit,
+    custodyPath,
+    providerCanaryPayload: {
+      ok: false,
+      error: 'request_denied',
+      stage_receipt: stageReceipt,
+      provider_proof_diagnostic: diagnostic,
+    },
+  });
+  const protectedAttestationPath = protectedInput(
+    t,
+    'attestation.json',
+    protectedAttestation({ expectedCommit }),
+  );
+  const driver = createProductionPrivateBetaLaunchDriverV1({
+    repositoryRoot: path.resolve('.'),
+    expectedCommit,
+    custodyPath,
+    protectedAttestationPath,
+    now: () => productionNow,
+    commandRunner: fixture.commandRunner,
+  });
+  const result = await runPrivateBetaLaunchOrchestratorV1({
+    driver,
+    checkpointPath,
+    sourceCommit: expectedCommit,
+    runId: 'provider_shape_diagnostic_v1',
+    mode: 'execute',
+    clock: () => '2026-08-02T12:00:00.000Z',
+  });
+  assert.equal(result.final_stop_code, 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED');
+  const canary = result.stages.find((stage) => stage.stage_id === 'PROVIDER_CANARY');
+  assert.deepEqual(canary.receipt, {
+    ...stageReceipt,
+    provider_proof_diagnostic: diagnostic,
+  });
+  assert.equal(JSON.stringify(result).includes('provider response body'), false);
+});
+
+test('production driver drops a diagnostic wider than the privacy-safe checkpoint bound', async (t) => {
+  const checkpointPath = temporaryCheckpoint(t);
+  const custodyPath = `${checkpointPath}.custody`;
+  const expectedCommit = '3'.repeat(40);
+  const stageReceipt = {
+    receipt_version: 'private-beta-launch-stage-receipt-v1',
+    stage: 'PROOF_STORAGE',
+    status: 'FAILED',
+    stop_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    provider_health_call_count: 3,
+    expected_provider_state: 'HEALTHY',
+    observed_provider_state: 'HEALTHY',
+    provider_failure_code: 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+    proof_storage_attempted: true,
+    proof_storage_succeeded: false,
+  };
+  const fixture = productionCommandFixture({
+    expectedCommit,
+    custodyPath,
+    providerCanaryPayload: {
+      ok: false,
+      error: 'request_denied',
+      stage_receipt: stageReceipt,
+      provider_proof_diagnostic: {
+        field_count: 33,
+        field_name_digest: 'a'.repeat(64),
+        field_type_classes: Array.from({ length: 33 }, () => 'string'),
+        failed_predicate_id: 'EXACT_FIELD_SET_MISMATCH',
+      },
+    },
+  });
+  const protectedAttestationPath = protectedInput(
+    t,
+    'attestation.json',
+    protectedAttestation({ expectedCommit }),
+  );
+  const driver = createProductionPrivateBetaLaunchDriverV1({
+    repositoryRoot: path.resolve('.'),
+    expectedCommit,
+    custodyPath,
+    protectedAttestationPath,
+    now: () => productionNow,
+    commandRunner: fixture.commandRunner,
+  });
+  const result = await runPrivateBetaLaunchOrchestratorV1({
+    driver,
+    checkpointPath,
+    sourceCommit: expectedCommit,
+    runId: 'provider_shape_bound_v1',
+    mode: 'execute',
+    clock: () => '2026-08-02T12:00:00.000Z',
+  });
+  assert.equal(result.final_stop_code, 'CANARY_PROOF_RECEIPT_VALIDATION_FAILED');
+  const canary = result.stages.find((stage) => stage.stage_id === 'PROVIDER_CANARY');
+  assert.deepEqual(canary.receipt, stageReceipt);
+});
 
 test('deterministic dry run and replay produce byte-identical checkpoints', async (t) => {
   const firstPath = temporaryCheckpoint(t);
