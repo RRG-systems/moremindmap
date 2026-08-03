@@ -1,4 +1,5 @@
 import React from 'react';
+import { buildCustomerVisualDNAProjection } from '../../lib/visualDNA/buildCustomerVisualDNAProjection.js';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 
 const POSTER_WIDTH = 1672;
@@ -145,6 +146,18 @@ function TraitBadge({ rank, item, fallbackLabel, tone, showEvidence = true }) {
       <strong>{item?.label || fallbackLabel || '—'}</strong>
       <em>{item ? formatScore(item.value) : '—'}</em>
       {showEvidence && evidence ? <small>{evidence}</small> : null}
+    </div>
+  );
+}
+
+function PanelLabel({ children, tone = '', classification = null }) {
+  const toneClass = tone ? ` bos-dna-v2__label--${tone}` : '';
+  return (
+    <div className={`bos-dna-v2__label${toneClass}`}>
+      <span>{children}</span>
+      {classification?.label ? (
+        <em data-classification={classification.kind}>{classification.label}</em>
+      ) : null}
     </div>
   );
 }
@@ -301,9 +314,10 @@ function PreviewPoster({
             <div className="bos-dna-v2__ring bos-dna-v2__ring--inner" />
             <div className="bos-dna-v2__reactor-core" aria-hidden="true" />
             <div className="bos-dna-v2__reactor-label">
-              <span>Primary Engine</span>
+              <span>Primary Engine · Assessment-derived</span>
               <strong>{engineHeadline}</strong>
               <em>{engineSub}</em>
+              {vm.centerInterpretation ? <small>{vm.centerInterpretation}</small> : null}
             </div>
           </div>
         </div>
@@ -366,12 +380,13 @@ export default function DeterministicBOSDNAVisualV2({
   const isFullscreen = displayMode === 'fullscreen';
 
   const sourceProfile = profile || customerViewModel || null;
-  const vm = resolveViewModel({
+  const resolvedViewModel = resolveViewModel({
     viewModel,
     profile: sourceProfile,
     narrative,
     allowSampleFallback,
   });
+  const vm = buildCustomerVisualDNAProjection(resolvedViewModel);
 
   const topDimensions = Array.isArray(vm.topDimensions) ? vm.topDimensions.slice(0, 6) : [];
   const tension = vm.tension || {
@@ -383,6 +398,7 @@ export default function DeterministicBOSDNAVisualV2({
   const futureCards = defaultFutureCards(vm);
   const customerPresentation = vm.customerPresentation || null;
   const visibility = customerPresentation?.visibility || {};
+  const classifications = customerPresentation?.panelClassifications || {};
   const show = (key) => !customerPresentation || visibility[key] === true;
   const globalLimitation = customerPresentation?.globalLimitation || '';
 
@@ -405,6 +421,7 @@ export default function DeterministicBOSDNAVisualV2({
       data-mode={displayMode}
       data-poster-width={POSTER_WIDTH}
       data-poster-height={POSTER_HEIGHT}
+      data-visual-dna-projection={customerPresentation?.version || 'deterministic-layer2'}
     >
       <style>{styles}</style>
 
@@ -416,7 +433,7 @@ export default function DeterministicBOSDNAVisualV2({
           showDimensionEvidence={show('dimensionEvidence')}
           showFutureCards={show('futureCards')}
           showOneMove={show('oneMove')}
-          limitation={globalLimitation}
+          limitation={customerPresentation?.previewLimitation || globalLimitation}
         />
       ) : (
       <div className="bos-dna-v2__frame" aria-label="Behavioral Operating System Visual Map">
@@ -447,7 +464,7 @@ export default function DeterministicBOSDNAVisualV2({
 
           <aside className="bos-dna-v2__left">
             <section className="bos-dna-v2__panel">
-              <div className="bos-dna-v2__label">Dimension Scorecard</div>
+              <PanelLabel classification={classifications.dimensionScorecard}>Dimension Scorecard</PanelLabel>
               {topDimensions.length ? (
                 topDimensions.map((item, index) => (
                   <DimensionRow
@@ -464,7 +481,7 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('evidenceAmplitude') ? (
             <section className="bos-dna-v2__panel">
-              <div className="bos-dna-v2__label">Evidence &amp; Amplitude</div>
+              <PanelLabel classification={classifications.evidenceAmplitude}>Evidence &amp; Amplitude</PanelLabel>
               <div className="bos-dna-v2__evidence">
                 <div>
                   <div className="bos-dna-v2__ev-row">
@@ -497,13 +514,13 @@ export default function DeterministicBOSDNAVisualV2({
             <div className="bos-dna-v2__dual">
               {show('energySource') ? (
               <section className="bos-dna-v2__panel">
-                <div className="bos-dna-v2__label bos-dna-v2__label--cyan">Energy Source</div>
+                <PanelLabel tone="cyan" classification={classifications.energySource}>Possible Energy Source</PanelLabel>
                 <CompactList items={vm.energySource} />
               </section>
               ) : null}
               {show('fatigueSource') ? (
               <section className="bos-dna-v2__panel">
-                <div className="bos-dna-v2__label bos-dna-v2__label--orange">Fatigue Source</div>
+                <PanelLabel tone="orange" classification={classifications.fatigueSource}>Possible Fatigue Source</PanelLabel>
                 <CompactList items={vm.fatigueSource} />
               </section>
               ) : null}
@@ -520,7 +537,7 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('inputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--left bos-dna-v2__panel">
-              <div className="bos-dna-v2__label">Inputs</div>
+              <PanelLabel classification={classifications.inputs}>Inputs</PanelLabel>
               <CompactList items={vm.inputs} empty="—" />
             </div>
             ) : null}
@@ -532,22 +549,23 @@ export default function DeterministicBOSDNAVisualV2({
               <div className="bos-dna-v2__ring bos-dna-v2__ring--inner" />
               <div className="bos-dna-v2__reactor-core" aria-hidden="true" />
               <div className="bos-dna-v2__reactor-label">
-                <span>Primary Engine</span>
+                <span>Primary Engine · Assessment-derived</span>
                 <strong>{firstLine(vm.engineLabel, `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`)}</strong>
                 <em>{firstLine(vm.systemType, `${vm.primaryEngine || '—'} + ${vm.secondaryEngine || '—'}`)}</em>
+                {vm.centerInterpretation ? <small>{vm.centerInterpretation}</small> : null}
               </div>
             </div>
 
             {show('outputs') ? (
             <div className="bos-dna-v2__io bos-dna-v2__io--right bos-dna-v2__panel">
-              <div className="bos-dna-v2__label">Outputs</div>
+              <PanelLabel classification={classifications.outputs}>Possible Outputs</PanelLabel>
               <CompactList items={vm.outputs} empty="—" />
             </div>
             ) : null}
 
             {show('operatingLoop') ? (
             <section className="bos-dna-v2__loop">
-              <div className="bos-dna-v2__label bos-dna-v2__label--cyan">Operating Loop</div>
+              <PanelLabel tone="cyan" classification={classifications.operatingLoop}>Operating Loop</PanelLabel>
               <div className="bos-dna-v2__loop-row">
                 {(loop.length ? loop : ['Sense', 'Decide', 'Move', 'Measure', 'Adapt']).map((step) => (
                   <span key={step}>{step}</span>
@@ -560,7 +578,7 @@ export default function DeterministicBOSDNAVisualV2({
           <aside className="bos-dna-v2__right">
             {show('coreTension') ? (
             <section className="bos-dna-v2__panel">
-              <div className="bos-dna-v2__label">Core Tension</div>
+              <PanelLabel classification={classifications.coreTension}>Core Tension</PanelLabel>
               <div className="bos-dna-v2__tension-row">
                 <strong>{tension.left || '—'}</strong>
                 <span className="bos-dna-v2__vs">VS</span>
@@ -573,9 +591,9 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('wrongSeatRisk') || show('futureBottleneck') ? (
             <section className={`bos-dna-v2__panel bos-dna-v2__risk ${riskClass(vm.wrongSeatRisk)}`}>
-              <div className="bos-dna-v2__label">
+              <PanelLabel classification={show('wrongSeatRisk') ? classifications.wrongSeatRisk : classifications.futureBottleneck}>
                 {show('wrongSeatRisk') ? 'Wrong-Seat Risk' : 'Scaling Pattern'}
-              </div>
+              </PanelLabel>
               {show('wrongSeatRisk') ? (
                 <p className="bos-dna-v2__risk-level">{firstLine(vm.wrongSeatRisk, 'Moderate')}</p>
               ) : null}
@@ -590,11 +608,11 @@ export default function DeterministicBOSDNAVisualV2({
             {show('environments') ? (
             <div className="bos-dna-v2__env">
               <section className="bos-dna-v2__panel">
-                <div className="bos-dna-v2__label bos-dna-v2__label--green">Best Environment</div>
+                <PanelLabel tone="green" classification={classifications.environments}>Environment to Test</PanelLabel>
                 <CompactList items={vm.bestEnvironment} />
               </section>
               <section className="bos-dna-v2__panel">
-                <div className="bos-dna-v2__label bos-dna-v2__label--risk">Worst Environment</div>
+                <PanelLabel tone="risk" classification={classifications.environments}>Context to Watch</PanelLabel>
                 <CompactList items={vm.worstEnvironment} />
               </section>
             </div>
@@ -602,7 +620,7 @@ export default function DeterministicBOSDNAVisualV2({
 
             {show('oneMove') ? (
             <section className="bos-dna-v2__panel bos-dna-v2__one-move">
-              <div className="bos-dna-v2__label bos-dna-v2__label--orange">One Move · A Test to Try</div>
+              <PanelLabel tone="orange" classification={classifications.oneMove}>One Move</PanelLabel>
               <h3 className="bos-dna-v2__one-move-title">{firstLine(vm.oneMove, '—')}</h3>
               <p className="bos-dna-v2__panel-body bos-dna-v2__one-move-body">{firstLine(vm.roleTruth, vm.evolutionPath, '—')}</p>
             </section>
@@ -619,7 +637,7 @@ export default function DeterministicBOSDNAVisualV2({
 
           {show('keySignals') ? (
           <section className={`bos-dna-v2__panel bos-dna-v2__signals ${show('futureCards') ? '' : 'bos-dna-v2__signals--wide'}`}>
-            <div className="bos-dna-v2__label">Key Signals</div>
+            <PanelLabel classification={classifications.keySignals}>Key Signals</PanelLabel>
             <CompactList items={vm.keySignals} empty="Key signals not available for this profile." />
           </section>
           ) : null}
@@ -630,12 +648,12 @@ export default function DeterministicBOSDNAVisualV2({
             </footer>
           ) : show('footer') ? (
           <footer className="bos-dna-v2__footer bos-dna-v2__panel">
-            <FooterChip label="Natural Advantage" value={vm.naturalAdvantage} />
-            <FooterChip label="Natural Risk" value={vm.naturalRisk} />
-            <FooterChip label="Energy" value={energySummary} />
-            <FooterChip label="Fatigue" value={fatigueSummary} />
-            <FooterChip label="Role Fit" value={roleFitSummary} />
-            <FooterChip label="Wrong-Seat Risk" value={vm.wrongSeatRisk || '—'} />
+            <FooterChip label="Advantage · Pattern to Test" value={vm.naturalAdvantage} />
+            <FooterChip label="Risk · Watch For" value={vm.naturalRisk} />
+            <FooterChip label="Energy · Hypothesis" value={energySummary} />
+            <FooterChip label="Fatigue · Hypothesis" value={fatigueSummary} />
+            {show('roleFit') ? <FooterChip label="Role · Question to Observe" value={roleFitSummary} /> : null}
+            <FooterChip label="Map Boundary" value="Not a prediction or performance verdict" />
           </footer>
           ) : null}
         </div>
@@ -738,6 +756,19 @@ const styles = `
   letter-spacing: 0.16em;
   text-transform: uppercase;
   line-height: 1.2;
+}
+
+.bos-dna-v2__label > em {
+  display: inline-block;
+  margin-left: 7px;
+  padding: 2px 5px;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-size: 7px;
+  font-style: normal;
+  letter-spacing: 0.08em;
+  opacity: 0.68;
+  vertical-align: 1px;
 }
 
 .bos-dna-v2__label--cyan { color: var(--bos-cyan); }
@@ -1246,6 +1277,26 @@ const styles = `
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
+}
+
+.bos-dna-v2__reactor-label small {
+  display: -webkit-box;
+  margin-top: 7px;
+  overflow: hidden;
+  color: var(--bos-muted);
+  font-size: 7.5px;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  text-transform: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.bos-dna-v2__reactor--preview .bos-dna-v2__reactor-label small {
+  font-size: clamp(0.45rem, 0.78vw, 0.54rem);
+  -webkit-line-clamp: 3;
 }
 
 .bos-dna-v2__io {
