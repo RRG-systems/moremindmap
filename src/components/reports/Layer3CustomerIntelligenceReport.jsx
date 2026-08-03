@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { resolveLayer3CustomerViewModel } from '../../lib/bosCustomerIntelligence/customerViewModelOverlay.js';
 import { BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS } from '../../lib/bosCustomerIntelligence/contracts.js';
 import { buildLayer3SemanticPacket } from '../../lib/bosCustomerIntelligence/semanticPacket.js';
+import { resolveLayer3ReportViewModel } from '../../lib/bosCustomerIntelligence/runtimeActivation.js';
 import {
   cacheLayer3Translation,
   getCachedLayer3Translation,
@@ -79,12 +80,11 @@ export default function Layer3CustomerIntelligenceReport({ viewModel }) {
     };
   }, [enabled, prepared, viewModel]);
 
-  const customerViewModel = remoteTranslation?.sourceHash === prepared.packet?.semantic_hash
-    ? resolveLayer3CustomerViewModel(viewModel, prepared.packet, {
-        bundle: remoteTranslation.bundle,
-        receipt: remoteTranslation.receipt,
-      })
-    : prepared.viewModel;
+  const customerViewModel = resolveLayer3ReportViewModel(
+    viewModel,
+    prepared,
+    remoteTranslation,
+  );
 
   return <FinalBOSCustomerReport viewModel={customerViewModel} />;
 }
