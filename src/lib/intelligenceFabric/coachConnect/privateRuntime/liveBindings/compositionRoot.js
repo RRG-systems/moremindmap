@@ -41,6 +41,7 @@ import {
   readPrivateLiveProductExecutionBindingV1,
 } from './productExecutionBinding.js';
 import {
+  connectPrivateRuntimeProductStoreClientV1,
   createPrivateLiveProductStoreV1,
 } from './privateLiveProductStore.js';
 import {
@@ -378,6 +379,9 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     }
     try {
       productClient = createProductStoreClient(productStoreUrl);
+      if (!await connectPrivateRuntimeProductStoreClientV1(productClient)) {
+        return makeDeniedComposition('PRODUCT_STORE_CONNECTION_REQUIRED', 503);
+      }
       intelligenceExecution = resolveCohortMemberBindings == null
         ? createPrivateRuntimeIntelligenceExecutionV1({
             productStore: createPrivateLiveProductStoreV1({
@@ -409,7 +413,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   let resolvedOperatorContext = resolveOperatorContext;
   let resolvedOperatorBridgeInput = resolveOperatorBridgeInput;
   let resolvedOperatorActivationDecision = operatorActivationDecision;
-  let recordOperatorAttachmentDiagnostic = null;
   if (resolvedOperatorContextBridge == null
     && resolvedOperatorContext == null
     && resolvedOperatorBridgeInput == null
@@ -446,8 +449,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     resolvedOperatorBridgeInput = operatorBinding.resolveOperatorBridgeInput;
     resolvedOperatorActivationDecision =
       operatorBinding.operatorActivationDecision;
-    recordOperatorAttachmentDiagnostic =
-      operatorBinding.recordOperatorAttachmentDiagnostic;
   }
 
   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
@@ -702,7 +703,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     operatorContextBridge: resolvedOperatorContextBridge,
     resolveOperatorContext: resolvedOperatorContext,
     resolveOperatorBridgeInput: resolvedOperatorBridgeInput,
-    recordOperatorAttachmentDiagnostic,
     serializeAuthenticatedSession,
     activationDecision: active,
     operatorActivationDecision:

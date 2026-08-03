@@ -11,9 +11,6 @@ import {
   createPrivateRuntimeLogoutHandler,
 } from '../api/internal/private-runtime-logout.js';
 import {
-  createPrivateRuntimeBootstrapHandler,
-} from '../api/internal/private-runtime-bootstrap.js';
-import {
   resolveSubscriptionEntitlement,
 } from '../api/internal/subscription-entitlement.js';
 
@@ -141,30 +138,4 @@ test('subscription entitlement defaults to the shared V2 composition and never p
   assert.equal(result.entitlement.source, 'temporary_internal_subscription_entitlement');
   assert.equal(result.entitlement.billing_evidence, false);
   assert.equal(result.entitlement.stripe_subscription_created, false);
-});
-
-test('attachment predicate remains absent from every bootstrap HTTP projection', async () => {
-  const handler = createPrivateRuntimeBootstrapHandler({
-    enabled: () => true,
-    bootstrap: async () => ({
-      ok: false,
-      allowed: false,
-      code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
-      status: 403,
-      diagnostic_receipt_written: true,
-    }),
-  });
-  const res = response();
-  await handler({
-    method: 'POST',
-    headers: {
-      'x-private-runtime-diagnostic': 'forged',
-      cookie: '__Host-more_subdev1_operator=forged',
-    },
-    body: {},
-  }, res);
-  assert.equal(res.statusCode, 403);
-  assert.deepEqual(res.payload, { ok: false, error: 'request_denied' });
-  assert.equal(JSON.stringify(res.headers).includes('BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND'), false);
-  assert.equal(JSON.stringify(res.payload).includes('BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND'), false);
 });

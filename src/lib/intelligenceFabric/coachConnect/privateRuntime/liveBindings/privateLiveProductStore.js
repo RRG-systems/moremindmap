@@ -38,6 +38,20 @@ return {'APPENDED', ARGV[3], tostring(current + 1)}
 `;
 
 const frozen = (value) => deepFreeze(structuredClone(value));
+
+export async function connectPrivateRuntimeProductStoreClientV1(client) {
+  if (client == null || typeof client !== 'object') return false;
+  if (client.status === 'ready') return true;
+  if (client.status !== 'wait') return false;
+  if (typeof client.connect !== 'function') return false;
+  try {
+    await client.connect();
+    return client.status === 'ready';
+  } catch {
+    return false;
+  }
+}
+
 const text = (value, max = 256) => typeof value === 'string'
   && value.length > 0
   && value.length <= max;

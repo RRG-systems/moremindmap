@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   MISSION_001_EXAMPLES,
   MISSION_002_FIXTURES,
@@ -22,6 +23,7 @@ import {
   privateRuntimeProductBindingDigest,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js';
 import {
+  connectPrivateRuntimeProductStoreClientV1,
   createPrivateLiveProductStoreV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/privateLiveProductStore.js';
 import {
@@ -56,6 +58,58 @@ const assessment = Object.freeze({
     created_at: now,
   },
   answers: {},
+});
+
+test('cold lazy product-store clients connect before the first authoritative read', async () => {
+  let connectCalls = 0;
+  const client = {
+    status: 'wait',
+    async connect() {
+      connectCalls += 1;
+      this.status = 'ready';
+    },
+  };
+  assert.equal(await connectPrivateRuntimeProductStoreClientV1(client), true);
+  assert.equal(connectCalls, 1);
+  assert.equal(client.status, 'ready');
+  assert.equal(await connectPrivateRuntimeProductStoreClientV1(client), true);
+  assert.equal(connectCalls, 1);
+});
+
+test('failed or unavailable cold product-store connections fail closed', async () => {
+  assert.equal(await connectPrivateRuntimeProductStoreClientV1(null), false);
+  for (const status of [
+    undefined,
+    'connecting',
+    'connect',
+    'reconnecting',
+    'close',
+    'end',
+    'unknown',
+  ]) {
+    assert.equal(await connectPrivateRuntimeProductStoreClientV1({ status }), false);
+  }
+  assert.equal(await connectPrivateRuntimeProductStoreClientV1({ status: 'wait' }), false);
+  assert.equal(await connectPrivateRuntimeProductStoreClientV1({
+    status: 'wait',
+    async connect() {
+      throw new Error('connection unavailable');
+    },
+  }), false);
+});
+
+test('both deployment-grade product-store builders await cold-client readiness', () => {
+  for (const path of [
+    '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js',
+    '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/operatorBridgeBinding.js',
+  ]) {
+    const source = readFileSync(new URL(path, import.meta.url), 'utf8');
+    assert.match(
+      source,
+      /productClient = createProductStoreClient\(productStoreUrl\);[\s\S]{0,160}await connectPrivateRuntimeProductStoreClientV1\(productClient\)/,
+    );
+    assert.match(source, /PRODUCT_STORE_CONNECTION_REQUIRED/);
+  }
 });
 
 function fakeRedis(initial = {}) {
