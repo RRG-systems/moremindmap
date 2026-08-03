@@ -409,6 +409,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   let resolvedOperatorContext = resolveOperatorContext;
   let resolvedOperatorBridgeInput = resolveOperatorBridgeInput;
   let resolvedOperatorActivationDecision = operatorActivationDecision;
+  let recordOperatorAttachmentDiagnostic = null;
   if (resolvedOperatorContextBridge == null
     && resolvedOperatorContext == null
     && resolvedOperatorBridgeInput == null
@@ -445,6 +446,8 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     resolvedOperatorBridgeInput = operatorBinding.resolveOperatorBridgeInput;
     resolvedOperatorActivationDecision =
       operatorBinding.operatorActivationDecision;
+    recordOperatorAttachmentDiagnostic =
+      operatorBinding.recordOperatorAttachmentDiagnostic;
   }
 
   const sessionCodec = createSessionEnvelopeCodec(tokenHashKey, clock);
@@ -699,6 +702,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     operatorContextBridge: resolvedOperatorContextBridge,
     resolveOperatorContext: resolvedOperatorContext,
     resolveOperatorBridgeInput: resolvedOperatorBridgeInput,
+    recordOperatorAttachmentDiagnostic,
     serializeAuthenticatedSession,
     activationDecision: active,
     operatorActivationDecision:

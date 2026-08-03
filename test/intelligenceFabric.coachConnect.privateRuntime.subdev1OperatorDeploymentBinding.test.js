@@ -49,6 +49,17 @@ function fixtureEnv(overrides = {}) {
 function binding(fixtureOverrides = {}) {
   const env = fixtureOverrides.env || fixtureEnv();
   let token = 0;
+  const productBindingAttestation = {
+    environment_id: 'private_beta_test',
+    subscriber_subject_ref: 'subject_a',
+    exact_scope: exactScope,
+    exact_scope_hash: exactScopeHash,
+  };
+  const productExecutionBinding = {
+    exact_scope: exactScope,
+    exact_scope_hash: exactScopeHash,
+    approved_profile_ids: [profileId],
+  };
   return createPrivateRuntimeOperatorBridgeLiveBindingV1({
     env,
     store: fixtureOverrides.store || new InMemorySubdev1OperatorBridgeStore(),
@@ -75,27 +86,38 @@ function binding(fixtureOverrides = {}) {
           : { status: 'NOT_FOUND', record: null };
       },
     },
-    authority: {
+    authority: fixtureOverrides.authority || {
       authority_packet: {
         environment_id: 'private_beta_test',
         live_enabled: true,
         emergency_disabled: false,
       },
-      activation_receipt: { approved: true },
+      activation_receipt: {
+        deployment_commit_sha: 'a'.repeat(40),
+        deployment_tree_sha: 'b'.repeat(40),
+        approved: true,
+        controlled_internal_beta: true,
+        private_live_only: true,
+        public_access: false,
+      },
     },
-    productBindingAttestation: {
-      environment_id: 'private_beta_test',
-      subscriber_subject_ref: 'subject_a',
-      exact_scope: exactScope,
-      exact_scope_hash: exactScopeHash,
-    },
-    productExecutionBinding: {
-      exact_scope: exactScope,
-      exact_scope_hash: exactScopeHash,
-      approved_profile_ids: [profileId],
-    },
+    productBindingAttestation,
+    productExecutionBinding,
+    resolveMemberBindings: fixtureOverrides.resolveMemberBindings || (async (selected) =>
+      selected === profileId
+        ? {
+            valid: true,
+            value: {
+              product_binding_attestation: productBindingAttestation,
+              product_execution_binding: productExecutionBinding,
+              cohort_digest: 'c'.repeat(64),
+              member: { member_sha256: 'd'.repeat(64) },
+            },
+          }
+        : { valid: false, value: null }),
     clock: () => now,
     randomToken: () => `operator-binding-token-${String(token += 1).padStart(40, '0')}`,
+    diagnosticSink: fixtureOverrides.diagnosticSink,
   });
 }
 
@@ -368,4 +390,264 @@ test('existing live composition consumes the default binding without canonical i
     request({ request_coach: true }, cookie),
   );
   assert.equal(coachDenied.code, 'COACH_CONNECT_STATE_MISSING');
+});
+
+test('attachment diagnostic receipt requires the fully validated deployment-bound operator path', async () => {
+  const emitted = [];
+  const operatorBinding = binding({ diagnosticSink: (receipt) => emitted.push(receipt) });
+  const session = await activateAndSelect(operatorBinding);
+  const req = request(
+    {},
+    `more_subdev1_browser=${session.browser.browser_token}; `
+      + `more_subdev1_operator=${session.activated.context_token}`,
+  );
+  const resolved = await operatorBinding.resolveOperatorContext({ req, body: {} });
+  const consumed = await operatorBinding.operatorContextBridge.consume({
+    contextToken: resolved.value.context_token,
+    browserToken: resolved.value.browser_token,
+    action: 'OPEN_SUBSCRIPTION',
+    profileReceipt: session.selected.profile_receipt,
+  });
+  const mapped = await operatorBinding.resolveOperatorBridgeInput({
+    req,
+    request_context: resolved.value,
+    operator_context: consumed,
+  });
+  assert.equal(mapped.ok, true);
+
+  const attempts = [
+    { operator_context: { ...consumed, allowed: false }, bridge_input: mapped.value },
+    { operator_context: { ...consumed, profile_state: 'NO_PROFILE' }, bridge_input: mapped.value },
+    {
+      operator_context: {
+        ...consumed,
+        exact_scope: { ...consumed.exact_scope, business_id: 'wrong_business' },
+      },
+      bridge_input: mapped.value,
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        edgeAttestation: { ...mapped.value.edgeAttestation, operator_context_verified: false },
+      },
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        authority: { ...mapped.value.authority, deployment_grade_security_state: false },
+      },
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        cohort_binding_receipt: {
+          ...mapped.value.cohort_binding_receipt,
+          cohort_digest: 'invalid',
+        },
+      },
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        cohort_binding_receipt: {
+          ...mapped.value.cohort_binding_receipt,
+          member_digest: 'invalid',
+        },
+      },
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        cohort_binding_receipt: {
+          ...mapped.value.cohort_binding_receipt,
+          exact_scope_hash: 'e'.repeat(64),
+        },
+      },
+    },
+    {
+      operator_context: consumed,
+      bridge_input: {
+        ...mapped.value,
+        cohort_binding_receipt: {
+          ...mapped.value.cohort_binding_receipt,
+          process_local_profile_cache: true,
+        },
+      },
+    },
+  ];
+  for (const attempt of attempts) {
+    const denied = await operatorBinding.recordOperatorAttachmentDiagnostic({
+      ...attempt,
+      predicate_code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
+      stage: 'ATTACHMENT_COORDINATOR',
+    });
+    assert.equal(denied.ok, false);
+    assert.equal(denied.code, 'ATTACHMENT_DIAGNOSTIC_NOT_AUTHORIZED');
+  }
+  assert.equal(emitted.length, 0);
+
+  const recorded = await operatorBinding.recordOperatorAttachmentDiagnostic({
+    operator_context: consumed,
+    bridge_input: mapped.value,
+    predicate_code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
+    stage: 'ATTACHMENT_COORDINATOR',
+  });
+  assert.equal(recorded.ok, true);
+  assert.equal(recorded.recorded, true);
+  assert.equal(emitted.length, 1);
+  assert.deepEqual(Object.keys(emitted[0]).sort(), [
+    'correlation_id',
+    'deployment_version_identifier',
+    'occurred_at',
+    'outcome',
+    'predicate_code',
+    'profile_category',
+    'receipt_version',
+    'stage',
+  ]);
+  assert.equal(emitted[0].profile_category, 'SYNTHETIC');
+  assert.equal(JSON.stringify(emitted[0]).includes(profileId), false);
+  assert.equal(JSON.stringify(emitted[0]).includes(accessCode), false);
+  const audit = await operatorBinding.operatorStore.auditSnapshot();
+  const diagnosticAudit = audit.at(-1);
+  assert.equal(
+    diagnosticAudit.event_type,
+    'PRIVATE_BETA_OPERATOR_ATTACHMENT_DIAGNOSTIC_RECORDED',
+  );
+  assert.equal(diagnosticAudit.failure_code, 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND');
+  assert.equal(JSON.stringify(diagnosticAudit).includes(profileId), false);
+  assert.equal(JSON.stringify(diagnosticAudit).includes(accessCode), false);
+});
+
+test('forged missing inactive and unselected operator requests emit no attachment receipt', async () => {
+  const emitted = [];
+  const operatorBinding = binding({ diagnosticSink: (receipt) => emitted.push(receipt) });
+  const canonicalSecurityService = Object.fromEntries([
+    'describe',
+    'health',
+    'beginPreAuth',
+    'completeAuthentication',
+    'resolveAuthenticatedContext',
+    'evaluatePrivateTestEligibility',
+    'issueCsrfGrant',
+    'issueTemporaryEntitlement',
+    'inspectTemporaryEntitlement',
+    'evaluatePrivateRuntimeAuthority',
+    'revokeTemporaryEntitlement',
+    'logout',
+    'inspectRecovery',
+  ].map((method) => [method, async () => ({
+    ok: false,
+    allowed: false,
+    code: 'AUTHENTICATION_REQUIRED',
+  })]));
+  const composition = createPrivateRuntimeLiveCompositionV2({
+    canonicalSecurityService,
+    privateRuntimeBridge: {
+      async attach() {
+        return {
+          ok: false,
+          allowed: false,
+          code: 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND',
+          runtime_ready: false,
+        };
+      },
+    },
+    operatorContextBridge: operatorBinding.operatorContextBridge,
+    resolveOperatorContext: operatorBinding.resolveOperatorContext,
+    resolveOperatorBridgeInput: operatorBinding.resolveOperatorBridgeInput,
+    recordOperatorAttachmentDiagnostic:
+      operatorBinding.recordOperatorAttachmentDiagnostic,
+    operatorActivationDecision: operatorBinding.operatorActivationDecision,
+    activationDecision: async () => ({
+      ok: false,
+      allowed: false,
+      code: 'AUTHENTICATION_REQUIRED',
+    }),
+  });
+
+  await composition.operations.bootstrap(request());
+  await composition.operations.bootstrap(request({}, 'forged_cookie_name=value'));
+  await composition.operations.bootstrap(request(
+    {},
+    '__Host-more_subdev1_browser=forged; __Host-more_subdev1_operator=forged',
+  ));
+  const browser = await operatorBinding.operatorContextBridge.establishBrowser();
+  const csrf = await operatorBinding.operatorContextBridge.issueCsrf({
+    request: request(),
+    browserToken: browser.browser_token,
+  });
+  const activated = await operatorBinding.operatorContextBridge.activate({
+    request: request(),
+    browserToken: browser.browser_token,
+    csrfProof: csrf.csrf_proof,
+    submittedCode: accessCode,
+  });
+  await composition.operations.bootstrap(request(
+    {},
+    `more_subdev1_browser=${browser.browser_token}; `
+      + `more_subdev1_operator=${activated.context_token}`,
+  ));
+  assert.equal(emitted.length, 0);
+
+  const selected = await activateAndSelect(operatorBinding);
+  const validResult = await composition.operations.bootstrap(request(
+    {},
+    `more_subdev1_browser=${selected.browser.browser_token}; `
+      + `more_subdev1_operator=${selected.activated.context_token}`,
+  ));
+  assert.equal(validResult.code, 'BUSINESS_ENGINE_ATTACHMENT_NOT_FOUND');
+  assert.equal(emitted.length, 1);
+});
+
+test('wrong deployment receipt prevents diagnostic emission', async () => {
+  const emitted = [];
+  const operatorBinding = binding({
+    diagnosticSink: (receipt) => emitted.push(receipt),
+    authority: {
+      authority_packet: {
+        environment_id: 'private_beta_test',
+        live_enabled: true,
+        emergency_disabled: false,
+      },
+      activation_receipt: {
+        deployment_commit_sha: 'wrong',
+        deployment_tree_sha: 'wrong',
+        approved: true,
+        controlled_internal_beta: true,
+        private_live_only: true,
+        public_access: false,
+      },
+    },
+  });
+  const session = await activateAndSelect(operatorBinding);
+  const req = request(
+    {},
+    `more_subdev1_browser=${session.browser.browser_token}; `
+      + `more_subdev1_operator=${session.activated.context_token}`,
+  );
+  const resolved = await operatorBinding.resolveOperatorContext({ req, body: {} });
+  const consumed = await operatorBinding.operatorContextBridge.consume({
+    contextToken: resolved.value.context_token,
+    browserToken: resolved.value.browser_token,
+    action: 'OPEN_SUBSCRIPTION',
+    profileReceipt: session.selected.profile_receipt,
+  });
+  const mapped = await operatorBinding.resolveOperatorBridgeInput({
+    req,
+    request_context: resolved.value,
+    operator_context: consumed,
+  });
+  const denied = await operatorBinding.recordOperatorAttachmentDiagnostic({
+    operator_context: consumed,
+    bridge_input: mapped.value,
+    predicate_code: 'ATTACHMENT_PARTIAL_FAILURE',
+  });
+  assert.equal(denied.code, 'ATTACHMENT_DIAGNOSTIC_NOT_AUTHORIZED');
+  assert.equal(emitted.length, 0);
 });

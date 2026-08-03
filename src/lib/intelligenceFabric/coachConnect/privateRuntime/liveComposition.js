@@ -103,6 +103,7 @@ export function createPrivateRuntimeLiveCompositionV2({
   operatorContextBridge = null,
   resolveOperatorContext = null,
   resolveOperatorBridgeInput = null,
+  recordOperatorAttachmentDiagnostic = null,
   serializeAuthenticatedSession = null,
   activationDecision = async () => false,
   operatorActivationDecision = async () => false,
@@ -203,7 +204,20 @@ export function createPrivateRuntimeLiveCompositionV2({
       privateRuntimeBridge.attach.bind(privateRuntimeBridge),
       [bridgeInput.value],
     );
-    if (!attached.ok) return attached;
+    if (!attached.ok) {
+      if (typeof recordOperatorAttachmentDiagnostic === 'function') {
+        await settlePrivateRuntimeLiveOperation(
+          recordOperatorAttachmentDiagnostic,
+          [{
+            operator_context: consumed,
+            bridge_input: bridgeInput.value,
+            predicate_code: attached.code,
+            stage: 'ATTACHMENT_COORDINATOR',
+          }],
+        );
+      }
+      return attached;
+    }
 
     const current = await settlePrivateRuntimeLiveOperation(
       operatorContextBridge.consume.bind(operatorContextBridge),
