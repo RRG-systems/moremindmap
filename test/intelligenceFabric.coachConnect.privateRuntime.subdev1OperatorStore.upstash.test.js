@@ -35,7 +35,7 @@ function fakeExecutor({ now = { value: Date.now() }, commands = [] } = {}) {
     if (operation === 'SAVE_CONTEXT') {
       if (records.has(key)) return { ok: false, code: 'OPERATOR_CONTEXT_INVALID' };
       records.set(key, {
-        value: JSON.parse(payload.context_json),
+        value: payload.context_json,
         expires_at: now.value + payload.ttl_ms,
       });
       return { ok: true, context_id: payload.context_id };
@@ -43,17 +43,18 @@ function fakeExecutor({ now = { value: Date.now() }, commands = [] } = {}) {
     if (operation === 'GET_CONTEXT') {
       const found = records.get(key);
       return found
-        ? { ok: true, status: 'FOUND', context: structuredClone(found.value) }
-        : { ok: true, status: 'NOT_FOUND', context: null };
+        ? { ok: true, status: 'FOUND', context_json: found.value }
+        : { ok: true, status: 'NOT_FOUND', context_json: null };
     }
     if (operation === 'REPLACE_CONTEXT') {
       const found = records.get(key);
       if (!found
-        || found.value.profile_generation !== payload.expected_profile_generation) {
+        || JSON.parse(found.value).profile_generation
+          !== payload.expected_profile_generation) {
         return { ok: false, code: 'PROFILE_RECEIPT_STALE' };
       }
       records.set(key, {
-        value: JSON.parse(payload.context_json),
+        value: payload.context_json,
         expires_at: now.value + payload.ttl_ms,
       });
       return {
@@ -83,6 +84,9 @@ function context(tokenHash, expiresAt) {
     profile_generation: 0,
     expires_at: expiresAt,
     status: 'ACTIVE',
+    revoked_at: null,
+    revocation_reason: null,
+    active_profile: null,
   };
 }
 
@@ -174,4 +178,33 @@ test('provider failures fail closed and no raw developer code enters provider co
     (await unavailable.getContextByTokenHash(digest('f'))).code,
     'OPERATOR_STORE_UNAVAILABLE',
   );
+});
+
+test('context retrieval preserves opaque JSON fields and rejects malformed provider shapes', async () => {
+  const tokenHash = digest('1');
+  const record = context(tokenHash, new Date(Date.now() + 60_000).toISOString());
+  const exactJson = JSON.stringify(record);
+  const store = createUpstashSubdev1OperatorBridgeStore({
+    configuration: configuration(),
+    commandExecutor: async (command) => {
+      assert.equal(command[4], 'GET_CONTEXT');
+      return { ok: true, status: 'FOUND', context_json: exactJson };
+    },
+  });
+  assert.deepEqual((await store.getContextByTokenHash(tokenHash)).context, record);
+
+  for (const providerResult of [
+    { ok: true, status: 'FOUND', context_json: '{not-json' },
+    { ok: true, status: 'FOUND', context_json: '[]' },
+    { ok: true, status: 'FOUND', context: record },
+  ]) {
+    const malformed = createUpstashSubdev1OperatorBridgeStore({
+      configuration: configuration(),
+      commandExecutor: async () => providerResult,
+    });
+    assert.equal(
+      (await malformed.getContextByTokenHash(tokenHash)).code,
+      'OPERATOR_STORE_UNAVAILABLE',
+    );
+  }
 });

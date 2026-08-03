@@ -43,7 +43,7 @@ function executor(now) {
     if (operation === 'SAVE_CONTEXT') {
       if (records.has(key)) return { ok: false, code: 'OPERATOR_CONTEXT_INVALID' };
       records.set(key, {
-        value: JSON.parse(payload.context_json),
+        value: payload.context_json,
         expires_at: now.value + payload.ttl_ms,
       });
       return { ok: true, context_id: payload.context_id };
@@ -51,16 +51,17 @@ function executor(now) {
     if (operation === 'GET_CONTEXT') {
       const found = records.get(key);
       return found
-        ? { ok: true, status: 'FOUND', context: structuredClone(found.value) }
-        : { ok: true, status: 'NOT_FOUND', context: null };
+        ? { ok: true, status: 'FOUND', context_json: found.value }
+        : { ok: true, status: 'NOT_FOUND', context_json: null };
     }
     if (operation === 'REPLACE_CONTEXT') {
       const found = records.get(key);
       if (!found
-        || found.value.profile_generation !== payload.expected_profile_generation) {
+        || JSON.parse(found.value).profile_generation
+          !== payload.expected_profile_generation) {
         return { ok: false, code: 'PROFILE_RECEIPT_STALE' };
       }
-      found.value = JSON.parse(payload.context_json);
+      found.value = payload.context_json;
       found.expires_at = now.value + payload.ttl_ms;
       return {
         ok: true,

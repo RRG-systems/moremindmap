@@ -86,9 +86,9 @@ end
 if operation == 'GET_CONTEXT' then
   local serialized = redis.call('GET', KEYS[1])
   if not serialized then
-    return result({ ok = true, status = 'NOT_FOUND', context = cjson.null })
+    return result({ ok = true, status = 'NOT_FOUND', context_json = cjson.null })
   end
-  return result({ ok = true, status = 'FOUND', context = cjson.decode(serialized) })
+  return result({ ok = true, status = 'FOUND', context_json = serialized })
 end
 
 if operation == 'REPLACE_CONTEXT' then
@@ -339,7 +339,29 @@ export class UpstashSubdev1OperatorBridgeStore {
         context: null,
       });
     }
-    return this.#execute('GET_CONTEXT', `context:${tokenHash}`, {});
+    const found = await this.#execute('GET_CONTEXT', `context:${tokenHash}`, {});
+    if (!found?.ok) return found;
+    if (found.status === 'NOT_FOUND') {
+      return frozen({
+        ok: true,
+        status: 'NOT_FOUND',
+        context: null,
+      });
+    }
+    if (found.status !== 'FOUND'
+      || typeof found.context_json !== 'string'
+      || found.context_json.length < 2
+      || found.context_json.length > 131_072) {
+      return frozen({ ok: false, code: 'OPERATOR_STORE_UNAVAILABLE' });
+    }
+    try {
+      const context = JSON.parse(found.context_json);
+      return context && typeof context === 'object' && !Array.isArray(context)
+        ? frozen({ ok: true, status: 'FOUND', context })
+        : frozen({ ok: false, code: 'OPERATOR_STORE_UNAVAILABLE' });
+    } catch {
+      return frozen({ ok: false, code: 'OPERATOR_STORE_UNAVAILABLE' });
+    }
   }
 
   async replaceContext({
