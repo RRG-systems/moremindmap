@@ -723,6 +723,23 @@ test('cohort activation binds exact deployment, protected cohort, rollback, and 
   });
   assert.equal(noRuntimeCommitAccepted.ok, true, JSON.stringify(noRuntimeCommitAccepted));
 
+  const emptyRuntimeCommitEnv = {
+    ...env,
+    VERCEL_GIT_COMMIT_SHA: '',
+  };
+  const emptyRuntimeCommitAccepted = await readPrivateRuntimeLiveConfigurationAuthorityV1({
+    env: emptyRuntimeCommitEnv,
+    resolveReference: createPrivateRuntimeEnvironmentReferenceResolver(emptyRuntimeCommitEnv),
+    adapterImplementationId: UPSTASH_REMOTE_SHARED_SECURITY_ADAPTER_VERSION,
+    adapterSourceSha256: sourceDigest,
+    nowMs: now,
+  });
+  assert.equal(
+    emptyRuntimeCommitAccepted.ok,
+    true,
+    JSON.stringify(emptyRuntimeCommitAccepted),
+  );
+
   for (const runtimeCommit of ['not-a-commit', '3'.repeat(40)]) {
     const commitEnv = { ...env };
     commitEnv.VERCEL_GIT_COMMIT_SHA = runtimeCommit;

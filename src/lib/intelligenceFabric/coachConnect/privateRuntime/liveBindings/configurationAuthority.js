@@ -276,6 +276,7 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
         approvedProfileCohortDigest: approvedProfileCohort.cohort_sha256,
         cohortCount: approvedProfileCohort.member_count,
         deploymentCommitSha: typeof env.VERCEL_GIT_COMMIT_SHA === 'string'
+          && env.VERCEL_GIT_COMMIT_SHA.length > 0
           ? env.VERCEL_GIT_COMMIT_SHA
           : null,
         immutableDeploymentIdentity,
