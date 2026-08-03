@@ -357,6 +357,13 @@ test('existing live composition consumes the default binding without canonical i
     'SUBSCRIPTION_RUNTIME',
   ]);
 
+  const canonicalDenied = await composition.operations.beginLogin({
+    browser_binding_reference: 'canonical-path-remains-fail-closed',
+  });
+  assert.equal(canonicalDenied.ok, false);
+  assert.equal(canonicalDenied.allowed, false);
+  assert.equal(canonicalDenied.code, 'AUTHENTICATION_REQUIRED');
+
   const coachDenied = await composition.operations.bootstrap(
     request({ request_coach: true }, cookie),
   );

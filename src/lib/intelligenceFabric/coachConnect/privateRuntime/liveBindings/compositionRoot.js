@@ -252,7 +252,7 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
         secret: true,
       }),
     ]);
-  if ([tokenHashKey, scopeHashKey, privateAccessCode]
+  if ([tokenHashKey, scopeHashKey]
     .some((value) => typeof value !== 'string' || value.length < 16)) {
     return makeDeniedComposition();
   }
@@ -279,8 +279,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     statePort,
     clock,
   });
-  if (protectedEdgeBinding.configured !== true) return makeDeniedComposition();
-
   const productBinding = authority.product_binding_attestation;
   const canonicalSecurityService = createCanonicalAsyncSecurityServiceV2({
     statePort,
@@ -310,8 +308,6 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     fetchImpl,
     clock,
   });
-  if (assertionPort.configured !== true) return makeDeniedComposition();
-
   let resolveCohortMemberBindings = null;
   const resolveCohortProductBinding = authority.approved_profile_cohort == null
     ? null
@@ -460,6 +456,12 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     if (authority.authority_packet.live_enabled !== true
       || authority.activation_receipt == null) {
       return denial('RUNTIME_DEFAULT_OFF', 404);
+    }
+    if (protectedEdgeBinding.configured !== true
+      || assertionPort.configured !== true
+      || typeof privateAccessCode !== 'string'
+      || privateAccessCode.length < 16) {
+      return denial('PROTECTED_EDGE_IDENTITY_REQUIRED', 503);
     }
     const edge = await protectedEdgeBinding.bindRequest(req, {
       correlationRef: correlationReference(req),

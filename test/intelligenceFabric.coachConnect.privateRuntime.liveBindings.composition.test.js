@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import {
   buildPrivateRuntimeLiveCompositionRootV2,
   createDeferredPrivateRuntimeLiveCompositionV2,
@@ -84,6 +85,26 @@ test('missing live configuration returns explicit async UNCONFIGURED without pro
   assert.equal(composition.configured, false);
   assert.equal((await composition.operations.beginLogin()).code, 'ASYNC_SECURITY_UNCONFIGURED');
   assert.equal(providerCalls, 0);
+});
+
+test('operator composition is not gated by unavailable canonical-only identity providers', () => {
+  const source = readFileSync(new URL(
+    '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/compositionRoot.js',
+    import.meta.url,
+  ), 'utf8');
+  assert.match(source, /\[tokenHashKey, scopeHashKey\]/);
+  assert.doesNotMatch(
+    source,
+    /if \(protectedEdgeBinding\.configured !== true\) return makeDeniedComposition\(\)/,
+  );
+  assert.doesNotMatch(
+    source,
+    /if \(assertionPort\.configured !== true\) return makeDeniedComposition\(\)/,
+  );
+  assert.match(
+    source,
+    /protectedEdgeBinding\.configured !== true[\s\S]*assertionPort\.configured !== true[\s\S]*PROTECTED_EDGE_IDENTITY_REQUIRED/,
+  );
 });
 
 test('deferred root resolves one shared composition and every operation stays Promise-native', async () => {
