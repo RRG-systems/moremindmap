@@ -916,7 +916,7 @@ test('provider proof response-shape diagnostic is deterministic, value-free, and
       name: 'missing field',
       value: (() => {
         const value = { ...validReceipt };
-        delete value.epoch;
+        delete value.provider_time_ms;
         return value;
       })(),
       predicate: 'EXACT_FIELD_SET_MISMATCH',
@@ -1004,6 +1004,55 @@ test('provider proof response-shape diagnostic is deterministic, value-free, and
       );
     });
   }
+});
+
+test('provider null-field elision is normalized without accepting unknown or required-field drift', async () => {
+  const nullElidedReceipt = {
+    ok: true,
+    status: 'HEALTHY',
+    code: '',
+    provider_time_ms: now,
+    receipt_hash: 'e'.repeat(64),
+    expires_at_ms: now + 60_000,
+    idempotent_replay: false,
+  };
+  const accepted = await runClassifiedCanaryFailure({
+    providerCommandExecutor: async () => JSON.stringify(nullElidedReceipt),
+  });
+  assert.equal(accepted.result.ok, true);
+  assert.deepEqual(accepted.result.provider_states, [
+    'RECOVERING',
+    'RECOVERING',
+    'HEALTHY',
+  ]);
+  assert.equal(Object.hasOwn(accepted.result, 'provider_proof_diagnostic'), false);
+
+  const missingRequired = { ...nullElidedReceipt };
+  delete missingRequired.receipt_hash;
+  const deniedMissing = await runClassifiedCanaryFailure({
+    providerCommandExecutor: async () => JSON.stringify(missingRequired),
+  });
+  assertProofFailureClassification(
+    deniedMissing.result,
+    'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+  );
+  assert.equal(
+    deniedMissing.result.provider_proof_diagnostic.failed_predicate_id,
+    'EXACT_FIELD_SET_MISMATCH',
+  );
+
+  const unknownField = { ...nullElidedReceipt, unexpected: 'synthetic' };
+  const deniedUnknown = await runClassifiedCanaryFailure({
+    providerCommandExecutor: async () => JSON.stringify(unknownField),
+  });
+  assertProofFailureClassification(
+    deniedUnknown.result,
+    'CANARY_PROOF_RECEIPT_VALIDATION_FAILED',
+  );
+  assert.equal(
+    deniedUnknown.result.provider_proof_diagnostic.failed_predicate_id,
+    'EXACT_FIELD_SET_MISMATCH',
+  );
 });
 
 test('provider proof response-shape diagnostic matches the 32-entry checkpoint bound', () => {

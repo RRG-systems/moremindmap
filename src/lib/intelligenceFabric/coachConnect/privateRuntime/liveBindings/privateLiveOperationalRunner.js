@@ -88,6 +88,19 @@ const PROVIDER_RESULT_FIELDS = Object.freeze([
   'expires_at_ms',
   'idempotent_replay',
 ]);
+const PROVIDER_RESULT_REQUIRED_FIELDS = Object.freeze([
+  'ok',
+  'status',
+  'code',
+  'provider_time_ms',
+  'receipt_hash',
+  'idempotent_replay',
+]);
+const PROVIDER_RESULT_NULLABLE_FIELDS = Object.freeze([
+  'epoch',
+  'approval_status',
+  'expires_at_ms',
+]);
 export const PROVIDER_PROOF_RESPONSE_SHAPE_DIAGNOSTIC_FIELDS = Object.freeze([
   'field_count',
   'field_name_digest',
@@ -1071,6 +1084,22 @@ function createProviderProofResponseShapeDiagnostic(value, operation) {
     : null;
 }
 
+function normalizeProviderResultNullElision(value) {
+  if (!object(value)
+    || Object.keys(value).some((field) => !PROVIDER_RESULT_FIELDS.includes(field))
+    || PROVIDER_RESULT_REQUIRED_FIELDS.some((field) => !Object.hasOwn(value, field))) {
+    return value;
+  }
+  const missing = PROVIDER_RESULT_NULLABLE_FIELDS.filter(
+    (field) => !Object.hasOwn(value, field),
+  );
+  if (missing.length === 0) return value;
+  return Object.freeze({
+    ...value,
+    ...Object.fromEntries(missing.map((field) => [field, null])),
+  });
+}
+
 function parseProviderResult(raw, operation) {
   const payload = Array.isArray(raw) && raw.length === 1 ? raw[0] : raw;
   let value;
@@ -1079,6 +1108,7 @@ function parseProviderResult(raw, operation) {
   } catch {
     throw providerCommandFailure(STORE_CANARY_PROOF_FAILURE_CODES.INVALID_JSON);
   }
+  value = normalizeProviderResultNullElision(value);
   if (!validProviderResultForOperation(value, operation)) {
     throw providerCommandFailure(
       STORE_CANARY_PROOF_FAILURE_CODES.RECEIPT,
