@@ -8,7 +8,10 @@ import { verifyExistingProfilePacket } from '../engine/bosCustomerIntelligence/p
 import {
   BOS_CUSTOMER_INTELLIGENCE_TIMEOUT_MS,
 } from '../../src/lib/bosCustomerIntelligence/contracts.js';
-import { validateLayer3SemanticPacket } from '../../src/lib/bosCustomerIntelligence/translationValidator.js';
+import {
+  validateLayer3SemanticPacket,
+  validateLayer3TranslationBundle,
+} from '../../src/lib/bosCustomerIntelligence/translationValidator.js';
 import { createRedisClient, normalizeProfileId } from './visual-dna/shared.js';
 
 const MAX_PACKET_CHARACTERS = 180000;
@@ -20,6 +23,55 @@ function featureEnabled() {
 function clientAddress(req) {
   const forwarded = String(req.headers?.['x-forwarded-for'] || '').split(',')[0].trim();
   return forwarded || req.socket?.remoteAddress || 'unknown';
+}
+
+function safeRequestId(req) {
+  const value = String(
+    req.headers?.['x-vercel-id']
+      || req.headers?.['x-request-id']
+      || 'unavailable',
+  );
+  return value.replace(/[^a-zA-Z0-9:._-]/g, '').slice(0, 160) || 'unavailable';
+}
+
+function validationFailureCode(failure) {
+  const match = String(failure || '').match(/([a-z0-9_]+)$/i);
+  return match?.[1]?.toLowerCase() || 'unknown_validation_failure';
+}
+
+export function buildSafeLayer3RuntimeReceipt({ req, packet, result } = {}) {
+  const receipt = result?.receipt || {};
+  const failures = Array.isArray(receipt.validation_failures)
+    ? receipt.validation_failures
+    : [];
+  const source = receipt.source || null;
+  const reason = receipt.reason || null;
+  const earlyFallback = new Set([
+    'durable_cache_unavailable',
+    'single_flight_unavailable',
+    'single_flight_in_progress',
+    'model_concurrency_limit',
+  ]).has(reason);
+
+  return Object.freeze({
+    request_id: safeRequestId(req || {}),
+    semantic_hash: packet?.semantic_hash || null,
+    receipt: Object.freeze({ source, reason }),
+    validation_failure_codes: Object.freeze(failures.map(validationFailureCode)),
+    validation_failure_count: failures.length,
+    provider_latency_ms: source === 'cache' || earlyFallback
+      ? null
+      : (Number.isFinite(Number(receipt.latency_ms)) ? Number(receipt.latency_ms) : null),
+    durable_cache_hit_outcome: source === 'cache'
+      ? 'hit'
+      : (reason === 'durable_cache_unavailable' ? 'unavailable' : 'miss'),
+    durable_cache_write_outcome: source === 'gpt_translation'
+      ? 'written'
+      : (reason === 'durable_cache_write_failed' ? 'failed' : 'not_attempted'),
+    valid_bundle_present: Boolean(
+      result?.bundle && validateLayer3TranslationBundle(packet, result.bundle).valid,
+    ),
+  });
 }
 
 export default async function handler(req, res) {
@@ -81,6 +133,10 @@ export default async function handler(req, res) {
       packet: authoritative.packet,
       transport,
     });
+    console.info(
+      '[BOS_L3_RUNTIME_RECEIPT]',
+      buildSafeLayer3RuntimeReceipt({ req, packet: authoritative.packet, result }),
+    );
     return res.status(200).json(result);
   } catch {
     return res.status(503).json({ error: 'translation_service_unavailable' });
