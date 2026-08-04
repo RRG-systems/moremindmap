@@ -190,6 +190,7 @@ function exactProviderBinding(exactScopeHash) {
     exact_scope_hash: exactScopeHash,
     approved_profile_cohort_sha256: null,
     provider_data_retention_mode: 'ZERO_DATA_RETENTION',
+    review_due_at: '2027-08-04T00:00:00.000Z',
   });
 }
 
@@ -205,6 +206,7 @@ const cohortProviderBinding = Object.freeze({
   exact_scope_hash: null,
   approved_profile_cohort_sha256: cohortSha,
   provider_data_retention_mode: 'ZERO_DATA_RETENTION',
+  review_due_at: '2027-08-04T00:00:00.000Z',
 });
 
 function fakeRedis(initial = {}) {
@@ -398,6 +400,30 @@ test('standard-retention private beta is labeled honestly and still disables sto
   assert.equal(result.receipt.internal_transcript_persisted, false);
   assert.equal(result.receipt.internal_conversation_content_persisted, false);
   assert.equal(result.receipt.canonical_mutation_performed, false);
+});
+
+test('warm runtime denies an expired child binding before any provider call', async () => {
+  let current = Date.parse('2026-08-04T12:00:00.000Z');
+  const provider = new DeterministicFixtureProvider({
+    proposal_type: 'RESPONSE_PLAN',
+    payload: payload(),
+    scope: scopeA,
+  });
+  const runtime = createLivingConversationRuntimeV1({
+    provider,
+    providerBinding: Object.freeze({
+      ...providerBinding,
+      review_due_at: '2026-08-04T12:00:01.000Z',
+    }),
+    expectedExactScopeHash: scopeHashA,
+    clock: () => current,
+  });
+  current = Date.parse('2026-08-04T12:00:01.000Z');
+  const result = await runtime.converse(governedInput(scopeA));
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'LIVING_CONVERSATION_PROVIDER_DISABLED');
+  assert.equal(result.provider_calls, 0);
+  assert.equal(provider.calls, 0);
 });
 
 test('free-text facts produce proposed evidence without canonical mutation', async () => {

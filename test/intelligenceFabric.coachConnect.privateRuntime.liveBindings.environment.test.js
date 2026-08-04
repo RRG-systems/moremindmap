@@ -33,6 +33,11 @@ import {
   validatePrivateRuntimeLiveEnvironmentAuthorityV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveBindings/index.js';
 import { hashPrivateRuntimeScope } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/contracts.js';
+import {
+  LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE,
+  LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
+  LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE,
+} from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/livingConversation/providerBinding.js';
 
 const now = Date.parse('2026-07-28T12:00:00.000Z');
 const sourceDigest = 'a'.repeat(64);
@@ -444,6 +449,10 @@ test('exact persistent PRIVATE_LIVE authority validates source-default-off', asy
   assert.equal(result.project_reference, documents.live.vercel_project_reference);
   assert.notEqual(result.immutable_deployment_identity, result.project_reference);
   assert.equal(result.provider_call_required, false);
+  assert.equal(
+    typeof result.derive_living_conversation_provider_binding,
+    'function',
+  );
 });
 
 test('immutable deployment identity is mandatory and project identity never substitutes', async () => {
@@ -458,6 +467,7 @@ test('immutable deployment identity is mandatory and project identity never subs
     nowMs: now,
   });
   assert.equal(missing.code, 'PROTECTED_EDGE_IMMUTABLE_DEPLOYMENT_IDENTITY_REQUIRED');
+  assert.equal(missing.derive_living_conversation_provider_binding, undefined);
 
   const projectOnlyEnv = {
     ...environment(documents),
@@ -698,6 +708,47 @@ test('cohort activation binds exact deployment, protected cohort, rollback, and 
   assert.equal(accepted.ok, true, JSON.stringify(accepted));
   assert.equal(accepted.approved_profile_cohort.member_count, 4);
   assert.equal(accepted.rollback_receipt.receipt_sha256, rollback.receipt_sha256);
+  env.MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_BINDING_REF =
+    LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE;
+  env.OPENAI_MODEL = 'gpt-5.5';
+  env[LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE] =
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE';
+  const derived = accepted.derive_living_conversation_provider_binding();
+  assert.equal(derived.ok, true, JSON.stringify(derived));
+  assert.equal(derived.derived, true);
+  assert.equal(derived.binding.model, 'gpt-5.5');
+  assert.equal(
+    derived.binding.credential_ref,
+    LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
+  );
+  assert.equal(
+    derived.binding.provider_data_retention_mode,
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE',
+  );
+  assert.deepEqual(derived.binding.allowed_purposes, ['CONVERSATION_PLAN_PROPOSAL']);
+  assert.equal(derived.binding.scope_mode, 'APPROVED_PROFILE_COHORT');
+  assert.equal(derived.binding.approved_profile_cohort_sha256, cohort.cohort_sha256);
+  assert.equal(derived.binding.exact_scope_hash, null);
+  assert.equal(derived.binding.review_due_at, '2026-07-29T10:00:00.000Z');
+
+  env[LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE] = 'ZERO_DATA_RETENTION';
+  assert.equal(
+    accepted.derive_living_conversation_provider_binding().code,
+    'LIVING_CONVERSATION_PROVIDER_RETENTION_DENIED',
+  );
+  env[LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE] =
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE';
+  delete env.OPENAI_MODEL;
+  assert.equal(
+    accepted.derive_living_conversation_provider_binding().code,
+    'LIVING_CONVERSATION_PROVIDER_MODEL_DENIED',
+  );
+  env.OPENAI_MODEL = 'gpt-5.5';
+  delete env.MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_BINDING_REF;
+  assert.equal(
+    accepted.derive_living_conversation_provider_binding().code,
+    'LIVING_CONVERSATION_PROVIDER_UNCONFIGURED',
+  );
 
   const legacyReceiptValue = {
     receipt_version: 'private-runtime-activation-receipt-v1',

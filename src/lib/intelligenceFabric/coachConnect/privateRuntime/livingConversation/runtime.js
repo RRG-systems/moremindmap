@@ -21,6 +21,7 @@ export function createLivingConversationRuntimeV1({
   providerBinding,
   expectedExactScopeHash = null,
   approvedProfileCohortSha256 = null,
+  clock = () => Date.now(),
 } = {}) {
   const exactProviderScope = providerBinding?.scope_mode === 'EXACT_PROFILE'
     && providerBinding.exact_scope_hash === expectedExactScopeHash
@@ -48,7 +49,8 @@ export function createLivingConversationRuntimeV1({
     traceId,
     exactScopeHash,
   } = {}) {
-    if (!configured) {
+    if (!configured || !Number.isFinite(Date.parse(providerBinding?.review_due_at))
+      || Date.parse(providerBinding.review_due_at) <= clock()) {
       return frozen({
         ok: false,
         code: 'LIVING_CONVERSATION_PROVIDER_DISABLED',

@@ -21,7 +21,14 @@ import {
   readPrivateRuntimeApprovedProfileCohortV1,
 } from './profileCohort.js';
 import {
+  LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE,
+  LIVING_CONVERSATION_PROVIDER_BINDING_VERSION,
   LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
+  LIVING_CONVERSATION_PROVIDER_MODEL_VARIABLE,
+  LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE,
+  LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE,
+  livingConversationProviderBindingDigest,
+  validateLivingConversationProviderBindingV1,
 } from '../livingConversation/providerBinding.js';
 
 export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
@@ -63,6 +70,168 @@ function parseDocument(serialized, field) {
     throw new TypeError(`${field} document is invalid`);
   }
   return parsed;
+}
+
+function earliestFutureTimestamp(nowMs, values) {
+  const timestamps = values
+    .map((value) => Date.parse(value))
+    .filter((value) => Number.isFinite(value) && value > nowMs);
+  return timestamps.length === values.length
+    ? new Date(Math.min(...timestamps)).toISOString()
+    : null;
+}
+
+function deriveLivingConversationProviderBinding({
+  env,
+  authorityPacket,
+  qualificationCertificate,
+  liveEnvironmentAttestation,
+  productBindingAttestation,
+  approvedProfileCohort,
+  immutableDeploymentIdentity,
+  protectedEdgeConfiguration,
+  liveAuthority,
+  activationReceipt,
+  rollbackReceipt,
+  authorityState,
+  nowMs,
+}) {
+  const referenceName = env[LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE];
+  if (referenceName == null) {
+    return frozen({
+      ok: false,
+      configured: false,
+      code: 'LIVING_CONVERSATION_PROVIDER_UNCONFIGURED',
+    });
+  }
+  if (referenceName !== LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE) {
+    return frozen({
+      ok: false,
+      configured: true,
+      code: 'LIVING_CONVERSATION_PROVIDER_DERIVATION_REFERENCE_DENIED',
+    });
+  }
+  const model = env[LIVING_CONVERSATION_PROVIDER_MODEL_VARIABLE];
+  const retentionMode = env[LIVING_CONVERSATION_PROVIDER_PRIVACY_VARIABLE];
+  const environmentId = authorityPacket.environment_id;
+  const packetDigest = authorityPacket.packet_sha256;
+  const productDigest = productBindingAttestation.binding_sha256;
+  const cohortDigest = approvedProfileCohort?.cohort_sha256;
+  const activationValid = activationReceipt?.approved === true
+    && activationReceipt.controlled_internal_beta === true
+    && activationReceipt.private_live_only === true
+    && activationReceipt.public_access === false
+    && activationReceipt.source_default_off === true
+    && activationReceipt.production_customer_rollout === false
+    && activationReceipt.environment_id === environmentId
+    && activationReceipt.configuration_authority_packet_digest === packetDigest
+    && activationReceipt.approved_profile_cohort_digest === cohortDigest
+    && activationReceipt.product_binding_attestation_digest === productDigest
+    && activationReceipt.rollback_receipt_digest === rollbackReceipt?.receipt_sha256
+    && activationReceipt.deployment_commit_sha === env.VERCEL_GIT_COMMIT_SHA;
+  const authorityValid = authorityState === 'READY_FOR_PRIVATE_TEST'
+    && authorityPacket.live_enabled === true
+    && authorityPacket.emergency_disabled === false
+    && protectedEdgeConfiguration.enabled === true
+    && protectedEdgeConfiguration.emergency_disabled === false
+    && sha256(packetDigest)
+    && sha256(productDigest)
+    && sha256(cohortDigest)
+    && sha256(immutableDeploymentIdentity)
+    && immutableDeploymentIdentity === protectedEdgeConfiguration.deployment_id
+    && productBindingAttestation.environment_id === environmentId
+    && approvedProfileCohort?.environment_id === environmentId
+    && approvedProfileCohort?.operating_mode === 'CONTROLLED_INTERNAL_BETA'
+    && approvedProfileCohort?.source_default_off === true
+    && approvedProfileCohort?.public_access === false
+    && approvedProfileCohort?.revoked === false
+    && liveAuthority?.environment_id === environmentId
+    && liveAuthority?.product_binding_attestation_digest === productDigest
+    && liveAuthority?.source_default_off === true
+    && liveAuthority?.public_access === false
+    && liveAuthority?.persistent_namespace === true
+    && liveAuthority?.disposable_namespace === false
+    && rollbackReceipt?.environment_id === environmentId
+    && rollbackReceipt?.configuration_authority_packet_digest === packetDigest
+    && rollbackReceipt?.approved_profile_cohort_digest === cohortDigest
+    && rollbackReceipt?.public_access === false
+    && activationValid;
+  if (!authorityValid) {
+    return frozen({
+      ok: false,
+      configured: true,
+      code: 'LIVING_CONVERSATION_PROVIDER_UPSTREAM_AUTHORITY_DENIED',
+    });
+  }
+  if (typeof model !== 'string' || !/^[a-zA-Z0-9._-]{2,128}$/.test(model)) {
+    return frozen({
+      ok: false,
+      configured: true,
+      code: 'LIVING_CONVERSATION_PROVIDER_MODEL_DENIED',
+    });
+  }
+  if (retentionMode !== 'STANDARD_ABUSE_MONITORING_STORE_FALSE') {
+    return frozen({
+      ok: false,
+      configured: true,
+      code: 'LIVING_CONVERSATION_PROVIDER_RETENTION_DENIED',
+    });
+  }
+  const reviewDueAt = earliestFutureTimestamp(nowMs, [
+    authorityPacket.review_due_at,
+    qualificationCertificate.review_due_at,
+    liveEnvironmentAttestation.review_due_at,
+    productBindingAttestation.review_due_at,
+    approvedProfileCohort.expires_at,
+    activationReceipt.expires_at,
+    rollbackReceipt.expires_at,
+  ]);
+  if (reviewDueAt == null) {
+    return frozen({
+      ok: false,
+      configured: true,
+      code: 'LIVING_CONVERSATION_PROVIDER_UPSTREAM_AUTHORITY_EXPIRED',
+    });
+  }
+  const binding = {
+    binding_version: LIVING_CONVERSATION_PROVIDER_BINDING_VERSION,
+    environment_id: environmentId,
+    configuration_authority_packet_sha256: packetDigest,
+    product_binding_attestation_sha256: productDigest,
+    enabled: true,
+    source_default_off: true,
+    private_beta_only: true,
+    public_access: false,
+    provider: 'OPENAI',
+    credential_ref: LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
+    model,
+    scope_mode: 'APPROVED_PROFILE_COHORT',
+    exact_scope_hash: null,
+    approved_profile_cohort_sha256: cohortDigest,
+    provider_data_retention_mode: retentionMode,
+    allowed_purposes: ['CONVERSATION_PLAN_PROPOSAL'],
+    timeout_ms: 15_000,
+    max_output_tokens: 1_800,
+    max_input_chars: 56_000,
+    issued_at: new Date(nowMs).toISOString(),
+    review_due_at: reviewDueAt,
+  };
+  binding.binding_sha256 = livingConversationProviderBindingDigest(binding);
+  const validation = validateLivingConversationProviderBindingV1(binding, {
+    environmentId,
+    configurationAuthorityPacketSha256: packetDigest,
+    productBindingAttestation,
+    approvedProfileCohort,
+    nowMs,
+  });
+  return validation.valid
+    ? frozen({ ok: true, configured: true, derived: true, binding: validation.value })
+    : frozen({
+        ok: false,
+        configured: true,
+        code: validation.errors[0]?.code
+          || 'LIVING_CONVERSATION_PROVIDER_BINDING_INVALID',
+      });
 }
 
 export function createPrivateRuntimeEnvironmentReferenceResolver(env = {}) {
@@ -356,5 +525,21 @@ export async function readPrivateRuntimeLiveConfigurationAuthorityV1({
   return Object.freeze({
     ...resolvedAuthority,
     resolve_secret_reference: resolveReference,
+    derive_living_conversation_provider_binding: () =>
+      deriveLivingConversationProviderBinding({
+        env,
+        authorityPacket,
+        qualificationCertificate,
+        liveEnvironmentAttestation,
+        productBindingAttestation,
+        approvedProfileCohort,
+        immutableDeploymentIdentity,
+        protectedEdgeConfiguration,
+        liveAuthority: liveAuthority.value,
+        activationReceipt,
+        rollbackReceipt,
+        authorityState: resolvedAuthority.state,
+        nowMs,
+      }),
   });
 }

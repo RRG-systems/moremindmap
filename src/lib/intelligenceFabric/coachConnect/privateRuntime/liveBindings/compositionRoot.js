@@ -57,6 +57,7 @@ import {
   OpenAiLivingConversationProvider,
 } from '../livingConversation/openAiProvider.js';
 import {
+  LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE,
   LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE,
   readLivingConversationProviderBindingV1,
 } from '../livingConversation/providerBinding.js';
@@ -361,15 +362,25 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     nowMs: clock(),
   });
   if (productExecutionBinding.ok) {
-    const providerBindingResult = await readLivingConversationProviderBindingV1({
-      env,
-      resolveReference: secretResolver,
-      environmentId: authority.authority_packet.environment_id,
-      configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
-      productBindingAttestation: productBinding,
-      approvedProfileCohort: authority.approved_profile_cohort,
-      nowMs: clock(),
-    });
+    const providerBindingResult =
+      env[LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE]
+        === LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE
+        ? typeof authority.derive_living_conversation_provider_binding === 'function'
+          ? authority.derive_living_conversation_provider_binding()
+          : {
+              ok: false,
+              configured: true,
+              code: 'LIVING_CONVERSATION_PROVIDER_UPSTREAM_AUTHORITY_DENIED',
+            }
+        : await readLivingConversationProviderBindingV1({
+            env,
+            resolveReference: secretResolver,
+            environmentId: authority.authority_packet.environment_id,
+            configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
+            productBindingAttestation: productBinding,
+            approvedProfileCohort: authority.approved_profile_cohort,
+            nowMs: clock(),
+          });
     if (providerBindingResult.ok) {
       try {
         const providerCredential = await secretResolver(

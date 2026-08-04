@@ -10,6 +10,7 @@ import {
   readLivingConversationProviderBindingV1,
   validateLivingConversationProviderBindingV1,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/livingConversation/providerBinding.js';
+import * as providerBindingModule from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/livingConversation/providerBinding.js';
 
 const nowMs = Date.parse('2026-08-04T12:00:00.000Z');
 const environmentId = 'private_live_living_conversation';
@@ -47,6 +48,13 @@ function binding(overrides = {}) {
   value.binding_sha256 = livingConversationProviderBindingDigest(value);
   return value;
 }
+
+test('raw provider-binding imports cannot mint a derived authority child', () => {
+  assert.equal(
+    providerBindingModule.deriveLivingConversationProviderBindingV1,
+    undefined,
+  );
+});
 
 test('provider binding is exact, protected, private-beta-only, and default-off', async () => {
   const valid = validateLivingConversationProviderBindingV1(binding(), {
@@ -269,6 +277,8 @@ test('composition root resolves the provider credential server-side and binds bo
     import.meta.url,
   ), 'utf8');
   assert.match(source, /readLivingConversationProviderBindingV1/);
+  assert.match(source, /authority\.derive_living_conversation_provider_binding\(\)/);
+  assert.match(source, /LIVING_CONVERSATION_DERIVED_PROVIDER_REFERENCE/);
   assert.match(source, /purpose: 'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL',[\s\S]{0,80}secret: true/);
   assert.doesNotMatch(source, /OPENAI_API_KEY/);
   assert.equal((source.match(/conversationProvider,/g) || []).length >= 2, true);
