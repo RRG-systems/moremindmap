@@ -288,9 +288,10 @@ function extractWrittenSignals(intake_answers) {
     if (count > 0) emotionCounts[emotion] = count;
   });
 
-  signals.dominant_emotion = Object.keys(emotionCounts).reduce((a, b) =>
-    emotionCounts[a] > emotionCounts[b] ? a : b
-  ) || "neutral";
+  signals.dominant_emotion = Object.keys(emotionCounts).reduce((current, candidate) => {
+    if (current === null) return candidate;
+    return emotionCounts[current] > emotionCounts[candidate] ? current : candidate;
+  }, null) || "neutral";
 
   // DETECT INTENSITY
   if (signals.all_text.includes("devastated") || signals.all_text.includes("crushing")) {
