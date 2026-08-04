@@ -194,6 +194,10 @@ function exactProviderBinding(exactScopeHash) {
 }
 
 const providerBinding = exactProviderBinding(scopeHashA);
+const standardRetentionProviderBinding = Object.freeze({
+  ...exactProviderBinding(scopeHashA),
+  provider_data_retention_mode: 'STANDARD_ABUSE_MONITORING_STORE_FALSE',
+});
 const cohortProviderBinding = Object.freeze({
   enabled: true,
   allowed_purposes: ['CONVERSATION_PLAN_PROPOSAL'],
@@ -369,6 +373,31 @@ test('an unplanned natural question receives a governed, explained, challenging 
   assert.equal(result.receipt.projection_appended, false);
   assert.equal(result.receipt.internal_transcript_persisted, false);
   assert.equal(result.receipt.provider_retention_mode, 'ZERO_DATA_RETENTION_ATTESTED');
+});
+
+test('standard-retention private beta is labeled honestly and still disables storage', async () => {
+  const provider = new DeterministicFixtureProvider({
+    proposal_type: 'RESPONSE_PLAN',
+    payload: payload(),
+    scope: scopeA,
+  });
+  const result = await createLivingConversationRuntimeV1({
+    provider,
+    providerBinding: standardRetentionProviderBinding,
+    expectedExactScopeHash: scopeHashA,
+  }).converse(governedInput(scopeA));
+  assert.equal(result.ok, true, JSON.stringify(result));
+  assert.equal(
+    result.conversation.provider_retention_mode,
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED',
+  );
+  assert.equal(
+    result.receipt.provider_retention_mode,
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED',
+  );
+  assert.equal(result.receipt.internal_transcript_persisted, false);
+  assert.equal(result.receipt.internal_conversation_content_persisted, false);
+  assert.equal(result.receipt.canonical_mutation_performed, false);
 });
 
 test('free-text facts produce proposed evidence without canonical mutation', async () => {

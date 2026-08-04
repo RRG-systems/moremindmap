@@ -5,6 +5,7 @@ import {
   OpenAiLivingConversationProvider,
 } from '../src/lib/intelligenceFabric/coachConnect/privateRuntime/livingConversation/openAiProvider.js';
 import {
+  LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
   livingConversationProviderBindingDigest,
   readLivingConversationProviderBindingV1,
   validateLivingConversationProviderBindingV1,
@@ -29,7 +30,7 @@ function binding(overrides = {}) {
     private_beta_only: true,
     public_access: false,
     provider: 'OPENAI',
-    credential_ref: 'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL',
+    credential_ref: LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
     model: 'synthetic-model-v1',
     scope_mode: 'EXACT_PROFILE',
     exact_scope_hash: productBinding.exact_scope_hash,
@@ -55,13 +56,25 @@ test('provider binding is exact, protected, private-beta-only, and default-off',
     nowMs,
   });
   assert.equal(valid.valid, true, JSON.stringify(valid.errors));
+  const standardRetention = validateLivingConversationProviderBindingV1(binding({
+    provider_data_retention_mode: 'STANDARD_ABUSE_MONITORING_STORE_FALSE',
+  }), {
+    environmentId,
+    configurationAuthorityPacketSha256: packetSha,
+    productBindingAttestation: productBinding,
+    nowMs,
+  });
+  assert.equal(standardRetention.valid, true, JSON.stringify(standardRetention.errors));
   for (const patch of [
     { public_access: true },
     { source_default_off: false },
     { enabled: false },
     { allowed_purposes: ['CONVERSATION_PLAN_PROPOSAL', 'EXTRACTION_PROPOSAL'] },
     { credential_ref: 'invalid-reference' },
-    { provider_data_retention_mode: 'ABUSE_MONITORING_RETENTION' },
+    { credential_ref: 'OPENAI_API_KEY' },
+    { credential_ref: 'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL' },
+    { credential_ref: 'MORE_PRIVATE_RUNTIME_OTHER_SECRET' },
+    { provider_data_retention_mode: 'UNDECLARED_RETENTION' },
     { scope_mode: 'APPROVED_PROFILE_COHORT' },
     { review_due_at: '2026-08-04T11:00:00.000Z' },
   ]) {

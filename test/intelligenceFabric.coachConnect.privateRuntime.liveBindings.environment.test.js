@@ -376,6 +376,26 @@ test('product-store authority aliases only the exact protected reference to serv
   assert.equal(await resolve('MORE_OTHER_PRODUCT_STORE_REDIS_URL'), null);
 });
 
+test('conversation provider authority aliases only the protected reference to server OPENAI_API_KEY', async () => {
+  const env = {
+    OPENAI_API_KEY: 'synthetic-openai-key-material',
+    MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_VALUE:
+      'must-not-shadow-the-reviewed-alias',
+    MORE_PRIVATE_RUNTIME_OTHER_VALUE: 'other-private-runtime-value',
+  };
+  const resolve = createPrivateRuntimeEnvironmentReferenceResolver(env);
+  assert.equal(
+    await resolve('MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_VALUE'),
+    env.OPENAI_API_KEY,
+  );
+  assert.equal(await resolve('OPENAI_API_KEY'), null);
+  assert.equal(
+    await resolve('MORE_PRIVATE_RUNTIME_OTHER_VALUE'),
+    env.MORE_PRIVATE_RUNTIME_OTHER_VALUE,
+  );
+  assert.equal(await resolve('MORE_CONVERSATION_PROVIDER_CREDENTIAL_VALUE'), null);
+});
+
 test('Marketplace redis transport is limited to the exact server-side product-store alias', () => {
   const env = { REDIS_URL: 'redis://synthetic-marketplace.invalid:6379' };
   assert.equal(privateRuntimeProductStoreConnectionAllowedV1({

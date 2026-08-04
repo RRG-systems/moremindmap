@@ -322,6 +322,7 @@ export function createLivingConversationResponseV1({
   modelReceipt,
   contextReceipt,
   referenceRegistry,
+  providerRetentionMode,
 } = {}) {
   const requestValidation = request?.request_version === LIVING_CONVERSATION_REQUEST_VERSION
     && exactPrivateRuntimeScope(request?.exact_scope);
@@ -361,8 +362,12 @@ export function createLivingConversationResponseV1({
     && contextReceipt.raw_dossier_included === false
     && contextReceipt.raw_assessment_answers_included === false
     && contextReceipt.transcript_included === false;
+  const providerRetentionValid = [
+    'ZERO_DATA_RETENTION_ATTESTED',
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED',
+  ].includes(providerRetentionMode);
   if (!requestValidation || !payloadValidation.valid
-    || !modelReceiptValid || !contextReceiptValid) {
+    || !modelReceiptValid || !contextReceiptValid || !providerRetentionValid) {
     return result([issue('LIVING_CONVERSATION_RESPONSE_INVALID', '$')]);
   }
   const scope = request.exact_scope;
@@ -435,7 +440,7 @@ export function createLivingConversationResponseV1({
     canonical_mutation_eligible: false,
     internal_transcript_persisted: false,
     internal_conversation_content_persisted: false,
-    provider_retention_mode: 'ZERO_DATA_RETENTION_ATTESTED',
+    provider_retention_mode: providerRetentionMode,
   };
   return result([], response);
 }

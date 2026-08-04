@@ -20,6 +20,9 @@ import {
 import {
   readPrivateRuntimeApprovedProfileCohortV1,
 } from './profileCohort.js';
+import {
+  LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE,
+} from '../livingConversation/providerBinding.js';
 
 export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
   'MORE_PRIVATE_RUNTIME_CONFIGURATION_AUTHORITY_PACKET_REF',
@@ -36,6 +39,10 @@ export const PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE =
 const PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS =
   'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL';
 const PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE = 'REDIS_URL';
+export const PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_ALIAS =
+  LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE;
+const PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_ALIAS_SOURCE =
+  'OPENAI_API_KEY';
 
 const frozen = (value) => deepFreeze(structuredClone(value));
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
@@ -67,6 +74,11 @@ export function createPrivateRuntimeEnvironmentReferenceResolver(env = {}) {
     }
     if (reference === PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS) {
       const aliasedValue = env[PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE];
+      return typeof aliasedValue === 'string' ? aliasedValue : null;
+    }
+    if (reference === PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_ALIAS) {
+      const aliasedValue =
+        env[PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_ALIAS_SOURCE];
       return typeof aliasedValue === 'string' ? aliasedValue : null;
     }
     const value = env[reference];

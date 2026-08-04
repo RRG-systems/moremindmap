@@ -5,6 +5,20 @@ export const LIVING_CONVERSATION_PROVIDER_BINDING_VERSION =
   'living-conversation-provider-binding-v1';
 export const LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE =
   'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_BINDING_REF';
+export const LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE =
+  'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL_VALUE';
+export const LIVING_CONVERSATION_PROVIDER_RETENTION_MODES = Object.freeze([
+  'ZERO_DATA_RETENTION',
+  'STANDARD_ABUSE_MONITORING_STORE_FALSE',
+]);
+
+export function livingConversationProviderRetentionReceipt(mode) {
+  if (mode === 'ZERO_DATA_RETENTION') return 'ZERO_DATA_RETENTION_ATTESTED';
+  if (mode === 'STANDARD_ABUSE_MONITORING_STORE_FALSE') {
+    return 'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED';
+  }
+  return null;
+}
 
 const FIELDS = Object.freeze([
   'binding_version',
@@ -86,7 +100,7 @@ export function validateLivingConversationProviderBindingV1(value, {
     issue('LIVING_CONVERSATION_PROVIDER_NOT_PRIVATE_BETA', 'activation');
   }
   if (value.provider !== 'OPENAI'
-    || !reference(value.credential_ref)
+    || value.credential_ref !== LIVING_CONVERSATION_PROVIDER_CREDENTIAL_REFERENCE
     || typeof value.model !== 'string'
     || !/^[a-zA-Z0-9._-]{2,128}$/.test(value.model)) {
     issue('LIVING_CONVERSATION_PROVIDER_BINDING_INVALID', 'provider');
@@ -103,7 +117,8 @@ export function validateLivingConversationProviderBindingV1(value, {
   if (!exactMode && !cohortMode) {
     issue('LIVING_CONVERSATION_PROVIDER_SCOPE_DENIED', 'scope_mode');
   }
-  if (value.provider_data_retention_mode !== 'ZERO_DATA_RETENTION') {
+  if (!LIVING_CONVERSATION_PROVIDER_RETENTION_MODES
+    .includes(value.provider_data_retention_mode)) {
     issue('LIVING_CONVERSATION_PROVIDER_RETENTION_DENIED', 'provider_data_retention_mode');
   }
   if (!Array.isArray(value.allowed_purposes)

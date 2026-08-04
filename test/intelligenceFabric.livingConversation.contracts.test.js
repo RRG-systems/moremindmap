@@ -119,6 +119,7 @@ test('response contract exposes safe explanation rather than hidden reasoning', 
     modelReceipt,
     contextReceipt,
     referenceRegistry,
+    providerRetentionMode: 'ZERO_DATA_RETENTION_ATTESTED',
   });
   assert.equal(response.valid, true, JSON.stringify(response.errors));
   assert.equal(livingConversationResponseMatchesScope(response.value, scope), true);
@@ -155,6 +156,7 @@ test('new subscriber facts remain exact-scope proposals and cannot mutate canoni
     modelReceipt: { ...modelReceipt, receipt_id: 'model_receipt_proposal' },
     contextReceipt,
     referenceRegistry,
+    providerRetentionMode: 'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED',
   });
   assert.equal(response.valid, true, JSON.stringify(response.errors));
   assert.equal(response.value.proposed_evidence.length, 1);
@@ -162,6 +164,10 @@ test('new subscriber facts remain exact-scope proposals and cannot mutate canoni
   assert.equal(response.value.proposed_evidence[0].status, 'PROPOSED');
   assert.equal(response.value.proposed_evidence[0].confirmation_required, true);
   assert.equal(response.value.proposed_evidence[0].canonical_mutation_eligible, false);
+  assert.equal(
+    response.value.provider_retention_mode,
+    'STANDARD_ABUSE_MONITORING_STORE_FALSE_ATTESTED',
+  );
 });
 
 test('unknown references, fabricated excerpts, and provider debug fields fail closed', () => {

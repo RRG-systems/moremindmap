@@ -7,6 +7,9 @@ import {
   createLivingConversationResponseV1,
   livingConversationResponseMatchesScope,
 } from './contracts.js';
+import {
+  livingConversationProviderRetentionReceipt,
+} from './providerBinding.js';
 
 export const LIVING_CONVERSATION_RUNTIME_VERSION =
   'living-conversation-runtime-v1';
@@ -25,11 +28,14 @@ export function createLivingConversationRuntimeV1({
   const cohortProviderScope = providerBinding?.scope_mode === 'APPROVED_PROFILE_COHORT'
     && providerBinding.exact_scope_hash == null
     && providerBinding.approved_profile_cohort_sha256 === approvedProfileCohortSha256;
+  const providerRetentionReceipt = livingConversationProviderRetentionReceipt(
+    providerBinding?.provider_data_retention_mode,
+  );
   const configured = provider != null
     && typeof provider.propose === 'function'
     && providerBinding?.enabled === true
     && providerBinding.allowed_purposes?.includes('CONVERSATION_PLAN_PROPOSAL')
-    && providerBinding.provider_data_retention_mode === 'ZERO_DATA_RETENTION'
+    && providerRetentionReceipt != null
     && (exactProviderScope || cohortProviderScope);
 
   async function converse({
@@ -102,6 +108,7 @@ export function createLivingConversationRuntimeV1({
       modelReceipt: membraneResult.receipt,
       contextReceipt: contextResult.receipt,
       referenceRegistry: contextResult.reference_registry,
+      providerRetentionMode: providerRetentionReceipt,
     });
     if (!responseResult.valid
       || !livingConversationResponseMatchesScope(responseResult.value, exactScope)) {
@@ -131,7 +138,7 @@ export function createLivingConversationRuntimeV1({
         projection_appended: false,
         internal_transcript_persisted: false,
         internal_conversation_content_persisted: false,
-        provider_retention_mode: 'ZERO_DATA_RETENTION_ATTESTED',
+        provider_retention_mode: providerRetentionReceipt,
         provider_attempts: 1,
       },
     });
