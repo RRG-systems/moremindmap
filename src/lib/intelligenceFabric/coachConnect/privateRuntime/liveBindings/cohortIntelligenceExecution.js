@@ -18,6 +18,9 @@ export function createPrivateRuntimeCohortIntelligenceExecutionV1({
   client,
   namespacePrefix,
   resolveMemberBindings,
+  conversationProvider = null,
+  conversationProviderBinding = null,
+  conversationProviderCohortSha256 = null,
   clock = () => new Date().toISOString(),
 } = {}) {
   if (client == null
@@ -50,6 +53,10 @@ export function createPrivateRuntimeCohortIntelligenceExecutionV1({
       }),
       binding: resolution.value.product_execution_binding,
       productBindingAttestation: resolution.value.product_binding_attestation,
+      conversationProvider,
+      conversationProviderBinding,
+      conversationProviderCohortSha256,
+      clock,
     });
     const result = await execution.execute(input);
     return result?.ok === true

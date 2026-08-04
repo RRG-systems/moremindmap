@@ -15,6 +15,9 @@ import {
 import { planSubscriberResponse } from '../../subscriber/conversation.js';
 import { materializeSubscriberEvent } from '../../subscriber/subscriberCycle.js';
 import { deepFreeze } from '../../validation.js';
+import {
+  createLivingConversationRuntimeV1,
+} from './livingConversation/runtime.js';
 
 export const PRIVATE_RUNTIME_INTELLIGENCE_EXECUTION_VERSION =
   'private-runtime-intelligence-execution-v1';
@@ -22,6 +25,7 @@ export const PRIVATE_RUNTIME_INTELLIGENCE_OPERATIONS = Object.freeze([
   'BOOTSTRAP',
   'SUBMIT_CONFIRMED_EVIDENCE',
   'RELOAD',
+  'CONVERSE',
 ]);
 
 const frozen = (value) => deepFreeze(structuredClone(value));
@@ -360,6 +364,10 @@ export function createPrivateRuntimeIntelligenceExecutionV1({
   productStore,
   binding,
   productBindingAttestation,
+  conversationProvider = null,
+  conversationProviderBinding = null,
+  conversationProviderCohortSha256 = null,
+  clock = () => new Date().toISOString(),
   contractBuilder = buildBusinessEngineContract,
   contractValidator = validateBusinessEngineContract,
 } = {}) {
@@ -370,6 +378,12 @@ export function createPrivateRuntimeIntelligenceExecutionV1({
     || !productBindingAttestation) {
     throw new TypeError('authorized private-live product execution dependencies required');
   }
+  const livingConversation = createLivingConversationRuntimeV1({
+    provider: conversationProvider,
+    providerBinding: conversationProviderBinding,
+    expectedExactScopeHash: binding.exact_scope_hash,
+    approvedProfileCohortSha256: conversationProviderCohortSha256,
+  });
 
   async function persistSnapshot({
     operation,
@@ -585,9 +599,27 @@ export function createPrivateRuntimeIntelligenceExecutionV1({
       }
       const asOfAt = operation === 'BOOTSTRAP'
         ? contract.contract_metadata.generated_at
-        : request.intelligence_input?.decided_at;
+        : operation === 'CONVERSE'
+          ? request.intelligence_input?.requested_at
+          : request.intelligence_input?.decided_at;
       if (!text(asOfAt) || !Number.isFinite(Date.parse(asOfAt))) {
         throw new ExecutionFailure(5, 'execution_clock', 'CANONICAL_EXECUTION_TIME_REQUIRED');
+      }
+      if (operation === 'CONVERSE') {
+        const evaluatedAt = clock();
+        const evaluatedMs = typeof evaluatedAt === 'number'
+          ? evaluatedAt
+          : Date.parse(evaluatedAt);
+        const requestedMs = Date.parse(asOfAt);
+        if (!Number.isFinite(evaluatedMs)
+          || requestedMs < evaluatedMs - (5 * 60_000)
+          || requestedMs > evaluatedMs + 60_000) {
+          throw new ExecutionFailure(
+            5,
+            'execution_clock',
+            'LIVING_CONVERSATION_REQUEST_STALE',
+          );
+        }
       }
       const provenance = liveProvenance({
         scope: binding.exact_scope,
@@ -613,6 +645,63 @@ export function createPrivateRuntimeIntelligenceExecutionV1({
         contract_hash: contractHash,
         projection_hash: projected.projection_hash,
       });
+
+      if (operation === 'CONVERSE') {
+        if (!priorProjection.record) {
+          throw new ExecutionFailure(
+            6,
+            'living_conversation_context',
+            'LIVING_BUSINESS_STATE_REQUIRED',
+          );
+        }
+        const history = await productStore.readEvents();
+        if (!history.ok) {
+          throw new ExecutionFailure(6, 'living_conversation_context', history.code);
+        }
+        await reconstruct(priorProjection.record.value, history, trace);
+        traceStage(trace, 21, 'living_conversation_context', 'PASSED', {
+          exact_scope_hash: binding.exact_scope_hash,
+          context_classes: 8,
+          raw_dossier_exposed: false,
+          raw_assessment_answers_exposed: false,
+          transcript_loaded: false,
+        });
+        const conversation = await livingConversation.converse({
+          input: request.intelligence_input,
+          exactScope: binding.exact_scope,
+          subscriberSubjectRef: authority.subscriber_subject_ref,
+          dossier: dossierResult.dossier,
+          businessEngineContract: contract,
+          snapshot: priorProjection.record.value,
+          traceId: requestContext.correlation_ref,
+          exactScopeHash: binding.exact_scope_hash,
+        });
+        if (!conversation.ok) {
+          throw new ExecutionFailure(
+            22,
+            'living_conversation_model',
+            conversation.code || 'LIVING_CONVERSATION_FAILED',
+          );
+        }
+        traceStage(trace, 22, 'living_conversation_model', 'PASSED', {
+          model_receipt_id: conversation.conversation.model_receipt.receipt_id,
+          proposal_count: conversation.conversation.proposed_evidence.length,
+          canonical_mutation_performed: false,
+          event_appended: false,
+          projection_appended: false,
+          transcript_persisted: false,
+        });
+        return frozen({
+          ok: true,
+          allowed: true,
+          status: 200,
+          runtime_ready: true,
+          projections: publicProjection(priorProjection.record.value, trace),
+          conversation: conversation.conversation,
+          conversation_receipt: conversation.receipt,
+          idempotent_replay: false,
+        });
+      }
 
       let events = [];
       if (operation === 'BOOTSTRAP') {

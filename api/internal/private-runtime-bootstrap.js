@@ -46,6 +46,7 @@ export function createPrivateRuntimeBootstrapHandler({
       subscription_runtime_attachment: result.subscription_runtime_attachment,
       coach_connect_attachment: result.coach_connect_attachment || null,
       projections: result.projections || null,
+      conversation: result.conversation || null,
     });
   };
 }

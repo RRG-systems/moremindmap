@@ -54,6 +54,13 @@ import {
   createPrivateRuntimeIntelligenceExecutionV1,
 } from '../intelligenceExecution.js';
 import {
+  OpenAiLivingConversationProvider,
+} from '../livingConversation/openAiProvider.js';
+import {
+  LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE,
+  readLivingConversationProviderBindingV1,
+} from '../livingConversation/providerBinding.js';
+import {
   createExactVaultProfileReader,
   createExactBusinessAssessmentReader,
   createSubdev1CanonicalExactProfileRepository,
@@ -343,6 +350,8 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
   });
   let intelligenceExecution = null;
   let productClient = null;
+  let conversationProvider = null;
+  let conversationProviderBinding = null;
   const productExecutionBinding = await readPrivateLiveProductExecutionBindingV1({
     env,
     resolveReference: secretResolver,
@@ -352,6 +361,39 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     nowMs: clock(),
   });
   if (productExecutionBinding.ok) {
+    const providerBindingResult = await readLivingConversationProviderBindingV1({
+      env,
+      resolveReference: secretResolver,
+      environmentId: authority.authority_packet.environment_id,
+      configurationAuthorityPacketSha256: authority.authority_packet.packet_sha256,
+      productBindingAttestation: productBinding,
+      approvedProfileCohort: authority.approved_profile_cohort,
+      nowMs: clock(),
+    });
+    if (providerBindingResult.ok) {
+      try {
+        const providerCredential = await secretResolver(
+          providerBindingResult.binding.credential_ref,
+          {
+            purpose: 'MORE_PRIVATE_RUNTIME_CONVERSATION_PROVIDER_CREDENTIAL',
+            secret: true,
+          },
+        );
+        conversationProvider = new OpenAiLivingConversationProvider({
+          apiKey: providerCredential,
+          model: providerBindingResult.binding.model,
+          fetchImpl,
+          timeoutMs: providerBindingResult.binding.timeout_ms,
+          maxOutputTokens: providerBindingResult.binding.max_output_tokens,
+          maxInputChars: providerBindingResult.binding.max_input_chars,
+        });
+        conversationProviderBinding = providerBindingResult.binding;
+      } catch {
+        return makeDeniedComposition('LIVING_CONVERSATION_PROVIDER_REQUIRED', 503);
+      }
+    } else if (env[LIVING_CONVERSATION_PROVIDER_REFERENCE_VARIABLE] != null) {
+      return makeDeniedComposition(providerBindingResult.code, 503);
+    }
     if (authority.approved_profile_cohort != null) {
       resolveCohortMemberBindings = async (profileId) =>
         projectPrivateRuntimeCohortMemberBindingsV1({
@@ -393,6 +435,9 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
             }),
             binding: productExecutionBinding.binding,
             productBindingAttestation: productBinding,
+            conversationProvider,
+            conversationProviderBinding,
+            conversationProviderCohortSha256: null,
             clock: () => new Date(clock()).toISOString(),
           })
         : createPrivateRuntimeCohortIntelligenceExecutionV1({
@@ -400,6 +445,10 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
             namespacePrefix:
               productExecutionBinding.binding.persistence_namespace_prefix,
             resolveMemberBindings: resolveCohortMemberBindings,
+            conversationProvider,
+            conversationProviderBinding,
+            conversationProviderCohortSha256:
+              authority.approved_profile_cohort.cohort_sha256,
             clock: () => new Date(clock()).toISOString(),
           });
     } catch {
@@ -714,6 +763,8 @@ export async function buildPrivateRuntimeLiveCompositionRootV2({
     composition_root_version: PRIVATE_RUNTIME_LIVE_COMPOSITION_ROOT_VERSION,
     live_authority_fingerprint: authority.live_authority.authority_fingerprint,
     provider_adapter: true,
+    provider_connection: conversationProvider != null,
+    living_conversation_configured: conversationProvider != null,
     source_default_off: true,
     public_access: false,
   });
