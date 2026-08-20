@@ -288,19 +288,26 @@ function extractWrittenSignals(intake_answers) {
     if (count > 0) emotionCounts[emotion] = count;
   });
 
-  signals.dominant_emotion = Object.keys(emotionCounts).reduce((a, b) =>
-    emotionCounts[a] > emotionCounts[b] ? a : b
-  ) || "neutral";
+  const emotionKeys = Object.keys(emotionCounts);
 
-  // DETECT INTENSITY
-  if (signals.all_text.includes("devastated") || signals.all_text.includes("crushing")) {
-    signals.emotional_intensity = "acute";
-  } else if (emotionCounts[signals.dominant_emotion] > 3) {
-    signals.emotional_intensity = "high";
-  } else if (emotionCounts[signals.dominant_emotion] > 1) {
-    signals.emotional_intensity = "moderate";
-  } else {
+  if (emotionKeys.length === 0) {
+    signals.dominant_emotion = "neutral";
     signals.emotional_intensity = "low";
+  } else {
+    signals.dominant_emotion = emotionKeys.reduce((a, b) =>
+      emotionCounts[a] > emotionCounts[b] ? a : b
+    );
+
+    // DETECT INTENSITY
+    if (signals.all_text.includes("devastated") || signals.all_text.includes("crushing")) {
+      signals.emotional_intensity = "acute";
+    } else if (emotionCounts[signals.dominant_emotion] > 3) {
+      signals.emotional_intensity = "high";
+    } else if (emotionCounts[signals.dominant_emotion] > 1) {
+      signals.emotional_intensity = "moderate";
+    } else {
+      signals.emotional_intensity = "low";
+    }
   }
 
   // DETECT INTERNAL STATE
@@ -409,7 +416,7 @@ function detectActionPattern(vectorScores, writtenSignals, operatingMode, primar
     pattern.consequence = "momentum loss, accumulating debt";
     pattern.speed = "decelerating";
     pattern.evidence = ["avoidance explicitly mentioned"];
-  } else if (primaryScore > 1.5) {
+  } else if (primaryScore > 0.15) {
     pattern.pattern = "action-driven";
     pattern.trigger = "opportunity, urgency";
     pattern.consequence = "high execution speed but may miss details";

@@ -13,8 +13,9 @@ export default function LeadershipPortal() {
   const navigate = useNavigate()
   const [accessCode, setAccessCode] = useState('')
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
 
     const normalizedCode = accessCode.trim().toLowerCase()
@@ -39,8 +40,29 @@ export default function LeadershipPortal() {
       navigate('/leadership/role-fit')
       return
     }
-
-    setError('That access code is not recognized.')
+    setBusy(true)
+    try {
+      const prepared = await fetch('/api/internal/subscription-v1-entry', { credentials: 'same-origin', cache: 'no-store' })
+      const gate = await prepared.json().catch(() => null)
+      if (!prepared.ok || !gate?.csrf_token) throw new Error('UNAVAILABLE')
+      const response = await fetch('/api/internal/subscription-v1-entry', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: { 'content-type': 'application/json', 'x-subscription-entry-csrf': gate.csrf_token },
+        body: JSON.stringify({ access_code: rawTrimmed }),
+      })
+      const result = await response.json().catch(() => null)
+      if (!response.ok || result?.ok !== true || result.redirect_to !== '/subscription') {
+        setError(response.status === 401 ? 'That access code is not recognized.' : 'Internal Subscription access is temporarily unavailable.')
+        return
+      }
+      navigate(result.redirect_to)
+    } catch {
+      setError('That access code is not recognized.')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -103,9 +125,10 @@ export default function LeadershipPortal() {
 
                 <button
                   type="submit"
+                  disabled={busy}
                   className="w-full rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-[0.18em] text-black transition hover:bg-orange-100"
                 >
-                  Enter Portal
+                  {busy ? 'Checking access…' : 'Enter Portal'}
                 </button>
               </form>
             </div>

@@ -1,3 +1,4 @@
+/* global process */
 import Redis from 'ioredis';
 
 export const STRIPE_INTERNAL_VERSION = 'stripe_v1';
@@ -60,6 +61,14 @@ export function accessGrantByAssessmentKey(assessmentId) {
 
 export function accessGrantBySessionKey(sessionId) {
   return `access_grant_by_session:${sessionId}`;
+}
+
+export function accessGrantByMembershipKey(membershipId) {
+  return `access_grant_by_membership:${membershipId}`;
+}
+
+export function accessGrantBySubscriptionKey(subscriptionId) {
+  return `access_grant_by_subscription:${subscriptionId}`;
 }
 
 export function paymentEventKey(eventId) {

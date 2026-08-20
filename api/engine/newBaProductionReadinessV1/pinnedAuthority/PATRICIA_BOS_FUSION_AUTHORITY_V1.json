@@ -1,0 +1,72 @@
+{
+  "contract_id": "new-ba-bos-fusion-authority-v1",
+  "version": "1.0.0",
+  "profile_id": "MM-20260708-DSST020Z",
+  "source_realization_id": "patricia-top-projection-repaired-candidate-v1",
+  "source_artifact_sha256": "54e3c525a63f34864a2b88eb7ce42bd7df9053e79f03e73b4aaa4aba472d61c2",
+  "source_version": "bos_personality_dna_runtime_v1:bos_vector_free_whole_person_model_v1",
+  "custody": "FROZEN_REPOSITORY_PROJECTION",
+  "claims": [
+    {
+      "claim_ref": "patricia-wpm-operating-core-v1",
+      "category": "operating_core",
+      "meaning": "Adjusts approach based on context; comfortable with pivot and iteration. Stabilized by reads room tension before people speak; adjusts based on perceived dynamics. Primary (flex) drives forward movement. Secondary (signal) provides stabilization. Friction emerges when systems conflict. Action-focused perception, thorough processing, near-term focus. World experienced through flex lens. Model: . Speed: unknown.",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["bi_operating", "bi_world", "bi_contradictions", "cp_identity"],
+      "allowed_uses": ["execution_feasibility", "intervention_design", "uncertainty_abstention"],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "patricia-wpm-work-relationships-v1",
+      "category": "work_relationships",
+      "meaning": "3 domains: relational, infrastructure, energy. Primary: Moderate-High - Under stress, attention to people disappears; damage done without awareness. Team experiences flexibility as primary organizing force. flexibility-first communication structure shapes relational dynamics. Scaling constraint not identified.",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["bi_operating", "bi_world", "bi_contradictions", "cp_identity"],
+      "allowed_uses": ["communication_leadership", "role_team", "uncertainty_abstention"],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "patricia-wpm-pressure-recovery-v1",
+      "category": "pressure_recovery",
+      "meaning": "Under pressure: Under strain, flexibility decreases; retreats to familiar patterns. Secondary system: Under strain, attention to people increases; can create hesitation. Normal operating → pressure applied → primary intensifies → secondary compensates or overrides. Build explicit decisive direction check-ins BEFORE pressure escalates Recognize when flexibility is amplifying — create circuit breakers Post-conflict repair: consciously re-engage decisive direction and pace after stress passes",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["bi_pressure", "cp_stress"],
+      "allowed_uses": ["adoption_friction", "execution_feasibility", "intervention_design", "uncertainty_abstention"],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "patricia-wpm-role-seat-v1",
+      "category": "role_seat",
+      "meaning": "Needs dimension refinement for specific role fit More than one role configuration can work; this is a demand-level map, not a job-title prescription. Hybrid - Can build or optimize depending on context Balanced - Can operate and envision Producer - Personal production primary Pragmatic - Explores when needed, stabilizes when required Balanced executor-strategist Moderate - Can handle ambiguity with boundaries Needs dimension refinement for specific role fit Executive Leadership Client-Facing/Relationship Management Process Management",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["cp_role", "cp_environment", "bi_scaling", "u_role"],
+      "allowed_uses": ["role_team", "execution_feasibility", "intervention_design", "uncertainty_abstention"],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "patricia-wpm-cognitive-process-v1",
+      "category": "cognitive_process",
+      "meaning": "Processes thoroughly, prioritizes accuracy over speed. Adjusts approach based on context; comfortable with pivot and iteration Decisions form through balanced assessment of options. Near-term time horizon—focuses on immediate next steps and short cycles. Moderate risk calibration—situational assessment drives risk decisions.",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["bi_world", "bi_decision"],
+      "allowed_uses": ["execution_feasibility", "intervention_design", "uncertainty_abstention"],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "patricia-wpm-energy-context-v1",
+      "category": "energy_context",
+      "meaning": "High-touch client relationships Consensus-required team cultures Direct communication culture, tolerance for bluntness Strengths remain assets at current scale Moderate-High - Under stress, relational awareness disappears; damage done without awareness Low - Direction stable Low - Execution reliable Moderate - Relational friction drains energy; isolation increases over time Low - Operates collaboratively The available governed source does not establish a longitudinal personal-energy trajectory.",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": ["cp_environment", "cp_risk"],
+      "allowed_uses": ["execution_feasibility", "communication_leadership", "role_team", "uncertainty_abstention"],
+      "business_cause_authority": false
+    }
+  ],
+  "boundary": {
+    "source_domain": "BOS_WHOLE_PERSON",
+    "business_cause_authority": false,
+    "personality_score_mapping": "PROHIBITED",
+    "business_evidence_mutation": false,
+    "allowed_contribution": "EXECUTION_MODIFIER_ONLY"
+  }
+}

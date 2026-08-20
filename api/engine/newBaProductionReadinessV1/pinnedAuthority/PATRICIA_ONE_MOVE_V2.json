@@ -1,0 +1,309 @@
+{
+  "contract_id": "more-one-move-v2",
+  "contract_version": "2.0.0",
+  "schema_version": "2.0.0",
+  "one_move_id": "one-move-2799caf89cf1268d1b5f",
+  "business_id": "business-ba-20260714-64ca0783",
+  "owner_profile_id": "mm-20260708-dsst020z",
+  "title": "End-to-end ownership transfer trial",
+  "intervention": "Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion.",
+  "why_now": "Requested organization, delegation, and team growth make transferability the immediate capacity question.",
+  "governing_constraint_id": "patricia-constraint-leader-centered-system-v1",
+  "primary_mechanism_ids": [
+    "patricia-mech-leader-centered-operating-bottleneck-v1",
+    "patricia-mech-partnership-workload-misalignment-v1"
+  ],
+  "symptom_distinction": "Tests transferable ownership rather than treating workload as a staffing-count problem or assuming equal economics proves misalignment.",
+  "causal_chain": [
+    "Workflow boundaries make inputs, outputs, decisions, standards, and escalation explicit.",
+    "Role-level execution and rescue logging expose hidden dependence.",
+    "Independent completion releases operator capacity for constraint work.",
+    "Repeated evidence informs broader leverage readiness without requiring a hire."
+  ],
+  "supporting_evidence_refs": [
+    "ba-20260714-64ca0783-q5",
+    "ba-20260714-64ca0783-q7",
+    "ba-20260714-64ca0783-q8",
+    "ba-20260714-64ca0783-q10"
+  ],
+  "counterevidence_refs": [
+    "ba-20260714-64ca0783-q8",
+    "ba-20260714-64ca0783-q11"
+  ],
+  "assumptions": [
+    "Operator-reported workload concentration is directionally reliable pending direct flow and time records.",
+    "An existing support role has enough capacity for a bounded trial.",
+    "Task volume is not treated as contribution value, and the current economic arrangement may be intentional or specialized."
+  ],
+  "prerequisites": [
+    "Obtain explicit authority for the participating existing support role.",
+    "Select a recurring workflow that can be isolated without compromising continuity.",
+    "Define baseline queue, completion, interruption, rescue, quality, and decision records."
+  ],
+  "execution_definition": "Complete after repeated end-to-end cycles are executed under assigned ownership and reviewed for quality, decisions, rescue, and operator intervention.",
+  "bounded_execution_steps": [
+    "Select one recurring workflow that currently returns to the operator.",
+    "Map its start, finish, standard, decision rights, exceptions, and evidence requirements.",
+    "Authorize controlled shadow-to-independent execution with operator involvement limited to defined exceptions.",
+    "Inspect commitments, outcomes, rescues, and intervention causes.",
+    "Retain, revise, or revert the transfer based on observed fidelity."
+  ],
+  "owner_role": "Operator owns scope, rights, standards, and exception decisions without silent rescue.",
+  "team_roles": [],
+  "whole_person_execution_considerations": [
+    {
+      "relationship_ref": "patricia-person-link-adaptive-system-adoption-v1",
+      "execution_adjustment": "Pilot one workflow before extending the ownership model.",
+      "business_truth_changed": false
+    },
+    {
+      "relationship_ref": "patricia-person-link-pressure-operating-friction-v1",
+      "execution_adjustment": "Predefine check-ins and escalation before workload pressure rises.",
+      "business_truth_changed": false
+    },
+    {
+      "relationship_ref": "patricia-person-link-hybrid-seat-transition-v1",
+      "execution_adjustment": "Treat the workflow as a seat-boundary test rather than proof of managerial readiness.",
+      "business_truth_changed": false
+    }
+  ],
+  "leading_indicators": [
+    "End-to-end completions occur under assigned role ownership.",
+    "Operator decisions, interruptions, and rescues for the selected workflow become inspectable.",
+    "Quality and exception handling remain within defined boundaries."
+  ],
+  "success_evidence": [
+    "Workflow continuity persists across repeated cycles without hidden operator rescue.",
+    "Released operator capacity is demonstrably redirected to relationship, system, or accountability work.",
+    "Role and decision records support a clearer leverage-readiness judgment."
+  ],
+  "failure_evidence": [
+    "Nominal delegation leaves decisions and follow-through with the operator.",
+    "Rescue work or quality failures expand.",
+    "Operator capacity is neither released nor redirected."
+  ],
+  "falsifiers": [
+    "Direct flow and time records show balanced ownership, stable execution, and no displaced constraint work.",
+    "Role, time, contribution, and economic records show an intentional balanced arrangement without capacity effects despite apparent workload concentration."
+  ],
+  "stop_or_reconsider_conditions": [
+    "Do not assign a person while patricia-missing-authorized-team-authority-v1 remains unresolved.",
+    "Stop if continuity, quality, or decision-authority boundaries are breached.",
+    "Reconsider when rescue demand cannot remain inside the bounded exception path."
+  ],
+  "observation_horizon": "Ownership and rescue signals require repeated workflow cycles; capacity effects require actual reallocation of released time.",
+  "reversibility_class": "BOUNDED_TEST",
+  "dependency_burden": "MODERATE",
+  "trajectory_effect_intent": [
+    {
+      "future_role": "current_course",
+      "intent": "Test whether operator concentration is causal.",
+      "mechanism_rationale": "Directly probes patricia-mech-leader-centered-operating-bottleneck-v1."
+    },
+    {
+      "future_role": "emerging_future",
+      "intent": "Convert as-needed support into end-to-end ownership.",
+      "mechanism_rationale": "Makes completion and intervention dependence inspectable."
+    },
+    {
+      "future_role": "better_future",
+      "intent": "Establish governed workflow and decision ownership.",
+      "mechanism_rationale": "Weakens the operating loop beneath patricia-mech-partnership-workload-misalignment-v1."
+    },
+    {
+      "future_role": "bold_future",
+      "intent": "Generate transferability evidence before broader leverage.",
+      "mechanism_rationale": "Provides a bounded precursor to capacity expansion."
+    },
+    {
+      "future_role": "downside_future",
+      "intent": "Prevent nominal delegation from increasing rescue and oversight.",
+      "mechanism_rationale": "Limits reinforcement of patricia-mech-leader-centered-operating-bottleneck-v1."
+    }
+  ],
+  "certainty_support_classification": "SUPPORTED_INTERVENTION_HYPOTHESIS",
+  "whole_business_model_binding": {
+    "version": 1,
+    "hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba"
+  },
+  "five_futures_binding": {
+    "version": "2.0.0",
+    "hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148",
+    "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT"
+  },
+  "authority_versions": {
+    "business_intelligence": {
+      "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    "script_registry": "2dcca632efd98b5f120cace9ab402e1de6e79e503a7a0d3565f5157354a677c9",
+    "script_library": "f7b2c6dec03c19260ec5a42cf0b34e75310133a7ef38a0d15b020137aab325e7"
+  },
+  "selection_model_version": "one-move-v2-inspectable-rubric-v1",
+  "selection_trace": {
+    "selection_receipt_hash": "eb503f5e314f9419d363476a1727b99904bcc0b9c4a3b1c7bdbf9b94dc0faa97",
+    "selected_score": 18,
+    "selected_components": [
+      {
+        "dimension_id": "constraint_leverage",
+        "categorical_level": "DIRECT",
+        "contribution": 3,
+        "meaning": "How directly the intervention weakens the governing constraint."
+      },
+      {
+        "dimension_id": "causal_reach",
+        "categorical_level": "MECHANISM_CHAIN",
+        "contribution": 2,
+        "meaning": "How far the intervention reaches through the supported causal chain."
+      },
+      {
+        "dimension_id": "evidence_support",
+        "categorical_level": "MODERATE",
+        "contribution": 2,
+        "meaning": "Strength of governed evidence for the intervention hypothesis."
+      },
+      {
+        "dimension_id": "execution_feasibility",
+        "categorical_level": "DIFFICULT",
+        "contribution": 1,
+        "meaning": "Whether execution can realistically start with present capability and authority."
+      },
+      {
+        "dimension_id": "time_to_signal",
+        "categorical_level": "NEAR",
+        "contribution": 3,
+        "meaning": "How soon a truthful leading signal can be observed."
+      },
+      {
+        "dimension_id": "reversibility_low_regret",
+        "categorical_level": "BOUNDED_TEST",
+        "contribution": 3,
+        "meaning": "How bounded, reversible, and low-regret the intervention is."
+      },
+      {
+        "dimension_id": "trajectory_leverage",
+        "categorical_level": "DIRECT",
+        "contribution": 3,
+        "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+      },
+      {
+        "dimension_id": "dependency_burden",
+        "categorical_level": "MODERATE",
+        "contribution": 1,
+        "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+      }
+    ],
+    "explanation": "The selected candidate has the strongest inspectable causal, evidence, execution, learning, reversibility, trajectory, and dependency profile under the fixed rubric.",
+    "probability_semantics": "NONE_NOT_AN_INTERVENTION_PROBABILITY_MODEL"
+  },
+  "observation_contract": {
+    "contract_id": "one-move-v2-future-observation-contract-v1",
+    "execution_started": null,
+    "execution_fidelity": null,
+    "leading_indicator_movement": null,
+    "business_state_movement": null,
+    "observation_horizon": "Ownership and rescue signals require repeated workflow cycles; capacity effects require actual reallocation of released time.",
+    "unexpected_effects": [],
+    "confounds": [],
+    "outcome": null,
+    "recommendation_still_valid": null,
+    "wbm_update_trigger": "Update WBM when governed observations materially change a business state, mechanism, constraint, or its epistemic support.",
+    "five_futures_update_trigger": "Recompute Five Futures from a newly validated WBM state; never infer probability movement from intervention intent.",
+    "tracking_or_subscription_implemented": false
+  },
+  "script_intelligence_refs": [],
+  "dynamic_research_warrant": null,
+  "provenance": {
+    "selected_candidate_id": "patricia-candidate-ownership-transfer-trial-v1",
+    "candidate_set_hash": "80092eb434d30d6e05e02ab247438be8a2d8fb8a4b41a0d4a30e44c1882f8c37",
+    "context_hash": "24f0722d2447a8314446b1eef697a5cfce8ac8ca90b4b23d322c3e3d91a9c40b",
+    "selected_authority_ids": [
+      "UB-03",
+      "UB-12",
+      "RE-06",
+      "RE-12",
+      "RE-13"
+    ],
+    "selected_section_ids": [
+      "UB-03:causal_mechanisms",
+      "UB-03:evidence_inputs",
+      "UB-03:counterexamples_and_confounds",
+      "UB-03:falsifiers",
+      "UB-03:intervention_relevance",
+      "UB-12:causal_mechanisms",
+      "UB-12:evidence_inputs",
+      "UB-12:counterexamples_and_confounds",
+      "UB-12:falsifiers",
+      "UB-12:intervention_relevance",
+      "RE-06:causal_mechanisms",
+      "RE-06:evidence_inputs",
+      "RE-06:counterexamples_and_confounds",
+      "RE-06:falsifiers",
+      "RE-06:intervention_relevance",
+      "RE-12:causal_mechanisms",
+      "RE-12:evidence_inputs",
+      "RE-12:counterexamples_and_confounds",
+      "RE-12:falsifiers",
+      "RE-12:intervention_relevance",
+      "RE-13:causal_mechanisms",
+      "RE-13:evidence_inputs",
+      "RE-13:counterexamples_and_confounds",
+      "RE-13:falsifiers",
+      "RE-13:intervention_relevance"
+    ],
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q5",
+      "ba-20260714-64ca0783-q7",
+      "ba-20260714-64ca0783-q8",
+      "ba-20260714-64ca0783-q10"
+    ],
+    "deterministic_selection": true,
+    "frontier_selected_winner": false
+  },
+  "runtime_boundaries": {
+    "customer_realization_implemented": false,
+    "customer_ui_implemented": false,
+    "production_wired": false,
+    "deployed_or_activated": false,
+    "one_three_five_implemented": false,
+    "rsl_implemented": false,
+    "outcome_engine_implemented": false,
+    "calibrated_intervention_probability_implemented": false,
+    "bayesian_model_implemented": false,
+    "mdp_or_pomdp_implemented": false,
+    "monte_carlo_implemented": false
+  },
+  "validation_receipt": {
+    "validator_version": "one-move-v2-validator-v1",
+    "status": "PASS",
+    "business_id": "business-ba-20260714-64ca0783",
+    "one_move_id": "one-move-2799caf89cf1268d1b5f",
+    "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+    "five_futures_hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148",
+    "governing_constraint_id": "patricia-constraint-leader-centered-system-v1",
+    "mechanism_count": 2,
+    "trajectory_relationship_count": 5,
+    "bounded_step_count": 5,
+    "probability_movement_claims": false,
+    "customer_realization_implemented": false,
+    "production_wired": false,
+    "receipt_hash": "561a7844e75b69e04c491ac5eb7b353251d12d3288ab0a5381b5d9d73bada42b"
+  },
+  "artifact_hash": "2e087bc4ea5b56212e7fefa5b00a33bbbb1c13e651351ca956176a017f4f4447"
+}

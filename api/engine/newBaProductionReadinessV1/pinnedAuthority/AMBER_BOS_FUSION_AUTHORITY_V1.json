@@ -1,0 +1,141 @@
+{
+  "contract_id": "new-ba-bos-fusion-authority-v1",
+  "version": "1.0.0",
+  "profile_id": "MM-20260617-YBNWT0KS",
+  "source_realization_id": "amber-top-projection-repaired-candidate-v1",
+  "source_artifact_sha256": "ad36804798f5b169c0875f28eb717396bb9e7e59bf291862a2dd046ab7111d8d",
+  "source_version": "bos_personality_dna_runtime_v1:bos_vector_free_whole_person_model_v1",
+  "custody": "FROZEN_REPOSITORY_PROJECTION",
+  "claims": [
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:operating_core",
+      "category": "operating_core",
+      "meaning": "Amber makes care concrete through reliability. When a client, team member, or standard is exposed, she moves toward the responsibility, finds a workable path, and makes sure the result holds. Under strain that strength can narrow her attention and move work into her hands faster than it builds ownership elsewhere. She also shows a real capacity to step back, reconsider impact, and repair. The central developmental question is not whether she can carry more. It is whether the dependable standard she has embodied can become portable enough to support the freedom and legacy she explicitly wants.",
+      "meaning_sha256": "931201d2adcbc7acc8cd8f0e387e39b9ea7f18b0309a4c6eeb51379ff5c8109f",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q02",
+        "q14",
+        "q17",
+        "q22",
+        "q24",
+        "q26",
+        "q27",
+        "q28"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:work_relationships",
+      "category": "work_relationships",
+      "meaning": "Amber appears strongest where accountability, customer or agent consequence, and practical authority are visible. Relationships are not separate from performance; direct standards can strain the channel, and deliberate repair can reopen it. The unresolved system question is whether guidance and high standards are becoming independent operating capacity or still returning to Amber as corrective work.",
+      "meaning_sha256": "b896c7f962eae589393b19ba9da7b0f7ce9b96e15661a6be6b431ef70160e373",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q02",
+        "q14",
+        "q17",
+        "q22",
+        "q24",
+        "q26",
+        "q27",
+        "q28"
+      ],
+      "allowed_uses": [
+        "communication_leadership",
+        "role_team",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:pressure_recovery",
+      "category": "pressure_recovery",
+      "meaning": "Pressure appears to narrow Amber into intense execution and lower interruption tolerance. Recovery is not passive: she reports stepping back, breathing, checking whether the reaction belongs to her or the other person, clarifying intent, and asking what was heard.",
+      "meaning_sha256": "20b321108e4d78f901c701586ad151ae099f29b1bf2873189b9a9329f9a00f48",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q17",
+        "q24"
+      ],
+      "allowed_uses": [
+        "adoption_friction",
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:role_seat",
+      "category": "role_seat",
+      "meaning": "Brokerage leadership with genuine shared operating ownership and explicit service standards More than one configuration can succeed. The distinction is not title; it is whether operating judgment and accountability are truly shared. The evidence supports ownership, practical judgment, direct standards, and strong identification with service quality.",
+      "meaning_sha256": "9cf9755b616f9b28cd1687f67f34aa0321daa32776ad2fcb776e3012dbd096dd",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q20",
+        "q22",
+        "q26",
+        "q27"
+      ],
+      "allowed_uses": [
+        "role_team",
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:cognitive_process",
+      "category": "cognitive_process",
+      "meaning": "Scenario-bounded decision making Post-event error review Perspective correction in interaction",
+      "meaning_sha256": "213671abd5eb014e79698e20a7f4e971a72ddabafa83ca0bc3a86670d6fee8e1",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q20",
+        "q04",
+        "u01",
+        "q14",
+        "q25"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260617-YBNWT0KS:energy_context",
+      "category": "energy_context",
+      "meaning": "Chosen ownership and meaningful outcomes may activate; repeated preventable rework and excess burden may deplete. There is not enough longitudinal evidence to say whether energy is improving, declining, or stable.",
+      "meaning_sha256": "14f87de821a1da9186b61788814c2b9181ba1a1eece21048b34ff3814b51bdb5",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "q16",
+        "q24",
+        "q26"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "communication_leadership",
+        "role_team",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    }
+  ],
+  "boundary": {
+    "source_domain": "BOS_WHOLE_PERSON",
+    "business_cause_authority": false,
+    "personality_score_mapping": "PROHIBITED",
+    "business_evidence_mutation": false,
+    "allowed_contribution": "EXECUTION_MODIFIER_ONLY"
+  }
+}

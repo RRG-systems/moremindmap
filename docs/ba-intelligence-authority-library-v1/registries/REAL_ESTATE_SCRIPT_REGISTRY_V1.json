@@ -1,0 +1,194 @@
+{
+  "registry_id": "real-estate-script-registry-v1",
+  "version": "1.0.0",
+  "status": "FROZEN_GOVERNED_RESOURCE_V1",
+  "count": 31,
+  "scripts": [
+    {
+      "script_id": "SC-01",
+      "title": "Relationship qualification / referral permission",
+      "stage": "new/warm relationship",
+      "provenance": "D.J. qualification/referral call; founder doctrine."
+    },
+    {
+      "script_id": "SC-02",
+      "title": "Database check-in / reactivation",
+      "stage": "dormant/known relationship",
+      "provenance": "D.J. check-in variants."
+    },
+    {
+      "script_id": "SC-03",
+      "title": "6x6 / 8x8 live call",
+      "stage": "short-term sequence",
+      "provenance": "D.J. founder workflow."
+    },
+    {
+      "script_id": "SC-04",
+      "title": "Referral ask",
+      "stage": "active relationship/advocate",
+      "provenance": "D.J. referral call + external variants."
+    },
+    {
+      "script_id": "SC-05",
+      "title": "Open-house visitor",
+      "stage": "event capture/qualification",
+      "provenance": "Vertical mechanism synthesis."
+    },
+    {
+      "script_id": "SC-06",
+      "title": "Open-house neighbor invitation",
+      "stage": "pre-event neighborhood outreach",
+      "provenance": "Founder/open-house doctrine."
+    },
+    {
+      "script_id": "SC-07",
+      "title": "Open-house follow-up",
+      "stage": "post-event",
+      "provenance": "Vertical mechanism synthesis."
+    },
+    {
+      "script_id": "SC-08",
+      "title": "Farm introduction",
+      "stage": "new farm contact",
+      "provenance": "Founder farming doctrine + external variants."
+    },
+    {
+      "script_id": "SC-09",
+      "title": "Farm door knock",
+      "stage": "farm field contact",
+      "provenance": "Founder doctrine; compliance dynamic."
+    },
+    {
+      "script_id": "SC-10",
+      "title": "Circle prospecting",
+      "stage": "listing/event adjacency",
+      "provenance": "External practitioner family."
+    },
+    {
+      "script_id": "SC-11",
+      "title": "FSBO",
+      "stage": "seller opportunity",
+      "provenance": "External practitioner family; law dynamic."
+    },
+    {
+      "script_id": "SC-12",
+      "title": "Expired",
+      "stage": "seller recovery",
+      "provenance": "External practitioner family."
+    },
+    {
+      "script_id": "SC-13",
+      "title": "Cold calling",
+      "stage": "outbound prospecting",
+      "provenance": "External practitioner family; compliance dynamic."
+    },
+    {
+      "script_id": "SC-14",
+      "title": "Seller appointment / listing consultation",
+      "stage": "seller decision",
+      "provenance": "Listing authority."
+    },
+    {
+      "script_id": "SC-15",
+      "title": "Buyer consultation",
+      "stage": "buyer decision",
+      "provenance": "Buyer authority."
+    },
+    {
+      "script_id": "SC-16",
+      "title": "Appointment setting",
+      "stage": "qualified opportunity",
+      "provenance": "Sales mechanism."
+    },
+    {
+      "script_id": "SC-17",
+      "title": "Price adjustment",
+      "stage": "active listing",
+      "provenance": "Listing authority."
+    },
+    {
+      "script_id": "SC-18",
+      "title": "Seller feedback",
+      "stage": "active listing",
+      "provenance": "Listing authority."
+    },
+    {
+      "script_id": "SC-19",
+      "title": "Commission / value objection",
+      "stage": "seller/buyer decision",
+      "provenance": "Offer/pricing + listing/buyer authority; law dynamic."
+    },
+    {
+      "script_id": "SC-20",
+      "title": "Buyer / seller objections",
+      "stage": "decision friction",
+      "provenance": "Sales mechanism."
+    },
+    {
+      "script_id": "SC-21",
+      "title": "Social DM to conversation",
+      "stage": "digital engagement",
+      "provenance": "Demand mechanism."
+    },
+    {
+      "script_id": "SC-22",
+      "title": "Networking / community",
+      "stage": "relationship creation",
+      "provenance": "Relationship demand doctrine."
+    },
+    {
+      "script_id": "SC-23",
+      "title": "Vendor",
+      "stage": "partner relationship",
+      "provenance": "Delivery/relationship authority."
+    },
+    {
+      "script_id": "SC-24",
+      "title": "Investor",
+      "stage": "specialized buyer/seller",
+      "provenance": "Buyer/financial boundary."
+    },
+    {
+      "script_id": "SC-25",
+      "title": "Rental-to-buyer",
+      "stage": "readiness transition",
+      "provenance": "Buyer authority."
+    },
+    {
+      "script_id": "SC-26",
+      "title": "Internet lead",
+      "stage": "rented-demand opportunity",
+      "provenance": "Demand/conversion authority."
+    },
+    {
+      "script_id": "SC-27",
+      "title": "Nurture",
+      "stage": "not-yet-ready opportunity",
+      "provenance": "Conversion/relationship authority."
+    },
+    {
+      "script_id": "SC-28",
+      "title": "Post-close",
+      "stage": "delivery handoff",
+      "provenance": "Transaction/retention authority."
+    },
+    {
+      "script_id": "SC-29",
+      "title": "Home anniversary",
+      "stage": "relationship continuity",
+      "provenance": "Founder long-term touch examples."
+    },
+    {
+      "script_id": "SC-30",
+      "title": "Annual review",
+      "stage": "relationship/advisory continuity",
+      "provenance": "Relationship/listing/buyer synthesis."
+    },
+    {
+      "script_id": "SC-31",
+      "title": "Referral thank-you",
+      "stage": "referral stewardship",
+      "provenance": "Founder relationship doctrine."
+    }
+  ]
+}

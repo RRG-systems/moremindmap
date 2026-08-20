@@ -1,10 +1,13 @@
+/* global Buffer, process */
 import Stripe from 'stripe';
 import {
   STRIPE_INTERNAL_VERSION,
   accessGrantByAssessmentKey,
   accessGrantByEmailKey,
+  accessGrantByMembershipKey,
   accessGrantByProfileKey,
   accessGrantBySessionKey,
+  accessGrantBySubscriptionKey,
   accessGrantKey,
   boundedText,
   createRedisClient,
@@ -16,6 +19,11 @@ import {
   setJsonHeaders,
   subscriptionStateKey
 } from './shared.js';
+import {
+  MONTHLY_PRODUCT_KEY,
+  membershipBindingFromStripeMetadata,
+  normalizedGrantStatusFromSubscription,
+} from './subscriptionV1Foundation.js';
 
 export const config = {
   api: {
@@ -57,8 +65,10 @@ function subscriptionIdFrom(value) {
   return boundedText(value.id, 120);
 }
 
-function compactEventObject(object = {}, eventType, existingSubscription = {}) {
+export function compactEventObject(object = {}, eventType, existingSubscription = {}) {
   const metadata = metadataFrom(object);
+  const inheritedMetadata = existingSubscription.membership_metadata || {};
+  const mergedMetadata = { ...inheritedMetadata, ...metadata };
   const productKey = boundedText(metadata.product_key || existingSubscription.product_key, 80);
   const accessType = boundedText(metadata.access_type || existingSubscription.access_type || productKey, 80);
   const subscriptionId = subscriptionIdFrom(object.subscription || object.id);
@@ -76,14 +86,21 @@ function compactEventObject(object = {}, eventType, existingSubscription = {}) {
     customer_email: customerEmail,
     checkout_session_id: boundedText(eventType === 'checkout.session.completed' ? object.id : object.checkout_session, 120),
     subscription_id: subscriptionId,
-    profile_id: boundedText(metadata.profile_id || object.client_reference_id, 120),
-    assessment_id: boundedText(metadata.assessment_id, 120),
-    source_context: boundedText(metadata.source_context, 120)
+    profile_id: boundedText(mergedMetadata.profile_id || object.client_reference_id, 120),
+    assessment_id: boundedText(mergedMetadata.assessment_id, 120),
+    source_context: boundedText(mergedMetadata.source_context, 120),
+    subject_id: boundedText(mergedMetadata.subject_id, 120),
+    membership_id: boundedText(mergedMetadata.membership_id, 120),
+    tenant_id: boundedText(mergedMetadata.tenant_id, 120),
+    business_id: boundedText(mergedMetadata.business_id, 120),
+    binding_source: boundedText(mergedMetadata.binding_source, 80),
+    membership_verified: String(mergedMetadata.membership_verified) === 'true'
   };
 }
 
-function subscriptionStateFrom(object = {}, eventId, existing = {}) {
+export function subscriptionStateFrom(object = {}, eventId, existing = {}) {
   const metadata = metadataFrom(object);
+  const mergedMetadata = { ...(existing.membership_metadata || {}), ...metadata };
   const subscriptionId = subscriptionIdFrom(object.subscription || object.id || existing.subscription_id);
   return {
     subscription_id: subscriptionId,
@@ -98,6 +115,16 @@ function subscriptionStateFrom(object = {}, eventId, existing = {}) {
     canceled_at: object.canceled_at || existing.canceled_at || null,
     latest_invoice: boundedText(object.latest_invoice || object.id || existing.latest_invoice, 120),
     stripe_event_id: eventId,
+    membership_metadata: {
+      subject_id: boundedText(mergedMetadata.subject_id, 120),
+      membership_id: boundedText(mergedMetadata.membership_id, 120),
+      tenant_id: boundedText(mergedMetadata.tenant_id, 120),
+      profile_id: boundedText(mergedMetadata.profile_id, 120),
+      business_id: boundedText(mergedMetadata.business_id, 120),
+      assessment_id: boundedText(mergedMetadata.assessment_id, 120),
+      binding_source: boundedText(mergedMetadata.binding_source, 80),
+      membership_verified: String(mergedMetadata.membership_verified) === 'true' ? 'true' : 'false'
+    },
     updated_at: new Date().toISOString(),
     internal_version: STRIPE_INTERNAL_VERSION
   };
@@ -133,6 +160,17 @@ async function saveAccessGrant(redis, event, session, paymentEvent) {
   const grantId = `grant_${session.id}`;
   const now = new Date().toISOString();
   const existing = await readJson(redis, accessGrantKey(grantId));
+  const metadata = {
+    subject_id: paymentEvent.subject_id,
+    membership_id: paymentEvent.membership_id,
+    tenant_id: paymentEvent.tenant_id,
+    profile_id: paymentEvent.profile_id,
+    business_id: paymentEvent.business_id,
+    binding_source: paymentEvent.binding_source,
+    membership_verified: paymentEvent.membership_verified ? 'true' : 'false',
+  };
+  const binding = membershipBindingFromStripeMetadata(metadata);
+  const monthly = paymentEvent.product_key === MONTHLY_PRODUCT_KEY;
   const grant = {
     grant_id: grantId,
     access_type: paymentEvent.access_type,
@@ -145,7 +183,14 @@ async function saveAccessGrant(redis, event, session, paymentEvent) {
     checkout_session_id: paymentEvent.checkout_session_id,
     subscription_id: paymentEvent.subscription_id,
     customer_id: paymentEvent.customer_id,
-    status: 'active',
+    subject_id: binding?.subject_id || '',
+    membership_id: binding?.membership_id || '',
+    tenant_id: binding?.scope.tenant_id || '',
+    business_id: binding?.scope.business_id || '',
+    scope: binding?.scope || null,
+    binding_source: binding?.binding_source || 'UNVERIFIED_LEGACY',
+    membership_verified: binding?.membership_verified === true,
+    status: monthly && !binding ? 'reconciliation_required' : 'active',
     created_at: existing?.created_at || now,
     updated_at: now,
     internal_version: STRIPE_INTERNAL_VERSION
@@ -156,6 +201,8 @@ async function saveAccessGrant(redis, event, session, paymentEvent) {
   if (grant.profile_id) await redis.sadd(accessGrantByProfileKey(grant.profile_id), grantId);
   if (grant.assessment_id) await redis.sadd(accessGrantByAssessmentKey(grant.assessment_id), grantId);
   if (grant.checkout_session_id) await redis.sadd(accessGrantBySessionKey(grant.checkout_session_id), grantId);
+  if (grant.membership_id) await redis.sadd(accessGrantByMembershipKey(grant.membership_id), grantId);
+  if (grant.subscription_id) await redis.sadd(accessGrantBySubscriptionKey(grant.subscription_id), grantId);
 
   return grant;
 }
@@ -167,7 +214,24 @@ async function saveSubscriptionState(redis, event, object, existing = {}) {
   return state;
 }
 
-async function processEvent(redis, event) {
+async function synchronizeSubscriptionGrants(redis, state) {
+  if (!state?.subscription_id) return;
+  const grantIds = await redis.smembers(accessGrantBySubscriptionKey(state.subscription_id));
+  const status = normalizedGrantStatusFromSubscription(state);
+  for (const grantId of grantIds || []) {
+    const grant = await readJson(redis, accessGrantKey(grantId));
+    if (!grant || grant.product_key !== MONTHLY_PRODUCT_KEY) continue;
+    const next = {
+      ...grant,
+      status: grant.membership_verified === true ? status : 'reconciliation_required',
+      updated_at: new Date().toISOString(),
+      source_subscription_event_id: state.stripe_event_id,
+    };
+    await redis.set(accessGrantKey(grantId), JSON.stringify(next));
+  }
+}
+
+export async function processEvent(redis, event) {
   const existingEvent = await redis.get(paymentEventKey(event.id));
   if (existingEvent) {
     return { processed: true, idempotent: true };
@@ -190,7 +254,7 @@ async function processEvent(redis, event) {
     if (paid || subscriptionReady) {
       await saveAccessGrant(redis, event, object, paymentEvent);
       if (object.mode === 'subscription') {
-        await saveSubscriptionState(redis, event, object, {
+        const state = await saveSubscriptionState(redis, event, object, {
           ...existingSubscription,
           subscription_id: paymentEvent.subscription_id,
           customer_id: paymentEvent.customer_id,
@@ -199,22 +263,25 @@ async function processEvent(redis, event) {
           access_type: paymentEvent.access_type,
           status: 'active'
         });
+        await synchronizeSubscriptionGrants(redis, state);
       }
     }
   }
 
   if (event.type === 'invoice.paid' && paymentEvent.subscription_id) {
-    await saveSubscriptionState(redis, event, object, {
+    const state = await saveSubscriptionState(redis, event, object, {
       ...existingSubscription,
       subscription_id: paymentEvent.subscription_id,
       customer_id: paymentEvent.customer_id,
       customer_email: paymentEvent.customer_email,
       status: 'active'
     });
+    await synchronizeSubscriptionGrants(redis, state);
   }
 
   if (event.type.startsWith('customer.subscription.')) {
-    await saveSubscriptionState(redis, event, object, existingSubscription);
+    const state = await saveSubscriptionState(redis, event, object, existingSubscription);
+    await synchronizeSubscriptionGrants(redis, state);
   }
 
   return { processed: true, idempotent: false };

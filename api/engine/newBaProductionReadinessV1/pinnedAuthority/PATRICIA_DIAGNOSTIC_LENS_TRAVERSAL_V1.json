@@ -1,0 +1,572 @@
+{
+  "contract_id": "more-diagnostic-lens-runtime-v1",
+  "contract_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "governing_fork": {
+    "fork": "UNCERTAIN_OR_CONTRADICTORY",
+    "q1_used_as_business_report_only": true,
+    "q1_determined_diagnosis": false,
+    "crosschecked_signal_names": [
+      "goal",
+      "opportunity_flow",
+      "conversion",
+      "capacity",
+      "operator_problem_label"
+    ],
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q2",
+      "ba-20260714-64ca0783-q1",
+      "ba-20260714-64ca0783-q4",
+      "ba-20260714-64ca0783-q6",
+      "ba-20260714-64ca0783-q8",
+      "ba-20260714-64ca0783-q11",
+      "ba-20260714-64ca0783-q12"
+    ],
+    "rationale": "The governed evidence does not separate opportunity, conversion and capacity cleanly; the operator label (insufficient) remains one report, not the diagnosis."
+  },
+  "receipts": [
+    {
+      "lens_id": "RE-DL-01",
+      "lens_order": 1,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T04",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q11"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-GOAL-RELATIVE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "The governed evidence does not separate opportunity, conversion and capacity cleanly; the operator label (insufficient) remains one report, not the diagnosis.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-02",
+        "RE-DL-03",
+        "RE-DL-04",
+        "RE-DL-05",
+        "RE-DL-08"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-02",
+      "lens_order": 2,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-INSPECT",
+        "RE-H-HEROIC",
+        "RE-H-SCALE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Evaluate how purposefully the operator is building the model required by the desired outcome across the material side of the governing fork.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-03",
+        "RE-DL-04",
+        "RE-DL-05",
+        "RE-DL-06",
+        "RE-DL-07",
+        "RE-DL-08"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-03",
+      "lens_order": 3,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T06"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-LAKE",
+        "RE-H-MET",
+        "RE-H-MINDSHARE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Inspect the relationship asset's size, quality, inflow, activation, decay and economic relevance to the stated goal.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-04",
+        "RE-DL-05",
+        "RE-DL-06",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-04",
+      "lens_order": 4,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T05",
+        "RE-T06",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-SOURCE-FIT",
+        "RE-H-GOAL-RELATIVE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Determine which sources actually create qualified opportunity, their economics and execution fit, and whether the portfolio meets the goal.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-03",
+        "RE-DL-05",
+        "RE-DL-06",
+        "RE-DL-07",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-05",
+      "lens_order": 5,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T07"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q9"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-MINDSHARE",
+        "RE-H-SPEED",
+        "RE-H-INSPECT"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Trace opportunity through the complete conversion and relationship-continuity chain and locate governed leakage.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-03",
+        "RE-DL-04",
+        "RE-DL-06",
+        "RE-DL-08",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-06",
+      "lens_order": 6,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T07"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q9"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-HEROIC",
+        "RE-H-INSPECT"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Determine whether repeatable value creation depends on memory/personality/heroics or governed models, systems, tools, cadence, measurement and ownership.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-05",
+        "RE-DL-07",
+        "RE-DL-08",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-07",
+      "lens_order": 7,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T02",
+        "RE-T03",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-PROFIT",
+        "RE-H-SCALE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Reconcile actual economic production, owner outcome and capacity to reinvest without confusing transaction volume or GCI with profit.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-04",
+        "RE-DL-06",
+        "RE-DL-08",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-08",
+      "lens_order": 8,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-SCALE",
+        "RE-H-INSPECT",
+        "RE-H-HEROIC"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "When opportunity is sufficient or growth is desired, determine which capacity, service, system, role, team, leadership or economic mechanism prevents leverage.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-05",
+        "RE-DL-06",
+        "RE-DL-07",
+        "RE-DL-09"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-09",
+      "lens_order": 9,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [
+        "RE-H-GOAL-RELATIVE",
+        "RE-H-INSPECT",
+        "RE-H-PROFIT",
+        "RE-H-SCALE"
+      ],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Leader-centered execution without a governed relationship, delegation, measurement, and accountability system.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [
+        "RE-DL-01",
+        "RE-DL-03",
+        "RE-DL-04",
+        "RE-DL-05",
+        "RE-DL-06",
+        "RE-DL-07",
+        "RE-DL-08",
+        "RE-DL-10"
+      ],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    },
+    {
+      "lens_id": "RE-DL-10",
+      "lens_order": 10,
+      "status": "EXAMINED",
+      "territory_refs": [
+        "RE-T01",
+        "RE-T02",
+        "RE-T03",
+        "RE-T04",
+        "RE-T05",
+        "RE-T06",
+        "RE-T07",
+        "RE-T08"
+      ],
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q2"
+      ],
+      "claim_refs": [],
+      "missing_evidence_refs": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "contradiction_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "heuristic_refs": [],
+      "whole_person_relationship_refs": [],
+      "result_summary": "Hand the validated complete diagnostic state to the frozen Five Futures V2 and One Move V2 contracts without altering their semantics.",
+      "confidence": "MODERATE",
+      "customer_visible_eligibility": "ELIGIBLE_WITH_DISCLOSURE",
+      "next_lens_ids": [],
+      "branching_reason": "The lens was selected from the UNCERTAIN_OR_CONTRADICTORY branch and its material territories."
+    }
+  ],
+  "examined_lenses": [
+    "RE-DL-01",
+    "RE-DL-02",
+    "RE-DL-03",
+    "RE-DL-04",
+    "RE-DL-05",
+    "RE-DL-06",
+    "RE-DL-07",
+    "RE-DL-08",
+    "RE-DL-09",
+    "RE-DL-10"
+  ],
+  "blocked_lenses": [],
+  "rigid_tree_prohibited": true
+}

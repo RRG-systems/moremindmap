@@ -1,0 +1,209 @@
+{
+  "router_contract_version": "ba-authority-router-metadata-v1",
+  "status": "FROZEN_METADATA_NOT_RUNTIME",
+  "north_star": "Right intelligence, right time, right context window.",
+  "inputs": [
+    "purpose/surface mission",
+    "business_id and governed WBM/evidence refs",
+    "active vertical",
+    "frozen owner WPM ref",
+    "0..N team socket refs",
+    "dynamic research need",
+    "future RSL refs when authorized"
+  ],
+  "selection_order": [
+    "identity/authority/security gate",
+    "purpose-to-authority candidates",
+    "evidence-driven authority expansion",
+    "cross-interaction expansion",
+    "vertical specialization",
+    "selective WPM/team retrieval",
+    "Dynamic Research trigger",
+    "context budget/section selection",
+    "lineage receipt"
+  ],
+  "hard_rules": [
+    "Never load all 28 by default.",
+    "Verified current customer evidence outranks generic assumptions about that company.",
+    "Vertical specializes Universal only for legitimate industry differences.",
+    "Dynamic current evidence never silently rewrites frozen canon.",
+    "WPM informs implementation and human mechanisms; it never overrides business facts.",
+    "No sibling customer prose as evidence.",
+    "Future RSL is absent until separately authorized.",
+    "Every selected section and claim carries authority/version/hash/source refs."
+  ],
+  "purpose_routes": [
+    {
+      "purpose": "whole_business_model_construction",
+      "universal": [
+        "UB-01",
+        "UB-02",
+        "UB-03",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-01",
+        "RE-16"
+      ],
+      "expand_on": [
+        "demand",
+        "conversion",
+        "capacity",
+        "team",
+        "relationship",
+        "delivery"
+      ]
+    },
+    {
+      "purpose": "financial_reality",
+      "universal": [
+        "UB-02",
+        "UB-01",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-01",
+        "RE-16"
+      ],
+      "expand_on": [
+        "team economics",
+        "source economics",
+        "growth cash"
+      ]
+    },
+    {
+      "purpose": "constraint_reality",
+      "universal": [
+        "UB-03",
+        "UB-08",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-06",
+        "RE-12",
+        "RE-13"
+      ],
+      "expand_on": [
+        "demand",
+        "team",
+        "delivery",
+        "financial"
+      ]
+    },
+    {
+      "purpose": "demand_conversion",
+      "universal": [
+        "UB-04",
+        "UB-06",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-02",
+        "RE-03",
+        "RE-04",
+        "RE-05",
+        "RE-06"
+      ],
+      "expand_on": [
+        "farm",
+        "open house",
+        "listing",
+        "capacity"
+      ]
+    },
+    {
+      "purpose": "listing_buyer_delivery",
+      "universal": [
+        "UB-05",
+        "UB-06",
+        "UB-08",
+        "UB-07"
+      ],
+      "vertical": [
+        "RE-09",
+        "RE-10",
+        "RE-11"
+      ],
+      "expand_on": [
+        "market dynamic",
+        "capacity",
+        "referral"
+      ]
+    },
+    {
+      "purpose": "team_organization",
+      "universal": [
+        "UB-09",
+        "UB-10",
+        "UB-08",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-13",
+        "RE-14",
+        "RE-15",
+        "RE-16"
+      ],
+      "expand_on": [
+        "lead routing",
+        "leader dependence",
+        "profitability"
+      ]
+    },
+    {
+      "purpose": "five_futures_state_packet",
+      "universal": [
+        "UB-01",
+        "UB-02",
+        "UB-03",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-01",
+        "RE-13",
+        "RE-16"
+      ],
+      "expand_on": [
+        "active constraint",
+        "material interactions",
+        "candidate movers"
+      ],
+      "restriction": "state contribution metadata only; no trajectory generation or weights"
+    },
+    {
+      "purpose": "one_move_candidate_state",
+      "universal": [
+        "UB-03",
+        "UB-09",
+        "UB-12"
+      ],
+      "vertical": [
+        "RE-12",
+        "RE-13"
+      ],
+      "expand_on": [
+        "active constraint authority",
+        "human adoption fit",
+        "observability"
+      ],
+      "restriction": "candidate state only; no customer recommendation runtime"
+    }
+  ],
+  "selection_receipt_fields": [
+    "router_version",
+    "purpose",
+    "business_id",
+    "vertical_id",
+    "selected_authority_ids",
+    "selected_section_ids",
+    "authority_hashes",
+    "business_evidence_refs",
+    "wpm_refs",
+    "team_member_refs",
+    "dynamic_research_refs",
+    "rsl_refs",
+    "exclusions",
+    "expansion_reasons",
+    "created_at"
+  ]
+}

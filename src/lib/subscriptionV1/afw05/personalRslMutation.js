@@ -1,0 +1,58 @@
+import { deepFreeze } from '../../intelligenceFabric/validation.js';
+import { createAuthorityReference, createEvidenceReference } from '../contracts.js';
+import { createPersonalRslEvent } from '../personalRsl.js';
+import { PROPOSAL_EVENT_TYPES } from './constants.js';
+import { validateGovernedChangeProposal, validateProposalDecision } from './contracts.js';
+
+export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], event_id, recorded_at }) {
+  const proposalValidation = validateGovernedChangeProposal(proposal);
+  const decisionValidation = validateProposalDecision(decision, proposal);
+  if (!proposalValidation.valid || !decisionValidation.valid) return deepFreeze({ ok: false, code: 'AFW05_MUTATION_AUTHORITY_INVALID' });
+  if (!decision.mutation_authorized) return deepFreeze({ ok: false, code: 'AFW05_CONFIRMATION_REQUIRED' });
+  const byId = new Map(evidence_catalog.map((item) => [item.evidence_id, item]));
+  const evidenceRefs = [];
+  for (const evidenceId of proposal.evidence_ref_ids) {
+    const source = byId.get(evidenceId);
+    if (!source) return deepFreeze({ ok: false, code: 'AFW05_EVIDENCE_REFERENCE_UNRESOLVED', evidence_id: evidenceId });
+    evidenceRefs.push(createEvidenceReference(source));
+  }
+  const eventType = proposal.retracts_event_ids.length
+    ? 'RETRACTION'
+    : proposal.proposal_type === 'COMMITMENT_CANDIDATE' && decision.effective_items.some((item) => item.field === 'commitment.intervention')
+      ? 'INTERVENTION'
+      : PROPOSAL_EVENT_TYPES[proposal.proposal_type];
+  if (!eventType) return deepFreeze({ ok: false, code: 'AFW05_PROPOSAL_EVENT_MAPPING_MISSING' });
+  return createPersonalRslEvent({
+    event_id,
+    scope: proposal.scope,
+    session_id: proposal.source_session_id,
+    event_type: eventType,
+    effective_at: decision.decided_at,
+    recorded_at,
+    source_class: 'CUSTOMER_SELF_REPORT',
+    actor: decision.actor,
+    establishing_authority: createAuthorityReference({
+      authority_id: `customer_confirmation:${decision.decision_id}`,
+      authority_version: '1.0.0',
+      authority_hash: decision.decision_hash,
+    }),
+    semantic_payload: {
+      proposal_id: proposal.proposal_id,
+      proposal_hash: proposal.proposal_hash,
+      decision_id: decision.decision_id,
+      decision_hash: decision.decision_hash,
+      target_contract: proposal.target_contract,
+      affected_governed_objects: proposal.affected_governed_objects,
+      items: decision.effective_items,
+      summary: proposal.summary,
+      purpose: proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE' ? 'FINISH_PLAN_135' : 'WEEKLY_COACHING',
+      lens: proposal.affected_governed_objects[0] === 'PLAN_135' ? 'PLAN' : proposal.affected_governed_objects[0],
+      privacy_classification: 'TENANT_PRIVATE',
+      raw_transcript_persisted: false,
+    },
+    evidence_refs: evidenceRefs,
+    supersedes_event_ids: proposal.supersedes_event_ids,
+    retracts_event_ids: proposal.retracts_event_ids,
+    confirmation_event_id: decision.decision_id,
+  });
+}

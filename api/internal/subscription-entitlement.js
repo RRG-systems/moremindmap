@@ -9,6 +9,11 @@ import { isThenable } from '../../src/lib/intelligenceFabric/coachConnect/produc
 import {
   getPrivateRuntimeLiveCompositionV2,
 } from '../../src/lib/intelligenceFabric/coachConnect/privateRuntime/liveComposition.js';
+import {
+  entitlementAllowsCoaching,
+  sameScope,
+  validateSubscriptionV1Contract,
+} from '../../src/lib/subscriptionV1/index.js';
 
 export const MONTHLY_INTELLIGENCE_ACCESS_TYPE = 'more_monthly_intelligence';
 
@@ -135,6 +140,8 @@ export function resolveSubscriptionEntitlement({
   env = globalThis.process?.env || {},
   now = Date.now(),
   paidAccessGrant = null,
+  paidEntitlement = null,
+  authenticatedMembershipScope = null,
   store = getDefaultDeveloperSecurityStore(),
   subject_binding = null,
   privateRuntimeDecision = null,
@@ -147,6 +154,7 @@ export function resolveSubscriptionEntitlement({
   const explicitLegacy = canonicalSecurityServiceV2 != null
     || privateRuntimeDecision != null
     || paidAccessGrant != null
+    || paidEntitlement != null
     || subject_binding != null;
   const composed = liveCompositionV2
     || (!explicitLegacy && typeof compositionAccessor === 'function'
@@ -166,8 +174,34 @@ export function resolveSubscriptionEntitlement({
     });
   }
   if (!privateRuntimeDecision
+    && paidEntitlement) {
+    const validation = validateSubscriptionV1Contract(paidEntitlement);
+    const access = validation.valid
+      ? entitlementAllowsCoaching(paidEntitlement, new Date(now).toISOString())
+      : { allowed: false, code: 'ENTITLEMENT_CONTRACT_INVALID' };
+    if (!access.allowed || !sameScope(paidEntitlement.scope, authenticatedMembershipScope)) {
+      return { allowed: false, code: access.allowed ? 'ENTITLEMENT_MEMBERSHIP_SCOPE_DENIED' : access.code };
+    }
+    return {
+      allowed: true,
+      entitlement: {
+        access_type: MONTHLY_INTELLIGENCE_ACCESS_TYPE,
+        entitlement_id: paidEntitlement.entitlement_id,
+        status: paidEntitlement.state === 'ACTIVE_CANCELING' ? 'active_canceling' : 'active',
+        source: 'paid_stripe_membership_projection',
+        temporary: false,
+        billing_evidence: true,
+        membership_scoped: true,
+      },
+    };
+  }
+  if (!privateRuntimeDecision
     && paidAccessGrant?.access_type === MONTHLY_INTELLIGENCE_ACCESS_TYPE
     && paidAccessGrant.status === 'active') {
+    if (paidAccessGrant.membership_verified !== true
+      || !sameScope(paidAccessGrant.scope, authenticatedMembershipScope)) {
+      return { allowed: false, code: 'LEGACY_PAID_GRANT_RECONCILIATION_REQUIRED' };
+    }
     return {
       allowed: true,
       entitlement: {
@@ -176,6 +210,7 @@ export function resolveSubscriptionEntitlement({
         source: 'paid_stripe',
         temporary: false,
         billing_evidence: true,
+        membership_scoped: true,
       },
     };
   }

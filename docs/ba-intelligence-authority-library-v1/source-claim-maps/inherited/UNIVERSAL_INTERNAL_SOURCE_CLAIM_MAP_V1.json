@@ -1,0 +1,264 @@
+{
+  "schema": "internal-source-claim-map-v1",
+  "date": "2026-08-11",
+  "status": "INTERNAL_RESEARCH_NOT_CANONICAL",
+  "claim_count": 32,
+  "claims": [
+    {
+      "id": "C-001",
+      "claim": "The target BA centers a governed Whole-Business Model rather than a briefing, dashboard, Futures artifact, One Move artifact, or prose chain.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S01", "S02"],
+      "supports": ["UB-01", "UB-04", "UB-21"],
+      "limit": "Target architecture, not implemented behavior."
+    },
+    {
+      "id": "C-002",
+      "claim": "Frozen BOS Whole-Person Authority enters BA by immutable subject/version/hash reference and must not be flattened to score fragments.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S03", "S01"],
+      "supports": ["UB-04", "UB-08", "UB-09"],
+      "limit": "Does not itself prove any business cause."
+    },
+    {
+      "id": "C-003",
+      "claim": "Purpose-specific BA artifacts should be independent projections from governed whole-business truth and must not use sibling prose as evidence.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S01", "S09"],
+      "supports": ["UB-21"],
+      "limit": "Current BA does not yet satisfy this target."
+    },
+    {
+      "id": "C-004",
+      "claim": "q1-q12 custody, Profile/Assessment identity, timestamps, persistence/retrieval, normalization, numeric extraction, provenance, prompt-size and structural guards are working pipes to preserve.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S01", "S09", "S11", "S13", "S15", "S24", "S29", "S30"],
+      "supports": ["UB-02", "UB-20", "UB-21"],
+      "limit": "Preservation does not canonize current semantic conclusions."
+    },
+    {
+      "id": "C-005",
+      "claim": "Business Reality plus Behavioral Reality informs trajectory, while business evidence remains necessary to explain business outcomes.",
+      "provenance_class": "MORE_FOUNDER_DOCTRINE / MORE_EXISTING_RESEARCH",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-04", "UB-05"],
+      "limit": "Legacy score mappings are not validated universal fusion rules."
+    },
+    {
+      "id": "C-006",
+      "claim": "The E-to-P doctrine distinguishes owner/memory/urgency dependence from purposeful models, systems, tools, accountability, coaching and learning.",
+      "provenance_class": "MORE_FOUNDER_DOCTRINE / VERTICAL_SPECIFIC_EVIDENCE",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-01", "UB-05", "UB-06", "UB-07"],
+      "limit": "The stable dependency/repeatability mechanism may universalize; labels/stages require cross-vertical validation."
+    },
+    {
+      "id": "C-007",
+      "claim": "A database/contact count is not equivalent to an active relationship asset.",
+      "provenance_class": "MORE_FOUNDER_DOCTRINE / MORE_EXISTING_RESEARCH",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-11"],
+      "limit": "Relationship truth and economic value require evidence beyond self-reported count."
+    },
+    {
+      "id": "C-008",
+      "claim": "Recency, relevance, interaction rhythm, segmentation, decay and reactivation are candidate mechanisms in relationship systems.",
+      "provenance_class": "MORE_EXISTING_RESEARCH / VERTICAL_SPECIFIC_EVIDENCE",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-11", "UB-18"],
+      "limit": "35+ touches, Lake terminology and income heuristics remain vertical/non-law."
+    },
+    {
+      "id": "C-009",
+      "claim": "Apparent lead shortage can be caused by capture, follow-up or conversion failure rather than raw opportunity supply.",
+      "provenance_class": "MORE_EXISTING_RESEARCH / MORE_FOUNDER_DOCTRINE",
+      "source_ids": ["S21", "S22", "S24", "S25"],
+      "supports": ["UB-10", "UB-17", "UB-04"],
+      "limit": "Cross-vertical source and conversion benchmarks are missing."
+    },
+    {
+      "id": "C-010",
+      "claim": "Systems are repeatable owned operations with standards, handoffs, inspection and exceptions; tools alone do not establish system maturity.",
+      "provenance_class": "MORE_FOUNDER_DOCTRINE / MORE_EXISTING_RESEARCH",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-06"],
+      "limit": "Current evidence is service/real-estate heavy."
+    },
+    {
+      "id": "C-011",
+      "claim": "Accountability requires visible commitments, inspection and correction; encouragement or intention alone does not prove execution.",
+      "provenance_class": "MORE_FOUNDER_DOCTRINE / RSL_LDE_FUTURE_DOCTRINE",
+      "source_ids": ["S21", "S22", "S45", "S47"],
+      "supports": ["UB-07", "UB-22"],
+      "limit": "Effectiveness claims require outcome evidence."
+    },
+    {
+      "id": "C-012",
+      "claim": "Financial evidence and financial interpretation must remain separate; exact arithmetic requires grounded values, units, periods and receipts.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S02", "S05", "S08", "S24", "S32"],
+      "supports": ["UB-02", "UB-20", "UB-21"],
+      "limit": "Current q9/free text is valid but not ledger-grade."
+    },
+    {
+      "id": "C-013",
+      "claim": "Missing financial visibility reduces confidence and can itself indicate low operating fidelity, but does not prove poor economics.",
+      "provenance_class": "MORE_EXISTING_RESEARCH / MORE_FOUNDER_DOCTRINE",
+      "source_ids": ["S21", "S22", "S24"],
+      "supports": ["UB-02", "UB-21"],
+      "limit": "Absence is an evidence state, not a negative financial fact."
+    },
+    {
+      "id": "C-014",
+      "claim": "Constraint diagnosis must compare cross-domain mechanisms, alternatives, contradictions, confounds and falsifiers rather than name a symptom.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / MORE_EXISTING_RESEARCH",
+      "source_ids": ["S01", "S02", "S21", "S22", "S39"],
+      "supports": ["UB-04"],
+      "limit": "Formal causal calibration remains absent."
+    },
+    {
+      "id": "C-015",
+      "claim": "Whole-Person evidence may amplify, compensate, create friction or modify intervention feasibility, but cannot establish business causation alone.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S01", "S02", "S03", "S04"],
+      "supports": ["UB-04", "UB-08", "UB-09", "UB-22"],
+      "limit": "Requires business evidence on both sides of a material relationship."
+    },
+    {
+      "id": "C-016",
+      "claim": "Scale reasoning should test what breaks first when goals/load rise and whether growth is supported by systems, people, economics and leadership.",
+      "provenance_class": "MORE_EXISTING_RESEARCH / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S21", "S22", "S24", "S30", "S33"],
+      "supports": ["UB-05", "UB-06", "UB-08", "UB-19"],
+      "limit": "No universal readiness threshold is internally validated."
+    },
+    {
+      "id": "C-017",
+      "claim": "Owner rescue, decision concentration and judgment-transfer failure can create hidden key-person and capacity constraints.",
+      "provenance_class": "MORE_EXISTING_RESEARCH / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S21", "S24", "S39", "S43", "S44"],
+      "supports": ["UB-08", "UB-09", "UB-19"],
+      "limit": "Decision-flow evidence is required before personality attribution."
+    },
+    {
+      "id": "C-018",
+      "claim": "The current BA pipeline creates deterministic draft plus legacy behavioral fusion, then generated Briefing, Futures and One Move artifacts that can consume prior generated context.",
+      "provenance_class": "MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S11", "S13", "S16", "S17", "S24", "S25", "S26", "S27", "S28", "S29", "S30"],
+      "supports": ["UB-21"],
+      "limit": "This is current-state evidence and a target-architecture limitation, not desired doctrine."
+    },
+    {
+      "id": "C-019",
+      "claim": "Legacy dimension/rank-to-business mappings exist but must not become the target BOS-to-BA fusion authority.",
+      "provenance_class": "MORE_IMPLEMENTED_BEHAVIOR / MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S03", "S09", "S17", "S18", "S26"],
+      "supports": ["UB-04", "UB-21"],
+      "limit": "Legacy output may be comparison-only during migration."
+    },
+    {
+      "id": "C-020",
+      "claim": "Known, supported, hypothesis, tentative, conflicted, insufficient and abstained states must remain distinct and preserve mind-change evidence.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S02", "S05", "S08", "S21", "S39"],
+      "supports": ["UB-21"],
+      "limit": "Older numeric confidence bands require calibration before reuse."
+    },
+    {
+      "id": "C-021",
+      "claim": "Deterministic systems own identity, normalization, exact calculation, lineage, schema and structural integrity; probabilistic systems own bounded synthesis and explanation.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S08", "S01", "S02"],
+      "supports": ["UB-02", "UB-20", "UB-21"],
+      "limit": "Deterministic systems must not pre-decide semantic conclusions."
+    },
+    {
+      "id": "C-022",
+      "claim": "Market context requires attributable source, date, scope and freshness; stale context becomes an evidence gap.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S01", "S05", "S36"],
+      "supports": ["UB-23", "UB-21"],
+      "limit": "No current market context was researched in this pass."
+    },
+    {
+      "id": "C-023",
+      "claim": "BA Five Futures is governed by Financial Reality plus Behavioral Reality plus Business Model Alignment plus Constraint Reality plus Confidence Reality.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / MORE_FOUNDER_DOCTRINE",
+      "source_ids": ["S06", "S21", "S22", "S42"],
+      "supports": ["UB-01", "UB-02", "UB-04", "UB-05", "UB-21"],
+      "limit": "Source-pack numerical examples are not universal/calibrated probability doctrine."
+    },
+    {
+      "id": "C-024",
+      "claim": "Five Futures trajectories remain conditional; numerical probability is prohibited without a governed calibrated basis.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / RSL_LDE_FUTURE_DOCTRINE",
+      "source_ids": ["S06", "S41", "S44", "S45", "S48"],
+      "supports": ["UB-05", "UB-21", "UB-22"],
+      "limit": "Implemented/simple probability updates are not canonized."
+    },
+    {
+      "id": "C-025",
+      "claim": "One Move derives from validated whole-business truth, governing constraint and structured Futures; it is bounded, observable, falsifiable and reversible where practical.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE",
+      "source_ids": ["S07", "S01", "S02"],
+      "supports": ["UB-04", "UB-22"],
+      "limit": "This pass makes no claim that any candidate intervention works."
+    },
+    {
+      "id": "C-026",
+      "claim": "One Move lifecycle distinguishes proposal, discussion, acceptance, authorization, execution, completion, outcome window, validation, inconclusive and invalidation states.",
+      "provenance_class": "MORE_IMPLEMENTED_BEHAVIOR / RSL_LDE_FUTURE_DOCTRINE",
+      "source_ids": ["S38", "S45", "S46", "S48"],
+      "supports": ["UB-07", "UB-22"],
+      "limit": "Current implementations/scaffolds do not prove intervention effect."
+    },
+    {
+      "id": "C-027",
+      "claim": "Natural-language conversation cannot mutate governed strategy, One Move or evidence state without explicit proposal, human confirmation and route-level validation.",
+      "provenance_class": "RSL_LDE_FUTURE_DOCTRINE",
+      "source_ids": ["S47", "S45"],
+      "supports": ["UB-07", "UB-22"],
+      "limit": "Implementation status varies; doctrine remains authoritative boundary."
+    },
+    {
+      "id": "C-028",
+      "claim": "An Outcome Ledger records events/evidence but does not by itself prove learning, future movement or intervention effectiveness.",
+      "provenance_class": "RSL_LDE_FUTURE_DOCTRINE / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S46", "S44", "S45"],
+      "supports": ["UB-22", "UB-21"],
+      "limit": "Outcome validation and replication remain future work."
+    },
+    {
+      "id": "C-029",
+      "claim": "Adaptive strategy drafts remain pending review and must not replace active strategy automatically.",
+      "provenance_class": "RSL_LDE_FUTURE_DOCTRINE / MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S41", "S48", "S44"],
+      "supports": ["UB-22"],
+      "limit": "No automatic learning claim."
+    },
+    {
+      "id": "C-030",
+      "claim": "MORE’s nine business-model paths are useful company-specific route evidence but are not a universal business-model taxonomy.",
+      "provenance_class": "MORE_IMPLEMENTED_BEHAVIOR",
+      "source_ids": ["S43", "S44"],
+      "supports": ["UB-01"],
+      "limit": "Treat as example/coverage evidence only."
+    },
+    {
+      "id": "C-031",
+      "claim": "Code and runtime traces reveal current concepts, calculations and guards but do not prove the embedded doctrine is correct or universal.",
+      "provenance_class": "SOURCE_AUTHORITY_RULE",
+      "source_ids": ["S11", "S12", "S13", "S14", "S15", "S16", "S17", "S18", "S19", "S20", "S24", "S25", "S26", "S27", "S28", "S29", "S30", "S31", "S32", "S33", "S34", "S35", "S36", "S37", "S38", "S43", "S44", "S45", "S46", "S47", "S48", "S49", "S50", "S51", "S52"],
+      "supports": ["UB-20", "UB-21"],
+      "limit": "All implemented behavior remains source-labeled."
+    },
+    {
+      "id": "C-032",
+      "claim": "Insufficient internal support must become a research gap, not a model-authored authority claim.",
+      "provenance_class": "MORE_CANONICAL_DOCTRINE / CAMPAIGN_SOURCE_AUTHORITY_RULE",
+      "source_ids": ["S04", "S05", "S21", "S22"],
+      "supports": ["UB-03", "UB-12", "UB-13", "UB-14", "UB-15", "UB-16", "UB-18", "UB-21"],
+      "limit": "Spock may revise the taxonomy after external fusion."
+    }
+  ]
+}

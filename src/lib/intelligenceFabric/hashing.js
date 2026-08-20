@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { sha256Text } from '../canonicalSha256.js';
 import { HASH_ALGORITHM, HASH_VERSION } from './constants.js';
 
 function canonicalize(value, seen) {
@@ -22,7 +22,8 @@ export function canonicalJson(value) {
 }
 
 export function hashCanonicalJson(value) {
-  return createHash(HASH_ALGORITHM).update(canonicalJson(value), 'utf8').digest('hex');
+  if (HASH_ALGORITHM !== 'sha256') throw new TypeError('Unsupported canonical hash algorithm');
+  return sha256Text(canonicalJson(value));
 }
 
 export function createPayloadHash(payload) {

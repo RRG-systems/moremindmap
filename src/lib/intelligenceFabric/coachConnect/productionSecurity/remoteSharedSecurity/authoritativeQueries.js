@@ -10,6 +10,10 @@ import {
   assertRemoteQueryResult,
   validateRemoteQueryEnvelope,
 } from './contracts.js';
+import {
+  validateCanonicalPrivateTestApprovalRecordV1,
+  validateRemoteSecurityRecord,
+} from './recordSchemas.js';
 
 export const REMOTE_SHARED_SECURITY_QUERY_SCRIPT_VERSION =
   'remote-shared-security-query-lua-v1';
@@ -46,6 +50,13 @@ local function active(record, now)
   if record == nil or record.__corrupt == true or record.status ~= 'ACTIVE' then return false end
   if record.expires_at_ms == nil then return true end
   return tonumber(record.expires_at_ms) > now
+end
+local function canonical_private_test_approval(record)
+  return record ~= nil
+    and record.__corrupt ~= true
+    and record.record_type == 'private-test-approval-v1'
+    and type(record.record_version) == 'number'
+    and record.record_version == 1
 end
 local function strip_internal(record)
   if record == nil then return nil end
@@ -198,6 +209,9 @@ return allow(strip_internal(entitlement), 2, now)
   GET_PRIVATE_TEST_APPROVAL: String.raw`
 local approval = decode_label('approval')
 if approval == nil then return deny('PRIVATE_TEST_APPROVAL_REQUIRED', now) end
+if not canonical_private_test_approval(approval) then
+  return deny('PRIVATE_TEST_APPROVAL_REQUIRED', now)
+end
 if not active(approval, now) then
   return deny(approval.status == 'REVOKED' and 'PRIVATE_TEST_APPROVAL_REVOKED'
     or 'PRIVATE_TEST_APPROVAL_EXPIRED', now)
@@ -215,6 +229,9 @@ local inverse = decode_label('subject_inverse')
 local approval = decode_label('approval')
 local epoch = decode_label('scope_epoch')
 if session == nil or entitlement == nil or inverse == nil or approval == nil or epoch == nil then
+  return deny('RUNTIME_AUTHORITY_DENIED', now)
+end
+if not canonical_private_test_approval(approval) then
   return deny('RUNTIME_AUTHORITY_DENIED', now)
 end
 local forward = decode_key_name(inverse.forward_key)
@@ -415,6 +432,23 @@ function normalizeProviderRecord(record, queryType) {
   return record;
 }
 
+function assertCanonicalApprovalQueryRecord(record, expectedType, providerTimeMs) {
+  const approval = expectedType === 'GET_PRIVATE_TEST_APPROVAL'
+    ? record
+    : expectedType === 'READ_AUTHORITY_SNAPSHOT'
+      ? record?.approval
+      : null;
+  if (approval == null) return;
+  const checked = validateRemoteSecurityRecord(approval, {
+    provider_time_ms: providerTimeMs,
+    require_active_ttl: true,
+  });
+  const canonical = validateCanonicalPrivateTestApprovalRecordV1(approval);
+  if (!checked.valid || !canonical.valid || approval.status !== 'ACTIVE') {
+    throw new RemoteSharedSecurityAdapterError('PROVIDER_RESPONSE_MALFORMED');
+  }
+}
+
 export function parseRemoteAuthoritativeQueryReply(reply, expectedType) {
   const payload = Array.isArray(reply) && reply.length === 1 ? reply[0] : reply;
   let internal = payload;
@@ -427,6 +461,9 @@ export function parseRemoteAuthoritativeQueryReply(reply, expectedType) {
   }
   if (!internal || typeof internal !== 'object' || !timestampMs(internal.server_time_ms)) {
     throw new RemoteSharedSecurityAdapterError('PROVIDER_RESPONSE_MALFORMED');
+  }
+  if (internal.ok === true) {
+    assertCanonicalApprovalQueryRecord(internal.record, expectedType, internal.server_time_ms);
   }
   const result = {
     result_version: ASYNC_SECURITY_QUERY_RESULT_VERSION,

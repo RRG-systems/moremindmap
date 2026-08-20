@@ -20,7 +20,7 @@ function inferStrengthDamage(vectorScores, stressPatterns, analyzedResponses) {
   const { stall_patterns, business_reality } = analyzedResponses;
   
   // High vector + low signal = speed damages relationships
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35) {
     damages.push({
       strength: 'Decisive direction-setting',
       damage: 'Creates momentum early, but relational processing often happens after decisions are emotionally finalized, causing resistance to surface downstream rather than during formation',
@@ -30,7 +30,7 @@ function inferStrengthDamage(vectorScores, stressPatterns, analyzedResponses) {
   }
   
   // High velocity + low fidelity = speed creates rework
-  if (vectorScores.velocity > 6.5 && vectorScores.fidelity < 4.0) {
+  if (vectorScores.velocity > 0.65 && vectorScores.fidelity < 0.40) {
     damages.push({
       strength: 'Execution speed',
       damage: 'Moves fast enough to require rework cycles; total time-to-completion often slower than deliberate approach despite higher tempo',
@@ -40,7 +40,7 @@ function inferStrengthDamage(vectorScores, stressPatterns, analyzedResponses) {
   }
   
   // High framework + low flex = process becomes cage
-  if (vectorScores.framework > 6.5 && vectorScores.flex < 4.0) {
+  if (vectorScores.framework > 0.65 && vectorScores.flex < 0.40) {
     damages.push({
       strength: 'Clear process and structure',
       damage: 'Process becomes identity; when reality requires pivot, framework resistance creates adaptation lag that competitors exploit',
@@ -50,7 +50,7 @@ function inferStrengthDamage(vectorScores, stressPatterns, analyzedResponses) {
   }
   
   // High fidelity + low velocity = precision stalls momentum
-  if (vectorScores.fidelity > 6.5 && vectorScores.velocity < 4.0) {
+  if (vectorScores.fidelity > 0.65 && vectorScores.velocity < 0.40) {
     damages.push({
       strength: 'Quality standards and verification',
       damage: 'High standards improve execution while simultaneously creating decision paralysis when stakes increase',
@@ -92,7 +92,7 @@ function inferRecurringBreakdowns(vectorScores, analyzedResponses, contradiction
   }
   
   // Relational friction + low signal = relationships degrade
-  if (vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational')) {
     breakdowns.push({
       pattern: 'Relationship repair cycles',
       breakdown: 'Relational damage accumulates invisibly during execution sprints; repair becomes necessary every 4-6 months when turnover or conflict surfaces',
@@ -113,7 +113,7 @@ function inferTeamExperience(vectorScores, leadershipArchitecture, analyzedRespo
   const { stall_patterns } = analyzedResponses;
   
   // High vector + low signal experience
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35) {
     experiences.push({
       dimension: 'Direction clarity',
       positive: 'Always clear where we are going',
@@ -123,7 +123,7 @@ function inferTeamExperience(vectorScores, leadershipArchitecture, analyzedRespo
   }
   
   // High velocity + relational friction
-  if (vectorScores.velocity > 6.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.velocity > 0.65 && stall_patterns?.frustrations?.includes('relational')) {
     experiences.push({
       dimension: 'Pace and urgency',
       positive: 'Things move fast, decisions happen quickly',
@@ -133,7 +133,7 @@ function inferTeamExperience(vectorScores, leadershipArchitecture, analyzedRespo
   }
   
   // High fidelity perception
-  if (vectorScores.fidelity > 6.5) {
+  if (vectorScores.fidelity > 0.65) {
     experiences.push({
       dimension: 'Standards and quality',
       positive: 'High quality output, errors caught early',
@@ -182,7 +182,7 @@ function inferEmergentCosts(vectorScores, futureConstraints, hiddenRisks, analyz
   }
   
   // Strategic drift cost
-  if (vectorScores.horizon < 4.0 && vectorScores.velocity > 6.5) {
+  if (vectorScores.horizon < 0.40 && vectorScores.velocity > 0.65) {
     costs.push({
       cost_type: 'Tactical efficiency without strategic coherence',
       mechanism: 'Team executes fast in locally optimal directions without global alignment; effort diffuses',

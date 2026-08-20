@@ -1,0 +1,156 @@
+{
+  "library_version": "1.0.0",
+  "frozen_at": "2026-08-12T00:00:00-07:00",
+  "authority_status": "FROZEN_CANON_V1",
+  "runtime_integration": "NOT_IMPLEMENTED",
+  "five_futures_v2": "NOT_IMPLEMENTED_METADATA_ONLY",
+  "registry_id": "real-estate-cassette-registry-v1",
+  "authority_class": "REAL_ESTATE_VERTICAL",
+  "expected_count": 16,
+  "bibles": [
+    {
+      "authority_id": "RE-01",
+      "title": "Residential Real Estate Business Model & Transaction Economics",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "sha256": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "bytes": 8028
+    },
+    {
+      "authority_id": "RE-02",
+      "title": "Relationship / MET / Database Asset Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "sha256": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "bytes": 8060
+    },
+    {
+      "authority_id": "RE-03",
+      "title": "Short-Term Mindshare & Relationship Qualification",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "sha256": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "bytes": 7741
+    },
+    {
+      "authority_id": "RE-04",
+      "title": "Long-Term Relationship, Repeat & Referral System",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "sha256": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "bytes": 7880
+    },
+    {
+      "authority_id": "RE-05",
+      "title": "Real Estate Demand Generation Portfolio & Agent-Channel Fit",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "sha256": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "bytes": 7935
+    },
+    {
+      "authority_id": "RE-06",
+      "title": "Lead Conversion, Follow-Up & Pipeline Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "sha256": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "bytes": 7899
+    },
+    {
+      "authority_id": "RE-07",
+      "title": "Geographic Farming Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "sha256": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb",
+      "bytes": 7828
+    },
+    {
+      "authority_id": "RE-08",
+      "title": "Open House Opportunity Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "sha256": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03",
+      "bytes": 7761
+    },
+    {
+      "authority_id": "RE-09",
+      "title": "Listing Business Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "sha256": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359",
+      "bytes": 8011
+    },
+    {
+      "authority_id": "RE-10",
+      "title": "Buyer Representation & Service Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "sha256": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b",
+      "bytes": 7856
+    },
+    {
+      "authority_id": "RE-11",
+      "title": "Residential Transaction & Client Delivery Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "sha256": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437",
+      "bytes": 7819
+    },
+    {
+      "authority_id": "RE-12",
+      "title": "Agent Operating Rhythm & E-to-P Intelligence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "sha256": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "bytes": 8045
+    },
+    {
+      "authority_id": "RE-13",
+      "title": "Agent Stage, Growth & Leverage Readiness",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "sha256": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "bytes": 7845
+    },
+    {
+      "authority_id": "RE-14",
+      "title": "Team Economics, Organization & Productivity",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "sha256": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b",
+      "bytes": 7972
+    },
+    {
+      "authority_id": "RE-15",
+      "title": "Recruiting, Onboarding & Agent Development",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "sha256": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182",
+      "bytes": 8096
+    },
+    {
+      "authority_id": "RE-16",
+      "title": "Financial, Profitability & Commission-to-Wealth Transition",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "sha256": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "bytes": 8268
+    }
+  ]
+}

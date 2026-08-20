@@ -6,6 +6,10 @@ import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx"
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
 import { startStripeCheckout } from "./lib/stripeCheckout.js";
 import UniversalTranslatorDrawer from "./components/universalTranslator/UniversalTranslatorDrawer.jsx";
+import {
+  ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
+  resolveOrdinaryBosEntry,
+} from "./lib/customerEntry/ordinaryCustomerEntryRouting.js";
 
 const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
 
@@ -371,10 +375,8 @@ export default function Profile() {
     
     setProfileIdLoading(true)
     try {
-      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
-      const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`)
-      console.log('[VALIDATE] VITE_API_URL:', import.meta.env.VITE_API_URL)
-      console.log('[VALIDATE] API base:', API)
+      const fullUrl =
+        `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`
       console.log('[VALIDATE] Full URL:', fullUrl)
       const res = await fetch(fullUrl)
       console.log('[VALIDATE] Response status:', res.status)
@@ -408,8 +410,18 @@ export default function Profile() {
         setProfileIdLoading(false)
         return
       }
+
+      const currentBos = await resolveOrdinaryBosEntry(data.profile_id || id)
+      if (currentBos.status === 'current') {
+        window.location.assign(currentBos.destination)
+        return
+      }
+      if (currentBos.status !== 'governed_fallback') {
+        setProfileIdError(ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE)
+        return
+      }
       
-      // For web-first report, use canonical dossier directly (no HTML generation)
+      // A governed incompatibility may still use the supported legacy BOS fallback.
       setResult({
         success: true,
         version: "web",

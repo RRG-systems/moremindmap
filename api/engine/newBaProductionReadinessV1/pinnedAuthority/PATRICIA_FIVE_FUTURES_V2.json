@@ -1,0 +1,844 @@
+{
+  "contract_id": "more-five-futures-v2",
+  "contract_version": "2.0.0",
+  "schema_version": "2.0.0",
+  "business_id": "business-ba-20260714-64ca0783",
+  "owner_profile_id": "mm-20260708-dsst020z",
+  "whole_business_model_binding": {
+    "business_id": "business-ba-20260714-64ca0783",
+    "owner_profile_id": "mm-20260708-dsst020z",
+    "whole_business_model_contract_version": "1.0.0",
+    "whole_business_model_schema_version": "1.0.0",
+    "whole_business_model_state_version": 1,
+    "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+    "authority_hashes": {
+      "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    "bos_hash": "54e3c525a63f34864a2b88eb7ce42bd7df9053e79f03e73b4aaa4aba472d61c2"
+  },
+  "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+  "futures": [
+    {
+      "future_role": "current_course",
+      "future_id": "patricia-future-current-course-v2",
+      "title": "Leader-Centered Continuity",
+      "state_summary": "Current configuration persists without governed direction-of-travel evidence.",
+      "business_state_if_realized": "Relationship-led opportunity remains insufficient or undiagnosed; defined workflows and bounded support coexist with unresolved transferability, attribution, and owner economics.",
+      "governing_mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "supporting_evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11"
+      ],
+      "assumptions": [
+        "No unreported records materially reverse the reported configuration.",
+        "Existing support remains compensating rather than ownership-changing."
+      ],
+      "required_changes": [],
+      "leading_indicators": [
+        "CRM completeness and dated next-action coverage remain unverified.",
+        "Source, stage, activity, aging, and outcome lineage remain unavailable.",
+        "Recurring operating commitments lack inspected ownership.",
+        "Primary task and decision ownership remains with the operator."
+      ],
+      "risks": [
+        "Allocation continues from perception rather than tested drivers.",
+        "Delivery work displaces demand and system work.",
+        "Expansion decisions remain ungated by contribution or cash."
+      ],
+      "falsifiers": [
+        "Timestamped source-stage records show sufficient qualified opportunity for the stated goal and material production from prospective lanes.",
+        "Direct workflow, time, and delegation records show stable adherence, balanced ownership, and no displaced constraint work."
+      ],
+      "operator_business_interactions": [
+        "patricia-person-link-adaptive-system-adoption-v1",
+        "patricia-person-link-pressure-operating-friction-v1",
+        "patricia-person-link-measurement-adoption-v1"
+      ],
+      "team_dependencies": [
+        "patricia-team-authority-boundary-v1"
+      ],
+      "dynamic_context_dependencies": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "certainty_support_classification": "HIGH_RELATIVE_SUPPORT",
+      "conditionality": "Persistence is better supported than any output trend. Active-client follow-up may differ from broader relationship follow-up; generation remains confounded by capture, qualification, customer readiness, source lag, unreported channels, and market effects. Financial gaps may reflect mismatched periods or entities, reinvestment, tax treatment, or missing records.",
+      "emergence_evidence": false,
+      "raw_relative_support_score": 16,
+      "normalized_relative_support_weight": 27,
+      "support_components": [
+        {
+          "component_id": "current_evidence_support",
+          "level": "STRONG",
+          "contribution": 3,
+          "meaning": "Direct support in the current WBM evidence and state."
+        },
+        {
+          "component_id": "momentum_support",
+          "level": "NEUTRAL",
+          "contribution": 1,
+          "meaning": "Alignment with observed leading, lagging, and direction-of-travel signals."
+        },
+        {
+          "component_id": "causal_feasibility",
+          "level": "SUPPORTED",
+          "contribution": 2,
+          "meaning": "Strength and completeness of the evidence-bound causal chain."
+        },
+        {
+          "component_id": "change_distance",
+          "level": "LOW_OR_NONE",
+          "contribution": 3,
+          "meaning": "Inverse support from the burden and distance of required changes."
+        },
+        {
+          "component_id": "counterevidence",
+          "level": "LIMITED",
+          "contribution": 2,
+          "meaning": "Inverse support after contradictions and counterevidence are considered."
+        },
+        {
+          "component_id": "constraint_compatibility",
+          "level": "DIRECTLY_ALIGNED",
+          "contribution": 3,
+          "meaning": "Whether the trajectory follows, weakens, bypasses, or worsens the governing constraint."
+        },
+        {
+          "component_id": "vulnerability_activation",
+          "level": "MODERATE",
+          "contribution": 2,
+          "meaning": "Role-sensitive support from material vulnerability activation."
+        }
+      ],
+      "weighting_model_version": "five-futures-relative-support-v1",
+      "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+      "whole_business_model_version": 1,
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "authority_versions": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      }
+    },
+    {
+      "future_role": "emerging_future",
+      "future_id": "patricia-future-emerging-support-layer-v2",
+      "title": "Bounded Support-Layer Emergence",
+      "state_summary": "Existing joint follow-up, database-update support, coaching, and coordinator or title assistance form an early distributed support layer; recurring ownership and operator relief remain unverified.",
+      "business_state_if_realized": "Selected recurring work gains durable ownership outside the operator while demand attribution and economic governance remain partial.",
+      "governing_mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "supporting_evidence_refs": [
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "assumptions": [
+        "Current supports can accept explicit recurring ownership.",
+        "Bounded transfer precedes broader leverage."
+      ],
+      "required_changes": [
+        "Convert as-needed assistance into documented end-to-end ownership.",
+        "Establish recurrent CRM use and next-action maintenance.",
+        "Inspect recurring commitments under named ownership."
+      ],
+      "leading_indicators": [
+        "Transferred work completes without operator intervention.",
+        "Dated CRM activity and next-action coverage become recurrent.",
+        "Operating reviews record ownership, commitments, and outcomes."
+      ],
+      "risks": [
+        "Assistance remains episodic and operator rescue persists.",
+        "Coordination rises before ownership transfers.",
+        "Unmeasured contribution types obscure whether workload is shifting."
+      ],
+      "falsifiers": [
+        "Comparable records show no increase in delegated ownership, CRM use, or inspected execution.",
+        "Direct records show current supports provide no material capacity."
+      ],
+      "operator_business_interactions": [
+        "patricia-person-link-adaptive-system-adoption-v1",
+        "patricia-person-link-pressure-operating-friction-v1",
+        "patricia-person-link-measurement-adoption-v1"
+      ],
+      "team_dependencies": [
+        "patricia-person-link-team-cause-boundary-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "Intentional specialization or different contribution value could explain unequal task volume."
+      ],
+      "dynamic_context_dependencies": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-longitudinal-state-v1"
+      ],
+      "certainty_support_classification": "INSUFFICIENT_EVIDENCE_BOUNDED",
+      "conditionality": "Emergence is limited to present support components; no comparable observations establish that delegation, CRM use, or accountability is increasing, so material transition remains unconfirmed.",
+      "emergence_evidence": true,
+      "raw_relative_support_score": 9,
+      "normalized_relative_support_weight": 15,
+      "support_components": [
+        {
+          "component_id": "current_evidence_support",
+          "level": "WEAK",
+          "contribution": 1,
+          "meaning": "Direct support in the current WBM evidence and state."
+        },
+        {
+          "component_id": "momentum_support",
+          "level": "NEUTRAL",
+          "contribution": 1,
+          "meaning": "Alignment with observed leading, lagging, and direction-of-travel signals."
+        },
+        {
+          "component_id": "causal_feasibility",
+          "level": "PLAUSIBLE",
+          "contribution": 1,
+          "meaning": "Strength and completeness of the evidence-bound causal chain."
+        },
+        {
+          "component_id": "change_distance",
+          "level": "MODERATE",
+          "contribution": 2,
+          "meaning": "Inverse support from the burden and distance of required changes."
+        },
+        {
+          "component_id": "counterevidence",
+          "level": "MATERIAL",
+          "contribution": 1,
+          "meaning": "Inverse support after contradictions and counterevidence are considered."
+        },
+        {
+          "component_id": "constraint_compatibility",
+          "level": "COMPATIBLE",
+          "contribution": 2,
+          "meaning": "Whether the trajectory follows, weakens, bypasses, or worsens the governing constraint."
+        },
+        {
+          "component_id": "vulnerability_activation",
+          "level": "WEAK",
+          "contribution": 1,
+          "meaning": "Role-sensitive support from material vulnerability activation."
+        }
+      ],
+      "weighting_model_version": "five-futures-relative-support-v1",
+      "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+      "whole_business_model_version": 1,
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "authority_versions": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      }
+    },
+    {
+      "future_role": "better_future",
+      "future_id": "patricia-future-better-governed-core-v2",
+      "title": "Governed Relationship and Operating Core",
+      "state_summary": "Governed relationship records and next actions combine with source-stage measurement, explicit ownership, and recurring review to alter the current operating mechanisms.",
+      "business_state_if_realized": "Relationship-led demand and delivery become more attributable and transferable, with capacity decisions gated by reconciled economics rather than gross production.",
+      "governing_mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "supporting_evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11"
+      ],
+      "assumptions": [
+        "The relationship base is sufficiently valid and owned for governed activation.",
+        "Internal mechanisms remain material after market and pipeline effects are isolated.",
+        "Role and financial records can establish viable task transfer."
+      ],
+      "required_changes": [
+        "Complete, segment, and assign ownership across relationship records.",
+        "Capture source, stage, activity, aging, outcome, and dated next actions.",
+        "Assign recurring role and decision ownership with inspected commitments.",
+        "Reconcile production, compensation, expenses, owner profit, cash, and contribution before expansion."
+      ],
+      "leading_indicators": [
+        "Contact completeness, segmentation, recency, and next-action coverage improve.",
+        "Source-attributed contacts, appointments, stage movement, and aging become inspectable.",
+        "Named owners complete recurring commitments without operator rescue.",
+        "Economic bridges reconcile before capacity decisions."
+      ],
+      "risks": [
+        "Data capture becomes administration without allocation changes.",
+        "Relationship-response lag obscures early effects.",
+        "Transfer adds coordination when standards or decision rights remain unclear.",
+        "An external market constraint dominates the internal bridge."
+      ],
+      "falsifiers": [
+        "Complete touch and source records show consistent activation without improved attributable opportunity, absent material confounds.",
+        "Governed source-stage records identify a different throughput constraint and support reliable allocation.",
+        "Durable task transfer does not release demand, system, or accountability work."
+      ],
+      "operator_business_interactions": [
+        "patricia-person-link-adaptive-system-adoption-v1",
+        "patricia-person-link-measurement-adoption-v1",
+        "patricia-person-link-pressure-operating-friction-v1"
+      ],
+      "team_dependencies": [
+        "patricia-person-link-team-cause-boundary-v1",
+        "Role, decision-right, relationship-ownership, and economic records must precede attribution of team effects."
+      ],
+      "dynamic_context_dependencies": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "certainty_support_classification": "MODERATE_RELATIVE_SUPPORT",
+      "conditionality": "Reachability depends on measurement separating generation from capture, conversion, capacity, and market effects; production improvement cannot be inferred before source-dependent lag is observed.",
+      "emergence_evidence": false,
+      "raw_relative_support_score": 12,
+      "normalized_relative_support_weight": 20,
+      "support_components": [
+        {
+          "component_id": "current_evidence_support",
+          "level": "MODERATE",
+          "contribution": 2,
+          "meaning": "Direct support in the current WBM evidence and state."
+        },
+        {
+          "component_id": "momentum_support",
+          "level": "NEUTRAL",
+          "contribution": 1,
+          "meaning": "Alignment with observed leading, lagging, and direction-of-travel signals."
+        },
+        {
+          "component_id": "causal_feasibility",
+          "level": "SUPPORTED",
+          "contribution": 2,
+          "meaning": "Strength and completeness of the evidence-bound causal chain."
+        },
+        {
+          "component_id": "change_distance",
+          "level": "MODERATE",
+          "contribution": 2,
+          "meaning": "Inverse support from the burden and distance of required changes."
+        },
+        {
+          "component_id": "counterevidence",
+          "level": "LIMITED",
+          "contribution": 2,
+          "meaning": "Inverse support after contradictions and counterevidence are considered."
+        },
+        {
+          "component_id": "constraint_compatibility",
+          "level": "DIRECTLY_ALIGNED",
+          "contribution": 3,
+          "meaning": "Whether the trajectory follows, weakens, bypasses, or worsens the governing constraint."
+        },
+        {
+          "component_id": "vulnerability_activation",
+          "level": "NONE",
+          "contribution": 0,
+          "meaning": "Role-sensitive support from material vulnerability activation."
+        }
+      ],
+      "weighting_model_version": "five-futures-relative-support-v1",
+      "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+      "whole_business_model_version": 1,
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "authority_versions": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      }
+    },
+    {
+      "future_role": "bold_future",
+      "future_id": "patricia-future-bold-transferable-team-v2",
+      "title": "Transferable Multi-Agent Operating Model",
+      "state_summary": "After the governed core proves repeatability and economics, validated demand lanes and gated capacity additions support a producer-to-manager transition.",
+      "business_state_if_realized": "A multi-agent business executes through portable records, distributed ownership, standards, and decision-ready economics without the operator remaining the primary transaction queue.",
+      "governing_mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "supporting_evidence_refs": [
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "assumptions": [
+        "At least one demand lane becomes repeatable after attribution testing.",
+        "Reconciled contribution and cash support staged leverage.",
+        "Portable standards preserve execution without primary operator ownership.",
+        "A managerial seat becomes feasible through bounded trials."
+      ],
+      "required_changes": [
+        "Complete the governed-core bridge before hiring.",
+        "Test prospective lanes and retain only those with attributable stage movement and economics.",
+        "Set demand, contribution, cash, role, and quality gates for each capacity addition.",
+        "Transfer decisions and relationship continuity rather than tasks alone.",
+        "Run bounded producer-to-manager seat trials."
+      ],
+      "leading_indicators": [
+        "Attributable qualified pipeline supports staged capacity across source-dependent lag.",
+        "Delegated client work meets standards without rising operator oversight.",
+        "Contribution, owner cash, and reserves reconcile before commitments.",
+        "New roles acquire independent ownership within defined ramps."
+      ],
+      "risks": [
+        "Hiring multiplies coordination before repeatability.",
+        "Prospective lanes fail to produce material attributable demand.",
+        "Volume expands while owner economics remain weak or unknown.",
+        "Leader rescue preserves dependence.",
+        "Recurring commitments precede cash evidence."
+      ],
+      "falsifiers": [
+        "Readiness testing fails to establish stable demand, contribution, cash, roles, standards, and delegated execution.",
+        "Capacity additions increase oversight without productive transfer after implementation lag.",
+        "Bounded seat trials fail to transfer primary operating ownership."
+      ],
+      "operator_business_interactions": [
+        "patricia-person-link-hybrid-seat-transition-v1",
+        "patricia-person-link-adaptive-system-adoption-v1",
+        "patricia-person-link-pressure-operating-friction-v1"
+      ],
+      "team_dependencies": [
+        "patricia-team-authority-boundary-v1",
+        "Explicit seats, decision rights, standards, relationship ownership, and economics are required before team expansion."
+      ],
+      "dynamic_context_dependencies": [
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "certainty_support_classification": "LOW_RELATIVE_SUPPORT",
+      "conditionality": "Goal intent and current assets establish plausibility, not readiness or attainment. A bounded ramp may be intentional, and unreported reserves, standards, or infrastructure could strengthen support; none are established.",
+      "emergence_evidence": false,
+      "raw_relative_support_score": 7,
+      "normalized_relative_support_weight": 12,
+      "support_components": [
+        {
+          "component_id": "current_evidence_support",
+          "level": "WEAK",
+          "contribution": 1,
+          "meaning": "Direct support in the current WBM evidence and state."
+        },
+        {
+          "component_id": "momentum_support",
+          "level": "NEUTRAL",
+          "contribution": 1,
+          "meaning": "Alignment with observed leading, lagging, and direction-of-travel signals."
+        },
+        {
+          "component_id": "causal_feasibility",
+          "level": "PLAUSIBLE",
+          "contribution": 1,
+          "meaning": "Strength and completeness of the evidence-bound causal chain."
+        },
+        {
+          "component_id": "change_distance",
+          "level": "TRANSFORMATIONAL",
+          "contribution": 0,
+          "meaning": "Inverse support from the burden and distance of required changes."
+        },
+        {
+          "component_id": "counterevidence",
+          "level": "MATERIAL",
+          "contribution": 1,
+          "meaning": "Inverse support after contradictions and counterevidence are considered."
+        },
+        {
+          "component_id": "constraint_compatibility",
+          "level": "COMPATIBLE",
+          "contribution": 2,
+          "meaning": "Whether the trajectory follows, weakens, bypasses, or worsens the governing constraint."
+        },
+        {
+          "component_id": "vulnerability_activation",
+          "level": "WEAK",
+          "contribution": 1,
+          "meaning": "Role-sensitive support from material vulnerability activation."
+        }
+      ],
+      "weighting_model_version": "five-futures-relative-support-v1",
+      "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+      "whole_business_model_version": 1,
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "authority_versions": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      }
+    },
+    {
+      "future_role": "downside_future",
+      "future_id": "patricia-future-downside-opacity-load-v2",
+      "title": "Centralization Deepens Under Premature Growth",
+      "state_summary": "Growth commitments outrun relationship governance, measurement, role clarity, and economic readiness while operator coordination load increases.",
+      "business_state_if_realized": "More cost and coordination coexist with uncertain pipeline and owner economics; delivery and rescue work displace demand and system work without proving higher throughput.",
+      "governing_mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "supporting_evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11"
+      ],
+      "assumptions": [
+        "Growth actions advance before readiness evidence.",
+        "Balancing supports do not acquire durable ownership.",
+        "Missing market evidence does not fully explain the internal pattern."
+      ],
+      "required_changes": [
+        "Commit recurring capacity before demand and cash gates.",
+        "Preserve as-needed delegation and self-held accountability.",
+        "Continue allocation without source-stage learning."
+      ],
+      "leading_indicators": [
+        "Operator task and decision queues expand.",
+        "CRM next-action coverage and source-stage visibility remain absent.",
+        "Support utilization grows without independent ownership.",
+        "Recurring costs appear before reconciled contribution and cash.",
+        "Qualified pipeline remains insufficient or undiagnosed."
+      ],
+      "risks": [
+        "Demand work is displaced by delivery and coordination.",
+        "Relationship value remains memory-dependent and nonportable.",
+        "Unknown economics absorb volume or hiring commitments.",
+        "Unmeasured contribution types make workload alignment harder to evaluate."
+      ],
+      "falsifiers": [
+        "Portable CRM records establish complete history, state, ownership, and next actions.",
+        "Role, time, contribution, and economics records show intentional alignment without capacity effects.",
+        "Governed financial records establish the complete economic bridge and sufficient capacity.",
+        "Current market evidence explains the production gap without internal vulnerability activation."
+      ],
+      "operator_business_interactions": [
+        "patricia-person-link-pressure-operating-friction-v1",
+        "patricia-person-link-adaptive-system-adoption-v1",
+        "patricia-person-link-team-cause-boundary-v1"
+      ],
+      "team_dependencies": [
+        "patricia-team-authority-boundary-v1",
+        "patricia-person-link-team-cause-boundary-v1"
+      ],
+      "dynamic_context_dependencies": [
+        "patricia-missing-direct-operating-corroboration-v1",
+        "patricia-missing-current-market-context-v1",
+        "patricia-missing-longitudinal-state-v1",
+        "patricia-missing-authorized-team-authority-v1",
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "certainty_support_classification": "MODERATE_RELATIVE_SUPPORT",
+      "conditionality": "This is bounded deterioration, not catastrophe. Active-client follow-up, process knowledge, production history, and existing support may offset it; current market evidence or hidden operating and financial records could replace the internal explanation.",
+      "emergence_evidence": false,
+      "raw_relative_support_score": 15,
+      "normalized_relative_support_weight": 26,
+      "support_components": [
+        {
+          "component_id": "current_evidence_support",
+          "level": "MODERATE",
+          "contribution": 2,
+          "meaning": "Direct support in the current WBM evidence and state."
+        },
+        {
+          "component_id": "momentum_support",
+          "level": "NEUTRAL",
+          "contribution": 1,
+          "meaning": "Alignment with observed leading, lagging, and direction-of-travel signals."
+        },
+        {
+          "component_id": "causal_feasibility",
+          "level": "SUPPORTED",
+          "contribution": 2,
+          "meaning": "Strength and completeness of the evidence-bound causal chain."
+        },
+        {
+          "component_id": "change_distance",
+          "level": "LOW_OR_NONE",
+          "contribution": 3,
+          "meaning": "Inverse support from the burden and distance of required changes."
+        },
+        {
+          "component_id": "counterevidence",
+          "level": "MATERIAL",
+          "contribution": 1,
+          "meaning": "Inverse support after contradictions and counterevidence are considered."
+        },
+        {
+          "component_id": "constraint_compatibility",
+          "level": "DIRECTLY_ALIGNED",
+          "contribution": 3,
+          "meaning": "Whether the trajectory follows, weakens, bypasses, or worsens the governing constraint."
+        },
+        {
+          "component_id": "vulnerability_activation",
+          "level": "STRONG",
+          "contribution": 3,
+          "meaning": "Role-sensitive support from material vulnerability activation."
+        }
+      ],
+      "weighting_model_version": "five-futures-relative-support-v1",
+      "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+      "whole_business_model_version": 1,
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "authority_versions": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      }
+    }
+  ],
+  "normalization": {
+    "normalized_relative_support_weights": [
+      27,
+      15,
+      20,
+      12,
+      26
+    ],
+    "normalization_version": "largest-remainder-role-order-v1",
+    "normalization_method": "LARGEST_REMAINDER_EXACT_100",
+    "tie_break": "FIXED_FUTURE_ROLE_ORDER",
+    "zero_total_fallback": null,
+    "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT"
+  },
+  "authority_versions": {
+    "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+    "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+    "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+    "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+    "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+    "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+    "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+    "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+    "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+    "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+    "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+    "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+    "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+    "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+    "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+    "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+    "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+    "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+  },
+  "legacy_coexistence": {
+    "five_futures_v1": "LEGACY_MODEL_GENERATED_PERCENTAGES_UNCHANGED",
+    "five_futures_v2": "UNCALIBRATED_RELATIVE_SUPPORT",
+    "silent_reinterpretation_prohibited": true
+  },
+  "one_move_interface": {
+    "status": "STRUCTURED_FUTURES_AVAILABLE_ONE_MOVE_V2_NOT_IMPLEMENTED",
+    "provides": [
+      "future_role",
+      "governing_mechanisms",
+      "required_changes",
+      "leading_indicators",
+      "falsifiers",
+      "relative_support_weight"
+    ],
+    "probability_movement_claims": false
+  },
+  "runtime_boundaries": {
+    "one_move_v2_implemented": false,
+    "customer_realization_implemented": false,
+    "customer_ui_implemented": false,
+    "bayesian_model_implemented": false,
+    "calibration_project_implemented": false,
+    "rsl_implemented": false,
+    "production_wired": false
+  },
+  "validation_receipt": {
+    "validator_version": "five-futures-v2-validator-v1",
+    "status": "PASS",
+    "business_id": "business-ba-20260714-64ca0783",
+    "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+    "future_count": 5,
+    "normalized_total": 100,
+    "support_semantics": "UNCALIBRATED_RELATIVE_SUPPORT",
+    "weighting_model_version": "five-futures-relative-support-v1",
+    "one_move_v2_implemented": false,
+    "customer_ui_implemented": false,
+    "receipt_hash": "af01096ad24625db00230c7e087ea51598d057a345b81b19a27f5230dcab5561"
+  },
+  "artifact_hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148"
+}

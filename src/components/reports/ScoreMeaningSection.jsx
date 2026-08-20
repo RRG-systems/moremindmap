@@ -1,4 +1,7 @@
-export default function ScoreMeaningSection({ scoreMeaning }) {
+export default function ScoreMeaningSection({
+  scoreMeaning,
+  customerIntelligenceActive = false,
+}) {
   if (!scoreMeaning) return null;
 
   return (
@@ -20,22 +23,43 @@ export default function ScoreMeaningSection({ scoreMeaning }) {
               </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-white/80">
-              You scored {score.score.toFixed(2)} in {label}. That is a {score.classification} score. {score.whatItMeans}
+              {customerIntelligenceActive
+                ? score.customerRecognition || score.whatItMeans
+                : `You scored ${score.score.toFixed(2)} in ${label}. That is a ${score.classification} score. ${score.whatItMeans}`}
             </p>
-            <div className="mt-3 grid gap-2 md:grid-cols-3">
-              <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-emerald-200/70">How it helps</p>
+            {customerIntelligenceActive ? (
+              score.customerSelfCheck ? (
+                <div className="mt-3 rounded-lg border border-sky-500/20 bg-sky-500/5 p-3">
+                  <p className="text-[0.62rem] font-bold uppercase tracking-wider text-sky-200/70">
+                    What to notice
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-white/75">
+                    {score.customerSelfCheck}
+                  </p>
+                </div>
+              ) : null
+            ) : (
+              <div className="mt-3 grid gap-2 md:grid-cols-3">
+                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-3">
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-emerald-200/70">
+                  How it helps
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.howItHelps}</p>
-              </div>
-              <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-amber-200/70">How it can work against you</p>
+                </div>
+                <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-amber-200/70">
+                  How it can work against you
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.howItWorksAgainst}</p>
-              </div>
-              <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-3">
-                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-sky-200/70">Best use</p>
+                </div>
+                <div className="rounded-lg border border-sky-500/20 bg-sky-500/5 p-3">
+                <p className="text-[0.62rem] font-bold uppercase tracking-wider text-sky-200/70">
+                  Best use
+                </p>
                 <p className="mt-1.5 text-xs leading-relaxed text-white/75">{score.bestUse}</p>
+                </div>
               </div>
-            </div>
+            )}
           </article>
         );
       })}

@@ -188,12 +188,13 @@ export function validateCompleteAttachmentSet({
   createdAt,
   expiresAt,
 }) {
+  const coachConnectAttached = coachConnectReceipt != null;
   const scopeHashes = [
     subjectReceipt?.exact_scope_hash,
     capability?.exact_scope_hash,
     businessEngineReceipt?.exact_scope_hash,
     subscriptionReceipt?.exact_scope_hash,
-    coachConnectReceipt?.exact_scope_hash,
+    ...(coachConnectAttached ? [coachConnectReceipt?.exact_scope_hash] : []),
   ];
   const subjectRefs = [
     subjectReceipt?.subscriber_subject_ref,
@@ -201,27 +202,30 @@ export function validateCompleteAttachmentSet({
     capability?.subscriber_subject_ref,
     businessEngineReceipt?.subscriber_subject_ref,
     subscriptionReceipt?.subscriber_subject_ref,
-    coachConnectReceipt?.subscriber_subject_ref,
+    ...(coachConnectAttached ? [coachConnectReceipt?.subscriber_subject_ref] : []),
   ];
   const valid = subjectReceipt?.subject_receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.subjectReceipt
     && sessionReceipt?.session_receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.sessionReceipt
     && capability?.envelope_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.capability
     && businessEngineReceipt?.receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.businessEngineAttachment
     && subscriptionReceipt?.receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.subscriptionAttachment
-    && coachConnectReceipt?.receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.coachConnectAttachment
+    && (!coachConnectAttached
+      || coachConnectReceipt.receipt_version === PRIVATE_RUNTIME_CONTRACT_VERSIONS.coachConnectAttachment)
     && new Set(scopeHashes).size === 1
     && new Set(subjectRefs).size === 1
     && sessionReceipt.authenticated_session_ref === capability.authenticated_session_ref
     && sessionReceipt.authenticated_session_ref === subscriptionReceipt.authenticated_session_ref
     && subscriptionReceipt.business_engine_attachment_ref === businessEngineReceipt.attachment_id
-    && coachConnectReceipt.business_engine_attachment_ref === businessEngineReceipt.attachment_id
-    && coachConnectReceipt.subscription_runtime_attachment_ref === subscriptionReceipt.attachment_id
+    && (!coachConnectAttached
+      || coachConnectReceipt.business_engine_attachment_ref === businessEngineReceipt.attachment_id)
+    && (!coachConnectAttached
+      || coachConnectReceipt.subscription_runtime_attachment_ref === subscriptionReceipt.attachment_id)
     && businessEngineReceipt.duplicate_engine_created === false
     && businessEngineReceipt.write_authorized === false
     && subscriptionReceipt.paid_entitlement === false
     && subscriptionReceipt.stripe_authority === false
-    && coachConnectReceipt.second_business_engine === false
-    && coachConnectReceipt.canonical_mutation_authority === false
+    && (!coachConnectAttached || coachConnectReceipt.second_business_engine === false)
+    && (!coachConnectAttached || coachConnectReceipt.canonical_mutation_authority === false)
     && typeof environmentId === 'string'
     && Number.isFinite(Date.parse(createdAt))
     && Number.isFinite(Date.parse(expiresAt))
@@ -241,7 +245,7 @@ export function validateCompleteAttachmentSet({
     exact_scope_hash: scopeHashes[0],
     business_engine_attachment_ref: businessEngineReceipt.attachment_id,
     subscription_attachment_ref: subscriptionReceipt.attachment_id,
-    coach_connect_attachment_ref: coachConnectReceipt.attachment_id,
+    coach_connect_attachment_ref: coachConnectReceipt?.attachment_id || null,
   }).slice(0, 32)}`;
   return frozen({
     ok: true,
@@ -254,7 +258,8 @@ export function validateCompleteAttachmentSet({
       exact_scope_hash: scopeHashes[0],
       business_engine_attachment_ref: businessEngineReceipt.attachment_id,
       subscription_runtime_attachment_ref: subscriptionReceipt.attachment_id,
-      coach_connect_attachment_ref: coachConnectReceipt.attachment_id,
+      coach_connect_attachment_ref: coachConnectReceipt?.attachment_id || null,
+      coach_connect_attached: coachConnectAttached,
       all_scopes_equal: true,
       all_authorities_current: true,
       business_engine_count: 1,

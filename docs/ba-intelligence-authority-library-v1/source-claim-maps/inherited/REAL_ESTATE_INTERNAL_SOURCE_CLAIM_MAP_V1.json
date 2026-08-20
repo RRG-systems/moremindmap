@@ -1,0 +1,816 @@
+{
+  "schema": "real-estate-internal-source-claim-map-v1",
+  "date": "2026-08-12",
+  "status": "INTERNAL_RESEARCH_CANDIDATE_NOT_CANONICAL",
+  "claim_count": 48,
+  "claims": [
+    {
+      "id": "RE-CL-001",
+      "claim": "The protected Universal chassis contains 12 Bibles; the Real Estate Cassette specializes manifestations and must not duplicate generic business mechanisms.",
+      "source_ids": [
+        "S55",
+        "S60"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "UNIVERSAL_BUSINESS_MECHANISM"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C16"
+      ],
+      "limit": "Universal missions/boundaries govern."
+    },
+    {
+      "id": "RE-CL-002",
+      "claim": "A living relationship is distinct from a stored contact and requires real-estate mindshare: the person thinks of the agent for buy, sell, invest or refer.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C02"
+      ],
+      "limit": "Founder definition; external validation still warranted."
+    },
+    {
+      "id": "RE-CL-003",
+      "claim": "The Lake separates water volume, water quality, new inflow and intelligent fishing into distinct diagnostic questions.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S22"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C02"
+      ],
+      "limit": "Metaphor is vertical, mechanisms map to Universal Demand."
+    },
+    {
+      "id": "RE-CL-004",
+      "claim": "Directional MET economics use approximately $500 per true relationship, with anchor examples at 250, 500, 1,000 and 2,000.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S21",
+        "S33"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC",
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C02",
+        "RE-C16"
+      ],
+      "limit": "Not an observed result or guarantee; income/GCI terminology conflicts."
+    },
+    {
+      "id": "RE-CL-005",
+      "claim": "The implemented target model preserves the $500 heuristic as modeled_not_guaranteed and bounds unsupported precision.",
+      "source_ids": [
+        "S33",
+        "S58",
+        "S59"
+      ],
+      "provenance_classes": [
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C16"
+      ],
+      "limit": "Implementation evidence, not validation of economics."
+    },
+    {
+      "id": "RE-CL-006",
+      "claim": "Short-term relationship creation uses either 6 contacts in 6 weeks or 8 in 8 weeks.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_HISTORICAL_COACHING_METHOD"
+      ],
+      "candidate_authorities": [
+        "RE-C03"
+      ],
+      "limit": "Selection logic between variants is unresolved."
+    },
+    {
+      "id": "RE-CL-007",
+      "claim": "The short-term sequence requires two live voice-to-voice or face-to-face contacts and ends with an explicit referral-mindshare qualification question.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C03"
+      ],
+      "limit": "Founder doctrine; effect not outcome validated."
+    },
+    {
+      "id": "RE-CL-008",
+      "claim": "A positive qualification answer triggers a conscious decision whether to graduate the person into the long-term relationship CRM.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C03",
+        "RE-C04"
+      ],
+      "limit": "This graduation gate is a distinctive two-system mechanism."
+    },
+    {
+      "id": "RE-CL-009",
+      "claim": "D.J. prescribes a physical 1-31 accordion folder with 5x7 cards moved 7-10 days forward and annotated through the 6/8 contacts.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_HISTORICAL_COACHING_METHOD"
+      ],
+      "candidate_authorities": [
+        "RE-C03"
+      ],
+      "limit": "Physical workflow is preserved; CRM translation remains open."
+    },
+    {
+      "id": "RE-CL-010",
+      "claim": "Long-term relationship maintenance combines marketing, social, personal notes, calls, birthdays, children’s birthdays, pop-bys/lunches, and client/vendor parties.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C04"
+      ],
+      "limit": "Exact mix is example doctrine, not universal mandate."
+    },
+    {
+      "id": "RE-CL-011",
+      "claim": "The older 35+ touch floor and the detailed 40-55 touch example are best treated as a floor plus robust implementation hypothesis, not silently collapsed.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "INTERNAL_CONTRADICTION"
+      ],
+      "candidate_authorities": [
+        "RE-C04"
+      ],
+      "limit": "Spock/D.J. should adjudicate final language."
+    },
+    {
+      "id": "RE-CL-012",
+      "claim": "D.J. ranks client/vendor parties as the strongest referral-producing touch, but no internal outcome ledger validates the ranking.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "FUTURE_RSL_COACHING_CANDIDATE"
+      ],
+      "candidate_authorities": [
+        "RE-C04"
+      ],
+      "limit": "Preserve claim and validation gap together."
+    },
+    {
+      "id": "RE-CL-013",
+      "claim": "A founder coaching baseline seeks roughly 2-3 lead-generation hours and 90 minutes of immediate follow-up before noon.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_HISTORICAL_COACHING_METHOD"
+      ],
+      "candidate_authorities": [
+        "RE-C12"
+      ],
+      "limit": "Not universal or outcome validated."
+    },
+    {
+      "id": "RE-CL-014",
+      "claim": "The operating day then uses client lunches and afternoon listing/buyer appointments, with live-contact and appointment counts known.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C12"
+      ],
+      "limit": "Detailed vertical manifestation."
+    },
+    {
+      "id": "RE-CL-015",
+      "claim": "Current income is described as a delayed echo of activity roughly 60-120 days earlier.",
+      "source_ids": [
+        "S53",
+        "S54"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC"
+      ],
+      "candidate_authorities": [
+        "RE-C12"
+      ],
+      "limit": "Needs market/source calibration."
+    },
+    {
+      "id": "RE-CL-016",
+      "claim": "Lead generation is defined broadly as meeting new people, database/referral calls and business creation, not merely paid acquisition.",
+      "source_ids": [
+        "S53",
+        "S54"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C05"
+      ],
+      "limit": "Universal Demand owns generic portfolio logic."
+    },
+    {
+      "id": "RE-CL-017",
+      "claim": "D.J. recommends 2-3 primary executable lead lanes rather than seven simultaneous lanes.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC"
+      ],
+      "candidate_authorities": [
+        "RE-C05"
+      ],
+      "limit": "Must be reconciled with diversification over time."
+    },
+    {
+      "id": "RE-CL-018",
+      "claim": "Follow-up is a separate operating block and system from lead generation; unworked opportunity is not evidence of insufficient demand.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S25"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C06"
+      ],
+      "limit": "Implementation uses simplified text inference."
+    },
+    {
+      "id": "RE-CL-019",
+      "claim": "Seven full internal script assets are present: business explanation, qualification, database check-in, alternate check-in, group/value invitation, sign-off, and referral call.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_HISTORICAL_COACHING_METHOD"
+      ],
+      "candidate_authorities": [
+        "RE-C02",
+        "RE-C03",
+        "RE-C04",
+        "RE-C06"
+      ],
+      "limit": "Other requested script categories are internal gaps; none were invented."
+    },
+    {
+      "id": "RE-CL-020",
+      "claim": "D.J. names a 1,000-home geographic farm, eight weekly initial mailings, ongoing monthly/twice-monthly mail, and repeated door knocking.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC"
+      ],
+      "candidate_authorities": [
+        "RE-C07"
+      ],
+      "limit": "Highly specific; requires external and outcome validation."
+    },
+    {
+      "id": "RE-CL-021",
+      "claim": "The farming notes specify about 40 doors per day three to four times weekly after week two.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC"
+      ],
+      "candidate_authorities": [
+        "RE-C07"
+      ],
+      "limit": "Feasibility, compliance and economics unresolved."
+    },
+    {
+      "id": "RE-CL-022",
+      "claim": "Open houses are described as a roughly seven-level maturity model from signs-and-hope to a high-visibility event with neighbor/database invitation, circle prospecting, capture and follow-up.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C08"
+      ],
+      "limit": "Only endpoints are internally specified; exact seven levels are missing."
+    },
+    {
+      "id": "RE-CL-023",
+      "claim": "The high-maturity open-house endpoint includes 40-plus signs with balloons, purposeful event design and local relationship capture.",
+      "source_ids": [
+        "S53"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "WORKING_HEURISTIC"
+      ],
+      "candidate_authorities": [
+        "RE-C08"
+      ],
+      "limit": "No internal benchmark proves sign count or causal effect."
+    },
+    {
+      "id": "RE-CL-024",
+      "claim": "Listings are treated as leverage, time protection, visibility, signs, market authority and a source of additional opportunity.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C09"
+      ],
+      "limit": "Countervailing service/capacity costs need evidence."
+    },
+    {
+      "id": "RE-CL-025",
+      "claim": "The internal listing system covers intake, pricing, consultation, preparation, launch, feedback, offers, seller communication and post-close continuity.",
+      "source_ids": [
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_EXTERNAL_RESEARCH",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C09"
+      ],
+      "limit": "Stored synthesis; deeper primary-source verification needed."
+    },
+    {
+      "id": "RE-CL-026",
+      "claim": "The internal buyer system covers intake, preapproval, consultation, search, showings, offer strategy, communication and post-close follow-up.",
+      "source_ids": [
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_EXTERNAL_RESEARCH",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C10"
+      ],
+      "limit": "Current buyer-representation regulation belongs Dynamic."
+    },
+    {
+      "id": "RE-CL-027",
+      "claim": "Transaction delivery requires contract-to-close deadlines, communication, vendors, compliance, handoffs and post-close relationship transfer.",
+      "source_ids": [
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_EXTERNAL_RESEARCH",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C11"
+      ],
+      "limit": "Current legal/compliance details require fresh sources."
+    },
+    {
+      "id": "RE-CL-028",
+      "claim": "E-to-P means moving from memory, motivation and personality dependence to models, systems, tools, accountability, coaching and education.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_HISTORICAL_COACHING_METHOD"
+      ],
+      "candidate_authorities": [
+        "RE-C12"
+      ],
+      "limit": "Generic mechanism is Universal; RE manifestations remain cassette."
+    },
+    {
+      "id": "RE-CL-029",
+      "claim": "Internal agent stages include early, inconsistent, stable solo, high-producing solo, leverage-ready, team-ready, stalled and overextended.",
+      "source_ids": [
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_RESEARCH",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C13"
+      ],
+      "limit": "Thresholds are not internally validated."
+    },
+    {
+      "id": "RE-CL-030",
+      "claim": "Scale must be earned: hiring before models, systems, role clarity, economics and accountability can multiply chaos.",
+      "source_ids": [
+        "S53",
+        "S54",
+        "S55"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "UNIVERSAL_BUSINESS_MECHANISM"
+      ],
+      "candidate_authorities": [
+        "RE-C13",
+        "RE-C14",
+        "RE-C15"
+      ],
+      "limit": "Vertical thresholds remain gaps."
+    },
+    {
+      "id": "RE-CL-031",
+      "claim": "A healthy team must create profit beyond leader personal production and cannot be inferred from headcount.",
+      "source_ids": [
+        "S54",
+        "S21"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE"
+      ],
+      "candidate_authorities": [
+        "RE-C14"
+      ],
+      "limit": "Needs full team economics evidence."
+    },
+    {
+      "id": "RE-CL-032",
+      "claim": "Team diagnosis requires roles, lead distribution, database ownership, productivity, accountability, leader dependence and profitability by role or unit.",
+      "source_ids": [
+        "S54",
+        "S21",
+        "S04"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_RESEARCH",
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C14"
+      ],
+      "limit": "Current intake support is partial."
+    },
+    {
+      "id": "RE-CL-033",
+      "claim": "Current BA stores team Profile IDs but does not fetch full team intelligence in the deterministic draft.",
+      "source_ids": [
+        "S25",
+        "S04"
+      ],
+      "provenance_classes": [
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C14",
+        "RE-C15"
+      ],
+      "limit": "Implemented boundary; no profile retrieval occurred."
+    },
+    {
+      "id": "RE-CL-034",
+      "claim": "Recruiting/onboarding are named as systems with role, candidate, interview, scorecard, ramp and exit logic, but the internal corpus lacks deep operational doctrine.",
+      "source_ids": [
+        "S54",
+        "S21",
+        "S04"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_RESEARCH",
+        "INSUFFICIENT_INTERNAL_SUPPORT"
+      ],
+      "candidate_authorities": [
+        "RE-C15"
+      ],
+      "limit": "External research priority."
+    },
+    {
+      "id": "RE-CL-035",
+      "claim": "Financial reality separates units, volume, ASP, GCI, expenses, profit, marketing spend, owner income and team-generated profit.",
+      "source_ids": [
+        "S54",
+        "S21",
+        "S04"
+      ],
+      "provenance_classes": [
+        "REAL_ESTATE_VERTICAL_INTELLIGENCE",
+        "UNIVERSAL_BUSINESS_MECHANISM"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C16"
+      ],
+      "limit": "Universal finance governs formulas; cassette governs RE units/terms."
+    },
+    {
+      "id": "RE-CL-036",
+      "claim": "Missing financials are evidence of low visibility, not proof of a particular economic condition.",
+      "source_ids": [
+        "S54",
+        "S55",
+        "S02"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "UNIVERSAL_BUSINESS_MECHANISM"
+      ],
+      "candidate_authorities": [
+        "RE-C16"
+      ],
+      "limit": "Must lower certainty and trigger evidence requests."
+    },
+    {
+      "id": "RE-CL-037",
+      "claim": "Commission income is framed as funding rentals, investments, debt reduction, retirement, passive income, ownership, freedom and legacy.",
+      "source_ids": [
+        "S53",
+        "S54"
+      ],
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE",
+        "FUTURE_RSL_COACHING_CANDIDATE"
+      ],
+      "candidate_authorities": [
+        "RE-C16"
+      ],
+      "limit": "Mechanism and risk/capital detail are thin."
+    },
+    {
+      "id": "RE-CL-038",
+      "claim": "The historical product used a 16-question intake; target/current New BA doctrine uses q1-q12 as governed evidence collectors.",
+      "source_ids": [
+        "S57",
+        "S54",
+        "S09"
+      ],
+      "provenance_classes": [
+        "MORE_HISTORICAL_PRODUCT_LOGIC",
+        "MORE_CANONICAL_DOCTRINE",
+        "INTERNAL_CONTRADICTION"
+      ],
+      "candidate_authorities": [
+        "RE-C01"
+      ],
+      "limit": "Evolution must be explicit, not reconciled silently."
+    },
+    {
+      "id": "RE-CL-039",
+      "claim": "Historical Bradley/Vonda assessment structures are report choreography and scripts resources, not future frontier-realization authority.",
+      "source_ids": [
+        "S53",
+        "S55",
+        "S09"
+      ],
+      "provenance_classes": [
+        "LEGACY_ASSESSMENT_WRITING_RULE",
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01"
+      ],
+      "limit": "Preserve intelligence, retire deterministic prose layout."
+    },
+    {
+      "id": "RE-CL-040",
+      "claim": "The target BA uses immutable Whole-Person Authority and a governed Whole-Business Model; legacy score mappings and fixed behavior rules are migration evidence only.",
+      "source_ids": [
+        "S02",
+        "S03",
+        "S09",
+        "S25"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C12",
+        "RE-C14"
+      ],
+      "limit": "No implementation was changed."
+    },
+    {
+      "id": "RE-CL-041",
+      "claim": "Five Futures remains a protected probability architecture; vertical authorities contribute state/evidence but do not author arbitrary GPT percentages.",
+      "source_ids": [
+        "S06",
+        "S51",
+        "S52",
+        "S55"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01"
+      ],
+      "limit": "Older qualitative names are lineage, not probability replacement."
+    },
+    {
+      "id": "RE-CL-042",
+      "claim": "One Move selects a bounded high-leverage intervention against the governing constraint; future RSL owns accumulated effectiveness evidence.",
+      "source_ids": [
+        "S07",
+        "S38",
+        "S55"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "RSL_LDE_FUTURE_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01"
+      ],
+      "limit": "Founder coaching hypotheses are not outcome proof."
+    },
+    {
+      "id": "RE-CL-043",
+      "claim": "Current implemented real-estate vertical adapters use deterministic alias/text scanning and legacy fallbacks, explicitly not canonical domain intelligence.",
+      "source_ids": [
+        "S31",
+        "S34",
+        "S35"
+      ],
+      "provenance_classes": [
+        "MORE_IMPLEMENTED_LOGIC"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C05",
+        "RE-C06"
+      ],
+      "limit": "Target cassette must replace—not canonize—fallback semantics."
+    },
+    {
+      "id": "RE-CL-044",
+      "claim": "Current dynamic facts about rates, affordability, inventory, buyer representation, commissions, platforms, AI/CRM and regulation must not be frozen in cassette doctrine.",
+      "source_ids": [
+        "S55",
+        "S60",
+        "S13"
+      ],
+      "provenance_classes": [
+        "DYNAMIC_CURRENT_INFORMATION",
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C05",
+        "RE-C09",
+        "RE-C10"
+      ],
+      "limit": "Requires dated governed external research."
+    },
+    {
+      "id": "RE-CL-045",
+      "claim": "Personality can modify feasibility, adoption, communication and role fit, but cannot override business facts or establish business causation.",
+      "source_ids": [
+        "S02",
+        "S03",
+        "S55"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C05",
+        "RE-C12",
+        "RE-C14",
+        "RE-C15"
+      ],
+      "limit": "Whole-Person boundary."
+    },
+    {
+      "id": "RE-CL-046",
+      "claim": "Future RSL must bind intervention, actor/context, execution fidelity, observation window, confounds and outcome before changing effectiveness beliefs.",
+      "source_ids": [
+        "S36",
+        "S37",
+        "S38",
+        "S45",
+        "S46",
+        "S47",
+        "S48",
+        "S55"
+      ],
+      "provenance_classes": [
+        "RSL_LDE_FUTURE_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C03",
+        "RE-C04",
+        "RE-C07",
+        "RE-C08",
+        "RE-C12"
+      ],
+      "limit": "No founder method is labeled outcome-validated here."
+    },
+    {
+      "id": "RE-CL-047",
+      "claim": "The cassette must preserve raw evidence/claim provenance and explicit insufficiency rather than fabricate missing scripts, benchmarks or workflows.",
+      "source_ids": [
+        "S02",
+        "S08",
+        "S55"
+      ],
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01"
+      ],
+      "limit": "Core research governance rule."
+    },
+    {
+      "id": "RE-CL-048",
+      "claim": "Prior internal Universal research correctly holds Lake, 35+, 6x6, GCI, listing/buyer workflows and agent/team stages outside Universal canon.",
+      "source_ids": [
+        "S60",
+        "S55"
+      ],
+      "provenance_classes": [
+        "MORE_EXISTING_RESEARCH",
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "candidate_authorities": [
+        "RE-C01",
+        "RE-C02",
+        "RE-C03",
+        "RE-C04",
+        "RE-C09",
+        "RE-C10",
+        "RE-C13",
+        "RE-C14"
+      ],
+      "limit": "Now specialized by the candidate cassette."
+    }
+  ]
+}

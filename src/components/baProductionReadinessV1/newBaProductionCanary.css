@@ -1,0 +1,67 @@
+.ba-production-private-gate { min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #02080f; color: #f6f4ee; }
+.ba-production-private-gate form { width: min(560px, 100%); display: grid; gap: 18px; padding: 32px; border: 1px solid rgba(104, 223, 139, .28); border-radius: 20px; background: rgba(8, 20, 30, .94); box-shadow: 0 30px 90px rgba(0,0,0,.4); }
+.ba-production-private-gate form > p { margin: 0; color: #69dd8b; text-transform: uppercase; letter-spacing: .14em; font-weight: 800; }
+.ba-production-private-gate h1 { margin: 0; font-size: clamp(2.4rem, 7vw, 4.6rem); line-height: .98; }
+.ba-production-private-gate form > span { color: rgba(246, 244, 238, .68); line-height: 1.65; }
+.ba-production-private-gate label { display: grid; gap: 8px; font-weight: 700; }
+.ba-production-private-gate input, .ba-production-private-gate button { border-radius: 10px; padding: 14px; font: inherit; }
+.ba-production-private-gate input { border: 1px solid rgba(255,255,255,.2); background: #06111b; color: #fff; }
+.ba-production-private-gate button { border: 0; background: #69dd8b; color: #031009; font-weight: 900; cursor: pointer; }
+.ba-production-private-gate strong[role="alert"] { color: #ff9a75; }
+.new-ba-production-experience { display: contents; }
+
+@media (max-width: 520px) {
+  .new-ba-production-experience .overview > h1,
+  .new-ba-production-experience .hero-subtitle {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+  .new-ba-production-experience .overview > h1 {
+    font-size: clamp(2rem, 10vw, 2.35rem);
+  }
+  .new-ba-production-experience .destination-card {
+    min-width: 0;
+    flex-basis: calc(100vw - 2.5rem);
+  }
+  .new-ba-production-experience .destination-card > *,
+  .new-ba-production-experience .door-primary-stat,
+  .new-ba-production-experience .door-primary-stat span,
+  .new-ba-production-experience .door-fact-list,
+  .new-ba-production-experience .door-fact-list span,
+  .new-ba-production-experience .destination-value,
+  .new-ba-production-experience .destination-qualifier {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .new-ba-production-experience .door-fact-list > div {
+    grid-template-columns: minmax(0, 1.3fr) minmax(7rem, .7fr);
+  }
+  .new-ba-production-experience .door-fact-list small {
+    grid-column: 2;
+  }
+  .new-ba-production-experience .overview-callout {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .new-ba-production-experience .overview-callout > div {
+    min-width: 0;
+  }
+  .new-ba-production-experience .future-list button {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .new-ba-production-experience .selected-future header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .new-ba-production-experience .selected-future header h2 {
+    min-width: 0;
+    font-size: 1.45rem;
+    overflow-wrap: anywhere;
+  }
+  .new-ba-production-experience .selected-future header strong {
+    font-size: 1.85rem;
+  }
+  .new-ba-production-experience .future-confidence {
+    grid-column: 1 / -1;
+  }
+}

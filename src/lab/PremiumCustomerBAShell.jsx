@@ -298,7 +298,7 @@ function OneMoveTab({ vm, lang }) {
         <Card title="Why Now"><p className="text-sm text-white/75">{l?.why_now || om.why_now}</p></Card>
       </div>
       <Card title="Why It Fits You">
-        <p className="text-sm text-white/75">{l?.why_fits_tammy || om.behavior_fit}</p>
+        <p className="text-sm text-white/75">{l?.why_fits_customer || om.behavior_fit}</p>
       </Card>
       <Card title="First 30 Days">
         <ol className="list-inside list-decimal space-y-1 text-sm text-white/75">

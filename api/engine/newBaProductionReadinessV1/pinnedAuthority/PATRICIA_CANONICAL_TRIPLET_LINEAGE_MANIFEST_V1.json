@@ -1,0 +1,134 @@
+{
+  "schema": "more.patricia.canonical_triplet.lineage.v1",
+  "campaign_id": "patricia-canonical-ba-triplet-v1",
+  "profile_id": "mm-20260708-dsst020z",
+  "assessment_id": "ba-20260714-64ca0783",
+  "identity_normalization": "LOWERCASE_COMPARISON_ONLY",
+  "input_authority": {
+    "answer_sha256": {
+      "q1": "7037547f2e7b5830fc114cb928b9b2922f951f004c6f1155f9045607be3bb583",
+      "q2": "ebfadf453863c1c49dd5e747d6ac914308ec026023614a43d19cb904e600c93d",
+      "q3": "fd27aded7aa32d02ab58215cb4594b77e1d99ffe126a15b06db82fbd66d3a524",
+      "q4": "f40581d889f3a576212f406fe297c67c61dc6158a75f8cb53fcfe2ea8fbfc10d",
+      "q5": "20f51a5b70fbb85f58381de23393c530549637ddc032dbe8017a8a30c39c7bc2",
+      "q6": "80d507561782ddc2ab0af97b9ce1c1357d357b0a256c7496b15499df0fb4c3ed",
+      "q7": "aca290b51b7466faf3cfb0f612791a1c23e818ba80f2a2d95f73c1e793cebddc",
+      "q8": "0a89cde3290edc3c156a9b8ff7049e9bb6a9856244ca7d86414ca4f8306934df",
+      "q9": "e20439f30ebc8474be45e4602eb521bf6f31a714db06986e8eef6eeffbf8923f",
+      "q10": "8415147ea90b8a6f5ec6da5bfa9ef540adff72c0b723e2e35a259c0d2a2864d2",
+      "q11": "fa208ad1ca34b321cc39a990d97e6f43404fdfe0b3a00f5048cae6a9990ebbfc",
+      "q12": "eb063a44e1743a4c3912c31df2a27ded228cee65ea85e763f7063b7229fccca4"
+    },
+    "new_bos_sha256": "54e3c525a63f34864a2b88eb7ce42bd7df9053e79f03e73b4aaa4aba472d61c2",
+    "frozen_bible_authority_hashes": {
+      "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "UB-05": "f2149e2eb4a74da43127a2fc1e9876185b476a74ff25bf928f31cd3dacb42c22",
+      "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "UB-08": "aa9873877f925992ffd435a600c1fe267f3c1639834fbf54100dd899248fcf5f",
+      "UB-09": "ac7bab7c42e4021e391406e6275ca9a73c3c11df6ead5acd83a39bb265f05c51",
+      "UB-10": "3983d9cd544b5f816132a7fd4c14dbd25b5b0d90d1f48aec5f945f36e87a9cf1",
+      "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "RE-07": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb",
+      "RE-08": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03",
+      "RE-09": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359",
+      "RE-10": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b",
+      "RE-11": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437",
+      "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b",
+      "RE-15": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182",
+      "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a"
+    },
+    "frozen_runtime_manifests": {
+      "wbm": {
+        "manifest_id": "whole-business-model-v1-freeze-manifest",
+        "version": "1.0.0",
+        "verdict": "WHOLE_BUSINESS_MODEL_V1_FROZEN_READY_FOR_FIVE_FUTURES_AND_ONE_MOVE",
+        "manifest_path": "docs/whole-business-model-v1/freeze/WHOLE_BUSINESS_MODEL_V1_MANIFEST.json",
+        "manifest_sha256": "720146129fe076b25d015e8f9a444610720a1bd19f43876467daf5a0601807b9",
+        "verified_artifact_count": 78
+      },
+      "five_futures": {
+        "manifest_id": "five-futures-v2-freeze-manifest",
+        "version": "2.0.0",
+        "verdict": "FIVE_FUTURES_V2_FROZEN_READY_FOR_ONE_MOVE_V2",
+        "manifest_path": "docs/five-futures-v2/freeze/FIVE_FUTURES_V2_MANIFEST.json",
+        "manifest_sha256": "b1f42c3e8daaf151ecd87fce19b06c1e0a5becc54089806dc8860def78079dd9",
+        "verified_artifact_count": 65
+      },
+      "one_move": {
+        "manifest_id": "one-move-v2-freeze-manifest",
+        "version": "2.0.0",
+        "verdict": "ONE_MOVE_V2_FROZEN_READY_FOR_BA_CUSTOMER_REALIZATION",
+        "manifest_path": "docs/one-move-v2/freeze/ONE_MOVE_V2_MANIFEST.json",
+        "manifest_sha256": "29d77058edf7136bf1951b7289dddd396571848f3dbe9d1e5679cf6239b41bf8",
+        "verified_artifact_count": 82
+      },
+      "mirrors": [
+        {
+          "source_root": "src/lib/wholeBusinessModelV1",
+          "frozen_root": "docs/whole-business-model-v1/implementation/src/lib/wholeBusinessModelV1",
+          "byte_identical_files": 12
+        },
+        {
+          "source_root": "src/lib/fiveFuturesV2",
+          "frozen_root": "docs/five-futures-v2/implementation/src/lib/fiveFuturesV2",
+          "byte_identical_files": 10
+        },
+        {
+          "source_root": "src/lib/oneMoveV2",
+          "frozen_root": "docs/one-move-v2/implementation/src/lib/oneMoveV2",
+          "byte_identical_files": 11
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "whole_business_model_v1": {
+      "state_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "input_hash": "fe369e6bcf3a67548cb5964103caf08de04f89e564a2f5a9b3ea1732aa9fad76",
+      "context_hash": "6586d0f45b03bbacbab279667d3a5ecf9fe62b2909b7ebb3e8606b2a354e7dca"
+    },
+    "five_futures_v2": {
+      "artifact_hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148",
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba"
+    },
+    "one_move_v2": {
+      "artifact_hash": "2e087bc4ea5b56212e7fefa5b00a33bbbb1c13e651351ca956176a017f4f4447",
+      "whole_business_model_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba",
+      "five_futures_hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148"
+    }
+  },
+  "provider": {
+    "model": "gpt-5.6-sol",
+    "store": false,
+    "accepted_call_count": 3,
+    "submission_count": 3,
+    "stage_order": [
+      "whole_business_model_v1",
+      "five_futures_v2",
+      "one_move_v2"
+    ]
+  },
+  "deterministic_downstream": {
+    "five_futures_weights": true,
+    "one_move_selection": true,
+    "frontier_authored_weights": false,
+    "frontier_selected_winner": false
+  },
+  "legacy_assessment_output_used": false,
+  "team_profiles_bound": false,
+  "dynamic_research_executed": false,
+  "cross_artifact_lineage_hash": "21af9b7c7a687a4f6cc2fd35d5566c18b10f9e72de072600f203331fda6f566a"
+}

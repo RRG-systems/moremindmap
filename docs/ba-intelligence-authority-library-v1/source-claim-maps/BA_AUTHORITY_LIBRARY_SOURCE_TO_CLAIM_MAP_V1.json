@@ -1,0 +1,3446 @@
+{
+  "map_id": "ba-authority-library-source-to-claim-map-v1",
+  "version": "1.0.0",
+  "claim_count": 194,
+  "claims": [
+    {
+      "claim_id": "UB-01-MISSION",
+      "authority_id": "UB-01",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-01-FF-CONTRIBUTION",
+      "authority_id": "UB-01",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-01-MECH-01",
+      "authority_id": "UB-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "A valuable offer can still fail when acquisition or delivery cost exceeds captured value.",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-01-MECH-02",
+      "authority_id": "UB-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Recurring cost attached to episodic revenue creates timing and liquidity exposure.",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-01-MECH-03",
+      "authority_id": "UB-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Founder-dependent creation/delivery can produce income without creating transferable enterprise capability.",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-01-MECH-04",
+      "authority_id": "UB-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Every model embeds a required demand system, delivery system, capital pattern and organizational form.",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-01-MECH-05",
+      "authority_id": "UB-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Local subsystem strength cannot rescue an incoherent model; misalignment migrates pressure into cash, capacity, quality or retention.",
+      "artifact_path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-02-MISSION",
+      "authority_id": "UB-02",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-02-FF-CONTRIBUTION",
+      "authority_id": "UB-02",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-02-MECH-01",
+      "authority_id": "UB-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Growth multiplies unit economics; negative contribution accelerates loss.",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-02-MECH-02",
+      "authority_id": "UB-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Profit can coexist with cash stress when collections lag obligations.",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-02-MECH-03",
+      "authority_id": "UB-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Blended averages hide unprofitable segments, cohorts and channels.",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-02-MECH-04",
+      "authority_id": "UB-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "High fixed cost increases upside after break-even and downside below it.",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-02-MECH-05",
+      "authority_id": "UB-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Long payback plus churn or weak repeat creates an acquisition treadmill.",
+      "artifact_path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-03-MISSION",
+      "authority_id": "UB-03",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-03-FF-CONTRIBUTION",
+      "authority_id": "UB-03",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-03-MECH-01",
+      "authority_id": "UB-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "System throughput is limited by the active constraint.",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-03-MECH-02",
+      "authority_id": "UB-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Improving non-constraints can create inventory, rework or idle capacity without changing output.",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-03-MECH-03",
+      "authority_id": "UB-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Maximizing utilization everywhere increases coordination and queue cost.",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-03-MECH-04",
+      "authority_id": "UB-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Founder approvals and scarce senior judgment are frequent invisible constraints in knowledge work.",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-03-MECH-05",
+      "authority_id": "UB-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "After elevation, the constraint moves and must be re-identified.",
+      "artifact_path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-04-MISSION",
+      "authority_id": "UB-04",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-04-FF-CONTRIBUTION",
+      "authority_id": "UB-04",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-04-MECH-01",
+      "authority_id": "UB-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Reach without capture does not build an owned demand asset.",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-04-MECH-02",
+      "authority_id": "UB-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Rented channels can scale but expose the business to price/platform change.",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-04-MECH-03",
+      "authority_id": "UB-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Relationship assets compound only when identity, consent, recency and useful contact are maintained.",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-04-MECH-04",
+      "authority_id": "UB-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Source quality changes conversion, service burden, economics and lifetime value.",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-04-MECH-05",
+      "authority_id": "UB-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Diversification reduces fragility but too many weak lanes dilute execution.",
+      "artifact_path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-05-MISSION",
+      "authority_id": "UB-05",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-05-FF-CONTRIBUTION",
+      "authority_id": "UB-05",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-05-MECH-01",
+      "authority_id": "UB-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Relative value versus credible alternatives drives conversion and price realization.",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-05-MECH-02",
+      "authority_id": "UB-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Weak proof raises perceived risk and price sensitivity.",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-05-MECH-03",
+      "authority_id": "UB-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "An offer can convert but destroy margin or delivery capacity.",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-05-MECH-04",
+      "authority_id": "UB-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Discounting can mask unclear value while training the market to wait.",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-05-MECH-05",
+      "authority_id": "UB-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Positioning determines the comparison set and therefore willingness to pay.",
+      "artifact_path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-06-MISSION",
+      "authority_id": "UB-06",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-06-FF-CONTRIBUTION",
+      "authority_id": "UB-06",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-06-MECH-01",
+      "authority_id": "UB-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Demand volume creates no value until opportunity is contacted, qualified and advanced.",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-06-MECH-02",
+      "authority_id": "UB-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Response delay and follow-up decay reduce contact/conversion, conditional on context and source.",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-06-MECH-03",
+      "authority_id": "UB-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Poor stage definitions create false pipeline and forecasts.",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-06-MECH-04",
+      "authority_id": "UB-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Conversion is multiplicative across stages; small leaks compound.",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-06-MECH-05",
+      "authority_id": "UB-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Capacity overload slows response and lowers quality, making demand look weak.",
+      "artifact_path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-07-MISSION",
+      "authority_id": "UB-07",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-07-FF-CONTRIBUTION",
+      "authority_id": "UB-07",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-07-MECH-01",
+      "authority_id": "UB-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Retention compounds lifetime contribution and reduces replacement demand.",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-07-MECH-02",
+      "authority_id": "UB-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Acquisition source can predict fit, retention and referral behavior.",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-07-MECH-03",
+      "authority_id": "UB-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Delivery quality and expectation fit influence continuity and advocacy.",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-07-MECH-04",
+      "authority_id": "UB-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Referral value includes direct customer value and second-order introductions.",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-07-MECH-05",
+      "authority_id": "UB-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "High gross retention can hide contraction or low contribution.",
+      "artifact_path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-08-MISSION",
+      "authority_id": "UB-08",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-08-FF-CONTRIBUTION",
+      "authority_id": "UB-08",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-08-MECH-01",
+      "authority_id": "UB-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Variation and rework consume capacity twice and destabilize flow.",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-08-MECH-02",
+      "authority_id": "UB-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "High utilization near the constraint increases queues and lead time.",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-08-MECH-03",
+      "authority_id": "UB-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Automation multiplies both good and bad process.",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-08-MECH-04",
+      "authority_id": "UB-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Knowledge-work capacity depends on skill, decision complexity, switching and review load, not hours alone.",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-08-MECH-05",
+      "authority_id": "UB-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Unclear handoffs create invisible ownership and defects.",
+      "artifact_path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-09-MISSION",
+      "authority_id": "UB-09",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-09-FF-CONTRIBUTION",
+      "authority_id": "UB-09",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-09-MECH-01",
+      "authority_id": "UB-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Accountability requires clear ownership, observable standard, timely feedback and meaningful consequence.",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-09-MECH-02",
+      "authority_id": "UB-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Diffuse ownership creates coordination failure and plausible deniability.",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-09-MECH-03",
+      "authority_id": "UB-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Misaligned incentives create rational behavior that looks like low motivation.",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-09-MECH-04",
+      "authority_id": "UB-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Low execution fidelity makes strategy evaluation invalid.",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-09-MECH-05",
+      "authority_id": "UB-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Excessive control can suppress truthful reporting and adaptation.",
+      "artifact_path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-10-MISSION",
+      "authority_id": "UB-10",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-10-FF-CONTRIBUTION",
+      "authority_id": "UB-10",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-10-MECH-01",
+      "authority_id": "UB-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Adding people without stable work/rights multiplies ambiguity and rework.",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-10-MECH-02",
+      "authority_id": "UB-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Delegating tasks without authority or context preserves founder bottlenecks.",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-10-MECH-03",
+      "authority_id": "UB-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Coordination load can grow faster than productive capacity.",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-10-MECH-04",
+      "authority_id": "UB-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Systems and role clarity make leverage possible; people alone do not.",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-10-MECH-05",
+      "authority_id": "UB-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Role fit affects execution, but structural causes must be tested before personality explanations.",
+      "artifact_path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-11-MISSION",
+      "authority_id": "UB-11",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-11-FF-CONTRIBUTION",
+      "authority_id": "UB-11",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-11-MECH-01",
+      "authority_id": "UB-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Growth multiplies positive or negative unit economics.",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-11-MECH-02",
+      "authority_id": "UB-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Complexity and coordination can grow faster than productive capacity.",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-11-MECH-03",
+      "authority_id": "UB-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Concentration converts channel/customer/key-person failure into cash risk.",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-11-MECH-04",
+      "authority_id": "UB-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Scaling volume can dilute quality and retention before financial results reveal it.",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-11-MECH-05",
+      "authority_id": "UB-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Resilience requires deliberate slack/options, which can look inefficient in stable periods.",
+      "artifact_path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MISSION",
+      "authority_id": "UB-12",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "UB-12-FF-CONTRIBUTION",
+      "authority_id": "UB-12",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "UB-12-MECH-01",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Invalid metrics create confident but wrong allocation.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MECH-02",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Lagging-only measurement delays correction.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MECH-03",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Attribution error rewards the wrong mechanism.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MECH-04",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Strategy maps are causal hypotheses, not permanent truth.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MECH-05",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "New evidence should update state rather than append narrative.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "UB-12-MECH-06",
+      "authority_id": "UB-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "An outcome cannot evaluate an intervention without execution fidelity, horizon and confounds.",
+      "artifact_path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_UNIVERSAL_MASTER",
+        "UNIVERSAL_INTERNAL_SOURCE_MAP",
+        "SUPERGROK_UNIVERSAL_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-01-MISSION",
+      "authority_id": "RE-01",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-01-FF-CONTRIBUTION",
+      "authority_id": "RE-01",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-01-MECH-01",
+      "authority_id": "RE-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Volume and GCI can rise while agent net or owner profit falls.",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-01-MECH-02",
+      "authority_id": "RE-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Listing inventory can create leverage and secondary demand; buyer work often consumes more variable time.",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-01-MECH-03",
+      "authority_id": "RE-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Pipeline and seasonality separate current activity from current income.",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-01-MECH-04",
+      "authority_id": "RE-01",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Brokerage/team splits change incentives, capacity and net economics.",
+      "artifact_path": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-02-MISSION",
+      "authority_id": "RE-02",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-02-FF-CONTRIBUTION",
+      "authority_id": "RE-02",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-02-MECH-01",
+      "authority_id": "RE-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Raw count does not create production; remembered trusted relevance does.",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-02-MECH-02",
+      "authority_id": "RE-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Relationship quality, recency and activation affect referrals and opportunity.",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-02-MECH-03",
+      "authority_id": "RE-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Owned contact plus history/system creates an asset; founder-only memory does not transfer.",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-02-MECH-04",
+      "authority_id": "RE-02",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "New inflow and intelligent activation are separate requirements.",
+      "artifact_path": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-03-MISSION",
+      "authority_id": "RE-03",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-03-FF-CONTRIBUTION",
+      "authority_id": "RE-03",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-03-MECH-01",
+      "authority_id": "RE-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Repeated varied contact over a bounded period increases familiarity/mindshare but does not prove relationship.",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-03-MECH-02",
+      "authority_id": "RE-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Live human contact supplies richer qualification than passive touches.",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-03-MECH-03",
+      "authority_id": "RE-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "A dated next action prevents memory-dependent decay.",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-03-MECH-04",
+      "authority_id": "RE-03",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Graduation protects the long-term database from indiscriminate accumulation.",
+      "artifact_path": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-04-MISSION",
+      "authority_id": "RE-04",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-04-FF-CONTRIBUTION",
+      "authority_id": "RE-04",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-04-MECH-01",
+      "authority_id": "RE-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Memory and relevance decay without continuity.",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-04-MECH-02",
+      "authority_id": "RE-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Diverse useful/personal contact is harder to ignore than repetitive broadcast.",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-04-MECH-03",
+      "authority_id": "RE-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Direct referral conversations differ from passive marketing.",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-04-MECH-04",
+      "authority_id": "RE-04",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Delivery quality and post-close continuity influence advocacy.",
+      "artifact_path": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-05-MISSION",
+      "authority_id": "RE-05",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-05-FF-CONTRIBUTION",
+      "authority_id": "RE-05",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-05-MECH-01",
+      "authority_id": "RE-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "The theoretically best source fails when the agent will not execute or the system cannot capture/follow.",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-05-MECH-02",
+      "authority_id": "RE-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Two or three primary lanes can preserve focus while a portfolio reduces long-term risk.",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-05-MECH-03",
+      "authority_id": "RE-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Source quality and lag change conversion/capacity/economics.",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-05-MECH-04",
+      "authority_id": "RE-05",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Listing activity can create seller, buyer and neighborhood demand.",
+      "artifact_path": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-06-MISSION",
+      "authority_id": "RE-06",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-06-FF-CONTRIBUTION",
+      "authority_id": "RE-06",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-06-MECH-01",
+      "authority_id": "RE-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Generation and follow-up are different systems.",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-06-MECH-02",
+      "authority_id": "RE-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Stage leaks compound; uncontacted opportunity cannot diagnose source quality.",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-06-MECH-03",
+      "authority_id": "RE-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Pipeline aging is a leading signal of future income risk.",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-06-MECH-04",
+      "authority_id": "RE-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Capacity and response speed interact.",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-06-MECH-05",
+      "authority_id": "RE-06",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Current closings reflect prior activity with source/market-dependent lag.",
+      "artifact_path": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-07-MISSION",
+      "authority_id": "RE-07",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-07-FF-CONTRIBUTION",
+      "authority_id": "RE-07",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-07-MECH-01",
+      "authority_id": "RE-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Repeated useful local presence can build familiarity and authority.",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-07-MECH-02",
+      "authority_id": "RE-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Direct human contact and listing evidence strengthen generic mail.",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-07-MECH-03",
+      "authority_id": "RE-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "A farm without capture/follow-up creates anonymous awareness.",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-07-MECH-04",
+      "authority_id": "RE-07",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Low turnover or excessive size can make cadence/economics impossible.",
+      "artifact_path": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-08-MISSION",
+      "authority_id": "RE-08",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-08-FF-CONTRIBUTION",
+      "authority_id": "RE-08",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-08-MECH-01",
+      "authority_id": "RE-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Attendance without capture/follow-up is weak demand.",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-08-MECH-02",
+      "authority_id": "RE-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Neighbor invitation and local conversation can create seller authority.",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-08-MECH-03",
+      "authority_id": "RE-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Event quality and useful information affect trust and conversion.",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-08-MECH-04",
+      "authority_id": "RE-08",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Repeated events/listing visibility can compound neighborhood presence.",
+      "artifact_path": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-09-MISSION",
+      "authority_id": "RE-09",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-09-FF-CONTRIBUTION",
+      "authority_id": "RE-09",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-09-MECH-01",
+      "authority_id": "RE-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Pricing/condition/positioning affect buyer attention and feedback.",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-09-MECH-02",
+      "authority_id": "RE-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Stale feedback without decision rules delays adjustment.",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-09-MECH-03",
+      "authority_id": "RE-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Listings create leverage and secondary buyer/neighbor demand when operationalized.",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-09-MECH-04",
+      "authority_id": "RE-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Poor communication increases distrust and cancellation risk.",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-09-MECH-05",
+      "authority_id": "RE-09",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Listing load can scale with systems but also concentrates deadline/quality risk.",
+      "artifact_path": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-10-MISSION",
+      "authority_id": "RE-10",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-10-FF-CONTRIBUTION",
+      "authority_id": "RE-10",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-10-MECH-01",
+      "authority_id": "RE-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Unqualified/unclear buyers consume capacity and distort pipeline.",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-10-MECH-02",
+      "authority_id": "RE-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Consultation and expectation setting reduce search waste and conflict.",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-10-MECH-03",
+      "authority_id": "RE-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Market/financing conditions alter readiness and offer outcomes.",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-10-MECH-04",
+      "authority_id": "RE-10",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Buyer load can exceed service capacity before revenue signals the problem.",
+      "artifact_path": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-11-MISSION",
+      "authority_id": "RE-11",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-11-FF-CONTRIBUTION",
+      "authority_id": "RE-11",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-11-MECH-01",
+      "authority_id": "RE-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Deadline/communication defects create rework, risk and client distrust.",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-11-MECH-02",
+      "authority_id": "RE-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Exception volume consumes scarce agent/leader capacity.",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-11-MECH-03",
+      "authority_id": "RE-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Clear ownership and proactive communication reduce rescue work.",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-11-MECH-04",
+      "authority_id": "RE-11",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Delivery quality affects reputation, repeat and referral.",
+      "artifact_path": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-12-MISSION",
+      "authority_id": "RE-12",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-12-FF-CONTRIBUTION",
+      "authority_id": "RE-12",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-12-MECH-01",
+      "authority_id": "RE-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Protected recurring activity produces pipeline only when capture/follow-up/conversion exist.",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-12-MECH-02",
+      "authority_id": "RE-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Calendar drift and interruptions make goals unsupported by behavior.",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-12-MECH-03",
+      "authority_id": "RE-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Accountability converts intention into inspected execution.",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-12-MECH-04",
+      "authority_id": "RE-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Current income is a delayed echo of prior activity, but lag varies by source/market.",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-12-MECH-05",
+      "authority_id": "RE-12",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Whole-person context can explain adoption friction without changing business truth.",
+      "artifact_path": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-13-MISSION",
+      "authority_id": "RE-13",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-13-FF-CONTRIBUTION",
+      "authority_id": "RE-13",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-13-MECH-01",
+      "authority_id": "RE-13",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Stage reflects interacting evidence, not GCI alone.",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-13-MECH-02",
+      "authority_id": "RE-13",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Leverage before stable demand/process/economics magnifies chaos.",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-13-MECH-03",
+      "authority_id": "RE-13",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "High production can coexist with fragility and low profit.",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-13-MECH-04",
+      "authority_id": "RE-13",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "A team dependent on leader production/judgment is not scalable.",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-13-MECH-05",
+      "authority_id": "RE-13",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Succession requires transferable relationships, systems and economics.",
+      "artifact_path": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-14-MISSION",
+      "authority_id": "RE-14",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-14-FF-CONTRIBUTION",
+      "authority_id": "RE-14",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-14-MECH-01",
+      "authority_id": "RE-14",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Team leads have no value without agent response/conversion.",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-14-MECH-02",
+      "authority_id": "RE-14",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "People added before systems/standards create coordination and margin loss.",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-14-MECH-03",
+      "authority_id": "RE-14",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Leader rescue hides weak seats and reduces transferability.",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-14-MECH-04",
+      "authority_id": "RE-14",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Volume can rise while team profit falls.",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-14-MECH-05",
+      "authority_id": "RE-14",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Ambiguous data/relationship ownership creates conflict and succession risk.",
+      "artifact_path": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-15-MISSION",
+      "authority_id": "RE-15",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-15-FF-CONTRIBUTION",
+      "authority_id": "RE-15",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-15-MECH-01",
+      "authority_id": "RE-15",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Recruiting volume cannot fix an incoherent team value proposition or unproductive seat.",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-15-MECH-02",
+      "authority_id": "RE-15",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Selection quality and expectation clarity affect ramp/retention.",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-15-MECH-03",
+      "authority_id": "RE-15",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Onboarding without real work/system/access delays productivity.",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-15-MECH-04",
+      "authority_id": "RE-15",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Weak agents can reflect weak lead flow, standards, coaching or role design.",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-15-MECH-05",
+      "authority_id": "RE-15",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Retention without productivity can destroy team economics.",
+      "artifact_path": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-16-MISSION",
+      "authority_id": "RE-16",
+      "claim_type": "CANONICAL_MISSION",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "CANONICAL_MASTER"
+      ],
+      "qualification": "Mission/boundary authority; detailed mechanisms integrate internal/external research."
+    },
+    {
+      "claim_id": "RE-16-FF-CONTRIBUTION",
+      "authority_id": "RE-16",
+      "claim_type": "FIVE_FUTURES_STATE_CONTRIBUTION_BOUNDARY",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE"
+      ],
+      "source_refs": [
+        "FIVE_FUTURES_TRUTH_TRACE",
+        "OPERATOR_RESOLUTION_2026-08-12"
+      ],
+      "qualification": "Metadata/state only; no V2 runtime, probability, calibration or Bayesian claim."
+    },
+    {
+      "claim_id": "RE-16-MECH-01",
+      "authority_id": "RE-16",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Gross commission can mask low net/profit.",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-16-MECH-02",
+      "authority_id": "RE-16",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Variable commissions plus recurring team/marketing costs create volatility.",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-16-MECH-03",
+      "authority_id": "RE-16",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Hiring without contribution/cash visibility can turn production into fragility.",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-16-MECH-04",
+      "authority_id": "RE-16",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Profit allocation and reserves create optionality; lifestyle inflation does not.",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-16-MECH-05",
+      "authority_id": "RE-16",
+      "claim_type": "CAUSAL_MECHANISM",
+      "claim": "Wealth guidance crosses regulatory boundaries and requires licensed professionals.",
+      "artifact_path": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "provenance_classes": [
+        "MORE_CANONICAL_DOCTRINE",
+        "DJ_FOUNDER_DOCTRINE",
+        "MORE_INTERNAL_RESEARCH",
+        "SUPPORTED_WITH_QUALIFICATION"
+      ],
+      "source_refs": [
+        "CANONICAL_REAL_ESTATE_MASTER",
+        "REAL_ESTATE_INTERNAL_SOURCE_MAP",
+        "DJ_FOUNDER_NOTES",
+        "REAL_ESTATE_BUSINESS_MODEL",
+        "SUPERGROK_REAL_ESTATE_EXTERNAL_V1_V2"
+      ],
+      "qualification": "Governed diagnostic mechanism; claim strength remains case/evidence/confound dependent and does not establish intervention effect."
+    },
+    {
+      "claim_id": "RE-02-H500",
+      "authority_id": "RE-02",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "Approximate $500 per qualified true relationship and 250/500/1000/2000 anchors.",
+      "provenance_classes": [
+        "FOUNDER_HEURISTIC"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Directional, modeled-not-guaranteed; terminology and outcome calibration unresolved."
+    },
+    {
+      "claim_id": "RE-03-6X6-8X8",
+      "authority_id": "RE-03",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "6 contacts in 6 weeks or 8 in 8 weeks with live qualification and conscious graduation.",
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Operating variants; relative effectiveness not outcome validated."
+    },
+    {
+      "claim_id": "RE-04-TOUCH-RANGE",
+      "authority_id": "RE-04",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "35+ floor and 40-55 example touch range.",
+      "provenance_classes": [
+        "FOUNDER_HEURISTIC"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Parameterize; meaningful human contact and diversity matter more than count."
+    },
+    {
+      "claim_id": "RE-07-FARM",
+      "authority_id": "RE-07",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "1,000-home, eight-week launch and 40-door cadence examples.",
+      "provenance_classes": [
+        "FOUNDER_HEURISTIC"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Adjust for local economics, capacity, law and outcomes."
+    },
+    {
+      "claim_id": "RE-08-OH-LEVELS",
+      "authority_id": "RE-08",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "Seven-level open-house maturity concept.",
+      "provenance_classes": [
+        "DJ_FOUNDER_DOCTRINE"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Preserve progression, not exact levels as industry law."
+    },
+    {
+      "claim_id": "RE-12-RHYTHM",
+      "authority_id": "RE-12",
+      "claim_type": "FOUNDER_DOCTRINE",
+      "claim": "2-3 lead-generation hours plus 90-minute follow-up and 60-120-day echo.",
+      "provenance_classes": [
+        "FOUNDER_HEURISTIC"
+      ],
+      "source_refs": [
+        "DJs real estate notes.docx",
+        "REAL_ESTATE_BUSINESS_MODEL_V1.md"
+      ],
+      "qualification": "Adjust by stage/source/market; not universal causal thresholds."
+    }
+  ],
+  "inherited_maps": [
+    {
+      "path": "source-claim-maps/inherited/UNIVERSAL_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "claim_count": 32
+    },
+    {
+      "path": "source-claim-maps/inherited/REAL_ESTATE_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "claim_count": 48
+    }
+  ]
+}

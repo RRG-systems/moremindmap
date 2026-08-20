@@ -1,0 +1,15 @@
+.subscription-entry-state { min-height: 100vh; display: grid; place-content: center; gap: .9rem; padding: 2rem; text-align: center; color: #eef6f3; background: radial-gradient(circle at 50% 20%, #0c2a2a, #02070d 52%); }
+.subscription-entry-state > span { color: #57e66c; font-size: 3rem; }
+.subscription-entry-state h1, .subscription-entry-state p { margin: 0; }
+.subscription-entry-state p { color: #9baeb6; }
+.subscription-entry-state a { justify-self: center; margin-top: .5rem; padding: .75rem 1.1rem; border: 1px solid #3b6171; border-radius: .7rem; color: #d8f4ed; text-decoration: none; }
+.internal-session-boundary { display: flex; align-items: center; gap: .55rem; padding: .55rem .7rem; border-bottom: 1px solid rgba(119, 166, 197, .14); color: #8fa8b5; background: rgba(4, 15, 24, .72); font-size: .62rem; }
+.internal-session-boundary span { padding: .3rem .45rem; border: 1px solid rgba(119, 166, 197, .16); border-radius: 999px; }
+.internal-session-boundary button { margin-left: auto; border: 0; color: #a9c7d4; background: transparent; font: inherit; cursor: pointer; }
+.internal-session-boundary button:disabled { opacity: .45; }
+.living-session-ended { display: grid; justify-items: center; gap: .6rem; padding: 1.2rem; border: 1px solid rgba(87, 230, 108, .32); border-radius: 1rem; text-align: center; background: rgba(24, 91, 44, .14); }
+.living-session-ended span { color: #57e66c; font-size: 1.6rem; }
+.living-session-ended h3, .living-session-ended p { margin: 0; }
+.living-session-ended p { color: #9dafb9; font-size: .83rem; line-height: 1.5; }
+.living-session-ended button { padding: .65rem .9rem; border: 1px solid rgba(87, 230, 108, .45); border-radius: .6rem; color: #dff7e3; background: rgba(42, 132, 55, .25); cursor: pointer; }
+@media (max-width: 760px) { .internal-session-boundary { flex-wrap: wrap; } .internal-session-boundary button { margin-left: 0; } }

@@ -44,3 +44,5 @@ export * from './coachConnect/index.js';
 export * from './coachConnect/security/index.js';
 export * from './testing/inMemoryLiveSessionDriver.js';
 export * from './testing/inMemoryDurableLiveSessionDriver.js';
+// Subscription V1 foundation is default-off and stops before provider/coaching execution.
+export * from '../subscriptionV1/index.js';

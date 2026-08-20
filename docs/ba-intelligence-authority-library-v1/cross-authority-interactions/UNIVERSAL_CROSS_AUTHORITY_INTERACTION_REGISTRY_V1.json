@@ -1,0 +1,296 @@
+{
+  "registry_id": "universal-cross-authority-interaction-registry-v1",
+  "version": "1.0.0",
+  "count": 12,
+  "interactions": [
+    {
+      "interaction_id": "UI-01",
+      "name": "Demand \u00d7 Conversion \u00d7 Capacity",
+      "authority_dependencies": [
+        "UB-04",
+        "UB-06",
+        "UB-08"
+      ],
+      "mechanism": "Demand creates opportunity; conversion advances it; capacity determines response and delivery. More demand into a conversion/capacity constraint can lower economics and quality.",
+      "misleading_interpretation": "We need more leads.",
+      "evidence": [
+        "source volume/quality",
+        "stage conversion",
+        "response time",
+        "capacity/load"
+      ],
+      "confounds": [
+        "source mix",
+        "seasonality",
+        "readiness",
+        "market shock"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Demand can raise queue/response delay, lowering conversion; weak conversion can encourage wasteful acquisition.",
+      "falsifier": "Claim weakens if added qualified demand raises profitable throughput without response, conversion or capacity deterioration."
+    },
+    {
+      "interaction_id": "UI-02",
+      "name": "Growth \u00d7 Unit Economics \u00d7 Cash",
+      "authority_dependencies": [
+        "UB-02",
+        "UB-11"
+      ],
+      "mechanism": "Growth multiplies unit economics and creates timing/capital needs.",
+      "misleading_interpretation": "Growth will fix margins later.",
+      "evidence": [
+        "cohort contribution",
+        "CAC/payback",
+        "cash conversion",
+        "working capital"
+      ],
+      "confounds": [
+        "planned investment",
+        "financing",
+        "cohort maturation"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Cash stress can force choices that worsen economics and retention.",
+      "falsifier": "Claim weakens if scaled cohorts improve contribution and cash within stated assumptions."
+    },
+    {
+      "interaction_id": "UI-03",
+      "name": "Constraint \u00d7 Operations \u00d7 Capacity",
+      "authority_dependencies": [
+        "UB-03",
+        "UB-08"
+      ],
+      "mechanism": "Only capacity/quality at the active constraint raises system throughput.",
+      "misleading_interpretation": "Utilization everywhere equals productivity.",
+      "evidence": [
+        "queues",
+        "cycle time",
+        "capacity by stage",
+        "rework"
+      ],
+      "confounds": [
+        "temporary shocks",
+        "coupled constraints"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Local optimization releases more work into the constraint and increases WIP.",
+      "falsifier": "Claim weakens if non-constraint improvement raises throughput without affecting claimed constraint."
+    },
+    {
+      "interaction_id": "UI-04",
+      "name": "Offer \u00d7 Positioning \u00d7 Pricing \u00d7 Conversion",
+      "authority_dependencies": [
+        "UB-05",
+        "UB-06",
+        "UB-02"
+      ],
+      "mechanism": "Differential value and proof affect willingness to pay, conversion, margin and fit.",
+      "misleading_interpretation": "Discount or better creative automatically fixes conversion.",
+      "evidence": [
+        "win/loss",
+        "objections",
+        "price realization",
+        "segment conversion",
+        "margin"
+      ],
+      "confounds": [
+        "lead quality",
+        "sales skill",
+        "capacity"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Discounting can raise poor-fit conversion and damage delivery/retention.",
+      "falsifier": "Claim weakens if offer/price changes do not change relevant conversion/realization under comparable demand."
+    },
+    {
+      "interaction_id": "UI-05",
+      "name": "Retention \u00d7 Acquisition \u00d7 LTV",
+      "authority_dependencies": [
+        "UB-07",
+        "UB-04",
+        "UB-02"
+      ],
+      "mechanism": "Retention/repeat/referral determine lifetime contribution and replacement demand.",
+      "misleading_interpretation": "Acquisition alone is the growth engine.",
+      "evidence": [
+        "cohort retention",
+        "LTV by source",
+        "referral chains",
+        "CAC"
+      ],
+      "confounds": [
+        "infrequent purchase cycles",
+        "segment mix"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Weak retention increases acquisition need; poor acquisition fit reduces retention.",
+      "falsifier": "Claim weakens if acquisition cohorts sustain contribution despite low repeat/retention by model design."
+    },
+    {
+      "interaction_id": "UI-06",
+      "name": "Founder Capability \u00d7 Systems \u00d7 Leverage",
+      "authority_dependencies": [
+        "UB-10",
+        "UB-08",
+        "UB-01"
+      ],
+      "mechanism": "Exceptional founder judgment can produce results while masking missing transferable systems.",
+      "misleading_interpretation": "Hire people like the founder.",
+      "evidence": [
+        "decision map",
+        "founder recurring work",
+        "absence tests",
+        "system/role evidence"
+      ],
+      "confounds": [
+        "deliberate expert model"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Founder rescue prevents system learning and role ownership.",
+      "falsifier": "Claim weakens if outcomes remain stable without founder involvement."
+    },
+    {
+      "interaction_id": "UI-07",
+      "name": "Accountability \u00d7 Incentives \u00d7 Execution",
+      "authority_dependencies": [
+        "UB-09",
+        "UB-10",
+        "UB-12"
+      ],
+      "mechanism": "Ownership, authority, standards, feedback, consequence and incentives shape fidelity and learning.",
+      "misleading_interpretation": "People are not motivated.",
+      "evidence": [
+        "owners/rights",
+        "commitments",
+        "fidelity",
+        "incentives",
+        "review actions"
+      ],
+      "confounds": [
+        "external shock",
+        "resource shortage"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Misaligned incentives produce rational local behavior and false reporting.",
+      "falsifier": "Claim weakens if clarified rights/incentives do not affect fidelity."
+    },
+    {
+      "interaction_id": "UI-08",
+      "name": "Measurement \u00d7 False Causality \u00d7 Resource Allocation",
+      "authority_dependencies": [
+        "UB-12",
+        "UB-02",
+        "UB-03"
+      ],
+      "mechanism": "Invalid causal assumptions direct money/time toward non-drivers.",
+      "misleading_interpretation": "Green dashboard proves strategy.",
+      "evidence": [
+        "metric lineage",
+        "leading/outcome relation",
+        "experiments",
+        "counterevidence"
+      ],
+      "confounds": [
+        "lag",
+        "sample size",
+        "confounds"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Resources reinforce the metric, making it look increasingly important.",
+      "falsifier": "Claim weakens when intervention on metric reliably changes outcome with fidelity/confounds addressed."
+    },
+    {
+      "interaction_id": "UI-09",
+      "name": "Business Model \u00d7 Demand \u00d7 Margin",
+      "authority_dependencies": [
+        "UB-01",
+        "UB-04",
+        "UB-02"
+      ],
+      "mechanism": "An effective demand engine can be structurally incompatible with margins or cash.",
+      "misleading_interpretation": "More volume validates the model.",
+      "evidence": [
+        "source CAC",
+        "contribution",
+        "payback",
+        "delivery cost"
+      ],
+      "confounds": [
+        "strategic loss leader"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Demand growth can accelerate capital destruction.",
+      "falsifier": "Claim weakens if source-level cohorts demonstrate positive contribution/payback."
+    },
+    {
+      "interaction_id": "UI-10",
+      "name": "Business Model \u00d7 Delivery \u00d7 Retention",
+      "authority_dependencies": [
+        "UB-01",
+        "UB-08",
+        "UB-07"
+      ],
+      "mechanism": "The model fails if delivery cannot sustain promise, quality or economics.",
+      "misleading_interpretation": "Acquisition efficiency proves the business.",
+      "evidence": [
+        "promise/outcome",
+        "quality/rework",
+        "retention",
+        "cost-to-serve"
+      ],
+      "confounds": [
+        "one-time/transactional design"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Poor delivery increases churn/recovery and raises acquisition burden.",
+      "falsifier": "Claim weakens if delivery/retention/economics remain healthy at scale."
+    },
+    {
+      "interaction_id": "UI-11",
+      "name": "Growth \u00d7 Complexity \u00d7 Organization",
+      "authority_dependencies": [
+        "UB-11",
+        "UB-10",
+        "UB-08"
+      ],
+      "mechanism": "Volume/scope increase coordination, decision and exception load.",
+      "misleading_interpretation": "Headcount equals capacity.",
+      "evidence": [
+        "span/meetings",
+        "handoffs",
+        "exceptions",
+        "throughput/headcount"
+      ],
+      "confounds": [
+        "temporary transition"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "More people create more coordination and founder rescue.",
+      "falsifier": "Claim weakens if productive capacity and quality outpace coordination cost."
+    },
+    {
+      "interaction_id": "UI-12",
+      "name": "Concentration \u00d7 Resilience \u00d7 Cash",
+      "authority_dependencies": [
+        "UB-11",
+        "UB-02",
+        "UB-04"
+      ],
+      "mechanism": "Channel/customer/key-person dependency can turn a shock into liquidity/survival risk.",
+      "misleading_interpretation": "Concentration is always efficient or always bad.",
+      "evidence": [
+        "concentration shares",
+        "switching/contingency",
+        "cash reserves",
+        "shock scenario"
+      ],
+      "confounds": [
+        "durable advantage",
+        "contracts"
+      ],
+      "delayed_effects": "Inspect the business-model-appropriate lag before conclusion.",
+      "feedback_loops": "Loss reduces cash and constrains adaptation, deepening dependency.",
+      "falsifier": "Claim weakens if replacement/contingency evidence and cash protection are strong."
+    }
+  ]
+}

@@ -8,6 +8,11 @@ import {
   BA_RETRIEVE_NOT_FOUND_MESSAGE,
   retrieveBusinessAssessment
 } from './lib/businessAssessment/retrieveBusinessAssessment.js';
+import {
+  ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
+  normalizeOrdinaryCustomerProfileId,
+  resolveOrdinaryBaEntry,
+} from './lib/customerEntry/ordinaryCustomerEntryRouting.js';
 import { startStripeCheckout } from './lib/stripeCheckout.js';
 
 const INDUSTRIES = [
@@ -806,7 +811,46 @@ export default function BusinessAssessment() {
     }
 
     try {
+      const routeProfile = normalizeOrdinaryCustomerProfileId(id);
+      if (routeProfile) {
+        const currentBa = await resolveOrdinaryBaEntry(routeProfile);
+        if (currentBa.status === 'current') {
+          window.location.assign(currentBa.destination);
+          return;
+        }
+        if (currentBa.status !== 'governed_fallback') {
+          setRetrieveState({
+            status: 'error',
+            error: ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
+            result: null,
+          });
+          return;
+        }
+      }
+
       const { payload } = await retrieveBusinessAssessment(id, buildApiUrl);
+
+      if (!routeProfile) {
+        const ownerProfileId =
+          payload?.owner_profile_id || payload?.assessment?.owner_profile_id || '';
+        const normalizedOwnerProfileId = normalizeOrdinaryCustomerProfileId(ownerProfileId);
+        if (normalizedOwnerProfileId) {
+          const currentBa = await resolveOrdinaryBaEntry(normalizedOwnerProfileId);
+          if (currentBa.status === 'current') {
+            window.location.assign(currentBa.destination);
+            return;
+          }
+          if (currentBa.status !== 'governed_fallback') {
+            setRetrieveState({
+              status: 'error',
+              error: ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
+              result: null,
+            });
+            return;
+          }
+        }
+      }
+
       setRetrieveState({ status: 'found', error: '', result: payload });
     } catch (error) {
       const isNotFound = error.code === 'not_found';

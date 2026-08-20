@@ -1,0 +1,116 @@
+{
+  "manifest_id": "universal-bible-manifest-v1",
+  "version": "1.0.0",
+  "frozen_at": "2026-08-12",
+  "count": 12,
+  "artifacts": [
+    {
+      "authority_id": "UB-01",
+      "title": "Business Model Architecture & Value Creation",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "sha256": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "bytes": 9529
+    },
+    {
+      "authority_id": "UB-02",
+      "title": "Financial & Unit Economics",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "sha256": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "bytes": 8795
+    },
+    {
+      "authority_id": "UB-03",
+      "title": "Constraint & Throughput Dynamics",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "sha256": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "bytes": 8567
+    },
+    {
+      "authority_id": "UB-04",
+      "title": "Demand System Architecture",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "sha256": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "bytes": 8634
+    },
+    {
+      "authority_id": "UB-05",
+      "title": "Offer, Positioning & Pricing Power",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "sha256": "f2149e2eb4a74da43127a2fc1e9876185b476a74ff25bf928f31cd3dacb42c22",
+      "bytes": 8531
+    },
+    {
+      "authority_id": "UB-06",
+      "title": "Sales & Conversion Mechanics",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "sha256": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "bytes": 8522
+    },
+    {
+      "authority_id": "UB-07",
+      "title": "Customer Lifetime, Retention & Referral Economics",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "sha256": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "bytes": 8445
+    },
+    {
+      "authority_id": "UB-08",
+      "title": "Operations, Systems & Capacity Utilization",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "sha256": "aa9873877f925992ffd435a600c1fe267f3c1639834fbf54100dd899248fcf5f",
+      "bytes": 8441
+    },
+    {
+      "authority_id": "UB-09",
+      "title": "Accountability, Ownership & Execution Fidelity",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "sha256": "ac7bab7c42e4021e391406e6275ca9a73c3c11df6ead5acd83a39bb265f05c51",
+      "bytes": 8523
+    },
+    {
+      "authority_id": "UB-10",
+      "title": "Capacity, Leverage & Organizational Design",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "sha256": "3983d9cd544b5f816132a7fd4c14dbd25b5b0d90d1f48aec5f945f36e87a9cf1",
+      "bytes": 8505
+    },
+    {
+      "authority_id": "UB-11",
+      "title": "Growth, Scale & Resilience",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "sha256": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "bytes": 8513
+    },
+    {
+      "authority_id": "UB-12",
+      "title": "Truth, Measurement & Evidence",
+      "version": "1.0.0",
+      "status": "FROZEN_CANON_V1",
+      "path": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "sha256": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "bytes": 8521
+    }
+  ]
+}

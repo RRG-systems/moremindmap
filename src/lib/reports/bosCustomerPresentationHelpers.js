@@ -1948,6 +1948,187 @@ export function buildCustomerTeamFitBody(facilitatorNotes = null) {
   };
 }
 
+const TRUTHFULNESS_INSUFFICIENT = 'Insufficient Evidence';
+
+function truthfulnessClaim(narrative, claimId) {
+  return narrative?.truthfulness?.claims_by_id?.[claimId] || null;
+}
+
+function truthfulnessClaimText(claim) {
+  if (!claim || claim.evidence_sufficiency?.status !== 'sufficient') {
+    return TRUTHFULNESS_INSUFFICIENT;
+  }
+  const confidence = String(claim.confidence?.band || 'very_low').replace(/_/g, ' ');
+  return `${claim.claim} Confidence: ${confidence}.`;
+}
+
+function truthfulnessSectionText(section) {
+  const body = String(section?.body || section?.summary || '').trim();
+  return body || TRUTHFULNESS_INSUFFICIENT;
+}
+
+/**
+ * Layer 2 customer projection. It preserves the established customer-body
+ * object contract, but never recreates stronger prose from score order after
+ * Narrative V3 has already applied evidence sufficiency and abstention.
+ */
+function buildTruthfulnessCustomerSectionBodies({ narrative, topScores, bottomScores }) {
+  const executiveText = truthfulnessSectionText(narrative?.executiveSummary);
+  const coreText = truthfulnessSectionText(narrative?.profileDNA);
+  const ceilingText = truthfulnessSectionText(narrative?.strategicCeiling);
+  const teamText = truthfulnessSectionText(narrative?.teamExperience);
+  const recommendation = narrative?.recommendedNextStep || {};
+  const recommendationText = truthfulnessSectionText(recommendation);
+  const dimensionClaims = topScores.slice(0, 2).map((score) => {
+    const dimension = normalizeDimensionKey(score.dimensionTechnical || score.dimension || '');
+    return truthfulnessClaim(narrative, `dimension_${dimension}`);
+  });
+  const advantageText = dimensionClaims.map(truthfulnessClaimText).join('\n\n')
+    || TRUTHFULNESS_INSUFFICIENT;
+
+  const futuresSource = narrative?.fiveFutures || {};
+  const futures = (futuresSource.futures || []).map((future) => buildCustomerFutureBody(future));
+  const futureSummary = truthfulnessSectionText(futuresSource);
+  const futureContent = stripCustomerMarkdown(futureSummary);
+
+  const first30Days = Array.isArray(recommendation.first30Days)
+    ? recommendation.first30Days.filter(Boolean)
+    : [];
+  const proofSignals = Array.isArray(recommendation.proofSignals)
+    ? recommendation.proofSignals.filter(Boolean)
+    : [];
+  const recommendationSupported = recommendationText !== TRUTHFULNESS_INSUFFICIENT;
+  const oneMoveBlocks = recommendationSupported
+    ? [
+        {
+          id: 'hypothesis',
+          title: 'Hypothesis to Test',
+          kind: 'paragraph',
+          content: stripCustomerMarkdown(recommendation.coreConstraint || recommendationText),
+        },
+        {
+          id: 'test-steps',
+          title: 'Test Steps',
+          kind: 'ordered_list',
+          items: first30Days.map(stripCustomerMarkdown),
+          content: first30Days.map((step, index) => `${index + 1}. ${stripCustomerMarkdown(step)}`).join('\n'),
+        },
+        {
+          id: 'observations',
+          title: 'Evidence to Observe',
+          kind: 'bullet_list',
+          items: proofSignals.map(stripCustomerMarkdown),
+          content: proofSignals.map((signal) => `- ${stripCustomerMarkdown(signal)}`).join('\n'),
+        },
+      ]
+    : [];
+  const oneMoveContent = recommendationSupported
+    ? oneMoveBlocks
+        .filter((block) => block.content)
+        .map((block) => `${block.title}\n${block.content}`)
+        .join('\n\n')
+    : TRUTHFULNESS_INSUFFICIENT;
+
+  const common = {
+    sourceStrategy: 'bos_truthfulness_v1',
+    usesRawNarrativeBody: false,
+  };
+
+  return {
+    customerExecutiveSummary: {
+      ...common,
+      headline: 'Evidence-Labeled Executive Summary',
+      body: executiveText,
+      content: stripCustomerMarkdown(executiveText),
+      role: 'executive_summary',
+      claimContracts: narrative?.executiveSummary?.claim_contracts || [],
+    },
+    customerCorePattern: {
+      ...common,
+      headline: 'Measured Operating Pattern',
+      meaning: coreText,
+      body: coreText,
+      content: stripCustomerMarkdown(coreText),
+      role: 'core_operating_pattern',
+      claimContracts: narrative?.profileDNA?.claim_contracts || [],
+    },
+    customerKeyAdvantage: {
+      ...common,
+      body: advantageText,
+      content: stripCustomerMarkdown(advantageText),
+      empty: dimensionClaims.every((claim) => claim?.evidence_sufficiency?.status !== 'sufficient'),
+      claimContracts: dimensionClaims.filter(Boolean),
+    },
+    customerScalingRisk: {
+      ...common,
+      body: ceilingText,
+      content: stripCustomerMarkdown(ceilingText),
+      preview: ceilingText,
+      claimContracts: narrative?.strategicCeiling?.claim_contracts || [],
+    },
+    customerMainConstraint: {
+      ...common,
+      headline: 'Main Constraint',
+      body: ceilingText,
+      content: stripCustomerMarkdown(ceilingText),
+      preview: ceilingText,
+      role: 'main_constraint',
+      claimContracts: narrative?.strategicCeiling?.claim_contracts || [],
+    },
+    customerOneMove: {
+      ...common,
+      headline: recommendationSupported ? 'Hypothesis to Test' : TRUTHFULNESS_INSUFFICIENT,
+      body: oneMoveContent,
+      content: stripCustomerMarkdown(oneMoveContent),
+      preview: recommendationSupported
+        ? stripCustomerMarkdown(recommendation.coreConstraint || recommendationText)
+        : TRUTHFULNESS_INSUFFICIENT,
+      blocks: oneMoveBlocks,
+      intervention: recommendationSupported ? recommendation.intervention || '' : '',
+      interventionType: recommendationSupported ? 'Hypothesis' : '',
+      interventionTypeRaw: recommendationSupported ? recommendation.interventionType || '' : '',
+      empty: !recommendationSupported,
+      role: 'one_move',
+      claimContracts: recommendation.claim_contracts || [],
+    },
+    customerBestNextMove: {
+      ...common,
+      headline: 'Main Constraint',
+      body: ceilingText,
+      content: stripCustomerMarkdown(ceilingText),
+      preview: ceilingText,
+      role: 'main_constraint',
+      claimContracts: narrative?.strategicCeiling?.claim_contracts || [],
+    },
+    customerFutureLandscape: {
+      ...common,
+      summary: futureSummary,
+      mostLikely: futures[0] || null,
+      futures,
+      content: futureContent,
+      empty: false,
+      claimContracts: futuresSource.claim_contracts || [],
+    },
+    customerTeamFit: {
+      ...common,
+      body: teamText,
+      content: stripCustomerMarkdown(teamText),
+      empty: teamText === TRUTHFULNESS_INSUFFICIENT,
+      claimContracts: narrative?.teamExperience?.claim_contracts || [],
+    },
+    customerPatternHeadline: 'Measured Operating Pattern',
+    customerPatternMeaning: coreText,
+    topScores,
+    bottomScores,
+    rawNarrativeSuppressedFromCustomer: true,
+    // The legacy raw Profile DNA paragraph remains suppressed; only the
+    // evidence-gated Layer 2 claim is used on the customer path.
+    profileDnaSuppressedFromCustomer: true,
+    sectionRoleDoctrine: 'bos_truthfulness_v1',
+    truthfulnessVersion: narrative.truthfulness_version,
+  };
+}
+
 /**
  * Master builder: customer-only section bodies for Premium BOS customer tabs.
  * Inputs are display-time view-model signals; source objects are not mutated.
@@ -1962,6 +2143,10 @@ export function buildCustomerSectionBodies({
   const scores = scoreMeaning?.scores || [];
   const topScores = pickTopScores(scores, 2);
   const bottomScores = pickBottomScores(scores, 2);
+
+  if (narrative?.truthfulness_version === 'bos_truthfulness_v1') {
+    return buildTruthfulnessCustomerSectionBodies({ narrative, topScores, bottomScores });
+  }
 
   const technicalPatternHeadline = patternHeadline
     || scoreMeaning?.patternSummary?.technicalHeadline

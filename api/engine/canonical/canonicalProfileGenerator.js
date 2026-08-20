@@ -423,7 +423,7 @@ function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses =
   const requires = [];
 
   // High vector thrives in fast-execution cultures
-  if (vectorScores.vector > 6.5) {
+  if (vectorScores.vector > 0.65) {
     thrives_in.push("Fast-moving organizations with clear decision authority");
     thrives_in.push("Entrepreneurial/startup environments that reward speed");
     struggles_in.push("Consensus-heavy cultures requiring extensive buy-in");
@@ -432,7 +432,7 @@ function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses =
   }
 
   // High framework thrives in structured environments
-  if (vectorScores.framework > 6.5) {
+  if (vectorScores.framework > 0.65) {
     thrives_in.push("Process-mature organizations (enterprise, regulated industries)");
     thrives_in.push("Operations-heavy roles with defined workflows");
     struggles_in.push("High-chaos startup environments");
@@ -441,7 +441,7 @@ function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses =
   }
 
   // High signal thrives in relational cultures
-  if (vectorScores.signal > 6.5) {
+  if (vectorScores.signal > 0.65) {
     thrives_in.push("Relationship-driven organizations (sales, customer success, HR)");
     thrives_in.push("Collaborative team cultures");
     struggles_in.push("Purely metrics-driven environments ignoring people dynamics");
@@ -449,14 +449,14 @@ function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses =
   }
 
   // High velocity thrives in fast-paced environments
-  if (vectorScores.velocity > 6.5) {
+  if (vectorScores.velocity > 0.65) {
     thrives_in.push("High-tempo organizations (trading, emergency response, rapid deployment)");
     struggles_in.push("Slow, deliberative cultures");
     requires.push("Freedom to move fast without excessive process");
   }
 
   // High horizon thrives in strategic environments
-  if (vectorScores.horizon > 6.5) {
+  if (vectorScores.horizon > 0.65) {
     thrives_in.push("Strategy-focused organizations valuing long-range planning");
     thrives_in.push("Product/R&D environments with long development cycles");
     struggles_in.push("Purely tactical execution environments");
@@ -464,21 +464,21 @@ function inferEnvironmentFit(vectorScores, rankedDimensions, analyzedResponses =
   }
 
   // High fidelity thrives in precision environments
-  if (vectorScores.fidelity > 6.5) {
+  if (vectorScores.fidelity > 0.65) {
     thrives_in.push("Quality-focused organizations (healthcare, finance, engineering)");
     struggles_in.push("Move-fast-break-things cultures");
     requires.push("Standards and verification time");
   }
 
   // Low signal struggles in relational environments
-  if (vectorScores.signal < 3.5) {
+  if (vectorScores.signal < 0.35) {
     struggles_in.push("High-touch client relationships");
     struggles_in.push("Consensus-required team cultures");
     requires.push("Direct communication culture, tolerance for bluntness");
   }
 
   // Low framework struggles in structured environments
-  if (vectorScores.framework < 3.5 && vectorScores.flex > 6.0) {
+  if (vectorScores.framework < 0.35 && vectorScores.flex > 0.60) {
     thrives_in.push("Startups and high-ambiguity environments");
     struggles_in.push("Bureaucratic or heavily-procedural organizations");
   }

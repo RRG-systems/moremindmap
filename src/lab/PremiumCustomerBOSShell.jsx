@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  DARREN_OPERATING_SCORES,
+  SYNTHETIC_OPERATING_SCORES,
   SCORES_REVEAL_META,
   UNAVAILABLE_SCORE_DIMENSIONS,
 } from './customerBosScoreMeaning.js';
@@ -67,7 +67,7 @@ function ScoresRevealContent() {
       <p className="text-sm leading-relaxed text-white/75">{SCORES_REVEAL_META.subtitle}</p>
       <p className="text-xs text-white/50">Personalized for {SCORES_REVEAL_META.profileName} · scores from MMB9/MMB10 lab fixture</p>
 
-      {DARREN_OPERATING_SCORES.map((score) => (
+      {SYNTHETIC_OPERATING_SCORES.map((score) => (
         <article key={score.dimension} className="rounded-xl border border-white/8 bg-black/25 p-4">
           <div className="flex flex-wrap items-baseline gap-3">
             <h4 className="text-base font-bold text-white">{score.dimension}</h4>

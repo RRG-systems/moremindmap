@@ -1,0 +1,71 @@
+{
+  "contract_version": "dynamic-research-hook-registry-v1",
+  "status": "FROZEN_METADATA_NO_RUNTIME_SEARCH",
+  "categories": [
+    {
+      "id": "market_conditions",
+      "examples": [
+        "local demand/supply",
+        "rates",
+        "DOM/inventory",
+        "economic shocks"
+      ]
+    },
+    {
+      "id": "law_regulation",
+      "examples": [
+        "agency/representation",
+        "commission/advertising/solicitation",
+        "privacy/communications",
+        "tax/entity"
+      ]
+    },
+    {
+      "id": "platform_rules",
+      "examples": [
+        "MLS",
+        "portals",
+        "advertising/social/CRM deliverability"
+      ]
+    },
+    {
+      "id": "current_benchmarks",
+      "examples": [
+        "channel costs",
+        "conversion ranges",
+        "compensation/brokerage offerings"
+      ]
+    },
+    {
+      "id": "current_competition",
+      "examples": [
+        "competitor/channel conditions",
+        "local service alternatives"
+      ]
+    }
+  ],
+  "trigger_rules": [
+    "Freshness materially changes the decision.",
+    "A law/regulation/platform rule could have changed.",
+    "A Bible explicitly marks a dynamic dependency.",
+    "Customer evidence conflicts with generic canon and current context may explain it.",
+    "An unusual model requires specialist/current knowledge."
+  ],
+  "catalogue_fields": [
+    "research_id",
+    "query/mission",
+    "source_url/reference",
+    "publisher/author",
+    "publication_date",
+    "retrieved_at",
+    "claim/excerpt_summary",
+    "authority_ids",
+    "support_expand_contradict",
+    "durable_or_current",
+    "quality_class",
+    "customer_reasoning_use",
+    "expiry/recheck_at",
+    "promotion_status"
+  ],
+  "promotion_rule": "Dynamic findings never rewrite V1 canon. Durable promotion requires a later reviewed Bible version with source/claim mapping and new hashes."
+}

@@ -25,13 +25,51 @@ import {
   buildBehavioralDNAInterpretation,
   buildExecutiveIntelligencePacket,
 } from '../behavioralDNAInterpretation.js';
+import { getOrBuildBosTruthfulnessLayer } from '../bosTruthfulness/buildTruthfulnessLayer.js';
+import {
+  applyTruthfulnessGate,
+  buildInsufficientEvidenceSection,
+} from './truthfulnessGate.js';
+
+const NARRATIVE_SECTIONS = Object.freeze([
+  'profileDNA',
+  'communicationStyle',
+  'hiddenContradictions',
+  'strategicCeiling',
+  'coachingLeverage',
+  'teamExperience',
+  'facilitatorNotes',
+  'fiveFutures',
+  'recommendedNextStep',
+  'executiveSummary',
+]);
+
+const COGNITION_AWARE_SECTIONS = new Set([
+  'profileDNA',
+  'executiveSummary',
+  'hiddenContradictions',
+  'strategicCeiling',
+  'recommendedNextStep',
+  'teamExperience',
+  'facilitatorNotes',
+  'fiveFutures',
+]);
+
+function buildTruthfulnessSafely(canonical) {
+  try {
+    return getOrBuildBosTruthfulnessLayer(canonical);
+  } catch (error) {
+    console.error('[BOS TRUTHFULNESS PROJECTION FAILURE]', error);
+    return getOrBuildBosTruthfulnessLayer({});
+  }
+}
 
 /**
  * Main entry point for V3 narrative expansion.
  * Renders 4 target sections: executive summary, communication, contradictions, ceiling.
  */
 export async function buildNarrativeV3(canonical, useGPT = true, profileId = null, disableCache = false, disableCompression = false) {
-  if (!canonical) return getDefaultNarrative();
+  if (!canonical) return getDefaultNarrative('canonical_missing');
 
   // [FORENSIC] Environment check
   const apiKeyPresent = !!( import.meta?.env?.VITE_OPENAI_API_KEY);
@@ -40,7 +78,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   // Check cache first (unless disabled for forensic test)
   let cacheHit = false;
   if (profileId && !disableCache) {
-    const cached = getCachedNarrative(profileId);
+    const cached = getCachedNarrative(profileId, canonical);
     if (cached) {
       cacheHit = true;
       console.log('[V3 CACHE HIT]', profileId, '| render_source:', cached.render_source);
@@ -50,44 +88,32 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     console.log('[V3 FORENSIC] Cache disabled for testing');
   }
 
-  // UNIFIED INTERPRETER: Produces ONE shared interpretation artifact
-  // All 7 sections render FROM this shared interpretation (not independent reinvention)
-  const unified = buildUnifiedInterpretation(canonical);
-  
-  // Keep old structured interpreter for backward compat with buildMicroScenario
-  const interpreted = interpretCanonical(canonical);
-  
-  // COGNITION CONTEXT: Extract GPT/V1 behavioral layer if available
-  const cognitionContext = getCognitionContext(canonical);
+  // Layer 2 is a deterministic, non-persisted projection. It does not alter
+  // Layer 1 scores, canonical contracts, or the payload sent to GPT.
+  const truthfulness = buildTruthfulnessSafely(canonical);
+
+  let unified;
+  let interpreted;
+  let cognitionContext;
+  try {
+    // UNIFIED INTERPRETER: Produces ONE shared interpretation artifact.
+    unified = buildUnifiedInterpretation(canonical);
+    // Keep old structured interpreter for backward compatibility with
+    // buildMicroScenario.
+    interpreted = interpretCanonical(canonical);
+    // COGNITION CONTEXT: Extract GPT/V1 behavioral layer if available.
+    cognitionContext = getCognitionContext(canonical);
+  } catch (error) {
+    console.error('[V3 INTERPRETATION FAILURE]', error);
+    return getDefaultNarrative('canonical_interpretation_failed', truthfulness);
+  }
+
   console.log('[COGNITION CONTEXT]', {
     source: cognitionContext?.source,
     hasDominance: !!cognitionContext?.dominance_profile,
     rankedCount: cognitionContext?.ranked_dimensions?.length,
   });
   const previousSections = {};
-
-  const sections = [
-    'profileDNA',
-    'communicationStyle',
-    'hiddenContradictions',
-    'strategicCeiling',
-    'coachingLeverage',
-    'teamExperience',
-    'facilitatorNotes',
-    'fiveFutures',
-    'recommendedNextStep',
-    'executiveSummary',
-  ];
-  const cognitionAwareSections = new Set([
-    'profileDNA',
-    'executiveSummary',
-    'hiddenContradictions',
-    'strategicCeiling',
-    'recommendedNextStep',
-    'teamExperience',
-    'facilitatorNotes',
-    'fiveFutures',
-  ]);
 
   const narrative = {
     render_source: null,
@@ -96,6 +122,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
     fallback_used: false,
     openai_error_message: null,
     generation_time_ms: 0,
+    truthfulness_version: truthfulness.version,
+    truthfulness_summary: truthfulness.summary,
+    // Additive render-time contract only. This is not persisted to the
+    // canonical dossier and is not included in the Layer 3 GPT request.
+    truthfulness,
   };
 
   const startTime = performance.now();
@@ -105,7 +136,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
   let gptSuccess = false;
   let skipGptForRemainder = false;
 
-  for (const section of sections) {
+  for (const section of NARRATIVE_SECTIONS) {
     let prompt;
     try {
       if (section === 'executiveSummary') {
@@ -117,7 +148,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
           cognitionContext,
           executiveIntelligence
         );
-      } else if (cognitionAwareSections.has(section)) {
+      } else if (COGNITION_AWARE_SECTIONS.has(section)) {
         prompt = getPromptBuilder(section)(unified, interpreted, previousSections, cognitionContext);
       } else {
         prompt = getPromptBuilder(section)(unified, interpreted, previousSections);
@@ -210,10 +241,11 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
       rendering.violations = violations;
       rendering.groundingUsed = extractGroundingUsed(section, interpreted);
       rendering = normalizeStructuredSection(section, rendering) || getDefaultSection(section);
+      rendering = applyTruthfulnessGate(section, rendering, truthfulness);
     } catch (error) {
       console.error(`[V3 SECTION FAILURE] section: ${section}`, error);
-      rendering = getDefaultSection(section);
-      rendering.render_source = 'fallback_local';
+      rendering = buildInsufficientEvidenceSection(section);
+      rendering.render_source = 'truthfulness_fail_closed';
       rendering.violations = [];
       rendering.groundingUsed = [];
       fallbackActivated = true;
@@ -244,7 +276,7 @@ export async function buildNarrativeV3(canonical, useGPT = true, profileId = nul
 
   // Cache the result (unless disabled for forensic test)
   if (profileId && !disableCache) {
-    cacheNarrative(profileId, narrative);
+    cacheNarrative(profileId, narrative, canonical);
     console.log('[V3] Cached narrative for', profileId);
   }
 
@@ -1723,66 +1755,29 @@ function compressionPass(text) {
   return compressed.trim();
 }
 
-function getDefaultNarrative() {
-  if (section === 'profileDNA') {
-    body = 
-      `Operating Model: Moves with directional conviction. Pattern-reading drives decision velocity. ` +
-      `Paired with ${interpreted.secondarySystem.dimension || 'supporting decision style'}, creates execution speed advantage that dominates coordination friction. ` +
-      `Builds competitive edge through rapid pattern convergence and direct execution.`;
-  }
-
-  if (section === 'coachingLeverage') {
-    body =
-      `1. Pace as signal: explicit awareness that meeting velocity = decision certainty. Slow decisions down when wrong choices cost more than speed saves.\n\n` +
-      `2. Process friction is intelligence: "Why did we need 6 meetings?" should prompt system redesign, not dismissal of process advocates.\n\n` +
-      `3. Delegate conviction, not execution: build teams where others own the 95%, you own the edge 5%. Requires trusting pattern-reading in others.\n\n` +
-      `4. Course correction has windows: waiting until month 4 to revisit month 1 decisions costs 3x what month 2 revision would. Speed includes strategic pivots.`;
-    
-    keyWarning = "Coaching works when framed as competitive advantage, not personal development. Position corrections as system optimization.";
-  }
-
-  if (section === 'recommendedNextStep') {
-    body =
-      `Conduct a "decision velocity audit": map 5 recent decisions. For each: when was it locked in, when did consequences surface, what was the gap cost? ` +
-      `Pattern reveals whether speed is advantage or constraint in your current context.\n\n` +
-      `Then: establish feedback lag metrics. Treat feedback speed as design problem, not people problem. ` +
-      `That shift moves system from 1x to 2x operating efficiency.`;
-  }
-
-  return {
-    executiveSummary: {
-      section: 'executiveSummary',
-      headline: 'Profile data not available',
-      body: 'Profile data not available',
-      micro_scenario: null,
-      key_warning: null,
-      grounding_used: [],
-    },
-    communicationStyle: {
-      section: 'communicationStyle',
-      headline: 'Profile data not available',
-      body: 'Profile data not available',
-      micro_scenario: null,
-      key_warning: null,
-      grounding_used: [],
-    },
-    hiddenContradictions: {
-      section: 'hiddenContradictions',
-      headline: 'Profile data not available',
-      body: 'Profile data not available',
-      micro_scenario: null,
-      key_warning: null,
-      grounding_used: [],
-    },
-    strategicCeiling: {
-      section: 'strategicCeiling',
-      headline: 'Profile data not available',
-      body: 'Profile data not available',
-      micro_scenario: null,
-      key_warning: null,
-      grounding_used: [],
-    },
+function getDefaultNarrative(reason, suppliedTruthfulness = null) {
+  const truthfulness = suppliedTruthfulness || buildTruthfulnessSafely({});
+  const narrative = {
+    render_source: 'truthfulness_fail_closed',
+    cache_hit: false,
+    gpt_call_success: false,
+    fallback_used: true,
+    openai_error_message: reason || 'narrative_input_unavailable',
+    generation_time_ms: 0,
+    truthfulness_version: truthfulness.version,
+    truthfulness_summary: truthfulness.summary,
+    truthfulness,
   };
+
+  for (const section of NARRATIVE_SECTIONS) {
+    narrative[section] = {
+      ...buildInsufficientEvidenceSection(section),
+      render_source: 'truthfulness_fail_closed',
+      violations: [],
+    };
+  }
+
+  return narrative;
 }
 
 export default buildNarrativeV3;

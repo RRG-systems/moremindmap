@@ -1,0 +1,473 @@
+{
+  "harness_id": "real-estate-generalization-harness-v1",
+  "status": "PASS",
+  "case_count": 21,
+  "cases": [
+    {
+      "case_id": "RECASE-01",
+      "case": "brand-new agent",
+      "selected_real_estate_authorities": [
+        "RE-03",
+        "RE-05",
+        "RE-06",
+        "RE-12",
+        "RE-13",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-02",
+      "case": "small database",
+      "selected_real_estate_authorities": [
+        "RE-02",
+        "RE-03",
+        "RE-05",
+        "RE-12"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-03",
+      "case": "large dead database",
+      "selected_real_estate_authorities": [
+        "RE-02",
+        "RE-04",
+        "RE-06"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-04",
+      "case": "sphere-only",
+      "selected_real_estate_authorities": [
+        "RE-02",
+        "RE-04",
+        "RE-05",
+        "RE-11"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-05",
+      "case": "paid-lead dependent",
+      "selected_real_estate_authorities": [
+        "RE-05",
+        "RE-06",
+        "RE-10",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-06",
+      "case": "open-house dependent",
+      "selected_real_estate_authorities": [
+        "RE-08",
+        "RE-03",
+        "RE-06",
+        "RE-09"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-07",
+      "case": "geographic farmer",
+      "selected_real_estate_authorities": [
+        "RE-07",
+        "RE-02",
+        "RE-09",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-08",
+      "case": "listing-heavy",
+      "selected_real_estate_authorities": [
+        "RE-09",
+        "RE-11",
+        "RE-01",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-09",
+      "case": "buyer-heavy",
+      "selected_real_estate_authorities": [
+        "RE-10",
+        "RE-11",
+        "RE-01",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-10",
+      "case": "high GCI / low profit",
+      "selected_real_estate_authorities": [
+        "RE-01",
+        "RE-14",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-11",
+      "case": "burnout",
+      "selected_real_estate_authorities": [
+        "RE-12",
+        "RE-13",
+        "RE-14",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-12",
+      "case": "leverage-ready solo",
+      "selected_real_estate_authorities": [
+        "RE-13",
+        "RE-14",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-13",
+      "case": "premature team",
+      "selected_real_estate_authorities": [
+        "RE-13",
+        "RE-14",
+        "RE-15",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-14",
+      "case": "leader-dependent team",
+      "selected_real_estate_authorities": [
+        "RE-14",
+        "RE-15",
+        "RE-02"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-15",
+      "case": "weak agent productivity",
+      "selected_real_estate_authorities": [
+        "RE-14",
+        "RE-15",
+        "RE-06"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-16",
+      "case": "recruiting/onboarding failure",
+      "selected_real_estate_authorities": [
+        "RE-15",
+        "RE-14",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-17",
+      "case": "strong business seeking time freedom",
+      "selected_real_estate_authorities": [
+        "RE-13",
+        "RE-14",
+        "RE-02",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-18",
+      "case": "market slowdown",
+      "selected_real_estate_authorities": [
+        "RE-05",
+        "RE-06",
+        "RE-01",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-19",
+      "case": "pipeline aging",
+      "selected_real_estate_authorities": [
+        "RE-06",
+        "RE-12",
+        "RE-01"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-20",
+      "case": "brokerage-economics issue",
+      "selected_real_estate_authorities": [
+        "RE-01",
+        "RE-16",
+        "RE-14"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "RECASE-21",
+      "case": "succession/book-transfer issue",
+      "selected_real_estate_authorities": [
+        "RE-02",
+        "RE-13",
+        "RE-14",
+        "RE-16"
+      ],
+      "universal_dependencies": [
+        "UB-01",
+        "UB-03",
+        "UB-12"
+      ],
+      "differentiation_proof": "Selected authorities and state questions change with the case; no generic \u201cmore leads\u201d fallback.",
+      "missing_evidence_visible": true,
+      "founder_heuristics_qualified": true,
+      "dynamic_research_separate": true,
+      "team_context_relevant_only": true,
+      "identity_contamination": false,
+      "verdict": "PASS"
+    }
+  ],
+  "assertions": {
+    "causal_depth": true,
+    "material_differentiation": true,
+    "thin_evidence_honest": true,
+    "founder_heuristics_qualified": true,
+    "dynamic_not_canon": true,
+    "wpm_does_not_override_business": true,
+    "team_relevance_only": true,
+    "cross_profile_contamination": false
+  }
+}

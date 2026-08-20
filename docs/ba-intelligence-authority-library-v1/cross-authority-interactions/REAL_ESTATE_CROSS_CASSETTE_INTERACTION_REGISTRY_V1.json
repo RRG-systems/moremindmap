@@ -1,0 +1,442 @@
+{
+  "registry_id": "real-estate-cross-cassette-interaction-registry-v1",
+  "version": "1.0.0",
+  "count": 18,
+  "interactions": [
+    {
+      "interaction_id": "REI-01",
+      "name": "MET quality \u00d7 touches \u00d7 referrals",
+      "authority_dependencies": [
+        "RE-02",
+        "RE-04"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cMET quality \u00d7 touches \u00d7 referrals\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-02",
+      "name": "new contact \u00d7 8\u00d78 \u00d7 graduation",
+      "authority_dependencies": [
+        "RE-03",
+        "RE-04"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cnew contact \u00d7 8\u00d78 \u00d7 graduation\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-03",
+      "name": "database size \u00d7 relationship quality \u00d7 production",
+      "authority_dependencies": [
+        "RE-02",
+        "RE-01"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cdatabase size \u00d7 relationship quality \u00d7 production\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-04",
+      "name": "farming \u00d7 listings \u00d7 neighborhood authority",
+      "authority_dependencies": [
+        "RE-07",
+        "RE-09"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cfarming \u00d7 listings \u00d7 neighborhood authority\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-05",
+      "name": "open house \u00d7 capture \u00d7 nurture \u00d7 database growth",
+      "authority_dependencies": [
+        "RE-08",
+        "RE-03",
+        "RE-04"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201copen house \u00d7 capture \u00d7 nurture \u00d7 database growth\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-06",
+      "name": "lead source \u00d7 qualification \u00d7 conversion",
+      "authority_dependencies": [
+        "RE-05",
+        "RE-06"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201clead source \u00d7 qualification \u00d7 conversion\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-07",
+      "name": "response speed \u00d7 capacity \u00d7 conversion",
+      "authority_dependencies": [
+        "RE-06",
+        "RE-12"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cresponse speed \u00d7 capacity \u00d7 conversion\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-08",
+      "name": "listing mix \u00d7 time leverage \u00d7 profitability",
+      "authority_dependencies": [
+        "RE-09",
+        "RE-01",
+        "RE-16"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201clisting mix \u00d7 time leverage \u00d7 profitability\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-09",
+      "name": "buyer load \u00d7 capacity \u00d7 service quality",
+      "authority_dependencies": [
+        "RE-10",
+        "RE-11"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cbuyer load \u00d7 capacity \u00d7 service quality\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-10",
+      "name": "transaction quality \u00d7 referrals",
+      "authority_dependencies": [
+        "RE-11",
+        "RE-04"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201ctransaction quality \u00d7 referrals\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-11",
+      "name": "team leads \u00d7 conversion \u00d7 team margin",
+      "authority_dependencies": [
+        "RE-14",
+        "RE-06",
+        "RE-16"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cteam leads \u00d7 conversion \u00d7 team margin\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-12",
+      "name": "recruiting \u00d7 onboarding \u00d7 productivity \u00d7 retention",
+      "authority_dependencies": [
+        "RE-15",
+        "RE-14"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201crecruiting \u00d7 onboarding \u00d7 productivity \u00d7 retention\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-13",
+      "name": "GCI \u00d7 expenses \u00d7 owner profit",
+      "authority_dependencies": [
+        "RE-01",
+        "RE-16"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cGCI \u00d7 expenses \u00d7 owner profit\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-14",
+      "name": "market conditions \u00d7 source mix \u00d7 conversion",
+      "authority_dependencies": [
+        "RE-05",
+        "RE-06"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cmarket conditions \u00d7 source mix \u00d7 conversion\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-15",
+      "name": "pipeline aging \u00d7 future income",
+      "authority_dependencies": [
+        "RE-06",
+        "RE-01"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cpipeline aging \u00d7 future income\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-16",
+      "name": "operating rhythm \u00d7 production lag",
+      "authority_dependencies": [
+        "RE-12",
+        "RE-06"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201coperating rhythm \u00d7 production lag\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-17",
+      "name": "founder relationships \u00d7 transferability",
+      "authority_dependencies": [
+        "RE-02",
+        "RE-14"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cfounder relationships \u00d7 transferability\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    },
+    {
+      "interaction_id": "REI-18",
+      "name": "brokerage economics \u00d7 agent net",
+      "authority_dependencies": [
+        "RE-01",
+        "RE-16"
+      ],
+      "mechanism": "The named factors interact causally; the router must retrieve their evidence together and test which factor is active rather than maximize one in isolation.",
+      "evidence": [
+        "source/identity/time-bounded state for every factor",
+        "stage or economic outcome linked to the interaction",
+        "contradictions and missingness"
+      ],
+      "misleading_interpretation": "Improving only the first visible factor in \u201cbrokerage economics \u00d7 agent net\u201d necessarily improves the final outcome.",
+      "confounds": [
+        "market/financing change",
+        "source and customer mix",
+        "capacity/execution fidelity",
+        "measurement/attribution error"
+      ],
+      "delayed_effects": "Residential pipeline, relationship and transaction effects may appear weeks, months or years later depending on source and state.",
+      "feedback_loops": "Movement in the downstream outcome changes capacity, cash, relationship assets or source choice and therefore feeds the next cycle.",
+      "falsifier": "The asserted interaction is weakened if the driver changes under adequate fidelity while the linked leading/outcome measures do not, absent material confounds."
+    }
+  ]
+}

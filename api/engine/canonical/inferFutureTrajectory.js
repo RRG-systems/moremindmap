@@ -57,7 +57,7 @@ export function inferFutureTrajectory(
   }
   
   // Strategic drift
-  if (vectorScores.horizon < 4.0 && vectorScores.velocity > 6.5) {
+  if (vectorScores.horizon < 0.40 && vectorScores.velocity > 0.65) {
     unchanged_5yr.push('Tactical efficiency without strategic coherence; wins battles while slowly losing war; market position erodes despite high activity');
     unchanged_breakpoints.push({
       trigger: 'Competitor with strategic clarity gains market leverage',
@@ -86,7 +86,7 @@ export function inferFutureTrajectory(
   }
   
   // If relational awareness built
-  if (vectorScores.signal < 3.5 && hiddenRisks?.relational_erosion_risk?.includes('High')) {
+  if (vectorScores.signal < 0.35 && hiddenRisks?.relational_erosion_risk?.includes('High')) {
     developed_2yr.push('Relational timing improves; relationship damage decreases; A-player retention increases');
     developed_5yr.push('Culture shifts from compliance to contribution; talent quality improves; execution multiplies through willing followership');
     development_requirements.push('Sustained relational awareness practice - 90-day intensive coaching on reading room before directing');

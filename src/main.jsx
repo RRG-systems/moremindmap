@@ -19,7 +19,17 @@ import PaymentCancelled from './PaymentCancelled.jsx'
 import VisualLabPage from './components/visualLab/VisualLabPage.jsx'
 import BOSRegressionViewer from './lab/BOSRegressionViewer.jsx'
 import BACustomerShellLab from './lab/BACustomerShellLab.jsx'
+import SubscriptionV1InternalDevApp from './subscriptionV1/SubscriptionV1InternalDevApp.jsx'
 import './index.css'
+
+const newBosProductionRenderEnabled = import.meta.env.VITE_NEW_BOS_PRODUCTION_RENDER_ENABLED === 'true'
+const NewBosProductionCanary = newBosProductionRenderEnabled
+  ? React.lazy(() => import('./components/newBosPersonalityDnaV1/NewBosProductionCanary.jsx'))
+  : null
+const newBaProductionRenderEnabled = import.meta.env.VITE_NEW_BA_PRODUCTION_RENDER_ENABLED === 'true'
+const NewBaProductionCanary = newBaProductionRenderEnabled
+  ? React.lazy(() => import('./components/baProductionReadinessV1/NewBaProductionCanary.jsx'))
+  : null
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -36,12 +46,37 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/leadership-dashboard" element={<LeadershipSalesDashboard />} />
         <Route path="/leadership/role-fit" element={<LeadershipRoleFitLab />} />
         <Route path="/leadership/fathom-dd-fit" element={<LeadershipRoleFitLab />} />
+        <Route path="/subscription" element={<SubscriptionV1InternalDevApp />} />
         <Route path="/business-assessment" element={<BusinessAssessment />} />
         <Route path="/business-assessment/visual-map" element={<BusinessAssessmentVisualMap />} />
         <Route path="/business-assessment/five-futures" element={<BusinessAssessmentFiveFutures />} />
         <Route path="/visual-lab" element={<VisualLabPage />} />
         <Route path="/visual-lab/bos-regression" element={<BOSRegressionViewer />} />
         <Route path="/visual-lab/ba-shell" element={<BACustomerShellLab />} />
+        {newBosProductionRenderEnabled && (
+          <Route
+            path="/new-bos"
+            element={<React.Suspense fallback={null}><NewBosProductionCanary customerMode /></React.Suspense>}
+          />
+        )}
+        {newBosProductionRenderEnabled && (
+          <Route
+            path="/private/new-bos-canary"
+            element={<React.Suspense fallback={null}><NewBosProductionCanary /></React.Suspense>}
+          />
+        )}
+        {newBaProductionRenderEnabled && (
+          <Route
+            path="/business-twin"
+            element={<React.Suspense fallback={null}><NewBaProductionCanary customerMode /></React.Suspense>}
+          />
+        )}
+        {newBaProductionRenderEnabled && (
+          <Route
+            path="/private/new-ba-canary"
+            element={<React.Suspense fallback={null}><NewBaProductionCanary /></React.Suspense>}
+          />
+        )}
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
       </Routes>

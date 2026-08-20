@@ -1,0 +1,438 @@
+{
+  "contract_version": "five-futures-bible-state-contribution-v1",
+  "status": "FROZEN_METADATA_ONLY_V2_RUNTIME_NOT_IMPLEMENTED",
+  "approved_future_direction": {
+    "trajectory_role_count": 5,
+    "roles": [
+      {
+        "role_id": "current_course",
+        "purpose": "Represent the trajectory already being produced by current state and mechanisms."
+      },
+      {
+        "role_id": "likely_next",
+        "purpose": "Represent the next materially distinct trajectory supported if current drivers persist."
+      },
+      {
+        "role_id": "constraint_intensified",
+        "purpose": "Represent the consequence when the governing constraint persists or worsens."
+      },
+      {
+        "role_id": "optimized",
+        "purpose": "Represent a better conditional trajectory when a bounded high-leverage mover is executed."
+      },
+      {
+        "role_id": "transformational",
+        "purpose": "Represent a structurally different model only when evidence supports the distinction."
+      }
+    ],
+    "weighting": "DETERMINISTIC_NORMALIZED_RELATIVE_SUPPORT_WEIGHTS_LATER_AFTER_WBM",
+    "calibration_project_authorized": false,
+    "bayesian_project_authorized": false,
+    "customer_probability_claim": false
+  },
+  "bible_contribution_fields": [
+    "authority_id",
+    "authority_version",
+    "authority_hash",
+    "claim_refs",
+    "state_dimensions",
+    "supporting_evidence_refs",
+    "contradiction_refs",
+    "missing_evidence",
+    "confidence_class",
+    "condition_sets",
+    "mechanism_links",
+    "leading_indicators",
+    "candidate_movers",
+    "confounds",
+    "falsifiers",
+    "time_horizon_relevance",
+    "dynamic_context_requirements"
+  ],
+  "prohibited_fields": [
+    "trajectory_probability",
+    "trajectory_weight",
+    "normalized_support",
+    "customer_wording",
+    "executive_diagnostic_prose",
+    "sibling_projection_prose",
+    "predicted_outcome",
+    "guaranteed_effect"
+  ],
+  "assembly_invariants": [
+    "WBM must exist before trajectory construction/weighting.",
+    "Bibles contribute state/evidence metadata only.",
+    "Five roles are purposeful projection roles, not permission to fabricate unsupported branches.",
+    "A role may be marked unsupported/merged/missing.",
+    "Frontier model may later construct evidence-bound trajectories but cannot invent weights.",
+    "Deterministic weight logic is a later separately authorized runtime.",
+    "Relative support is not empirical probability or confidence.",
+    "Outcome learning/RSL remains future and separate."
+  ],
+  "authority_contributions": [
+    {
+      "authority_id": "UB-01",
+      "title": "Business Model Architecture & Value Creation",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-02",
+      "title": "Financial & Unit Economics",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-03",
+      "title": "Constraint & Throughput Dynamics",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-04",
+      "title": "Demand System Architecture",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-05",
+      "title": "Offer, Positioning & Pricing Power",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-06",
+      "title": "Sales & Conversion Mechanics",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-07",
+      "title": "Customer Lifetime, Retention & Referral Economics",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-08",
+      "title": "Operations, Systems & Capacity Utilization",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-09",
+      "title": "Accountability, Ownership & Execution Fidelity",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-10",
+      "title": "Capacity, Leverage & Organizational Design",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-11",
+      "title": "Growth, Scale & Resilience",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "UB-12",
+      "title": "Truth, Measurement & Evidence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-01",
+      "title": "Residential Real Estate Business Model & Transaction Economics",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-02",
+      "title": "Relationship / MET / Database Asset Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-03",
+      "title": "Short-Term Mindshare & Relationship Qualification",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-04",
+      "title": "Long-Term Relationship, Repeat & Referral System",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-05",
+      "title": "Real Estate Demand Generation Portfolio & Agent-Channel Fit",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-06",
+      "title": "Lead Conversion, Follow-Up & Pipeline Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-07",
+      "title": "Geographic Farming Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-08",
+      "title": "Open House Opportunity Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-09",
+      "title": "Listing Business Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-10",
+      "title": "Buyer Representation & Service Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-11",
+      "title": "Residential Transaction & Client Delivery Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-12",
+      "title": "Agent Operating Rhythm & E-to-P Intelligence",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-13",
+      "title": "Agent Stage, Growth & Leverage Readiness",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-14",
+      "title": "Team Economics, Organization & Productivity",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-15",
+      "title": "Recruiting, Onboarding & Agent Development",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    },
+    {
+      "authority_id": "RE-16",
+      "title": "Financial, Profitability & Commission-to-Wealth Transition",
+      "contribution": "state_dimensions_and_mechanism_evidence",
+      "eligible_roles": [
+        "current_course",
+        "likely_next",
+        "constraint_intensified",
+        "optimized",
+        "transformational"
+      ],
+      "weight_output": false
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "library_version": "1.0.0",
+  "frozen_at": "2026-08-12T00:00:00-07:00",
+  "authority_status": "FROZEN_CANON_V1",
+  "runtime_integration": "NOT_IMPLEMENTED",
+  "five_futures_v2": "NOT_IMPLEMENTED_METADATA_ONLY",
+  "registry_id": "ba-intelligence-authority-library-registry-v1",
+  "universal_registry": "registries/UNIVERSAL_BUSINESS_BIBLE_REGISTRY_V1.json",
+  "real_estate_registry": "registries/REAL_ESTATE_CASSETTE_REGISTRY_V1.json",
+  "universal_count": 12,
+  "real_estate_count": 16,
+  "total_bible_count": 28,
+  "script_library": "script-conversation-library/REAL_ESTATE_SCRIPT_AND_CONVERSATION_LIBRARY_V1.md"
+}

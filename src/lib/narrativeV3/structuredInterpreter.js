@@ -124,7 +124,7 @@ export function buildMicroScenario(interpreted, sectionContext) {
       "Some team members experience this as clarity. Others experience it as override.";
   }
 
-  if (sectionContext === "strain" && interpreted.primarySystem.score > 2) {
+  if (sectionContext === "strain" && interpreted.primarySystem.score > 0.2) {
     return "Early in a high-load project: decisions move fast, credibility builds, team energy rises. " +
       "Mid-project (month 3-4): small details start creating friction. Some team members stop offering contrary opinions. " +
       "By month 6, cascading decisions begin contradicting each other.";

@@ -1,0 +1,1547 @@
+{
+  "contract_id": "more-business-twin-v1",
+  "contract_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "identity": {
+    "business_id": "business-ba-20260714-64ca0783",
+    "assessment_id": "ba-20260714-64ca0783",
+    "owner_profile_id": "mm-20260708-dsst020z",
+    "vertical": "real_estate",
+    "frozen_state": true
+  },
+  "artifact_bindings": {
+    "vbrm": {
+      "version": "1.0.0",
+      "hash": "6ecc9e49e981d4e56fee5263fa8bdf167b67abecb28d37c789a75d4f18d3f69c"
+    },
+    "wbm": {
+      "version": "1.0.0",
+      "hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba"
+    },
+    "five_futures": {
+      "version": "2.0.0",
+      "hash": "b245bcb9f12ef7e1cd02c6d1433ee733cff51a85a873bb98fe652db05a00d148"
+    },
+    "one_move": {
+      "version": "2.0.0",
+      "hash": "2e087bc4ea5b56212e7fefa5b00a33bbbb1c13e651351ca956176a017f4f4447"
+    },
+    "lineage_hash": "21af9b7c7a687a4f6cc2fd35d5566c18b10f9e72de072600f203331fda6f566a"
+  },
+  "orientation": {
+    "where_you_are_statement_refs": [
+      "twin-now-territory-RE-T01",
+      "twin-now-territory-RE-T02",
+      "twin-now-territory-RE-T03",
+      "twin-now-territory-RE-T04",
+      "twin-now-territory-RE-T05",
+      "twin-now-territory-RE-T06",
+      "twin-now-territory-RE-T07",
+      "twin-now-territory-RE-T08"
+    ],
+    "what_matters_now_statement_refs": [
+      "twin-why-constraint",
+      "twin-move-selected"
+    ],
+    "where_you_are_going_statement_refs": [
+      "twin-future-current_course",
+      "twin-future-emerging_future",
+      "twin-future-better_future",
+      "twin-future-bold_future",
+      "twin-future-downside_future"
+    ]
+  },
+  "domain_nodes": [
+    {
+      "node_id": "twin-node-RE-T01",
+      "territory_id": "RE-T01",
+      "mission": "Establish the size, identity, quality, recency, growth, activation and economic relevance of the relationship asset without equating raw contacts with true relationships.",
+      "statement_refs": [
+        "twin-now-territory-RE-T01"
+      ],
+      "state_label": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T02",
+      "territory_id": "RE-T02",
+      "mission": "Determine whether qualified opportunity supply is sufficient for the stated goals and how the operator actually creates it across a governed source portfolio.",
+      "statement_refs": [
+        "twin-now-territory-RE-T02"
+      ],
+      "state_label": "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T03",
+      "territory_id": "RE-T03",
+      "mission": "Locate where governed opportunity is captured, contacted, nurtured, qualified, appointed, presented, agreed, transacted and returned to relationship value—or leaks.",
+      "statement_refs": [
+        "twin-now-territory-RE-T03"
+      ],
+      "state_label": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+      "confidence": "LOW",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T04",
+      "territory_id": "RE-T04",
+      "mission": "Determine whether recurring lead, client, listing, buyer, transaction and post-close work is produced by inspectable systems rather than memory or heroic effort.",
+      "statement_refs": [
+        "twin-now-territory-RE-T04"
+      ],
+      "state_label": "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T05",
+      "territory_id": "RE-T05",
+      "mission": "Establish who owns which standards, how execution is inspected, how correction occurs and where accountability is absent or leader-dependent.",
+      "statement_refs": [
+        "twin-now-territory-RE-T05"
+      ],
+      "state_label": "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T06",
+      "territory_id": "RE-T06",
+      "mission": "Reconcile what the business produces economically across units, volume, GCI/revenue, expenses, contribution, profit, cash, owner income and reinvestment capacity.",
+      "statement_refs": [
+        "twin-now-territory-RE-T06"
+      ],
+      "state_label": "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T07",
+      "territory_id": "RE-T07",
+      "mission": "Determine present capacity, owner dependence, role/decision ownership, team economics and whether leverage is operationally/economically earned.",
+      "statement_refs": [
+        "twin-now-territory-RE-T07"
+      ],
+      "state_label": "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    },
+    {
+      "node_id": "twin-node-RE-T08",
+      "territory_id": "RE-T08",
+      "mission": "Bind the present residential business model, desired operating future, strategic choices and goal economics so all other territories are interpreted relative to the business being built.",
+      "statement_refs": [
+        "twin-now-territory-RE-T08"
+      ],
+      "state_label": "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates.",
+      "confidence": "MODERATE",
+      "customer_visible": true
+    }
+  ],
+  "relationship_edges": [
+    {
+      "edge_id": "twin-edge-01",
+      "from_node_id": "twin-node-RE-T01",
+      "to_node_id": "twin-node-RE-T03",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-01",
+      "magnitude_claimed": false
+    },
+    {
+      "edge_id": "twin-edge-02",
+      "from_node_id": "twin-node-RE-T03",
+      "to_node_id": "twin-node-RE-T07",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-02",
+      "magnitude_claimed": false
+    },
+    {
+      "edge_id": "twin-edge-03",
+      "from_node_id": "twin-node-RE-T03",
+      "to_node_id": "twin-node-RE-T02",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-03",
+      "magnitude_claimed": false
+    },
+    {
+      "edge_id": "twin-edge-04",
+      "from_node_id": "twin-node-RE-T01",
+      "to_node_id": "twin-node-RE-T07",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-04",
+      "magnitude_claimed": false
+    },
+    {
+      "edge_id": "twin-edge-05",
+      "from_node_id": "twin-node-RE-T07",
+      "to_node_id": "twin-node-RE-T06",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-05",
+      "magnitude_claimed": false
+    },
+    {
+      "edge_id": "twin-edge-06",
+      "from_node_id": "twin-node-RE-T07",
+      "to_node_id": "twin-node-RE-T06",
+      "relationship_type": "SUPPORTED_CAUSAL",
+      "statement_ref": "twin-why-mechanism-06",
+      "magnitude_claimed": false
+    }
+  ],
+  "destinations": [
+    {
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "order": 1,
+      "name": "YOUR BUSINESS NOW",
+      "mission": "See the actual current business system, its assets, vulnerabilities and honest gaps.",
+      "allowed_source_layers": [
+        "VBRM"
+      ],
+      "statement_refs": [
+        "twin-now-territory-RE-T01",
+        "twin-now-territory-RE-T02",
+        "twin-now-territory-RE-T03",
+        "twin-now-territory-RE-T04",
+        "twin-now-territory-RE-T05",
+        "twin-now-territory-RE-T06",
+        "twin-now-territory-RE-T07",
+        "twin-now-territory-RE-T08",
+        "twin-now-001",
+        "twin-now-002",
+        "twin-now-003",
+        "twin-now-004",
+        "twin-now-005",
+        "twin-now-006",
+        "twin-now-007",
+        "twin-now-008",
+        "twin-now-009",
+        "twin-now-010",
+        "twin-now-011",
+        "twin-now-012",
+        "twin-now-013",
+        "twin-now-014",
+        "twin-now-015",
+        "twin-now-016",
+        "twin-now-017",
+        "twin-now-018",
+        "twin-now-019",
+        "twin-now-020",
+        "twin-now-021",
+        "twin-now-022",
+        "twin-now-023",
+        "twin-now-024",
+        "twin-now-025",
+        "twin-now-026",
+        "twin-now-027",
+        "twin-now-028",
+        "twin-now-029",
+        "twin-now-030",
+        "twin-now-031",
+        "twin-now-032",
+        "twin-now-033",
+        "twin-now-034",
+        "twin-now-035",
+        "twin-now-036",
+        "twin-now-037",
+        "twin-now-038"
+      ],
+      "disclosure_refs": [
+        "twin-now-territory-RE-T01",
+        "twin-now-territory-RE-T02",
+        "twin-now-territory-RE-T03",
+        "twin-now-territory-RE-T04",
+        "twin-now-territory-RE-T05",
+        "twin-now-territory-RE-T06",
+        "twin-now-territory-RE-T07",
+        "twin-now-territory-RE-T08",
+        "twin-now-003",
+        "twin-now-005",
+        "twin-now-006",
+        "twin-now-014",
+        "twin-now-016",
+        "twin-now-017",
+        "twin-now-019",
+        "twin-now-022",
+        "twin-now-024",
+        "twin-now-025",
+        "twin-now-026",
+        "twin-now-027",
+        "twin-now-028",
+        "twin-now-032",
+        "twin-now-033",
+        "twin-now-034",
+        "twin-now-035",
+        "twin-now-036",
+        "twin-now-037",
+        "twin-now-038"
+      ]
+    },
+    {
+      "destination_id": "WHATS_DRIVING_IT",
+      "order": 2,
+      "name": "WHAT’S DRIVING IT",
+      "mission": "Understand the supported causal mechanisms, alternatives and conditions that would change the view.",
+      "allowed_source_layers": [
+        "WBM",
+        "VBRM"
+      ],
+      "statement_refs": [
+        "twin-why-constraint",
+        "twin-why-mechanism-01",
+        "twin-why-mechanism-02",
+        "twin-why-mechanism-03",
+        "twin-why-mechanism-04",
+        "twin-why-mechanism-05",
+        "twin-why-mechanism-06"
+      ],
+      "disclosure_refs": [
+        "twin-why-constraint",
+        "twin-why-mechanism-01",
+        "twin-why-mechanism-02",
+        "twin-why-mechanism-03",
+        "twin-why-mechanism-04",
+        "twin-why-mechanism-05",
+        "twin-why-mechanism-06"
+      ]
+    },
+    {
+      "destination_id": "WHERE_ITS_HEADING",
+      "order": 3,
+      "name": "WHERE IT’S HEADING",
+      "mission": "Compare five conditional trajectories using deterministic relative-support weights, not probabilities.",
+      "allowed_source_layers": [
+        "FIVE_FUTURES",
+        "WBM"
+      ],
+      "statement_refs": [
+        "twin-future-current_course",
+        "twin-future-emerging_future",
+        "twin-future-better_future",
+        "twin-future-bold_future",
+        "twin-future-downside_future"
+      ],
+      "disclosure_refs": [
+        "twin-future-current_course",
+        "twin-future-emerging_future",
+        "twin-future-better_future",
+        "twin-future-bold_future",
+        "twin-future-downside_future"
+      ]
+    },
+    {
+      "destination_id": "WHAT_CHANGES_IT",
+      "order": 4,
+      "name": "WHAT CHANGES IT",
+      "mission": "See the selected bounded intervention and the mechanism it is designed to test.",
+      "allowed_source_layers": [
+        "ONE_MOVE",
+        "WBM"
+      ],
+      "statement_refs": [
+        "twin-move-selected",
+        "twin-move-why-now",
+        "twin-move-success",
+        "twin-move-failure"
+      ],
+      "disclosure_refs": [
+        "twin-move-selected",
+        "twin-move-why-now",
+        "twin-move-success",
+        "twin-move-failure"
+      ]
+    },
+    {
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "order": 5,
+      "name": "HOW YOU EXECUTE IT",
+      "mission": "Translate the move into prerequisites, ownership, steps, proof and execution adjustments.",
+      "allowed_source_layers": [
+        "ONE_MOVE",
+        "WHOLE_PERSON_EXECUTION"
+      ],
+      "statement_refs": [
+        "twin-execute-step-01",
+        "twin-execute-step-02",
+        "twin-execute-step-03",
+        "twin-execute-step-04",
+        "twin-execute-step-05",
+        "twin-execute-adjustment-01",
+        "twin-execute-adjustment-02",
+        "twin-execute-adjustment-03"
+      ],
+      "disclosure_refs": [
+        "twin-execute-adjustment-01",
+        "twin-execute-adjustment-02",
+        "twin-execute-adjustment-03"
+      ]
+    },
+    {
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "order": 6,
+      "name": "WHY WE BELIEVE IT",
+      "mission": "Separate what is known, inferred, missing and contradicted, with explicit mind-change conditions.",
+      "allowed_source_layers": [
+        "VBRM",
+        "WBM",
+        "LINEAGE"
+      ],
+      "statement_refs": [
+        "twin-evidence-missing-01",
+        "twin-evidence-missing-02",
+        "twin-evidence-missing-03",
+        "twin-evidence-missing-04",
+        "twin-evidence-missing-05",
+        "twin-evidence-contradiction-01",
+        "twin-evidence-mind-change-01",
+        "twin-evidence-mind-change-02",
+        "twin-evidence-mind-change-03",
+        "twin-evidence-mind-change-04",
+        "twin-evidence-mind-change-05",
+        "twin-evidence-mind-change-06",
+        "twin-living-map-explanation"
+      ],
+      "disclosure_refs": [
+        "twin-evidence-mind-change-01",
+        "twin-evidence-mind-change-02",
+        "twin-evidence-mind-change-03",
+        "twin-evidence-mind-change-04",
+        "twin-evidence-mind-change-05",
+        "twin-evidence-mind-change-06"
+      ]
+    }
+  ],
+  "projection_trace": [
+    {
+      "statement_id": "twin-now-territory-RE-T01",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[0].state_summary",
+      "source_claim_refs": [
+        "patricia-relationship-base-v1",
+        "patricia-relationship-data-state-v1",
+        "patricia-relationship-cadence-v1",
+        "patricia-asset-relationship-base-v1",
+        "patricia-asset-relational-access-v1",
+        "patricia-vulnerability-relationship-transferability-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T02",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[1].state_summary",
+      "source_claim_refs": [
+        "patricia-demand-insufficiency-report-v1",
+        "patricia-demand-lane-state-v1",
+        "patricia-demand-funnel-visibility-gap-v1",
+        "patricia-market-current-state-v1",
+        "patricia-vulnerability-pipeline-opacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T03",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[2].state_summary",
+      "source_claim_refs": [
+        "vbrm-missing-re-t03-state-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T04",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[3].state_summary",
+      "source_claim_refs": [
+        "patricia-operations-process-knowledge-v1",
+        "patricia-operations-leader-ownership-v1",
+        "patricia-operations-repeatability-v1",
+        "patricia-asset-process-knowledge-v1",
+        "patricia-asset-partial-support-capacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T05",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[4].state_summary",
+      "source_claim_refs": [
+        "patricia-accountability-scope-v1",
+        "patricia-accountability-operating-gap-v1",
+        "patricia-constraint-self-attribution-v1",
+        "patricia-constraint-cause-boundary-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T06",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[5].state_summary",
+      "source_claim_refs": [
+        "patricia-financial-reported-state-v1",
+        "patricia-financial-arithmetic-conflict-v1",
+        "patricia-financial-profitability-gap-v1",
+        "patricia-asset-production-history-v1",
+        "patricia-vulnerability-financial-opacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T07",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[6].state_summary",
+      "source_claim_refs": [
+        "patricia-team-contribution-workload-state-v1",
+        "patricia-team-joint-client-work-v1",
+        "patricia-team-authority-boundary-v1",
+        "patricia-capacity-help-need-v1",
+        "patricia-capacity-leader-load-v1",
+        "patricia-vulnerability-key-person-dependence-v1",
+        "patricia-vulnerability-team-alignment-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-territory-RE-T08",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates.",
+      "source_artifact": "VBRM",
+      "source_path": "territory_states[7].state_summary",
+      "source_claim_refs": [
+        "patricia-goal-horizon-v1",
+        "patricia-goal-current-gap-v1",
+        "patricia-goal-readiness-gap-v1",
+        "patricia-stage-readiness-state-v1",
+        "patricia-stage-longitudinal-state-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-001",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator reports insufficient current opportunity generation.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[0].statement",
+      "source_claim_refs": [
+        "patricia-demand-insufficiency-report-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-002",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[1].statement",
+      "source_claim_refs": [
+        "patricia-demand-lane-state-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-003",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[2].statement",
+      "source_claim_refs": [
+        "patricia-demand-funnel-visibility-gap-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-004",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator has explicit production, delegation, team, and office goals across multiple horizons.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[3].statement",
+      "source_claim_refs": [
+        "patricia-goal-horizon-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-005",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The reported current team pace is below the near-term monthly closing target.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[4].statement",
+      "source_claim_refs": [
+        "patricia-goal-current-gap-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-006",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The growth plan lacks evidenced demand, economics, role, and process gates.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[5].statement",
+      "source_claim_refs": [
+        "patricia-goal-readiness-gap-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-007",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[6].statement",
+      "source_claim_refs": [
+        "patricia-relationship-base-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-008",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[7].statement",
+      "source_claim_refs": [
+        "patricia-relationship-data-state-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-009",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[8].statement",
+      "source_claim_refs": [
+        "patricia-relationship-cadence-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-010",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Coaching is present for business development and recruiting.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[9].statement",
+      "source_claim_refs": [
+        "patricia-accountability-scope-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-011",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Routine business execution is primarily self-accountable or unowned.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[10].statement",
+      "source_claim_refs": [
+        "patricia-accountability-operating-gap-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-012",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Listing, buyer, lead, transaction, and recruiting steps are articulated.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[11].statement",
+      "source_claim_refs": [
+        "patricia-operations-process-knowledge-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-013",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator retains primary transaction follow-through while using coordinator support as needed.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[12].statement",
+      "source_claim_refs": [
+        "patricia-operations-leader-ownership-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-014",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Operational repeatability is unverified despite the operator describing current processes as working.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[13].statement",
+      "source_claim_refs": [
+        "patricia-operations-repeatability-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-015",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Units, sales volume, gross, and expenses are reported for incompletely defined periods.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[14].statement",
+      "source_claim_refs": [
+        "patricia-financial-reported-state-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-016",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Reported units and volume imply an average sale price below the separately stated average.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[15].statement",
+      "source_claim_refs": [
+        "patricia-financial-arithmetic-conflict-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-017",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[16].statement",
+      "source_claim_refs": [
+        "patricia-financial-profitability-gap-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-018",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator attributes limitation to organization, time management, and distraction.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[17].statement",
+      "source_claim_refs": [
+        "patricia-constraint-self-attribution-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-019",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Current evidence does not establish whether the reported constraint is personal, structural, or mixed.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[18].statement",
+      "source_claim_refs": [
+        "patricia-constraint-cause-boundary-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-020",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Profit and business contribution are reported as equal while the operator reports performing most team work.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[19].statement",
+      "source_claim_refs": [
+        "patricia-team-contribution-workload-state-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-021",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The business partner participates in joint lead and client follow-up.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[20].statement",
+      "source_claim_refs": [
+        "patricia-team-joint-client-work-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-022",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "No person-level team synthesis is authorized for the reported partner relationship.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[21].statement",
+      "source_claim_refs": [
+        "patricia-team-authority-boundary-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-023",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator reports needing help, delegation, an assistant, and reliable CRM use.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[22].statement",
+      "source_claim_refs": [
+        "patricia-capacity-help-need-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-024",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Primary transaction ownership and reported team workload concentrate capacity demand on the operator.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[23].statement",
+      "source_claim_refs": [
+        "patricia-capacity-leader-load-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-025",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "No time-bound market or financing evidence is available to explain current demand or conversion.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[24].statement",
+      "source_claim_refs": [
+        "patricia-market-current-state-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-026",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Transaction experience exists, but leverage readiness and transferability are not established.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[25].statement",
+      "source_claim_refs": [
+        "patricia-stage-readiness-state-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-027",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "No comparable observations establish progression, regression, or stability.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[26].statement",
+      "source_claim_refs": [
+        "patricia-stage-longitudinal-state-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-028",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Existing relationships provide an owned-demand starting point, conditional on ownership, recency, and activation quality.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[27].statement",
+      "source_claim_refs": [
+        "patricia-asset-relationship-base-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-029",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator reports ease initiating SOI contact and prior business from local networking.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[28].statement",
+      "source_claim_refs": [
+        "patricia-asset-relational-access-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-030",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The operator can articulate core listing, buyer, recruiting, and transaction workflows.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[29].statement",
+      "source_claim_refs": [
+        "patricia-asset-process-knowledge-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-031",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Partner, transaction-coordinator, title, and coaching support provide bounded operating leverage.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[30].statement",
+      "source_claim_refs": [
+        "patricia-asset-partial-support-capacity-v1"
+      ],
+      "epistemic_state": "KNOWN",
+      "confidence": "HIGH",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-now-032",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Reported transactions establish operating experience, subject to period and arithmetic reconciliation.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[31].statement",
+      "source_claim_refs": [
+        "patricia-asset-production-history-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-033",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Relationship value remains dependent on incomplete records and personal memory.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[32].statement",
+      "source_claim_refs": [
+        "patricia-vulnerability-relationship-transferability-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-034",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Core follow-through and team workload are concentrated on the operator.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[33].statement",
+      "source_claim_refs": [
+        "patricia-vulnerability-key-person-dependence-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-035",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Unmeasured seat and contribution alignment may convert growth into additional operator burden.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[34].statement",
+      "source_claim_refs": [
+        "patricia-vulnerability-team-alignment-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-036",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Incomplete economic lineage prevents reliable evaluation of profit, cash, and hiring capacity.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[35].statement",
+      "source_claim_refs": [
+        "patricia-vulnerability-financial-opacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "HIGH",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-037",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "Absent source-stage visibility prevents early detection of demand, conversion, and future-income risk.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[36].statement",
+      "source_claim_refs": [
+        "patricia-vulnerability-pipeline-opacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-now-038",
+      "destination_id": "YOUR_BUSINESS_NOW",
+      "customer_text": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+      "source_artifact": "VBRM",
+      "source_path": "claims[37].statement",
+      "source_claim_refs": [
+        "vbrm-missing-re-t03-state-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-constraint",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Leader-centered execution without a governed relationship, delegation, measurement, and accountability system.",
+      "source_artifact": "WBM",
+      "source_path": "governing_constraint.candidate",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-01",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Relationship value is weakly captured because contact completeness, state, recency, segmentation, and next actions are not governed.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[0].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-relationship-activation-gap-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-02",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Work, decisions, relationship continuity, and accountability converge on one operator instead of transferable roles and systems.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[1].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-03",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Sparse instrumentation prevents diagnosis of whether demand, conversion, capacity, or market effects govern output.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[2].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-measurement-attribution-blindness-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-04",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Seat scope, task value, decision rights, and economic sharing are not sufficiently measured to establish alignment.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[3].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-partnership-workload-misalignment-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "LOW",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-05",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Additional people may multiply coordination requirements before the operating model is ready to convert them into productive capacity.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[4].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-leverage-readiness-gap-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-why-mechanism-06",
+      "destination_id": "WHATS_DRIVING_IT",
+      "customer_text": "Incomplete financial lineage prevents production from being translated into decision-ready economic capacity.",
+      "source_artifact": "WBM",
+      "source_path": "causal_model.mechanisms[5].underlying_mechanism",
+      "source_claim_refs": [
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-future-current_course",
+      "destination_id": "WHERE_ITS_HEADING",
+      "customer_text": "Leader-Centered Continuity. Current configuration persists without governed direction-of-travel evidence. Relative support: 27 of 100.",
+      "source_artifact": "FIVE_FUTURES",
+      "source_path": "futures[0]",
+      "source_claim_refs": [
+        "patricia-future-current-course-v2"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-future-emerging_future",
+      "destination_id": "WHERE_ITS_HEADING",
+      "customer_text": "Bounded Support-Layer Emergence. Existing joint follow-up, database-update support, coaching, and coordinator or title assistance form an early distributed support layer; recurring ownership and operator relief remain unverified. Relative support: 15 of 100.",
+      "source_artifact": "FIVE_FUTURES",
+      "source_path": "futures[1]",
+      "source_claim_refs": [
+        "patricia-future-emerging-support-layer-v2"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-future-better_future",
+      "destination_id": "WHERE_ITS_HEADING",
+      "customer_text": "Governed Relationship and Operating Core. Governed relationship records and next actions combine with source-stage measurement, explicit ownership, and recurring review to alter the current operating mechanisms. Relative support: 20 of 100.",
+      "source_artifact": "FIVE_FUTURES",
+      "source_path": "futures[2]",
+      "source_claim_refs": [
+        "patricia-future-better-governed-core-v2"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-future-bold_future",
+      "destination_id": "WHERE_ITS_HEADING",
+      "customer_text": "Transferable Multi-Agent Operating Model. After the governed core proves repeatability and economics, validated demand lanes and gated capacity additions support a producer-to-manager transition. Relative support: 12 of 100.",
+      "source_artifact": "FIVE_FUTURES",
+      "source_path": "futures[3]",
+      "source_claim_refs": [
+        "patricia-future-bold-transferable-team-v2"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-future-downside_future",
+      "destination_id": "WHERE_ITS_HEADING",
+      "customer_text": "Centralization Deepens Under Premature Growth. Growth commitments outrun relationship governance, measurement, role clarity, and economic readiness while operator coordination load increases. Relative support: 26 of 100.",
+      "source_artifact": "FIVE_FUTURES",
+      "source_path": "futures[4]",
+      "source_claim_refs": [
+        "patricia-future-downside-opacity-load-v2"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-move-selected",
+      "destination_id": "WHAT_CHANGES_IT",
+      "customer_text": "End-to-end ownership transfer trial. Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "intervention",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-move-why-now",
+      "destination_id": "WHAT_CHANGES_IT",
+      "customer_text": "Requested organization, delegation, and team growth make transferability the immediate capacity question.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "why_now",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "INFERRED",
+      "confidence": "MODERATE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-move-success",
+      "destination_id": "WHAT_CHANGES_IT",
+      "customer_text": "Evidence that would support the move: Workflow continuity persists across repeated cycles without hidden operator rescue. Released operator capacity is demonstrably redirected to relationship, system, or accountability work. Role and decision records support a clearer leverage-readiness judgment.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "success_evidence",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-move-failure",
+      "destination_id": "WHAT_CHANGES_IT",
+      "customer_text": "Evidence that would challenge the move: Nominal delegation leaves decisions and follow-through with the operator. Rescue work or quality failures expand. Operator capacity is neither released nor redirected.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "failure_evidence",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "WITH_DISCLOSURE"
+    },
+    {
+      "statement_id": "twin-execute-step-01",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Select one recurring workflow that currently returns to the operator.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "bounded_execution_steps[0]",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-execute-step-02",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Map its start, finish, standard, decision rights, exceptions, and evidence requirements.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "bounded_execution_steps[1]",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-execute-step-03",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Authorize controlled shadow-to-independent execution with operator involvement limited to defined exceptions.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "bounded_execution_steps[2]",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-execute-step-04",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Inspect commitments, outcomes, rescues, and intervention causes.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "bounded_execution_steps[3]",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-execute-step-05",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Retain, revise, or revert the transfer based on observed fidelity.",
+      "source_artifact": "ONE_MOVE",
+      "source_path": "bounded_execution_steps[4]",
+      "source_claim_refs": [
+        "one-move-2799caf89cf1268d1b5f"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-execute-adjustment-01",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Pilot one workflow before extending the ownership model.",
+      "source_artifact": "WHOLE_PERSON_EXECUTION",
+      "source_path": "whole_person_execution_considerations[0]",
+      "source_claim_refs": [
+        "patricia-person-link-adaptive-system-adoption-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "LOW",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-execute-adjustment-02",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Predefine check-ins and escalation before workload pressure rises.",
+      "source_artifact": "WHOLE_PERSON_EXECUTION",
+      "source_path": "whole_person_execution_considerations[1]",
+      "source_claim_refs": [
+        "patricia-person-link-pressure-operating-friction-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "LOW",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-execute-adjustment-03",
+      "destination_id": "HOW_YOU_EXECUTE_IT",
+      "customer_text": "Treat the workflow as a seat-boundary test rather than proof of managerial readiness.",
+      "source_artifact": "WHOLE_PERSON_EXECUTION",
+      "source_path": "whole_person_execution_considerations[2]",
+      "source_claim_refs": [
+        "patricia-person-link-hybrid-seat-transition-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "LOW",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-missing-01",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Still needed: Which current direct operating records corroborate the customer-reported systems and execution state?",
+      "source_artifact": "VBRM",
+      "source_path": "missing_evidence[0]",
+      "source_claim_refs": [
+        "patricia-missing-direct-operating-corroboration-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-missing-02",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Still needed: Which time-bound current market facts materially alter the internal business explanation?",
+      "source_artifact": "VBRM",
+      "source_path": "missing_evidence[1]",
+      "source_claim_refs": [
+        "patricia-missing-current-market-context-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-missing-03",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Still needed: Which comparable observations across time establish current direction of travel?",
+      "source_artifact": "VBRM",
+      "source_path": "missing_evidence[2]",
+      "source_claim_refs": [
+        "patricia-missing-longitudinal-state-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-missing-04",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Still needed: Which active team identities carry explicit WBM_CONTEXT authority and frozen BOS hashes?",
+      "source_artifact": "VBRM",
+      "source_path": "missing_evidence[3]",
+      "source_claim_refs": [
+        "patricia-missing-authorized-team-authority-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-missing-05",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Still needed: Which governed financial records corroborate the operator-reported financial state and time window?",
+      "source_artifact": "VBRM",
+      "source_path": "missing_evidence[4]",
+      "source_claim_refs": [
+        "patricia-missing-financial-source-documents-v1"
+      ],
+      "epistemic_state": "MISSING",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-contradiction-01",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "Unresolved: Units, volume, and stated average sale price do not reconcile.",
+      "source_artifact": "VBRM",
+      "source_path": "contradictions[0]",
+      "source_claim_refs": [
+        "patricia-contradiction-financial-arithmetic-v1"
+      ],
+      "epistemic_state": "CONTRADICTED",
+      "confidence": "LOW",
+      "disclosure_policy": "DIRECT"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-01",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Direct operating records show consistent follow-up, delegation, and distributed ownership.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[0]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-02",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Source-stage data isolates demand scarcity or conversion as the governing constraint.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[1]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-03",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Financial documents establish sufficient contribution, cash, and hiring capacity.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[2]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-04",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Role and workload records establish an intentional balanced team structure.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[3]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-05",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Current market evidence explains the reported production gap.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[4]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-evidence-mind-change-06",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "What would change this view: Comparable longitudinal observations establish a stable direction of travel.",
+      "source_artifact": "WBM",
+      "source_path": "epistemic_state.mind_change_conditions[5]",
+      "source_claim_refs": [
+        "patricia-constraint-leader-centered-system-v1"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DETAIL_ONLY"
+    },
+    {
+      "statement_id": "twin-living-map-explanation",
+      "destination_id": "WHY_WE_BELIEVE_IT",
+      "customer_text": "A Living Map would revisit this frozen baseline only when governed new evidence creates a validated state transition.",
+      "source_artifact": "VBRM",
+      "source_path": "state_lineage",
+      "source_claim_refs": [
+        "6ecc9e49e981d4e56fee5263fa8bdf167b67abecb28d37c789a75d4f18d3f69c"
+      ],
+      "epistemic_state": "CONDITIONAL",
+      "confidence": "NOT_APPLICABLE",
+      "disclosure_policy": "DIRECT"
+    }
+  ],
+  "living_map_transition": {
+    "transition_count": 1,
+    "mode": "EXPLANATORY_ONLY",
+    "live_capability_claimed": false,
+    "event_socket_version": "1.0.0",
+    "explanation_statement_ref": "twin-living-map-explanation"
+  },
+  "runtime_boundaries": {
+    "provider_calls": false,
+    "network_calls": false,
+    "customer_mutation": false,
+    "subscription_active": false,
+    "whole_person_business_cause_prohibited": true
+  },
+  "twin_lineage": {
+    "twin_version": 1,
+    "previous_twin_hash": null,
+    "created_at": "2026-08-13T17:16:15.458Z"
+  },
+  "twin_hash": "1639433eafa025abec5716d6825f72194dc85a3f18ad05c7370f17be026bc837"
+}

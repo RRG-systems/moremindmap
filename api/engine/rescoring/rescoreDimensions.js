@@ -1,3 +1,5 @@
+import { WRITTEN_QUESTION_IDS } from '../questionEvidenceRegistry.js';
+
 /**
  * rescoreDimensions.js - PHASE 2: THRESHOLD + DOMINANCE REFINEMENT
  * 
@@ -200,9 +202,7 @@ function extractWrittenSignals(answers) {
     contradiction_count: 0
   };
 
-  const writtenQuestions = [2, 14, 17, 20, 22, 24, 25, 26, 27, 28];
-  
-  writtenQuestions.forEach(q => {
+  WRITTEN_QUESTION_IDS.forEach(q => {
     const answer = answers[`Q${q}`] || answers[`q${q}`] || '';
     if (!answer) return;
     

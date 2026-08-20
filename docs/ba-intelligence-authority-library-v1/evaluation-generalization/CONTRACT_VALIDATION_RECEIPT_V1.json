@@ -1,0 +1,1471 @@
+{
+  "validator_version": "ba-authority-library-validator-v1",
+  "library_root": "/private/tmp/moremindmap-bos-behavioral-reasoning-v1/docs/ba-intelligence-authority-library-v1",
+  "status": "PASS",
+  "check_count": 257,
+  "failure_count": 0,
+  "failures": [],
+  "checks": [
+    {
+      "check": "exact_bible_counts",
+      "pass": true,
+      "observed": {
+        "universal": 12,
+        "real_estate": 16
+      }
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true,
+      "word_count": 1207
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true,
+      "word_count": 1138
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true,
+      "word_count": 1102
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true,
+      "word_count": 1097
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true,
+      "word_count": 1081
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true,
+      "word_count": 1077
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true,
+      "word_count": 1045
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true,
+      "word_count": 1073
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true,
+      "word_count": 1073
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true,
+      "word_count": 1081
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true,
+      "word_count": 1054
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true,
+      "word_count": 1069
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true,
+      "word_count": 1027
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 1014
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true,
+      "word_count": 979
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true,
+      "word_count": 970
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true,
+      "word_count": 991
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 984
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 977
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 957
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 986
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 961
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 965
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true,
+      "word_count": 996
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true,
+      "word_count": 974
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true,
+      "word_count": 1002
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true,
+      "word_count": 1011
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true
+    },
+    {
+      "check": "section_contract",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true,
+      "observed_count": 22
+    },
+    {
+      "check": "minimum_depth",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true,
+      "word_count": 1014
+    },
+    {
+      "check": "five_futures_metadata_only",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "whole_person_boundary",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "team_boundary",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "cross-authority-interactions/REAL_ESTATE_CROSS_CASSETTE_INTERACTION_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "cross-authority-interactions/UNIVERSAL_CROSS_AUTHORITY_INTERACTION_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "dynamic-research-hooks/DYNAMIC_RESEARCH_HOOK_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "dynamic-research-hooks/INTERNET_RESEARCH_AND_GAP_REGISTER_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "evaluation-generalization/CONTRACT_VALIDATION_RECEIPT_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "evaluation-generalization/REAL_ESTATE_GENERALIZATION_HARNESS_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "evaluation-generalization/UNIVERSAL_GENERALIZATION_HARNESS_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "five-futures-hooks/FIVE_FUTURES_STATE_CONTRIBUTION_CONTRACT_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "freeze/BA_INTELLIGENCE_AUTHORITY_LIBRARY_MANIFEST_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "freeze/REAL_ESTATE_CASSETTE_MANIFEST_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "freeze/UNIVERSAL_BIBLE_MANIFEST_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "handoffs/AI_HANDOFF_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "registries/BA_INTELLIGENCE_AUTHORITY_LIBRARY_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "registries/REAL_ESTATE_CASSETTE_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "registries/REAL_ESTATE_SCRIPT_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "registries/UNIVERSAL_BUSINESS_BIBLE_REGISTRY_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "routing-metadata/BA_AUTHORITY_ROUTER_METADATA_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "source-catalogues/BA_AUTHORITY_LIBRARY_SOURCE_CATALOGUE_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "source-claim-maps/BA_AUTHORITY_LIBRARY_SOURCE_TO_CLAIM_MAP_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "source-claim-maps/inherited/REAL_ESTATE_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "source-claim-maps/inherited/UNIVERSAL_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "pass": true
+    },
+    {
+      "check": "json_parse",
+      "artifact": "team-socket/TEAM_MULTI_PERSON_SOCKET_CONTRACT_V1.json",
+      "pass": true
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true,
+      "expected": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "actual": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true,
+      "expected": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "actual": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true,
+      "expected": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "actual": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true,
+      "expected": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "actual": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true,
+      "expected": "f2149e2eb4a74da43127a2fc1e9876185b476a74ff25bf928f31cd3dacb42c22",
+      "actual": "f2149e2eb4a74da43127a2fc1e9876185b476a74ff25bf928f31cd3dacb42c22"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true,
+      "expected": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "actual": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true,
+      "expected": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "actual": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true,
+      "expected": "aa9873877f925992ffd435a600c1fe267f3c1639834fbf54100dd899248fcf5f",
+      "actual": "aa9873877f925992ffd435a600c1fe267f3c1639834fbf54100dd899248fcf5f"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true,
+      "expected": "ac7bab7c42e4021e391406e6275ca9a73c3c11df6ead5acd83a39bb265f05c51",
+      "actual": "ac7bab7c42e4021e391406e6275ca9a73c3c11df6ead5acd83a39bb265f05c51"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true,
+      "expected": "3983d9cd544b5f816132a7fd4c14dbd25b5b0d90d1f48aec5f945f36e87a9cf1",
+      "actual": "3983d9cd544b5f816132a7fd4c14dbd25b5b0d90d1f48aec5f945f36e87a9cf1"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true,
+      "expected": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "actual": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true,
+      "expected": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "actual": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true,
+      "expected": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "actual": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "actual": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true,
+      "expected": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "actual": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true,
+      "expected": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "actual": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true,
+      "expected": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "actual": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "actual": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb",
+      "actual": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03",
+      "actual": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359",
+      "actual": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b",
+      "actual": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437",
+      "actual": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true,
+      "expected": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "actual": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true,
+      "expected": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "actual": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true,
+      "expected": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b",
+      "actual": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true,
+      "expected": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182",
+      "actual": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182"
+    },
+    {
+      "check": "registry_artifact_hash",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true,
+      "expected": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "actual": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a"
+    },
+    {
+      "check": "five_roles",
+      "pass": true
+    },
+    {
+      "check": "approved_weight_direction",
+      "pass": true
+    },
+    {
+      "check": "no_bayesian_or_calibration",
+      "pass": true
+    },
+    {
+      "check": "all_bibles_contribute_state_only",
+      "pass": true
+    },
+    {
+      "check": "script_family_coverage",
+      "pass": true,
+      "count": 31
+    },
+    {
+      "check": "interaction_counts",
+      "pass": true,
+      "observed": {
+        "universal": 12,
+        "real_estate": 18
+      }
+    },
+    {
+      "check": "generalization_cases",
+      "pass": true,
+      "observed": {
+        "universal": 8,
+        "real_estate": 21
+      }
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "MASTER_ARTIFACT_INDEX_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "team-socket/TEAM_MULTI_PERSON_SOCKET_CONTRACT_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-claim-maps/BA_AUTHORITY_LIBRARY_SOURCE_TO_CLAIM_MAP_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-catalogues/BA_AUTHORITY_LIBRARY_SOURCE_CATALOGUE_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "freeze/REAL_ESTATE_CASSETTE_MANIFEST_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "freeze/ARTIFACT_SHA256SUMS_V1.txt",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "freeze/UNIVERSAL_BIBLE_MANIFEST_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "freeze/BA_INTELLIGENCE_AUTHORITY_LIBRARY_MANIFEST_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "freeze/FINAL_FREEZE_REPORT_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "registries/BA_INTELLIGENCE_AUTHORITY_LIBRARY_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "registries/REAL_ESTATE_CASSETTE_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "registries/REAL_ESTATE_SCRIPT_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "registries/UNIVERSAL_BUSINESS_BIBLE_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "five-futures-hooks/FIVE_FUTURES_PROTECTION_VERDICT_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "five-futures-hooks/FIVE_FUTURES_STATE_CONTRIBUTION_CONTRACT_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "cross-authority-interactions/UNIVERSAL_CROSS_AUTHORITY_INTERACTION_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "cross-authority-interactions/REAL_ESTATE_CROSS_CASSETTE_INTERACTION_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "evaluation-generalization/CONTRACT_VALIDATION_RECEIPT_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "evaluation-generalization/UNIVERSAL_GENERALIZATION_HARNESS_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "evaluation-generalization/REAL_ESTATE_GENERALIZATION_HARNESS_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "evaluation-generalization/GENERALIZATION_VALIDATION_REPORT_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "dynamic-research-hooks/DYNAMIC_RESEARCH_HOOK_REGISTRY_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "dynamic-research-hooks/INTERNET_RESEARCH_AND_GAP_REGISTER_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "routing-metadata/BA_AUTHORITY_ROUTER_METADATA_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "script-conversation-library/REAL_ESTATE_SCRIPT_AND_CONVERSATION_LIBRARY_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "handoffs/EXECUTIVE_HANDOFF_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "handoffs/AI_HANDOFF_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-catalogues/inherited/UNIVERSAL_INTERNAL_SOURCE_CATALOGUE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-catalogues/inherited/REAL_ESTATE_INTERNAL_SOURCE_CATALOGUE_V1.md",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-claim-maps/inherited/UNIVERSAL_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "pass": true,
+      "matches": []
+    },
+    {
+      "check": "secret_scan",
+      "artifact": "source-claim-maps/inherited/REAL_ESTATE_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "pass": true,
+      "matches": []
+    }
+  ]
+}

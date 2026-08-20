@@ -11,42 +11,42 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
   // Culture unintentionally created
   let unintentional_culture = 'Standard organizational dynamics';
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35) {
     unintentional_culture = 'Execution-first culture where speed is rewarded and challenge is interpreted as resistance; compliance becomes safer than contribution';
   }
   
-  if (vectorScores.framework > 6.5 && vectorScores.flex < 4.0) {
+  if (vectorScores.framework > 0.65 && vectorScores.flex < 0.40) {
     unintentional_culture = 'Process-adherence culture where following procedure is rewarded over problem-solving; innovation constrained by framework protection';
   }
   
-  if (vectorScores.fidelity > 6.5 && vectorScores.velocity < 4.5) {
+  if (vectorScores.fidelity > 0.65 && vectorScores.velocity < 0.45) {
     unintentional_culture = 'Precision-focused culture where perfectionism masquerades as professionalism; risk aversion increases as standards become identity';
   }
   
   // Communication atmosphere
   let communication_atmosphere = 'Standard professional communication';
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 4.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.40) {
     communication_atmosphere = 'Directive and efficient; emotional context processed retrospectively; people learn to suppress concerns until asked directly';
   }
   
-  if (vectorScores.signal > 6.5) {
+  if (vectorScores.signal > 0.65) {
     communication_atmosphere = 'Relationally calibrated; team feels heard but may experience decision ambiguity when consensus delays action';
   }
   
-  if (vectorScores.framework > 6.5) {
+  if (vectorScores.framework > 0.65) {
     communication_atmosphere = 'Structured and procedural; informal communication decreases; relationship quality dependent on formal touchpoints';
   }
   
   // What subordinates stop saying
   const subordinates_stop_saying = [];
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational')) {
     subordinates_stop_saying.push('Early concerns about direction or approach - learn that speed is valued over deliberation');
     subordinates_stop_saying.push('Personal/emotional impacts of decisions - processed as irrelevant to execution');
   }
   
-  if (vectorScores.fidelity > 6.5 && vectorScores.velocity < 4.5) {
+  if (vectorScores.fidelity > 0.65 && vectorScores.velocity < 0.45) {
     subordinates_stop_saying.push('Imperfect ideas or early-stage thinking - wait until fully formed to avoid critique');
   }
   
@@ -57,24 +57,24 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
   // What teams become afraid to do
   const teams_become_afraid_to = [];
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35) {
     teams_become_afraid_to.push('Challenge direction once momentum starts');
     teams_become_afraid_to.push('Slow down for relational processing');
   }
   
-  if (vectorScores.fidelity > 6.5) {
+  if (vectorScores.fidelity > 0.65) {
     teams_become_afraid_to.push('Ship imperfect work even when iteration would improve it');
     teams_become_afraid_to.push('Experiment with approaches that might fail');
   }
   
-  if (vectorScores.framework > 6.5 && vectorScores.flex < 4.0) {
+  if (vectorScores.framework > 0.65 && vectorScores.flex < 0.40) {
     teams_become_afraid_to.push('Deviate from established process even when situation requires it');
   }
   
   // Where bottlenecks form
   const bottleneck_formation = [];
   
-  if (vectorScores.vector > 6.5 && business_reality?.gap_awareness) {
+  if (vectorScores.vector > 0.65 && business_reality?.gap_awareness) {
     bottleneck_formation.push({
       location: 'Decision authority',
       mechanism: 'All significant decisions flow through single point; team waits for approval',
@@ -82,7 +82,7 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
     });
   }
   
-  if (vectorScores.signal < 3.5 && business_reality?.leadership_scope) {
+  if (vectorScores.signal < 0.35 && business_reality?.leadership_scope) {
     bottleneck_formation.push({
       location: 'Relationship management',
       mechanism: 'Limited relational bandwidth cannot scale; client/team relationships become underserved',
@@ -93,7 +93,7 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
   // Where hidden resentment accumulates
   const hidden_resentment = [];
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 3.5) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.35) {
     hidden_resentment.push({
       source: 'Feeling steamrolled or unheard',
       accumulation: 'Silent during execution, surfaces during exits or performance reviews',
@@ -101,7 +101,7 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
     });
   }
   
-  if (vectorScores.fidelity > 6.5 && vectorScores.velocity < 5.0) {
+  if (vectorScores.fidelity > 0.65 && vectorScores.velocity < 0.50) {
     hidden_resentment.push({
       source: 'Pace frustration - feels unnecessarily slow',
       accumulation: 'High-velocity team members tolerate initially, then leave for faster environments',
@@ -113,17 +113,17 @@ export function inferOrganizationalEffects(vectorScores, leadershipReadiness, an
   const short_term_effects = [];
   const long_term_effects = [];
   
-  if (vectorScores.vector > 6.5 && vectorScores.velocity > 6.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.velocity > 0.60) {
     short_term_effects.push('Team moves quickly under urgency; execution happens fast');
     long_term_effects.push('Independent thinking gradually decreases because speed becomes more rewarded than challenge; culture becomes execute-on-command');
   }
   
-  if (vectorScores.fidelity > 6.5) {
+  if (vectorScores.fidelity > 0.65) {
     short_term_effects.push('Quality increases; errors caught before shipping');
     long_term_effects.push('Risk tolerance decreases; innovation slows as psychological safety narrows');
   }
   
-  if (vectorScores.framework > 6.5 && vectorScores.flex < 4.0) {
+  if (vectorScores.framework > 0.65 && vectorScores.flex < 0.40) {
     short_term_effects.push('Clear expectations and process reduce confusion');
     long_term_effects.push('Adaptability atrophies; organization responds slowly to market changes despite strong execution');
   }

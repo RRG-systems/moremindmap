@@ -11,7 +11,7 @@
  * Build causal chain for high vector + low signal pattern
  */
 function buildVectorSignalChain(vectorScores, analyzedResponses, futureTrajectory) {
-  if (vectorScores.vector < 6.5 || vectorScores.signal > 4.0) return null;
+  if (vectorScores.vector < 0.65 || vectorScores.signal > 0.40) return null;
   
   return {
     pattern_name: 'Decisive action with delayed relational processing',
@@ -25,7 +25,7 @@ function buildVectorSignalChain(vectorScores, analyzedResponses, futureTrajector
     coaching_interruption_point: 'Build relational awareness check-in BEFORE directive action; pause for calibration',
     intervention_timing: '90-day intensive practice window',
     evidence_strength: 'high',
-    inevitability: vectorScores.vector > 7.0 && vectorScores.signal < 3.0 ? 'very high' : 'high'
+    inevitability: vectorScores.vector > 0.70 && vectorScores.signal < 0.30 ? 'very high' : 'high'
   };
 }
 

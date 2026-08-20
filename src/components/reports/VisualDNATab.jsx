@@ -9,6 +9,12 @@ function ApprovedVisualPanel({ visualDNA }) {
       <p className="mt-3 text-sm leading-relaxed text-white/80">
         A visual representation of your Behavioral Operating System.
       </p>
+      {visualDNA?.layer3_translation_status === 'stored_visual_not_translated' ? (
+        <p className="mt-3 rounded-lg border border-amber-300/20 bg-amber-400/5 px-3 py-2 text-xs leading-relaxed text-amber-100/75">
+          This approved image is shown in its original form. The current customer explanation does
+          not rewrite words that are part of the image itself.
+        </p>
+      ) : null}
       {visualDNA?.image_url ? (
         <img
           src={visualDNA.image_url}
@@ -32,8 +38,7 @@ function BosDnaVisualPanel({ viewModel, personName, profileId }) {
             Behavioral Operating System Visual Map
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/75">
-            Premium deterministic BOS DNA visual built from your operating scores and profile pattern.
-            Rendered at display time — not stored as an image.
+            A visual map of the score patterns supported by your responses.
           </p>
         </div>
         {hasViewModel ? (
@@ -89,9 +94,9 @@ function DraftVisualPanel({ personName, operatingScores = [], viewModel, profile
   return (
     <section className="space-y-6">
       <div className="rounded-2xl border border-violet-400/25 bg-violet-500/5 p-5">
-        <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-violet-300/80">Visual DNA draft</p>
+        <p className="text-[0.65rem] font-bold uppercase tracking-[0.2em] text-violet-300/80">Your Visual DNA</p>
         <p className="mt-3 text-sm leading-relaxed text-white/80">
-          This is a visual representation of your operating system. The final approved image version may be added after review.
+          This map highlights the measured pattern while leaving unsupported conclusions open.
         </p>
       </div>
 

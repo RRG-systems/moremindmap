@@ -1,0 +1,2064 @@
+{
+  "contract_id": "more-whole-business-model-v1",
+  "contract_version": "1.0.0",
+  "schema_version": "1.0.0",
+  "assessment_identity": {
+    "business_id": "business-ba-20260714-64ca0783",
+    "assessment_id": "ba-20260714-64ca0783",
+    "owner_profile_id": "mm-20260708-dsst020z",
+    "vertical": "real_estate"
+  },
+  "frozen_whole_person_authority": {
+    "profile_id": "mm-20260708-dsst020z",
+    "bos_version": "bos_personality_dna_runtime_v1:bos_vector_free_whole_person_model_v1",
+    "bos_hash": "54e3c525a63f34864a2b88eb7ce42bd7df9053e79f03e73b4aaa4aba472d61c2",
+    "selected_claim_refs": [
+      "patricia-wpm-operating-core-v1",
+      "patricia-wpm-work-relationships-v1",
+      "patricia-wpm-pressure-recovery-v1",
+      "patricia-wpm-role-seat-v1",
+      "patricia-wpm-cognitive-process-v1",
+      "patricia-wpm-energy-context-v1"
+    ]
+  },
+  "source_integrity": {
+    "context_hash": "6586d0f45b03bbacbab279667d3a5ecf9fe62b2909b7ebb3e8606b2a354e7dca",
+    "authority_hashes": {
+      "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+      "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+      "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+      "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+      "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+      "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+      "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+      "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+      "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q1",
+      "ba-20260714-64ca0783-q2",
+      "ba-20260714-64ca0783-q3",
+      "ba-20260714-64ca0783-q4",
+      "ba-20260714-64ca0783-q5",
+      "ba-20260714-64ca0783-q6",
+      "ba-20260714-64ca0783-q7",
+      "ba-20260714-64ca0783-q8",
+      "ba-20260714-64ca0783-q9",
+      "ba-20260714-64ca0783-q10",
+      "ba-20260714-64ca0783-q11",
+      "ba-20260714-64ca0783-q12"
+    ],
+    "dynamic_refs": []
+  },
+  "authority_receipts": [
+    {
+      "router_version": "whole-business-context-router-v1",
+      "frozen_library_manifest_id": "ba-intelligence-authority-library-manifest-v1",
+      "frozen_library_version": "1.0.0",
+      "frozen_library_verdict": "BA_INTELLIGENCE_AUTHORITY_LIBRARY_V1_FROZEN_READY_FOR_RUNTIME_INTEGRATION",
+      "purpose": "whole_business_model_construction",
+      "business_id": "business-ba-20260714-64ca0783",
+      "vertical_id": "real_estate",
+      "selected_authority_ids": [
+        "UB-01",
+        "UB-02",
+        "UB-03",
+        "UB-12",
+        "UB-04",
+        "UB-06",
+        "UB-11",
+        "UB-07",
+        "RE-01",
+        "RE-16",
+        "RE-02",
+        "RE-03",
+        "RE-04",
+        "RE-05",
+        "RE-06",
+        "RE-13",
+        "RE-12",
+        "RE-14"
+      ],
+      "selected_section_ids": [
+        "UB-01:mission",
+        "UB-01:core_primitives",
+        "UB-01:causal_mechanisms",
+        "UB-01:evidence_inputs",
+        "UB-01:strong_patterns",
+        "UB-01:counterexamples_and_confounds",
+        "UB-01:cross_authority_interactions",
+        "UB-01:evidence_confidence_and_uncertainty",
+        "UB-01:falsifiers",
+        "UB-01:intervention_relevance",
+        "UB-01:five_futures_state_contribution_contract",
+        "UB-02:mission",
+        "UB-02:core_primitives",
+        "UB-02:causal_mechanisms",
+        "UB-02:evidence_inputs",
+        "UB-02:strong_patterns",
+        "UB-02:counterexamples_and_confounds",
+        "UB-02:cross_authority_interactions",
+        "UB-02:evidence_confidence_and_uncertainty",
+        "UB-02:falsifiers",
+        "UB-02:intervention_relevance",
+        "UB-02:five_futures_state_contribution_contract",
+        "UB-03:mission",
+        "UB-03:core_primitives",
+        "UB-03:causal_mechanisms",
+        "UB-03:evidence_inputs",
+        "UB-03:strong_patterns",
+        "UB-03:counterexamples_and_confounds",
+        "UB-03:cross_authority_interactions",
+        "UB-03:evidence_confidence_and_uncertainty",
+        "UB-03:falsifiers",
+        "UB-03:intervention_relevance",
+        "UB-03:five_futures_state_contribution_contract",
+        "UB-12:mission",
+        "UB-12:core_primitives",
+        "UB-12:causal_mechanisms",
+        "UB-12:evidence_inputs",
+        "UB-12:strong_patterns",
+        "UB-12:counterexamples_and_confounds",
+        "UB-12:cross_authority_interactions",
+        "UB-12:evidence_confidence_and_uncertainty",
+        "UB-12:falsifiers",
+        "UB-12:intervention_relevance",
+        "UB-12:five_futures_state_contribution_contract",
+        "UB-04:mission",
+        "UB-04:core_primitives",
+        "UB-04:causal_mechanisms",
+        "UB-04:evidence_inputs",
+        "UB-04:strong_patterns",
+        "UB-04:counterexamples_and_confounds",
+        "UB-04:cross_authority_interactions",
+        "UB-04:evidence_confidence_and_uncertainty",
+        "UB-04:falsifiers",
+        "UB-04:intervention_relevance",
+        "UB-04:five_futures_state_contribution_contract",
+        "UB-06:mission",
+        "UB-06:core_primitives",
+        "UB-06:causal_mechanisms",
+        "UB-06:evidence_inputs",
+        "UB-06:strong_patterns",
+        "UB-06:counterexamples_and_confounds",
+        "UB-06:cross_authority_interactions",
+        "UB-06:evidence_confidence_and_uncertainty",
+        "UB-06:falsifiers",
+        "UB-06:intervention_relevance",
+        "UB-06:five_futures_state_contribution_contract",
+        "UB-11:mission",
+        "UB-11:core_primitives",
+        "UB-11:causal_mechanisms",
+        "UB-11:evidence_inputs",
+        "UB-11:strong_patterns",
+        "UB-11:counterexamples_and_confounds",
+        "UB-11:cross_authority_interactions",
+        "UB-11:evidence_confidence_and_uncertainty",
+        "UB-11:falsifiers",
+        "UB-11:intervention_relevance",
+        "UB-11:five_futures_state_contribution_contract",
+        "UB-07:mission",
+        "UB-07:core_primitives",
+        "UB-07:causal_mechanisms",
+        "UB-07:evidence_inputs",
+        "UB-07:strong_patterns",
+        "UB-07:counterexamples_and_confounds",
+        "UB-07:cross_authority_interactions",
+        "UB-07:evidence_confidence_and_uncertainty",
+        "UB-07:falsifiers",
+        "UB-07:intervention_relevance",
+        "UB-07:five_futures_state_contribution_contract",
+        "RE-01:mission",
+        "RE-01:core_primitives",
+        "RE-01:causal_mechanisms",
+        "RE-01:evidence_inputs",
+        "RE-01:strong_patterns",
+        "RE-01:counterexamples_and_confounds",
+        "RE-01:cross_authority_interactions",
+        "RE-01:evidence_confidence_and_uncertainty",
+        "RE-01:falsifiers",
+        "RE-01:intervention_relevance",
+        "RE-01:five_futures_state_contribution_contract",
+        "RE-16:mission",
+        "RE-16:core_primitives",
+        "RE-16:causal_mechanisms",
+        "RE-16:evidence_inputs",
+        "RE-16:strong_patterns",
+        "RE-16:counterexamples_and_confounds",
+        "RE-16:cross_authority_interactions",
+        "RE-16:evidence_confidence_and_uncertainty",
+        "RE-16:falsifiers",
+        "RE-16:intervention_relevance",
+        "RE-16:five_futures_state_contribution_contract",
+        "RE-02:mission",
+        "RE-02:core_primitives",
+        "RE-02:causal_mechanisms",
+        "RE-02:evidence_inputs",
+        "RE-02:strong_patterns",
+        "RE-02:counterexamples_and_confounds",
+        "RE-02:cross_authority_interactions",
+        "RE-02:evidence_confidence_and_uncertainty",
+        "RE-02:falsifiers",
+        "RE-02:intervention_relevance",
+        "RE-02:five_futures_state_contribution_contract",
+        "RE-03:mission",
+        "RE-03:core_primitives",
+        "RE-03:causal_mechanisms",
+        "RE-03:evidence_inputs",
+        "RE-03:strong_patterns",
+        "RE-03:counterexamples_and_confounds",
+        "RE-03:cross_authority_interactions",
+        "RE-03:evidence_confidence_and_uncertainty",
+        "RE-03:falsifiers",
+        "RE-03:intervention_relevance",
+        "RE-03:five_futures_state_contribution_contract",
+        "RE-04:mission",
+        "RE-04:core_primitives",
+        "RE-04:causal_mechanisms",
+        "RE-04:evidence_inputs",
+        "RE-04:strong_patterns",
+        "RE-04:counterexamples_and_confounds",
+        "RE-04:cross_authority_interactions",
+        "RE-04:evidence_confidence_and_uncertainty",
+        "RE-04:falsifiers",
+        "RE-04:intervention_relevance",
+        "RE-04:five_futures_state_contribution_contract",
+        "RE-05:mission",
+        "RE-05:core_primitives",
+        "RE-05:causal_mechanisms",
+        "RE-05:evidence_inputs",
+        "RE-05:strong_patterns",
+        "RE-05:counterexamples_and_confounds",
+        "RE-05:cross_authority_interactions",
+        "RE-05:evidence_confidence_and_uncertainty",
+        "RE-05:falsifiers",
+        "RE-05:intervention_relevance",
+        "RE-05:five_futures_state_contribution_contract",
+        "RE-06:mission",
+        "RE-06:core_primitives",
+        "RE-06:causal_mechanisms",
+        "RE-06:evidence_inputs",
+        "RE-06:strong_patterns",
+        "RE-06:counterexamples_and_confounds",
+        "RE-06:cross_authority_interactions",
+        "RE-06:evidence_confidence_and_uncertainty",
+        "RE-06:falsifiers",
+        "RE-06:intervention_relevance",
+        "RE-06:five_futures_state_contribution_contract",
+        "RE-13:mission",
+        "RE-13:core_primitives",
+        "RE-13:causal_mechanisms",
+        "RE-13:evidence_inputs",
+        "RE-13:strong_patterns",
+        "RE-13:counterexamples_and_confounds",
+        "RE-13:cross_authority_interactions",
+        "RE-13:evidence_confidence_and_uncertainty",
+        "RE-13:falsifiers",
+        "RE-13:intervention_relevance",
+        "RE-13:five_futures_state_contribution_contract",
+        "RE-12:mission",
+        "RE-12:core_primitives",
+        "RE-12:causal_mechanisms",
+        "RE-12:evidence_inputs",
+        "RE-12:strong_patterns",
+        "RE-12:counterexamples_and_confounds",
+        "RE-12:cross_authority_interactions",
+        "RE-12:evidence_confidence_and_uncertainty",
+        "RE-12:falsifiers",
+        "RE-12:intervention_relevance",
+        "RE-12:five_futures_state_contribution_contract",
+        "RE-14:mission",
+        "RE-14:core_primitives",
+        "RE-14:causal_mechanisms",
+        "RE-14:evidence_inputs",
+        "RE-14:strong_patterns",
+        "RE-14:counterexamples_and_confounds",
+        "RE-14:cross_authority_interactions",
+        "RE-14:evidence_confidence_and_uncertainty",
+        "RE-14:falsifiers",
+        "RE-14:intervention_relevance",
+        "RE-14:five_futures_state_contribution_contract"
+      ],
+      "authority_hashes": {
+        "UB-01": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3",
+        "UB-02": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f",
+        "UB-03": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018",
+        "UB-12": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63",
+        "UB-04": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92",
+        "UB-06": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9",
+        "UB-11": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19",
+        "UB-07": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f",
+        "RE-01": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+        "RE-16": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+        "RE-02": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+        "RE-03": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+        "RE-04": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+        "RE-05": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+        "RE-06": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+        "RE-13": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+        "RE-12": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+        "RE-14": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+      },
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q6",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "wpm_refs": [
+        "patricia-wpm-operating-core-v1",
+        "patricia-wpm-work-relationships-v1",
+        "patricia-wpm-pressure-recovery-v1",
+        "patricia-wpm-role-seat-v1",
+        "patricia-wpm-cognitive-process-v1",
+        "patricia-wpm-energy-context-v1"
+      ],
+      "team_member_refs": [],
+      "dynamic_research_refs": [],
+      "rsl_refs": [],
+      "exclusions": [
+        {
+          "authority_id": "UB-05",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "UB-08",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "UB-09",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "UB-10",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-07",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-08",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-09",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-10",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-11",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        },
+        {
+          "authority_id": "RE-15",
+          "reason": "NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS"
+        }
+      ],
+      "expansion_reasons": [
+        "demand",
+        "goals",
+        "relationship",
+        "accountability",
+        "operations",
+        "financial",
+        "constraints",
+        "team",
+        "capacity",
+        "market",
+        "stage",
+        "pipeline",
+        "conversion",
+        "listing",
+        "buyer",
+        "transaction"
+      ],
+      "created_at": "2026-08-13T17:16:15.458Z"
+    }
+  ],
+  "governed_business_evidence": [
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q1"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q2"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q3"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q4"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q5"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q6"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q7"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q8"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q9"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q10"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q11"
+    },
+    {
+      "evidence_ref": "ba-20260714-64ca0783-q12"
+    }
+  ],
+  "current_business_reality": {
+    "demand": {
+      "state": "Opportunity generation is judged insufficient and remains relationship-led.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q6"
+      ]
+    },
+    "goals": {
+      "state": "Goals progress from two monthly closings toward a delegated multi-agent business.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q2"
+      ]
+    },
+    "relationship": {
+      "state": "A combined relationship base exists but lacks complete, segmented, system-governed records.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q5"
+      ]
+    },
+    "accountability": {
+      "state": "External coaching covers development and recruiting, while operating accountability is mostly self-held or absent.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q7"
+      ]
+    },
+    "operations": {
+      "state": "Core workflows are articulated, but execution and follow-through remain leader-centered.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q8"
+      ]
+    },
+    "financial": {
+      "state": "Production, gross, and expense figures are reported, but their periods, reconciliation, and owner economics remain unresolved.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11"
+      ]
+    },
+    "constraints": {
+      "state": "Organization, time management, and distraction are the operator-identified constraints.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q10"
+      ]
+    },
+    "team": {
+      "state": "Equal profit and business contribution coexist with a reported concentration of work on the operator.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q11"
+      ]
+    },
+    "capacity": {
+      "state": "Additional help, delegation, and daily CRM use are identified as necessary capacity changes.",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q12"
+      ]
+    }
+  },
+  "business_model": {
+    "value_creation": "Residential clients receive listing, buyer, and transaction coordination through direct operator involvement.",
+    "demand_entry": "Demand enters mainly through SOI contact and local networking; farming, paid leads, reviews, and online presence remain prospective lanes.",
+    "conversion": "Active opportunities are reportedly followed through joint outreach, but source-stage denominators and aging are unavailable.",
+    "delivery": "Listing and buyer workflows are defined, with transaction-coordinator support and the operator retaining primary follow-through.",
+    "value_capture": "Transaction revenue is reported through gross and expense figures without a verified commission-to-owner-profit bridge.",
+    "leverage": "A business partner, transaction coordinator, and title support provide partial leverage while core judgment and workload remain centralized.",
+    "concentration": "Demand is concentrated in relationships and execution is concentrated in the operator; source and key-person shares are unmeasured.",
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q1",
+      "ba-20260714-64ca0783-q3",
+      "ba-20260714-64ca0783-q4",
+      "ba-20260714-64ca0783-q5",
+      "ba-20260714-64ca0783-q6",
+      "ba-20260714-64ca0783-q8",
+      "ba-20260714-64ca0783-q9",
+      "ba-20260714-64ca0783-q11",
+      "ba-20260714-64ca0783-q12"
+    ]
+  },
+  "domain_states": [
+    {
+      "domain_id": "demand",
+      "authority_refs": [
+        "UB-04",
+        "UB-06",
+        "RE-05",
+        "RE-06",
+        "RE-12"
+      ],
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "claims": [
+        {
+          "claim_id": "patricia-demand-insufficiency-report-v1",
+          "meaning": "The operator reports insufficient current opportunity generation.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q1"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Active-client follow-up may differ from prospect and SOI follow-up."
+          ],
+          "falsifier": "Source-stage records show sufficient qualified opportunity for the stated goal."
+        },
+        {
+          "claim_id": "patricia-demand-lane-state-v1",
+          "meaning": "SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q1",
+            "ba-20260714-64ca0783-q4",
+            "ba-20260714-64ca0783-q6"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Unreported channels may already contribute."
+          ],
+          "falsifier": "Attributed records establish material production from the prospective lanes."
+        },
+        {
+          "claim_id": "patricia-demand-funnel-visibility-gap-v1",
+          "meaning": "Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+          "epistemic_class": "INSUFFICIENT_EVIDENCE",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q1",
+            "ba-20260714-64ca0783-q8"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Source lag and customer readiness vary."
+          ],
+          "falsifier": "Timestamped source-stage records isolate the active leak."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1"
+      ],
+      "strengths": [
+        "Existing relationship access and prior local networking results."
+      ],
+      "failure_modes": [
+        "Demand activity lacks source-level attribution and repeatability evidence."
+      ],
+      "interactions": [
+        "Generation, follow-up, conversion, and market effects remain entangled."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No channel volume, economics, or conversion rate inferred."
+      ]
+    },
+    {
+      "domain_id": "goals",
+      "authority_refs": [
+        "UB-03",
+        "UB-11",
+        "RE-13",
+        "RE-12"
+      ],
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "claims": [
+        {
+          "claim_id": "patricia-goal-horizon-v1",
+          "meaning": "The operator has explicit production, delegation, team, and office goals across multiple horizons.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q2"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Targets do not establish feasibility."
+          ],
+          "falsifier": "A corrected assessment supersedes the stated targets."
+        },
+        {
+          "claim_id": "patricia-goal-current-gap-v1",
+          "meaning": "The reported current team pace is below the near-term monthly closing target.",
+          "epistemic_class": "SUPPORTED_HYPOTHESIS",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q2",
+            "ba-20260714-64ca0783-q11"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q9"
+          ],
+          "confounds": [
+            "Production figures may use different periods or scopes."
+          ],
+          "falsifier": "Reconciled current records show the target pace is already sustained."
+        },
+        {
+          "claim_id": "patricia-goal-readiness-gap-v1",
+          "meaning": "The growth plan lacks evidenced demand, economics, role, and process gates.",
+          "epistemic_class": "SUPPORTED_HYPOTHESIS",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q2",
+            "ba-20260714-64ca0783-q5",
+            "ba-20260714-64ca0783-q9",
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Readiness evidence may exist outside the assessment."
+          ],
+          "falsifier": "Governed records establish stable demand, economics, roles, and execution."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "strengths": [
+        "Goals sequence production, leverage, and managerial transition."
+      ],
+      "failure_modes": [
+        "Targets are not connected to evidenced leading activities or hiring thresholds."
+      ],
+      "interactions": [
+        "Team growth depends on repeatability and economics rather than target timing alone."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No goal-attainment forecast inferred."
+      ]
+    },
+    {
+      "domain_id": "relationship",
+      "authority_refs": [
+        "UB-04",
+        "UB-07",
+        "RE-02",
+        "RE-03",
+        "RE-04"
+      ],
+      "epistemic_class": "KNOWN",
+      "claims": [
+        {
+          "claim_id": "patricia-relationship-base-v1",
+          "meaning": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q3",
+            "ba-20260714-64ca0783-q5"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Mindshare is operator-estimated rather than behaviorally verified."
+          ],
+          "falsifier": "Database and source records materially contradict the reported composition."
+        },
+        {
+          "claim_id": "patricia-relationship-data-state-v1",
+          "meaning": "The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q5"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Other contact records may exist outside the spreadsheet."
+          ],
+          "falsifier": "Current CRM records demonstrate complete segmented ownership and history."
+        },
+        {
+          "claim_id": "patricia-relationship-cadence-v1",
+          "meaning": "Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q5"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Active leads and past relationships may receive different treatment."
+          ],
+          "falsifier": "Touch histories show consistent state-based follow-up across the relationship base."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-relationship-activation-gap-v1",
+        "patricia-mech-leader-centered-operating-bottleneck-v1"
+      ],
+      "strengths": [
+        "The operator reports ease initiating SOI contact."
+      ],
+      "failure_modes": [
+        "Identity completeness, segmentation, history, qualification, and next actions are not governed."
+      ],
+      "interactions": [
+        "Raw contact count cannot establish mindshare, referral value, or production."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No referral rate, repeat rate, consent state, or relationship value inferred."
+      ]
+    },
+    {
+      "domain_id": "accountability",
+      "authority_refs": [
+        "UB-03",
+        "UB-12",
+        "RE-12"
+      ],
+      "epistemic_class": "KNOWN",
+      "claims": [
+        {
+          "claim_id": "patricia-accountability-scope-v1",
+          "meaning": "Coaching is present for business development and recruiting.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q7"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Cadence, inspection, and execution fidelity are unspecified."
+          ],
+          "falsifier": "Current coaching records show a different scope."
+        },
+        {
+          "claim_id": "patricia-accountability-operating-gap-v1",
+          "meaning": "Routine business execution is primarily self-accountable or unowned.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q7"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Informal partner accountability may be underreported."
+          ],
+          "falsifier": "Review records show recurring ownership, commitments, and inspected outcomes."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1"
+      ],
+      "strengths": [
+        "A coaching relationship already exists in a bounded area."
+      ],
+      "failure_modes": [
+        "Operating commitments and leading indicators lack evidenced inspection."
+      ],
+      "interactions": [
+        "Accountability effectiveness depends on measurable activity and explicit ownership."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No coaching effectiveness claim inferred."
+      ]
+    },
+    {
+      "domain_id": "operations",
+      "authority_refs": [
+        "UB-01",
+        "UB-03",
+        "UB-12",
+        "RE-01",
+        "RE-12"
+      ],
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "claims": [
+        {
+          "claim_id": "patricia-operations-process-knowledge-v1",
+          "meaning": "Listing, buyer, lead, transaction, and recruiting steps are articulated.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Process description does not prove consistent execution."
+          ],
+          "falsifier": "Direct records show the described workflows are not used."
+        },
+        {
+          "claim_id": "patricia-operations-leader-ownership-v1",
+          "meaning": "The operator retains primary transaction follow-through while using coordinator support as needed.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Unreported delegated work may reduce actual dependence."
+          ],
+          "falsifier": "Role and task records show durable ownership outside the operator."
+        },
+        {
+          "claim_id": "patricia-operations-repeatability-v1",
+          "meaning": "Operational repeatability is unverified despite the operator describing current processes as working.",
+          "epistemic_class": "SUPPORTED_HYPOTHESIS",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q8",
+            "ba-20260714-64ca0783-q10",
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "The reported weaknesses may concern efficiency rather than outcome quality."
+          ],
+          "falsifier": "Direct workflow records show stable adherence, delegation, cycle time, and quality."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1"
+      ],
+      "strengths": [
+        "Core process knowledge and transaction-coordinator access."
+      ],
+      "failure_modes": [
+        "Execution remains dependent on personal follow-through and unverified routines."
+      ],
+      "interactions": [
+        "Support availability does not establish delegated ownership or transferability."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No cycle-time, quality, rework, or adherence level inferred."
+      ]
+    },
+    {
+      "domain_id": "financial",
+      "authority_refs": [
+        "UB-02",
+        "UB-12",
+        "RE-01",
+        "RE-16"
+      ],
+      "epistemic_class": "CONFLICTED",
+      "claims": [
+        {
+          "claim_id": "patricia-financial-reported-state-v1",
+          "meaning": "Units, sales volume, gross, and expenses are reported for incompletely defined periods.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q9",
+            "ba-20260714-64ca0783-q11"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "The two responses may represent different entities, scopes, or periods."
+          ],
+          "falsifier": "Governed records materially replace the reported figures."
+        },
+        {
+          "claim_id": "patricia-financial-arithmetic-conflict-v1",
+          "meaning": "Reported units and volume imply an average sale price below the separately stated average.",
+          "epistemic_class": "CONFLICTED",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q9"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Rounding, excluded transactions, or mismatched periods could reconcile the figures."
+          ],
+          "falsifier": "Source documents reconcile the units, volume, and average price."
+        },
+        {
+          "claim_id": "patricia-financial-profitability-gap-v1",
+          "meaning": "Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+          "epistemic_class": "INSUFFICIENT_EVIDENCE",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q9"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Tax or P&L records may contain the missing bridge."
+          ],
+          "falsifier": "Governed financial records establish the complete economic bridge."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-measurement-attribution-blindness-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "strengths": [
+        "Some production and expense visibility is already reported."
+      ],
+      "failure_modes": [
+        "Current evidence cannot evaluate cash, true profit, source economics, or hiring capacity."
+      ],
+      "interactions": [
+        "Production growth cannot be assumed to improve owner economics."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No profit, margin, cash, reserve, or hiring threshold inferred."
+      ]
+    },
+    {
+      "domain_id": "constraints",
+      "authority_refs": [
+        "UB-03",
+        "UB-12",
+        "RE-12"
+      ],
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "claims": [
+        {
+          "claim_id": "patricia-constraint-self-attribution-v1",
+          "meaning": "The operator attributes limitation to organization, time management, and distraction.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q10"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Symptoms may arise from workload, unclear roles, or missing systems."
+          ],
+          "falsifier": "Time-use and flow records identify a different limiting point."
+        },
+        {
+          "claim_id": "patricia-constraint-cause-boundary-v1",
+          "meaning": "Current evidence does not establish whether the reported constraint is personal, structural, or mixed.",
+          "epistemic_class": "INSUFFICIENT_EVIDENCE",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q7",
+            "ba-20260714-64ca0783-q8",
+            "ba-20260714-64ca0783-q10",
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Self-description can collapse several mechanisms into one label."
+          ],
+          "falsifier": "Comparable records isolate one governing cause."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1"
+      ],
+      "strengths": [],
+      "failure_modes": [
+        "A personal explanation could obscure role, workload, and system causes."
+      ],
+      "interactions": [
+        "Constraint identity depends on demand, flow, workload, and execution evidence."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No personality cause established."
+      ]
+    },
+    {
+      "domain_id": "team",
+      "authority_refs": [
+        "UB-11",
+        "RE-13",
+        "RE-14",
+        "RE-16"
+      ],
+      "epistemic_class": "TENTATIVE",
+      "claims": [
+        {
+          "claim_id": "patricia-team-contribution-workload-state-v1",
+          "meaning": "Profit and business contribution are reported as equal while the operator reports performing most team work.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q11"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Task volume may not equal economic value, judgment load, or time."
+          ],
+          "falsifier": "Role, time, contribution, and compensation records show aligned workload and economics."
+        },
+        {
+          "claim_id": "patricia-team-joint-client-work-v1",
+          "meaning": "The business partner participates in joint lead and client follow-up.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Frequency and ownership are unmeasured."
+          ],
+          "falsifier": "Communication and routing records show no material joint execution."
+        },
+        {
+          "claim_id": "patricia-team-authority-boundary-v1",
+          "meaning": "No person-level team synthesis is authorized for the reported partner relationship.",
+          "epistemic_class": "ABSTAINED",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q11"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [],
+          "falsifier": "An active authorized team identity and frozen authority are supplied."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "strengths": [
+        "Joint follow-up and equal reported business contribution provide partial balance."
+      ],
+      "failure_modes": [
+        "Seats, decisions, workload, relationship ownership, and team economics are not governed."
+      ],
+      "interactions": [
+        "Unequal task volume may coexist with equal business contribution without proving inequity."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No member psychology, team aggregate, or interpersonal cause inferred."
+      ]
+    },
+    {
+      "domain_id": "capacity",
+      "authority_refs": [
+        "UB-03",
+        "UB-11",
+        "RE-12",
+        "RE-13",
+        "RE-14"
+      ],
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "claims": [
+        {
+          "claim_id": "patricia-capacity-help-need-v1",
+          "meaning": "The operator reports needing help, delegation, an assistant, and reliable CRM use.",
+          "epistemic_class": "KNOWN",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "A hire may not address process or role ambiguity."
+          ],
+          "falsifier": "Workload and flow records show sufficient capacity without those changes."
+        },
+        {
+          "claim_id": "patricia-capacity-leader-load-v1",
+          "meaning": "Primary transaction ownership and reported team workload concentrate capacity demand on the operator.",
+          "epistemic_class": "SUPPORTED_HYPOTHESIS",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q8",
+            "ba-20260714-64ca0783-q11",
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [
+            "ba-20260714-64ca0783-q8"
+          ],
+          "confounds": [
+            "Coordinator and partner support may offset more load than reported."
+          ],
+          "falsifier": "Task and time records show no concentrated queue, delay, or displaced demand activity."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-partnership-workload-misalignment-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "strengths": [
+        "Existing external and partner support can absorb bounded tasks."
+      ],
+      "failure_modes": [
+        "Adding people before clarifying work and economics may add coordination rather than capacity."
+      ],
+      "interactions": [
+        "Capacity relief depends on task transfer, decision rights, and adoption fidelity."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No staffing quantity or utilization level inferred."
+      ]
+    },
+    {
+      "domain_id": "market",
+      "authority_refs": [
+        "UB-04",
+        "UB-12",
+        "RE-05",
+        "RE-06"
+      ],
+      "epistemic_class": "INSUFFICIENT_EVIDENCE",
+      "claims": [
+        {
+          "claim_id": "patricia-market-current-state-v1",
+          "meaning": "No time-bound market or financing evidence is available to explain current demand or conversion.",
+          "epistemic_class": "INSUFFICIENT_EVIDENCE",
+          "evidence_refs": [],
+          "counterevidence_refs": [],
+          "confounds": [],
+          "falsifier": "Governed current market evidence establishes material effects."
+        }
+      ],
+      "mechanisms": [],
+      "strengths": [],
+      "failure_modes": [],
+      "interactions": [
+        "Market effects remain an external confound rather than an established cause."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No market constraint or tailwind inferred."
+      ]
+    },
+    {
+      "domain_id": "stage",
+      "authority_refs": [
+        "UB-03",
+        "UB-11",
+        "RE-13"
+      ],
+      "epistemic_class": "TENTATIVE",
+      "claims": [
+        {
+          "claim_id": "patricia-stage-readiness-state-v1",
+          "meaning": "Transaction experience exists, but leverage readiness and transferability are not established.",
+          "epistemic_class": "SUPPORTED_HYPOTHESIS",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q2",
+            "ba-20260714-64ca0783-q8",
+            "ba-20260714-64ca0783-q9",
+            "ba-20260714-64ca0783-q12"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Direct process and economic records may show greater maturity."
+          ],
+          "falsifier": "Verified repeatability, economics, delegated ownership, and stable demand establish leverage readiness."
+        },
+        {
+          "claim_id": "patricia-stage-longitudinal-state-v1",
+          "meaning": "No comparable observations establish progression, regression, or stability.",
+          "epistemic_class": "INSUFFICIENT_EVIDENCE",
+          "evidence_refs": [
+            "ba-20260714-64ca0783-q9",
+            "ba-20260714-64ca0783-q11"
+          ],
+          "counterevidence_refs": [],
+          "confounds": [
+            "Reported periods and scopes are not comparable."
+          ],
+          "falsifier": "Reconciled longitudinal records establish direction."
+        }
+      ],
+      "mechanisms": [
+        "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "patricia-mech-leverage-readiness-gap-v1",
+        "patricia-mech-financial-decision-opacity-v1"
+      ],
+      "strengths": [
+        "Existing production and articulated processes provide a base for readiness testing."
+      ],
+      "failure_modes": [
+        "Stage could be overstated from production alone or understated from sparse evidence."
+      ],
+      "interactions": [
+        "Stage depends jointly on demand, economics, systems, roles, and leader dependence."
+      ],
+      "missing_evidence": [],
+      "abstentions": [
+        "No definitive operating-stage label inferred."
+      ]
+    }
+  ],
+  "person_business_synthesis": [
+    {
+      "relationship_id": "patricia-person-link-adaptive-system-adoption-v1",
+      "business_mechanism_ref": "patricia-mech-leader-centered-operating-bottleneck-v1",
+      "whole_person_claim_ref": "patricia-wpm-operating-core-v1",
+      "relationship_type": "FEASIBILITY_MODIFIER",
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "whole_person_evidence_refs": [
+        "bi_operating",
+        "bi_world",
+        "bi_contradictions",
+        "cp_identity"
+      ],
+      "alternative_explanations": [
+        "Workload and role design may determine adoption independently of personal operating style."
+      ],
+      "epistemic_class": "TENTATIVE",
+      "falsifier": "System adoption and delegation show no relationship to adaptive implementation format.",
+      "intervention_implications": [
+        "Use bounded iterative implementation with explicit ownership and evidence."
+      ],
+      "business_cause_established_by_personality": false
+    },
+    {
+      "relationship_id": "patricia-person-link-pressure-operating-friction-v1",
+      "business_mechanism_ref": "patricia-mech-leader-centered-operating-bottleneck-v1",
+      "whole_person_claim_ref": "patricia-wpm-pressure-recovery-v1",
+      "relationship_type": "FRICTION",
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "whole_person_evidence_refs": [
+        "bi_pressure",
+        "cp_stress"
+      ],
+      "alternative_explanations": [
+        "Structural overload or absent accountability may fully explain execution friction."
+      ],
+      "epistemic_class": "TENTATIVE",
+      "falsifier": "Pressure-state observations show no change in system adherence, delegation, or recovery.",
+      "intervention_implications": [
+        "Make ownership and check-ins explicit before workload pressure escalates."
+      ],
+      "business_cause_established_by_personality": false
+    },
+    {
+      "relationship_id": "patricia-person-link-hybrid-seat-transition-v1",
+      "business_mechanism_ref": "patricia-mech-leverage-readiness-gap-v1",
+      "whole_person_claim_ref": "patricia-wpm-role-seat-v1",
+      "relationship_type": "FEASIBILITY_MODIFIER",
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q2",
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "whole_person_evidence_refs": [
+        "cp_role",
+        "cp_environment",
+        "bi_scaling",
+        "u_role"
+      ],
+      "alternative_explanations": [
+        "Economic and operating readiness may govern the producer-to-manager transition regardless of role preference."
+      ],
+      "epistemic_class": "TENTATIVE",
+      "falsifier": "Role trials show the mapped demands do not affect transition feasibility.",
+      "intervention_implications": [
+        "Test seat boundaries before treating managerial aspiration as leverage readiness."
+      ],
+      "business_cause_established_by_personality": false
+    },
+    {
+      "relationship_id": "patricia-person-link-measurement-adoption-v1",
+      "business_mechanism_ref": "patricia-mech-measurement-attribution-blindness-v1",
+      "whole_person_claim_ref": "patricia-wpm-cognitive-process-v1",
+      "relationship_type": "FEASIBILITY_MODIFIER",
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q10"
+      ],
+      "whole_person_evidence_refs": [
+        "bi_world",
+        "bi_decision"
+      ],
+      "alternative_explanations": [
+        "Tool design, workload, and accountability may dominate measurement adoption."
+      ],
+      "epistemic_class": "TENTATIVE",
+      "falsifier": "Measurement fidelity is unaffected by short-cycle, accuracy-oriented implementation.",
+      "intervention_implications": [
+        "Keep measurement narrow, concrete, and tied to immediate next actions."
+      ],
+      "business_cause_established_by_personality": false
+    },
+    {
+      "relationship_id": "patricia-person-link-team-cause-boundary-v1",
+      "business_mechanism_ref": "patricia-mech-partnership-workload-misalignment-v1",
+      "whole_person_claim_ref": "patricia-wpm-work-relationships-v1",
+      "relationship_type": "ABSTAINED",
+      "business_evidence_refs": [
+        "ba-20260714-64ca0783-q11"
+      ],
+      "whole_person_evidence_refs": [
+        "bi_operating",
+        "bi_world",
+        "bi_contradictions",
+        "cp_identity"
+      ],
+      "alternative_explanations": [
+        "Roles, task valuation, profit sharing, and operating structure may explain the reported imbalance."
+      ],
+      "epistemic_class": "INSUFFICIENT_EVIDENCE",
+      "falsifier": "Authorized observations link the reported team outcome to the governed Whole-Person mechanism.",
+      "intervention_implications": [
+        "Do not attribute the team structure to personality."
+      ],
+      "business_cause_established_by_personality": false
+    }
+  ],
+  "team_organizational_synthesis": [],
+  "causal_model": {
+    "mechanisms": [
+      {
+        "mechanism_id": "patricia-mech-relationship-activation-gap-v1",
+        "observed_symptom": "A sizeable relationship base coexists with insufficient demand and acknowledged follow-up weakness.",
+        "underlying_mechanism": "Relationship value is weakly captured because contact completeness, state, recency, segmentation, and next actions are not governed.",
+        "causal_chain": [
+          "Incomplete relationship records limit qualification and prioritization.",
+          "Random outreach and broadcast contact reduce observable continuity.",
+          "Unactivated relationships produce fewer attributable opportunities and weaken learning."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q1",
+          "ba-20260714-64ca0783-q3",
+          "ba-20260714-64ca0783-q5",
+          "ba-20260714-64ca0783-q6"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q8"
+        ],
+        "confounds": [
+          "Active opportunities may receive stronger follow-up than the broader SOI.",
+          "Residential repeat and referral effects can have long lags.",
+          "Market and source mix are unknown."
+        ],
+        "delayed_effects": [
+          "Relationship activation may affect appointments, referrals, and closings only after source-dependent lag."
+        ],
+        "feedback_loops": [
+          "Weak follow-up can encourage adding more lanes, diluting execution and further weakening follow-up."
+        ],
+        "falsifier": "Complete touch and source records show consistent activation without improvement in attributable opportunity, absent material confounds.",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS",
+        "affected_domains": [
+          "demand",
+          "relationship",
+          "conversion",
+          "pipeline",
+          "operations"
+        ]
+      },
+      {
+        "mechanism_id": "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "observed_symptom": "The operator retains primary follow-through, reports most team work, and requests organization and delegation relief.",
+        "underlying_mechanism": "Work, decisions, relationship continuity, and accountability converge on one operator instead of transferable roles and systems.",
+        "causal_chain": [
+          "Central ownership increases interruptions and task switching.",
+          "System-building, delegation, and demand activity compete with delivery work.",
+          "Dependence persists and constrains repeatable growth."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q5",
+          "ba-20260714-64ca0783-q7",
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q10",
+          "ba-20260714-64ca0783-q11",
+          "ba-20260714-64ca0783-q12"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q11"
+        ],
+        "confounds": [
+          "Workload concentration is self-reported.",
+          "Intentional boutique production can remain leader-centered.",
+          "Partner, coordinator, and title support may offset unmeasured work."
+        ],
+        "delayed_effects": [
+          "Displaced generation and system work may appear later as pipeline or income weakness."
+        ],
+        "feedback_loops": [
+          "Central work reduces time to transfer systems, causing more work to remain central."
+        ],
+        "falsifier": "Direct flow and time records show balanced ownership, stable execution, and no displacement of constraint work.",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS",
+        "affected_domains": [
+          "demand",
+          "conversion",
+          "transaction",
+          "operations",
+          "accountability",
+          "capacity",
+          "team",
+          "stage",
+          "goals",
+          "constraints"
+        ]
+      },
+      {
+        "mechanism_id": "patricia-mech-measurement-attribution-blindness-v1",
+        "observed_symptom": "Production goals and operating claims cannot be traced through source, stage, activity, aging, and outcome records.",
+        "underlying_mechanism": "Sparse instrumentation prevents diagnosis of whether demand, conversion, capacity, or market effects govern output.",
+        "causal_chain": [
+          "Missing stage and source lineage obscures the active leak.",
+          "Allocation follows perception rather than tested mechanism.",
+          "Learning and repeatability remain weak."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q1",
+          "ba-20260714-64ca0783-q5",
+          "ba-20260714-64ca0783-q7",
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q9",
+          "ba-20260714-64ca0783-q11"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q9"
+        ],
+        "confounds": [
+          "Records may exist outside the assessment.",
+          "Production figures may cover different periods or entities.",
+          "Market and source lag can break simple activity-outcome comparisons."
+        ],
+        "delayed_effects": [
+          "Incorrect allocation may affect closings only after pipeline lag."
+        ],
+        "feedback_loops": [
+          "Unmeasured activity produces ambiguous outcomes, reinforcing perception-based allocation."
+        ],
+        "falsifier": "Governed source-stage records consistently identify drivers and support reliable allocation decisions.",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS",
+        "affected_domains": [
+          "financial",
+          "demand",
+          "conversion",
+          "pipeline",
+          "operations",
+          "accountability",
+          "goals"
+        ]
+      },
+      {
+        "mechanism_id": "patricia-mech-partnership-workload-misalignment-v1",
+        "observed_symptom": "Equal profit and business contribution coexist with a report that one operator performs most work.",
+        "underlying_mechanism": "Seat scope, task value, decision rights, and economic sharing are not sufficiently measured to establish alignment.",
+        "causal_chain": [
+          "Ambiguous contribution measures obscure role performance.",
+          "One operator may absorb coordination and rescue work.",
+          "Unresolved load can reduce capacity and complicate scaling."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q11"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q11"
+        ],
+        "confounds": [
+          "Task count may not represent revenue value or judgment.",
+          "Role specialization may be intentional.",
+          "The profit agreement may consciously exchange different contributions."
+        ],
+        "delayed_effects": [
+          "Capacity or relationship effects may emerge only as volume and coordination increase."
+        ],
+        "feedback_loops": [
+          "Leader rescue can conceal weak seat definition, preserving the need for further rescue."
+        ],
+        "falsifier": "Role, time, contribution, and economics records show an intentional balanced arrangement without capacity effects.",
+        "epistemic_class": "TENTATIVE",
+        "affected_domains": [
+          "financial",
+          "relationship",
+          "operations",
+          "accountability",
+          "capacity",
+          "team"
+        ]
+      },
+      {
+        "mechanism_id": "patricia-mech-leverage-readiness-gap-v1",
+        "observed_symptom": "Hiring and team-growth goals precede verified repeatability, economics, role clarity, and transferable systems.",
+        "underlying_mechanism": "Additional people may multiply coordination requirements before the operating model is ready to convert them into productive capacity.",
+        "causal_chain": [
+          "Unproven work and ownership are transferred incompletely.",
+          "Coordination and leader oversight increase.",
+          "Growth can deepen dependence or reduce economic resilience."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q2",
+          "ba-20260714-64ca0783-q5",
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q9",
+          "ba-20260714-64ca0783-q11",
+          "ba-20260714-64ca0783-q12"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q9"
+        ],
+        "confounds": [
+          "A bounded ramp investment may be intentional.",
+          "Unreported reserves, standards, or infrastructure may establish readiness.",
+          "Existing support may absorb part of the transition."
+        ],
+        "delayed_effects": [
+          "Hiring economics, ramp, quality, and leader-dependence effects appear after implementation lag."
+        ],
+        "feedback_loops": [
+          "Premature leverage can increase leader oversight, reducing time available to complete the systems needed for leverage."
+        ],
+        "falsifier": "Verified demand, contribution, cash, roles, standards, and delegated execution establish readiness before expansion.",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS",
+        "affected_domains": [
+          "financial",
+          "demand",
+          "operations",
+          "capacity",
+          "team",
+          "stage",
+          "goals"
+        ]
+      },
+      {
+        "mechanism_id": "patricia-mech-financial-decision-opacity-v1",
+        "observed_symptom": "Reported production and expenses do not establish reconciled owner profit, cash, reserves, or hiring economics.",
+        "underlying_mechanism": "Incomplete financial lineage prevents production from being translated into decision-ready economic capacity.",
+        "causal_chain": [
+          "Gross production is observed without a complete net bridge.",
+          "Capacity and hiring choices cannot be gated by contribution or cash.",
+          "Volume growth may amplify unknown economics."
+        ],
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q9",
+          "ba-20260714-64ca0783-q11"
+        ],
+        "counterevidence_refs": [
+          "ba-20260714-64ca0783-q9"
+        ],
+        "confounds": [
+          "Deliberate reinvestment can reduce current profit.",
+          "Tax and entity treatment may alter reported categories.",
+          "Missing source documents may fully resolve the gap."
+        ],
+        "delayed_effects": [
+          "Recurring costs and hiring commitments can create cash effects after production decisions."
+        ],
+        "feedback_loops": [
+          "Volume-focused decisions can add cost without clarifying profit, preserving financial opacity."
+        ],
+        "falsifier": "Governed financial records reconcile production, expenses, compensation, profit, cash, reserves, and contribution decisions.",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS",
+        "affected_domains": [
+          "financial",
+          "capacity",
+          "team",
+          "stage",
+          "goals"
+        ]
+      }
+    ],
+    "reinforcing_loops": [
+      "patricia-mech-relationship-activation-gap-v1",
+      "patricia-mech-leader-centered-operating-bottleneck-v1",
+      "patricia-mech-measurement-attribution-blindness-v1",
+      "patricia-mech-partnership-workload-misalignment-v1",
+      "patricia-mech-leverage-readiness-gap-v1",
+      "patricia-mech-financial-decision-opacity-v1"
+    ],
+    "balancing_loops": [
+      "Partner, coordinator, title, coaching, and recurring mail support partially offset centralization."
+    ],
+    "compensating_strengths": [
+      "patricia-asset-relational-access-v1",
+      "patricia-asset-process-knowledge-v1",
+      "patricia-asset-partial-support-capacity-v1"
+    ],
+    "confounds": [
+      "patricia-missing-direct-operating-corroboration-v1",
+      "patricia-missing-current-market-context-v1",
+      "patricia-missing-longitudinal-state-v1",
+      "patricia-missing-financial-source-documents-v1"
+    ]
+  },
+  "governing_constraint": {
+    "constraint_id": "patricia-constraint-leader-centered-system-v1",
+    "constraint_type": "mixed",
+    "candidate": "Leader-centered execution without a governed relationship, delegation, measurement, and accountability system.",
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q5",
+      "ba-20260714-64ca0783-q7",
+      "ba-20260714-64ca0783-q8",
+      "ba-20260714-64ca0783-q10",
+      "ba-20260714-64ca0783-q11",
+      "ba-20260714-64ca0783-q12"
+    ],
+    "alternatives": [
+      {
+        "constraint_type": "demand",
+        "explanation": "Insufficient qualified opportunity may independently limit closings.",
+        "relative_support": "Operator-stated, but source-stage evidence cannot separate generation from follow-up."
+      },
+      {
+        "constraint_type": "economics",
+        "explanation": "Weak or volatile owner economics may limit capacity investment.",
+        "relative_support": "Materially possible, but financial records are incomplete."
+      },
+      {
+        "constraint_type": "market",
+        "explanation": "External transaction or financing conditions may govern demand and conversion.",
+        "relative_support": "Unresolved because no current market evidence is supplied."
+      }
+    ],
+    "why_current_candidate_stronger": "The pattern recurs across relationship management, accountability, operations, workload, and requested capacity relief, while alternatives lack isolating records.",
+    "epistemic_class": "SUPPORTED_HYPOTHESIS",
+    "falsifier": "Direct flow, time, pipeline, and delegation records show no leader-centered bottleneck and identify another throughput constraint."
+  },
+  "assets": [
+    {
+      "claim_id": "patricia-asset-relationship-base-v1",
+      "meaning": "Existing relationships provide an owned-demand starting point, conditional on ownership, recency, and activation quality.",
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q3",
+        "ba-20260714-64ca0783-q5"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Combined ownership and incomplete records limit transferability."
+      ],
+      "falsifier": "Verified records show low validity, ownership, consent, or relationship quality."
+    },
+    {
+      "claim_id": "patricia-asset-relational-access-v1",
+      "meaning": "The operator reports ease initiating SOI contact and prior business from local networking.",
+      "epistemic_class": "KNOWN",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q4",
+        "ba-20260714-64ca0783-q5"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Ease of contact does not establish consistent follow-up or conversion."
+      ],
+      "falsifier": "Activity and source records contradict the reported access or results."
+    },
+    {
+      "claim_id": "patricia-asset-process-knowledge-v1",
+      "meaning": "The operator can articulate core listing, buyer, recruiting, and transaction workflows.",
+      "epistemic_class": "KNOWN",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q8"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Knowledge does not prove repeatable execution."
+      ],
+      "falsifier": "Observed workflows materially differ from the described processes."
+    },
+    {
+      "claim_id": "patricia-asset-partial-support-capacity-v1",
+      "meaning": "Partner, transaction-coordinator, title, and coaching support provide bounded operating leverage.",
+      "epistemic_class": "KNOWN",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q7",
+        "ba-20260714-64ca0783-q8"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q11"
+      ],
+      "confounds": [
+        "Ownership, utilization, and economic effect are unmeasured."
+      ],
+      "falsifier": "Direct records show these supports provide no material capacity."
+    },
+    {
+      "claim_id": "patricia-asset-production-history-v1",
+      "meaning": "Reported transactions establish operating experience, subject to period and arithmetic reconciliation.",
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q9",
+        "ba-20260714-64ca0783-q11"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "The responses may cover different scopes or periods."
+      ],
+      "falsifier": "Source records fail to corroborate material transaction history."
+    }
+  ],
+  "vulnerabilities": [
+    {
+      "claim_id": "patricia-vulnerability-relationship-transferability-v1",
+      "meaning": "Relationship value remains dependent on incomplete records and personal memory.",
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q5"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Unreported systems may exist."
+      ],
+      "falsifier": "Portable CRM records establish complete history, state, ownership, and next actions."
+    },
+    {
+      "claim_id": "patricia-vulnerability-key-person-dependence-v1",
+      "meaning": "Core follow-through and team workload are concentrated on the operator.",
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q8",
+        "ba-20260714-64ca0783-q11",
+        "ba-20260714-64ca0783-q12"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q8"
+      ],
+      "confounds": [
+        "Available support may be understated."
+      ],
+      "falsifier": "Task and decision records show durable distributed ownership."
+    },
+    {
+      "claim_id": "patricia-vulnerability-team-alignment-v1",
+      "meaning": "Unmeasured seat and contribution alignment may convert growth into additional operator burden.",
+      "epistemic_class": "TENTATIVE",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q11"
+      ],
+      "counterevidence_refs": [
+        "ba-20260714-64ca0783-q8"
+      ],
+      "confounds": [
+        "Different contribution types may justify the arrangement."
+      ],
+      "falsifier": "Governed role and economic records show alignment without capacity effects."
+    },
+    {
+      "claim_id": "patricia-vulnerability-financial-opacity-v1",
+      "meaning": "Incomplete economic lineage prevents reliable evaluation of profit, cash, and hiring capacity.",
+      "epistemic_class": "STRONGLY_SUPPORTED",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q9"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Existing financial documents may resolve the gap."
+      ],
+      "falsifier": "Governed source documents establish the complete economic bridge."
+    },
+    {
+      "claim_id": "patricia-vulnerability-pipeline-opacity-v1",
+      "meaning": "Absent source-stage visibility prevents early detection of demand, conversion, and future-income risk.",
+      "epistemic_class": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "ba-20260714-64ca0783-q1",
+        "ba-20260714-64ca0783-q5",
+        "ba-20260714-64ca0783-q8"
+      ],
+      "counterevidence_refs": [],
+      "confounds": [
+        "Pipeline records may exist outside the assessment."
+      ],
+      "falsifier": "Timestamped pipeline records provide reliable source, stage, aging, and outcome visibility."
+    }
+  ],
+  "momentum": {
+    "direction": "UNCERTAIN",
+    "emerging_changes": [],
+    "leading_indicators": [
+      {
+        "indicator": "CRM adoption, contact completeness, and dated next-action coverage.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q5",
+          "ba-20260714-64ca0783-q12"
+        ]
+      },
+      {
+        "indicator": "Source-attributed contacts, appointments, stage movement, and aging.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q1",
+          "ba-20260714-64ca0783-q8"
+        ]
+      },
+      {
+        "indicator": "Delegated task ownership and operator workload concentration.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q8",
+          "ba-20260714-64ca0783-q11",
+          "ba-20260714-64ca0783-q12"
+        ]
+      },
+      {
+        "indicator": "Recurring accountability commitments and execution review.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q7"
+        ]
+      }
+    ],
+    "lagging_indicators": [
+      {
+        "indicator": "Monthly closed units and reconciled sales volume.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q9",
+          "ba-20260714-64ca0783-q11"
+        ]
+      },
+      {
+        "indicator": "Reconciled gross, expenses, owner profit, and cash.",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q9"
+        ]
+      }
+    ],
+    "evidence_refs": [
+      "ba-20260714-64ca0783-q2",
+      "ba-20260714-64ca0783-q9",
+      "ba-20260714-64ca0783-q11"
+    ],
+    "epistemic_class": "INSUFFICIENT_EVIDENCE"
+  },
+  "epistemic_state": {
+    "claim_support": [
+      {
+        "claim_id": "patricia-mech-relationship-activation-gap-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      },
+      {
+        "claim_id": "patricia-mech-leader-centered-operating-bottleneck-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      },
+      {
+        "claim_id": "patricia-mech-measurement-attribution-blindness-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      },
+      {
+        "claim_id": "patricia-mech-partnership-workload-misalignment-v1",
+        "epistemic_class": "TENTATIVE"
+      },
+      {
+        "claim_id": "patricia-mech-leverage-readiness-gap-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      },
+      {
+        "claim_id": "patricia-mech-financial-decision-opacity-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      },
+      {
+        "claim_id": "patricia-constraint-leader-centered-system-v1",
+        "epistemic_class": "SUPPORTED_HYPOTHESIS"
+      }
+    ],
+    "contradictions": [
+      {
+        "contradiction_id": "patricia-contradiction-financial-arithmetic-v1",
+        "evidence_refs": [
+          "ba-20260714-64ca0783-q9"
+        ],
+        "status": "UNRESOLVED",
+        "meaning": "Units, volume, and stated average sale price do not reconcile."
+      }
+    ],
+    "counterevidence": [
+      "Weekly active-opportunity and client follow-up may coexist with weak broader SOI continuity.",
+      "Current workflows are described as working, bounding any claim of total process failure.",
+      "Equal business contribution and joint client work bound a simple labor-inequity interpretation."
+    ],
+    "missing_evidence": [
+      {
+        "missing_id": "patricia-missing-direct-operating-corroboration-v1",
+        "domain": "operations",
+        "question": "Which current direct operating records corroborate the customer-reported systems and execution state?",
+        "decision_impact": "Could strengthen, weaken, or replace cross-domain operating mechanisms."
+      },
+      {
+        "missing_id": "patricia-missing-current-market-context-v1",
+        "domain": "market",
+        "question": "Which time-bound current market facts materially alter the internal business explanation?",
+        "decision_impact": "Could identify or rule out an external constraint or confound."
+      },
+      {
+        "missing_id": "patricia-missing-longitudinal-state-v1",
+        "domain": "stage",
+        "question": "Which comparable observations across time establish current direction of travel?",
+        "decision_impact": "Could change momentum, emerging-change support, and trajectory interpretation."
+      },
+      {
+        "missing_id": "patricia-missing-authorized-team-authority-v1",
+        "domain": "team",
+        "question": "Which active team identities carry explicit WBM_CONTEXT authority and frozen BOS hashes?",
+        "decision_impact": "Until proven, team structure remains operator-reported business evidence and no person-level team synthesis is authorized."
+      },
+      {
+        "missing_id": "patricia-missing-financial-source-documents-v1",
+        "domain": "financial",
+        "question": "Which governed financial records corroborate the operator-reported financial state and time window?",
+        "decision_impact": "Could strengthen or revise economic and capacity conclusions."
+      }
+    ],
+    "mind_change_conditions": [
+      "Direct operating records show consistent follow-up, delegation, and distributed ownership.",
+      "Source-stage data isolates demand scarcity or conversion as the governing constraint.",
+      "Financial documents establish sufficient contribution, cash, and hiring capacity.",
+      "Role and workload records establish an intentional balanced team structure.",
+      "Current market evidence explains the reported production gap.",
+      "Comparable longitudinal observations establish a stable direction of travel."
+    ]
+  },
+  "open_questions": [
+    {
+      "question_id": "patricia-open-production-scope-v1",
+      "question": "What periods and business scopes distinguish the reported 26 units from the reported 7 units?",
+      "expected_decision_impact": "Would establish a usable production baseline and resolve apparent scope tension."
+    },
+    {
+      "question_id": "patricia-open-followup-population-v1",
+      "question": "Which opportunities receive weekly follow-up, and how do they differ from the broader SOI and past-client population?",
+      "expected_decision_impact": "Would separate active-pipeline execution from relationship activation."
+    },
+    {
+      "question_id": "patricia-open-workload-composition-v1",
+      "question": "Which work, decisions, and revenue contributions underlie the reported contribution and workload shares?",
+      "expected_decision_impact": "Would test the partnership and leader-bottleneck mechanisms."
+    }
+  ],
+  "dynamic_research": [
+    {
+      "dynamic_research_warranted": true,
+      "research_question": "Which current served-market transaction, inventory, pricing, and financing conditions materially affect demand and conversion?",
+      "authority": "RE-05",
+      "expected_decision_impact": "Would identify or rule out an external demand or conversion confound."
+    }
+  ],
+  "projection_eligibility": {
+    "five_futures_v2": {
+      "status": "ELIGIBLE_WITH_DISCLOSURE",
+      "reasons": [
+        "Conditional mechanisms and falsifiers support bounded trajectory reasoning.",
+        "Operator-reported evidence lacks direct operating, financial, market, and longitudinal corroboration.",
+        "Team-person aggregation remains prohibited."
+      ]
+    },
+    "one_move_v2": {
+      "status": "ELIGIBLE_WITH_DISCLOSURE",
+      "reasons": [
+        "patricia-constraint-leader-centered-system-v1 and related mechanisms can ground conditional candidate generation.",
+        "Selection must preserve operating, financial, market, and team-authority gaps.",
+        "No personality or unauthorized team explanation may establish business cause."
+      ]
+    }
+  },
+  "state_lineage": {
+    "state_version": 1,
+    "prior_state": null,
+    "created_at": "2026-08-13T17:16:15.458Z",
+    "evidence_horizon": "Assessment-time operator reports observed 2026-07-14; financial labels reference 2024-2025 with ambiguous scope, and no current market, source-document, or comparable longitudinal evidence is supplied.",
+    "input_hash": "fe369e6bcf3a67548cb5964103caf08de04f89e564a2f5a9b3ea1732aa9fad76"
+  },
+  "downstream_contributions": {
+    "five_futures_v2": {
+      "roles": [
+        "current_course",
+        "emerging_future",
+        "better_future",
+        "bold_future",
+        "downside_future"
+      ],
+      "state_fields": [
+        "momentum",
+        "emerging_changes",
+        "constraints",
+        "assets",
+        "vulnerabilities",
+        "causal_mechanisms",
+        "evidence",
+        "counterevidence",
+        "missing_evidence",
+        "operator_business_interactions",
+        "team_context",
+        "dynamic_context"
+      ],
+      "trajectories_generated": false,
+      "weights_computed": false
+    },
+    "one_move_v2": {
+      "state_fields": [
+        "governing_constraint",
+        "causal_mechanisms",
+        "falsifiers",
+        "operator_business_interactions",
+        "leading_indicators"
+      ],
+      "candidates_ranked": false,
+      "move_selected": false
+    }
+  },
+  "runtime_boundaries": {
+    "five_futures_v2_implemented": false,
+    "one_move_v2_implemented": false,
+    "trajectory_weights_computed": false,
+    "bayesian_project_authorized": false,
+    "calibration_project_authorized": false,
+    "rsl_active": false
+  },
+  "validation_receipt": {
+    "validator_version": "whole-business-model-validator-v1",
+    "status": "PASS",
+    "business_id": "business-ba-20260714-64ca0783",
+    "context_hash": "6586d0f45b03bbacbab279667d3a5ecf9fe62b2909b7ebb3e8606b2a354e7dca",
+    "selected_authority_count": 18,
+    "business_evidence_count": 12,
+    "domain_state_count": 11,
+    "causal_mechanism_count": 6,
+    "person_business_link_count": 5,
+    "team_link_count": 0,
+    "contradiction_count": 1,
+    "missing_evidence_count": 5,
+    "five_futures_v2_implemented": false,
+    "one_move_v2_implemented": false,
+    "receipt_hash": "d18e35bbd445b25b75b89b596b2606ca234d01355ba01b503894b87453ca6656"
+  },
+  "state_hash": "d51d01c4e807a3341e6b76178c8e33a0050d7bb0653b887aaaf0bfc515255eba"
+}

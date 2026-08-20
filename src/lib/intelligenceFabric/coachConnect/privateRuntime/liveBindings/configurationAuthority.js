@@ -27,6 +27,10 @@ export const PRIVATE_RUNTIME_LIVE_REFERENCE_VARIABLES = deepFreeze([
 export const PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_IDENTITY_VARIABLE =
   'MORE_PRIVATE_RUNTIME_IMMUTABLE_DEPLOYMENT_SHA256';
 
+const PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS =
+  'MORE_PRIVATE_RUNTIME_PRODUCT_STORE_REDIS_URL';
+const PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE = 'REDIS_URL';
+
 const frozen = (value) => deepFreeze(structuredClone(value));
 const sha256 = (value) => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const deny = (code, field = null) => frozen({
@@ -55,9 +59,26 @@ export function createPrivateRuntimeEnvironmentReferenceResolver(env = {}) {
       || !reference.startsWith('MORE_PRIVATE_RUNTIME_')) {
       return null;
     }
+    if (reference === PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS) {
+      const aliasedValue = env[PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE];
+      return typeof aliasedValue === 'string' ? aliasedValue : null;
+    }
     const value = env[reference];
     return typeof value === 'string' ? value : null;
   };
+}
+
+export function privateRuntimeProductStoreConnectionAllowedV1({
+  reference,
+  value,
+  env = {},
+} = {}) {
+  if (typeof value !== 'string') return false;
+  if (value.startsWith('rediss://')) return true;
+  return reference === PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS
+    && value.startsWith('redis://')
+    && typeof env[PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE] === 'string'
+    && value === env[PRIVATE_RUNTIME_PRODUCT_STORE_AUTHORITY_ALIAS_SOURCE];
 }
 
 export async function readPrivateRuntimeLiveConfigurationAuthorityV1({

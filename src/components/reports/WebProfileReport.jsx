@@ -20,7 +20,7 @@ import DeterministicVisualDNA from '../visualDNA/DeterministicVisualDNA.jsx';
 import VisualDNAModal from '../visualDNA/VisualDNAModal.jsx';
 import { buildVisualDNAViewModel } from '../../lib/visualDNA/buildVisualDNAViewModel.js';
 import UniversalTranslatorDrawer from '../universalTranslator/UniversalTranslatorDrawer.jsx';
-import FinalBOSCustomerReport from './FinalBOSCustomerReport.jsx';
+import Layer3CustomerIntelligenceReport from './Layer3CustomerIntelligenceReport.jsx';
 import { buildCustomerBOSViewModel } from '../../lib/reports/buildCustomerBOSViewModel.js';
 
 function cleanTranslatorText(value, maxLength = 1200) {
@@ -1653,7 +1653,7 @@ export default function WebProfileReport({ canonical, profileId, behavioralIntel
 
       return (
         <div>
-          <FinalBOSCustomerReport viewModel={customerBosViewModel} />
+          <Layer3CustomerIntelligenceReport viewModel={customerBosViewModel} />
         </div>
       );
     } catch (err) {

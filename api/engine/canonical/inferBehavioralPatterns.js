@@ -118,13 +118,13 @@ function inferDecisionArchitecture(primary, secondary, opposing1, vectorScores) 
   let blind_spot = '';
   
   // High vector = fast formation
-  if (vectorScores.vector > 6.0) {
+  if (vectorScores.vector > 0.60) {
     formation_pattern = "Direction emerges quickly";
     speed_driver = "High command creates urgency bias";
-  } else if (vectorScores.framework > 6.0) {
+  } else if (vectorScores.framework > 0.60) {
     formation_pattern = "Decisions follow defined process";
     speed_driver = "Structure constrains speed";
-  } else if (vectorScores.signal > 6.0) {
+  } else if (vectorScores.signal > 0.60) {
     formation_pattern = "Decisions calibrate to relational context";
     speed_driver = "Relational awareness slows formation";
   } else {

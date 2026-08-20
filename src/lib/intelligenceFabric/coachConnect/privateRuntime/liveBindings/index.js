@@ -5,5 +5,7 @@ export * from './compositionRoot.js';
 export * from './configurationAuthority.js';
 export * from './contracts.js';
 export * from './environmentAttestation.js';
+export * from './privateLiveProductStore.js';
+export * from './productExecutionBinding.js';
 export * from './subscriptionRuntimeAttachmentAdapter.js';
 export * from '../../productionSecurity/protectedEdgeIdentity/index.js';

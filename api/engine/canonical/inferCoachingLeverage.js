@@ -26,18 +26,18 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
   }
   
   // If relational friction high = signal development
-  if (vectorScores.signal < 3.5 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.signal < 0.35 && stall_patterns?.frustrations?.includes('relational')) {
     highest_roi_adjustment = 'Relational timing awareness - pause before directing to read room dynamics';
   }
   
   // Invisible drag habits - unseen friction sources
   const invisible_drag_habits = [];
   
-  if (vectorScores.velocity > 6.5 && vectorScores.fidelity < 4.0) {
+  if (vectorScores.velocity > 0.65 && vectorScores.fidelity < 0.40) {
     invisible_drag_habits.push('Speed over verification - creates rework cycles that slow overall progress');
   }
   
-  if (vectorScores.vector > 6.5 && vectorScores.signal < 4.0) {
+  if (vectorScores.vector > 0.65 && vectorScores.signal < 0.40) {
     invisible_drag_habits.push('Direction without calibration - team confusion creates execution drag');
   }
   
@@ -61,7 +61,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     resistance_likelihood = 'Moderate-High - Claims coachability but multiple contradictions suggest behavioral inertia';
   }
   
-  if (vectorScores.flex > 6.0 && systems_accountability?.meta_awareness === 'high') {
+  if (vectorScores.flex > 0.60 && systems_accountability?.meta_awareness === 'high') {
     resistance_likelihood = 'Low-Moderate - High adaptability and self-awareness support behavioral change';
   }
   
@@ -72,7 +72,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     accountability_dependency = 'High - Requires external accountability to bridge knowledge-execution gap';
   }
   
-  if (vectorScores.framework > 7.0 && vectorScores.fidelity > 6.5) {
+  if (vectorScores.framework > 0.70 && vectorScores.fidelity > 0.65) {
     accountability_dependency = 'Low - Self-accountable through internal standards and process';
   }
   
@@ -83,7 +83,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
     quick_wins.push('Weekly pipeline review ritual - immediate execution consistency improvement');
   }
   
-  if (vectorScores.signal < 4.0 && stall_patterns?.frustrations?.includes('relational')) {
+  if (vectorScores.signal < 0.40 && stall_patterns?.frustrations?.includes('relational')) {
     quick_wins.push('Pre-directive pause - count to 3 before issuing direction, read room first');
   }
   
@@ -94,7 +94,7 @@ export function inferCoachingLeverage(vectorScores, contradictions, analyzedResp
   // Long-term work (6-24 months)
   const long_term_work = [];
   
-  if (vectorScores.signal < 4.0) {
+  if (vectorScores.signal < 0.40) {
     long_term_work.push('Relational awareness development - sustained practice in reading team dynamics');
   }
   

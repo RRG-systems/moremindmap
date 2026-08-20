@@ -1,0 +1,161 @@
+{
+  "harness_id": "universal-generalization-harness-v1",
+  "status": "PASS",
+  "case_count": 8,
+  "cases": [
+    {
+      "case_id": "UCASE-01",
+      "business_type": "Residential real estate",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-03",
+        "UB-04",
+        "UB-06",
+        "UB-08"
+      ],
+      "differentiated_reasoning": "transaction economics, relationship demand, conversion and capacity",
+      "boundary_proof": "Real-estate workflows/numbers remain in RE cassette.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-02",
+      "business_type": "Mortgage / loan officer",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-04",
+        "UB-06",
+        "UB-07",
+        "UB-12"
+      ],
+      "differentiated_reasoning": "referral/channel demand, qualification, cycle/fallout and lifetime partner value",
+      "boundary_proof": "Rates, lending rules and product facts are Dynamic/vertical.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-03",
+      "business_type": "Wholesale lending",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-04",
+        "UB-06",
+        "UB-10",
+        "UB-11"
+      ],
+      "differentiated_reasoning": "partner/channel activation, margin, capacity, concentration and organization",
+      "boundary_proof": "Wholesale lending operations/regulation require later vertical.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-04",
+      "business_type": "Recruiting",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-04",
+        "UB-05",
+        "UB-06",
+        "UB-08",
+        "UB-09"
+      ],
+      "differentiated_reasoning": "two-sided demand, qualification, placement conversion, delivery and accountability",
+      "boundary_proof": "Candidate/employer law and workflow remain vertical/dynamic.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-05",
+      "business_type": "Medical sales",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-04",
+        "UB-05",
+        "UB-06",
+        "UB-10",
+        "UB-12"
+      ],
+      "differentiated_reasoning": "complex stakeholders, proof, long cycle, territory/organization and evidence",
+      "boundary_proof": "Clinical/regulatory/product claims remain specialist vertical/dynamic.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-06",
+      "business_type": "Professional services",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-03",
+        "UB-05",
+        "UB-08",
+        "UB-10"
+      ],
+      "differentiated_reasoning": "scope, utilization, senior constraint, pricing and leverage",
+      "boundary_proof": "Profession-specific regulation/workflow stays vertical.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-07",
+      "business_type": "SaaS",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-04",
+        "UB-05",
+        "UB-07",
+        "UB-08",
+        "UB-11"
+      ],
+      "differentiated_reasoning": "recurring economics, acquisition, positioning, retention, support and scale",
+      "boundary_proof": "Current SaaS benchmarks/platform facts remain Dynamic.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    },
+    {
+      "case_id": "UCASE-08",
+      "business_type": "Local service business",
+      "selected_universal_authorities": [
+        "UB-01",
+        "UB-02",
+        "UB-04",
+        "UB-06",
+        "UB-08",
+        "UB-09"
+      ],
+      "differentiated_reasoning": "local demand, routing/crew capacity, conversion, delivery and accountability",
+      "boundary_proof": "Trade-specific licensing/material/process stays vertical.",
+      "missing_evidence_visible": true,
+      "whole_person_boundary": "Implementation/adoption only; business state governs.",
+      "team_context": "Loaded only if role/organization evidence is relevant.",
+      "verdict": "PASS"
+    }
+  ],
+  "assertions": {
+    "universal_not_verticalized": true,
+    "material_differentiation": true,
+    "missing_evidence_visible": true,
+    "dynamic_not_canon": true,
+    "wpm_does_not_override_business": true,
+    "team_relevance_only": true,
+    "cross_profile_contamination": false
+  }
+}

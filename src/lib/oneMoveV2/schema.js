@@ -1,0 +1,60 @@
+import {
+  CERTAINTY_SUPPORT_CLASSES,
+  DEPENDENCY_BURDENS,
+  FUTURE_ROLES,
+  ONE_MOVE_SELECTION_MODEL_VERSION,
+  ONE_MOVE_V2_CONTRACT_ID,
+  ONE_MOVE_V2_CONTRACT_VERSION,
+  ONE_MOVE_V2_SCHEMA_VERSION,
+  REVERSIBILITY_CLASSES,
+} from './constants.js';
+
+const stringArray = Object.freeze({ type: 'array', items: { type: 'string' } });
+
+export const ONE_MOVE_V2_SCHEMA = Object.freeze({
+  $schema: 'https://json-schema.org/draft/2020-12/schema',
+  $id: 'https://moremindmap.local/schemas/one-move-v2.json',
+  title: 'MORE MindMap One Move V2',
+  type: 'object',
+  required: [
+    'contract_id', 'contract_version', 'schema_version', 'one_move_id', 'business_id', 'owner_profile_id',
+    'title', 'intervention', 'why_now', 'governing_constraint_id', 'primary_mechanism_ids',
+    'symptom_distinction', 'causal_chain', 'supporting_evidence_refs', 'counterevidence_refs',
+    'assumptions', 'prerequisites', 'execution_definition', 'bounded_execution_steps', 'owner_role',
+    'team_roles', 'whole_person_execution_considerations', 'leading_indicators', 'success_evidence',
+    'failure_evidence', 'falsifiers', 'stop_or_reconsider_conditions', 'observation_horizon',
+    'reversibility_class', 'dependency_burden', 'trajectory_effect_intent',
+    'certainty_support_classification', 'whole_business_model_binding', 'five_futures_binding',
+    'authority_versions', 'selection_model_version', 'selection_trace', 'observation_contract',
+    'script_intelligence_refs', 'dynamic_research_warrant', 'provenance', 'runtime_boundaries',
+  ],
+  properties: {
+    contract_id: { const: ONE_MOVE_V2_CONTRACT_ID },
+    contract_version: { const: ONE_MOVE_V2_CONTRACT_VERSION },
+    schema_version: { const: ONE_MOVE_V2_SCHEMA_VERSION },
+    one_move_id: { type: 'string', minLength: 1 },
+    business_id: { type: 'string', minLength: 1 },
+    owner_profile_id: { type: 'string', minLength: 1 },
+    primary_mechanism_ids: stringArray,
+    supporting_evidence_refs: stringArray,
+    counterevidence_refs: stringArray,
+    assumptions: stringArray,
+    prerequisites: stringArray,
+    bounded_execution_steps: { type: 'array', minItems: 1, maxItems: 5, items: { type: 'string' } },
+    team_roles: stringArray,
+    leading_indicators: stringArray,
+    success_evidence: stringArray,
+    failure_evidence: stringArray,
+    falsifiers: stringArray,
+    stop_or_reconsider_conditions: stringArray,
+    reversibility_class: { enum: REVERSIBILITY_CLASSES },
+    dependency_burden: { enum: DEPENDENCY_BURDENS },
+    certainty_support_classification: { enum: CERTAINTY_SUPPORT_CLASSES },
+    trajectory_effect_intent: {
+      type: 'array', minItems: 5, maxItems: 5,
+      prefixItems: FUTURE_ROLES.map((future_role) => ({ type: 'object', properties: { future_role: { const: future_role } } })),
+    },
+    selection_model_version: { const: ONE_MOVE_SELECTION_MODEL_VERSION },
+  },
+});
+

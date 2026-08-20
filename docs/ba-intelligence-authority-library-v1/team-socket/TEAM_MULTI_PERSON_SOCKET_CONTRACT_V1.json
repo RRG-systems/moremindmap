@@ -1,0 +1,74 @@
+{
+  "contract_version": "ba-team-multi-person-socket-v1",
+  "status": "FROZEN_METADATA_NOT_TEAM_PRODUCT",
+  "entities": {
+    "business": {
+      "required": [
+        "business_id"
+      ]
+    },
+    "team": {
+      "required": [
+        "team_id",
+        "business_id",
+        "membership_status",
+        "version",
+        "updated_at"
+      ]
+    },
+    "person_membership": {
+      "required": [
+        "business_id",
+        "team_id",
+        "profile_id",
+        "bos_version",
+        "bos_hash",
+        "role",
+        "seat",
+        "membership_status",
+        "permissions",
+        "visibility",
+        "effective_at",
+        "version"
+      ],
+      "optional": [
+        "reporting_to_profile_id",
+        "relationship_link_ids",
+        "ended_at"
+      ]
+    },
+    "relationship_link": {
+      "required": [
+        "relationship_link_id",
+        "business_id",
+        "profile_id_a",
+        "profile_id_b",
+        "relationship_type",
+        "consent_visibility",
+        "version",
+        "effective_at"
+      ]
+    }
+  },
+  "retrieval_rules": [
+    "Owner/primary operator WPM may be selected when materially relevant.",
+    "Additional people require active membership, permission/visibility, role relevance and matching business/team scope.",
+    "Relationship links are optional and never inferred from proximity.",
+    "No cross-profile facts, scores, evidence or prose are merged.",
+    "Individual, relational and organizational claims retain distinct provenance.",
+    "Never average people into a team personality.",
+    "Test structure, incentives, workload, role design, authority, capacity and missing systems before personality."
+  ],
+  "receipt_fields": [
+    "business_id",
+    "team_id",
+    "selected_profile_ids",
+    "bos_version_hash_refs",
+    "role_relevance",
+    "permission_refs",
+    "relationship_link_refs",
+    "excluded_profiles_and_reason",
+    "as_of_at",
+    "router_version"
+  ]
+}

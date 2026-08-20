@@ -1,0 +1,129 @@
+{
+  "contract_id": "new-ba-bos-fusion-authority-v1",
+  "version": "1.0.0",
+  "profile_id": "MM-20260531-ASOVNJZ4",
+  "source_realization_id": "wally-top-projection-repaired-candidate-v1",
+  "source_artifact_sha256": "c63cbdee41721b4488fb8933d38bdffb96cf0a3e870d13b91d7dc7639c65bd49",
+  "source_version": "bos_personality_dna_runtime_v1:bos_vector_free_whole_person_model_v1",
+  "custody": "FROZEN_REPOSITORY_PROJECTION",
+  "claims": [
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:operating_core",
+      "category": "operating_core",
+      "meaning": "Enters situations with direction already forming; pulls team toward action. Stabilized by adjusts approach based on context; comfortable with pivot and iteration. Primary (signals) drives forward movement. Secondary (flex) provides stabilization. Friction emerges when systems conflict. Action-focused perception, thorough processing, near-term focus. World experienced through signals lens. Model: . Speed: unknown.",
+      "meaning_sha256": "a83cad8cf10077f65e4655c4e256efcd1fe635450a74c550724a7702895e0b02",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "bi_operating",
+        "bi_world",
+        "bi_contradictions",
+        "cp_identity"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:work_relationships",
+      "category": "work_relationships",
+      "meaning": "3 domains: relational, infrastructure, energy. Primary: Moderate-High - Under stress, attention to people disappears; damage done without awareness. Team experiences decisive direction as primary organizing force. decisive direction-first communication structure shapes relational dynamics. Scaling constraint not identified.",
+      "meaning_sha256": "1223028d62709415124046c0e3a057fdb419fc48f096dff5639901be7e2314d1",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "bi_operating",
+        "bi_world",
+        "bi_contradictions",
+        "cp_identity"
+      ],
+      "allowed_uses": [
+        "communication_leadership",
+        "role_team",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:pressure_recovery",
+      "category": "pressure_recovery",
+      "meaning": "Under pressure: Under strain, decisiveness increases; moves faster, reads less. Secondary system: Under strain, flexibility decreases; retreats to familiar patterns. Normal operating → pressure applied → primary intensifies → secondary compensates or overrides. Build explicit Perspective check-ins BEFORE pressure escalates Recognize when decisive direction is amplifying — create circuit breakers Post-conflict repair: consciously re-engage Perspective and Structure after stress passes",
+      "meaning_sha256": "5e55c09a512e04be1d1c5ca13a46288d5eb6daf80c64e4dc9332f5c4d2d516b3",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "bi_pressure",
+        "cp_stress"
+      ],
+      "allowed_uses": [
+        "adoption_friction",
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:role_seat",
+      "category": "role_seat",
+      "meaning": "Needs dimension refinement for specific role fit More than one role configuration can work; this is a demand-level map, not a job-title prescription. Hybrid - Can build or optimize depending on context Balanced - Can operate and envision Producer - Personal production primary Pragmatic - Explores when needed, stabilizes when required Balanced executor-strategist Moderate - Can handle ambiguity with boundaries Needs dimension refinement for specific role fit Executive Leadership Client-Facing/Relationship Management Process Management",
+      "meaning_sha256": "825200622d05d183d4877604ab1006eef57a9a1da1284575b9b3f63c002439d0",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "cp_role",
+        "cp_environment",
+        "bi_scaling",
+        "u_role"
+      ],
+      "allowed_uses": [
+        "role_team",
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:cognitive_process",
+      "category": "cognitive_process",
+      "meaning": "Processes thoroughly, prioritizes accuracy over speed. Enters situations with direction already forming; pulls team toward action Decisions form through balanced assessment of options. Near-term time horizon—focuses on immediate next steps and short cycles. Moderate risk calibration—situational assessment drives risk decisions.",
+      "meaning_sha256": "42a41f9da3635b493e1abfff936a420c85d2fe1d79abc9c20a21185ccb723ce0",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "bi_world",
+        "bi_decision"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "intervention_design",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    },
+    {
+      "claim_ref": "bos-fusion:MM-20260531-ASOVNJZ4:energy_context",
+      "category": "energy_context",
+      "meaning": "High-touch client relationships Consensus-required team cultures Direct communication culture, tolerance for bluntness Strengths remain assets at current scale Moderate-High - Under stress, relational awareness disappears; damage done without awareness Low - Direction stable Low - Execution reliable Moderate - Relational friction drains energy; isolation increases over time Low - Operates collaboratively The available governed source does not establish a longitudinal personal-energy trajectory.",
+      "meaning_sha256": "c0587d926e588a20091a2ce3e8678ed0ae1edae6446639c3b59d2a261cbf68b0",
+      "confidence": "SUPPORTED_HYPOTHESIS",
+      "evidence_refs": [
+        "cp_environment",
+        "cp_risk"
+      ],
+      "allowed_uses": [
+        "execution_feasibility",
+        "communication_leadership",
+        "role_team",
+        "uncertainty_abstention"
+      ],
+      "business_cause_authority": false
+    }
+  ],
+  "boundary": {
+    "source_domain": "BOS_WHOLE_PERSON",
+    "business_cause_authority": false,
+    "personality_score_mapping": "PROHIBITED",
+    "business_evidence_mutation": false,
+    "allowed_contribution": "EXECUTION_MODIFIER_ONLY"
+  }
+}

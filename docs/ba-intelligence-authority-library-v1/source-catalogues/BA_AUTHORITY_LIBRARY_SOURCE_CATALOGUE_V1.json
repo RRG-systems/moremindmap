@@ -1,0 +1,139 @@
+{
+  "catalogue_id": "ba-authority-library-source-catalogue-v1",
+  "version": "1.0.0",
+  "desktop_sources": [
+    {
+      "source_id": "DESKTOP-01",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/DJs real estate notes.docx",
+      "sha256": "fb3675454cf8da63cf5dec2e230cd369504e60e7923051e7862fd256e6041559",
+      "bytes": 24570,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-02",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/MORE_MINDMAP_CANONICAL_REAL_ESTATE_VERTICAL_INTELLIGENCE_CASSETTE_MASTER_V1.md",
+      "sha256": "c8d4de60ecb976cd52e6663f71aeda80a676104ce6926d93ebf6c18f1d7ffd7f",
+      "bytes": 12769,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-03",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/MORE_MINDMAP_CANONICAL_UNIVERSAL_BUSINESS_INTELLIGENCE_LIBRARY_MASTER_V1.md",
+      "sha256": "44551810b0d3ef46d4ac99e40a5ec35a5246739977107e663ba3be3e5d9bc6d9",
+      "bytes": 54482,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-04",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/MORE_MINDMAP_REAL_ESTATE_INTERNAL_RESEARCH_V1.zip",
+      "sha256": "1d89fdd2d44fbdef5180de9172d852962555fd67e0ba9a453bb6b37bfc6fa201",
+      "bytes": 78852,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-05",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/MORE_MINDMAP_UNIVERSAL_BUSINESS_INTERNAL_RESEARCH_V1.zip",
+      "sha256": "9561004166f521efd67edd0355faf3a81f94bc234a4271267113fe5ddb51d64d",
+      "bytes": 96978,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-06",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/REAL_ESTATE_BUSINESS_MODEL_V1.md",
+      "sha256": "e8d8c45bf40f24e26cc980adace248fc970b318443f4ddd569a304a8f25737b0",
+      "bytes": 172200,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-07",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/grok 135.docx",
+      "sha256": "5454bd75fe5b3691d820caf6b857e077e3c16f6cb9c8056e4f73e1a7ca87c614",
+      "bytes": 14810,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-08",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/grok real estate casette.docx",
+      "sha256": "e6a962b1e4bc6b2ece74652f1c831fb899f241a007823862321776e5052cc6e2",
+      "bytes": 18350,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-09",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/grok real estate intelligence 2.docx",
+      "sha256": "677b8af2499443d9f8a71b49b6010b4290c37dee9eb46bc8b9e85a12e8cc47dd",
+      "bytes": 19958,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-10",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/universal business intelligence expanded grok.docx",
+      "sha256": "741c877c8bcdeb0cb329aaf6c03f0ada6c13808ff20446f2d31e320357ff98d5",
+      "bytes": 16775,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    },
+    {
+      "source_id": "DESKTOP-11",
+      "path": "/Users/rrg/Desktop/BA RESEARCH/universal business intelligence reseach grok.docx",
+      "sha256": "1bfd0e0300669002a213abbd8ab0f5219c2530a92b054060b41ea64c27a28320",
+      "bytes": 27298,
+      "provenance": "SUPPLIED_BA_RESEARCH_SOURCE"
+    }
+  ],
+  "repo_sources": [
+    {
+      "source_id": "REPO-01",
+      "path": "docs/new-ba-intelligence-architecture-v1/NEW_BA_INTELLIGENCE_ARCHITECTURE_V1.md",
+      "sha256": "3d7b437e621cf7248ec062225bb9f4e04ee3287a03a3013b731aa43c0a8f1567",
+      "bytes": 7026,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    },
+    {
+      "source_id": "REPO-02",
+      "path": "docs/new-ba-intelligence-architecture-v1/NEW_BA_WHOLE_BUSINESS_MODEL_CONTRACT_V1.md",
+      "sha256": "566b26cbb77a4c87410203fab6716d49c4b7c171b6c95a7d602e7eaeaf05682c",
+      "bytes": 5127,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    },
+    {
+      "source_id": "REPO-03",
+      "path": "docs/new-ba-intelligence-architecture-v1/NEW_BA_FIVE_FUTURES_ARCHITECTURE_V1.md",
+      "sha256": "451e7e38dfcd5114339a99e9827c307ce6d355d91178c329d63add3626b65137",
+      "bytes": 3209,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    },
+    {
+      "source_id": "REPO-04",
+      "path": "docs/new-ba-intelligence-architecture-v1/NEW_BA_ONE_MOVE_ARCHITECTURE_V1.md",
+      "sha256": "9c4c5d32885e30e49dbb22f9d10ad2af03dd3a63d35683b106eeee1815934a13",
+      "bytes": 2388,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    },
+    {
+      "source_id": "REPO-05",
+      "path": "docs/five-futures-architecture-truth-trace-v1/FIVE_FUTURES_EXECUTIVE_TRUTH_REPORT_V1.md",
+      "sha256": "86a3e4477789e577881cf3e3150dd4583e5b708b2f7eb263afa82135bdaf3d88",
+      "bytes": 8767,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    },
+    {
+      "source_id": "REPO-06",
+      "path": "docs/five-futures-architecture-truth-trace-v1/FIVE_FUTURES_TRACE_EVIDENCE_MANIFEST_V1.json",
+      "sha256": "0ef9176e2955d78a5ea905f62545165f568b8aaff49d53cb50fc06cf19797f05",
+      "bytes": 20972,
+      "provenance": "MORE_CANONICAL_OR_TRACE_ARTIFACT"
+    }
+  ],
+  "inherited_source_maps": [
+    "MORE_MINDMAP_UNIVERSAL_BUSINESS_INTERNAL_RESEARCH_V1.zip::INTERNAL_SOURCE_CATALOGUE_V1.md",
+    "MORE_MINDMAP_REAL_ESTATE_INTERNAL_RESEARCH_V1.zip::REAL_ESTATE_INTERNAL_SOURCE_CATALOGUE_V1.md"
+  ],
+  "source_rules": [
+    "A source presence does not make every statement canon.",
+    "Canonical masters control taxonomy/mission/boundary.",
+    "Founder numbers remain qualified heuristics.",
+    "External research claims remain source-classified.",
+    "Current facts remain Dynamic Research.",
+    "Code/trace proves implementation, not business science."
+  ]
+}

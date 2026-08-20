@@ -4,6 +4,42 @@
 
 import { QUESTION_MAP } from './questionMap.js';
 import { DIMENSIONS, DIMENSION_LABELS, DIMENSION_TRADEOFFS } from './dimensionMap.js';
+import { normalizeAssessmentAnswers } from './normalizeAssessmentAnswers.js';
+import { assessAssessmentCompleteness } from './assessmentCompleteness.js';
+import {
+  WRITTEN_QUESTION_IDS,
+  getQuestionByEvidenceRole,
+  getWrittenResponseByRole,
+} from './questionEvidenceRegistry.js';
+import {
+  classifyTopologyScore,
+  isHighTopologyScore,
+  isLowTopologyScore,
+  topologyScoreToPercent,
+} from './measurement/measurementContract.js';
+
+function getSelectedKeys(choice) {
+  return String(choice || '')
+    .split(',')
+    .map((key) => key.trim())
+    .filter(Boolean);
+}
+
+function hasValidSelections(question, selectedKeys, expectedCount) {
+  const validKeys = new Set(question.answers?.map((option) => option.key) || []);
+  return selectedKeys.length === expectedCount
+    && new Set(selectedKeys).size === expectedCount
+    && selectedKeys.every((key) => validKeys.has(key));
+}
+
+function combineNormalizedDimensions(question, selectedKeys) {
+  return selectedKeys.reduce((combined, key) => {
+    Object.entries(question.normalized_dimensions?.[key] || {}).forEach(([dimension, score]) => {
+      combined[dimension] = (combined[dimension] || 0) + score;
+    });
+    return combined;
+  }, {});
+}
 
 /**
  * BuildProfileInput
@@ -52,6 +88,7 @@ export class BuildProfileInput {
   }
 
   buildMetadata(rawAssessment) {
+    const assessmentCompleteness = assessAssessmentCompleteness(rawAssessment?.answers);
     return {
       assessment_id: rawAssessment.assessment_id || `ast_${Date.now()}`,
       generated_at: new Date().toISOString(),
@@ -63,18 +100,24 @@ export class BuildProfileInput {
       confidence_score: 0.75, // Will be refined by confidence engine
       assessment_duration_seconds: rawAssessment.duration_seconds || 0,
       completion_date: new Date().toISOString(),
-      data_quality: this.assessDataQuality(rawAssessment)
+      data_quality: this.assessDataQuality(rawAssessment, assessmentCompleteness),
+      assessment_completeness: assessmentCompleteness
     };
   }
 
-  assessDataQuality(rawAssessment) {
+  assessDataQuality(rawAssessment, assessmentCompleteness = null) {
+    const completeness = assessmentCompleteness
+      || assessAssessmentCompleteness(rawAssessment?.answers);
+    if (!completeness.is_complete) return 'low';
+
     let quality = 'high';
     let penalties = 0;
 
     // Check written response depth (updated for 28-question intake)
-    const writtenResponses = Object.entries(rawAssessment.answers || {})
-      .filter(([key, val]) => key.startsWith('q') && [2, 19, 20, 21, 22, 23, 24, 26, 27, 28].includes(parseInt(key.slice(1))))
-      .map(([, val]) => {
+    const writtenResponses = WRITTEN_QUESTION_IDS
+      .map((id) => rawAssessment.answers?.[`q${id}`])
+      .filter((value) => value !== undefined && value !== null)
+      .map((val) => {
         // Safe text extraction
         if (typeof val === 'string') return val;
         if (val && typeof val === 'object' && val.text) return String(val.text);
@@ -83,7 +126,9 @@ export class BuildProfileInput {
         return '';
       });
 
-    const avgWrittenLength = writtenResponses.reduce((sum, t) => sum + (t || '').length, 0) / writtenResponses.length;
+    const avgWrittenLength = writtenResponses.length > 0
+      ? writtenResponses.reduce((sum, t) => sum + (t || '').length, 0) / writtenResponses.length
+      : 0;
     if (avgWrittenLength < 30) penalties += 1;
 
     // Check for defensive language (crude heuristic)
@@ -116,8 +161,10 @@ export class BuildProfileInput {
       return rawAnswers; // Return empty answers (safe fallback - triggers neutral scores)
     }
 
+    const normalizedAnswers = normalizeAssessmentAnswers(rawAssessment.answers);
+
     questions.forEach(question => {
-      const answer = rawAssessment.answers[`q${question.id}`];
+      const answer = normalizedAnswers[`q${question.id}`];
       
       // GUARD: Skip if answer is missing (don't crash on undefined.property)
       if (!answer) {
@@ -125,10 +172,10 @@ export class BuildProfileInput {
         return; // Continue loop
       }
       
-      if (question.type === 'mc' || question.type === 'ranking') {
-        // GUARD: MC/ranking answer must have choice property
+      if (question.type === 'mc') {
+        // GUARD: MC answer must have choice property
         if (!answer.choice) {
-          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} missing choice`);
+          console.warn(`[buildRawAnswers] GUARD: MC q${question.id} missing choice`);
           return; // Skip this answer
         }
         
@@ -145,6 +192,40 @@ export class BuildProfileInput {
           question_text: question.text,
           answer_choice: answer.choice,
           answer_text: answerText,
+          normalized_dimensions: normalizedDims
+        };
+      } else if (question.type === 'ranking' || question.type === 'choose_two') {
+        if (!answer.choice) {
+          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} missing choice`);
+          return;
+        }
+
+        const selectedKeys = getSelectedKeys(answer.choice);
+        const expectedCount = question.type === 'ranking'
+          ? question.answers?.length || 0
+          : 2;
+
+        if (!hasValidSelections(question, selectedKeys, expectedCount)) {
+          console.warn(`[buildRawAnswers] GUARD: ${question.type.toUpperCase()} q${question.id} invalid choice`);
+          return;
+        }
+
+        const answerTexts = selectedKeys.map((key) =>
+          question.answers.find((option) => option.key === key)?.text || 'Unknown'
+        );
+        const normalizedDims = question.type === 'ranking'
+          // Existing ranking semantics identify what matters most; no new
+          // positional weighting contract is introduced here.
+          ? question.normalized_dimensions?.[selectedKeys[0]] || {}
+          : combineNormalizedDimensions(question, selectedKeys);
+
+        rawAnswers[`q${question.id}`] = {
+          question_id: question.id,
+          question_type: question.type,
+          question_text: question.text,
+          answer_choice: selectedKeys.join(','),
+          answer_choices: selectedKeys,
+          answer_text: answerTexts.join(question.type === 'ranking' ? ' > ' : ' | '),
           normalized_dimensions: normalizedDims
         };
       } else if (question.type === 'written') {
@@ -186,7 +267,7 @@ export class BuildProfileInput {
       scores[dim] = {
         raw_score: Math.round(rawScore * 100) / 100,
         support_adjusted_score: Math.round(supportAdjustedScore * 100) / 100,
-        normalized_percent: Math.round((rawScore / 4.0) * 100),
+        normalized_percent: topologyScoreToPercent(rawScore),
         confidence: this.calculateDimensionConfidence(rawAnswers, dim),
         evidence_count: answerCount,
         contributing_answer_count: answerCount,
@@ -297,7 +378,7 @@ export class BuildProfileInput {
   }
 
   getOperatingDescription(dim, score) {
-    const level = score > 2.5 ? 'high' : score > 1.5 ? 'moderate' : 'low';
+    const level = classifyTopologyScore(score);
     return `${level} ${this.DIMENSION_LABELS[dim]}`;
   }
 
@@ -331,8 +412,8 @@ export class BuildProfileInput {
 
   buildTradeoffs(dimensionScores) {
     const tradeoffs = [];
-    const high = Object.entries(dimensionScores).filter(([, data]) => data.raw_score > 2.5).map(([dim]) => dim);
-    const low = Object.entries(dimensionScores).filter(([, data]) => data.raw_score < 1.5).map(([dim]) => dim);
+    const high = Object.entries(dimensionScores).filter(([, data]) => isHighTopologyScore(data.raw_score, data.evidence_count)).map(([dim]) => dim);
+    const low = Object.entries(dimensionScores).filter(([, data]) => isLowTopologyScore(data.raw_score, data.evidence_count)).map(([dim]) => dim);
 
     high.forEach(highDim => {
       (DIMENSION_TRADEOFFS[highDim] || []).forEach(lowDim => {
@@ -350,7 +431,7 @@ export class BuildProfileInput {
   }
 
   buildSynergies(dimensionScores) {
-    const high = Object.entries(dimensionScores).filter(([, data]) => data.raw_score > 2.5).map(([dim]) => dim);
+    const high = Object.entries(dimensionScores).filter(([, data]) => isHighTopologyScore(data.raw_score, data.evidence_count)).map(([dim]) => dim);
     
     if (high.includes('vector') && high.includes('fidelity')) {
       return [{
@@ -364,13 +445,9 @@ export class BuildProfileInput {
   }
 
   buildWrittenResponses(rawAnswers) {
-    // Step 2C Expansion: Now 10 written questions (Q2, Q19, Q20, Q21, Q22, Q23, Q24, Q25, Q26, Q27, Q28)
-    // Q19-Q23 are from original set
-    // Q24-Q28 are Step 2C additions (business/leadership/systems)
-    const writtenIds = [2, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
     const responses = {};
 
-    writtenIds.forEach(id => {
+    WRITTEN_QUESTION_IDS.forEach(id => {
       const answer = rawAnswers[`q${id}`];
       if (answer && answer.question_type === 'written') {
         responses[`q${id}_written`] = {
@@ -450,7 +527,10 @@ export class BuildProfileInput {
       signals.defensiveness.defensiveness_score += resp.extraction_signals.emotional_tone === 'defensive' ? 1 : 0;
     });
 
-    signals.abstraction_level.average_abstraction = Math.round(signals.abstraction_level.average_abstraction / Object.keys(writtenResponses).length);
+    const responseCount = Object.keys(writtenResponses).length;
+    signals.abstraction_level.average_abstraction = responseCount > 0
+      ? Math.round(signals.abstraction_level.average_abstraction / responseCount)
+      : 0;
     
     const blameRatio = signals.blame_pattern.total_blame_mentions / (signals.blame_pattern.total_blame_mentions + signals.blame_pattern.total_ownership_mentions + 1);
     if (blameRatio > 0.6) signals.blame_pattern.interpretation = 'Blame-external';
@@ -463,7 +543,7 @@ export class BuildProfileInput {
     const contradictions = [];
 
     // Example: high vector score but written description shows collaborative pattern
-    if (dimensionScores.vector.raw_score > 2.5) {
+    if (isHighTopologyScore(dimensionScores.vector.raw_score, dimensionScores.vector.evidence_count)) {
       const writtenText = Object.values(writtenResponses).map(r => r.response_text).join(' ');
       if (writtenText.includes('collaborative') || writtenText.includes('gather')) {
         contradictions.push({
@@ -485,21 +565,23 @@ export class BuildProfileInput {
   }
 
   buildPressureAnalysis(writtenResponses) {
-    const q15 = writtenResponses.q15_written;
-    const q24 = writtenResponses.q24_written;
+    const immediateQuestion = getQuestionByEvidenceRole('immediate_pressure');
+    const sustainedQuestion = getQuestionByEvidenceRole('sustained_pressure');
+    const immediate = getWrittenResponseByRole(writtenResponses, 'immediate_pressure');
+    const sustained = getWrittenResponseByRole(writtenResponses, 'sustained_pressure');
 
     return {
       immediate_stress_response: {
-        source: 'Q15',
-        pattern_type: q15 ? this.inferPressurePattern(q15.response_text) : 'unknown',
+        source: immediateQuestion ? `Q${immediateQuestion.id}` : null,
+        pattern_type: immediate ? this.inferPressurePattern(immediate.response_text) : 'unknown',
         description: 'What happens first when stressed'
       },
       sustained_stress_response: {
-        source: 'Q24',
-        pattern_type: q24 ? this.inferPressurePattern(q24.response_text) : 'unknown',
+        source: sustainedQuestion ? `Q${sustainedQuestion.id}` : null,
+        pattern_type: sustained ? this.inferPressurePattern(sustained.response_text) : 'unknown',
         description: 'What happens after sustained strain'
       },
-      pressure_indicators: this.derivePressureIndicators(q15, q24)
+      pressure_indicators: this.derivePressureIndicators(immediate, sustained)
     };
   }
 
@@ -524,20 +606,20 @@ export class BuildProfileInput {
   buildProfileFlags(dimensionScores, contradictions, pressureAnalysis) {
     return {
       high_rigidity: {
-        flag: dimensionScores.flex.raw_score < 1.5,
-        severity: dimensionScores.flex.raw_score < 1.5 ? 7 : 0
+        flag: isLowTopologyScore(dimensionScores.flex.raw_score, dimensionScores.flex.evidence_count),
+        severity: isLowTopologyScore(dimensionScores.flex.raw_score, dimensionScores.flex.evidence_count) ? 7 : 0
       },
       over_control_risk: {
-        flag: dimensionScores.framework.raw_score > 2.5 && dimensionScores.vector.raw_score > 2.5,
-        severity: dimensionScores.framework.raw_score > 2.5 && dimensionScores.vector.raw_score > 2.5 ? 6 : 0
+        flag: isHighTopologyScore(dimensionScores.framework.raw_score, dimensionScores.framework.evidence_count) && isHighTopologyScore(dimensionScores.vector.raw_score, dimensionScores.vector.evidence_count),
+        severity: isHighTopologyScore(dimensionScores.framework.raw_score, dimensionScores.framework.evidence_count) && isHighTopologyScore(dimensionScores.vector.raw_score, dimensionScores.vector.evidence_count) ? 6 : 0
       },
       collaboration_instability: {
         flag: contradictions.total_contradictions > 0,
         severity: contradictions.total_contradictions > 0 ? 5 : 0
       },
       relational_blindness: {
-        flag: dimensionScores.signal.raw_score < 1.5,
-        severity: dimensionScores.signal.raw_score < 1.5 ? 6 : 0
+        flag: isLowTopologyScore(dimensionScores.signal.raw_score, dimensionScores.signal.evidence_count),
+        severity: isLowTopologyScore(dimensionScores.signal.raw_score, dimensionScores.signal.evidence_count) ? 6 : 0
       }
     };
   }

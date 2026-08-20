@@ -1,0 +1,555 @@
+{
+  "orientation": {
+    "where_you_are_statement_refs": [
+      "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+      "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+      "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+      "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working.",
+      "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction.",
+      "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+      "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship.",
+      "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates."
+    ],
+    "what_matters_now_statement_refs": [
+      "Leader-centered execution without a governed relationship, delegation, measurement, and accountability system.",
+      "End-to-end ownership transfer trial. Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion."
+    ],
+    "where_you_are_going_statement_refs": [
+      "Leader-Centered Continuity. Current configuration persists without governed direction-of-travel evidence. Relative support: 27 of 100.",
+      "Bounded Support-Layer Emergence. Existing joint follow-up, database-update support, coaching, and coordinator or title assistance form an early distributed support layer; recurring ownership and operator relief remain unverified. Relative support: 15 of 100.",
+      "Governed Relationship and Operating Core. Governed relationship records and next actions combine with source-stage measurement, explicit ownership, and recurring review to alter the current operating mechanisms. Relative support: 20 of 100.",
+      "Transferable Multi-Agent Operating Model. After the governed core proves repeatability and economics, validated demand lanes and gated capacity additions support a producer-to-manager transition. Relative support: 12 of 100.",
+      "Centralization Deepens Under Premature Growth. Growth commitments outrun relationship governance, measurement, role clarity, and economic readiness while operator coordination load increases. Relative support: 26 of 100."
+    ]
+  },
+  "business_territories": [
+    {
+      "territory": "Relationship / Database Engine",
+      "state": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+      "confidence": "MODERATE",
+      "statements": [
+        "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized."
+      ]
+    },
+    {
+      "territory": "Opportunity / Lead Generation",
+      "state": "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+      "confidence": "MODERATE",
+      "statements": [
+        "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects."
+      ]
+    },
+    {
+      "territory": "Follow-Up / Conversion",
+      "state": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+      "confidence": "LOW",
+      "statements": [
+        "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it."
+      ]
+    },
+    {
+      "territory": "Operating / Systems",
+      "state": "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working.",
+      "confidence": "MODERATE",
+      "statements": [
+        "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working."
+      ]
+    },
+    {
+      "territory": "Execution / Accountability",
+      "state": "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction.",
+      "confidence": "MODERATE",
+      "statements": [
+        "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction."
+      ]
+    },
+    {
+      "territory": "Economics / Financial",
+      "state": "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+      "confidence": "MODERATE",
+      "statements": [
+        "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established."
+      ]
+    },
+    {
+      "territory": "Capacity / Team / Leverage",
+      "state": "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship.",
+      "confidence": "MODERATE",
+      "statements": [
+        "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship."
+      ]
+    },
+    {
+      "territory": "Direction / Business Model",
+      "state": "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates.",
+      "confidence": "MODERATE",
+      "statements": [
+        "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates."
+      ]
+    }
+  ],
+  "destinations": [
+    {
+      "id": "YOUR_BUSINESS_NOW",
+      "name": "YOUR BUSINESS NOW",
+      "mission": "See the actual current business system, its assets, vulnerabilities and honest gaps.",
+      "statements": [
+        {
+          "text": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind. The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support. Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator reports insufficient current opportunity generation. SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines. Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Listing, buyer, lead, transaction, and recruiting steps are articulated. The operator retains primary transaction follow-through while using coordinator support as needed. Operational repeatability is unverified despite the operator describing current processes as working.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Coaching is present for business development and recruiting. Routine business execution is primarily self-accountable or unowned. The operator attributes limitation to organization, time management, and distraction.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Units, sales volume, gross, and expenses are reported for incompletely defined periods. Reported units and volume imply an average sale price below the separately stated average. Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Profit and business contribution are reported as equal while the operator reports performing most team work. The business partner participates in joint lead and client follow-up. No person-level team synthesis is authorized for the reported partner relationship.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator has explicit production, delegation, team, and office goals across multiple horizons. The reported current team pace is below the near-term monthly closing target. The growth plan lacks evidenced demand, economics, role, and process gates.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator reports insufficient current opportunity generation.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "SOI contact and local networking are available lanes; other named lanes are intentions rather than evidenced engines.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Current evidence cannot separate generation scarcity from capture, qualification, follow-up, or market effects.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator has explicit production, delegation, team, and office goals across multiple horizons.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "The reported current team pace is below the near-term monthly closing target.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The growth plan lacks evidenced demand, economics, role, and process gates.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The combined SOI contains 392 contacts, about half attributed to the operator, with roughly 50 personal relationships believed top-of-mind.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "The database is an incomplete spreadsheet without email completion or segmentation and receives outside update support.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Postcards recur every five to six weeks while personal outreach is random and acknowledged as under-systematized.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Coaching is present for business development and recruiting.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Routine business execution is primarily self-accountable or unowned.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Listing, buyer, lead, transaction, and recruiting steps are articulated.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "The operator retains primary transaction follow-through while using coordinator support as needed.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Operational repeatability is unverified despite the operator describing current processes as working.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Units, sales volume, gross, and expenses are reported for incompletely defined periods.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Reported units and volume imply an average sale price below the separately stated average.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Agent net, owner compensation, owner profit, cash, reserves, and contribution by source or closing are not established.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator attributes limitation to organization, time management, and distraction.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Current evidence does not establish whether the reported constraint is personal, structural, or mixed.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Profit and business contribution are reported as equal while the operator reports performing most team work.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "The business partner participates in joint lead and client follow-up.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "No person-level team synthesis is authorized for the reported partner relationship.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator reports needing help, delegation, an assistant, and reliable CRM use.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Primary transaction ownership and reported team workload concentrate capacity demand on the operator.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "No time-bound market or financing evidence is available to explain current demand or conversion.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Transaction experience exists, but leverage readiness and transferability are not established.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "No comparable observations establish progression, regression, or stability.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Existing relationships provide an owned-demand starting point, conditional on ownership, recency, and activation quality.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The operator reports ease initiating SOI contact and prior business from local networking.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "The operator can articulate core listing, buyer, recruiting, and transaction workflows.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Partner, transaction-coordinator, title, and coaching support provide bounded operating leverage.",
+          "epistemic_state": "KNOWN",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Reported transactions establish operating experience, subject to period and arithmetic reconciliation.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Relationship value remains dependent on incomplete records and personal memory.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Core follow-through and team workload are concentrated on the operator.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Unmeasured seat and contribution alignment may convert growth into additional operator burden.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Incomplete economic lineage prevents reliable evaluation of profit, cash, and hiring capacity.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Absent source-stage visibility prevents early detection of demand, conversion, and future-income risk.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "The governed evidence makes follow-up / conversion material, but the accepted state does not establish a separate conclusion for it.",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        }
+      ]
+    },
+    {
+      "id": "WHATS_DRIVING_IT",
+      "name": "WHAT’S DRIVING IT",
+      "mission": "Understand the supported causal mechanisms, alternatives and conditions that would change the view.",
+      "statements": [
+        {
+          "text": "Leader-centered execution without a governed relationship, delegation, measurement, and accountability system.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Relationship value is weakly captured because contact completeness, state, recency, segmentation, and next actions are not governed.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Work, decisions, relationship continuity, and accountability converge on one operator instead of transferable roles and systems.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Sparse instrumentation prevents diagnosis of whether demand, conversion, capacity, or market effects govern output.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Seat scope, task value, decision rights, and economic sharing are not sufficiently measured to establish alignment.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Additional people may multiply coordination requirements before the operating model is ready to convert them into productive capacity.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Incomplete financial lineage prevents production from being translated into decision-ready economic capacity.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        }
+      ]
+    },
+    {
+      "id": "WHERE_ITS_HEADING",
+      "name": "WHERE IT’S HEADING",
+      "mission": "Compare five conditional trajectories using deterministic relative-support weights, not probabilities.",
+      "statements": [
+        {
+          "text": "Leader-Centered Continuity. Current configuration persists without governed direction-of-travel evidence. Relative support: 27 of 100.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Bounded Support-Layer Emergence. Existing joint follow-up, database-update support, coaching, and coordinator or title assistance form an early distributed support layer; recurring ownership and operator relief remain unverified. Relative support: 15 of 100.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Governed Relationship and Operating Core. Governed relationship records and next actions combine with source-stage measurement, explicit ownership, and recurring review to alter the current operating mechanisms. Relative support: 20 of 100.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Transferable Multi-Agent Operating Model. After the governed core proves repeatability and economics, validated demand lanes and gated capacity additions support a producer-to-manager transition. Relative support: 12 of 100.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Centralization Deepens Under Premature Growth. Growth commitments outrun relationship governance, measurement, role clarity, and economic readiness while operator coordination load increases. Relative support: 26 of 100.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        }
+      ]
+    },
+    {
+      "id": "WHAT_CHANGES_IT",
+      "name": "WHAT CHANGES IT",
+      "mission": "See the selected bounded intervention and the mechanism it is designed to test.",
+      "statements": [
+        {
+          "text": "End-to-end ownership transfer trial. Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Requested organization, delegation, and team growth make transferability the immediate capacity question.",
+          "epistemic_state": "INFERRED",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Evidence that would support the move: Workflow continuity persists across repeated cycles without hidden operator rescue. Released operator capacity is demonstrably redirected to relationship, system, or accountability work. Role and decision records support a clearer leverage-readiness judgment.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        },
+        {
+          "text": "Evidence that would challenge the move: Nominal delegation leaves decisions and follow-through with the operator. Rescue work or quality failures expand. Operator capacity is neither released nor redirected.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "WITH_DISCLOSURE"
+        }
+      ]
+    },
+    {
+      "id": "HOW_YOU_EXECUTE_IT",
+      "name": "HOW YOU EXECUTE IT",
+      "mission": "Translate the move into prerequisites, ownership, steps, proof and execution adjustments.",
+      "statements": [
+        {
+          "text": "Select one recurring workflow that currently returns to the operator.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Map its start, finish, standard, decision rights, exceptions, and evidence requirements.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Authorize controlled shadow-to-independent execution with operator involvement limited to defined exceptions.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Inspect commitments, outcomes, rescues, and intervention causes.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Retain, revise, or revert the transfer based on observed fidelity.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Pilot one workflow before extending the ownership model.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "Predefine check-ins and escalation before workload pressure rises.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "Treat the workflow as a seat-boundary test rather than proof of managerial readiness.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        }
+      ]
+    },
+    {
+      "id": "WHY_WE_BELIEVE_IT",
+      "name": "WHY WE BELIEVE IT",
+      "mission": "Separate what is known, inferred, missing and contradicted, with explicit mind-change conditions.",
+      "statements": [
+        {
+          "text": "Still needed: Which current direct operating records corroborate the customer-reported systems and execution state?",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Still needed: Which time-bound current market facts materially alter the internal business explanation?",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Still needed: Which comparable observations across time establish current direction of travel?",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Still needed: Which active team identities carry explicit WBM_CONTEXT authority and frozen BOS hashes?",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Still needed: Which governed financial records corroborate the operator-reported financial state and time window?",
+          "epistemic_state": "MISSING",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "Unresolved: Units, volume, and stated average sale price do not reconcile.",
+          "epistemic_state": "CONTRADICTED",
+          "disclosure_policy": "DIRECT"
+        },
+        {
+          "text": "What would change this view: Direct operating records show consistent follow-up, delegation, and distributed ownership.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "What would change this view: Source-stage data isolates demand scarcity or conversion as the governing constraint.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "What would change this view: Financial documents establish sufficient contribution, cash, and hiring capacity.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "What would change this view: Role and workload records establish an intentional balanced team structure.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "What would change this view: Current market evidence explains the reported production gap.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "What would change this view: Comparable longitudinal observations establish a stable direction of travel.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DETAIL_ONLY"
+        },
+        {
+          "text": "A Living Map would revisit this frozen baseline only when governed new evidence creates a validated state transition.",
+          "epistemic_state": "CONDITIONAL",
+          "disclosure_policy": "DIRECT"
+        }
+      ]
+    }
+  ],
+  "living_map_transition": {
+    "mode": "EXPLANATORY_ONLY",
+    "live_capability_claimed": false,
+    "explanation": "A Living Map would revisit this frozen baseline only when governed new evidence creates a validated state transition."
+  }
+}
