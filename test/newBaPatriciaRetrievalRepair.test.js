@@ -116,8 +116,12 @@ test('ordinary New BA route keeps generalized generation while packaging frozen 
   assert.match(route, /campaign\.advance\(source\.profile_id\)/u);
   const deployment = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
   const includeFiles = deployment.functions['api/moremindmap/new-ba.js'].includeFiles;
-  assert.match(includeFiles, /pinnedAuthority/u);
-  assert.match(includeFiles, /docs\/ba-intelligence-authority-library-v1/u);
+  assert.equal(includeFiles, 'docs/ba-intelligence-authority-library-v1/**');
+  assert.match(fs.readFileSync('api/engine/newBaProductionReadinessV1/canonicalReader.js', 'utf8'), /pinnedAuthority\//u);
+  const deploymentIgnore = fs.readFileSync('.vercelignore', 'utf8');
+  assert.doesNotMatch(deploymentIgnore, /^docs\/\*\*$/mu);
+  assert.ok(deploymentIgnore.lastIndexOf('!docs/ba-intelligence-authority-library-v1/**') > deploymentIgnore.lastIndexOf('*.md'));
+  assert.ok(deploymentIgnore.lastIndexOf('!docs/ba-intelligence-authority-library-v1/**') > deploymentIgnore.lastIndexOf('*.txt'));
 });
 
 test('retrieval serves an internally fused compatible prior without provider execution or publication', async () => {

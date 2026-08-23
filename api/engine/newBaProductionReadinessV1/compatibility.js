@@ -36,7 +36,8 @@ export function classifyNewBaCompatibility(source) {
     reasons: sufficiency.reasons,
     evidence_sufficiency: sufficiency,
   });
-  const missing = sufficiency.unanswered_questions.length > 0;
+  const missing = (sufficiency.unanswered_questions || []).length > 0
+    || (sufficiency.not_applicable_questions || []).length > 0;
   return Object.freeze({
     class: missing ? 'B' : 'A',
     label: missing ? NEW_BA_COMPATIBILITY_CLASSES.B : NEW_BA_COMPATIBILITY_CLASSES.A,

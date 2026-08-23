@@ -18,11 +18,11 @@
     },
     "api/moremindmap/new-ba.js": {
       "maxDuration": 800,
-      "includeFiles": "{api/engine/newBaProductionReadinessV1/pinnedAuthority/**,docs/ba-intelligence-authority-library-v1/**}"
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
     },
     "api/moremindmap/new-ba-generation.js": {
       "maxDuration": 800,
-      "includeFiles": "{api/engine/newBaProductionReadinessV1/pinnedAuthority/**,docs/ba-intelligence-authority-library-v1/**}"
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
     },
     "api/internal/subscription-v1-runtime.js": {
       "maxDuration": 800

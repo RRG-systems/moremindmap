@@ -56,6 +56,12 @@ function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPoint
   return Object.freeze({
     namespace: bounded,
     async getRealization({ profileId, realizationId }) { return readArtifact(profileId, realizationId); },
+    async getCurrent({ profileId }) {
+      const profile = normalizeProfileId(profileId);
+      const pointer = await getValue(pointerKey(profile));
+      if (!pointer) return null;
+      return readArtifact(profile, pointer);
+    },
     async inspect({ profileId, desiredIdentity }) {
       const profile = normalizeProfileId(profileId);
       const pointer = await getValue(pointerKey(profile));

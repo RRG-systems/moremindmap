@@ -18,6 +18,11 @@ import {
   sendFormspreeNotification
 } from '../engine/notifications/formspreeNotifications.js';
 import { queueBaCompletedContactSync, splitContactName } from '../integrations/gohighlevel/completionHooks.js';
+import { buildGovernedQuestionStates } from '../engine/businessAssessment/questionStates.js';
+import {
+  projectRecruitingBaState,
+  resolveRecruitingBaOwnerProfile,
+} from '../engine/recruitingV1/canonicalAdapters.js';
 
 const QUESTION_KEYS = Array.from({ length: 12 }, (_, index) => `q${index + 1}`);
 
@@ -42,8 +47,11 @@ export default async function handler(req, res) {
 
   let redis;
   try {
-    const { owner_profile_id, answers } = req.body || {};
-    const parsedProfile = parseProfileId(owner_profile_id);
+    const { owner_profile_id, answers, question_states } = req.body || {};
+    const recruitingAuthority = await resolveRecruitingBaOwnerProfile(req, owner_profile_id, {
+      required: req.body?.recruiting_mode === 'accepted_invitation',
+    });
+    const parsedProfile = parseProfileId(recruitingAuthority.owner_profile_id);
 
     if (!parsedProfile) {
       return res.status(400).json({ success: false, error: 'Invalid owner_profile_id' });
@@ -68,6 +76,11 @@ export default async function handler(req, res) {
     const normalizedAnswers = normalizeAnswers(answers);
     const assessmentId = createAssessmentId(now);
     const jobId = createJobId();
+    const governedQuestionStates = buildGovernedQuestionStates({
+      answers: normalizedAnswers,
+      requestedStates: question_states,
+      assessmentId,
+    });
     const teamProfileIds = parseTeamProfileIds(normalizedAnswers.q11);
     const assessmentType = normalizedAnswers.q11.trim() ? 'real_estate_team' : 'real_estate_agent';
     const profileContext = extractProfileContext(profileLookup.dossier, parsedProfile.normalized);
@@ -82,6 +95,7 @@ export default async function handler(req, res) {
       version: ASSESSMENT_VERSION,
       inputs: {
         answers: normalizedAnswers,
+        question_states: governedQuestionStates,
         team_profile_ids: teamProfileIds,
         financial_text: normalizedAnswers.q9
       },
@@ -90,7 +104,8 @@ export default async function handler(req, res) {
       metadata: {
         generated_at: null,
         model: null,
-        notes: 'Sprint 2 intake only. No intelligence generated.'
+        notes: 'Sprint 2 intake only. No intelligence generated.',
+        recruiting_relationship_ref: recruitingAuthority.relationship_ref || null,
       }
     };
 
@@ -109,6 +124,20 @@ export default async function handler(req, res) {
     await redis.set(businessAssessmentJobKey(jobId), JSON.stringify(job));
     await redis.sadd(`business_assessment:index:date:${now.toISOString().slice(0, 10)}`, assessmentId);
     await redis.sadd(`business_assessment:index:type:${assessmentType}`, assessmentId);
+
+    try {
+      await projectRecruitingBaState({
+        relationshipRef: recruitingAuthority.relationship_ref,
+        assessmentId,
+        state: 'BA_INTAKE_SAVED',
+      });
+    } catch (recruitingProjectionError) {
+      console.error(JSON.stringify({
+        event: 'RECRUITING_BA_INTAKE_PROJECTION_FAILED',
+        code: String(recruitingProjectionError?.message || 'RECRUITING_BA_PROJECTION_FAILED').split(':')[0],
+        customer_payload_logged: false,
+      }));
+    }
 
     const identity = extractNotificationIdentityFromDossier(profileLookup.dossier);
     const { firstName, lastName } = splitContactName(identity.full_name || profileContext.owner_profile_name);

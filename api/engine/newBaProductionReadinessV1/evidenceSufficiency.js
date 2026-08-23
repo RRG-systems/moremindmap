@@ -59,12 +59,15 @@ export function classifyBaEvidenceSufficiency({ answers = {}, answerSha256 = {},
     return Object.freeze({ ...mission, satisfied: evidenceQuestions.length > 0, evidence_questions: Object.freeze(evidenceQuestions) });
   });
   const failedMissions = missionCoverage.filter((mission) => !mission.satisfied).map((mission) => mission.mission_id);
-  const localizedConsequences = unanswered.map((key) => {
+  const localizedConsequences = [...unanswered, ...notApplicable].map((key) => {
     const authority = BA_QUESTION_AUTHORITY[key];
+    const explicitlyNotApplicable = notApplicable.includes(key);
     return Object.freeze({
       question_key: key,
-      state: 'UNKNOWN_UNANSWERED',
-      customer_safe_missing_evidence: `${authority.customer_question} is not yet established from this assessment.`,
+      state: explicitlyNotApplicable ? 'GOVERNED_NOT_APPLICABLE' : 'UNKNOWN_UNANSWERED',
+      customer_safe_missing_evidence: explicitlyNotApplicable
+        ? `${authority.customer_question} was explicitly marked not applicable for this assessment and remains unavailable as business evidence.`
+        : `${authority.customer_question} is not yet established from this assessment.`,
       primary_domain: authority.primary_domain,
       secondary_domains: authority.secondary_domains,
       affected_surfaces: authority.affected_surfaces,
@@ -74,26 +77,36 @@ export function classifyBaEvidenceSufficiency({ answers = {}, answerSha256 = {},
       ]),
     });
   });
-  const status = malformedHashes.length === 0 && failedMissions.length === 0 ? 'PASS' : 'FAIL';
-  const compatibilityClass = status === 'PASS' ? (unanswered.length === 0 ? 'A' : 'B') : 'C';
+  const status = malformedHashes.length === 0 ? 'PASS' : 'FAIL';
+  const missingEvidenceCount = unanswered.length + notApplicable.length;
+  const compatibilityClass = status === 'PASS' ? (missingEvidenceCount === 0 ? 'A' : 'B') : 'C';
   const result = {
     ...BA_EVIDENCE_SUFFICIENCY_CONTRACT,
     status,
     compatibility_class: compatibilityClass,
     automatic_rebuild: status === 'PASS',
-    preserve_missingness: unanswered.length > 0,
+    preserve_missingness: missingEvidenceCount > 0,
     answered_questions: Object.freeze(answered),
     unanswered_questions: Object.freeze(unanswered),
     not_applicable_questions: Object.freeze(notApplicable),
     malformed_answer_hashes: Object.freeze(malformedHashes),
     mission_coverage: Object.freeze(missionCoverage),
     failed_missions: Object.freeze(failedMissions),
+    bounded_abstentions: Object.freeze(failedMissions.map((missionId) => Object.freeze({
+      mission_id: missionId,
+      effect: 'LOCALIZED_ABSTENTION_REQUIRED',
+    }))),
     localized_consequences: Object.freeze(localizedConsequences),
     reasons: Object.freeze(status === 'PASS'
-      ? [unanswered.length === 0 ? 'complete_governed_business_evidence' : 'governed_business_evidence_sufficient_with_explicit_missingness']
+      ? [
+          missingEvidenceCount === 0
+            ? 'complete_governed_business_evidence'
+            : failedMissions.length
+              ? 'governed_business_evidence_partial_with_localized_abstention'
+              : 'governed_business_evidence_sufficient_with_explicit_missingness',
+        ]
       : [
           ...(malformedHashes.length ? ['governed_answer_hash_invalid'] : []),
-          ...(failedMissions.length ? ['required_reasoning_mission_not_supported'] : []),
         ]),
   };
   return deepFreeze({ ...result, contract_sha256: sha256Stable({
@@ -102,4 +115,3 @@ export function classifyBaEvidenceSufficiency({ answers = {}, answerSha256 = {},
     required_missions: REQUIRED_MISSIONS,
   }) });
 }
-

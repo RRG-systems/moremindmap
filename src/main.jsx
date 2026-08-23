@@ -20,6 +20,7 @@ import VisualLabPage from './components/visualLab/VisualLabPage.jsx'
 import BOSRegressionViewer from './lab/BOSRegressionViewer.jsx'
 import BACustomerShellLab from './lab/BACustomerShellLab.jsx'
 import SubscriptionV1InternalDevApp from './subscriptionV1/SubscriptionV1InternalDevApp.jsx'
+import RecruitingV1App from './recruitingV1/RecruitingV1App.jsx'
 import './index.css'
 
 const newBosProductionRenderEnabled = import.meta.env.VITE_NEW_BOS_PRODUCTION_RENDER_ENABLED === 'true'
@@ -30,6 +31,7 @@ const newBaProductionRenderEnabled = import.meta.env.VITE_NEW_BA_PRODUCTION_REND
 const NewBaProductionCanary = newBaProductionRenderEnabled
   ? React.lazy(() => import('./components/baProductionReadinessV1/NewBaProductionCanary.jsx'))
   : null
+const recruitingV1Enabled = import.meta.env.VITE_RECRUITING_V1_ENABLED === 'true'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -47,6 +49,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/leadership/role-fit" element={<LeadershipRoleFitLab />} />
         <Route path="/leadership/fathom-dd-fit" element={<LeadershipRoleFitLab />} />
         <Route path="/subscription" element={<SubscriptionV1InternalDevApp />} />
+        {recruitingV1Enabled && <Route path="/recruiting/*" element={<RecruitingV1App />} />}
         <Route path="/business-assessment" element={<BusinessAssessment />} />
         <Route path="/business-assessment/visual-map" element={<BusinessAssessmentVisualMap />} />
         <Route path="/business-assessment/five-futures" element={<BusinessAssessmentFiveFutures />} />

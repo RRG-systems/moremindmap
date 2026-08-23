@@ -2,9 +2,11 @@
 .env.*
 *.zip
 benchmark_profiles/
-docs/**
-!docs/ba-intelligence-authority-library-v1/
-!docs/ba-intelligence-authority-library-v1/**
+docs/integrations/**
+docs/intelligence_fabric/**
+docs/leadership/**
+docs/runbooks/**
+docs/validation/**
 lab_outputs/
 scripts/
 !scripts/
@@ -19,3 +21,8 @@ test/
 *.py
 TEST_*.js
 test-*.js
+
+# The frozen BA authority library is runtime input for canonical New BA. Keep
+# this final so the global markdown/text exclusions above cannot remove it.
+!docs/ba-intelligence-authority-library-v1/
+!docs/ba-intelligence-authority-library-v1/**

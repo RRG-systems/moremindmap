@@ -8,6 +8,7 @@ import {
   BA_RETRIEVE_NOT_FOUND_MESSAGE,
   retrieveBusinessAssessment
 } from './lib/businessAssessment/retrieveBusinessAssessment.js';
+import { enterCanonicalNewBaAfterIntake } from './lib/businessAssessment/canonicalNewBaSubmission.js';
 import {
   ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
   normalizeOrdinaryCustomerProfileId,
@@ -125,6 +126,11 @@ const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
   return acc;
 }, {});
 
+const INITIAL_QUESTION_STATES = QUESTIONS.reduce((acc, question) => {
+  acc[question.key] = 'UNANSWERED';
+  return acc;
+}, {});
+
 const BUSINESS_ASSESSMENT_PROMO_CODES = new Set(['BA5FREE']);
 
 function createProfileGateState() {
@@ -179,7 +185,8 @@ const DIMENSION_LABELS = {
   horizon: 'Perspective'
 };
 
-function buildApiUrl(path) {
+function buildApiUrl(path, forceSameOrigin = false) {
+  if (forceSameOrigin) return path;
   const baseUrl = import.meta.env.VITE_API_URL || '';
   return `${baseUrl}${path}`;
 }
@@ -280,16 +287,10 @@ function PremiumPreviewHeader({ personName }) {
   );
 }
 
-function isComplete(answers) {
-  return QUESTIONS.every((question) => {
-    if (question.key === 'q11') return true;
-    return answers[question.key]?.trim().length > 0;
-  });
-}
-
 export default function BusinessAssessment() {
   const [searchParams] = useSearchParams();
-  const [industry, setIndustry] = useState('Real Estate');
+  const recruitingMode = searchParams.get('recruiting') === '1';
+  const industry = 'Real Estate';
   const [promoCode, setPromoCode] = useState('');
   const [promoState, setPromoState] = useState({ status: 'idle', message: '' });
   const [retrieveId, setRetrieveId] = useState('');
@@ -300,6 +301,7 @@ export default function BusinessAssessment() {
   const [flowStarted, setFlowStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState(INITIAL_ANSWERS);
+  const [questionStates, setQuestionStates] = useState(INITIAL_QUESTION_STATES);
   const [submitState, setSubmitState] = useState({ status: 'idle', error: '', result: null });
   const [retrieveState, setRetrieveState] = useState({ status: 'idle', error: '', result: null });
   const [checkoutState, setCheckoutState] = useState({ loading: '', error: '' });
@@ -312,7 +314,7 @@ export default function BusinessAssessment() {
   });
 
   const currentQuestion = QUESTIONS[currentQuestionIndex];
-  const canSubmit = isComplete(answers);
+  const canSubmit = Boolean(normalizeOrdinaryCustomerProfileId(assessmentProfile?.id)) && industry === 'Real Estate';
   const retrievedAssessment = retrieveState.result?.assessment || null;
   const retrievedBriefing = retrievedAssessment?.output?.executive_diagnostic_briefing_v1 || null;
   const retrievedOutput = retrievedAssessment?.output || {};
@@ -355,6 +357,28 @@ export default function BusinessAssessment() {
   const hasCompletedBusinessAssessment = monthlyProfileGate.businessAssessmentStatus === 'found';
   const devCodeProfileValidated = Boolean(devCodeProfileGate.profile?.id);
   const devCodeAccepted = promoState.status === 'valid' && devCodeProfileValidated;
+
+  useEffect(() => {
+    if (!recruitingMode) return;
+    fetch('/api/recruiting/runtime?view=invite_session', {
+      credentials: 'same-origin',
+      cache: 'no-store',
+    }).then(async (response) => {
+      const payload = await response.json().catch(() => null);
+      if (!response.ok || payload?.ok !== true || !payload?.relationship?.bos_profile_id) {
+        throw new Error('Complete your invited MORE Profile before beginning the optional Business Assessment.');
+      }
+      setAssessmentProfile({
+        id: payload.relationship.bos_profile_id,
+        name: 'Invited recruit',
+        profileType: 'Verified MORE Profile',
+      });
+      setFlowStarted(true);
+      setCurrentQuestionIndex(0);
+    }).catch((error) => {
+      setSubmitState({ status: 'error', error: error.message, result: null });
+    });
+  }, [recruitingMode]);
 
   async function validateProfileForGate(event, gateType) {
     event.preventDefault();
@@ -460,6 +484,8 @@ export default function BusinessAssessment() {
     setAssessmentProfile(devCodeProfileGate.profile);
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
+    setAnswers({ ...INITIAL_ANSWERS });
+    setQuestionStates({ ...INITIAL_QUESTION_STATES });
     setSubmitState({ status: 'idle', error: '', result: null });
   }
 
@@ -619,10 +645,24 @@ export default function BusinessAssessment() {
   }
 
   function updateAnswer(value) {
+    const key = currentQuestion.key;
     setAnswers((current) => ({
       ...current,
-      [currentQuestion.key]: value
+      [key]: value
     }));
+    setQuestionStates((current) => ({
+      ...current,
+      [key]: value.trim() ? 'ANSWERED' : current[key] === 'NOT_APPLICABLE' ? 'NOT_APPLICABLE' : 'UNANSWERED',
+    }));
+  }
+
+  function toggleNotApplicable() {
+    const key = currentQuestion.key;
+    const nextState = questionStates[key] === 'NOT_APPLICABLE' ? 'UNANSWERED' : 'NOT_APPLICABLE';
+    setQuestionStates((current) => ({ ...current, [key]: nextState }));
+    if (nextState === 'NOT_APPLICABLE') {
+      setAnswers((current) => ({ ...current, [key]: '' }));
+    }
   }
 
   function getMissingGenerationSteps(assessment) {
@@ -630,9 +670,10 @@ export default function BusinessAssessment() {
   }
 
   async function postGenerationStep(step, assessmentId) {
-    const response = await fetch(buildApiUrl(step.endpoint), {
+    const response = await fetch(buildApiUrl(step.endpoint, recruitingMode), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: recruitingMode ? 'same-origin' : 'omit',
       body: JSON.stringify({ assessment_id: assessmentId })
     });
     const payload = await response.json().catch(() => null);
@@ -645,7 +686,10 @@ export default function BusinessAssessment() {
   }
 
   async function retrieveAssessmentByProfileId(ownerProfileId) {
-    const { payload } = await retrieveBusinessAssessment(ownerProfileId, buildApiUrl);
+    const { payload } = await retrieveBusinessAssessment(
+      ownerProfileId,
+      (path) => buildApiUrl(path, recruitingMode),
+    );
     return payload;
   }
 
@@ -654,6 +698,13 @@ export default function BusinessAssessment() {
     if (!id) return { status: 'not_found', assessmentId: '' };
 
     try {
+      const canonical = await resolveOrdinaryBaEntry(id);
+      if (canonical.status === 'current') {
+        return { status: 'found', assessmentId: '' };
+      }
+      if (canonical.status !== 'governed_fallback') {
+        return { status: 'not_found', assessmentId: '' };
+      }
       const payload = await retrieveAssessmentByProfileId(id);
       const assessment = payload?.assessment || null;
       const output = assessment?.output || {};
@@ -749,12 +800,15 @@ export default function BusinessAssessment() {
     let savedPayload = null;
 
     try {
-      const response = await fetch(buildApiUrl('/api/business-assessment/start'), {
+      const response = await fetch(buildApiUrl('/api/business-assessment/start', recruitingMode), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: recruitingMode ? 'same-origin' : 'omit',
         body: JSON.stringify({
           owner_profile_id: assessmentProfile.id,
-          answers
+          answers,
+          question_states: questionStates,
+          recruiting_mode: recruitingMode ? 'accepted_invitation' : undefined,
         })
       });
       const payload = await response.json().catch(() => null);
@@ -766,22 +820,32 @@ export default function BusinessAssessment() {
       savedPayload = payload;
       const ownerProfileId =
         payload.profile_context?.owner_profile_id || assessmentProfile.id;
-      setSubmitState({ status: 'generating', error: '', result: payload });
-      const completed = await runGenerationSequence({
-        assessmentId: payload.assessment_id,
-        ownerProfileId,
-        assessmentRecord: null
-      });
-      setSubmitState({ status: 'complete', error: '', result: completed });
+      setSubmitState({ status: 'routing', error: '', result: payload });
+      await enterCanonicalNewBaAfterIntake({ profileId: ownerProfileId });
     } catch (error) {
       setSubmitState({
         status: savedPayload ? 'generation_error' : 'error',
         error:
           savedPayload
-            ? 'Your intake was saved, but intelligence generation did not complete. You can retry generation.'
+            ? 'Your intake was saved, but your governed Business Twin could not be opened yet. You can retry without resubmitting your answers.'
             : error.message || 'Unable to save assessment intake.',
         result: savedPayload
       });
+    }
+  }
+
+  async function retryCanonicalGeneration() {
+    const ownerProfileId =
+      submitState.result?.profile_context?.owner_profile_id || assessmentProfile?.id;
+    setSubmitState((current) => ({ ...current, status: 'routing', error: '' }));
+    try {
+      await enterCanonicalNewBaAfterIntake({ profileId: ownerProfileId });
+    } catch {
+      setSubmitState((current) => ({
+        ...current,
+        status: 'generation_error',
+        error: 'Your governed Business Twin could not be opened yet. Your saved answers remain unchanged.',
+      }));
     }
   }
 
@@ -1362,7 +1426,8 @@ export default function BusinessAssessment() {
               Answer the real business questions.
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-white/56">
-              Stay specific. Your answers build the Executive Diagnostic, Five Futures, and One Move.
+              Stay specific where you can. Your governed evidence builds your Whole Business Model,
+              Five Futures, One Move, Plan, and Evidence experience.
             </p>
           </div>
 
@@ -1391,10 +1456,22 @@ export default function BusinessAssessment() {
             <textarea
               value={answers[currentQuestion.key]}
               onChange={(event) => updateAnswer(event.target.value)}
+              disabled={questionStates[currentQuestion.key] === 'NOT_APPLICABLE'}
               rows={currentQuestion.rows}
-              placeholder="Write the real answer here."
+              placeholder={questionStates[currentQuestion.key] === 'NOT_APPLICABLE' ? 'Marked not applicable.' : 'Write the real answer here, or leave it blank if you do not know yet.'}
               className="mt-5 w-full resize-y rounded-2xl border border-white/12 bg-black/70 px-4 py-4 text-base leading-7 text-white outline-none placeholder:text-white/30 focus:border-orange-300"
             />
+            <button
+              type="button"
+              aria-pressed={questionStates[currentQuestion.key] === 'NOT_APPLICABLE'}
+              onClick={toggleNotApplicable}
+              className="mt-3 rounded-lg border border-white/14 px-3 py-2 text-xs font-semibold text-white/62 transition hover:border-white/30 hover:text-white"
+            >
+              {questionStates[currentQuestion.key] === 'NOT_APPLICABLE' ? 'Marked not applicable — undo' : 'This question is not applicable'}
+            </button>
+            <p className="mt-3 text-sm leading-6 text-white/46">
+              Unanswered or not-applicable items remain visible as missing evidence. They do not invalidate your assessment.
+            </p>
 
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-between">
               <button
@@ -1418,14 +1495,14 @@ export default function BusinessAssessment() {
               ) : (
                 <button
                   type="button"
-                  disabled={!canSubmit || submitState.status === 'saving' || submitState.status === 'generating' || generationIsRunning}
+                  disabled={!canSubmit || submitState.status === 'saving' || submitState.status === 'routing' || generationIsRunning}
                   onClick={submitAssessment}
                   className="rounded-xl bg-orange-500 px-5 py-3 text-sm font-bold uppercase tracking-[0.18em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-45"
                 >
                   {submitState.status === 'saving'
                     ? 'Saving...'
-                    : submitState.status === 'generating' || generationIsRunning
-                      ? 'Generating...'
+                    : submitState.status === 'routing' || generationIsRunning
+                      ? 'Opening Business Twin...'
                       : 'Submit Assessment'}
                 </button>
               )}
@@ -1433,18 +1510,18 @@ export default function BusinessAssessment() {
 
             {!canSubmit && currentQuestionIndex === QUESTIONS.length - 1 && (
               <p className="mt-4 text-sm text-white/46">
-                Questions 1-10 and 12 need an answer. Question 11 can stay blank if you do not have a team.
+                A validated Profile identity and supported Business Assessment route are required. Business-evidence answers may remain missing.
               </p>
             )}
 
-            {(submitState.status === 'generating' || generationIsRunning) && (
+            {(submitState.status === 'routing' || generationIsRunning) && (
               <div className="mt-5 rounded-2xl border border-orange-300/35 bg-orange-400/[0.08] p-4">
                 <p className="text-sm font-semibold text-orange-100">
-                  {submitState.status === 'saving' ? 'Saving intake...' : generationState.phase || 'Preparing intelligence generation...'}
+                  {generationIsRunning ? generationState.phase : 'Opening your governed Business Twin...'}
                 </p>
                 <p className="mt-2 text-sm leading-6 text-white/66">
-                  Your intake has been saved. The system is now building the Business Intelligence
-                  Draft, Executive Diagnostic Briefing, Five Futures, and One Move.
+                  Your intake has been saved. New BA is reading your governed evidence, compatible New BOS,
+                  Whole Business Model, Five Futures, and One Move through the canonical path.
                 </p>
               </div>
             )}
@@ -1480,21 +1557,11 @@ export default function BusinessAssessment() {
                 </p>
                 <button
                   type="button"
-                  disabled={generationIsRunning}
-                  onClick={() =>
-                    runGenerationSequence({
-                      assessmentId: submitState.result?.assessment_id,
-                      ownerProfileId:
-                        submitState.result?.profile_context?.owner_profile_id ||
-                        assessmentProfile?.id,
-                      assessmentRecord: null
-                    }).then((completed) =>
-                      setSubmitState({ status: 'complete', error: '', result: completed })
-                    ).catch(() => {})
-                  }
+                  disabled={submitState.status === 'routing'}
+                  onClick={retryCanonicalGeneration}
                   className="mt-4 rounded-xl border border-red-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.16em] text-red-50 transition hover:border-red-100 hover:bg-red-300/10 disabled:cursor-wait disabled:opacity-55"
                 >
-                  Retry Generation
+                  Retry New BA
                 </button>
               </div>
             )}

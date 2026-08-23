@@ -10,11 +10,13 @@ import { createNewBaRouteHandler } from '../engine/newBaProductionReadinessV1/ro
 import { createRedisSingleFlight } from '../engine/newBaProductionReadinessV1/singleFlight.js';
 import { createRealProfileNewBaGenerationCampaign } from '../engine/newBaProductionReadinessV1/realProfileGenerationCampaign.js';
 import { createRedisNewBaBackgroundResponseStore } from '../engine/newBaProductionReadinessV1/backgroundResponseStore.js';
+import { reconcileRecruitingCanonicalBaReadySafely } from '../engine/recruitingV1/canonicalAdapters.js';
 
 const config = readNewBaProductionConfig(process.env);
 
 const handler = createNewBaRouteHandler({
   config,
+  onCanonicalServed: ({ redis, result }) => reconcileRecruitingCanonicalBaReadySafely({ redis, result }),
   serviceFactory: async () => {
     if (!process.env.REDIS_URL) throw new Error('new_ba_route_redis_binding_missing');
     const redis = new Redis(process.env.REDIS_URL, { maxRetriesPerRequest: 1, enableReadyCheck: true, lazyConnect: true });

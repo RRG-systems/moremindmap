@@ -14,7 +14,18 @@ function safeStatus(error) {
   return 500;
 }
 
-export function createNewBaRouteHandler({ config, serviceFactory }) {
+function safeRuntimeDiagnostic(error) {
+  const rawPath = typeof error?.path === 'string' ? error.path : '';
+  const pathSuffix = rawPath
+    ? rawPath.split(/[\\/]/u).filter(Boolean).slice(-6).join('/')
+    : null;
+  return Object.freeze({
+    code: String(error?.code || String(error?.message || '').split(':')[0] || 'new_ba_unknown_failure'),
+    path_suffix: pathSuffix,
+  });
+}
+
+export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalServed = null }) {
   if (typeof serviceFactory !== 'function') throw new Error('new_ba_route_service_factory_required');
   return async function newBaRoute(request, response) {
     response.setHeader('cache-control', 'private, no-store, max-age=0');
@@ -29,8 +40,19 @@ export function createNewBaRouteHandler({ config, serviceFactory }) {
       redis = created?.redis;
       const operation = request.query?.diagnostic === 'state' ? 'diagnose' : 'retrieve';
       const result = await service[operation]({ profileId: request.query?.id, suppliedToken: tokenFromRequest(request) });
+      if (operation === 'retrieve' && !result?.pending && result?.artifact && typeof onCanonicalServed === 'function') {
+        try {
+          await onCanonicalServed({ redis, result, request });
+        } catch (recruitingProjectionError) {
+          console.error('[NEW-BA-ROUTE] Recruiting canonical projection deferred', {
+            code: String(recruitingProjectionError?.message || 'RECRUITING_CANONICAL_PROJECTION_FAILED').split(':')[0],
+            customer_payload_logged: false,
+          });
+        }
+      }
       return response.status(result?.pending ? 202 : 200).json(result);
     } catch (error) {
+      console.error('[NEW-BA-ROUTE] Governed runtime unavailable', safeRuntimeDiagnostic(error));
       return response.status(safeStatus(error)).json({ error: 'New BA realization unavailable', safe_code: String(error?.message || 'new_ba_unknown_failure').split(':')[0] });
     } finally {
       if (redis) await redis.quit().catch(() => {});

@@ -119,11 +119,25 @@ function businessAssessmentKey(assessmentId) {
   return `business_assessment:${assessmentId}`;
 }
 
+export const NEW_BA_GOVERNED_ASSESSMENT_STATES = Object.freeze([
+  'intake_saved',
+  'business_intelligence_draft_ready',
+  'executive_diagnostic_briefing_ready',
+  'five_futures_and_one_move_ready',
+  'ready',
+  'complete',
+  'completed',
+]);
+
+export function isGovernedNewBaAssessmentState(value) {
+  return NEW_BA_GOVERNED_ASSESSMENT_STATES.includes(String(value || ''));
+}
+
 export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
   const profileId = normalizeProfileId(record?.owner_profile_id);
   if (profileId !== expectedProfileId) throw new Error('new_ba_canonical_reader_profile_mismatch');
   const assessmentId = normalizeAssessmentId(record?.assessment_id);
-  if (!['intake_saved', 'complete', 'completed', 'ready', 'five_futures_and_one_move_ready'].includes(String(record?.status || '').toLowerCase())) throw new Error('new_ba_canonical_reader_assessment_state_unsupported');
+  if (!isGovernedNewBaAssessmentState(record?.status)) throw new Error('new_ba_canonical_reader_assessment_state_unsupported');
   if (record?.version !== 'business_assessment_v1_intake') throw new Error('new_ba_canonical_reader_assessment_version_unsupported');
   if (!String(record?.assessment_type || '').startsWith('real_estate')) throw new Error('new_ba_canonical_reader_vertical_unsupported');
   const answers = {};
@@ -143,7 +157,10 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
     const unexpectedPinnedAnswer = Object.keys(answerSha256).find((key) => !Object.hasOwn(pinned.answerSha256, key));
     if (unexpectedPinnedAnswer) throw new Error(`new_ba_pinned_answer_presence_drift:${profileId}:${unexpectedPinnedAnswer}`);
   }
-  const evidenceSufficiency = classifyBaEvidenceSufficiency({ answers, answerSha256, explicit_question_states: record?.inputs?.question_states });
+  const explicitQuestionStates = record?.inputs?.question_states && typeof record.inputs.question_states === 'object'
+    ? record.inputs.question_states
+    : undefined;
+  const evidenceSufficiency = classifyBaEvidenceSufficiency({ answers, answerSha256, explicit_question_states: explicitQuestionStates });
   if (evidenceSufficiency.status !== 'PASS') throw new Error(`new_ba_business_evidence_insufficient:${evidenceSufficiency.failed_missions.join(',') || evidenceSufficiency.reasons.join(',')}`);
   const accepted = Object.freeze({
     profile_id: profileId,
@@ -157,6 +174,7 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
     completed_at: record.completed_at || null,
     answers: Object.freeze(answers),
     answer_sha256: Object.freeze(answerSha256),
+    ...(explicitQuestionStates ? { question_states: Object.freeze(structuredClone(explicitQuestionStates)) } : {}),
     read_only: true,
     excluded_fields: Object.freeze(['output', 'business_intelligence_draft', 'briefing', 'five_futures_v1', 'one_move_v1', 'profile_context', 'presentation']),
   });

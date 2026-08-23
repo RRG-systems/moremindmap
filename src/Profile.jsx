@@ -10,6 +10,10 @@ import {
   ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
   resolveOrdinaryBosEntry,
 } from "./lib/customerEntry/ordinaryCustomerEntryRouting.js";
+import {
+  createBosDraftCoordinator,
+  createBosDraftSnapshot,
+} from "./lib/bosIntakeDurability.js";
 
 const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
 
@@ -293,6 +297,9 @@ function buildApiUrl(baseUrl, endpoint) {
 }
 
 export default function Profile() {
+  const recruitingRequested = typeof window !== 'undefined'
+    && new URLSearchParams(window.location.search).get('recruiting') === '1'
+  const [recruitingAuthorized, setRecruitingAuthorized] = useState(false)
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
   const [page0BComplete, setPage0BComplete] = useState(false)
@@ -312,6 +319,8 @@ export default function Profile() {
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [checkoutError, setCheckoutError] = useState("")
   const [translatorSource, setTranslatorSource] = useState(null)
+  const [savedDraftAvailable, setSavedDraftAvailable] = useState(false)
+  const [draftState, setDraftState] = useState({ state: 'idle', message: '' })
   
   // Profile ID retrieval (recovery/testing path)
   const [profileId, setProfileId] = useState("")
@@ -320,11 +329,8 @@ export default function Profile() {
 
   // Use the locked 24-question set
   const questions = MOREMINDMAP_QUESTIONS
-  const selectedSet = useMemo(() => ({
-    id: "moremindmap_mini",
-    questions: MOREMINDMAP_QUESTIONS,
-  }), [])
   const [responses, setResponses] = useState({})
+  const draftCoordinator = useMemo(() => createBosDraftCoordinator(), [])
   const retrievedBosSectionPayloads = useMemo(() => {
     if (!(result?.success && result?.version === "retrieved" && result?.html)) return [];
     return buildBosSectionTranslatorPayloadsFromRenderedProfile(result.html, result.profile_id);
@@ -339,11 +345,132 @@ export default function Profile() {
     }
   }, [])
 
+  useEffect(() => {
+    if (!recruitingRequested) return
+    fetch('/api/recruiting/runtime?view=invite_session', {
+      credentials: 'same-origin',
+      cache: 'no-store'
+    }).then(async (response) => {
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || payload?.ok !== true || !payload?.relationship?.relationship_ref) {
+        throw new Error('Your recruiting invitation session is unavailable. Return to the invitation link and accept again.')
+      }
+      setRecruitingAuthorized(true)
+      setPaymentPassed(true)
+    }).catch((error) => setCheckoutError(error.message))
+  }, [recruitingRequested])
+
+  useEffect(() => {
+    setSavedDraftAvailable(draftCoordinator.hasLocalDraft())
+  }, [draftCoordinator])
+
   const progress = Math.round(((step + 1) / questions.length) * 100)
   const currentAnswer = responses[questions[step].id] || null
 
+  function currentDraftMetadata({
+    organizational = organizationalMetadata,
+    signals = contextualSignals,
+    personName = fullName,
+    personEmail = email
+  } = {}) {
+    return {
+      person_name: personName.trim() || null,
+      email: personEmail.trim() || null,
+      ...(organizational || {}),
+      contextual_signals: signals || {},
+      access_path: 'CURRENT_BOS_ENTRY',
+      recruiting_mode: recruitingAuthorized ? 'accepted_invitation' : undefined
+    }
+  }
+
+  async function persistDraft({
+    phase,
+    nextStep = step,
+    nextResponses = responses,
+    metadata = currentDraftMetadata()
+  }) {
+    const snapshot = createBosDraftSnapshot({
+      phase,
+      step: nextStep,
+      metadata,
+      responses: nextResponses
+    })
+    setDraftState({ state: 'saving', message: 'Saving your progress…' })
+    try {
+      const envelope = await draftCoordinator.save(snapshot)
+      setSavedDraftAvailable(false)
+      setDraftState({ state: 'saved', message: 'Progress saved.' })
+      return envelope
+    } catch (error) {
+      if (error?.code === 'BOS_DRAFT_STALE_REVISION' && error?.restored?.ok) {
+        applyRestoredDraft(error.restored.envelope)
+        setDraftState({ state: 'restored', message: 'A newer saved version was restored. Review it before continuing.' })
+      } else if (error?.code === 'BOS_DRAFT_LOCAL_PERSISTENCE_UNAVAILABLE') {
+        setDraftState({ state: 'error', message: 'This browser could not keep a secure resume key. Progress is not safe to continue; enable site storage and try again.' })
+      } else {
+        setDraftState({ state: 'error', message: 'We could not sync your progress. Your latest answers remain on this device; try again before submitting.' })
+      }
+      return null
+    }
+  }
+
+  function applyRestoredDraft(envelope) {
+    const snapshot = envelope?.snapshot || {}
+    const metadata = snapshot.metadata || {}
+    const organizational = {
+      identity: metadata.identity || {
+        full_name: metadata.person_name || '',
+        email: metadata.email || ''
+      },
+      organization: metadata.organization || {}
+    }
+    setFullName(metadata.person_name || metadata.identity?.full_name || '')
+    setEmail(metadata.email || metadata.identity?.email || '')
+    setOrganizationalMetadata(organizational)
+    setContextualSignals(metadata.contextual_signals || {})
+    setResponses(snapshot.responses || {})
+    setStep(Number.isInteger(snapshot.step) ? snapshot.step : 0)
+    setPaymentPassed(true)
+    setPromoValidated(true)
+    setSelectedOffer('full_profile')
+    setPage0AComplete(true)
+    const assessmentStarted = ['ASSESSMENT', 'READY_TO_SUBMIT'].includes(snapshot.phase)
+    setPage0BComplete(assessmentStarted)
+    setStarted(assessmentStarted)
+  }
+
+  async function resumeSavedAssessment() {
+    setDraftState({ state: 'restoring', message: 'Restoring your saved assessment…' })
+    const restored = await draftCoordinator.restore()
+    if (restored.ok) {
+      applyRestoredDraft(restored.envelope)
+      setSavedDraftAvailable(false)
+      setDraftState({ state: 'restored', message: 'Your saved assessment was restored.' })
+      return
+    }
+    if (restored.code === 'BOS_DRAFT_NOT_FOUND' && restored.local?.snapshot) {
+      draftCoordinator.clear()
+      const recovered = await draftCoordinator.save(restored.local.snapshot).catch(() => null)
+      if (recovered) {
+        applyRestoredDraft(recovered)
+        setSavedDraftAvailable(false)
+        setDraftState({ state: 'restored', message: 'Your device copy was recovered and saved again.' })
+        return
+      }
+    }
+    setDraftState({ state: 'error', message: 'Your saved assessment could not be restored right now. Please try again.' })
+  }
+
+  async function discardSavedAssessment() {
+    await draftCoordinator.discard().catch(() => draftCoordinator.clear())
+    setSavedDraftAvailable(false)
+    setDraftState({ state: 'idle', message: '' })
+  }
+
   function selectAnswer(questionId, key) {
-    setResponses((prev) => ({ ...prev, [questionId]: key }))
+    const nextResponses = { ...responses, [questionId]: key }
+    setResponses(nextResponses)
+    void persistDraft({ phase: 'ASSESSMENT', nextResponses })
   }
 
   function validatePromoCode() {
@@ -445,14 +572,6 @@ export default function Profile() {
   }
 
   async function handleStartAssessment() {
-    // DEBUG: Log state when button is clicked
-    console.log("[START ASSESSMENT CLICKED]", {
-      selectedOffer,
-      promoValidated,
-      fullName: fullName.trim(),
-      email: email.trim(),
-    })
-
     // If promo is active, skip checkout and enter Page 0A
     if (promoValidated) {
       console.log("[PROMO PATH] Promo validated, entering Page 0A")
@@ -486,8 +605,6 @@ export default function Profile() {
     console.log("BUTTON CLICKED — goNext() called")
     console.log("STEP:", step)
     console.log("TOTAL QUESTIONS:", questions.length)
-    console.log("CURRENT ANSWER:", currentAnswer)
-    
     if (!currentAnswer) {
       console.log("BLOCKED: currentAnswer is falsy")
       return
@@ -495,7 +612,9 @@ export default function Profile() {
     
     if (step < questions.length - 1) {
       console.log("NOT FINAL STEP — advancing to next question")
-      setStep(step + 1)
+      const nextStep = step + 1
+      setStep(nextStep)
+      void persistDraft({ phase: 'ASSESSMENT', nextStep })
     } else {
       console.log("FINAL STEP — CALLING submitAssessment()")
       submitAssessment()
@@ -503,7 +622,11 @@ export default function Profile() {
   }
 
   function goBack() {
-    if (step > 0) setStep(step - 1)
+    if (step > 0) {
+      const nextStep = step - 1
+      setStep(nextStep)
+      void persistDraft({ phase: 'ASSESSMENT', nextStep })
+    }
   }
 
   async function submitAssessment() {
@@ -518,17 +641,29 @@ export default function Profile() {
         answers[q.id] = responses[q.id] || null
       })
 
-      console.log("LIVE ANSWERS OBJECT", answers)
-      console.log("LIVE ANSWER COUNT", Object.keys(answers).length)
-      console.log("[SUBMIT] Total questions:", questions.length)
-      console.log("[SUBMIT] Answers keys:", Object.keys(answers).length)
-      console.log("[SUBMIT] Full payload:", JSON.stringify({ answers }, null, 2))
+      const metadata = currentDraftMetadata()
+      const draftEnvelope = await persistDraft({
+        phase: 'READY_TO_SUBMIT',
+        nextStep: questions.length - 1,
+        nextResponses: answers,
+        metadata
+      })
+      await draftCoordinator.flush()
+      if (!draftEnvelope) {
+        setSubmitting(false)
+        setProcessing(false)
+        setSubmitted(false)
+        return
+      }
+      const submissionAnswers = draftEnvelope.snapshot.responses
+      const submissionMetadata = draftEnvelope.snapshot.metadata
 
-      // Use env-based API URL
-      const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
+      // Current production BOS API is same-origin. A stale legacy backend host
+      // previously accepted preflight and returned 404 on the final POST.
+      const API = import.meta.env.VITE_API_URL || ""
       
       // CONTROLLED BETA: Route validated Behavior Profile promo users to Mini V2 async endpoint
-      const useV2 = promoValidated && BEHAVIOR_PROFILE_PROMO_CODES.has(promoCode.trim().toUpperCase())
+      const useV2 = recruitingAuthorized || (promoValidated && BEHAVIOR_PROFILE_PROMO_CODES.has(promoCode.trim().toUpperCase()))
       
       console.log("[SUBMIT] Using Mini V2:", useV2)
 
@@ -539,16 +674,21 @@ export default function Profile() {
         // Step 1: Start job
         const startRes = await fetch(buildApiUrl(API, `/api/moremindmap/start`), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            "X-BOS-Draft-Token": draftEnvelope.resume_token
+          },
           body: JSON.stringify({ 
-            answers,
-            metadata: {
-              person_name: fullName.trim() || null,
-              email: email.trim() || null,
-              ...organizationalMetadata,
-              contextual_signals: contextualSignals
+            answers: submissionAnswers,
+            metadata: submissionMetadata,
+            draft_reference: {
+              contract_version: 'bos_intake_draft_v1',
+              draft_id: draftEnvelope.draft_id,
+              revision: draftEnvelope.revision,
+              snapshot: draftEnvelope.snapshot
             }
           }),
+          credentials: recruitingAuthorized ? 'same-origin' : 'omit',
         })
         
         if (!startRes.ok) {
@@ -579,7 +719,9 @@ export default function Profile() {
           
           await new Promise(resolve => setTimeout(resolve, pollInterval))
           
-          const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`))
+          const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`), {
+            credentials: recruitingAuthorized ? 'same-origin' : 'omit'
+          })
           
           if (!statusRes.ok) {
             console.error("[MINI-V2] Status check failed:", statusRes.status)
@@ -591,7 +733,6 @@ export default function Profile() {
           
           if (statusData.status === 'complete') {
             console.log("[MINI-V2] Generation complete!")
-            console.log("[MINI-V2] canonical_profile_id:", statusData.canonical_profile_id)
             complete = true
             setProcessing(false)
             
@@ -606,10 +747,11 @@ export default function Profile() {
               // Since state updates are async, we call it directly with the ID
               setProfileIdLoading(true)
               try {
-                const API = import.meta.env.VITE_API_URL || "https://moremindmap-backend.vercel.app"
+                const API = import.meta.env.VITE_API_URL || ""
                 const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
-                console.log('[MINI-V2-ROUTE] Fetching profile:', fullUrl)
-                const res = await fetch(fullUrl)
+                const res = await fetch(fullUrl, {
+                  credentials: recruitingAuthorized ? 'same-origin' : 'omit'
+                })
                 
                 if (!res.ok) {
                   console.error('[MINI-V2-ROUTE] Fetch failed:', res.status)
@@ -632,6 +774,7 @@ export default function Profile() {
                 
                 setSubmitted(true)
                 setProcessing(false)
+                await draftCoordinator.discard().catch(() => draftCoordinator.clear())
               } catch (error) {
                 console.error("[MINI-V2-ROUTE] Error routing through validateProfileId:", error)
                 // Fallback: use direct job payload
@@ -643,6 +786,7 @@ export default function Profile() {
                   snapshot: statusData.metadata,
                   profile_id: statusData.canonical_profile_id
                 })
+                await draftCoordinator.discard().catch(() => draftCoordinator.clear())
               } finally {
                 setProfileIdLoading(false)
               }
@@ -653,6 +797,7 @@ export default function Profile() {
                 html: statusData.html,
                 snapshot: statusData.metadata
               })
+              await draftCoordinator.discard().catch(() => draftCoordinator.clear())
             }
           } else if (statusData.status === 'failed') {
             console.error("[MINI-V2] Generation failed:", statusData.error)
@@ -703,8 +848,6 @@ export default function Profile() {
         }
 
         const data = await res.json()
-        console.log("[MINI-V1] Response received:", data)
-        
         // Show processing screen for 2 seconds before displaying report
         setTimeout(() => {
           setProcessing(false)
@@ -722,14 +865,35 @@ export default function Profile() {
     }
   }
 
-  const handlePage0AComplete = (metadata) => {
+  const handlePage0AComplete = async (metadata) => {
+    const personName = metadata.identity.full_name
+    const personEmail = metadata.identity.email
+    const saved = await persistDraft({
+      phase: 'CONTEXTUAL_SIGNALS',
+      nextStep: 0,
+      nextResponses: {},
+      metadata: currentDraftMetadata({
+        organizational: metadata,
+        signals: {},
+        personName,
+        personEmail
+      })
+    })
+    if (!saved) return
     setOrganizationalMetadata(metadata)
-    setFullName(metadata.identity.full_name)
-    setEmail(metadata.identity.email)
+    setFullName(personName)
+    setEmail(personEmail)
     setPage0AComplete(true)
   }
 
-  const handlePage0BComplete = (signals) => {
+  const handlePage0BComplete = async (signals) => {
+    const saved = await persistDraft({
+      phase: 'ASSESSMENT',
+      nextStep: 0,
+      nextResponses: {},
+      metadata: currentDraftMetadata({ signals })
+    })
+    if (!saved) return
     setContextualSignals(signals)
     setPage0BComplete(true)
   }
@@ -740,6 +904,19 @@ export default function Profile() {
 
       <div className="relative z-10 px-6 py-16 md:py-20">
         <div className="max-w-4xl mx-auto">
+
+          {draftState.message && !submitted && (
+            <div
+              role="status"
+              className={`mb-5 rounded-2xl border px-5 py-3 text-sm ${
+                draftState.state === 'error'
+                  ? 'border-red-400/30 bg-red-500/10 text-red-100'
+                  : 'border-emerald-300/20 bg-emerald-400/[0.08] text-emerald-100'
+              }`}
+            >
+              {draftState.message}
+            </div>
+          )}
 
           {/* INTRO SCREEN (Payment Page) — Shows FIRST, before payment */}
           {!paymentPassed && !promoValidated && !submitted && (
@@ -762,6 +939,9 @@ export default function Profile() {
               onStart={handleStartAssessment}
               checkoutLoading={checkoutLoading}
               checkoutError={checkoutError}
+              savedDraftAvailable={savedDraftAvailable}
+              onResumeSavedAssessment={resumeSavedAssessment}
+              onDiscardSavedAssessment={discardSavedAssessment}
             />
           )}
 
@@ -996,7 +1176,7 @@ export default function Profile() {
 
 /* ── Intro Screen ── */
 
-function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading, checkoutError }) {
+function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, setSelectedOffer, promoCode, setPromoCode, promoValidated, validatePromoCode, profileId, setProfileId, profileIdError, profileIdLoading, validateProfileId, onStart, checkoutLoading, checkoutError, savedDraftAvailable, onResumeSavedAssessment, onDiscardSavedAssessment }) {
   const featureList = [
     "24 scenario-based questions",
     "Behavior Operating System profile",
@@ -1018,6 +1198,23 @@ function IntroScreen({ fullName, setFullName, email, setEmail, selectedOffer, se
       >
         ← Back to Home
       </a>
+
+      {savedDraftAvailable && (
+        <div className="mt-6 rounded-2xl border border-emerald-300/25 bg-emerald-400/[0.08] p-5 sm:flex sm:items-center sm:justify-between sm:gap-5">
+          <div>
+            <p className="font-semibold text-white">Saved assessment found on this device.</p>
+            <p className="mt-1 text-sm text-white/62">Resume from the last durable question boundary or clear it and start over.</p>
+          </div>
+          <div className="mt-4 flex gap-3 sm:mt-0">
+            <button type="button" onClick={onResumeSavedAssessment} className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black">
+              Resume
+            </button>
+            <button type="button" onClick={onDiscardSavedAssessment} className="rounded-xl border border-white/15 px-4 py-2 text-sm text-white/72">
+              Start over
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="pt-8 text-center md:pt-10">
         <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">
@@ -1313,7 +1510,7 @@ function QuestionScreen({
               <div className="space-y-3">
                 <p className="text-sm text-white/50 mb-4">Click in order (1st, 2nd, 3rd, 4th)</p>
                 {!Array.isArray(selectedKey) ? (
-                  answerOptions.map((opt, idx) => (
+                  answerOptions.map((opt) => (
                     <button
                       key={opt.key}
                       onClick={() => onSelect([opt.key])}
@@ -1430,7 +1627,7 @@ function ProcessingScreen() {
       setMessageIndex((prev) => (prev + 1) % messages.length)
     }, 400)
     return () => clearInterval(interval)
-  }, [])
+  }, [messages.length])
   
   return (
     <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-12 md:p-16 shadow-2xl shadow-black/30">

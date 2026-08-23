@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   AMBER_PROFILE_ID,
+  isGovernedNewBaAssessmentState,
   normalizeGovernedAssessmentRecord,
   resolveBundledBosAuthority,
 } from '../api/engine/newBaProductionReadinessV1/canonicalReader.js';
@@ -77,14 +78,92 @@ test('full evidence custody hash remains backward-compatible with the pre-suffic
   assert.equal(businessEvidence.evidence_sufficiency.compatibility_class, 'A');
 });
 
-test('genuinely insufficient evidence fails closed when goal, constraint, and scale missions are unsupported', () => {
+test('thin evidence preserves unsupported missions as localized abstentions without blocking the whole BA', () => {
   const answers = { q3: 'A relationship asset exists.', q8: 'Some operating systems exist.' };
   const answerSha256 = Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, sha256Text(value)]));
   const result = classifyBaEvidenceSufficiency({ answers, answerSha256 });
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.compatibility_class, 'B');
+  assert.equal(result.automatic_rebuild, true);
+  assert.deepEqual(result.failed_missions, ['GOAL_ANCHOR', 'CONSTRAINT_ANCHOR', 'SCALING_CAPACITY_ANCHOR']);
+  assert.equal(result.bounded_abstentions.every((item) => item.effect === 'LOCALIZED_ABSTENTION_REQUIRED'), true);
+});
+
+test('malformed governed answer custody remains a global hard failure', () => {
+  const result = classifyBaEvidenceSufficiency({ answers: { q2: 'A goal' }, answerSha256: { q2: 'not-a-sha256' } });
   assert.equal(result.status, 'FAIL');
   assert.equal(result.compatibility_class, 'C');
   assert.equal(result.automatic_rebuild, false);
-  assert.deepEqual(result.failed_missions, ['GOAL_ANCHOR', 'CONSTRAINT_ANCHOR', 'SCALING_CAPACITY_ANCHOR']);
+  assert.deepEqual(result.reasons, ['governed_answer_hash_invalid']);
+});
+
+test('every individual unanswered BA question remains compatible governed missing evidence', () => {
+  for (let missingIndex = 1; missingIndex <= 12; missingIndex += 1) {
+    const answers = Object.fromEntries(Array.from({ length: 12 }, (_, index) => {
+      const key = `q${index + 1}`;
+      return [key, index + 1 === missingIndex ? '' : `Governed evidence for ${key}`];
+    }).filter(([, value]) => value));
+    const answerSha256 = Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, sha256Text(value)]));
+    const result = classifyBaEvidenceSufficiency({ answers, answerSha256 });
+    assert.equal(result.status, 'PASS', `q${missingIndex}`);
+    assert.equal(result.compatibility_class, 'B', `q${missingIndex}`);
+    assert.deepEqual(result.unanswered_questions, [`q${missingIndex}`], `q${missingIndex}`);
+  }
+});
+
+test('canonical reader accepts emitted governed evidence states and rejects invented states', () => {
+  for (const status of [
+    'intake_saved',
+    'business_intelligence_draft_ready',
+    'executive_diagnostic_briefing_ready',
+    'five_futures_and_one_move_ready',
+    'ready',
+    'complete',
+    'completed',
+  ]) assert.equal(isGovernedNewBaAssessmentState(status), true, status);
+  assert.equal(isGovernedNewBaAssessmentState('intelligence_complete'), false);
+  assert.equal(isGovernedNewBaAssessmentState('COMPLETE'), false);
+  assert.equal(isGovernedNewBaAssessmentState('briefing_failed'), false);
+});
+
+test('a draft-ready assessment uses only saved answers and explicit states, never legacy output', () => {
+  const record = elevenAnswerRecord({
+    profileId: 'MM-20260821-DRAFT001',
+    assessmentId: 'ba-20260821-a1b2c3d4',
+    status: 'business_intelligence_draft_ready',
+  });
+  record.inputs.question_states = { q11: { state: 'NOT_APPLICABLE', reason: 'Customer explicitly marked no team.', evidence_refs: ['assessment:q11'] } };
+  record.output = { business_intelligence_draft: 'prohibited legacy draft', executive_diagnostic_briefing_v1: 'prohibited legacy briefing' };
+  const normalized = normalizeGovernedAssessmentRecord(record, 'MM-20260821-DRAFT001');
+  assert.equal(normalized.status, 'business_intelligence_draft_ready');
+  assert.deepEqual(normalized.evidence_sufficiency.not_applicable_questions, ['q11']);
+  assert.equal(JSON.stringify(normalized).includes('prohibited legacy'), false);
+});
+
+test('severely sparse evidence still constructs a bounded provider request with missingness', () => {
+  const answers = {};
+  const answerSha256 = {};
+  const evidenceSufficiency = classifyBaEvidenceSufficiency({ answers, answerSha256 });
+  const source = {
+    profile_id: AMBER_PROFILE_ID,
+    assessment_id: 'ba-20260821-0a0b0c0d',
+    business_evidence: {
+      profile_id: AMBER_PROFILE_ID,
+      assessment_id: 'ba-20260821-0a0b0c0d',
+      version: 'business_assessment_v1_intake',
+      assessment_type: 'real_estate_agent',
+      created_at: '2026-08-21T00:00:00.000Z',
+      updated_at: '2026-08-21T00:01:00.000Z',
+      answers,
+      answer_sha256: answerSha256,
+      evidence_sufficiency: evidenceSufficiency,
+    },
+    bos_authority: resolveBundledBosAuthority(AMBER_PROFILE_ID),
+  };
+  const context = createRealProfileGenerationContext({ source, displayName: 'Synthetic Sparse Subject' });
+  assert.equal(context.input.governed_business_evidence.length, 0);
+  assert.equal(context.input.missing_evidence.filter((item) => item.missing_id.startsWith('ME-Q')).length, 12);
+  assert.equal(context.providerPreflight.status, 'PASS');
 });
 
 test('not-applicable requires explicit governed evidence and is never inferred from a blank answer', () => {
@@ -98,6 +177,23 @@ test('not-applicable requires explicit governed evidence and is never inferred f
   assert.deepEqual(unsupportedNa.unanswered_questions, ['q11']);
   assert.deepEqual(governedNa.unanswered_questions, []);
   assert.deepEqual(governedNa.not_applicable_questions, ['q11']);
+  assert.equal(governedNa.compatibility_class, 'B');
+  assert.equal(governedNa.preserve_missingness, true);
+  assert.equal(governedNa.localized_consequences[0].state, 'GOVERNED_NOT_APPLICABLE');
+});
+
+test('missing goal, constraint, financial, team, and scaling evidence stays localized by domain', () => {
+  const answers = Object.fromEntries(Array.from({ length: 12 }, (_, index) => {
+    const key = `q${index + 1}`;
+    return ['q2', 'q9', 'q10', 'q11', 'q12'].includes(key) ? null : [key, `Governed evidence for ${key}`];
+  }).filter(Boolean));
+  const answerSha256 = Object.fromEntries(Object.entries(answers).map(([key, value]) => [key, sha256Text(value)]));
+  const result = classifyBaEvidenceSufficiency({ answers, answerSha256 });
+  assert.equal(result.status, 'PASS');
+  assert.equal(result.compatibility_class, 'B');
+  assert.deepEqual(result.unanswered_questions, ['q2', 'q9', 'q10', 'q11', 'q12']);
+  assert.deepEqual(result.localized_consequences.map((item) => item.primary_domain), ['goals', 'financial', 'constraints', 'team', 'capacity']);
+  assert.deepEqual(result.failed_missions, ['GOAL_ANCHOR', 'CONSTRAINT_ANCHOR', 'SCALING_CAPACITY_ANCHOR']);
 });
 
 test('WBM input carries only governed answers and localizes unanswered q11 as missing team evidence', () => {

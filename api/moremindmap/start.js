@@ -6,13 +6,16 @@
  */
 
 import { createJob } from '../engine/miniV2JobManager.js'
+import { createBosIntakeDraftStore, normalizeBosIntakeDraftSnapshot } from '../engine/bosIntakeDraftV1.js'
+import { redis as getRedis } from '../engine/redisClient.js'
+import { resolveRecruitingBosStartMetadata } from '../engine/recruitingV1/canonicalAdapters.js'
 
 export default async function handler(req, res) {
   // CORS headers
   res.setHeader("Access-Control-Allow-Credentials", true)
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,POST")
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type")
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-BOS-Draft-Token")
   res.setHeader('Content-Type', 'application/json')
 
   if (req.method === "OPTIONS") {
@@ -24,7 +27,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { answers, metadata = {} } = req.body
+    const { answers, metadata = {}, draft_reference: draftReference = null } = req.body
 
     // Validate answers
     if (!answers || typeof answers !== 'object') {
@@ -64,8 +67,53 @@ export default async function handler(req, res) {
       }
     })
 
-    // Create job in Redis (queued, no execution yet)
-    const jobId = await createJob({ answers: formattedAnswers, metadata })
+    let claimedDraft = null
+    if (draftReference) {
+      const resumeToken = String(req.headers['x-bos-draft-token'] || '').trim()
+      if (!resumeToken) {
+        return res.status(400).json({ success: false, code: 'BOS_DRAFT_TOKEN_REQUIRED', error: 'Your saved assessment could not be verified.' })
+      }
+      const snapshot = normalizeBosIntakeDraftSnapshot(draftReference.snapshot)
+      const store = createBosIntakeDraftStore({ redis: getRedis() })
+      claimedDraft = await store.claimSubmission({
+        draftId: String(draftReference.draft_id || ''),
+        resumeToken,
+        revision: draftReference.revision,
+        snapshot,
+        submission: { answers, metadata }
+      })
+      if (!['CLAIMED', 'IDEMPOTENT_REPLAY'].includes(claimedDraft.code)) {
+        const status = claimedDraft.code === 'STALE_REVISION' ? 409 : 400
+        return res.status(status).json({
+          success: false,
+          code: `BOS_DRAFT_${claimedDraft.code}`,
+          error: claimedDraft.code === 'STALE_REVISION'
+            ? 'A newer saved version exists. Restore it before submitting.'
+            : 'Your saved assessment did not match this submission.'
+        })
+      }
+    }
+
+    const governedMetadata = await resolveRecruitingBosStartMetadata(req, metadata)
+
+    // Create once. Draft-backed submissions use a deterministic job identity so
+    // an ordinary network retry cannot fork canonical BOS truth.
+    const jobId = await createJob(
+      {
+        answers: formattedAnswers,
+        metadata: {
+          ...governedMetadata,
+          bos_intake_draft: claimedDraft
+            ? {
+                contract_version: 'bos_intake_draft_v1',
+                draft_id: draftReference.draft_id,
+                revision: draftReference.revision
+              }
+            : null
+        }
+      },
+      claimedDraft ? { jobId: claimedDraft.job_id } : undefined
+    )
 
     // Return immediately - status endpoint will drive execution
     return res.status(200).json({

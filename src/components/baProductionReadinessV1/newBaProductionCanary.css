@@ -10,6 +10,30 @@
 .ba-production-private-gate strong[role="alert"] { color: #ff9a75; }
 .new-ba-production-experience { display: contents; }
 
+/* The Futures surface can keep three viewport columns while the selected card
+   itself becomes too narrow for its three intrinsic header columns. Let the
+   card own that responsive decision so laptop, split-view, and embedded
+   Business Twin layouts wrap without changing any Futures content. */
+.new-ba-production-experience .selected-future {
+  min-width: 0;
+  container-name: selected-future-card;
+  container-type: inline-size;
+}
+
+@container selected-future-card (max-width: 430px) {
+  .new-ba-production-experience .selected-future header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .new-ba-production-experience .selected-future header h2 {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .new-ba-production-experience .future-confidence {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 520px) {
   .new-ba-production-experience .overview > h1,
   .new-ba-production-experience .hero-subtitle {

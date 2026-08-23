@@ -31,3 +31,4 @@ dist-ssr
 
 # Browser profiles contain cookies, sessions, caches, and machine-local state.
 lab_outputs/**/.chrome-*/
+.vercel

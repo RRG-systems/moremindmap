@@ -17,6 +17,7 @@ import { refineExtraction } from './extractIntelligenceRefinement.js'
 import { generateCanonicalProfile } from './canonicalProfileGenerator.js'
 import { buildBehaviorProfileNotification, sendFormspreeNotification } from '../notifications/formspreeNotifications.js'
 import { queueBosCompletedContactSync, splitContactName } from '../../integrations/gohighlevel/completionHooks.js'
+import { onRecruitingBosVaultVerified } from '../recruitingV1/canonicalAdapters.js'
 
 function generateProfileId() {
   const now = new Date()
@@ -231,10 +232,8 @@ export async function executeCanonicalGeneration(job) {
     // FRONTIER RESTORATION: Call full 25-step inference orchestrator
     // with graceful fallback to template generation if orchestrator fails
     let canonical_profile = null
-    let frontier_orchestration_attempted = false
     
     try {
-      frontier_orchestration_attempted = true
       trace.push('frontier_orchestrator_attempting')
       
       canonical_profile = await generateCanonicalProfile(job.profileInput, {
@@ -352,6 +351,19 @@ export async function executeCanonicalGeneration(job) {
     }
 
     if (vault_result?.success) {
+      try {
+        canonical_diagnostics.recruiting_projection = await onRecruitingBosVaultVerified({
+          relationshipRef: job.payload?.metadata?.recruiting_relationship_ref || null,
+          profileId: profile_id,
+          vaultResult: vault_result
+        })
+        if (canonical_diagnostics.recruiting_projection.projected) trace.push('recruiting_bos_ready_projected')
+      } catch (recruitingProjectionError) {
+        canonical_diagnostics.recruiting_projection = { projected: false, error: recruitingProjectionError.message }
+        trace.push(`recruiting_bos_projection_error:${recruitingProjectionError.message}`)
+        console.error('[CANONICAL-GENERATION] Recruiting readiness projection failed:', recruitingProjectionError.message)
+      }
+
       const fullName = job.payload?.metadata?.person_name || job.payload?.metadata?.name || null
       const { firstName, lastName } = splitContactName(fullName)
       queueBosCompletedContactSync({

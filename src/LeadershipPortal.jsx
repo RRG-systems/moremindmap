@@ -8,6 +8,7 @@ import {
 
 const DEMO_CODE = 'darrendemo'
 const ADMIN_DASHBOARD_CODE = 'moreadmin26'
+const RECRUITING_V1_ENABLED = import.meta.env.VITE_RECRUITING_V1_ENABLED === 'true'
 
 export default function LeadershipPortal() {
   const navigate = useNavigate()
@@ -31,6 +32,12 @@ export default function LeadershipPortal() {
       sessionStorage.setItem('leadershipDashboardAccess', 'true')
       sessionStorage.setItem('leadershipDashboardCode', accessCode.trim().toUpperCase())
       navigate('/leadership-dashboard')
+      return
+    }
+
+    if (normalizedCode === 'recruiting tool') {
+      if (RECRUITING_V1_ENABLED) navigate('/recruiting/home')
+      else setError('Recruiting access is not enabled in this environment.')
       return
     }
 

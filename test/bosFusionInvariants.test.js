@@ -33,6 +33,7 @@ function rankSignature(dimensions) {
 async function buildCustomerBAViewModelThroughVite(retrieve, canonical) {
   const server = await createServer({
     appType: 'custom',
+    cacheDir: '.vite-test-cache',
     configLoader: 'runner',
     logLevel: 'silent',
     server: { middlewareMode: true },

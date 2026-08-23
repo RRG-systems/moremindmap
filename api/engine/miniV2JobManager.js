@@ -4,7 +4,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid'
-import { redisGet, redisSet, redisDel, redis as getRedis } from './redisClient.js'
+import { redisGet, redisSet, redis as getRedis } from './redisClient.js'
+import { createHash } from 'node:crypto'
 
 // Job TTL: 24 hours (86400 seconds)
 const JOB_TTL = 86400
@@ -36,9 +37,14 @@ export const JOB_STAGE = {
 /**
  * Create new job
  */
-export async function createJob(payload) {
-  const jobId = uuidv4()
+function payloadDigest(payload) {
+  return createHash('sha256').update(JSON.stringify(payload)).digest('hex')
+}
+
+export async function createJob(payload, { jobId: providedJobId = null } = {}) {
+  const jobId = providedJobId || uuidv4()
   const now = new Date().toISOString()
+  const intakePayloadSha256 = payloadDigest(payload)
   
   const job = {
     job_id: jobId,
@@ -50,6 +56,7 @@ export async function createJob(payload) {
     locked: false,
     locked_at: null,
     payload,
+    intake_payload_sha256: intakePayloadSha256,
     profileInput: null,
     reportContent: null,
     firstSnapshot: null,
@@ -71,14 +78,26 @@ export async function createJob(payload) {
     }
   }
   
-  await redisSet(`job:${jobId}`, job, { ex: JOB_TTL })
+  if (providedJobId) {
+    const rc = getRedis()
+    const created = await rc.set(`job:${jobId}`, JSON.stringify(job), 'EX', JOB_TTL, 'NX')
+    if (created !== 'OK') {
+      const existing = await redisGet(`job:${jobId}`)
+      if (existing?.intake_payload_sha256 !== intakePayloadSha256) {
+        throw new Error('BOS_JOB_IDEMPOTENCY_CONFLICT')
+      }
+      return jobId
+    }
+  } else {
+    await redisSet(`job:${jobId}`, job, { ex: JOB_TTL })
+  }
   
   // Add to recent jobs list for diagnostics
   try {
     const rc = getRedis()
     await rc.lpush('jobs:recent', jobId)
     await rc.ltrim('jobs:recent', 0, 49) // Keep last 50 jobs
-  } catch (e) {
+  } catch {
     // Fail silently - index is optional for diagnostics only
   }
   

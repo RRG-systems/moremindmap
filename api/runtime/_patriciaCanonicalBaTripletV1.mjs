@@ -494,7 +494,7 @@ function conciseSemanticStringContract(schema) {
 
 export function buildWbmSemanticSchema({ authorityIds, evidenceIds, missingEvidenceIds, wholePersonClaimIds, wholePersonEvidenceIds, domainIds = WBM_DOMAINS } = {}) {
   const authorityReferenceArray = governedAuthorityReferenceArray(authorityIds);
-  const evidenceReferenceArray = governedReferenceArray(evidenceIds, 'PATRICIA_WBM_EVIDENCE_CONTRACT_MISSING', 'PATRICIA_WBM_EVIDENCE_CONTRACT_INVALID');
+  const evidenceReferenceArray = optionalGovernedReferenceArray(evidenceIds, 'PATRICIA_WBM_EVIDENCE_CONTRACT_MISSING', 'PATRICIA_WBM_EVIDENCE_CONTRACT_INVALID');
   const missingEvidenceId = governedReferenceArray(missingEvidenceIds, 'PATRICIA_WBM_MISSING_EVIDENCE_CONTRACT_MISSING', 'PATRICIA_WBM_MISSING_EVIDENCE_CONTRACT_INVALID').items;
   const wholePersonClaimRef = governedReferenceArray(wholePersonClaimIds, 'PATRICIA_WBM_WHOLE_PERSON_CLAIM_CONTRACT_MISSING', 'PATRICIA_WBM_WHOLE_PERSON_CLAIM_CONTRACT_INVALID').items;
   const wholePersonEvidenceReferenceArray = governedReferenceArray(wholePersonEvidenceIds, 'PATRICIA_WBM_WHOLE_PERSON_EVIDENCE_CONTRACT_MISSING', 'PATRICIA_WBM_WHOLE_PERSON_EVIDENCE_CONTRACT_INVALID');
@@ -657,6 +657,8 @@ export function applyWbmFieldMissionOwnership(mission) {
       'Understand the entire governed business state globally before writing any field.',
       'Each local field owns one distinct semantic mission. Do not repeat the whole-business diagnosis across domains or fields.',
       'Compression removes duplication and misplaced intelligence only; it may not remove causal depth, counterevidence, confounds, falsifiers, uncertainty, missing evidence, authority, or provenance.',
+      'Missing business evidence is not permission to invent business truth. Where evidence cannot support a local claim or mechanism, use explicit insufficient-evidence or abstained semantics and preserve the relevant missing-evidence IDs.',
+      'If no governed business evidence supports a causal mechanism or governing constraint, state that limitation explicitly and keep downstream intervention eligibility bounded rather than using Whole-Person authority as a business cause.',
       'Constraint and Causal Dynamics may synthesize across domains. Individual domain states may reference those mechanisms by exact ID but may not reproduce their causal chains.',
     ]),
     field_missions: Object.freeze({

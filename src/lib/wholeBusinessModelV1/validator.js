@@ -79,7 +79,9 @@ function validateMechanism(mechanism, evidenceIds, index) {
   integrity(nonEmptyString(mechanism.underlying_mechanism), 'MALFORMED_STATE', `${field}.underlying_mechanism is required`);
   ensureArray(mechanism.causal_chain, `${field}.causal_chain`);
   integrity(mechanism.causal_chain.length >= 2, 'MALFORMED_STATE', `${field}.causal_chain requires at least two links`);
-  assertRefs(mechanism.evidence_refs, evidenceIds, `${field}.evidence_refs`);
+  assertRefs(mechanism.evidence_refs, evidenceIds, `${field}.evidence_refs`, {
+    allowEmpty: ['INSUFFICIENT_EVIDENCE', 'ABSTAINED'].includes(mechanism.epistemic_class),
+  });
   ensureArray(mechanism.counterevidence_refs || [], `${field}.counterevidence_refs`);
   (mechanism.counterevidence_refs || []).forEach((ref) => integrity(evidenceIds.has(ref), 'CORRUPTED_EVIDENCE', `${field} references unknown counterevidence ${ref}`));
   ensureArray(mechanism.confounds, `${field}.confounds`);
@@ -150,7 +152,9 @@ export function validateWholeBusinessModel(model, context) {
   integrity(canonicalHash([...governedRefs].sort()) === canonicalHash([...evidenceIds].sort()), 'CORRUPTED_EVIDENCE', 'WBM governed evidence reference set drifted');
   integrity(model.current_business_reality && typeof model.current_business_reality === 'object' && !Array.isArray(model.current_business_reality), 'MALFORMED_STATE', 'current_business_reality must be an object');
   integrity(model.business_model && typeof model.business_model === 'object' && !Array.isArray(model.business_model), 'MALFORMED_STATE', 'business_model must be an object');
-  assertRefs(model.business_model.evidence_refs, evidenceIds, 'business_model.evidence_refs');
+  assertRefs(model.business_model.evidence_refs, evidenceIds, 'business_model.evidence_refs', {
+    allowEmpty: evidenceIds.size === 0,
+  });
   ensureArray(model.domain_states, 'domain_states');
   integrity(model.domain_states.length > 0, 'MALFORMED_STATE', 'WBM requires domain states');
   model.domain_states.forEach((domain, index) => {
