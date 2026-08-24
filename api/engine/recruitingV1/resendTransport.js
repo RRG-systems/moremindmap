@@ -31,7 +31,7 @@ function notificationContent(item, baseUrl) {
     if (!token) throw new Error('RECRUITING_DELIVERY_TOKEN_REQUIRED');
     return {
       subject: 'Your MORE Recruiting sign-in link',
-      text: `Use this private link to continue: ${baseUrl}/recruiting/verify/${token}`,
+      text: `Use this private link to continue: ${baseUrl}/recruiting/verify/${token}\n\nThis single-use link expires 15 minutes after it was requested.`,
     };
   }
   if (item.kind === 'MANAGER_SETUP') {

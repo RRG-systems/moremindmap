@@ -32,6 +32,29 @@ test('Resend transport uses the exact recipient and outbox idempotency without p
   assert.equal(JSON.stringify(outcome).includes('only.this.person@example.test'), false);
 });
 
+test('manager verification email carries the public route, opaque token, and explicit 15-minute expiry', async () => {
+  const calls = [];
+  const transport = createResendRecruitingTransport({
+    apiKey: 'synthetic-provider-key-not-a-secret',
+    from: 'MORE Recruiting <recruiting@example.test>',
+    baseUrl: 'https://more.example.test',
+    fetchImpl: async (url, init) => {
+      calls.push({ url, init });
+      return { ok: true, status: 200, async json() { return { id: 'email_manager_verification' }; } };
+    },
+  });
+  const outcome = await transport.deliver({
+    outbox_id: 'outbox_manager_verification',
+    kind: 'MANAGER_VERIFICATION',
+    recipient: 'manager@example.test',
+    delivery_token: 'opaque-manager-token',
+  });
+  const body = JSON.parse(calls[0].init.body);
+  assert.equal(outcome.success, true);
+  assert.match(body.text, /https:\/\/more\.example\.test\/recruiting\/verify\/opaque-manager-token/u);
+  assert.match(body.text, /expires 15 minutes after it was requested/u);
+});
+
 test('Resend transport fails closed for unsupported notification kinds and sanitizes provider failure', async () => {
   const transport = createResendRecruitingTransport({
     apiKey: 'synthetic-provider-key-not-a-secret',

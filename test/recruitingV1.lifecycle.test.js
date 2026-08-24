@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../src/lib/recruitingV1/store.js';
 import { RecruitingV1Service, createSyntheticNotificationTransport } from '../src/lib/recruitingV1/service.js';
+import { MANAGER_CHALLENGE_TTL_MS } from '../src/lib/recruitingV1/contracts.js';
 
 const MEMBERSHIP_A = {
   membership_id: 'membership_a', manager_subject_id: 'manager_a', enterprise_id: 'enterprise_a',
@@ -34,6 +35,24 @@ async function invite(service, sessionToken, index = 1) {
     purpose: 'Synthetic-only governed recruiting evaluation.',
   }, `invite-${index}`);
 }
+
+test('manager verification delivery does not consume the credential and the 15-minute single-use boundary fails closed', async () => {
+  const { service, store, advance } = harness();
+  const requested = await service.requestManagerVerification(MEMBERSHIP_A.manager_profile_id);
+  await service.deliverOutbox(requested.outbox_id);
+  const beforeVerification = await store.read();
+  const challenge = beforeVerification.manager_challenges[Object.keys(beforeVerification.manager_challenges)[0]];
+  assert.equal(challenge.consumed_at, null);
+
+  advance(MANAGER_CHALLENGE_TTL_MS - 1);
+  const verified = await service.verifyManager(requested.verification_token);
+  assert.equal(verified.membership.membership_id, MEMBERSHIP_A.membership_id);
+  await assert.rejects(service.verifyManager(requested.verification_token), /RECRUITING_MANAGER_CHALLENGE_INVALID/);
+
+  const expiring = await service.requestManagerVerification(MEMBERSHIP_A.manager_profile_id);
+  advance(MANAGER_CHALLENGE_TTL_MS);
+  await assert.rejects(service.verifyManager(expiring.verification_token), /RECRUITING_MANAGER_CHALLENGE_INVALID/);
+});
 
 test('five-slot entitlement is atomic, explicit-period scoped, and resets at a new authoritative period', async () => {
   const { service, setNow } = harness();

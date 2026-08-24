@@ -309,6 +309,18 @@ export class RecruitingV1Service {
     });
   }
 
+  async inspectManagerReadOnly(sessionToken) {
+    const state = await this.store.read();
+    const now = this.now();
+    const { session, membership } = membershipFromSession(state, sessionToken, now);
+    return {
+      session: clone(session),
+      membership: clone(membership),
+      entitlement: entitlementFor(state, membership, now),
+      capabilities: { master_control: Array.isArray(membership.admin_roles) && membership.admin_roles.includes('RECRUITING_ADMIN') },
+    };
+  }
+
   async rotateManagerSession(sessionToken) {
     const rotatedToken = createOpaqueToken();
     const result = await this.store.transaction((state) => {

@@ -135,7 +135,7 @@ export function getRecruitingService(env = process.env) {
   return service;
 }
 
-function canonicalSignalView(dossier, role) {
+export function canonicalSignalView(dossier, role) {
   const canonical = dossier?.canonical_profile_json || dossier?.canonical_dossier?.canonical_profile_json || dossier;
   const ranked = canonical?.rescoring_gpt?.ranked_dimensions || canonical?.rescoring_v1?.ranked_dimensions || canonical?.ranked_dimensions || [];
   const narrative = canonical?.narrative_profile || canonical?.narrative || {};
@@ -240,7 +240,7 @@ function responseText(response) {
   return (response?.output || []).flatMap((item) => item.content || []).filter((item) => item.type === 'output_text').map((item) => item.text).join('');
 }
 
-function openAiProvider(env = process.env) {
+export function createRecruitingOpenAiProvider(env = process.env) {
   if (!env.OPENAI_API_KEY) throw new Error('RECRUITING_FRONTIER_PROVIDER_BINDING_REQUIRED');
   const client = new OpenAI({ apiKey: env.OPENAI_API_KEY, maxRetries: 0, timeout: 180_000 });
   return async (request) => {
@@ -269,7 +269,7 @@ export async function generateCandidateIntelligence({ sessionToken, candidateId,
     managerEvidence: candidate.manager_evidence,
     ...canonical,
   });
-  const projection = await generateRecruitingIntelligence({ context, provider: openAiProvider(env) });
+  const projection = await generateRecruitingIntelligence({ context, provider: createRecruitingOpenAiProvider(env) });
   return recruiting.saveIntelligence(sessionToken, candidateId, projection);
 }
 
