@@ -5,6 +5,7 @@ import { SYNTHETIC_REAL_ESTATE_SUBJECTS_V1 } from '../lab/subscriptionLivingBusi
 import { selectRecruitingCandidate } from '../lib/recruitingV1/candidateSelection.js';
 import RecruitingManagerSetup from './RecruitingManagerSetup.jsx';
 import RecruitingMasterControl from './RecruitingMasterControl.jsx';
+import { CandidateAnchor, DetailDrawer, JourneyMap, ProductHeader } from './RecruitingExperienceShell.jsx';
 import './recruitingV1.css';
 
 const SYNTHETIC = import.meta.env.VITE_RECRUITING_V1_SYNTHETIC_REVIEW === 'true';
@@ -24,12 +25,22 @@ const destinations = [
   ['export', '08', 'Save / Print'],
 ];
 
+const managerMapDestinations = [
+  ['home', 'Recruiting Home', 'Choose a candidate and see the next truthful step.', 'Open command center', 'green'],
+  ['invite', 'Invite & Readiness', 'Invite with consent, then see what is actually ready.', 'Invite or check readiness', 'violet'],
+  ['opportunity', 'Local Opportunity', 'Define what this leader can genuinely help an agent build.', 'Review local truth', 'amber'],
+  ['evidence', 'What You Know', 'Add facts and observations without rewriting recruit-owned truth.', 'Add evidence', 'blue'],
+  ['intelligence', 'Recruiting Intelligence', 'Understand both people and the authentic paths supported by evidence.', 'Open intelligence', 'teal'],
+  ['meeting', 'Meeting & Brief', 'Prepare, listen, avoid assumptions, and take the one-page brief.', 'Prepare the meeting', 'coral'],
+];
+
 function syntheticFixtureForScenario(name) {
   const fixture = clone(SYNTHETIC_RECRUITING_FIXTURE);
   if (name === 'empty') fixture.candidates = [];
   if (name === 'exhausted') fixture.entitlement = { ...fixture.entitlement, remaining: 0, reserved: 3, consumed: 2 };
   if (name === 'provider-error') fixture.intelligence = null;
   if (name === 'stale') fixture.intelligence.stale = true;
+  if (name === 'opportunity-empty') fixture.opportunity.items = [];
   return fixture;
 }
 
@@ -188,6 +199,12 @@ function ManagerExperience() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
+  function openManagerDestination(id) {
+    if (id === 'home') navigate('/recruiting/home?view=workspace');
+    else navigateTo(id);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
   function openCandidate(candidateId) {
     setSelectedCandidateId(candidateId);
     navigateTo('candidate');
@@ -203,14 +220,25 @@ function ManagerExperience() {
     },
     entitlement: masterControl.admin.entitlement,
   } : state;
+  const managerMapVisible = active === 'home' && new URLSearchParams(location.search).get('view') !== 'workspace';
+  const candidateContextVisible = ['candidate', 'evidence', 'intelligence', 'meeting', 'export'].includes(active)
+    || (active === 'opportunity' && Boolean(state.opportunity?.items?.length));
+  const role = active === 'master-control' ? 'Recruiting Admin' : 'Manager Recruiting Master';
 
   return (
-    <div className="recruiting-v1" data-synthetic={SYNTHETIC ? 'true' : 'false'}>
-      <DirectionARail active={active} navigate={navigateTo} manager={shellState.manager} demoAvailable={demoAvailable} />
-      <div className="recruiting-page-column">
-        <RecruitingHeader state={shellState} error={error} />
-        <main className="recruiting-main">
-          {active === 'home' && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={demoAvailable} />}
+    <div className={`recruiting-v1 campaign-shell ${managerMapVisible || active === 'master-control' ? 'campaign-layer-zero-shell' : 'campaign-layer-one-shell'}`} data-synthetic={SYNTHETIC ? 'true' : 'false'}>
+      <ProductHeader
+        manager={shellState.manager}
+        role={role}
+        backLabel={!managerMapVisible && !['master-control', 'demo'].includes(active) ? 'Back to Recruiting Map' : null}
+        onBack={() => navigateTo('home')}
+        meta={SYNTHETIC ? 'Synthetic founder review · No production activity' : null}
+        error={error}
+      />
+      {candidateContextVisible && <CandidateAnchor candidate={selected} intelligence={state.intelligence} onChange={() => navigate('/recruiting/home?view=workspace')} />}
+      <main className="recruiting-main">
+          {managerMapVisible && <ManagerJourneyMap state={state} candidate={selected} navigate={openManagerDestination} />}
+          {active === 'home' && !managerMapVisible && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={demoAvailable} />}
           {active === 'invite' && <InviteSurface state={state} setState={setState} setError={setError} navigate={navigateTo} />}
           {active === 'candidate' && <CandidateSurface state={state} candidate={selected} navigate={navigateTo} />}
           {active === 'opportunity' && <OpportunitySurface state={state} setState={setState} />}
@@ -219,38 +247,30 @@ function ManagerExperience() {
           {active === 'meeting' && <MeetingSurface state={state} candidate={selected} navigate={navigateTo} />}
           {active === 'export' && <ExportSurface state={state} candidate={selected} />}
           {active === 'demo' && (demoState
-            ? <DarrenSyntheticDemoSurface state={demoState} setState={setDemoState} setError={setError} />
+            ? <DarrenSyntheticDemoSurface state={demoState} setState={setDemoState} setError={setError} exit={() => navigateTo('home')} />
             : <LoadingState message="Opening Darren's synthetic demo…" />)}
           {active === 'master-control' && (state.manager.capabilities?.master_control
-            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} />
+            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} navigate={navigateTo} demoAvailable={demoAvailable} />
             : <NotReadySurface title="Master Control is not available for this account." copy="Only an approved Recruiting administrator can manage enterprise access and invitation allowances." />)}
-        </main>
-      </div>
+      </main>
     </div>
   );
 }
 
-function DirectionARail({ active, navigate, manager, demoAvailable }) {
-  return (
-    <aside className="recruiting-rail" aria-label="Recruiting destinations">
-      <div className="more-brand"><span>+</span><strong>MORE<br />MINDMAP</strong></div>
-      <p className="rail-label">Recruiting Intelligence</p>
-      <nav>{destinations.map(([id, number, label]) => <button type="button" key={id} className={active === id ? 'active' : ''} onClick={() => navigate(id)}><span>{number}</span>{label}</button>)}{demoAvailable && <button type="button" className={`demo-nav ${active === 'demo' ? 'active' : ''}`} onClick={() => navigate('demo')}><span>D</span>Synthetic Demo</button>}{manager.capabilities?.master_control && <button type="button" className={`master-control-nav ${active === 'master-control' ? 'active' : ''}`} onClick={() => navigate('master-control')}><span>MC</span>Master Control</button>}</nav>
-      <div className="rail-manager"><span>{manager.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><div><strong>{manager.name}</strong><small>{manager.enterprise_name}</small></div></div>
-      <div className="rail-boundary"><b>✓</b><small>Private recruiting relationships<br />Profile ID never verifies identity</small></div>
-    </aside>
-  );
-}
-
-function RecruitingHeader({ state, error }) {
-  const unlimited = state.entitlement.mode === 'unlimited';
-  return (
-    <header className="recruiting-header">
-      <div><span className="synthetic-badge">{state.synthetic_only ? 'Synthetic founder review' : 'Enterprise Recruiting'}</span><small>Updated from verified Recruiting sources</small></div>
-      <div className={`allowance ${unlimited ? 'unlimited' : ''}`}><strong>{unlimited ? '∞' : state.entitlement.remaining}</strong><span>{unlimited ? `${state.entitlement.used} invitations this period · unlimited access` : `of ${state.entitlement.limit} invitations remaining`}</span>{!unlimited && <i><b style={{ width: `${(state.entitlement.remaining / state.entitlement.limit) * 100}%` }} /></i>}</div>
-      {error && <p role="alert">{error}</p>}
-    </header>
-  );
+function ManagerJourneyMap({ state, candidate, navigate }) {
+  const cards = managerMapDestinations.map(([id, title, copy, action, tone]) => {
+    let cardState = '';
+    if (id === 'home') cardState = `${state.candidates.filter((item) => item.state === 'ACCEPTED').length} active ${state.candidates.filter((item) => item.state === 'ACCEPTED').length === 1 ? 'candidate' : 'candidates'}`;
+    if (id === 'invite') cardState = 'BOS + optional BA';
+    if (id === 'opportunity') cardState = 'Reusable authority';
+    if (id === 'evidence') cardState = `${(state.manager_evidence || []).length} manager ${(state.manager_evidence || []).length === 1 ? 'note' : 'notes'}`;
+    if (id === 'intelligence') cardState = `${state.intelligence?.output?.authentic_angles?.length || 0} supported ${(state.intelligence?.output?.authentic_angles?.length || 0) === 1 ? 'path' : 'paths'}`;
+    if (id === 'meeting') cardState = '5-minute review';
+    return { id, title, copy, action, tone, state: cardState };
+  });
+  const candidateLine = candidate ? `${candidate.recruit_name}${state.synthetic_only ? ' · synthetic candidate' : ''}` : 'No active candidate selected';
+  const readiness = candidate ? `${candidate.bos_profile_id ? 'BOS ready' : 'BOS pending'} · ${candidate.ba_readiness === 'BA_INTELLIGENCE_READY' ? 'BA Intelligence ready' : 'BA optional'} · ${state.intelligence?.output?.authentic_angles?.length || 0} supported paths` : 'Invite a recruit to begin';
+  return <JourneyMap eyebrow="A · Candidate Journey Map · Closest to New BA" title="Recruit with understanding, one candidate at a time." subtitle="Six destinations turn Recruiting into a simple customer journey while preserving every governed product truth." cards={cards} onOpen={navigate} footerLeft={<><b>{candidateLine}</b><span>{readiness}</span></>} footerRight="No compatibility score." />;
 }
 
 function HomeSurface({ state, navigate, openCandidate, demoAvailable }) {
@@ -277,12 +297,17 @@ function CandidateCard({ candidate, onOpen }) {
   return <button type="button" className="candidate-card" onClick={onOpen}><div className="candidate-avatar">{candidate.recruit_name.split(' ').map((part) => part[0]).join('')}</div><div><small>{candidate.state === 'DELIVERED' ? 'Invitation pending' : 'Candidate relationship'}</small><h3>{candidate.recruit_name}</h3><p>{candidate.purpose}</p></div><span className={`status-pill status-${candidate.readiness_state.toLowerCase()}`}>{readiness}</span><footer><small>{candidate.ba_readiness.replaceAll('_', ' ')}</small><b>Open candidate →</b></footer></button>;
 }
 
-function DarrenSyntheticDemoSurface({ state, setState, setError }) {
-  const [section, setSection] = useState('candidate');
+function DarrenSyntheticDemoSurface({ state, setState, setError, exit }) {
+  const [section, setSection] = useState('home');
+  const [briefOpen, setBriefOpen] = useState(false);
   const candidate = state.candidates[0];
   const sections = [
-    ['candidate', 'Candidate'], ['opportunity', 'Opportunity'], ['evidence', 'Evidence'],
-    ['intelligence', 'Intelligence'], ['meeting', 'Meeting'], ['export', 'Export'],
+    ['home', 'Recruiting Home', 'Prefilled explanatory'],
+    ['invite', 'Invite & Readiness', 'Read-only explanatory'],
+    ['opportunity', 'Local Opportunity', 'Demo-local edit + reset'],
+    ['evidence', 'What You Know', 'Demo-local edit + reset'],
+    ['intelligence', 'Recruiting Intelligence', 'Accepted synthetic projection'],
+    ['meeting', 'Meeting & Brief', 'Read-only payoff'],
   ];
 
   async function request({ action, body = {} }) {
@@ -303,24 +328,35 @@ function DarrenSyntheticDemoSurface({ state, setState, setError }) {
         const payload = await demoApi({ action: 'RESET_DEMO' });
         setState(payload.demo);
       }
-      setSection('candidate');
+      setSection('home');
+      setBriefOpen(false);
       setError('');
     } catch (failure) { setError(failure.message); }
   }
 
-  function navigate(sectionId) { setSection(sectionId); window.scrollTo({ top: 0, behavior: 'auto' }); }
+  function navigate(sectionId) {
+    if (sectionId === 'export') { setBriefOpen(true); return; }
+    if (sections.some(([id]) => id === sectionId)) setSection(sectionId);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  const stepIndex = sections.findIndex(([id]) => id === section);
+  const step = sections[stepIndex];
 
   return (
     <section className="darren-synthetic-demo" data-demo-only="true" data-synthetic-recruit="true">
-      <header className="demo-boundary-banner"><div><span>DEMO CANDIDATE — SYNTHETIC DATA</span><h1>Jordan Lee · Darren’s private Recruiting practice space</h1><p>Real manager authority, synthetic recruit reality. Nothing here creates an invitation, sends email, changes entitlement, or enters Recruiting ledgers.</p></div><button type="button" onClick={reset}>Reset demo</button></header>
-      <nav className="demo-section-nav" aria-label="Synthetic demo destinations">{sections.map(([id, label]) => <button type="button" key={id} className={section === id ? 'active' : ''} onClick={() => navigate(id)}>{label}</button>)}</nav>
+      <header className="demo-boundary-banner"><div><span>DEMO CANDIDATE — SYNTHETIC DATA</span><h1>Jordan Lee · Darren’s private Recruiting walkthrough</h1><p>The real six-destination manager journey, filled with synthetic truth. Nothing here creates an invitation, sends email, changes entitlement, or enters Recruiting ledgers.</p></div><div><button type="button" onClick={reset}>Reset synthetic demo</button><button type="button" className="demo-exit" onClick={exit}>Exit walkthrough</button></div></header>
+      <nav className="demo-section-nav" aria-label="Synthetic demo destinations">{sections.map(([id, label], index) => <button type="button" key={id} className={section === id ? 'active' : ''} onClick={() => navigate(id)}><span>{String(index + 1).padStart(2, '0')}</span>{label}</button>)}</nav>
       <div className="demo-zero-impact" role="note"><b>Zero-impact boundary</b><span>0 invitations</span><span>0 emails</span><span>0 real relationships</span><span>0 entitlement use</span><span>0 Recruiting audit events</span></div>
-      {section === 'candidate' && <CandidateSurface state={state} candidate={candidate} navigate={navigate} demo />}
+      <aside className="demo-walkthrough-overlay" aria-label="Walkthrough controls"><div><small>Step {String(stepIndex + 1).padStart(2, '0')} of 06 · {step[2]}</small><strong>{step[1]}</strong><span>Jordan remains the selected synthetic candidate.</span></div><div><button type="button" disabled={stepIndex === 0} onClick={() => navigate(sections[stepIndex - 1][0])}>← Previous</button><button type="button" disabled={stepIndex === sections.length - 1} onClick={() => navigate(sections[stepIndex + 1][0])}>Next →</button></div></aside>
+      {section !== 'home' && <CandidateAnchor candidate={candidate} intelligence={state.intelligence} demo onChange={() => setSection('home')} note="Synthetic walkthrough · demo-local state only" />}
+      {section === 'home' && <HomeSurface state={state} navigate={navigate} openCandidate={() => navigate('invite')} demoAvailable={false} />}
+      {section === 'invite' && <><section className="demo-readiness-note panel"><p className="eyebrow violet">Invite & Readiness · explanatory state</p><h2>No invitation is sent in this walkthrough.</h2><p>In the live manager journey, Jordan would first see Darren, the purpose, and the exact sharing boundary. This synthetic state begins after that explanation without claiming consent or creating a relationship.</p></section><CandidateSurface state={state} candidate={candidate} navigate={navigate} demo /></>}
       {section === 'opportunity' && <OpportunitySurface state={state} setState={setState} request={request} demo />}
       {section === 'evidence' && <EvidenceSurface state={state} setState={setState} candidate={candidate} request={request} demo />}
       {section === 'intelligence' && <IntelligenceSurface state={state} setState={setState} candidate={candidate} navigate={navigate} request={request} demo />}
       {section === 'meeting' && <MeetingSurface state={state} candidate={candidate} navigate={navigate} />}
-      {section === 'export' && <ExportSurface state={state} candidate={candidate} request={request} demo />}
+      {briefOpen && <DetailDrawer eyebrow="Meeting & Brief · Layer 02" title="Save or print the synthetic brief" subtitle="The real print view opens here without writing a production export audit." onClose={() => setBriefOpen(false)} footer="Synthetic walkthrough only · no real export audit"><ExportSurface state={state} candidate={candidate} request={request} demo /></DetailDrawer>}
     </section>
   );
 }
@@ -381,21 +417,59 @@ function ReadinessNode({ done, label, detail }) { return <div className={done ? 
 
 function OpportunitySurface({ state, setState, request = api, demo = false }) {
   const [editing, setEditing] = useState(false);
+  const [selectedProof, setSelectedProof] = useState(null);
+  const [drafts, setDrafts] = useState([]);
   const items = state.opportunity?.items || [];
-  async function addUnknown() {
-    const nextItems = [...items, { opportunity_evidence_id: `opp_${Date.now()}`, category: 'GROWTH_PATH', scope: 'LOCAL_LEADER_PRIMARY', statement: 'Growth-path capacity requires current local proof before it becomes a recruiting claim.', status: 'UNKNOWN', source: demo ? 'Synthetic demo authority' : 'Manager review needed', source_date: '2026-08-23', freshness: 'REVIEW_REQUIRED', constraints: [], counterevidence: [], demo_only: demo }];
+  const prompts = [
+    { key: 'why', category: 'GROWTH_PATH', label: 'What makes your local business worth joining?', short: 'Why this business is worth joining', fallbackStatus: 'UNKNOWN' },
+    { key: 'help', category: 'COACHING_AND_TRAINING', label: 'How do you personally help agents build a better business?', short: 'How I help agents build', fallbackStatus: 'SUPPORTED' },
+    { key: 'offer', category: 'OPERATIONS_AND_LEVERAGE', label: 'What can you genuinely offer today?', short: 'What we can offer today', fallbackStatus: 'CONDITIONAL' },
+    { key: 'promise', category: 'LEAD_OPPORTUNITY', label: 'What should MORE never promise or imply?', short: 'What we will not promise', fallbackStatus: 'NON_PROMISE' },
+  ];
+
+  function beginEditing() {
+    setDrafts(prompts.map((prompt) => {
+      const current = items.find((item) => item.category === prompt.category);
+      return { ...prompt, statement: current?.statement || '', status: current?.status || prompt.fallbackStatus, current };
+    }));
+    setEditing(true);
+  }
+
+  async function saveTruth(event) {
+    event.preventDefault();
+    const untouched = items.filter((item) => !prompts.some((prompt) => prompt.category === item.category));
+    const now = new Date();
+    const nextItems = [...untouched, ...drafts.filter((draft) => draft.statement.trim()).map((draft) => ({
+      ...(draft.current || {}),
+      opportunity_evidence_id: draft.current?.opportunity_evidence_id || `opp_${draft.key}_${Date.now()}`,
+      category: draft.category,
+      scope: 'LOCAL_LEADER_PRIMARY',
+      statement: draft.statement.trim(),
+      status: draft.status,
+      source: draft.current?.source || (demo ? 'Synthetic demo authority' : 'Manager Local Opportunity statement'),
+      source_date: now.toISOString().slice(0, 10),
+      freshness: demo ? 'SYNTHETIC_BASELINE' : 'CURRENT_MANAGER_REVIEW',
+      constraints: draft.current?.constraints || [],
+      counterevidence: draft.current?.counterevidence || [],
+      demo_only: demo || undefined,
+    }))];
     const payload = (!SYNTHETIC || demo) ? await request({ action: 'SAVE_OPPORTUNITY', body: { items: nextItems } }) : null;
     if (demo && payload?.demo) setState(payload.demo);
     else setState((current) => ({ ...current, opportunity: { ...current.opportunity, items: nextItems } }));
     setEditing(false);
   }
+  const localItems = items.filter((item) => item.scope !== 'COMPANY_SECONDARY');
   return (
     <section className="surface opportunity-surface" data-surface="opportunity">
-      <p className="eyebrow green">Local Opportunity Authority</p><h1>What can this leader genuinely help an agent build?</h1><p className="surface-subhead">Local capability leads. Company facts support only when they are current, locally available, and materially relevant.</p>
-      <section className="opportunity-summary panel"><div><span>⌾</span><div><small>Local leadership first</small><h2>{items.filter((item) => item.scope === 'LOCAL_LEADER_PRIMARY' && item.status === 'SUPPORTED').length} supported local capabilities</h2></div></div><div><span>△</span><div><small>Conditional</small><h2>{items.filter((item) => item.status === 'CONDITIONAL').length} promise requires verification</h2></div></div><div><span>○</span><div><small>Intentional unknowns</small><h2>{items.filter((item) => ['UNKNOWN', 'NON_PROMISE'].includes(item.status)).length} claims withheld</h2></div></div></section>
-      <div className="opportunity-list">{items.map((item) => <article className="panel opportunity-card" key={item.opportunity_evidence_id}><header><span>{item.category.replaceAll('_', ' ')}</span><b className={`evidence-state ${item.status.toLowerCase()}`}>{item.status.replaceAll('_', ' ')}</b></header><h2>{item.statement}</h2><div className="provenance-row"><span>Source · {item.source}</span><span>Dated · {item.source_date}</span><span>{item.freshness}</span></div>{item.constraints?.length > 0 && <footer><b>Constraint</b>{item.constraints.join(' ')}</footer>}{item.counterevidence?.length > 0 && <footer className="counter"><b>Counterevidence</b>{item.counterevidence.join(' ')}</footer>}</article>)}</div>
-      <button className="solid-button inline" type="button" onClick={() => setEditing(true)}>＋ Add capability or unknown</button>{editing && <div className="inline-editor panel"><p>Record what still needs verification instead of turning it into a promise.</p><button type="button" onClick={addUnknown}>Add an open question</button><button type="button" onClick={() => setEditing(false)}>Cancel</button></div>}
-      <section className="secondary-company"><p className="eyebrow violet">Company facts · secondary support</p><p>Platform facts never substitute for local leadership proof.</p></section>
+      <header className="campaign-surface-title"><div><p className="campaign-kicker">Local Opportunity · {items.length ? 'Saved' : 'First use'}</p><h1>{items.length ? 'This is the local truth MORE can safely use.' : 'Define the local truth once. Use it responsibly across every candidate.'}</h1><p className="surface-subhead">{items.length ? 'You defined it once. It supports every candidate conversation until you edit it.' : 'Four plain-language answers establish what is real, conditional, still unknown, and never a promise.'}</p></div><button className="solid-button inline" type="button" onClick={beginEditing}>{items.length ? 'Edit Local Opportunity' : 'Set up Local Opportunity'}</button></header>
+      {!items.length && <div className="opportunity-first-use">{prompts.map((prompt, index) => <article className={`panel tone-${['green', 'violet', 'amber', 'coral'][index]}`} key={prompt.key}><span>0{index + 1}</span><h2>{prompt.label}</h2><p>{index === 3 ? 'Naming the boundary is part of the opportunity.' : 'Use the truth you can support today. Missing information can stay missing.'}</p></article>)}</div>}
+      {items.length > 0 && <div className="opportunity-truth-grid">{localItems.map((item) => {
+        const prompt = prompts.find((entry) => entry.category === item.category);
+        return <article className={`panel opportunity-truth-card status-${item.status.toLowerCase()}`} key={item.opportunity_evidence_id}><header><span>{prompt?.short || item.category.replaceAll('_', ' ')}</span><b className={`evidence-state ${item.status.toLowerCase()}`}>{item.status.replaceAll('_', ' ')}</b></header><h2>{item.statement}</h2><p>{item.constraints?.[0] || (item.status === 'NON_PROMISE' ? 'This boundary stays visible in every recruiting conversation.' : 'Use only while this local truth remains current.')}</p><button type="button" onClick={() => setSelectedProof(item)}>See why this is safe →</button></article>;
+      })}</div>}
+      {editing && <form className="panel opportunity-truth-editor" onSubmit={saveTruth}><div><p className="campaign-kicker">Edit the local truth</p><h2>Say what is true in language a manager would actually use.</h2><p>Supported, conditional, unknown, and non-promise boundaries remain attached underneath.</p></div>{drafts.map((draft, index) => <fieldset key={draft.key}><legend><span>0{index + 1}</span>{draft.label}</legend><textarea rows="3" value={draft.statement} onChange={(event) => setDrafts((current) => current.map((item) => item.key === draft.key ? { ...item, statement: event.target.value } : item))} placeholder="Leave blank if this is not yet known." /><label>Current truth<select value={draft.status} onChange={(event) => setDrafts((current) => current.map((item) => item.key === draft.key ? { ...item, status: event.target.value } : item))}>{['SUPPORTED', 'CONDITIONAL', 'UNKNOWN', 'NON_PROMISE'].map((value) => <option key={value} value={value}>{value.replaceAll('_', ' ')}</option>)}</select></label></fieldset>)}<footer><button className="solid-button inline" type="submit">Save Local Opportunity</button><button className="text-action" type="button" onClick={() => setEditing(false)}>Cancel</button></footer></form>}
+      {items.length > 0 && <section className="opportunity-saved-strip"><span>✓</span><div><strong>Saved for {state.manager.enterprise_name}</strong><small>Reusable across candidates · edit when capacity or evidence changes</small></div><button type="button" onClick={beginEditing}>Review later</button></section>}
+      {selectedProof && <DetailDrawer eyebrow="Local Opportunity · Layer 02" title={selectedProof.statement} subtitle={`${selectedProof.status.replaceAll('_', ' ')} · ${selectedProof.scope.replaceAll('_', ' ')}`} onClose={() => setSelectedProof(null)} footer="Local Opportunity remains manager/local-enterprise authority. It never becomes recruit-owned truth."><dl className="campaign-proof-list"><div><dt>Source</dt><dd>{selectedProof.source}</dd></div><div><dt>Source date</dt><dd>{selectedProof.source_date}</dd></div><div><dt>Freshness</dt><dd>{selectedProof.freshness}</dd></div><div><dt>Conditions</dt><dd>{selectedProof.constraints?.join(' ') || 'No extra condition recorded.'}</dd></div><div><dt>Counterevidence</dt><dd>{selectedProof.counterevidence?.join(' ') || 'No counterevidence recorded.'}</dd></div></dl></DetailDrawer>}
     </section>
   );
 }
@@ -424,6 +498,7 @@ function EvidenceSurface({ state, setState, candidate, request = api, demo = fal
 }
 
 function IntelligenceSurface({ state, setState, candidate, navigate, request = api, demo = false }) {
+  const [proof, setProof] = useState(null);
   async function generate() {
     const payload = await request({ action: 'GENERATE_INTELLIGENCE', body: { candidate_id: candidate.candidate_id } });
     setState((current) => ({ ...current, intelligence: payload.intelligence }));
@@ -432,31 +507,34 @@ function IntelligenceSurface({ state, setState, candidate, navigate, request = a
   const output = state.intelligence.output;
   return (
     <section className="surface intelligence-surface" data-surface="intelligence">
-      <p className="eyebrow violet">Main Recruiting Intelligence</p><h1>Understand {candidate.recruit_name} before you decide what to say.</h1><p className="surface-subhead">Bilateral reasoning connects two people, one business reality, and only the local help that is actually supported.</p>
+      <header className="campaign-surface-title"><div><p className="campaign-kicker">Recruiting Intelligence · Layer 01</p><h1>Understand {candidate.recruit_name} before you decide what to say.</h1><p className="surface-subhead">Four truth classes stay separate. Bilateral reasoning connects two people only where evidence supports a useful conversation.</p></div><button className="solid-button inline" type="button" onClick={() => navigate('meeting')}>Open Meeting & Brief</button></header>
       {state.intelligence.stale && <div className="stale-banner"><b>Evidence changed</b><span>The last complete view remains visible, but it does not yet include the newest information.</span><button type="button" onClick={generate}>Refresh with current evidence</button></div>}
       <section className="understand-hero panel"><div><p className="eyebrow green">Understand This Recruit</p><h2>{output.understand_this_recruit.summary}</h2></div><ul>{output.understand_this_recruit.important_realities.map((item) => <li key={item}>✓ {item}</li>)}</ul></section>
-      <section className="bilateral panel"><header><p className="eyebrow teal">Bilateral Communication Advantage</p><span>Recruiter ↔ Recruit</span></header><div className="bilateral-people"><div><b>{state.manager.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{state.manager.name}</strong><small>{demo ? 'Canonical BOS · read-only reference' : 'Recruiter authority'}</small></div><i>↔</i><div><b>{candidate.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{candidate.recruit_name}</strong><small>{demo ? 'Synthetic BOS + BA authority' : 'Recruit authority'}</small></div></div><div className="bilateral-grid"><article><small>Your advantage</small><p>{output.bilateral_communication.advantage}</p></article><article><small>Your watchout</small><p>{output.bilateral_communication.recruiter_watchout}</p></article><article><small>Authentic adaptation</small><p>{output.bilateral_communication.adaptation}</p></article></div></section>
-      <div className="section-heading angles-heading"><div><p className="eyebrow amber">Authentic recruiting angles</p><h2>{output.authentic_angles.length} supported paths - not a quota of three.</h2></div><span>Evidence linked</span></div>
-      <div className="angle-grid">{output.authentic_angles.map((angle, index) => <article className="panel angle-card" key={angle.title}><header><span>0{index + 1}</span><b>Supported hypothesis</b></header><h2>{angle.title}</h2><dl><div><dt>What matters</dt><dd>{angle.recruit_need}</dd></div><div><dt>Current reality</dt><dd>{angle.current_reality}</dd></div><div><dt>Locally supported help</dt><dd>{angle.locally_supported_help}</dd></div></dl><blockquote>“{angle.validating_question}”</blockquote><footer><span>{angle.uncertainty}</span><b>{angle.recruit_evidence_ids.length + angle.opportunity_evidence_ids.length} evidence links</b></footer></article>)}</div>
+      <section className="bilateral panel"><header><p className="eyebrow teal">Bilateral Communication</p><span>Use the bridge here · nowhere else</span></header><div className="bilateral-people"><div><b>{state.manager.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{state.manager.name}</strong><small>{demo ? 'Canonical BOS · read-only reference' : 'Recruiter Reality'}</small></div><i>↔</i><div><b>{candidate.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{candidate.recruit_name}</strong><small>{demo ? 'Synthetic BOS + BA authority' : 'Recruit Reality'}</small></div></div><div className="bilateral-grid"><article><small>Your advantage</small><p>{output.bilateral_communication.advantage}</p></article><article><small>Your watchout</small><p>{output.bilateral_communication.recruiter_watchout}</p></article><article><small>Authentic adaptation</small><p>{output.bilateral_communication.adaptation}</p></article></div></section>
+      <section className="business-gap-reserved" aria-label="Business Gap Intelligence V1.1 reserved insertion point"><header><span>Reserved insertion point</span><strong>Business Gap Intelligence V1.1</strong><b>Not active in V1</b></header><div>{['Current Business Reality', 'Chosen or Possible Future', 'Gap', 'Constraint', 'Proof', 'What Must Change', 'Can We Help?'].map((label) => <span key={label}>{label}<i>→</i></span>)}</div><p>V1 does not fabricate this chain. Ratified intelligence will appear here before Authentic Recruiting Angles.</p></section>
+      <div className="section-heading angles-heading"><div><p className="eyebrow green">Authentic Recruiting Angles</p><h2>{output.authentic_angles.length} supported {output.authentic_angles.length === 1 ? 'path' : 'paths'}. No quota of three.</h2></div><span>Recruit evidence + local capability required</span></div>
+      <div className="angle-grid">{output.authentic_angles.map((angle, index) => <article className="panel angle-card" key={angle.title}><header><span>0{index + 1}</span><b>{index === 0 ? 'Supported' : 'Conditional'}</b></header><h2>{angle.title}</h2><p>{angle.rationale}</p><blockquote>{angle.validating_question}</blockquote><footer><button type="button" onClick={() => setProof(angle)}>Why this path is allowed →</button><b>{angle.recruit_evidence_ids.length + angle.opportunity_evidence_ids.length} evidence links</b></footer></article>)}</div>
       <section className="withheld panel"><span>⊘</span><div><p className="eyebrow amber">Intentionally withheld</p><h2>{output.withheld_angles[0]}</h2><p>Unknown is a product result. It prevents a local claim from becoming a recruiting promise.</p></div></section>
       <section className="success-environment"><div><p className="eyebrow green">Real Estate success is plural</p><h2>No single personality pattern owns success.</h2></div>{[['Natural success patterns', output.success_environment.natural_success_patterns], ['Supportive conditions', output.success_environment.supportive_conditions], ['Likely friction', output.success_environment.likely_frictions]].map(([title, items]) => <article className="panel" key={title}><h3>{title}</h3><ul>{items.map((item) => <li key={item}>{item}</li>)}</ul></article>)}</section>
       <section className="missing-panel panel"><p className="eyebrow amber">What still needs to be learned</p><div>{output.missing_evidence.map((item) => <span key={item}>{item}</span>)}</div></section>
-      <button className="solid-button inline" type="button" onClick={() => navigate('meeting')}>Open five-minute Meeting Plan →</button>
+      {proof && <DetailDrawer eyebrow="Recruiting Intelligence · Layer 02" title={proof.title} subtitle="A supported path must connect recruit evidence and a locally supported capability." onClose={() => setProof(null)} footer="This is a hypothesis for a real conversation, not a score, promise, or scripted pitch."><dl className="campaign-proof-list"><div><dt>Recruit need</dt><dd>{proof.recruit_need}</dd></div><div><dt>Current reality</dt><dd>{proof.current_reality}</dd></div><div><dt>Locally supported help</dt><dd>{proof.locally_supported_help}</dd></div><div><dt>Uncertainty</dt><dd>{proof.uncertainty}</dd></div><div><dt>Evidence links</dt><dd>{[...proof.recruit_evidence_ids, ...proof.opportunity_evidence_ids].join(' · ')}</dd></div></dl></DetailDrawer>}
     </section>
   );
 }
 
-function MeetingSurface({ state, candidate, navigate }) {
+function MeetingSurface({ state, navigate }) {
+  const [proof, setProof] = useState(null);
   if (!state.intelligence?.output) return <NotReadySurface title="The Meeting Plan is not ready." copy="Create complete Recruiting Intelligence first. An incomplete result never becomes a meeting brief." />;
   const plan = state.intelligence.output.meeting_plan;
   return (
     <section className="surface meeting-surface" data-surface="meeting">
-      <p className="eyebrow amber">Meeting Plan</p><h1>Five minutes before meeting {candidate.recruit_name}.</h1><p className="surface-subhead">Guidance for a useful conversation - never a script.</p>
-      <section className="meeting-start panel"><span>01</span><div><p className="eyebrow green">Start Here</p><h2>{plan.start_here}</h2></div></section>
-      <div className="meeting-grid"><MeetingBlock number="02" tone="teal" title="Learn" items={plan.learn} /><MeetingBlock number="03" tone="violet" title="Listen For" items={plan.listen_for} /><MeetingBlock number="04" tone="amber" title="Your Watchout" text={plan.your_watchout} /><MeetingBlock number="05" tone="blue" title="Supported paths - if confirmed" items={plan.supported_paths_if_confirmed} /></div>
+      <header className="campaign-surface-title"><div><p className="campaign-kicker">Meeting & Brief · Layer 01</p><h1>Five minutes before the meeting, know what to learn.</h1><p className="surface-subhead">Preparation, not another report. One grounded starting point, clear listening cues, and one justified next step.</p></div><button className="solid-button inline" type="button" onClick={() => navigate('export')}>Save / Print</button></header>
+      <nav className="meeting-timeline" aria-label="Five-minute meeting preparation"><span><b>0:00</b> Start</span><i>→</i><span><b>1:00</b> Learn</span><i>→</i><span><b>2:00</b> Listen</span><i>→</i><span><b>3:30</b> Adapt</span><i>→</i><span><b>5:00</b> Next step</span></nav>
+      <section className="meeting-start panel"><span>01</span><div><p className="eyebrow green">Start Here</p><h2>{plan.start_here}</h2><p>Let the candidate define the constraint before discussing a solution.</p></div><button type="button" onClick={() => setProof({ title: 'Why this is the grounded start', body: plan.start_here })}>See source →</button></section>
+      <div className="meeting-grid"><MeetingBlock number="02" tone="teal" title="Learn" items={plan.learn} /><MeetingBlock number="03" tone="violet" title="Listen For" items={plan.listen_for} /><MeetingBlock number="04" tone="amber" title="Your adaptation" text={plan.your_watchout} /><MeetingBlock number="05" tone="blue" title="If fit is real" text={plan.next_step_if_fit_is_real} /></div>
       <section className="do-not-assume panel"><span>⊘</span><div><p className="eyebrow coral">Do Not Assume</p><h2>{plan.do_not_assume}</h2></div></section>
-      <section className="meeting-next panel"><span>→</span><div><p className="eyebrow blue">If fit is real</p><h2>{plan.next_step_if_fit_is_real}</h2></div></section>
-      <div className="meeting-footer"><small>Built from four separate sources · {state.intelligence.output.authentic_angles.length} supported paths · {state.intelligence.output.missing_evidence.length} open evidence gaps</small><button className="solid-button inline" type="button" onClick={() => navigate('export')}>Save or print this brief →</button></div>
+      <div className="meeting-footer"><small>Built from four separate sources · {state.intelligence.output.authentic_angles.length} supported paths · {state.intelligence.output.missing_evidence.length} open evidence gaps</small><button className="text-action" type="button" onClick={() => setProof({ title: 'Meeting evidence boundary', body: 'Recruit Reality, Recruiter Reality, Manager-Supplied Evidence, and Local Opportunity Authority remain separate. Unknowns and withheld claims travel into the brief.' })}>Open evidence boundary →</button></div>
+      {proof && <DetailDrawer eyebrow="Meeting & Brief · Layer 02" title={proof.title} onClose={() => setProof(null)} footer="Meeting guidance remains non-scripted and evidence-bounded."><p className="campaign-proof-copy">{proof.body}</p><dl className="campaign-proof-list"><div><dt>Supported paths</dt><dd>{plan.supported_paths_if_confirmed.join(' · ') || 'None yet'}</dd></div><div><dt>Do not assume</dt><dd>{plan.do_not_assume}</dd></div><div><dt>Open evidence</dt><dd>{state.intelligence.output.missing_evidence.join(' · ')}</dd></div></dl></DetailDrawer>}
     </section>
   );
 }
@@ -469,7 +547,7 @@ function ExportSurface({ state, candidate, request = api, demo = false }) {
   const [details, setDetails] = useState(false);
   if (!state.intelligence?.output) return <NotReadySurface title="There is no complete intelligence to export." copy="Save and print become available after a complete, evidence-checked view is ready." />;
   async function print() {
-    if (!SYNTHETIC || demo) await request({ action: 'RECORD_EXPORT', body: { candidate_id: candidate.candidate_id, mode, details_included: details } });
+    if (!SYNTHETIC && !demo) await request({ action: 'RECORD_EXPORT', body: { candidate_id: candidate.candidate_id, mode, details_included: details } });
     document.body.dataset.recruitingPrintMode = mode;
     window.print();
   }
