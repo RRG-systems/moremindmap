@@ -141,6 +141,7 @@ function ManagerExperience() {
   const location = useLocation();
   const navigate = useNavigate();
   const initialLocation = useRef({ pathname: location.pathname, search: location.search });
+  const homeHydrationStarted = useRef(false);
   const active = routeFor(location.pathname);
   const syntheticScenario = new URLSearchParams(location.search).get('scenario');
   const [state, setState] = useState(SYNTHETIC ? syntheticFixtureForScenario(syntheticScenario) : null);
@@ -153,7 +154,8 @@ function ManagerExperience() {
   const selected = selectRecruitingCandidate(state?.candidates, selectedCandidateId);
 
   useEffect(() => {
-    if (SYNTHETIC) return;
+    if (SYNTHETIC || homeHydrationStarted.current) return;
+    homeHydrationStarted.current = true;
     api({ view: 'home' }).then((payload) => {
       setState(payload);
       setSessionStatus('ready');
