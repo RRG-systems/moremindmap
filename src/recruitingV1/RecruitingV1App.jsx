@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { SYNTHETIC_RECRUITING_FIXTURE } from '../lib/recruitingV1/syntheticFixture.js';
 import { SYNTHETIC_REAL_ESTATE_SUBJECTS_V1 } from '../lab/subscriptionLivingBusinessRelationshipV1/createSyntheticRealEstateFounderSubjectsV1.js';
@@ -6,6 +6,10 @@ import { selectRecruitingCandidate } from '../lib/recruitingV1/candidateSelectio
 import RecruitingManagerSetup from './RecruitingManagerSetup.jsx';
 import RecruitingMasterControl from './RecruitingMasterControl.jsx';
 import { CandidateAnchor, DetailDrawer, JourneyMap, ProductHeader } from './RecruitingExperienceShell.jsx';
+import {
+  RECRUITING_MANAGER_WORKSPACE_PATH,
+  resolveAuthenticatedRecruitingLanding,
+} from '../lib/recruitingV1/landing.js';
 import './recruitingV1.css';
 
 const SYNTHETIC = import.meta.env.VITE_RECRUITING_V1_SYNTHETIC_REVIEW === 'true';
@@ -136,6 +140,7 @@ export default function RecruitingV1App() {
 function ManagerExperience() {
   const location = useLocation();
   const navigate = useNavigate();
+  const initialLocation = useRef({ pathname: location.pathname, search: location.search });
   const active = routeFor(location.pathname);
   const syntheticScenario = new URLSearchParams(location.search).get('scenario');
   const [state, setState] = useState(SYNTHETIC ? syntheticFixtureForScenario(syntheticScenario) : null);
@@ -152,9 +157,14 @@ function ManagerExperience() {
     api({ view: 'home' }).then((payload) => {
       setState(payload);
       setSessionStatus('ready');
+      const landingPath = resolveAuthenticatedRecruitingLanding({
+        ...initialLocation.current,
+        manager: payload.manager,
+      });
+      if (landingPath) navigate(landingPath, { replace: true });
       demoApi({ view: 'availability' }).then(() => setDemoAvailable(true)).catch(() => setDemoAvailable(false));
     }).catch(() => setSessionStatus('unauthorized'));
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (SYNTHETIC || !selected?.candidate_id || !['candidate', 'evidence', 'intelligence', 'meeting', 'export'].includes(active)) return;
@@ -205,6 +215,12 @@ function ManagerExperience() {
     window.scrollTo({ top: 0, behavior: 'auto' });
   }
 
+  function openAdminDestination(id) {
+    if (id === 'home') navigate(RECRUITING_MANAGER_WORKSPACE_PATH);
+    else navigateTo(id);
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
   function openCandidate(candidateId) {
     setSelectedCandidateId(candidateId);
     navigateTo('candidate');
@@ -250,7 +266,7 @@ function ManagerExperience() {
             ? <DarrenSyntheticDemoSurface state={demoState} setState={setDemoState} setError={setError} exit={() => navigateTo('home')} />
             : <LoadingState message="Opening Darren's synthetic demo…" />)}
           {active === 'master-control' && (state.manager.capabilities?.master_control
-            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} navigate={navigateTo} demoAvailable={demoAvailable} />
+            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} navigate={openAdminDestination} demoAvailable={demoAvailable} />
             : <NotReadySurface title="Master Control is not available for this account." copy="Only an approved Recruiting administrator can manage enterprise access and invitation allowances." />)}
       </main>
     </div>
