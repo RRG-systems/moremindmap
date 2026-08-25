@@ -35,7 +35,9 @@ import OpenAI from 'openai';
 
 import { validateBaProviderEgressPayload } from './privacyEgress.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
-import { BA_QUESTION_AUTHORITY, classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
+import { classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
+import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../../../src/lib/baVerticalCassettesV1/index.js';
+import { resolveAssessmentVerticalBinding } from '../../business-assessment/verticalBinding.js';
 
 const WHOLE_PERSON_DOMAINS = Object.freeze({
   operating_core: ['operations', 'capacity', 'goals', 'stage'],
@@ -98,19 +100,25 @@ function wholePersonClaims(source) {
   }));
 }
 
-export function buildGovernedRealProfileWbmInput({ source, requestedAt }) {
+export function buildGovernedRealProfileWbmInput({ source, requestedAt, cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY }) {
   const profileId = normalizeProfileId(source.profile_id);
   invariant(source.business_evidence?.profile_id === profileId, 'new_ba_real_profile_business_evidence_profile_mismatch');
   invariant(source.bos_authority?.profile_id === profileId, 'new_ba_real_profile_bos_profile_mismatch');
+  const verticalBinding = resolveAssessmentVerticalBinding(source.business_evidence, { registry: cassetteRegistry });
+  const cassette = cassetteRegistry.resolveVertical(verticalBinding.vertical_id);
+  const questionAuthority = cassette.evidence_contract.question_authority;
   const evidenceSufficiency = source.business_evidence?.evidence_sufficiency || classifyBaEvidenceSufficiency({
     answers: source.business_evidence?.answers,
     answerSha256: source.business_evidence?.answer_sha256,
+    questionAuthority: questionAuthority,
+    questionKeys: cassette.intake_contract.questions.map((question) => question.key),
+    requiredMissions: cassette.evidence_contract.sufficiency_missions,
   });
   const evidence = Object.entries(source.business_evidence.answers).map(([key, value], index) => deepFreeze({
     evidence_id: `BE-${String(index + 1).padStart(2, '0')}`,
     business_id: `business-${source.assessment_id}`,
     profile_id: profileId.toLowerCase(),
-    domain: BA_QUESTION_AUTHORITY[key].primary_domain,
+    domain: questionAuthority[key].primary_domain,
     evidence_class: 'OPERATOR_REPORTED',
     source_ref: `stored_business_assessment:inputs.answers.${key}`,
     observed_at: source.business_evidence.updated_at || source.business_evidence.created_at,
@@ -134,7 +142,7 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt }) {
       decision_impact: `Keep ${consequence.primary_domain} claims and affected customer surfaces explicitly bounded until governed evidence is supplied.`,
     }));
   }
-  const materialDomains = unique(Object.values(BA_QUESTION_AUTHORITY).flatMap((item) => [item.primary_domain, ...item.secondary_domains])).filter((domain) => WBM_DOMAINS.includes(domain));
+  const materialDomains = unique(Object.values(questionAuthority).flatMap((item) => [item.primary_domain, ...item.secondary_domains])).filter((domain) => WBM_DOMAINS.includes(domain));
   const claims = wholePersonClaims(source);
   return deepFreeze({
     requested_at: requestedAt,
@@ -143,7 +151,8 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt }) {
       assessment_id: source.assessment_id,
       assessment_version: source.business_evidence.version,
       owner_profile_id: profileId.toLowerCase(),
-      vertical: 'real_estate',
+      vertical: cassette.vertical_id,
+      vertical_binding: verticalBinding,
       business_model_identity: source.business_evidence.assessment_type,
       completion_state: 'COMPLETE',
       evidence_sufficiency_state: evidenceSufficiency.preserve_missingness ? 'EVIDENCE_SUFFICIENT_WITH_MISSINGNESS' : 'EVIDENCE_SUFFICIENT_COMPLETE',
@@ -197,14 +206,14 @@ function preflightRequestShape({ stage, mission, schema, schemaName, maxOutputTo
   return deepFreeze({ status: 'PASS', stage, model: shape.model, store: false, reasoning_effort: 'xhigh', strict_schema: true, request_shape_sha256: sha256Stable(shape), provider_safe_mission_sha256: sha256Stable(safeMission), prohibited_identity_findings: 0 });
 }
 
-export function createRealProfileGenerationContext({ source, displayName, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary() }) {
-  const input = buildGovernedRealProfileWbmInput({ source, requestedAt });
-  const context = assembleWholeBusinessContext(input, { library });
+export function createRealProfileGenerationContext({ source, displayName, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY }) {
+  const input = buildGovernedRealProfileWbmInput({ source, requestedAt, cassetteRegistry });
+  const context = assembleWholeBusinessContext(input, { library, cassetteRegistry });
   const mission = applyWbmFieldMissionOwnership(buildWholeBusinessSynthesisMission(context));
   const schema = wbmSchemaFromMission(mission);
   const identityTokens = providerIdentityTokens({ source, displayName });
   const providerPreflight = preflightRequestShape({ stage: 'whole_business_model_v1', mission, schema, schemaName: 'real_profile_whole_business_model_v1', maxOutputTokens: 60_000, identityTokens });
-  return deepFreeze({ input, context, mission, schema, identityTokens, library, providerPreflight });
+  return deepFreeze({ input, context, mission, schema, identityTokens, library, cassetteRegistry, providerPreflight });
 }
 
 function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_model_v1', backgroundResponseStore = null, generationIdentitySha256 = null, profileId = null }) {
@@ -260,8 +269,8 @@ async function callWithRetry(provider, args) {
   throw lastError;
 }
 
-export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null }) {
-  const generation = createRealProfileGenerationContext({ source, displayName, requestedAt, library });
+export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, backgroundResponseStore = null, generationIdentitySha256 = null }) {
+  const generation = createRealProfileGenerationContext({ source, displayName, requestedAt, library, cassetteRegistry });
   const { provider, streaming } = makeProvider({ apiKey, identityTokens: generation.identityTokens, backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
   const synthesisAdapter = createFrontierSynthesisAdapter({
     synthesize: async ({ mission }) => {
@@ -277,7 +286,7 @@ export async function generateRealProfileWbm({ source, displayName, apiKey, requ
       return assembleWbmCandidate(result.parsed, governedMission.context_packet);
     },
   });
-  const result = await buildWholeBusinessModel(generation.input, { synthesisAdapter, library });
+  const result = await buildWholeBusinessModel(generation.input, { synthesisAdapter, library, cassetteRegistry });
   return deepFreeze({
     result,
     preflight: generation.providerPreflight,

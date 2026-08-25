@@ -96,30 +96,34 @@ export const DEFAULT_AUTHORITY_SECTIONS = Object.freeze([
   'Five Futures State-Contribution Contract',
 ]);
 
-export const BASE_AUTHORITY_ROUTE = Object.freeze({
-  universal: Object.freeze(['UB-01', 'UB-02', 'UB-03', 'UB-12']),
-  real_estate: Object.freeze(['RE-01', 'RE-16']),
+export const UNIVERSAL_BASE_AUTHORITY_ROUTE = Object.freeze(['UB-01', 'UB-02', 'UB-03', 'UB-12']);
+
+export const UNIVERSAL_DOMAIN_AUTHORITY_EXPANSION = Object.freeze({
+  financial: Object.freeze(['UB-01', 'UB-02', 'UB-11', 'UB-12']),
+  demand: Object.freeze(['UB-04', 'UB-06']),
+  relationship: Object.freeze(['UB-04', 'UB-07']),
+  conversion: Object.freeze(['UB-06', 'UB-12']),
+  pipeline: Object.freeze(['UB-03', 'UB-06', 'UB-12']),
+  listing: Object.freeze(['UB-05', 'UB-06', 'UB-08']),
+  buyer: Object.freeze(['UB-05', 'UB-06', 'UB-08']),
+  transaction: Object.freeze(['UB-07', 'UB-08']),
+  operations: Object.freeze(['UB-03', 'UB-08', 'UB-09']),
+  accountability: Object.freeze(['UB-09', 'UB-12']),
+  capacity: Object.freeze(['UB-03', 'UB-08', 'UB-10']),
+  team: Object.freeze(['UB-08', 'UB-09', 'UB-10', 'UB-12']),
+  stage: Object.freeze(['UB-01', 'UB-10', 'UB-11']),
+  goals: Object.freeze(['UB-01', 'UB-03', 'UB-11']),
+  constraints: Object.freeze(['UB-03', 'UB-08', 'UB-12']),
+  market: Object.freeze(['UB-01', 'UB-11', 'UB-12']),
+  dynamic_context: Object.freeze(['UB-11', 'UB-12']),
 });
 
-export const DOMAIN_AUTHORITY_EXPANSION = Object.freeze({
-  financial: Object.freeze({ universal: ['UB-01', 'UB-02', 'UB-11', 'UB-12'], real_estate: ['RE-01', 'RE-16'] }),
-  demand: Object.freeze({ universal: ['UB-04', 'UB-06'], real_estate: ['RE-02', 'RE-03', 'RE-04', 'RE-05', 'RE-06'] }),
-  relationship: Object.freeze({ universal: ['UB-04', 'UB-07'], real_estate: ['RE-02', 'RE-03', 'RE-04'] }),
-  conversion: Object.freeze({ universal: ['UB-06', 'UB-12'], real_estate: ['RE-03', 'RE-06'] }),
-  pipeline: Object.freeze({ universal: ['UB-03', 'UB-06', 'UB-12'], real_estate: ['RE-06', 'RE-09', 'RE-10'] }),
-  listing: Object.freeze({ universal: ['UB-05', 'UB-06', 'UB-08'], real_estate: ['RE-09', 'RE-11'] }),
-  buyer: Object.freeze({ universal: ['UB-05', 'UB-06', 'UB-08'], real_estate: ['RE-10', 'RE-11'] }),
-  transaction: Object.freeze({ universal: ['UB-07', 'UB-08'], real_estate: ['RE-09', 'RE-10', 'RE-11'] }),
-  operations: Object.freeze({ universal: ['UB-03', 'UB-08', 'UB-09'], real_estate: ['RE-11', 'RE-12', 'RE-13'] }),
-  accountability: Object.freeze({ universal: ['UB-09', 'UB-12'], real_estate: ['RE-12', 'RE-14', 'RE-15'] }),
-  capacity: Object.freeze({ universal: ['UB-03', 'UB-08', 'UB-10'], real_estate: ['RE-11', 'RE-12', 'RE-13', 'RE-14'] }),
-  team: Object.freeze({ universal: ['UB-08', 'UB-09', 'UB-10', 'UB-12'], real_estate: ['RE-13', 'RE-14', 'RE-15', 'RE-16'] }),
-  stage: Object.freeze({ universal: ['UB-01', 'UB-10', 'UB-11'], real_estate: ['RE-12', 'RE-13', 'RE-16'] }),
-  goals: Object.freeze({ universal: ['UB-01', 'UB-03', 'UB-11'], real_estate: ['RE-13', 'RE-16'] }),
-  constraints: Object.freeze({ universal: ['UB-03', 'UB-08', 'UB-12'], real_estate: ['RE-06', 'RE-12', 'RE-13'] }),
-  market: Object.freeze({ universal: ['UB-01', 'UB-11', 'UB-12'], real_estate: ['RE-01', 'RE-05', 'RE-16'] }),
-  dynamic_context: Object.freeze({ universal: ['UB-11', 'UB-12'], real_estate: ['RE-01'] }),
-});
+// Backward-compatible names remain available to callers, but no vertical route
+// lives in the universal WBM module. A governed cassette registration supplies it.
+export const BASE_AUTHORITY_ROUTE = Object.freeze({ universal: UNIVERSAL_BASE_AUTHORITY_ROUTE });
+export const DOMAIN_AUTHORITY_EXPANSION = Object.freeze(Object.fromEntries(
+  Object.entries(UNIVERSAL_DOMAIN_AUTHORITY_EXPANSION).map(([domain, universal]) => [domain, Object.freeze({ universal })]),
+));
 
 export const HARD_BLOCK_CODES = Object.freeze([
   'WRONG_SUBJECT',

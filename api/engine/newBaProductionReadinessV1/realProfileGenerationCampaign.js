@@ -9,7 +9,7 @@ import {
   generateRealProfileWbm,
 } from './realProfileGeneration.js';
 import { buildRealProfileNewBaRealization } from './realProfileRealizationFactory.js';
-import { buildNewBaRealizationIdentity } from './realizationIdentity.js';
+import { buildNewBaRealizationIdentityV3 } from './realizationIdentity.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 
 const REFERENCE_PROFILES = Object.freeze({
@@ -237,7 +237,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       ? JSON.parse(await redis.lindex(failureLedgerKey, -1))
       : null;
     const compatibility = classifyNewBaCompatibility(source);
-    const identity = buildNewBaRealizationIdentity({
+    const identity = buildNewBaRealizationIdentityV3({
       profileId: profile.profile,
       assessmentId: source.assessment_id,
       evidenceSha256: source.business_evidence.evidence_sha256,
@@ -245,6 +245,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       bosFusionContractSha256: source.bos_authority.fusion_contract_sha256,
       bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
       compatibilityClass: compatibility.class,
+      verticalBinding: source.business_evidence.vertical_binding,
       providerModel: config.providerModel,
     });
     const current = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
@@ -377,7 +378,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     });
     const validation = validateCompleteNewBaRealization(artifact, { profileId: profile.profile, assessmentId: profile.assessment_id });
     const compatibility = classifyNewBaCompatibility(source);
-    const identity = buildNewBaRealizationIdentity({
+    const identity = buildNewBaRealizationIdentityV3({
       profileId: profile.profile,
       assessmentId: source.assessment_id,
       evidenceSha256: source.business_evidence.evidence_sha256,
@@ -385,6 +386,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       bosFusionContractSha256: source.bos_authority.fusion_contract_sha256,
       bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
       compatibilityClass: compatibility.class,
+      verticalBinding: source.business_evidence.vertical_binding,
       providerModel: config.providerModel,
     });
     return deepFreeze({ profile, source, checkpoints, providerAccounting, artifact, validation, compatibility, identity });

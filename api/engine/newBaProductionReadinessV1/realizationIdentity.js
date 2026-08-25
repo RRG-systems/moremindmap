@@ -2,6 +2,11 @@ import { NEW_BA_FROZEN_AUTHORITY } from './frozenAuthority.js';
 import { isSha256, normalizeAssessmentId, normalizeProfileId, sha256Stable } from './stable.js';
 
 export const NEW_BA_REALIZATION_IDENTITY_VERSION = 'new_ba_composite_realization_identity_v2';
+export const NEW_BA_REALIZATION_IDENTITY_VERSION_V3 = 'new_ba_composite_realization_identity_v3';
+export const SUPPORTED_NEW_BA_REALIZATION_IDENTITY_VERSIONS = Object.freeze([
+  NEW_BA_REALIZATION_IDENTITY_VERSION,
+  NEW_BA_REALIZATION_IDENTITY_VERSION_V3,
+]);
 
 export function buildNewBaRealizationIdentity({
   profileId,
@@ -51,9 +56,61 @@ export function buildNewBaRealizationIdentity({
   });
 }
 
+export function buildNewBaRealizationIdentityV3({ verticalBinding, ...input } = {}) {
+  const legacy = buildNewBaRealizationIdentity(input);
+  if (!verticalBinding || typeof verticalBinding !== 'object') throw new Error('new_ba_identity_vertical_binding_missing');
+  for (const field of [
+    'vertical_id', 'cassette_id', 'cassette_version', 'cassette_manifest_sha256', 'cassette_registry_sha256',
+    'intake_contract_id', 'intake_contract_version', 'intake_contract_sha256',
+    'evidence_contract_id', 'evidence_contract_version', 'evidence_contract_sha256',
+    'box_1_projection_contract_id', 'box_1_projection_contract_version',
+    'box_1_projection_adapter_id', 'box_1_projection_contract_sha256', 'binding_sha256',
+  ]) {
+    if (!verticalBinding[field]) throw new Error(`new_ba_identity_vertical_binding_field_missing:${field}`);
+  }
+  for (const field of [
+    'cassette_manifest_sha256', 'cassette_registry_sha256', 'intake_contract_sha256',
+    'evidence_contract_sha256', 'box_1_projection_contract_sha256', 'binding_sha256',
+  ]) {
+    if (!isSha256(verticalBinding[field])) throw new Error(`new_ba_identity_vertical_binding_hash_invalid:${field}`);
+  }
+  const { cassette_version: ignoredLegacyCassetteVersion, ...legacyComponents } = legacy.components;
+  void ignoredLegacyCassetteVersion;
+  const components = Object.freeze({
+    ...legacyComponents,
+    vertical_id: verticalBinding.vertical_id,
+    cassette_id: verticalBinding.cassette_id,
+    cassette_version: verticalBinding.cassette_version,
+    cassette_manifest_sha256: verticalBinding.cassette_manifest_sha256,
+    cassette_registry_sha256: verticalBinding.cassette_registry_sha256,
+    intake_contract_id: verticalBinding.intake_contract_id,
+    intake_contract_version: verticalBinding.intake_contract_version,
+    intake_contract_sha256: verticalBinding.intake_contract_sha256,
+    evidence_contract_id: verticalBinding.evidence_contract_id,
+    evidence_contract_version: verticalBinding.evidence_contract_version,
+    evidence_contract_sha256: verticalBinding.evidence_contract_sha256,
+    box_1_projection_contract_id: verticalBinding.box_1_projection_contract_id,
+    box_1_projection_contract_version: verticalBinding.box_1_projection_contract_version,
+    box_1_projection_adapter_id: verticalBinding.box_1_projection_adapter_id,
+    box_1_projection_contract_sha256: verticalBinding.box_1_projection_contract_sha256,
+    vertical_binding_sha256: verticalBinding.binding_sha256,
+  });
+  const sha256 = sha256Stable(components);
+  return Object.freeze({
+    version: NEW_BA_REALIZATION_IDENTITY_VERSION_V3,
+    realization_id: `new-ba:${components.profile_id}:${components.assessment_id}:${sha256}`,
+    sha256,
+    components,
+  });
+}
+
+export function isSupportedNewBaRealizationIdentityVersion(version) {
+  return SUPPORTED_NEW_BA_REALIZATION_IDENTITY_VERSIONS.includes(version);
+}
+
 export function sameNewBaRealizationIdentity(left, right) {
-  return left?.version === NEW_BA_REALIZATION_IDENTITY_VERSION
-    && right?.version === NEW_BA_REALIZATION_IDENTITY_VERSION
+  return isSupportedNewBaRealizationIdentityVersion(left?.version)
+    && left?.version === right?.version
     && left.sha256 === right.sha256
     && left.realization_id === right.realization_id;
 }

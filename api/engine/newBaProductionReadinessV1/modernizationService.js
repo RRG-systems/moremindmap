@@ -3,7 +3,7 @@ import { classifyNewBaCompatibility } from './compatibility.js';
 import { validateCompleteNewBaRealization } from './completeness.js';
 import { createNewBaDiagnostics } from './diagnostics.js';
 import { buildLaunchSafeNewBaEnvelope } from './launchSafeRealizationStore.js';
-import { buildNewBaRealizationIdentity } from './realizationIdentity.js';
+import { buildNewBaRealizationIdentityV3 } from './realizationIdentity.js';
 import { buildCustomerSafePresentationViewModel } from '../../../src/lib/baProgressiveDisclosureV1/customerPresentationSanitizer.js';
 import { classifyCompatiblePriorRealization } from './compatibilitySelection.js';
 
@@ -22,6 +22,10 @@ function publicArtifact(envelope, fusionValidated, customerActive) {
       projection_version: envelope.artifact.authority.projection_version,
       customer_activation: customerActive,
       bos_ba_fusion_gate: fusionValidated ? (customerActive ? 'VALIDATED_COMPATIBLE_CUSTOMER_ACTIVE' : 'VALIDATED_PRIVATE_ACTIVATION_OFF') : 'CLOSED',
+      vertical_state: Object.freeze({
+        vertical_id: envelope.realization_identity.components.vertical_id || 'real_estate',
+        label: envelope.artifact.customer_view_model?.vertical?.label || 'Real Estate',
+      }),
     }),
   });
 }
@@ -44,7 +48,7 @@ export function createNewBaModernizationService({
     const compatibility = classifyNewBaCompatibility(source);
     diagnostics.record('compatibility_classified', { profile_id: profileId, compatibility_class: compatibility.class });
     if (!compatibility.automatic_rebuild) throw new Error(`new_ba_modernization_requires_evidence_or_review:${compatibility.class}`);
-    const identity = buildNewBaRealizationIdentity({
+    const identity = buildNewBaRealizationIdentityV3({
       profileId,
       assessmentId: source.assessment_id,
       evidenceSha256: source.business_evidence.evidence_sha256,
@@ -53,6 +57,7 @@ export function createNewBaModernizationService({
       bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
       compatibilityClass: compatibility.class,
       providerModel: config.providerModel,
+      verticalBinding: source.business_evidence.vertical_binding,
     });
     return Object.freeze({ source, compatibility, identity });
   }
@@ -75,6 +80,8 @@ export function createNewBaModernizationService({
         store: false,
         production_customer_active: config.customerActive,
         fusion_gate: config.fusionValidated ? (config.customerActive ? 'VALIDATED_COMPATIBLE_CUSTOMER_ACTIVE' : 'VALIDATED_PRIVATE_ACTIVATION_OFF') : 'CLOSED',
+        vertical_id: envelope.realization_identity.components.vertical_id || 'real_estate',
+        cassette_id: envelope.realization_identity.components.cassette_id || envelope.realization_identity.components.cassette_version,
       }),
     });
   }

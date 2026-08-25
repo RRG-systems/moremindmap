@@ -1,6 +1,7 @@
 import { EPISTEMIC_CLASSES, WBM_DOMAINS } from './constants.js';
 import { canonicalHash, isSha256, unique } from './canonical.js';
 import { integrity } from './errors.js';
+import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../baVerticalCassettesV1/index.js';
 
 function isString(value) {
   return typeof value === 'string' && value.trim().length > 0;
@@ -68,13 +69,33 @@ function validateTeam(team, businessId, permittedProfileIds) {
   }
 }
 
-export function validateWholeBusinessInputs(input) {
+export function validateWholeBusinessInputs(input, { cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY } = {}) {
   integrity(input && typeof input === 'object', 'MALFORMED_STATE', 'Whole-Business inputs must be an object');
   const identity = input.assessment_identity;
   integrity(isString(identity?.business_id), 'MALFORMED_STATE', 'assessment_identity.business_id is required');
   integrity(isString(identity?.assessment_id), 'MALFORMED_STATE', 'assessment_identity.assessment_id is required');
   integrity(isString(identity?.owner_profile_id), 'MALFORMED_STATE', 'assessment_identity.owner_profile_id is required');
-  integrity(identity?.vertical === 'real_estate', 'INVALID_CASSETTE', 'WBM V1 supports the frozen real_estate cassette only');
+  let registration;
+  try {
+    registration = cassetteRegistry.resolveVertical(identity?.vertical);
+  } catch {
+    integrity(false, 'INVALID_CASSETTE', `No governed cassette registration exists for ${identity?.vertical || 'unknown'}`);
+  }
+  const binding = identity?.vertical_binding;
+  if (binding) {
+    integrity(binding.vertical_id === registration.vertical_id, 'INVALID_CASSETTE', 'WBM vertical binding does not match the registered vertical');
+    integrity(binding.cassette_id === registration.cassette_id, 'INVALID_CASSETTE', 'WBM cassette identity does not match the registered cassette');
+    integrity(binding.cassette_version === registration.cassette_version, 'INVALID_CASSETTE', 'WBM cassette version does not match the registered cassette');
+    integrity(binding.cassette_manifest_sha256 === registration.cassette_manifest_sha256, 'BROKEN_AUTHORITY_HASH', 'WBM cassette manifest hash does not match the registered cassette');
+    integrity(binding.cassette_registry_sha256 === registration.cassette_registry_sha256, 'BROKEN_AUTHORITY_HASH', 'WBM cassette registry hash does not match the registered cassette');
+  } else {
+    integrity(
+      identity?.assessment_version === registration.compatibility?.assessment_version
+        && registration.compatibility?.legacy_assessment_types?.includes(identity?.business_model_identity),
+      'INVALID_CASSETTE',
+      'WBM input without an explicit cassette binding is not an exact legacy-compatible assessment',
+    );
+  }
   integrity(identity?.completion_state === 'COMPLETE', 'MALFORMED_STATE', 'Assessment must be complete');
   assertTimestamp(identity.assessed_at, 'assessment_identity.assessed_at');
   validateWholePerson(input.frozen_whole_person_authority, identity.owner_profile_id);
@@ -102,6 +123,8 @@ export function validateWholeBusinessInputs(input) {
     owner_profile_id: identity.owner_profile_id,
     evidence_ids: [...evidenceIds],
     evidence_domains: evidenceDomains,
+    vertical_id: registration.vertical_id,
+    cassette_id: registration.cassette_id,
     input_hash: canonicalHash(input),
   });
 }

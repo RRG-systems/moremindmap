@@ -1,7 +1,7 @@
 import { validateCompleteNewBaRealization } from './completeness.js';
 import { NEW_BA_FROZEN_AUTHORITY } from './frozenAuthority.js';
 import { assembleBosBaFusionProof } from './fusionAssembler.js';
-import { createRealProfileProjectionV2 } from './realProfileProjectionAdapter.js';
+import { projectNewBaBox1ThroughCassette } from './projectionDispatch.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 import { extractAssessmentMetricSources } from '../../../src/lib/businessEngine/contractDisplaySemantics.js';
 
@@ -455,6 +455,10 @@ function buildLineage({ source, wbm, futures, oneMove, projection }) {
     profile_id: normalizeProfileId(source.profile_id),
     assessment_id: source.assessment_id,
     business_evidence_sha256: source.business_evidence.evidence_sha256,
+    vertical_binding_sha256: source.business_evidence.vertical_binding.binding_sha256,
+    vertical_id: source.business_evidence.vertical_binding.vertical_id,
+    cassette_id: source.business_evidence.vertical_binding.cassette_id,
+    cassette_version: source.business_evidence.vertical_binding.cassette_version,
     bos_authority_sha256: source.bos_authority.sha256,
     bos_fusion_contract_sha256: source.bos_authority.fusion_contract_sha256,
     whole_business_model_sha256: wbm.state_hash,
@@ -472,12 +476,14 @@ export function buildRealProfileNewBaRealization({ source, displayName, wbm, fut
   invariant(providerAccounting?.store === false, 'new_ba_real_profile_store_false_required');
   invariant(Number(providerAccounting?.accepted_calls) === 3, 'new_ba_real_profile_three_accepted_stages_required');
   const sourceViewModel = makeSourceViewModel({ source, displayName, wbm, futures, oneMove });
-  const projection = createRealProfileProjectionV2({
+  const verticalBinding = source.business_evidence.vertical_binding;
+  const projection = projectNewBaBox1ThroughCassette({
+    verticalBinding,
     sourceViewModel,
     bindings: {
       subjectKey: normalizeProfileId(source.profile_id),
       modelDate: source.business_evidence.updated_at || source.business_evidence.created_at,
-      verticalAuthorityRefs: ['FROZEN_UNIVERSAL_BUSINESS_AUTHORITY_V1', 'FROZEN_REAL_ESTATE_VERTICAL_AUTHORITY_V1'],
+      verticalAuthorityRefs: [verticalBinding.cassette_id],
       sourceAuthority: 'REAL_PROFILE_WBM_V1_FIVE_FUTURES_V2_ONE_MOVE_V2',
     },
   });
@@ -497,6 +503,7 @@ export function buildRealProfileNewBaRealization({ source, displayName, wbm, fut
     lineage,
     customer_view_model: projection.customerViewModel,
     internal_trace: projection.internalTrace,
+    cassette_binding: projection.cassette_projection,
     provider_accounting: deepFreeze({ ...providerAccounting, model: 'gpt-5.6-sol', store: false, raw_request_persisted: false, raw_response_persisted: false }),
   };
   const artifact = deepFreeze({ ...baseArtifact, fusion: assembleBosBaFusionProof({ source, artifact: baseArtifact }) });

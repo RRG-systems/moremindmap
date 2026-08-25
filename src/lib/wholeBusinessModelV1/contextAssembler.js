@@ -1,14 +1,15 @@
 import {
-  BASE_AUTHORITY_ROUTE,
   DEFAULT_AUTHORITY_SECTIONS,
   DEFAULT_CONTEXT_BUDGET,
-  DOMAIN_AUTHORITY_EXPANSION,
+  UNIVERSAL_BASE_AUTHORITY_ROUTE,
+  UNIVERSAL_DOMAIN_AUTHORITY_EXPANSION,
   WBM_ROUTER_VERSION,
 } from './constants.js';
 import { canonicalHash, unique } from './canonical.js';
 import { getAuthority, loadFrozenAuthorityLibrary, selectAuthoritySections } from './authorityLibrary.js';
 import { integrity } from './errors.js';
 import { validateWholeBusinessInputs } from './inputContracts.js';
+import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../baVerticalCassettesV1/index.js';
 
 function materialDomains(input) {
   return unique([
@@ -16,16 +17,15 @@ function materialDomains(input) {
     ...input.missing_evidence.map((item) => item.domain),
     ...input.contradictions.flatMap((item) => item.domains || []),
     ...(input.context_hints?.material_domains || []),
-  ]).filter((domain) => DOMAIN_AUTHORITY_EXPANSION[domain]);
+  ]).filter((domain) => UNIVERSAL_DOMAIN_AUTHORITY_EXPANSION[domain]);
 }
 
-function selectAuthorityIds(domains, budget) {
-  const universal = [...BASE_AUTHORITY_ROUTE.universal];
-  const vertical = [...BASE_AUTHORITY_ROUTE.real_estate];
+function selectAuthorityIds(domains, budget, registration) {
+  const universal = [...UNIVERSAL_BASE_AUTHORITY_ROUTE];
+  const vertical = [...registration.wbm_authority.route.base];
   for (const domain of domains) {
-    const route = DOMAIN_AUTHORITY_EXPANSION[domain];
-    universal.push(...route.universal);
-    vertical.push(...route.real_estate);
+    universal.push(...UNIVERSAL_DOMAIN_AUTHORITY_EXPANSION[domain]);
+    vertical.push(...(registration.wbm_authority.route.domains[domain] || []));
   }
   return {
     universal: unique(universal).slice(0, budget.universal_authorities),
@@ -100,13 +100,20 @@ function assembleAuthorityPackets(library, authorityIds, budget) {
 }
 
 export function assembleWholeBusinessContext(input, options = {}) {
-  const inputReceipt = validateWholeBusinessInputs(input);
+  const cassetteRegistry = options.cassetteRegistry || PRODUCTION_BA_CASSETTE_REGISTRY;
+  const inputReceipt = validateWholeBusinessInputs(input, { cassetteRegistry });
+  const registration = cassetteRegistry.resolveVertical(input.assessment_identity.vertical);
   const library = options.library || loadFrozenAuthorityLibrary(options);
   const budget = { ...DEFAULT_CONTEXT_BUDGET, ...(options.contextBudget || {}) };
   const domains = materialDomains(input);
-  const ids = selectAuthorityIds(domains, budget);
+  const ids = selectAuthorityIds(domains, budget, registration);
   integrity(ids.universal.length < 12, 'MALFORMED_STATE', 'Selective assembly may not load all 12 Universal Bibles');
-  integrity(ids.vertical.length < 16, 'MALFORMED_STATE', 'Selective assembly may not load all 16 Real Estate Bibles');
+  const verticalBibles = library.vertical_bibles || library.real_estate_bibles || [];
+  const verticalInteractions = library.vertical_interactions || library.real_estate_interactions || { interactions: [] };
+  integrity(verticalBibles.length > 0, 'INVALID_CASSETTE', `No authority library is bound for ${registration.cassette_id}`);
+  if (verticalBibles.length === 16) {
+    integrity(ids.vertical.length < 16, 'MALFORMED_STATE', 'Selective assembly may not load all 16 registered vertical Bibles');
+  }
   const selectedIds = [...ids.universal, ...ids.vertical];
   const team = selectTeamContext(input, domains, budget);
   const wholePersonClaims = selectWholePersonClaims(input, domains, budget);
@@ -123,7 +130,7 @@ export function assembleWholeBusinessContext(input, options = {}) {
     selected_vertical_authorities: assembleAuthorityPackets(library, ids.vertical, budget),
     selected_cross_authority_interactions: [
       ...library.universal_interactions.interactions,
-      ...library.real_estate_interactions.interactions,
+      ...verticalInteractions.interactions,
     ].filter((interaction) => interactionIsRelevant(interaction, selectedIds)),
     frozen_whole_person_authority: {
       profile_id: input.frozen_whole_person_authority.profile_id,
@@ -156,6 +163,10 @@ export function assembleWholeBusinessContext(input, options = {}) {
   };
   packet.selection_receipt = {
     router_version: WBM_ROUTER_VERSION,
+    cassette_id: registration.cassette_id,
+    cassette_version: registration.cassette_version,
+    cassette_manifest_sha256: registration.cassette_manifest_sha256,
+    cassette_registry_sha256: registration.cassette_registry_sha256,
     frozen_library_manifest_id: library.freeze_manifest.manifest_id,
     frozen_library_version: library.freeze_manifest.version,
     frozen_library_verdict: library.freeze_manifest.verdict,
@@ -177,7 +188,7 @@ export function assembleWholeBusinessContext(input, options = {}) {
     dynamic_research_refs: dynamic.map((item) => item.dynamic_id),
     rsl_refs: [],
     exclusions: [
-      ...[...library.universal_bibles, ...library.real_estate_bibles]
+      ...[...library.universal_bibles, ...verticalBibles]
         .filter((authority) => !selectedIds.includes(authority.authority_id))
         .map((authority) => ({ authority_id: authority.authority_id, reason: 'NOT_SELECTED_FOR_CURRENT_EVIDENCE_DOMAINS' })),
       ...team.excluded,

@@ -7,6 +7,8 @@ import {
   canonicalHash,
   sha256,
 } from '../../src/lib/wholeBusinessModelV1/index.js';
+import { buildCustomerConfirmedVerticalBinding } from '../../api/business-assessment/verticalBinding.js';
+import { buildCustomerConfirmedSelection, REAL_ESTATE_CASSETTE_REGISTRATION } from '../../src/lib/baVerticalCassettesV1/index.js';
 
 const CASES = [
   ['new-agent-tiny-database', 'new agent / tiny database', ['relationship', 'demand', 'stage'], 'demand', 'A tiny qualified relationship base constrains opportunity creation before conversion skill can be observed.', ['Small known-person pool limits qualified conversations.', 'Low conversation volume produces thin pipeline evidence.', 'Thin pipeline prevents stable transaction learning.'], 'STABLE', false, true, false, false],
@@ -85,6 +87,10 @@ export function buildSyntheticWholeBusinessInput(caseDefinition) {
       assessment_version: 'synthetic-ba-v1',
       owner_profile_id: ownerProfileId,
       vertical: 'real_estate',
+      vertical_binding: buildCustomerConfirmedVerticalBinding({
+        selection: buildCustomerConfirmedSelection(REAL_ESTATE_CASSETTE_REGISTRATION),
+        selectedAt: '2026-08-12T11:59:00.000Z',
+      }),
       business_model_identity: 'residential-real-estate-agent-or-team',
       completion_state: 'COMPLETE',
       assessed_at: '2026-08-12T12:00:00.000Z',

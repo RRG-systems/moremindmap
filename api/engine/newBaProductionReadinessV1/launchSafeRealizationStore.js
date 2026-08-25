@@ -1,5 +1,5 @@
 import { validateCompleteNewBaRealization } from './completeness.js';
-import { NEW_BA_REALIZATION_IDENTITY_VERSION, sameNewBaRealizationIdentity } from './realizationIdentity.js';
+import { isSupportedNewBaRealizationIdentityVersion, sameNewBaRealizationIdentity } from './realizationIdentity.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 
 export const NEW_BA_LAUNCH_SAFE_ENVELOPE_VERSION = 'new_ba_launch_safe_realization_envelope_v1';
@@ -12,7 +12,7 @@ function validateNamespace(namespace) {
 
 export function buildLaunchSafeNewBaEnvelope({ profileId, realizationIdentity, artifact, compatibility, providerAccounting, createdAt = new Date().toISOString() } = {}) {
   const profile = normalizeProfileId(profileId);
-  if (realizationIdentity?.version !== NEW_BA_REALIZATION_IDENTITY_VERSION) throw new Error('new_ba_store_identity_version_invalid');
+  if (!isSupportedNewBaRealizationIdentityVersion(realizationIdentity?.version)) throw new Error('new_ba_store_identity_version_invalid');
   if (realizationIdentity.components?.profile_id !== profile) throw new Error('new_ba_store_identity_profile_mismatch');
   if (!['A', 'B'].includes(compatibility?.class)) throw new Error('new_ba_store_incompatible_artifact');
   const validation = validateCompleteNewBaRealization(artifact, { profileId: profile, assessmentId: realizationIdentity.components.assessment_id });

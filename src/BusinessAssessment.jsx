@@ -15,111 +15,17 @@ import {
   resolveOrdinaryBaEntry,
 } from './lib/customerEntry/ordinaryCustomerEntryRouting.js';
 import { startStripeCheckout } from './lib/stripeCheckout.js';
+import {
+  BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
+  BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
+  PRODUCTION_BA_CASSETTE_REGISTRY,
+  REAL_ESTATE_INTAKE_QUESTIONS,
+  buildCustomerConfirmedSelection,
+  suggestVerticalFromIndustry,
+} from './lib/baVerticalCassettesV1/index.js';
 
-const INDUSTRIES = [
-  { label: 'Real Estate', disabled: false },
-  { label: 'Mortgage (Beta Coming Soon)', disabled: true },
-  { label: 'Automotive (Beta Coming Soon)', disabled: true },
-  { label: 'Insurance (Beta Coming Soon)', disabled: true },
-  { label: 'Financial Services (Beta Coming Soon)', disabled: true },
-  { label: 'Professional Services (Beta Coming Soon)', disabled: true },
-  { label: 'Other (Beta Coming Soon)', disabled: true }
-];
-
-const QUESTIONS = [
-  {
-    key: 'q1',
-    purpose: 'Business Awareness Reality',
-    title: 'Do you currently have enough leads and opportunities to achieve your goals?',
-    prompt: 'Why or why not?\n\nBe specific.',
-    rows: 8
-  },
-  {
-    key: 'q2',
-    purpose: 'Desired Future',
-    title: 'What are your goals over the next:',
-    prompt:
-      '• 12 months\n• 24 months\n• 36 months\n\nAnd where would you like your business and life to be in 5–7 years?\n\nBe specific.',
-    rows: 10
-  },
-  {
-    key: 'q3',
-    purpose: 'Relationship Asset Reality',
-    title: 'How many people are currently in your database?',
-    prompt:
-      'Of those, approximately how many are true relationships?\n\n(True relationships = people who know you and think of you when it is time to buy, sell, or refer.)',
-    rows: 8
-  },
-  {
-    key: 'q4',
-    purpose: 'Business Generation Behavior',
-    title: 'If I asked you to generate business today and meet three new people before the day ended, what would you do?',
-    prompt: 'Be specific.',
-    rows: 8
-  },
-  {
-    key: 'q5',
-    purpose: 'Database Intelligence',
-    title: 'Describe your database and follow-up system.',
-    prompt:
-      'Include:\n\n• CRM\n• database size\n• database organization\n• A+, A, B, C, D segmentation if applicable\n• vendor database if applicable\n• frequency of contact\n• follow-up process\n• strengths\n• weaknesses',
-    rows: 12
-  },
-  {
-    key: 'q6',
-    purpose: 'Lead Generation Reality',
-    title: 'What lead generation activities are you willing to do consistently?',
-    prompt: 'What lead generation activities are you unwilling to do?\n\nWhy?',
-    rows: 9
-  },
-  {
-    key: 'q7',
-    purpose: 'Accountability Reality',
-    title: 'Who is holding you accountable?',
-    prompt:
-      'Describe:\n\n• coach\n• manager\n• team leader\n• spouse\n• accountability partner\n• nobody\n\nHow effective is that accountability?',
-    rows: 11
-  },
-  {
-    key: 'q8',
-    purpose: 'Systems Reality',
-    title: 'Describe your business systems.',
-    prompt:
-      'Include:\n\n• listing process\n• buyer process\n• lead conversion\n• transaction management\n• recruiting process if applicable\n\nWhat works?\n\nWhat is missing?',
-    rows: 12
-  },
-  {
-    key: 'q9',
-    purpose: 'Financial Reality',
-    title: 'Provide as much business and financial information as you are willing to share.',
-    prompt:
-      'Examples:\n\n• units closed\n• sales volume\n• average sales price\n• revenue\n• GCI\n• expenses\n• profit\n• marketing spend\n• P&L summaries\n• annual results\n• quarterly results\n• business notes\n• financial observations\n\nThe more information provided, the higher the confidence of the analysis.',
-    rows: 18
-  },
-  {
-    key: 'q10',
-    purpose: 'Constraint Reality',
-    title: 'What do you believe is currently limiting your growth?',
-    prompt:
-      'What is the biggest problem in the business today?\n\nIf I could wave a magic wand and solve one problem immediately, what would it be?',
-    rows: 10
-  },
-  {
-    key: 'q11',
-    purpose: 'Team Reality',
-    title: 'If you have a team:',
-    prompt:
-      'Enter team member Profile IDs.\n\nInclude:\n\n• role\n• production level\n• brief notes if helpful\n\nIf you do not have a team, leave blank.',
-    rows: 12
-  },
-  {
-    key: 'q12',
-    purpose: 'Scaling Reality',
-    title: 'Imagine your goals were tripled overnight.',
-    prompt: 'What would have to change for that outcome to become possible?\n\nWhat is the first thing that breaks?',
-    rows: 10
-  }
-];
+const QUESTIONS = REAL_ESTATE_INTAKE_QUESTIONS;
+const SUPPORTED_VERTICALS = PRODUCTION_BA_CASSETTE_REGISTRY.listSupported();
 
 const INITIAL_ANSWERS = QUESTIONS.reduce((acc, question) => {
   acc[question.key] = '';
@@ -138,7 +44,10 @@ function createProfileGateState() {
     input: '',
     status: 'idle',
     profile: null,
-    error: ''
+    error: '',
+    verticalSelection: createVerticalSelectionState(),
+    businessAssessmentStatus: 'idle',
+    businessAssessmentId: ''
   };
 }
 
@@ -148,8 +57,19 @@ function createMonthlyProfileGateState() {
     status: 'idle',
     profile: null,
     error: '',
+    verticalSelection: createVerticalSelectionState(),
     businessAssessmentStatus: 'idle',
     businessAssessmentId: ''
+  };
+}
+
+function createVerticalSelectionState() {
+  return {
+    selectedVerticalId: '',
+    confirmedSelection: null,
+    suggestionStatus: 'NONE',
+    suggestionLabel: '',
+    message: BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
   };
 }
 
@@ -259,10 +179,23 @@ function extractProfileResult(payload, profileId) {
     answers?.full_name?.answer_text ||
     'Profile Found';
 
+  const organization =
+    canonical?.metadata?.organization ||
+    canonical?.profile_metadata?.organization ||
+    canonical?.organization ||
+    dossier?.metadata?.organization ||
+    {};
+  const industry =
+    organization?.industry ||
+    canonical?.industry ||
+    canonical?.business_industry ||
+    '';
+
   return {
     id: canonical?.profile_id || payload?.profile_id || profileId,
     name,
-    profileType: deriveProfileType(canonical)
+    profileType: deriveProfileType(canonical),
+    industry: typeof industry === 'string' ? industry.trim() : '',
   };
 }
 
@@ -290,13 +223,13 @@ function PremiumPreviewHeader({ personName }) {
 export default function BusinessAssessment() {
   const [searchParams] = useSearchParams();
   const recruitingMode = searchParams.get('recruiting') === '1';
-  const industry = 'Real Estate';
   const [promoCode, setPromoCode] = useState('');
   const [promoState, setPromoState] = useState({ status: 'idle', message: '' });
   const [retrieveId, setRetrieveId] = useState('');
   const [checkoutProfileGate, setCheckoutProfileGate] = useState(createProfileGateState);
   const [monthlyProfileGate, setMonthlyProfileGate] = useState(createMonthlyProfileGateState);
   const [devCodeProfileGate, setDevCodeProfileGate] = useState(createProfileGateState);
+  const [recruitingProfileGate, setRecruitingProfileGate] = useState(createProfileGateState);
   const [assessmentProfile, setAssessmentProfile] = useState(null);
   const [flowStarted, setFlowStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -314,7 +247,8 @@ export default function BusinessAssessment() {
   });
 
   const currentQuestion = QUESTIONS[currentQuestionIndex];
-  const canSubmit = Boolean(normalizeOrdinaryCustomerProfileId(assessmentProfile?.id)) && industry === 'Real Estate';
+  const canSubmit = Boolean(normalizeOrdinaryCustomerProfileId(assessmentProfile?.id))
+    && Boolean(assessmentProfile?.verticalSelection);
   const retrievedAssessment = retrieveState.result?.assessment || null;
   const retrievedBriefing = retrievedAssessment?.output?.executive_diagnostic_briefing_v1 || null;
   const retrievedOutput = retrievedAssessment?.output || {};
@@ -358,8 +292,31 @@ export default function BusinessAssessment() {
   const devCodeProfileValidated = Boolean(devCodeProfileGate.profile?.id);
   const devCodeAccepted = promoState.status === 'valid' && devCodeProfileValidated;
 
+  function verticalStateForProfile(profile) {
+    const suggestion = suggestVerticalFromIndustry(profile?.industry);
+    if (suggestion.status === 'SUPPORTED_SUGGESTION') {
+      return {
+        ...createVerticalSelectionState(),
+        selectedVerticalId: suggestion.vertical_id,
+        suggestionStatus: suggestion.status,
+        suggestionLabel: suggestion.label,
+        message: `${suggestion.label} was suggested from your Profile. Confirm it before continuing.`,
+      };
+    }
+    if (suggestion.status === 'UNSUPPORTED_SUGGESTION') {
+      return {
+        ...createVerticalSelectionState(),
+        suggestionStatus: suggestion.status,
+        suggestionLabel: suggestion.label,
+        message: BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
+      };
+    }
+    return createVerticalSelectionState();
+  }
+
   useEffect(() => {
     if (!recruitingMode) return;
+    setRecruitingProfileGate((current) => ({ ...current, status: 'validating', error: '' }));
     fetch('/api/recruiting/runtime?view=invite_session', {
       credentials: 'same-origin',
       cache: 'no-store',
@@ -368,14 +325,18 @@ export default function BusinessAssessment() {
       if (!response.ok || payload?.ok !== true || !payload?.relationship?.bos_profile_id) {
         throw new Error('Complete your invited MORE Profile before beginning the optional Business Assessment.');
       }
-      setAssessmentProfile({
-        id: payload.relationship.bos_profile_id,
-        name: 'Invited recruit',
-        profileType: 'Verified MORE Profile',
+      setRecruitingProfileGate({
+        ...createProfileGateState(),
+        status: 'valid',
+        profile: {
+          id: payload.relationship.bos_profile_id,
+          name: 'Invited recruit',
+          profileType: 'Verified MORE Profile',
+          industry: '',
+        },
       });
-      setFlowStarted(true);
-      setCurrentQuestionIndex(0);
     }).catch((error) => {
+      setRecruitingProfileGate((current) => ({ ...current, status: 'error', error: error.message }));
       setSubmitState({ status: 'error', error: error.message, result: null });
     });
   }, [recruitingMode]);
@@ -398,9 +359,9 @@ export default function BusinessAssessment() {
         status: 'error',
         profile: null,
         error: 'Enter your MORE MindMap Profile ID to continue.',
-        ...(gateType === 'monthly'
-          ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
-          : {})
+        verticalSelection: createVerticalSelectionState(),
+        businessAssessmentStatus: 'idle',
+        businessAssessmentId: '',
       });
       return;
     }
@@ -409,9 +370,9 @@ export default function BusinessAssessment() {
       status: 'validating',
       profile: null,
       error: '',
-      ...(gateType === 'monthly'
-        ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
-        : {})
+      verticalSelection: createVerticalSelectionState(),
+      businessAssessmentStatus: 'idle',
+      businessAssessmentId: '',
     });
 
     try {
@@ -429,14 +390,15 @@ export default function BusinessAssessment() {
             gateType === 'monthly'
               ? 'Profile not found. First complete your Behavior Operating System profile, then take the Business Assessment.'
               : 'First you must complete your Behavior Operating System profile to unlock this action.',
-          ...(gateType === 'monthly'
-            ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
-            : {})
+          verticalSelection: createVerticalSelectionState(),
+          businessAssessmentStatus: 'idle',
+          businessAssessmentId: '',
         });
         return;
       }
 
       const profile = extractProfileResult(payload, normalizedGateProfileId);
+      const verticalSelection = verticalStateForProfile(profile);
 
       if (gateType === 'monthly') {
         setMonthlyProfileGate((current) => ({
@@ -444,6 +406,7 @@ export default function BusinessAssessment() {
           status: 'valid',
           profile,
           error: '',
+          verticalSelection,
           businessAssessmentStatus: 'checking',
           businessAssessmentId: ''
         }));
@@ -459,16 +422,24 @@ export default function BusinessAssessment() {
       setProfileGateState(gateType, {
         status: 'valid',
         profile,
-        error: ''
+        error: '',
+        verticalSelection,
+        businessAssessmentStatus: 'checking',
+        businessAssessmentId: '',
+      });
+      const completion = await getBusinessAssessmentCompletion(profile.id || normalizedGateProfileId);
+      setProfileGateState(gateType, {
+        businessAssessmentStatus: completion.status,
+        businessAssessmentId: completion.assessmentId,
       });
     } catch {
       setProfileGateState(gateType, {
         status: 'error',
         profile: null,
         error: 'Profile validation is not available right now. Please try again shortly.',
-        ...(gateType === 'monthly'
-          ? { businessAssessmentStatus: 'idle', businessAssessmentId: '' }
-          : {})
+        verticalSelection: createVerticalSelectionState(),
+        businessAssessmentStatus: 'idle',
+        businessAssessmentId: '',
       });
     }
   }
@@ -481,7 +452,18 @@ export default function BusinessAssessment() {
       });
       return;
     }
-    setAssessmentProfile(devCodeProfileGate.profile);
+    if (!devCodeProfileGate.verticalSelection?.confirmedSelection) {
+      setPromoState({ status: 'error', message: BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE });
+      return;
+    }
+    if (devCodeProfileGate.businessAssessmentStatus === 'found') {
+      retrieveAssessment(null, devCodeProfileGate.profile.id);
+      return;
+    }
+    setAssessmentProfile({
+      ...devCodeProfileGate.profile,
+      verticalSelection: devCodeProfileGate.verticalSelection.confirmedSelection,
+    });
     setFlowStarted(true);
     setCurrentQuestionIndex(0);
     setAnswers({ ...INITIAL_ANSWERS });
@@ -540,6 +522,18 @@ export default function BusinessAssessment() {
 
     if (!profileId) {
       setCheckoutState({ loading: '', error: 'First validate your profile to unlock checkout.' });
+      return;
+    }
+
+    if (productKey === 'business_assessment'
+      && !checkoutProfileGate.verticalSelection?.confirmedSelection) {
+      setCheckoutState({ loading: '', error: BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE });
+      return;
+    }
+
+    if (productKey === 'business_assessment'
+      && checkoutProfileGate.businessAssessmentStatus === 'found') {
+      retrieveAssessment(null, checkoutProfileGate.profile.id);
       return;
     }
 
@@ -603,6 +597,11 @@ export default function BusinessAssessment() {
       return;
     }
 
+    if (gateType === 'recruiting') {
+      setRecruitingProfileGate((current) => ({ ...current, ...patch }));
+      return;
+    }
+
     setCheckoutProfileGate((current) => ({ ...current, ...patch }));
   }
 
@@ -614,6 +613,7 @@ export default function BusinessAssessment() {
         status: 'idle',
         profile: null,
         error: '',
+        verticalSelection: createVerticalSelectionState(),
         businessAssessmentStatus: 'idle',
         businessAssessmentId: ''
       }));
@@ -626,7 +626,10 @@ export default function BusinessAssessment() {
         input: value,
         status: 'idle',
         profile: null,
-        error: ''
+        error: '',
+        verticalSelection: createVerticalSelectionState(),
+        businessAssessmentStatus: 'idle',
+        businessAssessmentId: '',
       }));
       setPromoState((current) =>
         current.status === 'valid' ? { status: 'idle', message: '' } : current
@@ -640,8 +643,74 @@ export default function BusinessAssessment() {
       input: value,
       status: 'idle',
       profile: null,
-      error: ''
+      error: '',
+      verticalSelection: createVerticalSelectionState(),
+      businessAssessmentStatus: 'idle',
+      businessAssessmentId: '',
     }));
+  }
+
+  function gateStateForType(gateType) {
+    if (gateType === 'devCode') return devCodeProfileGate;
+    if (gateType === 'recruiting') return recruitingProfileGate;
+    return checkoutProfileGate;
+  }
+
+  function updateVerticalSelection(gateType, verticalId) {
+    const gate = gateStateForType(gateType);
+    setProfileGateState(gateType, {
+      verticalSelection: {
+        ...gate.verticalSelection,
+        selectedVerticalId: verticalId,
+        confirmedSelection: null,
+        message: BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
+      },
+    });
+  }
+
+  function confirmVerticalSelection(gateType) {
+    const gate = gateStateForType(gateType);
+    try {
+      const registration = PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical(
+        gate.verticalSelection?.selectedVerticalId,
+      );
+      setProfileGateState(gateType, {
+        verticalSelection: {
+          ...gate.verticalSelection,
+          confirmedSelection: buildCustomerConfirmedSelection(registration),
+          message: `${registration.vertical_label} confirmed. You can continue.`,
+        },
+      });
+    } catch {
+      setProfileGateState(gateType, {
+        verticalSelection: {
+          ...gate.verticalSelection,
+          confirmedSelection: null,
+          message: BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
+        },
+      });
+    }
+  }
+
+  function beginRecruitingAssessment() {
+    const confirmedSelection = recruitingProfileGate.verticalSelection?.confirmedSelection;
+    if (!recruitingProfileGate.profile?.id || !confirmedSelection) {
+      setSubmitState({
+        status: 'error',
+        error: BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
+        result: null,
+      });
+      return;
+    }
+    setAssessmentProfile({
+      ...recruitingProfileGate.profile,
+      verticalSelection: confirmedSelection,
+    });
+    setFlowStarted(true);
+    setCurrentQuestionIndex(0);
+    setAnswers({ ...INITIAL_ANSWERS });
+    setQuestionStates({ ...INITIAL_QUESTION_STATES });
+    setSubmitState({ status: 'idle', error: '', result: null });
   }
 
   function updateAnswer(value) {
@@ -806,6 +875,7 @@ export default function BusinessAssessment() {
         credentials: recruitingMode ? 'same-origin' : 'omit',
         body: JSON.stringify({
           owner_profile_id: assessmentProfile.id,
+          vertical_selection: assessmentProfile.verticalSelection,
           answers,
           question_states: questionStates,
           recruiting_mode: recruitingMode ? 'accepted_invitation' : undefined,
@@ -931,6 +1001,8 @@ export default function BusinessAssessment() {
     if (retrieveState.status !== 'idle') return;
     setRetrieveId(routeProfileId);
     retrieveAssessment(null, routeProfileId);
+    // Route bootstrap intentionally fires once per route/status transition.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [routeProfileId, retrieveState.status]);
 
   useEffect(() => {
@@ -955,6 +1027,81 @@ export default function BusinessAssessment() {
       document.getElementById('business-assessment-results')?.scrollIntoView({ block: 'start' });
     });
   }, [showPremiumResults]);
+
+  function renderVerticalSelectionGate(gateType, gate) {
+    if (gateType === 'monthly') return null;
+    if (gate.businessAssessmentStatus === 'checking') {
+      return <p className="mt-3 text-sm text-white/58">Checking for an existing Business Twin...</p>;
+    }
+    if (gate.businessAssessmentStatus === 'found') {
+      return (
+        <div className="mt-4 rounded-xl border border-cyan-300/30 bg-cyan-400/[0.08] p-3">
+          <p className="text-sm text-cyan-50">
+            Your completed Business Assessment is already compatible. You do not need to select a vertical or begin again.
+          </p>
+          <button
+            type="button"
+            onClick={() => retrieveAssessment(null, gate.profile.id)}
+            className="mt-3 w-full rounded-xl border border-cyan-200/40 px-3 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-cyan-50"
+            data-testid={`${gateType}-open-existing-business-twin`}
+          >
+            Open Your Business Twin
+          </button>
+        </div>
+      );
+    }
+    return (
+      <div className="mt-4 border-t border-white/10 pt-4" data-testid={`${gateType}-vertical-gate`}>
+        <label
+          htmlFor={`${gateType}-vertical-selection`}
+          className="text-xs font-semibold uppercase tracking-[0.16em] text-white/72"
+        >
+          Confirm your business type
+        </label>
+        <select
+          id={`${gateType}-vertical-selection`}
+          value={gate.verticalSelection?.selectedVerticalId || ''}
+          onChange={(event) => updateVerticalSelection(gateType, event.target.value)}
+          className="mt-3 w-full rounded-xl border border-white/14 bg-black/70 px-3 py-3 text-sm text-white outline-none focus:border-orange-300"
+          aria-describedby={`${gateType}-vertical-message`}
+        >
+          <option value="">Select a supported business type</option>
+          {SUPPORTED_VERTICALS.map((registration) => (
+            <option key={registration.vertical_id} value={registration.vertical_id}>
+              {registration.vertical_label}
+            </option>
+          ))}
+        </select>
+        {gate.verticalSelection?.suggestionStatus === 'SUPPORTED_SUGGESTION'
+          && !gate.verticalSelection?.confirmedSelection && (
+          <p className="mt-2 text-xs leading-5 text-white/52">
+            Suggested from your Profile: {gate.verticalSelection.suggestionLabel}. A suggestion is not confirmation.
+          </p>
+        )}
+        {gate.verticalSelection?.suggestionStatus === 'UNSUPPORTED_SUGGESTION' && (
+          <p className="mt-2 text-xs leading-5 text-orange-100">
+            Your Profile lists {gate.verticalSelection.suggestionLabel}. That business type is not yet supported.
+          </p>
+        )}
+        <button
+          type="button"
+          disabled={!gate.verticalSelection?.selectedVerticalId || Boolean(gate.verticalSelection?.confirmedSelection)}
+          onClick={() => confirmVerticalSelection(gateType)}
+          className="mt-3 w-full rounded-xl border border-emerald-300/35 px-3 py-2.5 text-xs font-bold uppercase tracking-[0.12em] text-emerald-100 disabled:cursor-not-allowed disabled:opacity-40"
+          data-testid={`${gateType}-confirm-vertical`}
+        >
+          {gate.verticalSelection?.confirmedSelection ? 'Business Type Confirmed' : 'Confirm Business Type'}
+        </button>
+        <p
+          id={`${gateType}-vertical-message`}
+          className={`mt-2 text-xs leading-5 ${gate.verticalSelection?.confirmedSelection ? 'text-emerald-100' : 'text-white/52'}`}
+          aria-live="polite"
+        >
+          {gate.verticalSelection?.message}
+        </p>
+      </div>
+    );
+  }
 
   function renderProfileValidationForm({ gateType, helperText, accent = 'orange' }) {
     const gate =
@@ -1016,6 +1163,7 @@ export default function BusinessAssessment() {
                 Monthly Intelligence requires a completed Business Assessment first.
               </p>
             )}
+            {renderVerticalSelectionGate(gateType, gate)}
           </div>
         )}
 
@@ -1118,7 +1266,48 @@ export default function BusinessAssessment() {
           </section>
         )}
 
-        {!flowStarted && !previewPremium && (
+        {!flowStarted && !previewPremium && recruitingMode && (
+          <section className="mx-auto w-full max-w-xl">
+            <div className="rounded-[2rem] border border-orange-300/25 bg-[#101114] p-6 shadow-[0_24px_90px_rgba(0,0,0,0.4)] sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-300">
+                Optional Business Assessment
+              </p>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                Confirm your business type before beginning.
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-white/62">
+                Your invitation identifies the correct MORE Profile. Business type remains a separate customer-confirmed choice.
+              </p>
+              {recruitingProfileGate.status === 'validating' && (
+                <p className="mt-6 text-sm text-white/62">Validating your invitation...</p>
+              )}
+              {recruitingProfileGate.status === 'error' && (
+                <div className="mt-6 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
+                  {recruitingProfileGate.error}
+                </div>
+              )}
+              {recruitingProfileGate.profile && (
+                <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.07] p-4">
+                  <p className="text-sm font-semibold text-emerald-100">Invitation and MORE Profile validated.</p>
+                  {renderVerticalSelectionGate('recruiting', recruitingProfileGate)}
+                </div>
+              )}
+              {recruitingProfileGate.profile && (
+                <button
+                  type="button"
+                  disabled={!recruitingProfileGate.verticalSelection?.confirmedSelection}
+                  onClick={beginRecruitingAssessment}
+                  className="mt-6 w-full rounded-xl bg-orange-500 px-5 py-3.5 text-sm font-bold uppercase tracking-[0.14em] text-black transition hover:bg-orange-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  data-testid="recruiting-begin-business-assessment"
+                >
+                  Begin Business Assessment
+                </button>
+              )}
+            </div>
+          </section>
+        )}
+
+        {!flowStarted && !previewPremium && !recruitingMode && (
           <section className="mx-auto w-full max-w-7xl">
             <div className="text-center">
               <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">
@@ -1174,7 +1363,12 @@ export default function BusinessAssessment() {
 
                   <button
                     type="button"
-                    disabled={!checkoutProfileValidated || checkoutState.loading === 'business_assessment'}
+                    disabled={
+                      !checkoutProfileValidated ||
+                      !checkoutProfileGate.verticalSelection?.confirmedSelection ||
+                      checkoutProfileGate.businessAssessmentStatus === 'found' ||
+                      checkoutState.loading === 'business_assessment'
+                    }
                     onClick={() => startProductCheckout('business_assessment', 'business_assessment_offer')}
                     className="mt-7 inline-flex w-full items-center justify-center rounded-2xl bg-white px-5 py-4 text-sm font-semibold uppercase tracking-[0.14em] text-black transition hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-35"
                   >
@@ -1316,11 +1510,15 @@ export default function BusinessAssessment() {
                         {promoState.message}
                       </p>
                     )}
-                    {devCodeAccepted && (
+                    {devCodeAccepted && devCodeProfileGate.businessAssessmentStatus !== 'found' && (
                       <button
                         type="button"
                         onClick={beginAssessment}
-                        className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10"
+                        disabled={
+                          !devCodeProfileGate.verticalSelection?.confirmedSelection ||
+                          devCodeProfileGate.businessAssessmentStatus === 'checking'
+                        }
+                        className="mt-4 w-full rounded-xl border border-emerald-300/40 px-4 py-3 text-sm font-bold uppercase tracking-[0.14em] text-emerald-100 transition hover:border-emerald-200 hover:bg-emerald-300/10 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Begin Business Assessment
                       </button>

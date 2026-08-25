@@ -23,12 +23,19 @@ import {
   projectRecruitingBaState,
   resolveRecruitingBaOwnerProfile,
 } from '../engine/recruitingV1/canonicalAdapters.js';
+import {
+  BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
+  BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
+  BA_VERTICAL_FAILURE_CODES,
+  BaVerticalContractError,
+  PRODUCTION_BA_CASSETTE_REGISTRY,
+  realEstateAssessmentTypeForAnswers,
+} from '../../src/lib/baVerticalCassettesV1/index.js';
+import { buildCustomerConfirmedVerticalBinding } from './verticalBinding.js';
 
-const QUESTION_KEYS = Array.from({ length: 12 }, (_, index) => `q${index + 1}`);
-
-function normalizeAnswers(answers = {}) {
+function normalizeAnswers(answers = {}, questionKeys = []) {
   const normalized = {};
-  for (const key of QUESTION_KEYS) {
+  for (const key of questionKeys) {
     normalized[key] = typeof answers[key] === 'string' ? answers[key] : String(answers[key] || '');
   }
   return normalized;
@@ -47,7 +54,45 @@ export default async function handler(req, res) {
 
   let redis;
   try {
-    const { owner_profile_id, answers, question_states } = req.body || {};
+    const {
+      owner_profile_id,
+      vertical_selection,
+      answers,
+      question_states,
+    } = req.body || {};
+
+    if (!answers || typeof answers !== 'object') {
+      return res.status(400).json({ success: false, error: 'answers required' });
+    }
+
+    let verticalBinding;
+    try {
+      verticalBinding = buildCustomerConfirmedVerticalBinding({
+        selection: vertical_selection,
+        selectedAt: new Date().toISOString(),
+        registry: PRODUCTION_BA_CASSETTE_REGISTRY,
+      });
+    } catch (error) {
+      if (!(error instanceof BaVerticalContractError)) throw error;
+      const confirmationFailure = [
+        BA_VERTICAL_FAILURE_CODES.SELECTION_REQUIRED,
+        BA_VERTICAL_FAILURE_CODES.SELECTION_UNCONFIRMED,
+        BA_VERTICAL_FAILURE_CODES.SELECTION_MALFORMED,
+      ].includes(error.code);
+      return res.status(400).json({
+        success: false,
+        error: confirmationFailure
+          ? BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE
+          : BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
+        error_code: error.code,
+      });
+    }
+
+    const registration = PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical(verticalBinding.vertical_id);
+    if (registration.cassette_id !== verticalBinding.cassette_id) {
+      throw new BaVerticalContractError(BA_VERTICAL_FAILURE_CODES.CROSS_CASSETTE_CONTAMINATION);
+    }
+
     const recruitingAuthority = await resolveRecruitingBaOwnerProfile(req, owner_profile_id, {
       required: req.body?.recruiting_mode === 'accepted_invitation',
     });
@@ -55,10 +100,6 @@ export default async function handler(req, res) {
 
     if (!parsedProfile) {
       return res.status(400).json({ success: false, error: 'Invalid owner_profile_id' });
-    }
-
-    if (!answers || typeof answers !== 'object') {
-      return res.status(400).json({ success: false, error: 'answers required' });
     }
 
     redis = createRedisClient();
@@ -73,7 +114,8 @@ export default async function handler(req, res) {
     }
 
     const now = new Date();
-    const normalizedAnswers = normalizeAnswers(answers);
+    const questionKeys = registration.intake_contract.questions.map((question) => question.key);
+    const normalizedAnswers = normalizeAnswers(answers, questionKeys);
     const assessmentId = createAssessmentId(now);
     const jobId = createJobId();
     const governedQuestionStates = buildGovernedQuestionStates({
@@ -81,8 +123,13 @@ export default async function handler(req, res) {
       requestedStates: question_states,
       assessmentId,
     });
-    const teamProfileIds = parseTeamProfileIds(normalizedAnswers.q11);
-    const assessmentType = normalizedAnswers.q11.trim() ? 'real_estate_team' : 'real_estate_agent';
+    const teamQuestionKey = registration.intake_contract.team_profile_question_key;
+    const financialQuestionKey = registration.intake_contract.financial_text_question_key;
+    const teamProfileIds = teamQuestionKey ? parseTeamProfileIds(normalizedAnswers[teamQuestionKey]) : [];
+    if (registration.intake_contract.assessment_type_strategy !== 'real-estate-team-q11-v1') {
+      throw new BaVerticalContractError(BA_VERTICAL_FAILURE_CODES.REGISTRATION_MISSING, 'assessment_type_strategy');
+    }
+    const assessmentType = realEstateAssessmentTypeForAnswers(normalizedAnswers);
     const profileContext = extractProfileContext(profileLookup.dossier, parsedProfile.normalized);
 
     const record = {
@@ -93,11 +140,12 @@ export default async function handler(req, res) {
       created_at: now.toISOString(),
       updated_at: now.toISOString(),
       version: ASSESSMENT_VERSION,
+      vertical_binding: verticalBinding,
       inputs: {
         answers: normalizedAnswers,
         question_states: governedQuestionStates,
         team_profile_ids: teamProfileIds,
-        financial_text: normalizedAnswers.q9
+        financial_text: financialQuestionKey ? normalizedAnswers[financialQuestionKey] : ''
       },
       profile_context: profileContext,
       output: null,
@@ -176,7 +224,12 @@ export default async function handler(req, res) {
       status: 'completed',
       intake_status: 'intake_saved',
       assessment_type: assessmentType,
-      profile_context: profileContext
+      profile_context: profileContext,
+      vertical_state: {
+        vertical_id: verticalBinding.vertical_id,
+        vertical_label: verticalBinding.vertical_label,
+        cassette_id: verticalBinding.cassette_id,
+      }
     });
   } catch (error) {
     console.error('[BUSINESS-ASSESSMENT-START] Error:', error);

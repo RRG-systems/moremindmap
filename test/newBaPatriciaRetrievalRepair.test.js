@@ -15,6 +15,7 @@ import { buildLaunchSafeNewBaEnvelope } from '../api/engine/newBaProductionReadi
 import { createNewBaModernizationService } from '../api/engine/newBaProductionReadinessV1/modernizationService.js';
 import { buildNewBaRealizationIdentity } from '../api/engine/newBaProductionReadinessV1/realizationIdentity.js';
 import { sha256Stable } from '../api/engine/newBaProductionReadinessV1/stable.js';
+import { buildLegacyRealEstateVerticalBinding } from '../api/business-assessment/verticalBinding.js';
 
 function identity(overrides = {}) {
   const components = {
@@ -135,6 +136,12 @@ test('retrieval serves an internally fused compatible prior without provider exe
     evidence_sufficiency: { status: 'PASS', unanswered_questions: [], reasons: [] },
     created_at: '2026-07-14T16:26:52.501Z',
     read_only: true,
+    version: 'business_assessment_v1_intake',
+    assessment_type: 'real_estate_agent',
+    vertical_binding: buildLegacyRealEstateVerticalBinding({
+      version: 'business_assessment_v1_intake',
+      assessment_type: 'real_estate_agent',
+    }),
   };
   const recordedBos = resolveBundledBosAuthority(PATRICIA_PROFILE_ID);
   const source = {

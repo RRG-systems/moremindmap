@@ -12,7 +12,9 @@ import {
   projectBosFusionAuthorityFromArtifact,
   validateBosFusionAuthority,
 } from './fusionContract.js';
-import { BA_QUESTION_KEYS, classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
+import { classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
+import { resolveAssessmentVerticalBinding } from '../../business-assessment/verticalBinding.js';
+import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../../../src/lib/baVerticalCassettesV1/index.js';
 
 export const PATRICIA_PROFILE_ID = 'MM-20260708-DSST020Z';
 export const PATRICIA_ASSESSMENT_ID = 'ba-20260714-64ca0783';
@@ -139,10 +141,12 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
   const assessmentId = normalizeAssessmentId(record?.assessment_id);
   if (!isGovernedNewBaAssessmentState(record?.status)) throw new Error('new_ba_canonical_reader_assessment_state_unsupported');
   if (record?.version !== 'business_assessment_v1_intake') throw new Error('new_ba_canonical_reader_assessment_version_unsupported');
-  if (!String(record?.assessment_type || '').startsWith('real_estate')) throw new Error('new_ba_canonical_reader_vertical_unsupported');
+  const verticalBinding = resolveAssessmentVerticalBinding(record);
+  const cassette = PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical(verticalBinding.vertical_id);
+  const cassetteQuestionKeys = cassette.intake_contract.questions.map((question) => question.key);
   const answers = {};
   const answerSha256 = {};
-  for (const key of BA_QUESTION_KEYS) {
+  for (const key of cassetteQuestionKeys) {
     const answer = typeof record?.inputs?.answers?.[key] === 'string' ? record.inputs.answers[key] : '';
     if (!answer.trim()) continue;
     answers[key] = answer;
@@ -160,7 +164,14 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
   const explicitQuestionStates = record?.inputs?.question_states && typeof record.inputs.question_states === 'object'
     ? record.inputs.question_states
     : undefined;
-  const evidenceSufficiency = classifyBaEvidenceSufficiency({ answers, answerSha256, explicit_question_states: explicitQuestionStates });
+  const evidenceSufficiency = classifyBaEvidenceSufficiency({
+    answers,
+    answerSha256,
+    explicit_question_states: explicitQuestionStates,
+    questionAuthority: cassette.evidence_contract.question_authority,
+    questionKeys: cassetteQuestionKeys,
+    requiredMissions: cassette.evidence_contract.sufficiency_missions,
+  });
   if (evidenceSufficiency.status !== 'PASS') throw new Error(`new_ba_business_evidence_insufficient:${evidenceSufficiency.failed_missions.join(',') || evidenceSufficiency.reasons.join(',')}`);
   const accepted = Object.freeze({
     profile_id: profileId,
@@ -178,7 +189,12 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
     read_only: true,
     excluded_fields: Object.freeze(['output', 'business_intelligence_draft', 'briefing', 'five_futures_v1', 'one_move_v1', 'profile_context', 'presentation']),
   });
-  return Object.freeze({ ...accepted, evidence_sufficiency: evidenceSufficiency, evidence_sha256: sha256Stable(accepted) });
+  return Object.freeze({
+    ...accepted,
+    vertical_binding: verticalBinding,
+    evidence_sufficiency: evidenceSufficiency,
+    evidence_sha256: sha256Stable(accepted),
+  });
 }
 
 async function readBosAuthority(redis, bosNamespace, profileId) {
@@ -259,13 +275,17 @@ export function createAuthorizedSyntheticTopSource() {
     read_only: true,
     excluded_fields: Object.freeze([]),
   });
+  const verticalBinding = resolveAssessmentVerticalBinding({
+    version: evidence.version,
+    assessment_type: evidence.assessment_type,
+  });
   const bosArtifactSha256 = sha256Stable({ proof: 'synthetic-bos-top-v1', profile_id: SYNTHETIC_TOP_PROFILE_ID });
   const fusionAuthority = buildSyntheticBosFusionAuthority({ profileId: SYNTHETIC_TOP_PROFILE_ID, realizationId: 'synthetic-bos-top-v1', sourceArtifactSha256: bosArtifactSha256 });
   return Object.freeze({
     profile_id: SYNTHETIC_TOP_PROFILE_ID,
     assessment_id: SYNTHETIC_TOP_ASSESSMENT_ID,
     source_kind: 'AUTHORIZED_SYNTHETIC_GENERALIZATION_PROOF',
-    business_evidence: Object.freeze({ ...evidence, evidence_sha256: sha256Stable(evidence) }),
+    business_evidence: Object.freeze({ ...evidence, vertical_binding: verticalBinding, evidence_sha256: sha256Stable(evidence) }),
     bos_authority: Object.freeze({
       compatible: true,
       realization_id: 'synthetic-bos-top-v1',

@@ -133,8 +133,10 @@ export function loadFrozenAuthorityLibrary({ libraryRoot = DEFAULT_LIBRARY_ROOT 
     real_estate_registry: realEstate.registry,
     universal_bibles: universal.bibles,
     real_estate_bibles: realEstate.bibles,
+    vertical_bibles: realEstate.bibles,
     universal_interactions: readJson(path.join(resolvedRoot, 'cross-authority-interactions/UNIVERSAL_CROSS_AUTHORITY_INTERACTION_REGISTRY_V1.json')),
     real_estate_interactions: readJson(path.join(resolvedRoot, 'cross-authority-interactions/REAL_ESTATE_CROSS_CASSETTE_INTERACTION_REGISTRY_V1.json')),
+    vertical_interactions: readJson(path.join(resolvedRoot, 'cross-authority-interactions/REAL_ESTATE_CROSS_CASSETTE_INTERACTION_REGISTRY_V1.json')),
     router_metadata: readJson(path.join(resolvedRoot, 'routing-metadata/BA_AUTHORITY_ROUTER_METADATA_V1.json')),
     team_socket: readJson(path.join(resolvedRoot, 'team-socket/TEAM_MULTI_PERSON_SOCKET_CONTRACT_V1.json')),
     five_futures_metadata: readJson(path.join(resolvedRoot, 'five-futures-hooks/FIVE_FUTURES_STATE_CONTRIBUTION_CONTRACT_V1.json')),
@@ -143,7 +145,7 @@ export function loadFrozenAuthorityLibrary({ libraryRoot = DEFAULT_LIBRARY_ROOT 
 }
 
 export function getAuthority(library, authorityId) {
-  const authority = [...library.universal_bibles, ...library.real_estate_bibles]
+  const authority = [...library.universal_bibles, ...(library.vertical_bibles || library.real_estate_bibles || [])]
     .find((candidate) => candidate.authority_id === authorityId);
   integrity(authority, 'BROKEN_AUTHORITY_HASH', `Unknown frozen authority ${authorityId}`);
   return authority;

@@ -7,11 +7,12 @@ export async function buildWholeBusinessModel(input, {
   library,
   libraryRoot,
   contextBudget,
+  cassetteRegistry,
 } = {}) {
   if (!synthesisAdapter || typeof synthesisAdapter.synthesize !== 'function') {
     throw new TypeError('whole_business_model_requires_frontier_synthesis_adapter');
   }
-  const context = assembleWholeBusinessContext(input, { library, libraryRoot, contextBudget });
+  const context = assembleWholeBusinessContext(input, { library, libraryRoot, contextBudget, cassetteRegistry });
   const candidate = await synthesisAdapter.synthesize(context);
   const validationReceipt = validateWholeBusinessModel(candidate, context);
   const model = finalizeWholeBusinessState(candidate, validationReceipt);
