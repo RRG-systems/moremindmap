@@ -84,7 +84,7 @@ test('HTTP boundary provisions no manager, rotates opaque cookies, and requires 
   assert.equal(created.status, 200);
   assert.equal(created.payload.invitation.state, 'ISSUED');
   assert.equal(created.payload.delivery.state, 'DELIVERED');
-  assert.equal(created.payload.entitlement.remaining, 1);
+  assert.equal(created.payload.entitlement.remaining, refreshed.payload.entitlement.remaining - 1);
 
   const replayedProof = await invoke({
     method: 'POST',
