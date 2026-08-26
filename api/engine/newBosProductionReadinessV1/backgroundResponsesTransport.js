@@ -44,6 +44,15 @@ export function inspectNewBosBackgroundTransportDiff({ scientificRequest, execut
 }
 
 function eventFor(response, eventType, pollCount, transportInspection) {
+  const usage = response?.usage && typeof response.usage === 'object'
+    ? Object.freeze({
+      input_tokens: Number(response.usage.input_tokens) || 0,
+      output_tokens: Number(response.usage.output_tokens) || 0,
+      total_tokens: Number(response.usage.total_tokens) || 0,
+      cached_input_tokens: Number(response.usage.input_tokens_details?.cached_tokens) || 0,
+      reasoning_tokens: Number(response.usage.output_tokens_details?.reasoning_tokens) || 0,
+    })
+    : null;
   return Object.freeze({
     event_type: eventType,
     observed_at: new Date().toISOString(),
@@ -51,6 +60,13 @@ function eventFor(response, eventType, pollCount, transportInspection) {
     provider_request_id: response?._request_id || null,
     status: response?.status || null,
     poll_count: pollCount,
+    incomplete_details_reason: response?.incomplete_details?.reason || null,
+    error_code: response?.error?.code || null,
+    model: response?.model || null,
+    service_tier: response?.service_tier || null,
+    created_at: response?.created_at || null,
+    completed_at: response?.completed_at || null,
+    usage,
     scientific_request_sha256: transportInspection.scientific_request_sha256,
     execution_request_sha256: transportInspection.execution_request_sha256,
   });

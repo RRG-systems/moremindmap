@@ -89,22 +89,49 @@ export function createNewBosHumanRealizationProvider({
       }
       const startedAt = Date.now();
       const response = await transport(request);
-      if (response?.status && response.status !== 'completed') {
-        throw new Error(`human_realization_provider_terminal_status:${response.status}`);
-      }
-      if (!modelMatches(model, response?.model)) {
-        throw new Error('human_realization_provider_model_substitution_rejected');
-      }
-      const parsed = parseResponse(response);
       const receipt = Object.freeze({
         surface_id: surfaceId,
         requested_model: model,
         returned_model: response?.model || null,
         provider_response_id: response?._request_id || response?.id || null,
+        provider_status: response?.status || null,
+        incomplete_details_reason: response?.incomplete_details?.reason || null,
+        error_code: response?.error?.code || null,
+        created_at: response?.created_at || null,
+        completed_at: response?.completed_at || null,
         latency_ms: Date.now() - startedAt,
         usage: usageReceipt(response),
       });
-      await capture(Object.freeze({ request, response, receipt }));
+      await capture(Object.freeze({ request, response, receipt, captured_before_validation: true }));
+      if (response?.status && response.status !== 'completed') {
+        throw Object.assign(new Error(`human_realization_provider_terminal_status:${response.status}`), {
+          code: 'human_realization_provider_terminal_status',
+          provider_status: response.status,
+          incomplete_details_reason: response?.incomplete_details?.reason || null,
+          provider_error_code: response?.error?.code || null,
+          provider_response_id: response?._request_id || response?.id || null,
+          provider_usage: receipt.usage,
+        });
+      }
+      if (!modelMatches(model, response?.model)) {
+        throw Object.assign(new Error('human_realization_provider_model_substitution_rejected'), {
+          provider_status: response?.status || 'completed',
+          provider_response_id: receipt.provider_response_id,
+          provider_usage: receipt.usage,
+          semantic_rejection: true,
+        });
+      }
+      let parsed;
+      try {
+        parsed = parseResponse(response);
+      } catch (error) {
+        throw Object.assign(error, {
+          provider_status: response?.status || 'completed',
+          provider_response_id: receipt.provider_response_id,
+          provider_usage: receipt.usage,
+          semantic_rejection: true,
+        });
+      }
       return Object.freeze({
         customer_prose: parsed.customer_prose.trim(),
         generation: receipt,

@@ -6,6 +6,7 @@ import { buildLaunchSafeNewBaEnvelope } from './launchSafeRealizationStore.js';
 import { buildNewBaRealizationIdentityV3 } from './realizationIdentity.js';
 import { buildCustomerSafePresentationViewModel } from '../../../src/lib/baProgressiveDisclosureV1/customerPresentationSanitizer.js';
 import { classifyCompatiblePriorRealization } from './compatibilitySelection.js';
+import { classifyRealizationInspection } from '../realizationRecoveryV1/recoveryContract.js';
 
 function publicArtifact(envelope, fusionValidated, customerActive) {
   return Object.freeze({
@@ -102,6 +103,13 @@ export function createNewBaModernizationService({
     });
   }
 
+  async function repairExactPointer(profile, inspection) {
+    if (inspection.state !== 'publishable_orphan') return null;
+    await realizationStore.advancePointer({ profileId: profile, expectedCurrentId: inspection.pointer, nextRealizationId: inspection.current.realization_id });
+    diagnostics.record('pointer_self_healed', { profile_id: profile, realization_id: inspection.current.realization_id, prior_pointer: inspection.pointer });
+    return serve(inspection.current, 'exact_realization_pointer_self_healed');
+  }
+
   return Object.freeze({
     diagnostics,
     async diagnose({ profileId, suppliedToken = '' }) {
@@ -125,6 +133,7 @@ export function createNewBaModernizationService({
         compatibility_class: desired.compatibility.class,
         realization_state: current.state,
         retrieval_compatibility: priorCompatibility?.serveable ? 'COMPATIBLE_PRIOR_AVAILABLE' : current.state === 'current' ? 'CURRENT' : 'REBUILD_REQUIRED',
+        recovery_state: classifyRealizationInspection(current, { compatiblePrior: priorCompatibility?.serveable === true }),
         desired_realization_id: desired.identity.realization_id,
         current_realization_id: current.pointer,
         bos_authority_version: desired.source.bos_authority.version,
@@ -144,6 +153,8 @@ export function createNewBaModernizationService({
         diagnostics.record('current_fast_path', { profile_id: profile, realization_id: initial.pointer });
         return serve(initial.current, 'current_fast_path');
       }
+      const repaired = await repairExactPointer(profile, initial);
+      if (repaired) return repaired;
       const priorCompatibility = classifyCompatiblePriorRealization({ current: initial.current, desiredIdentity: desired.identity });
       if (initial.state === 'stale' && priorCompatibility.serveable) {
         diagnostics.record('compatible_prior_fast_path', {
@@ -161,6 +172,8 @@ export function createNewBaModernizationService({
       return singleFlight.run(desired.identity.sha256, async () => {
         const rechecked = await realizationStore.inspect({ profileId: profile, desiredIdentity: desired.identity });
         if (rechecked.state === 'current') return serve(rechecked.current, 'joined_or_rechecked_current');
+        const repairedAfterJoin = await repairExactPointer(profile, rechecked);
+        if (repairedAfterJoin) return repairedAfterJoin;
         diagnostics.record('rebuild_started', { profile_id: profile, realization_id: desired.identity.realization_id, prior_state: rechecked.state });
         const started = Date.now();
         try {
@@ -179,13 +192,33 @@ export function createNewBaModernizationService({
             compatibility: desired.compatibility,
             providerAccounting: generated.provider_accounting,
           });
-          const persistence = await realizationStore.persistImmutable(envelope);
+          const persistence = await realizationStore.persistImmutable(envelope, {
+            corruptRecovery: rechecked.state === 'corrupt_derived' ? rechecked.corruption : null,
+          });
           diagnostics.record('artifact_persisted', { profile_id: profile, realization_id: envelope.realization_id, written: persistence.written });
+          if (persistence.recovered_corrupt) {
+            diagnostics.record('corrupt_derived_recovered', {
+              profile_id: profile,
+              realization_id: envelope.realization_id,
+              corrupt_archive_sha256: persistence.corrupt_archive_sha256,
+            });
+          }
           await realizationStore.advancePointer({ profileId: profile, expectedCurrentId: rechecked.pointer, nextRealizationId: envelope.realization_id });
           diagnostics.record('pointer_advanced', { profile_id: profile, realization_id: envelope.realization_id });
           diagnostics.record('rebuild_succeeded', { profile_id: profile, realization_id: envelope.realization_id, latency_ms: Date.now() - started, provider_calls: envelope.provider_accounting.calls || 0 });
-          return serve(envelope, rechecked.state === 'missing' ? 'rebuilt_missing' : 'rebuilt_stale');
+          const rebuiltPath = rechecked.state === 'missing'
+            ? 'rebuilt_missing'
+            : rechecked.state === 'missing_derived'
+              ? 'rebuilt_missing_derived'
+              : rechecked.state === 'corrupt_derived'
+                ? 'rebuilt_corrupt_derived'
+                : 'rebuilt_stale';
+          return serve(envelope, rebuiltPath);
         } catch (error) {
+          if (error?.background_pending) {
+            diagnostics.record('background_pending', { profile_id: profile, realization_id: desired.identity.realization_id, latency_ms: Date.now() - started });
+            return pending(profile, desired, 'background_provider_resumable');
+          }
           diagnostics.record('rebuild_failed', { profile_id: profile, error_code: error?.message || error?.name, latency_ms: Date.now() - started });
           throw error;
         }

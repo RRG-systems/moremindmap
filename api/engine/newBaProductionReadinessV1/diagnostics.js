@@ -3,6 +3,8 @@ const ALLOWED = new Set([
   'rebuild_failed', 'artifact_persisted', 'pointer_advanced', 'pointer_rollback', 'provider_disabled',
   'privacy_rejected', 'validation_failed',
   'generation_stage_accepted', 'compatible_prior_fast_path',
+  'background_pending', 'pointer_self_healed', 'terminal_checkpoint_retired',
+  'corrupt_derived_recovered',
 ]);
 
 function sanitize(value) {

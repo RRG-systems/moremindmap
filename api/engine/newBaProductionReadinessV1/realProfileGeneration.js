@@ -48,6 +48,8 @@ const WHOLE_PERSON_DOMAINS = Object.freeze({
   energy: ['capacity', 'team', 'operations', 'goals'],
 });
 
+const INTERACTIVE_BACKGROUND_WAIT_MS = 12_000;
+
 function invariant(condition, code, details = undefined) {
   if (condition) return;
   const error = new Error(code);
@@ -225,7 +227,12 @@ function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_
     const privacy = inspectProviderPrivacy(request, identityTokens);
     invariant(privacy.valid, 'new_ba_real_profile_provider_request_privacy_failed', privacy.failures);
     if (!backgroundResponseStore) return streaming.transport(request);
-    const checkpoint = await backgroundResponseStore.load({ profileId, generationIdentitySha256, stage: startingStage });
+    const preparation = backgroundResponseStore.prepare
+      ? await backgroundResponseStore.prepare({ profileId, generationIdentitySha256, stage: startingStage })
+      : null;
+    const checkpoint = preparation
+      ? preparation.checkpoint
+      : await backgroundResponseStore.load({ profileId, generationIdentitySha256, stage: startingStage });
     let legacyCompletedReplay = false;
     if (checkpoint) {
       const inspection = inspectNewBosBackgroundTransportDiff({ scientificRequest: request, executionRequest: buildNewBosBackgroundExecutionRequest(request) });
@@ -240,8 +247,8 @@ function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_
       : (event) => backgroundResponseStore.save({ profileId, generationIdentitySha256, stage: startingStage, event });
     try {
       const result = checkpoint
-        ? await resumeNewBosBackgroundResponse({ client: backgroundClient, responseId: checkpoint.provider_response_id, scientificRequest: request, maxWaitMs: 600_000, onEvent })
-        : await executeNewBosBackgroundResponse({ client: backgroundClient, scientificRequest: request, maxWaitMs: 600_000, onEvent });
+        ? await resumeNewBosBackgroundResponse({ client: backgroundClient, responseId: checkpoint.provider_response_id, scientificRequest: request, maxWaitMs: INTERACTIVE_BACKGROUND_WAIT_MS, onEvent })
+        : await executeNewBosBackgroundResponse({ client: backgroundClient, scientificRequest: request, maxWaitMs: INTERACTIVE_BACKGROUND_WAIT_MS, onEvent });
       return result.response;
     } catch (error) {
       if (['background_poll_timeout', 'background_resume_poll_timeout'].includes(error?.code)) {

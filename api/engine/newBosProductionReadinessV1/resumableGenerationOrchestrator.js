@@ -1,0 +1,239 @@
+import { inspectNewBosBackgroundTransportDiff, buildNewBosBackgroundExecutionRequest, executeNewBosBackgroundResponse, resumeNewBosBackgroundResponse } from './backgroundResponsesTransport.js';
+import { buildNewBosSemanticStageRequest, createNewBosSemanticStageProvider } from './reasoningProvider.js';
+import { sha256Stable } from './realizationIdentity.js';
+import {
+  assembleNewBosReasoningDraftV1,
+  buildNewBosResumableCampaignIdentity,
+  buildNewBosSemanticStageSchema,
+  NEW_BOS_SEMANTIC_STAGES,
+  validateNewBosSemanticStageFragment,
+} from './resumableSemanticContract.js';
+
+function terminalObservation(error) {
+  const response = error?.providerResponse;
+  return Object.freeze({
+    provider_response_id: response?.id || error?.responseId || null,
+    provider_request_id: response?._request_id || null,
+    status: response?.status || error?.status || 'failed',
+    incomplete_details_reason: response?.incomplete_details?.reason || null,
+    error_code: response?.error?.code || (error?.responseId ? null : 'transport_error'),
+    model: response?.model || null,
+    service_tier: response?.service_tier || null,
+    created_at: response?.created_at || null,
+    completed_at: response?.completed_at || null,
+    usage: response?.usage || null,
+    observed_at: new Date().toISOString(),
+  });
+}
+
+function humanReviewError(stageId, classification) {
+  return Object.assign(new Error(`new_bos_resumable_stage_${classification?.state || 'unavailable'}:${stageId}`), {
+    human_review_required: true,
+    recovery_phase: stageId === 'causal_foundation' || stageId === 'operating_domains'
+      ? 'UNDERSTANDING_PROFILE'
+      : 'BUILDING_WHOLE_PERSON_MAP',
+    recovery_classification: classification || null,
+  });
+}
+
+export async function runNewBosResumableSemanticGeneration({
+  rawEvidence,
+  governedContext,
+  realizationIdentity,
+  model,
+  client,
+  checkpointStore,
+  privacyTokens = [],
+  interactiveWaitMs = 12_000,
+  onTechnicalEvent = async () => {},
+  onUsage = async () => {},
+} = {}) {
+  const evidenceIds = rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId);
+  const campaignIdentity = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
+  const accepted = [];
+  const acceptedUsage = [];
+  let acceptedSubmissionCount = 0;
+  let submissionCount = 0;
+  let retrievalCount = 0;
+
+  for (const stage of NEW_BOS_SEMANTIC_STAGES) {
+    const acceptedDependencies = accepted
+      .filter((item) => stage.dependencies.includes(item.stage_id))
+      .map((item) => Object.freeze({
+        stage_id: item.stage_id,
+        fragment: item.fragment,
+        fragment_sha256: item.fragment_sha256,
+      }));
+    if (acceptedDependencies.length !== stage.dependencies.length) {
+      throw new Error(`new_bos_resumable_stage_dependency_missing:${stage.id}`);
+    }
+    const scientificRequest = buildNewBosSemanticStageRequest({
+      rawEvidence,
+      governedContext,
+      model,
+      stageId: stage.id,
+      acceptedDependencies,
+      privacyTokens,
+    });
+    const requestSha256 = sha256Stable(scientificRequest);
+    const unitIdentitySha256 = sha256Stable({
+      version: 'new_bos_resumable_semantic_unit_v1',
+      campaign_sha256: campaignIdentity.sha256,
+      stage_id: stage.id,
+      stage_schema_sha256: sha256Stable(buildNewBosSemanticStageSchema({ stageId: stage.id, evidenceIds })),
+      dependency_hashes: acceptedDependencies.map(({ stage_id: stageId, fragment_sha256: fragmentSha256 }) => [stageId, fragmentSha256]),
+      scientific_request_sha256: requestSha256,
+    });
+    const unitId = `semantic:${stage.id}`;
+    const prepared = await checkpointStore.prepare({
+      campaignSha256: campaignIdentity.sha256,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+    });
+    if (prepared.disposition === 'REUSE_ACCEPTED') {
+      const fragment = validateNewBosSemanticStageFragment({ stageId: stage.id, fragment: prepared.record.accepted_value });
+      accepted.push(Object.freeze({ stage_id: stage.id, fragment, fragment_sha256: prepared.record.accepted_value_sha256 }));
+      const acceptedAttempts = Number(prepared.record.attempt) || 1;
+      acceptedSubmissionCount += acceptedAttempts;
+      acceptedUsage.push(Object.freeze({
+        stage_id: stage.id,
+        usage: prepared.record.observation?.usage || null,
+        provider_submissions: acceptedAttempts,
+      }));
+      await onTechnicalEvent(Object.freeze({ stage: 'semantic_checkpoint_reused', semantic_stage_id: stage.id }));
+      continue;
+    }
+    if (!['START_INITIAL', 'START_REPLACEMENT', 'RESUME_EXACT'].includes(prepared.disposition)) {
+      throw humanReviewError(stage.id, prepared.classification);
+    }
+
+    const provider = createNewBosSemanticStageProvider({
+      model,
+      stageId: stage.id,
+      privacyTokens,
+      transport: async (request) => {
+        if (sha256Stable(request) !== requestSha256) throw new Error('new_bos_resumable_stage_request_drift');
+        const inspection = inspectNewBosBackgroundTransportDiff({
+          scientificRequest: request,
+          executionRequest: buildNewBosBackgroundExecutionRequest(request),
+        });
+        if (!inspection.valid) throw new Error('new_bos_resumable_stage_background_contract_invalid');
+        const onEvent = async (event) => {
+          await checkpointStore.observe({
+            campaignSha256: campaignIdentity.sha256,
+            unitId,
+            unitIdentitySha256,
+            requestSha256,
+            event,
+          });
+          await onTechnicalEvent(Object.freeze({
+            stage: 'semantic_transport',
+            semantic_stage_id: stage.id,
+            status: event.status,
+            incomplete_details_reason: event.incomplete_details_reason,
+            error_code: event.error_code,
+            usage: event.usage,
+            poll_count: event.poll_count,
+          }));
+        };
+        try {
+          const result = prepared.disposition === 'RESUME_EXACT'
+            ? await resumeNewBosBackgroundResponse({
+              client,
+              responseId: prepared.record.observation.provider_response_id,
+              scientificRequest: request,
+              maxWaitMs: interactiveWaitMs,
+              onEvent,
+            })
+            : await executeNewBosBackgroundResponse({
+              client,
+              scientificRequest: request,
+              maxWaitMs: interactiveWaitMs,
+              onEvent,
+            });
+          submissionCount += result.transport_evidence.submit_count;
+          retrievalCount += result.transport_evidence.poll_count
+            + (result.transport_evidence.mode === 'background_resume_existing' ? 1 : 0);
+          return result.response;
+        } catch (error) {
+          if (['background_poll_timeout', 'background_resume_poll_timeout'].includes(error?.code)) {
+            error.code = 'new_bos_provider_background_in_progress';
+            error.background_pending = true;
+          } else if (!error?.providerResponse && !error?.responseId) {
+            await checkpointStore.observe({
+              campaignSha256: campaignIdentity.sha256,
+              unitId,
+              unitIdentitySha256,
+              requestSha256,
+              event: terminalObservation(error),
+            });
+          }
+          throw error;
+        }
+      },
+      capture: async ({ response, receipt }) => {
+        await onUsage(response);
+        await onTechnicalEvent(Object.freeze({
+          stage: 'semantic_completed',
+          semantic_stage_id: stage.id,
+          provider_response_id_sha256: receipt.provider_response_id ? sha256Stable(receipt.provider_response_id) : null,
+          requested_model: receipt.requested_model,
+          returned_model: receipt.returned_model,
+          latency_ms: receipt.latency_ms,
+          usage: receipt.usage,
+        }));
+      },
+    });
+
+    try {
+      const fragment = await provider.infer({
+        raw_evidence: rawEvidence,
+        governed_context: governedContext,
+        accepted_dependencies: acceptedDependencies,
+      });
+      const record = await checkpointStore.accept({
+        campaignSha256: campaignIdentity.sha256,
+        unitId,
+        unitIdentitySha256,
+        requestSha256,
+        value: fragment,
+      });
+      accepted.push(Object.freeze({ stage_id: stage.id, fragment, fragment_sha256: record.accepted_value_sha256 }));
+      const acceptedAttempts = Number(record.attempt) || 1;
+      acceptedSubmissionCount += acceptedAttempts;
+      acceptedUsage.push(Object.freeze({
+        stage_id: stage.id,
+        usage: record.observation?.usage || null,
+        provider_submissions: acceptedAttempts,
+      }));
+    } catch (error) {
+      if (error?.background_pending || error?.human_review_required) throw error;
+      if (/privacy|model_substitution|invalid_json|empty_output|fragment|schema|evidence|authority|truth/u.test(error?.message || '')) {
+        await checkpointStore.rejectSemantic({
+          campaignSha256: campaignIdentity.sha256,
+          unitId,
+          unitIdentitySha256,
+          requestSha256,
+          code: error?.message,
+        });
+      }
+      throw error;
+    }
+  }
+
+  const interpretationDraft = assembleNewBosReasoningDraftV1({ fragments: accepted });
+  return Object.freeze({
+    campaign_identity: campaignIdentity,
+    interpretation_draft: interpretationDraft,
+    interpretation_draft_sha256: sha256Stable(interpretationDraft),
+    accepted_stages: Object.freeze(accepted.map(({ stage_id: stageId, fragment_sha256: fragmentSha256 }) => Object.freeze({
+      stage_id: stageId,
+      fragment_sha256: fragmentSha256,
+    }))),
+    accepted_stage_usage: Object.freeze(acceptedUsage),
+    campaign_provider_submissions: acceptedSubmissionCount,
+    provider_submissions: submissionCount,
+    provider_retrievals: retrievalCount,
+  });
+}

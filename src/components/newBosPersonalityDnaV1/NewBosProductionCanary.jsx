@@ -4,6 +4,10 @@ import NewBosExperience from './NewBosExperience.jsx';
 
 const PROFILE_ID_PATTERN = /^MM-[A-Z0-9-]+$/;
 
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 export default function NewBosProductionCanary({ customerMode = false }) {
   const [profileId, setProfileId] = useState('');
   const [accessToken, setAccessToken] = useState('');
@@ -20,19 +24,33 @@ export default function NewBosProductionCanary({ customerMode = false }) {
     setStatus('loading');
     setMessage('');
     try {
-      const response = await fetch(`/api/moremindmap/new-bos?id=${encodeURIComponent(normalized)}`, {
-        method: 'GET',
-        cache: 'no-store',
-        credentials: 'same-origin',
-        headers: customerMode ? {} : { 'x-new-bos-canary-token': token },
-      });
-      const body = await response.json().catch(() => ({}));
-      if (!response.ok || !body?.artifact) throw new Error(body?.safe_code || 'new_bos_canary_unavailable');
-      setArtifact(body.artifact);
-      setStatus('ready');
+      for (let attempt = 0; attempt < 450; attempt += 1) {
+        const response = await fetch(`/api/moremindmap/new-bos?id=${encodeURIComponent(normalized)}`, {
+          method: 'GET',
+          cache: 'no-store',
+          credentials: 'same-origin',
+          headers: customerMode ? { accept: 'application/json' } : { accept: 'application/json', 'x-new-bos-canary-token': token },
+        });
+        const body = await response.json().catch(() => ({}));
+        if (response.status === 202 && body?.pending === true) {
+          setStatus('processing');
+          setMessage('Your governed realization is being prepared. This page will update automatically.');
+          await wait(Math.min(Math.max(Number(body.retry_after_ms) || 2000, 1000), 5000));
+          continue;
+        }
+        if (!response.ok || !body?.artifact) throw new Error(body?.safe_code || 'new_bos_canary_unavailable');
+        setArtifact(body.artifact);
+        setStatus('ready');
+        setMessage('');
+        return;
+      }
+      setStatus('processing');
+      setMessage('Your governed realization is still being prepared. You can safely refresh this page later.');
     } catch (error) {
       setStatus('error');
-      setMessage(String(error?.message || 'new_bos_canary_unavailable').replaceAll('_', ' '));
+      setMessage(customerMode
+        ? 'We could not finish preparing this realization right now. Your saved information is safe. Please try again later.'
+        : String(error?.message || 'new_bos_canary_unavailable').replaceAll('_', ' '));
     } finally {
       if (!customerMode) setAccessToken('');
     }
@@ -68,7 +86,7 @@ export default function NewBosProductionCanary({ customerMode = false }) {
       <main data-testid="new-bos-customer-loading" style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 24, background: '#172127', color: '#f7f1e6' }}>
         <div style={{ width: 'min(560px, 100%)' }}>
           <p style={{ color: '#f0a178', textTransform: 'uppercase', letterSpacing: '.14em', fontWeight: 800 }}>Your governed Personality DNA</p>
-          <h1 style={{ font: '400 3.2rem/1 Georgia, serif' }}>{status === 'loading' ? 'Reading the whole person…' : 'This realization is not available.'}</h1>
+          <h1 style={{ font: '400 3.2rem/1 Georgia, serif' }}>{['loading', 'processing'].includes(status) ? 'Preparing your Personality DNA…' : 'This realization is not available.'}</h1>
           {message && <p role="alert" style={{ color: '#f0a178' }}>{message}</p>}
         </div>
       </main>

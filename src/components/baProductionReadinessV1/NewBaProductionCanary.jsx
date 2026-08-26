@@ -69,7 +69,7 @@ export default function NewBaProductionCanary({ customerMode = false }) {
     setMessage('');
     try {
       let body = null;
-      for (let attempt = 0; attempt < 6; attempt += 1) {
+      for (let attempt = 0; attempt < 450; attempt += 1) {
         const response = await fetch(`/api/moremindmap/new-ba?id=${encodeURIComponent(normalized)}`, {
           method: 'GET',
           cache: 'no-store',
@@ -77,21 +77,30 @@ export default function NewBaProductionCanary({ customerMode = false }) {
           headers: customerMode ? {} : { 'x-new-ba-canary-token': token },
         });
         body = await response.json().catch(() => ({}));
-        if (response.status === 202 && body?.status === 'GENERATION_ADVANCING') {
-          await new Promise((resolve) => window.setTimeout(resolve, Number(body.retry_after_ms || 1500)));
+        if (response.status === 202 && body?.pending === true) {
+          setStatus('processing');
+          setMessage('Your governed Business Twin is being prepared. This page will update automatically.');
+          const delay = Math.min(Math.max(Number(body.retry_after_ms) || 2000, 1000), 5000);
+          await new Promise((resolve) => window.setTimeout(resolve, delay));
           continue;
         }
         if (!response.ok) throw new Error(body?.safe_code || 'new_ba_canary_unavailable');
         break;
       }
-      if (!body?.artifact?.customer_view_model) throw new Error('new_ba_generation_did_not_complete');
+      if (!body?.artifact?.customer_view_model) {
+        setStatus('processing');
+        setMessage('Your governed Business Twin is still being prepared. You can safely refresh this page later.');
+        return;
+      }
       const customerViewModel = normalizeLiveCustomerPresentation(normalizeNewBaRelativeSupportCustomerLanguage(buildCustomerSafePresentationViewModel(body.artifact.customer_view_model)));
       document.title = `${customerViewModel.identity.firstName}’s Business Twin · MORE MindMap`;
       setViewModel(customerViewModel);
       setStatus('ready');
     } catch (error) {
       setStatus('error');
-      setMessage(String(error?.message || 'new_ba_canary_unavailable').replaceAll('_', ' '));
+      setMessage(customerMode
+        ? 'We could not finish preparing this Business Twin right now. Your saved information is safe. Please try again later.'
+        : String(error?.message || 'new_ba_canary_unavailable').replaceAll('_', ' '));
     } finally {
       if (!customerMode) setAccessToken('');
     }
@@ -118,7 +127,7 @@ export default function NewBaProductionCanary({ customerMode = false }) {
       <main data-testid="new-ba-customer-loading" className="ba-production-private-gate">
         <div>
           <p>Your governed Business Twin</p>
-          <h1>{status === 'loading' ? 'Reading your business as a whole…' : 'This Business Twin is not available.'}</h1>
+          <h1>{['loading', 'processing'].includes(status) ? 'Preparing your Business Twin…' : 'This Business Twin is not available.'}</h1>
           {message && <strong role="alert">{message}</strong>}
         </div>
       </main>

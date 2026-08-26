@@ -10,6 +10,10 @@ const ALLOWED_EVENT_TYPES = Object.freeze([
   'pointer_advanced',
   'pointer_rollback',
   'provider_disabled',
+  'background_pending',
+  'pointer_self_healed',
+  'terminal_checkpoint_retired',
+  'corrupt_derived_recovered',
 ]);
 
 function sanitize(value) {

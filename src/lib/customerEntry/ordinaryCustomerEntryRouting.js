@@ -59,7 +59,7 @@ async function resolveCurrentProduct({
     );
     const payload = await response.json().catch(() => ({}));
     const code = safeCode(payload);
-    const pending = product === 'ba' && response.status === 202 && payload?.pending === true;
+    const pending = response.status === 202 && payload?.pending === true;
 
     if ((response.ok && payload?.artifact) || pending) {
       return Object.freeze({
@@ -103,4 +103,3 @@ export function resolveOrdinaryBosEntry(profileId, fetchImpl) {
 export function resolveOrdinaryBaEntry(profileId, fetchImpl) {
   return resolveCurrentProduct({ product: 'ba', profileId, fetchImpl });
 }
-

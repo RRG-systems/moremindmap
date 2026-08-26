@@ -27,7 +27,11 @@ const handler = createNewBaRouteHandler({
       fixtureReader: async (profileId) => profileId === SYNTHETIC_TOP_PROFILE_ID ? synthetic : null,
     });
     const realizationStore = createRedisNewBaRealizationStore({ redis, namespace: config.namespace, persistenceEnabled: config.persistenceEnabled });
-    const backgroundResponseStore = createRedisNewBaBackgroundResponseStore({ redis, namespace: config.namespace });
+    const backgroundResponseStore = createRedisNewBaBackgroundResponseStore({
+      redis,
+      namespace: config.namespace,
+      onRecoveryEvent: async (event) => console.info('[NEW-BA-RECOVERY]', event),
+    });
     const singleFlight = createRedisSingleFlight({ redis, namespace: config.namespace });
     const campaign = config.providerEnabled
       ? createRealProfileNewBaGenerationCampaign({

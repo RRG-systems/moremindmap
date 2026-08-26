@@ -51,6 +51,14 @@ test('routes a compatible BA artifact and an advancing compatible BA to Business
   assert.equal(pending.pending, true);
 });
 
+test('routes an advancing compatible BOS to the public New BOS customer route', async () => {
+  const pending = await resolveOrdinaryBosEntry('MM-20260617-YBNWT0KS', async () =>
+    response(202, { pending: true, status: 'REALIZATION_RECOVERY_IN_PROGRESS' }));
+  assert.equal(pending.status, 'current');
+  assert.equal(pending.pending, true);
+  assert.equal(pending.destination, '/new-bos?id=MM-20260617-YBNWT0KS');
+});
+
 test('uses legacy only for explicit governed incompatibility or missing current authority', async () => {
   const bos = await resolveOrdinaryBosEntry('MM-20260617-YBNWT0KS', async () =>
     response(409, { safe_code: 'new_bos_modernization_requires_evidence_or_review' }));
@@ -93,4 +101,3 @@ test('ordinary entry surfaces prefer the shared current-product resolver before 
   assert.doesNotMatch(profile, /NEW_BOS_CANARY_PROFILE_IDS|x-new-bos-canary-token/u);
   assert.doesNotMatch(ba, /NEW_BA_CANARY_PROFILE_IDS|x-new-ba-canary-token/u);
 });
-

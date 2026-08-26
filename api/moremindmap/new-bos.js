@@ -2,11 +2,11 @@ import Redis from 'ioredis';
 import process from 'node:process';
 
 import { createReadOnlyCanonicalReader } from '../engine/newBosProductionReadinessV1/canonicalReader.js';
-import { createRedisNewBosBackgroundResponseStore } from '../engine/newBosProductionReadinessV1/backgroundResponseStore.js';
 import { readNewBosProductionConfig } from '../engine/newBosProductionReadinessV1/config.js';
 import { createRedisLaunchSafeRealizationStore } from '../engine/newBosProductionReadinessV1/launchSafeRealizationStore.js';
 import { createNewBosModernizationService } from '../engine/newBosProductionReadinessV1/modernizationService.js';
 import { createProductionNewBosGenerator } from '../engine/newBosProductionReadinessV1/productionGenerator.js';
+import { createRedisNewBosResumableGenerationStore } from '../engine/newBosProductionReadinessV1/resumableGenerationStore.js';
 import { createNewBosProductionRouteHandler } from '../engine/newBosProductionReadinessV1/routeHandler.js';
 import { createRedisSingleFlightCoordinator } from '../engine/newBosProductionReadinessV1/singleFlight.js';
 
@@ -28,13 +28,16 @@ const handler = createNewBosProductionRouteHandler({
       persistenceEnabled: config.persistenceEnabled,
     });
     const singleFlight = createRedisSingleFlightCoordinator({ redis, namespace: config.namespace });
-    const backgroundResponseStore = createRedisNewBosBackgroundResponseStore({ redis, namespace: config.namespace });
+    const resumableGenerationStore = createRedisNewBosResumableGenerationStore({
+      redis,
+      namespace: config.namespace,
+    });
     const generator = config.providerEnabled
       ? createProductionNewBosGenerator({
         apiKey: process.env.OPENAI_API_KEY,
         repositoryRoot: process.cwd(),
         model: config.providerModel,
-        backgroundResponseStore,
+        resumableGenerationStore,
       })
       : null;
     return createNewBosModernizationService({

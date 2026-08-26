@@ -13,7 +13,7 @@ import { LIBRARY_MANIFEST_SHA256, selectLibraryForStage } from './libraryRegistr
 import { assembleRealizedSurfaceRendering, validateBrowserRenderableCandidate } from './renderingAssembly.js';
 import { auditHumanRealization, validateHumanRealization } from './truthValidator.js';
 
-const REASONING_STAGES = Object.freeze([
+export const NEW_BOS_REASONING_AUTHORITY_STAGES = Object.freeze([
   'vector_priors',
   'cross_vector_topology',
   'higher_order_attributes',
@@ -62,6 +62,18 @@ function validateRetrievedAuthority(selection, retrieved) {
   });
 }
 
+export async function retrieveNewBosGovernedReasoningContext({ libraryRetriever }) {
+  invariant(typeof libraryRetriever?.retrieve === 'function', 'Hash-verifying library retriever is required');
+  const retrievedContexts = [];
+  for (const stageId of NEW_BOS_REASONING_AUTHORITY_STAGES) {
+    const selection = selectLibraryForStage(stageId);
+    const retrieved = await libraryRetriever.retrieve(selection);
+    validateRetrievedAuthority(selection, retrieved);
+    retrievedContexts.push({ stage_id: stageId, selection, retrieved });
+  }
+  return Object.freeze(retrievedContexts);
+}
+
 export async function runPersonalityDnaProductionContract({
   activation,
   rawEvidence,
@@ -69,6 +81,8 @@ export async function runPersonalityDnaProductionContract({
   libraryRetriever,
   reasoningProvider,
   surfaceRealizer = null,
+  governedContext = null,
+  interpretationDraft = null,
 }) {
   invariant(
     activation === 'synthetic_lab' || activation === NEW_BOS_REAL_PROFILE_HS_GATE_V1,
@@ -82,24 +96,25 @@ export async function runPersonalityDnaProductionContract({
     invariant(rawEvidence?.governed_local_snapshot === true, 'Real-profile HS gate requires a governed local snapshot');
   }
   invariant(typeof libraryRetriever?.retrieve === 'function', 'Hash-verifying library retriever is required');
-  invariant(typeof reasoningProvider?.infer === 'function', 'Reasoning provider adapter is required');
+  if (!interpretationDraft) invariant(typeof reasoningProvider?.infer === 'function', 'Reasoning provider adapter is required');
 
-  const retrievedContexts = [];
-  for (const stageId of REASONING_STAGES) {
-    const selection = selectLibraryForStage(stageId);
-    const retrieved = await libraryRetriever.retrieve(selection);
-    validateRetrievedAuthority(selection, retrieved);
-    retrievedContexts.push({ stage_id: stageId, selection, retrieved });
+  const retrievedContexts = governedContext || await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+  if (governedContext) {
+    invariant(governedContext.length === NEW_BOS_REASONING_AUTHORITY_STAGES.length, 'Governed reasoning context stage count mismatch');
+    NEW_BOS_REASONING_AUTHORITY_STAGES.forEach((stageId, index) => {
+      invariant(governedContext[index]?.stage_id === stageId, `Governed reasoning context order mismatch for ${stageId}`);
+      validateRetrievedAuthority(governedContext[index].selection, governedContext[index].retrieved);
+    });
   }
 
-  const interpretationDraft = await reasoningProvider.infer({
+  const resolvedInterpretationDraft = interpretationDraft || await reasoningProvider.infer({
     raw_evidence: rawEvidence,
     governed_context: retrievedContexts,
     mission: 'Produce a typed Personality DNA artifact and vector-free whole-person model. Scores are priors; claims require evidence.',
     output_contract: 'BOS_PERSONALITY_DNA_RUNTIME_V1_CONTRACT',
     cache_key: runtimeCacheKey({ rawEvidence, providerModel }),
   });
-  const artifact = buildPersonalityDnaRuntime({ rawEvidence, interpretationDraft });
+  const artifact = buildPersonalityDnaRuntime({ rawEvidence, interpretationDraft: resolvedInterpretationDraft });
 
   return realizePersonalityDnaArtifact({ artifact, providerModel, surfaceRealizer });
 }

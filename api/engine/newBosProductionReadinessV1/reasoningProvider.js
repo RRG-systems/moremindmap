@@ -8,8 +8,14 @@ import {
   deriveProviderIdentityTokens,
   inspectProviderPrivacy,
   sanitizeProviderBoundText,
+  sanitizeProviderBoundValue,
 } from './privacyEgress.js';
 import { buildNewBosReasoningSchema, NEW_BOS_REASONING_OUTPUT_BUDGET } from './reasoningContract.js';
+import {
+  buildNewBosSemanticStageSchema,
+  semanticStageById,
+  validateNewBosSemanticStageFragment,
+} from './resumableSemanticContract.js';
 
 function outputText(response) {
   if (typeof response?.output_text === 'string') return response.output_text;
@@ -95,6 +101,136 @@ export function buildNewBosReasoningRequest({ rawEvidence, governedContext, mode
     throw error;
   }
   return request;
+}
+
+export function buildNewBosSemanticStageRequest({
+  rawEvidence,
+  governedContext,
+  model,
+  stageId,
+  acceptedDependencies = [],
+  privacyTokens = [],
+}) {
+  const stage = semanticStageById(stageId);
+  const governedPrivacyTokens = [...deriveProviderIdentityTokens(rawEvidence), ...privacyTokens];
+  const packet = buildPseudonymousReasoningPacket(rawEvidence, governedPrivacyTokens);
+  const evidenceIds = packet.evidence.map(({ evidence_id: id }) => id);
+  const doctrine = compactGovernedContext(governedContext).map((item) => Object.freeze({
+    ...item,
+    doctrine: sanitizeProviderBoundText(item.doctrine, governedPrivacyTokens),
+  }));
+  const dependencies = acceptedDependencies.map(({ stage_id: dependencyStageId, fragment, fragment_sha256: fragmentSha256 }) => Object.freeze({
+    stage_id: dependencyStageId,
+    fragment_sha256: fragmentSha256,
+    accepted_fragment: sanitizeProviderBoundValue(fragment, governedPrivacyTokens),
+  }));
+  const request = Object.freeze({
+    model,
+    store: false,
+    reasoning: Object.freeze({ effort: 'xhigh' }),
+    max_output_tokens: NEW_BOS_REASONING_OUTPUT_BUDGET.max_output_tokens,
+    safety_identifier: crypto.createHash('sha256')
+      .update(`new-bos-resumable:${stageId}:${rawEvidence.generation_metadata.canonical_source_sha256}`)
+      .digest('hex')
+      .slice(0, 32),
+    input: Object.freeze([Object.freeze({
+      role: 'user',
+      content: Object.freeze([Object.freeze({
+        type: 'input_text',
+        text: [
+          'MORE MindMap New BOS Resumable Generation V1 — governed whole-person semantic stage.',
+          '',
+          `Stage: ${stage.id}.`,
+          `Mission: ${stage.mission}`,
+          '',
+          'Understand the complete governed person before producing this stage. The stage boundary limits output ownership, not reasoning context.',
+          'Return only the fields owned by this stage and required by the strict response schema.',
+          'Do not repeat sibling-stage intelligence. Do not invent biography, scenes, quotations, observer reactions, outcomes, dates, numbers, or history.',
+          'Scores are probabilistic priors, never identity. Preserve contradictions, counterevidence, confounds, falsifiers, uncertainty, and abstention.',
+          'Never diagnose, proxy intelligence, infer protected traits, or weaken a semantic distinction merely to reduce output.',
+          'Every evidence reference must resolve to a supplied evidence ID. Reuse accepted claim IDs exactly where dependencies establish them.',
+          'Emit minified JSON only.',
+          '',
+          'GOVERNED PSEUDONYMOUS EVIDENCE:',
+          JSON.stringify(packet),
+          '',
+          'BOUNDED HASH-VERIFIED DOCTRINE:',
+          JSON.stringify(doctrine),
+          '',
+          'ACCEPTED HASH-BOUND DEPENDENCIES:',
+          JSON.stringify(dependencies),
+        ].join('\n'),
+      })]),
+    })]),
+    text: Object.freeze({
+      verbosity: NEW_BOS_REASONING_OUTPUT_BUDGET.text_verbosity,
+      format: Object.freeze({
+        type: 'json_schema',
+        name: `new_bos_resumable_${stage.id}_v1`,
+        strict: true,
+        schema: buildNewBosSemanticStageSchema({ stageId, evidenceIds }),
+      }),
+    }),
+  });
+  const privacy = inspectProviderPrivacy(request, governedPrivacyTokens);
+  if (!privacy.valid) {
+    const error = new Error('new_bos_semantic_stage_privacy_gate_failed');
+    error.failures = privacy.failures;
+    throw error;
+  }
+  return request;
+}
+
+export function createNewBosSemanticStageProvider({
+  transport,
+  model,
+  stageId,
+  capture = async () => {},
+  privacyTokens = [],
+} = {}) {
+  if (typeof transport !== 'function') throw new Error('new_bos_semantic_stage_transport_required');
+  if (!model) throw new Error('new_bos_semantic_stage_model_required');
+  semanticStageById(stageId);
+  let calls = 0;
+  return Object.freeze({
+    async infer({ raw_evidence: rawEvidence, governed_context: governedContext, accepted_dependencies: acceptedDependencies = [] }) {
+      if (calls !== 0) throw new Error('new_bos_semantic_stage_single_call_boundary_exceeded');
+      calls += 1;
+      const request = buildNewBosSemanticStageRequest({
+        rawEvidence,
+        governedContext,
+        model,
+        stageId,
+        acceptedDependencies,
+        privacyTokens,
+      });
+      const startedAt = Date.now();
+      const response = await transport(request);
+      const receipt = Object.freeze({
+        stage: stageId,
+        requested_model: model,
+        returned_model: response?.model || null,
+        provider_response_id: response?._request_id || response?.id || null,
+        latency_ms: Date.now() - startedAt,
+        usage: usageReceipt(response),
+      });
+      await capture(Object.freeze({ request, response, receipt, captured_before_validation: true }));
+      if (response?.status && response.status !== 'completed') throw new Error(`new_bos_semantic_stage_terminal_status:${response.status}`);
+      if (!modelMatches(model, response?.model)) throw new Error('new_bos_semantic_stage_model_substitution_rejected');
+      const serialized = outputText(response);
+      if (!serialized) throw new Error('new_bos_semantic_stage_empty_output');
+      let parsed;
+      try {
+        parsed = JSON.parse(serialized);
+      } catch {
+        throw new Error('new_bos_semantic_stage_invalid_json');
+      }
+      return validateNewBosSemanticStageFragment({ stageId, fragment: parsed });
+    },
+    callCount() {
+      return calls;
+    },
+  });
 }
 
 export function createNewBosReasoningProvider({ transport, model, capture = async () => {}, privacyTokens = [] } = {}) {

@@ -1,6 +1,7 @@
 import {
   artifactSha256,
 } from './derivedArtifactStore.js';
+import crypto from 'node:crypto';
 import { validateCompleteNewBosCandidate } from './completeness.js';
 import {
   NEW_BOS_REALIZATION_IDENTITY_VERSION,
@@ -21,6 +22,10 @@ function validateNamespace(namespace) {
     throw new Error('new_bos_launch_store_namespace_must_be_nonproduction');
   }
   return value;
+}
+
+function serializedSha256(serialized) {
+  return crypto.createHash('sha256').update(String(serialized)).digest('hex');
 }
 
 export function buildLaunchSafeRealizationEnvelope({
@@ -66,7 +71,7 @@ export function validateLaunchSafeRealizationEnvelope(envelope, { profileId = en
   return envelope;
 }
 
-function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPointer }) {
+function createStoreCore({ namespace, getValue, setImmutable, replaceCorrupt, compareAndSetPointer }) {
   const boundedNamespace = validateNamespace(namespace);
   const artifactKey = (profileId, realizationId) => `${boundedNamespace}:artifact:${normalizeProfileId(profileId)}:${realizationId}`;
   const pointerKey = (profileId) => `${boundedNamespace}:latest-compatible:${normalizeProfileId(profileId)}`;
@@ -77,6 +82,22 @@ function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPoint
     return validateLaunchSafeRealizationEnvelope(JSON.parse(serialized), { profileId });
   }
 
+  async function inspectArtifact(profileId, realizationId) {
+    if (!realizationId) return Object.freeze({ state: 'missing', envelope: null, serialized_sha256: null });
+    const serialized = await getValue(artifactKey(profileId, realizationId));
+    if (!serialized) return Object.freeze({ state: 'missing', envelope: null, serialized_sha256: null });
+    const hash = serializedSha256(serialized);
+    try {
+      return Object.freeze({
+        state: 'valid',
+        envelope: validateLaunchSafeRealizationEnvelope(JSON.parse(serialized), { profileId }),
+        serialized_sha256: hash,
+      });
+    } catch {
+      return Object.freeze({ state: 'corrupt', envelope: null, serialized_sha256: hash });
+    }
+  }
+
   return Object.freeze({
     namespace: boundedNamespace,
     async getRealization({ profileId, realizationId }) {
@@ -85,13 +106,41 @@ function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPoint
     async inspect({ profileId, desiredIdentity }) {
       const normalized = normalizeProfileId(profileId);
       const currentId = await getValue(pointerKey(normalized));
-      if (!currentId) return Object.freeze({ state: 'missing', current: null, pointer: null });
-      const current = await readArtifact(normalized, currentId);
-      if (!current) throw new Error('new_bos_launch_store_pointer_target_missing');
+      const desiredId = desiredIdentity?.realization_id || null;
+      const desiredInspection = await inspectArtifact(normalized, desiredId);
+      const desired = desiredInspection.envelope;
+      if (!currentId) {
+        if (desired && sameNewBosRealizationIdentity(desired.realization_identity, desiredIdentity)) {
+          return Object.freeze({ state: 'publishable_orphan', current: desired, pointer: null, pointer_repair_required: true });
+        }
+        if (desiredInspection.state === 'corrupt') {
+          return Object.freeze({
+            state: 'corrupt_derived', current: null, pointer: null,
+            corruption: Object.freeze({ realization_id: desiredId, serialized_sha256: desiredInspection.serialized_sha256 }),
+          });
+        }
+        return Object.freeze({ state: 'missing', current: null, pointer: null });
+      }
+      const currentInspection = currentId === desiredId
+        ? desiredInspection
+        : await inspectArtifact(normalized, currentId);
+      const current = currentInspection.envelope;
+      if (!current) {
+        if (desired && sameNewBosRealizationIdentity(desired.realization_identity, desiredIdentity)) {
+          return Object.freeze({ state: 'publishable_orphan', current: desired, pointer: currentId, pointer_repair_required: true });
+        }
+        if (desiredInspection.state === 'corrupt' || currentInspection.state === 'corrupt') {
+          const corrupt = desiredInspection.state === 'corrupt'
+            ? { realization_id: desiredId, serialized_sha256: desiredInspection.serialized_sha256 }
+            : { realization_id: currentId, serialized_sha256: currentInspection.serialized_sha256 };
+          return Object.freeze({ state: 'corrupt_derived', current: null, pointer: currentId, corruption: Object.freeze(corrupt) });
+        }
+        return Object.freeze({ state: 'missing_derived', current: null, pointer: currentId, pointer_target_missing: true });
+      }
       const state = sameNewBosRealizationIdentity(current.realization_identity, desiredIdentity) ? 'current' : 'stale';
       return Object.freeze({ state, current, pointer: currentId });
     },
-    async persistImmutable(envelope) {
+    async persistImmutable(envelope, { corruptRecovery = null } = {}) {
       validateLaunchSafeRealizationEnvelope(envelope);
       const key = artifactKey(envelope.profile_id, envelope.realization_id);
       const serialized = JSON.stringify(envelope);
@@ -99,7 +148,31 @@ function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPoint
       if (!written) {
         const existing = await getValue(key);
         if (!existing) throw new Error('new_bos_launch_store_immutable_write_unconfirmed');
-        const parsed = validateLaunchSafeRealizationEnvelope(JSON.parse(existing), { profileId: envelope.profile_id });
+        let parsed;
+        try {
+          parsed = validateLaunchSafeRealizationEnvelope(JSON.parse(existing), { profileId: envelope.profile_id });
+        } catch {
+          const existingSha256 = serializedSha256(existing);
+          const recoveryAuthorized = corruptRecovery?.realization_id === envelope.realization_id
+            && corruptRecovery?.serialized_sha256 === existingSha256;
+          if (!recoveryAuthorized || typeof replaceCorrupt !== 'function') {
+            throw new Error('new_bos_launch_store_corrupt_artifact_requires_recovery');
+          }
+          const replacement = await replaceCorrupt({
+            key,
+            archiveKey: `${key}:corrupt-derived-archive:${existingSha256}`,
+            expectedSerialized: existing,
+            replacementSerialized: serialized,
+          });
+          if (!replacement.updated) throw new Error('new_bos_launch_store_corrupt_recovery_stale_writer');
+          return Object.freeze({
+            written: true,
+            idempotent: false,
+            recovered_corrupt: true,
+            corrupt_archive_sha256: existingSha256,
+            realization_id: envelope.realization_id,
+          });
+        }
         if (parsed.artifact_sha256 !== envelope.artifact_sha256) throw new Error('new_bos_launch_store_immutable_conflict');
         return Object.freeze({ written: false, idempotent: true, realization_id: envelope.realization_id });
       }
@@ -129,8 +202,8 @@ function createStoreCore({ namespace, getValue, setImmutable, compareAndSetPoint
   });
 }
 
-export function createMemoryLaunchSafeRealizationStore({ namespace = 'preview:new-bos:test' } = {}) {
-  const values = new Map();
+export function createMemoryLaunchSafeRealizationStore({ namespace = 'preview:new-bos:test', values = new Map() } = {}) {
+  if (!(values instanceof Map)) throw new Error('new_bos_memory_launch_store_values_invalid');
   return createStoreCore({
     namespace,
     getValue: async (key) => values.get(key) || null,
@@ -138,6 +211,12 @@ export function createMemoryLaunchSafeRealizationStore({ namespace = 'preview:ne
       if (values.has(key)) return false;
       values.set(key, value);
       return true;
+    },
+    replaceCorrupt: async ({ key, archiveKey, expectedSerialized, replacementSerialized }) => {
+      if (values.get(key) !== expectedSerialized) return { updated: false };
+      if (!values.has(archiveKey)) values.set(archiveKey, expectedSerialized);
+      values.set(key, replacementSerialized);
+      return { updated: true };
     },
     compareAndSetPointer: async (key, expected, next) => {
       const current = values.get(key) || null;
@@ -160,6 +239,14 @@ redis.call('SET', KEYS[1], ARGV[2])
 return {1, ARGV[2]}
 `;
 
+const CORRUPT_REPAIR_SCRIPT = `
+local current = redis.call('GET', KEYS[1])
+if current ~= ARGV[1] then return {0} end
+redis.call('SET', KEYS[2], current, 'NX')
+redis.call('SET', KEYS[1], ARGV[2])
+return {1}
+`;
+
 export function createRedisLaunchSafeRealizationStore({ redis, namespace, persistenceEnabled = false } = {}) {
   if (typeof redis?.get !== 'function' || typeof redis?.set !== 'function' || typeof redis?.eval !== 'function') {
     throw new Error('new_bos_launch_store_redis_contract_invalid');
@@ -171,6 +258,11 @@ export function createRedisLaunchSafeRealizationStore({ redis, namespace, persis
       if (!persistenceEnabled) throw new Error('new_bos_launch_store_persistence_default_off');
       const result = await redis.set(key, value, 'NX');
       return result === 'OK';
+    },
+    replaceCorrupt: async ({ key, archiveKey, expectedSerialized, replacementSerialized }) => {
+      if (!persistenceEnabled) throw new Error('new_bos_launch_store_persistence_default_off');
+      const result = await redis.eval(CORRUPT_REPAIR_SCRIPT, 2, key, archiveKey, expectedSerialized, replacementSerialized);
+      return { updated: Number(result?.[0]) === 1 };
     },
     compareAndSetPointer: async (key, expected, next) => {
       if (!persistenceEnabled) throw new Error('new_bos_launch_store_persistence_default_off');

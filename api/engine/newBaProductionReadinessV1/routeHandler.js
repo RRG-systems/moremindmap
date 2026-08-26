@@ -1,3 +1,11 @@
+import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
+
+const GOVERNED_CUSTOMER_CODES = new Set([
+  'new_ba_business_assessment_not_found',
+  'new_ba_compatible_bos_authority_missing',
+  'new_ba_modernization_requires_evidence_or_review',
+]);
+
 function tokenFromRequest(request) {
   const explicit = request.headers?.['x-new-ba-canary-token'];
   if (typeof explicit === 'string') return explicit;
@@ -11,6 +19,7 @@ function safeStatus(error) {
   if (/access_denied/u.test(message)) return 403;
   if (/requires_evidence_or_review|hash_drift|identity_mismatch/u.test(message)) return 409;
   if (/default_off|not_authorized/u.test(message)) return 503;
+  if (classifyRecoveryFailure(error) === REALIZATION_RECOVERY_STATES.TRANSIENT_INFRASTRUCTURE) return 503;
   return 500;
 }
 
@@ -22,6 +31,20 @@ function safeRuntimeDiagnostic(error) {
   return Object.freeze({
     code: String(error?.code || String(error?.message || '').split(':')[0] || 'new_ba_unknown_failure'),
     path_suffix: pathSuffix,
+  });
+}
+
+function customerSafeCode(error) {
+  const code = String(error?.message || 'new_ba_unknown_failure').split(':')[0];
+  return GOVERNED_CUSTOMER_CODES.has(code) ? code : 'new_ba_temporarily_unavailable';
+}
+
+function customerSafePending(result) {
+  return Object.freeze({
+    pending: true,
+    status: 'GENERATION_ADVANCING',
+    message: 'Your governed Business Twin is being prepared.',
+    retry_after_ms: Math.min(Math.max(Number(result?.retry_after_ms) || 2000, 1000), 5000),
   });
 }
 
@@ -50,10 +73,13 @@ export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalSer
           });
         }
       }
-      return response.status(result?.pending ? 202 : 200).json(result);
+      return response.status(result?.pending ? 202 : 200).json(result?.pending ? customerSafePending(result) : result);
     } catch (error) {
       console.error('[NEW-BA-ROUTE] Governed runtime unavailable', safeRuntimeDiagnostic(error));
-      return response.status(safeStatus(error)).json({ error: 'New BA realization unavailable', safe_code: String(error?.message || 'new_ba_unknown_failure').split(':')[0] });
+      return response.status(safeStatus(error)).json({
+        error: 'New BA realization unavailable',
+        safe_code: customerSafeCode(error),
+      });
     } finally {
       if (redis) await redis.quit().catch(() => {});
     }
