@@ -79,6 +79,54 @@ function baselineEvidence() {
   ];
 }
 
+function baselineIntelligence() {
+  return {
+    contract: 'recruiting_intelligence_projection_v1',
+    generated_at: '2026-08-23T00:00:00.000Z',
+    stale: false,
+    demo_only: true,
+    synthetic_recruit: true,
+    output: {
+      understand_this_recruit: {
+        summary: 'Jordan is pursuing material growth while testing whether stronger operating evidence or first leverage deserves priority.',
+        important_realities: ['The growth goal is explicit.', 'The dominant constraint remains deliberately unresolved.'],
+      },
+      bilateral_communication: {
+        advantage: 'Darren can make the decision concrete without pretending the missing evidence is settled.',
+        recruiter_watchout: 'A decisive recommendation would outrun the synthetic evidence currently available.',
+        adaptation: 'Separate opportunity-flow proof from leverage readiness and let Jordan test both hypotheses.',
+      },
+      authentic_angles: [{
+        title: 'Test the first-leverage decision against current opportunity flow',
+        recruit_need: 'Jordan wants growth without simply adding personal workload.',
+        current_reality: 'The scenario supports a leverage question but leaves pipeline and transferable-work evidence incomplete.',
+        locally_supported_help: 'A synthetic bounded opportunity-and-capacity evidence review is supported in this demo.',
+        rationale: 'The review can distinguish whether leverage or opportunity generation is the nearer constraint.',
+        validating_question: 'What evidence would tell you an assistant removes a real constraint rather than adding management work?',
+        uncertainty: 'Actual repeatable opportunity flow and transferable work volume remain unknown.',
+        recruit_evidence_ids: ['demo_evidence_growth_goal'],
+        opportunity_evidence_ids: ['demo_opp_evidence_review'],
+      }],
+      withheld_angles: ['No lead-volume or production promise is supported by the synthetic opportunity authority.'],
+      success_environment: {
+        natural_success_patterns: ['Purposeful relationship-led growth with visible operating proof'],
+        supportive_conditions: ['Clear ownership boundaries', 'Truthful weekly numbers'],
+        likely_frictions: ['Hiring before work and economics are visible'],
+      },
+      missing_evidence: ['Qualified opportunity flow', 'Transferable recurring work', 'Assistant economics'],
+      meeting_plan: {
+        start_here: 'Ask Jordan what changed between the current production level and the stated growth goal.',
+        learn: ['How opportunity is created now', 'Which recurring work can leave Jordan’s hands'],
+        listen_for: ['A demand constraint', 'An ownership constraint'],
+        your_watchout: 'Do not assume first leverage is the answer because it is under consideration.',
+        supported_paths_if_confirmed: ['Opportunity-and-capacity evidence review'],
+        do_not_assume: 'Do not imply a lead source, staffing result, or recruiting promise.',
+        next_step_if_fit_is_real: 'Agree on one bounded evidence review before recommending a move.',
+      },
+    },
+  };
+}
+
 export function createDarrenSyntheticDemoBaseline({ managerName = 'Darren', enterpriseName = 'MORE MindMap' } = {}) {
   const recruitBos = jordanBosAuthority();
   const recruitBa = jordanBaAuthority();
@@ -110,7 +158,7 @@ export function createDarrenSyntheticDemoBaseline({ managerName = 'Darren', ente
     },
     opportunity: baselineOpportunity(),
     manager_evidence: baselineEvidence(),
-    intelligence: null,
+    intelligence: baselineIntelligence(),
     internal_authority: {
       recruit_bos: recruitBos,
       recruit_ba: recruitBa,
@@ -123,7 +171,7 @@ export function createDarrenSyntheticDemoBaseline({ managerName = 'Darren', ente
   return Object.freeze(clone(state));
 }
 
-export function publicDarrenSyntheticDemoState(state, { entitlement, managerAuthorityMode = 'CANONICAL_BOS_READ_ONLY_REFERENCE' } = {}) {
+export function publicDarrenSyntheticDemoState(state, { entitlement, managerAuthorityMode = 'SYNTHETIC_BOS_ONLY' } = {}) {
   const projected = clone(state);
   delete projected.internal_authority;
   if (projected.intelligence) delete projected.intelligence.manager_bos_reference_sha256;

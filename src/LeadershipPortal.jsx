@@ -6,7 +6,6 @@ import {
   isValidRoleFitAccessCode,
 } from './components/leadership/RoleFitAccessGate.jsx'
 
-const DEMO_CODE = 'darrendemo'
 const ADMIN_DASHBOARD_CODE = 'moreadmin26'
 const RECRUITING_V1_ENABLED = import.meta.env.VITE_RECRUITING_V1_ENABLED === 'true'
 
@@ -21,12 +20,6 @@ export default function LeadershipPortal() {
 
     const normalizedCode = accessCode.trim().toLowerCase()
     const rawTrimmed = accessCode.trim()
-
-    if (normalizedCode === DEMO_CODE) {
-      sessionStorage.setItem('leadershipDemoAccess', 'true')
-      navigate('/leadership-demo')
-      return
-    }
 
     if (normalizedCode === ADMIN_DASHBOARD_CODE) {
       sessionStorage.setItem('leadershipDashboardAccess', 'true')
@@ -49,6 +42,27 @@ export default function LeadershipPortal() {
     }
     setBusy(true)
     try {
+      const demoPrepared = await fetch('/api/internal/leadership-demo-entry', { credentials: 'same-origin', cache: 'no-store' })
+      const demoGate = await demoPrepared.json().catch(() => null)
+      if (demoPrepared.ok && demoGate?.csrf_token) {
+        const demoResponse = await fetch('/api/internal/leadership-demo-entry', {
+          method: 'POST',
+          credentials: 'same-origin',
+          cache: 'no-store',
+          headers: { 'content-type': 'application/json', 'x-leadership-demo-entry-csrf': demoGate.csrf_token },
+          body: JSON.stringify({ action: 'ENTER', access_code: rawTrimmed }),
+        })
+        const demoResult = await demoResponse.json().catch(() => null)
+        if (demoResponse.ok && demoResult?.ok === true && demoResult.redirect_to === '/leadership-demo') {
+          navigate(demoResult.redirect_to)
+          return
+        }
+        if (![401, 404].includes(demoResponse.status)) {
+          setError('Leadership demo access is temporarily unavailable.')
+          return
+        }
+      }
+
       const prepared = await fetch('/api/internal/subscription-v1-entry', { credentials: 'same-origin', cache: 'no-store' })
       const gate = await prepared.json().catch(() => null)
       if (!prepared.ok || !gate?.csrf_token) throw new Error('UNAVAILABLE')

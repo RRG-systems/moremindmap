@@ -1,15 +1,8 @@
 /* global process */
 
 import { createDarrenSyntheticDemoRuntime, recruitingDarrenDemoEnabled } from '../engine/recruitingV1/demoRuntime.js';
-
-const MANAGER_COOKIE = '__Host-more_recruiting_manager';
-
-function cookies(header = '') {
-  return Object.fromEntries(String(header).split(';').map((part) => part.trim()).filter(Boolean).map((part) => {
-    const index = part.indexOf('=');
-    return index < 0 ? [part, ''] : [part.slice(0, index), decodeURIComponent(part.slice(index + 1))];
-  }));
-}
+import { authenticateRecruitingDemoRequest } from '../engine/leadershipDemo/authority.js';
+import { getRecruitingRedis } from '../engine/recruitingV1/redisStore.js';
 
 function requestOrigin(req) {
   const host = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '').split(',')[0].trim().toLowerCase();
@@ -45,18 +38,19 @@ export default async function recruitingDemoHandler(req, res) {
   headers(res);
   if (!recruitingDarrenDemoEnabled(process.env)) return res.status(404).json({ ok: false, code: 'NOT_FOUND' });
   if (!sameOrigin(req, true)) return res.status(403).json({ ok: false, code: 'RECRUITING_DEMO_ORIGIN_DENIED' });
-  const managerToken = cookies(req.headers?.cookie)[MANAGER_COOKIE];
   try {
+    const auth = await authenticateRecruitingDemoRequest({ redis: getRecruitingRedis(process.env), req });
+    if (!auth.ok) return res.status(auth.status).json({ ok: false, code: auth.code });
     const runtime = createDarrenSyntheticDemoRuntime({ env: process.env });
     if (req.method === 'GET') {
       const view = String(req.query?.view || 'demo');
-      if (view === 'availability') return res.status(200).json({ ok: true, ...(await runtime.availability(managerToken)) });
-      if (view === 'demo') return res.status(200).json({ ok: true, ...(await runtime.read(managerToken)) });
+      if (view === 'availability') return res.status(200).json({ ok: true, ...(await runtime.availability(auth.capability)) });
+      if (view === 'demo') return res.status(200).json({ ok: true, ...(await runtime.read(auth.capability)) });
       return res.status(400).json({ ok: false, code: 'RECRUITING_DEMO_VIEW_INVALID' });
     }
     if (req.method !== 'POST') return res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED' });
     const action = String(req.body?.action || '');
-    const payload = await runtime.mutate(managerToken, req.headers?.['x-recruiting-demo-csrf'], action, req.body || {});
+    const payload = await runtime.mutate(auth.capability, req.headers?.['x-recruiting-demo-csrf'], action, req.body || {});
     return res.status(200).json({ ok: true, ...payload });
   } catch (error) {
     const code = String(error?.message || 'RECRUITING_DEMO_FAILURE').slice(0, 180);
@@ -64,4 +58,3 @@ export default async function recruitingDemoHandler(req, res) {
     return res.status(statusFor(error)).json({ ok: false, code });
   }
 }
-

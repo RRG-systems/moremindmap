@@ -1,7 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../src/lib/recruitingV1/store.js';
-import { RecruitingV1Service, createSyntheticNotificationTransport } from '../src/lib/recruitingV1/service.js';
+import fs from 'node:fs';
 import {
   DARREN_SYNTHETIC_DEMO_CANDIDATE_ID,
   DARREN_SYNTHETIC_DEMO_INVARIANTS,
@@ -9,20 +8,13 @@ import {
 } from '../src/lib/recruitingV1/darrenSyntheticDemo.js';
 import { createDarrenSyntheticDemoRuntime, InMemoryRecruitingDemoStore } from '../api/engine/recruitingV1/demoRuntime.js';
 
-const DARREN_PROFILE = 'mm-20260527-6zshuaao';
-const DARREN = {
-  membership_id: 'membership_darren_demo_test', manager_subject_id: 'manager_darren_demo_test', enterprise_id: 'enterprise_darren_demo_test',
-  manager_profile_id: DARREN_PROFILE, manager_name: 'Darren Synthetic Authority', manager_email: 'darren@example.test',
-  enterprise_name: 'MORE MindMap', status: 'ACTIVE', setup_state: 'COMPLETE', entitlement_mode: 'unlimited',
-  admin_roles: ['RECRUITING_ADMIN'], recruiting_governance: { all_enterprises: true, enterprise_ids: [] }, synthetic_only: true,
-};
-
-const OTHER_ADMIN = { ...DARREN, membership_id: 'membership_other_admin', manager_subject_id: 'manager_other_admin', manager_profile_id: 'mm-20990101-other001' };
-
-async function sessionFor(service, profileId) {
-  const requested = await service.requestManagerVerification(profileId);
-  return (await service.verifyManager(requested.verification_token)).session_token;
-}
+const DEMO_CAPABILITY = Object.freeze({
+  contract: 'recruiting_synthetic_demo_capability_v1',
+  demo_scope_id: 'leadership_demo_scope_test',
+  subject_key: 'recruiting-darren-jordan-v1',
+  allowed_product: 'recruiting',
+  synthetic_only: true,
+});
 
 function validOutput() {
   return {
@@ -66,26 +58,17 @@ function validOutput() {
 }
 
 function harness() {
-  const mainStore = new InMemoryRecruitingStore(createEmptyRecruitingState([DARREN, OTHER_ADMIN]));
-  const recruitingService = new RecruitingV1Service({ store: mainStore, transport: createSyntheticNotificationTransport() });
   const demoStore = new InMemoryRecruitingDemoStore();
   const providerRequests = [];
-  const env = {
-    RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED: 'true',
-    RECRUITING_DEMO_MANAGER_PROFILE_ID: DARREN_PROFILE,
-  };
+  const env = { RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED: 'true' };
   const runtime = createDarrenSyntheticDemoRuntime({
-    env, recruitingService, demoStore,
-    canonicalProfileLoader: async (profileId) => ({
-      found: true,
-      dossier: { canonical_profile_json: { profile_id: profileId, ranked_dimensions: [{ dimension: 'directness', narrative_hint: 'Direct while remaining curious.' }] } },
-    }),
+    env, demoStore,
     providerFactory: () => async (request) => {
       providerRequests.push(request);
       return { output: validOutput(), receipt: { model: 'gpt-5.6-sol', usage: { input_tokens: 100, output_tokens: 200 } } };
     },
   });
-  return { mainStore, recruitingService, demoStore, providerRequests, runtime };
+  return { demoStore, providerRequests, runtime };
 }
 
 test('Jordan baseline is explicitly synthetic, complete, resettable, and zero-impact', () => {
@@ -96,6 +79,8 @@ test('Jordan baseline is explicitly synthetic, complete, resettable, and zero-im
   assert.equal(state.candidates[0].recruit_email, null);
   assert.equal(state.candidates[0].synthetic_only, true);
   assert.equal(state.resettable, true);
+  assert.equal(state.intelligence.contract, 'recruiting_intelligence_projection_v1');
+  assert.equal(state.intelligence.output.authentic_angles.length, 1);
   assert.deepEqual(DARREN_SYNTHETIC_DEMO_INVARIANTS, {
     real_invitation_created: false,
     email_delivery_permitted: false,
@@ -107,43 +92,50 @@ test('Jordan baseline is explicitly synthetic, complete, resettable, and zero-im
   });
 });
 
-test('exact Darren admin authority is required and another all-enterprise admin is denied', async () => {
-  const { recruitingService, runtime } = harness();
-  const darrenSession = await sessionFor(recruitingService, DARREN_PROFILE);
-  assert.equal((await runtime.availability(darrenSession)).demo.available, true);
-  const otherSession = await sessionFor(recruitingService, OTHER_ADMIN.manager_profile_id);
-  await assert.rejects(runtime.availability(otherSession), /RECRUITING_DEMO_SCOPE_DENIED/);
+test('only the product-specific synthetic capability opens the demo', async () => {
+  const { runtime } = harness();
+  const availability = await runtime.availability(DEMO_CAPABILITY);
+  assert.equal(availability.demo.available, true);
+  assert.equal(availability.demo.manager_session_required, false);
+  assert.equal(availability.demo.manager_profile_bound_server_side, false);
+  await assert.rejects(runtime.availability({ ...DEMO_CAPABILITY, allowed_product: 'subscription' }), /RECRUITING_DEMO_SCOPE_DENIED/);
+  await assert.rejects(runtime.availability(null), /RECRUITING_DEMO_SCOPE_DENIED/);
 });
 
-test('demo generation reads Darren BOS, uses GPT-5.6 Sol store false, and never mutates Recruiting ledgers', async () => {
-  const { mainStore, recruitingService, providerRequests, runtime } = harness();
-  const session = await sessionFor(recruitingService, DARREN_PROFILE);
-  const before = await mainStore.read();
-  const opened = await runtime.read(session);
+test('demo generation uses synthetic Darren and Jordan only, GPT-5.6 Sol store false, and no Recruiting ledger authority', async () => {
+  const { providerRequests, runtime } = harness();
+  const opened = await runtime.read(DEMO_CAPABILITY);
   assert.deepEqual(opened.demo.ledger_effect, { invitations: 0, emails: 0, relationships: 0, entitlement: 0, recruiting_audit: 0 });
-  const generated = await runtime.mutate(session, opened.csrf_token, 'GENERATE_DEMO_INTELLIGENCE');
-  const after = await mainStore.read();
-  assert.deepEqual(after, before);
+  assert.equal(opened.demo.manager_authority_mode, 'SYNTHETIC_BOS_ONLY');
+  const generated = await runtime.mutate(DEMO_CAPABILITY, opened.csrf_token, 'GENERATE_DEMO_INTELLIGENCE');
   assert.equal(providerRequests.length, 1);
   assert.equal(providerRequests[0].model, 'gpt-5.6-sol');
   assert.equal(providerRequests[0].store, false);
   assert.equal(generated.demo.intelligence.output.authentic_angles.length, 1);
   assert.equal(generated.demo.intelligence.demo_only, true);
   assert.equal(JSON.stringify(generated.demo).includes('manager_bos_reference_sha256'), false);
-  assert.equal(JSON.stringify((await runtime.read(session)).demo).includes('Direct while remaining curious.'), false);
+  assert.equal(JSON.stringify((await runtime.read(DEMO_CAPABILITY)).demo).includes('canonical_profile'), false);
 });
 
 test('demo evidence and reset stay in the isolated demo store and return exactly to baseline', async () => {
-  const { mainStore, recruitingService, runtime } = harness();
-  const session = await sessionFor(recruitingService, DARREN_PROFILE);
-  const before = await mainStore.read();
-  const opened = await runtime.read(session);
-  const added = await runtime.mutate(session, opened.csrf_token, 'ADD_DEMO_EVIDENCE', {
+  const { runtime } = harness();
+  const opened = await runtime.read(DEMO_CAPABILITY);
+  const added = await runtime.mutate(DEMO_CAPABILITY, opened.csrf_token, 'ADD_DEMO_EVIDENCE', {
     evidence: { type: 'OBSERVATION', claim: 'Synthetic observation for reset proof.', source: 'Founder synthetic demo', source_date: '2026-08-23' },
   });
   assert.equal(added.demo.manager_evidence.length, 3);
-  const reset = await runtime.mutate(session, added.csrf_token, 'RESET_DEMO');
+  assert.equal(added.demo.intelligence.stale, true);
+  const reset = await runtime.mutate(DEMO_CAPABILITY, added.csrf_token, 'RESET_DEMO');
   assert.equal(reset.demo.manager_evidence.length, 2);
-  assert.equal(reset.demo.intelligence, null);
-  assert.deepEqual(await mainStore.read(), before);
+  assert.equal(reset.demo.intelligence.output.authentic_angles.length, 1);
+  assert.equal(reset.demo.intelligence.stale, false);
+});
+
+test('demo runtime and direct React route contain no manager hydration, membership, entitlement, or canonical Darren dependency', () => {
+  const runtime = fs.readFileSync(new URL('../api/engine/recruitingV1/demoRuntime.js', import.meta.url), 'utf8');
+  const route = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
+  assert.doesNotMatch(runtime, /getCanonicalProfile|inspectManagerReadOnly|getRecruitingService|canonicalProfileLoader/u);
+  assert.match(route, /location\.pathname === '\/recruiting\/demo'.+<RecruitingDemoExperience \/>/u);
+  assert.ok(route.indexOf("location.pathname === '/recruiting/demo'") < route.indexOf('return <ManagerExperience />'));
+  assert.match(route, /Synthetic recruiter BOS authority/u);
 });

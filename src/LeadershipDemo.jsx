@@ -1,115 +1,137 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import {
-  companyAlignmentSlides,
-  craigFoxSlides,
-  executiveBoardSlides,
-  livingMapCoachConnectSlides,
-} from './lib/leadershipDemoSlides'
+
+const products = [
+  {
+    id: 'recruiting',
+    action: 'LAUNCH_RECRUITING',
+    number: '01',
+    eyebrow: 'Candidate intelligence',
+    title: 'Recruiting Tool Demo',
+    description: 'Walk Darren and Jordan through all six Recruiting destinations with prefilled, synthetic intelligence and zero real Recruiting activity.',
+    detail: 'Six-destination walkthrough · Synthetic-only · Prefilled payoff',
+    tone: 'green',
+  },
+  {
+    id: 'subscription',
+    action: 'LAUNCH_SUBSCRIPTION',
+    number: '02',
+    eyebrow: 'Living relationship',
+    title: 'Subscription Model Demo',
+    description: 'Open the existing Jordan Subscription relationship directly, with its synthetic Personal RSL, publication, proposals, and allowance state.',
+    detail: 'Existing re-mid authority · Same-browser continuity · No billing',
+    tone: 'violet',
+  },
+]
 
 export default function LeadershipDemo() {
-  const [hasAccess, setHasAccess] = useState(false)
-  const [selectedDeck, setSelectedDeck] = useState(null)
+  const [status, setStatus] = useState('loading')
+  const [csrfToken, setCsrfToken] = useState('')
+  const [busyProduct, setBusyProduct] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    setHasAccess(sessionStorage.getItem('leadershipDemoAccess') === 'true')
+    let active = true
+    fetch('/api/internal/leadership-demo-entry?view=launcher', { credentials: 'same-origin', cache: 'no-store' })
+      .then(async (response) => ({ response, payload: await response.json().catch(() => null) }))
+      .then(({ response, payload }) => {
+        if (!active) return
+        if (!response.ok || payload?.ok !== true || !payload.csrf_token || payload.choices?.length !== 2) {
+          setStatus('locked')
+          return
+        }
+        setCsrfToken(payload.csrf_token)
+        setStatus('ready')
+      })
+      .catch(() => { if (active) setStatus('locked') })
+    return () => { active = false }
   }, [])
 
-  useEffect(() => {
-    if (!selectedDeck) return undefined
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setSelectedDeck(null)
-      if (event.key === 'ArrowLeft') {
-        setSelectedDeck((deck) => ({ ...deck, index: Math.max(0, deck.index - 1) }))
+  async function launch(product) {
+    if (!csrfToken || busyProduct) return
+    setBusyProduct(product.id)
+    setError('')
+    try {
+      const response = await fetch('/api/internal/leadership-demo-entry', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: {
+          'content-type': 'application/json',
+          'x-leadership-demo-launch-csrf': csrfToken,
+        },
+        body: JSON.stringify({ action: product.action }),
+      })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || payload?.ok !== true || !['/recruiting/demo', '/subscription'].includes(payload.redirect_to)) {
+        throw new Error(payload?.code || 'LEADERSHIP_DEMO_LAUNCH_FAILED')
       }
-      if (event.key === 'ArrowRight') {
-        setSelectedDeck((deck) => ({ ...deck, index: Math.min(deck.slides.length - 1, deck.index + 1) }))
-      }
+      window.location.assign(payload.redirect_to)
+    } catch {
+      setError('That demo could not be opened. Return to the Leadership Portal and start a fresh demo session.')
+      setCsrfToken('')
+    } finally {
+      setBusyProduct('')
     }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [selectedDeck])
-
-  if (!hasAccess) {
-    return <LockedLeadershipDemo />
   }
 
-  return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      <DemoBackground />
+  if (status === 'loading') return <LeadershipDemoStatus title="Opening Darren’s demo area…" />
+  if (status === 'locked') return <LockedLeadershipDemo />
 
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[#030605] text-white">
+      <DemoBackground />
       <header className="relative z-10 border-b border-white/10 bg-black/35 backdrop-blur-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
-          <Link to="/" className="text-lg font-semibold tracking-wide md:text-xl">
-            MoreMindMap
-          </Link>
-          <Link
-            to="/leadership"
-            className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white"
-          >
-            Leadership Portal
-          </Link>
+          <Link to="/" className="text-lg font-semibold tracking-wide md:text-xl">MoreMindMap</Link>
+          <Link to="/leadership" className="rounded-full border border-white/12 bg-white/[0.04] px-4 py-2 text-sm text-white/70 transition hover:bg-white/10 hover:text-white">Leadership Portal</Link>
         </div>
       </header>
 
-      <main className="relative z-10 mx-auto max-w-7xl px-6 py-16">
+      <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
-          <div className="inline-flex rounded-full border border-cyan-300/25 bg-cyan-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-cyan-100">
-            Demo Experience
-          </div>
-          <h1 className="mt-7 text-4xl font-semibold tracking-tight md:text-6xl">
-            Leadership Intelligence Demo
-          </h1>
-          <p className="mt-5 max-w-3xl text-lg leading-8 text-white/66">
-            Four demonstration decks for leadership conversations. Click any slide to open a fullscreen preview.
-          </p>
+          <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">Two products. One synthetic Jordan story.</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with its own narrow synthetic authority; neither grants access to a real customer product.</p>
         </section>
 
-        <DemoSection
-          eyebrow="Demo A"
-          title="Craig Fox Recruiting Intelligence Demo"
-          description="Six slide slots for recruiting intelligence, agent attraction, conversion friction, and field-leadership leverage."
-          slides={craigFoxSlides}
-          onOpen={setSelectedDeck}
-        />
+        {error && <div className="mt-8 rounded-2xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-sm text-red-100" role="alert">{error}</div>}
 
-        <DemoSection
-          eyebrow="Demo B"
-          title="Executive / Board Intelligence Demo"
-          description="Four slide slots for board-level constraints, leadership risk, operating leverage, and action briefing."
-          slides={executiveBoardSlides}
-          onOpen={setSelectedDeck}
-        />
+        <section className="mt-12 grid gap-6 lg:grid-cols-2" aria-label="Product demos">
+          {products.map((product) => (
+            <button
+              key={product.id}
+              type="button"
+              onClick={() => launch(product)}
+              disabled={Boolean(busyProduct) || !csrfToken}
+              className={`group min-h-[360px] rounded-[2rem] border p-8 text-left shadow-[0_24px_90px_rgba(0,0,0,0.42)] backdrop-blur-md transition hover:-translate-y-1 focus:outline-none focus:ring-4 disabled:cursor-wait disabled:opacity-55 ${product.tone === 'green' ? 'border-emerald-300/24 bg-[linear-gradient(145deg,rgba(13,62,40,.58),rgba(4,17,15,.92))] focus:ring-emerald-300/15' : 'border-violet-300/24 bg-[linear-gradient(145deg,rgba(53,35,88,.62),rgba(10,12,24,.94))] focus:ring-violet-300/15'}`}
+            >
+              <div className="flex items-start justify-between gap-6">
+                <span className={`text-sm font-semibold tracking-[0.2em] ${product.tone === 'green' ? 'text-emerald-300' : 'text-violet-300'}`}>{product.number}</span>
+                <span className="rounded-full border border-white/12 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/54">Synthetic demo</span>
+              </div>
+              <div className="mt-16 text-xs uppercase tracking-[0.24em] text-white/42">{product.eyebrow}</div>
+              <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">{product.title}</h2>
+              <p className="mt-5 max-w-xl text-base leading-7 text-white/62">{product.description}</p>
+              <div className="mt-8 border-t border-white/10 pt-6">
+                <small className="block text-xs leading-5 text-white/42">{product.detail}</small>
+                <strong className={`mt-5 flex items-center justify-between text-sm ${product.tone === 'green' ? 'text-emerald-200' : 'text-violet-200'}`}>
+                  {busyProduct === product.id ? 'Opening synthetic experience…' : `Open ${product.title}`}
+                  <span aria-hidden="true">→</span>
+                </strong>
+              </div>
+            </button>
+          ))}
+        </section>
 
-        <DemoSection
-          eyebrow="Demo C"
-          title="Company Alignment Intelligence Demo"
-          description="Four slides for business drift, operating decay, alignment, and company intelligence."
-          slides={companyAlignmentSlides}
-          onOpen={setSelectedDeck}
-        />
-
-        <DemoSection
-          eyebrow="Demo D"
-          title="Demo D — Living Business Map + Coach Connect"
-          description="A living business intelligence system that combines ongoing agent evidence, Five Futures, One Move, and weighted human coaching."
-          slides={livingMapCoachConnectSlides}
-          onOpen={setSelectedDeck}
-        />
+        <footer className="mt-10 flex items-center gap-3 text-sm text-white/38"><span aria-hidden="true">◇</span> Demo capabilities are bounded, browser-bound, synthetic-only, and expire automatically.</footer>
       </main>
-
-      {selectedDeck && (
-        <SlideLightbox
-          slides={selectedDeck.slides}
-          index={selectedDeck.index}
-          onNavigate={(index) => setSelectedDeck((deck) => ({ ...deck, index }))}
-          onClose={() => setSelectedDeck(null)}
-        />
-      )}
     </div>
   )
+}
+
+function LeadershipDemoStatus({ title }) {
+  return <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-6 text-white"><DemoBackground /><div className="relative z-10 text-center"><div className="mx-auto h-12 w-12 animate-pulse rounded-full border border-emerald-300/30 bg-emerald-400/10" /><h1 className="mt-6 text-2xl font-semibold">{title}</h1></div></div>
 }
 
 function LockedLeadershipDemo() {
@@ -117,193 +139,15 @@ function LockedLeadershipDemo() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-6 text-white">
       <DemoBackground />
       <div className="relative z-10 max-w-xl rounded-[2rem] border border-white/12 bg-white/[0.055] p-8 text-center shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-md">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-300/30 bg-orange-400/10 text-orange-100">
-          L
-        </div>
-        <h1 className="mt-6 text-3xl font-semibold tracking-tight">
-          Leadership Demo Locked
-        </h1>
-        <p className="mt-4 text-white/62">
-          Enter the demo access code to open the Leadership Intelligence experience.
-        </p>
-        <Link
-          to="/leadership"
-          className="mt-7 inline-flex rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-orange-100"
-        >
-          Go to Access Screen
-        </Link>
-      </div>
-    </div>
-  )
-}
-
-function DemoSection({ eyebrow, title, description, slides, onOpen }) {
-  return (
-    <section className="mt-16">
-      <div className="flex flex-col gap-3 border-b border-white/10 pb-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <div className="text-xs uppercase tracking-[0.24em] text-white/42">{eyebrow}</div>
-          <h2 className="mt-3 text-2xl font-semibold tracking-tight md:text-4xl">
-            {title}
-          </h2>
-        </div>
-        <p className="max-w-2xl text-sm leading-6 text-white/55 md:text-right">
-          {description}
-        </p>
-      </div>
-
-      <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        {slides.map((slide, index) => (
-          <SlideCard
-            key={slide.image}
-            slide={slide}
-            number={index + 1}
-            onOpen={() => onOpen({ slides, index })}
-          />
-        ))}
-      </div>
-    </section>
-  )
-}
-
-function SlideCard({ slide, number, onOpen }) {
-  const [imageFailed, setImageFailed] = useState(false)
-
-  return (
-    <button
-      type="button"
-      onClick={onOpen}
-      className="group overflow-hidden rounded-[1.75rem] border border-white/10 bg-white/[0.045] text-left shadow-[0_18px_60px_rgba(0,0,0,0.28)] backdrop-blur-md transition hover:-translate-y-1 hover:border-orange-300/35 hover:bg-white/[0.07]"
-    >
-      <div className="relative aspect-[16/10] border-b border-white/10 bg-black/45">
-        {!imageFailed && (
-          <img
-            src={slide.image}
-            alt={slide.title}
-            className={`h-full w-full ${slide.fit === 'contain' ? 'object-contain' : 'object-cover'}`}
-            onError={() => setImageFailed(true)}
-          />
-        )}
-        {imageFailed && <SlidePlaceholder slide={slide} number={number} />}
-        <div className="absolute left-4 top-4 rounded-full border border-white/12 bg-black/60 px-3 py-1 text-xs uppercase tracking-[0.16em] text-white/70 backdrop-blur">
-          Slide {String(number).padStart(2, '0')}
-        </div>
-      </div>
-      <div className="p-5">
-        <div className="text-xs uppercase tracking-[0.22em] text-orange-200/70">
-          {slide.type}
-        </div>
-        <h3 className="mt-3 text-xl font-semibold tracking-tight text-white">
-          {slide.title}
-        </h3>
-        <p className="mt-3 text-sm leading-6 text-white/58">{slide.subtitle}</p>
-        <div className="mt-5 text-xs uppercase tracking-[0.18em] text-cyan-100/70">
-          Click to open fullscreen
-        </div>
-      </div>
-    </button>
-  )
-}
-
-function SlidePlaceholder({ slide, number }) {
-  return (
-    <div className="flex h-full flex-col justify-between bg-[radial-gradient(circle_at_25%_20%,rgba(168,85,247,0.22),transparent_34%),radial-gradient(circle_at_78%_70%,rgba(249,115,22,0.2),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-6">
-      <div className="flex justify-end">
-        <div className="h-12 w-12 rounded-full border border-cyan-300/30 bg-cyan-400/10 shadow-[0_0_30px_rgba(34,211,238,0.16)]" />
-      </div>
-      <div>
-        <div className="text-xs uppercase tracking-[0.24em] text-white/45">
-          Placeholder Asset
-        </div>
-        <div className="mt-2 text-2xl font-semibold text-white">
-          {String(number).padStart(2, '0')}
-        </div>
-        <div className="mt-4 h-px w-full bg-gradient-to-r from-orange-300/45 via-cyan-300/35 to-transparent" />
-        <div className="mt-4 text-sm font-medium text-white/80">{slide.title}</div>
-      </div>
-    </div>
-  )
-}
-
-function SlideLightbox({ slides, index, onNavigate, onClose }) {
-  const [failedImage, setFailedImage] = useState('')
-  const slide = slides[index]
-  const imageFailed = failedImage === slide.image
-  const canGoPrevious = index > 0
-  const canGoNext = index < slides.length - 1
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/88 p-4 backdrop-blur-xl md:p-8"
-      role="dialog"
-      aria-modal="true"
-      onClick={onClose}
-    >
-      <div
-        className="relative max-h-full w-full max-w-6xl overflow-hidden rounded-[2rem] border border-white/14 bg-[#050505] shadow-[0_30px_120px_rgba(0,0,0,0.8)]"
-        onClick={(event) => event.stopPropagation()}
-      >
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-full border border-white/15 bg-black/70 px-4 py-2 text-sm text-white/72 backdrop-blur transition hover:bg-white hover:text-black"
-        >
-          Close
-        </button>
-
-        <div className="aspect-[16/9] bg-black">
-          {!imageFailed && (
-            <img
-              src={slide.image}
-              alt={slide.title}
-              className="h-full w-full object-contain"
-              onError={() => setFailedImage(slide.image)}
-            />
-          )}
-          {imageFailed && <SlidePlaceholder slide={slide} number={index + 1} />}
-        </div>
-
-        <div className="flex flex-col gap-4 border-t border-white/10 p-5 md:flex-row md:items-end md:justify-between md:p-6">
-          <div>
-            <div className="text-xs uppercase tracking-[0.22em] text-orange-200/70">
-              {slide.type} · Slide {index + 1} of {slides.length}
-            </div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-white">
-              {slide.title}
-            </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/58">{slide.subtitle}</p>
-          </div>
-          <div className="flex shrink-0 gap-2">
-            <button
-              type="button"
-              aria-label="Previous slide"
-              disabled={!canGoPrevious}
-              onClick={() => onNavigate(index - 1)}
-              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white/80 transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-25"
-            >
-              ← Previous
-            </button>
-            <button
-              type="button"
-              aria-label="Next slide"
-              disabled={!canGoNext}
-              onClick={() => onNavigate(index + 1)}
-              className="rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-sm text-white/80 transition hover:bg-white hover:text-black disabled:cursor-not-allowed disabled:opacity-25"
-            >
-              Next →
-            </button>
-          </div>
-        </div>
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-orange-300/30 bg-orange-400/10 text-orange-100">L</div>
+        <h1 className="mt-6 text-3xl font-semibold tracking-tight">Leadership Demo Locked</h1>
+        <p className="mt-4 text-white/62">Enter the demo access code in the Leadership Portal to create a fresh, bounded demo session.</p>
+        <Link to="/leadership" className="mt-7 inline-flex rounded-2xl bg-white px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-black transition hover:bg-orange-100">Go to Access Screen</Link>
       </div>
     </div>
   )
 }
 
 function DemoBackground() {
-  return (
-    <div className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(168,85,247,0.16),transparent_30%),radial-gradient(circle_at_84%_24%,rgba(249,115,22,0.15),transparent_30%),radial-gradient(circle_at_58%_78%,rgba(14,165,233,0.12),transparent_34%)]" />
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] opacity-35" />
-    </div>
-  )
+  return <div className="pointer-events-none absolute inset-0"><div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,197,94,0.17),transparent_30%),radial-gradient(circle_at_84%_24%,rgba(139,92,246,0.16),transparent_30%),radial-gradient(circle_at_58%_78%,rgba(14,165,233,0.1),transparent_34%)]" /><div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] opacity-35" /></div>
 }

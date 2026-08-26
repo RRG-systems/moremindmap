@@ -60,10 +60,11 @@ function syntheticDarrenDemoReviewState() {
     contract: 'recruiting_darren_synthetic_demo_v1', baseline_version: '1.0.0', demo_only: true, synthetic_only: true,
     label: 'DEMO CANDIDATE — SYNTHETIC DATA', resettable: true,
     manager: { name: 'Darren Synthetic', enterprise_name: 'MORE MindMap', capabilities: { darren_demo: true } },
-    entitlement: { mode: 'unlimited', used: 0, reserved: 0, consumed: 0, remaining: null }, candidates: [candidate],
+    entitlement: { mode: 'unlimited', used: 0, reserved: 0, consumed: 0, remaining: null, synthetic_only: true, ledger_written: false }, candidates: [candidate],
     recruit: { name: 'Jordan Lee', readiness: 'BA_INTELLIGENCE_READY', bos_summary: `${jordan.wholePerson.communication} ${jordan.wholePerson.motivation}`, ba_summary: jordan.businessReality, known: ['Synthetic BOS authority ready', 'Synthetic BA authority ready', ...jordan.known.slice(0, 4)], unknown: clone(jordan.missing) },
     opportunity: { authority_id: 'demo_synthetic_opportunity_jordan_v1', demo_only: true, items: [
       { opportunity_evidence_id: 'demo_opp_evidence_review', category: 'COACHING_AND_TRAINING', scope: 'LOCAL_LEADER_PRIMARY', statement: 'The synthetic demo assumes access to a structured opportunity-and-capacity evidence review; actual Darren or enterprise capabilities are not asserted.', status: 'SUPPORTED', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: ['Demo-only capability; verify real availability before any customer conversation.'], counterevidence: [], demo_only: true },
+      { opportunity_evidence_id: 'demo_opp_leverage_hypothesis', category: 'OPERATIONS_AND_LEVERAGE', scope: 'LOCAL_LEADER_PRIMARY', statement: 'A bounded first-leverage decision review is available in the synthetic scenario when opportunity, economics, and transferable-work evidence support it.', status: 'CONDITIONAL', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: ['No hiring outcome or operating support is promised.'], counterevidence: ['Jordan may need better opportunity evidence before leverage is the next move.'], demo_only: true },
       { opportunity_evidence_id: 'demo_opp_no_lead_promise', category: 'LEAD_OPPORTUNITY', scope: 'LOCAL_LEADER_PRIMARY', statement: 'The demo establishes no company-provided lead volume, allocation, or conversion outcome.', status: 'NON_PROMISE', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: [], counterevidence: [], demo_only: true },
     ] },
     manager_evidence: [
@@ -125,16 +126,61 @@ async function demoApi({ view, action, body = {} }) {
 
 function routeFor(pathname) {
   const part = pathname.split('/').filter(Boolean)[1] || 'home';
-  if (['master-control', 'demo'].includes(part)) return part;
+  if (part === 'master-control') return part;
   return destinations.some(([id]) => id === part) ? part : 'home';
 }
 
 export default function RecruitingV1App() {
   const location = useLocation();
+  if (location.pathname === '/recruiting/demo') return <RecruitingDemoExperience />;
   if (location.pathname.startsWith('/recruiting/accept/')) return <InvitationAcceptance />;
   if (location.pathname.startsWith('/recruiting/verify/')) return <ManagerVerification />;
   if (location.pathname.startsWith('/recruiting/setup')) return <RecruitingManagerSetup request={api} synthetic={SYNTHETIC} fixture={SYNTHETIC_RECRUITING_FIXTURE} />;
   return <ManagerExperience />;
+}
+
+function RecruitingDemoExperience() {
+  const navigate = useNavigate();
+  const [state, setState] = useState(SYNTHETIC ? syntheticDarrenDemoReviewState() : null);
+  const [status, setStatus] = useState(SYNTHETIC ? 'ready' : 'loading');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (SYNTHETIC) return;
+    demoApi({ view: 'demo' })
+      .then((payload) => {
+        setState(payload.demo);
+        setStatus('ready');
+      })
+      .catch((failure) => {
+        setError(failure.message);
+        setStatus('unauthorized');
+      });
+  }, []);
+
+  if (status === 'loading') return <LoadingState message="Opening Jordan’s synthetic Recruiting demo…" />;
+  if (status === 'unauthorized' || !state) {
+    return <main className="manager-onboarding"><div className="loading-mark">!</div><h1>A fresh Leadership demo session is required.</h1><p>{error || 'This synthetic capability is missing or expired.'}</p><button type="button" onClick={() => navigate('/leadership', { replace: true })}>Return to Leadership Portal →</button></main>;
+  }
+
+  return (
+    <div className="recruiting-v1 campaign-shell campaign-layer-one-shell" data-synthetic-demo="true">
+      <ProductHeader
+        manager={state.manager}
+        role="Synthetic Recruiting Demo"
+        meta="Synthetic Darren + Jordan · No manager session or customer activity"
+        error={error}
+      />
+      <main className="recruiting-main">
+        <DarrenSyntheticDemoSurface
+          state={state}
+          setState={setState}
+          setError={setError}
+          exit={() => navigate('/leadership-demo')}
+        />
+      </main>
+    </div>
+  );
 }
 
 function ManagerExperience() {
@@ -148,9 +194,6 @@ function ManagerExperience() {
   const [sessionStatus, setSessionStatus] = useState(SYNTHETIC ? 'ready' : 'loading');
   const [error, setError] = useState(SYNTHETIC && syntheticScenario === 'error' ? 'Synthetic review: Recruiting Intelligence is temporarily unavailable.' : '');
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
-  const syntheticDemo = SYNTHETIC ? syntheticDarrenDemoReviewState() : null;
-  const [demoState, setDemoState] = useState(syntheticDemo);
-  const [demoAvailable, setDemoAvailable] = useState(SYNTHETIC);
   const selected = selectRecruitingCandidate(state?.candidates, selectedCandidateId);
 
   useEffect(() => {
@@ -164,7 +207,6 @@ function ManagerExperience() {
         manager: payload.manager,
       });
       if (landingPath) navigate(landingPath, { replace: true });
-      demoApi({ view: 'availability' }).then(() => setDemoAvailable(true)).catch(() => setDemoAvailable(false));
     }).catch(() => setSessionStatus('unauthorized'));
   }, [navigate]);
 
@@ -194,13 +236,6 @@ function ManagerExperience() {
       .then((payload) => setState((current) => ({ ...current, master_control: payload })))
       .catch((failure) => setError(failure.message));
   }, [active, state?.manager?.capabilities?.master_control]);
-
-  useEffect(() => {
-    if (SYNTHETIC || active !== 'demo' || !demoAvailable) return;
-    demoApi({ view: 'demo' })
-      .then((payload) => setDemoState(payload.demo))
-      .catch((failure) => setError(failure.message));
-  }, [active, demoAvailable]);
 
   if (sessionStatus === 'loading') return <LoadingState />;
   if (sessionStatus === 'unauthorized') return <ManagerOnboarding onVerified={() => window.location.assign('/recruiting/home')} />;
@@ -248,7 +283,7 @@ function ManagerExperience() {
       <ProductHeader
         manager={shellState.manager}
         role={role}
-        backLabel={!managerMapVisible && !['master-control', 'demo'].includes(active) ? 'Back to Recruiting Map' : null}
+        backLabel={!managerMapVisible && active !== 'master-control' ? 'Back to Recruiting Map' : null}
         onBack={() => navigateTo('home')}
         meta={SYNTHETIC ? 'Synthetic founder review · No production activity' : null}
         error={error}
@@ -256,7 +291,7 @@ function ManagerExperience() {
       {candidateContextVisible && <CandidateAnchor candidate={selected} intelligence={state.intelligence} onChange={() => navigate('/recruiting/home?view=workspace')} />}
       <main className="recruiting-main">
           {managerMapVisible && <ManagerJourneyMap state={state} candidate={selected} navigate={openManagerDestination} />}
-          {active === 'home' && !managerMapVisible && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={demoAvailable} />}
+          {active === 'home' && !managerMapVisible && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={SYNTHETIC} />}
           {active === 'invite' && <InviteSurface state={state} setState={setState} setError={setError} navigate={navigateTo} />}
           {active === 'candidate' && <CandidateSurface state={state} candidate={selected} navigate={navigateTo} />}
           {active === 'opportunity' && <OpportunitySurface state={state} setState={setState} />}
@@ -264,11 +299,8 @@ function ManagerExperience() {
           {active === 'intelligence' && <IntelligenceSurface state={state} setState={setState} candidate={selected} navigate={navigateTo} />}
           {active === 'meeting' && <MeetingSurface state={state} candidate={selected} navigate={navigateTo} />}
           {active === 'export' && <ExportSurface state={state} candidate={selected} />}
-          {active === 'demo' && (demoState
-            ? <DarrenSyntheticDemoSurface state={demoState} setState={setDemoState} setError={setError} exit={() => navigateTo('home')} />
-            : <LoadingState message="Opening Darren's synthetic demo…" />)}
           {active === 'master-control' && (state.manager.capabilities?.master_control
-            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} navigate={openAdminDestination} demoAvailable={demoAvailable} />
+            ? <RecruitingMasterControl data={masterControl} request={api} synthetic={SYNTHETIC} refresh={refreshMasterControl} setError={setError} navigate={openAdminDestination} demoAvailable={SYNTHETIC} />
             : <NotReadySurface title="Master Control is not available for this account." copy="Only an approved Recruiting administrator can manage enterprise access and invitation allowances." />)}
       </main>
     </div>
@@ -517,18 +549,24 @@ function EvidenceSurface({ state, setState, candidate, request = api, demo = fal
 
 function IntelligenceSurface({ state, setState, candidate, navigate, request = api, demo = false }) {
   const [proof, setProof] = useState(null);
+  const [generating, setGenerating] = useState(false);
   async function generate() {
-    const payload = await request({ action: 'GENERATE_INTELLIGENCE', body: { candidate_id: candidate.candidate_id } });
-    setState((current) => ({ ...current, intelligence: payload.intelligence }));
+    setGenerating(true);
+    try {
+      const payload = await request({ action: 'GENERATE_INTELLIGENCE', body: { candidate_id: candidate.candidate_id } });
+      setState((current) => ({ ...current, intelligence: payload.intelligence }));
+    } finally {
+      setGenerating(false);
+    }
   }
   if (!state.intelligence?.output) return <NotReadySurface title="Recruiting Intelligence is not ready yet." copy="The recruit’s profile and at least one supported local capability are required before a complete view can be created." actionLabel="Create Recruiting Intelligence" onAction={generate} />;
   const output = state.intelligence.output;
   return (
     <section className="surface intelligence-surface" data-surface="intelligence">
-      <header className="campaign-surface-title"><div><p className="campaign-kicker">Recruiting Intelligence · Layer 01</p><h1>Understand {candidate.recruit_name} before you decide what to say.</h1><p className="surface-subhead">Four truth classes stay separate. Bilateral reasoning connects two people only where evidence supports a useful conversation.</p></div><button className="solid-button inline" type="button" onClick={() => navigate('meeting')}>Open Meeting & Brief</button></header>
-      {state.intelligence.stale && <div className="stale-banner"><b>Evidence changed</b><span>The last complete view remains visible, but it does not yet include the newest information.</span><button type="button" onClick={generate}>Refresh with current evidence</button></div>}
+      <header className="campaign-surface-title"><div><p className="campaign-kicker">Recruiting Intelligence · Layer 01</p><h1>Understand {candidate.recruit_name} before you decide what to say.</h1><p className="surface-subhead">Four truth classes stay separate. Bilateral reasoning connects two people only where evidence supports a useful conversation.</p></div><div className="intelligence-header-actions">{demo && <button className="outline-button inline" type="button" disabled={generating} onClick={generate}>{generating ? 'Refreshing synthetic view…' : 'Refresh synthetic intelligence'}</button>}<button className="solid-button inline" type="button" onClick={() => navigate('meeting')}>Open Meeting & Brief</button></div></header>
+      {state.intelligence.stale && <div className="stale-banner"><b>Evidence changed</b><span>The last complete view remains visible, but it does not yet include the newest information.</span><button type="button" disabled={generating} onClick={generate}>{generating ? 'Refreshing…' : 'Refresh with current evidence'}</button></div>}
       <section className="understand-hero panel"><div><p className="eyebrow green">Understand This Recruit</p><h2>{output.understand_this_recruit.summary}</h2></div><ul>{output.understand_this_recruit.important_realities.map((item) => <li key={item}>✓ {item}</li>)}</ul></section>
-      <section className="bilateral panel"><header><p className="eyebrow teal">Bilateral Communication</p><span>Use the bridge here · nowhere else</span></header><div className="bilateral-people"><div><b>{state.manager.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{state.manager.name}</strong><small>{demo ? 'Canonical BOS · read-only reference' : 'Recruiter Reality'}</small></div><i>↔</i><div><b>{candidate.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{candidate.recruit_name}</strong><small>{demo ? 'Synthetic BOS + BA authority' : 'Recruit Reality'}</small></div></div><div className="bilateral-grid"><article><small>Your advantage</small><p>{output.bilateral_communication.advantage}</p></article><article><small>Your watchout</small><p>{output.bilateral_communication.recruiter_watchout}</p></article><article><small>Authentic adaptation</small><p>{output.bilateral_communication.adaptation}</p></article></div></section>
+      <section className="bilateral panel"><header><p className="eyebrow teal">Bilateral Communication</p><span>Use the bridge here · nowhere else</span></header><div className="bilateral-people"><div><b>{state.manager.name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{state.manager.name}</strong><small>{demo ? 'Synthetic recruiter BOS authority' : 'Recruiter Reality'}</small></div><i>↔</i><div><b>{candidate.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</b><strong>{candidate.recruit_name}</strong><small>{demo ? 'Synthetic BOS + BA authority' : 'Recruit Reality'}</small></div></div><div className="bilateral-grid"><article><small>Your advantage</small><p>{output.bilateral_communication.advantage}</p></article><article><small>Your watchout</small><p>{output.bilateral_communication.recruiter_watchout}</p></article><article><small>Authentic adaptation</small><p>{output.bilateral_communication.adaptation}</p></article></div></section>
       <section className="business-gap-reserved" aria-label="Business Gap Intelligence V1.1 reserved insertion point"><header><span>Reserved insertion point</span><strong>Business Gap Intelligence V1.1</strong><b>Not active in V1</b></header><div>{['Current Business Reality', 'Chosen or Possible Future', 'Gap', 'Constraint', 'Proof', 'What Must Change', 'Can We Help?'].map((label) => <span key={label}>{label}<i>→</i></span>)}</div><p>V1 does not fabricate this chain. Ratified intelligence will appear here before Authentic Recruiting Angles.</p></section>
       <div className="section-heading angles-heading"><div><p className="eyebrow green">Authentic Recruiting Angles</p><h2>{output.authentic_angles.length} supported {output.authentic_angles.length === 1 ? 'path' : 'paths'}. No quota of three.</h2></div><span>Recruit evidence + local capability required</span></div>
       <div className="angle-grid">{output.authentic_angles.map((angle, index) => <article className="panel angle-card" key={angle.title}><header><span>0{index + 1}</span><b>{index === 0 ? 'Supported' : 'Conditional'}</b></header><h2>{angle.title}</h2><p>{angle.rationale}</p><blockquote>{angle.validating_question}</blockquote><footer><button type="button" onClick={() => setProof(angle)}>Why this path is allowed →</button><b>{angle.recruit_evidence_ids.length + angle.opportunity_evidence_ids.length} evidence links</b></footer></article>)}</div>

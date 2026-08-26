@@ -1,6 +1,5 @@
 /* global Buffer, process */
 
-import { getCanonicalProfile } from '../../business-assessment/shared.js';
 import {
   addDarrenSyntheticDemoEvidence,
   assembleDarrenSyntheticDemoInputs,
@@ -9,37 +8,42 @@ import {
   saveDarrenSyntheticDemoIntelligence,
   saveDarrenSyntheticDemoOpportunity,
 } from '../../../src/lib/recruitingV1/darrenSyntheticDemo.js';
-import { createOpaqueToken, digestToken, normalizeProfileId, stableHash } from '../../../src/lib/recruitingV1/contracts.js';
+import { createOpaqueToken, digestToken, stableHash } from '../../../src/lib/recruitingV1/contracts.js';
 import { assembleRecruitingContext, generateRecruitingIntelligence } from '../../../src/lib/recruitingV1/intelligence.js';
-import {
-  canonicalSignalView,
-  createRecruitingOpenAiProvider,
-  getRecruitingService,
-  syntheticReviewEnabled,
-} from './runtime.js';
+import { createRecruitingOpenAiProvider } from './runtime.js';
 import { getRecruitingRedis, normalizeRecruitingNamespace } from './redisStore.js';
 
 const DEMO_CSRF_TTL_SECONDS = 15 * 60;
 const DEMO_GENERATION_LOCK_SECONDS = 4 * 60;
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
-function exactDemoProfile(env) {
-  return normalizeProfileId(env.RECRUITING_DEMO_MANAGER_PROFILE_ID);
-}
-
 export function recruitingDarrenDemoEnabled(env = process.env) {
-  return env.RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED === 'true' && Boolean(exactDemoProfile(env));
+  return env.RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED === 'true';
 }
 
-function assertDarrenAuthority(inspected, env) {
-  const membership = inspected?.membership;
-  const exactProfile = exactDemoProfile(env);
+function assertSyntheticDemoCapability(capability, env) {
   if (!recruitingDarrenDemoEnabled(env)) throw new Error('RECRUITING_DEMO_NOT_FOUND');
-  if (!membership || normalizeProfileId(membership.manager_profile_id) !== exactProfile) throw new Error('RECRUITING_DEMO_SCOPE_DENIED');
-  if (!Array.isArray(membership.admin_roles) || !membership.admin_roles.includes('RECRUITING_ADMIN')) throw new Error('RECRUITING_DEMO_ADMIN_REQUIRED');
-  if (membership.entitlement_mode !== 'unlimited' || membership.recruiting_governance?.all_enterprises !== true) throw new Error('RECRUITING_DEMO_AUTHORITY_INCOMPLETE');
-  return membership;
+  if (capability?.contract !== 'recruiting_synthetic_demo_capability_v1'
+    || capability.synthetic_only !== true || capability.allowed_product !== 'recruiting'
+    || capability.subject_key !== 'recruiting-darren-jordan-v1' || !capability.demo_scope_id) {
+    throw new Error('RECRUITING_DEMO_SCOPE_DENIED');
+  }
+  return Object.freeze({
+    membership_id: capability.demo_scope_id,
+    manager_subject_id: `synthetic:${capability.demo_scope_id}`,
+    enterprise_id: 'demo_synthetic_enterprise_v1',
+    manager_profile_id: null,
+    manager_name: 'Darren Synthetic',
+    enterprise_name: 'MORE MindMap',
+    synthetic_only: true,
+    demo_only: true,
+  });
 }
+
+const SYNTHETIC_DEMO_ENTITLEMENT = Object.freeze({
+  mode: 'unlimited', used: 0, reserved: 0, consumed: 0, remaining: null,
+  synthetic_only: true, ledger_written: false,
+});
 
 function demoKeys(namespace, membershipId) {
   const base = `more:${normalizeRecruitingNamespace(namespace)}:darren-synthetic-demo:v1:${stableHash(membershipId).slice(0, 32)}`;
@@ -142,62 +146,53 @@ function syntheticManagerBos(membership) {
   });
 }
 
-async function managerBosFor(membership, { env, canonicalProfileLoader }) {
-  if (syntheticReviewEnabled(env)) return syntheticManagerBos(membership);
-  const profile = await canonicalProfileLoader(membership.manager_profile_id);
-  if (!profile?.found) throw new Error('RECRUITING_DEMO_MANAGER_BOS_UNAVAILABLE');
-  return canonicalSignalView(profile.dossier, 'recruiter');
-}
-
 export function createDarrenSyntheticDemoRuntime({
   env = process.env,
-  recruitingService = getRecruitingService(env),
   demoStore = new RedisRecruitingDemoStore(getRecruitingRedis(env), { namespace: env.RECRUITING_V1_NAMESPACE }),
-  canonicalProfileLoader = async (profileId) => getCanonicalProfile(getRecruitingRedis(env), profileId),
   providerFactory = createRecruitingOpenAiProvider,
   now = () => new Date(),
 } = {}) {
-  async function authority(sessionToken) {
-    const inspected = await recruitingService.inspectManagerReadOnly(sessionToken);
-    return { inspected, membership: assertDarrenAuthority(inspected, env) };
+  async function authority(capability) {
+    return { membership: assertSyntheticDemoCapability(capability, env) };
   }
 
   function baseline(membership) {
     return createDarrenSyntheticDemoBaseline({ managerName: membership.manager_name, enterpriseName: membership.enterprise_name });
   }
 
-  async function buildPublic(membership, inspected) {
+  async function buildPublic(membership) {
     const state = await demoStore.read(membership, baseline(membership));
-    const managerBos = await managerBosFor(membership, { env, canonicalProfileLoader });
+    const managerBos = syntheticManagerBos(membership);
     const managerBosReferenceSha256 = stableHash(managerBos);
     if (state.intelligence?.manager_bos_reference_sha256 && state.intelligence.manager_bos_reference_sha256 !== managerBosReferenceSha256) {
       state.intelligence.stale = true;
     }
-    const projected = publicDarrenSyntheticDemoState(state, { entitlement: inspected.entitlement });
+    const projected = publicDarrenSyntheticDemoState(state, { entitlement: SYNTHETIC_DEMO_ENTITLEMENT });
     return { state: projected, managerBos, managerBosReferenceSha256 };
   }
 
-  async function read(sessionToken) {
-    const { membership, inspected } = await authority(sessionToken);
-    const result = await buildPublic(membership, inspected);
+  async function read(capability) {
+    const { membership } = await authority(capability);
+    const result = await buildPublic(membership);
     return { demo: result.state, csrf_token: await demoStore.issueCsrf(membership) };
   }
 
-  async function availability(sessionToken) {
-    const { membership } = await authority(sessionToken);
+  async function availability(capability) {
+    await authority(capability);
     return {
       demo: {
         available: true,
         demo_only: true,
         synthetic_only: true,
         label: 'DEMO CANDIDATE — SYNTHETIC DATA',
-        manager_profile_bound_server_side: Boolean(membership.manager_profile_id),
+        manager_profile_bound_server_side: false,
+        manager_session_required: false,
       },
     };
   }
 
-  async function mutate(sessionToken, csrfToken, action, payload = {}) {
-    const { membership, inspected } = await authority(sessionToken);
+  async function mutate(capability, csrfToken, action, payload = {}) {
+    const { membership } = await authority(capability);
     await demoStore.consumeCsrf(membership, csrfToken);
     let state = await demoStore.read(membership, baseline(membership));
     let result = null;
@@ -215,7 +210,7 @@ export function createDarrenSyntheticDemoRuntime({
       result = { opportunity: state.opportunity };
     } else if (action === 'GENERATE_DEMO_INTELLIGENCE') {
       state = await demoStore.withGenerationLock(membership, async () => {
-        const managerBos = await managerBosFor(membership, { env, canonicalProfileLoader });
+        const managerBos = syntheticManagerBos(membership);
         const context = assembleRecruitingContext(assembleDarrenSyntheticDemoInputs({ state, membership, managerBos }));
         const provider = providerFactory(env);
         const intelligence = await generateRecruitingIntelligence({ context, provider });
@@ -230,7 +225,7 @@ export function createDarrenSyntheticDemoRuntime({
       throw new Error('RECRUITING_DEMO_ACTION_INVALID');
     }
 
-    const projected = publicDarrenSyntheticDemoState(state, { entitlement: inspected.entitlement });
+    const projected = publicDarrenSyntheticDemoState(state, { entitlement: SYNTHETIC_DEMO_ENTITLEMENT });
     return { ...result, demo: projected, csrf_token: await demoStore.issueCsrf(membership) };
   }
 

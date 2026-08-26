@@ -924,6 +924,9 @@
 .demo-readiness-note { margin-top: 16px; padding: 20px; }
 .demo-readiness-note h2 { margin: 7px 0; }
 .demo-readiness-note p:last-child { color: #94a1a5; font-size: 10px; line-height: 1.55; }
+.intelligence-header-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.outline-button.inline { padding: 10px 13px; border: 1px solid #38505a; border-radius: 5px; color: #b9c7cc; background: #08151b; font: inherit; font-size: 8px; font-weight: 800; }
+.outline-button.inline:disabled { cursor: wait; opacity: .55; }
 
 @media (max-width: 1200px) {
   .campaign-product-header,
@@ -953,6 +956,7 @@
   .campaign-map-copy > p:last-child { font-size: 13px; }
   .campaign-map-footer { align-items: flex-start; flex-direction: column; gap: 3px; padding-block: 10px; }
   .campaign-surface-title { align-items: flex-start; flex-direction: column; }
+  .intelligence-header-actions { justify-content: flex-start; }
   .campaign-surface-title h1 { font-size: 37px; }
   .campaign-candidate-anchor { grid-template-columns: 32px 1fr auto; }
   .campaign-candidate-anchor p,
