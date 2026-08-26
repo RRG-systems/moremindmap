@@ -53,6 +53,16 @@ function readEphemeralMessages() {
   } catch { return [] }
 }
 
+function AllowanceBoundary({ session }) {
+  return <aside className="living-conversation internal-dev-conversation allowance-boundary" aria-label="Subscription allowance state">
+    <header><div><span className="living-presence" aria-hidden="true" /><p>MORE · LIVING RELATIONSHIP</p><h2>Your Business Twin is current.</h2></div><span className="living-state-label">allowance complete</span></header>
+    <div className="living-thread">
+      <div className="living-blank"><span>✓</span><h3>This month’s substantive coaching sessions are complete.</h3><p>Your governed relationship, Business Twin, Personal RSL, and confirmed changes remain available. The next coaching session opens with the next allowance cycle; no billing or customer state changed here.</p></div>
+      <div className="internal-session-boundary"><span>{session.standard_sessions_used} of {session.standard_sessions_per_cycle} substantive sessions used</span><span>{session.standard_sessions_available} available this cycle</span></div>
+    </div>
+  </aside>
+}
+
 function RemoteConversation({ bootstrap, onCurrent }) {
   const [messages, setMessages] = useState(readEphemeralMessages)
   const [draft, setDraft] = useState('')
@@ -179,6 +189,8 @@ export default function SubscriptionV1InternalDevApp() {
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
   return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-layer-max="2">
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
-    <RemoteConversation bootstrap={state.bootstrap} onCurrent={setCurrent} />
+    {state.bootstrap.coaching_available === false
+      ? <AllowanceBoundary session={state.bootstrap.session} />
+      : <RemoteConversation bootstrap={state.bootstrap} onCurrent={setCurrent} />}
   </main>
 }

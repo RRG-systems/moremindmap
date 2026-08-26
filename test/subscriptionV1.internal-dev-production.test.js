@@ -13,6 +13,7 @@ import {
   issueRuntimeCsrf,
   withDurableAllowanceLedger,
 } from '../api/engine/subscriptionV1/internalDevInfrastructure.js';
+import { ensureActiveSession } from '../api/internal/subscription-v1-runtime.js';
 import { proveSyntheticSubscriberLoaderGeneralization } from '../api/engine/subscriptionV1/internalDevSubscriberLoader.js';
 import { parseSubscriptionStructuredOutput } from '../api/engine/subscriptionV1/liveDemoOpenAiTransport.js';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
@@ -107,6 +108,33 @@ test('internal entitlement reuses the frozen four-session and approximate-30-min
   assert.equal(replay.ok, true);
   assert.equal(replay.sessions.length, 1);
   assert.equal(replay.sessions[0].charge_point_reached, true);
+});
+
+test('an exhausted synthetic allowance preserves read-only relationship access without opening a fifth session', async () => {
+  const redis = new FakeRedis();
+  const relationshipKey = 'rel_allowanceboundary00';
+  const keys = internalDevKeys({ relationship_key: relationshipKey, subject_key: 're-mid' });
+  const lab = await createSyntheticLivingRelationshipLab({ subject_key: 're-mid', relationship_key: relationshipKey });
+  const now = new Date('2026-08-25T18:00:00.000Z');
+  const entitlement = createInternalSyntheticEntitlement({ scope: lab.scope, asOf: now });
+  await withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
+    const cycle = ledger.createCycle(entitlement, { onboarding_consumed: true });
+    for (let index = 0; index < 4; index += 1) {
+      const minute = index * 3;
+      const reservedAt = new Date(now.getTime() + minute * 60_000).toISOString();
+      const activeAt = new Date(now.getTime() + (minute + 1) * 60_000).toISOString();
+      const completedAt = new Date(now.getTime() + (minute + 2) * 60_000).toISOString();
+      const reserved = ledger.reserve({ ledger_id: cycle.ledger.ledger_id, scope: lab.scope, session_class: 'STANDARD', idempotency_key: `exhaust-${index}`, now: reservedAt });
+      const active = ledger.activate({ session_id: reserved.session.session_id, scope: lab.scope, now: activeAt });
+      ledger.recordFirstValidResponse({ session_id: active.session.session_id, scope: lab.scope, response_hash: hashCanonicalJson({ index }), now: activeAt });
+      ledger.complete({ session_id: active.session.session_id, scope: lab.scope, now: completedAt });
+    }
+  }});
+  const boundary = await ensureActiveSession({ redis, keys, scope: lab.scope, capabilityHash: 'b'.repeat(64), now: new Date('2026-08-25T19:00:00.000Z') });
+  assert.equal(boundary.ok, false);
+  assert.equal(boundary.code, 'STANDARD_ALLOWANCE_EXHAUSTED');
+  assert.equal(boundary.allowance.standard_slots_consumed, 4);
+  assert.equal(boundary.allowance.standard_slots_available, 0);
 });
 
 test('Redis durability adapter preserves an accepted AFW-05 mutation across runtime reconstruction', async () => {
@@ -207,6 +235,9 @@ test('public Subscription shell exposes no profile selector, API secret, canary 
   assert.match(runtime, /configured_max_output_tokens/u);
   assert.match(runtime, /sanitized_stage/u);
   assert.match(ui, /data-synthetic-only="true"/u);
+  assert.match(ui, /coaching_available === false/u);
+  assert.match(ui, /Your Business Twin is current\./u);
+  assert.match(runtime, /SUBSCRIPTION_V1_RELATIONSHIP_READY_ALLOWANCE_EXHAUSTED/u);
   assert.match(styles, /\.living-relationship-app \.drawer-layer \{ right: 0; bottom: 0; z-index: 50; \}/u);
   assert.match(styles, /body\.drawer-open \.living-relationship-app \.living-twin-column \{ position: relative; z-index: 50; \}/u);
   assert.doesNotMatch(styles, /\.drawer-layer \{ bottom: max\(46vh, 360px\); \}/u);

@@ -55,7 +55,25 @@ function publicSession(session, allowance) {
   };
 }
 
-async function ensureActiveSession({ redis, keys, scope, capabilityHash, now }) {
+function publicAllowanceBoundary(allowance) {
+  return {
+    session_id: null,
+    session_class: null,
+    state: 'ALLOWANCE_EXHAUSTED',
+    activated_at: null,
+    hard_expires_at: null,
+    charge_point_reached: false,
+    approximate_minutes: 30,
+    standard_sessions_per_cycle: allowance.standard_slots_total,
+    standard_sessions_used: allowance.standard_slots_consumed,
+    standard_sessions_available: allowance.standard_slots_available,
+    onboarding_included: true,
+    onboarding_consumed: allowance.onboarding_consumed,
+    conversational_time_controller: false,
+  };
+}
+
+export async function ensureActiveSession({ redis, keys, scope, capabilityHash, now }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
     const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
     const cycle = ledger.createCycle(entitlement);
@@ -80,7 +98,10 @@ async function ensureActiveSession({ redis, keys, scope, capabilityHash, now }) 
         idempotency_key: `internal-entry:${capabilityHash}:${now.toISOString()}`,
         now: now.toISOString(),
       });
-      if (!reserved.ok) return reserved;
+      if (!reserved.ok) {
+        inspected = ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() });
+        return { ...reserved, allowance: inspected.ledger, entitlement };
+      }
       const activated = ledger.activate({ session_id: reserved.session.session_id, scope, now: now.toISOString() });
       if (!activated.ok) return activated;
       session = activated.session;
@@ -161,7 +182,24 @@ export default async function handler(req, res) {
         initial_conversation: [],
       });
       const active = await ensureActiveSession({ redis, keys, scope: provisional.scope, capabilityHash: auth.capability_hash, now });
-      if (!active.ok) return send(res, 409, { ok: false, code: active.code });
+      if (!active.ok) {
+        if (active.code !== 'STANDARD_ALLOWANCE_EXHAUSTED' || !active.allowance) {
+          return send(res, 409, { ok: false, code: active.code });
+        }
+        return send(res, 200, {
+          ok: true,
+          code: 'SUBSCRIPTION_V1_RELATIONSHIP_READY_ALLOWANCE_EXHAUSTED',
+          csrf_token: null,
+          identity: { first_name: 'Jordan', vertical: 'Real Estate', synthetic_only: true },
+          view_model: provisional.current.view_model,
+          publication: provisional.current.publication,
+          session: publicAllowanceBoundary(active.allowance),
+          architecture: provisional.architecture,
+          entitlement: { source: 'INTERNAL_SYNTHETIC', billing_evidence: false, stripe_mutation: false, same_downstream_session_contract: true },
+          provider: { model: 'gpt-5.6-sol', store: false, server_side: true, browser_secret: false },
+          coaching_available: false,
+        });
+      }
       const sessionKind = active.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
       const loaded = await loadProductionIntendedSyntheticSubscriber({
         redis,
@@ -183,6 +221,7 @@ export default async function handler(req, res) {
         architecture: loaded.architecture,
         entitlement: { source: 'INTERNAL_SYNTHETIC', billing_evidence: false, stripe_mutation: false, same_downstream_session_contract: true },
         provider: { model: 'gpt-5.6-sol', store: false, server_side: true, browser_secret: false },
+        coaching_available: true,
       });
     }
 
