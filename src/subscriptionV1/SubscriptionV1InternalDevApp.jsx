@@ -154,7 +154,7 @@ function RemoteConversation({ bootstrap, onCurrent }) {
   }
 
   return <aside className="living-conversation internal-dev-conversation" aria-label="Talk with MORE">
-    <header><div><span className="living-presence" aria-hidden="true" /><p>MORE · LIVE GPT-5.6 SOL</p><h2>Talk through your business.</h2></div><span className="living-state-label">{session.session_class === 'ONBOARDING_INCLUDED' ? 'first relationship session' : 'continuing relationship'}</span></header>
+    <header><div><span className="living-presence" aria-hidden="true" /><p>MORE • LIVE</p><h2>Talk through your business.</h2></div><span className="living-state-label">{session.session_class === 'ONBOARDING_INCLUDED' ? 'first relationship session' : 'continuing relationship'}</span></header>
     <div className="internal-session-boundary"><span>{session.standard_sessions_per_cycle} substantive sessions / month</span><span>About {session.approximate_minutes} minutes</span><button type="button" disabled={busy || ended} onClick={endSession}>End session</button></div>
     <div className="living-thread" aria-live="polite">
       {messages.length === 0 && !ended && <div className="living-blank"><span>✦</span><h3>What would be useful to work through?</h3><p>You don’t need to choose a framework or fill out another form. Just talk to me.</p></div>}

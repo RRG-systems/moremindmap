@@ -234,6 +234,8 @@ test('public Subscription shell exposes no profile selector, API secret, canary 
   assert.match(runtime, /customer_evidence_logged:\s*false/u);
   assert.match(runtime, /configured_max_output_tokens/u);
   assert.match(runtime, /sanitized_stage/u);
+  assert.match(ui, /MORE • LIVE/u);
+  assert.doesNotMatch(ui, /MORE [·•] LIVE GPT-5\.6 SOL/u);
   assert.match(ui, /data-synthetic-only="true"/u);
   assert.match(ui, /coaching_available === false/u);
   assert.match(ui, /Your Business Twin is current\./u);
