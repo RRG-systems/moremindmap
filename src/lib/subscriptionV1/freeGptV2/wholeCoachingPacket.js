@@ -99,11 +99,13 @@ export function assembleWholeCoachingUnderstandingPacketV2({
   visible_customer_context = null,
   external_evidence = [],
   relationship_context = null,
+  purpose = relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING',
+  active_lens = 'OVERVIEW',
   assembled_at,
 }) {
   if (!doctrine_retrieval?.retrieval_hash) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_DOCTRINE_REQUIRED' });
   const base = assembleCoachingStatePacket({
-    scope, session_id, purpose: relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING', active_lens: 'OVERVIEW', artifacts, personal_history,
+    scope, session_id, purpose, active_lens, artifacts, personal_history,
     business_truth, whole_person_execution_context, uncertainty, current_state, assembled_at,
   });
   if (!base.ok) return deepFreeze(base);

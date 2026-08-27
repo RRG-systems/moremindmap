@@ -42,10 +42,15 @@ export function createFreeGptLivingRelationshipRuntimeV2({
     transcript.push({ role: turn.role, content: turn.content.trim() });
   }
 
-  function assemble({ visible_customer_context = null, as_of_at = clock() } = {}) {
+  function assemble({
+    purpose = relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING',
+    active_lens = 'OVERVIEW',
+    topics = [],
+    visible_customer_context = null,
+    as_of_at = clock(),
+  } = {}) {
     const rslStore = store.buildPersonalRslStore({ scope });
-    const purpose = relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING';
-    const history = retrieveRelevantPersonalHistory({ store: rslStore, scope, purpose, active_lens: 'OVERVIEW', as_of_at });
+    const history = retrieveRelevantPersonalHistory({ store: rslStore, scope, purpose, active_lens, topics, as_of_at });
     if (!history.ok) return history;
     const publication = store.readCurrent({ scope });
     if (!publication.ok) return publication;
@@ -69,6 +74,8 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       visible_customer_context,
       external_evidence: currentExternalEvidence,
       relationship_context,
+      purpose,
+      active_lens,
       assembled_at: as_of_at,
     });
     if (assembled.ok) currentUnderstanding = assembled.packet;
@@ -102,7 +109,12 @@ export function createFreeGptLivingRelationshipRuntimeV2({
     if (!committed.ok) return committed;
     pendingProposalId = null;
     if (committed.mutation_performed) {
-      const reassembled = assemble({ as_of_at: decidedAt });
+      const activeObject = proposal.affected_governed_objects[0];
+      const reassembled = assemble({
+        purpose: proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE' ? 'FINISH_PLAN_135' : 'WEEKLY_COACHING',
+        active_lens: activeObject === 'PLAN_135' ? 'PLAN' : activeObject || 'OVERVIEW',
+        as_of_at: decidedAt,
+      });
       if (!reassembled.ok) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_POST_PUBLICATION_ASSEMBLY_FAILED', detail: reassembled.code });
     }
     return deepFreeze({ ...clone(committed), decision: created.decision, next_state_packet: currentUnderstanding?.base_state_packet || null, continuation_ready: true });
@@ -130,7 +142,13 @@ export function createFreeGptLivingRelationshipRuntimeV2({
 
     assemble,
 
-    async coach({ customer_turn, visible_customer_context = null }) {
+    async coach({
+      customer_turn,
+      purpose = relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING',
+      active_lens = 'OVERVIEW',
+      topics = [],
+      visible_customer_context = null,
+    }) {
       if (typeof customer_turn !== 'string' || !customer_turn.trim()) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CUSTOMER_MESSAGE_REQUIRED' });
       const normalizedTurn = customer_turn.trim();
       transcript.push({ role: 'customer', content: normalizedTurn });
@@ -154,7 +172,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         }
       }
 
-      const assembled = assemble({ visible_customer_context });
+      const assembled = assemble({ purpose, active_lens, topics, visible_customer_context });
       if (!assembled.ok) return assembled;
       const coaching = await conversation_seam.coach({ packet: currentUnderstanding, customer_message: normalizedTurn, mutation_performed: Boolean(decisionResult?.mutation_performed) });
       if (!coaching.ok) return coaching;
@@ -163,7 +181,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         const byId = new Map(currentExternalEvidence.map((item) => [item.external_evidence_id, item]));
         for (const item of coaching.external_evidence) byId.set(item.external_evidence_id, clone(item));
         currentExternalEvidence = [...byId.values()];
-        const researched = assemble({ visible_customer_context });
+        const researched = assemble({ purpose, active_lens, topics, visible_customer_context });
         if (!researched.ok) return researched;
       }
 
@@ -191,6 +209,16 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       const publication = store.readCurrent({ scope });
       let proposal = null;
       if (extraction.candidate) {
+        let supersedesEventIds = [];
+        if (extraction.candidate.proposal_type === 'CORRECTION_CANDIDATE') {
+          const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
+          if (!replay.ok) return replay;
+          const correctedFields = new Set(extraction.candidate.items.map((item) => item.field));
+          supersedesEventIds = replay.state.active_events
+            .filter((event) => (event.semantic_payload?.items || []).some((item) => correctedFields.has(item.field)))
+            .map((event) => event.event_id);
+          if (!supersedesEventIds.length) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CORRECTION_TARGET_REQUIRED' });
+        }
         const hidden = createHiddenCandidateFromExtraction({
           session_id,
           scope_hash: scopeFingerprint(scope),
@@ -204,6 +232,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           source_state_packet: currentUnderstanding.base_state_packet,
           current_publication: publication.publication,
           created_at: clock(),
+          supersedes_event_ids: supersedesEventIds,
         });
         if (!governed.ok) return governed;
         const saved = await store.saveProposal({ scope, proposal: governed.proposal, saved_at: clock() });
@@ -235,6 +264,11 @@ export function createFreeGptLivingRelationshipRuntimeV2({
 
     currentStatePacket() { return currentUnderstanding?.base_state_packet ? deepFreeze(clone(currentUnderstanding.base_state_packet)) : null; },
     wholeUnderstandingPacket() { return currentUnderstanding ? deepFreeze(clone(currentUnderstanding)) : null; },
+    pendingProposal() {
+      if (!pendingProposalId) return null;
+      const found = store.readProposal({ scope, proposal_id: pendingProposalId });
+      return found.ok && found.workflow_status === 'AWAITING_CUSTOMER_DECISION' ? deepFreeze(clone(found.proposal)) : null;
+    },
     transcriptBoundary() { return transcript.snapshot(); },
     externalEvidenceBoundary() { return deepFreeze(clone(currentExternalEvidence)); },
     clearEphemeralConversation() { return transcript.clear(); },

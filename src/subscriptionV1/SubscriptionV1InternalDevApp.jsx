@@ -29,12 +29,12 @@ function CoachMessageBody({ content }) {
 function ExactUpdateCard({ proposal, busy, onDecision }) {
   const [editing, setEditing] = useState(false)
   const [items, setItems] = useState(() => proposal.proposed_items.map((item) => ({ ...item })))
-  return <section className="living-decision" data-confirmation-ux="secondary-fallback" aria-label="Exact Business Twin update available">
-    <p className="living-kicker">Exact map update ready</p>
+  return <section className="living-decision" data-confirmation-ux="secondary-fallback" aria-label="Pending Business Twin review" aria-live="polite">
+    <p className="living-kicker">MORE noticed something worth keeping</p>
     <h3>{proposal.summary}</h3>
     <p>{proposal.reason}</p>
-    <p className="living-decision-natural">Reply naturally to confirm, change, wait, or reject this exact update. Nothing changes unless you authorize it.</p>
-    <details className="living-decision-fallback"><summary>Use confirmation buttons instead</summary>
+    <p className="living-decision-natural">Keep talking naturally. You can confirm, change, wait, or reject this exact update in your own words. Nothing changes unless you authorize it.</p>
+    <details className="living-decision-fallback"><summary>Review exact update and controls</summary>
       {editing && <div className="living-edit-fields">{items.map((item, index) => <label key={item.field}><span>{item.field.split('.').at(-1).replaceAll('_', ' ')}</span><textarea value={item.value} onChange={(event) => setItems((current) => current.map((entry, itemIndex) => itemIndex === index ? { ...entry, value: event.target.value } : entry))} /></label>)}</div>}
       <div className="living-decision-actions">
         {editing ? <button type="button" className="confirm" disabled={busy} onClick={() => onDecision('EDIT', items)}>Use these edits</button> : <button type="button" className="confirm" disabled={busy} onClick={() => onDecision('CONFIRM')}>Yes, update my map</button>}
@@ -66,7 +66,7 @@ function AllowanceBoundary({ session }) {
 function RemoteConversation({ bootstrap, onCurrent }) {
   const [messages, setMessages] = useState(readEphemeralMessages)
   const [draft, setDraft] = useState('')
-  const [pending, setPending] = useState(null)
+  const [pending, setPending] = useState(bootstrap.pending_proposal || null)
   const [busy, setBusy] = useState(false)
   const [activeLens, setActiveLens] = useState('OVERVIEW')
   const [csrf, setCsrf] = useState(bootstrap.csrf_token)

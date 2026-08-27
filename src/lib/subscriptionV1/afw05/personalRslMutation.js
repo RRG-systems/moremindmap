@@ -4,6 +4,22 @@ import { createPersonalRslEvent } from '../personalRsl.js';
 import { PROPOSAL_EVENT_TYPES } from './constants.js';
 import { validateGovernedChangeProposal, validateProposalDecision } from './contracts.js';
 
+function evidenceEventType(proposal, effectiveItems) {
+  if (proposal.retracts_event_ids.length) return 'RETRACTION';
+  if (proposal.proposal_type === 'CORRECTION_CANDIDATE') return 'CORRECTION';
+  if (proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE') return 'PLAN_CHANGE';
+  if (proposal.proposal_type === 'COMMITMENT_CANDIDATE') {
+    return effectiveItems.some((item) => item.field === 'commitment.intervention') ? 'INTERVENTION' : 'COMMITMENT';
+  }
+  const fields = effectiveItems.map((item) => item.field.toLowerCase());
+  if (fields.some((field) => /^evidence\.(?:execution_)?outcome(?:_|$)/u.test(field))) return 'OUTCOME';
+  if (fields.some((field) => /^evidence\.(?:attempt|experiment)(?:_|$)/u.test(field))) return 'ATTEMPT';
+  if (fields.some((field) => /^evidence\.decision(?:_|$)/u.test(field))) return 'DECISION';
+  if (fields.some((field) => /^evidence\.friction(?:_|$)/u.test(field))) return 'FRICTION';
+  if (fields.some((field) => /^evidence\.(?:operating_change|changed_reality|state_change)(?:_|$)/u.test(field))) return 'STATE_CHANGE';
+  return PROPOSAL_EVENT_TYPES[proposal.proposal_type];
+}
+
 export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], event_id, recorded_at }) {
   const proposalValidation = validateGovernedChangeProposal(proposal);
   const decisionValidation = validateProposalDecision(decision, proposal);
@@ -16,11 +32,7 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
     if (!source) return deepFreeze({ ok: false, code: 'AFW05_EVIDENCE_REFERENCE_UNRESOLVED', evidence_id: evidenceId });
     evidenceRefs.push(createEvidenceReference(source));
   }
-  const eventType = proposal.retracts_event_ids.length
-    ? 'RETRACTION'
-    : proposal.proposal_type === 'COMMITMENT_CANDIDATE' && decision.effective_items.some((item) => item.field === 'commitment.intervention')
-      ? 'INTERVENTION'
-      : PROPOSAL_EVENT_TYPES[proposal.proposal_type];
+  const eventType = evidenceEventType(proposal, decision.effective_items);
   if (!eventType) return deepFreeze({ ok: false, code: 'AFW05_PROPOSAL_EVENT_MAPPING_MISSING' });
   return createPersonalRslEvent({
     event_id,

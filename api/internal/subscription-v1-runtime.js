@@ -37,6 +37,40 @@ function safeConversation(value) {
   return turns;
 }
 
+const LENS_BY_SURFACE = Object.freeze({
+  overview: 'OVERVIEW',
+  where: 'WHERE_YOU_ARE',
+  futures: 'FIVE_FUTURES',
+  move: 'ONE_MOVE',
+  plan: 'PLAN',
+  evidence: 'EVIDENCE',
+});
+
+function safeVisibleContext(value) {
+  const surface = String(value?.surface || 'overview').toLowerCase();
+  const active_lens = LENS_BY_SURFACE[surface] || 'OVERVIEW';
+  const visible_objects = Array.isArray(value?.visible_objects)
+    ? value.visible_objects.filter((item) => typeof item === 'string' && item.trim()).slice(0, 20).map((item) => item.trim().slice(0, 120))
+    : [];
+  const purpose = active_lens === 'EVIDENCE'
+    ? 'EVIDENCE_REVIEW'
+    : active_lens === 'FIVE_FUTURES'
+      ? 'REVIEW_FUTURES'
+      : active_lens === 'ONE_MOVE'
+        ? 'REVIEW_ONE_MOVE'
+        : null;
+  return { visible_customer_context: { surface, visible_objects }, active_lens, purpose, topics: visible_objects };
+}
+
+function publicPendingProposal(proposal) {
+  return proposal ? {
+    proposal_id: proposal.proposal_id,
+    summary: proposal.summary,
+    reason: proposal.reason,
+    proposed_items: clone(proposal.proposed_items || []),
+  } : null;
+}
+
 function publicSession(session, allowance) {
   return {
     session_id: session.session_id,
@@ -217,6 +251,7 @@ export default async function handler(req, res) {
         identity: { first_name: 'Jordan', vertical: 'Real Estate', synthetic_only: true },
         view_model: loaded.current.view_model,
         publication: loaded.current.publication,
+        pending_proposal: publicPendingProposal(loaded.controller.pendingProposal()),
         session: publicSession(active.session, active.allowance),
         architecture: loaded.architecture,
         entitlement: { source: 'INTERNAL_SYNTHETIC', billing_evidence: false, stripe_mutation: false, same_downstream_session_contract: true },
@@ -259,7 +294,7 @@ export default async function handler(req, res) {
     if (action === 'TURN') {
       const message = String(req.body?.message || '').trim();
       if (!message || message.length > 5000) return send(res, 400, { ok: false, code: 'SUBSCRIPTION_V1_CUSTOMER_MESSAGE_INVALID', csrf_token: nextCsrf });
-      result = await loaded.controller.send({ message, visible_customer_context: req.body?.visible_customer_context || null });
+      result = await loaded.controller.send({ message, ...safeVisibleContext(req.body?.visible_customer_context) });
     } else {
       result = await loaded.controller.decide({
         proposal_id: String(req.body?.proposal_id || ''),

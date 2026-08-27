@@ -60,11 +60,57 @@ function applyEvidence(viewModel, publication) {
   viewModel.destinations.evidence.livingAcceptedChanges = additions.map(([field, value]) => ({ field, value }));
 }
 
-export function projectLivingPublicationToBusinessTwin({ base_view_model, publication }) {
+function projectRelationshipHistory(records, publication) {
+  const activeIds = new Set(publication.active_personal_rsl_event_ids || []);
+  const displayValue = (value) => {
+    if (typeof value === 'string') return value;
+    if (value == null) return null;
+    if (Array.isArray(value)) return value.map(displayValue).filter(Boolean).join(' · ');
+    if (typeof value === 'object') {
+      const title = typeof value.title === 'string' ? value.title : null;
+      const strategies = Array.isArray(value.strategies) ? value.strategies.map(displayValue).filter(Boolean) : [];
+      return [title, ...strategies].filter(Boolean).join(' · ') || 'Structured confirmed update';
+    }
+    return String(value);
+  };
+  const displayItem = (item) => {
+    if (/^plan_135\.way_[123]$/u.test(item?.field || '') && typeof item?.value === 'string') {
+      try { return displayValue(JSON.parse(item.value)); } catch { return displayValue(item.value); }
+    }
+    return displayValue(item?.value);
+  };
+  const labelFor = (eventType) => {
+    if (['COMMITMENT', 'DECISION', 'PLAN_CHANGE'].includes(eventType)) return 'Agreed';
+    if (['ATTEMPT', 'INTERVENTION'].includes(eventType)) return 'Attempted';
+    if (['OUTCOME', 'VALIDATION', 'FALSIFICATION'].includes(eventType)) return 'Outcome';
+    if (['CORRECTION', 'EVIDENCE_CORRECTED', 'STATE_CHANGE'].includes(eventType)) return 'Changed';
+    return 'Learned';
+  };
+  return (records || [])
+    .map((record) => record?.event)
+    .filter((event) => event && activeIds.has(event.event_id))
+    .sort((left, right) => right.effective_at.localeCompare(left.effective_at) || right.recorded_at.localeCompare(left.recorded_at))
+    .map((event) => ({
+      eventId: event.event_id,
+      kind: labelFor(event.event_type),
+      eventType: event.event_type,
+      happenedAt: event.effective_at,
+      title: event.semantic_payload?.summary || 'Confirmed relationship update',
+      details: (event.semantic_payload?.items || []).map(displayItem).filter(Boolean),
+      source: event.source_class === 'CUSTOMER_SELF_REPORT' ? 'You confirmed this with MORE' : 'Private MORE relationship evidence',
+    }));
+}
+
+export function projectLivingPublicationToBusinessTwin({ base_view_model, publication, personal_rsl_records = [] }) {
   if (!base_view_model || !validatePublicationHash(publication)) throw new TypeError('AFW06_VALIDATED_PUBLICATION_REQUIRED');
   const viewModel = clone(base_view_model);
   applyPlan(viewModel, publication.five_boxes.PLAN_135);
   applyEvidence(viewModel, publication);
+  viewModel.destinations.evidence.relationshipHistory = {
+    items: projectRelationshipHistory(personal_rsl_records, publication),
+    sourceBoundary: 'Private MORE relationship history includes only governed, customer-confirmed Personal RSL events.',
+    coachingBoundary: 'Coaching Notes, Coach Connect history, and coach reports are not connected to this Subscription history.',
+  };
   viewModel.destinations.where.livingAcceptedChanges = clone(publication.five_boxes.WHERE_YOU_ARE.accepted_changes);
   viewModel.destinations.futures.livingChallenges = clone(publication.five_boxes.FIVE_FUTURES.customer_challenges);
   viewModel.destinations.move.livingChallenges = clone(publication.five_boxes.ONE_MOVE.customer_challenges);

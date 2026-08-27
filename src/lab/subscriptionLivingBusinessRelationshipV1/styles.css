@@ -53,6 +53,22 @@ body.drawer-open .living-relationship-app .living-twin-column { position: relati
 .living-decision-actions button.confirm { grid-column: 1 / -1; border-color: rgba(75, 196, 87, .48); background: rgba(37, 126, 49, .42); color: #e9f7eb; box-shadow: none; }
 .living-decision-actions button.quiet { color: #9caab4; }
 .living-decision-actions button:disabled { opacity: .45; cursor: not-allowed; }
+.relationship-history { margin: 1.25rem 0; overflow: hidden; }
+.relationship-history > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: .85rem; }
+.relationship-history > header h2, .relationship-history > header p { margin: 0; }
+.relationship-history > header > span { padding: .35rem .6rem; border: 1px solid rgba(39, 205, 186, .26); border-radius: 999px; color: #8ee2d7; font-size: .72rem; white-space: nowrap; }
+.relationship-history-list { display: grid; gap: .65rem; }
+.relationship-history-list article { display: grid; grid-template-columns: 108px 1fr; gap: 1rem; padding: .8rem 0; border-top: 1px solid rgba(119, 166, 197, .14); }
+.relationship-history-list time { color: #8da4b0; font-size: .72rem; }
+.relationship-history-list article div { display: grid; gap: .24rem; }
+.relationship-history-list article small { color: #65d9ca; font-size: .65rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+.relationship-history-list article h3, .relationship-history-list article p { margin: 0; }
+.relationship-history-list article h3 { color: #e9f0f2; font-size: .9rem; }
+.relationship-history-list article p { color: #b4c2c8; font-size: .76rem; line-height: 1.45; }
+.relationship-history-list article span { color: #7f96a2; font-size: .66rem; }
+.relationship-history-empty { margin: .5rem 0 1rem; color: #94a9b3; font-size: .8rem; line-height: 1.5; }
+.relationship-history > footer { display: grid; gap: .2rem; margin-top: .9rem; padding-top: .75rem; border-top: 1px solid rgba(119, 166, 197, .14); }
+.relationship-history > footer p { margin: 0; color: #778e99; font-size: .66rem; line-height: 1.45; }
 .living-edit-fields { display: grid; gap: .5rem; margin: .7rem 0; }
 .living-edit-fields label { display: grid; gap: .25rem; }
 .living-edit-fields label span { color: #9fb0bb; font-size: .65rem; text-transform: capitalize; }
