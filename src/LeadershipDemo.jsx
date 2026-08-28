@@ -8,8 +8,8 @@ const products = [
     number: '01',
     eyebrow: 'Candidate intelligence',
     title: 'Recruiting Tool Demo',
-    description: 'Walk Darren and Jordan through all six Recruiting destinations with prefilled, synthetic intelligence and zero real Recruiting activity.',
-    detail: 'Six-destination walkthrough · Synthetic-only · Prefilled payoff',
+    description: 'Open one guided Darren and Jordan conversation where MORE can listen, revise the working hypothesis, and help them reach an honest decision.',
+    detail: 'Campaign 2G shared session · Synthetic-only · Natural conversation',
     tone: 'green',
   },
   {
@@ -63,7 +63,7 @@ export default function LeadershipDemo() {
         body: JSON.stringify({ action: product.action }),
       })
       const payload = await response.json().catch(() => null)
-      if (!response.ok || payload?.ok !== true || !['/recruiting/demo', '/subscription'].includes(payload.redirect_to)) {
+      if (!response.ok || payload?.ok !== true || !['/recruiting-v2/demo', '/subscription'].includes(payload.redirect_to)) {
         throw new Error(payload?.code || 'LEADERSHIP_DEMO_LAUNCH_FAILED')
       }
       window.location.assign(payload.redirect_to)

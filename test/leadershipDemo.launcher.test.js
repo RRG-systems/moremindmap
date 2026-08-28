@@ -113,14 +113,20 @@ test('Subscription launcher exchange reuses the existing re-mid synthetic capabi
 test('Leadership launcher source exposes exactly two interactive choices and no obsolete deck or client-side demo-code authority', () => {
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
-  const recruitingApi = fs.readFileSync(new URL('../api/recruiting/demo.js', import.meta.url), 'utf8');
+  const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
+  const recruitingApi = fs.readFileSync(new URL('../api/recruiting/v2-demo.js', import.meta.url), 'utf8');
   const recruitingApp = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
   assert.equal((launcher.match(/title: 'Recruiting Tool Demo'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'Subscription Model Demo'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
+  assert.match(launcher, /Campaign 2G shared session/u);
+  assert.match(launcher, /\['\/recruiting-v2\/demo', '\/subscription'\]/u);
+  assert.match(launcherApi, /redirect_to: '\/recruiting-v2\/demo'/u);
+  assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
   assert.doesNotMatch(launcher, /Craig Fox|Executive \/ Board|Company Alignment|leadershipDemoSlides|slide-\d+/u);
   assert.doesNotMatch(portal, /darrendemo|leadershipDemoAccess/u);
   assert.match(portal, /x-leadership-demo-entry-csrf/u);
   assert.doesNotMatch(recruitingApi, /more_recruiting_manager|MANAGER_COOKIE/u);
-  assert.ok(recruitingApp.indexOf("location.pathname === '/recruiting/demo'") < recruitingApp.indexOf('return <ManagerExperience />'));
+  assert.match(recruitingApp, /location\.pathname === '\/recruiting\/demo'.+<Navigate to="\/recruiting-v2\/demo" replace \/>/u);
+  assert.doesNotMatch(recruitingApp, /RecruitingDemoExperience|DarrenSyntheticDemoSurface|six-destination manager journey/u);
 });

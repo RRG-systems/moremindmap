@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { SYNTHETIC_RECRUITING_FIXTURE } from '../lib/recruitingV1/syntheticFixture.js';
-import { SYNTHETIC_REAL_ESTATE_SUBJECTS_V1 } from '../lab/subscriptionLivingBusinessRelationshipV1/createSyntheticRealEstateFounderSubjectsV1.js';
 import { selectRecruitingCandidate } from '../lib/recruitingV1/candidateSelection.js';
 import RecruitingManagerSetup from './RecruitingManagerSetup.jsx';
 import RecruitingMasterControl from './RecruitingMasterControl.jsx';
@@ -16,7 +15,6 @@ const SYNTHETIC = import.meta.env.VITE_RECRUITING_V1_SYNTHETIC_REVIEW === 'true'
 const clone = (value) => JSON.parse(JSON.stringify(value));
 let recruitingCsrfToken = null;
 let recruitingSetupCsrfToken = null;
-let recruitingDemoCsrfToken = null;
 
 const destinations = [
   ['home', '01', 'Recruiting Home'],
@@ -48,42 +46,6 @@ function syntheticFixtureForScenario(name) {
   return fixture;
 }
 
-function syntheticDarrenDemoReviewState() {
-  const jordan = SYNTHETIC_REAL_ESTATE_SUBJECTS_V1['re-mid'];
-  const candidate = {
-    candidate_id: 'demo_synthetic_jordan_v1', invitation_id: null, recruit_name: 'Jordan Lee', recruit_email: null,
-    purpose: 'Synthetic Recruiting V1 demonstration only.', state: 'DEMO_ONLY', readiness_state: 'BA_INTELLIGENCE_READY',
-    ba_readiness: 'BA_INTELLIGENCE_READY', delivery_state: 'NOT_APPLICABLE', entitlement_state: 'NOT_APPLICABLE', accepted_at: null,
-    bos_profile_id: 'synthetic:re-mid:bos-v1', ba_assessment_id: 'synthetic:re-mid:ba-v1', demo_only: true, synthetic_only: true,
-  };
-  return {
-    contract: 'recruiting_darren_synthetic_demo_v1', baseline_version: '1.0.0', demo_only: true, synthetic_only: true,
-    label: 'DEMO CANDIDATE — SYNTHETIC DATA', resettable: true,
-    manager: { name: 'Darren Synthetic', enterprise_name: 'MORE MindMap', capabilities: { darren_demo: true } },
-    entitlement: { mode: 'unlimited', used: 0, reserved: 0, consumed: 0, remaining: null, synthetic_only: true, ledger_written: false }, candidates: [candidate],
-    recruit: { name: 'Jordan Lee', readiness: 'BA_INTELLIGENCE_READY', bos_summary: `${jordan.wholePerson.communication} ${jordan.wholePerson.motivation}`, ba_summary: jordan.businessReality, known: ['Synthetic BOS authority ready', 'Synthetic BA authority ready', ...jordan.known.slice(0, 4)], unknown: clone(jordan.missing) },
-    opportunity: { authority_id: 'demo_synthetic_opportunity_jordan_v1', demo_only: true, items: [
-      { opportunity_evidence_id: 'demo_opp_evidence_review', category: 'COACHING_AND_TRAINING', scope: 'LOCAL_LEADER_PRIMARY', statement: 'The synthetic demo assumes access to a structured opportunity-and-capacity evidence review; actual Darren or enterprise capabilities are not asserted.', status: 'SUPPORTED', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: ['Demo-only capability; verify real availability before any customer conversation.'], counterevidence: [], demo_only: true },
-      { opportunity_evidence_id: 'demo_opp_leverage_hypothesis', category: 'OPERATIONS_AND_LEVERAGE', scope: 'LOCAL_LEADER_PRIMARY', statement: 'A bounded first-leverage decision review is available in the synthetic scenario when opportunity, economics, and transferable-work evidence support it.', status: 'CONDITIONAL', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: ['No hiring outcome or operating support is promised.'], counterevidence: ['Jordan may need better opportunity evidence before leverage is the next move.'], demo_only: true },
-      { opportunity_evidence_id: 'demo_opp_no_lead_promise', category: 'LEAD_OPPORTUNITY', scope: 'LOCAL_LEADER_PRIMARY', statement: 'The demo establishes no company-provided lead volume, allocation, or conversion outcome.', status: 'NON_PROMISE', source: 'Synthetic demo authority', source_date: '2026-08-23', freshness: 'SYNTHETIC_BASELINE', constraints: [], counterevidence: [], demo_only: true },
-    ] },
-    manager_evidence: [
-      { evidence_id: 'demo_evidence_growth_goal', candidate_id: candidate.candidate_id, type: 'GOAL', claim: jordan.goal, source: 'Synthetic Jordan fixture', source_date: '2026-08-23', truth_class: 'MANAGER_SUPPLIED_EVIDENCE', demo_only: true },
-      { evidence_id: 'demo_evidence_leverage_question', candidate_id: candidate.candidate_id, type: 'OBSERVATION', claim: 'Jordan is considering a first assistant, while the scenario intentionally leaves the dominant constraint unresolved.', source: 'Synthetic Jordan fixture', source_date: '2026-08-23', truth_class: 'MANAGER_SUPPLIED_EVIDENCE', demo_only: true },
-    ],
-    intelligence: { contract: 'recruiting_intelligence_projection_v1', generated_at: '2026-08-23T00:00:00.000Z', stale: false, demo_only: true, synthetic_recruit: true, output: {
-      understand_this_recruit: { summary: 'Jordan is pursuing material growth while testing whether stronger operating evidence or first leverage deserves priority.', important_realities: ['The growth goal is explicit.', 'The dominant constraint remains deliberately unresolved.'] },
-      bilateral_communication: { advantage: 'Darren can make the decision concrete without pretending the missing evidence is settled.', recruiter_watchout: 'A decisive recommendation would outrun the synthetic evidence currently available.', adaptation: 'Separate opportunity-flow proof from leverage readiness and let Jordan test both hypotheses.' },
-      authentic_angles: [{ title: 'Test the first-leverage decision against current opportunity flow', recruit_need: 'Jordan wants growth without simply adding personal workload.', current_reality: 'The scenario supports a leverage question but leaves pipeline and transferable-work evidence incomplete.', locally_supported_help: 'A synthetic bounded opportunity-and-capacity evidence review is supported in this demo.', rationale: 'The review can distinguish whether leverage or opportunity generation is the nearer constraint.', validating_question: 'What evidence would tell you an assistant removes a real constraint rather than adding management work?', uncertainty: 'Actual repeatable opportunity flow and transferable work volume remain unknown.', recruit_evidence_ids: ['demo_evidence_growth_goal'], opportunity_evidence_ids: ['demo_opp_evidence_review'] }],
-      withheld_angles: ['No lead-volume or production promise is supported by the synthetic opportunity authority.'],
-      success_environment: { natural_success_patterns: ['Purposeful relationship-led growth with visible operating proof'], supportive_conditions: ['Clear ownership boundaries', 'Truthful weekly numbers'], likely_frictions: ['Hiring before work and economics are visible'] },
-      missing_evidence: ['Qualified opportunity flow', 'Transferable recurring work', 'Assistant economics'],
-      meeting_plan: { start_here: 'Ask Jordan what changed between the current production level and the stated growth goal.', learn: ['How opportunity is created now', 'Which recurring work can leave Jordan’s hands'], listen_for: ['A demand constraint', 'An ownership constraint'], your_watchout: 'Do not assume first leverage is the answer because it is under consideration.', supported_paths_if_confirmed: ['Opportunity-and-capacity evidence review'], do_not_assume: 'Do not imply a lead source, staffing result, or recruiting promise.', next_step_if_fit_is_real: 'Agree on one bounded evidence review before recommending a move.' },
-    } },
-    ledger_effect: { invitations: 0, emails: 0, relationships: 0, entitlement: 0, recruiting_audit: 0 },
-  };
-}
-
 async function api({ view, action, body = {}, query = {} }) {
   const url = new URL('/api/recruiting/runtime', window.location.origin);
   if (view) url.searchParams.set('view', view);
@@ -107,23 +69,6 @@ async function api({ view, action, body = {}, query = {} }) {
   return payload;
 }
 
-async function demoApi({ view, action, body = {} }) {
-  const url = new URL('/api/recruiting/demo', window.location.origin);
-  if (view) url.searchParams.set('view', view);
-  const response = await fetch(url, {
-    method: action ? 'POST' : 'GET', credentials: 'same-origin', cache: 'no-store',
-    headers: action ? {
-      'content-type': 'application/json',
-      ...(recruitingDemoCsrfToken ? { 'x-recruiting-demo-csrf': recruitingDemoCsrfToken } : {}),
-    } : {},
-    body: action ? JSON.stringify({ action, ...body }) : undefined,
-  });
-  const payload = await response.json().catch(() => ({}));
-  if (payload.csrf_token) recruitingDemoCsrfToken = payload.csrf_token;
-  if (!response.ok || payload.ok !== true) throw new Error(payload.code || 'The synthetic demo is temporarily unavailable.');
-  return payload;
-}
-
 function routeFor(pathname) {
   const part = pathname.split('/').filter(Boolean)[1] || 'home';
   if (part === 'master-control') return part;
@@ -132,55 +77,11 @@ function routeFor(pathname) {
 
 export default function RecruitingV1App() {
   const location = useLocation();
-  if (location.pathname === '/recruiting/demo') return <RecruitingDemoExperience />;
+  if (location.pathname === '/recruiting/demo') return <Navigate to="/recruiting-v2/demo" replace />;
   if (location.pathname.startsWith('/recruiting/accept/')) return <InvitationAcceptance />;
   if (location.pathname.startsWith('/recruiting/verify/')) return <ManagerVerification />;
   if (location.pathname.startsWith('/recruiting/setup')) return <RecruitingManagerSetup request={api} synthetic={SYNTHETIC} fixture={SYNTHETIC_RECRUITING_FIXTURE} />;
   return <ManagerExperience />;
-}
-
-function RecruitingDemoExperience() {
-  const navigate = useNavigate();
-  const [state, setState] = useState(SYNTHETIC ? syntheticDarrenDemoReviewState() : null);
-  const [status, setStatus] = useState(SYNTHETIC ? 'ready' : 'loading');
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (SYNTHETIC) return;
-    demoApi({ view: 'demo' })
-      .then((payload) => {
-        setState(payload.demo);
-        setStatus('ready');
-      })
-      .catch((failure) => {
-        setError(failure.message);
-        setStatus('unauthorized');
-      });
-  }, []);
-
-  if (status === 'loading') return <LoadingState message="Opening Jordan’s synthetic Recruiting demo…" />;
-  if (status === 'unauthorized' || !state) {
-    return <main className="manager-onboarding"><div className="loading-mark">!</div><h1>A fresh Leadership demo session is required.</h1><p>{error || 'This synthetic capability is missing or expired.'}</p><button type="button" onClick={() => navigate('/leadership', { replace: true })}>Return to Leadership Portal →</button></main>;
-  }
-
-  return (
-    <div className="recruiting-v1 campaign-shell campaign-layer-one-shell" data-synthetic-demo="true">
-      <ProductHeader
-        manager={state.manager}
-        role="Synthetic Recruiting Demo"
-        meta="Synthetic Darren + Jordan · No manager session or customer activity"
-        error={error}
-      />
-      <main className="recruiting-main">
-        <DarrenSyntheticDemoSurface
-          state={state}
-          setState={setState}
-          setError={setError}
-          exit={() => navigate('/leadership-demo')}
-        />
-      </main>
-    </div>
-  );
 }
 
 function ManagerExperience() {
@@ -345,70 +246,6 @@ function HomeSurface({ state, navigate, openCandidate, demoAvailable }) {
 function CandidateCard({ candidate, onOpen }) {
   const readiness = candidate.readiness_state.replaceAll('_', ' ');
   return <button type="button" className="candidate-card" onClick={onOpen}><div className="candidate-avatar">{candidate.recruit_name.split(' ').map((part) => part[0]).join('')}</div><div><small>{candidate.state === 'DELIVERED' ? 'Invitation pending' : 'Candidate relationship'}</small><h3>{candidate.recruit_name}</h3><p>{candidate.purpose}</p></div><span className={`status-pill status-${candidate.readiness_state.toLowerCase()}`}>{readiness}</span><footer><small>{candidate.ba_readiness.replaceAll('_', ' ')}</small><b>Open candidate →</b></footer></button>;
-}
-
-function DarrenSyntheticDemoSurface({ state, setState, setError, exit }) {
-  const [section, setSection] = useState('home');
-  const [briefOpen, setBriefOpen] = useState(false);
-  const candidate = state.candidates[0];
-  const sections = [
-    ['home', 'Recruiting Home', 'Prefilled explanatory'],
-    ['invite', 'Invite & Readiness', 'Read-only explanatory'],
-    ['opportunity', 'Local Opportunity', 'Demo-local edit + reset'],
-    ['evidence', 'What You Know', 'Demo-local edit + reset'],
-    ['intelligence', 'Recruiting Intelligence', 'Accepted synthetic projection'],
-    ['meeting', 'Meeting & Brief', 'Read-only payoff'],
-  ];
-
-  async function request({ action, body = {} }) {
-    const actionMap = {
-      ADD_EVIDENCE: 'ADD_DEMO_EVIDENCE', SAVE_OPPORTUNITY: 'SAVE_DEMO_OPPORTUNITY',
-      GENERATE_INTELLIGENCE: 'GENERATE_DEMO_INTELLIGENCE', RECORD_EXPORT: 'RECORD_DEMO_EXPORT',
-    };
-    if (SYNTHETIC) throw new Error('Live generation is available only in the authenticated Darren demo.');
-    return demoApi({ action: actionMap[action] || action, body });
-  }
-
-  async function reset() {
-    if (!window.confirm('Reset Jordan to the clean synthetic baseline? No real Recruiting state will change.')) return;
-    try {
-      if (SYNTHETIC) {
-        setState(syntheticDarrenDemoReviewState());
-      } else {
-        const payload = await demoApi({ action: 'RESET_DEMO' });
-        setState(payload.demo);
-      }
-      setSection('home');
-      setBriefOpen(false);
-      setError('');
-    } catch (failure) { setError(failure.message); }
-  }
-
-  function navigate(sectionId) {
-    if (sectionId === 'export') { setBriefOpen(true); return; }
-    if (sections.some(([id]) => id === sectionId)) setSection(sectionId);
-    window.scrollTo({ top: 0, behavior: 'auto' });
-  }
-
-  const stepIndex = sections.findIndex(([id]) => id === section);
-  const step = sections[stepIndex];
-
-  return (
-    <section className="darren-synthetic-demo" data-demo-only="true" data-synthetic-recruit="true">
-      <header className="demo-boundary-banner"><div><span>DEMO CANDIDATE — SYNTHETIC DATA</span><h1>Jordan Lee · Darren’s private Recruiting walkthrough</h1><p>The real six-destination manager journey, filled with synthetic truth. Nothing here creates an invitation, sends email, changes entitlement, or enters Recruiting ledgers.</p></div><div><button type="button" onClick={reset}>Reset synthetic demo</button><button type="button" className="demo-exit" onClick={exit}>Exit walkthrough</button></div></header>
-      <nav className="demo-section-nav" aria-label="Synthetic demo destinations">{sections.map(([id, label], index) => <button type="button" key={id} className={section === id ? 'active' : ''} onClick={() => navigate(id)}><span>{String(index + 1).padStart(2, '0')}</span>{label}</button>)}</nav>
-      <div className="demo-zero-impact" role="note"><b>Zero-impact boundary</b><span>0 invitations</span><span>0 emails</span><span>0 real relationships</span><span>0 entitlement use</span><span>0 Recruiting audit events</span></div>
-      <aside className="demo-walkthrough-overlay" aria-label="Walkthrough controls"><div><small>Step {String(stepIndex + 1).padStart(2, '0')} of 06 · {step[2]}</small><strong>{step[1]}</strong><span>Jordan remains the selected synthetic candidate.</span></div><div><button type="button" disabled={stepIndex === 0} onClick={() => navigate(sections[stepIndex - 1][0])}>← Previous</button><button type="button" disabled={stepIndex === sections.length - 1} onClick={() => navigate(sections[stepIndex + 1][0])}>Next →</button></div></aside>
-      {section !== 'home' && <CandidateAnchor candidate={candidate} intelligence={state.intelligence} demo onChange={() => setSection('home')} note="Synthetic walkthrough · demo-local state only" />}
-      {section === 'home' && <HomeSurface state={state} navigate={navigate} openCandidate={() => navigate('invite')} demoAvailable={false} />}
-      {section === 'invite' && <><section className="demo-readiness-note panel"><p className="eyebrow violet">Invite & Readiness · explanatory state</p><h2>No invitation is sent in this walkthrough.</h2><p>In the live manager journey, Jordan would first see Darren, the purpose, and the exact sharing boundary. This synthetic state begins after that explanation without claiming consent or creating a relationship.</p></section><CandidateSurface state={state} candidate={candidate} navigate={navigate} demo /></>}
-      {section === 'opportunity' && <OpportunitySurface state={state} setState={setState} request={request} demo />}
-      {section === 'evidence' && <EvidenceSurface state={state} setState={setState} candidate={candidate} request={request} demo />}
-      {section === 'intelligence' && <IntelligenceSurface state={state} setState={setState} candidate={candidate} navigate={navigate} request={request} demo />}
-      {section === 'meeting' && <MeetingSurface state={state} candidate={candidate} navigate={navigate} />}
-      {briefOpen && <DetailDrawer eyebrow="Meeting & Brief · Layer 02" title="Save or print the synthetic brief" subtitle="The real print view opens here without writing a production export audit." onClose={() => setBriefOpen(false)} footer="Synthetic walkthrough only · no real export audit"><ExportSurface state={state} candidate={candidate} request={request} demo /></DetailDrawer>}
-    </section>
-  );
 }
 
 function InviteSurface({ state, setState, setError, navigate }) {

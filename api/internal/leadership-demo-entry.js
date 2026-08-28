@@ -98,7 +98,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
       return send(res, 200, {
         ok: true,
         code: 'LEADERSHIP_DEMO_RECRUITING_CAPABILITY_ISSUED',
-        redirect_to: '/recruiting/demo',
+        redirect_to: '/recruiting-v2/demo',
         synthetic_only: true,
       });
     }
