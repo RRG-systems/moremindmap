@@ -87,6 +87,8 @@ export function createRecruitingGuSession({
     world_version: worldVersion,
     events: [],
     conversation: [],
+    coach_moves: [],
+    current_coach_move: null,
     projections: [],
     current_projection: null,
     scenario_assumptions: {},
@@ -163,6 +165,76 @@ export function recordFrontierProjection(current, { plan, receipt, basedOnRevisi
     text: plan?.guidance?.summary || plan?.guidance?.headline || 'The environment has been recomposed.',
     revision: next.revision, occurred_at: next.updated_at,
   });
+  return Object.freeze(next);
+}
+
+export function recordCoachMove(current, { move, receipt, basedOnRevision, condition }, now = new Date()) {
+  assertRevision(current, basedOnRevision);
+  if (!move?.insight || !move?.explanation || !move?.selfDiscoveryQuestion) throw new Error('RECRUITING_GU_V1_COACH_MOVE_INVALID');
+  let next = append(current, {
+    type: 'FRONTIER_COACH_MOVE_PUBLISHED',
+    actor: 'MORE',
+    room: current.current_room,
+    text: move.insight,
+    metadata: {
+      condition,
+      visual_materially_helps: move.visual?.materiallyHelps === true,
+      provider: receipt?.provider?.modelReturned || receipt?.modelConfig?.model || null,
+    },
+  }, now);
+  const record = {
+    coach_move_id: `coach-move-${String(next.coach_moves.length + 1).padStart(4, '0')}`,
+    room: current.current_room,
+    based_on_revision: basedOnRevision,
+    published_at_revision: next.revision,
+    condition,
+    move: clone(move),
+    receipt,
+    created_at: next.updated_at,
+  };
+  next.coach_moves.push(record);
+  next.current_coach_move = record;
+  next.conversation.push({
+    turn_id: `turn-${String(next.conversation.length + 1).padStart(4, '0')}`,
+    actor: 'MORE',
+    room: current.current_room,
+    text: `${move.insight} ${move.explanation} ${move.selfDiscoveryQuestion}`,
+    insight: move.insight,
+    explanation: move.explanation,
+    question: move.selfDiscoveryQuestion,
+    revision: next.revision,
+    occurred_at: next.updated_at,
+  });
+  return Object.freeze(next);
+}
+
+export function recordCompiledProjection(current, { plan, receipt, basedOnRevision, coachMoveId }, now = new Date()) {
+  assertRevision(current, basedOnRevision);
+  if (current.current_coach_move?.coach_move_id !== coachMoveId) throw new Error('RECRUITING_GU_V1_COACH_MOVE_STALE');
+  if (current.current_coach_move?.move?.visual?.materiallyHelps !== true) throw new Error('RECRUITING_GU_V1_VISUAL_NOT_REQUESTED');
+  if (plan?.stateBinding?.sessionRevision !== basedOnRevision) throw new Error('RECRUITING_GU_V1_STALE_MODEL_PLAN_REFUSED');
+  let next = append(current, {
+    type: 'OPTIONAL_GU_PROJECTION_PUBLISHED',
+    actor: 'MORE',
+    room: current.current_room,
+    text: 'The optional visual expression is ready.',
+    evidence_refs: plan?.evidence?.map((item) => item.id) || [],
+    lineage: { coach_move_id: coachMoveId },
+    metadata: { plan_version: plan?.planVersion || null, provider: receipt?.provider?.modelReturned || receipt?.modelConfig?.model || null },
+  }, now);
+  const projection = {
+    projection_id: `projection-${String(next.projections.length + 1).padStart(4, '0')}`,
+    room: current.current_room,
+    based_on_revision: basedOnRevision,
+    published_at_revision: next.revision,
+    supersedes_projection_id: next.current_projection?.projection_id || null,
+    coach_move_id: coachMoveId,
+    plan,
+    receipt,
+    created_at: next.updated_at,
+  };
+  next.projections.push(projection);
+  next.current_projection = projection;
   return Object.freeze(next);
 }
 
@@ -254,7 +326,14 @@ export function decideSecondOffer(current, { decision, expectedRevision, actor =
   return Object.freeze(next);
 }
 
-export function frontierSessionContext(session) {
+export function frontierSessionContext(session, { roomScoped = false } = {}) {
+  const compatibleRooms = session.current_room === 'YOU'
+    ? new Set(['HOME', 'YOU'])
+    : session.current_room === 'YOUR_BUSINESS'
+      ? new Set(['HOME', 'YOU', 'YOUR_BUSINESS'])
+      : new Set(ROOMS);
+  const compatible = (item) => !roomScoped || compatibleRooms.has(item.room);
+  const compatibleProjections = session.projections.filter(compatible);
   return Object.freeze({
     contract: 'recruiting_v2_shared_business_session_003a_v1',
     sessionId: session.session_id,
@@ -263,14 +342,14 @@ export function frontierSessionContext(session) {
     status: session.status === 'COMPLETED' ? 'COMPLETED' : 'OPEN',
     revision: session.revision,
     currentPurpose: session.conversation.at(-1)?.text || null,
-    recentEvents: session.events.slice(-16).map((item) => ({
+    recentEvents: session.events.filter(compatible).slice(-16).map((item) => ({
       eventId: item.event_id, type: item.type, actor: item.actor === 'MANAGER' ? 'DARREN' : item.actor === 'INVITEE' ? 'JORDAN' : item.actor,
       assertedBy: item.actor, subject: session.relationship_id, text: item.text,
       evidenceRefs: item.evidence_refs, perspectiveState: item.actor === 'MORE' ? 'MORE_HYPOTHESIS' : item.actor === 'SYSTEM' ? 'SYSTEM_RECORD' : item.actor === 'MANAGER' ? 'RECRUITER_ASSERTION' : 'CANDIDATE_ASSERTION',
       occurredAt: item.occurred_at, lineage: item.lineage, metadata: item.metadata,
     })),
-    activeHypotheses: session.current_projection?.plan?.hypotheses || [],
-    hypothesisHistory: session.projections.flatMap((item) => item.plan?.hypotheses || []).slice(-16),
+    activeHypotheses: compatible(session.current_projection || {}) ? session.current_projection?.plan?.hypotheses || [] : [],
+    hypothesisHistory: compatibleProjections.flatMap((item) => item.plan?.hypotheses || []).slice(-16),
     decisions: session.decisions,
     commitments: session.proposals.at(-1)?.proposal?.commitments || [],
     scenarioAssumptions: session.scenario_assumptions,

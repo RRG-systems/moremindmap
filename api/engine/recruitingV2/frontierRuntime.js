@@ -48,7 +48,7 @@ export function createRecruitingV2FrontierRuntime({ apiKey, transport, modelConf
   const world = governedWorld || createRecruitingV2SyntheticWorld();
   const worldHash = stableHash(world);
 
-  async function planSurface({ purpose, sessionContext }) {
+  async function planSurface({ purpose, sessionContext, coachingMove = null }) {
     const startedAt = performance.now();
     const humanPurpose = boundedText(purpose);
     const safeContext = safeSessionContext(sessionContext, world);
@@ -58,12 +58,21 @@ export function createRecruitingV2FrontierRuntime({ apiKey, transport, modelConf
     let repair = null;
     for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       const response = await callFrontier({
-        messages: buildFrontierMessages({ world, stateBinding: binding, sessionContext: safeContext, humanPurpose, repair }),
+        messages: buildFrontierMessages({ world, stateBinding: binding, sessionContext: safeContext, humanPurpose, coachingMove, repair }),
         schema: FRONTIER_SURFACE_PLAN_SCHEMA,
         schemaName: 'more_recruiting_v2_surface_plan_003a',
       });
+      const candidate = coachingMove ? {
+        ...response.parsed,
+        guidance: {
+          ...response.parsed?.guidance,
+          headline: coachingMove.insight,
+          summary: coachingMove.explanation,
+          nextCue: coachingMove.selfDiscoveryQuestion,
+        },
+      } : response.parsed;
       const validation = validateFrontierPlan({
-        candidate: response.parsed,
+        candidate,
         world,
         stateBinding: binding,
         priorHypotheses: safeContext.hypothesisHistory,
@@ -74,13 +83,14 @@ export function createRecruitingV2FrontierRuntime({ apiKey, transport, modelConf
         const totalLatencyMs = Math.round(performance.now() - startedAt);
         const receipt = Object.freeze({
           runtime: 'recruiting-v2-frontier-runtime-003a-v1', modelConfig,
+          compilerOnly: Boolean(coachingMove),
           attempts: attempts.length, repairEvents: attempts.filter((item) => !item.validation.ok).map((item) => item.validation.errors),
           provider: response.receipt, totalLatencyMs, worldHash, sessionContextHash,
           rawRequestPersisted: false, rawResponsePersisted: false, store: false,
         });
-        return Object.freeze({ plan: materializeFrontierPlan({ candidate: response.parsed, world, validation, providerReceipt: receipt }), receipt });
+        return Object.freeze({ plan: materializeFrontierPlan({ candidate, world, validation, providerReceipt: receipt }), receipt });
       }
-      repair = { candidate: response.parsed, errors: validation.errors };
+      repair = { candidate, errors: validation.errors };
     }
     const error = new Error('RECRUITING_V2_FRONTIER_PLAN_FAILED_CLOSED');
     error.code = 'RECRUITING_V2_FRONTIER_PLAN_FAILED_CLOSED';

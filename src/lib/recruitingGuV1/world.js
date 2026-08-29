@@ -26,6 +26,60 @@ export function createSyntheticRecruitingGuWorld() {
   return createRecruitingV2SyntheticWorld();
 }
 
+function words(value) {
+  return [...new Set(String(value || '').toLowerCase().match(/[a-z][a-z0-9'-]{2,}/gu) || [])];
+}
+
+function relevance(queryWords, value) {
+  const serialized = JSON.stringify(value).toLowerCase();
+  return queryWords.reduce((score, word) => score + (serialized.includes(word) ? 1 : 0), 0);
+}
+
+export function scopeRecruitingGuWorldForRoom(world, room) {
+  if (room === 'YOUR_BUSINESS') return world;
+  if (room !== 'YOU') throw new Error('RECRUITING_GU_V1_WORLD_ROOM_INVALID');
+  const evidence = world.evidence.filter((item) => /bos/u.test(item.id) && !/darren|manager/u.test(item.id));
+  const evidenceIds = new Set(evidence.map((item) => item.id));
+  const objects = world.objects.filter((item) => item.kind === 'PERSON'
+    && !/darren|manager/u.test(item.id)
+    && (item.sourceIds || []).some((id) => evidenceIds.has(id)));
+  if (!objects.length || !evidence.length) throw new Error('RECRUITING_GU_V1_YOU_BOS_SCOPE_EMPTY');
+  return Object.freeze({
+    ...world,
+    objects: Object.freeze(objects),
+    evidence: Object.freeze(evidence),
+    roomScope: 'YOU_BOS_ONLY',
+  });
+}
+
+export function rankRecruitingGuWorldForCompiler(world, semanticMeaning) {
+  const query = words(semanticMeaning).filter((item) => item.length > 2);
+  const rankedObjects = world.objects
+    .map((item, index) => ({ item, index, score: relevance(query, item) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index);
+  const positive = rankedObjects.filter((entry) => entry.score > 0);
+  const selectedObjects = (positive.length ? positive : rankedObjects).slice(0, 6).map((entry) => entry.item);
+  const requiredEvidence = new Set(selectedObjects.flatMap((item) => item.sourceIds || []));
+  const rankedEvidence = world.evidence
+    .map((item, index) => ({ item, index, score: relevance(query, item) + (requiredEvidence.has(item.id) ? 10 : 0) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .filter((entry) => entry.score > 0)
+    .slice(0, 24)
+    .map((entry) => entry.item);
+  return Object.freeze({
+    ...world,
+    objects: Object.freeze(selectedObjects),
+    evidence: Object.freeze(rankedEvidence),
+    compilerSelection: Object.freeze({
+      mode: 'SEMANTIC_MEANING_RANKED',
+      availableObjects: world.objects.length,
+      selectedObjects: selectedObjects.length,
+      availableEvidence: world.evidence.length,
+      selectedEvidence: rankedEvidence.length,
+    }),
+  });
+}
+
 export function createRecruitingGuWorld({ relationship, candidate, manager, bosArtifact, baViewModel, opportunity = { items: [] }, managerEvidence = [] } = {}) {
   if (!relationship?.relationship_id || !candidate?.profile_id || !manager?.subject_id) throw new Error('RECRUITING_GU_V1_WORLD_BINDING_REQUIRED');
   const profileName = bounded(candidate.name || 'MORE member', 140);

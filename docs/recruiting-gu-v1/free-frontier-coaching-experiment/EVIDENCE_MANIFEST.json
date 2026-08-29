@@ -1,0 +1,30 @@
+{
+  "contract": "recruiting_gu_v1_free_frontier_coaching_experiment_evidence_manifest_v1",
+  "date_local": "2026-08-28",
+  "custody": {
+    "worktree": "/Users/rrg/.openclaw/workspace/moremindmap-sidebar-future-lab-v1",
+    "branch": "codex/recruiting-gu-v1-build",
+    "starting_head": "af1c1f3e50fc9a34f30a4c29ed5900438e049ba0",
+    "starting_tree": "e3ceb7d78d44d61d30ff3788aa7718f5adeee756",
+    "canonical_production_baseline": "3899c7371639631224e644096c82f727cdf7cf2b",
+    "reconciled_production_deployment": "dpl_Ap6e9psbMXEqzo28ZC1CadF7xVJx"
+  },
+  "verification": {
+    "focused_tests": { "passed": 20, "failed": 0, "total": 20 },
+    "completed_full_suite_source_equivalent": { "passed": 902, "failed": 20, "total": 922 },
+    "untouched_starting_head_named_failures": 20,
+    "new_full_suite_failures": 0,
+    "changed_file_eslint": "PASS",
+    "build": "PASS",
+    "git_diff_check": "PASS",
+    "protected_phrases_in_client_bundle": 0,
+    "redundant_final_full_suite": "INTERRUPTED_IN_KNOWN_ASYNC_SECURITY_TAIL_AFTER_BASELINE_PATTERN_REPRODUCED"
+  },
+  "browser": {
+    "confirmed_url": "http://127.0.0.1:5197/recruiting-gu-v1/demo",
+    "screenshots": 8,
+    "synthetic_baseline_restored_after_capture": true,
+    "external_mutation": false
+  },
+  "verdict": "BOUNDED_EXPERIMENT_PASS_FREE_FRONTIER_COACHING_MERITS_CONTINUED_DEVELOPMENT_NOT_AUTHORIZED_FOR_PRODUCTION_OR_DARREN_DEMO"
+}

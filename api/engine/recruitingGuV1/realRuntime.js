@@ -12,7 +12,13 @@ import { getRecruitingService } from '../recruitingV1/runtime.js';
 import { getRecruitingRedis } from '../recruitingV1/redisStore.js';
 import { readCurrentAuthoredSurfaces } from './authoredSurfaces.js';
 import { createRecruitingGuWorld } from '../../../src/lib/recruitingGuV1/world.js';
+import {
+  RECRUITING_GU_EXPERIMENT_2_CONDITIONS,
+  RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
+} from '../../../src/lib/recruitingGuV1/experiment2Contract.js';
 import { createRecruitingGuV1Runtime } from './runtime.js';
+import { createCanonicalPurposeRankedContext } from './purposeRankedContext.js';
+import { createRecruitingGuExperiment2OpenAiTransport } from './openAiTransport.js';
 
 const APPROVAL_TTL_MS = 30 * 60 * 1000;
 
@@ -84,10 +90,15 @@ async function relationshipBinding({ service, redis, membership, relationship, e
 }
 
 export function createRecruitingGuV1RealRuntime({ env = process.env, service = getRecruitingService(env), redis = getRecruitingRedis(env), frontierTransport = null } = {}) {
+  const experimentTransport = frontierTransport || createRecruitingGuExperiment2OpenAiTransport({
+    apiKey: env.OPENAI_API_KEY,
+    modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
+  });
   const runtime = createRecruitingGuV1Runtime({
     store: service.store,
-    apiKey: env.OPENROUTER_API_KEY,
-    frontierTransport,
+    frontierTransport: experimentTransport,
+    modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
+    experimentCondition: RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
     worldResolver: async ({ authority }) => {
       const state = await service.store.read();
       const relationship = state.consultation_relationships?.[authority.relationship_id];
@@ -97,6 +108,17 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
       const membership = state.memberships[authority.membership_id];
       const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: authority.session_token }, env });
       return binding.world;
+    },
+    contextResolver: async ({ authority, room, purpose }) => {
+      const authoredSurfaces = await readCurrentAuthoredSurfaces({ redis, profileId: authority.profile_id, env });
+      return createCanonicalPurposeRankedContext({
+        redis,
+        env,
+        profileId: authority.profile_id,
+        room,
+        purpose,
+        authoredSurfaces,
+      });
     },
   });
 
@@ -277,6 +299,7 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
     async mutate(sessionToken, sessionId, action, payload) {
       const authority = await withSessionAuthority(sessionToken, sessionId);
       if (action === 'CHAT') return runtime.chat({ authority, sessionId, payload });
+      if (action === 'COMPILE_GU') return runtime.compileGu({ authority, sessionId, payload });
       return { session: await runtime.mutateSimple({ authority, sessionId, action, payload }) };
     },
     modelConfig: runtime.modelConfig,

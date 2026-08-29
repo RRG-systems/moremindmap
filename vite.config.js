@@ -5,6 +5,7 @@ import { Buffer } from 'node:buffer'
 import { createSubscriptionLiveDemoOpenAiTransport } from './api/engine/subscriptionV1/liveDemoOpenAiTransport.js'
 import { createRecruitingGuV1DemoHandler } from './api/recruiting/gu-v1-demo.js'
 import { getRecruitingGuV1DemoRuntime } from './api/engine/recruitingGuV1/demoRuntime.js'
+import { getRecruitingRedis } from './api/engine/recruitingV1/redisStore.js'
 
 const SUBSCRIPTION_LIVE_DEMO_ROUTE = '/api/internal/subscription-v1-live-frontier-demo'
 const RECRUITING_GU_V1_LOCAL_ROUTE = '/api/recruiting/gu-v1-demo'
@@ -42,9 +43,11 @@ function recruitingGuV1LocalPlugin({ enabled }) {
     name: 'recruiting-gu-v1-local-demo',
     configureServer(server) {
       if (!enabled) return
-      const runtime = getRecruitingGuV1DemoRuntime({ apiKey: globalThis.process?.env?.OPENROUTER_API_KEY })
+      const localEnv = { ...globalThis.process?.env, RECRUITING_GU_V1_LOCAL_DEMO: 'true' }
+      const redis = localEnv.REDIS_URL ? getRecruitingRedis(localEnv) : null
+      const runtime = getRecruitingGuV1DemoRuntime({ openAiApiKey: localEnv.OPENAI_API_KEY, redis, env: localEnv })
       const handler = createRecruitingGuV1DemoHandler({
-        env: { ...globalThis.process?.env, RECRUITING_GU_V1_LOCAL_DEMO: 'true' },
+        env: localEnv,
         runtime,
         authenticate: async () => ({ ok: true, capability_hash: 'local-synthetic-darren', capability: { demo_scope_id: 'local-synthetic-darren', synthetic_only: true } }),
       })

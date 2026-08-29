@@ -1,0 +1,75 @@
+{
+  "contract": "recruiting_gu_v1_experiment_2_sanitized_summary_v1",
+  "generated_at": "2026-08-29T07:34:54.120Z",
+  "checkpoint": "af1c1f3e50fc9a34f30a4c29ed5900438e049ba0",
+  "model_config": {
+    "gateway": "OpenAI Responses API",
+    "provider": "OpenAI",
+    "model_requested": "gpt-5.6-sol",
+    "model_returned": "gpt-5.6-sol",
+    "reasoning_effort": "low",
+    "strict_json_schema": true,
+    "provider_fallbacks": false,
+    "store": false
+  },
+  "fixed_subject": "SYNTHETIC",
+  "conditions": [
+    {
+      "condition": "CONDITION_1_CONTROL",
+      "coach_or_plan_ms": [16094, 15085, 17359],
+      "you_ba_leakage": "POSSIBLE_FULL_WORLD",
+      "visual_decisions": [true, true, true],
+      "repairs": 0
+    },
+    {
+      "condition": "CONDITION_2_SPLIT",
+      "coach_ms": [4975, 3028, 4241],
+      "you_ba_leakage": "OBSERVED_FULL_WORLD",
+      "visual_decisions": [false, false, true],
+      "primary_repairs": 0
+    },
+    {
+      "condition": "CONDITION_3_SPLIT_RANKED",
+      "coach_ms": [2789, 2867, 3500],
+      "you_ba_leakage": "NONE_BY_CONSTRUCTION_AND_OUTPUT",
+      "visual_decisions": [false, false, false],
+      "repairs": 0
+    },
+    {
+      "condition": "CONDITION_4_SPLIT_RANKED_DEMONSTRATIONS",
+      "coach_ms": [3186, 2602, 3631],
+      "you_ba_leakage": "NONE_BY_CONSTRUCTION_AND_OUTPUT",
+      "visual_decisions": [false, false, false],
+      "repairs": 0
+    }
+  ],
+  "optional_compiler_probe": {
+    "requested": true,
+    "published": true,
+    "latency_ms": 30929,
+    "attempts": 2,
+    "repair_events": ["BLOCK_KIND_INCOMPATIBLE"],
+    "block_types": ["TIMELINE", "PLAIN_LANGUAGE", "EVIDENCE_GAP", "QUESTION"]
+  },
+  "context_characters": {
+    "you_ranked_world": 2202,
+    "you_ranked_context_initial": 29356,
+    "business_ranked_world": 15160,
+    "business_ranked_context": 76067
+  },
+  "patricia": {
+    "canonical_diagnostic_only": true,
+    "bos": "HEALTHY_CURRENT_15_SURFACES",
+    "ba": "COMPLETE_COMPATIBLE_PRIOR",
+    "local_experiment_result": "FAIL_CLOSED_READ_ONLY_REDIS_REQUIRED",
+    "provider_calls": 0,
+    "canonical_mutations": 0,
+    "external_mutations": 0
+  },
+  "raw_provider_request_persisted": false,
+  "raw_provider_response_persisted": false,
+  "raw_sensitive_answers_persisted": false,
+  "canonical_mutation": false,
+  "external_mutation": false,
+  "production_deploy": false
+}

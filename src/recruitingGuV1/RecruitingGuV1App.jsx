@@ -11,13 +11,12 @@ const ROOMS = ['HOME', 'YOU', 'YOUR_BUSINESS', 'PLAN'];
 const LABEL = { HOME: 'HOME', YOU: 'YOU', YOUR_BUSINESS: 'YOUR BUSINESS', PLAN: 'PLAN' };
 const SUGGESTIONS = Object.freeze({
   YOU: [
-    'What are this person’s biggest sales superpowers?',
-    'What might be getting in their way?',
+    'What should I understand about this person that might not be obvious at first?',
+    'What could be one of their biggest strengths—and when could that same strength get in their way?',
   ],
   YOUR_BUSINESS: [
-    'What are the two best futures this business could head toward—and what downside future should we watch for?',
-    'What direction is this business heading now, and what appears to be holding it back?',
-    'What is the gap between where this business is now and where this person wants it to go?',
+    'If you were coaching this person, what would you help them see first?',
+    'What looks like the biggest opportunity in this business right now—and what might be keeping this person from getting where they want to go?',
   ],
 });
 
@@ -31,6 +30,15 @@ function AppHeader({ room, manager, synthetic, onRoom }) {
     <nav aria-label="Recruiting consultation rooms">{ROOMS.map((item) => <button type="button" key={item} className={room === item ? 'active' : ''} onClick={() => onRoom(item)}>{LABEL[item]}</button>)}</nav>
     <div className="gu-account"><button type="button" aria-label="Help">?</button>{synthetic && <span className="gu-synthetic-pill">SYNTHETIC · LOCAL ONLY</span>}<div><b>{manager?.name || 'Manager'}</b><small>{manager?.entitlement_mode === 'unlimited' ? 'admin / unlimited' : 'Manager'}</small></div></div>
   </header>;
+}
+
+function SubjectTabs({ subjects, activeSubject, busy, onSubject }) {
+  if (!subjects?.length) return null;
+  return <nav className="gu-subject-tabs" aria-label="Experiment 2 subjects">
+    <span>EXPERIMENT 2 SUBJECT</span>
+    {subjects.map((subject) => <button type="button" key={subject.id} className={activeSubject === subject.id ? 'active' : ''} disabled={busy} onClick={() => onSubject(subject.id)}>{subject.label}</button>)}
+    <small>Temporary read-only test harness</small>
+  </nav>;
 }
 
 function OrbitGraphic() {
@@ -94,7 +102,7 @@ function ConversationRail({ room, session, busy, progress, error, onSubmit, onSu
   const suggestions = SUGGESTIONS[room] || [];
   return <aside className="gu-chat" aria-label="MORE conversation">
     <header>{room === 'PLAN' ? 'PLAN CONVERSATION' : 'MORE CONVERSATION'}</header>
-    <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{(session?.conversation || []).map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small><p>{turn.text}</p></article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
+    <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{(session?.conversation || []).map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small>{turn.actor === 'MORE' && turn.insight ? <><strong className="gu-turn__insight">{turn.insight}</strong><p>{turn.explanation}</p><p className="gu-turn__question">{turn.question}</p></> : <p>{turn.text}</p>}</article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
     <div className="gu-chat__bottom">{suggestions.length > 0 && <section className="gu-suggestions"><p>SUGGESTED QUESTIONS</p>{suggestions.map((item) => <button type="button" key={item} disabled={busy} onClick={() => onSuggestion(item)}>{item}</button>)}</section>}
       <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder={room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Talk naturally · ⌘ Enter to send</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
     </div>
@@ -160,6 +168,7 @@ export default function RecruitingGuV1App() {
   const [projectionVisible, setProjectionVisible] = useState(true);
   const [scenarioValues, setScenarioValues] = useState({});
   const [evidence, setEvidence] = useState(null);
+  const [activeSubject, setActiveSubject] = useState(null);
   const session = bundle?.session;
   const room = session?.current_room || 'HOME';
   const progressTimer = useRef(null);
@@ -173,7 +182,8 @@ export default function RecruitingGuV1App() {
       setHome(payload);
       const selected = new URLSearchParams(location.search).get('candidate_id');
       if (selected) return openCandidate(selected);
-      if (payload.active_session_id && payload.synthetic_only) return mutateGu('OPEN_SYNTHETIC_DEMO').then((opened) => { setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
+      if (payload.active_session_id && payload.experiment_only) return mutateGu('OPEN_EXPERIMENT_SUBJECT', { subject: payload.active_subject }).then((opened) => { setActiveSubject(payload.active_subject); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
+      if (payload.active_session_id && payload.synthetic_only) return mutateGu('OPEN_SYNTHETIC_DEMO').then((opened) => { setActiveSubject('SYNTHETIC'); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
       return null;
     }).catch((failure) => setError(failure.message));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,7 +195,7 @@ export default function RecruitingGuV1App() {
   const manager = bundle?.manager || home?.manager;
 
   function beginProgress() {
-    const stages = ['Reading the governed evidence…', 'Choosing the smallest useful visual form…', 'Composing the current thinking environment…'];
+    const stages = ['Understanding what matters most now…', 'Preparing one useful coaching thought…', 'Getting the question clear…'];
     let index = 0;
     setProgress(stages[0]);
     clearInterval(progressTimer.current);
@@ -209,12 +219,24 @@ export default function RecruitingGuV1App() {
     try {
       const payload = await mutateGu(home.synthetic_only ? 'OPEN_SYNTHETIC_DEMO' : 'OPEN_DARREN_DEMO');
       if (payload.redirect_to) { window.location.assign(payload.redirect_to); return; }
-      setBundle(payload); setProjectionVisible(Boolean(payload.session.current_projection));
+      setActiveSubject('SYNTHETIC'); setBundle(payload); setProjectionVisible(Boolean(payload.session.current_projection));
     }
     catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
   }
+  async function openSubject(subject) {
+    if (busy || (activeSubject === subject && !error)) return;
+    setBusy(true); setError('');
+    try {
+      const payload = await mutateGu('OPEN_EXPERIMENT_SUBJECT', { subject });
+      setActiveSubject(subject);
+      setBundle(payload);
+      setProjectionVisible(Boolean(payload.session.current_projection));
+    } catch (failure) { setError(failure.message); }
+    finally { setBusy(false); }
+  }
   async function navigateRoom(nextRoom) {
+    setError('');
     if (nextRoom === 'HOME') { setBundle(null); return; }
     if (!session || busy || nextRoom === room) return;
     try { const payload = await mutateGu('CHANGE_ROOM', { session_id: session.session_id, room: nextRoom, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); setProjectionVisible(Boolean(payload.session.current_projection?.room === nextRoom)); }
@@ -223,7 +245,29 @@ export default function RecruitingGuV1App() {
   async function submit(message, actor = 'MANAGER') {
     if (!session || busy) return;
     setBusy(true); setError(''); beginProgress();
-    try { const payload = await mutateGu('CHAT', { session_id: session.session_id, message, actor, expected_revision: session.revision }); setBundle((current) => ({ ...current, ...payload })); setProjectionVisible(true); }
+    try {
+      const payload = await mutateGu('CHAT', { session_id: session.session_id, message, actor, expected_revision: session.revision });
+      setBundle((current) => ({ ...current, ...payload }));
+      setProjectionVisible(Boolean(payload.session.current_projection?.published_at_revision === payload.session.revision));
+      if (payload.visual_requested) {
+        setProgress('Turning that coaching thought into a useful visual…');
+        try {
+          const compiled = await mutateGu('COMPILE_GU', {
+            session_id: session.session_id,
+            expected_revision: payload.session.revision,
+            coach_move_id: payload.coach_move_id,
+          });
+          setBundle((current) => ({ ...current, ...compiled }));
+          setProjectionVisible(true);
+        } catch (visualFailure) {
+          setError(`The coaching thought is ready. Optional visual unavailable: ${visualFailure.message}`);
+        }
+      } else if (payload.experiment_condition) {
+        setProjectionVisible(false);
+      } else {
+        setProjectionVisible(true);
+      }
+    }
     catch (failure) { setError(failure.message); }
     finally { clearInterval(progressTimer.current); setBusy(false); }
   }
@@ -257,14 +301,15 @@ export default function RecruitingGuV1App() {
 
   if (approvalToken) return <ApprovalPage token={approvalToken} />;
   if (!home) return <main className="gu-loading"><MoreMark /><h1>{error || 'Opening Recruiting GU V1…'}</h1></main>;
-  return <div className="recruiting-gu-v1" data-room={room} data-synthetic={home.synthetic_only ? 'true' : 'false'}>
+  return <div className="recruiting-gu-v1" data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
     <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} />
+    <SubjectTabs subjects={home.experiment_subjects} activeSubject={activeSubject} busy={busy} onSubject={openSubject} />
     {room === 'HOME' ? <Home data={home} selected={session?.subject_binding ? { name: session.subject_binding.name } : null} onContinue={() => navigateRoom('YOU')} onOpenCandidate={openCandidate} onOpenRelationship={openRelationship} onDemo={openDemo} onMoreId={(profileId) => mutateGu('REQUEST_MORE_ID', { profile_id: profileId })} /> : <>
       <div className="gu-room-layout">
         {room === 'YOU' || room === 'YOUR_BUSINESS' ? <AuthoredRoom room={room} surfaces={bundle.authored_surfaces} projection={projection} showProjection={showProjection} projectionProps={projectionProps} /> : <PlanRoom session={session} busy={busy} onDecision={planDecision} onSecondOffer={secondOffer} />}
         <ConversationRail room={room} session={session} busy={busy} progress={progress} error={error} onSubmit={submit} onSuggestion={(question) => submit(question, 'MANAGER')} />
       </div>
-      <p className="gu-boundary">{home.synthetic_only ? 'Synthetic Darren/Jordan demo. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, Recruiting V1, or Production mutation.' : 'Consent-bound consultation. Canonical BOS/BA are read-only; generated projections remain revisable session views.'}</p>
+      <p className="gu-boundary">{session?.synthetic_only ? 'Synthetic Darren/Jordan demo. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, Recruiting V1, or Production mutation.' : 'Patricia experiment: canonical BOS/BA read only. No canonical write, Recruiting V1, fulfillment, external, Darren Demo, or Production mutation.'}</p>
       <BottomNav room={room} onRoom={navigateRoom} />
     </>}
     {evidence && <EvidenceDrawer evidence={evidence} onClose={() => setEvidence(null)} />}

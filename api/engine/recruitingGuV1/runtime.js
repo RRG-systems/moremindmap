@@ -8,10 +8,21 @@ import {
   decidePlan,
   decideSecondOffer,
   frontierSessionContext,
+  recordCoachMove,
+  recordCompiledProjection,
   recordFrontierProjection,
   recordPlanProposal,
   recordScenarioChange,
 } from '../../../src/lib/recruitingGuV1/session.js';
+import {
+  RECRUITING_GU_EXPERIMENT_2_CONDITIONS,
+  isCoachFirstCondition,
+  usesDjDemonstrations,
+  usesPurposeRankedContext,
+} from '../../../src/lib/recruitingGuV1/experiment2Contract.js';
+import { rankRecruitingGuWorldForCompiler, scopeRecruitingGuWorldForRoom } from '../../../src/lib/recruitingGuV1/world.js';
+import { DJ_COACHING_DEMONSTRATIONS } from './experiment2Prompt.js';
+import { createRecruitingGuCoachRuntime } from './experiment2Runtime.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -100,12 +111,16 @@ export function createRecruitingGuV1Runtime({
   apiKey,
   modelConfig = FRONTIER_MODEL_CONFIG,
   frontierTransport = null,
+  contextResolver = null,
+  experimentCondition = RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
   effectAdapter = createSyntheticEffectAdapter(),
   now = () => new Date(),
 } = {}) {
   if (typeof store?.read !== 'function' || typeof store?.transaction !== 'function') throw new Error('RECRUITING_GU_V1_STORE_REQUIRED');
   if (typeof worldResolver !== 'function') throw new Error('RECRUITING_GU_V1_WORLD_RESOLVER_REQUIRED');
   const transport = frontierTransport || createRecruitingV2OpenRouterTransport({ apiKey, modelConfig });
+  if (!Object.values(RECRUITING_GU_EXPERIMENT_2_CONDITIONS).includes(experimentCondition)) throw new Error('RECRUITING_GU_V1_EXPERIMENT_CONDITION_INVALID');
+  const coachRuntime = createRecruitingGuCoachRuntime({ transport, modelConfig });
 
   async function open({ authority, binding }) {
     const world = await worldResolver({ authority, binding });
@@ -171,6 +186,47 @@ export function createRecruitingGuV1Runtime({
     }
     const world = await worldResolver({ authority, session: afterHuman });
     if (world.version !== afterHuman.world_version) throw new Error('RECRUITING_GU_V1_GOVERNED_WORLD_STALE');
+    if (isCoachFirstCondition(experimentCondition)) {
+      const ranked = usesPurposeRankedContext(experimentCondition);
+      const governedWorld = ranked ? scopeRecruitingGuWorldForRoom(world, afterHuman.current_room) : world;
+      const contextResult = ranked
+        ? await contextResolver?.({ authority, session: afterHuman, purpose: payload.message, room: afterHuman.current_room, world: governedWorld })
+        : null;
+      if (ranked && !contextResult?.context) throw new Error('RECRUITING_GU_V1_PURPOSE_CONTEXT_REQUIRED');
+      const result = await coachRuntime.coach({
+        world: governedWorld,
+        sessionContext: frontierSessionContext(afterHuman, { roomScoped: ranked }),
+        purpose: payload.message,
+        purposeContext: contextResult?.context || null,
+        demonstrations: usesDjDemonstrations(experimentCondition) ? DJ_COACHING_DEMONSTRATIONS : [],
+      });
+      const session = await store.transaction((state) => {
+        const current = sessionFrom(state, sessionId, authority);
+        const next = recordCoachMove(current, {
+          move: result.move,
+          receipt: result.receipt,
+          basedOnRevision: afterHuman.revision,
+          condition: experimentCondition,
+        }, now());
+        return put(state, next);
+      });
+      return {
+        session,
+        world: governedWorld,
+        visual_requested: result.move.visual.materiallyHelps === true,
+        coach_move_id: session.current_coach_move.coach_move_id,
+        context_receipt: contextResult?.receipt || null,
+        experiment_condition: experimentCondition,
+        latency: {
+          total_ms: Math.round(performance.now() - startedAt),
+          coach_ms: result.receipt.totalLatencyMs,
+          provider_ms: result.receipt.provider?.latencyMs || null,
+          visual_ms: null,
+          progressive_state: true,
+        },
+        provider_receipt: result.receipt,
+      };
+    }
     const planner = createRecruitingV2FrontierRuntime({ transport, modelConfig, governedWorld: world });
     const result = await planner.planSurface({ purpose: payload.message, sessionContext: frontierSessionContext(afterHuman) });
     const session = await store.transaction((state) => {
@@ -181,5 +237,57 @@ export function createRecruitingGuV1Runtime({
     return { session, world, latency: { total_ms: Math.round(performance.now() - startedAt), provider_ms: result.receipt.provider?.latencyMs || null, progressive_state: true }, provider_receipt: result.receipt };
   }
 
-  return Object.freeze({ open, read, chat, mutateSimple, modelConfig });
+  async function compileGu({ authority, sessionId, payload }) {
+    if (!isCoachFirstCondition(experimentCondition)) throw new Error('RECRUITING_GU_V1_OPTIONAL_COMPILER_NOT_ACTIVE');
+    const state = await store.read();
+    const current = sessionFrom(state, sessionId, authority);
+    if (current.revision !== payload.expected_revision) {
+      const error = new Error('RECRUITING_GU_V1_STALE_SESSION_REFUSED');
+      error.current_revision = current.revision;
+      throw error;
+    }
+    const coachRecord = current.current_coach_move;
+    if (!coachRecord || coachRecord.coach_move_id !== payload.coach_move_id) throw new Error('RECRUITING_GU_V1_COACH_MOVE_STALE');
+    if (coachRecord.move.visual.materiallyHelps !== true) throw new Error('RECRUITING_GU_V1_VISUAL_NOT_REQUESTED');
+    const startedAt = performance.now();
+    const fullWorld = await worldResolver({ authority, session: current });
+    if (fullWorld.version !== current.world_version) throw new Error('RECRUITING_GU_V1_GOVERNED_WORLD_STALE');
+    const ranked = usesPurposeRankedContext(experimentCondition);
+    const roomWorld = ranked ? scopeRecruitingGuWorldForRoom(fullWorld, current.current_room) : fullWorld;
+    const compilerWorld = rankRecruitingGuWorldForCompiler(
+      roomWorld,
+      `${coachRecord.move.insight} ${coachRecord.move.explanation} ${coachRecord.move.visual.semanticIdea}`,
+    );
+    const planner = createRecruitingV2FrontierRuntime({ transport, modelConfig, governedWorld: compilerWorld });
+    const result = await planner.planSurface({
+      purpose: coachRecord.move.visual.semanticIdea,
+      sessionContext: frontierSessionContext(current, { roomScoped: ranked }),
+      coachingMove: coachRecord.move,
+    });
+    const session = await store.transaction((nextState) => {
+      const latest = sessionFrom(nextState, sessionId, authority);
+      const next = recordCompiledProjection(latest, {
+        plan: result.plan,
+        receipt: result.receipt,
+        basedOnRevision: current.revision,
+        coachMoveId: coachRecord.coach_move_id,
+      }, now());
+      return put(nextState, next);
+    });
+    return {
+      session,
+      world: compilerWorld,
+      experiment_condition: experimentCondition,
+      latency: {
+        total_ms: Math.round(performance.now() - startedAt),
+        coach_ms: coachRecord.receipt?.totalLatencyMs || null,
+        visual_ms: result.receipt.totalLatencyMs,
+        provider_ms: result.receipt.provider?.latencyMs || null,
+        progressive_state: true,
+      },
+      provider_receipt: result.receipt,
+    };
+  }
+
+  return Object.freeze({ open, read, chat, compileGu, mutateSimple, modelConfig, experimentCondition });
 }

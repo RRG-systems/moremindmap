@@ -1,0 +1,16 @@
+0828a0756c9a9311de5a2ece0eeb57319bfb931adbe7cca1070c9d64cb39e4fc  docs/recruiting-gu-v1/free-frontier-coaching-experiment/EVIDENCE_MANIFEST.json
+9b801a990344af82ca4c1c358eaa0e8ee803514d16832a4e740ec6a652217900  docs/recruiting-gu-v1/free-frontier-coaching-experiment/IMPLEMENTATION_AND_AUTHORITY_TRACE.md
+6a6b43780b86e90822fec357bda1e502965f9eaa79716f8afd3c42df4f5fdff7  docs/recruiting-gu-v1/free-frontier-coaching-experiment/LIVE_FRONTIER_EVIDENCE.md
+e0a6a2f976ad20a71dad69fb5fc58a5362d54f868684abeefe73f6ffe978ab60  docs/recruiting-gu-v1/free-frontier-coaching-experiment/README.md
+a65fda34269139cd4bc2d07b8de9c3a40468b276fe718165c3879903d85b6429  docs/recruiting-gu-v1/free-frontier-coaching-experiment/SCREENSHOT_INDEX.md
+9622d3cc007fcf59c3c39935ca6f564a26faf0e542392eb3970f73fb641fbe72  docs/recruiting-gu-v1/free-frontier-coaching-experiment/TEST_AND_REGRESSION_EVIDENCE.md
+f370e9cc533822535d35c51b13d318bdde7514635ad587eb6c4bc0a8e436c046  docs/recruiting-gu-v1/free-frontier-coaching-experiment/UNRESOLVED_GAPS_AND_VERDICT.md
+f6d2de9b84befa84506a25b101fcd2399e4c4d7f3cb51ae703a2bcf0b44da357  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/LIVE_RUN_SANITIZED_RECEIPT.json
+96bdfb371786aa9d1a642c3b1f35204b72ddb88d157317da30b5dbfd5031ce50  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/01-home-cold-open.jpg
+5bdc25b6d0a1e0d33c2e6df7722af20f4cedb4640a8d19440db44f24580d8476  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/02-you-bos-only-new-coaching-questions.jpg
+1b802c2954214e647214e635dc969557468092dbdf9cc72feecaa50fc2e5adad  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/03-you-progressive-understanding.jpg
+515741ca10bd6dc00021bb91148fa2003c8b36ef2af79307b821e2904e355e2a  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/04-you-bos-only-frontier-environment.jpg
+36824d768e40293074ae9df6bfe2503c0a2a1d0f5358b1f20d8dc4943aa8932f  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/05-you-human-correction-updates-understanding.jpg
+6b69cc2058c61084a336fce1118b7bbd2495872c679637b23408b3e526ce93d1  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/06-your-business-authored-ba-continuous-chat.jpg
+7f77941e3133511948523dd62295ce25abb1c09d613dc5470415a924615c3127  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/07-your-business-fused-frontier-environment.jpg
+7f5b457b3035240a499716a20f3048271d6e75c49d5db92151d2b38fa76fa463  docs/recruiting-gu-v1/free-frontier-coaching-experiment/evidence/screenshots/08-first-party-informed-without-sensitive-source-exposure.jpg

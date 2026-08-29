@@ -32,6 +32,14 @@ Founder-quality composition boundary:
 
 Return only the strict requested JSON schema.`;
 
+const COMPILER_SYSTEM = `You are the MORE governed visual compiler. The frontier coach has already decided the human meaning.
+
+Express that already-decided meaning using the smallest useful MORE-native visual environment. Do not create a new interpretation, add a new conclusion, or turn the visual compilation task into coaching. The deterministic renderer owns values, charts, layout, controls, and execution.
+
+Use only supplied governed object and evidence IDs. Never invent a fact, number, value, source, person, capability, commitment, or action. Preserve missingness, counterevidence, conditionality, state binding, and the safe-action boundary. Model interpretations remain revisable session hypotheses and never become canonical truth.
+
+Copy the supplied coaching insight, explanation, and self-discovery question into guidance headline, summary, and nextCue. Select only blocks that materially clarify the supplied visual meaning. Return only the strict requested JSON schema.`;
+
 function serializeWorld(world) {
   return {
     contract: world.contract, worldId: world.worldId, version: world.version, asOf: world.asOf,
@@ -40,7 +48,7 @@ function serializeWorld(world) {
   };
 }
 
-export function buildFrontierMessages({ world, stateBinding, sessionContext, humanPurpose, repair = null }) {
+export function buildFrontierMessages({ world, stateBinding, sessionContext, humanPurpose, coachingMove = null, repair = null }) {
   const payload = {
     planVersion: RECRUITING_V2_PLAN_VERSION,
     exactStateBinding: stateBinding,
@@ -48,10 +56,13 @@ export function buildFrontierMessages({ world, stateBinding, sessionContext, hum
     sharedSession: sessionContext,
     governedReality: serializeWorld(world),
     creationLanguage: CREATION_LANGUAGE_CONTRACT,
-    instruction: 'Understand the whole legitimate state, decide what matters now, and compose the smallest useful governed environment. Lead with visual intelligence when it answers the purpose. Make the next human move obvious without prescribing a conversation script.',
+    instruction: coachingMove
+      ? 'Compile the already-decided coaching meaning into the smallest useful governed visual environment. Do not reason toward a different meaning.'
+      : 'Understand the whole legitimate state, decide what matters now, and compose the smallest useful governed environment. Lead with visual intelligence when it answers the purpose. Make the next human move obvious without prescribing a conversation script.',
   };
+  if (coachingMove) payload.alreadyDecidedCoachingMeaning = coachingMove;
   if (repair) payload.validationRepair = { errors: repair.errors, rejectedCandidate: repair.candidate, instruction: 'Repair only the validation failures and preserve the exact state binding.' };
-  return Object.freeze([{ role: 'system', content: SYSTEM }, { role: 'user', content: JSON.stringify(payload) }]);
+  return Object.freeze([{ role: 'system', content: coachingMove ? COMPILER_SYSTEM : SYSTEM }, { role: 'user', content: JSON.stringify(payload) }]);
 }
 
-export const FRONTIER_PROMPT_RECEIPT = Object.freeze({ version: 'recruiting-v2-shared-session-doctrine-003a-v1', system: SYSTEM });
+export const FRONTIER_PROMPT_RECEIPT = Object.freeze({ version: 'recruiting-v2-shared-session-doctrine-003a-v1', system: SYSTEM, compilerSystem: COMPILER_SYSTEM });

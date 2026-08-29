@@ -1,0 +1,73 @@
+{
+  "contract": "recruiting_gu_v1_free_frontier_coaching_experiment_sanitized_receipt_v1",
+  "synthetic_only": true,
+  "raw_provider_request_persisted": false,
+  "raw_provider_response_persisted": false,
+  "protected_source_answer_exposed": false,
+  "model": {
+    "gateway": "OpenRouter",
+    "requested_model": "openai/gpt-5.6-luna",
+    "returned_provider": "OpenAI",
+    "reasoning_effort": "low",
+    "structured_output": "strict-json-schema",
+    "max_output_tokens": 4200,
+    "provider_fallbacks": false,
+    "store": false,
+    "timeout_ms": 75000
+  },
+  "sealed_turns": [
+    {
+      "name": "YOU_INITIAL",
+      "total_ms": 12245,
+      "accepted_provider_ms": 5257,
+      "attempts": 2,
+      "room_scope": "BOS_ONLY_NO_BA_EVIDENCE_OR_BA_SOURCE_ANSWERS",
+      "source_availability": {
+        "bos_first_party_answers": "AVAILABLE_SYNTHETIC_GOVERNED",
+        "ba_first_party_answers": "NOT_REQUESTED_IN_YOU"
+      },
+      "block_types": ["PERSON", "HYPOTHESIS", "PLAIN_LANGUAGE"],
+      "one_short_question": true
+    },
+    {
+      "name": "YOU_CORRECTION",
+      "total_ms": 7256,
+      "attempts": 1,
+      "room_scope": "BOS_ONLY_NO_BA_EVIDENCE_OR_BA_SOURCE_ANSWERS",
+      "human_correction_present": true,
+      "superseded_prior_hypothesis": true,
+      "one_short_question": true
+    },
+    {
+      "name": "YOUR_BUSINESS_INITIAL",
+      "total_ms": 7389,
+      "attempts": 1,
+      "room_scope": "WHOLE_PERSON_PLUS_WHOLE_BUSINESS",
+      "source_availability": {
+        "bos_first_party_answers": "AVAILABLE_SYNTHETIC_GOVERNED",
+        "ba_first_party_answers": "AVAILABLE_SYNTHETIC_GOVERNED"
+      },
+      "real_estate_authority_count": 16,
+      "block_types": ["PERSON", "CONSTRAINT", "METRIC_STRIP", "DECISION"],
+      "one_short_question": true
+    },
+    {
+      "name": "YOUR_BUSINESS_FIRST_PARTY_MATERIALITY",
+      "total_ms": 11259,
+      "attempts": 1,
+      "room_scope": "WHOLE_PERSON_PLUS_WHOLE_BUSINESS",
+      "block_types": ["RELATIONSHIP", "COMPARISON", "EVIDENCE_GAP"],
+      "first_party_source_materially_improved_understanding": true,
+      "protected_source_answer_exposed": false,
+      "causal_humility_preserved": true,
+      "one_short_question": true
+    }
+  ],
+  "sealed_latency": {
+    "minimum_ms": 7256,
+    "maximum_ms": 12245,
+    "mean_ms": 9537.25,
+    "median_ms": 9324
+  },
+  "external_mutation": false
+}

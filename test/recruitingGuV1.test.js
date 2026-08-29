@@ -6,6 +6,7 @@ import { createRecruitingGuV1DemoRuntime } from '../api/engine/recruitingGuV1/de
 import { createRecruitingGuV1RealRuntime } from '../api/engine/recruitingGuV1/realRuntime.js';
 import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../src/lib/recruitingV1/store.js';
 import { RECRUITING_GU_V1_SESSION_CONTRACT } from '../src/lib/recruitingGuV1/session.js';
+import { RECRUITING_GU_EXPERIMENT_2_VERSION } from '../src/lib/recruitingGuV1/experiment2Contract.js';
 import { RecruitingV1Service, createSyntheticNotificationTransport } from '../src/lib/recruitingV1/service.js';
 
 function fakeFrontierTransport({ messages, schemaName }) {
@@ -24,8 +25,23 @@ function fakeFrontierTransport({ messages, schemaName }) {
     });
   }
   const payload = JSON.parse(messages[1].content);
+  if (schemaName === 'more_recruiting_gu_v1_experiment_2_coach_move') {
+    const scenarioHours = payload.relevantSharedSession?.scenarioAssumptions?.releasedHours;
+    return Promise.resolve({
+      parsed: {
+        version: RECRUITING_GU_EXPERIMENT_2_VERSION,
+        insight: scenarioHours ? `${scenarioHours} governed scenario hours remain an assumption.` : 'Jordan may protect trust by keeping important work close.',
+        explanation: 'That can preserve quality, but it may also keep the business dependent on one person.',
+        selfDiscoveryQuestion: 'Where do you see this helping Jordan, and where does it start to cost them?',
+        visual: { materiallyHelps: true, semanticIdea: scenarioHours ? 'Show the governed scenario assumption without treating it as fact.' : 'Show the person and the supported tradeoff without claiming business cause.' },
+      },
+      receipt: { modelReturned: 'openai/gpt-5.6-luna', providerReturned: 'OpenAI', latencyMs: 29, store: false },
+    });
+  }
   const purpose = payload.currentHumanPurpose;
   const scenarioHours = payload.sharedSession?.scenarioAssumptions?.releasedHours;
+  const firstObject = payload.governedReality.objects[0];
+  const typeByKind = { PERSON: 'PERSON', TIME_SERIES: 'LINE_CHART', METRICS: 'METRIC_STRIP', COMPARISON: 'COMPARISON', BUSINESS_TWIN: 'PLAIN_LANGUAGE', RELATIONSHIP: 'RELATIONSHIP', FUTURES: 'FIVE_FUTURES', SCENARIO: 'SCENARIO', EVIDENCE_GAP: 'EVIDENCE_GAP', INTERVENTION: 'DECISION', FUNNEL: 'FUNNEL' };
   return Promise.resolve({
     parsed: {
       planVersion: payload.planVersion,
@@ -33,7 +49,7 @@ function fakeFrontierTransport({ messages, schemaName }) {
       purpose: { humanWords: purpose, interpretedPurpose: purpose, meetingNeed: 'See the governed reality together.', materiallyChanged: false },
       guidance: { eyebrow: 'CURRENT READ', headline: scenarioHours ? `${scenarioHours} governed scenario hours remain an assumption.` : 'The evidence supports a visible, revisable working view.', summary: 'MORE selected one governed representation and kept missingness visible.', nextCue: 'Test the view together.', whyThisEnvironment: 'A visual comparison is useful for this purpose.' },
       hypotheses: [],
-      blocks: [{ blockId: 'block-governed-read', type: 'PERSON', title: 'See the person without turning style into cause', subtitle: 'BOS can guide the meeting while business causation remains open.', objectIds: ['obj-jordan-person'], evidenceIds: ['ev-jordan-bos'], emphasis: 'PRIMARY', reason: 'The purpose asks about the person.' }],
+      blocks: [{ blockId: 'block-governed-read', type: typeByKind[firstObject.kind] || 'PLAIN_LANGUAGE', title: 'See the governed meaning', subtitle: 'The visual supports the coaching thought without creating a new conclusion.', objectIds: [firstObject.id], evidenceIds: firstObject.sourceIds?.slice(0, 1) || [], emphasis: 'PRIMARY', reason: 'The coach determined that a visual would materially help.' }],
       interactions: ['SHOW_EVIDENCE', 'CHANGE_PURPOSE'],
       completion: { recommendation: 'CONTINUE', ready: false, summary: 'The current view is useful but not a decision.', nextStep: 'Continue the human conversation.' },
     },
@@ -58,6 +74,9 @@ test('GU V1 keeps one revision-bound session across authored rooms, frontier rec
   let result = await runtime.mutate(sessionId, 'CHANGE_ROOM', { room: 'YOU', expected_revision: opened.session.revision });
   assert.equal(result.session.current_room, 'YOU');
   result = await runtime.mutate(sessionId, 'CHAT', { message: 'What are this person’s biggest sales superpowers?', actor: 'MANAGER', expected_revision: result.session.revision });
+  assert.equal(result.session.current_projection, null);
+  assert.equal(result.session.current_coach_move.move.insight, 'Jordan may protect trust by keeping important work close.');
+  result = await runtime.mutate(sessionId, 'COMPILE_GU', { coach_move_id: result.coach_move_id, expected_revision: result.session.revision });
   assert.equal(result.session.current_projection.room, 'YOU');
   assert.equal(result.session.current_projection.plan.blocks[0].type, 'PERSON');
   assert.equal(result.session.conversation.length, 2);
@@ -69,6 +88,7 @@ test('GU V1 keeps one revision-bound session across authored rooms, frontier rec
 
   result = await runtime.mutate(sessionId, 'CHANGE_ROOM', { room: 'YOUR_BUSINESS', expected_revision: result.session.revision });
   result = await runtime.mutate(sessionId, 'CHAT', { message: 'What direction is this business heading now?', actor: 'INVITEE', expected_revision: result.session.revision });
+  result = await runtime.mutate(sessionId, 'COMPILE_GU', { coach_move_id: result.coach_move_id, expected_revision: result.session.revision });
   assert.equal(result.session.current_projection.room, 'YOUR_BUSINESS');
   assert.equal(result.session.conversation.length, 4);
   assert.equal(result.session.conversation[2].actor, 'INVITEE');
@@ -103,7 +123,7 @@ test('GU V1 synthetic reset removes only the synthetic shared session', async ()
   await runtime.open();
   assert.equal((await runtime.home()).active_session_id !== null, true);
   const receipt = await runtime.reset();
-  assert.deepEqual(receipt, { reset: true, external_mutation: false });
+  assert.deepEqual(receipt, { reset: true, subject: null, external_mutation: false, canonical_mutation: false });
   assert.equal((await runtime.home()).active_session_id, null);
 });
 
@@ -140,6 +160,7 @@ test('frontier may reuse a revision-bound scenario number as a governed assumpti
   result = await runtime.mutate(sessionId, 'CHANGE_ROOM', { room: 'YOUR_BUSINESS', expected_revision: result.session.revision });
   result = await runtime.mutate(sessionId, 'SCENARIO_CHANGE', { values: { releasedHours: 9 }, expected_revision: result.session.revision });
   result = await runtime.mutate(sessionId, 'CHAT', { message: 'Show what the governed changed assumption means.', actor: 'MANAGER', expected_revision: result.session.revision });
+  result = await runtime.mutate(sessionId, 'COMPILE_GU', { coach_move_id: result.coach_move_id, expected_revision: result.session.revision });
   assert.match(result.session.current_projection.plan.guidance.headline, /^9 governed scenario hours/u);
 });
 

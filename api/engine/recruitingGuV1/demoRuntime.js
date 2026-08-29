@@ -1,11 +1,17 @@
 import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../../../src/lib/recruitingV1/store.js';
-import { createSyntheticRecruitingGuWorld } from '../../../src/lib/recruitingGuV1/world.js';
-import { createSyntheticAuthoredSurfaces } from './authoredSurfaces.js';
+import { createRecruitingGuWorld, createSyntheticRecruitingGuWorld } from '../../../src/lib/recruitingGuV1/world.js';
+import {
+  RECRUITING_GU_EXPERIMENT_2_CONDITIONS,
+  RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
+} from '../../../src/lib/recruitingGuV1/experiment2Contract.js';
+import { createSyntheticAuthoredSurfaces, readCurrentAuthoredSurfaces } from './authoredSurfaces.js';
 import { createRecruitingGuV1Runtime } from './runtime.js';
+import { createCanonicalPurposeRankedContext, createSyntheticPurposeRankedContext } from './purposeRankedContext.js';
+import { createRecruitingGuExperiment2OpenAiTransport } from './openAiTransport.js';
 
 let singleton;
 
-const AUTHORITY = Object.freeze({
+const SYNTHETIC_AUTHORITY = Object.freeze({
   manager_subject_id: 'manager_synthetic_darren',
   membership_id: 'membership_synthetic_moremindmap_darren',
   enterprise_id: 'enterprise_synthetic_moremindmap',
@@ -13,8 +19,8 @@ const AUTHORITY = Object.freeze({
 });
 
 const MANAGER = Object.freeze({
-  name: 'Darren', subject_id: AUTHORITY.manager_subject_id, membership_id: AUTHORITY.membership_id,
-  enterprise_id: AUTHORITY.enterprise_id, enterprise_name: 'MORE MindMap', entitlement_mode: 'unlimited',
+  name: 'Darren', subject_id: SYNTHETIC_AUTHORITY.manager_subject_id, membership_id: SYNTHETIC_AUTHORITY.membership_id,
+  enterprise_id: SYNTHETIC_AUTHORITY.enterprise_id, enterprise_name: 'MORE MindMap', entitlement_mode: 'unlimited',
   entitlement: { mode: 'unlimited', remaining: null }, capabilities: { master_control: true, darren_synthetic_demo: true },
 });
 const STANDARD_MANAGER = Object.freeze({
@@ -29,26 +35,140 @@ const INVITEE = Object.freeze({
   readiness_state: 'BA_INTELLIGENCE_READY', ba_readiness: 'BA_INTELLIGENCE_READY',
 });
 
-export function createRecruitingGuV1DemoRuntime({ store = new InMemoryRecruitingStore(createEmptyRecruitingState()), apiKey, frontierTransport, now } = {}) {
-  const authoredSurfaces = createSyntheticAuthoredSurfaces();
-  const world = createSyntheticRecruitingGuWorld();
-  const runtime = createRecruitingGuV1Runtime({
-    store, apiKey, frontierTransport, now,
-    worldResolver: async () => world,
+const PATRICIA_PROFILE_ID = 'mm-20260708-dsst020z';
+const PATRICIA_AUTHORITY = Object.freeze({
+  manager_subject_id: SYNTHETIC_AUTHORITY.manager_subject_id,
+  membership_id: SYNTHETIC_AUTHORITY.membership_id,
+  enterprise_id: SYNTHETIC_AUTHORITY.enterprise_id,
+  relationship_id: 'rel-experiment-2-darren-patricia-read-only',
+  profile_id: PATRICIA_PROFILE_ID,
+  experiment_permission: 'FOUNDER_CONFIRMED_REPEATED_DEMO_USE',
+});
+
+const EXPERIMENT_SUBJECTS = Object.freeze([
+  Object.freeze({ id: 'SYNTHETIC', label: 'SYNTHETIC', name: 'Jordan Lee', profile_id: INVITEE.profile_id, canonical_read: false }),
+  Object.freeze({ id: 'PATRICIA', label: 'PATRICIA', name: 'Patricia', profile_id: PATRICIA_PROFILE_ID, canonical_read: true }),
+]);
+
+export function createRecruitingGuV1DemoRuntime({
+  store = new InMemoryRecruitingStore(createEmptyRecruitingState()),
+  openAiApiKey,
+  frontierTransport,
+  now,
+  redis = null,
+  env = globalThis.process?.env || {},
+  experimentCondition = RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
+} = {}) {
+  const syntheticAuthoredSurfaces = createSyntheticAuthoredSurfaces();
+  const syntheticWorld = createSyntheticRecruitingGuWorld();
+  const experimentTransport = frontierTransport || createRecruitingGuExperiment2OpenAiTransport({
+    apiKey: openAiApiKey || env.OPENAI_API_KEY,
+    modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
   });
-  const binding = Object.freeze({ manager: MANAGER, invitee: INVITEE, synthetic_only: true, authored_surfaces: authoredSurfaces });
+
+  function subjectFromAuthority(authority) {
+    if (authority.relationship_id === SYNTHETIC_AUTHORITY.relationship_id) return 'SYNTHETIC';
+    if (authority.relationship_id === PATRICIA_AUTHORITY.relationship_id) return 'PATRICIA';
+    throw new Error('RECRUITING_GU_V1_EXPERIMENT_SUBJECT_SCOPE_DENIED');
+  }
+
+  async function bindingFor(subjectId) {
+    if (subjectId === 'SYNTHETIC') return Object.freeze({
+      manager: MANAGER,
+      invitee: INVITEE,
+      synthetic_only: true,
+      authored_surfaces: syntheticAuthoredSurfaces,
+      world: syntheticWorld,
+    });
+    if (subjectId !== 'PATRICIA') throw new Error('RECRUITING_GU_V1_EXPERIMENT_SUBJECT_INVALID');
+    if (typeof redis?.get !== 'function') throw new Error('RECRUITING_GU_V1_PATRICIA_READ_ONLY_REDIS_REQUIRED');
+    const authoredSurfaces = await readCurrentAuthoredSurfaces({ redis, profileId: PATRICIA_PROFILE_ID, env });
+    const invitee = Object.freeze({
+      candidate_id: null,
+      profile_id: PATRICIA_PROFILE_ID,
+      bos_profile_id: PATRICIA_PROFILE_ID,
+      name: 'Patricia',
+      recruit_name: 'Patricia',
+      readiness_state: authoredSurfaces.ba ? 'BA_INTELLIGENCE_READY' : 'BOS_READY',
+      ba_readiness: authoredSurfaces.ba ? 'BA_INTELLIGENCE_READY' : 'BA_NOT_STARTED',
+    });
+    const relationship = Object.freeze({
+      relationship_id: PATRICIA_AUTHORITY.relationship_id,
+      profile_id: PATRICIA_PROFILE_ID,
+      owner_name: 'Patricia',
+      consent_state: 'FOUNDER_CONFIRMED_EXPERIMENT_PERMISSION',
+      source: 'EXPERIMENT_2_READ_ONLY_HARNESS',
+      status: 'ACTIVE',
+      canonical_write_authority: false,
+    });
+    const world = createRecruitingGuWorld({
+      relationship,
+      candidate: invitee,
+      manager: MANAGER,
+      bosArtifact: authoredSurfaces.bos,
+      baViewModel: authoredSurfaces.ba,
+      opportunity: { items: [] },
+      managerEvidence: [],
+    });
+    return Object.freeze({ manager: MANAGER, invitee, synthetic_only: false, authored_surfaces: authoredSurfaces, world });
+  }
+
+  const runtime = createRecruitingGuV1Runtime({
+    store,
+    frontierTransport: experimentTransport,
+    modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
+    now,
+    experimentCondition,
+    worldResolver: async ({ authority }) => (await bindingFor(subjectFromAuthority(authority))).world,
+    contextResolver: async ({ authority, room, purpose }) => {
+      const subjectId = subjectFromAuthority(authority);
+      const binding = await bindingFor(subjectId);
+      return subjectId === 'SYNTHETIC'
+        ? createSyntheticPurposeRankedContext({ room, purpose, authoredSurfaces: binding.authored_surfaces })
+        : createCanonicalPurposeRankedContext({ redis, env, profileId: PATRICIA_PROFILE_ID, room, purpose, authoredSurfaces: binding.authored_surfaces });
+    },
+  });
+
+  async function authorityForSession(sessionId) {
+    const snapshot = await store.read();
+    const session = snapshot.shared_business_sessions?.[sessionId];
+    if (!session) throw new Error('RECRUITING_GU_V1_SESSION_NOT_FOUND');
+    if (session.relationship_id === SYNTHETIC_AUTHORITY.relationship_id) return SYNTHETIC_AUTHORITY;
+    if (session.relationship_id === PATRICIA_AUTHORITY.relationship_id) return PATRICIA_AUTHORITY;
+    throw new Error('RECRUITING_GU_V1_EXPERIMENT_SUBJECT_SCOPE_DENIED');
+  }
+
+  async function openSubject(subjectId) {
+    const authority = subjectId === 'SYNTHETIC' ? SYNTHETIC_AUTHORITY : subjectId === 'PATRICIA' ? PATRICIA_AUTHORITY : null;
+    if (!authority) throw new Error('RECRUITING_GU_V1_EXPERIMENT_SUBJECT_INVALID');
+    return runtime.open({ authority, binding: await bindingFor(subjectId) });
+  }
+
   return Object.freeze({
-    authority: AUTHORITY,
+    authority: SYNTHETIC_AUTHORITY,
     modelConfig: runtime.modelConfig,
+    experimentCondition,
     async home({ standard = false } = {}) {
       const snapshot = await store.read();
-      const active = Object.values(snapshot.shared_business_sessions || {}).find((item) => item.relationship_id === AUTHORITY.relationship_id && item.status !== 'COMPLETED') || null;
-      return { contract: 'more_recruiting_gu_v1_demo_home_v1', synthetic_only: standard !== true, manager: standard ? STANDARD_MANAGER : MANAGER, candidates: [INVITEE], active_session_id: active?.session_id || null, model_config: runtime.modelConfig };
+      const active = Object.values(snapshot.shared_business_sessions || {}).find((item) => [SYNTHETIC_AUTHORITY.relationship_id, PATRICIA_AUTHORITY.relationship_id].includes(item.relationship_id) && item.status !== 'COMPLETED') || null;
+      return {
+        contract: 'more_recruiting_gu_v1_demo_home_v1',
+        synthetic_only: standard !== true,
+        experiment_only: true,
+        manager: standard ? STANDARD_MANAGER : MANAGER,
+        candidates: [INVITEE],
+        experiment_subjects: EXPERIMENT_SUBJECTS.map((item) => ({ id: item.id, label: item.label, name: item.name, canonical_read: item.canonical_read })),
+        active_subject: active?.relationship_id === PATRICIA_AUTHORITY.relationship_id ? 'PATRICIA' : active ? 'SYNTHETIC' : null,
+        active_session_id: active?.session_id || null,
+        model_config: runtime.modelConfig,
+        experiment_condition: experimentCondition,
+      };
     },
-    async open() { return runtime.open({ authority: AUTHORITY, binding }); },
+    async open() { return openSubject('SYNTHETIC'); },
+    openSubject,
     async openCandidate(candidateId) {
       if (candidateId !== INVITEE.candidate_id) throw new Error('RECRUITING_GU_V1_CANDIDATE_SCOPE_DENIED');
-      return runtime.open({ authority: AUTHORITY, binding });
+      return openSubject('SYNTHETIC');
     },
     async requestMoreId(profileId) {
       if (!/^mm-\d{8}-[a-z0-9]{8}$/u.test(String(profileId || '').trim())) throw new Error('RECRUITING_GU_V1_PROFILE_ID_INVALID');
@@ -60,19 +180,26 @@ export function createRecruitingGuV1DemoRuntime({ store = new InMemoryRecruiting
         },
       };
     },
-    async read(sessionId) { return runtime.read({ authority: AUTHORITY, sessionId }); },
+    async read(sessionId) { return runtime.read({ authority: await authorityForSession(sessionId), sessionId }); },
     async mutate(sessionId, action, payload) {
-      if (action === 'CHAT') return runtime.chat({ authority: AUTHORITY, sessionId, payload });
-      return { session: await runtime.mutateSimple({ authority: AUTHORITY, sessionId, action, payload }) };
+      const authority = await authorityForSession(sessionId);
+      if (action === 'CHAT') return runtime.chat({ authority, sessionId, payload });
+      if (action === 'COMPILE_GU') return runtime.compileGu({ authority, sessionId, payload });
+      return { session: await runtime.mutateSimple({ authority, sessionId, action, payload }) };
     },
-    async reset() {
+    async reset(subjectId = null) {
+      const relationshipIds = subjectId === 'SYNTHETIC'
+        ? [SYNTHETIC_AUTHORITY.relationship_id]
+        : subjectId === 'PATRICIA'
+          ? [PATRICIA_AUTHORITY.relationship_id]
+          : [SYNTHETIC_AUTHORITY.relationship_id, PATRICIA_AUTHORITY.relationship_id];
       await store.transaction((state) => {
         for (const [id, session] of Object.entries(state.shared_business_sessions || {})) {
-          if (session.relationship_id === AUTHORITY.relationship_id) delete state.shared_business_sessions[id];
+          if (relationshipIds.includes(session.relationship_id)) delete state.shared_business_sessions[id];
         }
         return true;
       });
-      return { reset: true, external_mutation: false };
+      return { reset: true, subject: subjectId, external_mutation: false, canonical_mutation: false };
     },
   });
 }

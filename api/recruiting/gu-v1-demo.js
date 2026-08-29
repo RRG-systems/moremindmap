@@ -58,7 +58,7 @@ export function createRecruitingGuV1DemoHandler({
   } = {}) {
   let activeRuntime = runtime;
   const getRuntime = () => {
-    if (!activeRuntime) activeRuntime = getRecruitingGuV1DemoRuntime({ apiKey: env.OPENROUTER_API_KEY });
+    if (!activeRuntime) activeRuntime = getRecruitingGuV1DemoRuntime({ openAiApiKey: env.OPENAI_API_KEY, redis: getRecruitingRedis(env), env });
     return activeRuntime;
   };
   return async function recruitingGuV1DemoHandler(req, res) {
@@ -83,11 +83,18 @@ export function createRecruitingGuV1DemoHandler({
       const action = String(req.body?.action || '');
       let payload;
       if (action === 'OPEN_SYNTHETIC_DEMO') payload = await getRuntime().open();
+      else if (action === 'OPEN_EXPERIMENT_SUBJECT') payload = await getRuntime().openSubject(String(req.body?.subject || ''));
       else if (action === 'OPEN_CANDIDATE') payload = await getRuntime().openCandidate(req.body?.candidate_id);
       else if (action === 'REQUEST_MORE_ID') payload = await getRuntime().requestMoreId(req.body?.profile_id);
-      else if (action === 'RESET_SYNTHETIC_DEMO') payload = await getRuntime().reset();
+      else if (action === 'RESET_SYNTHETIC_DEMO') payload = await getRuntime().reset(req.body?.subject || null);
       else payload = await getRuntime().mutate(String(req.body?.session_id || ''), action, req.body || {});
-      return res.status(200).json({ ok: true, ...payload, csrf_token: issueCsrf(scope), synthetic_only: true });
+      return res.status(200).json({
+        ok: true,
+        ...payload,
+        csrf_token: issueCsrf(scope),
+        synthetic_only: payload?.session?.synthetic_only ?? true,
+        experiment_only: true,
+      });
     } catch (error) {
       const code = String(error?.message || 'RECRUITING_GU_V1_DEMO_FAILURE').slice(0, 180);
       console.error(JSON.stringify({

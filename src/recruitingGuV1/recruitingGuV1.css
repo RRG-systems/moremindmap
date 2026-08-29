@@ -79,6 +79,13 @@ body:has(.recruiting-gu-v1), body:has(.gu-approval), body:has(.gu-loading) { mar
 .gu-turn--invitee { margin-left:auto; border-color:rgba(71,157,255,.26); background:rgba(31,105,191,.09); }
 .gu-turn small { color:var(--gu-green); font-size:10px; font-weight:700; text-transform:uppercase; }
 .gu-turn p { margin:5px 0 0; color:#d6d9d8; font-size:13px; line-height:1.48; }
+.gu-turn__insight { display:block; margin-top:7px; color:#f4f6f5; font-size:15px; line-height:1.35; }
+.gu-turn .gu-turn__question { margin-top:11px; color:#74ead0; font-weight:650; }
+.gu-subject-tabs { position:fixed; z-index:68; top:76px; right:20px; display:flex; align-items:center; gap:7px; padding:7px; border:1px solid var(--gu-line); border-radius:999px; background:rgba(3,9,10,.94); box-shadow:0 12px 40px rgba(0,0,0,.28); }
+.gu-subject-tabs>span,.gu-subject-tabs>small { color:#77817e; font-size:9px; font-weight:700; letter-spacing:.1em; }
+.gu-subject-tabs button { padding:7px 13px; border:1px solid #293634; border-radius:999px; color:#aeb7b4; background:#071011; font:inherit; font-size:11px; font-weight:800; letter-spacing:.06em; cursor:pointer; }
+.gu-subject-tabs button.active { border-color:var(--gu-green); color:#00110d; background:var(--gu-green); }
+.gu-subject-tabs button:disabled { cursor:wait; opacity:.55; }
 .gu-chat__error { padding:12px; border:1px solid rgba(255,101,101,.3); border-radius:10px; color:#ffb4b4; background:rgba(105,16,16,.2); font-size:12px; }
 .gu-chat__bottom { padding-bottom:62px; border-top:1px solid var(--gu-line); }
 .gu-suggestions { padding:17px 17px 10px; }
