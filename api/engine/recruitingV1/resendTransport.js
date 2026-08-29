@@ -48,6 +48,13 @@ function notificationContent(item, baseUrl) {
       text: `Review your private invitation and consent before continuing: ${baseUrl}/recruiting/accept/${token}`,
     };
   }
+  if (item.kind === 'CONSULTATION_APPROVAL') {
+    if (!token) throw new Error('RECRUITING_DELIVERY_TOKEN_REQUIRED');
+    return {
+      subject: 'Someone would like to open a MORE consultation with you',
+      text: `You control whether your MORE profile is used in this consultation. Review the request and decide here: ${baseUrl}/recruiting-gu-v1/approve/${token}\n\nYour MORE ID alone did not grant access. This single-use approval link expires automatically.`,
+    };
+  }
   if (item.kind === 'MANAGER_BOS_READY' || item.kind === 'MANAGER_BA_INTELLIGENCE_READY') {
     return {
       subject: item.kind === 'MANAGER_BOS_READY'

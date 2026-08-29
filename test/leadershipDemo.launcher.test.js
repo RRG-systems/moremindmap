@@ -12,6 +12,7 @@ import {
   issueLeadershipLauncherCapability,
   issueLeadershipLauncherCsrf,
   issueRecruitingDemoCapability,
+  issueRecruitingDemoCapabilityForManager,
   sameOriginLeadershipDemoRequest,
 } from '../api/engine/leadershipDemo/authority.js';
 import { issueInternalDevCapability } from '../api/engine/subscriptionV1/internalDevInfrastructure.js';
@@ -99,6 +100,24 @@ test('Recruiting receives only a narrower synthetic capability and the launcher 
   assert.equal(recruitingAuth.capability.subject_key, 'recruiting-darren-jordan-v1');
 });
 
+test('authenticated Darren admin can mint only the same isolated synthetic Recruiting capability', async () => {
+  const redis = new FakeRedis();
+  const req = request();
+  await assert.rejects(() => issueRecruitingDemoCapabilityForManager({
+    redis, req, managerSubjectId: 'manager-standard', membershipId: 'membership-standard', masterControl: false,
+  }), /RECRUITING_DEMO_MANAGER_AUTHORITY_DENIED/u);
+
+  const issued = await issueRecruitingDemoCapabilityForManager({
+    redis, req, managerSubjectId: 'manager-darren', membershipId: 'membership-darren', masterControl: true,
+  });
+  const auth = await authenticateRecruitingDemoRequest({ redis, req: request({ cookie: cookiePair(issued.cookie) }) });
+  assert.equal(auth.ok, true);
+  assert.equal(auth.capability.synthetic_only, true);
+  assert.equal(auth.capability.allowed_product, 'recruiting');
+  assert.equal(auth.capability.subject_key, 'recruiting-darren-jordan-v1');
+  assert.match(auth.capability.demo_scope_id, /^recruiting_manager_[a-f0-9]{24}$/u);
+});
+
 test('Subscription launcher exchange reuses the existing re-mid synthetic capability and relationship cookies', async () => {
   const redis = new FakeRedis();
   const issued = await issueInternalDevCapability({ redis, req: request() });
@@ -114,19 +133,19 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
-  const recruitingApi = fs.readFileSync(new URL('../api/recruiting/v2-demo.js', import.meta.url), 'utf8');
+  const recruitingApi = fs.readFileSync(new URL('../api/recruiting/gu-v1-demo.js', import.meta.url), 'utf8');
   const recruitingApp = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
-  assert.equal((launcher.match(/title: 'Recruiting Tool Demo'/gu) || []).length, 1);
+  assert.equal((launcher.match(/title: 'Recruiting GU V1'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'Subscription Model Demo'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
-  assert.match(launcher, /Campaign 2G shared session/u);
-  assert.match(launcher, /\['\/recruiting-v2\/demo', '\/subscription'\]/u);
-  assert.match(launcherApi, /redirect_to: '\/recruiting-v2\/demo'/u);
+  assert.match(launcher, /HOME → YOU → YOUR BUSINESS → PLAN/u);
+  assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription'\]/u);
+  assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
   assert.doesNotMatch(launcher, /Craig Fox|Executive \/ Board|Company Alignment|leadershipDemoSlides|slide-\d+/u);
   assert.doesNotMatch(portal, /darrendemo|leadershipDemoAccess/u);
   assert.match(portal, /x-leadership-demo-entry-csrf/u);
   assert.doesNotMatch(recruitingApi, /more_recruiting_manager|MANAGER_COOKIE/u);
-  assert.match(recruitingApp, /location\.pathname === '\/recruiting\/demo'.+<Navigate to="\/recruiting-v2\/demo" replace \/>/u);
+  assert.match(recruitingApp, /location\.pathname === '\/recruiting\/demo'.+RECRUITING_GU_V1_ENABLED.+\/recruiting-gu-v1\/demo/u);
   assert.doesNotMatch(recruitingApp, /RecruitingDemoExperience|DarrenSyntheticDemoSurface|six-destination manager journey/u);
 });

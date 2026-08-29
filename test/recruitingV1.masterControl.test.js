@@ -151,7 +151,7 @@ test('v1 membership records migrate to active standard entitlements without gran
     version: 1,
     memberships: { legacy: { ...STANDARD, setup_state: undefined, entitlement_mode: undefined, admin_roles: undefined, recruiting_governance: undefined } },
   });
-  assert.equal(migrated.version, 2);
+  assert.equal(migrated.version, 3);
   assert.equal(migrated.memberships[STANDARD.membership_id].setup_state, 'COMPLETE');
   assert.equal(migrated.memberships[STANDARD.membership_id].entitlement_mode, '5_per_month');
   assert.deepEqual(migrated.memberships[STANDARD.membership_id].admin_roles, []);

@@ -14,7 +14,7 @@ function normalizeMembership(item) {
 
 export function createEmptyRecruitingState(memberships = []) {
   return {
-    version: 2,
+    version: 3,
     memberships: Object.fromEntries(memberships.map((item) => [item.membership_id, normalizeMembership(item)])),
     manager_challenges: {},
     manager_sessions: {},
@@ -27,6 +27,10 @@ export function createEmptyRecruitingState(memberships = []) {
     opportunity_by_enterprise: {},
     evidence_by_candidate: {},
     intelligence_by_candidate: {},
+    consultation_requests: {},
+    consultation_relationships: {},
+    shared_business_sessions: {},
+    gu_effect_outbox: {},
     outbox: {},
     inbox_by_membership: {},
     audit: [],
@@ -39,7 +43,7 @@ export function normalizeRecruitingState(input) {
   for (const key of Object.keys(empty)) {
     if (state[key] === undefined) state[key] = clone(empty[key]);
   }
-  state.version = 2;
+  state.version = 3;
   state.memberships = Object.fromEntries(Object.values(state.memberships || {}).map((item) => {
     const membership = normalizeMembership(item);
     return [membership.membership_id, membership];

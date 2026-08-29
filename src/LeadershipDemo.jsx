@@ -7,9 +7,9 @@ const products = [
     action: 'LAUNCH_RECRUITING',
     number: '01',
     eyebrow: 'Candidate intelligence',
-    title: 'Recruiting Tool Demo',
-    description: 'Open one guided Darren and Jordan conversation where MORE can listen, revise the working hypothesis, and help them reach an honest decision.',
-    detail: 'Campaign 2G shared session · Synthetic-only · Natural conversation',
+    title: 'Recruiting GU V1',
+    description: 'Open the complete Darren and Jordan consultation: authored BOS and Business Twin, one persistent MORE conversation, purpose-bound visual intelligence, and a mutual plan.',
+    detail: 'HOME → YOU → YOUR BUSINESS → PLAN · Synthetic-only',
     tone: 'green',
   },
   {
@@ -63,7 +63,7 @@ export default function LeadershipDemo() {
         body: JSON.stringify({ action: product.action }),
       })
       const payload = await response.json().catch(() => null)
-      if (!response.ok || payload?.ok !== true || !['/recruiting-v2/demo', '/subscription'].includes(payload.redirect_to)) {
+      if (!response.ok || payload?.ok !== true || !['/recruiting-gu-v1/demo', '/subscription'].includes(payload.redirect_to)) {
         throw new Error(payload?.code || 'LEADERSHIP_DEMO_LAUNCH_FAILED')
       }
       window.location.assign(payload.redirect_to)

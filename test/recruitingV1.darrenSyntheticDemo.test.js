@@ -131,11 +131,11 @@ test('demo evidence and reset stay in the isolated demo store and return exactly
   assert.equal(reset.demo.intelligence.stale, false);
 });
 
-test('obsolete V1 demo route is retired to Campaign 2G while historical rollback runtime remains isolated', () => {
+test('obsolete V1 demo route launches GU V1 when enabled and preserves Campaign 2G as the default-off rollback', () => {
   const runtime = fs.readFileSync(new URL('../api/engine/recruitingV1/demoRuntime.js', import.meta.url), 'utf8');
   const route = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
   assert.doesNotMatch(runtime, /getCanonicalProfile|inspectManagerReadOnly|getRecruitingService|canonicalProfileLoader/u);
-  assert.match(route, /location\.pathname === '\/recruiting\/demo'.+<Navigate to="\/recruiting-v2\/demo" replace \/>/u);
+  assert.match(route, /location\.pathname === '\/recruiting\/demo'.+RECRUITING_GU_V1_ENABLED \? '\/recruiting-gu-v1\/demo' : '\/recruiting-v2\/demo'/u);
   assert.ok(route.indexOf("location.pathname === '/recruiting/demo'") < route.indexOf('return <ManagerExperience />'));
   assert.doesNotMatch(route, /RecruitingDemoExperience|DarrenSyntheticDemoSurface/u);
 });

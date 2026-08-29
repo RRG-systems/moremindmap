@@ -175,7 +175,7 @@ test('server runtime is capability-scoped, one-time-CSRF protected, durable acro
   assert.equal(requests.length, 0);
 });
 
-test('Production airlock replaces only the Recruiting launcher target and preserves synthetic isolation', () => {
+test('Production airlock preserves the retired Campaign 2G source while launching Recruiting GU V1 with synthetic isolation', () => {
   const app = fs.readFileSync(new URL('../src/recruitingV2Demo/RecruitingV2DemoApp.jsx', import.meta.url), 'utf8');
   const api = fs.readFileSync(new URL('../api/recruiting/v2-demo.js', import.meta.url), 'utf8');
   const runtime = fs.readFileSync(new URL('../api/engine/recruitingV2Demo/runtime.js', import.meta.url), 'utf8');
@@ -183,6 +183,8 @@ test('Production airlock replaces only the Recruiting launcher target and preser
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
   const recruitingV1 = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
+  const guApp = fs.readFileSync(new URL('../src/recruitingGuV1/RecruitingGuV1App.jsx', import.meta.url), 'utf8');
+  const guApi = fs.readFileSync(new URL('../api/recruiting/gu-v1-demo.js', import.meta.url), 'utf8');
   const combined = `${api}\n${runtime}`;
   assert.match(main, /path="\/recruiting-v2\/demo"/u);
   assert.doesNotMatch(combined, /getRecruitingService|getCanonicalProfile|inspectManager|membership_by|consumeEntitlement|reserveInvitation|Resend|sendEmail|saveCanonicalProfile/u);
@@ -192,13 +194,15 @@ test('Production airlock replaces only the Recruiting launcher target and preser
   assert.match(app, />Reset Demo</u);
   assert.match(app, /event\.key === 'Escape'/u);
   assert.match(app, /detailReturnFocus\.current\?\.focus/u);
-  assert.equal((launcher.match(/title: 'Recruiting Tool Demo'/gu) || []).length, 1);
+  assert.equal((launcher.match(/title: 'Recruiting GU V1'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
-  assert.match(launcher, /recruiting-v2\/demo/u);
-  assert.match(launcherApi, /redirect_to: '\/recruiting-v2\/demo'/u);
+  assert.match(launcher, /recruiting-gu-v1\/demo/u);
+  assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
-  assert.match(recruitingV1, /<Navigate to="\/recruiting-v2\/demo" replace \/>/u);
+  assert.match(recruitingV1, /RECRUITING_GU_V1_ENABLED.+\/recruiting-gu-v1\/demo/u);
   assert.doesNotMatch(recruitingV1, /RecruitingDemoExperience|DarrenSyntheticDemoSurface/u);
+  assert.match(main, /path="\/recruiting-gu-v1\/demo"/u);
+  assert.doesNotMatch(`${guApi}\n${guApp}`, /Stripe\(|sendEmail\(|grantEntitlement\(/u);
   assert.equal(recruitingV2SyntheticDemoEnabled({ RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED: 'true' }), true);
   assert.equal(recruitingV2SyntheticDemoEnabled({}), false);
 });

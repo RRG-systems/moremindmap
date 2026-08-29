@@ -175,6 +175,29 @@ export async function issueRecruitingDemoCapability({ redis, req, launcher, now 
   };
 }
 
+export async function issueRecruitingDemoCapabilityForManager({
+  redis,
+  req,
+  managerSubjectId,
+  membershipId,
+  masterControl,
+  now = new Date(),
+}) {
+  if (masterControl !== true || !String(managerSubjectId || '').trim() || !String(membershipId || '').trim()) {
+    throw new Error('RECRUITING_DEMO_MANAGER_AUTHORITY_DENIED');
+  }
+  return issueRecruitingDemoCapability({
+    redis,
+    req,
+    now,
+    launcher: {
+      synthetic_only: true,
+      allowed_products: ['recruiting'],
+      launcher_scope_id: `recruiting_manager_${digest(`${membershipId}\n${managerSubjectId}`).slice(0, 24)}`,
+    },
+  });
+}
+
 export async function authenticateRecruitingDemoRequest({ redis, req, now = new Date() }) {
   const capabilityToken = parseCookies(req.headers?.cookie)[RECRUITING_DEMO_COOKIE];
   if (!capabilityToken) return { ok: false, code: 'RECRUITING_DEMO_CAPABILITY_REQUIRED', status: 401 };

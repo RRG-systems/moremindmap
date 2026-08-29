@@ -45,7 +45,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
           csrf_token,
           synthetic_only: true,
           choices: [
-            { id: 'recruiting', title: 'Recruiting Tool Demo' },
+            { id: 'recruiting', title: 'Recruiting GU V1' },
             { id: 'subscription', title: 'Subscription Model Demo' },
           ],
         });
@@ -98,7 +98,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
       return send(res, 200, {
         ok: true,
         code: 'LEADERSHIP_DEMO_RECRUITING_CAPABILITY_ISSUED',
-        redirect_to: '/recruiting-v2/demo',
+        redirect_to: '/recruiting-gu-v1/demo',
         synthetic_only: true,
       });
     }

@@ -12,6 +12,7 @@ import {
 import './recruitingV1.css';
 
 const SYNTHETIC = import.meta.env.VITE_RECRUITING_V1_SYNTHETIC_REVIEW === 'true';
+const RECRUITING_GU_V1_ENABLED = import.meta.env.VITE_RECRUITING_GU_V1_ENABLED === 'true';
 const clone = (value) => JSON.parse(JSON.stringify(value));
 let recruitingCsrfToken = null;
 let recruitingSetupCsrfToken = null;
@@ -77,7 +78,7 @@ function routeFor(pathname) {
 
 export default function RecruitingV1App() {
   const location = useLocation();
-  if (location.pathname === '/recruiting/demo') return <Navigate to="/recruiting-v2/demo" replace />;
+  if (location.pathname === '/recruiting/demo') return <Navigate to={RECRUITING_GU_V1_ENABLED ? '/recruiting-gu-v1/demo' : '/recruiting-v2/demo'} replace />;
   if (location.pathname.startsWith('/recruiting/accept/')) return <InvitationAcceptance />;
   if (location.pathname.startsWith('/recruiting/verify/')) return <ManagerVerification />;
   if (location.pathname.startsWith('/recruiting/setup')) return <RecruitingManagerSetup request={api} synthetic={SYNTHETIC} fixture={SYNTHETIC_RECRUITING_FIXTURE} />;
@@ -160,6 +161,10 @@ function ManagerExperience() {
   }
 
   function openCandidate(candidateId) {
+    if (RECRUITING_GU_V1_ENABLED) {
+      window.location.assign(`/recruiting-gu-v1?candidate_id=${encodeURIComponent(candidateId)}`);
+      return;
+    }
     setSelectedCandidateId(candidateId);
     navigateTo('candidate');
   }
