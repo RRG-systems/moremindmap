@@ -8,6 +8,9 @@ import { createSyntheticAuthoredSurfaces, readCurrentAuthoredSurfaces } from './
 import { createRecruitingGuV1Runtime } from './runtime.js';
 import { createCanonicalPurposeRankedContext, createSyntheticPurposeRankedContext } from './purposeRankedContext.js';
 import { createRecruitingGuExperiment2OpenAiTransport } from './openAiTransport.js';
+import { createPatriciaReadOnlyRedis } from './readOnlyCanonicalRedis.js';
+import { readNewBosProductionConfig } from '../newBosProductionReadinessV1/config.js';
+import { readNewBaProductionConfig } from '../newBaProductionReadinessV1/config.js';
 
 let singleton;
 
@@ -61,6 +64,16 @@ export function createRecruitingGuV1DemoRuntime({
 } = {}) {
   const syntheticAuthoredSurfaces = createSyntheticAuthoredSurfaces();
   const syntheticWorld = createSyntheticRecruitingGuWorld();
+  const bosConfig = readNewBosProductionConfig(env);
+  const baConfig = readNewBaProductionConfig(env);
+  const patriciaRedis = typeof redis?.get === 'function'
+    ? createPatriciaReadOnlyRedis({
+      redis,
+      profileId: PATRICIA_PROFILE_ID,
+      bosNamespace: bosConfig.namespace,
+      baNamespace: baConfig.namespace,
+    })
+    : null;
   const experimentTransport = frontierTransport || createRecruitingGuExperiment2OpenAiTransport({
     apiKey: openAiApiKey || env.OPENAI_API_KEY,
     modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
@@ -81,8 +94,8 @@ export function createRecruitingGuV1DemoRuntime({
       world: syntheticWorld,
     });
     if (subjectId !== 'PATRICIA') throw new Error('RECRUITING_GU_V1_EXPERIMENT_SUBJECT_INVALID');
-    if (typeof redis?.get !== 'function') throw new Error('RECRUITING_GU_V1_PATRICIA_READ_ONLY_REDIS_REQUIRED');
-    const authoredSurfaces = await readCurrentAuthoredSurfaces({ redis, profileId: PATRICIA_PROFILE_ID, env });
+    if (!patriciaRedis) throw new Error('RECRUITING_GU_V1_PATRICIA_READ_ONLY_REDIS_REQUIRED');
+    const authoredSurfaces = await readCurrentAuthoredSurfaces({ redis: patriciaRedis, profileId: PATRICIA_PROFILE_ID, env });
     const invitee = Object.freeze({
       candidate_id: null,
       profile_id: PATRICIA_PROFILE_ID,
@@ -125,7 +138,7 @@ export function createRecruitingGuV1DemoRuntime({
       const binding = await bindingFor(subjectId);
       return subjectId === 'SYNTHETIC'
         ? createSyntheticPurposeRankedContext({ room, purpose, authoredSurfaces: binding.authored_surfaces })
-        : createCanonicalPurposeRankedContext({ redis, env, profileId: PATRICIA_PROFILE_ID, room, purpose, authoredSurfaces: binding.authored_surfaces });
+        : createCanonicalPurposeRankedContext({ redis: patriciaRedis, env, profileId: PATRICIA_PROFILE_ID, room, purpose, authoredSurfaces: binding.authored_surfaces });
     },
   });
 
@@ -166,6 +179,12 @@ export function createRecruitingGuV1DemoRuntime({
     },
     async open() { return openSubject('SYNTHETIC'); },
     openSubject,
+    readOnlyAudit() {
+      return patriciaRedis?.audit() || Object.freeze({
+        mode: 'UNBOUND', get_count: 0, denied_read_count: 0, denied_write_count: 0,
+        write_commands_forwarded: 0, canonical_mutation: false,
+      });
+    },
     async openCandidate(candidateId) {
       if (candidateId !== INVITEE.candidate_id) throw new Error('RECRUITING_GU_V1_CANDIDATE_SCOPE_DENIED');
       return openSubject('SYNTHETIC');

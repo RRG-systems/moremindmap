@@ -1,0 +1,62 @@
+{
+  "contract": "recruiting-gu-v1-patricia-local-read-repair-receipt-v1",
+  "created_at": "2026-08-29T14:45:25Z",
+  "profile_id": "mm-20260708-dsst020z",
+  "route": "http://127.0.0.1:5197/recruiting-gu-v1/demo",
+  "patricia_loaded": true,
+  "bos": {
+    "loaded": true,
+    "complete_surface_count": 15,
+    "realization_id": "new-bos:MM-20260708-DSST020Z:62985631183188496e4856267db2522b4e97673b5e3add55d9d05c9678e888b7",
+    "artifact_sha256": "15aeb40800550d6db00a2200de0eb8def1a77c5e583b4f282075e1cabec8f29d",
+    "unchanged_after_read": true
+  },
+  "ba": {
+    "loaded": true,
+    "complete": true,
+    "realization_id": "new-ba:MM-20260708-DSST020Z:ba-20260714-64ca0783:897c18f42778c89b5898f0e3eb9295769d643371fce244cbd3e3df2c31b25061",
+    "artifact_sha256": "8a9b3285b7af36ec3211c3c39054c88fc0d74df8895f77f994be1e3291350990",
+    "unchanged_after_read": true
+  },
+  "rooms": {
+    "you": {
+      "bos_available": true,
+      "ba_available": false,
+      "ba_answer_count": 0,
+      "cassette_authority_count": 0
+    },
+    "your_business": {
+      "bos_available": true,
+      "ba_available": true,
+      "bos_answer_count": 24,
+      "ba_answer_count": 12,
+      "cassette_authority_count": 2
+    }
+  },
+  "redis": {
+    "direct_reader_get_count": 14,
+    "demo_runtime_get_count": 8,
+    "denied_read_count": 0,
+    "denied_write_count": 0,
+    "write_commands_forwarded": 0
+  },
+  "provider_calls": 0,
+  "canonical_mutation": false,
+  "external_mutation": false,
+  "browser": {
+    "patricia_you_loaded": true,
+    "patricia_bos_interaction_proven": true,
+    "patricia_your_business_loaded": true,
+    "patricia_ba_interaction_proven": true,
+    "synthetic_control_still_works": true
+  },
+  "tests": {
+    "focused_passed": 15,
+    "focused_failed": 0,
+    "protected_passed": 140,
+    "protected_failed": 0,
+    "changed_file_eslint": "PASS",
+    "build": "PASS"
+  },
+  "production_authority": false
+}

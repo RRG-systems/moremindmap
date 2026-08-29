@@ -1,0 +1,4 @@
+6a5218891235476bfec2982a2db61f890b2e1f8f495a38e4fc2b646228c86658  docs/recruiting-gu-v1/experiment-2/patricia-local-read-repair/README.md
+71f698d3ef34584761dfdb3484df750a95ef08c243f9ad34c18a8133734056f4  docs/recruiting-gu-v1/experiment-2/patricia-local-read-repair/READ_ONLY_RECEIPT.json
+dec81209b4a62e25be5227d1f4727103e1eee1cac598da41df47f254b9664c59  docs/recruiting-gu-v1/experiment-2/patricia-local-read-repair/patricia-you-canonical-bos.jpg
+42390a7a252139e9360e276b084b9bde3208f725d7f1434a2f655fe2d9e76e8c  docs/recruiting-gu-v1/experiment-2/patricia-local-read-repair/patricia-your-business-canonical-ba.jpg

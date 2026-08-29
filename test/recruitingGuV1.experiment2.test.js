@@ -10,6 +10,7 @@ import {
   RECRUITING_GU_EXPERIMENT_2_VERSION,
   validateRecruitingGuCoachMove,
 } from '../src/lib/recruitingGuV1/experiment2Contract.js';
+import { createPatriciaReadOnlyRedis } from '../api/engine/recruitingGuV1/readOnlyCanonicalRedis.js';
 
 function planFor(payload) {
   const object = payload.governedReality.objects[0];
@@ -147,6 +148,33 @@ test('temporary subject tabs expose no Patricia profile ID and Patricia fails cl
   assert.deepEqual(home.experiment_subjects.map((item) => item.label), ['SYNTHETIC', 'PATRICIA']);
   assert.equal(JSON.stringify(home.experiment_subjects).includes('mm-20260708-dsst020z'), false);
   await assert.rejects(() => runtime.openSubject('PATRICIA'), /PATRICIA_READ_ONLY_REDIS_REQUIRED/u);
+});
+
+test('Patricia Redis projection permits only profile-scoped reads and forwards zero writes', async () => {
+  const values = new Map([
+    ['business_assessment_by_profile:mm-20260708-dsst020z', 'ba-20260714-64ca0783'],
+    ['business_assessment:ba-20260714-64ca0783', '{"status":"complete"}'],
+  ]);
+  const forwarded = { get: 0, set: 0, eval: 0 };
+  const redis = {
+    async get(key) { forwarded.get += 1; return values.get(key) || null; },
+    async set() { forwarded.set += 1; return 'OK'; },
+    async eval() { forwarded.eval += 1; return 1; },
+  };
+  const readOnly = createPatriciaReadOnlyRedis({
+    redis,
+    profileId: 'mm-20260708-dsst020z',
+    bosNamespace: 'nonprod:new-bos:production-canary:v1',
+    baNamespace: 'nonprod:new-ba:v1',
+  });
+  assert.equal(await readOnly.get('business_assessment_by_profile:mm-20260708-dsst020z'), 'ba-20260714-64ca0783');
+  assert.equal(await readOnly.get('business_assessment:ba-20260714-64ca0783'), '{"status":"complete"}');
+  await assert.rejects(() => readOnly.get('vault:profile:mm-20260617-ybnwt0ks'), /KEY_SCOPE_DENIED/u);
+  assert.throws(() => readOnly.set('anything', 'value'), /WRITE_DENIED/u);
+  assert.throws(() => readOnly.eval('return 1', 0), /WRITE_DENIED/u);
+  assert.deepEqual(forwarded, { get: 2, set: 0, eval: 0 });
+  assert.equal(readOnly.audit().write_commands_forwarded, 0);
+  assert.equal(readOnly.audit().canonical_mutation, false);
 });
 
 test('Experiment 2 uses direct OpenAI Responses with one fixed strict no-store configuration', async () => {
