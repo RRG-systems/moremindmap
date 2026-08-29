@@ -4,6 +4,7 @@ import NewBosExperience from '../components/newBosPersonalityDnaV1/NewBosExperie
 import BusinessTwinApp from '../lab/baProgressiveDisclosureV1/BusinessTwinApp.jsx';
 import RecruitingV2Renderer from '../recruitingV2/RecruitingV2Renderer.jsx';
 import { fetchApprovalPreview, fetchGuHome, mutateGu, decideApproval } from '../lib/recruitingGuV1/client.js';
+import { visibleConversationForRoom } from '../lib/recruitingGuV1/session.js';
 import '../recruitingV2/recruitingV2.css';
 import './recruitingGuV1.css';
 
@@ -91,20 +92,32 @@ function ThinkingProgress({ stage }) {
 function ConversationRail({ room, session, busy, progress, error, onSubmit, onSuggestion }) {
   const [value, setValue] = useState('');
   const listRef = useRef(null);
-  useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }); }, [session?.conversation?.length, busy]);
+  const submissionLocked = useRef(false);
+  const visibleConversation = visibleConversationForRoom(session, room);
+  useEffect(() => { listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' }); }, [visibleConversation.length, busy]);
   async function submit(event) {
     event.preventDefault();
     const clean = value.trim();
-    if (!clean || busy) return;
-    setValue('');
-    await onSubmit(clean, 'MANAGER');
+    if (!clean || busy || submissionLocked.current) return;
+    submissionLocked.current = true;
+    try {
+      setValue('');
+      await onSubmit(clean, 'MANAGER');
+    } finally {
+      submissionLocked.current = false;
+    }
+  }
+  function handleKeyDown(event) {
+    if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent?.isComposing) return;
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
   }
   const suggestions = SUGGESTIONS[room] || [];
   return <aside className="gu-chat" aria-label="MORE conversation">
     <header>{room === 'PLAN' ? 'PLAN CONVERSATION' : 'MORE CONVERSATION'}</header>
-    <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{(session?.conversation || []).map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small>{turn.actor === 'MORE' && turn.insight ? <><strong className="gu-turn__insight">{turn.insight}</strong><p>{turn.explanation}</p><p className="gu-turn__question">{turn.question}</p></> : <p>{turn.text}</p>}</article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
+    <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{visibleConversation.map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small>{turn.actor === 'MORE' && turn.insight ? <><strong className="gu-turn__insight">{turn.insight}</strong><p>{turn.explanation}</p><p className="gu-turn__question">{turn.question}</p></> : <p>{turn.text}</p>}</article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
     <div className="gu-chat__bottom">{suggestions.length > 0 && <section className="gu-suggestions"><p>SUGGESTED QUESTIONS</p>{suggestions.map((item) => <button type="button" key={item} disabled={busy} onClick={() => onSuggestion(item)}>{item}</button>)}</section>}
-      <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} placeholder={room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Talk naturally · ⌘ Enter to send</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
+      <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} placeholder={room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Enter to send · Shift+Enter for a new line</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
     </div>
   </aside>;
 }

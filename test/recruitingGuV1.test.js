@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 import { createRecruitingGuV1DemoRuntime } from '../api/engine/recruitingGuV1/demoRuntime.js';
 import { createRecruitingGuV1RealRuntime } from '../api/engine/recruitingGuV1/realRuntime.js';
 import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../src/lib/recruitingV1/store.js';
-import { RECRUITING_GU_V1_SESSION_CONTRACT } from '../src/lib/recruitingGuV1/session.js';
+import { RECRUITING_GU_V1_SESSION_CONTRACT, visibleConversationForRoom } from '../src/lib/recruitingGuV1/session.js';
 import { RECRUITING_GU_EXPERIMENT_2_VERSION } from '../src/lib/recruitingGuV1/experiment2Contract.js';
 import { RecruitingV1Service, createSyntheticNotificationTransport } from '../src/lib/recruitingV1/service.js';
 
@@ -145,12 +145,32 @@ test('GU V1 contract exposes four rooms and stale-write refusal', () => {
   assert.equal(RECRUITING_GU_V1_SESSION_CONTRACT.stale_write_policy, 'REFUSE');
 });
 
-test('frozen conversation rail exposes natural input without a Darren or Jordan speaker toggle', () => {
+test('conversation rail is room-focused and exposes duplicate-safe Enter and Shift+Enter behavior', () => {
   const source = readFileSync(new URL('../src/recruitingGuV1/RecruitingGuV1App.jsx', import.meta.url), 'utf8');
   assert.equal(source.includes('is speaking'), false);
   assert.equal(source.includes('className="gu-actor"'), false);
-  assert.match(source, /Talk naturally · ⌘ Enter to send/u);
+  assert.match(source, /visibleConversationForRoom\(session, room\)/u);
+  assert.match(source, /event\.key !== 'Enter' \|\| event\.shiftKey/u);
+  assert.match(source, /event\.currentTarget\.form\?\.requestSubmit\(\)/u);
+  assert.match(source, /submissionLocked\.current/u);
+  assert.match(source, /Enter to send · Shift\+Enter for a new line/u);
   assert.match(source, /room !== 'PLAN'/u);
+});
+
+test('visible conversation resets between rooms while preserving the underlying shared session', () => {
+  const session = {
+    conversation: [
+      { turn_id: 'turn-0001', actor: 'MANAGER', room: 'YOU', text: 'A person question.' },
+      { turn_id: 'turn-0002', actor: 'MORE', room: 'YOU', text: 'A person coaching move.' },
+      { turn_id: 'turn-0003', actor: 'MANAGER', room: 'YOUR_BUSINESS', text: 'A business question.' },
+      { turn_id: 'turn-0004', actor: 'MORE', room: 'YOUR_BUSINESS', text: 'A business coaching move.' },
+      { turn_id: 'turn-0005', actor: 'MANAGER', room: 'PLAN', text: 'A proposed commitment.' },
+    ],
+  };
+  assert.deepEqual(visibleConversationForRoom(session, 'YOU').map((turn) => turn.turn_id), ['turn-0001', 'turn-0002']);
+  assert.deepEqual(visibleConversationForRoom(session, 'YOUR_BUSINESS').map((turn) => turn.turn_id), ['turn-0003', 'turn-0004']);
+  assert.deepEqual(visibleConversationForRoom(session, 'PLAN').map((turn) => turn.turn_id), ['turn-0005']);
+  assert.equal(session.conversation.length, 5);
 });
 
 test('frontier may reuse a revision-bound scenario number as a governed assumption', async () => {

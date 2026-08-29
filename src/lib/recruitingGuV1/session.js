@@ -120,6 +120,11 @@ export function changeRoom(current, { room, expectedRevision, actor = 'MANAGER' 
   return Object.freeze(next);
 }
 
+export function visibleConversationForRoom(session, room) {
+  if (!ROOMS.includes(room)) return Object.freeze([]);
+  return Object.freeze((session?.conversation || []).filter((turn) => turn.room === room));
+}
+
 export function appendConversationTurn(current, { actor, message, room, expectedRevision }, now = new Date()) {
   assertRevision(current, expectedRevision);
   if (!['MANAGER', 'INVITEE'].includes(actor)) throw new Error('RECRUITING_GU_V1_HUMAN_ACTOR_INVALID');
