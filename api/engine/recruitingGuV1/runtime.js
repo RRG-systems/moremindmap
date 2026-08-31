@@ -10,10 +10,12 @@ import {
   frontierSessionContext,
   recordCoachMove,
   recordCompiledProjection,
+  recordAgreementDelivery,
   recordFrontierProjection,
   recordPlanProposal,
   recordScenarioChange,
 } from '../../../src/lib/recruitingGuV1/session.js';
+import { buildConsultingAgreementEmail } from '../../../src/lib/recruitingGuV1/agreementEmail.js';
 import {
   RECRUITING_GU_EXPERIMENT_2_CONDITIONS,
   isCoachFirstCondition,
@@ -73,7 +75,7 @@ async function draftPlan({ transport, session, humanPurpose }) {
     messages: [
       {
         role: 'system',
-        content: 'You are MORE inside a co-present recruiting consultation. Turn the humans rough proposed support and commitments into a short, concrete, mutual plan. Preserve their meaning; do not add promises, capabilities, money, dates, people, outcomes, or facts they did not supply. Make uncertainty explicit. Return only the strict schema.',
+        content: 'You are MORE inside a co-present consulting conversation. Turn the humans rough proposed support and commitments into a short, concrete, mutual plan. Preserve their meaning; do not add promises, capabilities, money, dates, people, outcomes, or facts they did not supply. Use natural manager, person, consulting, shared plan, agreed plan, and next-steps language. Do not introduce hiring or sales-pipeline role labels. Make uncertainty explicit. Return only the strict schema.',
       },
       {
         role: 'user',
@@ -105,6 +107,52 @@ export function createSyntheticEffectAdapter(now = () => new Date()) {
   });
 }
 
+export function createSyntheticAgreementDeliveryAdapter({
+  recipients = {
+    PERSON: { name: 'Jordan Lee', email: 'jordan.plan@example.test' },
+    MANAGER: { name: 'Darren', email: 'darren.plan@example.test' },
+  },
+  now = () => new Date(),
+} = {}) {
+  const deliveries = new Map();
+  function deliver({ session }) {
+    const accepted = session?.accepted_plan_snapshot;
+    if (!accepted?.acceptance_id || !accepted?.snapshot_hash) throw new Error('CONSULTING_AGREED_PLAN_ACCEPTANCE_REQUIRED');
+    const content = buildConsultingAgreementEmail({ acceptedPlanSnapshot: accepted });
+    const results = session.agreement_delivery.recipients.map((deliveryState) => {
+      const recipient = recipients[deliveryState.recipient_role];
+      if (!recipient?.email) throw new Error('CONSULTING_TEST_SAFE_RECIPIENT_REQUIRED');
+      const existing = deliveries.get(deliveryState.idempotency_key);
+      if (existing) return existing.result;
+      const outboxId = `synthetic-agreed-plan-${deliveryState.idempotency_key.slice(0, 20)}`;
+      const result = Object.freeze({
+        recipient_role: deliveryState.recipient_role,
+        recipient_masked: recipient.email.replace(/^(.{2}).*(@.*)$/u, '$1***$2'),
+        outbox_id: outboxId,
+        state: 'DELIVERED',
+        synthetic: true,
+        provider_receipt: `synthetic:${outboxId}`,
+        attempted_at: now().toISOString(),
+      });
+      deliveries.set(deliveryState.idempotency_key, Object.freeze({
+        result,
+        recipient: Object.freeze({ ...recipient, role: deliveryState.recipient_role }),
+        acceptance_id: accepted.acceptance_id,
+        snapshot_hash: accepted.snapshot_hash,
+        content,
+      }));
+      return result;
+    });
+    return Promise.resolve(results);
+  }
+  return Object.freeze({
+    synthetic: true,
+    deliver,
+    retry: deliver,
+    readDeliveries: () => Object.freeze([...deliveries.values()].map(clone)),
+  });
+}
+
 export function createRecruitingGuV1Runtime({
   store,
   worldResolver,
@@ -114,10 +162,12 @@ export function createRecruitingGuV1Runtime({
   contextResolver = null,
   experimentCondition = RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
   effectAdapter = createSyntheticEffectAdapter(),
+  agreementDeliveryAdapter = createSyntheticAgreementDeliveryAdapter(),
   now = () => new Date(),
 } = {}) {
   if (typeof store?.read !== 'function' || typeof store?.transaction !== 'function') throw new Error('RECRUITING_GU_V1_STORE_REQUIRED');
   if (typeof worldResolver !== 'function') throw new Error('RECRUITING_GU_V1_WORLD_RESOLVER_REQUIRED');
+  if (typeof agreementDeliveryAdapter?.deliver !== 'function') throw new Error('RECRUITING_GU_V1_AGREEMENT_DELIVERY_ADAPTER_REQUIRED');
   const transport = frontierTransport || createRecruitingV2OpenRouterTransport({ apiKey, modelConfig });
   if (!Object.values(RECRUITING_GU_EXPERIMENT_2_CONDITIONS).includes(experimentCondition)) throw new Error('RECRUITING_GU_V1_EXPERIMENT_CONDITION_INVALID');
   const coachRuntime = createRecruitingGuCoachRuntime({ transport, modelConfig });
@@ -153,7 +203,22 @@ export function createRecruitingGuV1Runtime({
   }
 
   async function mutateSimple({ authority, sessionId, action, payload }) {
-    return store.transaction((state) => {
+    if (action === 'RETRY_AGREEMENT_EMAIL') {
+      if (typeof agreementDeliveryAdapter.retry !== 'function') throw new Error('RECRUITING_GU_V1_AGREEMENT_RETRY_UNAVAILABLE');
+      const snapshot = await store.read();
+      const current = sessionFrom(snapshot, sessionId, authority);
+      const acceptanceId = current.accepted_plan_snapshot?.acceptance_id;
+      const results = await agreementDeliveryAdapter.retry({
+        session: clone(current),
+        acceptanceId,
+        recipientRole: payload.recipient_role,
+      });
+      return store.transaction((state) => {
+        const latest = sessionFrom(state, sessionId, authority);
+        return put(state, recordAgreementDelivery(latest, { acceptanceId, results }, now()));
+      });
+    }
+    const session = await store.transaction((state) => {
       const current = sessionFrom(state, sessionId, authority);
       let next;
       if (action === 'CHANGE_ROOM') next = changeRoom(current, { room: payload.room, expectedRevision: payload.expected_revision, actor: 'MANAGER' }, now());
@@ -163,6 +228,31 @@ export function createRecruitingGuV1Runtime({
       else throw new Error('RECRUITING_GU_V1_ACTION_INVALID');
       return put(state, next);
     });
+    if (action !== 'PLAN_DECISION' || payload.decision !== 'YES') return session;
+    const acceptanceId = session.accepted_plan_snapshot.acceptance_id;
+    let results;
+    try {
+      results = await agreementDeliveryAdapter.deliver({ session: clone(session), acceptanceId });
+    } catch (error) {
+      const safeCode = String(error?.message || 'CONSULTING_AGREED_PLAN_DELIVERY_FAILED').slice(0, 180);
+      results = session.agreement_delivery.recipients.map((item) => ({
+        recipient_role: item.recipient_role,
+        state: 'FAILED',
+        synthetic: agreementDeliveryAdapter.synthetic === true,
+        recipient_masked: null,
+        outbox_id: null,
+        provider_receipt: safeCode,
+        attempted_at: now().toISOString(),
+      }));
+    }
+    try {
+      return await store.transaction((state) => {
+        const current = sessionFrom(state, sessionId, authority);
+        return put(state, recordAgreementDelivery(current, { acceptanceId, results }, now()));
+      });
+    } catch {
+      return session;
+    }
   }
 
   async function chat({ authority, sessionId, payload }) {

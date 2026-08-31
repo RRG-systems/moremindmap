@@ -3,12 +3,13 @@ import { useLocation } from 'react-router-dom';
 import NewBosExperience from '../components/newBosPersonalityDnaV1/NewBosExperience.jsx';
 import BusinessTwinApp from '../lab/baProgressiveDisclosureV1/BusinessTwinApp.jsx';
 import RecruitingV2Renderer from '../recruitingV2/RecruitingV2Renderer.jsx';
-import { fetchApprovalPreview, fetchGuHome, mutateGu, decideApproval } from '../lib/recruitingGuV1/client.js';
+import { fetchApprovalPreview, fetchGuHome, fetchGuSession, mutateGu, decideApproval } from '../lib/recruitingGuV1/client.js';
 import { visibleConversationForRoom } from '../lib/recruitingGuV1/session.js';
 import '../recruitingV2/recruitingV2.css';
 import './recruitingGuV1.css';
 
 const ROOMS = ['HOME', 'YOU', 'YOUR_BUSINESS', 'PLAN'];
+const ACCEPTED_PLAN_SESSION_KEY = 'more-consulting-accepted-plan-session-v1';
 const LABEL = { HOME: 'HOME', YOU: 'YOU', YOUR_BUSINESS: 'YOUR BUSINESS', PLAN: 'PLAN' };
 const SUGGESTIONS = Object.freeze({
   YOU: [
@@ -22,23 +23,23 @@ const SUGGESTIONS = Object.freeze({
 });
 
 function MoreMark() {
-  return <div className="gu-brand"><span>M</span><div><strong>MORE</strong><small>Recruiting GU V1</small></div></div>;
+  return <div className="gu-brand"><span>M</span><div><strong>MORE</strong><small>Consulting Demonstration</small></div></div>;
 }
 
 function AppHeader({ room, manager, synthetic, onRoom }) {
   return <header className="gu-header">
     <MoreMark />
-    <nav aria-label="Recruiting consultation rooms">{ROOMS.map((item) => <button type="button" key={item} className={room === item ? 'active' : ''} onClick={() => onRoom(item)}>{LABEL[item]}</button>)}</nav>
+    <nav aria-label="Consulting demonstration rooms">{ROOMS.map((item) => <button type="button" key={item} className={room === item ? 'active' : ''} onClick={() => onRoom(item)}>{LABEL[item]}</button>)}</nav>
     <div className="gu-account"><button type="button" aria-label="Help">?</button>{synthetic && <span className="gu-synthetic-pill">SYNTHETIC · LOCAL ONLY</span>}<div><b>{manager?.name || 'Manager'}</b><small>{manager?.entitlement_mode === 'unlimited' ? 'admin / unlimited' : 'Manager'}</small></div></div>
   </header>;
 }
 
 function SubjectTabs({ subjects, activeSubject, busy, onSubject }) {
   if (!subjects?.length) return null;
-  return <nav className="gu-subject-tabs" aria-label="Experiment 2 subjects">
-    <span>EXPERIMENT 2 SUBJECT</span>
+  return <nav className="gu-subject-tabs" aria-label="Demonstration subjects">
+    <span>DEMONSTRATION SUBJECT</span>
     {subjects.map((subject) => <button type="button" key={subject.id} className={activeSubject === subject.id ? 'active' : ''} disabled={busy} onClick={() => onSubject(subject.id)}>{subject.label}</button>)}
-    <small>Temporary read-only test harness</small>
+    <small>Synthetic + Founder-authorized read-only</small>
   </nav>;
 }
 
@@ -72,14 +73,14 @@ function Home({ data, selected, onContinue, onOpenCandidate, onOpenRelationship,
     try { await onMoreId(moreId); setPending('Request sent. Their MORE ID did not grant access; the owner must approve.'); } catch (error) { setPending(error.message); }
   }
   return <main className="gu-home">
-    <section className="gu-home__hero"><div><p className="gu-kicker">RECRUITING / BUSINESS CONSULTATION</p><h1>Where would you<br />like to begin?</h1><p>Explore Personality DNA, Business Assessment, and build a shared plan together with MORE guiding the conversation.</p></div><OrbitGraphic /></section>
+    <section className="gu-home__hero"><div><p className="gu-kicker">CONSULTING DEMONSTRATION</p><h1>Where would you<br />like to begin?</h1><p>Explore Personality DNA, Business Assessment, and build a shared plan together with MORE guiding the conversation.</p></div><OrbitGraphic /></section>
     <p className="gu-kicker gu-start-label">START A CONSULTATION</p>
     <section className={`gu-home-grid ${canOpenDarrenDemo ? 'gu-home-grid--three' : ''}`}>
-      <HomeCard tone="green" icon="person" title={selected ? `Continue with ${selected.name}` : 'Continue with an invitee'} copy={selected ? 'This consent-bound consultation is ready. Begin with their complete BOS.' : 'Pick up where you left off with someone you’ve invited through Recruiting.'} button={selected ? 'Open YOU' : 'Choose invitee'} footer={selected ? 'Invitee selected · session continuous' : `${ready.length} ready to continue`} onClick={selected ? onContinue : () => setChooser((value) => !value)} />
+      <HomeCard tone="green" icon="person" title={selected ? `Continue with ${selected.name}` : 'Continue with a person'} copy={selected ? 'This approved consultation is ready. Begin with their complete BOS.' : 'Pick up where you left off in an approved shared consultation.'} button={selected ? 'Open YOU' : 'Choose person'} footer={selected ? 'Person selected · session continuous' : `${ready.length} ready to continue`} onClick={selected ? onContinue : () => setChooser((value) => !value)} />
       <HomeCard tone="blue" icon="people" title="Meet with another MORE member" copy="Enter their MORE ID to start a business consultation together." button="Enter MORE ID" footer="Requires their approval" onClick={() => { setShowMoreId(true); setTimeout(() => document.getElementById('gu-more-id')?.focus(), 0); }} />
-      {canOpenDarrenDemo && <HomeCard tone="gold" icon="flask" title="Darren Synthetic Demo" copy="Use a synthetic Jordan profile to experience MORE end-to-end." button="Darren Demo" footer="Synthetic · Demo only" onClick={onDemo} />}
+      {canOpenDarrenDemo && <HomeCard tone="gold" icon="flask" title="Darren + Jordan Demonstration" copy="Use a synthetic Jordan profile to experience MORE end-to-end." button="Open demonstration" footer="Synthetic · Demonstration only" onClick={onDemo} />}
     </section>
-    {chooser && <section className="gu-home-picker" aria-label="Ready invitees"><header><div><p className="gu-kicker">READY INVITEES</p><h2>Who are you meeting with?</h2></div><button type="button" onClick={() => setChooser(false)}>Close</button></header>{ready.map((item) => <button type="button" key={item.candidate_id} onClick={() => onOpenCandidate(item.candidate_id)}><span>{item.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><div><strong>{item.recruit_name}</strong><small>{item.ba_readiness?.replaceAll('_', ' ')}</small></div><b>Begin →</b></button>)}{approved.map((item) => <button type="button" key={item.relationship_id} onClick={() => onOpenRelationship(item.relationship_id)}><span>{item.owner_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><div><strong>{item.owner_name}</strong><small>Owner-approved MORE-ID consultation</small></div><b>Begin →</b></button>)}{!ready.length && !approved.length && <p>No consented, BOS-ready invitee is available yet.</p>}</section>}
+    {chooser && <section className="gu-home-picker" aria-label="Ready people"><header><div><p className="gu-kicker">READY PEOPLE</p><h2>Who are you meeting with?</h2></div><button type="button" onClick={() => setChooser(false)}>Close</button></header>{ready.map((item) => <button type="button" key={item.candidate_id} onClick={() => onOpenCandidate(item.candidate_id)}><span>{item.recruit_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><div><strong>{item.recruit_name}</strong><small>{item.ba_readiness?.replaceAll('_', ' ')}</small></div><b>Begin →</b></button>)}{approved.map((item) => <button type="button" key={item.relationship_id} onClick={() => onOpenRelationship(item.relationship_id)}><span>{item.owner_name.split(' ').map((part) => part[0]).join('').slice(0, 2)}</span><div><strong>{item.owner_name}</strong><small>Owner-approved MORE-ID consultation</small></div><b>Begin →</b></button>)}{!ready.length && !approved.length && <p>No approved, BOS-ready person is available yet.</p>}</section>}
     {showMoreId && <form className="gu-more-id" onSubmit={submit}><label htmlFor="gu-more-id">MORE ID</label><input id="gu-more-id" value={moreId} onChange={(event) => setMoreId(event.target.value)} placeholder="mm-YYYYMMDD-xxxxxxxx" /><button type="submit" disabled={!moreId.trim()}>Request owner approval</button><p>{pending || 'A MORE ID identifies a profile. It never grants consultation access by itself.'}</p></form>}
     <footer className="gu-trust">▢ &nbsp; Secure. Private. Built on trust.</footer>
   </main>;
@@ -113,11 +114,13 @@ function ConversationRail({ room, session, busy, progress, error, onSubmit, onSu
     event.currentTarget.form?.requestSubmit();
   }
   const suggestions = SUGGESTIONS[room] || [];
+  const activeProposal = session.proposals?.find((item) => item.proposal_id === session.current_proposal_id);
+  const adjustingPlan = room === 'PLAN' && activeProposal?.status === 'ADJUSTMENT_REQUESTED';
   return <aside className="gu-chat" aria-label="MORE conversation">
-    <header>{room === 'PLAN' ? 'PLAN CONVERSATION' : 'MORE CONVERSATION'}</header>
+    <header>{adjustingPlan ? 'PLAN ADJUSTMENT' : room === 'PLAN' ? 'PLAN CONVERSATION' : 'MORE CONVERSATION'}</header>
     <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{visibleConversation.map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small>{turn.actor === 'MORE' && turn.insight ? <><strong className="gu-turn__insight">{turn.insight}</strong><p>{turn.explanation}</p><p className="gu-turn__question">{turn.question}</p></> : <p>{turn.text}</p>}</article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
     <div className="gu-chat__bottom">{suggestions.length > 0 && <section className="gu-suggestions"><p>SUGGESTED QUESTIONS</p>{suggestions.map((item) => <button type="button" key={item} disabled={busy} onClick={() => onSuggestion(item)}>{item}</button>)}</section>}
-      <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} placeholder={room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Enter to send · Shift+Enter for a new line</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
+      <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} placeholder={adjustingPlan ? 'Say what should change—commitments, conditions, or timing…' : room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Enter to send · Shift+Enter for a new line</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
     </div>
   </aside>;
 }
@@ -145,11 +148,24 @@ function PlanRoom({ session, busy, onDecision, onSecondOffer }) {
   const proposal = session.proposals?.find((item) => item.proposal_id === session.current_proposal_id);
   const lastDecision = session.decisions?.at(-1)?.decision;
   const receipt = session.effect_receipts?.at(-1);
-  if (session.status === 'COMPLETED' && lastDecision === 'YES') return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">THE ANSWER THE TWO OF YOU REACHED.</p><h1>Congratulations — let’s get started.</h1><p>The accepted plan is recorded in this Shared Business Session.</p><PlanProposal proposal={proposal} actions={false} /></main>;
+  const accepted = session.accepted_plan_snapshot;
+  if (session.status === 'COMPLETED' && lastDecision === 'YES') return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">THE ANSWER THE TWO OF YOU REACHED.</p><h1>Congratulations — let’s get started.</h1><p>The exact agreed plan is recorded in this Shared Business Session.</p><PlanProposal proposal={accepted ? { version: accepted.version, proposal: accepted.plan } : proposal} actions={false} /><AgreementDeliveryStatus delivery={session.agreement_delivery} /></main>;
   if (session.status === 'COMPLETED' && receipt) return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">STAY CONNECTED</p><h1>{session.subject_binding.name} accepted 3 months of MORE.</h1><div className="gu-receipt"><p>One-time sponsor payment <b>simulated</b></p><p>Activation email <b>simulated</b></p><p>3-month MORE entitlement <b>simulated</b></p><p>90-day follow-up <b>scheduled</b></p><p>Reminders <b>simulated</b></p></div></main>;
   if (session.status === 'COMPLETED' && lastDecision === 'CLOSE_GRACEFULLY') return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">MEETING COMPLETE</p><h1>Thank you for the honest conversation.</h1><p>No plan, payment, entitlement, email, or follow-up was created.</p></main>;
   if (session.status === 'SECOND_OFFER') return <main className="gu-plan gu-plan--offer"><p className="gu-kicker">ONE MORE OPTION</p><h1>That’s okay.</h1><p>Darren would still like to give you 3 months of MORE and reconnect in 90 days.</p><div><button type="button" disabled={busy} onClick={() => onSecondOffer('STAY_CONNECTED')}>YES — Stay Connected</button><button type="button" disabled={busy} onClick={() => onSecondOffer('CLOSE_GRACEFULLY')}>NO — Close Gracefully</button></div></main>;
+  if (proposal?.status === 'ADJUSTMENT_REQUESTED') return <main className="gu-plan gu-plan--adjusting"><p className="gu-kicker">ADJUSTING THIS SHARED PLAN</p><h1>What should change?</h1><p>The current draft is preserved below. Use the same PLAN conversation to say what should change about the commitments, conditions, or timing. MORE will revise this draft and bring back a clean plan for YES / ADJUST / NOT NOW.</p><PlanProposal proposal={proposal} actions={false} /></main>;
   return <main className="gu-plan"><p className="gu-kicker">PLAN TOGETHER</p><h1>Let’s decide together<br />on a few next steps.</h1><i /><p>Share what you’re willing to do to support this person’s business<br />and what outcome you want to create together.</p><p>I’ll turn your commitments into a clear plan we can decide on—together.</p>{proposal ? <PlanProposal proposal={proposal} onDecision={onDecision} busy={busy} /> : <div className="gu-plan__start"><span>◯</span><strong>Start the conversation</strong><p>Type what you’re willing to do, what outcome<br />you want, and any conditions or timing.</p></div>}</main>;
+}
+
+function AgreementDeliveryStatus({ delivery }) {
+  if (!delivery || delivery.status === 'NOT_STARTED') return null;
+  const delivered = delivery.recipients?.filter((item) => item.state === 'DELIVERED').length || 0;
+  const copy = delivery.status === 'DELIVERED'
+    ? 'A copy of this exact agreed plan was prepared for both people.'
+    : delivery.status === 'PENDING'
+      ? 'The agreed plan is accepted. Email delivery is still pending.'
+      : `The agreed plan is accepted. ${delivered} of 2 email copies were delivered; delivery can be retried safely without changing the plan.`;
+  return <section className={`gu-plan-delivery gu-plan-delivery--${delivery.status.toLowerCase()}`} aria-label="Agreed plan email status"><strong>AGREED PLAN EMAIL</strong><p>{copy}</p></section>;
 }
 
 function PlanProposal({ proposal, onDecision, busy, actions = true }) {
@@ -195,6 +211,16 @@ export default function RecruitingGuV1App() {
       setHome(payload);
       const selected = new URLSearchParams(location.search).get('candidate_id');
       if (selected) return openCandidate(selected);
+      const acceptedSessionId = window.sessionStorage.getItem(ACCEPTED_PLAN_SESSION_KEY);
+      if (acceptedSessionId) return fetchGuSession(acceptedSessionId).then((recovered) => {
+        if (recovered.session?.status === 'COMPLETED' && recovered.session?.accepted_plan_snapshot) {
+          setActiveSubject(payload.active_subject);
+          setBundle({ session: recovered.session, manager: payload.manager });
+          setProjectionVisible(false);
+          return;
+        }
+        window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY);
+      }).catch(() => window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY));
       if (payload.active_session_id && payload.experiment_only) return mutateGu('OPEN_EXPERIMENT_SUBJECT', { subject: payload.active_subject }).then((opened) => { setActiveSubject(payload.active_subject); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
       if (payload.active_session_id && payload.synthetic_only) return mutateGu('OPEN_SYNTHETIC_DEMO').then((opened) => { setActiveSubject('SYNTHETIC'); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
       return null;
@@ -250,7 +276,7 @@ export default function RecruitingGuV1App() {
   }
   async function navigateRoom(nextRoom) {
     setError('');
-    if (nextRoom === 'HOME') { setBundle(null); return; }
+    if (nextRoom === 'HOME') { window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY); setBundle(null); return; }
     if (!session || busy || nextRoom === room) return;
     try { const payload = await mutateGu('CHANGE_ROOM', { session_id: session.session_id, room: nextRoom, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); setProjectionVisible(Boolean(payload.session.current_projection?.room === nextRoom)); }
     catch (failure) { setError(failure.message); }
@@ -295,8 +321,15 @@ export default function RecruitingGuV1App() {
     finally { clearInterval(progressTimer.current); setBusy(false); }
   }
   async function planDecision(decision) {
-    try { const payload = await mutateGu('PLAN_DECISION', { session_id: session.session_id, decision, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); }
+    if (busy) return;
+    setBusy(true); setError('');
+    try {
+      const payload = await mutateGu('PLAN_DECISION', { session_id: session.session_id, decision, expected_revision: session.revision });
+      if (decision === 'YES' && payload.session?.accepted_plan_snapshot) window.sessionStorage.setItem(ACCEPTED_PLAN_SESSION_KEY, payload.session.session_id);
+      setBundle((current) => ({ ...current, session: payload.session }));
+    }
     catch (failure) { setError(failure.message); }
+    finally { setBusy(false); }
   }
   async function secondOffer(decision) {
     try { const payload = await mutateGu('SECOND_OFFER_DECISION', { session_id: session.session_id, decision, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); }
@@ -313,7 +346,7 @@ export default function RecruitingGuV1App() {
   }), [scenarioValues, session?.revision, busy]);
 
   if (approvalToken) return <ApprovalPage token={approvalToken} />;
-  if (!home) return <main className="gu-loading"><MoreMark /><h1>{error || 'Opening Recruiting GU V1…'}</h1></main>;
+  if (!home) return <main className="gu-loading"><MoreMark /><h1>{error || 'Opening Consulting Demonstration…'}</h1></main>;
   return <div className="recruiting-gu-v1" data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
     <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} />
     <SubjectTabs subjects={home.experiment_subjects} activeSubject={activeSubject} busy={busy} onSubject={openSubject} />
@@ -322,7 +355,7 @@ export default function RecruitingGuV1App() {
         {room === 'YOU' || room === 'YOUR_BUSINESS' ? <AuthoredRoom room={room} surfaces={bundle.authored_surfaces} projection={projection} showProjection={showProjection} projectionProps={projectionProps} /> : <PlanRoom session={session} busy={busy} onDecision={planDecision} onSecondOffer={secondOffer} />}
         <ConversationRail room={room} session={session} busy={busy} progress={progress} error={error} onSubmit={submit} onSuggestion={(question) => submit(question, 'MANAGER')} />
       </div>
-      <p className="gu-boundary">{session?.synthetic_only ? 'Synthetic Darren/Jordan demo. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, Recruiting V1, or Production mutation.' : 'Patricia experiment: canonical BOS/BA read only. No canonical write, Recruiting V1, fulfillment, external, Darren Demo, or Production mutation.'}</p>
+      <p className="gu-boundary">{session?.synthetic_only ? 'Synthetic Darren/Jordan demonstration. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, real-product, or Production mutation.' : 'Patricia demonstration: canonical BOS/BA read only. YOU is BOS-only; YOUR BUSINESS is BOS + BA / Business Twin. No canonical/customer write, email, fulfillment, external action, or Production mutation.'}</p>
       <BottomNav room={room} onRoom={navigateRoom} />
     </>}
     {evidence && <EvidenceDrawer evidence={evidence} onClose={() => setEvidence(null)} />}

@@ -45,7 +45,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
           csrf_token,
           synthetic_only: true,
           choices: [
-            { id: 'recruiting', title: 'Recruiting GU V1' },
+            { id: 'recruiting', title: 'Consulting Demonstration' },
             { id: 'subscription', title: 'Subscription Model Demo' },
           ],
         });

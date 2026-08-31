@@ -12,6 +12,8 @@ import {
   issueLeadershipLauncherCapability,
   issueLeadershipLauncherCsrf,
   issueRecruitingDemoCapability,
+  issueRecruitingDemoCsrf,
+  consumeRecruitingDemoCsrf,
   issueRecruitingDemoCapabilityForManager,
   sameOriginLeadershipDemoRequest,
 } from '../api/engine/leadershipDemo/authority.js';
@@ -100,6 +102,15 @@ test('Recruiting receives only a narrower synthetic capability and the launcher 
   assert.equal(recruitingAuth.capability.subject_key, 'recruiting-darren-jordan-v1');
 });
 
+test('Recruiting demo CSRF survives serverless instance rotation and remains single use', async () => {
+  const redis = new FakeRedis();
+  const capabilityHash = 'a'.repeat(64);
+  const proof = await issueRecruitingDemoCsrf({ redis, capabilityHash });
+
+  assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof }), true);
+  assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof }), false);
+});
+
 test('authenticated Darren admin can mint only the same isolated synthetic Recruiting capability', async () => {
   const redis = new FakeRedis();
   const req = request();
@@ -135,14 +146,22 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
   const recruitingApi = fs.readFileSync(new URL('../api/recruiting/gu-v1-demo.js', import.meta.url), 'utf8');
   const recruitingApp = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
-  assert.equal((launcher.match(/title: 'Recruiting GU V1'/gu) || []).length, 1);
+  const consultingDemoApp = fs.readFileSync(new URL('../src/recruitingGuV1/RecruitingGuV1App.jsx', import.meta.url), 'utf8');
+  assert.equal((launcher.match(/title: 'Consulting Demonstration'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'Subscription Model Demo'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
   assert.match(launcher, /HOME → YOU → YOUR BUSINESS → PLAN/u);
   assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription'\]/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
+  assert.match(launcherApi, /title: 'Consulting Demonstration'/u);
+  assert.doesNotMatch(launcherApi, /title: 'Recruiting GU V1'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
   assert.doesNotMatch(launcher, /Craig Fox|Executive \/ Board|Company Alignment|leadershipDemoSlides|slide-\d+/u);
+  assert.doesNotMatch(launcher, /Consulting Tool|Recruiting GU V1|Candidate intelligence/u);
+  assert.match(consultingDemoApp, /<small>Consulting Demonstration<\/small>/u);
+  assert.match(consultingDemoApp, /DEMONSTRATION SUBJECT/u);
+  assert.match(consultingDemoApp, /YOU is BOS-only; YOUR BUSINESS is BOS \+ BA \/ Business Twin/u);
+  assert.doesNotMatch(consultingDemoApp, /Consulting Tool|Recruiting GU V1|RECRUITING \/ BUSINESS CONSULTATION|through Recruiting|READY INVITEES/u);
   assert.doesNotMatch(portal, /darrendemo|leadershipDemoAccess/u);
   assert.match(portal, /x-leadership-demo-entry-csrf/u);
   assert.doesNotMatch(recruitingApi, /more_recruiting_manager|MANAGER_COOKIE/u);

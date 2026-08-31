@@ -5,7 +5,7 @@ import {
   RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
 } from '../../../src/lib/recruitingGuV1/experiment2Contract.js';
 import { createSyntheticAuthoredSurfaces, readCurrentAuthoredSurfaces } from './authoredSurfaces.js';
-import { createRecruitingGuV1Runtime } from './runtime.js';
+import { createRecruitingGuV1Runtime, createSyntheticAgreementDeliveryAdapter } from './runtime.js';
 import { createCanonicalPurposeRankedContext, createSyntheticPurposeRankedContext } from './purposeRankedContext.js';
 import { createRecruitingGuExperiment2OpenAiTransport } from './openAiTransport.js';
 import { createPatriciaReadOnlyRedis } from './readOnlyCanonicalRedis.js';
@@ -61,6 +61,7 @@ export function createRecruitingGuV1DemoRuntime({
   redis = null,
   env = globalThis.process?.env || {},
   experimentCondition = RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
+  agreementDeliveryAdapter: providedAgreementDeliveryAdapter = null,
 } = {}) {
   const syntheticAuthoredSurfaces = createSyntheticAuthoredSurfaces();
   const syntheticWorld = createSyntheticRecruitingGuWorld();
@@ -78,6 +79,7 @@ export function createRecruitingGuV1DemoRuntime({
     apiKey: openAiApiKey || env.OPENAI_API_KEY,
     modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
   });
+  const agreementDeliveryAdapter = providedAgreementDeliveryAdapter || createSyntheticAgreementDeliveryAdapter({ now });
 
   function subjectFromAuthority(authority) {
     if (authority.relationship_id === SYNTHETIC_AUTHORITY.relationship_id) return 'SYNTHETIC';
@@ -132,6 +134,7 @@ export function createRecruitingGuV1DemoRuntime({
     modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
     now,
     experimentCondition,
+    agreementDeliveryAdapter,
     worldResolver: async ({ authority }) => (await bindingFor(subjectFromAuthority(authority))).world,
     contextResolver: async ({ authority, room, purpose }) => {
       const subjectId = subjectFromAuthority(authority);
@@ -184,6 +187,9 @@ export function createRecruitingGuV1DemoRuntime({
         mode: 'UNBOUND', get_count: 0, denied_read_count: 0, denied_write_count: 0,
         write_commands_forwarded: 0, canonical_mutation: false,
       });
+    },
+    agreementEmailAudit() {
+      return agreementDeliveryAdapter.readDeliveries?.() || Object.freeze([]);
     },
     async openCandidate(candidateId) {
       if (candidateId !== INVITEE.candidate_id) throw new Error('RECRUITING_GU_V1_CANDIDATE_SCOPE_DENIED');

@@ -6,6 +6,7 @@ const ENTRY_CSRF_TTL_SECONDS = 5 * 60;
 const LAUNCHER_CSRF_TTL_SECONDS = 5 * 60;
 const LAUNCHER_TTL_SECONDS = 30 * 60;
 const RECRUITING_DEMO_TTL_SECONDS = 8 * 60 * 60;
+const RECRUITING_DEMO_CSRF_TTL_SECONDS = 5 * 60;
 const LAUNCHER_COOKIE = '__Host-more_leadership_demo';
 const RECRUITING_DEMO_COOKIE = '__Host-more_recruiting_demo';
 
@@ -214,10 +215,22 @@ export async function authenticateRecruitingDemoRequest({ redis, req, now = new 
   return { ok: true, capability, capability_hash: capabilityHash };
 }
 
+export async function issueRecruitingDemoCsrf({ redis, capabilityHash }) {
+  const proof = opaqueToken();
+  await redis.set(`${PREFIX}:recruiting-csrf:${capabilityHash}:${digest(proof)}`, 'active', 'EX', RECRUITING_DEMO_CSRF_TTL_SECONDS, 'NX');
+  return proof;
+}
+
+export async function consumeRecruitingDemoCsrf({ redis, capabilityHash, proof }) {
+  if (typeof proof !== 'string' || proof.length < 32) return false;
+  return await redis.getdel(`${PREFIX}:recruiting-csrf:${capabilityHash}:${digest(proof)}`) === 'active';
+}
+
 export const LEADERSHIP_DEMO_AUTHORITY = Object.freeze({
   launcher_cookie: LAUNCHER_COOKIE,
   recruiting_demo_cookie: RECRUITING_DEMO_COOKIE,
   launcher_ttl_seconds: LAUNCHER_TTL_SECONDS,
+  recruiting_demo_csrf_ttl_seconds: RECRUITING_DEMO_CSRF_TTL_SECONDS,
   recruiting_demo_ttl_seconds: RECRUITING_DEMO_TTL_SECONDS,
   launcher_authenticates_real_products: false,
   recruiting_demo_authenticates_real_recruiting: false,

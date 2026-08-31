@@ -149,8 +149,9 @@ function invitationInScope(state, membership, invitationId) {
   return invitation;
 }
 
-function enqueue(state, { kind, recipient, membership, invitation, payload, tokenCapsule = null }, now) {
-  const idempotency_key = stableHash({ kind, recipient, invitation_id: invitation?.invitation_id, generation: invitation?.token_generation || 0, payload });
+function enqueue(state, { kind, recipient, membership, invitation, payload, tokenCapsule = null, idempotencyKey = null }, now) {
+  const idempotency_key = boundedText(idempotencyKey, 180)
+    || stableHash({ kind, recipient, invitation_id: invitation?.invitation_id, generation: invitation?.token_generation || 0, payload });
   const existing = Object.values(state.outbox).find((item) => item.idempotency_key === idempotency_key);
   if (existing) return existing;
   const item = {
@@ -1102,6 +1103,100 @@ export class RecruitingV1Service {
       manager_evidence: clone(state.evidence_by_candidate[candidateId] || []),
       intelligence: clone(state.intelligence_by_candidate[candidateId] || null),
     };
+  }
+
+  async deliverAgreedPlanEmails({ sessionId, acceptanceId }) {
+    const queued = await this.store.transaction((state) => {
+      const now = this.now();
+      const session = state.shared_business_sessions?.[boundedText(sessionId, 180)];
+      const accepted = session?.accepted_plan_snapshot;
+      if (!session || session.status !== 'COMPLETED' || !accepted || accepted.acceptance_id !== acceptanceId) {
+        throw new Error('CONSULTING_AGREED_PLAN_ACCEPTANCE_REQUIRED');
+      }
+      if (stableHash(accepted.plan) !== accepted.snapshot_hash) throw new Error('CONSULTING_AGREED_PLAN_SNAPSHOT_DRIFT');
+      const membership = state.memberships?.[session.manager_binding.membership_id];
+      if (!membership || membership.status !== 'ACTIVE' || membership.setup_state !== 'COMPLETE' || !normalizeEmail(membership.manager_email)) {
+        throw new Error('CONSULTING_MANAGER_EMAIL_AUTHORITY_REQUIRED');
+      }
+      const invitation = session.subject_binding.candidate_id
+        ? Object.values(state.invitations || {}).find((item) => item.candidate_id === session.subject_binding.candidate_id)
+        : null;
+      const consultationRequest = session.subject_binding.consultation_request_id
+        ? state.consultation_requests?.[session.subject_binding.consultation_request_id]
+        : null;
+      const personEmail = invitation?.accepted_at
+        ? normalizeEmail(invitation.recruit_email)
+        : consultationRequest?.status === 'APPROVED'
+          ? normalizeEmail(consultationRequest.owner_email)
+          : null;
+      if (!personEmail) throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+      const recipients = [
+        { recipient_role: 'PERSON', recipient: personEmail, recipient_name: session.subject_binding.name },
+        { recipient_role: 'MANAGER', recipient: normalizeEmail(membership.manager_email), recipient_name: session.manager_binding.name },
+      ];
+      return recipients.map((recipient) => {
+        const deliveryState = session.agreement_delivery?.recipients?.find((item) => item.recipient_role === recipient.recipient_role);
+        if (!deliveryState?.idempotency_key) throw new Error('CONSULTING_AGREED_PLAN_IDEMPOTENCY_REQUIRED');
+        const outbox = enqueue(state, {
+          kind: 'CONSULTING_AGREED_PLAN',
+          recipient: recipient.recipient,
+          membership,
+          invitation,
+          idempotencyKey: deliveryState.idempotency_key,
+          payload: {
+            acceptance_id: accepted.acceptance_id,
+            recipient_role: recipient.recipient_role,
+            recipient_name: recipient.recipient_name,
+            manager_name: session.manager_binding.name,
+            person_name: session.subject_binding.name,
+            accepted_plan_snapshot: clone(accepted),
+          },
+        }, now);
+        return {
+          recipient_role: recipient.recipient_role,
+          recipient_masked: recipient.recipient.replace(/^(.{2}).*(@.*)$/u, '$1***$2'),
+          outbox_id: outbox.outbox_id,
+        };
+      });
+    });
+    const attempts = await Promise.all(queued.map(async (recipient) => {
+      const delivered = await this.deliverOutbox(recipient.outbox_id);
+      return {
+        ...recipient,
+        state: delivered.item?.state === 'DELIVERED' ? 'DELIVERED' : delivered.item?.state === 'FAILED' ? 'FAILED' : 'PENDING',
+        synthetic: this.transport?.synthetic === true,
+        provider_receipt: delivered.item?.provider_receipt || null,
+        attempted_at: delivered.item?.updated_at || iso(this.now()),
+      };
+    }));
+    return attempts;
+  }
+
+  async retryAgreedPlanEmail({ sessionId, acceptanceId, recipientRole }) {
+    if (!['PERSON', 'MANAGER'].includes(recipientRole)) throw new Error('CONSULTING_AGREED_PLAN_RECIPIENT_ROLE_INVALID');
+    await this.store.transaction((state) => {
+      const now = this.now();
+      const session = state.shared_business_sessions?.[boundedText(sessionId, 180)];
+      if (!session?.accepted_plan_snapshot || session.accepted_plan_snapshot.acceptance_id !== acceptanceId) {
+        throw new Error('CONSULTING_AGREED_PLAN_ACCEPTANCE_REQUIRED');
+      }
+      const recipient = session.agreement_delivery?.recipients?.find((item) => item.recipient_role === recipientRole);
+      const outbox = Object.values(state.outbox || {}).find((item) => item.idempotency_key === recipient?.idempotency_key);
+      if (!outbox || outbox.kind !== 'CONSULTING_AGREED_PLAN' || outbox.payload?.acceptance_id !== acceptanceId) {
+        throw new Error('CONSULTING_AGREED_PLAN_RETRY_TARGET_REQUIRED');
+      }
+      if (outbox.state === 'DELIVERED') return true;
+      if (outbox.state !== 'FAILED') throw new Error('CONSULTING_AGREED_PLAN_RETRY_STATE_INVALID');
+      outbox.state = 'PENDING';
+      outbox.updated_at = iso(now);
+      audit(state, 'CONSULTING_AGREED_PLAN_RETRY_AUTHORIZED', {
+        outbox_id: outbox.outbox_id,
+        acceptance_id: acceptanceId,
+        recipient_role: recipientRole,
+      }, now);
+      return true;
+    });
+    return this.deliverAgreedPlanEmails({ sessionId, acceptanceId });
   }
 
   async saveIntelligence(sessionToken, candidateId, projection) {

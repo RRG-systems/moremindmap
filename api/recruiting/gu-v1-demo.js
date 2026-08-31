@@ -1,12 +1,12 @@
 /* global process */
 
-import crypto from 'node:crypto';
-import { Buffer } from 'node:buffer';
-import { authenticateRecruitingDemoRequest } from '../engine/leadershipDemo/authority.js';
+import {
+  authenticateRecruitingDemoRequest,
+  consumeRecruitingDemoCsrf,
+  issueRecruitingDemoCsrf,
+} from '../engine/leadershipDemo/authority.js';
 import { getRecruitingRedis } from '../engine/recruitingV1/redisStore.js';
 import { getRecruitingGuV1DemoRuntime } from '../engine/recruitingGuV1/demoRuntime.js';
-
-const csrfByScope = new Map();
 
 function requestOrigin(req) {
   const host = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '').split(',')[0].trim().toLowerCase();
@@ -26,20 +26,6 @@ function headers(res) {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'same-origin');
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-}
-
-function issueCsrf(scope) {
-  const token = crypto.randomBytes(24).toString('base64url');
-  csrfByScope.set(scope, token);
-  return token;
-}
-
-function consumeCsrf(scope, supplied) {
-  const expected = csrfByScope.get(scope);
-  const ok = typeof supplied === 'string' && typeof expected === 'string' && supplied.length === expected.length
-    && crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected));
-  if (ok) csrfByScope.delete(scope);
-  return ok;
 }
 
 function statusFor(code) {
@@ -70,16 +56,17 @@ export function createRecruitingGuV1DemoHandler({
       const auth = await authenticate(req);
       if (!auth?.ok) return res.status(auth?.status || 401).json({ ok: false, code: auth?.code || 'RECRUITING_DEMO_CAPABILITY_REQUIRED' });
       const scope = auth.capability_hash || auth.capability?.demo_scope_id || 'local-synthetic-darren';
+      const redis = getRecruitingRedis(env);
       activeScope = scope;
       if (req.method === 'GET') {
         const view = String(req.query?.view || 'home');
-        const csrf_token = issueCsrf(scope);
+        const csrf_token = await issueRecruitingDemoCsrf({ redis, capabilityHash: scope });
         if (view === 'home') return res.status(200).json({ ok: true, ...(await getRuntime().home({ standard: String(req.query?.home_mode || '') === 'standard' })), csrf_token });
         if (view === 'session') return res.status(200).json({ ok: true, session: await getRuntime().read(String(req.query?.session_id || '')), csrf_token });
         return res.status(400).json({ ok: false, code: 'RECRUITING_GU_V1_VIEW_INVALID' });
       }
       if (req.method !== 'POST') return res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED' });
-      if (!consumeCsrf(scope, req.headers?.['x-recruiting-gu-v1-csrf'])) return res.status(403).json({ ok: false, code: 'RECRUITING_GU_V1_CSRF_DENIED' });
+      if (!await consumeRecruitingDemoCsrf({ redis, capabilityHash: scope, proof: req.headers?.['x-recruiting-gu-v1-csrf'] })) return res.status(403).json({ ok: false, code: 'RECRUITING_GU_V1_CSRF_DENIED' });
       const action = String(req.body?.action || '');
       let payload;
       if (action === 'OPEN_SYNTHETIC_DEMO') payload = await getRuntime().open();
@@ -91,7 +78,7 @@ export function createRecruitingGuV1DemoHandler({
       return res.status(200).json({
         ok: true,
         ...payload,
-        csrf_token: issueCsrf(scope),
+        csrf_token: await issueRecruitingDemoCsrf({ redis, capabilityHash: scope }),
         synthetic_only: payload?.session?.synthetic_only ?? true,
         experiment_only: true,
       });
@@ -110,7 +97,7 @@ export function createRecruitingGuV1DemoHandler({
         ok: false,
         code,
         current_revision: error?.current_revision || null,
-        ...(activeScope && !/CSRF/u.test(code) ? { csrf_token: issueCsrf(activeScope) } : {}),
+        ...(activeScope && !/CSRF/u.test(code) ? { csrf_token: await issueRecruitingDemoCsrf({ redis: getRecruitingRedis(env), capabilityHash: activeScope }) } : {}),
       });
     }
   };

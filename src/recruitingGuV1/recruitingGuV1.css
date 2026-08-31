@@ -145,6 +145,13 @@ body:has(.recruiting-gu-v1), body:has(.gu-approval), body:has(.gu-loading) { mar
 .gu-plan--complete,.gu-plan--offer { display:grid; align-content:center; min-height:100%; }
 .gu-plan--complete>h1,.gu-plan--offer>h1 { max-width:900px; }
 .gu-plan--offer>p { max-width:720px!important; font-size:23px!important; }
+.gu-plan--adjusting { background:radial-gradient(circle at 50% 34%,rgba(18,226,173,.11),transparent 30%),#020607; }
+.gu-plan--adjusting>h1 { margin-bottom:18px; }
+.gu-plan--adjusting>.gu-plan-proposal { opacity:.82; border-style:dashed; }
+.gu-plan-delivery { width:min(900px,100%); margin:20px auto 0; padding:17px 20px; border:1px solid rgba(18,226,173,.3); border-radius:14px; background:rgba(8,38,32,.6); }
+.gu-plan-delivery strong { color:var(--gu-green); font-size:12px; letter-spacing:.12em; }
+.gu-plan-delivery p { margin:7px 0 0; color:#c8d4d0; line-height:1.5; }
+.gu-plan-delivery--failed,.gu-plan-delivery--partial_failure { border-color:rgba(240,183,90,.45); background:rgba(59,40,9,.45); }
 .gu-receipt { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; width:min(780px,100%); margin-top:24px; }
 .gu-receipt p { display:flex; justify-content:space-between; margin:0!important; padding:18px; border:1px solid var(--gu-line); border-radius:12px; background:#071011; }
 .gu-receipt b { color:var(--gu-green); text-transform:uppercase; }

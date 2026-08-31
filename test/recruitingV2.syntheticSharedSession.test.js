@@ -175,7 +175,7 @@ test('server runtime is capability-scoped, one-time-CSRF protected, durable acro
   assert.equal(requests.length, 0);
 });
 
-test('Production airlock preserves the retired Campaign 2G source while launching Recruiting GU V1 with synthetic isolation', () => {
+test('Production airlock preserves the retired Campaign 2G source while launching the Consulting Demonstration with synthetic isolation', () => {
   const app = fs.readFileSync(new URL('../src/recruitingV2Demo/RecruitingV2DemoApp.jsx', import.meta.url), 'utf8');
   const api = fs.readFileSync(new URL('../api/recruiting/v2-demo.js', import.meta.url), 'utf8');
   const runtime = fs.readFileSync(new URL('../api/engine/recruitingV2Demo/runtime.js', import.meta.url), 'utf8');
@@ -194,7 +194,7 @@ test('Production airlock preserves the retired Campaign 2G source while launchin
   assert.match(app, />Reset Demo</u);
   assert.match(app, /event\.key === 'Escape'/u);
   assert.match(app, /detailReturnFocus\.current\?\.focus/u);
-  assert.equal((launcher.match(/title: 'Recruiting GU V1'/gu) || []).length, 1);
+  assert.equal((launcher.match(/title: 'Consulting Demonstration'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
   assert.match(launcher, /recruiting-gu-v1\/demo/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);

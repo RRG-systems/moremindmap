@@ -1,3 +1,5 @@
+import { buildConsultingAgreementEmail } from '../../../src/lib/recruitingGuV1/agreementEmail.js';
+
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
 function requireBinding(value, code) {
@@ -55,6 +57,9 @@ function notificationContent(item, baseUrl) {
       text: `You control whether your MORE profile is used in this consultation. Review the request and decide here: ${baseUrl}/recruiting-gu-v1/approve/${token}\n\nYour MORE ID alone did not grant access. This single-use approval link expires automatically.`,
     };
   }
+  if (item.kind === 'CONSULTING_AGREED_PLAN') {
+    return buildConsultingAgreementEmail({ acceptedPlanSnapshot: item.payload?.accepted_plan_snapshot });
+  }
   if (item.kind === 'MANAGER_BOS_READY' || item.kind === 'MANAGER_BA_INTELLIGENCE_READY') {
     return {
       subject: item.kind === 'MANAGER_BOS_READY'
@@ -87,7 +92,13 @@ export function createResendRecruitingTransport({ apiKey, from, baseUrl, fetchIm
             'idempotency-key': outboxId,
             'user-agent': 'MORE-MindMap-Recruiting-V1/1.0',
           },
-          body: JSON.stringify({ from: resolvedFrom, to: [recipient], subject: content.subject, text: content.text }),
+          body: JSON.stringify({
+            from: resolvedFrom,
+            to: [recipient],
+            subject: content.subject,
+            text: content.text,
+            ...(content.html ? { html: content.html } : {}),
+          }),
           signal: AbortSignal.timeout(20_000),
         });
         const parsed = await response.json().catch(() => null);

@@ -95,6 +95,13 @@ export function createRecruitingGuSession({
     proposals: [],
     current_proposal_id: null,
     decisions: [],
+    accepted_plan_snapshot: null,
+    agreement_delivery: {
+      contract: 'more_consulting_agreed_plan_delivery_v1',
+      acceptance_id: null,
+      status: 'NOT_STARTED',
+      recipients: [],
+    },
     effect_receipts: [],
     invariants: {
       external_mutation: false,
@@ -264,7 +271,7 @@ export function recordPlanProposal(current, { proposal, basedOnRevision }, now =
     metadata: { commitment_count: proposal.commitments.length },
   }, now);
   const prior = next.proposals.find((item) => item.proposal_id === next.current_proposal_id);
-  if (prior && prior.status === 'CURRENT') prior.status = 'SUPERSEDED';
+  if (prior && ['CURRENT', 'ADJUSTMENT_REQUESTED'].includes(prior.status)) prior.status = 'SUPERSEDED';
   const record = {
     proposal_id: `proposal-${String(next.proposals.length + 1).padStart(4, '0')}`,
     version: next.proposals.length + 1,
@@ -295,18 +302,95 @@ export function decidePlan(current, { decision, expectedRevision, actor = 'MANAG
     text: decision === 'YES' ? 'The two humans accepted the plan.' : decision === 'ADJUST' ? 'The plan needs adjustment.' : 'The plan was not accepted now.',
     lineage: { proposal_id: proposal.proposal_id },
   }, now);
-  next.decisions.push({ decision_id: `decision-${String(next.decisions.length + 1).padStart(4, '0')}`, decision, proposal_id: proposal.proposal_id, actor, at_revision: next.revision, decided_at: next.updated_at });
+  const nextProposal = next.proposals.find((item) => item.proposal_id === next.current_proposal_id);
+  const decisionRecord = { decision_id: `decision-${String(next.decisions.length + 1).padStart(4, '0')}`, decision, proposal_id: proposal.proposal_id, actor, at_revision: next.revision, decided_at: next.updated_at };
+  next.decisions.push(decisionRecord);
   if (decision === 'YES') {
+    const acceptedPlan = clone(nextProposal.proposal);
+    const snapshotHash = stableHash(acceptedPlan);
+    const acceptanceId = `plan-acceptance-${stableHash({
+      session_id: next.session_id,
+      proposal_id: nextProposal.proposal_id,
+      version: nextProposal.version,
+      snapshot_hash: snapshotHash,
+    }).slice(0, 24)}`;
     next.status = 'COMPLETED';
     next.completed_at = next.updated_at;
-    proposal.status = 'ACCEPTED';
+    nextProposal.status = 'ACCEPTED';
+    decisionRecord.acceptance_id = acceptanceId;
+    next.events.at(-1).lineage = { proposal_id: nextProposal.proposal_id, acceptance_id: acceptanceId };
+    next.accepted_plan_snapshot = {
+      contract: 'more_consulting_accepted_plan_snapshot_v1',
+      acceptance_id: acceptanceId,
+      session_id: next.session_id,
+      proposal_id: nextProposal.proposal_id,
+      version: nextProposal.version,
+      accepted_by: actor,
+      accepted_at: next.updated_at,
+      snapshot_hash: snapshotHash,
+      plan: acceptedPlan,
+    };
+    next.agreement_delivery = {
+      contract: 'more_consulting_agreed_plan_delivery_v1',
+      acceptance_id: acceptanceId,
+      status: 'PENDING',
+      recipients: ['PERSON', 'MANAGER'].map((recipientRole) => ({
+        recipient_role: recipientRole,
+        idempotency_key: stableHash({
+          acceptance_id: acceptanceId,
+          recipient_role: recipientRole,
+          snapshot_hash: snapshotHash,
+        }),
+        state: 'PENDING',
+        synthetic: null,
+        recipient_masked: null,
+        outbox_id: null,
+        provider_receipt: null,
+        attempted_at: null,
+      })),
+    };
   } else if (decision === 'ADJUST') {
     next.status = 'OPEN';
-    proposal.status = 'ADJUSTMENT_REQUESTED';
+    nextProposal.status = 'ADJUSTMENT_REQUESTED';
   } else {
     next.status = 'SECOND_OFFER';
-    proposal.status = 'NOT_ACCEPTED_NOW';
+    nextProposal.status = 'NOT_ACCEPTED_NOW';
   }
+  return Object.freeze(next);
+}
+
+export function recordAgreementDelivery(current, { acceptanceId, results }, now = new Date()) {
+  const accepted = current.accepted_plan_snapshot;
+  if (!accepted || accepted.acceptance_id !== acceptanceId) throw new Error('RECRUITING_GU_V1_ACCEPTED_PLAN_REQUIRED');
+  if (stableHash(accepted.plan) !== accepted.snapshot_hash) throw new Error('RECRUITING_GU_V1_ACCEPTED_PLAN_SNAPSHOT_DRIFT');
+  if (!Array.isArray(results) || results.length !== 2) throw new Error('RECRUITING_GU_V1_AGREEMENT_DELIVERY_RESULTS_REQUIRED');
+  const roles = new Set(results.map((item) => item?.recipient_role));
+  if (roles.size !== 2 || !roles.has('PERSON') || !roles.has('MANAGER')) throw new Error('RECRUITING_GU_V1_AGREEMENT_DELIVERY_ROLES_INVALID');
+  let next = append(current, {
+    type: 'AGREED_PLAN_EMAIL_DELIVERY_RECORDED',
+    actor: 'SYSTEM',
+    room: 'PLAN',
+    text: 'Agreed-plan delivery status recorded.',
+    lineage: { acceptance_id: acceptanceId, proposal_id: accepted.proposal_id },
+  }, now);
+  const resultByRole = new Map(results.map((item) => [item.recipient_role, item]));
+  next.agreement_delivery.recipients = next.agreement_delivery.recipients.map((currentRecipient) => {
+    const result = resultByRole.get(currentRecipient.recipient_role);
+    return {
+      ...currentRecipient,
+      state: ['DELIVERED', 'FAILED', 'PENDING'].includes(result.state) ? result.state : 'FAILED',
+      synthetic: result.synthetic === true,
+      recipient_masked: text(result.recipient_masked, 180) || null,
+      outbox_id: text(result.outbox_id, 180) || null,
+      provider_receipt: text(result.provider_receipt, 300) || null,
+      attempted_at: result.attempted_at || next.updated_at,
+    };
+  });
+  const delivered = next.agreement_delivery.recipients.filter((item) => item.state === 'DELIVERED').length;
+  const failed = next.agreement_delivery.recipients.filter((item) => item.state === 'FAILED').length;
+  next.agreement_delivery.status = delivered === 2 ? 'DELIVERED' : failed === 2 ? 'FAILED' : failed > 0 ? 'PARTIAL_FAILURE' : 'PENDING';
+  next.agreement_delivery.updated_at = next.updated_at;
+  next.invariants.external_mutation = next.agreement_delivery.recipients.some((item) => item.state === 'DELIVERED' && item.synthetic === false);
   return Object.freeze(next);
 }
 

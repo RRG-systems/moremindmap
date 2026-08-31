@@ -120,6 +120,18 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
         authoredSurfaces,
       });
     },
+    agreementDeliveryAdapter: {
+      synthetic: false,
+      deliver: ({ session }) => service.deliverAgreedPlanEmails({
+        sessionId: session.session_id,
+        acceptanceId: session.accepted_plan_snapshot?.acceptance_id,
+      }),
+      retry: ({ session, recipientRole }) => service.retryAgreedPlanEmail({
+        sessionId: session.session_id,
+        acceptanceId: session.accepted_plan_snapshot?.acceptance_id,
+        recipientRole,
+      }),
+    },
   });
 
   async function managerContext(sessionToken) {

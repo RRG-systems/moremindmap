@@ -6,10 +6,10 @@ const products = [
     id: 'recruiting',
     action: 'LAUNCH_RECRUITING',
     number: '01',
-    eyebrow: 'Candidate intelligence',
-    title: 'Recruiting GU V1',
-    description: 'Open the complete Darren and Jordan consultation: authored BOS and Business Twin, one persistent MORE conversation, purpose-bound visual intelligence, and a mutual plan.',
-    detail: 'HOME → YOU → YOUR BUSINESS → PLAN · Synthetic-only',
+    eyebrow: 'Shared business clarity',
+    title: 'Consulting Demonstration',
+    description: 'Open the complete Darren and Jordan demonstration: authored BOS and Business Twin, one persistent MORE conversation, purpose-bound visual intelligence, and a mutual plan.',
+    detail: 'HOME → YOU → YOUR BUSINESS → PLAN · Synthetic + read-only',
     tone: 'green',
   },
   {
@@ -91,8 +91,8 @@ export default function LeadershipDemo() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
           <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">Two products. One synthetic Jordan story.</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with its own narrow synthetic authority; neither grants access to a real customer product.</p>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">Two products. One bounded demo area.</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with narrow demonstration authority; neither grants access to a real customer product.</p>
         </section>
 
         {error && <div className="mt-8 rounded-2xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-sm text-red-100" role="alert">{error}</div>}
