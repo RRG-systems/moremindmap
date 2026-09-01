@@ -46,6 +46,8 @@ const handler = createNewBosProductionRouteHandler({
       realizationStore,
       singleFlight,
       generator,
+      resumableGenerationStore,
+      redisUrl: process.env.REDIS_URL,
     });
   },
 });

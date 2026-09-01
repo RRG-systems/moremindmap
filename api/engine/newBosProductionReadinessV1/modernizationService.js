@@ -3,11 +3,12 @@ import { attachCustomerTopProjection } from '../../../src/lib/newBosPersonalityD
 import { adaptCanonicalProfileToNewBosRawEvidence } from './canonicalAdapter.js';
 import { classifyNewBosCompatibility } from './compatibility.js';
 import { completeNewBosCandidate, validateCompleteNewBosCandidate } from './completeness.js';
-import { authorizeNewBosRead } from './config.js';
+import { authorizeNewBosOperatorInspection, authorizeNewBosRead } from './config.js';
 import { createNewBosLaunchDiagnostics } from './diagnostics.js';
 import { buildLaunchSafeRealizationEnvelope } from './launchSafeRealizationStore.js';
 import { buildNewBosRealizationIdentity } from './realizationIdentity.js';
 import { classifyRealizationInspection } from '../realizationRecoveryV1/recoveryContract.js';
+import { inspectNewBosResumableRuntimeState } from './runtimeStateInspector.js';
 
 function publicArtifact(artifact) {
   return Object.freeze({
@@ -30,6 +31,8 @@ export function createNewBosModernizationService({
   realizationStore,
   singleFlight,
   generator,
+  resumableGenerationStore = null,
+  redisUrl = '',
   diagnostics = createNewBosLaunchDiagnostics(),
 } = {}) {
   if (typeof canonicalReader?.read !== 'function') throw new Error('new_bos_modernization_canonical_reader_required');
@@ -116,6 +119,19 @@ export function createNewBosModernizationService({
 
   return Object.freeze({
     diagnostics,
+    async inspectResumable({ profileId, suppliedToken = '' }) {
+      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken });
+      const desired = await desiredState(normalized);
+      const current = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
+      return inspectNewBosResumableRuntimeState({
+        config,
+        redisUrl,
+        rawEvidence: desired.rawEvidence,
+        realizationIdentity: desired.identity,
+        realizationInspection: current,
+        checkpointStore: resumableGenerationStore,
+      });
+    },
     async diagnose({ profileId, suppliedToken = '' }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });

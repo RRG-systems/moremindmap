@@ -4,6 +4,8 @@ import test from 'node:test';
 import { RICH_SYNTHETIC_FIXTURE } from '../src/lib/newBosPersonalityDnaV1/richSyntheticFixture.js';
 import { runPersonalityDnaProductionContract } from '../src/lib/newBosPersonalityDnaV1/runtimeOrchestrator.js';
 import { createRedisNewBosResumableGenerationStore } from '../api/engine/newBosProductionReadinessV1/resumableGenerationStore.js';
+import { authorizeNewBosOperatorInspection } from '../api/engine/newBosProductionReadinessV1/config.js';
+import { inspectNewBosResumableRuntimeState } from '../api/engine/newBosProductionReadinessV1/runtimeStateInspector.js';
 import { realizePersonalityDnaArtifactBounded } from '../api/engine/newBosProductionReadinessV1/boundedSurfaceRealization.js';
 import { runNewBosResumableSemanticGeneration } from '../api/engine/newBosProductionReadinessV1/resumableGenerationOrchestrator.js';
 import {
@@ -338,4 +340,79 @@ test('four-stage provider execution resumes entirely from accepted semantic chec
   assert.equal(second.provider_submissions, 0);
   assert.equal(second.interpretation_draft_sha256, first.interpretation_draft_sha256);
   assert.deepEqual(second.interpretation_draft, first.interpretation_draft);
+});
+
+test('operator inspection replays the exact campaign and exposes only sanitized runtime metadata', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:runtime-inspector-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  const rawEvidence = Object.freeze({
+    ...RICH_SYNTHETIC_FIXTURE.rawEvidence,
+    profile_id: 'MM-SYNTHETIC-INSPECTOR',
+    generation_metadata: Object.freeze({ canonical_source_sha256: '7'.repeat(64) }),
+  });
+  const realizationIdentity = buildNewBosRealizationIdentity({
+    profileId: rawEvidence.profile_id,
+    canonicalSourceSha256: rawEvidence.generation_metadata.canonical_source_sha256,
+    rawEvidenceVersion: rawEvidence.version,
+    providerModel: 'gpt-5.6-sol',
+    compatibilityClass: 'A',
+  });
+  const evidenceIds = rawEvidence.evidence.map(({ evidence_id: id }) => id);
+  const campaign = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
+  await store.prepare({
+    campaignSha256: campaign.sha256,
+    unitId: 'semantic:causal_foundation',
+    unitIdentitySha256: '8'.repeat(64),
+    requestSha256: '9'.repeat(64),
+  });
+  await store.observe({
+    campaignSha256: campaign.sha256,
+    unitId: 'semantic:causal_foundation',
+    unitIdentitySha256: '8'.repeat(64),
+    requestSha256: '9'.repeat(64),
+    event: {
+      provider_response_id: 'resp_must_not_escape',
+      status: 'incomplete',
+      incomplete_details_reason: 'max_output_tokens',
+      usage: { input_tokens: 100, output_tokens: 200, customer_payload: 'must-not-escape' },
+    },
+  });
+  const result = await inspectNewBosResumableRuntimeState({
+    config: { namespace },
+    redisUrl: 'rediss://operator:super-secret@example.invalid:6380/2',
+    rawEvidence,
+    realizationIdentity,
+    realizationInspection: { state: 'missing', pointer: null, current: null },
+    checkpointStore: store,
+  });
+  assert.equal(result.campaign_sha256, campaign.sha256);
+  assert.equal(result.units.length, 19);
+  assert.deepEqual(result.recovery_review_provenance, {
+    source: 'resumable_checkpoint_classification',
+    unit_identity: 'semantic:causal_foundation',
+    checkpoint_state: 'HUMAN_REVIEW_REQUIRED',
+    review_reason: 'max_output_tokens',
+  });
+  assert.equal(result.units[0].attempt, 1);
+  assert.equal(result.units[0].provider_terminal_status, 'incomplete');
+  assert.deepEqual(result.units[0].usage, { input_tokens: 100, output_tokens: 200 });
+  assert.equal(result.redis_binding.database_index, '2');
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /resp_must_not_escape|super-secret|operator@example|customer_payload|must-not-escape/u);
+  assert.doesNotMatch(serialized, /"accepted_value":/u);
+});
+
+test('operator inspection requires the existing exact canary-token authority even when customers are active', () => {
+  const config = { staged: true, customerActive: true, accessToken: 'operator-token' };
+  assert.equal(authorizeNewBosOperatorInspection({
+    config,
+    profileId: 'mm-synthetic-inspector',
+    suppliedToken: 'operator-token',
+  }), 'MM-SYNTHETIC-INSPECTOR');
+  assert.throws(() => authorizeNewBosOperatorInspection({
+    config,
+    profileId: 'MM-SYNTHETIC-INSPECTOR',
+    suppliedToken: 'wrong-token',
+  }), /new_bos_operator_inspection_access_denied/u);
 });

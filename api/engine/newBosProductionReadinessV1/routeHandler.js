@@ -65,7 +65,11 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
     if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed' });
     try {
       const service = await serviceFactory();
-      const operation = request.query?.diagnostic === 'state' ? 'diagnose' : 'retrieve';
+      const operation = request.query?.diagnostic === 'resumable-state'
+        ? 'inspectResumable'
+        : request.query?.diagnostic === 'state'
+          ? 'diagnose'
+          : 'retrieve';
       if (typeof service?.[operation] !== 'function') throw new Error('new_bos_route_service_operation_unavailable');
       const result = await service[operation]({
         profileId: request.query?.id,

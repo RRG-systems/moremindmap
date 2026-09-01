@@ -68,6 +68,18 @@ export function authorizeNewBosRead({ config, profileId, suppliedToken = '' }) {
   return normalized;
 }
 
+export function authorizeNewBosOperatorInspection({ config, profileId, suppliedToken = '' }) {
+  const normalized = String(profileId || '').trim().toUpperCase();
+  if (!PROFILE_ID_PATTERN.test(normalized)) throw new Error('new_bos_profile_id_invalid');
+  if (!config?.staged) throw new Error('new_bos_runtime_default_off');
+  const expected = Buffer.from(config.accessToken || '');
+  const supplied = Buffer.from(String(suppliedToken || ''));
+  if (!expected.length || expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) {
+    throw new Error('new_bos_operator_inspection_access_denied');
+  }
+  return normalized;
+}
+
 export const NEW_BOS_PRODUCTION_ENVIRONMENT_CONTRACT = Object.freeze([
   'NEW_BOS_PRODUCTION_STAGED',
   'NEW_BOS_CUSTOMER_ACTIVE',
