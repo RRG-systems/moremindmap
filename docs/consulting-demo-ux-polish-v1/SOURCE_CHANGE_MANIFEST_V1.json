@@ -1,0 +1,44 @@
+{
+  "schema_version": "consulting-demo-ux-polish-source-change-manifest-v1",
+  "baseline": {
+    "source_commit": "847dd578a1e6f614abe074635879b3de86cb16e5",
+    "source_tree": "264ce971e6859fb0f76ddb323f27dbfb69db3971",
+    "production_deployment": "dpl_4hY8LR9sbxXuHwZ8ph4yCxz23seC",
+    "rollback_source": "b8d084bbb299078a9191323abf2ff643ba3c1a25",
+    "rollback_deployment": "dpl_762248GWfQrpGJVJXmw4iVDstV8E"
+  },
+  "changed_source_and_test_files": [
+    {
+      "path": "src/LeadershipDemo.jsx",
+      "sha256": "dfe455d74156e41b6d6ac73c048ba727a1ba43a8f6ad5f1d7a7100fa3ea3e08e",
+      "mission": "Refresh a one-time launcher CSRF after browser restoration or a failed exchange while preserving the 30-minute launcher capability."
+    },
+    {
+      "path": "src/recruitingGuV1/RecruitingGuV1App.jsx",
+      "sha256": "8d253dcf40d9534ffe93ee509c927b31cd6b3e681236e5806458a1e96abe6536",
+      "mission": "Add demo-only subject reset and activate the existing container-responsive Business Twin rules inside Consulting."
+    },
+    {
+      "path": "src/recruitingGuV1/recruitingGuV1.css",
+      "sha256": "43e22ba75d77f93b0006874467e76466926e3ba3686eb04cfd5a26bc79270100",
+      "mission": "Style the bounded Reset Demo control."
+    },
+    {
+      "path": "test/leadershipDemo.launcher.test.js",
+      "sha256": "6082424b271db8e409c976c53eddc95ed07fbc22594e9ac73366de9980768eb5",
+      "mission": "Prove fresh CSRF rotation under one valid launcher capability and lock the customer-facing repair seams."
+    },
+    {
+      "path": "test/recruitingGuV1.experiment2.test.js",
+      "sha256": "cdc7a0ef289dc08277079abcda41be46e473c853af6435d8c27c910e9e8298cd",
+      "mission": "Prove synthetic and Patricia resets are subject-scoped and return zero-mutation receipts."
+    }
+  ],
+  "excluded": [
+    "Production deployment or domain promotion",
+    "Subscription runtime changes",
+    "provider, Redis, email, Stripe, billing, fulfillment, customer, or canonical mutations",
+    "generated benchmark output and local Vite caches",
+    "temporary local QA configuration"
+  ]
+}

@@ -64,6 +64,24 @@ test('launcher entry is exact, same-origin, rate-limit ready, and protected by o
   assert.equal(LEADERSHIP_DEMO_AUTHORITY.launcher_authenticates_real_products, false);
 });
 
+test('one valid launcher capability can return from a product and consume a fresh CSRF without reauthentication', async () => {
+  const redis = new FakeRedis();
+  const req = request();
+  const capability = await issueLeadershipLauncherCapability({ redis, req });
+  const cookie = cookiePair(capability.cookie);
+  const returnedRequest = request({ cookie });
+  const authenticated = await authenticateLeadershipLauncher({ redis, req: returnedRequest });
+  assert.equal(authenticated.ok, true);
+
+  const first = await issueLeadershipLauncherCsrf({ redis, capabilityHash: authenticated.capability_hash });
+  assert.equal(await consumeLeadershipLauncherCsrf({ redis, capabilityHash: authenticated.capability_hash, proof: first }), true);
+
+  const second = await issueLeadershipLauncherCsrf({ redis, capabilityHash: authenticated.capability_hash });
+  assert.notEqual(second, first);
+  assert.equal(await consumeLeadershipLauncherCsrf({ redis, capabilityHash: authenticated.capability_hash, proof: second }), true);
+  assert.equal((await authenticateLeadershipLauncher({ redis, req: returnedRequest })).ok, true);
+});
+
 test('opaque launcher is browser-bound, expiring, and exchanges through one-time launch CSRF', async () => {
   const redis = new FakeRedis();
   const now = new Date('2026-08-26T16:00:00.000Z');
@@ -160,6 +178,11 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   assert.doesNotMatch(launcher, /Consulting Tool|Recruiting GU V1|Candidate intelligence/u);
   assert.match(consultingDemoApp, /<small>Consulting Demonstration<\/small>/u);
   assert.match(consultingDemoApp, /DEMONSTRATION SUBJECT/u);
+  assert.match(consultingDemoApp, /data-demo-only-control="true"/u);
+  assert.match(consultingDemoApp, />Reset Demo<\/button>/u);
+  assert.match(consultingDemoApp, /RESET_SYNTHETIC_DEMO/u);
+  assert.match(consultingDemoApp, /new-ba-production-experience/u);
+  assert.match(launcher, /addEventListener\('pageshow'/u);
   assert.match(consultingDemoApp, /YOU is BOS-only; YOUR BUSINESS is BOS \+ BA \/ Business Twin/u);
   assert.doesNotMatch(consultingDemoApp, /Consulting Tool|Recruiting GU V1|RECRUITING \/ BUSINESS CONSULTATION|through Recruiting|READY INVITEES/u);
   assert.doesNotMatch(portal, /darrendemo|leadershipDemoAccess/u);

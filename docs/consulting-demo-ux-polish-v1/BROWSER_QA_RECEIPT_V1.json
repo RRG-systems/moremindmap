@@ -1,0 +1,80 @@
+{
+  "schema_version": "consulting-demo-ux-polish-browser-qa-receipt-v1",
+  "production_control": {
+    "deployment": "dpl_4hY8LR9sbxXuHwZ8ph4yCxz23seC",
+    "patricia_read_only_artifacts": "PASS",
+    "patricia_bos": "rendered",
+    "patricia_business_twin": "rendered",
+    "patricia_futures": "rendered",
+    "observed_selected_future_header_width_px": 203.359,
+    "observed_selected_future_title_width_px": 0,
+    "classification": "The title collapses inside the Consulting embed even though the text remains present."
+  },
+  "candidate": {
+    "url": "http://127.0.0.1:5204",
+    "data": "fully synthetic local runtime plus Founder-authorized read-only Patricia Production control",
+    "provider_egress": false,
+    "network_customer_writes": false,
+    "product_switching": {
+      "sequence": [
+        "launcher",
+        "Consulting Demonstration",
+        "launcher without reauthentication",
+        "Subscription Model Demo route",
+        "launcher without reauthentication",
+        "Consulting Demonstration"
+      ],
+      "result": "PASS",
+      "security_note": "The durable launcher capability is unchanged. Every product exchange still requires a newly issued, single-use same-origin CSRF."
+    },
+    "reset_demo": {
+      "visible_to_demo": true,
+      "mounted_after_subject_selectors": true,
+      "returns_home": true,
+      "clears_selected_subject": true,
+      "synthetic_subject_isolation": "PASS",
+      "patricia_subject_isolation": "PASS by deterministic runtime test and read-only authority boundary",
+      "external_mutation": false,
+      "canonical_mutation": false,
+      "subscription_state_mutation": false
+    },
+    "five_futures_layout": [
+      {
+        "viewport": "desktop",
+        "viewport_css_px": "1440x1000",
+        "selected_future_header_width_px": 203.359,
+        "title_width_px": 114.47,
+        "overlap": false,
+        "page_horizontal_overflow": false
+      },
+      {
+        "viewport": "iPad landscape",
+        "viewport_css_px": "1024x768",
+        "title_width_px": 254,
+        "overlap": false,
+        "page_horizontal_overflow": false
+      },
+      {
+        "viewport": "iPad portrait",
+        "viewport_css_px": "768x1024",
+        "title_width_px": 322,
+        "overlap": false,
+        "page_horizontal_overflow": false
+      },
+      {
+        "viewport": "narrow split",
+        "viewport_css_px": "600x768",
+        "title_width_px": 164,
+        "overlap": false,
+        "page_horizontal_overflow": false
+      }
+    ],
+    "console_errors": 0,
+    "page_errors": 0,
+    "notes": [
+      "The local browser used a sealed synthetic no-egress API adapter outside the repository.",
+      "The local Subscription destination intentionally retained its existing entitlement gate because no Preview or Production bindings were authorized. Existing launcher-cookie issuance and Subscription parity are protected by unchanged implementation and focused tests.",
+      "The Business Twin side rail remains intentionally horizontally scrollable at portrait/narrow widths; the document and selected Future card do not overflow."
+    ]
+  }
+}

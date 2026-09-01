@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 
 const products = [
@@ -30,26 +30,37 @@ export default function LeadershipDemo() {
   const [busyProduct, setBusyProduct] = useState('')
   const [error, setError] = useState('')
 
-  useEffect(() => {
-    let active = true
-    fetch('/api/internal/leadership-demo-entry?view=launcher', { credentials: 'same-origin', cache: 'no-store' })
-      .then(async (response) => ({ response, payload: await response.json().catch(() => null) }))
-      .then(({ response, payload }) => {
-        if (!active) return
-        if (!response.ok || payload?.ok !== true || !payload.csrf_token || payload.choices?.length !== 2) {
-          setStatus('locked')
-          return
-        }
-        setCsrfToken(payload.csrf_token)
-        setStatus('ready')
-      })
-      .catch(() => { if (active) setStatus('locked') })
-    return () => { active = false }
+  const hydrateLauncher = useCallback(async () => {
+    setStatus('loading')
+    setCsrfToken('')
+    try {
+      const response = await fetch('/api/internal/leadership-demo-entry?view=launcher', { credentials: 'same-origin', cache: 'no-store' })
+      const payload = await response.json().catch(() => null)
+      if (!response.ok || payload?.ok !== true || !payload.csrf_token || payload.choices?.length !== 2) {
+        setStatus('locked')
+        return
+      }
+      setCsrfToken(payload.csrf_token)
+      setStatus('ready')
+    } catch {
+      setStatus('locked')
+    }
   }, [])
+
+  useEffect(() => {
+    hydrateLauncher()
+    const restoreAfterProduct = (event) => {
+      if (event.persisted) hydrateLauncher()
+    }
+    window.addEventListener('pageshow', restoreAfterProduct)
+    return () => window.removeEventListener('pageshow', restoreAfterProduct)
+  }, [hydrateLauncher])
 
   async function launch(product) {
     if (!csrfToken || busyProduct) return
+    const launchToken = csrfToken
     setBusyProduct(product.id)
+    setCsrfToken('')
     setError('')
     try {
       const response = await fetch('/api/internal/leadership-demo-entry', {
@@ -58,7 +69,7 @@ export default function LeadershipDemo() {
         cache: 'no-store',
         headers: {
           'content-type': 'application/json',
-          'x-leadership-demo-launch-csrf': csrfToken,
+          'x-leadership-demo-launch-csrf': launchToken,
         },
         body: JSON.stringify({ action: product.action }),
       })
@@ -68,8 +79,8 @@ export default function LeadershipDemo() {
       }
       window.location.assign(payload.redirect_to)
     } catch {
-      setError('That demo could not be opened. Return to the Leadership Portal and start a fresh demo session.')
-      setCsrfToken('')
+      setError('That demo could not be opened. Please try again.')
+      await hydrateLauncher()
     } finally {
       setBusyProduct('')
     }

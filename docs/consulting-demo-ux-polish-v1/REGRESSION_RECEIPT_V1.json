@@ -1,0 +1,35 @@
+{
+  "schema_version": "consulting-demo-ux-polish-regression-receipt-v1",
+  "focused": {
+    "command_scope": "Leadership launcher, Consulting, Five Futures responsive, Subscription Track 1, Recruiting shared infrastructure, BOS, BA and Business Twin protections",
+    "tests": 18,
+    "passed": 18,
+    "failed": 0
+  },
+  "protected": {
+    "tests": 65,
+    "passed": 65,
+    "failed": 0
+  },
+  "repository_node_baseline_comparison": {
+    "candidate": { "tests": 936, "passed": 916, "failed": 20 },
+    "unchanged_parent": { "tests": 933, "passed": 913, "failed": 20 },
+    "assessment": "The three added tests pass. The same 20 pre-existing Coach Connect private-runtime failures remain outside the changed-file allowlist; no new repository-wide failure was introduced."
+  },
+  "eslint": {
+    "scope": "all changed JavaScript and JSX source/test files",
+    "result": "PASS"
+  },
+  "build": {
+    "command": "npm run build -- --configLoader runner",
+    "result": "PASS",
+    "bundle": "dist/assets/index-IHyR8T45.js",
+    "css": "dist/assets/index-DMkhEJSK.css",
+    "note": "The runner config loader avoids an environment-only Vite temp-file permission issue caused by shared symlinked dependencies."
+  },
+  "diff_check": "PASS",
+  "provider_calls": 0,
+  "customer_mutations": 0,
+  "canonical_mutations": 0,
+  "deployments": 0
+}

@@ -11,6 +11,7 @@ import {
   validateRecruitingGuCoachMove,
 } from '../src/lib/recruitingGuV1/experiment2Contract.js';
 import { createPatriciaReadOnlyRedis } from '../api/engine/recruitingGuV1/readOnlyCanonicalRedis.js';
+import { createEmptyRecruitingState, InMemoryRecruitingStore } from '../src/lib/recruitingV1/store.js';
 
 function planFor(payload) {
   const object = payload.governedReality.objects[0];
@@ -148,6 +149,52 @@ test('temporary subject tabs expose no Patricia profile ID and Patricia fails cl
   assert.deepEqual(home.experiment_subjects.map((item) => item.label), ['SYNTHETIC', 'PATRICIA']);
   assert.equal(JSON.stringify(home.experiment_subjects).includes('mm-20260708-dsst020z'), false);
   await assert.rejects(() => runtime.openSubject('PATRICIA'), /PATRICIA_READ_ONLY_REDIS_REQUIRED/u);
+});
+
+test('demo reset is subject-scoped, returns a no-mutation receipt, and restores a fresh subject baseline', async () => {
+  const runtime = createRecruitingGuV1DemoRuntime({ frontierTransport: transportFactory() });
+  const opened = await runtime.openSubject('SYNTHETIC');
+  const reset = await runtime.reset('SYNTHETIC');
+  assert.deepEqual(reset, {
+    reset: true,
+    subject: 'SYNTHETIC',
+    external_mutation: false,
+    canonical_mutation: false,
+  });
+  await assert.rejects(() => runtime.read(opened.session.session_id), /SESSION_NOT_FOUND/u);
+  const fresh = await runtime.openSubject('SYNTHETIC');
+  assert.notEqual(fresh.session.session_id, opened.session.session_id);
+  assert.equal(fresh.session.current_room, 'HOME');
+  assert.equal(fresh.session.revision, 1);
+});
+
+test('Patricia demo reset deletes only Patricia session state and cannot touch canonical authority', async () => {
+  const state = createEmptyRecruitingState();
+  state.shared_business_sessions = {
+    session_patricia_demo: {
+      session_id: 'session_patricia_demo',
+      relationship_id: 'rel-experiment-2-darren-patricia-read-only',
+      status: 'ACTIVE',
+    },
+    session_synthetic_demo: {
+      session_id: 'session_synthetic_demo',
+      relationship_id: 'rel-synthetic-darren-jordan-v2',
+      status: 'ACTIVE',
+    },
+  };
+  const store = new InMemoryRecruitingStore(state);
+  const runtime = createRecruitingGuV1DemoRuntime({ store, frontierTransport: transportFactory() });
+
+  const receipt = await runtime.reset('PATRICIA');
+  assert.deepEqual(receipt, {
+    reset: true,
+    subject: 'PATRICIA',
+    external_mutation: false,
+    canonical_mutation: false,
+  });
+  const after = await store.read();
+  assert.equal(after.shared_business_sessions.session_patricia_demo, undefined);
+  assert.equal(after.shared_business_sessions.session_synthetic_demo.relationship_id, 'rel-synthetic-darren-jordan-v2');
 });
 
 test('Patricia Redis projection permits only profile-scoped reads and forwards zero writes', async () => {

@@ -6,6 +6,7 @@ import RecruitingV2Renderer from '../recruitingV2/RecruitingV2Renderer.jsx';
 import { fetchApprovalPreview, fetchGuHome, fetchGuSession, mutateGu, decideApproval } from '../lib/recruitingGuV1/client.js';
 import { visibleConversationForRoom } from '../lib/recruitingGuV1/session.js';
 import '../recruitingV2/recruitingV2.css';
+import '../components/baProductionReadinessV1/newBaProductionCanary.css';
 import './recruitingGuV1.css';
 
 const ROOMS = ['HOME', 'YOU', 'YOUR_BUSINESS', 'PLAN'];
@@ -34,11 +35,13 @@ function AppHeader({ room, manager, synthetic, onRoom }) {
   </header>;
 }
 
-function SubjectTabs({ subjects, activeSubject, busy, onSubject }) {
+function SubjectTabs({ subjects, activeSubject, busy, onSubject, onReset }) {
   if (!subjects?.length) return null;
   return <nav className="gu-subject-tabs" aria-label="Demonstration subjects">
     <span>DEMONSTRATION SUBJECT</span>
     {subjects.map((subject) => <button type="button" key={subject.id} className={activeSubject === subject.id ? 'active' : ''} disabled={busy} onClick={() => onSubject(subject.id)}>{subject.label}</button>)}
+    {/* DARRENDEMO ONLY: never mount this reset control in a live Consulting customer product. */}
+    <button type="button" className="gu-subject-tabs__reset" data-demo-only-control="true" disabled={busy || !activeSubject} onClick={onReset}>Reset Demo</button>
     <small>Synthetic + Founder-authorized read-only</small>
   </nav>;
 }
@@ -139,7 +142,7 @@ function AuthoredRoom({ room, surfaces, projection, showProjection, projectionPr
   return <div className={`gu-authored gu-authored--${room === 'YOU' ? 'bos' : 'ba'}`}>
     <div className="gu-authored__canvas" aria-hidden={showProjection ? 'true' : undefined}>{room === 'YOU'
       ? <NewBosExperience artifactOverride={surfaces.bos} customerMode runtimeLabel="Complete governed BOS · consultation read" />
-      : surfaces.ba ? <BusinessTwinApp viewModel={surfaces.ba} /> : <div className="gu-missing-ba"><p className="gu-kicker">BUSINESS TWIN</p><h1>The complete BA is not ready yet.</h1><p>MORE will not invent or flatten a business assessment that does not exist.</p></div>}</div>
+      : surfaces.ba ? <div className="new-ba-production-experience"><BusinessTwinApp viewModel={surfaces.ba} /></div> : <div className="gu-missing-ba"><p className="gu-kicker">BUSINESS TWIN</p><h1>The complete BA is not ready yet.</h1><p>MORE will not invent or flatten a business assessment that does not exist.</p></div>}</div>
     {showProjection && <Projection projection={projection} {...projectionProps} />}
   </div>;
 }
@@ -274,6 +277,25 @@ export default function RecruitingGuV1App() {
     } catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
   }
+  async function resetSelectedSubject() {
+    if (!activeSubject || busy) return;
+    const subject = activeSubject;
+    setBusy(true); setError('');
+    try {
+      const receipt = await mutateGu('RESET_SYNTHETIC_DEMO', { subject });
+      if (receipt.reset !== true || receipt.subject !== subject || receipt.external_mutation !== false || receipt.canonical_mutation !== false) throw new Error('DEMO_RESET_RECEIPT_INVALID');
+      window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY);
+      setBundle(null);
+      setActiveSubject(null);
+      setProjectionVisible(false);
+      setScenarioValues({});
+      setEvidence(null);
+      setHome((current) => ({ ...current, active_subject: null, active_session_id: null }));
+      const refreshed = await fetchGuHome();
+      setHome(refreshed);
+    } catch (failure) { setError(failure.message); }
+    finally { setBusy(false); }
+  }
   async function navigateRoom(nextRoom) {
     setError('');
     if (nextRoom === 'HOME') { window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY); setBundle(null); return; }
@@ -349,7 +371,7 @@ export default function RecruitingGuV1App() {
   if (!home) return <main className="gu-loading"><MoreMark /><h1>{error || 'Opening Consulting Demonstration…'}</h1></main>;
   return <div className="recruiting-gu-v1" data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
     <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} />
-    <SubjectTabs subjects={home.experiment_subjects} activeSubject={activeSubject} busy={busy} onSubject={openSubject} />
+    <SubjectTabs subjects={home.experiment_subjects} activeSubject={activeSubject} busy={busy} onSubject={openSubject} onReset={resetSelectedSubject} />
     {room === 'HOME' ? <Home data={home} selected={session?.subject_binding ? { name: session.subject_binding.name } : null} onContinue={() => navigateRoom('YOU')} onOpenCandidate={openCandidate} onOpenRelationship={openRelationship} onDemo={openDemo} onMoreId={(profileId) => mutateGu('REQUEST_MORE_ID', { profile_id: profileId })} /> : <>
       <div className="gu-room-layout">
         {room === 'YOU' || room === 'YOUR_BUSINESS' ? <AuthoredRoom room={room} surfaces={bundle.authored_surfaces} projection={projection} showProjection={showProjection} projectionProps={projectionProps} /> : <PlanRoom session={session} busy={busy} onDecision={planDecision} onSecondOffer={secondOffer} />}

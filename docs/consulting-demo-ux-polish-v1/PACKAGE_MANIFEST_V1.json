@@ -1,0 +1,26 @@
+{
+  "schema_version": "consulting-demo-ux-polish-package-manifest-v1",
+  "manifest_policy": "SHA-256 inventory excludes this manifest to avoid a self-referential hash.",
+  "files": [
+    { "path": "00-production-before-patricia-futures-ipad-landscape.png", "sha256": "7d4dd07e18d49a8753ef3e8ea1e32cf05c437507cdbfa2e16d1f1c5c71ab52b8" },
+    { "path": "00-production-before-patricia-futures-laptop.png", "sha256": "1bcb0899a9f436ba96d9dc29b422f7d65e2b1101ad320bc76d2964f684d742e7" },
+    { "path": "01-consulting-home-desktop.png", "sha256": "f2d1cbdc07fb7b85bb16530ba8979403d3e5ca3aa0a7f9ea058c4e0416fc44e1" },
+    { "path": "02-futures-desktop.png", "sha256": "f1dc10a8f1714082f8b7f27c1c1c2ebf869589d277b5cc9f5288801a7b7392d5" },
+    { "path": "02-futures-ipad-landscape.png", "sha256": "f72055ba5c5e04cba421c2a9ad66ed6f4e459f4af61cebfb90a409cdafa313f3" },
+    { "path": "02-futures-ipad-portrait.png", "sha256": "3629541535fbe72c8f2502717334d9e3d9be581f1d37da18f90b56b63791859c" },
+    { "path": "02-futures-narrow-split.png", "sha256": "f845ddb98178a83229af61ff0e038fe07fa92bdcfb883c18244d3dfb58e90614" },
+    { "path": "03-futures-ipad-landscape-card.png", "sha256": "6eb405b14f3bf052f5b6bf494114b5e9c1f92c01d5f006665c75f12f72bca766" },
+    { "path": "04-reset-demo-home-ipad.png", "sha256": "fb1b2c0b12cc56ec34b254319e05152f336a6e8d65d2b017c146f06e20e8749b" },
+    { "path": "05-launcher-return-ipad.png", "sha256": "687c42f7300f8f89aca743f7657eb410563ea91ad3da2ca52c1b964c1d9689ea" },
+    { "path": "06-repaired-futures-desktop.png", "sha256": "a657452e511defaa13a86636c2951010a9cbef0664e27adc13a531445b190a6a" },
+    { "path": "06-repaired-futures-ipad-landscape.png", "sha256": "65e41e80dd6cf5d17a826c52eaf4739c81f9d5f2a8b4c248689b28aa7a7986d4" },
+    { "path": "06-repaired-futures-ipad-portrait.png", "sha256": "76587cf97e558ed3014aef27cc611336920e074c809b75bf357ca467d9cf6f92" },
+    { "path": "06-repaired-futures-narrow-split.png", "sha256": "902884980757170a461ada659818df73d644c018f9986eb663b968b4b5e18671" },
+    { "path": "07-reset-demo-home-ipad-landscape.png", "sha256": "2e166ebd5e0260857c8abc28d836ecd585aaa12e56d46897943cf83ee1992414" },
+    { "path": "BROWSER_QA_RECEIPT_V1.json", "sha256": "bc691fc84c460875bed28e0589607bf5f8a626e88f85d864ed391d532f4b0077" },
+    { "path": "FINAL_REVIEW_AND_HANDOFF_V1.md", "sha256": "c016aa6359c353dcdb4a85a95e84ac6fb630468ce54f8bafdc2fa0e621c6543c" },
+    { "path": "REGRESSION_RECEIPT_V1.json", "sha256": "8d64a771dde4befd6cc4fcae8b32ab29ed4c8593c38cf820edd0e1e4d28ac882" },
+    { "path": "SOURCE_CHANGE_MANIFEST_V1.json", "sha256": "431cc9a0e7280eca2d7200d3f4e637ebb5ca2d17efd1cc06a10884d4212fd3e0" }
+  ],
+  "file_count_excluding_manifest": 19
+}
