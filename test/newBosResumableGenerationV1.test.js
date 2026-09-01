@@ -415,4 +415,9 @@ test('operator inspection requires the existing exact canary-token authority eve
     profileId: 'MM-SYNTHETIC-INSPECTOR',
     suppliedToken: 'wrong-token',
   }), /new_bos_operator_inspection_access_denied/u);
+  assert.equal(authorizeNewBosOperatorInspection({
+    config,
+    profileId: 'MM-SYNTHETIC-INSPECTOR',
+    platformProtected: true,
+  }), 'MM-SYNTHETIC-INSPECTOR');
 });

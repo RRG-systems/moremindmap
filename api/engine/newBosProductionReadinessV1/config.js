@@ -49,6 +49,7 @@ export function readNewBosProductionConfig(env = globalThis.process?.env || {}) 
     namespace,
     providerModel: String(env.NEW_BOS_PROVIDER_MODEL || 'gpt-5.6-sol').trim(),
     accessToken: String(env.NEW_BOS_CANARY_ACCESS_TOKEN || ''),
+    deploymentHost: String(env.VERCEL_URL || '').trim().toLowerCase(),
   });
 }
 
@@ -68,10 +69,11 @@ export function authorizeNewBosRead({ config, profileId, suppliedToken = '' }) {
   return normalized;
 }
 
-export function authorizeNewBosOperatorInspection({ config, profileId, suppliedToken = '' }) {
+export function authorizeNewBosOperatorInspection({ config, profileId, suppliedToken = '', platformProtected = false }) {
   const normalized = String(profileId || '').trim().toUpperCase();
   if (!PROFILE_ID_PATTERN.test(normalized)) throw new Error('new_bos_profile_id_invalid');
   if (!config?.staged) throw new Error('new_bos_runtime_default_off');
+  if (platformProtected === true) return normalized;
   const expected = Buffer.from(config.accessToken || '');
   const supplied = Buffer.from(String(suppliedToken || ''));
   if (!expected.length || expected.length !== supplied.length || !crypto.timingSafeEqual(expected, supplied)) {

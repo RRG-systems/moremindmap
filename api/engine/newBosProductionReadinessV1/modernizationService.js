@@ -119,8 +119,8 @@ export function createNewBosModernizationService({
 
   return Object.freeze({
     diagnostics,
-    async inspectResumable({ profileId, suppliedToken = '' }) {
-      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken });
+    async inspectResumable({ profileId, suppliedToken = '', platformProtected = false }) {
+      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken, platformProtected });
       const desired = await desiredState(normalized);
       const current = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
       return inspectNewBosResumableRuntimeState({

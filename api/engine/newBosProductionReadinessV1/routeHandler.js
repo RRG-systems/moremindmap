@@ -54,6 +54,12 @@ function customerSafeReviewRequired() {
   });
 }
 
+function platformProtectedCandidateRequest(request, config) {
+  const deploymentHost = String(config?.deploymentHost || '').trim().toLowerCase();
+  const requestHost = String(request.headers?.host || '').trim().toLowerCase();
+  return deploymentHost.endsWith('.vercel.app') && requestHost === deploymentHost;
+}
+
 export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
   if (typeof serviceFactory !== 'function') throw new Error('new_bos_route_service_factory_required');
   return async function newBosProductionRoute(request, response) {
@@ -74,6 +80,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       const result = await service[operation]({
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
+        platformProtected: operation === 'inspectResumable' && platformProtectedCandidateRequest(request, config),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));
       if (result?.review_required) return response.status(409).json(customerSafeReviewRequired());

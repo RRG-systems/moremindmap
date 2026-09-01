@@ -317,6 +317,45 @@ test('BOS and BA 202 responses expose only customer-safe processing state', asyn
   assert.deepEqual(Object.keys(baResponse.body).sort(), ['message', 'pending', 'retry_after_ms', 'status']);
 });
 
+test('resumable inspector is platform-protected only on the exact Vercel deployment host', async () => {
+  const response = () => ({
+    statusCode: null,
+    body: null,
+    setHeader() {},
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.body = body; return this; },
+  });
+  const calls = [];
+  const handler = createNewBosProductionRouteHandler({
+    config: {
+      staged: true,
+      canaryEnabled: false,
+      customerActive: true,
+      deploymentHost: 'candidate.example.vercel.app',
+    },
+    serviceFactory: async () => ({
+      inspectResumable: async (input) => { calls.push(input); return { status: 'ok' }; },
+    }),
+  });
+  const candidate = response();
+  await handler({
+    method: 'GET',
+    query: { id: PROFILE, diagnostic: 'resumable-state' },
+    headers: { host: 'candidate.example.vercel.app' },
+  }, candidate);
+  assert.equal(candidate.statusCode, 200);
+  assert.equal(calls[0].platformProtected, true);
+
+  const publicDomain = response();
+  await handler({
+    method: 'GET',
+    query: { id: PROFILE, diagnostic: 'resumable-state' },
+    headers: { host: 'moremindmap.com' },
+  }, publicDomain);
+  assert.equal(publicDomain.statusCode, 200);
+  assert.equal(calls[1].platformProtected, false);
+});
+
 test('machinery failures return generic customer codes while governed truth failures stay explicit', async () => {
   const makeResponse = () => ({
     statusCode: null, body: null, setHeader() {},
