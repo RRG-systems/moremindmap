@@ -15,7 +15,19 @@ import {
 import { createHashBoundLibraryRetriever } from './libraryRetriever.js';
 import { deriveProviderIdentityTokens, inspectProviderPrivacy } from './privacyEgress.js';
 import { sha256Stable } from './realizationIdentity.js';
-import { runNewBosResumableSemanticGeneration } from './resumableGenerationOrchestrator.js';
+import {
+  executeNewBosBackgroundResponse,
+  retireStaleNewBosBackgroundResponse,
+} from './backgroundResponsesTransport.js';
+import { createNewBosSemanticStageProvider } from './reasoningProvider.js';
+import {
+  buildNewBosSemanticUnitPlan,
+  runNewBosResumableSemanticGeneration,
+} from './resumableGenerationOrchestrator.js';
+import {
+  NEW_BOS_SEMANTIC_STAGES,
+  validateNewBosSemanticStageFragment,
+} from './resumableSemanticContract.js';
 
 function addUsage(left, right) {
   return Object.freeze({
@@ -62,7 +74,7 @@ export function createProductionNewBosGenerator({
   const surfaceClient = new OpenAI({ apiKey, maxRetries: 0, timeout: surfaceTimeoutMs });
   const libraryRetriever = createHashBoundLibraryRetriever({ repositoryRoot });
 
-  return async function generate({ rawEvidence, providerModel, realizationIdentity }) {
+  const generate = async function generate({ rawEvidence, providerModel, realizationIdentity }) {
     if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
     if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
     const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
@@ -173,4 +185,191 @@ export function createProductionNewBosGenerator({
       }),
     });
   };
+
+  Object.defineProperty(generate, 'recoverStaleSurfaceRouting', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async ({
+      rawEvidence,
+      providerModel,
+      realizationIdentity,
+      expectedCampaignSha256,
+      expectedUnitIdentitySha256,
+      expectedRequestSha256,
+      expectedProviderResponseIdSha256,
+    } = {}) => {
+      if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+      if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+      const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const acceptedDependencies = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES.slice(0, 3)) {
+        const unitId = `semantic:${stage.id}`;
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: expectedCampaignSha256,
+          unitId,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED'
+          || inspection?.classification?.disposition !== 'REUSE_ACCEPTED') {
+          throw new Error(`new_bos_stale_queue_dependency_not_accepted:${stage.id}`);
+        }
+        const fragment = validateNewBosSemanticStageFragment({
+          stageId: stage.id,
+          fragment: inspection.record.accepted_value,
+        });
+        acceptedDependencies.push(Object.freeze({
+          stage_id: stage.id,
+          fragment,
+          fragment_sha256: inspection.record.accepted_value_sha256,
+        }));
+      }
+      const plan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'surface_routing',
+        acceptedDependencies,
+        privacyTokens,
+      });
+      if (plan.campaign_identity.sha256 !== expectedCampaignSha256
+        || plan.unit_identity_sha256 !== expectedUnitIdentitySha256
+        || plan.request_sha256 !== expectedRequestSha256
+        || plan.unit_id !== 'semantic:surface_routing') {
+        throw new Error('new_bos_stale_queue_recomputed_identity_mismatch');
+      }
+
+      const claimed = await resumableGenerationStore.claimStaleQueuedReplacement({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+        unitIdentitySha256: plan.unit_identity_sha256,
+        requestSha256: plan.request_sha256,
+        expectedProviderResponseIdSha256,
+      });
+      const retirement = await retireStaleNewBosBackgroundResponse({
+        client: reasoningClient,
+        responseId: claimed.responseId,
+      });
+      if (retirement.disposition === 'PRESERVE_COMPLETED') {
+        const provider = createNewBosSemanticStageProvider({
+          model,
+          stageId: 'surface_routing',
+          privacyTokens,
+          transport: async (request) => {
+            if (sha256Stable(request) !== plan.request_sha256) {
+              throw new Error('new_bos_stale_queue_completed_request_drift');
+            }
+            return retirement.provider_response;
+          },
+        });
+        const fragment = await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        await resumableGenerationStore.accept({
+          campaignSha256: expectedCampaignSha256,
+          unitId: plan.unit_id,
+          unitIdentitySha256: plan.unit_identity_sha256,
+          requestSha256: plan.request_sha256,
+          value: fragment,
+        });
+        return Object.freeze({
+          status: 'PROVIDER_COMPLETED_ACCEPTED',
+          replacement_prepared: false,
+          provider_terminal_status: retirement.status,
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity: plan.unit_id,
+        });
+      }
+      if (retirement.disposition !== 'RETIRE_CANCELLED') {
+        return Object.freeze({
+          status: 'PROVIDER_TERMINAL_STOP',
+          replacement_prepared: false,
+          provider_terminal_status: retirement.status,
+          provider_terminal_reason: retirement.terminal_reason,
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity: plan.unit_id,
+        });
+      }
+      const prepared = await resumableGenerationStore.retireStaleQueuedAndPrepareReplacement({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+        unitIdentitySha256: plan.unit_identity_sha256,
+        requestSha256: plan.request_sha256,
+        expectedProviderResponseIdSha256,
+        cancellation: retirement,
+      });
+      const onEvent = async (event) => resumableGenerationStore.observe({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+        unitIdentitySha256: plan.unit_identity_sha256,
+        requestSha256: plan.request_sha256,
+        event,
+      });
+      const provider = createNewBosSemanticStageProvider({
+        model,
+        stageId: 'surface_routing',
+        privacyTokens,
+        transport: async (request) => {
+          if (sha256Stable(request) !== plan.request_sha256) {
+            throw new Error('new_bos_stale_queue_replacement_request_drift');
+          }
+          const result = await executeNewBosBackgroundResponse({
+            client: reasoningClient,
+            scientificRequest: request,
+            maxWaitMs: interactiveWaitMs,
+            onEvent,
+          });
+          return result.response;
+        },
+      });
+      try {
+        const fragment = await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        const accepted = await resumableGenerationStore.accept({
+          campaignSha256: expectedCampaignSha256,
+          unitId: plan.unit_id,
+          unitIdentitySha256: plan.unit_identity_sha256,
+          requestSha256: plan.request_sha256,
+          value: fragment,
+        });
+        return Object.freeze({
+          status: 'SURFACE_ROUTING_REPLACEMENT_ACCEPTED',
+          replacement_prepared: prepared.disposition === 'START_REPLACEMENT',
+          replacement_attempt: prepared.record.attempt,
+          provider_terminal_status: accepted.observation?.status || 'completed',
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity: plan.unit_id,
+          accepted_value_sha256: accepted.accepted_value_sha256,
+        });
+      } catch (error) {
+        if (['background_poll_timeout', 'background_resume_poll_timeout'].includes(error?.code)) {
+          return Object.freeze({
+            status: 'SURFACE_ROUTING_REPLACEMENT_IN_PROGRESS',
+            replacement_prepared: true,
+            replacement_attempt: prepared.record.attempt,
+            provider_terminal_status: 'queued',
+            campaign_sha256: expectedCampaignSha256,
+            unit_identity: plan.unit_id,
+          });
+        }
+        if (/privacy|model_substitution|invalid_json|empty_output|fragment|schema|evidence|authority|truth/u.test(error?.message || '')) {
+          await resumableGenerationStore.rejectSemantic({
+            campaignSha256: expectedCampaignSha256,
+            unitId: plan.unit_id,
+            unitIdentitySha256: plan.unit_identity_sha256,
+            requestSha256: plan.request_sha256,
+            code: error?.message,
+          });
+        }
+        throw error;
+      }
+    },
+  });
+  return Object.freeze(generate);
 }

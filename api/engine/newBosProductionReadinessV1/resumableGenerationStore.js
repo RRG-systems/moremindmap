@@ -13,6 +13,8 @@ const TRANSIENT_ERROR_CODES = new Set([
   'timeout',
   'rate_limit_exhausted',
 ]);
+const STALE_ACTIVE_MINIMUM_AGE_MS = 30 * 60 * 1000;
+const STALE_REPLACEMENT_UNIT = 'semantic:surface_routing';
 
 function assertNamespace(namespace) {
   if (!String(namespace || '').startsWith('preview:new-bos:') && !String(namespace || '').startsWith('nonprod:new-bos:')) {
@@ -45,8 +47,25 @@ function replacementClaimKey(key, nextAttempt) {
     : `${key}:replacement-claim-v1:attempt:${nextAttempt}`;
 }
 
+function staleActiveClaimKey(key) {
+  return `${key}:stale-active-replacement-claim-v1:attempt:1`;
+}
+
+function staleActiveArchiveKey(key) {
+  return `${key}:stale-active-archive-v1:attempt:1`;
+}
+
 function parse(raw) {
   return raw ? JSON.parse(raw) : null;
+}
+
+function stableResponseIdSha256(responseId) {
+  return crypto.createHash('sha256').update(String(responseId || '')).digest('hex');
+}
+
+function timestampMs(value) {
+  const parsed = Date.parse(String(value || ''));
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 function sanitizeObservation(event) {
@@ -232,10 +251,160 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
 
     prepare,
 
+    async claimStaleQueuedReplacement({
+      campaignSha256,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      expectedProviderResponseIdSha256,
+      now = new Date(),
+    }) {
+      if (unitId !== STALE_REPLACEMENT_UNIT) throw new Error('new_bos_stale_queue_replacement_unit_not_authorized');
+      assertIdentity(unitIdentitySha256, 'unit_identity');
+      assertIdentity(requestSha256, 'request_hash');
+      assertIdentity(expectedProviderResponseIdSha256, 'provider_response_identity');
+      const key = rootKey(namespace, campaignSha256, unitId);
+      const existing = parse(await redis.get(key));
+      if (!existing) throw new Error('new_bos_stale_queue_checkpoint_missing');
+      if (existing.state === 'ACCEPTED') throw new Error('new_bos_stale_queue_checkpoint_already_accepted');
+      if (existing.attempt !== 1) throw new Error('new_bos_stale_queue_replacement_attempt_not_authorized');
+      if (existing.unit_identity_sha256 !== unitIdentitySha256) throw new Error('new_bos_resumable_store_unit_identity_mismatch');
+      if (existing.request_sha256 !== requestSha256) throw new Error('new_bos_resumable_store_request_hash_mismatch');
+      if (!ACTIVE.has(existing.observation?.status)) throw new Error('new_bos_stale_queue_checkpoint_not_active');
+      const responseId = existing.observation?.provider_response_id;
+      if (!responseId || stableResponseIdSha256(responseId) !== expectedProviderResponseIdSha256) {
+        throw new Error('new_bos_stale_queue_provider_response_identity_mismatch');
+      }
+      const createdAtMs = timestampMs(existing.created_at);
+      const nowMs = now instanceof Date ? now.getTime() : timestampMs(now);
+      if (createdAtMs === null || !Number.isFinite(nowMs) || nowMs - createdAtMs < STALE_ACTIVE_MINIMUM_AGE_MS) {
+        throw new Error('new_bos_stale_queue_minimum_age_not_met');
+      }
+      const claim = Object.freeze({
+        version: 'new_bos_resumable_stale_active_replacement_claim_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: unitId,
+        unit_identity_sha256: unitIdentitySha256,
+        request_sha256: requestSha256,
+        prior_checkpoint_sha256: sha256Stable(existing),
+        prior_attempt: 1,
+        next_attempt: 2,
+        provider_response_id_sha256: expectedProviderResponseIdSha256,
+        replacement_reason: 'stale_queued_external_response',
+        claimed_at: new Date(nowMs).toISOString(),
+      });
+      const serialized = JSON.stringify(claim);
+      const claimKey = staleActiveClaimKey(key);
+      const existingClaim = parse(await redis.get(claimKey));
+      if (existingClaim) {
+        if (existingClaim.campaign_sha256 !== campaignSha256
+          || existingClaim.unit_id !== unitId
+          || existingClaim.unit_identity_sha256 !== unitIdentitySha256
+          || existingClaim.request_sha256 !== requestSha256
+          || existingClaim.provider_response_id_sha256 !== expectedProviderResponseIdSha256
+          || existingClaim.prior_checkpoint_sha256 !== sha256Stable(existing)) {
+          throw new Error('new_bos_stale_queue_replacement_claim_conflict');
+        }
+        return Object.freeze({ claim: existingClaim, responseId, record: existing });
+      }
+      const claimed = await redis.set(claimKey, serialized, 'NX');
+      if (claimed !== 'OK') {
+        const racedClaim = parse(await redis.get(claimKey));
+        if (racedClaim?.campaign_sha256 !== campaignSha256
+          || racedClaim?.unit_id !== unitId
+          || racedClaim?.unit_identity_sha256 !== unitIdentitySha256
+          || racedClaim?.request_sha256 !== requestSha256
+          || racedClaim?.provider_response_id_sha256 !== expectedProviderResponseIdSha256
+          || racedClaim?.prior_checkpoint_sha256 !== sha256Stable(existing)) {
+          throw new Error('new_bos_stale_queue_replacement_claim_conflict');
+        }
+        return Object.freeze({ claim: racedClaim, responseId, record: existing });
+      }
+      return Object.freeze({ claim, responseId, record: existing });
+    },
+
+    async retireStaleQueuedAndPrepareReplacement({
+      campaignSha256,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      expectedProviderResponseIdSha256,
+      cancellation,
+    }) {
+      if (unitId !== STALE_REPLACEMENT_UNIT) throw new Error('new_bos_stale_queue_replacement_unit_not_authorized');
+      const key = rootKey(namespace, campaignSha256, unitId);
+      const claimKey = staleActiveClaimKey(key);
+      const claim = parse(await redis.get(claimKey));
+      const existing = parse(await redis.get(key));
+      if (!claim) throw new Error('new_bos_stale_queue_replacement_claim_missing');
+      if (!existing) throw new Error('new_bos_stale_queue_checkpoint_missing');
+      if (existing.state === 'ACCEPTED') throw new Error('new_bos_stale_queue_checkpoint_already_accepted');
+      if (claim.campaign_sha256 !== campaignSha256
+        || claim.unit_id !== unitId
+        || claim.unit_identity_sha256 !== unitIdentitySha256
+        || claim.request_sha256 !== requestSha256
+        || claim.provider_response_id_sha256 !== expectedProviderResponseIdSha256
+        || claim.prior_checkpoint_sha256 !== sha256Stable(existing)) {
+        throw new Error('new_bos_stale_queue_replacement_claim_identity_mismatch');
+      }
+      if (existing.attempt !== 1 || !ACTIVE.has(existing.observation?.status)) {
+        throw new Error('new_bos_stale_queue_checkpoint_changed_after_claim');
+      }
+      if (stableResponseIdSha256(existing.observation?.provider_response_id) !== expectedProviderResponseIdSha256) {
+        throw new Error('new_bos_stale_queue_provider_response_identity_mismatch');
+      }
+      if (cancellation?.status !== 'cancelled'
+        || stableResponseIdSha256(cancellation?.provider_response_id) !== expectedProviderResponseIdSha256) {
+        throw new Error('new_bos_stale_queue_cancellation_not_proven');
+      }
+      const archived = Object.freeze({
+        version: 'new_bos_resumable_stale_active_archive_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: unitId,
+        unit_identity_sha256: unitIdentitySha256,
+        request_sha256: requestSha256,
+        state: existing.state,
+        attempt: existing.attempt,
+        observation: existing.observation,
+        archived_at: claim.claimed_at,
+        provider_terminal_status: 'cancelled',
+        provider_response_id_sha256: expectedProviderResponseIdSha256,
+        replacement_authorized: true,
+        replacement_reason: 'stale_queued_external_response',
+      });
+      const archiveSerialized = JSON.stringify(archived);
+      const archiveKey = staleActiveArchiveKey(key);
+      const archiveResult = await redis.set(archiveKey, archiveSerialized, 'NX');
+      if (archiveResult !== 'OK' && await redis.get(archiveKey) !== archiveSerialized) {
+        throw new Error('new_bos_stale_queue_archive_conflict');
+      }
+      const intent = Object.freeze({
+        version: 'new_bos_resumable_unit_checkpoint_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: unitId,
+        unit_identity_sha256: unitIdentitySha256,
+        request_sha256: requestSha256,
+        prior_attempt: 1,
+        next_attempt: 2,
+        retry_sequence: 'stale_queued_external_response',
+        stale_archive_sha256: sha256Stable(archived),
+        claimed_at: claim.claimed_at,
+        state: 'SUBMISSION_INTENT',
+        attempt: 2,
+        claim_token_sha256: sha256Stable(crypto.randomUUID()),
+        observation: null,
+      });
+      await redis.set(key, JSON.stringify(intent));
+      return Object.freeze({ disposition: 'START_REPLACEMENT', record: intent, archive: archived });
+    },
+
     async observe({ campaignSha256, unitId, unitIdentitySha256, requestSha256, event }) {
       const key = rootKey(namespace, campaignSha256, unitId);
       const existing = parse(await redis.get(key));
       if (!existing) throw new Error('new_bos_resumable_store_observation_without_intent');
+      if (existing.attempt === 1 && await redis.get(staleActiveClaimKey(key))) {
+        throw new Error('new_bos_stale_queue_replacement_claim_active');
+      }
       if (existing.unit_identity_sha256 !== unitIdentitySha256) throw new Error('new_bos_resumable_store_unit_identity_mismatch');
       if (existing.request_sha256 !== requestSha256) throw new Error('new_bos_resumable_store_request_hash_mismatch');
       const observation = sanitizeObservation(event);

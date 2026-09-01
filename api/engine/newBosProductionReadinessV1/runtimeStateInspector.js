@@ -38,6 +38,7 @@ function sanitizeUnitInspection(unitId, inspection) {
     accepted: record?.state === 'ACCEPTED',
     attempt: Number.isInteger(record?.attempt) ? record.attempt : null,
     provider_terminal_status: record?.observation?.status || null,
+    provider_response_id_sha256: record?.observation?.provider_response_id_sha256 || null,
     provider_terminal_reason: record?.observation?.incomplete_details_reason || record?.observation?.error_code || null,
     semantic_rejection_code: record?.semantic_rejection_code || null,
     created_at: record?.created_at || null,

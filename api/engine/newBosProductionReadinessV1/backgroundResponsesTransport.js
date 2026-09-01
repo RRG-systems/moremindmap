@@ -72,6 +72,61 @@ function eventFor(response, eventType, pollCount, transportInspection) {
   });
 }
 
+export async function retireStaleNewBosBackgroundResponse({
+  client,
+  responseId,
+} = {}) {
+  if (typeof client?.responses?.retrieve !== 'function'
+    || typeof client?.responses?.cancel !== 'function') {
+    throw new Error('new_bos_background_retirement_client_invalid');
+  }
+  if (!responseId || typeof responseId !== 'string') {
+    throw new Error('new_bos_background_retirement_response_id_required');
+  }
+
+  const observed = await client.responses.retrieve(responseId);
+  if (observed?.id !== responseId) {
+    throw new Error('new_bos_background_retirement_response_id_changed');
+  }
+  if (observed.status === 'completed') {
+    return Object.freeze({
+      disposition: 'PRESERVE_COMPLETED',
+      provider_response_id: responseId,
+      provider_response: observed,
+      status: observed.status,
+      observed_at: new Date().toISOString(),
+    });
+  }
+  if (observed.status === 'cancelled') {
+    return Object.freeze({
+      disposition: 'RETIRE_CANCELLED',
+      provider_response_id: responseId,
+      status: observed.status,
+      observed_at: new Date().toISOString(),
+    });
+  }
+  if (!ACTIVE_STATUSES.has(observed.status)) {
+    return Object.freeze({
+      disposition: 'STOP_TERMINAL',
+      provider_response_id: responseId,
+      status: observed.status || null,
+      terminal_reason: observed?.incomplete_details?.reason || observed?.error?.code || 'terminal_reason_missing',
+      observed_at: new Date().toISOString(),
+    });
+  }
+
+  const cancelled = await client.responses.cancel(responseId);
+  if (cancelled?.id !== responseId || cancelled?.status !== 'cancelled') {
+    throw new Error('new_bos_background_retirement_cancellation_not_proven');
+  }
+  return Object.freeze({
+    disposition: 'RETIRE_CANCELLED',
+    provider_response_id: responseId,
+    status: cancelled.status,
+    observed_at: new Date().toISOString(),
+  });
+}
+
 export async function executeNewBosBackgroundResponse({
   client,
   scientificRequest,

@@ -132,6 +132,35 @@ export function createNewBosModernizationService({
         checkpointStore: resumableGenerationStore,
       });
     },
+    async replaceStaleSurfaceRouting({
+      profileId,
+      suppliedToken = '',
+      platformProtected = false,
+      expectedCampaignSha256,
+      expectedUnitIdentitySha256,
+      expectedRequestSha256,
+      expectedProviderResponseIdSha256,
+    } = {}) {
+      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken, platformProtected });
+      if (!platformProtected) throw new Error('new_bos_stale_queue_replacement_requires_protected_candidate');
+      if (typeof generator?.recoverStaleSurfaceRouting !== 'function') {
+        throw new Error('new_bos_stale_queue_recovery_operation_unavailable');
+      }
+      const desired = await desiredState(normalized);
+      const current = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
+      if (current.state === 'current' || current.pointer) {
+        throw new Error('new_bos_stale_queue_replacement_realization_already_current');
+      }
+      return generator.recoverStaleSurfaceRouting({
+        rawEvidence: desired.rawEvidence,
+        providerModel: config.providerModel,
+        realizationIdentity: desired.identity,
+        expectedCampaignSha256,
+        expectedUnitIdentitySha256,
+        expectedRequestSha256,
+        expectedProviderResponseIdSha256,
+      });
+    },
     async diagnose({ profileId, suppliedToken = '' }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });

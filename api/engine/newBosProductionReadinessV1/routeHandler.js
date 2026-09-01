@@ -68,10 +68,16 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
     if (!config.staged || (!config.canaryEnabled && !config.customerActive)) {
       return response.status(404).json({ error: 'Not found' });
     }
-    if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed' });
+    const staleSurfaceRoutingReplacement = request.method === 'POST'
+      && request.query?.action === 'replace-stale-surface-routing';
+    if (!['GET', 'POST'].includes(request.method) || (request.method === 'POST' && !staleSurfaceRoutingReplacement)) {
+      return response.status(405).json({ error: 'Method not allowed' });
+    }
     try {
       const service = await serviceFactory();
-      const operation = request.query?.diagnostic === 'resumable-state'
+      const operation = staleSurfaceRoutingReplacement
+        ? 'replaceStaleSurfaceRouting'
+        : request.query?.diagnostic === 'resumable-state'
         ? 'inspectResumable'
         : request.query?.diagnostic === 'state'
           ? 'diagnose'
@@ -80,7 +86,14 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       const result = await service[operation]({
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
-        platformProtected: operation === 'inspectResumable' && platformProtectedCandidateRequest(request, config),
+        platformProtected: ['inspectResumable', 'replaceStaleSurfaceRouting'].includes(operation)
+          && platformProtectedCandidateRequest(request, config),
+        ...(operation === 'replaceStaleSurfaceRouting' ? {
+          expectedCampaignSha256: request.body?.expected_campaign_sha256,
+          expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,
+          expectedRequestSha256: request.body?.expected_request_sha256,
+          expectedProviderResponseIdSha256: request.body?.expected_provider_response_id_sha256,
+        } : {}),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));
       if (result?.review_required) return response.status(409).json(customerSafeReviewRequired());

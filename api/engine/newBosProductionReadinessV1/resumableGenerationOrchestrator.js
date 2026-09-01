@@ -67,24 +67,20 @@ export async function runNewBosResumableSemanticGeneration({
     if (acceptedDependencies.length !== stage.dependencies.length) {
       throw new Error(`new_bos_resumable_stage_dependency_missing:${stage.id}`);
     }
-    const scientificRequest = buildNewBosSemanticStageRequest({
+    const plan = buildNewBosSemanticUnitPlan({
       rawEvidence,
       governedContext,
+      realizationIdentity,
       model,
       stageId: stage.id,
       acceptedDependencies,
       privacyTokens,
     });
-    const requestSha256 = sha256Stable(scientificRequest);
-    const unitIdentitySha256 = sha256Stable({
-      version: 'new_bos_resumable_semantic_unit_v1',
-      campaign_sha256: campaignIdentity.sha256,
-      stage_id: stage.id,
-      stage_schema_sha256: sha256Stable(buildNewBosSemanticStageSchema({ stageId: stage.id, evidenceIds })),
-      dependency_hashes: acceptedDependencies.map(({ stage_id: stageId, fragment_sha256: fragmentSha256 }) => [stageId, fragmentSha256]),
-      scientific_request_sha256: requestSha256,
-    });
-    const unitId = `semantic:${stage.id}`;
+    const {
+      request_sha256: requestSha256,
+      unit_identity_sha256: unitIdentitySha256,
+      unit_id: unitId,
+    } = plan;
     const prepared = await checkpointStore.prepare({
       campaignSha256: campaignIdentity.sha256,
       unitId,
@@ -235,5 +231,42 @@ export async function runNewBosResumableSemanticGeneration({
     campaign_provider_submissions: acceptedSubmissionCount,
     provider_submissions: submissionCount,
     provider_retrievals: retrievalCount,
+  });
+}
+
+export function buildNewBosSemanticUnitPlan({
+  rawEvidence,
+  governedContext,
+  realizationIdentity,
+  model,
+  stageId,
+  acceptedDependencies = [],
+  privacyTokens = [],
+} = {}) {
+  const evidenceIds = rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId);
+  const campaignIdentity = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
+  const scientificRequest = buildNewBosSemanticStageRequest({
+    rawEvidence,
+    governedContext,
+    model,
+    stageId,
+    acceptedDependencies,
+    privacyTokens,
+  });
+  const requestSha256 = sha256Stable(scientificRequest);
+  const unitIdentitySha256 = sha256Stable({
+    version: 'new_bos_resumable_semantic_unit_v1',
+    campaign_sha256: campaignIdentity.sha256,
+    stage_id: stageId,
+    stage_schema_sha256: sha256Stable(buildNewBosSemanticStageSchema({ stageId, evidenceIds })),
+    dependency_hashes: acceptedDependencies.map(({ stage_id: dependencyStageId, fragment_sha256: fragmentSha256 }) => [dependencyStageId, fragmentSha256]),
+    scientific_request_sha256: requestSha256,
+  });
+  return Object.freeze({
+    campaign_identity: campaignIdentity,
+    scientific_request: scientificRequest,
+    request_sha256: requestSha256,
+    unit_identity_sha256: unitIdentitySha256,
+    unit_id: `semantic:${stageId}`,
   });
 }

@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
 import test from 'node:test';
 
 import { RICH_SYNTHETIC_FIXTURE } from '../src/lib/newBosPersonalityDnaV1/richSyntheticFixture.js';
 import { runPersonalityDnaProductionContract } from '../src/lib/newBosPersonalityDnaV1/runtimeOrchestrator.js';
 import { createRedisNewBosResumableGenerationStore } from '../api/engine/newBosProductionReadinessV1/resumableGenerationStore.js';
+import { retireStaleNewBosBackgroundResponse } from '../api/engine/newBosProductionReadinessV1/backgroundResponsesTransport.js';
 import { authorizeNewBosOperatorInspection } from '../api/engine/newBosProductionReadinessV1/config.js';
 import { inspectNewBosResumableRuntimeState } from '../api/engine/newBosProductionReadinessV1/runtimeStateInspector.js';
 import { realizePersonalityDnaArtifactBounded } from '../api/engine/newBosProductionReadinessV1/boundedSurfaceRealization.js';
@@ -336,6 +338,125 @@ test('unconfirmed response-ID custody stops instead of blindly resubmitting', as
   const stopped = await store.prepare({ campaignSha256: CAMPAIGN, unitId: 'semantic:surface_routing', unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
   assert.equal(stopped.disposition, 'STOP');
   assert.equal(stopped.classification.reason, 'response_id_custody_unconfirmed');
+});
+
+test('stale queued surface-routing can be retired exactly once without touching accepted semantic checkpoints', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:stale-surface-routing-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  for (const [index, stageId] of ['causal_foundation', 'operating_domains', 'whole_person_decision_synthesis'].entries()) {
+    const unitId = `semantic:${stageId}`;
+    const unitIdentitySha256 = String(index + 1).repeat(64);
+    const requestSha256 = String(index + 4).repeat(64);
+    await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256, requestSha256 });
+    await store.observe({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      event: { provider_response_id: `resp_${stageId}`, status: 'completed' },
+    });
+    await store.accept({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      value: splitFixture()[index].fragment,
+    });
+  }
+  const acceptedBefore = new Map([...redis.values.entries()].filter(([key]) => /semantic:(causal_foundation|operating_domains|whole_person_decision_synthesis)$/u.test(key)));
+  const responseId = 'resp_stale_surface_routing';
+  await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+  });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: responseId, status: 'queued' },
+  });
+  const responseIdSha256 = crypto.createHash('sha256').update(responseId).digest('hex');
+  const claimed = await store.claimStaleQueuedReplacement({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    expectedProviderResponseIdSha256: responseIdSha256,
+    now: new Date(Date.now() + 31 * 60 * 1000),
+  });
+  assert.equal(claimed.responseId, responseId);
+  const repeatedClaim = await store.claimStaleQueuedReplacement({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    expectedProviderResponseIdSha256: responseIdSha256,
+    now: new Date(Date.now() + 32 * 60 * 1000),
+  });
+  assert.deepEqual(repeatedClaim.claim, claimed.claim);
+  await assert.rejects(() => store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: responseId, status: 'in_progress' },
+  }), /new_bos_stale_queue_replacement_claim_active/u);
+  const replacement = await store.retireStaleQueuedAndPrepareReplacement({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    expectedProviderResponseIdSha256: responseIdSha256,
+    cancellation: { provider_response_id: responseId, status: 'cancelled' },
+  });
+  assert.equal(replacement.disposition, 'START_REPLACEMENT');
+  assert.equal(replacement.record.attempt, 2);
+  assert.equal(replacement.record.retry_sequence, 'stale_queued_external_response');
+  for (const [key, value] of acceptedBefore) assert.equal(redis.values.get(key), value);
+  assert.equal([...redis.values.keys()].filter((key) => key.includes(':stale-active-archive-v1:attempt:1')).length, 1);
+
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: 'resp_replacement', status: 'failed', error_code: 'server_error' },
+  });
+  const stopped = await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+  });
+  assert.equal(stopped.disposition, 'STOP');
+  assert.equal(stopped.classification.state, 'TERMINAL_EXHAUSTED');
+});
+
+test('provider retirement cancels only active exact responses and preserves completed work', async () => {
+  const calls = [];
+  const activeClient = {
+    responses: {
+      async retrieve(responseId) { calls.push(['retrieve', responseId]); return { id: responseId, status: 'queued' }; },
+      async cancel(responseId) { calls.push(['cancel', responseId]); return { id: responseId, status: 'cancelled' }; },
+    },
+  };
+  const retired = await retireStaleNewBosBackgroundResponse({ client: activeClient, responseId: 'resp_exact' });
+  assert.equal(retired.disposition, 'RETIRE_CANCELLED');
+  assert.deepEqual(calls, [['retrieve', 'resp_exact'], ['cancel', 'resp_exact']]);
+
+  const completedClient = {
+    responses: {
+      async retrieve(responseId) { return { id: responseId, status: 'completed', output_text: '{}' }; },
+      async cancel() { throw new Error('completed response must not be cancelled'); },
+    },
+  };
+  const completed = await retireStaleNewBosBackgroundResponse({ client: completedClient, responseId: 'resp_completed' });
+  assert.equal(completed.disposition, 'PRESERVE_COMPLETED');
+  assert.equal(completed.provider_response.status, 'completed');
 });
 
 test('all 15 accepted surface checkpoints survive restart and suppress regeneration', async () => {
