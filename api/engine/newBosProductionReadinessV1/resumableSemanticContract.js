@@ -1,4 +1,5 @@
 import { LIBRARY_MANIFEST_SHA256 } from '../../../src/lib/newBosPersonalityDnaV1/libraryRegistry.js';
+import { assertVectorFreeWholePerson } from '../../../src/lib/newBosPersonalityDnaV1/contracts.js';
 
 import { buildNewBosReasoningSchema } from './reasoningContract.js';
 import { NEW_BOS_PROVIDER_POLICY_VERSION, sha256Stable } from './realizationIdentity.js';
@@ -107,6 +108,7 @@ export function validateNewBosSemanticStageFragment({ stageId, fragment }) {
   const expectedTopLevel = [...stage.top_level, ...(stage.specialized.length ? ['specialized'] : [])];
   assertExactKeys(fragment, expectedTopLevel, stageId);
   if (stage.specialized.length) assertExactKeys(fragment.specialized, stage.specialized, `${stageId}.specialized`);
+  if (stageId === 'whole_person_decision_synthesis') assertVectorFreeWholePerson(fragment.whole_person);
   return fragment;
 }
 

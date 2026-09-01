@@ -432,5 +432,158 @@ export function createProductionNewBosGenerator({
     writable: false,
     value: inspectAcceptedSemanticAssembly,
   });
+  Object.defineProperty(generate, 'repairInvalidStage3VectorFree', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async ({
+      rawEvidence,
+      providerModel,
+      realizationIdentity,
+      expectedCampaignSha256,
+      expectedStage3,
+      expectedStage4,
+    } = {}) => {
+      if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+      if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+      const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const acceptedDependencies = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES.slice(0, 2)) {
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: expectedCampaignSha256,
+          unitId: `semantic:${stage.id}`,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED'
+          || inspection?.classification?.disposition !== 'REUSE_ACCEPTED') {
+          throw new Error(`new_bos_invalid_stage3_dependency_not_accepted:${stage.id}`);
+        }
+        const fragment = validateNewBosSemanticStageFragment({
+          stageId: stage.id,
+          fragment: inspection.record.accepted_value,
+        });
+        acceptedDependencies.push(Object.freeze({
+          stage_id: stage.id,
+          fragment,
+          fragment_sha256: inspection.record.accepted_value_sha256,
+        }));
+      }
+      const plan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        acceptedDependencies,
+        privacyTokens,
+      });
+      if (plan.campaign_identity.sha256 !== expectedCampaignSha256
+        || plan.unit_identity_sha256 !== expectedStage3?.unit_identity_sha256
+        || plan.request_sha256 !== expectedStage3?.request_sha256
+        || plan.unit_id !== 'semantic:whole_person_decision_synthesis') {
+        throw new Error('new_bos_invalid_stage3_recomputed_identity_mismatch');
+      }
+      const currentStage3 = await resumableGenerationStore.inspect({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+      });
+      if (currentStage3?.record?.state !== 'ACCEPTED'
+        || currentStage3.record.accepted_value_sha256 !== expectedStage3?.accepted_value_sha256) {
+        throw new Error('new_bos_invalid_stage3_checkpoint_identity_mismatch');
+      }
+      let failureCode = null;
+      try {
+        validateNewBosSemanticStageFragment({
+          stageId: 'whole_person_decision_synthesis',
+          fragment: currentStage3.record.accepted_value,
+        });
+      } catch (error) {
+        failureCode = String(error?.message || '');
+      }
+      if (!failureCode.startsWith('Whole-person model leaked assessment language:')) {
+        throw new Error('new_bos_invalid_stage3_vector_free_failure_not_reproduced');
+      }
+      const currentStage4 = await resumableGenerationStore.inspect({
+        campaignSha256: expectedCampaignSha256,
+        unitId: 'semantic:surface_routing',
+      });
+      if (currentStage4?.record?.state !== 'ACCEPTED'
+        || currentStage4.record.unit_identity_sha256 !== expectedStage4?.unit_identity_sha256
+        || currentStage4.record.request_sha256 !== expectedStage4?.request_sha256
+        || currentStage4.record.accepted_value_sha256 !== expectedStage4?.accepted_value_sha256) {
+        throw new Error('new_bos_invalid_stage4_checkpoint_identity_mismatch');
+      }
+      const retired = await resumableGenerationStore.retireInvalidStage3AndDependentStage4({
+        campaignSha256: expectedCampaignSha256,
+        expectedStage3,
+        expectedStage4,
+        failureCode,
+      });
+      const onEvent = async (event) => resumableGenerationStore.observe({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+        unitIdentitySha256: plan.unit_identity_sha256,
+        requestSha256: plan.request_sha256,
+        event,
+      });
+      const provider = createNewBosSemanticStageProvider({
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        privacyTokens,
+        transport: async (request) => {
+          if (sha256Stable(request) !== plan.request_sha256) {
+            throw new Error('new_bos_invalid_stage3_replacement_request_drift');
+          }
+          const result = await executeNewBosBackgroundResponse({
+            client: reasoningClient,
+            scientificRequest: request,
+            maxWaitMs: interactiveWaitMs,
+            onEvent,
+          });
+          return result.response;
+        },
+      });
+      try {
+        const fragment = await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        const accepted = await resumableGenerationStore.accept({
+          campaignSha256: expectedCampaignSha256,
+          unitId: plan.unit_id,
+          unitIdentitySha256: plan.unit_identity_sha256,
+          requestSha256: plan.request_sha256,
+          value: fragment,
+        });
+        return Object.freeze({
+          status: 'STAGE3_VECTOR_FREE_REPLACEMENT_ACCEPTED',
+          replacement_attempt: retired.stage3.attempt,
+          stage4_state: retired.stage4.state,
+          accepted_value_sha256: accepted.accepted_value_sha256,
+          campaign_sha256: expectedCampaignSha256,
+        });
+      } catch (error) {
+        if (error?.code === 'background_poll_timeout') {
+          return Object.freeze({
+            status: 'STAGE3_VECTOR_FREE_REPLACEMENT_IN_PROGRESS',
+            replacement_attempt: retired.stage3.attempt,
+            stage4_state: retired.stage4.state,
+            campaign_sha256: expectedCampaignSha256,
+          });
+        }
+        if (/privacy|model_substitution|invalid_json|empty_output|fragment|schema|evidence|authority|truth|assessment language/u.test(error?.message || '')) {
+          await resumableGenerationStore.rejectSemantic({
+            campaignSha256: expectedCampaignSha256,
+            unitId: plan.unit_id,
+            unitIdentitySha256: plan.unit_identity_sha256,
+            requestSha256: plan.request_sha256,
+            code: error?.message,
+          });
+        }
+        throw error;
+      }
+    },
+  });
   return Object.freeze(generate);
 }

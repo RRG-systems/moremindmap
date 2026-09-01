@@ -15,6 +15,7 @@ import {
   buildNewBosResumableCampaignIdentity,
   buildNewBosSemanticStageSchema,
   NEW_BOS_SEMANTIC_STAGES,
+  validateNewBosSemanticStageFragment,
 } from '../api/engine/newBosProductionReadinessV1/resumableSemanticContract.js';
 import { buildNewBosRealizationIdentity, sha256Stable } from '../api/engine/newBosProductionReadinessV1/realizationIdentity.js';
 
@@ -28,6 +29,24 @@ function fakeRedis() {
     async set(key, value, ...args) {
       if (args.includes('NX') && values.has(key)) return null;
       values.set(key, value);
+      return 'OK';
+    },
+    async eval(_script, keyCount, ...args) {
+      const keys = args.slice(0, keyCount);
+      const argv = args.slice(keyCount);
+      if (values.get(keys[0]) !== argv[0]) return 'STAGE3_CHANGED';
+      if (values.get(keys[1]) !== argv[1]) return 'STAGE4_CHANGED';
+      const archive3 = values.get(keys[2]);
+      if (archive3 && archive3 !== argv[2]) return 'STAGE3_ARCHIVE_CONFLICT';
+      const archive4 = values.get(keys[3]);
+      if (archive4 && archive4 !== argv[3]) return 'STAGE4_ARCHIVE_CONFLICT';
+      const claim = values.get(keys[4]);
+      if (claim && claim !== argv[6]) return 'CLAIM_CONFLICT';
+      values.set(keys[2], argv[2]);
+      values.set(keys[3], argv[3]);
+      values.set(keys[0], argv[4]);
+      values.set(keys[1], argv[5]);
+      values.set(keys[4], argv[6]);
       return 'OK';
     },
   };
@@ -110,6 +129,22 @@ test('deterministic assembly reconstructs the unchanged whole-person interpretat
   delete expected.surface_renderings;
   expected.surface_evidence_refs = splitFixture().find(({ stage_id: id }) => id === 'surface_routing').fragment.surface_evidence_refs;
   assert.deepEqual(assembled, expected);
+});
+
+test('stage-3 checkpoint validation enforces the existing vector-free whole-person invariant before acceptance', () => {
+  const valid = splitFixture().find(({ stage_id: id }) => id === 'whole_person_decision_synthesis').fragment;
+  assert.equal(validateNewBosSemanticStageFragment({
+    stageId: 'whole_person_decision_synthesis',
+    fragment: valid,
+  }), valid);
+  for (const forbidden of ['assessment', 'vector', 'dimension', 'structure score', 'measured pattern']) {
+    const invalid = structuredClone(valid);
+    invalid.whole_person.core_explanation = `This ${forbidden} wording must never enter an accepted checkpoint.`;
+    assert.throws(() => validateNewBosSemanticStageFragment({
+      stageId: 'whole_person_decision_synthesis',
+      fragment: invalid,
+    }), new RegExp(`Whole-person model leaked assessment language: ${forbidden}`, 'u'));
+  }
 });
 
 test('assembled interpretation runs through the unchanged production runtime validators without provider inference', async () => {
@@ -457,6 +492,128 @@ test('provider retirement cancels only active exact responses and preserves comp
   const completed = await retireStaleNewBosBackgroundResponse({ client: completedClient, responseId: 'resp_completed' });
   assert.equal(completed.disposition, 'PRESERVE_COMPLETED');
   assert.equal(completed.provider_response.status, 'completed');
+});
+
+test('invalid accepted stage 3 and its stage-4 dependency retire atomically while stages 1-2 remain byte-identical', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:invalid-stage3-repair-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  const fragments = splitFixture();
+  for (const [index, stageId] of ['causal_foundation', 'operating_domains'].entries()) {
+    const unitId = `semantic:${stageId}`;
+    const unitIdentitySha256 = String(index + 1).repeat(64);
+    const requestSha256 = String(index + 3).repeat(64);
+    await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256, requestSha256 });
+    await store.observe({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      event: { provider_response_id: `resp_${stageId}`, status: 'completed' },
+    });
+    await store.accept({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      value: fragments[index].fragment,
+    });
+  }
+  const stage12Before = new Map([...redis.values.entries()].filter(([key]) => /semantic:(causal_foundation|operating_domains)$/u.test(key)));
+  const stage3Identity = '7'.repeat(64);
+  const stage3Request = '8'.repeat(64);
+  const invalidStage3 = structuredClone(fragments[2].fragment);
+  invalidStage3.whole_person.core_explanation = 'This assessment language is invalid customer meaning.';
+  await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:whole_person_decision_synthesis',
+    unitIdentitySha256: stage3Identity,
+    requestSha256: stage3Request,
+  });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:whole_person_decision_synthesis',
+    unitIdentitySha256: stage3Identity,
+    requestSha256: stage3Request,
+    event: { provider_response_id: 'resp_invalid_stage3', status: 'completed' },
+  });
+  const stage3Accepted = await store.accept({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:whole_person_decision_synthesis',
+    unitIdentitySha256: stage3Identity,
+    requestSha256: stage3Request,
+    value: invalidStage3,
+  });
+
+  const stage4Identity = '9'.repeat(64);
+  const stage4Request = 'a'.repeat(64);
+  await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: stage4Identity,
+    requestSha256: stage4Request,
+  });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: stage4Identity,
+    requestSha256: stage4Request,
+    event: { provider_response_id: 'resp_stage4_attempt1', status: 'incomplete', incomplete_details_reason: 'max_output_tokens' },
+  });
+  const stage4Attempt2 = await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: stage4Identity,
+    requestSha256: stage4Request,
+  });
+  assert.equal(stage4Attempt2.record.attempt, 2);
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: stage4Identity,
+    requestSha256: stage4Request,
+    event: { provider_response_id: 'resp_stage4_attempt2', status: 'completed' },
+  });
+  const stage4Accepted = await store.accept({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: stage4Identity,
+    requestSha256: stage4Request,
+    value: fragments[3].fragment,
+  });
+
+  const retired = await store.retireInvalidStage3AndDependentStage4({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: stage3Identity,
+      request_sha256: stage3Request,
+      accepted_value_sha256: stage3Accepted.accepted_value_sha256,
+    },
+    expectedStage4: {
+      unit_identity_sha256: stage4Identity,
+      request_sha256: stage4Request,
+      accepted_value_sha256: stage4Accepted.accepted_value_sha256,
+    },
+    failureCode: 'Whole-person model leaked assessment language: assessment',
+  });
+  assert.equal(retired.stage3.attempt, 2);
+  assert.equal(retired.stage4.state, 'DEPENDENCY_INVALIDATED');
+  assert.equal(retired.stage4.next_attempt, 3);
+  for (const [key, value] of stage12Before) assert.equal(redis.values.get(key), value);
+  assert.equal([...redis.values.keys()].filter((key) => key.includes(':invalid-semantic-archive-v1')).length, 2);
+
+  const newStage4Identity = 'b'.repeat(64);
+  const newStage4Request = 'c'.repeat(64);
+  const stage4Replacement = await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:surface_routing',
+    unitIdentitySha256: newStage4Identity,
+    requestSha256: newStage4Request,
+  });
+  assert.equal(stage4Replacement.disposition, 'START_REPLACEMENT');
+  assert.equal(stage4Replacement.record.attempt, 3);
+  assert.equal(stage4Replacement.record.unit_identity_sha256, newStage4Identity);
+  assert.equal(stage4Replacement.record.retry_sequence, 'stage3_vector_free_dependency_replacement');
 });
 
 test('all 15 accepted surface checkpoints survive restart and suppress regeneration', async () => {

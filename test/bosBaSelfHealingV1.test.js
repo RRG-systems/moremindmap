@@ -411,6 +411,54 @@ test('stale surface-routing replacement is POST-only and exact-candidate protect
   assert.equal(unsupported.statusCode, 405);
 });
 
+test('invalid stage-3 repair route is hash-bound and exact-candidate protected', async () => {
+  const response = () => ({
+    statusCode: null, body: null, setHeader() {},
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.body = body; return this; },
+  });
+  const calls = [];
+  const handler = createNewBosProductionRouteHandler({
+    config: {
+      staged: true,
+      canaryEnabled: false,
+      customerActive: true,
+      deploymentHost: 'candidate.example.vercel.app',
+    },
+    serviceFactory: async () => ({
+      repairInvalidStage3VectorFree: async (input) => {
+        calls.push(input);
+        if (!input.platformProtected) throw new Error('new_bos_invalid_stage3_repair_requires_protected_candidate');
+        return { status: 'ok' };
+      },
+    }),
+  });
+  const exact = response();
+  await handler({
+    method: 'POST',
+    query: { id: PROFILE, action: 'repair-invalid-stage3-vector-free' },
+    headers: { host: 'candidate.example.vercel.app' },
+    body: {
+      expected_campaign_sha256: '1'.repeat(64),
+      expected_stage3: { accepted_value_sha256: '2'.repeat(64) },
+      expected_stage4: { accepted_value_sha256: '3'.repeat(64) },
+    },
+  }, exact);
+  assert.equal(exact.statusCode, 200);
+  assert.equal(calls[0].platformProtected, true);
+  assert.equal(calls[0].expectedStage3.accepted_value_sha256, '2'.repeat(64));
+
+  const publicDomain = response();
+  await handler({
+    method: 'POST',
+    query: { id: PROFILE, action: 'repair-invalid-stage3-vector-free' },
+    headers: { host: 'moremindmap.com' },
+    body: {},
+  }, publicDomain);
+  assert.equal(publicDomain.statusCode, 500);
+  assert.equal(calls[1].platformProtected, false);
+});
+
 test('machinery failures return generic customer codes while governed truth failures stay explicit', async () => {
   const makeResponse = () => ({
     statusCode: null, body: null, setHeader() {},

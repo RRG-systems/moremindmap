@@ -70,13 +70,18 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
     }
     const staleSurfaceRoutingReplacement = request.method === 'POST'
       && request.query?.action === 'replace-stale-surface-routing';
-    if (!['GET', 'POST'].includes(request.method) || (request.method === 'POST' && !staleSurfaceRoutingReplacement)) {
+    const invalidStage3Repair = request.method === 'POST'
+      && request.query?.action === 'repair-invalid-stage3-vector-free';
+    if (!['GET', 'POST'].includes(request.method)
+      || (request.method === 'POST' && !staleSurfaceRoutingReplacement && !invalidStage3Repair)) {
       return response.status(405).json({ error: 'Method not allowed' });
     }
     try {
       const service = await serviceFactory();
       const operation = staleSurfaceRoutingReplacement
         ? 'replaceStaleSurfaceRouting'
+        : invalidStage3Repair
+          ? 'repairInvalidStage3VectorFree'
         : request.query?.diagnostic === 'semantic-assembly'
           ? 'inspectAcceptedSemanticAssembly'
         : request.query?.diagnostic === 'resumable-state'
@@ -88,13 +93,23 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       const result = await service[operation]({
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
-        platformProtected: ['inspectResumable', 'inspectAcceptedSemanticAssembly', 'replaceStaleSurfaceRouting'].includes(operation)
+        platformProtected: [
+          'inspectResumable',
+          'inspectAcceptedSemanticAssembly',
+          'replaceStaleSurfaceRouting',
+          'repairInvalidStage3VectorFree',
+        ].includes(operation)
           && platformProtectedCandidateRequest(request, config),
         ...(operation === 'replaceStaleSurfaceRouting' ? {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
           expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,
           expectedRequestSha256: request.body?.expected_request_sha256,
           expectedProviderResponseIdSha256: request.body?.expected_provider_response_id_sha256,
+        } : {}),
+        ...(operation === 'repairInvalidStage3VectorFree' ? {
+          expectedCampaignSha256: request.body?.expected_campaign_sha256,
+          expectedStage3: request.body?.expected_stage3,
+          expectedStage4: request.body?.expected_stage4,
         } : {}),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));
