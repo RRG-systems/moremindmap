@@ -125,6 +125,10 @@ test('Recruiting demo CSRF survives serverless instance rotation and remains sin
   const capabilityHash = 'a'.repeat(64);
   const proof = await issueRecruitingDemoCsrf({ redis, capabilityHash });
 
+  assert.equal(LEADERSHIP_DEMO_AUTHORITY.recruiting_demo_csrf_ttl_seconds, 300);
+  assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof: '' }), false);
+  assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof: 'short' }), false);
+  assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash: 'b'.repeat(64), proof }), false);
   assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof }), true);
   assert.equal(await consumeRecruitingDemoCsrf({ redis, capabilityHash, proof }), false);
 });
@@ -165,6 +169,7 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   const recruitingApi = fs.readFileSync(new URL('../api/recruiting/gu-v1-demo.js', import.meta.url), 'utf8');
   const recruitingApp = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
   const consultingDemoApp = fs.readFileSync(new URL('../src/recruitingGuV1/RecruitingGuV1App.jsx', import.meta.url), 'utf8');
+  const consultingDemoClient = fs.readFileSync(new URL('../src/lib/recruitingGuV1/client.js', import.meta.url), 'utf8');
   assert.equal((launcher.match(/title: 'Consulting Demonstration'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'Subscription Model Demo'/gu) || []).length, 1);
   assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
@@ -180,7 +185,8 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   assert.match(consultingDemoApp, /DEMONSTRATION SUBJECT/u);
   assert.match(consultingDemoApp, /data-demo-only-control="true"/u);
   assert.match(consultingDemoApp, />Reset Demo<\/button>/u);
-  assert.match(consultingDemoApp, /RESET_SYNTHETIC_DEMO/u);
+  assert.match(consultingDemoApp, /resetGuDemoSubject\(subject\)/u);
+  assert.match(consultingDemoClient, /RESET_SYNTHETIC_DEMO/u);
   assert.match(consultingDemoApp, /new-ba-production-experience/u);
   assert.match(launcher, /addEventListener\('pageshow'/u);
   assert.match(consultingDemoApp, /YOU is BOS-only; YOUR BUSINESS is BOS \+ BA \/ Business Twin/u);

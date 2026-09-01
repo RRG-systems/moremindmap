@@ -38,6 +38,18 @@ export async function mutateGu(action, body = {}, { signal } = {}) {
   }));
 }
 
+export async function resetGuDemoSubject(subject) {
+  if (window.location.pathname !== '/recruiting-gu-v1/demo') throw new Error('RECRUITING_GU_V1_DEMO_RESET_ROUTE_DENIED');
+  if (subject !== 'SYNTHETIC' && subject !== 'PATRICIA') throw new Error('RECRUITING_GU_V1_DEMO_RESET_SUBJECT_DENIED');
+
+  csrfToken = '';
+  const refreshed = await fetchGuHome();
+  if (typeof refreshed?.csrf_token !== 'string' || refreshed.csrf_token.length < 32 || csrfToken !== refreshed.csrf_token) {
+    throw new Error('RECRUITING_GU_V1_DEMO_RESET_CSRF_REFRESH_FAILED');
+  }
+  return mutateGu('RESET_SYNTHETIC_DEMO', { subject });
+}
+
 export async function fetchApprovalPreview(token) {
   const url = new URL('/api/recruiting/gu-v1', window.location.origin);
   url.searchParams.set('view', 'approval_preview');

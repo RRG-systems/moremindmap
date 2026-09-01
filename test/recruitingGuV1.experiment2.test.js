@@ -170,20 +170,29 @@ test('demo reset is subject-scoped, returns a no-mutation receipt, and restores 
 
 test('Patricia demo reset deletes only Patricia session state and cannot touch canonical authority', async () => {
   const state = createEmptyRecruitingState();
+  state.memberships = { subscription_sentinel: { membership_id: 'subscription_sentinel', status: 'ACTIVE', subscription_tier: 'PROTECTED' } };
+  state.audit = [{ event: 'CANONICAL_STATE_SENTINEL', bytes: 'patricia-bos-ba-unchanged' }];
   state.shared_business_sessions = {
     session_patricia_demo: {
       session_id: 'session_patricia_demo',
       relationship_id: 'rel-experiment-2-darren-patricia-read-only',
       status: 'ACTIVE',
+      current_room: 'PLAN',
+      revision: 19,
+      conversation: [{ turn_id: 'patricia-temporary-demo-turn' }],
     },
     session_synthetic_demo: {
       session_id: 'session_synthetic_demo',
       relationship_id: 'rel-synthetic-darren-jordan-v2',
       status: 'ACTIVE',
+      current_room: 'YOUR_BUSINESS',
+      revision: 7,
+      conversation: [{ turn_id: 'synthetic-session-must-survive' }],
     },
   };
   const store = new InMemoryRecruitingStore(state);
   const runtime = createRecruitingGuV1DemoRuntime({ store, frontierTransport: transportFactory() });
+  const before = await store.read();
 
   const receipt = await runtime.reset('PATRICIA');
   assert.deepEqual(receipt, {
@@ -194,7 +203,25 @@ test('Patricia demo reset deletes only Patricia session state and cannot touch c
   });
   const after = await store.read();
   assert.equal(after.shared_business_sessions.session_patricia_demo, undefined);
-  assert.equal(after.shared_business_sessions.session_synthetic_demo.relationship_id, 'rel-synthetic-darren-jordan-v2');
+  const expected = structuredClone(before);
+  delete expected.shared_business_sessions.session_patricia_demo;
+  assert.deepEqual(after, expected);
+});
+
+test('demo reset rejects missing, invalid, and cross-subject scope without deleting either subject', async () => {
+  const state = createEmptyRecruitingState();
+  state.shared_business_sessions = {
+    session_patricia_demo: { session_id: 'session_patricia_demo', relationship_id: 'rel-experiment-2-darren-patricia-read-only' },
+    session_synthetic_demo: { session_id: 'session_synthetic_demo', relationship_id: 'rel-synthetic-darren-jordan-v2' },
+  };
+  const store = new InMemoryRecruitingStore(state);
+  const runtime = createRecruitingGuV1DemoRuntime({ store, frontierTransport: transportFactory() });
+  const before = await store.read();
+
+  await assert.rejects(() => runtime.reset(), /RECRUITING_GU_V1_DEMO_RESET_SUBJECT_DENIED/u);
+  await assert.rejects(() => runtime.reset('BOTH'), /RECRUITING_GU_V1_DEMO_RESET_SUBJECT_DENIED/u);
+  await assert.rejects(() => runtime.reset('PATRICIA:SYNTHETIC'), /RECRUITING_GU_V1_DEMO_RESET_SUBJECT_DENIED/u);
+  assert.deepEqual(await store.read(), before);
 });
 
 test('Patricia Redis projection permits only profile-scoped reads and forwards zero writes', async () => {

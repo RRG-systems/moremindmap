@@ -213,11 +213,10 @@ export function createRecruitingGuV1DemoRuntime({
       return { session: await runtime.mutateSimple({ authority, sessionId, action, payload }) };
     },
     async reset(subjectId = null) {
+      if (subjectId !== 'SYNTHETIC' && subjectId !== 'PATRICIA') throw new Error('RECRUITING_GU_V1_DEMO_RESET_SUBJECT_DENIED');
       const relationshipIds = subjectId === 'SYNTHETIC'
         ? [SYNTHETIC_AUTHORITY.relationship_id]
-        : subjectId === 'PATRICIA'
-          ? [PATRICIA_AUTHORITY.relationship_id]
-          : [SYNTHETIC_AUTHORITY.relationship_id, PATRICIA_AUTHORITY.relationship_id];
+        : [PATRICIA_AUTHORITY.relationship_id];
       await store.transaction((state) => {
         for (const [id, session] of Object.entries(state.shared_business_sessions || {})) {
           if (relationshipIds.includes(session.relationship_id)) delete state.shared_business_sessions[id];

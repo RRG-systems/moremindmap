@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import NewBosExperience from '../components/newBosPersonalityDnaV1/NewBosExperience.jsx';
 import BusinessTwinApp from '../lab/baProgressiveDisclosureV1/BusinessTwinApp.jsx';
 import RecruitingV2Renderer from '../recruitingV2/RecruitingV2Renderer.jsx';
-import { fetchApprovalPreview, fetchGuHome, fetchGuSession, mutateGu, decideApproval } from '../lib/recruitingGuV1/client.js';
+import { fetchApprovalPreview, fetchGuHome, fetchGuSession, mutateGu, decideApproval, resetGuDemoSubject } from '../lib/recruitingGuV1/client.js';
 import { visibleConversationForRoom } from '../lib/recruitingGuV1/session.js';
 import '../recruitingV2/recruitingV2.css';
 import '../components/baProductionReadinessV1/newBaProductionCanary.css';
@@ -282,7 +282,7 @@ export default function RecruitingGuV1App() {
     const subject = activeSubject;
     setBusy(true); setError('');
     try {
-      const receipt = await mutateGu('RESET_SYNTHETIC_DEMO', { subject });
+      const receipt = await resetGuDemoSubject(subject);
       if (receipt.reset !== true || receipt.subject !== subject || receipt.external_mutation !== false || receipt.canonical_mutation !== false) throw new Error('DEMO_RESET_RECEIPT_INVALID');
       window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY);
       setBundle(null);

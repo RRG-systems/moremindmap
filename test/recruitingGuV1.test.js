@@ -122,8 +122,8 @@ test('GU V1 synthetic reset removes only the synthetic shared session', async ()
   const runtime = createRecruitingGuV1DemoRuntime({ store, frontierTransport: fakeFrontierTransport });
   await runtime.open();
   assert.equal((await runtime.home()).active_session_id !== null, true);
-  const receipt = await runtime.reset();
-  assert.deepEqual(receipt, { reset: true, subject: null, external_mutation: false, canonical_mutation: false });
+  const receipt = await runtime.reset('SYNTHETIC');
+  assert.deepEqual(receipt, { reset: true, subject: 'SYNTHETIC', external_mutation: false, canonical_mutation: false });
   assert.equal((await runtime.home()).active_session_id, null);
 });
 
