@@ -161,6 +161,19 @@ export function createNewBosModernizationService({
         expectedProviderResponseIdSha256,
       });
     },
+    async inspectAcceptedSemanticAssembly({ profileId, suppliedToken = '', platformProtected = false }) {
+      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken, platformProtected });
+      if (!platformProtected) throw new Error('new_bos_semantic_assembly_inspection_requires_protected_candidate');
+      if (typeof generator?.inspectAcceptedSemanticAssembly !== 'function') {
+        throw new Error('new_bos_semantic_assembly_inspection_unavailable');
+      }
+      const desired = await desiredState(normalized);
+      return generator.inspectAcceptedSemanticAssembly({
+        rawEvidence: desired.rawEvidence,
+        providerModel: config.providerModel,
+        realizationIdentity: desired.identity,
+      });
+    },
     async diagnose({ profileId, suppliedToken = '' }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });

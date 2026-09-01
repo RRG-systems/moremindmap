@@ -25,6 +25,8 @@ import {
   runNewBosResumableSemanticGeneration,
 } from './resumableGenerationOrchestrator.js';
 import {
+  assembleNewBosReasoningDraftV1,
+  buildNewBosResumableCampaignIdentity,
   NEW_BOS_SEMANTIC_STAGES,
   validateNewBosSemanticStageFragment,
 } from './resumableSemanticContract.js';
@@ -73,6 +75,59 @@ export function createProductionNewBosGenerator({
   const reasoningClient = new OpenAI({ apiKey, maxRetries: 0, timeout: reasoningTimeoutMs });
   const surfaceClient = new OpenAI({ apiKey, maxRetries: 0, timeout: surfaceTimeoutMs });
   const libraryRetriever = createHashBoundLibraryRetriever({ repositoryRoot });
+
+  async function inspectAcceptedSemanticAssembly({ rawEvidence, providerModel, realizationIdentity }) {
+    if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+    const evidenceIds = rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId);
+    const campaignIdentity = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
+    try {
+      const fragments = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES) {
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: campaignIdentity.sha256,
+          unitId: `semantic:${stage.id}`,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED') {
+          throw new Error(`new_bos_semantic_assembly_checkpoint_not_accepted:${stage.id}`);
+        }
+        fragments.push(Object.freeze({
+          stage_id: stage.id,
+          fragment: validateNewBosSemanticStageFragment({
+            stageId: stage.id,
+            fragment: inspection.record.accepted_value,
+          }),
+        }));
+      }
+      const interpretationDraft = assembleNewBosReasoningDraftV1({ fragments });
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const artifact = await runPersonalityDnaProductionContract({
+        activation: 'real_profile_hs_gate_v1',
+        rawEvidence,
+        providerModel: model,
+        libraryRetriever,
+        reasoningProvider: null,
+        governedContext,
+        interpretationDraft,
+      });
+      return Object.freeze({
+        status: 'SEMANTIC_ASSEMBLY_VALID',
+        campaign_sha256: campaignIdentity.sha256,
+        interpretation_draft_sha256: sha256Stable(interpretationDraft),
+        surface_packet_count: artifact.surface_packets?.length || 0,
+      });
+    } catch (error) {
+      return Object.freeze({
+        status: 'SEMANTIC_ASSEMBLY_INVALID',
+        campaign_sha256: campaignIdentity.sha256,
+        failure_code: String(error?.message || error?.name || 'unknown_failure').slice(0, 300),
+        failure_sha256: sha256Stable({
+          name: error?.name || null,
+          message: error?.message || null,
+          stack_frame: String(error?.stack || '').split('\n')[1]?.trim() || null,
+        }),
+      });
+    }
+  }
 
   const generate = async function generate({ rawEvidence, providerModel, realizationIdentity }) {
     if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
@@ -370,6 +425,12 @@ export function createProductionNewBosGenerator({
         throw error;
       }
     },
+  });
+  Object.defineProperty(generate, 'inspectAcceptedSemanticAssembly', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: inspectAcceptedSemanticAssembly,
   });
   return Object.freeze(generate);
 }

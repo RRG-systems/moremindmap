@@ -77,6 +77,8 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       const service = await serviceFactory();
       const operation = staleSurfaceRoutingReplacement
         ? 'replaceStaleSurfaceRouting'
+        : request.query?.diagnostic === 'semantic-assembly'
+          ? 'inspectAcceptedSemanticAssembly'
         : request.query?.diagnostic === 'resumable-state'
         ? 'inspectResumable'
         : request.query?.diagnostic === 'state'
@@ -86,7 +88,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       const result = await service[operation]({
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
-        platformProtected: ['inspectResumable', 'replaceStaleSurfaceRouting'].includes(operation)
+        platformProtected: ['inspectResumable', 'inspectAcceptedSemanticAssembly', 'replaceStaleSurfaceRouting'].includes(operation)
           && platformProtectedCandidateRequest(request, config),
         ...(operation === 'replaceStaleSurfaceRouting' ? {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
