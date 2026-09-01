@@ -183,6 +183,52 @@ test('incomplete without a provider reason requires human review and cannot spen
   assert.equal(stopped.classification.reason, 'incomplete_reason_missing');
 });
 
+test('max-output terminal state preserves attempt one and permits exactly one generic replacement', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:max-output-recovery-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  const unitId = 'semantic:causal_foundation';
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: {
+      provider_response_id: 'resp_max_output_attempt_one',
+      status: 'incomplete',
+      incomplete_details_reason: 'max_output_tokens',
+      usage: { output_tokens: 64000 },
+    },
+  });
+  const replacement = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  assert.equal(replacement.disposition, 'START_REPLACEMENT');
+  assert.equal(replacement.record.attempt, 2);
+  const archive = [...redis.values.entries()].find(([key]) => key.includes(':terminal-archive-v1:attempt:1'));
+  assert.ok(archive);
+  const archived = JSON.parse(archive[1]);
+  assert.equal(archived.observation.status, 'incomplete');
+  assert.equal(archived.observation.incomplete_details_reason, 'max_output_tokens');
+  assert.equal(archived.replacement_authorized, true);
+
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: {
+      provider_response_id: 'resp_max_output_attempt_two',
+      status: 'incomplete',
+      incomplete_details_reason: 'max_output_tokens',
+      usage: { output_tokens: 64000 },
+    },
+  });
+  const exhausted = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  assert.equal(exhausted.disposition, 'STOP');
+  assert.equal(exhausted.classification.state, 'TERMINAL_EXHAUSTED');
+  assert.equal(exhausted.classification.reason, 'max_output_tokens');
+});
+
 test('documented transient machinery failure permits exactly one replacement', async () => {
   const store = createRedisNewBosResumableGenerationStore({ redis: fakeRedis(), namespace: 'nonprod:new-bos:retry-test' });
   const unitId = 'surface:this_is_you';
@@ -389,10 +435,11 @@ test('operator inspection replays the exact campaign and exposes only sanitized 
   assert.equal(result.campaign_sha256, campaign.sha256);
   assert.equal(result.units.length, 19);
   assert.deepEqual(result.recovery_review_provenance, {
-    source: 'resumable_checkpoint_classification',
+    source: 'resumable_checkpoint_recovery',
     unit_identity: 'semantic:causal_foundation',
-    checkpoint_state: 'HUMAN_REVIEW_REQUIRED',
-    review_reason: 'max_output_tokens',
+    checkpoint_state: 'TERMINAL_RETRYABLE',
+    recovery_disposition: 'START_REPLACEMENT',
+    reason: 'max_output_tokens',
   });
   assert.equal(result.units[0].attempt, 1);
   assert.equal(result.units[0].provider_terminal_status, 'incomplete');

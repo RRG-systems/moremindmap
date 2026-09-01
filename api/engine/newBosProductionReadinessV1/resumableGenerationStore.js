@@ -5,6 +5,7 @@ import { sha256Stable } from './realizationIdentity.js';
 const SHA256 = /^[a-f0-9]{64}$/u;
 const UNIT_ID = /^[a-z0-9:_-]+$/u;
 const ACTIVE = new Set(['queued', 'in_progress']);
+const RETRYABLE_INCOMPLETE_REASONS = new Set(['max_output_tokens']);
 const TRANSIENT_ERROR_CODES = new Set([
   'server_error',
   'service_unavailable',
@@ -32,6 +33,10 @@ function rootKey(namespace, campaignSha256, unitId) {
   assertIdentity(campaignSha256, 'campaign_identity');
   assertUnit(unitId);
   return `${namespace}:resumable-v1:${campaignSha256}:unit:${unitId}`;
+}
+
+function terminalArchiveKey(key, attempt) {
+  return `${key}:terminal-archive-v1:attempt:${attempt}`;
 }
 
 function parse(raw) {
@@ -72,10 +77,16 @@ function classify(record) {
     return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: 'completed_result_not_accepted' });
   }
   if (status === 'incomplete') {
+    const reason = record.observation?.incomplete_details_reason || 'incomplete_reason_missing';
+    if (RETRYABLE_INCOMPLETE_REASONS.has(reason)) {
+      return record.attempt >= 2
+        ? Object.freeze({ state: 'TERMINAL_EXHAUSTED', disposition: 'STOP', reason })
+        : Object.freeze({ state: 'TERMINAL_RETRYABLE', disposition: 'START_REPLACEMENT', reason });
+    }
     return Object.freeze({
       state: 'HUMAN_REVIEW_REQUIRED',
       disposition: 'STOP',
-      reason: record.observation?.incomplete_details_reason || 'incomplete_reason_missing',
+      reason,
     });
   }
   if (status === 'failed' && TRANSIENT_ERROR_CODES.has(record.observation?.error_code)) {
@@ -111,6 +122,25 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
       const classification = classify(existing);
       if (classification.disposition === 'START_REPLACEMENT') {
         const claimKey = `${key}:replacement-claim-v1`;
+        const archiveKey = terminalArchiveKey(key, existing.attempt);
+        const archived = Object.freeze({
+          version: 'new_bos_resumable_terminal_archive_v1',
+          campaign_sha256: campaignSha256,
+          unit_id: unitId,
+          unit_identity_sha256: existing.unit_identity_sha256,
+          request_sha256: existing.request_sha256,
+          state: existing.state,
+          attempt: existing.attempt,
+          observation: existing.observation || null,
+          semantic_rejection_code: existing.semantic_rejection_code || null,
+          archived_at: existing.updated_at || existing.observation?.observed_at || existing.created_at,
+          replacement_authorized: true,
+        });
+        const archiveSerialized = JSON.stringify(archived);
+        const archiveResult = await redis.set(archiveKey, archiveSerialized, 'NX');
+        if (archiveResult !== 'OK' && await redis.get(archiveKey) !== archiveSerialized) {
+          return Object.freeze({ disposition: 'STOP', classification: Object.freeze({ state: 'TERMINAL_EXHAUSTED', reason: 'terminal_archive_conflict' }) });
+        }
         const claim = Object.freeze({
           version: 'new_bos_resumable_replacement_claim_v1',
           campaign_sha256: campaignSha256,
@@ -121,7 +151,7 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
           claimed_at: new Date().toISOString(),
         });
         const claimed = await redis.set(claimKey, JSON.stringify(claim), 'NX');
-        if (claimed !== 'OK') return Object.freeze({ disposition: 'STOP', classification: Object.freeze({ state: 'TERMINAL_EXHAUSTED' }) });
+        if (claimed !== 'OK') return Object.freeze({ disposition: 'STOP', classification: Object.freeze({ state: 'TERMINAL_EXHAUSTED', reason: 'replacement_claim_conflict' }) });
         const intent = Object.freeze({
           ...claim,
           version: 'new_bos_resumable_unit_checkpoint_v1',

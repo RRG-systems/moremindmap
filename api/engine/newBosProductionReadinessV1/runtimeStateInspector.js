@@ -87,7 +87,9 @@ export async function inspectNewBosResumableRuntimeState({
     unitId,
     await checkpointStore.inspect({ campaignSha256: campaign.sha256, unitId }),
   )));
-  const firstReviewStop = units.find(({ recovery_disposition: disposition }) => disposition === 'STOP') || null;
+  const firstRecoveryDecision = units.find(({ checkpoint_state: state, recovery_disposition: disposition }) => (
+    state !== 'MISSING' && disposition !== 'REUSE_ACCEPTED'
+  )) || null;
   return Object.freeze({
     version: 'new_bos_resumable_runtime_inspection_v1',
     namespace: Object.freeze({
@@ -103,14 +105,17 @@ export async function inspectNewBosResumableRuntimeState({
     realization_state: realizationInspection.state,
     current_realization_id: realizationInspection.pointer || null,
     complete_surface_count: realizationInspection.current?.complete_surface_count || 0,
-    recovery_review_provenance: firstReviewStop
+    recovery_review_provenance: firstRecoveryDecision
       ? Object.freeze({
-        source: 'resumable_checkpoint_classification',
-        unit_identity: firstReviewStop.unit_identity,
-        checkpoint_state: firstReviewStop.checkpoint_state,
-        review_reason: firstReviewStop.review_reason,
+        source: firstRecoveryDecision.recovery_disposition === 'STOP'
+          ? 'resumable_checkpoint_review'
+          : 'resumable_checkpoint_recovery',
+        unit_identity: firstRecoveryDecision.unit_identity,
+        checkpoint_state: firstRecoveryDecision.checkpoint_state,
+        recovery_disposition: firstRecoveryDecision.recovery_disposition,
+        reason: firstRecoveryDecision.review_reason,
       })
-      : Object.freeze({ source: 'no_checkpoint_review_stop_observed' }),
+      : Object.freeze({ source: 'no_checkpoint_recovery_or_review_observed' }),
     units: Object.freeze(units),
   });
 }
