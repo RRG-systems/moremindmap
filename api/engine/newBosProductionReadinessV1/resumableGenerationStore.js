@@ -39,6 +39,12 @@ function terminalArchiveKey(key, attempt) {
   return `${key}:terminal-archive-v1:attempt:${attempt}`;
 }
 
+function replacementClaimKey(key, nextAttempt) {
+  return nextAttempt === 2
+    ? `${key}:replacement-claim-v1`
+    : `${key}:replacement-claim-v1:attempt:${nextAttempt}`;
+}
+
 function parse(raw) {
   return raw ? JSON.parse(raw) : null;
 }
@@ -101,15 +107,46 @@ function classify(record) {
   return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: 'unknown_terminal_state' });
 }
 
+function isMaxOutputThenServerErrorSequence({ current, attemptOneArchive } = {}) {
+  return current?.attempt === 2
+    && current?.observation?.status === 'failed'
+    && current?.observation?.error_code === 'server_error'
+    && attemptOneArchive?.version === 'new_bos_resumable_terminal_archive_v1'
+    && attemptOneArchive?.attempt === 1
+    && attemptOneArchive?.replacement_authorized === true
+    && attemptOneArchive?.observation?.status === 'incomplete'
+    && attemptOneArchive?.observation?.incomplete_details_reason === 'max_output_tokens'
+    && attemptOneArchive?.campaign_sha256 === current?.campaign_sha256
+    && attemptOneArchive?.unit_id === current?.unit_id
+    && attemptOneArchive?.unit_identity_sha256 === current?.unit_identity_sha256
+    && attemptOneArchive?.request_sha256 === current?.request_sha256;
+}
+
+async function classifyWithHistory({ redis, key, record } = {}) {
+  const classification = classify(record);
+  if (classification.state !== 'TERMINAL_EXHAUSTED'
+    || classification.reason !== 'server_error'
+    || record?.attempt !== 2) {
+    return classification;
+  }
+  const attemptOneArchive = parse(await redis.get(terminalArchiveKey(key, 1)));
+  if (!isMaxOutputThenServerErrorSequence({ current: record, attemptOneArchive })) {
+    return classification;
+  }
+  return Object.freeze({
+    state: 'TERMINAL_RETRYABLE',
+    disposition: 'START_REPLACEMENT',
+    reason: 'server_error',
+    retry_sequence: 'max_output_tokens_to_server_error',
+    final_attempt: 3,
+  });
+}
+
 export function createRedisNewBosResumableGenerationStore({ redis, namespace } = {}) {
   if (typeof redis?.get !== 'function' || typeof redis?.set !== 'function') {
     throw new Error('new_bos_resumable_store_redis_contract_invalid');
   }
   assertNamespace(namespace);
-
-  async function read({ campaignSha256, unitId }) {
-    return parse(await redis.get(rootKey(namespace, campaignSha256, unitId)));
-  }
 
   async function prepare({ campaignSha256, unitId, unitIdentitySha256, requestSha256 }) {
     assertIdentity(unitIdentitySha256, 'unit_identity');
@@ -119,9 +156,10 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
     if (existing) {
       if (existing.unit_identity_sha256 !== unitIdentitySha256) throw new Error('new_bos_resumable_store_unit_identity_mismatch');
       if (existing.request_sha256 !== requestSha256) throw new Error('new_bos_resumable_store_request_hash_mismatch');
-      const classification = classify(existing);
+      const classification = await classifyWithHistory({ redis, key, record: existing });
       if (classification.disposition === 'START_REPLACEMENT') {
-        const claimKey = `${key}:replacement-claim-v1`;
+        const nextAttempt = existing.attempt + 1;
+        const claimKey = replacementClaimKey(key, nextAttempt);
         const archiveKey = terminalArchiveKey(key, existing.attempt);
         const archived = Object.freeze({
           version: 'new_bos_resumable_terminal_archive_v1',
@@ -148,6 +186,8 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
           unit_identity_sha256: unitIdentitySha256,
           request_sha256: requestSha256,
           prior_attempt: existing.attempt,
+          next_attempt: nextAttempt,
+          retry_sequence: classification.retry_sequence || null,
           claimed_at: new Date().toISOString(),
         });
         const claimed = await redis.set(claimKey, JSON.stringify(claim), 'NX');
@@ -156,7 +196,7 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
           ...claim,
           version: 'new_bos_resumable_unit_checkpoint_v1',
           state: 'SUBMISSION_INTENT',
-          attempt: 2,
+          attempt: nextAttempt,
           claim_token_sha256: sha256Stable(crypto.randomUUID()),
           observation: null,
         });
@@ -185,8 +225,9 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
 
   return Object.freeze({
     async inspect({ campaignSha256, unitId }) {
-      const record = await read({ campaignSha256, unitId });
-      return Object.freeze({ record, classification: classify(record) });
+      const key = rootKey(namespace, campaignSha256, unitId);
+      const record = parse(await redis.get(key));
+      return Object.freeze({ record, classification: await classifyWithHistory({ redis, key, record }) });
     },
 
     prepare,

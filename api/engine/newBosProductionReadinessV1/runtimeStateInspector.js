@@ -32,6 +32,8 @@ function sanitizeUnitInspection(unitId, inspection) {
     unit_identity: unitId,
     checkpoint_state: classification.state,
     recovery_disposition: classification.disposition,
+    ...(classification.retry_sequence ? { retry_sequence: classification.retry_sequence } : {}),
+    ...(Number.isInteger(classification.final_attempt) ? { final_attempt: classification.final_attempt } : {}),
     review_reason: classification.reason || null,
     accepted: record?.state === 'ACCEPTED',
     attempt: Number.isInteger(record?.attempt) ? record.attempt : null,
@@ -113,6 +115,8 @@ export async function inspectNewBosResumableRuntimeState({
         unit_identity: firstRecoveryDecision.unit_identity,
         checkpoint_state: firstRecoveryDecision.checkpoint_state,
         recovery_disposition: firstRecoveryDecision.recovery_disposition,
+        ...(firstRecoveryDecision.retry_sequence ? { retry_sequence: firstRecoveryDecision.retry_sequence } : {}),
+        ...(Number.isInteger(firstRecoveryDecision.final_attempt) ? { final_attempt: firstRecoveryDecision.final_attempt } : {}),
         reason: firstRecoveryDecision.review_reason,
       })
       : Object.freeze({ source: 'no_checkpoint_recovery_or_review_observed' }),

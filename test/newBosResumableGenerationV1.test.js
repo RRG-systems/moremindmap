@@ -241,6 +241,95 @@ test('documented transient machinery failure permits exactly one replacement', a
   assert.equal(exhausted.classification.state, 'TERMINAL_EXHAUSTED');
 });
 
+test('exact max-output then server-error sequence permits one third-and-final attempt', async () => {
+  const redis = fakeRedis();
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace: 'nonprod:new-bos:final-sequence-retry-test' });
+  const unitId = 'semantic:causal_foundation';
+
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: {
+      provider_response_id: 'resp_sequence_attempt_one',
+      status: 'incomplete',
+      incomplete_details_reason: 'max_output_tokens',
+    },
+  });
+  assert.equal((await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST })).record.attempt, 2);
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: {
+      provider_response_id: 'resp_sequence_attempt_two',
+      status: 'failed',
+      error_code: 'server_error',
+    },
+  });
+
+  const review = await store.inspect({ campaignSha256: CAMPAIGN, unitId });
+  assert.equal(review.classification.disposition, 'START_REPLACEMENT');
+  assert.equal(review.classification.retry_sequence, 'max_output_tokens_to_server_error');
+  assert.equal(review.classification.final_attempt, 3);
+
+  const finalAttempt = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  assert.equal(finalAttempt.disposition, 'START_REPLACEMENT');
+  assert.equal(finalAttempt.record.attempt, 3);
+  assert.equal(finalAttempt.record.retry_sequence, 'max_output_tokens_to_server_error');
+  const attemptTwoArchive = [...redis.values.entries()].find(([key]) => key.includes(':terminal-archive-v1:attempt:2'));
+  assert.ok(attemptTwoArchive);
+  assert.equal(JSON.parse(attemptTwoArchive[1]).observation.error_code, 'server_error');
+
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: {
+      provider_response_id: 'resp_sequence_attempt_three',
+      status: 'failed',
+      error_code: 'server_error',
+    },
+  });
+  const exhausted = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  assert.equal(exhausted.disposition, 'STOP');
+  assert.equal(exhausted.classification.state, 'TERMINAL_EXHAUSTED');
+  assert.equal(exhausted.classification.reason, 'server_error');
+});
+
+test('third-attempt authority is denied for any other two-attempt sequence', async () => {
+  const redis = fakeRedis();
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace: 'nonprod:new-bos:other-sequence-stop-test' });
+  const unitId = 'semantic:causal_foundation';
+
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: 'resp_other_attempt_one', status: 'failed', error_code: 'service_unavailable' },
+  });
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: 'resp_other_attempt_two', status: 'failed', error_code: 'server_error' },
+  });
+
+  const stopped = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  assert.equal(stopped.disposition, 'STOP');
+  assert.equal(stopped.classification.state, 'TERMINAL_EXHAUSTED');
+  assert.equal(stopped.classification.reason, 'server_error');
+  assert.equal([...redis.values.keys()].some((key) => key.includes(':terminal-archive-v1:attempt:2')), false);
+});
+
 test('unconfirmed response-ID custody stops instead of blindly resubmitting', async () => {
   const store = createRedisNewBosResumableGenerationStore({ redis: fakeRedis(), namespace: 'nonprod:new-bos:crash-gap-test' });
   await store.prepare({ campaignSha256: CAMPAIGN, unitId: 'semantic:surface_routing', unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
