@@ -292,7 +292,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
         <h3>{session.start_action === 'START_MY_FIRST_SESSION' ? 'Your coaching relationship is ready.' : 'Ready when you are.'}</h3>
         <p>{session.start_action === 'START_MY_FIRST_SESSION' ? 'Start when you are ready to meet your MORE coach and begin the work.' : 'MORE remembers where you left off. Start when you are ready to continue.'}</p>
         <button type="button" disabled={busy} onClick={startSession}>{session.start_action === 'START_MY_FIRST_SESSION' ? 'START MY FIRST SESSION' : 'START SESSION'}</button>
-        <small>If I ever sound too technical or complicated, tell me. Ask me to explain it more simply or adjust how I communicate.</small>
+        <small className="s2-session-start-note">If I ever sound too technical or complicated, tell me. Ask me to explain it more simply or adjust how I communicate.</small>
       </section>}
       {pending && <ExactUpdateCard proposal={pending} busy={busy} onDecision={decide} />}
       {sources.length > 0 && <section className="living-research" aria-label="Current external sources"><span>Current outside information</span>{sources.map((source) => <a key={source.external_evidence_id} href={source.source_url} target="_blank" rel="noreferrer">{source.source_title}</a>)}<small>This information can help the conversation. It does not change what MORE knows about your business.</small></section>}

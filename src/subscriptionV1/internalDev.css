@@ -10,6 +10,7 @@
 .s2-subject-switcher button[aria-pressed="true"] { border-color: rgba(105, 226, 112, .72); color: #eff8f1; background: linear-gradient(145deg, rgba(34, 105, 56, .42), rgba(10, 41, 47, .92)); box-shadow: inset 0 0 0 1px rgba(105, 226, 112, .12), 0 0 20px rgba(61, 196, 80, .08); }
 .s2-subject-switcher strong { color: #68df6d; font-size: .68rem; font-weight: 800; letter-spacing: .13em; line-height: 1.1; }
 .s2-subject-switcher span { overflow: hidden; font-size: .72rem; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+.s2-session-start .s2-session-start-note { display: block; margin-top: .75rem; line-height: 1.45; }
 .s2-composer-meta { display: flex; grid-column: 1 / -1; align-items: center; justify-content: space-between; gap: .65rem; min-width: 0; }
 .s2-composer-meta small { display: block; flex: 1 1 auto; min-width: 0; margin: 0; overflow-wrap: anywhere; }
 .living-composer .s2-end-session { flex: 0 0 auto; align-self: center; width: auto; min-width: 7.5rem; min-height: 2.6rem; padding: .55rem .78rem; border-color: rgba(119, 166, 197, .34); color: #a9c2ce; background: rgba(15, 40, 55, .72); font-size: .68rem; font-weight: 700; letter-spacing: .015em; line-height: 1.15; white-space: nowrap; }

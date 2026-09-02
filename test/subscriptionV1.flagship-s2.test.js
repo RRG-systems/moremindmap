@@ -295,6 +295,7 @@ test('a real demo-only AFW-05 change triggers the mandatory map-change GU while 
 
 test('rendered S2 change surface supports explicit start, mandatory GU, both demo subjects, Enter semantics, and customer-language recovery', () => {
   const ui = fs.readFileSync(new URL('../src/subscriptionV1/SubscriptionV1InternalDevApp.jsx', import.meta.url), 'utf8');
+  const styles = fs.readFileSync(new URL('../src/subscriptionV1/internalDev.css', import.meta.url), 'utf8');
   const renderer = fs.readFileSync(new URL('../src/subscriptionS2/SubscriptionS2GuRenderer.jsx', import.meta.url), 'utf8');
   const server = fs.readFileSync(new URL('../scripts/subscriptionS2LocalServer.mjs', import.meta.url), 'utf8');
   const runtime = fs.readFileSync(new URL('../api/internal/subscription-v1-runtime.js', import.meta.url), 'utf8');
@@ -305,6 +306,8 @@ test('rendered S2 change surface supports explicit start, mandatory GU, both dem
   assert.match(ui, /event\.key !== 'Enter' \|\| event\.shiftKey/u);
   assert.match(ui, /submitLockRef/u);
   assert.match(ui, /explain it more simply/u);
+  assert.match(ui, /className="s2-session-start-note"/u);
+  assert.match(styles, /\.s2-session-start \.s2-session-start-note\s*\{[^}]*display:\s*block;[^}]*margin-top:\s*\.75rem;/u);
   assert.match(renderer, /data-s2-gu-event/u);
   assert.doesNotMatch(renderer, /block\.type\.replaceAll/u);
   assert.match(server, /127\.0\.0\.1/u);
