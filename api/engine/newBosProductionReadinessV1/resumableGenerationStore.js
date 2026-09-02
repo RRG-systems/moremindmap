@@ -120,6 +120,13 @@ function sanitizeObservation(event) {
 function classify(record) {
   if (!record) return Object.freeze({ state: 'MISSING', disposition: 'START_INITIAL' });
   if (record.state === 'ACCEPTED') return Object.freeze({ state: 'ACCEPTED', disposition: 'REUSE_ACCEPTED' });
+  if (record.state === 'SEMANTIC_REJECTED') {
+    return Object.freeze({
+      state: 'SEMANTIC_REJECTED',
+      disposition: 'STOP',
+      reason: record.semantic_rejection_code || 'semantic_validation_failed',
+    });
+  }
   if (record.state === 'SUBMISSION_INTENT' && !record.observation?.provider_response_id) {
     return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: 'response_id_custody_unconfirmed' });
   }
@@ -149,7 +156,6 @@ function classify(record) {
   if (['failed', 'cancelled'].includes(status)) {
     return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: record.observation?.error_code || status });
   }
-  if (record.state === 'SEMANTIC_REJECTED') return Object.freeze({ state: 'SEMANTIC_REJECTED', disposition: 'STOP' });
   return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: 'unknown_terminal_state' });
 }
 
@@ -617,6 +623,9 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
         if (existing.accepted_value_sha256 !== valueSha256) throw new Error('new_bos_resumable_store_accepted_value_conflict');
         return existing;
       }
+      if (existing.state === 'SEMANTIC_REJECTED') {
+        throw new Error('new_bos_resumable_store_accept_semantic_rejected');
+      }
       const accepted = Object.freeze({
         ...existing,
         state: 'ACCEPTED',
@@ -628,17 +637,45 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
       return accepted;
     },
 
-    async rejectSemantic({ campaignSha256, unitId, unitIdentitySha256, requestSha256, code }) {
+    async rejectSemantic({ campaignSha256, unitId, unitIdentitySha256, requestSha256, code, rejection = null }) {
       const key = rootKey(namespace, campaignSha256, unitId);
       const existing = parse(await redis.get(key));
       if (!existing) throw new Error('new_bos_resumable_store_reject_without_intent');
       if (existing.unit_identity_sha256 !== unitIdentitySha256 || existing.request_sha256 !== requestSha256) {
         throw new Error('new_bos_resumable_store_reject_identity_mismatch');
       }
+      const typed = rejection && typeof rejection === 'object'
+        ? Object.freeze({
+          code: String(rejection.category || 'SEMANTIC_VALIDATION_REJECTION'),
+          validator: String(rejection.validator || 'semantic_validator'),
+          detail: rejection.language_class ? String(rejection.language_class) : null,
+          validation_code_sha256: rejection.validation_code_sha256 || null,
+        })
+        : Object.freeze({
+          code: String(code || 'semantic_validation_failed'),
+          validator: null,
+          detail: null,
+          validation_code_sha256: null,
+        });
+      if (existing.state === 'SEMANTIC_REJECTED') {
+        if (existing.semantic_rejection_code !== typed.code
+          || (existing.semantic_validator || null) !== typed.validator
+          || (existing.semantic_rejection_detail || null) !== typed.detail
+          || (existing.semantic_validation_code_sha256 || null) !== typed.validation_code_sha256) {
+          throw new Error('new_bos_resumable_store_semantic_rejection_conflict');
+        }
+        return existing;
+      }
+      if (existing.state === 'ACCEPTED') {
+        throw new Error('new_bos_resumable_store_reject_accepted');
+      }
       const rejected = Object.freeze({
         ...existing,
         state: 'SEMANTIC_REJECTED',
-        semantic_rejection_code: String(code || 'semantic_validation_failed'),
+        semantic_rejection_code: typed.code,
+        semantic_validator: typed.validator,
+        semantic_rejection_detail: typed.detail,
+        semantic_validation_code_sha256: typed.validation_code_sha256,
         rejected_at: new Date().toISOString(),
       });
       await redis.set(key, JSON.stringify(rejected));

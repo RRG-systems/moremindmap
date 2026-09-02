@@ -72,8 +72,13 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       && request.query?.action === 'replace-stale-surface-routing';
     const invalidStage3Repair = request.method === 'POST'
       && request.query?.action === 'repair-invalid-stage3-vector-free';
+    const completedStage3Classification = request.method === 'POST'
+      && request.query?.action === 'classify-completed-stage3-semantic-rejection';
     if (!['GET', 'POST'].includes(request.method)
-      || (request.method === 'POST' && !staleSurfaceRoutingReplacement && !invalidStage3Repair)) {
+      || (request.method === 'POST'
+        && !staleSurfaceRoutingReplacement
+        && !invalidStage3Repair
+        && !completedStage3Classification)) {
       return response.status(405).json({ error: 'Method not allowed' });
     }
     try {
@@ -82,6 +87,8 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
         ? 'replaceStaleSurfaceRouting'
         : invalidStage3Repair
           ? 'repairInvalidStage3VectorFree'
+        : completedStage3Classification
+          ? 'classifyCompletedStage3SemanticRejection'
         : request.query?.diagnostic === 'completed-stage3-validation'
           ? 'inspectCompletedStage3Validation'
         : request.query?.diagnostic === 'semantic-assembly'
@@ -99,6 +106,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           'inspectResumable',
           'inspectAcceptedSemanticAssembly',
           'inspectCompletedStage3Validation',
+          'classifyCompletedStage3SemanticRejection',
           'replaceStaleSurfaceRouting',
           'repairInvalidStage3VectorFree',
         ].includes(operation)
@@ -119,6 +127,12 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           expectedUnitIdentitySha256: request.query?.expected_unit_identity_sha256,
           expectedRequestSha256: request.query?.expected_request_sha256,
           expectedProviderResponseIdSha256: request.query?.expected_provider_response_id_sha256,
+        } : {}),
+        ...(operation === 'classifyCompletedStage3SemanticRejection' ? {
+          expectedCampaignSha256: request.body?.expected_campaign_sha256,
+          expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,
+          expectedRequestSha256: request.body?.expected_request_sha256,
+          expectedProviderResponseIdSha256: request.body?.expected_provider_response_id_sha256,
         } : {}),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));

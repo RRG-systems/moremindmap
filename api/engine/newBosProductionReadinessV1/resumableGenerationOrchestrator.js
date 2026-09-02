@@ -8,6 +8,7 @@ import {
   NEW_BOS_SEMANTIC_STAGES,
   validateNewBosSemanticStageFragment,
 } from './resumableSemanticContract.js';
+import { classifySemanticValidationError } from './completedStage3ValidationDiagnostic.js';
 
 function terminalObservation(error) {
   const response = error?.providerResponse;
@@ -205,13 +206,14 @@ export async function runNewBosResumableSemanticGeneration({
       }));
     } catch (error) {
       if (error?.background_pending || error?.human_review_required) throw error;
-      if (/privacy|model_substitution|invalid_json|empty_output|fragment|schema|evidence|authority|truth/u.test(error?.message || '')) {
+      const rejection = classifySemanticValidationError(error);
+      if (rejection) {
         await checkpointStore.rejectSemantic({
           campaignSha256: campaignIdentity.sha256,
           unitId,
           unitIdentitySha256,
           requestSha256,
-          code: error?.message,
+          rejection,
         });
       }
       throw error;

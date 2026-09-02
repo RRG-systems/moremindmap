@@ -189,6 +189,188 @@ test('completed stage-3 diagnostic classifies validation without retaining provi
     classifyCompletedStage3ValidationError(new Error('new_bos_semantic_stage_invalid_json')).category,
     'OUTPUT_CONTRACT_REJECTION',
   );
+  assert.deepEqual(classifyCompletedStage3ValidationError(
+    new Error('Whole-person model leaked assessment language: adaptability'),
+  ), {
+    category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+    validator: 'assertVectorFreeWholePerson',
+    language_class: 'ADAPTABILITY_LANGUAGE',
+    validation_code_sha256: providerResponseIdSha256('Whole-person model leaked assessment language: adaptability'),
+  });
+});
+
+function semanticRejectionHarness({ profileId, sourceHash, namespace }) {
+  const rawEvidence = Object.freeze({
+    ...RICH_SYNTHETIC_FIXTURE.rawEvidence,
+    generation_metadata: Object.freeze({ canonical_source_sha256: sourceHash }),
+  });
+  const realizationIdentity = buildNewBosRealizationIdentity({
+    profileId,
+    canonicalSourceSha256: sourceHash,
+    rawEvidenceVersion: rawEvidence.version,
+    providerModel: 'gpt-5.6-sol',
+    compatibilityClass: 'A',
+  });
+  const governedContext = [{
+    retrieved: {
+      authorities: [{ id: 1, title: 'Synthetic doctrine', sha256: 'e'.repeat(64), bounded_block: 'Use governed evidence without invention.' }],
+    },
+  }];
+  const redis = fakeRedis();
+  return {
+    rawEvidence,
+    realizationIdentity,
+    governedContext,
+    store: createRedisNewBosResumableGenerationStore({ redis, namespace }),
+    campaign: buildNewBosResumableCampaignIdentity({
+      realizationIdentity,
+      evidenceIds: rawEvidence.evidence.map(({ evidence_id: id }) => id),
+    }),
+  };
+}
+
+test('fresh vector-free stage-3 rejection persists the typed validator receipt and can never be accepted', async () => {
+  const harness = semanticRejectionHarness({
+    profileId: 'MM-SYNTHETIC-FRESH-REJECTION',
+    sourceHash: '1'.repeat(64),
+    namespace: 'nonprod:new-bos:fresh-semantic-rejection-test',
+  });
+  const fragments = splitFixture();
+  const invalidStage3 = structuredClone(fragments[2].fragment);
+  invalidStage3.whole_person.core_explanation = 'Adaptability language is prohibited in this customer-facing contract.';
+  let creates = 0;
+  const client = {
+    responses: {
+      async create() {
+        const fragment = [fragments[0].fragment, fragments[1].fragment, invalidStage3][creates];
+        creates += 1;
+        return {
+          id: `resp_fresh_rejection_${creates}`,
+          status: 'completed',
+          model: 'gpt-5.6-sol',
+          output_text: JSON.stringify(fragment),
+          usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+        };
+      },
+      async retrieve() { throw new Error('fresh result must not use provider retrieval'); },
+    },
+  };
+  await assert.rejects(runNewBosResumableSemanticGeneration({
+    ...harness,
+    model: 'gpt-5.6-sol',
+    client,
+    checkpointStore: harness.store,
+  }), /Whole-person model leaked assessment language: adaptability/u);
+  assert.equal(creates, 3);
+  const stage3 = await harness.store.inspect({
+    campaignSha256: harness.campaign.sha256,
+    unitId: 'semantic:whole_person_decision_synthesis',
+  });
+  assert.equal(stage3.record.state, 'SEMANTIC_REJECTED');
+  assert.equal(stage3.record.observation.status, 'completed');
+  assert.equal(stage3.record.attempt, 1);
+  assert.equal(stage3.record.semantic_rejection_code, 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION');
+  assert.equal(stage3.record.semantic_validator, 'assertVectorFreeWholePerson');
+  assert.equal(stage3.record.semantic_rejection_detail, 'ADAPTABILITY_LANGUAGE');
+  assert.equal(stage3.classification.state, 'SEMANTIC_REJECTED');
+  assert.equal(stage3.classification.reason, 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION');
+  await assert.rejects(harness.store.accept({
+    campaignSha256: harness.campaign.sha256,
+    unitId: 'semantic:whole_person_decision_synthesis',
+    unitIdentitySha256: stage3.record.unit_identity_sha256,
+    requestSha256: stage3.record.request_sha256,
+    value: fragments[2].fragment,
+  }), /accept_semantic_rejected/u);
+});
+
+test('resumed completed vector-free rejection persists the same typed receipt with zero replacement submission', async () => {
+  const harness = semanticRejectionHarness({
+    profileId: 'MM-SYNTHETIC-RESUMED-REJECTION',
+    sourceHash: '2'.repeat(64),
+    namespace: 'nonprod:new-bos:resumed-semantic-rejection-test',
+  });
+  const fragments = splitFixture();
+  const invalidStage3 = structuredClone(fragments[2].fragment);
+  invalidStage3.whole_person.core_explanation = 'Adaptability language is prohibited in this resumed customer-facing contract.';
+  let creates = 0;
+  let retrieves = 0;
+  const client = {
+    responses: {
+      async create() {
+        creates += 1;
+        if (creates < 3) return {
+          id: `resp_resumed_dependency_${creates}`,
+          status: 'completed',
+          model: 'gpt-5.6-sol',
+          output_text: JSON.stringify(fragments[creates - 1].fragment),
+        };
+        return { id: 'resp_resumed_stage3', status: 'in_progress', model: 'gpt-5.6-sol' };
+      },
+      async retrieve(responseId) {
+        retrieves += 1;
+        assert.equal(responseId, 'resp_resumed_stage3');
+        return {
+          id: responseId,
+          status: 'completed',
+          model: 'gpt-5.6-sol',
+          output_text: JSON.stringify(invalidStage3),
+          usage: { input_tokens: 20, output_tokens: 20, total_tokens: 40 },
+        };
+      },
+    },
+  };
+  await assert.rejects(runNewBosResumableSemanticGeneration({
+    ...harness,
+    model: 'gpt-5.6-sol',
+    client,
+    checkpointStore: harness.store,
+    interactiveWaitMs: 0,
+  }), /new_bos_background_poll_timeout/u);
+  await assert.rejects(runNewBosResumableSemanticGeneration({
+    ...harness,
+    model: 'gpt-5.6-sol',
+    client,
+    checkpointStore: harness.store,
+    interactiveWaitMs: 0,
+  }), /Whole-person model leaked assessment language: adaptability/u);
+  assert.equal(creates, 3);
+  assert.equal(retrieves, 1);
+  const stage3 = await harness.store.inspect({
+    campaignSha256: harness.campaign.sha256,
+    unitId: 'semantic:whole_person_decision_synthesis',
+  });
+  assert.equal(stage3.record.state, 'SEMANTIC_REJECTED');
+  assert.equal(stage3.record.observation.status, 'completed');
+  assert.equal(stage3.record.attempt, 1);
+  assert.equal(stage3.record.semantic_rejection_code, 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION');
+  assert.equal(stage3.record.semantic_validator, 'assertVectorFreeWholePerson');
+  assert.equal(stage3.record.semantic_rejection_detail, 'ADAPTABILITY_LANGUAGE');
+  assert.equal(stage3.classification.state, 'SEMANTIC_REJECTED');
+  assert.equal(stage3.classification.reason, 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION');
+});
+
+test('malformed semantic output is typed while provider terminal failure remains a distinct machinery state', async () => {
+  const semantic = classifyCompletedStage3ValidationError(
+    new Error('new_bos_semantic_fragment_key_mismatch:whole_person_decision_synthesis'),
+  );
+  assert.equal(semantic.category, 'SCHEMA_SHAPE_REJECTION');
+  assert.equal(classifyCompletedStage3ValidationError(
+    new Error('new_bos_semantic_stage_invalid_json'),
+  ).category, 'OUTPUT_CONTRACT_REJECTION');
+  const redis = fakeRedis();
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace: 'nonprod:new-bos:terminal-distinction-test' });
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId: 'semantic:causal_foundation', unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:causal_foundation',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    event: { provider_response_id: 'resp_terminal', status: 'incomplete', incomplete_details_reason: 'content_filter' },
+  });
+  const terminal = await store.inspect({ campaignSha256: CAMPAIGN, unitId: 'semantic:causal_foundation' });
+  assert.notEqual(terminal.record.state, 'SEMANTIC_REJECTED');
+  assert.equal(terminal.classification.state, 'HUMAN_REVIEW_REQUIRED');
+  assert.equal(terminal.classification.reason, 'content_filter');
 });
 
 test('assembled interpretation runs through the unchanged production runtime validators without provider inference', async () => {
@@ -246,6 +428,20 @@ test('durable unit resumes an exact active response and reuses accepted output',
   const reused = await store.prepare({ campaignSha256: CAMPAIGN, unitId: 'semantic:causal_foundation', unitIdentitySha256: UNIT_IDENTITY, requestSha256: REQUEST });
   assert.equal(reused.disposition, 'REUSE_ACCEPTED');
   assert.equal(reused.record.accepted_value_sha256, sha256Stable(value));
+  await assert.rejects(store.rejectSemantic({
+    campaignSha256: CAMPAIGN,
+    unitId: 'semantic:causal_foundation',
+    unitIdentitySha256: UNIT_IDENTITY,
+    requestSha256: REQUEST,
+    rejection: {
+      category: 'SCHEMA_SHAPE_REJECTION',
+      validator: 'validateNewBosSemanticStageFragment',
+      validation_code_sha256: 'f'.repeat(64),
+    },
+  }), /reject_accepted/u);
+  const stillAccepted = await store.inspect({ campaignSha256: CAMPAIGN, unitId: 'semantic:causal_foundation' });
+  assert.equal(stillAccepted.record.state, 'ACCEPTED');
+  assert.equal(stillAccepted.record.accepted_value_sha256, sha256Stable(value));
 });
 
 test('incomplete without a provider reason requires human review and cannot spend retry authority', async () => {

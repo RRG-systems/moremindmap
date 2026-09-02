@@ -1,14 +1,13 @@
 import crypto from 'node:crypto';
 
-const VECTOR_FREE_FAILURE = /^Whole-person model leaked assessment language: (assessment|vector|dimension|structure score|measured pattern)$/u;
+import { FORBIDDEN_WHOLE_PERSON_LANGUAGE } from '../../../src/lib/newBosPersonalityDnaV1/constants.js';
 
-const VECTOR_FREE_CLASSES = Object.freeze({
-  assessment: 'ASSESSMENT_LANGUAGE',
-  vector: 'VECTOR_LANGUAGE',
-  dimension: 'DIMENSION_LANGUAGE',
-  'structure score': 'STRUCTURE_SCORE_LANGUAGE',
-  'measured pattern': 'MEASURED_PATTERN_LANGUAGE',
-});
+const VECTOR_FREE_FAILURE_PREFIX = 'Whole-person model leaked assessment language: ';
+
+const VECTOR_FREE_CLASSES = Object.freeze(Object.fromEntries(FORBIDDEN_WHOLE_PERSON_LANGUAGE.map((term) => [
+  term,
+  `${term.toUpperCase().replaceAll(' ', '_')}_LANGUAGE`,
+])));
 
 function sha256Text(value) {
   return crypto.createHash('sha256').update(String(value || '')).digest('hex');
@@ -43,14 +42,16 @@ export function sanitizeCompletedStage3ProviderMetadata(response) {
   });
 }
 
-export function classifyCompletedStage3ValidationError(error) {
+export function classifySemanticValidationError(error) {
   const message = String(error?.message || '');
-  const vectorFree = message.match(VECTOR_FREE_FAILURE);
-  if (vectorFree) {
+  const vectorFreeTerm = message.startsWith(VECTOR_FREE_FAILURE_PREFIX)
+    ? message.slice(VECTOR_FREE_FAILURE_PREFIX.length)
+    : null;
+  if (vectorFreeTerm && Object.hasOwn(VECTOR_FREE_CLASSES, vectorFreeTerm)) {
     return Object.freeze({
       category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
       validator: 'assertVectorFreeWholePerson',
-      language_class: VECTOR_FREE_CLASSES[vectorFree[1]],
+      language_class: VECTOR_FREE_CLASSES[vectorFreeTerm],
       validation_code_sha256: sha256Text(message),
     });
   }
@@ -82,6 +83,13 @@ export function classifyCompletedStage3ValidationError(error) {
       validation_code_sha256: sha256Text(message),
     });
   }
+  return null;
+}
+
+export function classifyCompletedStage3ValidationError(error) {
+  const classified = classifySemanticValidationError(error);
+  if (classified) return classified;
+  const message = String(error?.message || '');
   return Object.freeze({
     category: 'OTHER_TYPED_VALIDATION_REJECTION',
     validator: 'stage3_acceptance_validator',

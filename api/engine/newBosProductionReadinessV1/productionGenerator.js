@@ -32,6 +32,7 @@ import {
 } from './resumableSemanticContract.js';
 import {
   classifyCompletedStage3ValidationError,
+  classifySemanticValidationError,
   providerResponseIdSha256,
   sanitizeCompletedStage3ProviderMetadata,
 } from './completedStage3ValidationDiagnostic.js';
@@ -577,13 +578,14 @@ export function createProductionNewBosGenerator({
             campaign_sha256: expectedCampaignSha256,
           });
         }
-        if (/privacy|model_substitution|invalid_json|empty_output|fragment|schema|evidence|authority|truth|assessment language/u.test(error?.message || '')) {
+        const rejection = classifySemanticValidationError(error);
+        if (rejection) {
           await resumableGenerationStore.rejectSemantic({
             campaignSha256: expectedCampaignSha256,
             unitId: plan.unit_id,
             unitIdentitySha256: plan.unit_identity_sha256,
             requestSha256: plan.request_sha256,
-            code: error?.message,
+            rejection,
           });
         }
         throw error;
@@ -602,6 +604,7 @@ export function createProductionNewBosGenerator({
       expectedUnitIdentitySha256,
       expectedRequestSha256,
       expectedProviderResponseIdSha256,
+      persistSemanticRejection = false,
     } = {}) => {
       if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
       if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
@@ -707,6 +710,19 @@ export function createProductionNewBosGenerator({
           checkpoint_writes: 0,
         });
       } catch (error) {
+        const rejection = classifySemanticValidationError(error);
+        if (persistSemanticRejection && !rejection) {
+          throw new Error('new_bos_completed_stage3_semantic_rejection_not_typed');
+        }
+        const checkpoint = persistSemanticRejection
+          ? await resumableGenerationStore.rejectSemantic({
+            campaignSha256: expectedCampaignSha256,
+            unitId: plan.unit_id,
+            unitIdentitySha256: expectedUnitIdentitySha256,
+            requestSha256: expectedRequestSha256,
+            rejection,
+          })
+          : null;
         return Object.freeze({
           version: 'new_bos_completed_stage3_validation_diagnostic_v1',
           ...classifyCompletedStage3ValidationError(error),
@@ -716,7 +732,11 @@ export function createProductionNewBosGenerator({
           provider: providerMetadata,
           provider_submissions: 0,
           provider_retrievals: 1,
-          checkpoint_writes: 0,
+          checkpoint_writes: checkpoint ? 1 : 0,
+          checkpoint_state: checkpoint?.state || inspection.record.state,
+          semantic_rejection_code: checkpoint?.semantic_rejection_code || null,
+          semantic_validator: checkpoint?.semantic_validator || null,
+          semantic_rejection_detail: checkpoint?.semantic_rejection_detail || null,
         });
       }
     },

@@ -510,6 +510,66 @@ test('completed stage-3 diagnostic is protected, read-only, and hash-bound', asy
   assert.equal(calls[1].platformProtected, false);
 });
 
+test('completed stage-3 semantic-rejection classification is POST-only, hash-bound, and exact-candidate protected', async () => {
+  const response = () => ({
+    statusCode: null, body: null, setHeader() {},
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.body = body; return this; },
+  });
+  const calls = [];
+  const handler = createNewBosProductionRouteHandler({
+    config: {
+      staged: true,
+      canaryEnabled: false,
+      customerActive: true,
+      deploymentHost: 'candidate.example.vercel.app',
+    },
+    serviceFactory: async () => ({
+      classifyCompletedStage3SemanticRejection: async (input) => {
+        calls.push(input);
+        if (!input.platformProtected) throw new Error('new_bos_completed_stage3_classification_requires_protected_candidate');
+        return {
+          checkpoint_state: 'SEMANTIC_REJECTED',
+          semantic_rejection_code: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+          checkpoint_writes: 1,
+          provider_retrievals: 1,
+          provider_submissions: 0,
+        };
+      },
+    }),
+  });
+  const exact = response();
+  await handler({
+    method: 'POST',
+    query: { id: PROFILE, action: 'classify-completed-stage3-semantic-rejection' },
+    headers: { host: 'candidate.example.vercel.app' },
+    body: {
+      expected_campaign_sha256: '1'.repeat(64),
+      expected_unit_identity_sha256: '2'.repeat(64),
+      expected_request_sha256: '3'.repeat(64),
+      expected_provider_response_id_sha256: '4'.repeat(64),
+    },
+  }, exact);
+  assert.equal(exact.statusCode, 200);
+  assert.equal(calls[0].platformProtected, true);
+  assert.equal(calls[0].expectedCampaignSha256, '1'.repeat(64));
+  assert.equal(calls[0].expectedProviderResponseIdSha256, '4'.repeat(64));
+  assert.equal(exact.body.checkpoint_state, 'SEMANTIC_REJECTED');
+  assert.equal(exact.body.checkpoint_writes, 1);
+  assert.equal(exact.body.provider_retrievals, 1);
+  assert.equal(exact.body.provider_submissions, 0);
+
+  const publicDomain = response();
+  await handler({
+    method: 'POST',
+    query: { id: PROFILE, action: 'classify-completed-stage3-semantic-rejection' },
+    headers: { host: 'moremindmap.com' },
+    body: {},
+  }, publicDomain);
+  assert.equal(publicDomain.statusCode, 500);
+  assert.equal(calls[1].platformProtected, false);
+});
+
 test('machinery failures return generic customer codes while governed truth failures stay explicit', async () => {
   const makeResponse = () => ({
     statusCode: null, body: null, setHeader() {},
