@@ -18,6 +18,11 @@ import {
   validateNewBosSemanticStageFragment,
 } from '../api/engine/newBosProductionReadinessV1/resumableSemanticContract.js';
 import { buildNewBosRealizationIdentity, sha256Stable } from '../api/engine/newBosProductionReadinessV1/realizationIdentity.js';
+import {
+  classifyCompletedStage3ValidationError,
+  providerResponseIdSha256,
+  sanitizeCompletedStage3ProviderMetadata,
+} from '../api/engine/newBosProductionReadinessV1/completedStage3ValidationDiagnostic.js';
 
 function fakeRedis() {
   const values = new Map();
@@ -145,6 +150,45 @@ test('stage-3 checkpoint validation enforces the existing vector-free whole-pers
       fragment: invalid,
     }), new RegExp(`Whole-person model leaked assessment language: ${forbidden}`, 'u'));
   }
+});
+
+test('completed stage-3 diagnostic classifies validation without retaining provider content or identifiers', () => {
+  const response = {
+    id: 'resp_private_completed_stage3',
+    status: 'completed',
+    model: 'gpt-5.6-sol',
+    service_tier: 'priority',
+    created_at: 1,
+    completed_at: 2,
+    output_text: 'private provider content must never enter the receipt',
+    usage: {
+      input_tokens: 10,
+      output_tokens: 5,
+      total_tokens: 15,
+      input_tokens_details: { cached_tokens: 2 },
+      output_tokens_details: { reasoning_tokens: 3 },
+    },
+  };
+  const metadata = sanitizeCompletedStage3ProviderMetadata(response);
+  assert.equal(metadata.provider_response_id_sha256, providerResponseIdSha256(response.id));
+  assert.equal(JSON.stringify(metadata).includes(response.id), false);
+  assert.equal(JSON.stringify(metadata).includes(response.output_text), false);
+  assert.deepEqual(classifyCompletedStage3ValidationError(
+    new Error('Whole-person model leaked assessment language: assessment'),
+  ), {
+    category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+    validator: 'assertVectorFreeWholePerson',
+    language_class: 'ASSESSMENT_LANGUAGE',
+    validation_code_sha256: providerResponseIdSha256('Whole-person model leaked assessment language: assessment'),
+  });
+  assert.equal(
+    classifyCompletedStage3ValidationError(new Error('new_bos_semantic_fragment_key_mismatch:whole_person_decision_synthesis')).category,
+    'SCHEMA_SHAPE_REJECTION',
+  );
+  assert.equal(
+    classifyCompletedStage3ValidationError(new Error('new_bos_semantic_stage_invalid_json')).category,
+    'OUTPUT_CONTRACT_REJECTION',
+  );
 });
 
 test('assembled interpretation runs through the unchanged production runtime validators without provider inference', async () => {

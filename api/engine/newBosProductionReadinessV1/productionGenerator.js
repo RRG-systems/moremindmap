@@ -30,6 +30,11 @@ import {
   NEW_BOS_SEMANTIC_STAGES,
   validateNewBosSemanticStageFragment,
 } from './resumableSemanticContract.js';
+import {
+  classifyCompletedStage3ValidationError,
+  providerResponseIdSha256,
+  sanitizeCompletedStage3ProviderMetadata,
+} from './completedStage3ValidationDiagnostic.js';
 
 function addUsage(left, right) {
   return Object.freeze({
@@ -582,6 +587,137 @@ export function createProductionNewBosGenerator({
           });
         }
         throw error;
+      }
+    },
+  });
+  Object.defineProperty(generate, 'inspectCompletedStage3Validation', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async ({
+      rawEvidence,
+      providerModel,
+      realizationIdentity,
+      expectedCampaignSha256,
+      expectedUnitIdentitySha256,
+      expectedRequestSha256,
+      expectedProviderResponseIdSha256,
+    } = {}) => {
+      if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+      if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+      const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const acceptedDependencies = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES.slice(0, 2)) {
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: expectedCampaignSha256,
+          unitId: `semantic:${stage.id}`,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED'
+          || inspection?.classification?.disposition !== 'REUSE_ACCEPTED') {
+          throw new Error(`new_bos_completed_stage3_diagnostic_dependency_not_accepted:${stage.id}`);
+        }
+        acceptedDependencies.push(Object.freeze({
+          stage_id: stage.id,
+          fragment: validateNewBosSemanticStageFragment({
+            stageId: stage.id,
+            fragment: inspection.record.accepted_value,
+          }),
+          fragment_sha256: inspection.record.accepted_value_sha256,
+        }));
+      }
+      const plan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        acceptedDependencies,
+        privacyTokens,
+      });
+      if (plan.campaign_identity.sha256 !== expectedCampaignSha256
+        || plan.unit_identity_sha256 !== expectedUnitIdentitySha256
+        || plan.request_sha256 !== expectedRequestSha256) {
+        throw new Error('new_bos_completed_stage3_diagnostic_identity_mismatch');
+      }
+      const inspection = await resumableGenerationStore.inspect({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+      });
+      if (inspection?.record?.state !== 'PROVIDER_COMPLETED'
+        || inspection?.record?.attempt !== 2
+        || inspection?.record?.observation?.status !== 'completed'
+        || inspection?.classification?.reason !== 'completed_result_not_accepted') {
+        throw new Error('new_bos_completed_stage3_diagnostic_state_mismatch');
+      }
+      const responseId = inspection.record.observation.provider_response_id;
+      if (!responseId
+        || providerResponseIdSha256(responseId) !== expectedProviderResponseIdSha256) {
+        throw new Error('new_bos_completed_stage3_diagnostic_response_identity_mismatch');
+      }
+      const response = await reasoningClient.responses.retrieve(responseId);
+      if (response?.id !== responseId) {
+        throw new Error('new_bos_completed_stage3_diagnostic_provider_identity_changed');
+      }
+      const providerMetadata = sanitizeCompletedStage3ProviderMetadata(response);
+      if (providerMetadata.provider_response_id_sha256 !== expectedProviderResponseIdSha256) {
+        throw new Error('new_bos_completed_stage3_diagnostic_response_hash_changed');
+      }
+      if (response.status !== 'completed') {
+        return Object.freeze({
+          version: 'new_bos_completed_stage3_validation_diagnostic_v1',
+          category: 'PROVIDER_INCOMPLETE_TERMINAL_ANOMALY',
+          validator: 'provider_terminal_state',
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity_sha256: expectedUnitIdentitySha256,
+          request_sha256: expectedRequestSha256,
+          provider: providerMetadata,
+          provider_submissions: 0,
+          provider_retrievals: 1,
+          checkpoint_writes: 0,
+        });
+      }
+      const provider = createNewBosSemanticStageProvider({
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        privacyTokens,
+        transport: async (request) => {
+          if (sha256Stable(request) !== expectedRequestSha256) {
+            throw new Error('new_bos_completed_stage3_diagnostic_request_drift');
+          }
+          return response;
+        },
+      });
+      try {
+        await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        return Object.freeze({
+          version: 'new_bos_completed_stage3_validation_diagnostic_v1',
+          category: 'ACCEPTANCE_VALIDATION_PASSED_CHECKPOINT_UNACCEPTED',
+          validator: 'stage3_acceptance_validator',
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity_sha256: expectedUnitIdentitySha256,
+          request_sha256: expectedRequestSha256,
+          provider: providerMetadata,
+          provider_submissions: 0,
+          provider_retrievals: 1,
+          checkpoint_writes: 0,
+        });
+      } catch (error) {
+        return Object.freeze({
+          version: 'new_bos_completed_stage3_validation_diagnostic_v1',
+          ...classifyCompletedStage3ValidationError(error),
+          campaign_sha256: expectedCampaignSha256,
+          unit_identity_sha256: expectedUnitIdentitySha256,
+          request_sha256: expectedRequestSha256,
+          provider: providerMetadata,
+          provider_submissions: 0,
+          provider_retrievals: 1,
+          checkpoint_writes: 0,
+        });
       }
     },
   });

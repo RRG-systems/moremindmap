@@ -82,6 +82,8 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
         ? 'replaceStaleSurfaceRouting'
         : invalidStage3Repair
           ? 'repairInvalidStage3VectorFree'
+        : request.query?.diagnostic === 'completed-stage3-validation'
+          ? 'inspectCompletedStage3Validation'
         : request.query?.diagnostic === 'semantic-assembly'
           ? 'inspectAcceptedSemanticAssembly'
         : request.query?.diagnostic === 'resumable-state'
@@ -96,6 +98,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
         platformProtected: [
           'inspectResumable',
           'inspectAcceptedSemanticAssembly',
+          'inspectCompletedStage3Validation',
           'replaceStaleSurfaceRouting',
           'repairInvalidStage3VectorFree',
         ].includes(operation)
@@ -110,6 +113,12 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
           expectedStage3: request.body?.expected_stage3,
           expectedStage4: request.body?.expected_stage4,
+        } : {}),
+        ...(operation === 'inspectCompletedStage3Validation' ? {
+          expectedCampaignSha256: request.query?.expected_campaign_sha256,
+          expectedUnitIdentitySha256: request.query?.expected_unit_identity_sha256,
+          expectedRequestSha256: request.query?.expected_request_sha256,
+          expectedProviderResponseIdSha256: request.query?.expected_provider_response_id_sha256,
         } : {}),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));
