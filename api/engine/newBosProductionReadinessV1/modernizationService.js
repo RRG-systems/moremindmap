@@ -260,6 +260,31 @@ export function createNewBosModernizationService({
         persistSemanticRejection: true,
       });
     },
+    async replaceSemanticRejectedStage3({
+      profileId,
+      suppliedToken = '',
+      platformProtected = false,
+      expectedCampaignSha256,
+      expectedStage3,
+    } = {}) {
+      const normalized = authorizeNewBosOperatorInspection({ config, profileId, suppliedToken, platformProtected });
+      if (!platformProtected) throw new Error('new_bos_semantic_rejected_stage3_replacement_requires_protected_candidate');
+      if (typeof generator?.replaceSemanticRejectedStage3 !== 'function') {
+        throw new Error('new_bos_semantic_rejected_stage3_replacement_unavailable');
+      }
+      const desired = await desiredState(normalized);
+      const current = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
+      if (current.state === 'current' || current.pointer) {
+        throw new Error('new_bos_semantic_rejected_stage3_replacement_realization_already_current');
+      }
+      return generator.replaceSemanticRejectedStage3({
+        rawEvidence: desired.rawEvidence,
+        providerModel: config.providerModel,
+        realizationIdentity: desired.identity,
+        expectedCampaignSha256,
+        expectedStage3,
+      });
+    },
     async diagnose({ profileId, suppliedToken = '' }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });

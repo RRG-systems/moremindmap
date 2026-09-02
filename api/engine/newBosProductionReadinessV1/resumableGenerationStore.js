@@ -35,6 +35,18 @@ redis.call('SET', KEYS[5], ARGV[7])
 return 'OK'
 `;
 
+const RETIRE_SEMANTIC_REJECTED_STAGE3_SCRIPT = `
+if redis.call('GET', KEYS[1]) ~= ARGV[1] then return 'STAGE3_CHANGED' end
+local prior_archive = redis.call('GET', KEYS[2])
+if prior_archive and prior_archive ~= ARGV[2] then return 'STAGE3_ARCHIVE_CONFLICT' end
+local prior_claim = redis.call('GET', KEYS[3])
+if prior_claim and prior_claim ~= ARGV[4] then return 'CLAIM_CONFLICT' end
+redis.call('SET', KEYS[2], ARGV[2])
+redis.call('SET', KEYS[1], ARGV[3])
+redis.call('SET', KEYS[3], ARGV[4])
+return 'OK'
+`;
+
 function assertNamespace(namespace) {
   if (!String(namespace || '').startsWith('preview:new-bos:') && !String(namespace || '').startsWith('nonprod:new-bos:')) {
     throw new Error('new_bos_resumable_store_namespace_invalid');
@@ -80,6 +92,14 @@ function invalidSemanticArchiveKey(key) {
 
 function invalidStage3RepairClaimKey(namespace, campaignSha256) {
   return `${namespace}:resumable-v1:${campaignSha256}:invalid-stage3-vector-free-repair-v1`;
+}
+
+function semanticRejectedStage3ArchiveKey(key, attempt) {
+  return `${key}:semantic-rejection-archive-v1:attempt:${attempt}`;
+}
+
+function semanticRejectedStage3ReplacementClaimKey(namespace, campaignSha256) {
+  return `${namespace}:resumable-v1:${campaignSha256}:semantic-rejected-stage3-replacement-v1`;
 }
 
 function parse(raw) {
@@ -317,6 +337,96 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
     },
 
     prepare,
+
+    async retireSemanticRejectedStage3AndPrepareReplacement({
+      campaignSha256,
+      expectedStage3,
+      now = new Date(),
+    } = {}) {
+      if (typeof redis?.eval !== 'function') throw new Error('new_bos_semantic_rejected_stage3_atomic_store_required');
+      assertIdentity(expectedStage3?.unit_identity_sha256, 'semantic_rejected_stage3_unit_identity');
+      assertIdentity(expectedStage3?.request_sha256, 'semantic_rejected_stage3_request_hash');
+      assertIdentity(expectedStage3?.provider_response_id_sha256, 'semantic_rejected_stage3_provider_response_identity');
+      assertIdentity(expectedStage3?.semantic_validation_code_sha256, 'semantic_rejected_stage3_validation_code');
+      const key = rootKey(namespace, campaignSha256, VECTOR_FREE_STAGE3_UNIT);
+      const existingSerialized = await redis.get(key);
+      const existing = parse(existingSerialized);
+      if (!existing
+        || existing.state !== 'SEMANTIC_REJECTED'
+        || existing.unit_id !== VECTOR_FREE_STAGE3_UNIT
+        || existing.attempt !== 2
+        || existing.observation?.status !== 'completed'
+        || existing.unit_identity_sha256 !== expectedStage3.unit_identity_sha256
+        || existing.request_sha256 !== expectedStage3.request_sha256
+        || existing.observation?.provider_response_id_sha256 !== expectedStage3.provider_response_id_sha256
+        || existing.semantic_rejection_code !== 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION'
+        || existing.semantic_validator !== 'assertVectorFreeWholePerson'
+        || existing.semantic_rejection_detail !== 'ADAPTABILITY_LANGUAGE'
+        || existing.semantic_validation_code_sha256 !== expectedStage3.semantic_validation_code_sha256) {
+        throw new Error('new_bos_semantic_rejected_stage3_checkpoint_identity_mismatch');
+      }
+      const retiredAt = now instanceof Date ? now.toISOString() : new Date(now).toISOString();
+      const archive = Object.freeze({
+        version: 'new_bos_resumable_semantic_rejection_archive_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        prior_checkpoint_sha256: sha256Stable(existing),
+        prior_checkpoint: existing,
+        prior_attempt: existing.attempt,
+        semantic_rejection_code: existing.semantic_rejection_code,
+        semantic_validator: existing.semantic_validator,
+        semantic_rejection_detail: existing.semantic_rejection_detail,
+        semantic_validation_code_sha256: existing.semantic_validation_code_sha256,
+        retired_at: retiredAt,
+        replacement_authorized: true,
+        replacement_authority: 'founder_exactly_one_stage3_semantic_rejection_replacement',
+      });
+      const archiveSha256 = sha256Stable(archive);
+      const intent = Object.freeze({
+        version: 'new_bos_resumable_unit_checkpoint_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        unit_identity_sha256: existing.unit_identity_sha256,
+        request_sha256: existing.request_sha256,
+        prior_attempt: existing.attempt,
+        next_attempt: 3,
+        retry_sequence: 'authorized_stage3_semantic_rejection_replacement',
+        semantic_rejection_archive_sha256: archiveSha256,
+        state: 'SUBMISSION_INTENT',
+        attempt: 3,
+        claim_token_sha256: sha256Stable(crypto.randomUUID()),
+        observation: null,
+        created_at: retiredAt,
+      });
+      const claim = Object.freeze({
+        version: 'new_bos_semantic_rejected_stage3_replacement_claim_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        prior_checkpoint_sha256: archive.prior_checkpoint_sha256,
+        semantic_rejection_archive_sha256: archiveSha256,
+        prior_attempt: 2,
+        next_attempt: 3,
+        claimed_at: retiredAt,
+      });
+      const result = await redis.eval(
+        RETIRE_SEMANTIC_REJECTED_STAGE3_SCRIPT,
+        3,
+        key,
+        semanticRejectedStage3ArchiveKey(key, existing.attempt),
+        semanticRejectedStage3ReplacementClaimKey(namespace, campaignSha256),
+        existingSerialized,
+        JSON.stringify(archive),
+        JSON.stringify(intent),
+        JSON.stringify(claim),
+      );
+      if (result !== 'OK') throw new Error(`new_bos_semantic_rejected_stage3_atomic_retirement_failed:${result}`);
+      return Object.freeze({
+        disposition: 'START_STAGE3_REPLACEMENT',
+        record: intent,
+        archive_sha256: archiveSha256,
+        prior_checkpoint_sha256: archive.prior_checkpoint_sha256,
+      });
+    },
 
     async retireInvalidStage3AndDependentStage4({
       campaignSha256,

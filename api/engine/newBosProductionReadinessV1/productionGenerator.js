@@ -592,6 +592,142 @@ export function createProductionNewBosGenerator({
       }
     },
   });
+  Object.defineProperty(generate, 'replaceSemanticRejectedStage3', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async ({
+      rawEvidence,
+      providerModel,
+      realizationIdentity,
+      expectedCampaignSha256,
+      expectedStage3,
+    } = {}) => {
+      if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+      if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+      const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const acceptedDependencies = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES.slice(0, 2)) {
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: expectedCampaignSha256,
+          unitId: `semantic:${stage.id}`,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED'
+          || inspection?.classification?.disposition !== 'REUSE_ACCEPTED') {
+          throw new Error(`new_bos_semantic_rejected_stage3_dependency_not_accepted:${stage.id}`);
+        }
+        acceptedDependencies.push(Object.freeze({
+          stage_id: stage.id,
+          fragment: validateNewBosSemanticStageFragment({
+            stageId: stage.id,
+            fragment: inspection.record.accepted_value,
+          }),
+          fragment_sha256: inspection.record.accepted_value_sha256,
+        }));
+      }
+      const plan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        acceptedDependencies,
+        privacyTokens,
+      });
+      if (plan.campaign_identity.sha256 !== expectedCampaignSha256
+        || plan.unit_identity_sha256 !== expectedStage3?.unit_identity_sha256
+        || plan.request_sha256 !== expectedStage3?.request_sha256
+        || plan.unit_id !== 'semantic:whole_person_decision_synthesis') {
+        throw new Error('new_bos_semantic_rejected_stage3_recomputed_identity_mismatch');
+      }
+      const current = await resumableGenerationStore.inspect({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+      });
+      if (current?.record?.state !== 'SEMANTIC_REJECTED'
+        || current.record.attempt !== 2
+        || current.record.semantic_rejection_code !== 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION'
+        || current.record.semantic_validator !== 'assertVectorFreeWholePerson'
+        || current.record.semantic_rejection_detail !== 'ADAPTABILITY_LANGUAGE') {
+        throw new Error('new_bos_semantic_rejected_stage3_state_mismatch');
+      }
+      const retired = await resumableGenerationStore.retireSemanticRejectedStage3AndPrepareReplacement({
+        campaignSha256: expectedCampaignSha256,
+        expectedStage3,
+      });
+      const onEvent = async (event) => resumableGenerationStore.observe({
+        campaignSha256: expectedCampaignSha256,
+        unitId: plan.unit_id,
+        unitIdentitySha256: plan.unit_identity_sha256,
+        requestSha256: plan.request_sha256,
+        event,
+      });
+      const provider = createNewBosSemanticStageProvider({
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        privacyTokens,
+        transport: async (request) => {
+          if (sha256Stable(request) !== plan.request_sha256) {
+            throw new Error('new_bos_semantic_rejected_stage3_replacement_request_drift');
+          }
+          const result = await executeNewBosBackgroundResponse({
+            client: reasoningClient,
+            scientificRequest: request,
+            maxWaitMs: interactiveWaitMs,
+            onEvent,
+          });
+          if (result.transport_evidence.submit_count !== 1) {
+            throw new Error('new_bos_semantic_rejected_stage3_replacement_submission_count_invalid');
+          }
+          return result.response;
+        },
+      });
+      try {
+        const fragment = await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        const accepted = await resumableGenerationStore.accept({
+          campaignSha256: expectedCampaignSha256,
+          unitId: plan.unit_id,
+          unitIdentitySha256: plan.unit_identity_sha256,
+          requestSha256: plan.request_sha256,
+          value: fragment,
+        });
+        return Object.freeze({
+          status: 'STAGE3_SEMANTIC_REJECTION_REPLACEMENT_ACCEPTED',
+          replacement_attempt: retired.record.attempt,
+          archive_sha256: retired.archive_sha256,
+          accepted_value_sha256: accepted.accepted_value_sha256,
+          campaign_sha256: expectedCampaignSha256,
+          provider_submissions: 1,
+        });
+      } catch (error) {
+        if (error?.code === 'background_poll_timeout') {
+          return Object.freeze({
+            status: 'STAGE3_SEMANTIC_REJECTION_REPLACEMENT_IN_PROGRESS',
+            replacement_attempt: retired.record.attempt,
+            archive_sha256: retired.archive_sha256,
+            campaign_sha256: expectedCampaignSha256,
+            provider_submissions: 1,
+          });
+        }
+        const rejection = classifySemanticValidationError(error);
+        if (rejection) {
+          await resumableGenerationStore.rejectSemantic({
+            campaignSha256: expectedCampaignSha256,
+            unitId: plan.unit_id,
+            unitIdentitySha256: plan.unit_identity_sha256,
+            requestSha256: plan.request_sha256,
+            rejection,
+          });
+        }
+        throw error;
+      }
+    },
+  });
   Object.defineProperty(generate, 'inspectCompletedStage3Validation', {
     enumerable: false,
     configurable: false,

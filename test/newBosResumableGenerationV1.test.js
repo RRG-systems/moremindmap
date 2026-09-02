@@ -39,6 +39,17 @@ function fakeRedis() {
     async eval(_script, keyCount, ...args) {
       const keys = args.slice(0, keyCount);
       const argv = args.slice(keyCount);
+      if (keyCount === 3) {
+        if (values.get(keys[0]) !== argv[0]) return 'STAGE3_CHANGED';
+        const archive = values.get(keys[1]);
+        if (archive && archive !== argv[1]) return 'STAGE3_ARCHIVE_CONFLICT';
+        const claim = values.get(keys[2]);
+        if (claim && claim !== argv[3]) return 'CLAIM_CONFLICT';
+        values.set(keys[1], argv[1]);
+        values.set(keys[0], argv[2]);
+        values.set(keys[2], argv[3]);
+        return 'OK';
+      }
       if (values.get(keys[0]) !== argv[0]) return 'STAGE3_CHANGED';
       if (values.get(keys[1]) !== argv[1]) return 'STAGE4_CHANGED';
       const archive3 = values.get(keys[2]);
@@ -371,6 +382,107 @@ test('malformed semantic output is typed while provider terminal failure remains
   assert.notEqual(terminal.record.state, 'SEMANTIC_REJECTED');
   assert.equal(terminal.classification.state, 'HUMAN_REVIEW_REQUIRED');
   assert.equal(terminal.classification.reason, 'content_filter');
+});
+
+test('one authorized Stage-3 semantic-rejection replacement archives the exact typed attempt and cannot be claimed twice', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:semantic-rejection-replacement-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  const fragments = splitFixture();
+  const preserved = new Map();
+  for (const [index, stageId] of ['causal_foundation', 'operating_domains'].entries()) {
+    const unitId = `semantic:${stageId}`;
+    const unitIdentitySha256 = String(index + 1).repeat(64);
+    const requestSha256 = String(index + 3).repeat(64);
+    await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256, requestSha256 });
+    await store.observe({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      event: { provider_response_id: `resp_preserved_${index}`, status: 'completed' },
+    });
+    await store.accept({
+      campaignSha256: CAMPAIGN,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      value: fragments[index].fragment,
+    });
+  }
+  for (const [key, value] of redis.values.entries()) {
+    if (/semantic:(causal_foundation|operating_domains)$/u.test(key)) preserved.set(key, value);
+  }
+
+  const unitId = 'semantic:whole_person_decision_synthesis';
+  const unitIdentitySha256 = '7'.repeat(64);
+  const requestSha256 = '8'.repeat(64);
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256, requestSha256 });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256,
+    requestSha256,
+    event: {
+      provider_response_id: 'resp_stage3_attempt_1',
+      status: 'incomplete',
+      incomplete_details_reason: 'max_output_tokens',
+    },
+  });
+  const attempt2 = await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256, requestSha256 });
+  assert.equal(attempt2.record.attempt, 2);
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256,
+    requestSha256,
+    event: { provider_response_id: 'resp_stage3_attempt_2', status: 'completed' },
+  });
+  await store.rejectSemantic({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256,
+    requestSha256,
+    rejection: {
+      category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+      validator: 'assertVectorFreeWholePerson',
+      language_class: 'ADAPTABILITY_LANGUAGE',
+      validation_code_sha256: 'd'.repeat(64),
+    },
+  });
+  const rejected = await store.inspect({ campaignSha256: CAMPAIGN, unitId });
+  const retired = await store.retireSemanticRejectedStage3AndPrepareReplacement({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: unitIdentitySha256,
+      request_sha256: requestSha256,
+      provider_response_id_sha256: rejected.record.observation.provider_response_id_sha256,
+      semantic_validation_code_sha256: 'd'.repeat(64),
+    },
+    now: new Date('2026-09-02T03:00:00.000Z'),
+  });
+  assert.equal(retired.disposition, 'START_STAGE3_REPLACEMENT');
+  assert.equal(retired.record.attempt, 3);
+  assert.equal(retired.record.retry_sequence, 'authorized_stage3_semantic_rejection_replacement');
+  assert.equal(retired.record.semantic_rejection_archive_sha256, retired.archive_sha256);
+  const archivedEntry = [...redis.values.entries()].find(([key]) => key.includes(':semantic-rejection-archive-v1:attempt:2'));
+  assert.ok(archivedEntry);
+  const archived = JSON.parse(archivedEntry[1]);
+  assert.deepEqual(archived.prior_checkpoint, rejected.record);
+  assert.equal(archived.semantic_rejection_code, 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION');
+  assert.equal(archived.semantic_validator, 'assertVectorFreeWholePerson');
+  assert.equal(archived.semantic_rejection_detail, 'ADAPTABILITY_LANGUAGE');
+  assert.equal(archived.replacement_authorized, true);
+  for (const [key, value] of preserved) assert.equal(redis.values.get(key), value);
+  await assert.rejects(store.retireSemanticRejectedStage3AndPrepareReplacement({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: unitIdentitySha256,
+      request_sha256: requestSha256,
+      provider_response_id_sha256: rejected.record.observation.provider_response_id_sha256,
+      semantic_validation_code_sha256: 'd'.repeat(64),
+    },
+  }), /checkpoint_identity_mismatch/u);
 });
 
 test('assembled interpretation runs through the unchanged production runtime validators without provider inference', async () => {

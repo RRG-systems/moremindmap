@@ -74,11 +74,14 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       && request.query?.action === 'repair-invalid-stage3-vector-free';
     const completedStage3Classification = request.method === 'POST'
       && request.query?.action === 'classify-completed-stage3-semantic-rejection';
+    const semanticRejectedStage3Replacement = request.method === 'POST'
+      && request.query?.action === 'replace-semantic-rejected-stage3';
     if (!['GET', 'POST'].includes(request.method)
       || (request.method === 'POST'
         && !staleSurfaceRoutingReplacement
         && !invalidStage3Repair
-        && !completedStage3Classification)) {
+        && !completedStage3Classification
+        && !semanticRejectedStage3Replacement)) {
       return response.status(405).json({ error: 'Method not allowed' });
     }
     try {
@@ -89,6 +92,8 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           ? 'repairInvalidStage3VectorFree'
         : completedStage3Classification
           ? 'classifyCompletedStage3SemanticRejection'
+        : semanticRejectedStage3Replacement
+          ? 'replaceSemanticRejectedStage3'
         : request.query?.diagnostic === 'completed-stage3-validation'
           ? 'inspectCompletedStage3Validation'
         : request.query?.diagnostic === 'semantic-assembly'
@@ -107,6 +112,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           'inspectAcceptedSemanticAssembly',
           'inspectCompletedStage3Validation',
           'classifyCompletedStage3SemanticRejection',
+          'replaceSemanticRejectedStage3',
           'replaceStaleSurfaceRouting',
           'repairInvalidStage3VectorFree',
         ].includes(operation)
@@ -133,6 +139,10 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,
           expectedRequestSha256: request.body?.expected_request_sha256,
           expectedProviderResponseIdSha256: request.body?.expected_provider_response_id_sha256,
+        } : {}),
+        ...(operation === 'replaceSemanticRejectedStage3' ? {
+          expectedCampaignSha256: request.body?.expected_campaign_sha256,
+          expectedStage3: request.body?.expected_stage3,
         } : {}),
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));

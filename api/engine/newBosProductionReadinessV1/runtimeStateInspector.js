@@ -44,6 +44,7 @@ function sanitizeUnitInspection(unitId, inspection) {
     semantic_validator: record?.semantic_validator || null,
     semantic_rejection_detail: record?.semantic_rejection_detail || null,
     semantic_validation_code_sha256: record?.semantic_validation_code_sha256 || null,
+    semantic_rejection_archive_sha256: record?.semantic_rejection_archive_sha256 || null,
     created_at: record?.created_at || null,
     updated_at: record?.updated_at || null,
     accepted_at: record?.accepted_at || null,
