@@ -7,12 +7,7 @@ import '../lab/subscriptionLivingBusinessRelationshipV1/styles.css'
 import './internalDev.css'
 
 const STORAGE_KEY = 'more_subscription_v1_internal_ephemeral_conversation'
-const SUBJECT_STORAGE_KEY = 'more_subscription_s2_demo_subject'
-const DEMO_SUBJECTS = Object.freeze([
-  { id: 'synthetic', label: 'SYNTHETIC', note: 'Synthetic Jordan' },
-  { id: 'patricia-demo', label: 'PATRICIA', note: 'Sealed demo copy' },
-])
-const DEMO_SUBJECT_IDS = new Set(DEMO_SUBJECTS.map((subject) => subject.id))
+const DEMO_SUBJECT = 'synthetic'
 const messageStorageKey = (subject) => `${STORAGE_KEY}:${subject}`
 
 function InlineCoachText({ text }) {
@@ -290,7 +285,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
       {preSession && <section className="s2-session-start" aria-label={session.start_action === 'START_MY_FIRST_SESSION' ? 'Start my first session' : 'Start session'}>
         <span aria-hidden="true">✦</span>
         <h3>{session.start_action === 'START_MY_FIRST_SESSION' ? 'Your coaching relationship is ready.' : 'Ready when you are.'}</h3>
-        <p>{session.start_action === 'START_MY_FIRST_SESSION' ? 'Start when you are ready to meet your MORE coach and begin the work.' : 'MORE remembers where you left off. Start when you are ready to continue.'}</p>
+        <p>{session.start_action === 'START_MY_FIRST_SESSION' ? 'Click START MY FIRST SESSION to meet your MORE coach and begin.' : 'Click START SESSION to pick up where you left off.'}</p>
         <button type="button" disabled={busy} onClick={startSession}>{session.start_action === 'START_MY_FIRST_SESSION' ? 'START MY FIRST SESSION' : 'START SESSION'}</button>
         <small className="s2-session-start-note">If I ever sound too technical or complicated, tell me. Ask me to explain it more simply or adjust how I communicate.</small>
       </section>}
@@ -306,57 +301,54 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
 }
 
 export default function SubscriptionV1InternalDevApp() {
-  const [demoSubject, setDemoSubject] = useState(() => sessionStorage.getItem(SUBJECT_STORAGE_KEY) === 'patricia-demo' ? 'patricia-demo' : 'synthetic')
   const [state, setState] = useState({ loading: true, error: null, bootstrap: null })
   const [current, setCurrent] = useState(null)
+  const [resetVersion, setResetVersion] = useState(0)
+  const [resetting, setResetting] = useState(false)
   useEffect(() => {
     let live = true
-    fetch(`/api/internal/subscription-v1-runtime?subject=${encodeURIComponent(demoSubject)}`, { credentials: 'same-origin', cache: 'no-store' })
+    fetch('/api/internal/subscription-v1-runtime', { credentials: 'same-origin', cache: 'no-store' })
       .then(async (response) => ({ response, body: await response.json().catch(() => null) }))
       .then(({ response, body }) => {
         if (!live) return
         if (!response.ok || body?.ok !== true) setState({ loading: false, error: body?.code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
         else {
-          const authoritativeSubject = DEMO_SUBJECT_IDS.has(body.demo_subject) ? body.demo_subject : 'synthetic'
-          sessionStorage.setItem(SUBJECT_STORAGE_KEY, authoritativeSubject)
-          if (authoritativeSubject !== demoSubject) setDemoSubject(authoritativeSubject)
           setCurrent({ view_model: body.view_model, publication: body.publication })
           setState({ loading: false, error: null, bootstrap: body })
         }
       })
       .catch(() => live && setState({ loading: false, error: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE', bootstrap: null }))
     return () => { live = false }
-  }, [demoSubject])
-  async function chooseDemoSubject(subject) {
-    if (subject === demoSubject) return
-    setState({ loading: true, error: null, bootstrap: null })
-    setCurrent(null)
+  }, [resetVersion])
+  async function resetDemo() {
+    if (resetting || state.bootstrap?.demo_reset_enabled !== true) return
+    setResetting(true)
     try {
-      const prepared = await fetch('/api/internal/subscription-v1-demo-subject', { credentials: 'same-origin', cache: 'no-store' })
+      const prepared = await fetch('/api/internal/subscription-v1-demo-reset', { credentials: 'same-origin', cache: 'no-store' })
       const ready = await prepared.json().catch(() => null)
-      if (!prepared.ok || ready?.ok !== true || !ready.csrf_token) throw new Error(ready?.code || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE')
-      const response = await fetch('/api/internal/subscription-v1-demo-subject', {
+      if (!prepared.ok || ready?.ok !== true || !ready.csrf_token) throw new Error(ready?.code || 'SUBSCRIPTION_DEMO_RESET_UNAVAILABLE')
+      const response = await fetch('/api/internal/subscription-v1-demo-reset', {
         method: 'POST', credentials: 'same-origin', cache: 'no-store',
-        headers: { 'content-type': 'application/json', 'x-subscription-demo-subject-csrf': ready.csrf_token },
-        body: JSON.stringify({ subject }),
+        headers: { 'content-type': 'application/json', 'x-subscription-demo-reset-csrf': ready.csrf_token },
+        body: JSON.stringify({ action: 'RESET_DEMO' }),
       })
       const result = await response.json().catch(() => null)
-      if (!response.ok || result?.ok !== true || !DEMO_SUBJECT_IDS.has(result.selected_subject)) {
-        throw new Error(result?.code || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE')
-      }
-      sessionStorage.setItem(SUBJECT_STORAGE_KEY, result.selected_subject)
-      setDemoSubject(result.selected_subject)
+      if (!response.ok || result?.ok !== true) throw new Error(result?.code || 'SUBSCRIPTION_DEMO_RESET_UNAVAILABLE')
+      sessionStorage.removeItem(messageStorageKey(DEMO_SUBJECT))
+      setCurrent(null)
+      setState({ loading: true, error: null, bootstrap: null })
+      setResetVersion((version) => version + 1)
     } catch (error) {
-      setState({ loading: false, error: error?.message || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE', bootstrap: null })
-    }
+      setState((value) => ({ ...value, error: error?.message || 'SUBSCRIPTION_DEMO_RESET_UNAVAILABLE' }))
+    } finally { setResetting(false) }
   }
   if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying the synthetic entitlement and governed state.</p></main>
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
-  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={demoSubject} data-layer-max="2">
-    {state.bootstrap.demo_subject_switching === true && <nav className="s2-subject-switcher" aria-label="Choose local demo subject">{DEMO_SUBJECTS.map((subject) => <button key={subject.id} type="button" aria-pressed={demoSubject === subject.id} onClick={() => chooseDemoSubject(subject.id)}><strong>{subject.label}</strong><span>{subject.note}</span></button>)}</nav>}
+  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">
+    <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />
-      : <RemoteConversation key={demoSubject} bootstrap={state.bootstrap} demoSubject={demoSubject} onCurrent={setCurrent} />}
+      : <RemoteConversation key={`${DEMO_SUBJECT}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} />}
   </main>
 }

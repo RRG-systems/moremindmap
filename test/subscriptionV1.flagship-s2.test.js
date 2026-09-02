@@ -293,7 +293,7 @@ test('a real demo-only AFW-05 change triggers the mandatory map-change GU while 
   assert.equal(decision.body.session_map_delta.material, true);
 });
 
-test('rendered S2 change surface supports explicit start, mandatory GU, both demo subjects, Enter semantics, and customer-language recovery', () => {
+test('rendered S2 change surface supports explicit start, mandatory GU, Synthetic Jordan demo reset, Enter semantics, and customer-language recovery', () => {
   const ui = fs.readFileSync(new URL('../src/subscriptionV1/SubscriptionV1InternalDevApp.jsx', import.meta.url), 'utf8');
   const styles = fs.readFileSync(new URL('../src/subscriptionV1/internalDev.css', import.meta.url), 'utf8');
   const renderer = fs.readFileSync(new URL('../src/subscriptionS2/SubscriptionS2GuRenderer.jsx', import.meta.url), 'utf8');
@@ -301,8 +301,9 @@ test('rendered S2 change surface supports explicit start, mandatory GU, both dem
   const runtime = fs.readFileSync(new URL('../api/internal/subscription-v1-runtime.js', import.meta.url), 'utf8');
   assert.match(ui, /START MY FIRST SESSION/u);
   assert.match(ui, /START SESSION/u);
-  assert.match(ui, /PATRICIA/u);
-  assert.match(ui, /SYNTHETIC/u);
+  assert.match(ui, /SYNTHETIC JORDAN/u);
+  assert.match(ui, /RESET DEMO/u);
+  assert.doesNotMatch(ui, /PATRICIA|chooseDemoSubject|subscription-v1-demo-subject/iu);
   assert.match(ui, /event\.key !== 'Enter' \|\| event\.shiftKey/u);
   assert.match(ui, /submitLockRef/u);
   assert.match(ui, /explain it more simply/u);

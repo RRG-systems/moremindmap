@@ -95,35 +95,27 @@ async function createDarrenSession(redis) {
   return { issued, cookie, auth };
 }
 
-async function switchSubject(handler, cookie, subject) {
-  const prepared = await invoke(handler, request({ cookie }));
-  assert.equal(prepared.status, 200);
-  const response = await invoke(handler, request({ method: 'POST', cookie, csrf: prepared.body.csrf_token, body: { subject } }));
-  return { ...response, usedCsrf: prepared.body.csrf_token };
-}
-
-test('DarrenDemo capability starts Synthetic and switches only through one-time server authority', async () => {
+test('DarrenDemo capability exposes Synthetic Jordan as its only subject authority', async () => {
   const redis = new FakeRedis();
   const session = await createDarrenSession(redis);
   assert.equal(session.auth.demo_subject, 'synthetic');
   assert.equal(session.auth.capability.subject_key, 're-mid');
   assert.equal(session.auth.capability.relationship_key, session.auth.capability.synthetic_relationship_key);
+  assert.equal(session.auth.capability.demo_subject_switching, false);
+  assert.equal(session.auth.capability.demo_reset_enabled, true);
+  assert.deepEqual(session.auth.capability.allowed_demo_subjects, ['synthetic']);
 
   const handler = createSubscriptionDemoSubjectHandler({ getRedis: () => redis, enabled: () => true, authenticate });
-  const switched = await switchSubject(handler, session.cookie, 'patricia-demo');
-  assert.equal(switched.status, 200);
-  assert.equal(switched.body.selected_subject, 'patricia-demo');
+  const retired = await invoke(handler, request({ method: 'POST', cookie: session.cookie, body: { subject: 'patricia-demo' } }));
+  assert.equal(retired.status, 410);
+  assert.equal(retired.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_RETIRED');
 
   const reloaded = await authenticate({ redis, req: request({ cookie: session.cookie }) });
   assert.equal(reloaded.ok, true);
-  assert.equal(reloaded.demo_subject, 'patricia-demo');
-  assert.equal(reloaded.capability.subject_key, PATRICIA_DEMO_SUBJECT_KEY);
-  assert.equal(reloaded.capability.relationship_key, PATRICIA_DEMO_RELATIONSHIP_KEY);
+  assert.equal(reloaded.demo_subject, 'synthetic');
+  assert.equal(reloaded.capability.subject_key, 're-mid');
+  assert.equal(reloaded.capability.relationship_key, session.auth.capability.synthetic_relationship_key);
   assert.equal(reloaded.capability.synthetic_relationship_key, session.auth.capability.synthetic_relationship_key);
-
-  const csrfReplay = await invoke(handler, request({ method: 'POST', cookie: session.cookie, csrf: switched.usedCsrf, body: { subject: 'synthetic' } }));
-  assert.equal(csrfReplay.status, 403);
-  assert.equal(csrfReplay.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_CSRF_DENIED');
 });
 
 test('query-only tampering cannot change authoritative subject scope', async () => {
@@ -137,32 +129,44 @@ test('query-only tampering cannot change authoritative subject scope', async () 
   assert.equal(tampered.body.view_model.identity.firstName, 'Jordan');
 });
 
-test('Patricia selection loads only the sealed Patricia-derived Business Twin and survives reload', async () => {
-  const redis = new FakeRedis();
-  const session = await createDarrenSession(redis);
-  const switchHandler = createSubscriptionDemoSubjectHandler({ getRedis: () => redis, enabled: () => true, authenticate });
-  assert.equal((await switchSubject(switchHandler, session.cookie, 'patricia-demo')).status, 200);
-
-  const runtime = createSubscriptionV1RuntimeHandler({ getRedis: () => redis, authenticate, env: { OPENAI_API_KEY: 'unused-test-key' } });
-  const first = await invoke(runtime, request({ cookie: session.cookie }));
-  const reload = await invoke(runtime, request({ cookie: session.cookie, query: { subject: 'synthetic' } }));
-  for (const result of [first, reload]) {
-    assert.equal(result.status, 200);
-    assert.equal(result.body.demo_subject, 'patricia-demo');
-    assert.equal(result.body.identity.demo_copy_only, true);
-    assert.match(result.body.view_model.identity.business, /Patricia-derived/u);
-    assert.doesNotMatch(result.body.view_model.identity.business, /Jordan/u);
-    assert.equal(result.body.architecture.actual_patricia_write_path, false);
-  }
-});
-
-test('Synthetic to Patricia to Synthetic remains coherent in one DarrenDemo session', async () => {
+test('retired Patricia subject selection cannot become active and reload stays Synthetic Jordan', async () => {
   const redis = new FakeRedis();
   const session = await createDarrenSession(redis);
   const handler = createSubscriptionDemoSubjectHandler({ getRedis: () => redis, enabled: () => true, authenticate });
-  assert.equal((await switchSubject(handler, session.cookie, 'patricia-demo')).status, 200);
-  assert.equal((await authenticate({ redis, req: request({ cookie: session.cookie }) })).demo_subject, 'patricia-demo');
-  assert.equal((await switchSubject(handler, session.cookie, 'synthetic')).status, 200);
+  const getAttempt = await invoke(handler, request({ cookie: session.cookie, query: { subject: 'patricia-demo' } }));
+  const postAttempt = await invoke(handler, request({ method: 'POST', cookie: session.cookie, body: { subject: 'patricia-demo' } }));
+  for (const result of [getAttempt, postAttempt]) {
+    assert.equal(result.status, 410);
+    assert.equal(result.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_RETIRED');
+  }
+
+  const runtime = createSubscriptionV1RuntimeHandler({ getRedis: () => redis, authenticate, env: { OPENAI_API_KEY: 'unused-test-key' } });
+  const first = await invoke(runtime, request({ cookie: session.cookie }));
+  const reload = await invoke(runtime, request({ cookie: session.cookie, query: { subject: 'patricia-demo' } }));
+  for (const result of [first, reload]) {
+    assert.equal(result.status, 200);
+    assert.equal(result.body.demo_subject, 'synthetic');
+    assert.equal(result.body.identity.first_name, 'Jordan');
+    assert.equal(result.body.view_model.identity.firstName, 'Jordan');
+    assert.doesNotMatch(result.body.view_model.identity.business, /Patricia-derived/u);
+    assert.equal(result.body.architecture.subject_key, 're-mid');
+    assert.equal(result.body.architecture.synthetic_only, true);
+    assert.equal(result.body.architecture.exact_scope_hash, internalDevKeys({
+      relationship_key: session.auth.capability.synthetic_relationship_key,
+      subject_key: 're-mid',
+    }).scope_hash);
+  }
+});
+
+test('retired subject route cannot change Synthetic Jordan through repeated selections', async () => {
+  const redis = new FakeRedis();
+  const session = await createDarrenSession(redis);
+  const handler = createSubscriptionDemoSubjectHandler({ getRedis: () => redis, enabled: () => true, authenticate });
+  for (const subject of ['patricia-demo', 'synthetic', 'patricia-demo']) {
+    const attempt = await invoke(handler, request({ method: 'POST', cookie: session.cookie, body: { subject } }));
+    assert.equal(attempt.status, 410);
+    assert.equal(attempt.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_RETIRED');
+  }
   const restored = await authenticate({ redis, req: request({ cookie: session.cookie }) });
   assert.equal(restored.demo_subject, 'synthetic');
   assert.equal(restored.capability.subject_key, 're-mid');
@@ -173,17 +177,20 @@ test('arbitrary subjects and missing or non-Darren authority fail closed', async
   const redis = new FakeRedis();
   const session = await createDarrenSession(redis);
   const handler = createSubscriptionDemoSubjectHandler({ getRedis: () => redis, enabled: () => true, authenticate });
-  const unsupported = await switchSubject(handler, session.cookie, 'MM-arbitrary-customer');
-  assert.equal(unsupported.status, 400);
-  assert.equal(unsupported.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_UNSUPPORTED');
+  const unsupported = await invoke(handler, request({ method: 'POST', cookie: session.cookie, body: { subject: 'MM-arbitrary-customer' } }));
+  assert.equal(unsupported.status, 410);
+  assert.equal(unsupported.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_RETIRED');
   assert.equal((await authenticate({ redis, req: request({ cookie: session.cookie }) })).demo_subject, 'synthetic');
 
   const missing = await invoke(handler, request());
   assert.equal(missing.status, 401);
   const direct = await issueInternalDevCapability({ redis, req: request() });
   const denied = await invoke(handler, request({ cookie: cookieHeader(direct.cookies) }));
-  assert.equal(denied.status, 403);
-  assert.equal(denied.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_AUTHORITY_DENIED');
+  assert.equal(denied.status, 410);
+  assert.equal(denied.body.code, 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_RETIRED');
+  const directAuth = await authenticate({ redis, req: request({ cookie: cookieHeader(direct.cookies) }) });
+  assert.equal(directAuth.demo_subject, 'synthetic');
+  assert.equal(directAuth.capability.demo_subject_switching, false);
 });
 
 test('Patricia writable state remains isolated from canonical identities and Synthetic scope', async () => {

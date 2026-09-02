@@ -58,7 +58,7 @@ export async function loadProductionIntendedSyntheticSubscriber({
       loader_id: 'subscription_v1_production_intended_subscriber_loader_v1',
       same_runtime_for_future_paid_entitlements: true,
       subject_key,
-      exact_scope_hash: understanding?.scope_hash || null,
+      exact_scope_hash: understanding?.scope_hash || keys.scope_hash,
       required_artifact_types: understanding?.artifact_manifest?.map?.((item) => item.artifact_type) || [],
       free_gpt_v2: true,
       afw05_core_reused: true,

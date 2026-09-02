@@ -8,6 +8,7 @@ import { InMemoryLivingRelationshipStore } from '../../../src/lib/subscriptionV1
 import {
   SUBSCRIPTION_DEMO_SUBJECT_IDS,
   SYNTHETIC_DEMO_SUBJECT_KEY,
+  hasDarrenDemoAuthority,
   hasDarrenDemoSubjectAuthority,
   resolveSubscriptionDemoSubject,
   validateSubscriptionDemoCapability,
@@ -158,8 +159,9 @@ export async function issueInternalDevCapability({ redis, req, launcher = null, 
     synthetic_relationship_key: relationship.relationship_key,
     subject_key: SYNTHETIC_DEMO_SUBJECT_KEY,
     demo_subject_id: 'synthetic',
-    demo_subject_switching: darrenDemoAuthority,
-    allowed_demo_subjects: darrenDemoAuthority ? [...SUBSCRIPTION_DEMO_SUBJECT_IDS] : ['synthetic'],
+    demo_subject_switching: false,
+    demo_reset_enabled: darrenDemoAuthority,
+    allowed_demo_subjects: [...SUBSCRIPTION_DEMO_SUBJECT_IDS],
     authority_source: darrenDemoAuthority ? 'LEADERSHIP_DEMO' : 'DIRECT_SYNTHETIC',
     launcher_scope_id: darrenDemoAuthority ? launcher.launcher_scope_id : null,
     synthetic_only: true,
@@ -203,6 +205,17 @@ export async function issueDemoSubjectSwitchCsrf({ redis, capabilityHash }) {
 export async function consumeDemoSubjectSwitchCsrf({ redis, capabilityHash, proof }) {
   if (typeof proof !== 'string' || proof.length < 32) return false;
   return await redis.getdel(`${PREFIX}:subject-switch-csrf:${capabilityHash}:${digest(proof)}`) === 'active';
+}
+
+export async function issueDemoResetCsrf({ redis, capabilityHash }) {
+  const proof = token();
+  await redis.set(`${PREFIX}:demo-reset-csrf:${capabilityHash}:${digest(proof)}`, 'active', 'EX', CSRF_TTL_SECONDS, 'NX');
+  return proof;
+}
+
+export async function consumeDemoResetCsrf({ redis, capabilityHash, proof }) {
+  if (typeof proof !== 'string' || proof.length < 32) return false;
+  return await redis.getdel(`${PREFIX}:demo-reset-csrf:${capabilityHash}:${digest(proof)}`) === 'active';
 }
 
 export async function switchInternalDevDemoSubject({ redis, capability, capabilityHash, selection, now = new Date() }) {
@@ -283,6 +296,37 @@ export function internalDevKeys({ relationship_key, subject_key = 're-mid' }) {
     research: `${PREFIX}:research:${scopeHash}`,
     diagnostics: `${PREFIX}:diagnostics:${scopeHash}`,
     s2_relationship: `${PREFIX}:s2-relationship:${scopeHash}`,
+  };
+}
+
+export async function resetInternalDevSyntheticDemo({ redis, capability }) {
+  if (!hasDarrenDemoAuthority(capability)
+    || capability.demo_reset_enabled !== true
+    || capability.demo_subject_id !== 'synthetic'
+    || capability.subject_key !== SYNTHETIC_DEMO_SUBJECT_KEY
+    || capability.relationship_key !== capability.synthetic_relationship_key) {
+    return { ok: false, code: 'SUBSCRIPTION_DEMO_RESET_AUTHORITY_DENIED' };
+  }
+  const keys = internalDevKeys({ relationship_key: capability.relationship_key, subject_key: capability.subject_key });
+  const livingOwner = await acquireLock(redis, keys.living_lock);
+  let allowanceOwner = null;
+  try {
+    allowanceOwner = await acquireLock(redis, keys.allowance_lock);
+    for (const key of [keys.living_state, keys.living_backup, keys.allowance, keys.allowance_backup, keys.research, keys.diagnostics, keys.s2_relationship]) {
+      await redis.del(key);
+    }
+  } finally {
+    if (allowanceOwner) await releaseLock(redis, keys.allowance_lock, allowanceOwner);
+    await releaseLock(redis, keys.living_lock, livingOwner);
+  }
+  return {
+    ok: true,
+    code: 'SUBSCRIPTION_DARRENDEMO_SYNTHETIC_BASELINE_RESTORED',
+    demo_subject: 'synthetic',
+    scope_hash: keys.scope_hash,
+    canonical_customer_mutation_performed: false,
+    real_personal_rsl_mutation_performed: false,
+    stripe_mutation_performed: false,
   };
 }
 

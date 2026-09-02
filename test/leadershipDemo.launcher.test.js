@@ -160,8 +160,9 @@ test('Subscription launcher exchange reuses the existing re-mid synthetic capabi
     synthetic_only: true,
   } });
   assert.equal(issued.capability.subject_key, 're-mid');
-  assert.equal(issued.capability.demo_subject_switching, true);
-  assert.deepEqual(issued.capability.allowed_demo_subjects, ['synthetic', 'patricia-demo']);
+  assert.equal(issued.capability.demo_subject_switching, false);
+  assert.equal(issued.capability.demo_reset_enabled, true);
+  assert.deepEqual(issued.capability.allowed_demo_subjects, ['synthetic']);
   assert.equal(issued.capability.synthetic_only, true);
   assert.equal(issued.capability.billing_evidence, false);
   assert.equal(issued.capability.stripe_subscription_created, false);
