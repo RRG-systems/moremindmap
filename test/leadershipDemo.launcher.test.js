@@ -153,8 +153,15 @@ test('authenticated Darren admin can mint only the same isolated synthetic Recru
 
 test('Subscription launcher exchange reuses the existing re-mid synthetic capability and relationship cookies', async () => {
   const redis = new FakeRedis();
-  const issued = await issueInternalDevCapability({ redis, req: request() });
+  const issued = await issueInternalDevCapability({ redis, req: request(), launcher: {
+    contract: 'leadership_demo_launcher_capability_v1',
+    launcher_scope_id: 'leadership_demo_aaaaaaaaaaaaaaaaaaaaaaaa',
+    allowed_products: ['recruiting', 'subscription'],
+    synthetic_only: true,
+  } });
   assert.equal(issued.capability.subject_key, 're-mid');
+  assert.equal(issued.capability.demo_subject_switching, true);
+  assert.deepEqual(issued.capability.allowed_demo_subjects, ['synthetic', 'patricia-demo']);
   assert.equal(issued.capability.synthetic_only, true);
   assert.equal(issued.capability.billing_evidence, false);
   assert.equal(issued.capability.stripe_subscription_created, false);

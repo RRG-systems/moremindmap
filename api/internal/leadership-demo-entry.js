@@ -105,7 +105,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
 
     if (action === 'LAUNCH_SUBSCRIPTION') {
       if (!internalDevEnabled(process.env)) return send(res, 404, { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF' });
-      const issued = await issueInternalDevCapability({ redis, req });
+      const issued = await issueInternalDevCapability({ redis, req, launcher: auth.capability });
       res.setHeader('Set-Cookie', issued.cookies);
       return send(res, 200, {
         ok: true,

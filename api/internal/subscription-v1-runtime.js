@@ -21,12 +21,16 @@ import { createSubscriptionS2GuRuntime } from '../engine/subscriptionS2/guRuntim
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
 async function defaultLoadSubscriber(args) {
-  const { loadProductionIntendedSyntheticSubscriber } = await import('../engine/subscriptionV1/internalDevSubscriberLoader.js');
-  return loadProductionIntendedSyntheticSubscriber(args);
+  const { loadAuthorizedSubscriptionDemoSubscriber } = await import('../engine/subscriptionS2/demoSubscriberLoader.js');
+  return loadAuthorizedSubscriptionDemoSubscriber(args);
 }
 
 function publicIdentity(loaded) {
   return loaded?.identity || { first_name: 'Jordan', vertical: 'Real Estate', synthetic_only: true, demo_subject: 'SYNTHETIC' };
+}
+
+function publicDemoSubject(auth) {
+  return auth?.demo_subject || auth?.capability?.demo_subject_id || 'synthetic';
 }
 
 function send(res, status, body) {
@@ -459,6 +463,8 @@ export function createSubscriptionV1RuntimeHandler({
           ok: true,
           code: allowanceExhausted ? 'SUBSCRIPTION_V1_RELATIONSHIP_READY_ALLOWANCE_EXHAUSTED' : 'SUBSCRIPTION_S2_PRE_SESSION_READY',
           csrf_token,
+          demo_subject: publicDemoSubject(auth),
+          demo_subject_switching: auth.capability.demo_subject_switching === true,
           identity: publicIdentity(provisional),
           view_model: provisional.current.view_model,
           publication: provisional.current.publication,
@@ -488,6 +494,8 @@ export function createSubscriptionV1RuntimeHandler({
         ok: true,
         code: 'SUBSCRIPTION_V1_PRODUCTION_INTENDED_SUBSCRIBER_READY',
         csrf_token,
+        demo_subject: publicDemoSubject(auth),
+        demo_subject_switching: auth.capability.demo_subject_switching === true,
         identity: publicIdentity(loaded),
         view_model: loaded.current.view_model,
         publication: loaded.current.publication,

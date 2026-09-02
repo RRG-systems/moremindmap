@@ -5,6 +5,13 @@ import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.j
 import { contractHeader, validateSubscriptionV1Contract } from '../../../src/lib/subscriptionV1/contracts.js';
 import { InMemoryAllowanceSessionLedger } from '../../../src/lib/subscriptionV1/sessionLedger.js';
 import { InMemoryLivingRelationshipStore } from '../../../src/lib/subscriptionV1/afw05/store.js';
+import {
+  SUBSCRIPTION_DEMO_SUBJECT_IDS,
+  SYNTHETIC_DEMO_SUBJECT_KEY,
+  hasDarrenDemoSubjectAuthority,
+  resolveSubscriptionDemoSubject,
+  validateSubscriptionDemoCapability,
+} from '../subscriptionS2/demoSubjectAuthority.js';
 
 const PREFIX = 'more:subscription-v1:internal-dev:v1';
 const CAPABILITY_TTL_SECONDS = 8 * 60 * 60;
@@ -116,7 +123,14 @@ export function exactJordanCode(value) {
   return expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
 }
 
-export async function issueInternalDevCapability({ redis, req, now = new Date() }) {
+export async function issueInternalDevCapability({ redis, req, launcher = null, now = new Date() }) {
+  const darrenDemoAuthority = launcher !== null;
+  if (darrenDemoAuthority && (launcher?.contract !== 'leadership_demo_launcher_capability_v1'
+    || launcher.synthetic_only !== true
+    || !launcher.allowed_products?.includes('subscription')
+    || !String(launcher.launcher_scope_id || '').startsWith('leadership_demo_'))) {
+    throw new Error('SUBSCRIPTION_DEMO_LAUNCHER_AUTHORITY_INVALID');
+  }
   const parsed = cookies(req.headers?.cookie);
   const suppliedRelationship = parsed[COOKIE_RELATIONSHIP];
   let relationshipKey = suppliedRelationship ? `${PREFIX}:relationship:${digest(suppliedRelationship)}` : null;
@@ -127,7 +141,7 @@ export async function issueInternalDevCapability({ redis, req, now = new Date() 
     relationshipKey = `${PREFIX}:relationship:${digest(relationshipToken)}`;
     relationship = {
       relationship_key: `rel_${digest(relationshipToken).slice(0, 20)}`,
-      subject_key: 're-mid',
+      subject_key: SYNTHETIC_DEMO_SUBJECT_KEY,
       synthetic_only: true,
       created_at: now.toISOString(),
       last_authenticated_at: now.toISOString(),
@@ -139,8 +153,15 @@ export async function issueInternalDevCapability({ redis, req, now = new Date() 
   const capabilityToken = token();
   const capabilityKey = `${PREFIX}:capability:${digest(capabilityToken)}`;
   const capability = {
+    contract: 'subscription_v1_internal_capability_v2',
     relationship_key: relationship.relationship_key,
-    subject_key: 're-mid',
+    synthetic_relationship_key: relationship.relationship_key,
+    subject_key: SYNTHETIC_DEMO_SUBJECT_KEY,
+    demo_subject_id: 'synthetic',
+    demo_subject_switching: darrenDemoAuthority,
+    allowed_demo_subjects: darrenDemoAuthority ? [...SUBSCRIPTION_DEMO_SUBJECT_IDS] : ['synthetic'],
+    authority_source: darrenDemoAuthority ? 'LEADERSHIP_DEMO' : 'DIRECT_SYNTHETIC',
+    launcher_scope_id: darrenDemoAuthority ? launcher.launcher_scope_id : null,
     synthetic_only: true,
     billing_evidence: false,
     stripe_subscription_created: false,
@@ -158,18 +179,62 @@ export async function issueInternalDevCapability({ redis, req, now = new Date() 
   };
 }
 
-export async function authenticateInternalDevRequest({ redis, req }) {
-  if (!internalDevEnabled()) return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF', status: 404 };
+export async function authenticateInternalDevRequest({ redis, req, env = globalThis.process?.env || {} }) {
+  if (!internalDevEnabled(env)) return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF', status: 404 };
   const capabilityToken = cookies(req.headers?.cookie)[COOKIE_CAPABILITY];
   if (!capabilityToken) return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', status: 401 };
   const capabilityHash = digest(capabilityToken);
   const raw = await redis.get(`${PREFIX}:capability:${capabilityHash}`);
   const capability = raw ? JSON.parse(raw) : null;
-  if (!capability || capability.synthetic_only !== true || capability.subject_key !== 're-mid'
+  const subjectAuthority = validateSubscriptionDemoCapability(capability);
+  if (!subjectAuthority.ok
     || capability.browser_binding_hash !== clientKey(req) || Date.parse(capability.expires_at) <= Date.now()) {
     return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', status: 401 };
   }
-  return { ok: true, capability, capability_hash: capabilityHash };
+  return { ok: true, capability, capability_hash: capabilityHash, demo_subject: subjectAuthority.selection };
+}
+
+export async function issueDemoSubjectSwitchCsrf({ redis, capabilityHash }) {
+  const proof = token();
+  await redis.set(`${PREFIX}:subject-switch-csrf:${capabilityHash}:${digest(proof)}`, 'active', 'EX', CSRF_TTL_SECONDS, 'NX');
+  return proof;
+}
+
+export async function consumeDemoSubjectSwitchCsrf({ redis, capabilityHash, proof }) {
+  if (typeof proof !== 'string' || proof.length < 32) return false;
+  return await redis.getdel(`${PREFIX}:subject-switch-csrf:${capabilityHash}:${digest(proof)}`) === 'active';
+}
+
+export async function switchInternalDevDemoSubject({ redis, capability, capabilityHash, selection, now = new Date() }) {
+  if (!hasDarrenDemoSubjectAuthority(capability)) {
+    return { ok: false, code: 'SUBSCRIPTION_DEMO_SUBJECT_AUTHORITY_DENIED' };
+  }
+  const resolved = resolveSubscriptionDemoSubject({ selection, capability });
+  if (!resolved.ok) return resolved;
+  const capabilityKey = `${PREFIX}:capability:${capabilityHash}`;
+  const raw = await redis.get(capabilityKey);
+  let current = null;
+  try { current = raw ? JSON.parse(raw) : null; } catch { current = null; }
+  if (!current || hashCanonicalJson(current) !== hashCanonicalJson(capability)) {
+    return { ok: false, code: 'SUBSCRIPTION_DEMO_CAPABILITY_STALE' };
+  }
+  const expiresAt = Date.parse(current.expires_at);
+  const remainingSeconds = Math.ceil((expiresAt - now.getTime()) / 1000);
+  if (!Number.isFinite(expiresAt) || remainingSeconds < 1) {
+    return { ok: false, code: 'SUBSCRIPTION_DEMO_CAPABILITY_EXPIRED' };
+  }
+  const next = {
+    ...current,
+    demo_subject_id: resolved.selection,
+    subject_key: resolved.subject_key,
+    relationship_key: resolved.relationship_key,
+    demo_copy_only: resolved.demo_copy_only,
+    subject_selected_at: now.toISOString(),
+    subject_selection_version: Number(current.subject_selection_version || 0) + 1,
+  };
+  const persisted = await redis.set(capabilityKey, JSON.stringify(next), 'EX', remainingSeconds, 'XX');
+  if (persisted !== 'OK') return { ok: false, code: 'SUBSCRIPTION_DEMO_CAPABILITY_UPDATE_FAILED' };
+  return { ok: true, capability: next, selection: resolved.selection };
 }
 
 export async function issueRuntimeCsrf({ redis, capabilityHash }) {

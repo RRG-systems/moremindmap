@@ -12,6 +12,7 @@ const DEMO_SUBJECTS = Object.freeze([
   { id: 'synthetic', label: 'SYNTHETIC', note: 'Synthetic Jordan' },
   { id: 'patricia-demo', label: 'PATRICIA', note: 'Sealed demo copy' },
 ])
+const DEMO_SUBJECT_IDS = new Set(DEMO_SUBJECTS.map((subject) => subject.id))
 const messageStorageKey = (subject) => `${STORAGE_KEY}:${subject}`
 
 function InlineCoachText({ text }) {
@@ -310,27 +311,49 @@ export default function SubscriptionV1InternalDevApp() {
   const [current, setCurrent] = useState(null)
   useEffect(() => {
     let live = true
-    sessionStorage.setItem(SUBJECT_STORAGE_KEY, demoSubject)
     fetch(`/api/internal/subscription-v1-runtime?subject=${encodeURIComponent(demoSubject)}`, { credentials: 'same-origin', cache: 'no-store' })
       .then(async (response) => ({ response, body: await response.json().catch(() => null) }))
       .then(({ response, body }) => {
         if (!live) return
         if (!response.ok || body?.ok !== true) setState({ loading: false, error: body?.code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
-        else { setCurrent({ view_model: body.view_model, publication: body.publication }); setState({ loading: false, error: null, bootstrap: body }) }
+        else {
+          const authoritativeSubject = DEMO_SUBJECT_IDS.has(body.demo_subject) ? body.demo_subject : 'synthetic'
+          sessionStorage.setItem(SUBJECT_STORAGE_KEY, authoritativeSubject)
+          if (authoritativeSubject !== demoSubject) setDemoSubject(authoritativeSubject)
+          setCurrent({ view_model: body.view_model, publication: body.publication })
+          setState({ loading: false, error: null, bootstrap: body })
+        }
       })
       .catch(() => live && setState({ loading: false, error: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE', bootstrap: null }))
     return () => { live = false }
   }, [demoSubject])
-  function chooseDemoSubject(subject) {
+  async function chooseDemoSubject(subject) {
     if (subject === demoSubject) return
     setState({ loading: true, error: null, bootstrap: null })
     setCurrent(null)
-    setDemoSubject(subject)
+    try {
+      const prepared = await fetch('/api/internal/subscription-v1-demo-subject', { credentials: 'same-origin', cache: 'no-store' })
+      const ready = await prepared.json().catch(() => null)
+      if (!prepared.ok || ready?.ok !== true || !ready.csrf_token) throw new Error(ready?.code || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE')
+      const response = await fetch('/api/internal/subscription-v1-demo-subject', {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'content-type': 'application/json', 'x-subscription-demo-subject-csrf': ready.csrf_token },
+        body: JSON.stringify({ subject }),
+      })
+      const result = await response.json().catch(() => null)
+      if (!response.ok || result?.ok !== true || !DEMO_SUBJECT_IDS.has(result.selected_subject)) {
+        throw new Error(result?.code || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE')
+      }
+      sessionStorage.setItem(SUBJECT_STORAGE_KEY, result.selected_subject)
+      setDemoSubject(result.selected_subject)
+    } catch (error) {
+      setState({ loading: false, error: error?.message || 'SUBSCRIPTION_DEMO_SUBJECT_SWITCH_UNAVAILABLE', bootstrap: null })
+    }
   }
   if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying the synthetic entitlement and governed state.</p></main>
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
   return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={demoSubject} data-layer-max="2">
-    <nav className="s2-subject-switcher" aria-label="Choose local demo subject">{DEMO_SUBJECTS.map((subject) => <button key={subject.id} type="button" aria-pressed={demoSubject === subject.id} onClick={() => chooseDemoSubject(subject.id)}><strong>{subject.label}</strong><span>{subject.note}</span></button>)}</nav>
+    {state.bootstrap.demo_subject_switching === true && <nav className="s2-subject-switcher" aria-label="Choose local demo subject">{DEMO_SUBJECTS.map((subject) => <button key={subject.id} type="button" aria-pressed={demoSubject === subject.id} onClick={() => chooseDemoSubject(subject.id)}><strong>{subject.label}</strong><span>{subject.note}</span></button>)}</nav>}
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />

@@ -21,9 +21,12 @@ import { createBaProgressiveDisclosureV1 } from '../../../src/lib/baProgressiveD
 import { createSyntheticRealEstateFounderViewModelV1 } from '../../../src/lab/subscriptionLivingBusinessRelationshipV1/createSyntheticRealEstateFounderSubjectsV1.js';
 import { createSubscriptionLiveDemoOpenAiTransport } from '../subscriptionV1/liveDemoOpenAiTransport.js';
 import { RedisLivingRelationshipStore, internalDevKeys, readExternalEvidence } from '../subscriptionV1/internalDevInfrastructure.js';
+import {
+  PATRICIA_DEMO_RELATIONSHIP_KEY,
+  PATRICIA_DEMO_SUBJECT_KEY,
+} from './demoSubjectAuthority.js';
 
-export const PATRICIA_DEMO_SUBJECT_KEY = 'patricia-demo-s2';
-export const PATRICIA_DEMO_RELATIONSHIP_KEY = 'rel_d3a0c0a3d3a0c0a3d3a0';
+export { PATRICIA_DEMO_RELATIONSHIP_KEY, PATRICIA_DEMO_SUBJECT_KEY };
 export const PATRICIA_DEMO_SCOPE = Object.freeze({
   subject_id: 'subject_local_demo_patricia_derived_s2',
   membership_id: 'membership_local_demo_patricia_derived_s2',
