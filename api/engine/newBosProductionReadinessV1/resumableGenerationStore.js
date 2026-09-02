@@ -102,6 +102,10 @@ function semanticRejectedStage3ReplacementClaimKey(namespace, campaignSha256) {
   return `${namespace}:resumable-v1:${campaignSha256}:semantic-rejected-stage3-replacement-v1`;
 }
 
+function stage3RequestContractV2ClaimKey(namespace, campaignSha256) {
+  return `${namespace}:resumable-v1:${campaignSha256}:stage3-vector-free-request-contract-v2-claim-v1`;
+}
+
 function parse(raw) {
   return raw ? JSON.parse(raw) : null;
 }
@@ -152,6 +156,15 @@ function classify(record) {
   }
   const status = record.observation?.status;
   if (ACTIVE.has(status)) return Object.freeze({ state: status === 'queued' ? 'QUEUED' : 'IN_PROGRESS', disposition: 'RESUME_EXACT' });
+  if (record.retry_boundary === 'exactly_one_repaired_stage3_execution'
+    && status
+    && status !== 'completed') {
+    return Object.freeze({
+      state: 'TERMINAL_EXHAUSTED',
+      disposition: 'STOP',
+      reason: record.observation?.incomplete_details_reason || record.observation?.error_code || status,
+    });
+  }
   if (status === 'completed') {
     return Object.freeze({ state: 'HUMAN_REVIEW_REQUIRED', disposition: 'STOP', reason: 'completed_result_not_accepted' });
   }
@@ -422,6 +435,113 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
       if (result !== 'OK') throw new Error(`new_bos_semantic_rejected_stage3_atomic_retirement_failed:${result}`);
       return Object.freeze({
         disposition: 'START_STAGE3_REPLACEMENT',
+        record: intent,
+        archive_sha256: archiveSha256,
+        prior_checkpoint_sha256: archive.prior_checkpoint_sha256,
+      });
+    },
+
+    async archiveRejectedStage3AndPrepareRequestContractV2({
+      campaignSha256,
+      expectedStage3,
+      nextStage3,
+      now = new Date(),
+    } = {}) {
+      if (typeof redis?.eval !== 'function') throw new Error('new_bos_stage3_request_contract_v2_atomic_store_required');
+      assertIdentity(expectedStage3?.unit_identity_sha256, 'stage3_request_v1_unit_identity');
+      assertIdentity(expectedStage3?.request_sha256, 'stage3_request_v1_request_hash');
+      assertIdentity(expectedStage3?.provider_response_id_sha256, 'stage3_request_v1_provider_response_identity');
+      assertIdentity(expectedStage3?.semantic_validation_code_sha256, 'stage3_request_v1_validation_code');
+      assertIdentity(nextStage3?.unit_identity_sha256, 'stage3_request_v2_unit_identity');
+      assertIdentity(nextStage3?.request_sha256, 'stage3_request_v2_request_hash');
+      if (nextStage3?.request_contract_version !== 'new_bos_stage3_vector_free_request_v2') {
+        throw new Error('new_bos_stage3_request_contract_v2_identity_invalid');
+      }
+      if (nextStage3.unit_identity_sha256 === expectedStage3.unit_identity_sha256
+        || nextStage3.request_sha256 === expectedStage3.request_sha256) {
+        throw new Error('new_bos_stage3_request_contract_v2_hash_not_advanced');
+      }
+      const key = rootKey(namespace, campaignSha256, VECTOR_FREE_STAGE3_UNIT);
+      const existingSerialized = await redis.get(key);
+      const existing = parse(existingSerialized);
+      if (!existing
+        || existing.state !== 'SEMANTIC_REJECTED'
+        || existing.unit_id !== VECTOR_FREE_STAGE3_UNIT
+        || existing.attempt !== 3
+        || existing.observation?.status !== 'completed'
+        || existing.unit_identity_sha256 !== expectedStage3.unit_identity_sha256
+        || existing.request_sha256 !== expectedStage3.request_sha256
+        || existing.observation?.provider_response_id_sha256 !== expectedStage3.provider_response_id_sha256
+        || existing.semantic_rejection_code !== 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION'
+        || existing.semantic_validator !== 'assertVectorFreeWholePerson'
+        || existing.semantic_rejection_detail !== 'ADAPTABILITY_LANGUAGE'
+        || existing.semantic_validation_code_sha256 !== expectedStage3.semantic_validation_code_sha256) {
+        throw new Error('new_bos_stage3_request_contract_v2_prior_checkpoint_identity_mismatch');
+      }
+      const archivedAt = now instanceof Date ? now.toISOString() : new Date(now).toISOString();
+      const archive = Object.freeze({
+        version: 'new_bos_resumable_semantic_rejection_archive_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        prior_checkpoint_sha256: sha256Stable(existing),
+        prior_checkpoint: existing,
+        prior_attempt: existing.attempt,
+        semantic_rejection_code: existing.semantic_rejection_code,
+        semantic_validator: existing.semantic_validator,
+        semantic_rejection_detail: existing.semantic_rejection_detail,
+        semantic_validation_code_sha256: existing.semantic_validation_code_sha256,
+        archived_at: archivedAt,
+        replacement_authorized: true,
+        replacement_authority: 'founder_stage3_vector_free_request_contract_v2_first_execution',
+      });
+      const archiveSha256 = sha256Stable(archive);
+      const intent = Object.freeze({
+        version: 'new_bos_resumable_unit_checkpoint_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        unit_identity_sha256: nextStage3.unit_identity_sha256,
+        request_sha256: nextStage3.request_sha256,
+        request_contract_version: nextStage3.request_contract_version,
+        prior_unit_identity_sha256: existing.unit_identity_sha256,
+        prior_request_sha256: existing.request_sha256,
+        prior_attempt: existing.attempt,
+        next_attempt: 1,
+        retry_sequence: 'stage3_vector_free_request_contract_v2',
+        retry_boundary: 'exactly_one_repaired_stage3_execution',
+        semantic_rejection_archive_sha256: archiveSha256,
+        state: 'SUBMISSION_INTENT',
+        attempt: 1,
+        claim_token_sha256: sha256Stable(crypto.randomUUID()),
+        observation: null,
+        created_at: archivedAt,
+      });
+      const claim = Object.freeze({
+        version: 'new_bos_stage3_vector_free_request_contract_v2_claim_v1',
+        campaign_sha256: campaignSha256,
+        unit_id: VECTOR_FREE_STAGE3_UNIT,
+        prior_checkpoint_sha256: archive.prior_checkpoint_sha256,
+        semantic_rejection_archive_sha256: archiveSha256,
+        prior_attempt: existing.attempt,
+        request_contract_version: nextStage3.request_contract_version,
+        next_unit_identity_sha256: nextStage3.unit_identity_sha256,
+        next_request_sha256: nextStage3.request_sha256,
+        next_attempt: 1,
+        claimed_at: archivedAt,
+      });
+      const result = await redis.eval(
+        RETIRE_SEMANTIC_REJECTED_STAGE3_SCRIPT,
+        3,
+        key,
+        semanticRejectedStage3ArchiveKey(key, existing.attempt),
+        stage3RequestContractV2ClaimKey(namespace, campaignSha256),
+        existingSerialized,
+        JSON.stringify(archive),
+        JSON.stringify(intent),
+        JSON.stringify(claim),
+      );
+      if (result !== 'OK') throw new Error(`new_bos_stage3_request_contract_v2_atomic_transition_failed:${result}`);
+      return Object.freeze({
+        disposition: 'START_STAGE3_REQUEST_CONTRACT_V2',
         record: intent,
         archive_sha256: archiveSha256,
         prior_checkpoint_sha256: archive.prior_checkpoint_sha256,

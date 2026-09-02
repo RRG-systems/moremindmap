@@ -1,5 +1,10 @@
 import { inspectNewBosBackgroundTransportDiff, buildNewBosBackgroundExecutionRequest, executeNewBosBackgroundResponse, resumeNewBosBackgroundResponse } from './backgroundResponsesTransport.js';
-import { buildNewBosSemanticStageRequest, createNewBosSemanticStageProvider } from './reasoningProvider.js';
+import {
+  buildNewBosSemanticStageRequest,
+  createNewBosSemanticStageProvider,
+  NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+  semanticStageRequestContractVersion,
+} from './reasoningProvider.js';
 import { sha256Stable } from './realizationIdentity.js';
 import {
   assembleNewBosReasoningDraftV1,
@@ -82,7 +87,36 @@ export async function runNewBosResumableSemanticGeneration({
       unit_identity_sha256: unitIdentitySha256,
       unit_id: unitId,
     } = plan;
-    const prepared = await checkpointStore.prepare({
+    let prepared;
+    if (stage.id === 'whole_person_decision_synthesis') {
+      const existing = await checkpointStore.inspect({
+        campaignSha256: campaignIdentity.sha256,
+        unitId,
+      });
+      if (existing?.record?.state === 'ACCEPTED'
+        && existing.record.unit_identity_sha256 !== unitIdentitySha256) {
+        const legacyPlan = buildNewBosSemanticUnitPlan({
+          rawEvidence,
+          governedContext,
+          realizationIdentity,
+          model,
+          stageId: stage.id,
+          acceptedDependencies,
+          privacyTokens,
+          requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+        });
+        if (existing.record.unit_identity_sha256 !== legacyPlan.unit_identity_sha256
+          || existing.record.request_sha256 !== legacyPlan.request_sha256) {
+          throw new Error('new_bos_resumable_stage3_legacy_checkpoint_identity_mismatch');
+        }
+        prepared = Object.freeze({
+          disposition: 'REUSE_ACCEPTED',
+          record: existing.record,
+          classification: existing.classification,
+        });
+      }
+    }
+    prepared ||= await checkpointStore.prepare({
       campaignSha256: campaignIdentity.sha256,
       unitId,
       unitIdentitySha256,
@@ -109,6 +143,7 @@ export async function runNewBosResumableSemanticGeneration({
       model,
       stageId: stage.id,
       privacyTokens,
+      requestContractVersion: plan.request_contract_version,
       transport: async (request) => {
         if (sha256Stable(request) !== requestSha256) throw new Error('new_bos_resumable_stage_request_drift');
         const inspection = inspectNewBosBackgroundTransportDiff({
@@ -244,6 +279,7 @@ export function buildNewBosSemanticUnitPlan({
   stageId,
   acceptedDependencies = [],
   privacyTokens = [],
+  requestContractVersion = semanticStageRequestContractVersion(stageId),
 } = {}) {
   const evidenceIds = rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId);
   const campaignIdentity = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
@@ -254,21 +290,29 @@ export function buildNewBosSemanticUnitPlan({
     stageId,
     acceptedDependencies,
     privacyTokens,
+    requestContractVersion,
   });
   const requestSha256 = sha256Stable(scientificRequest);
-  const unitIdentitySha256 = sha256Stable({
-    version: 'new_bos_resumable_semantic_unit_v1',
+  const unitIdentity = {
+    version: requestContractVersion === NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1
+      ? 'new_bos_resumable_semantic_unit_v1'
+      : 'new_bos_resumable_semantic_unit_v2',
     campaign_sha256: campaignIdentity.sha256,
     stage_id: stageId,
     stage_schema_sha256: sha256Stable(buildNewBosSemanticStageSchema({ stageId, evidenceIds })),
     dependency_hashes: acceptedDependencies.map(({ stage_id: dependencyStageId, fragment_sha256: fragmentSha256 }) => [dependencyStageId, fragmentSha256]),
     scientific_request_sha256: requestSha256,
-  });
+    ...(requestContractVersion === NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1
+      ? {}
+      : { request_contract_version: requestContractVersion }),
+  };
+  const unitIdentitySha256 = sha256Stable(unitIdentity);
   return Object.freeze({
     campaign_identity: campaignIdentity,
     scientific_request: scientificRequest,
     request_sha256: requestSha256,
     unit_identity_sha256: unitIdentitySha256,
     unit_id: `semantic:${stageId}`,
+    request_contract_version: requestContractVersion,
   });
 }

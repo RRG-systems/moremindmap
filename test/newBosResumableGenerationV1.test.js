@@ -9,7 +9,15 @@ import { retireStaleNewBosBackgroundResponse } from '../api/engine/newBosProduct
 import { authorizeNewBosOperatorInspection } from '../api/engine/newBosProductionReadinessV1/config.js';
 import { inspectNewBosResumableRuntimeState } from '../api/engine/newBosProductionReadinessV1/runtimeStateInspector.js';
 import { realizePersonalityDnaArtifactBounded } from '../api/engine/newBosProductionReadinessV1/boundedSurfaceRealization.js';
-import { runNewBosResumableSemanticGeneration } from '../api/engine/newBosProductionReadinessV1/resumableGenerationOrchestrator.js';
+import {
+  buildNewBosSemanticUnitPlan,
+  runNewBosResumableSemanticGeneration,
+} from '../api/engine/newBosProductionReadinessV1/resumableGenerationOrchestrator.js';
+import {
+  buildNewBosSemanticStageRequest,
+  NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+  NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+} from '../api/engine/newBosProductionReadinessV1/reasoningProvider.js';
 import {
   assembleNewBosReasoningDraftV1,
   buildNewBosResumableCampaignIdentity,
@@ -18,6 +26,7 @@ import {
   validateNewBosSemanticStageFragment,
 } from '../api/engine/newBosProductionReadinessV1/resumableSemanticContract.js';
 import { buildNewBosRealizationIdentity, sha256Stable } from '../api/engine/newBosProductionReadinessV1/realizationIdentity.js';
+import { FORBIDDEN_WHOLE_PERSON_LANGUAGE } from '../src/lib/newBosPersonalityDnaV1/constants.js';
 import {
   classifyCompletedStage3ValidationError,
   providerResponseIdSha256,
@@ -153,7 +162,7 @@ test('stage-3 checkpoint validation enforces the existing vector-free whole-pers
     stageId: 'whole_person_decision_synthesis',
     fragment: valid,
   }), valid);
-  for (const forbidden of ['assessment', 'vector', 'dimension', 'structure score', 'measured pattern']) {
+  for (const forbidden of FORBIDDEN_WHOLE_PERSON_LANGUAGE) {
     const invalid = structuredClone(valid);
     invalid.whole_person.core_explanation = `This ${forbidden} wording must never enter an accepted checkpoint.`;
     assert.throws(() => validateNewBosSemanticStageFragment({
@@ -161,6 +170,192 @@ test('stage-3 checkpoint validation enforces the existing vector-free whole-pers
       fragment: invalid,
     }), new RegExp(`Whole-person model leaked assessment language: ${forbidden}`, 'u'));
   }
+  const lived = structuredClone(valid);
+  lived.whole_person.core_explanation = 'When plans change, this person pauses, reorients around the most important outcome, and chooses the next workable step.';
+  assert.equal(validateNewBosSemanticStageFragment({
+    stageId: 'whole_person_decision_synthesis',
+    fragment: lived,
+  }), lived);
+});
+
+test('Stage-3 request V2 appends one shared vector-free output boundary without removing internal coordinate context', () => {
+  const rawEvidence = {
+    ...RICH_SYNTHETIC_FIXTURE.rawEvidence,
+    generation_metadata: { canonical_source_sha256: 'f'.repeat(64) },
+  };
+  const dependencies = splitFixture().slice(0, 2).map(({ stage_id: stageId, fragment }) => ({
+    stage_id: stageId,
+    fragment,
+    fragment_sha256: sha256Stable(fragment),
+  }));
+  const request = buildNewBosSemanticStageRequest({
+    rawEvidence,
+    governedContext: [],
+    model: 'gpt-5.6-sol',
+    stageId: 'whole_person_decision_synthesis',
+    acceptedDependencies: dependencies,
+    requestContractVersion: NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+  });
+  const prompt = request.input[0].content[0].text;
+  assert.ok(prompt.indexOf('ACCEPTED HASH-BOUND DEPENDENCIES:') < prompt.indexOf('STAGE-3 OUTPUT BOUNDARY'));
+  assert.match(prompt, /internal analytic context and provenance only/u);
+  assert.match(prompt, /Retain that intelligence for reasoning/u);
+  assert.equal(prompt.includes(JSON.stringify(FORBIDDEN_WHOLE_PERSON_LANGUAGE)), true);
+  for (const term of FORBIDDEN_WHOLE_PERSON_LANGUAGE) assert.equal(prompt.includes(term), true);
+  assert.match(JSON.stringify(request), /adaptability/u);
+
+  const legacy = buildNewBosSemanticStageRequest({
+    rawEvidence,
+    governedContext: [],
+    model: 'gpt-5.6-sol',
+    stageId: 'whole_person_decision_synthesis',
+    acceptedDependencies: dependencies,
+    requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+  });
+  assert.equal(legacy.input[0].content[0].text.includes('STAGE-3 OUTPUT BOUNDARY'), false);
+  assert.notEqual(sha256Stable(request), sha256Stable(legacy));
+});
+
+test('Stage-3 request versioning changes only Stage-3 unit identity while Stage 1 and Stage 2 remain byte-identical', () => {
+  const rawEvidence = {
+    ...RICH_SYNTHETIC_FIXTURE.rawEvidence,
+    generation_metadata: { canonical_source_sha256: 'e'.repeat(64) },
+  };
+  const realizationIdentity = buildNewBosRealizationIdentity({
+    profileId: 'MM-SYNTHETIC-STAGE3-V2',
+    canonicalSourceSha256: rawEvidence.generation_metadata.canonical_source_sha256,
+    rawEvidenceVersion: rawEvidence.version,
+    providerModel: 'gpt-5.6-sol',
+    compatibilityClass: 'A',
+  });
+  for (const stageId of ['causal_foundation', 'operating_domains']) {
+    const implicit = buildNewBosSemanticUnitPlan({
+      rawEvidence,
+      governedContext: [],
+      realizationIdentity,
+      model: 'gpt-5.6-sol',
+      stageId,
+    });
+    const explicitV1 = buildNewBosSemanticUnitPlan({
+      rawEvidence,
+      governedContext: [],
+      realizationIdentity,
+      model: 'gpt-5.6-sol',
+      stageId,
+      requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+    });
+    assert.deepEqual(implicit, explicitV1);
+  }
+  const dependencies = splitFixture().slice(0, 2).map(({ stage_id: stageId, fragment }) => ({
+    stage_id: stageId,
+    fragment,
+    fragment_sha256: sha256Stable(fragment),
+  }));
+  const plan = (requestContractVersion) => buildNewBosSemanticUnitPlan({
+    rawEvidence,
+    governedContext: [],
+    realizationIdentity,
+    model: 'gpt-5.6-sol',
+    stageId: 'whole_person_decision_synthesis',
+    acceptedDependencies: dependencies,
+    requestContractVersion,
+  });
+  const v1 = plan(NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1);
+  const v2 = plan(NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2);
+  assert.notEqual(v1.request_sha256, v2.request_sha256);
+  assert.notEqual(v1.unit_identity_sha256, v2.unit_identity_sha256);
+  assert.equal(v1.campaign_identity.sha256, v2.campaign_identity.sha256);
+  assert.equal(v2.request_contract_version, NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2);
+});
+
+test('an already-accepted legacy Stage-3 checkpoint remains resumable without regeneration after request V2', async () => {
+  const rawEvidence = {
+    ...RICH_SYNTHETIC_FIXTURE.rawEvidence,
+    generation_metadata: { canonical_source_sha256: 'd'.repeat(64) },
+  };
+  const realizationIdentity = buildNewBosRealizationIdentity({
+    profileId: 'MM-SYNTHETIC-LEGACY-STAGE3-ACCEPTED',
+    canonicalSourceSha256: rawEvidence.generation_metadata.canonical_source_sha256,
+    rawEvidenceVersion: rawEvidence.version,
+    providerModel: 'gpt-5.6-sol',
+    compatibilityClass: 'A',
+  });
+  const store = createRedisNewBosResumableGenerationStore({
+    redis: fakeRedis(),
+    namespace: 'nonprod:new-bos:legacy-stage3-accepted-test',
+  });
+  const campaign = buildNewBosResumableCampaignIdentity({
+    realizationIdentity,
+    evidenceIds: rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId),
+  });
+  const accepted = [];
+  for (const [index, stage] of NEW_BOS_SEMANTIC_STAGES.slice(0, 3).entries()) {
+    const dependencies = accepted.filter((item) => stage.dependencies.includes(item.stage_id));
+    const plan = buildNewBosSemanticUnitPlan({
+      rawEvidence,
+      governedContext: [],
+      realizationIdentity,
+      model: 'gpt-5.6-sol',
+      stageId: stage.id,
+      acceptedDependencies: dependencies,
+      requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+    });
+    await store.prepare({
+      campaignSha256: campaign.sha256,
+      unitId: plan.unit_id,
+      unitIdentitySha256: plan.unit_identity_sha256,
+      requestSha256: plan.request_sha256,
+    });
+    await store.observe({
+      campaignSha256: campaign.sha256,
+      unitId: plan.unit_id,
+      unitIdentitySha256: plan.unit_identity_sha256,
+      requestSha256: plan.request_sha256,
+      event: { provider_response_id: `resp_legacy_accepted_${index}`, status: 'completed' },
+    });
+    const record = await store.accept({
+      campaignSha256: campaign.sha256,
+      unitId: plan.unit_id,
+      unitIdentitySha256: plan.unit_identity_sha256,
+      requestSha256: plan.request_sha256,
+      value: splitFixture()[index].fragment,
+    });
+    accepted.push({
+      stage_id: stage.id,
+      fragment: splitFixture()[index].fragment,
+      fragment_sha256: record.accepted_value_sha256,
+    });
+  }
+  let submissions = 0;
+  const result = await runNewBosResumableSemanticGeneration({
+    rawEvidence,
+    governedContext: [],
+    realizationIdentity,
+    model: 'gpt-5.6-sol',
+    checkpointStore: store,
+    client: {
+      responses: {
+        async create() {
+          submissions += 1;
+          return {
+            id: 'resp_surface_routing_only',
+            status: 'completed',
+            model: 'gpt-5.6-sol',
+            output_text: JSON.stringify(splitFixture()[3].fragment),
+          };
+        },
+        async retrieve() { throw new Error('completed Stage 4 must not poll'); },
+      },
+    },
+  });
+  assert.equal(submissions, 1);
+  assert.equal(result.accepted_stages.length, 4);
+  const stage3 = await store.inspect({
+    campaignSha256: campaign.sha256,
+    unitId: 'semantic:whole_person_decision_synthesis',
+  });
+  assert.equal(stage3.record.attempt, 1);
+  assert.equal(stage3.record.observation.provider_response_id, 'resp_legacy_accepted_2');
 });
 
 test('completed stage-3 diagnostic classifies validation without retaining provider content or identifiers', () => {
@@ -483,6 +678,124 @@ test('one authorized Stage-3 semantic-rejection replacement archives the exact t
       semantic_validation_code_sha256: 'd'.repeat(64),
     },
   }), /checkpoint_identity_mismatch/u);
+});
+
+test('Stage-3 request-contract V2 atomically archives rejected attempt 3 and permits only its first hash-bound execution', async () => {
+  const redis = fakeRedis();
+  const namespace = 'nonprod:new-bos:stage3-request-contract-v2-test';
+  const store = createRedisNewBosResumableGenerationStore({ redis, namespace });
+  const unitId = 'semantic:whole_person_decision_synthesis';
+  const oldUnitIdentity = '7'.repeat(64);
+  const oldRequest = '8'.repeat(64);
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: oldUnitIdentity, requestSha256: oldRequest });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: oldUnitIdentity,
+    requestSha256: oldRequest,
+    event: { provider_response_id: 'resp_attempt_1', status: 'incomplete', incomplete_details_reason: 'max_output_tokens' },
+  });
+  await store.prepare({ campaignSha256: CAMPAIGN, unitId, unitIdentitySha256: oldUnitIdentity, requestSha256: oldRequest });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: oldUnitIdentity,
+    requestSha256: oldRequest,
+    event: { provider_response_id: 'resp_attempt_2', status: 'completed' },
+  });
+  await store.rejectSemantic({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: oldUnitIdentity,
+    requestSha256: oldRequest,
+    rejection: {
+      category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+      validator: 'assertVectorFreeWholePerson',
+      language_class: 'ADAPTABILITY_LANGUAGE',
+      validation_code_sha256: 'd'.repeat(64),
+    },
+  });
+  const attempt2 = await store.inspect({ campaignSha256: CAMPAIGN, unitId });
+  await store.retireSemanticRejectedStage3AndPrepareReplacement({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: oldUnitIdentity,
+      request_sha256: oldRequest,
+      provider_response_id_sha256: attempt2.record.observation.provider_response_id_sha256,
+      semantic_validation_code_sha256: 'd'.repeat(64),
+    },
+  });
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: oldUnitIdentity,
+    requestSha256: oldRequest,
+    event: { provider_response_id: 'resp_attempt_3', status: 'completed' },
+  });
+  await store.rejectSemantic({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: oldUnitIdentity,
+    requestSha256: oldRequest,
+    rejection: {
+      category: 'VECTOR_FREE_ASSESSMENT_LANGUAGE_REJECTION',
+      validator: 'assertVectorFreeWholePerson',
+      language_class: 'ADAPTABILITY_LANGUAGE',
+      validation_code_sha256: 'e'.repeat(64),
+    },
+  });
+  const attempt3 = await store.inspect({ campaignSha256: CAMPAIGN, unitId });
+  const nextStage3 = {
+    unit_identity_sha256: '9'.repeat(64),
+    request_sha256: 'a'.repeat(64),
+    request_contract_version: NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+  };
+  const transitioned = await store.archiveRejectedStage3AndPrepareRequestContractV2({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: oldUnitIdentity,
+      request_sha256: oldRequest,
+      provider_response_id_sha256: attempt3.record.observation.provider_response_id_sha256,
+      semantic_validation_code_sha256: 'e'.repeat(64),
+    },
+    nextStage3,
+    now: new Date('2026-09-02T06:00:00.000Z'),
+  });
+  assert.equal(transitioned.disposition, 'START_STAGE3_REQUEST_CONTRACT_V2');
+  assert.equal(transitioned.record.attempt, 1);
+  assert.equal(transitioned.record.prior_attempt, 3);
+  assert.equal(transitioned.record.request_contract_version, NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2);
+  assert.equal(transitioned.record.retry_boundary, 'exactly_one_repaired_stage3_execution');
+  const archives = [...redis.values.keys()].filter((key) => key.includes(':semantic-rejection-archive-v1:attempt:'));
+  assert.equal(archives.some((key) => key.endsWith(':attempt:2')), true);
+  assert.equal(archives.some((key) => key.endsWith(':attempt:3')), true);
+  await assert.rejects(store.archiveRejectedStage3AndPrepareRequestContractV2({
+    campaignSha256: CAMPAIGN,
+    expectedStage3: {
+      unit_identity_sha256: oldUnitIdentity,
+      request_sha256: oldRequest,
+      provider_response_id_sha256: attempt3.record.observation.provider_response_id_sha256,
+      semantic_validation_code_sha256: 'e'.repeat(64),
+    },
+    nextStage3,
+  }), /prior_checkpoint_identity_mismatch/u);
+
+  await store.observe({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: nextStage3.unit_identity_sha256,
+    requestSha256: nextStage3.request_sha256,
+    event: { provider_response_id: 'resp_v2_only_execution', status: 'failed', error_code: 'server_error' },
+  });
+  const stopped = await store.prepare({
+    campaignSha256: CAMPAIGN,
+    unitId,
+    unitIdentitySha256: nextStage3.unit_identity_sha256,
+    requestSha256: nextStage3.request_sha256,
+  });
+  assert.equal(stopped.disposition, 'STOP');
+  assert.equal(stopped.classification.state, 'TERMINAL_EXHAUSTED');
+  assert.equal(stopped.record.attempt, 1);
 });
 
 test('assembled interpretation runs through the unchanged production runtime validators without provider inference', async () => {

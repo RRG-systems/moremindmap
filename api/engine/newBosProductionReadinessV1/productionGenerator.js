@@ -19,7 +19,11 @@ import {
   executeNewBosBackgroundResponse,
   retireStaleNewBosBackgroundResponse,
 } from './backgroundResponsesTransport.js';
-import { createNewBosSemanticStageProvider } from './reasoningProvider.js';
+import {
+  createNewBosSemanticStageProvider,
+  NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+  NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+} from './reasoningProvider.js';
 import {
   buildNewBosSemanticUnitPlan,
   runNewBosResumableSemanticGeneration,
@@ -293,6 +297,7 @@ export function createProductionNewBosGenerator({
         stageId: 'surface_routing',
         acceptedDependencies,
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
       });
       if (plan.campaign_identity.sha256 !== expectedCampaignSha256
         || plan.unit_identity_sha256 !== expectedUnitIdentitySha256
@@ -373,6 +378,7 @@ export function createProductionNewBosGenerator({
         model,
         stageId: 'surface_routing',
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
         transport: async (request) => {
           if (sha256Stable(request) !== plan.request_sha256) {
             throw new Error('new_bos_stale_queue_replacement_request_drift');
@@ -482,6 +488,7 @@ export function createProductionNewBosGenerator({
         stageId: 'whole_person_decision_synthesis',
         acceptedDependencies,
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
       });
       if (plan.campaign_identity.sha256 !== expectedCampaignSha256
         || plan.unit_identity_sha256 !== expectedStage3?.unit_identity_sha256
@@ -536,6 +543,7 @@ export function createProductionNewBosGenerator({
         model,
         stageId: 'whole_person_decision_synthesis',
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
         transport: async (request) => {
           if (sha256Stable(request) !== plan.request_sha256) {
             throw new Error('new_bos_invalid_stage3_replacement_request_drift');
@@ -634,6 +642,7 @@ export function createProductionNewBosGenerator({
         stageId: 'whole_person_decision_synthesis',
         acceptedDependencies,
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
       });
       if (plan.campaign_identity.sha256 !== expectedCampaignSha256
         || plan.unit_identity_sha256 !== expectedStage3?.unit_identity_sha256
@@ -667,6 +676,7 @@ export function createProductionNewBosGenerator({
         model,
         stageId: 'whole_person_decision_synthesis',
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
         transport: async (request) => {
           if (sha256Stable(request) !== plan.request_sha256) {
             throw new Error('new_bos_semantic_rejected_stage3_replacement_request_drift');
@@ -728,6 +738,153 @@ export function createProductionNewBosGenerator({
       }
     },
   });
+  Object.defineProperty(generate, 'replaceStage3RequestContractV2', {
+    enumerable: false,
+    configurable: false,
+    writable: false,
+    value: async ({
+      rawEvidence,
+      providerModel,
+      realizationIdentity,
+      expectedCampaignSha256,
+      expectedStage3,
+    } = {}) => {
+      if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
+      if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+      const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
+      const governedContext = await retrieveNewBosGovernedReasoningContext({ libraryRetriever });
+      const acceptedDependencies = [];
+      for (const stage of NEW_BOS_SEMANTIC_STAGES.slice(0, 2)) {
+        const inspection = await resumableGenerationStore.inspect({
+          campaignSha256: expectedCampaignSha256,
+          unitId: `semantic:${stage.id}`,
+        });
+        if (inspection?.record?.state !== 'ACCEPTED'
+          || inspection?.classification?.disposition !== 'REUSE_ACCEPTED') {
+          throw new Error(`new_bos_stage3_request_contract_v2_dependency_not_accepted:${stage.id}`);
+        }
+        acceptedDependencies.push(Object.freeze({
+          stage_id: stage.id,
+          fragment: validateNewBosSemanticStageFragment({
+            stageId: stage.id,
+            fragment: inspection.record.accepted_value,
+          }),
+          fragment_sha256: inspection.record.accepted_value_sha256,
+        }));
+      }
+      const legacyPlan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        acceptedDependencies,
+        privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
+      });
+      if (legacyPlan.campaign_identity.sha256 !== expectedCampaignSha256
+        || legacyPlan.unit_identity_sha256 !== expectedStage3?.unit_identity_sha256
+        || legacyPlan.request_sha256 !== expectedStage3?.request_sha256) {
+        throw new Error('new_bos_stage3_request_contract_v2_prior_identity_mismatch');
+      }
+      const repairedPlan = buildNewBosSemanticUnitPlan({
+        rawEvidence,
+        governedContext,
+        realizationIdentity,
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        acceptedDependencies,
+        privacyTokens,
+        requestContractVersion: NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+      });
+      const transitioned = await resumableGenerationStore.archiveRejectedStage3AndPrepareRequestContractV2({
+        campaignSha256: expectedCampaignSha256,
+        expectedStage3,
+        nextStage3: {
+          unit_identity_sha256: repairedPlan.unit_identity_sha256,
+          request_sha256: repairedPlan.request_sha256,
+          request_contract_version: repairedPlan.request_contract_version,
+        },
+      });
+      const onEvent = async (event) => resumableGenerationStore.observe({
+        campaignSha256: expectedCampaignSha256,
+        unitId: repairedPlan.unit_id,
+        unitIdentitySha256: repairedPlan.unit_identity_sha256,
+        requestSha256: repairedPlan.request_sha256,
+        event,
+      });
+      const provider = createNewBosSemanticStageProvider({
+        model,
+        stageId: 'whole_person_decision_synthesis',
+        privacyTokens,
+        requestContractVersion: NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2,
+        transport: async (request) => {
+          if (sha256Stable(request) !== repairedPlan.request_sha256) {
+            throw new Error('new_bos_stage3_request_contract_v2_request_drift');
+          }
+          const result = await executeNewBosBackgroundResponse({
+            client: reasoningClient,
+            scientificRequest: request,
+            maxWaitMs: interactiveWaitMs,
+            onEvent,
+          });
+          if (result.transport_evidence.submit_count !== 1) {
+            throw new Error('new_bos_stage3_request_contract_v2_submission_count_invalid');
+          }
+          return result.response;
+        },
+      });
+      try {
+        const fragment = await provider.infer({
+          raw_evidence: rawEvidence,
+          governed_context: governedContext,
+          accepted_dependencies: acceptedDependencies,
+        });
+        const accepted = await resumableGenerationStore.accept({
+          campaignSha256: expectedCampaignSha256,
+          unitId: repairedPlan.unit_id,
+          unitIdentitySha256: repairedPlan.unit_identity_sha256,
+          requestSha256: repairedPlan.request_sha256,
+          value: fragment,
+        });
+        return Object.freeze({
+          status: 'STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2_ACCEPTED',
+          request_contract_version: repairedPlan.request_contract_version,
+          request_sha256: repairedPlan.request_sha256,
+          unit_identity_sha256: repairedPlan.unit_identity_sha256,
+          prior_checkpoint_sha256: transitioned.prior_checkpoint_sha256,
+          archive_sha256: transitioned.archive_sha256,
+          accepted_value_sha256: accepted.accepted_value_sha256,
+          campaign_sha256: expectedCampaignSha256,
+          provider_submissions: 1,
+        });
+      } catch (error) {
+        if (error?.code === 'background_poll_timeout') {
+          return Object.freeze({
+            status: 'STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2_IN_PROGRESS',
+            request_contract_version: repairedPlan.request_contract_version,
+            request_sha256: repairedPlan.request_sha256,
+            unit_identity_sha256: repairedPlan.unit_identity_sha256,
+            prior_checkpoint_sha256: transitioned.prior_checkpoint_sha256,
+            archive_sha256: transitioned.archive_sha256,
+            campaign_sha256: expectedCampaignSha256,
+            provider_submissions: 1,
+          });
+        }
+        const rejection = classifySemanticValidationError(error);
+        if (rejection) {
+          await resumableGenerationStore.rejectSemantic({
+            campaignSha256: expectedCampaignSha256,
+            unitId: repairedPlan.unit_id,
+            unitIdentitySha256: repairedPlan.unit_identity_sha256,
+            requestSha256: repairedPlan.request_sha256,
+            rejection,
+          });
+        }
+        throw error;
+      }
+    },
+  });
   Object.defineProperty(generate, 'inspectCompletedStage3Validation', {
     enumerable: false,
     configurable: false,
@@ -773,6 +930,7 @@ export function createProductionNewBosGenerator({
         stageId: 'whole_person_decision_synthesis',
         acceptedDependencies,
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
       });
       if (plan.campaign_identity.sha256 !== expectedCampaignSha256
         || plan.unit_identity_sha256 !== expectedUnitIdentitySha256
@@ -820,6 +978,7 @@ export function createProductionNewBosGenerator({
         model,
         stageId: 'whole_person_decision_synthesis',
         privacyTokens,
+        requestContractVersion: NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1,
         transport: async (request) => {
           if (sha256Stable(request) !== expectedRequestSha256) {
             throw new Error('new_bos_completed_stage3_diagnostic_request_drift');

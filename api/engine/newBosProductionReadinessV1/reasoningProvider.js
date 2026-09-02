@@ -2,6 +2,8 @@ import crypto from 'node:crypto';
 
 import OpenAI from 'openai';
 
+import { FORBIDDEN_WHOLE_PERSON_LANGUAGE } from '../../../src/lib/newBosPersonalityDnaV1/constants.js';
+
 import { compactGovernedContext } from './libraryRetriever.js';
 import {
   buildPseudonymousReasoningPacket,
@@ -36,6 +38,32 @@ function usageReceipt(response) {
 
 function modelMatches(requested, returned) {
   return !returned || returned === requested || String(returned).startsWith(`${requested}-`);
+}
+
+export const NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1 = 'new_bos_semantic_stage_request_v1';
+export const NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2 = 'new_bos_stage3_vector_free_request_v2';
+
+export function semanticStageRequestContractVersion(stageId) {
+  return stageId === 'whole_person_decision_synthesis'
+    ? NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2
+    : NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1;
+}
+
+function stageOutputBoundary({ stageId, requestContractVersion }) {
+  if (stageId !== 'whole_person_decision_synthesis') return [];
+  if (requestContractVersion === NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1) return [];
+  if (requestContractVersion !== NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2) {
+    throw new Error('new_bos_stage3_request_contract_unsupported');
+  }
+  return [
+    '',
+    `STAGE-3 OUTPUT BOUNDARY — ${NEW_BOS_STAGE3_VECTOR_FREE_REQUEST_CONTRACT_V2}:`,
+    '- Coordinate vocabulary in the supplied evidence, doctrine, and accepted dependencies is internal analytic context and provenance only. Retain that intelligence for reasoning; do not copy its assessment language into customer meaning.',
+    '- Every customer-facing human-meaning field inside `whole_person` must exclude every exact term in the shared prohibited-vocabulary list below.',
+    '- Express supported mechanisms as ordinary lived behavior: what the person notices, decides, protects, changes, repeats, experiences, or does. Do not describe the person through assessment, vector, coordinate, score, dimension, or measured-pattern terminology.',
+    `- SHARED PROHIBITED VOCABULARY (derived from the canonical validator): ${JSON.stringify(FORBIDDEN_WHOLE_PERSON_LANGUAGE)}`,
+    '- This is a language boundary, not an intelligence-removal instruction. Preserve causal meaning, evidence, uncertainty, contradictions, and falsifiers.',
+  ];
 }
 
 export function buildNewBosReasoningRequest({ rawEvidence, governedContext, model, privacyTokens = [] }) {
@@ -110,8 +138,13 @@ export function buildNewBosSemanticStageRequest({
   stageId,
   acceptedDependencies = [],
   privacyTokens = [],
+  requestContractVersion = semanticStageRequestContractVersion(stageId),
 }) {
   const stage = semanticStageById(stageId);
+  if (stageId !== 'whole_person_decision_synthesis'
+    && requestContractVersion !== NEW_BOS_SEMANTIC_STAGE_REQUEST_CONTRACT_V1) {
+    throw new Error('new_bos_semantic_stage_request_contract_unsupported');
+  }
   const governedPrivacyTokens = [...deriveProviderIdentityTokens(rawEvidence), ...privacyTokens];
   const packet = buildPseudonymousReasoningPacket(rawEvidence, governedPrivacyTokens);
   const evidenceIds = packet.evidence.map(({ evidence_id: id }) => id);
@@ -159,6 +192,7 @@ export function buildNewBosSemanticStageRequest({
           '',
           'ACCEPTED HASH-BOUND DEPENDENCIES:',
           JSON.stringify(dependencies),
+          ...stageOutputBoundary({ stageId, requestContractVersion }),
         ].join('\n'),
       })]),
     })]),
@@ -187,6 +221,7 @@ export function createNewBosSemanticStageProvider({
   stageId,
   capture = async () => {},
   privacyTokens = [],
+  requestContractVersion = semanticStageRequestContractVersion(stageId),
 } = {}) {
   if (typeof transport !== 'function') throw new Error('new_bos_semantic_stage_transport_required');
   if (!model) throw new Error('new_bos_semantic_stage_model_required');
@@ -203,6 +238,7 @@ export function createNewBosSemanticStageProvider({
         stageId,
         acceptedDependencies,
         privacyTokens,
+        requestContractVersion,
       });
       const startedAt = Date.now();
       const response = await transport(request);

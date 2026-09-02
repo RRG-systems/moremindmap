@@ -76,12 +76,15 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
       && request.query?.action === 'classify-completed-stage3-semantic-rejection';
     const semanticRejectedStage3Replacement = request.method === 'POST'
       && request.query?.action === 'replace-semantic-rejected-stage3';
+    const stage3RequestContractV2Replacement = request.method === 'POST'
+      && request.query?.action === 'replace-stage3-request-contract-v2';
     if (!['GET', 'POST'].includes(request.method)
       || (request.method === 'POST'
         && !staleSurfaceRoutingReplacement
         && !invalidStage3Repair
         && !completedStage3Classification
-        && !semanticRejectedStage3Replacement)) {
+        && !semanticRejectedStage3Replacement
+        && !stage3RequestContractV2Replacement)) {
       return response.status(405).json({ error: 'Method not allowed' });
     }
     try {
@@ -94,6 +97,8 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           ? 'classifyCompletedStage3SemanticRejection'
         : semanticRejectedStage3Replacement
           ? 'replaceSemanticRejectedStage3'
+        : stage3RequestContractV2Replacement
+          ? 'replaceStage3RequestContractV2'
         : request.query?.diagnostic === 'completed-stage3-validation'
           ? 'inspectCompletedStage3Validation'
         : request.query?.diagnostic === 'semantic-assembly'
@@ -113,6 +118,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           'inspectCompletedStage3Validation',
           'classifyCompletedStage3SemanticRejection',
           'replaceSemanticRejectedStage3',
+          'replaceStage3RequestContractV2',
           'replaceStaleSurfaceRouting',
           'repairInvalidStage3VectorFree',
         ].includes(operation)
@@ -141,6 +147,10 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
           expectedProviderResponseIdSha256: request.body?.expected_provider_response_id_sha256,
         } : {}),
         ...(operation === 'replaceSemanticRejectedStage3' ? {
+          expectedCampaignSha256: request.body?.expected_campaign_sha256,
+          expectedStage3: request.body?.expected_stage3,
+        } : {}),
+        ...(operation === 'replaceStage3RequestContractV2' ? {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
           expectedStage3: request.body?.expected_stage3,
         } : {}),
