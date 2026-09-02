@@ -3,16 +3,16 @@ import {
   InMemoryLivingRelationshipStore,
   createAuthorityReference,
   createEvidenceReference,
-  createConfirmedPersonalRslMutation,
   createFreeGptLivingRelationshipRuntimeV2,
   createGovernedChangeProposal,
   createHiddenCandidateFromExtraction,
   createInitialLivingBusinessTwinPublication,
   createLivingConversationController,
   createFrontierConversationSeamV2,
+  createSessionCloseSeamV1,
+  createCoachingEpisodeContext,
   createNaturalAuthorizationInterpreterV1,
   createPostResponseCandidateExtractorV1,
-  createProposalDecision,
   initialLivingStateFromBusinessTwin,
   scopeFingerprint,
 } from '../../lib/subscriptionV1/index.js';
@@ -237,6 +237,7 @@ function productProofQueues(legacy) {
         reason: 'Accepted synthetic provider fixture: the customer explicitly authorized the exact pending proposal.',
       };
     }],
+    SESSION_CLOSE: [sessionCloseOutput()],
   };
 }
 
@@ -248,6 +249,8 @@ function relationshipContext(sessionKind, subject = null) {
   if (sessionKind === 'FIRST_EVER') {
     return {
       session_kind: 'FIRST_EVER',
+      preferred_conversational_name: firstName,
+      preferred_name_authority: 'GOVERNED_SYNTHETIC_SUBJECT_FIXTURE',
       mission: 'Begin the real coaching relationship while naturally validating the existing BOS and strengthening the highest-value thin, missing, uncertain, or contradicted person and business evidence.',
       bos_validation: {
         status: 'NOT_YET_COMPLETED',
@@ -260,9 +263,27 @@ function relationshipContext(sessionKind, subject = null) {
   }
   return {
     session_kind: 'WEEKLY',
+    preferred_conversational_name: firstName,
+    preferred_name_authority: 'GOVERNED_SYNTHETIC_SUBJECT_FIXTURE',
     mission: 'Continue the longitudinal relationship from prior commitments, execution, outcomes, learning, current numbers, and the present Vision-to-Perspective gap. Do not repeat BOS onboarding.',
     bos_validation: { status: 'ESTABLISHED', repeat_weekly: false },
     continuity_rule: 'Use relevant Personal RSL as accumulated relationship memory, never as a prescriptive rulebook or transcript dump.',
+  };
+}
+
+function sessionCloseOutput(subject = null) {
+  const firstName = subject?.firstName || 'Marcus';
+  return {
+    customer_message: `${firstName}, we have a useful place to pick this up next time. The relationship continues, and nothing new was saved without your approval.`,
+    session_learning: {
+      what_mattered: 'The human clarified what matters most in the current business moment.',
+      what_changed: 'No unconfirmed map change is treated as complete.',
+      what_was_learned: 'The conversation produced a bounded next understanding.',
+      what_was_decided: 'Only decisions the human explicitly made are treated as decisions.',
+      what_remains_open: 'Open questions and any pending proposal remain open.',
+      durable_governed_meaning: 'Any durable meaning remains a candidate requiring exact authorization.',
+      pick_up_next_time: 'Continue from the latest governed state, attempt, outcome, and open question.',
+    },
   };
 }
 
@@ -276,13 +297,33 @@ const MARCUS_WEEKLY_CONTINUITY_SEED = Object.freeze([
   {
     candidate_type: 'COMMITMENT_CANDIDATE', proposal_type: 'COMMITMENT_CANDIDATE', target_contract: 'PLAN_135', operation: 'PROPOSE',
     summary: 'Run the manager-owned delivery lane for one full week without rescuing routine exceptions.',
-    items: [{ field: 'commitment.weekly', value: 'Run the manager-owned delivery lane for one full week; keep routine decisions with the manager; record any exception Marcus must rescue.' }],
+    items: [
+      { field: 'commitment.intervention', value: 'Run the manager-owned delivery lane for one full week; keep routine decisions with the manager; record any exception Marcus must rescue.' },
+      { field: 'commitment.due_at', value: '2026-08-26T09:00:00.000Z' },
+      { field: 'commitment.observation_window_end', value: '2026-08-27T09:00:00.000Z' },
+      { field: 'commitment.falsifiers', value: 'Routine decisions repeatedly return to Marcus; client milestones materially slip.' },
+    ],
     reason: 'Marcus explicitly made this bounded weekly commitment.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
   },
   {
     candidate_type: 'OUTCOME_CANDIDATE', proposal_type: 'EVIDENCE_CANDIDATE', target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE',
+    summary: 'Marcus completed the manager-owned delivery-lane test for one week.',
+    items: [
+      { field: 'evidence.attempt', value: 'Marcus ran the manager-owned delivery lane for one full week.' },
+      { field: 'evidence.execution_degree', value: 'COMPLETE' },
+      { field: 'evidence.intervention_lineage_id', value: '__LATEST_INTERVENTION_LINEAGE__' },
+    ],
+    reason: 'This is synthetic execution evidence linked to the exact authorized intervention.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
+  },
+  {
+    candidate_type: 'OUTCOME_CANDIDATE', proposal_type: 'EVIDENCE_CANDIDATE', target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE',
     summary: 'The manager-owned lane completed all five client milestones on time; one unfamiliar pricing exception returned to Marcus; routine decisions stayed with the manager; Marcus recovered four delivery hours.',
-    items: [{ field: 'evidence.execution_outcome', value: 'All five client milestones finished on time. One unfamiliar pricing exception returned to Marcus. Routine decisions stayed with the manager. Marcus recovered four delivery hours.' }],
+    items: [
+      { field: 'evidence.execution_outcome', value: 'All five client milestones finished on time. One unfamiliar pricing exception returned to Marcus. Routine decisions stayed with the manager. Marcus recovered four delivery hours.' },
+      { field: 'evidence.outcome_classification', value: 'BENEFICIAL' },
+      { field: 'evidence.intervention_lineage_id', value: '__LATEST_INTERVENTION_LINEAGE__' },
+      { field: 'evidence.requested_attribution', value: 'ASSOCIATED_ONLY' },
+    ],
     reason: 'This is synthetic observed outcome evidence for the later-session continuity proof.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
   },
 ]);
@@ -299,20 +340,52 @@ function weeklyContinuitySeed(subject = null) {
     {
       candidate_type: 'COMMITMENT_CANDIDATE', proposal_type: 'COMMITMENT_CANDIDATE', target_contract: 'PLAN_135', operation: 'PROPOSE',
       summary: subject.weekly.commitment,
-      items: [{ field: 'commitment.weekly', value: subject.weekly.commitment }],
+      items: [
+        { field: 'commitment.intervention', value: subject.weekly.commitment },
+        { field: 'commitment.due_at', value: '2026-08-26T09:00:00.000Z' },
+        { field: 'commitment.observation_window_end', value: '2026-08-27T09:00:00.000Z' },
+      ],
       reason: `${subject.firstName} made this bounded synthetic weekly commitment.`, evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
     },
     {
       candidate_type: 'OUTCOME_CANDIDATE', proposal_type: 'EVIDENCE_CANDIDATE', target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE',
+      summary: `${subject.firstName} completed the bounded weekly intervention.`,
+      items: [
+        { field: 'evidence.attempt', value: `${subject.firstName} completed the bounded weekly intervention.` },
+        { field: 'evidence.execution_degree', value: 'COMPLETE' },
+        { field: 'evidence.intervention_lineage_id', value: '__LATEST_INTERVENTION_LINEAGE__' },
+      ],
+      reason: 'This is synthetic execution evidence linked to the exact authorized intervention.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
+    },
+    {
+      candidate_type: 'OUTCOME_CANDIDATE', proposal_type: 'EVIDENCE_CANDIDATE', target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE',
       summary: subject.weekly.outcome,
-      items: [{ field: 'evidence.execution_outcome', value: subject.weekly.outcome }],
+      items: [
+        { field: 'evidence.execution_outcome', value: subject.weekly.outcome },
+        { field: 'evidence.outcome_classification', value: 'BENEFICIAL' },
+        { field: 'evidence.intervention_lineage_id', value: '__LATEST_INTERVENTION_LINEAGE__' },
+        { field: 'evidence.requested_attribution', value: 'ASSOCIATED_ONLY' },
+      ],
       reason: 'This is synthetic observed outcome evidence for later-session continuity proof.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
     },
   ];
 }
 
 async function seedWeeklyContinuity({ runtime, store, sessionId, clock, scope, subject = null }) {
-  for (const [index, candidate] of weeklyContinuitySeed(subject).entries()) {
+  for (const [index, candidateTemplate] of weeklyContinuitySeed(subject).entries()) {
+    const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
+    if (!replay.ok) throw new Error(replay.code);
+    const latestInterventionLineageId = [...replay.state.active_events]
+      .reverse()
+      .find((event) => event.event_type === 'INTERVENTION')
+      ?.semantic_payload?.lineage?.intervention_lineage_id || null;
+    const candidate = JSON.parse(JSON.stringify(candidateTemplate));
+    for (const item of candidate.items) {
+      if (item.value === '__LATEST_INTERVENTION_LINEAGE__') {
+        if (!latestInterventionLineageId) throw new Error('SYNTHETIC_WEEKLY_INTERVENTION_LINEAGE_REQUIRED');
+        item.value = latestInterventionLineageId;
+      }
+    }
     const packet = runtime.wholeUnderstandingPacket();
     const publication = store.readCurrent({ scope });
     const hidden = createHiddenCandidateFromExtraction({
@@ -326,18 +399,19 @@ async function seedWeeklyContinuity({ runtime, store, sessionId, clock, scope, s
     if (!governed.ok) throw new Error(governed.code);
     const saved = await store.saveProposal({ scope, proposal: governed.proposal, saved_at: clock() });
     if (!saved.ok) throw new Error(saved.code);
-    const decision = createProposalDecision({ proposal: governed.proposal, decision: 'CONFIRM', actor: { actor_type: 'CUSTOMER', actor_ref: scope.subject_id }, decided_at: clock(), note: 'Synthetic continuity fixture confirmed through the governed AFW-05 path.' });
-    if (!decision.ok) throw new Error(decision.code);
-    const mutation = createConfirmedPersonalRslMutation({ proposal: governed.proposal, decision: decision.decision, evidence_catalog: [], event_id: `rsl_synthetic_weekly_${index + 1}`, recorded_at: clock() });
-    if (!mutation.ok) throw new Error(mutation.code);
-    const committed = await store.commitDecision({ scope, proposal: governed.proposal, decision: decision.decision, event: mutation.event, idempotency_key: `synthetic-weekly-seed:${index + 1}`, committed_at: clock() });
+    const committed = await runtime.decide({
+      proposal_id: governed.proposal.proposal_id,
+      decision: 'CONFIRM',
+      note: 'Synthetic continuity fixture confirmed through the governed AFW-05 path.',
+      idempotency_key: `synthetic-weekly-seed:${index + 1}`,
+    });
     if (!committed.ok) throw new Error(committed.code);
     const reassembled = runtime.assemble({ as_of_at: clock() });
     if (!reassembled.ok) throw new Error(reassembled.code);
   }
 }
 
-export async function createSyntheticLivingRelationshipLab({ accepted_outputs = null, conversation_outputs = null, candidate_outputs = null, authorization_outputs = null, vertical_id = FOUNDER_REVIEW_SUBJECT_V2.vertical_id, product_proof_sequence = false, live_provider = false, transport: suppliedTransport = null, session_kind = 'FIRST_EVER', subject_key = 'marcus', relationship_key = null, store: suppliedStore = null, session_id: suppliedSessionId = null, clock: suppliedClock = null, initial_conversation = [], external_evidence = [], seed_weekly_fixture = true } = {}) {
+export async function createSyntheticLivingRelationshipLab({ accepted_outputs = null, conversation_outputs = null, candidate_outputs = null, authorization_outputs = null, session_close_outputs = null, vertical_id = FOUNDER_REVIEW_SUBJECT_V2.vertical_id, product_proof_sequence = false, live_provider = false, transport: suppliedTransport = null, session_kind = 'FIRST_EVER', subject_key = 'marcus', relationship_key = null, store: suppliedStore = null, session_id: suppliedSessionId = null, clock: suppliedClock = null, initial_conversation = [], external_evidence = [], seed_weekly_fixture = true, coaching_episode_phase = 'ACTIVE', session_temporal_context = null } = {}) {
   const realization = await loadBaProgressiveDisclosureV1('synthetic-top');
   const realEstateSubject = subject_key === 'marcus' ? null : getSyntheticRealEstateSubjectV1(subject_key);
   const subjectVerticalId = realEstateSubject ? 'REAL_ESTATE' : vertical_id;
@@ -364,12 +438,13 @@ export async function createSyntheticLivingRelationshipLab({ accepted_outputs = 
     CONVERSATION: conversation_outputs || legacy.conversation,
     CANDIDATE_EXTRACTION: candidate_outputs || legacy.candidates,
     NATURAL_AUTHORIZATION: authorization_outputs || [],
+    SESSION_CLOSE: session_close_outputs || [sessionCloseOutput(realEstateSubject)],
   };
-  const queues = product_proof_sequence && !accepted_outputs && !conversation_outputs && !candidate_outputs && !authorization_outputs
+  const queues = product_proof_sequence && !accepted_outputs && !conversation_outputs && !candidate_outputs && !authorization_outputs && !session_close_outputs
     ? productProofQueues(legacy)
     : configuredQueues;
   if (!suppliedTransport && !live_provider && (!Array.isArray(queues.CONVERSATION) || !queues.CONVERSATION.length || !Array.isArray(queues.CANDIDATE_EXTRACTION) || !queues.CANDIDATE_EXTRACTION.length)) throw new TypeError('AFW06_ACCEPTED_SYNTHETIC_OUTPUTS_REQUIRED');
-  const outputIndex = { CONVERSATION: 0, CANDIDATE_EXTRACTION: 0, NATURAL_AUTHORIZATION: 0 };
+  const outputIndex = { CONVERSATION: 0, CANDIDATE_EXTRACTION: 0, NATURAL_AUTHORIZATION: 0, SESSION_CLOSE: 0 };
   const replayTransport = async (_request, { stage }) => {
     const queue = queues[stage];
     if (!queue?.length) throw new Error(`FREE_GPT_V2_SYNTHETIC_${stage}_OUTPUT_REQUIRED`);
@@ -386,6 +461,7 @@ export async function createSyntheticLivingRelationshipLab({ accepted_outputs = 
   let tick = 0;
   const clock = suppliedClock || (() => new Date(Date.parse('2026-08-19T09:01:00.000Z') + tick++ * 1000).toISOString());
   const conversationSeam = createFrontierConversationSeamV2({ transport, enabled: true, now: clock });
+  const sessionCloseSeam = createSessionCloseSeamV1({ transport, enabled: true, now: clock });
   const candidateExtractor = createPostResponseCandidateExtractorV1({ transport, enabled: true, now: clock });
   const authorizationInterpreter = createNaturalAuthorizationInterpreterV1({ transport, enabled: true, now: clock });
   const businessTruth = [createEvidenceReference({ evidence_id: `synthetic_business_state_${subject_key}`, evidence_domain: 'BUSINESS', content_hash: hashCanonicalJson({ synthetic: true, subject_key, state: 'accepted' }), certainty: 'KNOWN' })];
@@ -403,15 +479,21 @@ export async function createSyntheticLivingRelationshipLab({ accepted_outputs = 
     session_id: sessionId,
     store,
     conversation_seam: conversationSeam,
+    session_close_seam: sessionCloseSeam,
     candidate_extractor: candidateExtractor,
     authorization_interpreter: authorizationInterpreter,
-    doctrine_retrieval: retrieveCoachingDoctrine({ purpose: session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING', vertical_id: subjectVerticalId }),
+    doctrine_retrieval: retrieveCoachingDoctrine({ purpose: session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING', vertical_id: null }),
     canonical_artifacts: artifacts,
     business_truth: businessTruth,
     whole_person_execution_context: wholePerson,
-    vertical_context: { vertical_id: subjectVerticalId || 'NO_MATURE_CASSETTE', business_stage: realEstateSubject?.stage || 'GROWING_FOUNDER_LED', business_model: realEstateSubject ? 'RESIDENTIAL_REAL_ESTATE_AGENT_OR_TEAM' : 'PROFESSIONAL_SERVICES_DELIVERY', fixture_class: 'SYNTHETIC_ONLY' },
     external_evidence,
     relationship_context: relationshipContext(session_kind, realEstateSubject),
+    coaching_session: createCoachingEpisodeContext({
+      phase: coaching_episode_phase,
+      preferred_conversational_name: realEstateSubject?.firstName || 'Marcus',
+      session_kind,
+    }),
+    session_temporal_context,
     initial_conversation,
     initial_pending_proposal_id: pendingProposal,
     clock,

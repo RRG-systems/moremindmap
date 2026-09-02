@@ -129,10 +129,14 @@ export function createLivingBusinessRelationshipRuntime({
       if (!created.ok) return created;
       let event = null;
       if (created.decision.mutation_authorized) {
+        const rslStore = store.buildPersonalRslStore({ scope });
+        const replay = rslStore.replay({ scope, effective_as_of: decidedAt, recorded_as_of: decidedAt });
+        if (!replay.ok) return replay;
         const mutation = createConfirmedPersonalRslMutation({
           proposal: found.proposal,
           decision: created.decision,
           evidence_catalog,
+          active_personal_rsl_events: replay.state.active_events,
           event_id: `rsl_${hashCanonicalJson({ proposal_id, decision_hash: created.decision.decision_hash }).slice(0, 24)}`,
           recorded_at: decidedAt,
         });

@@ -57,6 +57,32 @@ export const FRONTIER_CONVERSATION_OUTPUT_SCHEMA_V2 = deepFreeze({
   },
 });
 
+const SESSION_LEARNING_KEYS = [
+  'what_mattered',
+  'what_changed',
+  'what_was_learned',
+  'what_was_decided',
+  'what_remains_open',
+  'durable_governed_meaning',
+  'pick_up_next_time',
+];
+
+export const SESSION_CLOSE_OUTPUT_SCHEMA_V1 = deepFreeze({
+  type: 'json_schema',
+  name: 'subscription_flagship_s1_1_session_close_v1',
+  strict: true,
+  schema: {
+    type: 'object', additionalProperties: false, required: ['customer_message', 'session_learning'],
+    properties: {
+      customer_message: { type: 'string', minLength: 1 },
+      session_learning: {
+        type: 'object', additionalProperties: false, required: SESSION_LEARNING_KEYS,
+        properties: Object.fromEntries(SESSION_LEARNING_KEYS.map((key) => [key, { type: 'string', minLength: 1, maxLength: 1200 }])),
+      },
+    },
+  },
+});
+
 const candidateObjectSchema = {
   type: 'object',
   description: 'A customer-authored durable candidate that must be proposed for exact confirmation before any mutation. Use this branch whenever the customer explicitly asks MORE to remember a new preference, correction, commitment, or other governed change.',
@@ -116,6 +142,19 @@ export function validateConversationOutputV2(value) {
   return deepFreeze({ valid: errors.length === 0, errors });
 }
 
+export function validateSessionCloseOutputV1(value) {
+  const errors = [];
+  if (!exactKeys(value, ['customer_message', 'session_learning'])) errors.push('SESSION_CLOSE_FIELDS_INVALID');
+  if (typeof value?.customer_message !== 'string' || !value.customer_message.trim()) errors.push('SESSION_CLOSE_CUSTOMER_MESSAGE_INVALID');
+  if (!exactKeys(value?.session_learning, SESSION_LEARNING_KEYS)
+    || !SESSION_LEARNING_KEYS.every((key) => Object.hasOwn(value?.session_learning || {}, key))) errors.push('SESSION_LEARNING_FIELDS_INVALID');
+  for (const key of SESSION_LEARNING_KEYS) {
+    const field = value?.session_learning?.[key];
+    if (typeof field !== 'string' || !field.trim() || field.length > 1200) errors.push(`SESSION_LEARNING_${key.toUpperCase()}_INVALID`);
+  }
+  return deepFreeze({ valid: errors.length === 0, errors });
+}
+
 function validItems(items) {
   return Array.isArray(items) && items.length > 0 && items.length <= 8
     && items.every((item) => exactKeys(item, ['field', 'value'])
@@ -123,7 +162,7 @@ function validItems(items) {
       && typeof item.value === 'string' && item.value.length > 0 && item.value.length <= 600);
 }
 
-export function validateDurableCandidateOutput(value, { allowed_evidence_refs = [], allowed_authority_refs = [] } = {}) {
+export function validateDurableCandidateOutput(value, { allowed_evidence_refs = [], allowed_authority_refs = [], allowed_intervention_lineage_ids = [] } = {}) {
   const errors = [];
   if (!exactKeys(value, ['candidate'])) errors.push('CANDIDATE_OUTPUT_FIELDS_INVALID');
   if (value?.candidate === null) return deepFreeze({ valid: errors.length === 0, errors, candidate: null });
@@ -139,6 +178,15 @@ export function validateDurableCandidateOutput(value, { allowed_evidence_refs = 
   if (candidate?.confirmation_required !== true) errors.push('CANDIDATE_CONFIRMATION_REQUIRED');
   if (!Array.isArray(candidate?.evidence_ref_ids) || candidate.evidence_ref_ids.some((id) => !allowed_evidence_refs.includes(id))) errors.push('INVENTED_EVIDENCE_REFERENCE');
   if (!Array.isArray(candidate?.authority_ref_ids) || candidate.authority_ref_ids.some((id) => !allowed_authority_refs.includes(id))) errors.push('INVENTED_AUTHORITY_REFERENCE');
+  const itemMap = new Map((candidate?.items || []).map((item) => [item.field, item.value]));
+  const isAttempt = itemMap.has('evidence.attempt') || itemMap.has('evidence.experiment');
+  const isOutcome = itemMap.has('evidence.outcome') || itemMap.has('evidence.execution_outcome');
+  if (isAttempt || isOutcome) {
+    const lineageId = itemMap.get('evidence.intervention_lineage_id');
+    if (!allowed_intervention_lineage_ids.includes(lineageId)) errors.push('INTERVENTION_LINEAGE_REFERENCE_INVALID');
+  }
+  if (isAttempt && !['PARTIAL', 'COMPLETE'].includes(String(itemMap.get('evidence.execution_degree') || '').toUpperCase())) errors.push('EXECUTION_DEGREE_REQUIRED');
+  if (isOutcome && !['BENEFICIAL', 'STERILE', 'ADVERSE', 'MIXED', 'INCONCLUSIVE', 'NOT_TESTED_INSUFFICIENT_EXECUTION', 'CONFOUNDED', 'INTELLIGENTLY_ABANDONED'].includes(String(itemMap.get('evidence.outcome_classification') || '').toUpperCase().replace(/[ /-]+/gu, '_'))) errors.push('OUTCOME_CLASSIFICATION_REQUIRED');
   if (errors.length) return deepFreeze({ valid: false, errors, candidate: null });
   const normalized = clone(candidate);
   normalized.target_contract = canonicalTarget(candidate);
@@ -183,7 +231,7 @@ export function validateNaturalAuthorizationOutput(value, proposal) {
 }
 
 export function createFreeGptProviderReceipt({ stage, request_hash, response_hash, usage = {}, latency_ms = 0, web_search_calls = 0, attempt_count = 1, estimated_token_cost_microusd = 0, created_at }) {
-  if (!['CONVERSATION', 'CANDIDATE_EXTRACTION', 'NATURAL_AUTHORIZATION'].includes(stage)) throw new TypeError('FREE_GPT_V2_STAGE_INVALID');
+  if (!['CONVERSATION', 'CANDIDATE_EXTRACTION', 'NATURAL_AUTHORIZATION', 'SESSION_CLOSE'].includes(stage)) throw new TypeError('FREE_GPT_V2_STAGE_INVALID');
   if (![request_hash, response_hash].every((value) => HASH.test(value))) throw new TypeError('FREE_GPT_V2_RECEIPT_HASH_INVALID');
   return deepFreeze({
     contract_id: 'free_gpt_v2_provider_receipt', schema_version: FREE_GPT_V2_VERSION,

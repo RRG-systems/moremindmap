@@ -14,6 +14,8 @@ export async function loadProductionIntendedSyntheticSubscriber({
   subject_key,
   session_id,
   session_kind,
+  coaching_episode_phase = 'ACTIVE',
+  session_temporal_context = null,
   initial_conversation = [],
   env = globalThis.process?.env || {},
   transport = null,
@@ -39,6 +41,8 @@ export async function loadProductionIntendedSyntheticSubscriber({
     transport: providerTransport,
     clock: now,
     initial_conversation,
+    coaching_episode_phase,
+    session_temporal_context,
     external_evidence: externalEvidence,
     seed_weekly_fixture: false,
   });

@@ -1,5 +1,6 @@
 import { deepFreeze } from '../../intelligenceFabric/validation.js';
 import { createAuthorityReference, createEvidenceReference } from '../contracts.js';
+import { createConfirmedLineageMetadata } from '../lineage.js';
 import { createPersonalRslEvent } from '../personalRsl.js';
 import { PROPOSAL_EVENT_TYPES } from './constants.js';
 import { validateGovernedChangeProposal, validateProposalDecision } from './contracts.js';
@@ -20,7 +21,7 @@ function evidenceEventType(proposal, effectiveItems) {
   return PROPOSAL_EVENT_TYPES[proposal.proposal_type];
 }
 
-export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], event_id, recorded_at }) {
+export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], active_personal_rsl_events = [], event_id, recorded_at }) {
   const proposalValidation = validateGovernedChangeProposal(proposal);
   const decisionValidation = validateProposalDecision(decision, proposal);
   if (!proposalValidation.valid || !decisionValidation.valid) return deepFreeze({ ok: false, code: 'AFW05_MUTATION_AUTHORITY_INVALID' });
@@ -34,6 +35,14 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
   }
   const eventType = evidenceEventType(proposal, decision.effective_items);
   if (!eventType) return deepFreeze({ ok: false, code: 'AFW05_PROPOSAL_EVENT_MAPPING_MISSING' });
+  const lineage = createConfirmedLineageMetadata({
+    proposal,
+    decision,
+    event_type: eventType,
+    effective_items: decision.effective_items,
+    active_events: active_personal_rsl_events,
+  });
+  if (!lineage.ok) return lineage;
   return createPersonalRslEvent({
     event_id,
     scope: proposal.scope,
@@ -61,6 +70,7 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
       lens: proposal.affected_governed_objects[0] === 'PLAN_135' ? 'PLAN' : proposal.affected_governed_objects[0],
       privacy_classification: 'TENANT_PRIVATE',
       raw_transcript_persisted: false,
+      lineage: lineage.lineage,
     },
     evidence_refs: evidenceRefs,
     supersedes_event_ids: proposal.supersedes_event_ids,

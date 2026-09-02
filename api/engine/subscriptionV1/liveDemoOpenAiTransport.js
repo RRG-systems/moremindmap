@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
 
-const ALLOWED_STAGES = new Set(['CONVERSATION', 'CANDIDATE_EXTRACTION', 'NATURAL_AUTHORIZATION']);
+const ALLOWED_STAGES = new Set(['CONVERSATION', 'CANDIDATE_EXTRACTION', 'NATURAL_AUTHORIZATION', 'SESSION_CLOSE']);
 const PRIVATE_CUSTOMER_PATTERN = /\bMM-\d{8}-[A-Z0-9]{8}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/iu;
 
 function assertRequest(request, stage) {

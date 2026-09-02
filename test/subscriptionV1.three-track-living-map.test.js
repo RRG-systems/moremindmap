@@ -6,14 +6,14 @@ import { createSyntheticLivingRelationshipLab } from '../src/lab/subscriptionLiv
 
 const conversation = (customer_message) => ({ customer_message });
 
-const durableCandidate = ({ candidate_type = 'EVIDENCE_CANDIDATE', proposal_type = 'EVIDENCE_CANDIDATE', field, value, summary }) => ({
+const durableCandidate = ({ candidate_type = 'EVIDENCE_CANDIDATE', proposal_type = 'EVIDENCE_CANDIDATE', field, value, items = null, summary, target_contract = 'EVIDENCE_LEDGER' }) => ({
   candidate: {
     candidate_type,
     proposal_type,
-    target_contract: 'EVIDENCE_LEDGER',
+    target_contract,
     operation: 'PROPOSE',
     summary,
-    items: [{ field, value }],
+    items: items || [{ field, value }],
     reason: 'The customer stated durable relationship meaning that requires exact confirmation.',
     evidence_ref_ids: [],
     authority_ref_ids: [],
@@ -25,12 +25,53 @@ const durableCandidate = ({ candidate_type = 'EVIDENCE_CANDIDATE', proposal_type
 test('Track 1 recovers a pending proposal, honors the active Evidence lens, and publishes a dated outcome history entry', async () => {
   const store = new InMemoryLivingRelationshipStore();
   const relationshipKey = 'rel_track1_outcome_demo';
+  let tick = 0;
+  const clock = () => new Date(Date.parse('2026-08-19T09:01:00.000Z') + tick++ * 1000).toISOString();
+  const seed = await createSyntheticLivingRelationshipLab({
+    subject_key: 're-mid', relationship_key: relationshipKey, store, seed_weekly_fixture: false, clock,
+    conversation_outputs: [conversation('I can hold that as a proposal until you confirm it.'), conversation('I can record the exact execution only after confirmation.')],
+    candidate_outputs: [
+      durableCandidate({
+        candidate_type: 'COMMITMENT_CANDIDATE', proposal_type: 'COMMITMENT_CANDIDATE', target_contract: 'PLAN_135',
+        field: 'commitment.intervention', value: 'Protect both follow-up blocks.', summary: 'Protect both follow-up blocks.',
+      }),
+      { candidate: null },
+    ],
+  });
+  const interventionTurn = await seed.controller.send({ message: 'I will protect both follow-up blocks.' });
+  const intervention = await seed.controller.decide({ proposal_id: interventionTurn.proposal.proposal_id, decision: 'CONFIRM', idempotency_key: 'track1-intervention-confirm' });
+  assert.equal(intervention.ok, true, intervention.code);
+  const lineageId = intervention.event.semantic_payload.lineage.intervention_lineage_id;
+  const attemptCandidate = durableCandidate({
+    candidate_type: 'EVIDENCE_CANDIDATE',
+    summary: 'Record that Jordan completed both protected follow-up blocks.',
+    items: [
+      { field: 'evidence.attempt', value: 'Jordan completed both protected follow-up blocks.' },
+      { field: 'evidence.execution_degree', value: 'COMPLETE' },
+      { field: 'evidence.intervention_lineage_id', value: lineageId },
+    ],
+  });
+  const attemptLab = await createSyntheticLivingRelationshipLab({
+    subject_key: 're-mid', relationship_key: relationshipKey, store, seed_weekly_fixture: false, clock,
+    conversation_outputs: [conversation('I can record the exact execution only after confirmation.')],
+    candidate_outputs: [attemptCandidate],
+  });
+  const attemptTurn = await attemptLab.controller.send({ message: 'I completed both protected follow-up blocks.' });
+  assert.equal(attemptTurn.ok, true, JSON.stringify(attemptTurn));
+  assert.ok(attemptTurn.proposal, JSON.stringify(attemptTurn.extraction));
+  const attempt = await attemptLab.controller.decide({ proposal_id: attemptTurn.proposal.proposal_id, decision: 'CONFIRM', idempotency_key: 'track1-attempt-confirm' });
+  assert.equal(attempt.ok, true, attempt.code);
   const options = {
-    subject_key: 're-mid', relationship_key: relationshipKey, store, seed_weekly_fixture: false,
+    subject_key: 're-mid', relationship_key: relationshipKey, store, seed_weekly_fixture: false, clock,
     conversation_outputs: [conversation('That result sounds durable. Keep talking naturally and confirm it only if the exact meaning is right.')],
     candidate_outputs: [durableCandidate({
-      candidate_type: 'OUTCOME_CANDIDATE', field: 'evidence.outcome',
-      value: 'Jordan protected both follow-up blocks and booked three qualified conversations.',
+      candidate_type: 'OUTCOME_CANDIDATE',
+      items: [
+        { field: 'evidence.outcome', value: 'Jordan protected both follow-up blocks and booked three qualified conversations.' },
+        { field: 'evidence.outcome_classification', value: 'BENEFICIAL' },
+        { field: 'evidence.intervention_lineage_id', value: lineageId },
+        { field: 'evidence.requested_attribution', value: 'ASSOCIATED_ONLY' },
+      ],
       summary: 'Record the result of Jordan’s protected follow-up experiment.',
     })],
   };
@@ -53,22 +94,22 @@ test('Track 1 recovers a pending proposal, honors the active Evidence lens, and 
   assert.equal(accepted.ok, true, accepted.code);
   assert.equal(recovered.controller.pendingProposal(), null);
   const records = recoveredStore.readPersonalRsl({ scope: recovered.scope }).records;
-  assert.equal(records.length, 1);
-  assert.equal(records[0].event.event_type, 'OUTCOME');
+  assert.equal(records.some((record) => record.event.event_type === 'INTERVENTION'), true);
+  assert.equal(records.some((record) => record.event.event_type === 'ATTEMPT'), true);
+  assert.equal(records.some((record) => record.event.event_type === 'OUTCOME'), true);
   const history = recovered.controller.current().view_model.destinations.evidence.relationshipHistory;
-  assert.equal(history.items.length, 1);
-  assert.equal(history.items[0].kind, 'Outcome');
-  assert.equal(history.items[0].details[0], 'Jordan protected both follow-up blocks and booked three qualified conversations.');
+  const outcomeHistory = history.items.find((item) => item.kind === 'Outcome');
+  assert.ok(outcomeHistory);
+  assert.equal(outcomeHistory.details[0], 'Jordan protected both follow-up blocks and booked three qualified conversations.');
   assert.match(history.sourceBoundary, /customer-confirmed Personal RSL/u);
   assert.match(history.coachingBoundary, /Coach Connect history.*not connected/u);
 });
 
-test('Track 1 maps learned meaning, action items, decisions, attempts, and operating changes into the existing Personal RSL vocabulary and history labels', async () => {
+test('Track 1 maps learned meaning, action items, decisions, and operating changes into the existing Personal RSL vocabulary and history labels', async () => {
   const scenarios = [
     ['learned meaning', 'EVIDENCE_CANDIDATE', 'evidence.communication_preference', 'EVIDENCE_ASSERTED', 'Learned'],
     ['action item', 'COMMITMENT_CANDIDATE', 'commitment.action', 'COMMITMENT', 'Agreed'],
     ['decision', 'EVIDENCE_CANDIDATE', 'evidence.decision', 'DECISION', 'Agreed'],
-    ['attempt', 'EVIDENCE_CANDIDATE', 'evidence.attempt', 'ATTEMPT', 'Attempted'],
     ['operating change', 'EVIDENCE_CANDIDATE', 'evidence.operating_change', 'STATE_CHANGE', 'Changed'],
   ];
   for (const [label, candidateType, field, eventType, historyKind] of scenarios) {

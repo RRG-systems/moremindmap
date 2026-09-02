@@ -217,7 +217,47 @@ export function internalDevKeys({ relationship_key, subject_key = 're-mid' }) {
     allowance_lock: `${PREFIX}:allowance-lock:${scopeHash}`,
     research: `${PREFIX}:research:${scopeHash}`,
     diagnostics: `${PREFIX}:diagnostics:${scopeHash}`,
+    s2_relationship: `${PREFIX}:s2-relationship:${scopeHash}`,
   };
+}
+
+export async function readS2FirstSessionRelationshipEvent({ redis, key, relationshipScopeHash }) {
+  const raw = await redis.get(key);
+  if (!raw) return { ok: true, code: 'SUBSCRIPTION_S2_FIRST_SESSION_NOT_ESTABLISHED', event: null };
+  let event;
+  try { event = JSON.parse(raw); } catch { return { ok: false, code: 'SUBSCRIPTION_S2_RELATIONSHIP_EVENT_CORRUPT', event: null }; }
+  const unsigned = { ...event };
+  delete unsigned.event_hash;
+  if (event.contract !== 'SUBSCRIPTION_FLAGSHIP_S2_FIRST_SESSION_RELATIONSHIP_EVENT_V1'
+    || event.relationship_scope_hash !== relationshipScopeHash
+    || !/^session_[a-f0-9]{24}$/u.test(event.session_id || '')
+    || event.event_type !== 'FIRST_SESSION_DELIBERATELY_STARTED'
+    || event.event_hash !== hashCanonicalJson(unsigned)) {
+    return { ok: false, code: 'SUBSCRIPTION_S2_RELATIONSHIP_EVENT_INVALID', event: null };
+  }
+  return { ok: true, code: 'SUBSCRIPTION_S2_FIRST_SESSION_ESTABLISHED', event };
+}
+
+export async function establishS2FirstSessionRelationshipEvent({ redis, key, relationshipScopeHash, sessionId, establishedAt }) {
+  if (!/^[a-f0-9]{64}$/u.test(relationshipScopeHash || '') || !/^session_[a-f0-9]{24}$/u.test(sessionId || '')) {
+    return { ok: false, code: 'SUBSCRIPTION_S2_RELATIONSHIP_EVENT_BINDING_INVALID', event: null };
+  }
+  const body = {
+    contract: 'SUBSCRIPTION_FLAGSHIP_S2_FIRST_SESSION_RELATIONSHIP_EVENT_V1',
+    relationship_scope_hash: relationshipScopeHash,
+    session_id: sessionId,
+    event_type: 'FIRST_SESSION_DELIBERATELY_STARTED',
+    authority: 'EXACT_CUSTOMER_START_ACTION',
+    synthetic_only: true,
+    canonical_mutation_performed: false,
+    personal_rsl_mutation_performed: false,
+    established_at: new Date(establishedAt).toISOString(),
+  };
+  const event = { ...body, event_hash: hashCanonicalJson(body) };
+  const created = await redis.set(key, JSON.stringify(event), 'EX', RELATIONSHIP_TTL_SECONDS, 'NX');
+  if (created) return { ok: true, code: 'SUBSCRIPTION_S2_FIRST_SESSION_ESTABLISHED', event };
+  const replay = await readS2FirstSessionRelationshipEvent({ redis, key, relationshipScopeHash });
+  return replay.ok ? { ...replay, code: 'IDEMPOTENT_REPLAY' } : replay;
 }
 
 export class RedisLivingRelationshipStore extends InMemoryLivingRelationshipStore {

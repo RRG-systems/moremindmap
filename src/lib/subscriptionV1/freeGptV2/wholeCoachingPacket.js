@@ -1,6 +1,7 @@
 import { hashCanonicalJson } from '../../intelligenceFabric/hashing.js';
 import { deepFreeze } from '../../intelligenceFabric/validation.js';
 import { assembleCoachingStatePacket } from '../coachingState.js';
+import { purposeRankPrivateAdvisorContext } from './purposeRankedContext.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const INTERNAL_KEY = /(?:^|_)(?:id|ids|hash|hashes|ref|refs|reference|references|schema|scope|binding|bindings|lineage|provider|contract)(?:$|_)/iu;
@@ -42,7 +43,7 @@ function refsFor(selected, basePacket, doctrine, externalEvidence) {
   return { evidence: [...new Set(evidence)].sort(), authority: [...new Set(authority)].sort() };
 }
 
-function providerPacket({ selected, basePacket, doctrine, verticalContext, conversation, visibleContext, externalEvidence, relationshipContext }) {
+function providerPacket({ selected, basePacket, doctrine, conversation, visibleContext, externalEvidence, relationshipContext, coachingSession, temporalState, relationshipContinuity }) {
   const history = (basePacket.relevant_history || []).map((event) => ({
     kind: humanize(event.event_type),
     happened_at: event.effective_at,
@@ -68,11 +69,15 @@ function providerPacket({ selected, basePacket, doctrine, verticalContext, conve
     relevant_coaching_history: semanticProjection(history),
     coaching_intelligence: {
       universal: (doctrine.layers?.universal_kernel || []).map(({ title, guidance }) => ({ title, guidance })),
-      vertical: (doctrine.layers?.vertical_cassette || []).map(({ title, guidance }) => ({ title, guidance })),
-      vertical_context: semanticProjection(verticalContext),
+      vertical: [],
+      vertical_context: null,
+      semantic_cassette_injected: false,
     },
     current_conversation: semanticProjection(conversation.slice(-24)),
     subscription_relationship: semanticProjection(relationshipContext),
+    coaching_session: clone(coachingSession),
+    temporal_state: semanticProjection(temporalState),
+    relationship_continuity: semanticProjection(relationshipContinuity),
     visible_customer_context: semanticProjection(visibleContext),
     governed_external_context: semanticProjection(externalEvidence.map(({ purpose, source_title, source_url, citation, retrieved_at }) => ({ purpose, source_title, source_url, citation, retrieved_at }))),
     truth_boundaries: {
@@ -94,13 +99,17 @@ export function assembleWholeCoachingUnderstandingPacketV2({
   uncertainty = [],
   current_state,
   doctrine_retrieval,
-  vertical_context = null,
   conversation = [],
   visible_customer_context = null,
   external_evidence = [],
   relationship_context = null,
+  coaching_session = null,
+  temporal_state = null,
+  relationship_continuity = null,
   purpose = relationship_context?.session_kind === 'FIRST_EVER' ? 'ONBOARDING' : 'WEEKLY_COACHING',
   active_lens = 'OVERVIEW',
+  topics = [],
+  customer_message = '',
   assembled_at,
 }) {
   if (!doctrine_retrieval?.retrieval_hash) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_DOCTRINE_REQUIRED' });
@@ -111,13 +120,31 @@ export function assembleWholeCoachingUnderstandingPacketV2({
   if (!base.ok) return deepFreeze(base);
   let selected;
   let provider_understanding;
+  let rankedContext;
   try {
     selected = selectArtifacts(artifacts, base.selection_receipt);
-    provider_understanding = providerPacket({ selected, basePacket: base.packet, doctrine: doctrine_retrieval, verticalContext: vertical_context, conversation, visibleContext: visible_customer_context, externalEvidence: external_evidence, relationshipContext: relationship_context });
+    const fullProviderUnderstanding = providerPacket({ selected, basePacket: base.packet, doctrine: doctrine_retrieval, conversation, visibleContext: visible_customer_context, externalEvidence: external_evidence, relationshipContext: relationship_context, coachingSession: coaching_session, temporalState: temporal_state, relationshipContinuity: relationship_continuity });
+    rankedContext = purposeRankPrivateAdvisorContext({
+      full_provider_understanding: fullProviderUnderstanding,
+      doctrine_retrieval,
+      purpose,
+      active_lens,
+      topics,
+      customer_message,
+    });
+    provider_understanding = rankedContext.provider_understanding;
   } catch (error) {
     return deepFreeze({ ok: false, code: error.message || 'FREE_GPT_V2_PROVIDER_PROJECTION_FAILED' });
   }
-  const allowed_refs = refsFor(selected, base.packet, doctrine_retrieval, external_evidence);
+  const allowed_refs = refsFor(selected, base.packet, rankedContext.doctrine_retrieval, external_evidence);
+  const authorizedInterventionLineageHandles = (relationship_continuity?.open_loops || [])
+    .filter((item) => item?.kind === 'STABLE_INTERVENTION_LINEAGE' && /^intervention_[a-f0-9]{24}$/u.test(item.intervention_lineage_id || ''))
+    .map((item) => ({
+      intervention_lineage_id: item.intervention_lineage_id,
+      summary: item.summary || null,
+      open_loop_state: item.status,
+      due_at: item.due_at || null,
+    }));
   const body = {
     contract_id: 'whole_coaching_understanding_packet_v2',
     schema_version: '2.0.0',
@@ -125,8 +152,11 @@ export function assembleWholeCoachingUnderstandingPacketV2({
     session_id,
     base_state_packet: base.packet,
     selected_artifacts: Object.fromEntries(Object.entries(selected).map(([type, artifact]) => [type, { artifact_id: artifact.artifact_id, content_hash: artifact.content_hash }])),
-    doctrine_retrieval_hash: doctrine_retrieval.retrieval_hash,
+    doctrine_retrieval_hash: rankedContext.doctrine_retrieval.retrieval_hash,
+    full_doctrine_corpus_hash: doctrine_retrieval.retrieval_hash,
+    context_selection_receipt: rankedContext.receipt,
     allowed_refs,
+    authorized_intervention_lineage_handles: authorizedInterventionLineageHandles,
     catastrophic_constraints: {
       contradicted_claims: clone(selected.EVIDENCE_LEDGER?.payload?.contradicted || []),
     },
@@ -143,6 +173,7 @@ export function assembleWholeCoachingUnderstandingPacketV2({
     packet,
     provider_understanding,
     selection_receipt: base.selection_receipt,
+    context_selection_receipt: rankedContext.receipt,
     domain_boundary: base.domain_boundary,
   });
 }
