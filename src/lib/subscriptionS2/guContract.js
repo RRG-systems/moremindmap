@@ -200,7 +200,9 @@ function conciseCustomerText(value, { maxSentences = 3, maxWords = 72 } = {}) {
   const selected = [];
   let words = 0;
   for (const sentence of sentences) {
-    const count = sentence.trim().split(/\s+/u).filter(Boolean).length;
+    const sentenceWords = sentence.trim().split(/\s+/u).filter(Boolean);
+    const count = sentenceWords.length;
+    if (!selected.length && count > maxWords) return sentenceWords.slice(0, maxWords).join(' ');
     if (selected.length && (selected.length >= maxSentences || words + count > maxWords)) break;
     selected.push(sentence.trim());
     words += count;
@@ -304,6 +306,20 @@ function continuityObjects(providerUnderstanding) {
   ].filter(Boolean);
 }
 
+function firstSessionWelcomeObject(providerUnderstanding) {
+  const preferredName = firstText(providerUnderstanding?.coaching_session?.preferred_conversational_name);
+  return {
+    id: 's2-first-session-welcome',
+    kind: 'WELCOME',
+    title: 'Welcome to MORE',
+    statement: preferredName
+      ? `Congratulations, ${preferredName}. Your coaching relationship starts here.`
+      : 'Congratulations. Your coaching relationship starts here.',
+    items: [],
+    sourceIds: ['s2-source-coaching-session'],
+  };
+}
+
 function sessionLearningObject(sessionLearning) {
   if (!sessionLearning) return null;
   const labels = [
@@ -341,10 +357,16 @@ export function buildSubscriptionS2GuWorld({ event, packet, publication, viewMod
     source('s2-source-business-twin', 'Current governed Business Twin', 'GOVERNED_SYNTHETIC'),
     source('s2-source-evidence', 'Current governed Evidence state', 'GOVERNED_SYNTHETIC'),
     source('s2-source-personal-rsl', 'Exact-scope governed relationship memory', 'PRIVATE_GOVERNED_SYNTHETIC'),
+    source('s2-source-coaching-session', 'Current governed coaching-session orientation', 'SESSION_ONLY_NONCANONICAL'),
     source('s2-source-session-learning', 'Ephemeral mutually aligned session learning', 'SESSION_ONLY_NONCANONICAL'),
     source('s2-source-map-delta', 'Real AFW-05 publication delta', 'GOVERNED_SYNTHETIC'),
   ];
-  const objects = [...viewModelObjects(viewModel), ...continuityObjects(packet.provider_understanding)];
+  const availableObjects = [...viewModelObjects(viewModel), ...continuityObjects(packet.provider_understanding)];
+  const objects = event === 'FIRST_SESSION_WELCOME'
+    ? [firstSessionWelcomeObject(packet.provider_understanding)]
+    : event === 'COACHING_MOMENT'
+      ? availableObjects.filter((item) => item.id !== 's2-relationship-preferences')
+      : availableObjects;
   const learning = sessionLearningObject(sessionLearning);
   const delta = mapDeltaObject(mapDelta);
   if (learning) objects.push(learning);
@@ -392,7 +414,7 @@ const KIND_BY_BLOCK = Object.freeze({
   EVIDENCE_GAP: ['EVIDENCE_GAP', 'OPEN_LOOPS'],
   COMMITMENTS: ['COMMITMENTS', 'ONE_MOVE', 'SESSION_LEARNING'],
   DECISION: ['ONE_MOVE', 'SESSION_LEARNING', 'MAP_DELTA'],
-  PLAIN_LANGUAGE: ['VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'MAP_DELTA'],
+  PLAIN_LANGUAGE: ['WELCOME', 'VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'MAP_DELTA'],
   QUESTION: ['VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'EVIDENCE_GAP', 'SESSION_LEARNING'],
 });
 
@@ -428,7 +450,7 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
     for (const id of block.evidenceIds || []) if (!evidenceIds.has(id)) errors.push(`S2_GU_EVIDENCE_SCOPE_DENIED:${id}`);
   }
   const requiredObjectByEvent = {
-    FIRST_SESSION_WELCOME: 's2-relationship-preferences',
+    FIRST_SESSION_WELCOME: 's2-first-session-welcome',
     SESSION_OPENING: null,
     MAP_CHANGE: 's2-map-delta',
     SESSION_CLOSING: 's2-session-learning',
@@ -436,6 +458,8 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
   const mandatory = world.event !== 'COACHING_MOMENT';
   if (mandatory && candidate?.renderDecision?.render !== true) errors.push('S2_GU_MANDATORY_RENDER_REQUIRED');
   if (mandatory && list(candidate?.blocks).length < 1) errors.push('S2_GU_MANDATORY_BLOCK_REQUIRED');
+  if (world.event === 'FIRST_SESSION_WELCOME' && list(candidate?.blocks).length !== 1) errors.push('S2_GU_FIRST_WELCOME_ONE_BLOCK_REQUIRED');
+  if (world.event === 'FIRST_SESSION_WELCOME' && (selectedObjectIds.size !== 1 || !selectedObjectIds.has('s2-first-session-welcome'))) errors.push('S2_GU_FIRST_WELCOME_ONLY_REQUIRED');
   if (world.event === 'SESSION_OPENING' && list(candidate?.blocks).length !== 1) errors.push('S2_1_GU_OPENING_ONE_BLOCK_REQUIRED');
   if (!mandatory && candidate?.renderDecision?.render === false && list(candidate?.blocks).length) errors.push('S2_GU_RESTRAINED_NO_RENDER_BLOCK_DENIED');
   if (!mandatory && candidate?.renderDecision?.render === true && (list(candidate?.blocks).length < 1 || list(candidate?.blocks).length > 2)) errors.push('S2_GU_RESTRAINED_BLOCK_COUNT_INVALID');
@@ -456,11 +480,28 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
 export function materializeSubscriptionS2GuPlan({ candidate, world, receipt }) {
   const objectMap = new Map(world.objects.map((item) => [item.id, item]));
   const evidenceMap = new Map(world.evidence.map((item) => [item.id, item]));
+  const firstSessionWelcome = world.event === 'FIRST_SESSION_WELCOME';
   return Object.freeze({
     ...clone(candidate),
+    guidance: firstSessionWelcome ? Object.freeze({
+      ...clone(candidate.guidance),
+      summary: conciseCustomerText(candidate.guidance.summary, { maxSentences: 1, maxWords: 18 }),
+      nextCue: conciseCustomerText(candidate.guidance.nextCue, { maxSentences: 1, maxWords: 18 }),
+    }) : Object.freeze(clone(candidate.guidance)),
     blocks: Object.freeze(candidate.blocks.map((block) => Object.freeze({
       ...clone(block),
-      objects: Object.freeze(block.objectIds.map((id) => objectMap.get(id)).map((item) => world.event === 'SESSION_OPENING'
+      ...(firstSessionWelcome ? {
+        title: conciseCustomerText(block.title, { maxSentences: 1, maxWords: 8 }),
+        subtitle: '',
+      } : {}),
+      objects: Object.freeze(block.objectIds.map((id) => objectMap.get(id)).map((item) => firstSessionWelcome
+        ? {
+            ...item,
+            statement: conciseCustomerText(item.statement, { maxSentences: 2, maxWords: 12 }),
+            qualifier: '',
+            items: [],
+          }
+        : world.event === 'SESSION_OPENING'
         ? {
             ...item,
             statement: conciseCustomerText(item.statement, { maxSentences: 2, maxWords: 42 }),

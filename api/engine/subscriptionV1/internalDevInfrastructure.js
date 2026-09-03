@@ -181,17 +181,26 @@ export async function issueInternalDevCapability({ redis, req, launcher = null, 
   };
 }
 
-export async function authenticateInternalDevRequest({ redis, req, env = globalThis.process?.env || {} }) {
-  if (!internalDevEnabled(env)) return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF', status: 404 };
+function rejectedInternalDevAuthentication(code, failureClass, status = 401) {
+  return { ok: false, code, status, failure_class: failureClass };
+}
+
+export async function authenticateInternalDevRequest({ redis, req, env = globalThis.process?.env || {}, now = new Date() }) {
+  if (!internalDevEnabled(env)) return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF', 'RUNTIME_DEFAULT_OFF', 404);
   const capabilityToken = cookies(req.headers?.cookie)[COOKIE_CAPABILITY];
-  if (!capabilityToken) return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', status: 401 };
+  if (!capabilityToken) return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', 'CAPABILITY_COOKIE_MISSING');
   const capabilityHash = digest(capabilityToken);
   const raw = await redis.get(`${PREFIX}:capability:${capabilityHash}`);
-  const capability = raw ? JSON.parse(raw) : null;
+  if (!raw) return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', 'CAPABILITY_STATE_MISSING');
+  let capability = null;
+  try { capability = JSON.parse(raw); } catch {
+    return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', 'CAPABILITY_STATE_MALFORMED');
+  }
   const subjectAuthority = validateSubscriptionDemoCapability(capability);
-  if (!subjectAuthority.ok
-    || capability.browser_binding_hash !== clientKey(req) || Date.parse(capability.expires_at) <= Date.now()) {
-    return { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', status: 401 };
+  if (!subjectAuthority.ok) return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', 'CAPABILITY_CONTRACT_INVALID');
+  if (capability.browser_binding_hash !== clientKey(req)) return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', 'CAPABILITY_BROWSER_BINDING_MISMATCH');
+  if (!Number.isFinite(Date.parse(capability.expires_at)) || Date.parse(capability.expires_at) <= now.getTime()) {
+    return rejectedInternalDevAuthentication('SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID', 'CAPABILITY_EXPIRED');
   }
   return { ok: true, capability, capability_hash: capabilityHash, demo_subject: subjectAuthority.selection };
 }

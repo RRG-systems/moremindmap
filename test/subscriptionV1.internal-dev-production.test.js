@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import test from 'node:test';
 import {
   RedisLivingRelationshipStore,
+  authenticateInternalDevRequest,
   consumeEntryCsrf,
   consumeRuntimeCsrf,
   createInternalSyntheticEntitlement,
@@ -88,6 +89,41 @@ test('internal Leadership entitlement uses one-time CSRF, exact human code, opaq
   assert.equal(await consumeRuntimeCsrf({ redis, capabilityHash: 'a'.repeat(64), proof: runtimeCsrf }), false);
 });
 
+test('internal entitlement rejection preserves fail-closed authority while classifying recoverable re-entry boundaries', async () => {
+  const redis = new FakeRedis();
+  const now = new Date('2026-09-03T02:12:42.209Z');
+  const request = req();
+  const missing = await authenticateInternalDevRequest({ redis, req: request, env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now });
+  assert.equal(missing.code, 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED');
+  assert.equal(missing.failure_class, 'CAPABILITY_COOKIE_MISSING');
+
+  const issued = await issueInternalDevCapability({ redis, req: request, now });
+  const cookie = issued.cookies.map((value) => value.split(';')[0]).join('; ');
+  const valid = await authenticateInternalDevRequest({ redis, req: req(cookie), env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now: new Date('2026-09-03T04:45:05.965Z') });
+  assert.equal(valid.ok, true);
+
+  const changedNetwork = req(cookie);
+  changedNetwork.headers['x-forwarded-for'] = '203.0.113.8';
+  const bindingMismatch = await authenticateInternalDevRequest({ redis, req: changedNetwork, env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now: new Date('2026-09-03T04:46:16.080Z') });
+  assert.equal(bindingMismatch.code, 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID');
+  assert.equal(bindingMismatch.failure_class, 'CAPABILITY_BROWSER_BINDING_MISMATCH');
+
+  const capabilityKey = [...redis.values.keys()].find((key) => key.includes(':capability:'));
+  const originalCapability = redis.values.get(capabilityKey);
+  redis.values.delete(capabilityKey);
+  const missingState = await authenticateInternalDevRequest({ redis, req: req(cookie), env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now: new Date('2026-09-03T04:46:16.080Z') });
+  assert.equal(missingState.failure_class, 'CAPABILITY_STATE_MISSING');
+  redis.values.set(capabilityKey, '{malformed');
+  const malformedState = await authenticateInternalDevRequest({ redis, req: req(cookie), env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now: new Date('2026-09-03T04:46:16.080Z') });
+  assert.equal(malformedState.failure_class, 'CAPABILITY_STATE_MALFORMED');
+  redis.values.set(capabilityKey, originalCapability);
+
+  const expired = await authenticateInternalDevRequest({ redis, req: req(cookie), env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' }, now: new Date('2026-09-03T10:12:42.210Z') });
+  assert.equal(expired.failure_class, 'CAPABILITY_EXPIRED');
+  assert.equal(Object.hasOwn(bindingMismatch, 'capability'), false);
+  assert.equal(Object.hasOwn(bindingMismatch, 'capability_hash'), false);
+});
+
 test('internal entitlement reuses the frozen four-session and approximate-30-minute accounting contract', async () => {
   const redis = new FakeRedis();
   const keys = internalDevKeys({ relationship_key: 'rel_aaaaaaaaaaaaaaaaaaaa', subject_key: 're-mid' });
@@ -104,10 +140,31 @@ test('internal entitlement reuses the frozen four-session and approximate-30-min
   assert.equal(first.cycle.standard_slots_consumed, 0);
   assert.equal(first.cycle.onboarding_consumed, true);
   assert.equal(first.timing.active_hard_cap_seconds, 1800);
+  assert.equal(first.timing.active_hard_cap_enforced, false);
   const replay = await withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => ledger.inspect({ ledger_id: first.cycle.ledger_id, scope: lab.scope, now: '2026-08-20T12:03:00.000Z' }) });
   assert.equal(replay.ok, true);
   assert.equal(replay.sessions.length, 1);
   assert.equal(replay.sessions[0].charge_point_reached, true);
+});
+
+test('the approximate 30-minute cue never auto-terminates an active coaching session', async () => {
+  const redis = new FakeRedis();
+  const keys = internalDevKeys({ relationship_key: 'rel_nohardcap000000000', subject_key: 're-mid' });
+  const lab = await createSyntheticLivingRelationshipLab({ subject_key: 're-mid', relationship_key: 'rel_nohardcap000000000' });
+  const entitlement = createInternalSyntheticEntitlement({ scope: lab.scope, asOf: new Date('2026-08-20T12:00:00.000Z') });
+  const started = await withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
+    const cycle = ledger.createCycle(entitlement);
+    const reserved = ledger.reserve({ ledger_id: cycle.ledger.ledger_id, scope: lab.scope, session_class: 'ONBOARDING_INCLUDED', idempotency_key: 'no-hard-cap', now: '2026-08-20T12:00:00.000Z' });
+    const active = ledger.activate({ session_id: reserved.session.session_id, scope: lab.scope, now: '2026-08-20T12:01:00.000Z' });
+    return ledger.recordFirstValidResponse({ session_id: active.session.session_id, scope: lab.scope, response_hash: hashCanonicalJson({ answer: true }), now: '2026-08-20T12:02:00.000Z' });
+  }});
+  assert.equal(started.session.hard_expires_at, null);
+  const fourHoursLater = await withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => ledger.inspect({ ledger_id: started.ledger.ledger_id, scope: lab.scope, now: '2026-08-20T16:01:00.000Z' }) });
+  assert.equal(fourHoursLater.sessions[0].state, 'ACTIVE');
+  assert.equal(fourHoursLater.sessions[0].ended_at, null);
+  const closed = await withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => ledger.complete({ session_id: started.session.session_id, scope: lab.scope, now: '2026-08-20T16:02:00.000Z' }) });
+  assert.equal(closed.session.state, 'CONSUMED');
+  assert.equal(closed.code, 'SESSION_COMPLETED');
 });
 
 test('an exhausted synthetic allowance preserves read-only relationship access without opening a fifth session', async () => {
@@ -231,6 +288,9 @@ test('public Subscription shell exposes no profile selector, API secret, canary 
   assert.doesNotMatch(runtime, /retrieve-profile|MM-\d{8}-[A-Z0-9]{8}/u);
   assert.match(runtime, /subject_key: auth\.capability\.subject_key/u);
   assert.match(runtime, /SUBSCRIPTION_V1_RUNTIME_\$\{action\}_REJECTED/u);
+  assert.match(runtime, /SUBSCRIPTION_V1_RUNTIME_AUTH_REJECTED/u);
+  assert.match(runtime, /failure_class/u);
+  assert.match(runtime, /capability_material_logged:\s*false/u);
   assert.match(runtime, /customer_evidence_logged:\s*false/u);
   assert.match(runtime, /configured_max_output_tokens/u);
   assert.match(runtime, /sanitized_stage/u);
@@ -238,6 +298,8 @@ test('public Subscription shell exposes no profile selector, API secret, canary 
   assert.doesNotMatch(ui, /MORE [·•] LIVE GPT-5\.6 SOL/u);
   assert.match(ui, /data-synthetic-only="true"/u);
   assert.match(ui, /coaching_available === false/u);
+  assert.match(ui, /failure\.status === 401 && failure\.reentryRequired/u);
+  assert.match(ui, /onEntitlementLost/u);
   assert.match(ui, /Your Business Twin is current\./u);
   assert.match(runtime, /SUBSCRIPTION_V1_RELATIONSHIP_READY_ALLOWANCE_EXHAUSTED/u);
   assert.match(styles, /\.living-relationship-app \.drawer-layer \{ right: 0; bottom: 0; z-index: 50; \}/u);

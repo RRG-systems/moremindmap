@@ -157,8 +157,8 @@ test('S2 GU keeps the exact frontier configuration, renders only supplied object
     return {
       output: {
         renderDecision: { render: true, reason: 'A small welcome view makes the start clear.' },
-        guidance: { eyebrow: 'ignored', headline: 'ignored', summary: 'Start with one clear goal.', nextCue: 'What would make today useful?' },
-        blocks: [{ blockId: 's2-block-relationship', type: 'RELATIONSHIP', title: 'How we can work together', subtitle: 'You can change the pace at any time.', objectIds: ['s2-relationship-preferences'], evidenceIds: ['s2-source-personal-rsl'], emphasis: 'PRIMARY', reason: 'This helps the first conversation feel clear.' }],
+        guidance: { eyebrow: 'ignored', headline: 'ignored', summary: 'Start with one clear goal and remember that the entire relationship can adapt as the coach learns what helps the customer think, decide, and act.', nextCue: 'What would make today useful, and what way of working together would help you think most clearly right now?' },
+        blocks: [{ blockId: 's2-block-welcome', type: 'PLAIN_LANGUAGE', title: 'Welcome to MORE', subtitle: 'You can change the pace at any time.', objectIds: ['s2-first-session-welcome'], evidenceIds: ['s2-source-coaching-session'], emphasis: 'PRIMARY', reason: 'This helps the first conversation feel clear.' }],
       },
       receipt: { provider: 'OpenAI Responses API', model: request.model, reasoning_effort: request.reasoning.effort, store: request.store, background: request.background, tools: 0, latency_ms: 1 },
     };
@@ -180,8 +180,19 @@ test('S2 GU keeps the exact frontier configuration, renders only supplied object
   assert.equal(captured.text.format.schema.properties.blocks.maxItems, 2);
   assert.match(captured.input[0].content, /fifth grader/iu);
   assert.match(captured.input[0].content, /lead generation/iu);
-  assert.equal(result.plan.blocks[0].objects[0].id, 's2-relationship-preferences');
-  assert.ok(result.world.objects.find((item) => item.id === 's2-perspective').statement.split(/\s+/u).length <= 72);
+  assert.match(captured.input[1].content, /quick welcome, not a Business Twin report/iu);
+  assert.equal(result.plan.blocks[0].objects[0].id, 's2-first-session-welcome');
+  assert.equal(result.plan.blocks[0].objects[0].statement, 'Congratulations, Jordan. Your coaching relationship starts here.');
+  assert.deepEqual(result.plan.blocks[0].objects[0].items, []);
+  assert.ok(result.plan.guidance.summary.split(/\s+/u).length <= 18);
+  assert.ok(result.plan.guidance.nextCue.split(/\s+/u).length <= 18);
+  assert.equal(result.plan.blocks[0].subtitle, '');
+  assert.deepEqual(result.world.objects.map((item) => item.id), ['s2-first-session-welcome']);
+  const overfilledWelcome = structuredClone(result.plan);
+  overfilledWelcome.blocks.push({ blockId: 's2-block-extra-vision', type: 'PLAIN_LANGUAGE', title: 'Where you are going', subtitle: '', objectIds: ['s2-vision'], evidenceIds: ['s2-source-business-twin'], emphasis: 'SECONDARY', reason: 'Show more context.' });
+  const overfilledErrors = validateSubscriptionS2GuPlan({ candidate: overfilledWelcome, world: result.world }).errors;
+  assert.equal(overfilledErrors.includes('S2_GU_FIRST_WELCOME_ONE_BLOCK_REQUIRED'), true);
+  assert.equal(overfilledErrors.includes('S2_GU_FIRST_WELCOME_ONLY_REQUIRED'), true);
   const leaked = structuredClone(result.plan);
   leaked.guidance.summary = 'The governed RSL state binding was retrieved.';
   assert.equal(validateSubscriptionS2GuPlan({ candidate: leaked, world: result.world }).errors.includes('S2_GU_CUSTOMER_LANGUAGE_INTERNAL_JARGON'), true);
@@ -200,6 +211,7 @@ test('S2 GU keeps the exact frontier configuration, renders only supplied object
   });
   assert.equal(noVisual.plan.renderDecision.render, false);
   assert.deepEqual(noVisual.plan.blocks, []);
+  assert.equal(noVisual.world.objects.some((item) => item.id === 's2-relationship-preferences'), false);
 });
 
 test('Patricia-derived S2 demo uses a byte-sealed source and an independent writable relationship that persists only in demo keys', async () => {
@@ -293,6 +305,58 @@ test('a real demo-only AFW-05 change triggers the mandatory map-change GU while 
   assert.equal(decision.body.session_map_delta.material, true);
 });
 
+test('Synthetic Jordan acknowledges a durable communication preference once and later turns keep the preference GU ineligible', async () => {
+  const redis = new FakeRedis();
+  const capability = { relationship_key: 'rel_22222222222222222222', subject_key: 're-mid', synthetic_only: true, local_demo_only: true };
+  const transport = async (_request, { stage }) => {
+    if (stage === 'CONVERSATION') return { output: { customer_message: 'Jordan, I will keep this simple. What is the one decision you want to make?' }, usage: {}, latency_ms: 1 };
+    if (stage === 'CANDIDATE_EXTRACTION') return { output: { candidate: {
+      candidate_type: 'PERSONAL_RSL_CANDIDATE', proposal_type: 'EVIDENCE_CANDIDATE', target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE',
+      summary: 'Remember Jordan’s durable communication preference.', items: [{ field: 'evidence.communication_preference', value: 'Speak simply and ask one focused question.' }],
+      reason: 'Jordan explicitly asked MORE to remember this preference.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true,
+      generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE',
+    } }, usage: {}, latency_ms: 1 };
+    return { output: { decision: 'NONE', proposal_hash: '0'.repeat(64), effective_items: [], unambiguous: false, reason: 'No natural authorization request.' }, usage: {}, latency_ms: 1 };
+  };
+  const events = [];
+  const generateGu = async ({ event, loaded }) => {
+    events.push(event);
+    return {
+      ok: true,
+      plan: {
+        event,
+        renderDecision: { render: event !== 'COACHING_MOMENT', reason: event === 'COACHING_MOMENT' ? 'Conversation is enough.' : 'This event requires a visual.' },
+        guidance: { eyebrow: 'MORE', headline: event, summary: 'One clear idea.', nextCue: 'What matters next?' },
+        blocks: event === 'COACHING_MOMENT' ? [] : [{ blockId: `s2-block-${event.toLowerCase().replaceAll('_', '-')}`, type: 'PLAIN_LANGUAGE', title: 'What matters', subtitle: '', objects: [] }],
+        interactions: [],
+      },
+      receipt: { provider: { stage: 'S2_GU', model: 'gpt-5.6-sol', store: false, latency_ms: 1 } },
+      current: loaded.controller.current(),
+    };
+  };
+  const handler = createSubscriptionV1RuntimeHandler({
+    getRedis: () => redis,
+    authenticate: async () => ({ ok: true, capability, capability_hash: hashCanonicalJson(capability) }),
+    loadSubscriber: (args) => loadProductionIntendedSyntheticSubscriber({ ...args, transport }),
+    generateGu,
+    env: { OPENAI_API_KEY: 'unused-test-key' },
+  });
+  const opened = await invoke(handler, directRequest());
+  const started = await invoke(handler, directRequest({ method: 'POST', csrf: opened.body.csrf_token, body: { action: 'START_MY_FIRST_SESSION' } }));
+  const proposed = await invoke(handler, directRequest({ method: 'POST', csrf: started.body.csrf_token, body: { action: 'TURN', session_id: started.body.session.session_id, message: 'Please remember to speak simply and ask one focused question.', conversation: [], visible_customer_context: { surface: 'overview', visible_objects: [] } } }));
+  assert.equal(proposed.status, 200);
+  assert.equal(proposed.body.confirmation_required, true);
+  assert.equal(proposed.body.gu_plan, null);
+  const confirmed = await invoke(handler, directRequest({ method: 'POST', csrf: proposed.body.csrf_token, body: { action: 'DECISION', session_id: started.body.session.session_id, proposal_id: proposed.body.proposal.proposal_id, decision: 'CONFIRM', edited_items: [] } }));
+  assert.equal(confirmed.status, 200);
+  assert.equal(confirmed.body.mutation_performed, true);
+  assert.equal(confirmed.body.gu_plan.event, 'MAP_CHANGE');
+  const later = await invoke(handler, directRequest({ method: 'POST', csrf: confirmed.body.csrf_token, body: { action: 'TURN', session_id: started.body.session.session_id, message: 'What should I focus on now?', conversation: [], visible_customer_context: { surface: 'overview', visible_objects: [] } } }));
+  assert.equal(later.status, 200);
+  assert.equal(later.body.gu_plan, null);
+  assert.deepEqual(events, ['FIRST_SESSION_WELCOME', 'COACHING_MOMENT', 'MAP_CHANGE', 'COACHING_MOMENT']);
+});
+
 test('rendered S2 change surface supports explicit start, mandatory GU, Synthetic Jordan demo reset, Enter semantics, and customer-language recovery', () => {
   const ui = fs.readFileSync(new URL('../src/subscriptionV1/SubscriptionV1InternalDevApp.jsx', import.meta.url), 'utf8');
   const styles = fs.readFileSync(new URL('../src/subscriptionV1/internalDev.css', import.meta.url), 'utf8');
@@ -308,12 +372,14 @@ test('rendered S2 change surface supports explicit start, mandatory GU, Syntheti
   assert.match(ui, /submitLockRef/u);
   assert.match(ui, /explain it more simply/u);
   assert.match(ui, /className="s2-session-start-note"/u);
-  assert.match(styles, /\.s2-session-start \.s2-session-start-note\s*\{[^}]*display:\s*block;[^}]*margin-top:\s*\.75rem;/u);
+  assert.match(styles, /\.s2-session-start button\s*\{[^}]*min-width:\s*14rem;[^}]*background:\s*linear-gradient/u);
+  assert.match(styles, /\.s2-gu\s*\{[^}]*display:\s*grid;[^}]*border-radius:\s*1rem;/u);
   assert.match(renderer, /data-s2-gu-event/u);
   assert.doesNotMatch(renderer, /block\.type\.replaceAll/u);
   assert.match(server, /127\.0\.0\.1/u);
   assert.match(server, /isolated_process_memory: true/u);
   assert.doesNotMatch(server, /REDIS_URL|moremindmap\.com/iu);
+  assert.doesNotMatch(server, /PATRICIA|patricia-demo|PATRICIA_DERIVED/u);
   assert.match(server, /stripe_subscription_created:\s*false/u);
   assert.match(runtime, /conversational_time_controller:\s*false/u);
   assert.doesNotMatch(ui, /setTimeout\([^)]*30\s*\*\s*60/iu);

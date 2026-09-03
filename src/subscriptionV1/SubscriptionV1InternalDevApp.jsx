@@ -66,7 +66,7 @@ function AllowanceBoundary({ session }) {
   </aside>
 }
 
-function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
+function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost }) {
   const initiallyPreSession = Boolean(bootstrap.session?.pre_session_state)
   const [messages, setMessages] = useState(() => initiallyPreSession ? [] : readEphemeralMessages(demoSubject))
   const [draft, setDraft] = useState('')
@@ -135,6 +135,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
           if (event.phase === 'COACHING_READY') onProgress?.(event)
           if (event.ok !== true) {
             const failure = new Error(event.code || 'SUBSCRIPTION_V1_POST_RESPONSE_EXTRACTION_FAILED')
+            failure.code = event.code || 'SUBSCRIPTION_V1_POST_RESPONSE_EXTRACTION_FAILED'
             failure.phase = event.phase
             throw failure
           }
@@ -146,7 +147,12 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
         const event = JSON.parse(buffer)
         if (event.csrf_token) setCsrf(event.csrf_token)
         if (event.phase === 'COACHING_READY') onProgress?.(event)
-        if (event.ok !== true) throw new Error(event.code || 'SUBSCRIPTION_V1_POST_RESPONSE_EXTRACTION_FAILED')
+        if (event.ok !== true) {
+          const failure = new Error(event.code || 'SUBSCRIPTION_V1_POST_RESPONSE_EXTRACTION_FAILED')
+          failure.code = event.code || 'SUBSCRIPTION_V1_POST_RESPONSE_EXTRACTION_FAILED'
+          failure.phase = event.phase
+          throw failure
+        }
         finalResult = event
       }
       if (!finalResult) throw new Error('SUBSCRIPTION_V1_PROGRESSIVE_RESPONSE_EMPTY')
@@ -154,7 +160,14 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
     }
     const result = await response.json().catch(() => ({ ok: false, code: 'SUBSCRIPTION_V1_RESPONSE_INVALID' }))
     if (result.csrf_token) setCsrf(result.csrf_token)
-    if (!response.ok || result.ok !== true) throw new Error(result.code || 'SUBSCRIPTION_V1_REQUEST_FAILED')
+    if (!response.ok || result.ok !== true) {
+      const failure = new Error(result.code || 'SUBSCRIPTION_V1_REQUEST_FAILED')
+      failure.code = result.code || 'SUBSCRIPTION_V1_REQUEST_FAILED'
+      failure.status = response.status
+      failure.reentryRequired = result.reentry_required === true
+      if (failure.status === 401 && failure.reentryRequired) onEntitlementLost?.(failure.code)
+      throw failure
+    }
     return result
   }
 
@@ -207,7 +220,8 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject }) {
       if (result.mutation_performed) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated. We’ll continue from this new view.' }])
       if (result.gu_plan) setMessages((current) => [...current, { role: 'gu', plan: result.gu_plan }])
       if (result.gu_error) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated, but the new visual could not be shown safely.' }])
-    } catch {
+    } catch (failure) {
+      if (failure?.status === 401 && failure?.reentryRequired === true) return
       setError(coachDelivered
         ? 'You received the coaching response, but the follow-up check failed closed. Nothing was proposed or changed.'
         : 'That turn could not be carried forward safely. Your Business Twin has not changed. Please try again.')
@@ -344,11 +358,12 @@ export default function SubscriptionV1InternalDevApp() {
   }
   if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying the synthetic entitlement and governed state.</p></main>
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
+  const handleEntitlementLost = (code) => setState({ loading: false, error: code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
   return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">
     <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />
-      : <RemoteConversation key={`${DEMO_SUBJECT}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} />}
+      : <RemoteConversation key={`${DEMO_SUBJECT}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} />}
   </main>
 }

@@ -13,7 +13,7 @@ const EVENT_MISSION = Object.freeze({
   FIRST_SESSION_WELCOME: {
     eyebrow: 'WELCOME TO MORE',
     headline: 'WELCOME TO MORE',
-    mission: 'Create a small, calm welcome that makes the continuing coaching relationship tangible. Show only the most useful starting context and the adjustable relationship preferences. End with one natural invitation that can teach MORE how this human wants to be coached without turning the moment into a form.',
+    mission: 'Create an extremely restrained premium welcome. Do not display goals, Business Twin state, personality, plan, evidence, or relationship preferences. Use only the supplied welcome object and end with one short natural invitation into the conversation.',
   },
   SESSION_OPENING: {
     eyebrow: 'HERE’S WHERE WE ARE',
@@ -70,6 +70,8 @@ function requestFor({ world, event, repair = null }) {
         },
         instruction: event === 'COACHING_MOMENT'
           ? 'Choose whether a visual materially improves this moment. Usually it will not. If render is false, return zero blocks. If render is true, return one or two blocks. Each sentence should carry one clear idea. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
+          : event === 'FIRST_SESSION_WELCOME'
+            ? 'Set render to true. Select exactly one PLAIN_LANGUAGE block containing only the required first-session-welcome object. This is a quick welcome, not a Business Twin report, relationship summary, or onboarding form. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue to one short sentence each. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
           : event === 'SESSION_OPENING'
             ? 'Set render to true. Select exactly one block and no more than two closely related objects. Put the important point first. Omit empty prior agreements and empty progress. Do not show a metric inventory or full state report. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue short. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
             : 'Set render to true. Select one or two blocks. Use the required event object. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue short. Each sentence should carry one clear idea. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.',

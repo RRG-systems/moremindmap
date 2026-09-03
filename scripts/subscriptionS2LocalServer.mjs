@@ -2,11 +2,6 @@ import http from 'node:http';
 
 import { createSubscriptionV1RuntimeHandler } from '../api/internal/subscription-v1-runtime.js';
 import { loadProductionIntendedSyntheticSubscriber } from '../api/engine/subscriptionV1/internalDevSubscriberLoader.js';
-import {
-  PATRICIA_DEMO_RELATIONSHIP_KEY,
-  PATRICIA_DEMO_SUBJECT_KEY,
-  loadPatriciaDerivedDemoSubscriber,
-} from '../api/engine/subscriptionS2/patriciaDemoSubscriberLoader.js';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 
 const HOST = '127.0.0.1';
@@ -18,11 +13,6 @@ const SUBJECTS = Object.freeze({
     subject_key: 're-mid',
     relationship_key: 'rel_11111111111111111111',
     label: 'SYNTHETIC',
-  }),
-  'patricia-demo': Object.freeze({
-    subject_key: PATRICIA_DEMO_SUBJECT_KEY,
-    relationship_key: PATRICIA_DEMO_RELATIONSHIP_KEY,
-    label: 'PATRICIA_DERIVED',
   }),
 });
 
@@ -137,6 +127,7 @@ async function localQaGu({ event, loaded, keys }) {
   }[event];
   if (!heading) throw new Error('SUBSCRIPTION_S2_LOCAL_QA_GU_EVENT_DENIED');
   const render = event !== 'COACHING_MOMENT';
+  const firstSessionWelcome = event === 'FIRST_SESSION_WELCOME';
   return {
     ok: true,
     plan: {
@@ -144,13 +135,23 @@ async function localQaGu({ event, loaded, keys }) {
       event,
       stateBinding: { relationshipScopeHash: keys.scope_hash },
       renderDecision: { render, reason: 'Deterministic local render-wiring proof.' },
-      guidance: { eyebrow: heading[0], headline: heading[1], summary: 'Start with one important idea.', nextCue: 'What would make this useful today?' },
+      guidance: {
+        eyebrow: heading[0],
+        headline: heading[1],
+        summary: firstSessionWelcome ? 'Jordan, your coaching relationship is ready.' : 'Start with one important idea.',
+        nextCue: firstSessionWelcome ? 'What would make this conversation valuable today?' : 'What would make this useful today?',
+      },
       blocks: render ? [{
         blockId: `s2-block-local-${event.toLowerCase().replaceAll('_', '-')}`,
         type: 'PLAIN_LANGUAGE',
-        title: event === 'SESSION_CLOSING' ? 'What we will carry forward' : 'One clear place to begin',
-        subtitle: 'The full Business Twin remains available underneath.',
-        objects: [{ id: 's2-local-qa-object', kind: 'PLAIN_LANGUAGE', statement: event === 'SESSION_CLOSING' ? 'We will continue from what mattered today.' : 'Choose the one thing that would make this session useful.', items: [] }],
+        title: firstSessionWelcome ? 'Welcome to MORE' : event === 'SESSION_CLOSING' ? 'What we will carry forward' : 'One clear place to begin',
+        subtitle: firstSessionWelcome ? '' : 'The full Business Twin remains available underneath.',
+        objects: firstSessionWelcome ? [{
+          id: 's2-first-session-welcome',
+          kind: 'WELCOME',
+          statement: 'Congratulations, Jordan. Your coaching relationship starts here.',
+          items: [],
+        }] : [{ id: 's2-local-qa-object', kind: 'PLAIN_LANGUAGE', statement: event === 'SESSION_CLOSING' ? 'We will continue from what mattered today.' : 'Choose the one thing that would make this session useful.', items: [] }],
         evidence: [],
         emphasis: 'PRIMARY',
       }] : [],
@@ -176,9 +177,7 @@ async function bodyFor(request) {
 }
 
 export function createSubscriptionS2LocalServer({ redis = new LocalDemoRedis(), env = process.env } = {}) {
-  const loadSubscriber = async (args) => args.subject_key === PATRICIA_DEMO_SUBJECT_KEY
-    ? loadPatriciaDerivedDemoSubscriber({ ...args, ...(LOCAL_QA_REPLAY ? { transport: localQaTransport } : {}) })
-    : loadProductionIntendedSyntheticSubscriber({ ...args, ...(LOCAL_QA_REPLAY ? { transport: localQaTransport } : {}) });
+  const loadSubscriber = async (args) => loadProductionIntendedSyntheticSubscriber({ ...args, ...(LOCAL_QA_REPLAY ? { transport: localQaTransport } : {}) });
   const authenticate = async ({ req }) => {
     const selected = subjectFor(req);
     if (!selected) return { ok: false, code: 'SUBSCRIPTION_S2_LOCAL_SUBJECT_DENIED', status: 403 };

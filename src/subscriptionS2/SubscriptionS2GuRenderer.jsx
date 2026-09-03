@@ -18,16 +18,17 @@ function ObjectContent({ object }) {
 export default function SubscriptionS2GuRenderer({ plan }) {
   if (!plan?.guidance || plan?.renderDecision?.render === false || !Array.isArray(plan.blocks) || plan.blocks.length === 0) return null
   const firstSessionWelcome = plan.event === 'FIRST_SESSION_WELCOME'
+  const welcomeStatement = firstSessionWelcome ? plan.blocks[0]?.objects?.[0]?.statement : null
   return <section className={`s2-gu s2-gu-${String(plan.event || '').toLowerCase()}`} aria-label={plan.guidance.headline} data-s2-gu-event={plan.event}>
     <header className="s2-gu-heading">
       {!firstSessionWelcome && <span>{plan.guidance.eyebrow}</span>}
       <h3>{firstSessionWelcome ? 'WELCOME TO MORE' : plan.guidance.headline}</h3>
-      <p>{plan.guidance.summary}</p>
+      <p>{firstSessionWelcome ? welcomeStatement : plan.guidance.summary}</p>
     </header>
-    <div className="s2-gu-grid">{plan.blocks.map((block) => <article key={block.blockId} className={`s2-gu-block s2-gu-${String(block.type).toLowerCase()}`}>
+    {!firstSessionWelcome && <div className="s2-gu-grid">{plan.blocks.map((block) => <article key={block.blockId} className={`s2-gu-block s2-gu-${String(block.type).toLowerCase()}`}>
       <div className="s2-gu-block-heading"><h4>{block.title}</h4>{block.subtitle && <p>{block.subtitle}</p>}</div>
       {block.objects?.map((object) => <ObjectContent key={object.id} object={object} />)}
-    </article>)}</div>
+    </article>)}</div>}
     <p className="s2-gu-next">{plan.guidance.nextCue}</p>
   </section>
 }

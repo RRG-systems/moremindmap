@@ -135,10 +135,11 @@ export const OUTCOME_DIRECTIONS = deepFreeze([
 // These are defaults in a replaceable policy object, not schema constants.
 export const DEFAULT_SESSION_TIMING_POLICY = deepFreeze({
   policy_id: 'subscription_v1_session_timing_defaults',
-  policy_version: '1.0.0',
+  policy_version: '1.1.0',
   reservation_ttl_seconds: 300,
   reconnect_grace_seconds: 900,
   active_hard_cap_seconds: 1800,
+  active_hard_cap_enforced: false,
   standard_slots_per_billing_cycle: 4,
   onboarding_included_per_membership: 1,
   founder_approval_status: 'RATIFIED_AS_CONFIGURABLE_DEFAULTS',

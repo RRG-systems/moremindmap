@@ -21,6 +21,7 @@ function validateTimingPolicy(policy) {
     && integer(policy.reservation_ttl_seconds)
     && integer(policy.reconnect_grace_seconds)
     && integer(policy.active_hard_cap_seconds)
+    && (policy.active_hard_cap_enforced == null || typeof policy.active_hard_cap_enforced === 'boolean')
     && integer(policy.standard_slots_per_billing_cycle)
     && integer(policy.onboarding_included_per_membership));
 }
@@ -95,7 +96,9 @@ export class InMemoryAllowanceSessionLedger {
       if (!isOpen(session)) continue;
       const reservationExpired = session.state === 'RESERVED' && Date.parse(session.reservation_expires_at) <= at;
       const graceExpired = session.state === 'GRACE' && Date.parse(session.grace_expires_at) <= at;
-      const hardExpired = session.hard_expires_at && Date.parse(session.hard_expires_at) <= at;
+      const hardExpired = this.timingPolicy.active_hard_cap_enforced === true
+        && session.hard_expires_at
+        && Date.parse(session.hard_expires_at) <= at;
       if (!reservationExpired && !graceExpired && !hardExpired) continue;
       if (!session.charge_point_reached) {
         const ledger = this.ledgers.get(session.ledger_id);
@@ -166,7 +169,9 @@ export class InMemoryAllowanceSessionLedger {
     const activated = this.#replaceSession(session_id, {
       state: 'ACTIVE',
       activated_at: at,
-      hard_expires_at: plusSeconds(at, this.timingPolicy.active_hard_cap_seconds),
+      hard_expires_at: this.timingPolicy.active_hard_cap_enforced === true
+        ? plusSeconds(at, this.timingPolicy.active_hard_cap_seconds)
+        : null,
     });
     return deepFreeze({ ok: true, code: 'SESSION_ACTIVE', session: activated });
   }

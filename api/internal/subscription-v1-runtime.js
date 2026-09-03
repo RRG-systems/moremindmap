@@ -430,7 +430,17 @@ export function createSubscriptionV1RuntimeHandler({
   try {
     if (!sameOriginRequest(req, { allowMissingForGet: true })) return send(res, 403, { ok: false, code: 'SUBSCRIPTION_V1_ORIGIN_DENIED' });
     auth = await authenticate({ redis, req });
-    if (!auth.ok) return send(res, auth.status, { ok: false, code: auth.code });
+    if (!auth.ok) {
+      console.warn(JSON.stringify({
+        event: 'SUBSCRIPTION_V1_RUNTIME_AUTH_REJECTED',
+        code: String(auth.code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_INVALID').slice(0, 120),
+        failure_class: String(auth.failure_class || 'AUTHENTICATION_REJECTED_UNCLASSIFIED').slice(0, 120),
+        request_correlation_hash: req.headers?.['x-vercel-id'] ? hashCanonicalJson(String(req.headers['x-vercel-id'])).slice(0, 20) : null,
+        capability_material_logged: false,
+        customer_data_logged: false,
+      }));
+      return send(res, auth.status, { ok: false, code: auth.code, reentry_required: auth.status === 401 });
+    }
     const keys = internalDevKeys({ relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key });
     const now = new Date();
 
