@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import LivingBusinessTwinApp from '../lab/subscriptionLivingBusinessRelationshipV1/LivingBusinessTwinApp.jsx'
 import SubscriptionS2GuRenderer from '../subscriptionS2/SubscriptionS2GuRenderer.jsx'
+import { prepareBlindDemoRequestProof } from './blindDemoRequestProof.js'
 import '../lab/baProgressiveDisclosureV1/styles.css'
 import '../lab/subscriptionLivingBusinessRelationshipV1/styles.css'
 import './internalDev.css'
@@ -117,9 +118,18 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
 
   async function post(body, { onProgress = null } = {}) {
     const progressive = body.action === 'TURN'
+    let requestCsrf = csrf
+    if (bootstrap.blind_demo) {
+      try {
+        requestCsrf = await prepareBlindDemoRequestProof({ blind: bootstrap.blind_demo, kind: 'runtime', sessionId: body.session_id || null })
+      } catch (failure) {
+        if (failure.status === 401 && failure.reentryRequired) onEntitlementLost?.(failure.code)
+        throw failure
+      }
+    }
     const response = await fetch('/api/internal/subscription-v1-runtime', {
       method: 'POST', credentials: 'same-origin', cache: 'no-store',
-      headers: { 'content-type': 'application/json', accept: progressive ? 'application/x-ndjson' : 'application/json', 'x-subscription-runtime-csrf': csrf },
+      headers: { 'content-type': 'application/json', accept: progressive ? 'application/x-ndjson' : 'application/json', 'x-subscription-runtime-csrf': requestCsrf },
       body: JSON.stringify({ ...body, subject: demoSubject, ...(bootstrap.blind_demo ? { view_token: bootstrap.blind_demo.view_token } : {}) }),
     })
     if (response.headers.get('content-type')?.startsWith('application/x-ndjson')) {
@@ -348,9 +358,10 @@ export default function SubscriptionV1InternalDevApp() {
     setSwitching(true)
     setSwitchError('')
     try {
+      const selectionCsrf = await prepareBlindDemoRequestProof({ blind, kind: 'selection' })
       const response = await fetch('/api/internal/subscription-v1-runtime', {
         method: 'POST', credentials: 'same-origin', cache: 'no-store',
-        headers: { 'content-type': 'application/json', 'x-subscription-demo-subject-csrf': blind.selection_csrf },
+        headers: { 'content-type': 'application/json', 'x-subscription-demo-subject-csrf': selectionCsrf },
         body: JSON.stringify({ action: 'SELECT_MODEL', selection, view_token: blind.view_token }),
       })
       const result = await response.json()
