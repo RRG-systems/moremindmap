@@ -45,8 +45,9 @@ export default async function leadershipDemoEntryHandler(req, res) {
           csrf_token,
           synthetic_only: true,
           choices: [
-            { id: 'recruiting', title: 'Consulting Demonstration' },
-            { id: 'subscription', title: 'Subscription Model Demo' },
+            { id: 'recruiting', title: 'CONSULTING DEMONSTRATION' },
+            { id: 'subscription-model-1', title: 'SUBSCRIPTION MODEL 1' },
+            { id: 'subscription-model-2', title: 'SUBSCRIPTION MODEL 2' },
           ],
         });
       }
@@ -103,9 +104,11 @@ export default async function leadershipDemoEntryHandler(req, res) {
       });
     }
 
-    if (action === 'LAUNCH_SUBSCRIPTION') {
+    const blindDemoSelection = action === 'LAUNCH_SUBSCRIPTION_MODEL_1' ? '1'
+      : action === 'LAUNCH_SUBSCRIPTION_MODEL_2' ? '2' : null;
+    if (blindDemoSelection) {
       if (!internalDevEnabled(process.env)) return send(res, 404, { ok: false, code: 'SUBSCRIPTION_V1_INTERNAL_DEV_DEFAULT_OFF' });
-      const issued = await issueInternalDevCapability({ redis, req, launcher: auth.capability });
+      const issued = await issueInternalDevCapability({ redis, req, launcher: auth.capability, blindDemoSelection });
       res.setHeader('Set-Cookie', issued.cookies);
       return send(res, 200, {
         ok: true,

@@ -124,13 +124,16 @@ export function exactJordanCode(value) {
   return expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
 }
 
-export async function issueInternalDevCapability({ redis, req, launcher = null, now = new Date() }) {
+export async function issueInternalDevCapability({ redis, req, launcher = null, blindDemoSelection = null, now = new Date() }) {
   const darrenDemoAuthority = launcher !== null;
   if (darrenDemoAuthority && (launcher?.contract !== 'leadership_demo_launcher_capability_v1'
     || launcher.synthetic_only !== true
     || !launcher.allowed_products?.includes('subscription')
     || !String(launcher.launcher_scope_id || '').startsWith('leadership_demo_'))) {
     throw new Error('SUBSCRIPTION_DEMO_LAUNCHER_AUTHORITY_INVALID');
+  }
+  if (blindDemoSelection !== null && (!darrenDemoAuthority || !['1', '2'].includes(blindDemoSelection))) {
+    throw new Error('SUBSCRIPTION_BLIND_DEMO_LAUNCH_SELECTION_DENIED');
   }
   const parsed = cookies(req.headers?.cookie);
   const suppliedRelationship = parsed[COOKIE_RELATIONSHIP];
@@ -164,6 +167,7 @@ export async function issueInternalDevCapability({ redis, req, launcher = null, 
     allowed_demo_subjects: [...SUBSCRIPTION_DEMO_SUBJECT_IDS],
     authority_source: darrenDemoAuthority ? 'LEADERSHIP_DEMO' : 'DIRECT_SYNTHETIC',
     launcher_scope_id: darrenDemoAuthority ? launcher.launcher_scope_id : null,
+    ...(blindDemoSelection ? { blind_demo_launch_selection: blindDemoSelection } : {}),
     synthetic_only: true,
     billing_evidence: false,
     stripe_subscription_created: false,

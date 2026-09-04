@@ -7,18 +7,28 @@ const products = [
     action: 'LAUNCH_RECRUITING',
     number: '01',
     eyebrow: 'Shared business clarity',
-    title: 'Consulting Demonstration',
+    title: 'CONSULTING DEMONSTRATION',
     description: 'Open the complete Darren and Jordan demonstration: authored BOS and Business Twin, one persistent MORE conversation, purpose-bound visual intelligence, and a mutual plan.',
     detail: 'HOME → YOU → YOUR BUSINESS → PLAN · Synthetic + read-only',
     tone: 'green',
   },
   {
-    id: 'subscription',
-    action: 'LAUNCH_SUBSCRIPTION',
+    id: 'subscription-model-1',
+    action: 'LAUNCH_SUBSCRIPTION_MODEL_1',
     number: '02',
     eyebrow: 'Living relationship',
-    title: 'Subscription Model Demo',
-    description: 'Open the existing Jordan Subscription relationship directly, with its synthetic Personal RSL, publication, proposals, and allowance state.',
+    title: 'SUBSCRIPTION MODEL 1',
+    description: 'Open MODEL 1 in its independently governed Jordan relationship, with its own conversation, Personal RSL, proposals, and publication history.',
+    detail: 'Existing re-mid authority · Same-browser continuity · No billing',
+    tone: 'violet',
+  },
+  {
+    id: 'subscription-model-2',
+    action: 'LAUNCH_SUBSCRIPTION_MODEL_2',
+    number: '03',
+    eyebrow: 'Living relationship',
+    title: 'SUBSCRIPTION MODEL 2',
+    description: 'Open MODEL 2 in its independently governed Jordan relationship, with its own conversation, Personal RSL, proposals, and publication history.',
     detail: 'Existing re-mid authority · Same-browser continuity · No billing',
     tone: 'violet',
   },
@@ -36,7 +46,7 @@ export default function LeadershipDemo() {
     try {
       const response = await fetch('/api/internal/leadership-demo-entry?view=launcher', { credentials: 'same-origin', cache: 'no-store' })
       const payload = await response.json().catch(() => null)
-      if (!response.ok || payload?.ok !== true || !payload.csrf_token || payload.choices?.length !== 2) {
+      if (!response.ok || payload?.ok !== true || !payload.csrf_token || payload.choices?.length !== 3) {
         setStatus('locked')
         return
       }
@@ -102,13 +112,13 @@ export default function LeadershipDemo() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
           <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">Two products. One bounded demo area.</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with narrow demonstration authority; neither grants access to a real customer product.</p>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">Three products. One bounded demo area.</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with narrow demonstration authority; none grants access to a real customer product.</p>
         </section>
 
         {error && <div className="mt-8 rounded-2xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-sm text-red-100" role="alert">{error}</div>}
 
-        <section className="mt-12 grid gap-6 lg:grid-cols-2" aria-label="Product demos">
+        <section className="mt-12 grid gap-6 lg:grid-cols-3" aria-label="Product demos">
           {products.map((product) => (
             <button
               key={product.id}

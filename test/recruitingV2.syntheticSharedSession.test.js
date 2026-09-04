@@ -194,8 +194,8 @@ test('Production airlock preserves the retired Campaign 2G source while launchin
   assert.match(app, />Reset Demo</u);
   assert.match(app, /event\.key === 'Escape'/u);
   assert.match(app, /detailReturnFocus\.current\?\.focus/u);
-  assert.equal((launcher.match(/title: 'Consulting Demonstration'/gu) || []).length, 1);
-  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
+  assert.equal((launcher.match(/title: 'CONSULTING DEMONSTRATION'/gu) || []).length, 1);
+  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 3);
   assert.match(launcher, /recruiting-gu-v1\/demo/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);

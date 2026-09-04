@@ -46,12 +46,18 @@ export async function handleBlindDemo({ req, res, redis, auth, env,
       return send(409, { ok: false, code: 'BLIND_DEMO_REQUEST_IN_PROGRESS' });
     }
     let selection = JSON.parse(await redis.get(keys.selection) || 'null');
-    if (!selection) {
-      selection = { contract: BLIND_EXPERIMENT_VERSION, root: keys.root, selection: '1', revision: randomUUID() };
-      await redis.set(keys.selection, JSON.stringify(selection));
-    }
-    if (selection.contract !== BLIND_EXPERIMENT_VERSION || selection.root !== keys.root || !['1', '2'].includes(selection.selection)) {
+    if (selection && (selection.contract !== BLIND_EXPERIMENT_VERSION || selection.root !== keys.root || !['1', '2'].includes(selection.selection))) {
       throw new Error('BLIND_DEMO_SELECTION_STATE_INVALID');
+    }
+    if (auth.capability.blind_demo_launch_selection !== undefined && !['1', '2'].includes(auth.capability.blind_demo_launch_selection)) {
+      throw new Error('BLIND_DEMO_LAUNCH_SELECTION_INVALID');
+    }
+    const launchSelection = ['1', '2'].includes(auth.capability.blind_demo_launch_selection)
+      ? auth.capability.blind_demo_launch_selection : null;
+    if (!selection || (launchSelection && selection.launch_capability_hash !== auth.capability_hash)) {
+      selection = { contract: BLIND_EXPERIMENT_VERSION, root: keys.root, selection: launchSelection || '1',
+        revision: randomUUID(), launch_capability_hash: auth.capability_hash };
+      await redis.set(keys.selection, JSON.stringify(selection));
     }
     if (req.method === 'POST' && req.body?.action === 'SELECT_MODEL') {
       if (!await consumeDemoSubjectSwitchCsrf({ redis, capabilityHash: auth.capability_hash, proof: req.headers?.['x-subscription-demo-subject-csrf'] })) {

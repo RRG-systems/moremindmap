@@ -6,16 +6,74 @@ import { blindRelationship } from '../api/engine/subscriptionBlindDemo/authority
 import { authenticateInternalDevRequest, issueInternalDevCapability } from '../api/engine/subscriptionV1/internalDevInfrastructure.js';
 
 const base = { host: 'moremindmap.com', origin: 'https://moremindmap.com', 'x-forwarded-proto': 'https', 'x-forwarded-for': '203.0.113.55', 'user-agent': 'blind-fixture' };
-async function setup() {
+async function setup(blindDemoSelection = null) {
   const redis = new BlindDemoRedis();
   const issued = await issueInternalDevCapability({ redis, req: { headers: base }, launcher: {
     contract: 'leadership_demo_launcher_capability_v1', launcher_scope_id: 'leadership_demo_fixture', synthetic_only: true, allowed_products: ['subscription'],
-  } });
+  }, blindDemoSelection });
   const headers = { ...base, cookie: issued.cookies.map((s) => s.split(';')[0]).join('; ') };
   const auth = await authenticateInternalDevRequest({ redis, req: { headers }, env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' } });
   assert.equal(auth.ok, true);
   return { redis, auth, headers };
 }
+
+test('each opaque Leadership product action establishes only its server-bound initial arm', async () => {
+  const two = await setup('2');
+  const twoBootstrap = await invoke(two);
+  assert.equal(twoBootstrap.status, 200);
+  assert.equal(twoBootstrap.body.blind_demo.label, 'MODEL 2');
+  assert.equal(twoBootstrap.body.blind_demo.selection, '2');
+
+  const one = await setup('1');
+  const oneBootstrap = await invoke(one);
+  assert.equal(oneBootstrap.status, 200);
+  assert.equal(oneBootstrap.body.blind_demo.label, 'MODEL 1');
+  assert.equal(oneBootstrap.body.blind_demo.selection, '1');
+
+  await assert.rejects(issueInternalDevCapability({ redis: one.redis, req: { headers: base }, blindDemoSelection: '2' }), /LAUNCH_SELECTION_DENIED/u);
+  await assert.rejects(issueInternalDevCapability({ redis: one.redis, req: { headers: base }, launcher: {
+    contract: 'leadership_demo_launcher_capability_v1', launcher_scope_id: 'leadership_demo_fixture', synthetic_only: true, allowed_products: ['subscription'],
+  }, blindDemoSelection: 'patricia-demo' }), /LAUNCH_SELECTION_DENIED/u);
+});
+
+test('product relaunch reuses both relationships, changes only selection, and does not reapply launch intent on every read', async () => {
+  const x = await setup('1');
+  const first = await invoke(x);
+  const relationships = ['1', '2'].map(selection => blindRelationship(x.auth, selection));
+  const before = [];
+  for (const [index, relationship_key] of relationships.entries()) {
+    const history = JSON.stringify({ relationship_key, messages: [{ role: 'coach', content: `history-${index}`, session_id: 'preserved-session' }], session_learning: { status: 'NOTES_READY', note: `learning-${index}` } });
+    const key = `more:subscription-blind:v1:history:${relationship_key}`;
+    await x.redis.set(key, history); before.push([key, history]);
+  }
+  const issued = await issueInternalDevCapability({ redis: x.redis, req: { headers: x.headers }, launcher: {
+    contract: 'leadership_demo_launcher_capability_v1', launcher_scope_id: 'leadership_demo_fixture', synthetic_only: true, allowed_products: ['subscription'],
+  }, blindDemoSelection: '2' });
+  const headers = { ...base, cookie: issued.cookies.map(s => s.split(';')[0]).join('; ') };
+  const auth = await authenticateInternalDevRequest({ redis: x.redis, req: { headers }, env: { SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true' } });
+  const relaunched = { ...x, headers, auth };
+  assert.deepEqual(['1', '2'].map(selection => blindRelationship(auth, selection)), relationships);
+  const second = await invoke(relaunched);
+  assert.equal(second.body.blind_demo.selection, '2');
+  assert.notEqual(second.body.blind_demo.view_token, first.body.blind_demo.view_token);
+  assert.equal((await invoke(relaunched, { method: 'POST', body: { action: 'TURN', view_token: first.body.blind_demo.view_token } })).status, 409);
+  for (const [key, history] of before) assert.equal(await x.redis.get(key), history);
+  assert.equal((await select(relaunched, second.body, '1')).status, 200);
+  const switched = await invoke(relaunched, { query: { model: '2', provider: 'client-choice' } });
+  assert.equal(switched.body.blind_demo.selection, '1');
+  for (const [key, history] of before) assert.equal(await x.redis.get(key), history);
+});
+
+test('launch intent cannot overwrite malformed selection state or bypass an in-flight root lock', async () => {
+  const x = await setup('2'), keys = blindStorageKeys(x.auth);
+  const malformed = JSON.stringify({ contract: 'invalid', root: keys.root, selection: '1' });
+  await x.redis.set(keys.selection, malformed);
+  assert.equal((await invoke(x)).status, 503);
+  assert.equal(await x.redis.get(keys.selection), malformed);
+  await x.redis.set(keys.lock, 'active-owner');
+  assert.equal((await invoke(x)).status, 409);
+  assert.equal(await x.redis.get(keys.selection), malformed);
+});
 async function invoke(x, { method = 'GET', body = {}, query = {}, headers = {}, runtimeFactory, providerFactory } = {}) {
   let status = 200, result;
   const response = { setHeader() {}, status(n) { status = n; return this; }, json(v) { result = v; }, write() {}, end() {} };

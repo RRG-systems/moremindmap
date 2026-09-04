@@ -166,11 +166,12 @@ test('Subscription launcher exchange reuses the existing re-mid synthetic capabi
   assert.equal(issued.capability.synthetic_only, true);
   assert.equal(issued.capability.billing_evidence, false);
   assert.equal(issued.capability.stripe_subscription_created, false);
+  assert.equal(issued.capability.blind_demo_launch_selection, undefined);
   assert.equal(issued.cookies.some((value) => value.startsWith('__Host-more_subscription_internal=')), true);
   assert.equal(issued.cookies.some((value) => value.startsWith('__Host-more_subscription_relationship=')), true);
 });
 
-test('Leadership launcher source exposes exactly two interactive choices and no obsolete deck or client-side demo-code authority', () => {
+test('Leadership launcher source exposes exactly three products with two opaque Subscription arms and no client-side provider authority', () => {
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
@@ -178,13 +179,21 @@ test('Leadership launcher source exposes exactly two interactive choices and no 
   const recruitingApp = fs.readFileSync(new URL('../src/recruitingV1/RecruitingV1App.jsx', import.meta.url), 'utf8');
   const consultingDemoApp = fs.readFileSync(new URL('../src/recruitingGuV1/RecruitingGuV1App.jsx', import.meta.url), 'utf8');
   const consultingDemoClient = fs.readFileSync(new URL('../src/lib/recruitingGuV1/client.js', import.meta.url), 'utf8');
-  assert.equal((launcher.match(/title: 'Consulting Demonstration'/gu) || []).length, 1);
-  assert.equal((launcher.match(/title: 'Subscription Model Demo'/gu) || []).length, 1);
-  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 2);
+  assert.equal((launcher.match(/title: 'CONSULTING DEMONSTRATION'/gu) || []).length, 1);
+  assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 1'/gu) || []).length, 1);
+  assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 2'/gu) || []).length, 1);
+  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 3);
   assert.match(launcher, /HOME → YOU → YOUR BUSINESS → PLAN/u);
   assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription'\]/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
-  assert.match(launcherApi, /title: 'Consulting Demonstration'/u);
+  assert.match(launcherApi, /title: 'CONSULTING DEMONSTRATION'/u);
+  assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_1/u);
+  assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_2/u);
+  assert.doesNotMatch(launcherApi, /action === 'LAUNCH_SUBSCRIPTION'/u);
+  assert.doesNotMatch(launcher, /OpenAI|GPT|Grok|xAI|provider logo|pricing/u);
+  assert.match(launcherApi, /action === 'LAUNCH_SUBSCRIPTION_MODEL_1' \? '1'/u);
+  assert.match(launcherApi, /action === 'LAUNCH_SUBSCRIPTION_MODEL_2' \? '2'/u);
+  assert.doesNotMatch(launcherApi, /req\.body\??\.\s*(?:model|selection|provider|blindDemoSelection)/u);
   assert.doesNotMatch(launcherApi, /title: 'Recruiting GU V1'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
   assert.doesNotMatch(launcher, /Craig Fox|Executive \/ Board|Company Alignment|leadershipDemoSlides|slide-\d+/u);
