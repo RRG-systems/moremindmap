@@ -56,6 +56,11 @@ function lineageOf(event) {
   return lineage && LINEAGE_ID.test(lineage.intervention_lineage_id || '') ? lineage : null;
 }
 
+function isObservation(event, type) {
+  return event.event_type === type || (event.event_type === 'CORRECTION'
+    && lineageOf(event)?.stage === (type === 'ATTEMPT' ? 'EXECUTION_OBSERVED' : 'OUTCOME_OBSERVED'));
+}
+
 function eventsForLineage(events, lineageId) {
   return (events || []).filter((event) => lineageOf(event)?.intervention_lineage_id === lineageId);
 }
@@ -122,6 +127,13 @@ export function validateRelationshipEpisodeEvent(event, scope) {
 }
 
 export function createConfirmedLineageMetadata({ proposal, decision, event_type, effective_items, active_events = [] }) {
+  if (event_type === 'CORRECTION' && proposal.supersedes_event_ids?.length === 1) {
+    const original = active_events.find((event) => event.event_id === proposal.supersedes_event_ids[0]);
+    const stage = original?.semantic_payload?.lineage?.stage;
+    // Keep the immutable CORRECTION event while preserving observation meaning.
+    if (stage === 'EXECUTION_OBSERVED') event_type = 'ATTEMPT';
+    if (stage === 'OUTCOME_OBSERVED') event_type = 'OUTCOME';
+  }
   const values = itemValues(effective_items);
   if (event_type === 'INTERVENTION') {
     const interventionLineageId = `intervention_${hashCanonicalJson({ scope: proposal.scope_hash, proposal: proposal.proposal_hash, decision: decision.decision_hash }).slice(0, 24)}`;
@@ -154,7 +166,7 @@ export function createConfirmedLineageMetadata({ proposal, decision, event_type,
   const linked = eventsForLineage(active_events, interventionLineageId);
   const intervention = linked.find((event) => event.event_type === 'INTERVENTION');
   if (!intervention || !sameScope(intervention.scope, proposal.scope)) return deepFreeze({ ok: false, code: 'PERSONAL_RSL_INTERVENTION_LINEAGE_NOT_FOUND' });
-  if (event_type === 'OUTCOME' && !linked.some((event) => event.event_type === 'ATTEMPT')) {
+  if (event_type === 'OUTCOME' && !linked.some((event) => isObservation(event, 'ATTEMPT'))) {
     return deepFreeze({ ok: false, code: 'PERSONAL_RSL_OUTCOME_REQUIRES_LINKED_EXECUTION' });
   }
   const inherited = lineageOf(intervention);
@@ -199,7 +211,7 @@ export function createLinkedCausalReviewEvent({ scope, active_events, outcome_ev
   if (!outcomeLineage || outcomeLineage.stage !== 'OUTCOME_OBSERVED') return deepFreeze({ ok: false, code: 'LINEAGE_OUTCOME_EVENT_REQUIRED' });
   const linked = eventsForLineage(active_events, outcomeLineage.intervention_lineage_id);
   const intervention = linked.find((event) => event.event_type === 'INTERVENTION');
-  const attempt = [...linked].reverse().find((event) => event.event_type === 'ATTEMPT');
+  const attempt = [...linked].reverse().find((event) => isObservation(event, 'ATTEMPT'));
   if (!intervention || !attempt || !sameScope(intervention.scope, scope) || !sameScope(attempt.scope, scope) || !sameScope(outcome_event.scope, scope)) {
     return deepFreeze({ ok: false, code: 'LINEAGE_CAUSAL_REVIEW_SOURCE_CHAIN_INVALID' });
   }
@@ -292,8 +304,8 @@ function projectedLoopState(lineageEvents, asOfAt) {
   const lineage = lineageOf(latest);
   if (!lineage) return 'UNRESOLVED';
   if (['INTELLIGENTLY_ABANDONED', 'SUPERSEDED', 'UNRESOLVED'].includes(lineage.open_loop_state)) return lineage.open_loop_state;
-  const attempts = lineageEvents.filter((event) => event.event_type === 'ATTEMPT');
-  const outcomes = lineageEvents.filter((event) => event.event_type === 'OUTCOME');
+  const attempts = lineageEvents.filter((event) => isObservation(event, 'ATTEMPT'));
+  const outcomes = lineageEvents.filter((event) => isObservation(event, 'OUTCOME'));
   if (outcomes.length) return lineage.open_loop_state;
   if (attempts.length) {
     const degree = lineageOf(attempts.at(-1))?.execution_degree;
@@ -327,8 +339,10 @@ export function derivePrivateLongitudinalScorecard({ scope, active_events = [], 
   const interventions = [...byLineage.entries()].map(([lineageId, events]) => {
     const ordered = events.sort((left, right) => left.effective_at.localeCompare(right.effective_at) || left.recorded_at.localeCompare(right.recorded_at));
     const intervention = ordered.find((event) => event.event_type === 'INTERVENTION');
-    const attempts = ordered.filter((event) => event.event_type === 'ATTEMPT');
-    const outcomes = ordered.filter((event) => event.event_type === 'OUTCOME');
+    const correctedObservation = ordered.some((event) => event.event_type === 'CORRECTION' && (isObservation(event, 'ATTEMPT') || isObservation(event, 'OUTCOME')));
+    const currentObservations = correctedObservation ? ordered.filter((event) => activeEventIds.has(event.event_id)) : ordered;
+    const attempts = currentObservations.filter((event) => isObservation(event, 'ATTEMPT'));
+    const outcomes = currentObservations.filter((event) => isObservation(event, 'OUTCOME'));
     const reviews = ordered.filter((event) => lineageOf(event)?.stage === 'CAUSAL_REVIEW');
     return {
       intervention_lineage_id: lineageId,
@@ -337,7 +351,7 @@ export function derivePrivateLongitudinalScorecard({ scope, active_events = [], 
       actually_tried: attempts.map((event) => ({ summary: event.semantic_payload?.summary || null, at: event.effective_at, degree: lineageOf(event)?.execution_degree || null })),
       what_happened: outcomes.map((event) => ({ summary: event.semantic_payload?.summary || null, at: event.effective_at, classification: lineageOf(event)?.outcome_classification || null })),
       causal_reviews: reviews.map((event) => ({ at: event.effective_at, validation_status: event.semantic_payload?.outcome_validation?.validation_status || null, attribution_status: event.semantic_payload?.outcome_validation?.attribution_status || null, confidence: event.semantic_payload?.outcome_validation?.causal_confidence || null })),
-      open_loop_state: ordered.some((event) => supersededEventIds.has(event.event_id)) ? 'SUPERSEDED' : projectedLoopState(ordered, as_of_at),
+      open_loop_state: ordered.some((event) => supersededEventIds.has(event.event_id) && (!correctedObservation || event.event_type === 'INTERVENTION')) ? 'SUPERSEDED' : projectedLoopState(currentObservations, as_of_at),
       due_at: lineageOf(intervention)?.due_at || null,
       observation_window: clone(lineageOf(intervention)?.observation_window || { start: null, end: null }),
       remains_uncertain: !outcomes.length || !reviews.length || reviews.some((event) => ['CONFOUNDED', 'ASSOCIATED_ONLY'].includes(event.semantic_payload?.outcome_validation?.attribution_status)),

@@ -4,6 +4,7 @@ import { createConfirmedLineageMetadata } from '../lineage.js';
 import { createPersonalRslEvent } from '../personalRsl.js';
 import { PROPOSAL_EVENT_TYPES } from './constants.js';
 import { validateGovernedChangeProposal, validateProposalDecision } from './contracts.js';
+import { correctionTargetContext } from './correctionTargets.js';
 
 function evidenceEventType(proposal, effectiveItems) {
   if (proposal.retracts_event_ids.length) return 'RETRACTION';
@@ -35,6 +36,10 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
   }
   const eventType = evidenceEventType(proposal, decision.effective_items);
   if (!eventType) return deepFreeze({ ok: false, code: 'AFW05_PROPOSAL_EVENT_MAPPING_MISSING' });
+  if (eventType === 'CORRECTION' && proposal.supersedes_event_ids.some((id) => active_personal_rsl_events.some((event) => event.event_id === id && event.semantic_payload?.lineage))) {
+    const binding = correctionTargetContext({ scope: proposal.scope, proposal: { ...proposal, proposed_items: decision.effective_items }, active_events: active_personal_rsl_events });
+    if (!binding.ok) return binding;
+  }
   const lineage = createConfirmedLineageMetadata({
     proposal,
     decision,

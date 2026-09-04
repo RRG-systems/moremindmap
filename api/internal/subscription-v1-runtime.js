@@ -17,6 +17,7 @@ import {
   withDurableAllowanceLedger,
 } from '../engine/subscriptionV1/internalDevInfrastructure.js';
 import { createSubscriptionS2GuRuntime } from '../engine/subscriptionS2/guRuntime.js';
+import { hasDarrenDemoAuthority } from '../engine/subscriptionS2/demoSubjectAuthority.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -938,4 +939,18 @@ export function createSubscriptionV1RuntimeHandler({
   };
 }
 
-export default createSubscriptionV1RuntimeHandler();
+const ordinaryHandler = createSubscriptionV1RuntimeHandler();
+export default async function subscriptionRuntimeEntry(req, res) {
+  // Only the authenticated DarrenDemo launcher enters the blind experiment.
+  // Existing direct synthetic and all canonical runtime composition stay intact.
+  let redis, auth;
+  try {
+    redis = getSubscriptionRedis();
+    auth = await authenticateInternalDevRequest({ redis, req });
+  } catch { return ordinaryHandler(req, res); }
+  if (auth.ok && hasDarrenDemoAuthority(auth.capability)) {
+    const { handleBlindDemo } = await import('../engine/subscriptionBlindDemo/runtime.js');
+    return handleBlindDemo({ req, res, redis, auth, env: globalThis.process?.env || {} });
+  }
+  return ordinaryHandler(req, res);
+}

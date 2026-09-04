@@ -66,9 +66,9 @@ function AllowanceBoundary({ session }) {
   </aside>
 }
 
-function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost }) {
+function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost, onBusyChange }) {
   const initiallyPreSession = Boolean(bootstrap.session?.pre_session_state)
-  const [messages, setMessages] = useState(() => initiallyPreSession ? [] : readEphemeralMessages(demoSubject))
+  const [messages, setMessages] = useState(() => bootstrap.blind_demo ? (bootstrap.conversation || []) : initiallyPreSession ? [] : readEphemeralMessages(demoSubject))
   const [draft, setDraft] = useState('')
   const [pending, setPending] = useState(bootstrap.pending_proposal || null)
   const [busy, setBusy] = useState(false)
@@ -79,13 +79,14 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
   const [usage, setUsage] = useState(null)
   const [sources, setSources] = useState([])
   const [preSession, setPreSession] = useState(initiallyPreSession)
-  const [sessionLearning, setSessionLearning] = useState(null)
+  const [sessionLearning, setSessionLearning] = useState(bootstrap.session_learning || null)
   const [error, setError] = useState('')
   const endRef = useRef(null)
   const episodeStartedAt = useRef(null)
   const submitLockRef = useRef(false)
   const endSessionLockRef = useRef(false)
   const startSessionLockRef = useRef(false)
+  useEffect(() => { onBusyChange?.(busy) }, [busy, onBusyChange])
 
   useEffect(() => {
     const handler = (event) => setActiveLens(String(event.detail || 'overview').toUpperCase())
@@ -93,10 +94,14 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
     return () => globalThis.removeEventListener('ba-pd:destination', handler)
   }, [])
   useEffect(() => {
+    if (bootstrap.blind_demo) {
+      endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      return
+    }
     if (preSession) sessionStorage.removeItem(messageStorageKey(demoSubject))
     else sessionStorage.setItem(messageStorageKey(demoSubject), JSON.stringify(messages.slice(-24)))
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [messages, pending, preSession, demoSubject])
+  }, [messages, pending, preSession, demoSubject, bootstrap.blind_demo])
 
   function visibleCustomerContext() {
     const visibleBySurface = {
@@ -115,7 +120,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
     const response = await fetch('/api/internal/subscription-v1-runtime', {
       method: 'POST', credentials: 'same-origin', cache: 'no-store',
       headers: { 'content-type': 'application/json', accept: progressive ? 'application/x-ndjson' : 'application/json', 'x-subscription-runtime-csrf': csrf },
-      body: JSON.stringify({ ...body, subject: demoSubject }),
+      body: JSON.stringify({ ...body, subject: demoSubject, ...(bootstrap.blind_demo ? { view_token: bootstrap.blind_demo.view_token } : {}) }),
     })
     if (response.headers.get('content-type')?.startsWith('application/x-ndjson')) {
       if (!response.ok || !response.body) throw new Error('SUBSCRIPTION_V1_PROGRESSIVE_RESPONSE_INVALID')
@@ -319,6 +324,9 @@ export default function SubscriptionV1InternalDevApp() {
   const [current, setCurrent] = useState(null)
   const [resetVersion, setResetVersion] = useState(0)
   const [resetting, setResetting] = useState(false)
+  const [switching, setSwitching] = useState(false)
+  const [coachingBusy, setCoachingBusy] = useState(false)
+  const [switchError, setSwitchError] = useState('')
   useEffect(() => {
     let live = true
     fetch('/api/internal/subscription-v1-runtime', { credentials: 'same-origin', cache: 'no-store' })
@@ -334,6 +342,26 @@ export default function SubscriptionV1InternalDevApp() {
       .catch(() => live && setState({ loading: false, error: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE', bootstrap: null }))
     return () => { live = false }
   }, [resetVersion])
+  async function selectModel(selection) {
+    const blind = state.bootstrap?.blind_demo
+    if (!blind || switching || coachingBusy || selection === blind.selection) return
+    setSwitching(true)
+    setSwitchError('')
+    try {
+      const response = await fetch('/api/internal/subscription-v1-runtime', {
+        method: 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'content-type': 'application/json', 'x-subscription-demo-subject-csrf': blind.selection_csrf },
+        body: JSON.stringify({ action: 'SELECT_MODEL', selection, view_token: blind.view_token }),
+      })
+      const result = await response.json()
+      if (!response.ok || result.ok !== true) throw new Error('Selection could not change safely. Let the current turn finish, then reload.')
+      setCurrent(null)
+      setState({ loading: true, error: null, bootstrap: null })
+      setResetVersion((version) => version + 1)
+    } catch {
+      setSwitchError('The coach could not be switched safely. Finish the current turn, then reload and try again.')
+    } finally { setSwitching(false) }
+  }
   async function resetDemo() {
     if (resetting || state.bootstrap?.demo_reset_enabled !== true) return
     setResetting(true)
@@ -360,10 +388,10 @@ export default function SubscriptionV1InternalDevApp() {
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
   const handleEntitlementLost = (code) => setState({ loading: false, error: code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
   return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">
-    <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>
+    <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />
-      : <RemoteConversation key={`${DEMO_SUBJECT}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} />}
+      : <RemoteConversation key={`${DEMO_SUBJECT}:${state.bootstrap.blind_demo?.selection || 'ordinary'}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} onBusyChange={setCoachingBusy} />}
   </main>
 }

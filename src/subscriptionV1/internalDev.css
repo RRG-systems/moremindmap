@@ -11,6 +11,10 @@
 .s2-demo-toolbar button:hover:not(:disabled) { border-color: rgba(105, 226, 112, .48); color: #dff7e3; }
 .s2-demo-toolbar button:focus-visible { outline: 2px solid #69e270; outline-offset: 2px; }
 .s2-demo-toolbar button:disabled { opacity: .55; cursor: wait; }
+.s2-demo-toolbar > .s2-blind-selector { display: flex; flex-wrap: wrap; gap: .4rem; }
+.s2-blind-selector button { min-height: 44px; min-width: 86px; }
+.s2-blind-selector button[aria-pressed="true"] { color: #e5fbe8; border-color: #69e270; background: rgba(38, 96, 58, .65); }
+.s2-demo-toolbar > p[role="status"] { flex-basis: 100%; margin: .25rem 0; color: #c3ced3; font-size: .75rem; line-height: 1.4; }
 .s2-subject-switcher { display: flex; flex-wrap: wrap; align-items: center; gap: .55rem; min-width: 0; margin-right: 400px; padding: .75rem 1rem; border-bottom: 1px solid rgba(119, 166, 197, .18); background: linear-gradient(180deg, rgba(7, 24, 36, .98), rgba(3, 12, 20, .94)); }
 .s2-subject-switcher button { display: grid; flex: 1 1 9.5rem; gap: .18rem; max-width: 15rem; min-width: 0; min-height: 3.25rem; padding: .62rem .8rem; border: 1px solid rgba(119, 166, 197, .28); border-radius: .8rem; color: #a9bcc7; text-align: left; background: rgba(8, 28, 42, .72); cursor: pointer; }
 .s2-subject-switcher button:hover { border-color: rgba(105, 226, 112, .48); background: rgba(13, 42, 52, .86); }

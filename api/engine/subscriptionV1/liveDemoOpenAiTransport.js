@@ -77,9 +77,9 @@ function researchTrace(response, retrievedAt) {
   return { calls: searches.length, evidence };
 }
 
-export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 180000, maxTransportRetries = 1 }) {
+export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 180000, maxTransportRetries = 1, client: suppliedClient = null }) {
   if (!apiKey) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_OPENAI_API_KEY_REQUIRED');
-  const client = new OpenAI({ apiKey, maxRetries: 0, timeout: timeoutMs });
+  const client = suppliedClient || new OpenAI({ apiKey, maxRetries: 0, timeout: timeoutMs });
   return async function subscriptionLiveDemoTransport(request, { stage }) {
     assertRequest(request, stage);
     const started = Date.now();

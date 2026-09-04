@@ -5,6 +5,7 @@ import { EphemeralTranscriptBuffer } from '../personalRsl.js';
 import { retrieveRelevantPersonalHistory } from '../retrieval.js';
 import { createGovernedChangeProposal, createProposalDecision } from '../afw05/contracts.js';
 import { createConfirmedPersonalRslMutation } from '../afw05/personalRslMutation.js';
+import { correctionRecordCatalog, correctionTargetContext, resolveCorrectionTargets } from '../afw05/correctionTargets.js';
 import {
   createLinkedCausalReviewEvent,
   createRelationshipEpisodeEvent,
@@ -144,6 +145,8 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       const rslStore = store.buildPersonalRslStore({ scope });
       const replay = rslStore.replay({ scope, effective_as_of: decidedAt, recorded_as_of: decidedAt });
       if (!replay.ok) return replay;
+      const targetBinding = correctionTargetContext({ scope, proposal: { ...proposal, proposed_items: created.decision.effective_items }, active_events: replay.state.active_events });
+      if (!targetBinding.ok) return targetBinding;
       const mutation = createConfirmedPersonalRslMutation({
         proposal,
         decision: created.decision,
@@ -223,7 +226,15 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       if (pendingProposalId) {
         const found = store.readProposal({ scope, proposal_id: pendingProposalId });
         if (!found.ok) return found;
-        authorization = await authorization_interpreter.interpret({ proposal: found.proposal, customer_message: normalizedTurn });
+        const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
+        if (!replay.ok) return replay;
+        const binding = correctionTargetContext({ scope, proposal: found.proposal, active_events: replay.state.active_events });
+        if (!binding.ok) return binding;
+        authorization = await authorization_interpreter.interpret({
+          proposal: found.proposal, customer_message: normalizedTurn,
+          target_context: correctionRecordCatalog({ scope, active_events: binding.targets }),
+          conversation: transcript.snapshot().turns,
+        });
         if (!authorization.ok) return authorization;
         if (['CONFIRM', 'EDIT', 'DEFER', 'REJECT'].includes(authorization.decision)) {
           decisionResult = await commitProposalDecision({
@@ -295,7 +306,11 @@ export function createFreeGptLivingRelationshipRuntimeV2({
 
       const extractionPacket = currentUnderstanding;
       const extractionStartedAt = monotonic_clock();
-      const extraction = await candidate_extractor.extract({ packet: extractionPacket, customer_message: normalizedTurn, coach_message: coaching.customer_message });
+      const activeRead = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
+      if (!activeRead.ok) return activeRead;
+      const extraction = await candidate_extractor.extract({ packet: extractionPacket, customer_message: normalizedTurn, coach_message: coaching.customer_message,
+        correction_records: correctionRecordCatalog({ scope, active_events: activeRead.state.active_events }),
+      });
       if (!extraction.ok) return extraction;
       const extractionCompletedAt = monotonic_clock();
       const publication = store.readCurrent({ scope });
@@ -325,11 +340,10 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         if (extraction.candidate.proposal_type === 'CORRECTION_CANDIDATE') {
           const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
           if (!replay.ok) return replay;
-          const correctedFields = new Set(extraction.candidate.items.map((item) => item.field));
-          supersedesEventIds = replay.state.active_events
-            .filter((event) => (event.semantic_payload?.items || []).some((item) => correctedFields.has(item.field)))
-            .map((event) => event.event_id);
-          if (!supersedesEventIds.length) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CORRECTION_TARGET_REQUIRED' });
+          const binding = resolveCorrectionTargets({ scope, items: extraction.candidate.items,
+            authority_ref_ids: extraction.candidate.authority_ref_ids, active_events: replay.state.active_events });
+          if (!binding.ok) return deepFreeze({ ...binding, customer_message: coaching.customer_message, mutation_performed: false });
+          supersedesEventIds = binding.supersedes_event_ids;
         }
         const hidden = createHiddenCandidateFromExtraction({
           session_id,
