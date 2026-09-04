@@ -13,7 +13,7 @@ import {
   derivePrivacySafeFutureLearningCandidates,
 } from '../lineage.js';
 import { createHiddenCandidateFromExtraction } from './contracts.js';
-import { assembleWholeCoachingUnderstandingPacketV2 } from './wholeCoachingPacket.js';
+import { assembleWholeCoachingUnderstandingPacketV2, createGovernedCoachingEvidenceCatalog } from './wholeCoachingPacket.js';
 import { assembleTemporalCoachingState } from './temporalState.js';
 import { assembleRelationshipContinuityState } from './relationshipContinuity.js';
 
@@ -33,7 +33,6 @@ export function createFreeGptLivingRelationshipRuntimeV2({
   whole_person_execution_context,
   uncertainty = [],
   external_evidence = [],
-  evidence_catalog = [],
   relationship_context = null,
   coaching_session = null,
   session_temporal_context = null,
@@ -150,7 +149,11 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       const mutation = createConfirmedPersonalRslMutation({
         proposal,
         decision: created.decision,
-        evidence_catalog,
+        evidence_catalog: createGovernedCoachingEvidenceCatalog({
+          business_truth,
+          whole_person_execution_context,
+          external_evidence: currentExternalEvidence,
+        }),
         active_personal_rsl_events: replay.state.active_events,
         event_id: `rsl_${hashCanonicalJson({ proposal_id: proposal.proposal_id, decision_hash: created.decision.decision_hash }).slice(0, 24)}`,
         recorded_at: decidedAt,
