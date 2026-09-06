@@ -1,8 +1,11 @@
+/* global process */
 import {
+  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
   getCanonicalProfile,
+  isPublicProductAuthorityError,
   parseProfileId,
   setCors
 } from './shared.js';
@@ -479,6 +482,8 @@ function findSectionForValidation(candidate, validation) {
   ) || null;
 }
 
+// Existing dormant repair helper retained for compatibility with the frozen BA generator.
+// eslint-disable-next-line no-unused-vars
 function isStructurallyCompleteThinSectionSupplementCandidate(validation, candidate) {
   if (!structurallyComplete(candidate)) return false;
   if (!Array.isArray(candidate?.sections) || !candidate.sections.length) return false;
@@ -781,6 +786,8 @@ function buildSupplementalUnderLengthExpansionPrompt(prompt, previousOutput, val
   };
 }
 
+// Existing dormant repair helper retained for compatibility with the frozen BA generator.
+// eslint-disable-next-line no-unused-vars
 function buildThinSectionSupplementalPrompt(prompt, previousOutput, validation) {
   const gap = thinSectionGap(validation);
   const section = findSectionForValidation(previousOutput, validation);
@@ -1152,7 +1159,7 @@ async function callOpenAIForBriefing(prompt, { timeoutMs = BRIEFING_OPENAI_CALL_
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -1191,6 +1198,7 @@ export default async function handler(req, res) {
     activeAssessmentRecord = assessmentRecord;
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
     activeOwnerProfileId = ownerProfileId;
+    await authorizeBusinessAssessmentRequest(req, redis, ownerProfileId);
     const businessIntelligenceDraft = assessmentRecord.output?.business_intelligence_draft;
 
     if (!businessIntelligenceDraft) {
@@ -2133,6 +2141,9 @@ export default async function handler(req, res) {
       executive_diagnostic_briefing_v1: briefing
     });
   } catch (error) {
+    if (isPublicProductAuthorityError(error)) {
+      return res.status(403).json({ ok: false, error: 'product_access_not_verified' });
+    }
     console.error('[BUSINESS-ASSESSMENT-BRIEFING] Error:', error);
     if (error?.code === 'openai_call_timeout' && redis && activeAssessmentRecord && activeAssessmentId) {
       const diagnostics = timeoutDiagnostics({

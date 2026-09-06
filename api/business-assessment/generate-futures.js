@@ -1,8 +1,11 @@
+/* global process */
 import {
+  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
   getCanonicalProfile,
+  isPublicProductAuthorityError,
   parseProfileId,
   setCors
 } from './shared.js';
@@ -351,7 +354,7 @@ async function callOpenAIForFutures(prompt, { timeoutMs, maxCompletionTokens, st
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
@@ -381,6 +384,7 @@ export default async function handler(req, res) {
     activeAssessmentRecord = assessmentRecord;
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
     activeOwnerProfileId = ownerProfileId;
+    await authorizeBusinessAssessmentRequest(req, redis, ownerProfileId);
     const businessIntelligenceDraft = assessmentRecord.output?.business_intelligence_draft;
     const executiveDiagnosticBriefing = assessmentRecord.output?.executive_diagnostic_briefing_v1;
 
@@ -672,6 +676,9 @@ export default async function handler(req, res) {
       one_move_v1: normalized.one_move_v1
     });
   } catch (error) {
+    if (isPublicProductAuthorityError(error)) {
+      return res.status(403).json({ ok: false, error: 'product_access_not_verified' });
+    }
     console.error('[BUSINESS-ASSESSMENT-FUTURES] Error:', error);
     if (error?.code === 'openai_futures_call_timeout' && redis && activeAssessmentRecord && activeAssessmentId) {
       const diagnostics = futuresDiagnostics({

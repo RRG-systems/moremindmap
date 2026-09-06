@@ -1,6 +1,5 @@
 import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
-import { Buffer } from 'node:buffer';
-import crypto from 'node:crypto';
+import { timingSafeHeaderMatch } from '../../../src/lib/publicSiteAirlockV1/security.js';
 
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_bos_canonical_profile_not_found',
@@ -57,11 +56,10 @@ function customerSafeReviewRequired() {
 }
 
 function platformProtectedCandidateRequest(request, config) {
-  const supplied = Buffer.from(String(request.headers?.['x-more-platform-authority'] || ''));
-  const expected = Buffer.from(String(config?.platformAuthoritySecret || ''));
-  return expected.length > 0
-    && supplied.length === expected.length
-    && crypto.timingSafeEqual(supplied, expected);
+  return timingSafeHeaderMatch(
+    request.headers?.['x-more-platform-authority'],
+    config?.platformAuthoritySecret,
+  );
 }
 
 export function createNewBosProductionRouteHandler({ config, serviceFactory }) {

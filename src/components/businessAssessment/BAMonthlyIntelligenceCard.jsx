@@ -48,7 +48,7 @@ export default function BAMonthlyIntelligenceCard({
       >
         {isLoading
           ? 'Opening Checkout...'
-          : 'Start MORE Monthly Intelligence — $23.95/month'}
+          : 'Start MORE Monthly Intelligence — $38.95/month'}
       </button>
       {customerError ? (
         <p className="mt-4 rounded-2xl border border-red-400/30 bg-red-500/[0.08] px-4 py-3 text-sm leading-6 text-red-100">

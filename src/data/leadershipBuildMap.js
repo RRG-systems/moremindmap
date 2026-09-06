@@ -41,7 +41,7 @@ export const leadershipBuildMap = [
     label: 'Subscription Foundation',
     status: 'planned',
     bullets: [
-      '$23.95/month plan',
+      '$38.95/month plan',
       'usage tracking',
       'monthly access rules',
       'subscription state connected to profile/assessment records'

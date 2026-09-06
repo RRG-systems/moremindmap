@@ -32,6 +32,8 @@ import {
   realEstateAssessmentTypeForAnswers,
 } from '../../src/lib/baVerticalCassettesV1/index.js';
 import { buildCustomerConfirmedVerticalBinding } from './verticalBinding.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
+import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
 
 function normalizeAnswers(answers = {}, questionKeys = []) {
   const normalized = {};
@@ -42,7 +44,7 @@ function normalizeAnswers(answers = {}, questionKeys = []) {
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -111,6 +113,17 @@ export default async function handler(req, res) {
         error: 'Behavioral profile not found',
         owner_profile_id: parsedProfile.normalized
       });
+    }
+
+    const publicAuthority = await authorizeProductRequest({
+      req,
+      store: new RedisPublicStore(redis),
+      productKey: 'business_assessment',
+      profileId: parsedProfile.normalized,
+    });
+    if (publicAuthority.grant?.vertical_binding?.binding_sha256
+      && publicAuthority.grant.vertical_binding.binding_sha256 !== verticalBinding.binding_sha256) {
+      return res.status(403).json({ success: false, error: 'Confirmed business vertical does not match this access grant.' });
     }
 
     const now = new Date();
@@ -232,7 +245,10 @@ export default async function handler(req, res) {
       }
     });
   } catch (error) {
-    console.error('[BUSINESS-ASSESSMENT-START] Error:', error);
+    console.error(JSON.stringify({ event: 'BUSINESS_ASSESSMENT_START_FAILED', code: String(error?.message || 'unknown').split(':')[0], customer_payload_logged: false }));
+    if (/public_product_/u.test(error?.message || '')) {
+      return res.status(403).json({ success: false, error: 'Product access could not be verified.' });
+    }
     return res.status(500).json({
       success: false,
       error: error.message || 'Failed to save business assessment intake'

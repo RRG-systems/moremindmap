@@ -1,5 +1,9 @@
+/* global process */
 import crypto from 'crypto';
 import Redis from 'ioredis';
+import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
+import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
 
 export const ASSESSMENT_VERSION = 'business_assessment_v1_intake';
 
@@ -14,12 +18,22 @@ const DIMENSION_LABELS = {
   horizon: 'Perspective'
 };
 
-export function setCors(res) {
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+export function setCors(res, req = { headers: {} }) {
   res.setHeader('Content-Type', 'application/json');
+  return applyExactOriginCors(req, res, { methods: 'GET,POST,OPTIONS' });
+}
+
+export function authorizeBusinessAssessmentRequest(req, redis, ownerProfileId = '') {
+  return authorizeProductRequest({
+    req,
+    store: new RedisPublicStore(redis),
+    productKey: 'business_assessment',
+    profileId: ownerProfileId,
+  });
+}
+
+export function isPublicProductAuthorityError(error) {
+  return /^public_product_/u.test(String(error?.message || ''));
 }
 
 export function createRedisClient() {

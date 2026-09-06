@@ -1,8 +1,10 @@
 import {
+  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
   getCanonicalProfile,
+  isPublicProductAuthorityError,
   parseProfileId,
   setCors
 } from './shared.js';
@@ -19,7 +21,7 @@ async function resolveAssessmentId(redis, { assessment_id, owner_profile_id }) {
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -51,6 +53,7 @@ export default async function handler(req, res) {
 
     const assessmentRecord = JSON.parse(rawAssessment);
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
+    await authorizeBusinessAssessmentRequest(req, redis, ownerProfileId);
     const profileLookup = await getCanonicalProfile(redis, ownerProfileId);
 
     if (!profileLookup.found) {
@@ -94,6 +97,9 @@ export default async function handler(req, res) {
       business_intelligence_draft: businessIntelligenceDraft
     });
   } catch (error) {
+    if (isPublicProductAuthorityError(error)) {
+      return res.status(403).json({ ok: false, error: 'product_access_not_verified' });
+    }
     console.error('[BUSINESS-ASSESSMENT-ANALYZE] Error:', error);
     return res.status(500).json({
       ok: false,

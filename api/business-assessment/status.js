@@ -1,7 +1,13 @@
-import { businessAssessmentJobKey, createRedisClient, setCors } from './shared.js';
+import {
+  authorizeBusinessAssessmentRequest,
+  businessAssessmentJobKey,
+  createRedisClient,
+  isPublicProductAuthorityError,
+  setCors,
+} from './shared.js';
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -26,6 +32,7 @@ export default async function handler(req, res) {
     }
 
     const job = JSON.parse(raw);
+    await authorizeBusinessAssessmentRequest(req, redis, job.owner_profile_id);
     return res.status(200).json({
       success: true,
       job_id,
@@ -38,6 +45,9 @@ export default async function handler(req, res) {
       updated_at: job.updated_at
     });
   } catch (error) {
+    if (isPublicProductAuthorityError(error)) {
+      return res.status(404).json({ success: false, status: 'not_found', error: 'Job not found' });
+    }
     console.error('[BUSINESS-ASSESSMENT-STATUS] Error:', error);
     return res.status(500).json({ success: false, error: error.message || 'Failed to retrieve job status' });
   } finally {

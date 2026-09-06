@@ -15,7 +15,19 @@ import {
   createBosDraftSnapshot,
 } from "./lib/bosIntakeDurability.js";
 
-const BEHAVIOR_PROFILE_PROMO_CODES = new Set(["FATHOMFREE", "MOREFREE26"])
+// Complimentary authority is server-owned by publicSiteAirlockV1. No active
+// capability value or digest may be shipped in this client bundle.
+const BEHAVIOR_PROFILE_PROMO_CODES = new Set()
+
+function publicStartToken() {
+  if (typeof window === 'undefined') return ''
+  return window.sessionStorage.getItem('more.public.start_token.v1') || ''
+}
+
+function publicStartHeaders(headers = {}) {
+  const token = publicStartToken()
+  return token ? { ...headers, 'X-MORE-Start-Token': token } : headers
+}
 
 function visibleTextFromHtml(html, maxLength = 5000) {
   if (!html) return "";
@@ -346,6 +358,10 @@ export default function Profile() {
   }, [])
 
   useEffect(() => {
+    if (publicStartToken()) setPaymentPassed(true)
+  }, [])
+
+  useEffect(() => {
     if (!recruitingRequested) return
     fetch('/api/recruiting/runtime?view=invite_session', {
       credentials: 'same-origin',
@@ -505,7 +521,7 @@ export default function Profile() {
       const fullUrl =
         `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`
       console.log('[VALIDATE] Full URL:', fullUrl)
-      const res = await fetch(fullUrl)
+      const res = await fetch(fullUrl, { headers: publicStartHeaders(), cache: 'no-store' })
       console.log('[VALIDATE] Response status:', res.status)
       console.log('[VALIDATE] Response ok?', res.ok)
       
@@ -674,10 +690,10 @@ export default function Profile() {
         // Step 1: Start job
         const startRes = await fetch(buildApiUrl(API, `/api/moremindmap/start`), {
           method: "POST",
-          headers: {
+          headers: publicStartHeaders({
             "Content-Type": "application/json",
             "X-BOS-Draft-Token": draftEnvelope.resume_token
-          },
+          }),
           body: JSON.stringify({ 
             answers: submissionAnswers,
             metadata: submissionMetadata,
@@ -720,6 +736,7 @@ export default function Profile() {
           await new Promise(resolve => setTimeout(resolve, pollInterval))
           
           const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`), {
+            headers: publicStartHeaders(),
             credentials: recruitingAuthorized ? 'same-origin' : 'omit'
           })
           
@@ -750,6 +767,7 @@ export default function Profile() {
                 const API = import.meta.env.VITE_API_URL || ""
                 const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
                 const res = await fetch(fullUrl, {
+                  headers: publicStartHeaders(),
                   credentials: recruitingAuthorized ? 'same-origin' : 'omit'
                 })
                 
@@ -819,7 +837,7 @@ export default function Profile() {
           })
         }
       } else {
-        // SYNCHRONOUS FLOW for Mini V1 (non-FATHOMFREE users)
+        // Synchronous legacy flow for callers outside the governed async path.
         console.log("[MINI-V1] Using synchronous endpoint")
         const endpoint = `${API}/api/moremindmap/mini-profile`
         

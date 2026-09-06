@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 function buildApiUrl(path) {
   const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -15,28 +15,42 @@ function displayProduct(value) {
 }
 
 export default function PaymentSuccess() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const product = displayProduct(searchParams.get('product'));
   const sessionId = searchParams.get('session_id') || '';
-  const [accessState, setAccessState] = useState({ status: 'idle', active: false });
+  const [accessState, setAccessState] = useState({ status: 'idle', active: false, startToken: '' });
 
   useEffect(() => {
     let cancelled = false;
     async function checkAccess() {
       if (!sessionId) return;
-      setAccessState({ status: 'checking', active: false });
+      setAccessState({ status: 'checking', active: false, startToken: '' });
       try {
         const response = await fetch(
           buildApiUrl(`/api/stripe/access-status?session_id=${encodeURIComponent(sessionId)}`)
         );
         const payload = await response.json().catch(() => null);
         if (cancelled) return;
+        let startToken = '';
+        const active = Boolean(response.ok && payload?.access_found && payload?.payment_truth === 'webhook_confirmed');
+        if (active) {
+          const tokenResponse = await fetch(buildApiUrl('/api/public-v1/access'), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ action: 'create_start_token_from_session', checkout_session_id: sessionId }),
+          });
+          const tokenPayload = await tokenResponse.json().catch(() => null);
+          if (tokenResponse.ok && tokenPayload?.ok) startToken = tokenPayload.start_token || '';
+        }
         setAccessState({
           status: 'checked',
-          active: Boolean(response.ok && payload?.access_found && payload?.payment_truth === 'webhook_confirmed')
+          active,
+          startToken,
         });
       } catch {
-        if (!cancelled) setAccessState({ status: 'checked', active: false });
+        if (!cancelled) setAccessState({ status: 'checked', active: false, startToken: '' });
       }
     }
     checkAccess();
@@ -44,6 +58,20 @@ export default function PaymentSuccess() {
       cancelled = true;
     };
   }, [sessionId]);
+
+  async function continueToProduct() {
+    if (!accessState.startToken) return;
+    const response = await fetch(buildApiUrl('/api/public-v1/product-start'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-MORE-Start-Token': accessState.startToken },
+      credentials: 'same-origin',
+      body: JSON.stringify({ start_token: accessState.startToken }),
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !payload?.ok || !payload.destination) return;
+    window.sessionStorage.setItem('more.public.start_token.v1', accessState.startToken);
+    navigate(payload.destination);
+  }
 
   return (
     <main className="min-h-screen bg-black px-6 py-10 text-white">
@@ -65,17 +93,20 @@ export default function PaymentSuccess() {
             only after payment confirmation is processed.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            {accessState.active && accessState.startToken && (
+              <button
+                type="button"
+                onClick={continueToProduct}
+                className="rounded-xl bg-white px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-100"
+              >
+                Continue To Product
+              </button>
+            )}
             <Link
-              to="/profile"
-              className="rounded-xl bg-white px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-100"
-            >
-              Return To Profile
-            </Link>
-            <Link
-              to="/business-assessment"
+              to="/"
               className="rounded-xl border border-white/15 px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-white/80 transition hover:border-white/35 hover:bg-white/5"
             >
-              Business Assessment
+              Return Home
             </Link>
           </div>
         </section>

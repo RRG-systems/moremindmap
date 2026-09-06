@@ -6,7 +6,11 @@ import { retrieveBusinessAssessment } from '../lib/businessAssessment/retrieveBu
  */
 export async function loadBusinessAssessmentVisualRecord(profileId, buildApiUrl) {
   try {
-    const { payload, source } = await retrieveBusinessAssessment(profileId, buildApiUrl);
+    const startToken = typeof window === 'undefined'
+      ? ''
+      : window.sessionStorage.getItem('more.public.start_token.v1') || '';
+    const requestOptions = startToken ? { headers: { 'X-MORE-Start-Token': startToken } } : {};
+    const { payload, source } = await retrieveBusinessAssessment(profileId, buildApiUrl, requestOptions);
     return { record: payload, source, error: '' };
   } catch (error) {
     return {

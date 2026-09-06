@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
-import RealEstate from './RealEstate.jsx'
+import PublicSiteV21 from './PublicSiteV21.jsx'
 import Profile from './Profile.jsx'
 import Recovery from './Recovery.jsx'
 import Success from './Success.jsx'
@@ -40,7 +40,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/real-estate" element={<RealEstate />} />
+        <Route path="/step-1" element={<PublicSiteV21 page="step1" />} />
+        <Route path="/step-2" element={<PublicSiteV21 page="step2" />} />
+        <Route path="/step-3" element={<PublicSiteV21 page="step3" />} />
+        <Route path="/step-4" element={<PublicSiteV21 page="step4" />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/recovery" element={<Recovery />} />
         <Route path="/success" element={<Success />} />

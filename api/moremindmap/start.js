@@ -9,14 +9,16 @@ import { createJob } from '../engine/miniV2JobManager.js'
 import { createBosIntakeDraftStore, normalizeBosIntakeDraftSnapshot } from '../engine/bosIntakeDraftV1.js'
 import { redis as getRedis } from '../engine/redisClient.js'
 import { resolveRecruitingBosStartMetadata } from '../engine/recruitingV1/canonicalAdapters.js'
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js'
+import { authorizeProductRequest, bindBosJobToGrant } from '../../src/lib/publicSiteAirlockV1/productBoundary.js'
+import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js'
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader("Access-Control-Allow-Credentials", true)
-  res.setHeader("Access-Control-Allow-Origin", "*")
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS,POST")
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-BOS-Draft-Token")
   res.setHeader('Content-Type', 'application/json')
+  if (!applyExactOriginCors(req, res, { methods: 'POST,OPTIONS' })) {
+    return res.status(403).json({ error: 'Origin not allowed' })
+  }
 
   if (req.method === "OPTIONS") {
     return res.status(200).end()
@@ -27,6 +29,12 @@ export default async function handler(req, res) {
   }
 
   try {
+    const publicStore = new RedisPublicStore(getRedis())
+    const publicAuthority = await authorizeProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'behavior_operating_system',
+    })
     const { answers, metadata = {}, draft_reference: draftReference = null } = req.body
 
     // Validate answers
@@ -103,6 +111,7 @@ export default async function handler(req, res) {
         answers: formattedAnswers,
         metadata: {
           ...governedMetadata,
+          public_product_grant_id: publicAuthority.grant?.grant_id || null,
           bos_intake_draft: claimedDraft
             ? {
                 contract_version: 'bos_intake_draft_v1',
@@ -115,6 +124,8 @@ export default async function handler(req, res) {
       claimedDraft ? { jobId: claimedDraft.job_id } : undefined
     )
 
+    await bindBosJobToGrant({ store: publicStore, grant: publicAuthority.grant, jobId })
+
     // Return immediately - status endpoint will drive execution
     return res.status(200).json({
       success: true,
@@ -123,7 +134,10 @@ export default async function handler(req, res) {
       message: 'Report generation queued. Poll /api/moremindmap/status?job_id=' + jobId
     })
   } catch (error) {
-    console.error('[MINI-V2-START] Error:', error)
+    console.error(JSON.stringify({ event: 'MINI_V2_START_FAILED', code: String(error?.message || 'unknown').split(':')[0], customer_payload_logged: false }))
+    if (/public_product_/u.test(error?.message || '')) {
+      return res.status(403).json({ success: false, error: 'Product access could not be verified.' })
+    }
     return res.status(500).json({
       success: false,
       error: error.message || 'Internal server error'

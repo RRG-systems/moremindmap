@@ -37,7 +37,15 @@ const INITIAL_QUESTION_STATES = QUESTIONS.reduce((acc, question) => {
   return acc;
 }, {});
 
-const BUSINESS_ASSESSMENT_PROMO_CODES = new Set(['BA5FREE']);
+// Complimentary authority is server-owned by publicSiteAirlockV1. No active
+// capability value or digest may be shipped in this client bundle.
+const BUSINESS_ASSESSMENT_PROMO_CODES = new Set();
+
+function publicStartHeaders(headers = {}) {
+  if (typeof window === 'undefined') return headers;
+  const token = window.sessionStorage.getItem('more.public.start_token.v1') || '';
+  return token ? { ...headers, 'X-MORE-Start-Token': token } : headers;
+}
 
 function createProfileGateState() {
   return {
@@ -379,7 +387,7 @@ export default function BusinessAssessment() {
       const url = buildApiUrl(
         `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(normalizedGateProfileId)}&nocache=1`
       );
-      const response = await fetch(url);
+      const response = await fetch(url, { headers: publicStartHeaders(), cache: 'no-store' });
       const payload = await response.json().catch(() => null);
 
       if (!response.ok || !payload?.canonical_dossier) {
@@ -741,7 +749,7 @@ export default function BusinessAssessment() {
   async function postGenerationStep(step, assessmentId) {
     const response = await fetch(buildApiUrl(step.endpoint, recruitingMode), {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: publicStartHeaders({ 'Content-Type': 'application/json' }),
       credentials: recruitingMode ? 'same-origin' : 'omit',
       body: JSON.stringify({ assessment_id: assessmentId })
     });
@@ -758,6 +766,7 @@ export default function BusinessAssessment() {
     const { payload } = await retrieveBusinessAssessment(
       ownerProfileId,
       (path) => buildApiUrl(path, recruitingMode),
+      { headers: publicStartHeaders(), credentials: recruitingMode ? 'same-origin' : 'omit' },
     );
     return payload;
   }
@@ -871,7 +880,7 @@ export default function BusinessAssessment() {
     try {
       const response = await fetch(buildApiUrl('/api/business-assessment/start', recruitingMode), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: publicStartHeaders({ 'Content-Type': 'application/json' }),
         credentials: recruitingMode ? 'same-origin' : 'omit',
         body: JSON.stringify({
           owner_profile_id: assessmentProfile.id,
@@ -962,7 +971,9 @@ export default function BusinessAssessment() {
         }
       }
 
-      const { payload } = await retrieveBusinessAssessment(id, buildApiUrl);
+      const { payload } = await retrieveBusinessAssessment(id, buildApiUrl, {
+        headers: publicStartHeaders(),
+      });
 
       if (!routeProfile) {
         const ownerProfileId =
@@ -1386,7 +1397,7 @@ export default function BusinessAssessment() {
                   <div className="border-b border-white/10 pb-5">
                     <p className="text-xl font-semibold text-white">MORE Monthly Intelligence</p>
                     <div className="mt-4 flex items-end gap-3">
-                      <span className="text-5xl font-semibold tracking-tight text-white">$23.95</span>
+                      <span className="text-5xl font-semibold tracking-tight text-white">$38.95</span>
                       <span className="pb-2 text-sm font-medium text-white/45">/month</span>
                     </div>
                     <p className="mt-5 text-base font-semibold leading-7 text-white">

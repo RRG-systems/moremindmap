@@ -1,3 +1,4 @@
+/* global process */
 /**
  * retrieve-profile.js
  * 
@@ -22,8 +23,17 @@ import Redis from 'ioredis';
 import process from 'node:process';
 import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
 import { readVisualDNAMetadata } from './visual-dna/shared.js';
+import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js';
+import { verifyStartToken } from '../../src/lib/publicSiteAirlockV1/security.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
+import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
 
 export default async function handler(req, res) {
+  res.setHeader('Content-Type', 'application/json');
+  if (!applyExactOriginCors(req, res, { methods: 'GET,OPTIONS' })) {
+    return res.status(403).json({ error: 'Origin not allowed' });
+  }
+  if (req.method === 'OPTIONS') return res.status(204).end();
   // Only GET allowed
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -51,11 +61,28 @@ export default async function handler(req, res) {
   try {
     // Connect to Redis
     const redis = new Redis(process.env.REDIS_URL);
+    if (String(process.env.PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED || '').toLowerCase() === 'true') {
+      try {
+        const claims = verifyStartToken(req.headers?.['x-more-start-token'], process.env.PUBLIC_PRODUCT_START_SIGNING_KEY);
+        if (!['behavior_operating_system', 'business_assessment'].includes(claims.product_key)) throw new Error('public_product_authority_denied');
+        const authority = await authorizeProductRequest({
+          req,
+          store: new RedisPublicStore(redis),
+          productKey: claims.product_key,
+          profileId: id,
+        });
+        if (!authority.grant?.profile_id) throw new Error('public_product_profile_binding_required');
+      } catch {
+        await redis.disconnect();
+        return res.status(404).json({ error: 'Profile not found' });
+      }
+    }
 
     // FALLBACK STRATEGY:
     // 1. Try lowercase key first (new format for all new profiles)
     // 2. Fallback to uppercase key (legacy support for existing profiles)
     let profileData;
+
     // Try 1: Lowercase key (new standard)
     const lowercaseKey = `vault:profile:mm-${datepart}-${randompart}`;
     profileData = await redis.get(lowercaseKey);
@@ -90,7 +117,7 @@ export default async function handler(req, res) {
     try {
       behavioral_intelligence_v1 = extractBehavioralIntelligence(canonicalDossier);
     } catch {
-      console.error('[RETRIEVE] Behavioral extraction failed');
+      console.error(JSON.stringify({ event: 'PUBLIC_PROFILE_INTELLIGENCE_PROJECTION_FAILED', customer_payload_logged: false }));
       // Non-blocking: return canonical even if extraction fails
     }
 
@@ -98,7 +125,7 @@ export default async function handler(req, res) {
     try {
       visual_dna = await readVisualDNAMetadata(redis, id);
     } catch {
-      console.error('[RETRIEVE] Visual DNA metadata lookup failed');
+      console.error(JSON.stringify({ event: 'PUBLIC_PROFILE_VISUAL_DNA_PROJECTION_FAILED', customer_payload_logged: false }));
     }
 
     await redis.disconnect();
@@ -110,11 +137,11 @@ export default async function handler(req, res) {
       canonical_dossier: canonicalDossier,
       behavioral_intelligence_v1: behavioral_intelligence_v1,
       visual_dna,
-      retrieved_at: new Date().toISOString()
+      retrieved_at: new Date().toISOString(),
     });
 
   } catch {
-    console.error('[RETRIEVE] Profile retrieval failed');
+    console.error(JSON.stringify({ event: 'PUBLIC_PROFILE_RETRIEVE_FAILED', customer_payload_logged: false }));
     return res.status(500).json({ 
       error: 'Failed to retrieve profile'
     });

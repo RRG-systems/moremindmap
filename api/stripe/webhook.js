@@ -24,6 +24,8 @@ import {
   membershipBindingFromStripeMetadata,
   normalizedGrantStatusFromSubscription,
 } from './subscriptionV1Foundation.js';
+import { createPublicSiteService } from '../../src/lib/publicSiteAirlockV1/service.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 
 export const config = {
   api: {
@@ -232,6 +234,27 @@ async function synchronizeSubscriptionGrants(redis, state) {
 }
 
 export async function processEvent(redis, event) {
+  const publicObject = event.data?.object || {};
+  const publicIntentId = boundedText(publicObject.metadata?.purchase_intent_id, 160);
+  if (event.type === 'checkout.session.completed' && publicIntentId) {
+    const paid = publicObject.payment_status === 'paid';
+    if (!paid) throw new Error('provider_payment_confirmation_required');
+    const publicStore = new RedisPublicStore(redis);
+    const publicService = createPublicSiteService({
+      store: publicStore,
+      startSigningKey: process.env.PUBLIC_PRODUCT_START_SIGNING_KEY,
+      complimentaryPepper: process.env.PUBLIC_COMPLIMENTARY_PEPPER,
+      complimentaryManifest: process.env.PUBLIC_COMPLIMENTARY_MANIFEST || '[]',
+    });
+    await publicService.recordPaymentGrant({
+      event_id: event.id,
+      checkout_session_id: publicObject.id,
+      intent_id: publicIntentId,
+      payment_truth: 'provider_confirmed',
+      customer_email: publicObject.customer_details?.email || publicObject.customer_email,
+    });
+  }
+
   const existingEvent = await redis.get(paymentEventKey(event.id));
   if (existingEvent) {
     return { processed: true, idempotent: true };
@@ -252,7 +275,10 @@ export async function processEvent(redis, event) {
     const paid = object.payment_status === 'paid';
     const subscriptionReady = object.mode === 'subscription' && Boolean(object.subscription || object.customer);
     if (paid || subscriptionReady) {
-      await saveAccessGrant(redis, event, object, paymentEvent);
+      // Governed public sessions already wrote their deterministic grant above.
+      // Replaying the legacy projection here would drop the Cassette vertical
+      // binding and purchase-intent provenance from the same grant key.
+      if (!publicIntentId) await saveAccessGrant(redis, event, object, paymentEvent);
       if (object.mode === 'subscription') {
         const state = await saveSubscriptionState(redis, event, object, {
           ...existingSubscription,

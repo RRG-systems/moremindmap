@@ -1,7 +1,9 @@
 import {
+  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
+  isPublicProductAuthorityError,
   parseAssessmentId,
   parseProfileId,
   setCors
@@ -39,7 +41,7 @@ function buildNotFoundResponse({ ownerProfileId = null, assessmentId = null, mes
 }
 
 export default async function handler(req, res) {
-  setCors(res);
+  if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -67,6 +69,7 @@ export default async function handler(req, res) {
     redis = createRedisClient();
 
     if (parsedAssessment) {
+      await authorizeBusinessAssessmentRequest(req, redis);
       const raw = await redis.get(businessAssessmentKey(parsedAssessment.normalized));
       if (!raw) {
         return res.status(200).json(
@@ -78,11 +81,13 @@ export default async function handler(req, res) {
       }
 
       const assessment = JSON.parse(raw);
+      await authorizeBusinessAssessmentRequest(req, redis, assessment.owner_profile_id);
       return res.status(200).json(
         buildRetrieveResponse(assessment, assessment.owner_profile_id || parsedProfile?.normalized || null)
       );
     }
 
+    await authorizeBusinessAssessmentRequest(req, redis, parsedProfile.normalized);
     const assessmentId = await redis.get(businessAssessmentByProfileKey(parsedProfile.normalized));
 
     if (!assessmentId) {
@@ -108,7 +113,10 @@ export default async function handler(req, res) {
     const assessment = JSON.parse(raw);
     return res.status(200).json(buildRetrieveResponse(assessment, parsedProfile.normalized));
   } catch (error) {
-    console.error('[BUSINESS-ASSESSMENT-RETRIEVE] Error:', error);
+    if (isPublicProductAuthorityError(error)) {
+      return res.status(404).json({ success: false, error: 'Assessment not found' });
+    }
+    console.error(JSON.stringify({ event: 'BUSINESS_ASSESSMENT_RETRIEVE_FAILED', customer_payload_logged: false }));
     return res.status(500).json({
       success: false,
       error: 'Failed to retrieve assessment'

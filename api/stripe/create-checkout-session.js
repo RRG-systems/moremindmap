@@ -1,4 +1,6 @@
+/* global process */
 import Stripe from 'stripe';
+import { applyExactOriginCors, parseBoolean } from '../../src/lib/publicSiteAirlockV1/security.js';
 
 const DEFAULT_SITE_URL = 'https://moremindmap.com';
 const SOURCE_CONTEXT_LIMIT = 120;
@@ -29,10 +31,9 @@ const PRODUCTS = {
   }
 };
 
-function setJsonHeaders(res) {
+function setJsonHeaders(req, res) {
   res.setHeader('Content-Type', 'application/json');
-  res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  return applyExactOriginCors(req, res, { methods: 'POST,OPTIONS' });
 }
 
 function parseBody(req) {
@@ -76,7 +77,9 @@ function absoluteUrl(path) {
 }
 
 export default async function handler(req, res) {
-  setJsonHeaders(res);
+  if (!setJsonHeaders(req, res)) {
+    return res.status(403).json({ ok: false, error: 'origin_not_allowed' });
+  }
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -86,12 +89,25 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'method_not_allowed' });
   }
 
+  // Compatibility-only escape hatch for rollback. The V2.1 public shell must
+  // use the governed purchase-intent endpoint so checkout and grant state share
+  // one idempotency boundary.
+  if (!parseBoolean(process.env.PUBLIC_LEGACY_STRIPE_CHECKOUT_ENABLED)) {
+    return res.status(404).json({ ok: false, error: 'not_found' });
+  }
+
   const body = parseBody(req);
   const productKey = boundedText(body.product_key, 80);
   const product = PRODUCTS[productKey];
 
   if (!product) {
     return res.status(400).json({ ok: false, error: 'invalid_stripe_product_key' });
+  }
+
+  if (productKey === 'more_monthly_intelligence'
+    && (!parseBoolean(process.env.PUBLIC_SUBSCRIPTION_CHECKOUT_ENABLED)
+      || !boundedText(process.env.PUBLIC_SUBSCRIPTION_DESTINATION, 320))) {
+    return res.status(409).json({ ok: false, error: 'subscription_checkout_gated' });
   }
 
   const secretKey = process.env.STRIPE_SECRET_KEY;

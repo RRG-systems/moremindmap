@@ -25,16 +25,10 @@ export default function PaymentCancelled() {
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Link
-              to="/profile"
+              to="/"
               className="rounded-xl bg-white px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-black transition hover:bg-white/85"
             >
-              Return To Profile
-            </Link>
-            <Link
-              to="/business-assessment"
-              className="rounded-xl border border-white/15 px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-white/80 transition hover:border-white/35 hover:bg-white/5"
-            >
-              Business Assessment
+              Return Home
             </Link>
           </div>
         </section>

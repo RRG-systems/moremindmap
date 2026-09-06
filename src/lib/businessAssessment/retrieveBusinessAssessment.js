@@ -138,7 +138,7 @@ function buildRetrieveUrl(buildApiUrl, identifier) {
  * Retrieve a stored Business Assessment by Profile ID or Assessment ID.
  * Returns a normalized retrieve payload or throws with a customer-safe message.
  */
-export async function retrieveBusinessAssessment(rawId, buildApiUrl) {
+export async function retrieveBusinessAssessment(rawId, buildApiUrl, requestOptions = {}) {
   const identifier = normalizeRetrieveIdentifier(rawId);
 
   if (identifier.type === 'empty') {
@@ -157,7 +157,7 @@ export async function retrieveBusinessAssessment(rawId, buildApiUrl) {
   let rawPayload = null;
 
   try {
-    const response = await fetch(buildRetrieveUrl(buildApiUrl, identifier));
+    const response = await fetch(buildRetrieveUrl(buildApiUrl, identifier), requestOptions);
     httpStatus = response.status;
     rawPayload = await response.json().catch(() => null);
 

@@ -8,14 +8,17 @@
 
 import { getJob, formatJobResponse, lockJob, unlockJob, isStaleLock, JOB_STATUS, JOB_STAGE } from '../engine/miniV2JobManager.js'
 import { executeNextStage } from '../engine/miniV2StagedExecutor.js'
+import { redis as getRedis } from '../engine/redisClient.js'
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js'
+import { authorizeProductRequest, bindBosProfileToGrant } from '../../src/lib/publicSiteAirlockV1/productBoundary.js'
+import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js'
 
 export default async function handler(req, res) {
   // CORS headers
-  res.setHeader("Access-Control-Allow-Credentials", true)
-  res.setHeader("Access-Control-Allow-Origin", "*")
-  res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS")
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type")
   res.setHeader('Content-Type', 'application/json')
+  if (!applyExactOriginCors(req, res, { methods: 'GET,OPTIONS' })) {
+    return res.status(403).json({ error: 'Origin not allowed' })
+  }
 
   if (req.method === "OPTIONS") {
     return res.status(200).end()
@@ -35,6 +38,19 @@ export default async function handler(req, res) {
       })
     }
 
+    const publicStore = new RedisPublicStore(getRedis())
+    const publicAuthority = await authorizeProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'behavior_operating_system',
+    })
+    if (publicAuthority.grant) {
+      const boundGrantId = await publicStore.get(`public_product_v1:bos_job:${job_id}`)
+      if (boundGrantId !== publicAuthority.grant.grant_id) {
+        return res.status(404).json({ success: false, error: 'Job not found' })
+      }
+    }
+
     // Get job from Redis
     let job = await getJob(job_id)
 
@@ -48,6 +64,9 @@ export default async function handler(req, res) {
     // If already complete or failed, return final result
     if (job.status === JOB_STATUS.COMPLETE || job.status === JOB_STATUS.FAILED) {
       const response = formatJobResponse(job)
+      if (response.success && response.canonical_profile_id) {
+        await bindBosProfileToGrant({ store: publicStore, jobId: job_id, profileId: response.canonical_profile_id })
+      }
       return res.status(response.success ? 200 : 500).json(response)
     }
 
@@ -80,6 +99,9 @@ export default async function handler(req, res) {
       
       // Return current status
       const response = formatJobResponse(job)
+      if (response.success && response.canonical_profile_id) {
+        await bindBosProfileToGrant({ store: publicStore, jobId: job_id, profileId: response.canonical_profile_id })
+      }
       return res.status(response.success ? 200 : 500).json(response)
     } catch {
       // Unlock on error
@@ -93,7 +115,10 @@ export default async function handler(req, res) {
       const response = formatJobResponse(job)
       return res.status(500).json(response)
     }
-  } catch {
+  } catch (error) {
+    if (/public_product_/u.test(error?.message || '')) {
+      return res.status(404).json({ success: false, error: 'Job not found' })
+    }
     console.error('[MINI-V2-STATUS] Request failed')
     return res.status(500).json({
       success: false,
