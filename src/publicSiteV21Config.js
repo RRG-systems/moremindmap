@@ -11,4 +11,3 @@ export function resolveProductionAthleteDestination(value = import.meta.env.VITE
   if (/^https:\/\/[^\s]+$/u.test(destination) || /^\/[a-z0-9/_-]+$/iu.test(destination)) return destination;
   return '';
 }
-

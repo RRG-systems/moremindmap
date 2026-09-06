@@ -7,4 +7,3 @@ export default createAccessHandler({
     return { ...runtime, close: () => closePublicRuntime(runtime) };
   },
 });
-

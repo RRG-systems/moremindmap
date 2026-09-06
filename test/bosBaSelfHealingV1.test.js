@@ -357,7 +357,7 @@ test('resumable inspector is platform-protected only by the server-bound authori
   assert.equal(calls[1].platformProtected, false);
 });
 
-test('stale surface-routing replacement is POST-only and exact-candidate protected', async () => {
+test('stale surface-routing replacement is POST-only and server-authority protected', async () => {
   const response = () => ({
     statusCode: null,
     body: null,
@@ -412,7 +412,7 @@ test('stale surface-routing replacement is POST-only and exact-candidate protect
   assert.equal(unsupported.statusCode, 405);
 });
 
-test('invalid stage-3 repair route is hash-bound and exact-candidate protected', async () => {
+test('invalid stage-3 repair route is hash-bound and server-authority protected', async () => {
   const response = () => ({
     statusCode: null, body: null, setHeader() {},
     status(code) { this.statusCode = code; return this; },
@@ -460,7 +460,7 @@ test('invalid stage-3 repair route is hash-bound and exact-candidate protected',
   assert.equal(calls[1].platformProtected, false);
 });
 
-test('completed stage-3 diagnostic is protected, read-only, and hash-bound', async () => {
+test('completed stage-3 diagnostic is server-authority protected, read-only, and hash-bound', async () => {
   const response = () => ({
     statusCode: null, body: null, setHeader() {},
     status(code) { this.statusCode = code; return this; },
@@ -511,7 +511,7 @@ test('completed stage-3 diagnostic is protected, read-only, and hash-bound', asy
   assert.equal(calls[1].platformProtected, false);
 });
 
-test('completed stage-3 semantic-rejection classification is POST-only, hash-bound, and exact-candidate protected', async () => {
+test('completed stage-3 semantic-rejection classification is POST-only, hash-bound, and server-authority protected', async () => {
   const response = () => ({
     statusCode: null, body: null, setHeader() {},
     status(code) { this.statusCode = code; return this; },
@@ -571,7 +571,7 @@ test('completed stage-3 semantic-rejection classification is POST-only, hash-bou
   assert.equal(calls[1].platformProtected, false);
 });
 
-test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and exact-candidate protected', async () => {
+test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and server-authority protected', async () => {
   const response = () => ({
     statusCode: null, body: null, setHeader() {},
     status(code) { this.statusCode = code; return this; },
@@ -625,7 +625,7 @@ test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and ex
   assert.equal(calls[1].platformProtected, false);
 });
 
-test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and exact-candidate protected', async () => {
+test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and server-authority protected', async () => {
   const response = () => ({
     statusCode: null, body: null, setHeader() {},
     status(code) { this.statusCode = code; return this; },

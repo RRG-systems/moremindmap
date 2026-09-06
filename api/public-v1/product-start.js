@@ -7,4 +7,3 @@ export default createProductStartHandler({
     return { ...runtime, close: () => closePublicRuntime(runtime) };
   },
 });
-

@@ -50,7 +50,6 @@ export function canonicalJson(value) {
   }
   return JSON.stringify(value);
 }
-
 export function sha256(value) {
   return crypto.createHash('sha256').update(String(value)).digest('hex');
 }
@@ -100,4 +99,3 @@ export function publicCatalogProjection({ checkoutEnabled = false, subscriptionE
     })),
   };
 }
-

@@ -7,4 +7,3 @@ export default createInquiryHandler({
     return { ...runtime, close: () => closePublicRuntime(runtime) };
   },
 });
-
