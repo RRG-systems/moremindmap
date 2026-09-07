@@ -73,11 +73,15 @@ test('New BOS customer retrieval remains owner-authorized and does not require p
     authorizeCustomerRead: async ({ profileId }) => {
       ownerCalls += 1;
       assert.equal(profileId, 'MM-20990101-DEMO0001');
+      return { mode: 'profile_owner_receipt' };
     },
     serviceFactory: async () => ({
       retrieve: async (input) => {
         assert.equal(input.platformProtected, false);
-        return { ok: true };
+        return {
+          artifact: { safe: true },
+          receipt: { profile_id: 'MM-20990101-DEMO0001', provider_accounting: { calls: 4 } },
+        };
       },
     }),
   });
@@ -89,6 +93,8 @@ test('New BOS customer retrieval remains owner-authorized and does not require p
   }, response);
   assert.equal(response.statusCode, 200);
   assert.equal(ownerCalls, 1);
+  assert.deepEqual(response.payload, { artifact: { safe: true } });
+  assert.equal(Object.hasOwn(response.payload, 'receipt'), false);
 });
 
 test('New BA diagnostics require exact platform authority even when customer runtime is active', async () => {
@@ -133,11 +139,19 @@ test('New BA customer retrieval remains owner-authorized and does not require pl
     authorizeCustomerRead: async ({ profileId }) => {
       ownerCalls += 1;
       assert.equal(profileId, 'MM-20990101-DEMO0001');
+      return { mode: 'profile_owner_receipt' };
     },
     serviceFactory: async () => ({
       retrieve: async (input) => {
         assert.equal(input.platformProtected, false);
-        return { ok: true };
+        return {
+          artifact: { safe: true },
+          receipt: {
+            profile_id: 'MM-20990101-DEMO0001',
+            assessment_id: 'ba-20990101-deadbeef',
+            provider_calls: 4,
+          },
+        };
       },
     }),
   });
@@ -149,6 +163,33 @@ test('New BA customer retrieval remains owner-authorized and does not require pl
   }, response);
   assert.equal(response.statusCode, 200);
   assert.equal(ownerCalls, 1);
+  assert.deepEqual(response.payload, { artifact: { safe: true } });
+  assert.equal(Object.hasOwn(response.payload, 'receipt'), false);
+});
+
+test('customer-active BOS and BA success shaping fails closed when no public artifact exists', async () => {
+  for (const [createHandler, expectedError] of [
+    [createNewBosProductionRouteHandler, 'New BOS realization unavailable'],
+    [createNewBaRouteHandler, 'New BA realization unavailable'],
+  ]) {
+    const handler = createHandler({
+      config: customerActiveConfig(),
+      authorizeCustomerRead: async () => ({ mode: 'profile_owner_receipt' }),
+      serviceFactory: async () => ({
+        retrieve: async () => ({ receipt: { provider_calls: 4 } }),
+      }),
+    });
+    const response = responseDouble();
+    await handler({
+      method: 'GET',
+      headers: {},
+      query: { id: 'MM-20990101-DEMO0001' },
+    }, response);
+    assert.equal(response.statusCode, 500);
+    assert.deepEqual(Object.keys(response.payload).sort(), ['error', 'safe_code']);
+    assert.equal(response.payload.error, expectedError);
+    assert.equal(Object.hasOwn(response.payload, 'receipt'), false);
+  }
 });
 
 test('New BA platform authority is server-configured and missing authority fails closed', () => {

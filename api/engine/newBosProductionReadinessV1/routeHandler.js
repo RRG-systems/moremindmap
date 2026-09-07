@@ -56,6 +56,13 @@ function customerSafeReviewRequired() {
   });
 }
 
+function customerSafeArtifact(result) {
+  if (!result?.artifact || typeof result.artifact !== 'object' || Array.isArray(result.artifact)) {
+    throw new Error('new_bos_customer_artifact_unavailable');
+  }
+  return Object.freeze({ artifact: result?.artifact });
+}
+
 function platformProtectedCandidateRequest(request, config) {
   return timingSafeHeaderMatch(
     request.headers?.['x-more-platform-authority'],
@@ -162,6 +169,9 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory, aut
       });
       if (result?.pending) return response.status(202).json(customerSafePending(result));
       if (result?.review_required) return response.status(409).json(customerSafeReviewRequired());
+      if (operation === 'retrieve' && config.customerActive) {
+        return response.status(200).json(customerSafeArtifact(result));
+      }
       return response.status(200).json(result);
     } catch (error) {
       return response.status(safeStatus(error)).json({

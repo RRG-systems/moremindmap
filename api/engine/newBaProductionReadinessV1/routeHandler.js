@@ -50,6 +50,13 @@ function customerSafePending(result) {
   });
 }
 
+function customerSafeArtifact(result) {
+  if (!result?.artifact || typeof result.artifact !== 'object' || Array.isArray(result.artifact)) {
+    throw new Error('new_ba_customer_artifact_unavailable');
+  }
+  return Object.freeze({ artifact: result?.artifact });
+}
+
 function platformProtectedCandidateRequest(request, config) {
   return timingSafeHeaderMatch(
     request.headers?.['x-more-platform-authority'],
@@ -101,7 +108,11 @@ export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalSer
           });
         }
       }
-      return response.status(result?.pending ? 202 : 200).json(result?.pending ? customerSafePending(result) : result);
+      if (result?.pending) return response.status(202).json(customerSafePending(result));
+      if (operation === 'retrieve' && config.customerActive) {
+        return response.status(200).json(customerSafeArtifact(result));
+      }
+      return response.status(200).json(result);
     } catch (error) {
       console.error('[NEW-BA-ROUTE] Governed runtime unavailable', safeRuntimeDiagnostic(error));
       return response.status(safeStatus(error)).json({
