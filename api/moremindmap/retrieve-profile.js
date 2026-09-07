@@ -19,6 +19,7 @@
  */
 
 import Redis from 'ioredis';
+import process from 'node:process';
 import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
 import { readVisualDNAMetadata } from './visual-dna/shared.js';
 
@@ -55,46 +56,22 @@ export default async function handler(req, res) {
     // 1. Try lowercase key first (new format for all new profiles)
     // 2. Fallback to uppercase key (legacy support for existing profiles)
     let profileData;
-    let retrievedKey;
-    let keyAttempts = [];
-    
     // Try 1: Lowercase key (new standard)
     const lowercaseKey = `vault:profile:mm-${datepart}-${randompart}`;
-    console.log(`[RETRIEVE] Attempt 1: GET ${lowercaseKey}`);
-    keyAttempts.push({ attempt: 1, key: lowercaseKey, strategy: 'lowercase' });
-    
     profileData = await redis.get(lowercaseKey);
     
-    if (profileData) {
-      retrievedKey = lowercaseKey;
-      keyAttempts.push({ attempt: 1, result: 'found', bytes: Buffer.byteLength(profileData, 'utf8') });
-      console.log(`[RETRIEVE] ✓ Found at attempt 1: ${lowercaseKey}`);
-    } else {
+    if (!profileData) {
       // Try 2: Uppercase key (fallback for legacy MM-* keys)
       const uppercaseKey = `vault:profile:MM-${datepart}-${randompart}`;
-      console.log(`[RETRIEVE] Attempt 2: GET ${uppercaseKey}`);
-      keyAttempts.push({ attempt: 2, key: uppercaseKey, strategy: 'uppercase_legacy' });
-      
       profileData = await redis.get(uppercaseKey);
-      
-      if (profileData) {
-        retrievedKey = uppercaseKey;
-        keyAttempts.push({ attempt: 2, result: 'found', bytes: Buffer.byteLength(profileData, 'utf8') });
-        console.log(`[RETRIEVE] ✓ Found at attempt 2: ${uppercaseKey}`);
-      } else {
-        keyAttempts.push({ attempt: 2, result: 'not_found' });
-        console.log(`[RETRIEVE] ✗ Not found at attempt 2: ${uppercaseKey}`);
-      }
     }
 
     // Handle not found
     if (!profileData) {
       await redis.disconnect();
-      console.log(`[RETRIEVE] Final result: Profile not found after ${keyAttempts.length} attempts`);
       return res.status(404).json({ 
         error: 'Profile not found',
-        profile_id: id,
-        _debug_key_attempts: keyAttempts
+        profile_id: id
       });
     }
 
@@ -102,9 +79,9 @@ export default async function handler(req, res) {
     let canonicalDossier;
     try {
       canonicalDossier = JSON.parse(profileData);
-    } catch (e) {
+    } catch {
       await redis.disconnect();
-      console.error('[RETRIEVE] JSON parse error:', e);
+      console.error('[RETRIEVE] Stored profile could not be parsed');
       return res.status(500).json({ error: 'Invalid profile data' });
     }
 
@@ -112,23 +89,16 @@ export default async function handler(req, res) {
     let behavioral_intelligence_v1 = null;
     try {
       behavioral_intelligence_v1 = extractBehavioralIntelligence(canonicalDossier);
-    } catch (extractErr) {
-      console.error('[RETRIEVE] Behavioral extraction failed:', extractErr.message);
-      console.error('[RETRIEVE] Full error details:', {
-        message: extractErr.message,
-        stack_sample: extractErr.stack?.split('\n').slice(0, 3).join(' | '),
-        canonical_keys: canonicalDossier ? Object.keys(canonicalDossier).slice(0, 12) : 'N/A',
-        has_top_systems: !!canonicalDossier?.top_systems,
-        has_intake_answers: !!canonicalDossier?.intake_answers
-      });
+    } catch {
+      console.error('[RETRIEVE] Behavioral extraction failed');
       // Non-blocking: return canonical even if extraction fails
     }
 
     let visual_dna = null;
     try {
       visual_dna = await readVisualDNAMetadata(redis, id);
-    } catch (visualDNAErr) {
-      console.error('[RETRIEVE] Visual DNA metadata lookup failed:', visualDNAErr.message);
+    } catch {
+      console.error('[RETRIEVE] Visual DNA metadata lookup failed');
     }
 
     await redis.disconnect();
@@ -140,15 +110,13 @@ export default async function handler(req, res) {
       canonical_dossier: canonicalDossier,
       behavioral_intelligence_v1: behavioral_intelligence_v1,
       visual_dna,
-      retrieved_at: new Date().toISOString(),
-      _debug_key_attempts: keyAttempts
+      retrieved_at: new Date().toISOString()
     });
 
-  } catch (error) {
-    console.error('[RETRIEVE] Error:', error);
+  } catch {
+    console.error('[RETRIEVE] Profile retrieval failed');
     return res.status(500).json({ 
-      error: 'Failed to retrieve profile',
-      message: error.message 
+      error: 'Failed to retrieve profile'
     });
   }
 }

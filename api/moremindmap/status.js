@@ -55,7 +55,7 @@ export default async function handler(req, res) {
     if (job.locked) {
       if (isStaleLock(job)) {
         // Stale lock, unlock and proceed
-        console.log(`[MINI-V2-STATUS] Releasing stale lock for job ${job_id}`)
+        console.log('[MINI-V2-STATUS] Releasing stale job lock')
         await unlockJob(job_id)
         job = await getJob(job_id)
       } else {
@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     try {
       // Execute next stage
-      const stageResult = await executeNextStage(job)
+      await executeNextStage(job)
       
       // Unlock job
       await unlockJob(job_id)
@@ -81,11 +81,11 @@ export default async function handler(req, res) {
       // Return current status
       const response = formatJobResponse(job)
       return res.status(response.success ? 200 : 500).json(response)
-    } catch (error) {
+    } catch {
       // Unlock on error
       await unlockJob(job_id)
       
-      console.error(`[MINI-V2-STATUS] Stage execution error:`, error)
+      console.error('[MINI-V2-STATUS] Stage execution failed')
       
       // Reload job (may have error state)
       job = await getJob(job_id)
@@ -93,11 +93,11 @@ export default async function handler(req, res) {
       const response = formatJobResponse(job)
       return res.status(500).json(response)
     }
-  } catch (error) {
-    console.error('[MINI-V2-STATUS] Error:', error)
+  } catch {
+    console.error('[MINI-V2-STATUS] Request failed')
     return res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error'
+      error: 'Internal server error'
     })
   }
 }

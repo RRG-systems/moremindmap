@@ -240,12 +240,9 @@ export function formatJobResponse(job) {
       job_id: job.job_id,
       html: job.result_html,
       metadata: job.result_metadata,
-      diagnostics: job.diagnostics,
       created_at: job.created_at,
       updated_at: job.updated_at,
-      canonical_profile_id: job.canonical_profile_id || null,
-      canonical_company_name: job.canonical_company_name || null,
-      canonical_diagnostics: job.canonical_diagnostics || null
+      canonical_profile_id: job.canonical_profile_id || null
     }
   }
   
@@ -254,7 +251,7 @@ export function formatJobResponse(job) {
       success: false,
       status: 'failed',
       job_id: job.job_id,
-      error: job.error,
+      error: 'Generation failed. Please try again.',
       stage: job.stage,
       created_at: job.created_at,
       updated_at: job.updated_at

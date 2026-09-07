@@ -49,7 +49,7 @@ export function readNewBosProductionConfig(env = globalThis.process?.env || {}) 
     namespace,
     providerModel: String(env.NEW_BOS_PROVIDER_MODEL || 'gpt-5.6-sol').trim(),
     accessToken: String(env.NEW_BOS_CANARY_ACCESS_TOKEN || ''),
-    deploymentHost: String(env.VERCEL_URL || '').trim().toLowerCase(),
+    platformAuthoritySecret: String(env.NEW_BOS_PLATFORM_AUTHORITY_SECRET || ''),
   });
 }
 
@@ -89,6 +89,7 @@ export const NEW_BOS_PRODUCTION_ENVIRONMENT_CONTRACT = Object.freeze([
   'NEW_BOS_CANARY_ENABLED',
   'NEW_BOS_CANARY_PROFILE_IDS',
   'NEW_BOS_CANARY_ACCESS_TOKEN',
+  'NEW_BOS_PLATFORM_AUTHORITY_SECRET',
   'NEW_BOS_PROVIDER_ENABLED',
   'NEW_BOS_PROVIDER_MODEL',
   'NEW_BOS_DERIVED_PERSISTENCE_ENABLED',

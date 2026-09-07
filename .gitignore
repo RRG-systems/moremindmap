@@ -13,6 +13,7 @@ submissions
 .env
 dist-ssr
 *.local
+.vite-test-cache/
 
 # Editor directories and files
 .vscode/*

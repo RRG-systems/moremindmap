@@ -1,4 +1,6 @@
 import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
+import { Buffer } from 'node:buffer';
+import crypto from 'node:crypto';
 
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_bos_canonical_profile_not_found',
@@ -55,9 +57,11 @@ function customerSafeReviewRequired() {
 }
 
 function platformProtectedCandidateRequest(request, config) {
-  const deploymentHost = String(config?.deploymentHost || '').trim().toLowerCase();
-  const requestHost = String(request.headers?.host || '').trim().toLowerCase();
-  return deploymentHost.endsWith('.vercel.app') && requestHost === deploymentHost;
+  const supplied = Buffer.from(String(request.headers?.['x-more-platform-authority'] || ''));
+  const expected = Buffer.from(String(config?.platformAuthoritySecret || ''));
+  return expected.length > 0
+    && supplied.length === expected.length
+    && crypto.timingSafeEqual(supplied, expected);
 }
 
 export function createNewBosProductionRouteHandler({ config, serviceFactory }) {

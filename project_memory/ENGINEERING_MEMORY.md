@@ -20,7 +20,7 @@ const redis = new Redis(process.env.REDIS_URL);
 ```
 
 **Connection Parameters:**
-- URL format: `redis://default:{PASSWORD}@{HOST}:{PORT}`
+- URL format: `[REDACTED_ROTATED_REDIS_CREDENTIAL]`
 - Host: `detail-ultraswift-vessel-11189.db.redis.io`
 - Port: 16937
 - Auth: Password in URL

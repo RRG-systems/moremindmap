@@ -8,7 +8,9 @@
 
 import Redis from 'ioredis';
 import { generateProfileId, isValidProfileId } from './generateProfileId.js';
+import { Buffer } from 'node:buffer';
 import { createHash } from 'crypto';
+import process from 'node:process';
 
 // Get Redis client (inline initialization)
 function getRedis() {
@@ -17,9 +19,12 @@ function getRedis() {
     throw new Error('REDIS_URL environment variable not configured');
   }
   
-  // Log provider details
-  console.log(`[REDIS-INIT] REDIS_URL env var: ${redisUrl}`);
-  console.log(`[REDIS-INIT] Creating ioredis.Redis instance`);
+  // Never emit connection material. Runtime logs are not a credential boundary.
+  console.log(JSON.stringify({
+    event: 'REDIS_CLIENT_INITIALIZED',
+    redis_url_configured: true,
+    credential_logged: false,
+  }));
   
   return new Redis(redisUrl);
 }
@@ -77,8 +82,8 @@ export async function saveCanonicalProfile(options) {
   const diagnostics = {
     timestamp: new Date().toISOString(),
     redis_module: 'ioredis',
-    redis_url_env: process.env.REDIS_URL || 'NOT_SET',
-    redis_url_host_extracted: process.env.REDIS_URL ? new URL(process.env.REDIS_URL).hostname : 'N/A',
+    redis_url_configured: Boolean(process.env.REDIS_URL),
+    redis_connection_metadata_included: false,
     profile_id_provided: !!profile_id,
     operations: []
   };

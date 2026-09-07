@@ -34,6 +34,7 @@ import { attachCustomerTopProjection } from '../src/lib/newBosPersonalityDnaV1/t
 const IDENTITY = 'a'.repeat(64);
 const REQUEST = 'b'.repeat(64);
 const PROFILE = 'MM-20990101-SELFHEAL';
+const PLATFORM_AUTHORITY = 'synthetic-platform-authority-secret-1234567890';
 
 function sha256(value) {
   return crypto.createHash('sha256').update(String(value)).digest('hex');
@@ -317,7 +318,7 @@ test('BOS and BA 202 responses expose only customer-safe processing state', asyn
   assert.deepEqual(Object.keys(baResponse.body).sort(), ['message', 'pending', 'retry_after_ms', 'status']);
 });
 
-test('resumable inspector is platform-protected only on the exact Vercel deployment host', async () => {
+test('resumable inspector is platform-protected only by the server-bound authority secret', async () => {
   const response = () => ({
     statusCode: null,
     body: null,
@@ -331,7 +332,7 @@ test('resumable inspector is platform-protected only on the exact Vercel deploym
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       inspectResumable: async (input) => { calls.push(input); return { status: 'ok' }; },
@@ -341,7 +342,7 @@ test('resumable inspector is platform-protected only on the exact Vercel deploym
   await handler({
     method: 'GET',
     query: { id: PROFILE, diagnostic: 'resumable-state' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
   }, candidate);
   assert.equal(candidate.statusCode, 200);
   assert.equal(calls[0].platformProtected, true);
@@ -370,7 +371,7 @@ test('stale surface-routing replacement is POST-only and exact-candidate protect
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       replaceStaleSurfaceRouting: async (input) => {
@@ -384,7 +385,7 @@ test('stale surface-routing replacement is POST-only and exact-candidate protect
   await handler({
     method: 'POST',
     query: { id: PROFILE, action: 'replace-stale-surface-routing' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
     body: {
       expected_campaign_sha256: '1'.repeat(64),
       expected_unit_identity_sha256: '2'.repeat(64),
@@ -423,7 +424,7 @@ test('invalid stage-3 repair route is hash-bound and exact-candidate protected',
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       repairInvalidStage3VectorFree: async (input) => {
@@ -437,7 +438,7 @@ test('invalid stage-3 repair route is hash-bound and exact-candidate protected',
   await handler({
     method: 'POST',
     query: { id: PROFILE, action: 'repair-invalid-stage3-vector-free' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
     body: {
       expected_campaign_sha256: '1'.repeat(64),
       expected_stage3: { accepted_value_sha256: '2'.repeat(64) },
@@ -471,7 +472,7 @@ test('completed stage-3 diagnostic is protected, read-only, and hash-bound', asy
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       inspectCompletedStage3Validation: async (input) => {
@@ -492,7 +493,7 @@ test('completed stage-3 diagnostic is protected, read-only, and hash-bound', asy
       expected_request_sha256: '3'.repeat(64),
       expected_provider_response_id_sha256: '4'.repeat(64),
     },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
   }, exact);
   assert.equal(exact.statusCode, 200);
   assert.equal(calls[0].platformProtected, true);
@@ -522,7 +523,7 @@ test('completed stage-3 semantic-rejection classification is POST-only, hash-bou
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       classifyCompletedStage3SemanticRejection: async (input) => {
@@ -542,7 +543,7 @@ test('completed stage-3 semantic-rejection classification is POST-only, hash-bou
   await handler({
     method: 'POST',
     query: { id: PROFILE, action: 'classify-completed-stage3-semantic-rejection' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
     body: {
       expected_campaign_sha256: '1'.repeat(64),
       expected_unit_identity_sha256: '2'.repeat(64),
@@ -582,7 +583,7 @@ test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and ex
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       replaceSemanticRejectedStage3: async (input) => {
@@ -596,7 +597,7 @@ test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and ex
   await handler({
     method: 'POST',
     query: { id: PROFILE, action: 'replace-semantic-rejected-stage3' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
     body: {
       expected_campaign_sha256: '1'.repeat(64),
       expected_stage3: {
@@ -636,7 +637,7 @@ test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and exac
       staged: true,
       canaryEnabled: false,
       customerActive: true,
-      deploymentHost: 'candidate.example.vercel.app',
+      platformAuthoritySecret: PLATFORM_AUTHORITY,
     },
     serviceFactory: async () => ({
       replaceStage3RequestContractV2: async (input) => {
@@ -650,7 +651,7 @@ test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and exac
   await handler({
     method: 'POST',
     query: { id: PROFILE, action: 'replace-stage3-request-contract-v2' },
-    headers: { host: 'candidate.example.vercel.app' },
+    headers: { host: 'candidate.example.vercel.app', 'x-more-platform-authority': PLATFORM_AUTHORITY },
     body: {
       expected_campaign_sha256: '1'.repeat(64),
       expected_stage3: {
