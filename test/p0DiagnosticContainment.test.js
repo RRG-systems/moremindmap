@@ -75,6 +75,14 @@ test('the exact reported 25 and five adjacent non-production handlers are outsid
   assert.equal(fs.existsSync(path.join(root, 'quarantined-api-source/README.md')), true);
 });
 
+test('the SPA fallback cannot turn an unknown API path into a successful HTML response', () => {
+  const config = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
+  assert.deepEqual(config.rewrites, [{
+    source: '/:path((?!api(?:/|$)).*)',
+    destination: '/',
+  }]);
+});
+
 test('deployable source cannot import the quarantined HTTP handlers', () => {
   const deployableFiles = execFileSync('git', ['ls-files', 'api'], { cwd: root, encoding: 'utf8' })
     .trim()

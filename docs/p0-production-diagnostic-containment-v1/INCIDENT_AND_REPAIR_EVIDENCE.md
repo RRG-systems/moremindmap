@@ -62,6 +62,7 @@ All 30 files retain their bytes and history under `quarantined-api-source/`, out
 - The retained Product Profile retrieval handler no longer returns storage-key attempts, stack fragments, or raw error messages and no longer logs Profile storage keys.
 - The retained Product job-status projection no longer returns internal diagnostics, canonical diagnostics, storage keys, company metadata, or raw failure text.
 - New BOS operator-only diagnostic/repair capability no longer trusts the attacker-controlled HTTP `Host` header as platform authority. A constant-time, server-bound authority secret is now required; absence fails closed.
+- The Vite SPA fallback now excludes `/api` paths, so an absent API route remains an HTTP 404 instead of being rewritten to the homepage with HTTP 200.
 - Two tracked historical evidence copies of the live Redis credential were replaced in the candidate tree with the marker `[REDACTED_ROTATED_REDIS_CREDENTIAL]`; Git history is preserved.
 
 ## Credential decision
@@ -85,6 +86,7 @@ This repair contains the non-production diagnostic/test/raw/debug incident. It d
 | Host spoof cannot grant New BOS operator authority | PASS | focused runtime regression |
 | Product Profile storage/raw-error debug removed | PASS | focused static regression |
 | Product job-status internal diagnostics/raw failures removed | PASS | focused runtime regression |
+| Unknown API paths excluded from SPA success fallback | PASS | focused configuration regression; live 404 proof pending |
 | Canonical protected Product regression matrix | PASS | 129/129 on exact repair tree |
 | Supplemental Leadership/Recruiting/Subscription matrix | PASS | 151/151 on exact repair tree |
 | Candidate-owned scoped lint | PASS | zero findings across eight changed active JS/test files |
