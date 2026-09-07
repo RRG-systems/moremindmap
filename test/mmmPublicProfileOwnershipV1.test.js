@@ -366,8 +366,8 @@ test('Assessment-ID owner retrieval proves the signed Profile and its exact poin
   await store.set(businessAssessmentByProfileKey(profileId), assessmentId);
   const env = {
     PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-    PUBLIC_PRODUCT_START_SIGNING_KEY: startKey,
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: startKey,
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
     ...ownershipEnvironment,
   };
   const authority = await authorizeBusinessAssessmentIdBeforeRead({
@@ -456,8 +456,8 @@ test('owner receipt authorizes only existing Product reads while grant-only muta
   const req = { headers: { cookie: cookieHeader(verified.receipt) } };
   const env = {
     PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-    PUBLIC_PRODUCT_START_SIGNING_KEY: startKey,
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: startKey,
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
     ...ownershipEnvironment,
   };
   const allowed = await authorizeExistingProductRead({ req, store, productKey: 'behavior_operating_system', profileId, env });
@@ -472,8 +472,8 @@ test('unbound or cross-Profile Product grants cannot be reused to read an existi
   const store = new MemoryPublicStore();
   const env = {
     PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-    PUBLIC_PRODUCT_START_SIGNING_KEY: startKey,
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: startKey,
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
   };
   await store.set('access_grant:grant_unbound', JSON.stringify({
     grant_id: 'grant_unbound',
@@ -523,8 +523,8 @@ test('an explicitly forced existing-read boundary validates an exact grant even 
   const token = sealStartToken({ grant_id: 'grant_bound', product_key: 'business_assessment' }, startKey);
   const env = {
     PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'false',
-    PUBLIC_PRODUCT_START_SIGNING_KEY: startKey,
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: startKey,
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
   };
   const authority = await authorizeExistingProductRead({
     req: { headers: { 'x-more-start-token': token } },

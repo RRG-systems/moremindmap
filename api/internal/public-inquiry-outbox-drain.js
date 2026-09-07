@@ -38,7 +38,7 @@ export function createPublicInquiryOutboxDrainHandler({ env = process.env, runti
     res.setHeader('Cache-Control', 'private, no-store, max-age=0');
     res.setHeader('X-Content-Type-Options', 'nosniff');
     const authorized = enabled(env)
-      && timingSafeHeaderMatch(bearer(req), env.PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET);
+      && timingSafeHeaderMatch(bearer(req), env.MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET);
     if (!authorized) return res.status(404).json({ ok: false, error: 'not_found' });
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
 

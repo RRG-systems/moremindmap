@@ -20,7 +20,7 @@ import {
   PUBLIC_INQUIRY_PENDING_SET,
   createPublicInquiryOutboxDrainHandler,
 } from '../api/internal/public-inquiry-outbox-drain.js';
-import { runtimeFlags } from '../src/lib/publicSiteAirlockV1/security.js';
+import { nonsecretRuntimeAttestation, runtimeFlags } from '../src/lib/publicSiteAirlockV1/security.js';
 import { publicProfileOwnershipTransportConfigured } from '../src/lib/publicSiteAirlockV1/resendOwnershipTransport.js';
 
 const previewHostname = 'moremindmap-airlock-synthetic.vercel.app';
@@ -245,31 +245,63 @@ test('public inquiry transport fails closed on missing binding, wrong destinatio
 test('public inquiry runtime flag requires the same validated transport contract plus drain authority', () => {
   const configured = {
     PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
-    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key_123456',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key_123456',
     PUBLIC_INQUIRY_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
     PUBLIC_INQUIRY_EMAIL_TO: 'private-sales@moremindmap.example',
-    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret,
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret,
   };
   assert.equal(runtimeFlags(configured).inquiry_intake_enabled, true);
-  assert.equal(runtimeFlags({ ...configured, PUBLIC_INQUIRY_RESEND_API_KEY: 'present-but-invalid' }).inquiry_intake_enabled, false);
+  assert.equal(runtimeFlags({ ...configured, MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY: 'present-but-invalid' }).inquiry_intake_enabled, false);
   assert.equal(runtimeFlags({ ...configured, PUBLIC_INQUIRY_EMAIL_TO: 'not-a-mailbox' }).inquiry_intake_enabled, false);
-  assert.equal(runtimeFlags({ ...configured, PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'short' }).inquiry_intake_enabled, false);
+  assert.equal(runtimeFlags({ ...configured, MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: 'short' }).inquiry_intake_enabled, false);
 });
 
 test('profile ownership transport readiness requires an exact server-only Resend binding', () => {
   const configured = {
-    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
     PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
   };
   assert.equal(publicProfileOwnershipTransportConfigured(configured), true);
-  assert.equal(publicProfileOwnershipTransportConfigured({ ...configured, PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 'present-but-invalid' }), false);
+  assert.equal(publicProfileOwnershipTransportConfigured({ ...configured, MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY: 'present-but-invalid' }), false);
   assert.equal(publicProfileOwnershipTransportConfigured({ ...configured, PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'not-a-mailbox' }), false);
+});
+
+test('legacy PUBLIC_ secret names cannot activate any migrated server-only gate', () => {
+  const legacy = {
+    PUBLIC_CHECKOUT_ENABLED: 'true',
+    PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
+    PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
+    PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED: 'true',
+    PUBLIC_STRIPE_MODE: 'test',
+    STRIPE_SECRET_KEY: 'sk_test_synthetic_never_sent',
+    STRIPE_PRICE_BEHAVIOR_OS: 'price_synthetic_bos',
+    STRIPE_PRICE_BUSINESS_ASSESSMENT: 'price_synthetic_ba',
+    PUBLIC_PRODUCT_START_SIGNING_KEY: 'legacy-start-signing-key-at-least-thirty-two-characters',
+    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: 'legacy-owner-signing-key-at-least-thirty-two-characters',
+    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_legacy_inquiry_key_123456',
+    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_legacy_owner_key_123456',
+    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'legacy-drain-secret-at-least-thirty-two-characters',
+    PUBLIC_COMPLIMENTARY_PEPPER: 'legacy-complimentary-pepper-at-least-thirty-two-characters',
+    PUBLIC_COMPLIMENTARY_MANIFEST: '[]',
+    PUBLIC_INQUIRY_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
+    PUBLIC_INQUIRY_EMAIL_TO: 'private-sales@moremindmap.example',
+    PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'candidate.example.vercel.app',
+  };
+  const flags = runtimeFlags(legacy);
+  assert.equal(flags.checkout_enabled, false);
+  assert.equal(flags.inquiry_intake_enabled, false);
+  assert.equal(flags.complimentary_redemption_enabled, false);
+  assert.equal(publicInquiryTransportConfigured(legacy), false);
+  assert.equal(publicProfileOwnershipTransportConfigured(legacy), false);
+  assert.equal(nonsecretRuntimeAttestation(legacy).profile_ownership_binding_state, 'unconfigured');
 });
 
 test('public inquiry drain hides without authority and never constructs its runtime', async () => {
   let runtimeCalls = 0;
   const handler = createPublicInquiryOutboxDrainHandler({
-    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
+    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
     runtimeFactory: async () => { runtimeCalls += 1; throw new Error('must_not_run'); },
   });
   const denied = response();
@@ -305,7 +337,7 @@ test('authorized public inquiry drain is bounded, aggregate-only and removes del
     async close() { closed += 1; },
   };
   const handler = createPublicInquiryOutboxDrainHandler({
-    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
+    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
     runtimeFactory: async () => runtime,
   });
   const res = response();
@@ -322,7 +354,7 @@ test('authorized public inquiry drain is bounded, aggregate-only and removes del
 test('drain stays fail-closed when disabled even with a valid secret', async () => {
   let runtimeCalls = 0;
   const handler = createPublicInquiryOutboxDrainHandler({
-    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'false', PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
+    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'false', MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
     runtimeFactory: async () => { runtimeCalls += 1; },
   });
   const res = response();
@@ -333,7 +365,7 @@ test('drain stays fail-closed when disabled even with a valid secret', async () 
 
 test('drain authorization secret is never included in its public response', async () => {
   const handler = createPublicInquiryOutboxDrainHandler({
-    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
+    env: { PUBLIC_INQUIRY_INTAKE_ENABLED: 'true', MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: drainSecret },
     runtimeFactory: async () => ({
       store: { async smembers() { return []; }, async srem() { throw new Error('must_not_run'); } },
       service: { async dispatchInquiry() { throw new Error('must_not_run'); } },

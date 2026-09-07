@@ -98,15 +98,15 @@ test('runtime mutation flags default off and nonsecret attestation excludes secr
   assert.equal(nonsecretRuntimeAttestation({
     VERCEL_ENV: 'preview',
     VERCEL_URL: 'candidate.example.vercel.app',
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
-    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
     PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
   }).profile_ownership_binding_state, 'configured');
   assert.equal(nonsecretRuntimeAttestation({
     VERCEL_ENV: 'preview',
     VERCEL_URL: 'candidate.example.vercel.app',
-    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: 'short',
-    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: 'short',
+    MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
     PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
   }).profile_ownership_binding_state, 'unconfigured');
 });
@@ -115,7 +115,7 @@ test('checkout, complimentary and inquiry flags activate only as a complete fail
   const base = {
     PUBLIC_CHECKOUT_ENABLED: 'true',
     PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-    PUBLIC_PRODUCT_START_SIGNING_KEY: signingKey,
+    MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: signingKey,
     PUBLIC_STRIPE_MODE: 'test',
     STRIPE_SECRET_KEY: 'sk_test_synthetic_never_sent',
     STRIPE_PRICE_BEHAVIOR_OS: 'price_synthetic_bos',
@@ -128,32 +128,32 @@ test('checkout, complimentary and inquiry flags activate only as a complete fail
   assert.equal(runtimeFlags({
     ...base,
     PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
-    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
     PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
     PUBLIC_INQUIRY_EMAIL_TO: 'private@example.test',
   }).inquiry_intake_enabled, false);
   assert.equal(runtimeFlags({
     ...base,
     PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
-    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
     PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
     PUBLIC_INQUIRY_EMAIL_TO: 'private@example.test',
-    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
   }).inquiry_intake_enabled, true);
   assert.equal(runtimeFlags({ ...base, PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED: 'true' }).complimentary_redemption_enabled, false);
   assert.equal(runtimeFlags({
     ...base,
     PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED: 'true',
-    PUBLIC_COMPLIMENTARY_PEPPER: pepper,
-    PUBLIC_COMPLIMENTARY_MANIFEST: '[]',
+    MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER: pepper,
+    MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST: '[]',
   }).complimentary_redemption_enabled, true);
   const secret = 'private-inbox@example.test';
   assert.doesNotMatch(JSON.stringify(nonsecretRuntimeAttestation({
     ...base,
     PUBLIC_INQUIRY_EMAIL_TO: secret,
-    PUBLIC_INQUIRY_RESEND_API_KEY: 're_private',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY: 're_private',
     PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
-    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
+    MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
   })), new RegExp(secret, 'u'));
 });
 
@@ -458,7 +458,7 @@ test('product data access requires a valid server grant when enforcement is enab
       profileId,
       env: {
         PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-        PUBLIC_PRODUCT_START_SIGNING_KEY: signingKey,
+        MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: signingKey,
       },
     }),
     /public_product_/u,

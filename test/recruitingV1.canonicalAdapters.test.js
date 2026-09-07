@@ -21,8 +21,8 @@ const ENV = { RECRUITING_V1_SYNTHETIC_REVIEW: 'true' };
 const ENFORCED_ENV = {
   ...ENV,
   PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-  PUBLIC_PRODUCT_START_SIGNING_KEY: 'synthetic-public-start-signing-key-32-bytes',
-  PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: 'synthetic-profile-owner-signing-key-32-bytes',
+  MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: 'synthetic-public-start-signing-key-32-bytes',
+  MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: 'synthetic-profile-owner-signing-key-32-bytes',
 };
 const CONSENT = { accepted: true, version: 'recruiting_v1_consent_2026_08' };
 const EMPTY_PUBLIC_STORE = Object.freeze({ async get() { return null; } });
@@ -341,7 +341,7 @@ test('BA Profile and Assessment locators require exact pre-read authority', asyn
   }));
   const token = sealStartToken(
     { grant_id: grantId, product_key: 'business_assessment' },
-    ENFORCED_ENV.PUBLIC_PRODUCT_START_SIGNING_KEY,
+    ENFORCED_ENV.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
   );
   const publicRead = await authorizeBusinessAssessmentIdBeforeRead({
     req: { headers: { 'x-more-start-token': token } },

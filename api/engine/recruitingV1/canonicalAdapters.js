@@ -193,7 +193,7 @@ export async function authorizeBusinessAssessmentIdBeforeRead({
   try { ownerAudience = resolveProfileOwnershipAudience(env); } catch { ownerAudience = ''; }
   const owner = readVerifiedProfileOwnerRequest({
     cookieHeader: req?.headers?.cookie,
-    signingKey: env.PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY,
+    signingKey: env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
     audience: ownerAudience,
   });
   if (owner?.profile_id) {

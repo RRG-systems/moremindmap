@@ -185,7 +185,7 @@ test('an already-granted purchase intent can never open another provider Checkou
     env: {
       PUBLIC_CHECKOUT_ENABLED: 'true',
       PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
-      PUBLIC_PRODUCT_START_SIGNING_KEY: 'synthetic-start-signing-key-at-least-thirty-two-characters',
+      MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: 'synthetic-start-signing-key-at-least-thirty-two-characters',
       PUBLIC_STRIPE_MODE: 'test',
       STRIPE_SECRET_KEY: 'sk_test_synthetic_never_sent',
       STRIPE_PRICE_BEHAVIOR_OS: 'price_synthetic_bos',

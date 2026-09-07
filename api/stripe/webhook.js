@@ -286,9 +286,9 @@ export async function processEvent(redis, event, env = process.env) {
     const publicStore = new RedisPublicStore(redis);
     const publicService = createPublicSiteService({
       store: publicStore,
-      startSigningKey: env.PUBLIC_PRODUCT_START_SIGNING_KEY,
-      complimentaryPepper: env.PUBLIC_COMPLIMENTARY_PEPPER,
-      complimentaryManifest: env.PUBLIC_COMPLIMENTARY_MANIFEST || '[]',
+      startSigningKey: env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
+      complimentaryPepper: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER,
+      complimentaryManifest: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '[]',
     });
     await publicService.recordPaymentGrant({
       event_id: event.id,

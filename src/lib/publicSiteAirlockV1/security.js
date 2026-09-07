@@ -22,12 +22,12 @@ export function runtimeFlags(env = process.env) {
   const stripeReady = stripeModeMatches
     && /^price_[A-Za-z0-9_]{4,180}$/u.test(String(env.STRIPE_PRICE_BEHAVIOR_OS || '').trim())
     && /^price_[A-Za-z0-9_]{4,180}$/u.test(String(env.STRIPE_PRICE_BUSINESS_ASSESSMENT || '').trim());
-  const startReady = String(env.PUBLIC_PRODUCT_START_SIGNING_KEY || '').length >= 32;
+  const startReady = String(env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY || '').length >= 32;
   const inquiryReady = publicInquiryTransportConfigured(env)
-    && String(env.PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET || '').length >= 32;
+    && String(env.MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET || '').length >= 32;
   const complimentaryReady = startReady
-    && String(env.PUBLIC_COMPLIMENTARY_PEPPER || '').length >= 32
-    && Boolean(String(env.PUBLIC_COMPLIMENTARY_MANIFEST || '').trim());
+    && String(env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER || '').length >= 32
+    && Boolean(String(env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '').trim());
   return Object.freeze({
     checkout_enabled: checkoutRequested && productStartEnforcement && startReady && stripeReady,
     complimentary_redemption_enabled: parseBoolean(env.PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED)
@@ -59,10 +59,10 @@ export function nonsecretRuntimeAttestation(env = process.env) {
       : 'unconfigured',
     stripe_binding_state: env.STRIPE_SECRET_KEY ? 'configured' : 'unconfigured',
     profile_ownership_binding_state: profileOwnershipConfigured(env) ? 'configured' : 'unconfigured',
-    inquiry_binding_state: env.PUBLIC_INQUIRY_RESEND_API_KEY
+    inquiry_binding_state: env.MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY
       && env.PUBLIC_INQUIRY_EMAIL_FROM
       && env.PUBLIC_INQUIRY_EMAIL_TO
-      && env.PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET
+      && env.MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET
       ? 'configured'
       : 'unconfigured',
   };
@@ -70,7 +70,7 @@ export function nonsecretRuntimeAttestation(env = process.env) {
 }
 
 function profileOwnershipConfigured(env) {
-  if (String(env.PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY || '').length < 32
+  if (String(env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY || '').length < 32
     || !publicProfileOwnershipTransportConfigured(env)) return false;
   try {
     resolveProfileOwnershipAudience(env);

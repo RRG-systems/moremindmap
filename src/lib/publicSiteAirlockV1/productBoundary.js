@@ -19,7 +19,7 @@ export async function authorizeProductRequest({ req, store, productKey, profileI
   const token = req.headers?.['x-more-start-token'];
   let claims;
   try {
-    claims = verifyStartToken(token, env.PUBLIC_PRODUCT_START_SIGNING_KEY);
+    claims = verifyStartToken(token, env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY);
   } catch {
     throw new Error('public_product_authority_denied');
   }
@@ -51,7 +51,7 @@ export async function authorizeExistingProductRead({ req, store, productKey, pro
     if (verifyProfileOwnerRequest({
       profileId,
       cookieHeader: req.headers?.cookie,
-      signingKey: env.PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY,
+      signingKey: env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
       audience: ownershipAudience,
     })) {
       return { mode: 'profile_owner_receipt', grant: null, claims: null };

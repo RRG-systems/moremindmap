@@ -14,8 +14,8 @@ import { createPublicSiteService } from '../src/lib/publicSiteAirlockV1/service.
 
 const TEST_ENV = Object.freeze({
   PUBLIC_STRIPE_MODE: 'test',
-  PUBLIC_PRODUCT_START_SIGNING_KEY: 'synthetic-public-start-key-at-least-thirty-two-characters',
-  PUBLIC_COMPLIMENTARY_PEPPER: 'synthetic-complimentary-pepper-at-least-thirty-two-characters',
+  MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY: 'synthetic-public-start-key-at-least-thirty-two-characters',
+  MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER: 'synthetic-complimentary-pepper-at-least-thirty-two-characters',
 });
 const PROFILE_ID = 'mm-20990101-paytest1';
 const TEST_NOW = Date.parse('2099-01-01T00:00:00.000Z');
@@ -32,8 +32,8 @@ function serviceFor(store) {
   return createPublicSiteService({
     store,
     clock: () => TEST_NOW,
-    startSigningKey: TEST_ENV.PUBLIC_PRODUCT_START_SIGNING_KEY,
-    complimentaryPepper: TEST_ENV.PUBLIC_COMPLIMENTARY_PEPPER,
+    startSigningKey: TEST_ENV.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
+    complimentaryPepper: TEST_ENV.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER,
     complimentaryManifest: '[]',
     profileStateReader: async () => ({ bos: 'ready', ba: 'ready' }),
     ownershipVerifier: async () => true,

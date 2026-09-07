@@ -66,7 +66,7 @@ function inquiryText(inquiry) {
 
 export function publicInquiryTransportConfigured(env = process.env) {
   try {
-    requireApiKey(env.PUBLIC_INQUIRY_RESEND_API_KEY);
+    requireApiKey(env.MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY);
     requireMailbox(env.PUBLIC_INQUIRY_EMAIL_FROM, 'public_inquiry_sender_required', { allowDisplayName: true });
     requireMailbox(env.PUBLIC_INQUIRY_EMAIL_TO, 'public_inquiry_destination_required');
     return true;
@@ -119,7 +119,7 @@ export function createResendInquiryTransport({ apiKey, from, to, fetchImpl = fet
 
 export function createResendInquiryTransportFromEnv(env = process.env, options = {}) {
   return createResendInquiryTransport({
-    apiKey: env.PUBLIC_INQUIRY_RESEND_API_KEY,
+    apiKey: env.MOREMINDMAP_SERVER_ONLY_INQUIRY_RESEND_API_KEY,
     from: env.PUBLIC_INQUIRY_EMAIL_FROM,
     to: env.PUBLIC_INQUIRY_EMAIL_TO,
     ...options,

@@ -16,7 +16,7 @@ export function createPublicRuntime(env = process.env, options = {}) {
     store,
     ownerReader: options.ownerReader || createCanonicalProfileOwnerReader(store),
     transport: options.ownershipTransport || createResendOwnershipTransport({ env }),
-    signingKey: env.PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY,
+    signingKey: env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
     audience: options.ownershipAudience || resolveProfileOwnershipAudience(env),
     clock: options.clock,
     tokenFactory: options.ownershipTokenFactory,
@@ -28,9 +28,9 @@ export function createPublicRuntime(env = process.env, options = {}) {
     || (publicInquiryTransportConfigured(env) ? createResendInquiryTransportFromEnv(env) : null);
   const service = createPublicSiteService({
     store,
-    startSigningKey: env.PUBLIC_PRODUCT_START_SIGNING_KEY,
-    complimentaryPepper: env.PUBLIC_COMPLIMENTARY_PEPPER,
-    complimentaryManifest: env.PUBLIC_COMPLIMENTARY_MANIFEST || '[]',
+    startSigningKey: env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
+    complimentaryPepper: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER,
+    complimentaryManifest: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '[]',
     profileStateReader: options.profileStateReader || createProfileStateReader(store),
     ownershipVerifier: options.ownershipVerifier || ((input) => ownership.verifyRequest(input)),
     inquiryTransport,

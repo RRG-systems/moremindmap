@@ -12,7 +12,7 @@ function mailbox(value, { displayName = false } = {}) {
 }
 
 export function publicProfileOwnershipTransportConfigured(env = process.env) {
-  const apiKey = String(env.PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY || '').trim();
+  const apiKey = String(env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY || '').trim();
   return /^re_[A-Za-z0-9_-]{12,240}$/u.test(apiKey)
     && Boolean(mailbox(env.PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM, { displayName: true }));
 }
@@ -20,7 +20,7 @@ export function publicProfileOwnershipTransportConfigured(env = process.env) {
 export function createResendOwnershipTransport({ env = process.env, fetchImpl = fetch } = {}) {
   return Object.freeze({
     async send(item = {}) {
-      const apiKey = String(env.PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY || '').trim();
+      const apiKey = String(env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY || '').trim();
       const from = mailbox(env.PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM, { displayName: true });
       const recipient = mailbox(item.recipient);
       const challengeId = boundedText(item.challenge_id, 160);
