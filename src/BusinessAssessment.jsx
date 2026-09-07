@@ -23,6 +23,7 @@ import {
   buildCustomerConfirmedSelection,
   suggestVerticalFromIndustry,
 } from './lib/baVerticalCassettesV1/index.js';
+import { renewStoredPublicStartToken } from './lib/publicProductStartSession.js';
 
 const QUESTIONS = REAL_ESTATE_INTAKE_QUESTIONS;
 const SUPPORTED_VERTICALS = PRODUCTION_BA_CASSETTE_REGISTRY.listSupported();
@@ -41,9 +42,13 @@ const INITIAL_QUESTION_STATES = QUESTIONS.reduce((acc, question) => {
 // capability value or digest may be shipped in this client bundle.
 const BUSINESS_ASSESSMENT_PROMO_CODES = new Set();
 
+function publicStartToken() {
+  if (typeof window === 'undefined') return '';
+  return window.sessionStorage.getItem('more.public.start_token.v1') || '';
+}
+
 function publicStartHeaders(headers = {}) {
-  if (typeof window === 'undefined') return headers;
-  const token = window.sessionStorage.getItem('more.public.start_token.v1') || '';
+  const token = publicStartToken();
   return token ? { ...headers, 'X-MORE-Start-Token': token } : headers;
 }
 
@@ -231,6 +236,9 @@ function PremiumPreviewHeader({ personName }) {
 export default function BusinessAssessment() {
   const [searchParams] = useSearchParams();
   const recruitingMode = searchParams.get('recruiting') === '1';
+  const [publicStartStatus, setPublicStartStatus] = useState(() => (
+    !recruitingMode && publicStartToken() ? 'checking' : 'idle'
+  ));
   const [promoCode, setPromoCode] = useState('');
   const [promoState, setPromoState] = useState({ status: 'idle', message: '' });
   const [retrieveId, setRetrieveId] = useState('');
@@ -347,6 +355,67 @@ export default function BusinessAssessment() {
       setRecruitingProfileGate((current) => ({ ...current, status: 'error', error: error.message }));
       setSubmitState({ status: 'error', error: error.message, result: null });
     });
+  }, [recruitingMode]);
+
+  useEffect(() => {
+    if (recruitingMode) return;
+    const token = publicStartToken();
+    if (!token) {
+      setPublicStartStatus('idle');
+      return;
+    }
+    let cancelled = false;
+
+    async function enterPublicBusinessAssessment() {
+      setPublicStartStatus('checking');
+      try {
+        const refreshed = await renewStoredPublicStartToken().catch(() => token);
+        const response = await fetch(buildApiUrl('/api/public-v1/product-start', true), {
+          method: 'POST',
+          headers: publicStartHeaders({ 'Content-Type': 'application/json' }),
+          credentials: 'same-origin',
+          body: JSON.stringify({ start_token: refreshed }),
+        });
+        const payload = await response.json().catch(() => null);
+        const profileId = normalizeOrdinaryCustomerProfileId(payload?.profile_id);
+        if (!response.ok
+          || payload?.ok !== true
+          || payload?.product_key !== 'business_assessment'
+          || !profileId
+          || !payload?.vertical_binding?.binding_sha256) {
+          throw new Error('public_business_assessment_start_unavailable');
+        }
+        const registration = PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical(
+          payload.vertical_binding.vertical_id,
+        );
+        if (registration.cassette_id !== payload.vertical_binding.cassette_id
+          || registration.cassette_version !== payload.vertical_binding.cassette_version) {
+          throw new Error('public_business_assessment_vertical_binding_mismatch');
+        }
+        const verticalSelection = buildCustomerConfirmedSelection(registration);
+        if (cancelled) return;
+        setAssessmentProfile({
+          id: profileId,
+          name: 'Verified MORE Profile',
+          profileType: 'Verified MORE Profile',
+          industry: '',
+          verticalSelection,
+        });
+        setFlowStarted(true);
+        setCurrentQuestionIndex(0);
+        setAnswers({ ...INITIAL_ANSWERS });
+        setQuestionStates({ ...INITIAL_QUESTION_STATES });
+        setSubmitState({ status: 'idle', error: '', result: null });
+        setPublicStartStatus('ready');
+      } catch {
+        if (!cancelled) setPublicStartStatus('unavailable');
+      }
+    }
+
+    void enterPublicBusinessAssessment();
+    return () => {
+      cancelled = true;
+    };
   }, [recruitingMode]);
 
   async function validateProfileForGate(event, gateType) {
@@ -766,7 +835,7 @@ export default function BusinessAssessment() {
     const { payload } = await retrieveBusinessAssessment(
       ownerProfileId,
       (path) => buildApiUrl(path, recruitingMode),
-      { headers: publicStartHeaders(), credentials: recruitingMode ? 'same-origin' : 'omit' },
+      { headers: publicStartHeaders(), credentials: 'same-origin' },
     );
     return payload;
   }
@@ -878,6 +947,7 @@ export default function BusinessAssessment() {
     let savedPayload = null;
 
     try {
+      if (!recruitingMode && publicStartToken()) await renewStoredPublicStartToken();
       const response = await fetch(buildApiUrl('/api/business-assessment/start', recruitingMode), {
         method: 'POST',
         headers: publicStartHeaders({ 'Content-Type': 'application/json' }),
@@ -1318,7 +1388,23 @@ export default function BusinessAssessment() {
           </section>
         )}
 
-        {!flowStarted && !previewPremium && !recruitingMode && (
+        {!flowStarted && !previewPremium && !recruitingMode && publicStartStatus === 'checking' && (
+          <section className="mx-auto w-full max-w-xl">
+            <div className="rounded-[2rem] border border-white/12 bg-[#101114] p-8 text-center shadow-[0_24px_90px_rgba(0,0,0,0.4)]">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-300">
+                Business Assessment Access
+              </p>
+              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                Preparing your assessment...
+              </h1>
+              <p className="mt-3 text-sm leading-6 text-white/62">
+                We are verifying the Profile and business type bound to this access.
+              </p>
+            </div>
+          </section>
+        )}
+
+        {!flowStarted && !previewPremium && !recruitingMode && publicStartStatus !== 'checking' && (
           <section className="mx-auto w-full max-w-7xl">
             <div className="text-center">
               <p className="text-4xl font-semibold tracking-[0.12em] text-white md:text-5xl">

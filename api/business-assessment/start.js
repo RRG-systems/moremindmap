@@ -20,6 +20,7 @@ import {
 import { queueBaCompletedContactSync, splitContactName } from '../integrations/gohighlevel/completionHooks.js';
 import { buildGovernedQuestionStates } from '../engine/businessAssessment/questionStates.js';
 import {
+  authorizePublicOrRecruitingProductRequest,
   projectRecruitingBaState,
   resolveRecruitingBaOwnerProfile,
 } from '../engine/recruitingV1/canonicalAdapters.js';
@@ -31,9 +32,21 @@ import {
   PRODUCTION_BA_CASSETTE_REGISTRY,
   realEstateAssessmentTypeForAnswers,
 } from '../../src/lib/baVerticalCassettesV1/index.js';
-import { buildCustomerConfirmedVerticalBinding } from './verticalBinding.js';
+import {
+  buildCustomerConfirmedVerticalBinding,
+  reconcileGrantedVerticalBinding,
+  validatePersistedVerticalBinding,
+} from './verticalBinding.js';
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
-import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
+import { canonicalJson, normalizeProfileId } from '../../src/lib/publicSiteAirlockV1/contracts.js';
+import {
+  claimProductExecution,
+  commitProductExecution,
+  deterministicAssessmentId,
+  deterministicExecutionUuid,
+  productExecutionFingerprint,
+  releaseProductExecution,
+} from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
 
 function normalizeAnswers(answers = {}, questionKeys = []) {
   const normalized = {};
@@ -41,6 +54,87 @@ function normalizeAnswers(answers = {}, questionKeys = []) {
     normalized[key] = typeof answers[key] === 'string' ? answers[key] : String(answers[key] || '');
   }
   return normalized;
+}
+
+function parseRecord(raw) {
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function replayStableVerticalAuthority(binding) {
+  if (!binding || typeof binding !== 'object') return null;
+  const {
+    selected_at: ignoredSelectedAt,
+    binding_sha256: ignoredBindingSha256,
+    ...stableAuthority
+  } = binding;
+  void ignoredSelectedAt;
+  void ignoredBindingSha256;
+  return stableAuthority;
+}
+
+async function verifyCommittedAssessmentExecution(redis, {
+  execution,
+  expectedOwnerProfileId,
+  expectedVerticalBinding,
+  expectedAnswers,
+  expectedQuestionStates,
+  expectedGrantId,
+  expectedRelationshipRef,
+  requestSha256,
+}) {
+  const assessmentId = execution?.identifiers?.assessment_id;
+  const jobId = execution?.identifiers?.job_id;
+  const [assessmentRaw, jobRaw, profileAssessmentId] = await Promise.all([
+    redis.get(businessAssessmentKey(assessmentId)),
+    redis.get(businessAssessmentJobKey(jobId)),
+    redis.get(businessAssessmentByProfileKey(expectedOwnerProfileId)),
+  ]);
+  const assessment = parseRecord(assessmentRaw);
+  const job = parseRecord(jobRaw);
+  const valid = assessment
+    && job
+    && assessment.assessment_id === assessmentId
+    && assessment.owner_profile_id === expectedOwnerProfileId
+    && (assessment.metadata?.public_product_grant_id || null) === (expectedGrantId || null)
+    && (assessment.metadata?.recruiting_relationship_ref || null) === (expectedRelationshipRef || null)
+    && assessment.metadata?.product_execution_request_sha256 === requestSha256
+    && canonicalJson(assessment.vertical_binding) === canonicalJson(expectedVerticalBinding)
+    && canonicalJson(assessment.inputs?.answers) === canonicalJson(expectedAnswers)
+    && canonicalJson(assessment.inputs?.question_states) === canonicalJson(expectedQuestionStates)
+    && job.job_id === jobId
+    && job.assessment_id === assessmentId
+    && job.owner_profile_id === expectedOwnerProfileId
+    && profileAssessmentId === assessmentId;
+  if (!valid) throw new Error('public_product_execution_artifact_mismatch');
+  return { assessment, job };
+}
+
+export async function projectRecruitingBaStateIdempotently({
+  relationshipRef,
+  assessmentId,
+  project = projectRecruitingBaState,
+}) {
+  if (!relationshipRef) return;
+  try {
+    return await project({
+      relationshipRef,
+      assessmentId,
+      state: 'BA_INTAKE_SAVED',
+    });
+  } catch (recruitingProjectionError) {
+    console.error(JSON.stringify({
+      event: 'RECRUITING_BA_INTAKE_PROJECTION_FAILED',
+      code: 'RECRUITING_BA_INTAKE_PROJECTION_PENDING',
+      customer_payload_logged: false,
+    }));
+    void recruitingProjectionError;
+    throw new Error('RECRUITING_BA_INTAKE_PROJECTION_PENDING');
+  }
 }
 
 export default async function handler(req, res) {
@@ -55,6 +149,8 @@ export default async function handler(req, res) {
   }
 
   let redis;
+  let publicStore;
+  let executionClaim;
   try {
     const {
       owner_profile_id,
@@ -96,7 +192,7 @@ export default async function handler(req, res) {
     }
 
     const recruitingAuthority = await resolveRecruitingBaOwnerProfile(req, owner_profile_id, {
-      required: req.body?.recruiting_mode === 'accepted_invitation',
+      inspectIfPresent: true,
     });
     const parsedProfile = parseProfileId(recruitingAuthority.owner_profile_id);
 
@@ -105,7 +201,21 @@ export default async function handler(req, res) {
     }
 
     redis = createRedisClient();
+    publicStore = new RedisPublicStore(redis);
+    const publicAuthority = await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'business_assessment',
+      profileId: parsedProfile.normalized,
+      relationshipRef: recruitingAuthority.relationship_ref || '',
+    });
+    if (publicAuthority.grant
+        && normalizeProfileId(publicAuthority.grant.profile_id) !== parsedProfile.normalized) {
+      throw new Error('public_product_profile_binding_mismatch');
+    }
 
+    // Resolve access before Profile existence so callers cannot distinguish a
+    // real Profile from a missing one without exact product/relationship scope.
     const profileLookup = await getCanonicalProfile(redis, parsedProfile.normalized);
     if (!profileLookup.found) {
       return res.status(404).json({
@@ -114,23 +224,67 @@ export default async function handler(req, res) {
         owner_profile_id: parsedProfile.normalized
       });
     }
-
-    const publicAuthority = await authorizeProductRequest({
-      req,
-      store: new RedisPublicStore(redis),
-      productKey: 'business_assessment',
-      profileId: parsedProfile.normalized,
-    });
-    if (publicAuthority.grant?.vertical_binding?.binding_sha256
-      && publicAuthority.grant.vertical_binding.binding_sha256 !== verticalBinding.binding_sha256) {
-      return res.status(403).json({ success: false, error: 'Confirmed business vertical does not match this access grant.' });
+    if (publicAuthority.grant?.vertical_binding) {
+      try {
+        verticalBinding = reconcileGrantedVerticalBinding({
+          requestedBinding: verticalBinding,
+          grantBinding: publicAuthority.grant.vertical_binding,
+          registry: PRODUCTION_BA_CASSETTE_REGISTRY,
+        });
+      } catch (error) {
+        if (!(error instanceof BaVerticalContractError)) throw error;
+        return res.status(403).json({ success: false, error: 'Confirmed business vertical does not match this access grant.' });
+      }
     }
 
     const now = new Date();
     const questionKeys = registration.intake_contract.questions.map((question) => question.key);
     const normalizedAnswers = normalizeAnswers(answers, questionKeys);
-    const assessmentId = createAssessmentId(now);
-    const jobId = createJobId();
+    const semanticQuestionStates = buildGovernedQuestionStates({
+      answers: normalizedAnswers,
+      requestedStates: question_states,
+      assessmentId: 'ba-execution-pending',
+    });
+    const requestSha256 = productExecutionFingerprint('business_assessment', {
+      owner_profile_id: parsedProfile.normalized,
+      vertical_binding_authority: publicAuthority.grant?.vertical_binding
+        ? { binding_sha256: verticalBinding.binding_sha256 }
+        : replayStableVerticalAuthority(verticalBinding),
+      answers: normalizedAnswers,
+      question_states: semanticQuestionStates,
+    });
+    const authorityRef = publicAuthority.grant?.grant_id || publicAuthority.relationship_ref || '';
+    const proposedAssessmentId = authorityRef
+      ? deterministicAssessmentId({
+          authorityRef,
+          productKey: 'business_assessment',
+          requestSha256,
+          now: now.getTime(),
+        })
+      : createAssessmentId(now);
+    const proposedJobId = authorityRef
+      ? deterministicExecutionUuid({
+          authorityRef,
+          productKey: 'business_assessment',
+          requestSha256,
+          kind: 'job',
+        })
+      : createJobId();
+    executionClaim = await claimProductExecution({
+      store: publicStore,
+      authority: publicAuthority,
+      productKey: 'business_assessment',
+      requestSha256,
+      identifiers: { assessment_id: proposedAssessmentId, job_id: proposedJobId },
+      context: { vertical_binding: verticalBinding },
+      now: now.getTime(),
+    });
+    const assessmentId = executionClaim.record?.identifiers?.assessment_id || proposedAssessmentId;
+    const jobId = executionClaim.record?.identifiers?.job_id || proposedJobId;
+    verticalBinding = validatePersistedVerticalBinding(
+      executionClaim.record?.context?.vertical_binding || verticalBinding,
+      { registry: PRODUCTION_BA_CASSETTE_REGISTRY },
+    );
     const governedQuestionStates = buildGovernedQuestionStates({
       answers: normalizedAnswers,
       requestedStates: question_states,
@@ -167,6 +321,8 @@ export default async function handler(req, res) {
         model: null,
         notes: 'Sprint 2 intake only. No intelligence generated.',
         recruiting_relationship_ref: recruitingAuthority.relationship_ref || null,
+        public_product_grant_id: publicAuthority.grant?.grant_id || null,
+        product_execution_request_sha256: requestSha256,
       }
     };
 
@@ -180,25 +336,75 @@ export default async function handler(req, res) {
       updated_at: now.toISOString()
     };
 
-    await redis.set(businessAssessmentKey(assessmentId), JSON.stringify(record));
-    await redis.set(businessAssessmentByProfileKey(parsedProfile.normalized), assessmentId);
-    await redis.set(businessAssessmentJobKey(jobId), JSON.stringify(job));
-    await redis.sadd(`business_assessment:index:date:${now.toISOString().slice(0, 10)}`, assessmentId);
-    await redis.sadd(`business_assessment:index:type:${assessmentType}`, assessmentId);
+    const startResult = {
+      success: true,
+      job_id: jobId,
+      assessment_id: assessmentId,
+      status: 'completed',
+      intake_status: 'intake_saved',
+      assessment_type: assessmentType,
+      profile_context: profileContext,
+      vertical_state: {
+        vertical_id: verticalBinding.vertical_id,
+        vertical_label: verticalBinding.vertical_label,
+        cassette_id: verticalBinding.cassette_id,
+      }
+    };
 
-    try {
-      await projectRecruitingBaState({
+    if (executionClaim.code === 'REPLAY') {
+      await verifyCommittedAssessmentExecution(redis, {
+        execution: executionClaim.record,
+        expectedOwnerProfileId: parsedProfile.normalized,
+        expectedVerticalBinding: verticalBinding,
+        expectedAnswers: normalizedAnswers,
+        expectedQuestionStates: governedQuestionStates,
+        expectedGrantId: publicAuthority.grant?.grant_id || null,
+        expectedRelationshipRef: recruitingAuthority.relationship_ref || null,
+        requestSha256,
+      });
+      await projectRecruitingBaStateIdempotently({
         relationshipRef: recruitingAuthority.relationship_ref,
         assessmentId,
-        state: 'BA_INTAKE_SAVED',
       });
-    } catch (recruitingProjectionError) {
-      console.error(JSON.stringify({
-        event: 'RECRUITING_BA_INTAKE_PROJECTION_FAILED',
-        code: String(recruitingProjectionError?.message || 'RECRUITING_BA_PROJECTION_FAILED').split(':')[0],
-        customer_payload_logged: false,
-      }));
+      return res.status(200).json(executionClaim.record.result || startResult);
     }
+    if (executionClaim.code === 'IN_PROGRESS') {
+      return res.status(409).json({
+        success: false,
+        error: 'This assessment intake is already being saved. Retry the same submission.',
+        job_id: jobId,
+        assessment_id: assessmentId,
+      });
+    }
+
+    if (executionClaim.code === 'BYPASS') {
+      await redis.set(businessAssessmentKey(assessmentId), JSON.stringify(record));
+      await redis.set(businessAssessmentByProfileKey(parsedProfile.normalized), assessmentId);
+      await redis.set(businessAssessmentJobKey(jobId), JSON.stringify(job));
+      await redis.sadd(`business_assessment:index:date:${now.toISOString().slice(0, 10)}`, assessmentId);
+      await redis.sadd(`business_assessment:index:type:${assessmentType}`, assessmentId);
+    } else {
+      await commitProductExecution({
+        store: publicStore,
+        claim: executionClaim,
+        result: startResult,
+        setValues: [
+          { key: businessAssessmentKey(assessmentId), value: JSON.stringify(record) },
+          { key: businessAssessmentByProfileKey(parsedProfile.normalized), value: assessmentId },
+          { key: businessAssessmentJobKey(jobId), value: JSON.stringify(job) },
+        ],
+        setMembers: [
+          { key: `business_assessment:index:date:${now.toISOString().slice(0, 10)}`, value: assessmentId },
+          { key: `business_assessment:index:type:${assessmentType}`, value: assessmentId },
+        ],
+        now: now.getTime(),
+      });
+    }
+
+    await projectRecruitingBaStateIdempotently({
+      relationshipRef: recruitingAuthority.relationship_ref,
+      assessmentId,
+    });
 
     const identity = extractNotificationIdentityFromDossier(profileLookup.dossier);
     const { firstName, lastName } = splitContactName(identity.full_name || profileContext.owner_profile_name);
@@ -230,28 +436,25 @@ export default async function handler(req, res) {
       console.warn('[BUSINESS-ASSESSMENT-START] Business Assessment notification was not sent:', notificationResult.reason || notificationResult.status);
     }
 
-    return res.status(200).json({
-      success: true,
-      job_id: jobId,
-      assessment_id: assessmentId,
-      status: 'completed',
-      intake_status: 'intake_saved',
-      assessment_type: assessmentType,
-      profile_context: profileContext,
-      vertical_state: {
-        vertical_id: verticalBinding.vertical_id,
-        vertical_label: verticalBinding.vertical_label,
-        cassette_id: verticalBinding.cassette_id,
-      }
-    });
+    return res.status(200).json(startResult);
   } catch (error) {
-    console.error(JSON.stringify({ event: 'BUSINESS_ASSESSMENT_START_FAILED', code: String(error?.message || 'unknown').split(':')[0], customer_payload_logged: false }));
+    if (publicStore && executionClaim?.code === 'ACQUIRED') {
+      try { await releaseProductExecution({ store: publicStore, claim: executionClaim }); } catch { /* lease expiry remains a recovery path */ }
+    }
+    console.error(JSON.stringify({ event: 'BUSINESS_ASSESSMENT_START_FAILED', code: 'START_REQUEST_FAILED', customer_payload_logged: false }));
     if (/public_product_/u.test(error?.message || '')) {
       return res.status(403).json({ success: false, error: 'Product access could not be verified.' });
     }
+    if (error?.message === 'RECRUITING_BA_INTAKE_PROJECTION_PENDING') {
+      return res.status(503).json({
+        success: false,
+        retryable: true,
+        error: 'Assessment intake was saved, but Recruiting readiness is pending. Retry the same submission.',
+      });
+    }
     return res.status(500).json({
       success: false,
-      error: error.message || 'Failed to save business assessment intake'
+      error: 'Failed to save business assessment intake'
     });
   } finally {
     if (redis) await redis.disconnect();

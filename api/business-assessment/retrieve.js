@@ -1,5 +1,4 @@
 import {
-  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
@@ -8,6 +7,11 @@ import {
   parseProfileId,
   setCors
 } from './shared.js';
+import {
+  authorizeBusinessAssessmentIdBeforeRead,
+  authorizePublicOrRecruitingProductRequest,
+} from '../engine/recruitingV1/canonicalAdapters.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 
 function buildRetrieveResponse(assessment, ownerProfileId) {
   const profileContext = assessment.profile_context || {};
@@ -40,6 +44,24 @@ function buildNotFoundResponse({ ownerProfileId = null, assessmentId = null, mes
   };
 }
 
+export async function readAuthorizedAssessmentById({ redis, assessmentId, authorizeRead }) {
+  const raw = await redis.get(businessAssessmentKey(assessmentId));
+  if (!raw) return null;
+
+  let assessment;
+  try {
+    assessment = JSON.parse(raw);
+  } catch {
+    return null;
+  }
+  if (!assessment || typeof assessment !== 'object' || Array.isArray(assessment)) return null;
+
+  const parsedOwner = parseProfileId(assessment.owner_profile_id);
+  if (!parsedOwner) return null;
+  await authorizeRead(parsedOwner.normalized, assessment);
+  return Object.freeze({ assessment, ownerProfileId: parsedOwner.normalized });
+}
+
 export default async function handler(req, res) {
   if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
 
@@ -67,27 +89,43 @@ export default async function handler(req, res) {
   let redis;
   try {
     redis = createRedisClient();
+    const publicStore = new RedisPublicStore(redis);
 
     if (parsedAssessment) {
-      await authorizeBusinessAssessmentRequest(req, redis);
-      const raw = await redis.get(businessAssessmentKey(parsedAssessment.normalized));
-      if (!raw) {
-        return res.status(200).json(
-          buildNotFoundResponse({
-            assessmentId: parsedAssessment.normalized,
-            message: 'No Business Assessment found for this Assessment ID.'
-          })
-        );
-      }
-
-      const assessment = JSON.parse(raw);
-      await authorizeBusinessAssessmentRequest(req, redis, assessment.owner_profile_id);
+      await authorizeBusinessAssessmentIdBeforeRead({
+        req,
+        store: publicStore,
+        assessmentId: parsedAssessment.normalized,
+        force: true,
+      });
+      const authorized = await readAuthorizedAssessmentById({
+        redis,
+        assessmentId: parsedAssessment.normalized,
+        authorizeRead: (ownerProfileId, assessment) => authorizePublicOrRecruitingProductRequest({
+          req,
+          store: publicStore,
+          productKey: 'business_assessment',
+          profileId: ownerProfileId,
+          relationshipRef: assessment.metadata?.recruiting_relationship_ref || '',
+          assessmentId: parsedAssessment.normalized,
+          read: true,
+          force: true,
+        }),
+      });
+      if (!authorized) return res.status(404).json({ success: false, error: 'Assessment not found' });
       return res.status(200).json(
-        buildRetrieveResponse(assessment, assessment.owner_profile_id || parsedProfile?.normalized || null)
+        buildRetrieveResponse(authorized.assessment, authorized.ownerProfileId)
       );
     }
 
-    await authorizeBusinessAssessmentRequest(req, redis, parsedProfile.normalized);
+    await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'business_assessment',
+      profileId: parsedProfile.normalized,
+      read: true,
+      allowProfileBoundBaRead: true,
+    });
     const assessmentId = await redis.get(businessAssessmentByProfileKey(parsedProfile.normalized));
 
     if (!assessmentId) {
@@ -111,6 +149,19 @@ export default async function handler(req, res) {
     }
 
     const assessment = JSON.parse(raw);
+    const assessmentOwner = parseProfileId(assessment?.owner_profile_id)?.normalized;
+    if (!assessmentOwner || assessmentOwner !== parsedProfile.normalized) {
+      return res.status(404).json({ success: false, error: 'Assessment not found' });
+    }
+    await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'business_assessment',
+      profileId: parsedProfile.normalized,
+      relationshipRef: assessment.metadata?.recruiting_relationship_ref || '',
+      assessmentId,
+      read: true,
+    });
     return res.status(200).json(buildRetrieveResponse(assessment, parsedProfile.normalized));
   } catch (error) {
     if (isPublicProductAuthorityError(error)) {

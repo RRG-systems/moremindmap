@@ -1,5 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  clearPendingCheckoutSessionId,
+  readPendingCheckoutSessionId,
+  readStoredPublicStartToken,
+  storePendingCheckoutSessionId,
+  storePublicStartToken,
+} from './lib/publicProductStartSession.js';
+
+const MAX_ACCESS_CHECK_ATTEMPTS = 8;
+const ACCESS_CHECK_RETRY_DELAY_MS = 1500;
 
 function buildApiUrl(path) {
   const baseUrl = import.meta.env.VITE_API_URL || '';
@@ -18,46 +28,85 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const product = displayProduct(searchParams.get('product'));
-  const sessionId = searchParams.get('session_id') || '';
-  const [accessState, setAccessState] = useState({ status: 'idle', active: false, startToken: '' });
+  const checkoutSessionId = searchParams.get('session_id') || '';
+  const [sessionId] = useState(() => checkoutSessionId || readPendingCheckoutSessionId());
+  const [retrySequence, setRetrySequence] = useState(0);
+  const [accessState, setAccessState] = useState(() => {
+    if (sessionId) return { status: 'idle', active: false, startToken: '' };
+    const startToken = readStoredPublicStartToken();
+    return { status: startToken ? 'checked' : 'idle', active: Boolean(startToken), startToken };
+  });
+
+  useLayoutEffect(() => {
+    if (!sessionId || typeof window === 'undefined') return;
+    storePendingCheckoutSessionId(sessionId);
+    const scrubbed = new URL(window.location.href);
+    if (!scrubbed.searchParams.has('session_id')) return;
+    scrubbed.searchParams.delete('session_id');
+    window.history.replaceState(
+      window.history.state,
+      document.title,
+      `${scrubbed.pathname}${scrubbed.search}${scrubbed.hash}`,
+    );
+  }, [sessionId]);
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer = null;
+
+    function waitForRetry() {
+      return new Promise((resolve) => {
+        retryTimer = window.setTimeout(resolve, ACCESS_CHECK_RETRY_DELAY_MS);
+      });
+    }
+
     async function checkAccess() {
       if (!sessionId) return;
       setAccessState({ status: 'checking', active: false, startToken: '' });
-      try {
-        const response = await fetch(
-          buildApiUrl(`/api/stripe/access-status?session_id=${encodeURIComponent(sessionId)}`)
-        );
-        const payload = await response.json().catch(() => null);
-        if (cancelled) return;
-        let startToken = '';
-        const active = Boolean(response.ok && payload?.access_found && payload?.payment_truth === 'webhook_confirmed');
-        if (active) {
-          const tokenResponse = await fetch(buildApiUrl('/api/public-v1/access'), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'same-origin',
-            body: JSON.stringify({ action: 'create_start_token_from_session', checkout_session_id: sessionId }),
-          });
-          const tokenPayload = await tokenResponse.json().catch(() => null);
-          if (tokenResponse.ok && tokenPayload?.ok) startToken = tokenPayload.start_token || '';
+      for (let attempt = 0; attempt < MAX_ACCESS_CHECK_ATTEMPTS && !cancelled; attempt += 1) {
+        try {
+          const response = await fetch(
+            buildApiUrl(`/api/stripe/access-status?session_id=${encodeURIComponent(sessionId)}`),
+            { credentials: 'same-origin', cache: 'no-store' },
+          );
+          const payload = await response.json().catch(() => null);
+          if (cancelled) return;
+          const active = Boolean(
+            response.ok
+              && payload?.access_found
+              && payload?.payment_truth === 'webhook_confirmed',
+          );
+          if (active) {
+            const tokenResponse = await fetch(buildApiUrl('/api/public-v1/access'), {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify({ action: 'create_start_token_from_session', checkout_session_id: sessionId }),
+            });
+            const tokenPayload = await tokenResponse.json().catch(() => null);
+            const startToken = tokenResponse.ok && tokenPayload?.ok
+              ? tokenPayload.start_token || ''
+              : '';
+            if (startToken) {
+              const startTokenStored = storePublicStartToken(startToken);
+              if (startTokenStored) clearPendingCheckoutSessionId();
+              setAccessState({ status: 'checked', active: true, startToken });
+              return;
+            }
+          }
+        } catch {
+          // A webhook or transient network response may lag the checkout redirect.
         }
-        setAccessState({
-          status: 'checked',
-          active,
-          startToken,
-        });
-      } catch {
-        if (!cancelled) setAccessState({ status: 'checked', active: false, startToken: '' });
+        if (attempt < MAX_ACCESS_CHECK_ATTEMPTS - 1) await waitForRetry();
       }
+      if (!cancelled) setAccessState({ status: 'checked', active: false, startToken: '' });
     }
     checkAccess();
     return () => {
       cancelled = true;
+      if (retryTimer !== null) window.clearTimeout(retryTimer);
     };
-  }, [sessionId]);
+  }, [retrySequence, sessionId]);
 
   async function continueToProduct() {
     if (!accessState.startToken) return;
@@ -69,7 +118,7 @@ export default function PaymentSuccess() {
     });
     const payload = await response.json().catch(() => null);
     if (!response.ok || !payload?.ok || !payload.destination) return;
-    window.sessionStorage.setItem('more.public.start_token.v1', accessState.startToken);
+    storePublicStartToken(accessState.startToken);
     navigate(payload.destination);
   }
 
@@ -100,6 +149,15 @@ export default function PaymentSuccess() {
                 className="rounded-xl bg-white px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-black transition hover:bg-emerald-100"
               >
                 Continue To Product
+              </button>
+            )}
+            {!accessState.active && accessState.status === 'checked' && sessionId && (
+              <button
+                type="button"
+                onClick={() => setRetrySequence((sequence) => sequence + 1)}
+                className="rounded-xl border border-emerald-200/35 px-5 py-3 text-center text-sm font-bold uppercase tracking-[0.16em] text-emerald-100 transition hover:border-emerald-100 hover:bg-emerald-300/10"
+              >
+                Retry Verification
               </button>
             )}
             <Link

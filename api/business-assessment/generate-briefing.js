@@ -1,6 +1,5 @@
 /* global process */
 import {
-  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
@@ -9,6 +8,8 @@ import {
   parseProfileId,
   setCors
 } from './shared.js';
+import { authorizePublicOrRecruitingProductRequest } from '../engine/recruitingV1/canonicalAdapters.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 import { REAL_ESTATE_BUSINESS_MODEL_V1 } from '../engine/businessAssessment/realEstateBusinessModelV1.js';
 import { buildExecutiveDiagnosticBriefingPrompt } from '../engine/businessAssessment/buildExecutiveDiagnosticBriefingPrompt.js';
 import {
@@ -1198,7 +1199,14 @@ export default async function handler(req, res) {
     activeAssessmentRecord = assessmentRecord;
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
     activeOwnerProfileId = ownerProfileId;
-    await authorizeBusinessAssessmentRequest(req, redis, ownerProfileId);
+    await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: new RedisPublicStore(redis),
+      productKey: 'business_assessment',
+      profileId: ownerProfileId,
+      relationshipRef: assessmentRecord.metadata?.recruiting_relationship_ref || '',
+      assessmentId,
+    });
     const businessIntelligenceDraft = assessmentRecord.output?.business_intelligence_draft;
 
     if (!businessIntelligenceDraft) {

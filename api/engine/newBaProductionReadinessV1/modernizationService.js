@@ -144,7 +144,7 @@ export function createNewBaModernizationService({
         diagnostics: diagnostics.snapshot(),
       });
     },
-    async retrieve({ profileId, suppliedToken = '' }) {
+    async retrieve({ profileId, suppliedToken = '', readOnly = false }) {
       const profile = authorizeNewBaRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: profile, feature_state: config.customerActive ? 'customer_active' : 'private_canary' });
       const desired = await desiredState(profile);
@@ -153,8 +153,6 @@ export function createNewBaModernizationService({
         diagnostics.record('current_fast_path', { profile_id: profile, realization_id: initial.pointer });
         return serve(initial.current, 'current_fast_path');
       }
-      const repaired = await repairExactPointer(profile, initial);
-      if (repaired) return repaired;
       const priorCompatibility = classifyCompatiblePriorRealization({ current: initial.current, desiredIdentity: desired.identity });
       if (initial.state === 'stale' && priorCompatibility.serveable) {
         diagnostics.record('compatible_prior_fast_path', {
@@ -165,6 +163,12 @@ export function createNewBaModernizationService({
         });
         return serve(initial.current, 'compatible_prior_fast_path');
       }
+      if (readOnly) {
+        diagnostics.record('provider_disabled', { profile_id: profile, realization_state: initial.state });
+        throw new Error('public_product_current_artifact_unavailable');
+      }
+      const repaired = await repairExactPointer(profile, initial);
+      if (repaired) return repaired;
       if (!config.persistenceEnabled || (typeof generator?.generate !== 'function' && typeof generator?.advance !== 'function')) {
         diagnostics.record('provider_disabled', { profile_id: profile, realization_state: initial.state });
         throw new Error('new_ba_modernization_rebuild_default_off');

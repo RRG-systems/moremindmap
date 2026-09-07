@@ -14,6 +14,7 @@ import {
   createBosDraftCoordinator,
   createBosDraftSnapshot,
 } from "./lib/bosIntakeDurability.js";
+import { renewStoredPublicStartToken } from './lib/publicProductStartSession.js';
 
 // Complimentary authority is server-owned by publicSiteAirlockV1. No active
 // capability value or digest may be shipped in this client bundle.
@@ -309,14 +310,18 @@ function buildApiUrl(baseUrl, endpoint) {
 }
 
 export default function Profile() {
+  const ownerRouteProfileId = typeof window !== 'undefined'
+    ? new URLSearchParams(window.location.search).get('id') || ''
+    : ''
   const recruitingRequested = typeof window !== 'undefined'
     && new URLSearchParams(window.location.search).get('recruiting') === '1'
   const [recruitingAuthorized, setRecruitingAuthorized] = useState(false)
+  const [publicBosAuthorized, setPublicBosAuthorized] = useState(false)
   const [page0AComplete, setPage0AComplete] = useState(false)
   const [organizationalMetadata, setOrganizationalMetadata] = useState(null)
   const [page0BComplete, setPage0BComplete] = useState(false)
   const [contextualSignals, setContextualSignals] = useState(null)
-  const [paymentPassed, setPaymentPassed] = useState(false)
+  const [paymentPassed, setPaymentPassed] = useState(() => Boolean(publicStartToken()))
   const [started, setStarted] = useState(false)
   const [step, setStep] = useState(0)
   const [fullName, setFullName] = useState("")
@@ -358,7 +363,38 @@ export default function Profile() {
   }, [])
 
   useEffect(() => {
-    if (publicStartToken()) setPaymentPassed(true)
+    const token = publicStartToken()
+    if (!token) return
+    let cancelled = false
+    async function enterPublicBos() {
+      try {
+        const refreshed = await renewStoredPublicStartToken().catch(() => token)
+        const response = await fetch('/api/public-v1/product-start', {
+          method: 'POST',
+          headers: publicStartHeaders({ 'Content-Type': 'application/json' }),
+          credentials: 'same-origin',
+          body: JSON.stringify({ start_token: refreshed })
+        })
+        const payload = await response.json().catch(() => null)
+        if (cancelled) return
+        const authorized = Boolean(
+          response.ok
+            && payload?.ok === true
+            && payload?.product_key === 'behavior_operating_system'
+        )
+        setPublicBosAuthorized(authorized)
+        setPaymentPassed(authorized)
+      } catch {
+        if (!cancelled) {
+          setPublicBosAuthorized(false)
+          setPaymentPassed(false)
+        }
+      }
+    }
+    void enterPublicBos()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
@@ -501,9 +537,9 @@ export default function Profile() {
     }
   }
 
-  async function validateProfileId() {
+  async function validateProfileId(requestedId = profileId) {
     setProfileIdError(null)
-    const id = profileId.trim()
+    const id = String(requestedId || '').trim()
     
     if (!id) {
       setProfileIdError("Please enter a profile ID")
@@ -521,7 +557,7 @@ export default function Profile() {
       const fullUrl =
         `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(id)}`
       console.log('[VALIDATE] Full URL:', fullUrl)
-      const res = await fetch(fullUrl, { headers: publicStartHeaders(), cache: 'no-store' })
+      const res = await fetch(fullUrl, { headers: publicStartHeaders(), credentials: 'same-origin', cache: 'no-store' })
       console.log('[VALIDATE] Response status:', res.status)
       console.log('[VALIDATE] Response ok?', res.ok)
       
@@ -587,6 +623,14 @@ export default function Profile() {
     }
   }
 
+  useEffect(() => {
+    if (!ownerRouteProfileId) return
+    setProfileId(ownerRouteProfileId)
+    void validateProfileId(ownerRouteProfileId)
+    // Exact owner-receipt route bootstrap intentionally runs once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function handleStartAssessment() {
     // If promo is active, skip checkout and enter Page 0A
     if (promoValidated) {
@@ -651,6 +695,7 @@ export default function Profile() {
     setProcessing(true)
     
     try {
+      if (publicBosAuthorized) await renewStoredPublicStartToken()
       // Transform responses to new format: { questionId: answer }
       const answers = {}
       questions.forEach((q) => {
@@ -679,7 +724,9 @@ export default function Profile() {
       const API = import.meta.env.VITE_API_URL || ""
       
       // CONTROLLED BETA: Route validated Behavior Profile promo users to Mini V2 async endpoint
-      const useV2 = recruitingAuthorized || (promoValidated && BEHAVIOR_PROFILE_PROMO_CODES.has(promoCode.trim().toUpperCase()))
+      const useV2 = recruitingAuthorized
+        || publicBosAuthorized
+        || (promoValidated && BEHAVIOR_PROFILE_PROMO_CODES.has(promoCode.trim().toUpperCase()))
       
       console.log("[SUBMIT] Using Mini V2:", useV2)
 
@@ -953,7 +1000,7 @@ export default function Profile() {
               setProfileId={setProfileId}
               profileIdError={profileIdError}
               profileIdLoading={profileIdLoading}
-              validateProfileId={validateProfileId}
+              validateProfileId={() => validateProfileId()}
               onStart={handleStartAssessment}
               checkoutLoading={checkoutLoading}
               checkoutError={checkoutError}

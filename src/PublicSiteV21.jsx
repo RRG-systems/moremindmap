@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './publicSiteV21.css';
 import { resolveProductionAthleteDestination } from './publicSiteV21Config.js';
@@ -66,25 +66,66 @@ function idempotencyKey(scope) {
   return `${scope}:${random}`;
 }
 
+function stableAttemptKey(attemptRef, scope, fingerprint) {
+  if (attemptRef.current.fingerprint !== fingerprint) {
+    attemptRef.current = { fingerprint, key: idempotencyKey(scope) };
+  }
+  return attemptRef.current.key;
+}
+
 function customerMessage(code) {
   const messages = {
     not_found: 'This action is not enabled in the current review configuration.',
-    ownership_verification_required: 'We need to verify that this MindMap belongs to you before opening it.',
+    ownership_verification_required: 'If this Profile can be verified, use the private link sent to the email connected to it.',
+    ownership_verification_failed: 'That verification link is invalid or has expired. Request a new link to continue.',
+    ownership_verified: 'Ownership verified. Enter your MORE Profile ID again to continue.',
+    missing: 'We could not find a completed result for that verified Profile.',
     completed_bos_required: 'Build or retrieve your MindMap first.',
+    profile_ownership_required: 'Verify that this MindMap belongs to you before continuing.',
+    purchase_already_granted: 'This purchase is already complete. Use your existing payment return or retrieve your result.',
     subscription_checkout_gated: 'Subscription checkout is not open yet. No payment was started.',
     request_unavailable: 'This action is not available right now. Nothing was changed.',
   };
   return messages[code] || 'We could not verify that request. Nothing was changed.';
 }
 
+function useProfileOwnershipLink(setState) {
+  useLayoutEffect(() => {
+    const prefix = '#more-profile-owner=';
+    if (!window.location.hash.startsWith(prefix)) return;
+    let token = '';
+    try { token = decodeURIComponent(window.location.hash.slice(prefix.length)); }
+    catch { token = ''; }
+    window.history.replaceState({}, document.title, `${window.location.pathname}${window.location.search}`);
+    if (!token) {
+      setState({ phase: 'idle', message: customerMessage('ownership_verification_failed') });
+      return;
+    }
+    postJson('/api/public-v1/profile-ownership', { action: 'verify', token })
+      .then(() => setState({ phase: 'idle', message: customerMessage('ownership_verified'), tone: 'success' }))
+      .catch((error) => setState({ phase: 'idle', message: customerMessage(error.message) }));
+  }, [setState]);
+}
+
+async function requestProfileOwnership(profileId, returnPath) {
+  return postJson('/api/public-v1/profile-ownership', {
+    action: 'request',
+    profile_id: profileId,
+    return_path: returnPath,
+  });
+}
+
 function Step1Page() {
   const navigate = useNavigate();
   const [state, setState] = useState({});
   const [busy, setBusy] = useState(false);
+  const checkoutKey = useMemo(() => idempotencyKey('bos-checkout'), []);
+  const complimentaryAttempt = useRef({ fingerprint: '', key: '' });
+  useProfileOwnershipLink(setState);
   async function checkout() {
     setBusy(true); setState({});
     try {
-      const payload = await postJson('/api/public-v1/purchase-intent', { product_key: 'behavior_operating_system' }, idempotencyKey('bos-checkout'));
+      const payload = await postJson('/api/public-v1/purchase-intent', { product_key: 'behavior_operating_system' }, checkoutKey);
       window.location.assign(payload.checkout_url);
     } catch (error) { setState({ message: customerMessage(error.message) }); setBusy(false); }
   }
@@ -93,10 +134,19 @@ function Step1Page() {
     const value = new FormData(event.currentTarget).get('profileId');
     try {
       if (/^mm-/iu.test(String(value).trim())) {
-        const payload = await postJson('/api/public-v1/access', { action: 'lookup', value });
-        setState({ message: customerMessage(payload.state), tone: payload.state === 'ready' ? 'success' : 'error' });
+        const payload = await postJson('/api/public-v1/access', { action: 'lookup', value, product_key: 'behavior_operating_system' });
+        if (payload.state === 'ownership_verification_required') {
+          await requestProfileOwnership(value, '/step-1');
+          setState({ message: customerMessage(payload.state) });
+        } else if (payload.state === 'ready' && payload.destination) {
+          navigate(`${payload.destination}?id=${encodeURIComponent(payload.profile_id)}`);
+        } else {
+          setState({ message: customerMessage(payload.state) });
+        }
       } else {
-        const redeemed = await postJson('/api/public-v1/access', { action: 'redeem', product_key: 'behavior_operating_system', capability: value, idempotency_key: idempotencyKey('bos-comp') });
+        const capability = String(value || '').trim();
+        const redemptionKey = stableAttemptKey(complimentaryAttempt, 'bos-comp', capability);
+        const redeemed = await postJson('/api/public-v1/access', { action: 'redeem', product_key: 'behavior_operating_system', capability, idempotency_key: redemptionKey });
         const token = await postJson('/api/public-v1/access', { action: 'create_start_token', grant_id: redeemed.grant.grant_id });
         const started = await postJson('/api/public-v1/product-start', { start_token: token.start_token });
         sessionStorage.setItem('more.public.start_token.v1', token.start_token);
@@ -109,20 +159,36 @@ function Step1Page() {
 }
 
 function Step2Page() {
+  const navigate = useNavigate();
   const [state, setState] = useState({ phase: 'idle' });
   const [busy, setBusy] = useState(false);
+  const checkoutAttempt = useRef({ fingerprint: '', key: '' });
+  useProfileOwnershipLink(setState);
   async function begin(event) {
-    event.preventDefault();
+    event.preventDefault(); setBusy(true);
     const profileId = String(new FormData(event.currentTarget).get('profileId') || '').trim();
-    if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(profileId)) { setState({ message: 'Enter a valid MORE Profile ID.' }); return; }
-    setState({ phase: 'vertical', profileId });
+    if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(profileId)) { setState({ message: 'Enter a valid MORE Profile ID.' }); setBusy(false); return; }
+    try {
+      const payload = await postJson('/api/public-v1/access', { action: 'lookup', value: profileId, product_key: 'behavior_operating_system' });
+      if (payload.state === 'ownership_verification_required') {
+        await requestProfileOwnership(profileId, '/step-2');
+        setState({ phase: 'idle', message: customerMessage(payload.state) });
+      } else if (payload.state === 'ready') {
+        setState({ phase: 'vertical', profileId: payload.profile_id });
+      } else {
+        setState({ phase: 'idle', message: customerMessage('completed_bos_required') });
+      }
+    } catch (error) { setState({ phase: 'idle', message: customerMessage(error.message) }); }
+    finally { setBusy(false); }
   }
   async function confirmVertical(event) {
     event.preventDefault(); setBusy(true);
     const vertical = new FormData(event.currentTarget).get('vertical');
     const verticalSelection = { vertical_id: vertical, confirmation: 'CUSTOMER_CONFIRMED' };
     try {
-      const payload = await postJson('/api/public-v1/purchase-intent', { product_key: 'business_assessment', profile_id: state.profileId, vertical_selection: verticalSelection }, idempotencyKey('ba-checkout'));
+      const checkoutFingerprint = JSON.stringify({ profile_id: state.profileId, vertical_selection: verticalSelection });
+      const checkoutKey = stableAttemptKey(checkoutAttempt, 'ba-checkout', checkoutFingerprint);
+      const payload = await postJson('/api/public-v1/purchase-intent', { product_key: 'business_assessment', profile_id: state.profileId, vertical_selection: verticalSelection }, checkoutKey);
       window.location.assign(payload.checkout_url);
     } catch (error) { setState((current) => ({ ...current, message: customerMessage(error.message) })); setBusy(false); }
   }
@@ -130,8 +196,15 @@ function Step2Page() {
     event.preventDefault(); setBusy(true);
     const value = new FormData(event.currentTarget).get('profileId');
     try {
-      const payload = await postJson('/api/public-v1/access', { action: 'lookup', value });
-      setState({ phase: 'idle', message: customerMessage(payload.state), tone: payload.state === 'ready' ? 'success' : 'error' });
+      const payload = await postJson('/api/public-v1/access', { action: 'lookup', value, product_key: 'business_assessment' });
+      if (payload.state === 'ownership_verification_required') {
+        await requestProfileOwnership(value, '/step-2');
+        setState({ phase: 'idle', message: customerMessage(payload.state) });
+      } else if (payload.state === 'ready' && payload.destination) {
+        navigate(`${payload.destination}?id=${encodeURIComponent(payload.profile_id)}`);
+      } else {
+        setState({ phase: 'idle', message: customerMessage(payload.state) });
+      }
     } catch (error) { setState({ phase: 'idle', message: customerMessage(error.message) }); }
     finally { setBusy(false); }
   }

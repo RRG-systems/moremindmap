@@ -24,8 +24,13 @@ import {
   membershipBindingFromStripeMetadata,
   normalizedGrantStatusFromSubscription,
 } from './subscriptionV1Foundation.js';
-import { createPublicSiteService } from '../../src/lib/publicSiteAirlockV1/service.js';
+import {
+  assertPersistedPurchaseIntentContract,
+  createPublicSiteService,
+} from '../../src/lib/publicSiteAirlockV1/service.js';
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
+import { assertPublicStripeEventMode } from '../../src/lib/publicSiteAirlockV1/stripeCheckoutProvider.js';
+import { PUBLIC_PRODUCT_CONTRACT_VERSION } from '../../src/lib/publicSiteAirlockV1/contracts.js';
 
 export const config = {
   api: {
@@ -233,18 +238,57 @@ async function synchronizeSubscriptionGrants(redis, state) {
   }
 }
 
-export async function processEvent(redis, event) {
+export async function assertGovernedPublicCheckoutBinding(redis, event, object, intentId, env = process.env) {
+  const stripeMode = assertPublicStripeEventMode(event, env);
+  const intent = await readJson(redis, `public_product_v1:purchase_intent:${intentId}`);
+  if (!intent) throw new Error('purchase_intent_not_found');
+  const { product } = assertPersistedPurchaseIntentContract(intent, {
+    intentId,
+    sessionId: boundedText(object?.id, 160),
+  });
+  const metadata = object?.metadata || {};
+  const expectedMode = product.cadence === 'monthly' ? 'subscription' : 'payment';
+  const expectedSessionPrefix = stripeMode === 'test' ? 'cs_test_' : 'cs_live_';
+  const expectedProfileId = boundedText(intent.profile_id, 120);
+  const expectedVerticalDigest = boundedText(intent.vertical_binding?.binding_sha256, 160);
+  const exact = event.type === 'checkout.session.completed'
+    && object?.livemode === (stripeMode === 'live')
+    && String(object?.id || '').startsWith(expectedSessionPrefix)
+    && object?.payment_status === 'paid'
+    && object?.mode === expectedMode
+    && object?.amount_total === intent.expected_price_minor
+    && String(object?.currency || '').toLowerCase() === String(intent.currency || '').toLowerCase()
+    && boundedText(metadata.purchase_intent_id, 160) === intent.intent_id
+    && boundedText(metadata.product_key, 80) === intent.product_key
+    && boundedText(metadata.access_type, 80) === intent.access_type
+    && boundedText(metadata.profile_id, 120) === expectedProfileId
+    && boundedText(metadata.vertical_binding_sha256, 160) === expectedVerticalDigest
+    && boundedText(metadata.internal_version, 80) === PUBLIC_PRODUCT_CONTRACT_VERSION
+    && boundedText(object.client_reference_id, 160) === (expectedProfileId || intent.intent_id);
+  if (!exact) throw new Error('stripe_public_checkout_binding_mismatch');
+  if (intent.product_key === 'business_assessment' && (!expectedProfileId || !expectedVerticalDigest)) {
+    throw new Error('stripe_public_checkout_binding_mismatch');
+  }
+  if (intent.product_key !== 'business_assessment' && expectedVerticalDigest) {
+    throw new Error('stripe_public_checkout_binding_mismatch');
+  }
+  return intent;
+}
+
+export async function processEvent(redis, event, env = process.env) {
+  if (String(env.PUBLIC_STRIPE_MODE || '').trim()) {
+    assertPublicStripeEventMode(event, env);
+  }
   const publicObject = event.data?.object || {};
   const publicIntentId = boundedText(publicObject.metadata?.purchase_intent_id, 160);
   if (event.type === 'checkout.session.completed' && publicIntentId) {
-    const paid = publicObject.payment_status === 'paid';
-    if (!paid) throw new Error('provider_payment_confirmation_required');
+    await assertGovernedPublicCheckoutBinding(redis, event, publicObject, publicIntentId, env);
     const publicStore = new RedisPublicStore(redis);
     const publicService = createPublicSiteService({
       store: publicStore,
-      startSigningKey: process.env.PUBLIC_PRODUCT_START_SIGNING_KEY,
-      complimentaryPepper: process.env.PUBLIC_COMPLIMENTARY_PEPPER,
-      complimentaryManifest: process.env.PUBLIC_COMPLIMENTARY_MANIFEST || '[]',
+      startSigningKey: env.PUBLIC_PRODUCT_START_SIGNING_KEY,
+      complimentaryPepper: env.PUBLIC_COMPLIMENTARY_PEPPER,
+      complimentaryManifest: env.PUBLIC_COMPLIMENTARY_MANIFEST || '[]',
     });
     await publicService.recordPaymentGrant({
       event_id: event.id,
@@ -346,7 +390,7 @@ export default async function handler(req, res) {
   let redis;
   try {
     redis = createRedisClient();
-    const result = await processEvent(redis, event);
+    const result = await processEvent(redis, event, process.env);
     return res.status(200).json({ ok: true, processed: result.processed, idempotent: Boolean(result.idempotent) });
   } catch {
     return res.status(500).json({ ok: false, error: 'stripe_webhook_processing_failed' });

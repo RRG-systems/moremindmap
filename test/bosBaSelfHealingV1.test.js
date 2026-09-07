@@ -272,6 +272,120 @@ test('New BA modernization reconstructs a proven corrupt derived artifact withou
   assert.ok(service.diagnostics.snapshot().some(({ event_type: type }) => type === 'corrupt_derived_recovered'));
 });
 
+test('profile-owner receipt reads cannot repair, generate, persist, or publish a missing current BOS artifact', async () => {
+  const envelope = syntheticBosEnvelope(PROFILE);
+  let singleFlightRuns = 0;
+  let generatorCalls = 0;
+  let persistenceCalls = 0;
+  let pointerWrites = 0;
+  const service = createNewBosModernizationService({
+    config: {
+      staged: true, customerActive: true, canaryEnabled: false, providerEnabled: true, persistenceEnabled: true,
+      baFusionValidated: true, allowedProfileIds: [], namespace: 'nonprod:new-bos:owner-read-test', providerModel: 'gpt-5.6-sol',
+    },
+    canonicalReader: { read: async () => canonicalEnvelope() },
+    realizationStore: {
+      inspect: async () => ({ state: 'publishable_orphan', current: envelope, pointer: null }),
+      persistImmutable: async () => { persistenceCalls += 1; return { written: true }; },
+      advancePointer: async () => { pointerWrites += 1; return { updated: true }; },
+    },
+    singleFlight: { run: async (_key, task) => { singleFlightRuns += 1; return task(); } },
+    generator: async () => { generatorCalls += 1; return { artifact: envelope.artifact }; },
+  });
+
+  await assert.rejects(
+    service.retrieve({ profileId: PROFILE, readOnly: true }),
+    /public_product_current_artifact_unavailable/u,
+  );
+  assert.deepEqual({ singleFlightRuns, generatorCalls, persistenceCalls, pointerWrites }, {
+    singleFlightRuns: 0,
+    generatorCalls: 0,
+    persistenceCalls: 0,
+    pointerWrites: 0,
+  });
+
+  let seenReadOnly = false;
+  const response = {
+    statusCode: null,
+    body: null,
+    setHeader() {},
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.body = body; return this; },
+  };
+  await createNewBosProductionRouteHandler({
+    config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => ({ mode: 'profile_owner_receipt' }),
+    serviceFactory: async () => ({
+      retrieve: async ({ readOnly: receiptReadOnly }) => {
+        seenReadOnly = receiptReadOnly;
+        return { artifact: { profile_id: PROFILE } };
+      },
+    }),
+  })({ method: 'GET', query: { id: PROFILE }, headers: {} }, response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(seenReadOnly, true);
+});
+
+test('profile-owner receipt reads cannot repair, generate, persist, publish, or project a missing current BA artifact', async () => {
+  const source = createAuthorizedSyntheticTopSource();
+  const envelope = await syntheticBaEnvelope();
+  let singleFlightRuns = 0;
+  let generatorCalls = 0;
+  let persistenceCalls = 0;
+  let pointerWrites = 0;
+  const service = createNewBaModernizationService({
+    config: {
+      staged: true, customerActive: true, fusionValidated: true, canaryEnabled: false, providerEnabled: true,
+      persistenceEnabled: true, allowedProfileIds: [], namespace: 'nonprod:new-ba:owner-read-test', providerModel: 'gpt-5.6-sol',
+    },
+    authorityReader: { read: async () => source },
+    realizationStore: {
+      inspect: async () => ({ state: 'publishable_orphan', current: envelope, pointer: null }),
+      persistImmutable: async () => { persistenceCalls += 1; return { written: true }; },
+      advancePointer: async () => { pointerWrites += 1; return { updated: true }; },
+    },
+    singleFlight: { run: async (_key, task) => { singleFlightRuns += 1; return task(); } },
+    generator: { advance: async () => { generatorCalls += 1; return { complete: false }; } },
+  });
+
+  await assert.rejects(
+    service.retrieve({ profileId: source.profile_id, readOnly: true }),
+    /public_product_current_artifact_unavailable/u,
+  );
+  assert.deepEqual({ singleFlightRuns, generatorCalls, persistenceCalls, pointerWrites }, {
+    singleFlightRuns: 0,
+    generatorCalls: 0,
+    persistenceCalls: 0,
+    pointerWrites: 0,
+  });
+
+  let projectionCalls = 0;
+  let seenReadOnly = false;
+  const response = {
+    statusCode: null,
+    body: null,
+    setHeader() {},
+    status(code) { this.statusCode = code; return this; },
+    json(body) { this.body = body; return this; },
+  };
+  await createNewBaRouteHandler({
+    config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => ({ mode: 'profile_owner_receipt' }),
+    serviceFactory: async () => ({
+      service: {
+        retrieve: async ({ readOnly }) => {
+          seenReadOnly = readOnly;
+          return { artifact: { profile_id: source.profile_id } };
+        },
+      },
+    }),
+    onCanonicalServed: async () => { projectionCalls += 1; },
+  })({ method: 'GET', query: { id: source.profile_id }, headers: {} }, response);
+  assert.equal(response.statusCode, 200);
+  assert.equal(seenReadOnly, true);
+  assert.equal(projectionCalls, 0);
+});
+
 test('customer recovery surfaces keep provider and internal failure details out of customer prose', async () => {
   const [bosSource, baSource] = await Promise.all([
     readFile(new URL('../src/components/newBosPersonalityDnaV1/NewBosProductionCanary.jsx', import.meta.url), 'utf8'),
@@ -298,6 +412,7 @@ test('BOS and BA 202 responses expose only customer-safe processing state', asyn
   const bosResponse = response();
   await createNewBosProductionRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ retrieve: async () => internalBosPending }),
   })({ method: 'GET', query: { id: PROFILE }, headers: {} }, bosResponse);
   assert.equal(bosResponse.statusCode, 202);
@@ -309,6 +424,7 @@ test('BOS and BA 202 responses expose only customer-safe processing state', asyn
   const baResponse = response();
   await createNewBaRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ service: { retrieve: async () => ({
       pending: true, status: 'GENERATION_ADVANCING', retry_after_ms: 1500,
       profile_id: PROFILE, assessment_id: 'ba-internal', accepted_stage: 'whole_business_model_v1', next_stage: 'five_futures_v2',
@@ -353,8 +469,8 @@ test('resumable inspector is platform-protected only by the server-bound authori
     query: { id: PROFILE, diagnostic: 'resumable-state' },
     headers: { host: 'moremindmap.com' },
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 200);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('stale surface-routing replacement is POST-only and server-authority protected', async () => {
@@ -404,8 +520,8 @@ test('stale surface-routing replacement is POST-only and server-authority protec
     headers: { host: 'moremindmap.com' },
     body: {},
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 
   const unsupported = response();
   await handler({ method: 'POST', query: { id: PROFILE }, headers: {} }, unsupported);
@@ -456,8 +572,8 @@ test('invalid stage-3 repair route is hash-bound and server-authority protected'
     headers: { host: 'moremindmap.com' },
     body: {},
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('completed stage-3 diagnostic is server-authority protected, read-only, and hash-bound', async () => {
@@ -507,8 +623,8 @@ test('completed stage-3 diagnostic is server-authority protected, read-only, and
     query: { id: PROFILE, diagnostic: 'completed-stage3-validation' },
     headers: { host: 'moremindmap.com' },
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('completed stage-3 semantic-rejection classification is POST-only, hash-bound, and server-authority protected', async () => {
@@ -567,8 +683,8 @@ test('completed stage-3 semantic-rejection classification is POST-only, hash-bou
     headers: { host: 'moremindmap.com' },
     body: {},
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and server-authority protected', async () => {
@@ -621,8 +737,8 @@ test('semantic-rejected Stage-3 replacement is one-operation, hash-bound, and se
     headers: { host: 'moremindmap.com' },
     body: {},
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and server-authority protected', async () => {
@@ -673,8 +789,8 @@ test('Stage-3 request-contract V2 replacement is POST-only, hash-bound, and serv
     headers: { host: 'moremindmap.com' },
     body: {},
   }, publicDomain);
-  assert.equal(publicDomain.statusCode, 500);
-  assert.equal(calls[1].platformProtected, false);
+  assert.equal(publicDomain.statusCode, 403);
+  assert.equal(calls.length, 1);
 });
 
 test('machinery failures return generic customer codes while governed truth failures stay explicit', async () => {
@@ -686,6 +802,7 @@ test('machinery failures return generic customer codes while governed truth fail
   const machinery = makeResponse();
   await createNewBosProductionRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ retrieve: async () => { throw new Error('new_bos_background_terminal_failure:provider_internal'); } }),
   })({ method: 'GET', query: { id: PROFILE }, headers: {} }, machinery);
   assert.equal(machinery.body.safe_code, 'new_bos_temporarily_unavailable');
@@ -695,6 +812,7 @@ test('machinery failures return generic customer codes while governed truth fail
   const truth = makeResponse();
   await createNewBosProductionRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ retrieve: async () => { throw new Error('new_bos_modernization_requires_evidence_or_review:A'); } }),
   })({ method: 'GET', query: { id: PROFILE }, headers: {} }, truth);
   assert.equal(truth.body.safe_code, 'new_bos_modernization_requires_evidence_or_review');
@@ -702,6 +820,7 @@ test('machinery failures return generic customer codes while governed truth fail
   const baMachinery = makeResponse();
   await createNewBaRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ service: { retrieve: async () => { throw new Error('provider_timeout:upstream_detail'); } } }),
   })({ method: 'GET', query: { id: PROFILE }, headers: {} }, baMachinery);
   assert.equal(baMachinery.body.safe_code, 'new_ba_temporarily_unavailable');
@@ -787,6 +906,7 @@ test('New BOS returns a truthful resumable processing state instead of a termina
   };
   const handler = createNewBosProductionRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
     serviceFactory: async () => ({ retrieve: async () => result }),
   });
   await handler({ method: 'GET', query: { id: PROFILE }, headers: {} }, response);

@@ -103,6 +103,18 @@ export function validatePersistedVerticalBinding(binding, {
   return deepFreeze({ ...binding });
 }
 
+export function reconcileGrantedVerticalBinding({ requestedBinding, grantBinding, registry = PRODUCTION_BA_CASSETTE_REGISTRY } = {}) {
+  const requested = validatePersistedVerticalBinding(requestedBinding, { registry });
+  if (!grantBinding) return requested;
+  const granted = validatePersistedVerticalBinding(grantBinding, { registry });
+  if (requested.selection_source !== 'CUSTOMER_CONFIRMED'
+    || granted.selection_source !== 'CUSTOMER_CONFIRMED'
+    || requested.vertical_id !== granted.vertical_id) {
+    throw new BaVerticalContractError(BA_VERTICAL_FAILURE_CODES.BINDING_MISMATCH, 'grant_vertical_binding');
+  }
+  return granted;
+}
+
 export function resolveAssessmentVerticalBinding(record, options = {}) {
   if (record?.vertical_binding !== undefined && record?.vertical_binding !== null) {
     return validatePersistedVerticalBinding(record.vertical_binding, options);

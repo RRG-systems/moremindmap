@@ -2,17 +2,30 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  authorizeBusinessAssessmentIdBeforeRead,
+  authorizePublicOrRecruitingProductRequest,
   onRecruitingBosVaultVerified,
   projectRecruitingBaState,
+  reconcileRecruitingBosReadyFromCompletedJob,
   reconcileRecruitingCanonicalBaReady,
   reconcileRecruitingCanonicalBaReadySafely,
   resolveRecruitingBaOwnerProfile,
   resolveRecruitingBosStartMetadata,
 } from '../api/engine/recruitingV1/canonicalAdapters.js';
 import { getRecruitingService, resetSyntheticRecruitingRuntimeForTest } from '../api/engine/recruitingV1/runtime.js';
+import { MemoryPublicStore } from '../src/lib/publicSiteAirlockV1/memoryStore.js';
+import { PRODUCT_EXECUTION_CONTRACT_VERSION } from '../src/lib/publicSiteAirlockV1/productBoundary.js';
+import { sealStartToken } from '../src/lib/publicSiteAirlockV1/security.js';
 
 const ENV = { RECRUITING_V1_SYNTHETIC_REVIEW: 'true' };
+const ENFORCED_ENV = {
+  ...ENV,
+  PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
+  PUBLIC_PRODUCT_START_SIGNING_KEY: 'synthetic-public-start-signing-key-32-bytes',
+  PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: 'synthetic-profile-owner-signing-key-32-bytes',
+};
 const CONSENT = { accepted: true, version: 'recruiting_v1_consent_2026_08' };
+const EMPTY_PUBLIC_STORE = Object.freeze({ async get() { return null; } });
 
 async function acceptedRelationship() {
   resetSyntheticRecruitingRuntimeForTest();
@@ -62,6 +75,290 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
   const owner = await resolveRecruitingBaOwnerProfile(req, 'mm-20990101-attacker1', { required: true, env: ENV });
   assert.equal(owner.owner_profile_id, 'mm-20990101-recruit1');
   assert.notEqual(owner.owner_profile_id, 'mm-20990101-attacker1');
+});
+
+test('public enforcement accepts only the exact server-bound Recruiting relationship, Profile, and BA', async () => {
+  const { invitation, cookie } = await acceptedRelationship();
+  const req = { headers: { cookie }, body: { recruiting_mode: 'forged-client-value-is-not-authority' } };
+
+  const bosStart = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'behavior_operating_system',
+    env: ENFORCED_ENV,
+    allowUnboundBosStart: true,
+  });
+  assert.equal(bosStart.mode, 'recruiting_invite_session');
+  assert.equal(bosStart.relationship_ref, invitation.invitation_id);
+
+  const metadata = await resolveRecruitingBosStartMetadata(
+    req,
+    { person_name: 'Synthetic Recruit', recruiting_relationship_ref: 'attacker-controlled' },
+    ENFORCED_ENV,
+    { authority: bosStart },
+  );
+  assert.equal(metadata.recruiting_relationship_ref, invitation.invitation_id);
+
+  await assert.rejects(
+    authorizePublicOrRecruitingProductRequest({
+      req,
+      store: EMPTY_PUBLIC_STORE,
+      productKey: 'behavior_operating_system',
+      relationshipRef: 'invite_other_relationship',
+      env: ENFORCED_ENV,
+    }),
+    /public_product_authority_denied/u,
+  );
+
+  const profileId = 'mm-20990101-recruit5';
+  await onRecruitingBosVaultVerified({
+    relationshipRef: invitation.invitation_id,
+    profileId,
+    vaultResult: { success: true },
+    env: ENFORCED_ENV,
+  });
+  const owner = await resolveRecruitingBaOwnerProfile(req, 'mm-20990101-attacker1', {
+    inspectIfPresent: true,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(owner.owner_profile_id, profileId);
+
+  const bosRead = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'behavior_operating_system',
+    profileId,
+    read: true,
+    force: true,
+    allowProfileBoundBosRead: true,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(bosRead.profile_id, profileId);
+  await assert.rejects(
+    authorizePublicOrRecruitingProductRequest({
+      req,
+      store: EMPTY_PUBLIC_STORE,
+      productKey: 'behavior_operating_system',
+      profileId: 'mm-20990101-other001',
+      read: true,
+      force: true,
+      allowProfileBoundBosRead: true,
+      env: ENFORCED_ENV,
+    }),
+    /public_product_authority_denied/u,
+  );
+
+  const assessmentId = 'ba-20990101-aabbccdd';
+  await assert.rejects(
+    authorizePublicOrRecruitingProductRequest({
+      req,
+      store: EMPTY_PUBLIC_STORE,
+      productKey: 'business_assessment',
+      profileId,
+      relationshipRef: invitation.invitation_id,
+      assessmentId,
+      env: ENFORCED_ENV,
+    }),
+    /public_product_authority_denied/u,
+  );
+  await projectRecruitingBaState({
+    relationshipRef: invitation.invitation_id,
+    assessmentId,
+    state: 'BA_INTAKE_SAVED',
+    env: ENFORCED_ENV,
+  });
+  const ba = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'business_assessment',
+    profileId,
+    relationshipRef: invitation.invitation_id,
+    assessmentId,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(ba.assessment_id, assessmentId);
+
+  for (const scopedMismatch of [
+    { relationshipRef: 'invite_other_relationship', profileId, assessmentId },
+    { relationshipRef: invitation.invitation_id, profileId: 'mm-20990101-other001', assessmentId },
+    { relationshipRef: invitation.invitation_id, profileId, assessmentId: 'ba-20990101-ffffffff' },
+  ]) {
+    await assert.rejects(
+      authorizePublicOrRecruitingProductRequest({
+        req,
+        store: EMPTY_PUBLIC_STORE,
+        productKey: 'business_assessment',
+        env: ENFORCED_ENV,
+        ...scopedMismatch,
+      }),
+      /public_product_authority_denied/u,
+    );
+  }
+
+  await assert.rejects(
+    authorizePublicOrRecruitingProductRequest({
+      req: { headers: {}, body: { recruiting_mode: 'accepted_invitation' } },
+      store: EMPTY_PUBLIC_STORE,
+      productKey: 'behavior_operating_system',
+      env: ENFORCED_ENV,
+      allowUnboundBosStart: true,
+    }),
+    /public_product_authority_denied/u,
+  );
+});
+
+test('completed Recruiting BOS status repairs only an exact verified Vault/job binding', async () => {
+  const { invitation, cookie } = await acceptedRelationship();
+  const req = { headers: { cookie } };
+  const authority = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'behavior_operating_system',
+    relationshipRef: invitation.invitation_id,
+    env: ENFORCED_ENV,
+  });
+  const profileId = 'mm-20990101-repair01';
+  const job = {
+    job_id: 'job-recruiting-complete',
+    status: 'complete',
+    canonical_profile_id: profileId,
+    payload: { metadata: { recruiting_relationship_ref: invitation.invitation_id } },
+  };
+  const exactVault = {
+    profile_id: profileId,
+    job_id: job.job_id,
+    created_at: '2099-01-01T00:00:00.000Z',
+    canonical_profile_json: { vector_scores: { action: 7 } },
+  };
+
+  await assert.rejects(
+    reconcileRecruitingBosReadyFromCompletedJob({
+      redis: { async get() { return JSON.stringify({ ...exactVault, job_id: 'other-job' }); } },
+      authority,
+      job,
+      env: ENFORCED_ENV,
+    }),
+    /RECRUITING_COMPLETED_BOS_VAULT_IDENTITY_MISMATCH/u,
+  );
+  await assert.rejects(
+    resolveRecruitingBaOwnerProfile(req, '', { required: true, env: ENFORCED_ENV }),
+    /RECRUITING_BOS_READY_REQUIRED_FOR_BA/u,
+  );
+
+  const repaired = await reconcileRecruitingBosReadyFromCompletedJob({
+    redis: { async get(key) {
+      assert.equal(key, `vault:profile:${profileId}`);
+      return JSON.stringify(exactVault);
+    } },
+    authority,
+    job,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(repaired.projected, true);
+  assert.equal(repaired.reconciled, true);
+
+  const refreshedAuthority = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'behavior_operating_system',
+    profileId,
+    env: ENFORCED_ENV,
+    read: true,
+    force: true,
+    allowProfileBoundBosRead: true,
+  });
+  const alreadyBound = await reconcileRecruitingBosReadyFromCompletedJob({
+    redis: { async get() { throw new Error('Vault must not be reread after exact binding'); } },
+    authority: refreshedAuthority,
+    job,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(alreadyBound.reason, 'RECRUITING_BOS_ALREADY_BOUND');
+});
+
+test('BA Profile and Assessment locators require exact pre-read authority', async () => {
+  const { invitation, cookie } = await acceptedRelationship();
+  const profileId = 'mm-20990101-baread01';
+  const assessmentId = 'ba-20990101-a1b2c3d4';
+  await onRecruitingBosVaultVerified({
+    relationshipRef: invitation.invitation_id,
+    profileId,
+    vaultResult: { success: true },
+    env: ENFORCED_ENV,
+  });
+  await projectRecruitingBaState({
+    relationshipRef: invitation.invitation_id,
+    assessmentId,
+    state: 'BA_INTAKE_SAVED',
+    env: ENFORCED_ENV,
+  });
+  const req = { headers: { cookie } };
+  const profileRead = await authorizePublicOrRecruitingProductRequest({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    productKey: 'business_assessment',
+    profileId,
+    read: true,
+    force: true,
+    allowProfileBoundBaRead: true,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(profileRead.profile_id, profileId);
+  const assessmentRead = await authorizeBusinessAssessmentIdBeforeRead({
+    req,
+    store: EMPTY_PUBLIC_STORE,
+    assessmentId,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(assessmentRead.assessment_id, assessmentId);
+  await assert.rejects(
+    authorizeBusinessAssessmentIdBeforeRead({
+      req,
+      store: EMPTY_PUBLIC_STORE,
+      assessmentId: 'ba-20990101-ffffffff',
+      env: ENFORCED_ENV,
+    }),
+    /public_product_authority_denied/u,
+  );
+
+  const store = new MemoryPublicStore();
+  const grantId = 'grant_ba_locator';
+  const publicProfileId = 'mm-20990101-public01';
+  const publicAssessmentId = 'ba-20990101-1234abcd';
+  await store.set(`access_grant:${grantId}`, JSON.stringify({
+    grant_id: grantId,
+    status: 'active',
+    product_key: 'business_assessment',
+    profile_id: publicProfileId,
+  }));
+  await store.set(`public_product_v1:grant_execution:${grantId}`, JSON.stringify({
+    contract_version: PRODUCT_EXECUTION_CONTRACT_VERSION,
+    authority_type: 'PUBLIC_GRANT',
+    authority_ref: grantId,
+    product_key: 'business_assessment',
+    state: 'COMMITTED',
+    identifiers: { assessment_id: publicAssessmentId },
+  }));
+  const token = sealStartToken(
+    { grant_id: grantId, product_key: 'business_assessment' },
+    ENFORCED_ENV.PUBLIC_PRODUCT_START_SIGNING_KEY,
+  );
+  const publicRead = await authorizeBusinessAssessmentIdBeforeRead({
+    req: { headers: { 'x-more-start-token': token } },
+    store,
+    assessmentId: publicAssessmentId,
+    env: ENFORCED_ENV,
+  });
+  assert.equal(publicRead.profile_id, publicProfileId);
+  await assert.rejects(
+    authorizeBusinessAssessmentIdBeforeRead({
+      req: { headers: { 'x-more-start-token': token } },
+      store,
+      assessmentId: 'ba-20990101-ffffffff',
+      env: ENFORCED_ENV,
+    }),
+    /public_product_authority_denied/u,
+  );
 });
 
 test('canonical projection failure records only a retryable sanitized receipt and never invalidates accepted BA', async () => {

@@ -12,10 +12,23 @@ import {
 } from '../src/lib/publicSiteAirlockV1/contracts.js';
 import { createPublicSiteService } from '../src/lib/publicSiteAirlockV1/service.js';
 import { MemoryPublicStore } from '../src/lib/publicSiteAirlockV1/memoryStore.js';
-import { complimentaryDigest, nonsecretRuntimeAttestation, runtimeFlags } from '../src/lib/publicSiteAirlockV1/security.js';
+import {
+  complimentaryDigest,
+  nonsecretRuntimeAttestation,
+  runtimeFlags,
+  verifyStartToken,
+} from '../src/lib/publicSiteAirlockV1/security.js';
 import { createInquiryHandler } from '../src/lib/publicSiteAirlockV1/handlers.js';
 import { authorizeProductRequest } from '../src/lib/publicSiteAirlockV1/productBoundary.js';
 import { resolveProductionAthleteDestination } from '../src/publicSiteV21Config.js';
+import {
+  PRODUCTION_BA_CASSETTE_REGISTRY,
+  buildCustomerConfirmedSelection,
+} from '../src/lib/baVerticalCassettesV1/index.js';
+import {
+  buildCustomerConfirmedVerticalBinding,
+  reconcileGrantedVerticalBinding,
+} from '../api/business-assessment/verticalBinding.js';
 import { createNewBosProductionRouteHandler } from '../api/engine/newBosProductionReadinessV1/routeHandler.js';
 import legacyCheckoutHandler from '../api/stripe/create-checkout-session.js';
 import accessStatusHandler from '../api/stripe/access-status.js';
@@ -40,7 +53,7 @@ function buildService(options = {}) {
       complimentaryPepper: pepper,
       complimentaryManifest: options.complimentaryManifest || '[]',
       profileStateReader: options.profileStateReader || (async () => ({ bos: 'ready', ba: 'ready' })),
-      ownershipVerifier: options.ownershipVerifier || (async () => false),
+      ownershipVerifier: options.ownershipVerifier || (async () => true),
       inquiryTransport: transport,
     }),
   };
@@ -77,10 +90,71 @@ test('runtime mutation flags default off and nonsecret attestation excludes secr
     inquiry_intake_enabled: false,
     product_start_enforcement_enabled: false,
     subscription_checkout_enabled: false,
+    legacy_checkout_enabled: false,
   });
   const attestation = nonsecretRuntimeAttestation({ STRIPE_SECRET_KEY: 'must-not-escape', REDIS_URL: 'must-not-escape' });
   assert.doesNotMatch(JSON.stringify(attestation), /must-not-escape/u);
   assert.match(attestation.sha256, /^[a-f0-9]{64}$/u);
+  assert.equal(nonsecretRuntimeAttestation({
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'candidate.example.vercel.app',
+    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: signingKey,
+    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
+    PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
+  }).profile_ownership_binding_state, 'configured');
+  assert.equal(nonsecretRuntimeAttestation({
+    VERCEL_ENV: 'preview',
+    VERCEL_URL: 'candidate.example.vercel.app',
+    PUBLIC_PROFILE_OWNERSHIP_SIGNING_KEY: 'short',
+    PUBLIC_PROFILE_OWNERSHIP_RESEND_API_KEY: 're_synthetic_profile_owner_key_123456',
+    PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM: 'MORE MindMap <hello@moremindmap.example>',
+  }).profile_ownership_binding_state, 'unconfigured');
+});
+
+test('checkout, complimentary and inquiry flags activate only as a complete fail-closed lattice', () => {
+  const base = {
+    PUBLIC_CHECKOUT_ENABLED: 'true',
+    PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'true',
+    PUBLIC_PRODUCT_START_SIGNING_KEY: signingKey,
+    PUBLIC_STRIPE_MODE: 'test',
+    STRIPE_SECRET_KEY: 'sk_test_synthetic_never_sent',
+    STRIPE_PRICE_BEHAVIOR_OS: 'price_synthetic_bos',
+    STRIPE_PRICE_BUSINESS_ASSESSMENT: 'price_synthetic_ba',
+  };
+  assert.equal(runtimeFlags({ ...base, PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED: 'false' }).checkout_enabled, false);
+  assert.equal(runtimeFlags({ ...base, STRIPE_SECRET_KEY: 'sk_live_wrong_mode' }).checkout_enabled, false);
+  assert.equal(runtimeFlags(base).checkout_enabled, true);
+  assert.equal(runtimeFlags({ ...base, PUBLIC_SUBSCRIPTION_CHECKOUT_ENABLED: 'true' }).subscription_checkout_enabled, false);
+  assert.equal(runtimeFlags({
+    ...base,
+    PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
+    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
+    PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
+    PUBLIC_INQUIRY_EMAIL_TO: 'private@example.test',
+  }).inquiry_intake_enabled, false);
+  assert.equal(runtimeFlags({
+    ...base,
+    PUBLIC_INQUIRY_INTAKE_ENABLED: 'true',
+    PUBLIC_INQUIRY_RESEND_API_KEY: 're_synthetic_public_inquiry_key',
+    PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
+    PUBLIC_INQUIRY_EMAIL_TO: 'private@example.test',
+    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
+  }).inquiry_intake_enabled, true);
+  assert.equal(runtimeFlags({ ...base, PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED: 'true' }).complimentary_redemption_enabled, false);
+  assert.equal(runtimeFlags({
+    ...base,
+    PUBLIC_COMPLIMENTARY_REDEMPTION_ENABLED: 'true',
+    PUBLIC_COMPLIMENTARY_PEPPER: pepper,
+    PUBLIC_COMPLIMENTARY_MANIFEST: '[]',
+  }).complimentary_redemption_enabled, true);
+  const secret = 'private-inbox@example.test';
+  assert.doesNotMatch(JSON.stringify(nonsecretRuntimeAttestation({
+    ...base,
+    PUBLIC_INQUIRY_EMAIL_TO: secret,
+    PUBLIC_INQUIRY_RESEND_API_KEY: 're_private',
+    PUBLIC_INQUIRY_EMAIL_FROM: 'from@example.test',
+    PUBLIC_INQUIRY_OUTBOX_DRAIN_SECRET: 'synthetic-drain-secret-at-least-thirty-two',
+  })), new RegExp(secret, 'u'));
 });
 
 test('Production Athlete route seam fails closed unless an HTTPS or same-origin path is configured', () => {
@@ -108,7 +182,11 @@ test('purchase intent is idempotent and BA binds the existing Cassette Foundatio
   assert.equal(ba.vertical_binding.vertical_id, 'real_estate');
   assert.equal(ba.vertical_binding.intake_contract_id, 'real-estate-business-assessment-intake-v1');
   assert.equal(ba.vertical_binding.evidence_contract_id, 'real-estate-business-evidence-routing-v1');
-  assert.equal(store.snapshot().effects.filter(([op, key]) => op === 'set' && key.includes('purchase_intent:')).length, 2);
+  assert.equal(
+    Object.keys(store.snapshot().values)
+      .filter((key) => key.startsWith('public_product_v1:purchase_intent:')).length,
+    2,
+  );
 });
 
 test('BA purchase fails closed without completed BOS or explicit supported vertical', async () => {
@@ -158,23 +236,27 @@ test('governed webhook grant preserves Cassette vertical binding instead of bein
     created: 4070908800,
     data: {
       object: {
-        id: 'cs_governed_ba_1',
+        id: 'cs_test_governed_ba_1',
+        livemode: false,
         mode: 'payment',
         payment_status: 'paid',
         amount_total: 4900,
         currency: 'usd',
+        client_reference_id: profileId,
         customer_details: { email: 'owner@example.test' },
         metadata: {
           product_key: 'business_assessment',
           access_type: 'business_assessment',
           purchase_intent_id: intent.intent_id,
           profile_id: profileId,
+          vertical_binding_sha256: intent.vertical_binding.binding_sha256,
+          internal_version: 'mmm-public-product-v1',
         },
       },
     },
   };
-  await processEvent(store, event);
-  const grant = JSON.parse(await store.get('access_grant:grant_cs_governed_ba_1'));
+  await processEvent(store, event, { PUBLIC_STRIPE_MODE: 'test' });
+  const grant = JSON.parse(await store.get('access_grant:grant_cs_test_governed_ba_1'));
   assert.equal(grant.purchase_intent_id, intent.intent_id);
   assert.equal(grant.vertical_binding.vertical_id, 'real_estate');
   assert.equal(grant.vertical_binding.intake_contract_id, 'real-estate-business-assessment-intake-v1');
@@ -199,7 +281,7 @@ test('complimentary capability remains server-digested, product-scoped, bounded 
     { digest: complimentaryDigest(bosCode, pepper), product_key: 'behavior_operating_system', capability_id: 'synthetic-bos', expires_at: '2099-02-01T00:00:00.000Z', max_uses: 1 },
     { digest: complimentaryDigest(baCode, pepper), product_key: 'business_assessment', capability_id: 'synthetic-ba', expires_at: '2099-02-01T00:00:00.000Z', max_uses: 1 },
   ]);
-  const { service } = buildService({ complimentaryManifest: manifest });
+  const { store, service } = buildService({ complimentaryManifest: manifest });
   const bos = await service.redeemComplimentary({ product_key: 'behavior_operating_system', capability: bosCode, idempotency_key: 'comp-bos-redeem-001' });
   const replay = await service.redeemComplimentary({ product_key: 'behavior_operating_system', capability: bosCode, idempotency_key: 'comp-bos-redeem-001' });
   assert.equal(bos.grant.grant_id, replay.grant.grant_id);
@@ -209,6 +291,18 @@ test('complimentary capability remains server-digested, product-scoped, bounded 
   assert.equal(ba.grant.profile_id, profileId);
   assert.equal(ba.grant.vertical_id, 'real_estate');
   assert.equal(JSON.stringify(ba).includes(baCode), false);
+  assert.deepEqual(await store.smembers(`access_grant_by_profile:${profileId}`), [ba.grant.grant_id]);
+  await assert.rejects(
+    service.redeemComplimentary({
+      product_key: 'business_assessment',
+      capability: baCode,
+      profile_id: profileId,
+      email: 'altered@example.test',
+      vertical_selection: realEstateSelection,
+      idempotency_key: 'comp-ba-redeem-0001',
+    }),
+    /complimentary_redemption_conflict/u,
+  );
 });
 
 test('start token and Product start are bound and idempotent', async () => {
@@ -223,17 +317,79 @@ test('start token and Product start are bound and idempotent', async () => {
   assert.equal(replay.idempotent, true);
 });
 
+test('checkout Session exchange is retry-bounded while an exact started Product session can renew safely', async () => {
+  let now = Date.parse('2099-01-01T00:00:00.000Z');
+  const { service } = buildService({ clock: () => now });
+  const intent = await service.createPurchaseIntent({ product_key: 'behavior_operating_system', idempotency_key: 'checkout-exchange-0001' });
+  await service.recordPaymentGrant({
+    event_id: 'evt_exchange_1',
+    checkout_session_id: 'cs_test_exchange_1',
+    intent_id: intent.intent_id,
+    payment_truth: 'provider_confirmed',
+  });
+  const first = await service.createStartTokenForSession({ checkout_session_id: 'cs_test_exchange_1' });
+  now += 60_000;
+  const retry = await service.createStartTokenForSession({ checkout_session_id: 'cs_test_exchange_1' });
+  assert.equal(retry.start_token, first.start_token);
+  assert.equal(retry.idempotent, true);
+  await service.startProduct({ start_token: first.start_token });
+
+  now += 2 * 60_000;
+  await assert.rejects(
+    service.createStartTokenForSession({ checkout_session_id: 'cs_test_exchange_1' }),
+    /active_grant_required/u,
+  );
+  now += 13 * 60_000;
+  assert.throws(() => verifyStartToken(first.start_token, signingKey, now), /public_start_token_expired/u);
+  const renewed = await service.renewStartToken({ start_token: first.start_token });
+  assert.equal(verifyStartToken(renewed.start_token, signingKey, now).grant_id, first.grant.grant_id);
+
+  now = first.renewable_until_ms + 1;
+  await assert.rejects(service.renewStartToken({ start_token: renewed.start_token }), /active_grant_required/u);
+});
+
+test('paid BA intake reuses the exact checkout-time vertical binding without timestamp drift', () => {
+  const confirmedSelection = buildCustomerConfirmedSelection(
+    PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical('real_estate'),
+  );
+  const checkoutBinding = buildCustomerConfirmedVerticalBinding({
+    selection: confirmedSelection,
+    selectedAt: '2099-01-01T00:00:00.000Z',
+  });
+  const intakeBinding = buildCustomerConfirmedVerticalBinding({
+    selection: confirmedSelection,
+    selectedAt: '2099-01-01T00:30:00.000Z',
+  });
+  assert.notEqual(checkoutBinding.binding_sha256, intakeBinding.binding_sha256);
+  assert.deepEqual(reconcileGrantedVerticalBinding({
+    requestedBinding: intakeBinding,
+    grantBinding: checkoutBinding,
+  }), checkoutBinding);
+  assert.throws(() => reconcileGrantedVerticalBinding({
+    requestedBinding: intakeBinding,
+    grantBinding: { ...checkoutBinding, vertical_id: 'unsupported' },
+  }), /BA_VERTICAL/u);
+});
+
 test('profile locator does not reveal existence until subject ownership is verified', async () => {
   const unverified = buildService({ ownershipVerifier: async () => false }).service;
   assert.deepEqual(await unverified.lookupEntry({ value: profileId }), { state: 'ownership_verification_required' });
   const verified = buildService({ ownershipVerifier: async () => true }).service;
-  assert.deepEqual(await verified.lookupEntry({ value: profileId }), { state: 'ready', profile_id: profileId, business_assessment_state: 'ready' });
+  assert.deepEqual(await verified.lookupEntry({ value: profileId }), {
+    state: 'ready',
+    profile_id: profileId,
+    behavior_operating_system_state: 'ready',
+    business_assessment_state: 'ready',
+    ownership_verified: true,
+    destination: '/profile',
+  });
 });
 
 test('inquiry intake is concurrent-idempotent and delivery failure never loses the accepted receipt', async () => {
   let attempts = 0;
+  let now = Date.parse('2099-01-01T00:00:00.000Z');
   const transport = { send: async () => { attempts += 1; if (attempts === 1) throw new Error('synthetic_transport_down'); return { id: 'sandbox-delivery-2' }; } };
-  const { store, service } = buildService({ inquiryTransport: transport });
+  const { store, service } = buildService({ inquiryTransport: transport, clock: () => now });
   const input = { name: 'Synthetic Founder', phone: '6025550101', email: 'founder@example.test', idempotency_key: 'inquiry-concurrent-001' };
   const [a, b] = await Promise.all([service.createInquiry(input), service.createInquiry(input)]);
   assert.equal(a.receipt_id, b.receipt_id);
@@ -241,6 +397,10 @@ test('inquiry intake is concurrent-idempotent and delivery failure never loses t
   const outboxId = `outbox_${a.receipt_id}`;
   assert.equal((await service.dispatchInquiry(outboxId)).state, 'retry_pending');
   assert.equal(JSON.parse(await store.get(`public_inquiry_v1:receipt:${a.receipt_id}`)).state, 'accepted_for_delivery');
+  const deferred = await service.dispatchInquiry(outboxId);
+  assert.deepEqual(deferred, { state: 'retry_pending', idempotent: true, retry_after_ms: 120000 });
+  assert.equal(attempts, 1);
+  now += 120000;
   assert.equal((await service.dispatchInquiry(outboxId)).state, 'delivered');
   assert.equal((await service.dispatchInquiry(outboxId)).idempotent, true);
   assert.equal(attempts, 2);
@@ -316,10 +476,11 @@ test('matching a direct deployment Host never grants protected New BOS operator 
   const req = { method: 'GET', headers: { host: 'candidate.vercel.app', 'x-new-bos-canary-token': 'wrong' }, query: { diagnostic: 'resumable-state', id: 'MM-20990101-DEMO0001' } };
   const res = createResponse();
   await handler(req, res);
-  assert.equal(seen[0].platformProtected, false);
+  assert.equal(res.statusCode, 403);
+  assert.equal(seen.length, 0);
   const authorized = { ...req, headers: { ...req.headers, 'x-more-platform-authority': secret } };
   await handler(authorized, createResponse());
-  assert.equal(seen[1].platformProtected, true);
+  assert.equal(seen[0].platformProtected, true);
 });
 
 test('deployable API tree contains no identified diagnostic, test or raw handlers', () => {
@@ -346,4 +507,7 @@ test('active client source contains no prior complimentary capability values, st
   const paymentSuccess = fs.readFileSync(path.join(root, 'src/PaymentSuccess.jsx'), 'utf8');
   assert.doesNotMatch(paymentSuccess, /to="\/(?:profile|business-assessment)"/u);
   assert.match(paymentSuccess, /Continue To Product/u);
+  const productionEnv = fs.readFileSync(path.join(root, '.env.production'), 'utf8');
+  assert.match(productionEnv, /^VITE_API_URL=\s*$/mu);
+  assert.doesNotMatch(productionEnv, /^VITE_API_URL=https?:\/\//mu);
 });

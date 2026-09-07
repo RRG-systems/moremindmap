@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import Redis from 'ioredis';
 import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js';
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
-import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
+import { authorizeExistingProductRead, authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
 
 export const ASSESSMENT_VERSION = 'business_assessment_v1_intake';
 
@@ -29,6 +29,16 @@ export function authorizeBusinessAssessmentRequest(req, redis, ownerProfileId = 
     store: new RedisPublicStore(redis),
     productKey: 'business_assessment',
     profileId: ownerProfileId,
+  });
+}
+
+export function authorizeBusinessAssessmentReadRequest(req, redis, ownerProfileId, { force = false } = {}) {
+  return authorizeExistingProductRead({
+    req,
+    store: new RedisPublicStore(redis),
+    productKey: 'business_assessment',
+    profileId: ownerProfileId,
+    force,
   });
 }
 

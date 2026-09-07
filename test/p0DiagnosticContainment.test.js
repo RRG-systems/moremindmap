@@ -183,10 +183,12 @@ test('a matching public deployment Host never grants New BOS operator authority'
     },
     query: { diagnostic: 'resumable-state', id: 'MM-20990101-DEMO0001' },
   };
-  await handler(request, responseDouble());
-  assert.equal(seen[0].platformProtected, false);
+  const denied = responseDouble();
+  await handler(request, denied);
+  assert.equal(denied.statusCode, 403);
+  assert.equal(seen.length, 0);
   await handler({ ...request, headers: { ...request.headers, 'x-more-platform-authority': authority } }, responseDouble());
-  assert.equal(seen[1].platformProtected, true);
+  assert.equal(seen[0].platformProtected, true);
 
   const emptyAuthorityHandler = createNewBosProductionRouteHandler({
     config: { staged: true, canaryEnabled: true, customerActive: false, platformAuthoritySecret: '' },
@@ -194,8 +196,10 @@ test('a matching public deployment Host never grants New BOS operator authority'
       inspectResumable: async (input) => { seen.push(input); return { ok: true }; },
     }),
   });
-  await emptyAuthorityHandler({ ...request, headers: { host: 'candidate.vercel.app' } }, responseDouble());
-  assert.equal(seen[2].platformProtected, false);
+  const emptyDenied = responseDouble();
+  await emptyAuthorityHandler({ ...request, headers: { host: 'candidate.vercel.app' } }, emptyDenied);
+  assert.equal(emptyDenied.statusCode, 403);
+  assert.equal(seen.length, 1);
 });
 
 test('New BOS platform authority is server-configured and declared in the environment contract', () => {

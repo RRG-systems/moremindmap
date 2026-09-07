@@ -333,7 +333,7 @@ export function createNewBosModernizationService({
         diagnostics: diagnostics.snapshot(),
       });
     },
-    async retrieve({ profileId, suppliedToken = '' }) {
+    async retrieve({ profileId, suppliedToken = '', readOnly = false }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });
       const desired = await desiredState(normalized);
@@ -341,6 +341,10 @@ export function createNewBosModernizationService({
       if (initial.state === 'current') {
         diagnostics.record('current_fast_path', { profile_id: normalized, realization_id: initial.pointer, completeness_count: initial.current.complete_surface_count });
         return serveEnvelope(initial.current, 'current_fast_path');
+      }
+      if (readOnly) {
+        diagnostics.record('provider_disabled', { profile_id: normalized, realization_state: initial.state });
+        throw new Error('public_product_current_artifact_unavailable');
       }
       const repaired = await repairExactPointer(normalized, initial);
       if (repaired) return repaired;

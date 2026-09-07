@@ -9,9 +9,29 @@
 import { getJob, formatJobResponse, lockJob, unlockJob, isStaleLock, JOB_STATUS, JOB_STAGE } from '../engine/miniV2JobManager.js'
 import { executeNextStage } from '../engine/miniV2StagedExecutor.js'
 import { redis as getRedis } from '../engine/redisClient.js'
+import {
+  authorizePublicOrRecruitingProductRequest,
+  reconcileRecruitingBosReadyFromCompletedJob,
+} from '../engine/recruitingV1/canonicalAdapters.js'
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js'
-import { authorizeProductRequest, bindBosProfileToGrant } from '../../src/lib/publicSiteAirlockV1/productBoundary.js'
+import { assertBosExecutionAuthority, bindBosProfileToGrant } from '../../src/lib/publicSiteAirlockV1/productBoundary.js'
 import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js'
+
+async function reconcileCompletedBosBindings({ job, authority, store }) {
+  const response = formatJobResponse(job)
+  if (!response.success || !response.canonical_profile_id) return response
+  await reconcileRecruitingBosReadyFromCompletedJob({
+    redis: getRedis(),
+    authority,
+    job,
+  })
+  await bindBosProfileToGrant({
+    store,
+    jobId: job.job_id,
+    profileId: response.canonical_profile_id,
+  })
+  return response
+}
 
 export default async function handler(req, res) {
   // CORS headers
@@ -38,20 +58,9 @@ export default async function handler(req, res) {
       })
     }
 
-    const publicStore = new RedisPublicStore(getRedis())
-    const publicAuthority = await authorizeProductRequest({
-      req,
-      store: publicStore,
-      productKey: 'behavior_operating_system',
-    })
-    if (publicAuthority.grant) {
-      const boundGrantId = await publicStore.get(`public_product_v1:bos_job:${job_id}`)
-      if (boundGrantId !== publicAuthority.grant.grant_id) {
-        return res.status(404).json({ success: false, error: 'Job not found' })
-      }
-    }
-
-    // Get job from Redis
+    // Read the server-owned job before authorizing so a Recruiting invite can
+    // be compared with the exact relationship embedded at governed BOS start.
+    // Unauthorized and missing jobs remain indistinguishable to the caller.
     let job = await getJob(job_id)
 
     if (!job) {
@@ -61,12 +70,18 @@ export default async function handler(req, res) {
       })
     }
 
+    const publicStore = new RedisPublicStore(getRedis())
+    const publicAuthority = await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: publicStore,
+      productKey: 'behavior_operating_system',
+      relationshipRef: job.payload?.metadata?.recruiting_relationship_ref || '',
+    })
+    await assertBosExecutionAuthority({ store: publicStore, authority: publicAuthority, jobId: job_id })
+
     // If already complete or failed, return final result
     if (job.status === JOB_STATUS.COMPLETE || job.status === JOB_STATUS.FAILED) {
-      const response = formatJobResponse(job)
-      if (response.success && response.canonical_profile_id) {
-        await bindBosProfileToGrant({ store: publicStore, jobId: job_id, profileId: response.canonical_profile_id })
-      }
+      const response = await reconcileCompletedBosBindings({ job, authority: publicAuthority, store: publicStore })
       return res.status(response.success ? 200 : 500).json(response)
     }
 
@@ -98,10 +113,7 @@ export default async function handler(req, res) {
       job = await getJob(job_id)
       
       // Return current status
-      const response = formatJobResponse(job)
-      if (response.success && response.canonical_profile_id) {
-        await bindBosProfileToGrant({ store: publicStore, jobId: job_id, profileId: response.canonical_profile_id })
-      }
+      const response = await reconcileCompletedBosBindings({ job, authority: publicAuthority, store: publicStore })
       return res.status(response.success ? 200 : 500).json(response)
     } catch {
       // Unlock on error

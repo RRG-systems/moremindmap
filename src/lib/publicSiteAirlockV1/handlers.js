@@ -1,6 +1,8 @@
 /* global process */
-import { publicCatalogProjection } from './contracts.js';
+import { waitUntil as vercelWaitUntil } from '@vercel/functions';
+import { normalizeProfileId, publicCatalogProjection } from './contracts.js';
 import { applyExactOriginCors, runtimeFlags } from './security.js';
+import { profileOwnerCookie } from './profileOwnership.js';
 
 function jsonBody(req) {
   if (!req.body) return {};
@@ -16,13 +18,15 @@ function safeError(error) {
     'grant_profile_binding_mismatch', 'grant_vertical_binding_required', 'idempotency_key_required',
     'inquiry_rejected', 'operation_in_progress', 'product_destination_gated', 'product_not_found',
     'rate_limited',
-    'profile_id_required', 'provider_payment_confirmation_required', 'purchase_intent_not_found',
+    'profile_id_required', 'profile_ownership_required', 'provider_payment_confirmation_required', 'purchase_intent_not_found',
     'subscription_checkout_gated', 'valid_email_required', 'valid_inquiry_fields_required',
+    'valid_profile_id_required',
   ]);
   return allowed.has(code) ? code : 'request_unavailable';
 }
 
 function statusFor(code) {
+  if (code === 'ownership_verification_failed') return 401;
   if (code === 'operation_in_progress') return 409;
   if (code === 'rate_limited') return 429;
   if (code.endsWith('_gated')) return 409;
@@ -30,9 +34,9 @@ function statusFor(code) {
   return 400;
 }
 
-function prepare(req, res, { env, methods }) {
+function prepare(req, res, { env, methods, allowCredentials = false }) {
   res.setHeader('Content-Type', 'application/json');
-  if (!applyExactOriginCors(req, res, { env, methods })) {
+  if (!applyExactOriginCors(req, res, { env, methods, allowCredentials })) {
     res.status(403).json({ ok: false, error: 'origin_not_allowed' });
     return false;
   }
@@ -58,23 +62,32 @@ export function createCatalogHandler({ env = process.env } = {}) {
 
 export function createAccessHandler({ serviceFactory, env = process.env } = {}) {
   return async function access(req, res) {
-    if (!prepare(req, res, { env, methods: 'POST,OPTIONS' })) return;
+    if (!prepare(req, res, { env, methods: 'POST,OPTIONS', allowCredentials: true })) return;
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
     const body = jsonBody(req);
     let runtime;
     try {
       runtime = await serviceFactory();
       await runtime.service.enforceRateLimit({ scope: 'access', identity: requestFingerprint(req), limit: 30 });
-      if (body.action === 'lookup') return res.status(200).json({ ok: true, ...(await runtime.service.lookupEntry(body)) });
+      const requestContext = { cookie_header: req.headers?.cookie };
+      if (body.action === 'lookup') return res.status(200).json({ ok: true, ...(await runtime.service.lookupEntry(body, requestContext)) });
       if (body.action === 'redeem') {
         if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
-        return res.status(200).json({ ok: true, ...(await runtime.service.redeemComplimentary(body)) });
+        return res.status(200).json({ ok: true, ...(await runtime.service.redeemComplimentary(body, requestContext)) });
       }
       if (body.action === 'create_start_token') {
         return res.status(200).json({ ok: true, ...(await runtime.service.createStartTokenForGrant(body)) });
       }
       if (body.action === 'create_start_token_from_session') {
         return res.status(200).json({ ok: true, ...(await runtime.service.createStartTokenForSession(body)) });
+      }
+      if (body.action === 'renew_start_token') {
+        return res.status(200).json({
+          ok: true,
+          ...(await runtime.service.renewStartToken({
+            start_token: req.headers?.['x-more-start-token'] || body.start_token,
+          })),
+        });
       }
       return res.status(400).json({ ok: false, error: 'invalid_action' });
     } catch (error) {
@@ -88,7 +101,7 @@ export function createAccessHandler({ serviceFactory, env = process.env } = {}) 
 
 export function createPurchaseIntentHandler({ serviceFactory, checkoutProviderFactory, env = process.env } = {}) {
   return async function purchaseIntent(req, res) {
-    if (!prepare(req, res, { env, methods: 'POST,OPTIONS' })) return;
+    if (!prepare(req, res, { env, methods: 'POST,OPTIONS', allowCredentials: true })) return;
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
     if (!runtimeFlags(env).checkout_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
     let runtime;
@@ -96,7 +109,13 @@ export function createPurchaseIntentHandler({ serviceFactory, checkoutProviderFa
       const body = jsonBody(req);
       runtime = await serviceFactory();
       await runtime.service.enforceRateLimit({ scope: 'purchase_intent', identity: requestFingerprint(req), limit: 10 });
-      const intent = await runtime.service.createPurchaseIntent({ ...body, idempotency_key: req.headers?.['idempotency-key'] || body.idempotency_key });
+      const intent = await runtime.service.createPurchaseIntent(
+        { ...body, idempotency_key: req.headers?.['idempotency-key'] || body.idempotency_key },
+        { cookie_header: req.headers?.cookie },
+      );
+      if (intent.status === 'granted') {
+        return res.status(409).json({ ok: false, error: 'purchase_already_granted' });
+      }
       const checkout = await checkoutProviderFactory(env).create({ intent });
       return res.status(200).json({ ok: true, intent_id: intent.intent_id, checkout_url: checkout.url, idempotent: intent.idempotent });
     } catch (error) {
@@ -104,6 +123,81 @@ export function createPurchaseIntentHandler({ serviceFactory, checkoutProviderFa
       return res.status(statusFor(code)).json({ ok: false, error: code });
     } finally {
       if (runtime?.close) await runtime.close();
+    }
+  };
+}
+
+export function createProfileOwnershipHandler({
+  serviceFactory,
+  env = process.env,
+  waitUntil = vercelWaitUntil,
+} = {}) {
+  return async function profileOwnership(req, res) {
+    if (!prepare(req, res, { env, methods: 'POST,OPTIONS', allowCredentials: true })) return;
+    if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
+    let runtime;
+    let backgroundOwnsRuntime = false;
+    try {
+      const body = jsonBody(req);
+      runtime = await serviceFactory();
+      await runtime.service.enforceRateLimit({
+        scope: `profile_ownership:${body.action === 'verify' ? 'verify' : 'request'}`,
+        identity: requestFingerprint(req),
+        limit: body.action === 'verify' ? 20 : 5,
+      });
+      if (body.action === 'request') {
+        const normalizedProfileId = normalizeProfileId(body.profile_id);
+        await runtime.service.enforceRateLimit({
+          scope: 'profile_ownership:profile',
+          identity: normalizedProfileId || 'invalid_profile_id',
+          limit: 3,
+          windowMs: 15 * 60 * 1000,
+        });
+        let registered = false;
+        const task = Promise.resolve()
+          .then(() => registered
+            ? runtime.ownership.requestChallenge({
+              profile_id: normalizedProfileId || body.profile_id,
+              return_path: body.return_path,
+            })
+            : null)
+          .catch(() => null)
+          .finally(async () => {
+            if (registered && runtime?.close) {
+              try { await runtime.close(); } catch { /* background delivery remains fail-closed */ }
+            }
+          });
+        try {
+          if (typeof waitUntil !== 'function') throw new Error('background_primitive_unavailable');
+          waitUntil(task);
+          registered = true;
+          backgroundOwnsRuntime = true;
+        } catch {
+          // The public response is deliberately identical; no unregistered
+          // provider work is dispatched after the request lifecycle ends.
+        }
+        return res.status(202).json({ ok: true, state: 'verification_requested_if_available' });
+      }
+      if (body.action === 'verify') {
+        const verified = await runtime.ownership.consumeChallenge(body.token);
+        res.setHeader('Set-Cookie', profileOwnerCookie(verified.receipt, verified.max_age_seconds));
+        return res.status(200).json({
+          ok: true,
+          state: 'ownership_verified',
+          profile_id: verified.profile_id,
+          return_path: verified.return_path,
+        });
+      }
+      return res.status(400).json({ ok: false, error: 'invalid_action' });
+    } catch (error) {
+      const raw = String(error?.message || '');
+      if (raw === 'ownership_verification_failed') {
+        return res.status(401).json({ ok: false, error: 'ownership_verification_failed' });
+      }
+      const code = safeError(error);
+      return res.status(statusFor(code)).json({ ok: false, error: code });
+    } finally {
+      if (!backgroundOwnsRuntime && runtime?.close) await runtime.close();
     }
   };
 }
@@ -139,7 +233,15 @@ export function createInquiryHandler({ serviceFactory, env = process.env } = {})
       await runtime.service.enforceRateLimit({ scope: 'inquiry', identity: requestFingerprint(req), limit: 5 });
       const body = jsonBody(req);
       const result = await runtime.service.createInquiry({ ...body, idempotency_key: req.headers?.['idempotency-key'] || body.idempotency_key });
-      return res.status(202).json({ ok: true, ...result });
+      let delivery = null;
+      try { delivery = await runtime.service.dispatchInquiry(result.outbox_id); }
+      catch { delivery = { state: 'retry_pending' }; }
+      return res.status(202).json({
+        ok: true,
+        receipt_id: result.receipt_id,
+        state: delivery.state === 'delivered' ? 'delivered' : result.state,
+        idempotent: result.idempotent,
+      });
     } catch (error) {
       const code = safeError(error);
       return res.status(statusFor(code)).json({ ok: false, error: code });

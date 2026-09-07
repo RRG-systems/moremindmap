@@ -1,5 +1,4 @@
 import {
-  authorizeBusinessAssessmentRequest,
   businessAssessmentByProfileKey,
   businessAssessmentKey,
   createRedisClient,
@@ -8,6 +7,8 @@ import {
   parseProfileId,
   setCors
 } from './shared.js';
+import { authorizePublicOrRecruitingProductRequest } from '../engine/recruitingV1/canonicalAdapters.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 import { REAL_ESTATE_BUSINESS_MODEL_V1 } from '../engine/businessAssessment/realEstateBusinessModelV1.js';
 import { buildBusinessIntelligenceDraft } from '../engine/businessAssessment/buildBusinessIntelligenceDraft.js';
 
@@ -53,7 +54,14 @@ export default async function handler(req, res) {
 
     const assessmentRecord = JSON.parse(rawAssessment);
     const ownerProfileId = assessmentRecord.owner_profile_id || owner_profile_id;
-    await authorizeBusinessAssessmentRequest(req, redis, ownerProfileId);
+    await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: new RedisPublicStore(redis),
+      productKey: 'business_assessment',
+      profileId: ownerProfileId,
+      relationshipRef: assessmentRecord.metadata?.recruiting_relationship_ref || '',
+      assessmentId,
+    });
     const profileLookup = await getCanonicalProfile(redis, ownerProfileId);
 
     if (!profileLookup.found) {

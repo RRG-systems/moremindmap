@@ -1,4 +1,3 @@
-/* global process */
 /**
  * retrieve-profile.js
  * 
@@ -24,9 +23,8 @@ import process from 'node:process';
 import { extractBehavioralIntelligence } from '../engine/canonical/extractIntelligence.js';
 import { readVisualDNAMetadata } from './visual-dna/shared.js';
 import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security.js';
-import { verifyStartToken } from '../../src/lib/publicSiteAirlockV1/security.js';
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
-import { authorizeProductRequest } from '../../src/lib/publicSiteAirlockV1/productBoundary.js';
+import { authorizePublicOrRecruitingProductRequest } from '../engine/recruitingV1/canonicalAdapters.js';
 
 export default async function handler(req, res) {
   res.setHeader('Content-Type', 'application/json');
@@ -63,15 +61,14 @@ export default async function handler(req, res) {
     const redis = new Redis(process.env.REDIS_URL);
     if (String(process.env.PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED || '').toLowerCase() === 'true') {
       try {
-        const claims = verifyStartToken(req.headers?.['x-more-start-token'], process.env.PUBLIC_PRODUCT_START_SIGNING_KEY);
-        if (!['behavior_operating_system', 'business_assessment'].includes(claims.product_key)) throw new Error('public_product_authority_denied');
-        const authority = await authorizeProductRequest({
+        await authorizePublicOrRecruitingProductRequest({
           req,
           store: new RedisPublicStore(redis),
-          productKey: claims.product_key,
+          productKey: 'behavior_operating_system',
           profileId: id,
+          read: true,
+          allowProfileBoundBosRead: true,
         });
-        if (!authority.grant?.profile_id) throw new Error('public_product_profile_binding_required');
       } catch {
         await redis.disconnect();
         return res.status(404).json({ error: 'Profile not found' });

@@ -15,6 +15,7 @@ function tokenFromRequest(request) {
 
 function safeStatus(error) {
   if (/profile_id_invalid|profile_not_allowlisted/u.test(error?.message || '')) return 404;
+  if (/public_product_|profile_owner_required/u.test(error?.message || '')) return 404;
   if (/access_denied/u.test(error?.message || '')) return 403;
   if (/requires_evidence_or_review/u.test(error?.message || '')) return 409;
   if (/provider_default_off/u.test(error?.message || '')) return 503;
@@ -62,7 +63,7 @@ function platformProtectedCandidateRequest(request, config) {
   );
 }
 
-export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
+export function createNewBosProductionRouteHandler({ config, serviceFactory, authorizeCustomerRead = null }) {
   if (typeof serviceFactory !== 'function') throw new Error('new_bos_route_service_factory_required');
   return async function newBosProductionRoute(request, response) {
     response.setHeader('cache-control', 'private, no-store, max-age=0');
@@ -89,9 +90,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
         && !stage3RequestContractV2Replacement)) {
       return response.status(405).json({ error: 'Method not allowed' });
     }
-    try {
-      const service = await serviceFactory();
-      const operation = staleSurfaceRoutingReplacement
+    const operation = staleSurfaceRoutingReplacement
         ? 'replaceStaleSurfaceRouting'
         : invalidStage3Repair
           ? 'repairInvalidStage3VectorFree'
@@ -110,21 +109,25 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory }) {
         : request.query?.diagnostic === 'state'
           ? 'diagnose'
           : 'retrieve';
+    try {
+      const operatorOperation = operation !== 'retrieve';
+      const platformProtected = platformProtectedCandidateRequest(request, config);
+      let customerAuthority = null;
+      if (operatorOperation && !platformProtected) {
+        throw new Error('new_bos_operator_inspection_access_denied');
+      }
+      if (operation === 'retrieve' && config.customerActive) {
+        if (typeof authorizeCustomerRead !== 'function') throw new Error('new_bos_profile_owner_required');
+        customerAuthority = await authorizeCustomerRead({ request, profileId: request.query?.id });
+      }
+      const created = await serviceFactory();
+      const service = created?.service || created;
       if (typeof service?.[operation] !== 'function') throw new Error('new_bos_route_service_operation_unavailable');
       const result = await service[operation]({
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
-        platformProtected: [
-          'inspectResumable',
-          'inspectAcceptedSemanticAssembly',
-          'inspectCompletedStage3Validation',
-          'classifyCompletedStage3SemanticRejection',
-          'replaceSemanticRejectedStage3',
-          'replaceStage3RequestContractV2',
-          'replaceStaleSurfaceRouting',
-          'repairInvalidStage3VectorFree',
-        ].includes(operation)
-          && platformProtectedCandidateRequest(request, config),
+        platformProtected: operatorOperation && platformProtected,
+        readOnly: customerAuthority?.mode === 'profile_owner_receipt',
         ...(operation === 'replaceStaleSurfaceRouting' ? {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
           expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,

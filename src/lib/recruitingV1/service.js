@@ -863,6 +863,7 @@ export class RecruitingV1Service {
         relationship_ref: invitation.invitation_id,
         candidate_id: invitation.candidate_id,
         bos_profile_id: invitation.bos_profile_id || null,
+        ba_assessment_id: invitation.ba_assessment_id || null,
         ba_readiness: invitation.ba_readiness,
         purpose: 'RECRUITING_INTELLIGENCE',
       },

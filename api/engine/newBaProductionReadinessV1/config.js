@@ -45,6 +45,7 @@ export function readNewBaProductionConfig(env = process.env) {
     bosNamespace,
     providerModel,
     accessToken: String(env.NEW_BA_CANARY_ACCESS_TOKEN || ''),
+    platformAuthoritySecret: String(env.NEW_BA_PLATFORM_AUTHORITY_SECRET || ''),
   });
 }
 
@@ -68,6 +69,7 @@ export const NEW_BA_PRODUCTION_ENVIRONMENT_CONTRACT = Object.freeze([
   'NEW_BA_CANARY_ENABLED',
   'NEW_BA_CANARY_PROFILE_IDS',
   'NEW_BA_CANARY_ACCESS_TOKEN',
+  'NEW_BA_PLATFORM_AUTHORITY_SECRET',
   'NEW_BA_PROVIDER_ENABLED',
   'NEW_BA_PROVIDER_MODEL',
   'NEW_BA_DERIVED_PERSISTENCE_ENABLED',

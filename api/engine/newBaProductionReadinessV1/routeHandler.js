@@ -1,4 +1,5 @@
 import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
+import { timingSafeHeaderMatch } from '../../../src/lib/publicSiteAirlockV1/security.js';
 
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_ba_business_assessment_not_found',
@@ -16,6 +17,7 @@ function tokenFromRequest(request) {
 function safeStatus(error) {
   const message = String(error?.message || '');
   if (/profile_id_invalid|profile_not_allowlisted/u.test(message)) return 404;
+  if (/public_product_|profile_owner_required/u.test(message)) return 404;
   if (/access_denied/u.test(message)) return 403;
   if (/requires_evidence_or_review|hash_drift|identity_mismatch/u.test(message)) return 409;
   if (/default_off|not_authorized/u.test(message)) return 503;
@@ -48,7 +50,14 @@ function customerSafePending(result) {
   });
 }
 
-export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalServed = null }) {
+function platformProtectedCandidateRequest(request, config) {
+  return timingSafeHeaderMatch(
+    request.headers?.['x-more-platform-authority'],
+    config?.platformAuthoritySecret,
+  );
+}
+
+export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalServed = null, authorizeCustomerRead = null }) {
   if (typeof serviceFactory !== 'function') throw new Error('new_ba_route_service_factory_required');
   return async function newBaRoute(request, response) {
     response.setHeader('cache-control', 'private, no-store, max-age=0');
@@ -58,12 +67,31 @@ export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalSer
     if (request.method !== 'GET') return response.status(405).json({ error: 'Method not allowed' });
     let redis;
     try {
+      const operation = request.query?.diagnostic === 'state' ? 'diagnose' : 'retrieve';
+      const operatorOperation = operation !== 'retrieve';
+      const platformProtected = platformProtectedCandidateRequest(request, config);
+      let customerAuthority = null;
+      if (operatorOperation && !platformProtected) {
+        throw new Error('new_ba_operator_inspection_access_denied');
+      }
+      if (operation === 'retrieve' && config.customerActive) {
+        if (typeof authorizeCustomerRead !== 'function') throw new Error('new_ba_profile_owner_required');
+        customerAuthority = await authorizeCustomerRead({ request, profileId: request.query?.id });
+      }
       const created = await serviceFactory();
       const service = created?.service || created;
       redis = created?.redis;
-      const operation = request.query?.diagnostic === 'state' ? 'diagnose' : 'retrieve';
-      const result = await service[operation]({ profileId: request.query?.id, suppliedToken: tokenFromRequest(request) });
-      if (operation === 'retrieve' && !result?.pending && result?.artifact && typeof onCanonicalServed === 'function') {
+      const result = await service[operation]({
+        profileId: request.query?.id,
+        suppliedToken: tokenFromRequest(request),
+        platformProtected: operatorOperation && platformProtected,
+        readOnly: customerAuthority?.mode === 'profile_owner_receipt',
+      });
+      if (operation === 'retrieve'
+        && customerAuthority?.mode !== 'profile_owner_receipt'
+        && !result?.pending
+        && result?.artifact
+        && typeof onCanonicalServed === 'function') {
         try {
           await onCanonicalServed({ redis, result, request });
         } catch (recruitingProjectionError) {

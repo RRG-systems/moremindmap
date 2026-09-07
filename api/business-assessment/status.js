@@ -1,10 +1,12 @@
 import {
-  authorizeBusinessAssessmentRequest,
   businessAssessmentJobKey,
+  businessAssessmentKey,
   createRedisClient,
   isPublicProductAuthorityError,
   setCors,
 } from './shared.js';
+import { authorizePublicOrRecruitingProductRequest } from '../engine/recruitingV1/canonicalAdapters.js';
+import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 
 export default async function handler(req, res) {
   if (!setCors(res, req)) return res.status(403).json({ success: false, error: 'Origin not allowed' });
@@ -32,7 +34,19 @@ export default async function handler(req, res) {
     }
 
     const job = JSON.parse(raw);
-    await authorizeBusinessAssessmentRequest(req, redis, job.owner_profile_id);
+    const assessmentRaw = job.assessment_id
+      ? await redis.get(businessAssessmentKey(job.assessment_id))
+      : null;
+    let assessment = null;
+    try { assessment = assessmentRaw ? JSON.parse(assessmentRaw) : null; } catch { assessment = null; }
+    await authorizePublicOrRecruitingProductRequest({
+      req,
+      store: new RedisPublicStore(redis),
+      productKey: 'business_assessment',
+      profileId: job.owner_profile_id,
+      relationshipRef: assessment?.metadata?.recruiting_relationship_ref || '',
+      assessmentId: job.assessment_id || '',
+    });
     return res.status(200).json({
       success: true,
       job_id,
