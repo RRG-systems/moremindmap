@@ -25,7 +25,7 @@
     },
     "api/internal/athlete-living-consult-one-shot-v1.js": {
       "maxDuration": 800,
-      "includeFiles": "api/engine/athleteLivingConsultOneShotV1/fixtures/**"
+      "includeFiles": "server/athleteLivingConsultOneShotV1/fixtures/**"
     },
     "api/**/*.js": {
       "maxDuration": 180

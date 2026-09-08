@@ -5,15 +5,15 @@ import test from 'node:test';
 import {
   ATHLETE_CONSULT_DEMO_FIXTURE_IDS_V1,
   createAthleteConsultDemoFixtureV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/demoFixtures.js';
+} from '../server/athleteLivingConsultOneShotV1/demoFixtures.js';
 import {
   ATHLETE_LIVING_CONSULT_ONE_SHOT_DEMO_POLICY_V1,
   createAthleteLivingConsultOneShotDemoRuntimeV1,
   createAthleteLivingConsultStructuralQaSeamsV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/demoRuntime.js';
+} from '../server/athleteLivingConsultOneShotV1/demoRuntime.js';
 
 const rawMikaBos = JSON.parse(fs.readFileSync(
-  new URL('../api/engine/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url),
+  new URL('../server/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url),
   'utf8',
 ));
 

@@ -6,8 +6,8 @@ import test from 'node:test';
 import {
   createAthleteLivingConsultOneShotDemoRuntimeV1,
   createAthleteLivingConsultStructuralQaSeamsV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/demoRuntime.js';
-import { createAthleteConsultDemoFixtureV1 } from '../api/engine/athleteLivingConsultOneShotV1/demoFixtures.js';
+} from '../server/athleteLivingConsultOneShotV1/demoRuntime.js';
+import { createAthleteConsultDemoFixtureV1 } from '../server/athleteLivingConsultOneShotV1/demoFixtures.js';
 import {
   ATHLETE_CONSULTING_DURABILITY_V1,
   athleteConsultingFixtureBindingV1,
@@ -17,7 +17,7 @@ import {
   readAthleteConsultingSessionEnvelopeV1,
   validateAthleteConsultingSessionEnvelopeV1,
   withAthleteConsultingSessionLeaseV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/durableInfrastructure.js';
+} from '../server/athleteLivingConsultOneShotV1/durableInfrastructure.js';
 import {
   athleteConsultingDarrenDemoEnabled,
   consumeAthleteConsultingDemoCsrf,
@@ -26,7 +26,7 @@ import {
 } from '../api/engine/leadershipDemo/authority.js';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 
-const FIXTURE_PATH = new URL('../api/engine/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
+const FIXTURE_PATH = new URL('../server/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
 const rawBos = JSON.parse(fs.readFileSync(FIXTURE_PATH, 'utf8'));
 const fixedClock = () => '2026-09-08T12:00:00.000Z';
 

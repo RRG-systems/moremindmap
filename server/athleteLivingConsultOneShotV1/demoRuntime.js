@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
-import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import {
   assertAthletePresentationSafePayloadV1,
   compileAthleteSharedContextV1,
@@ -10,12 +10,12 @@ import {
   createAthletePostResponseCandidateExtractorV1,
   createAthleteSharedContextGrantV1,
   createInitialAthleteLivingMapPublicationV1,
-} from '../../../src/lib/athleteLivingConsultOneShotV1/index.js';
+} from '../../src/lib/athleteLivingConsultOneShotV1/index.js';
 import {
   createFrontierConversationSeamV2,
   createSessionCloseSeamV1,
-} from '../../../src/lib/subscriptionV1/freeGptV2/providerSeams.js';
-import { createSubscriptionS2OpenAiTransport } from '../subscriptionS2/openAiTransport.js';
+} from '../../src/lib/subscriptionV1/freeGptV2/providerSeams.js';
+import { createSubscriptionS2OpenAiTransport } from '../../api/engine/subscriptionS2/openAiTransport.js';
 import { createAthleteConsultDemoFixtureV1 } from './demoFixtures.js';
 import { createAthleteS2GuRuntimeV1 } from './athleteGuRuntime.js';
 

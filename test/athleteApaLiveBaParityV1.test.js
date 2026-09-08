@@ -21,7 +21,7 @@ test('Box 1 is a source-separated governed Athlete current reality bound to curr
   assert.deepEqual(new Set(ATHLETE_APA_PARITY_FIXTURE.claims.map((claim) => claim.sourceClass)), new Set(['ATHLETE_REPORT', 'INSTRUCTOR_REPORT', 'INSTRUCTOR_OBSERVATION', 'SHARED_AGREEMENT', 'OBJECTIVE_RECORD']))
   assert.equal(ATHLETE_APA_PARITY_FIXTURE.openEvidence.contradictions[0].status, 'UNRESOLVED')
   assert.ok(ATHLETE_APA_PARITY_FIXTURE.openEvidence.missing.every((item) => item.status === 'MISSING'))
-  const source = await fs.readFile(new URL('../api/engine/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url))
+  const source = await fs.readFile(new URL('../server/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url))
   assert.equal(sha256(source), ATHLETE_APA_PARITY_FIXTURE.bosBinding.sourceArtifactSha256)
   assert.equal(JSON.parse(source).identity, ATHLETE_APA_PARITY_FIXTURE.bosBinding.sourceArtifactIdentity)
 })

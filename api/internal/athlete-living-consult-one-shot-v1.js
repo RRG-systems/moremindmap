@@ -11,7 +11,7 @@ import {
   sameOriginLeadershipDemoRequest,
 } from '../engine/leadershipDemo/authority.js';
 import { getSubscriptionRedis } from '../engine/subscriptionV1/internalDevInfrastructure.js';
-import { createAthleteLivingConsultOneShotDemoRuntimeV1 } from '../engine/athleteLivingConsultOneShotV1/demoRuntime.js';
+import { createAthleteLivingConsultOneShotDemoRuntimeV1 } from '../../server/athleteLivingConsultOneShotV1/demoRuntime.js';
 import {
   athleteConsultingFixtureBindingV1,
   athleteConsultingSessionKeys,
@@ -20,7 +20,7 @@ import {
   readAthleteConsultingSessionEnvelopeV1,
   resetAthleteConsultingSessionEnvelopeV1,
   withAthleteConsultingSessionLeaseV1,
-} from '../engine/athleteLivingConsultOneShotV1/durableInfrastructure.js';
+} from '../../server/athleteLivingConsultOneShotV1/durableInfrastructure.js';
 
 const ACTIONS = new Set([
   'START_MY_FIRST_SESSION',

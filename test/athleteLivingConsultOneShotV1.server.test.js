@@ -4,7 +4,7 @@ import { createAthleteLivingConsultOneShotHandlerV1 } from '../api/internal/athl
 import {
   createAthleteLivingConsultOneShotDemoRuntimeV1,
   createAthleteLivingConsultStructuralQaSeamsV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/demoRuntime.js';
+} from '../server/athleteLivingConsultOneShotV1/demoRuntime.js';
 import { postAthleteLivingConsultOneShot } from '../src/athleteLivingConsultOneShotV1/client.js';
 
 const ENABLED_ENV = Object.freeze({

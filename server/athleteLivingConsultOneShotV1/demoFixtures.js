@@ -4,9 +4,9 @@ import {
   ATHLETE_APA_PARITY_OPEN_EVIDENCE,
   ATHLETE_APA_PARITY_RELATIONSHIP,
   ATHLETE_APA_PARITY_SUBJECT,
-} from '../../../src/lib/athleteApaV1/parityFixture.js';
-import { ATHLETE_APA_PARITY_V1 } from '../../../src/lib/athleteApaV1/parityProjection.js';
-import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+} from '../../src/lib/athleteApaV1/parityFixture.js';
+import { ATHLETE_APA_PARITY_V1 } from '../../src/lib/athleteApaV1/parityProjection.js';
+import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 

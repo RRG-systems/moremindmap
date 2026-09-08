@@ -1,11 +1,11 @@
-import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import {
   SUBSCRIPTION_S2_GU_OUTPUT_SCHEMA,
   SUBSCRIPTION_S2_GU_PLAN_VERSION,
   materializeSubscriptionS2GuPlan,
   validateSubscriptionS2GuPlan,
-} from '../../../src/lib/subscriptionS2/guContract.js';
-import { createSubscriptionS2OpenAiTransport } from '../subscriptionS2/openAiTransport.js';
+} from '../../src/lib/subscriptionS2/guContract.js';
+import { createSubscriptionS2OpenAiTransport } from '../../api/engine/subscriptionS2/openAiTransport.js';
 
 const EVENT_MISSION = Object.freeze({
   FIRST_SESSION_WELCOME: Object.freeze({

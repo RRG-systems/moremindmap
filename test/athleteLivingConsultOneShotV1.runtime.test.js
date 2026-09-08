@@ -8,17 +8,17 @@ import {
   createAthleteLivingConsultStructuralQaSeamsV1,
   createAthleteLivingConsultOneShotDemoRuntimeV1,
   createPresentationSafeMikaBosProjectionV1,
-} from '../api/engine/athleteLivingConsultOneShotV1/demoRuntime.js';
+} from '../server/athleteLivingConsultOneShotV1/demoRuntime.js';
 import {
   createAthletePostResponseCandidateExtractorV1,
   validateAthleteDurableCandidateOutputV1,
 } from '../src/lib/athleteLivingConsultOneShotV1/index.js';
 import { createFrontierConversationSeamV2 } from '../src/lib/subscriptionV1/freeGptV2/providerSeams.js';
-import { createAthleteS2GuRuntimeV1 } from '../api/engine/athleteLivingConsultOneShotV1/athleteGuRuntime.js';
+import { createAthleteS2GuRuntimeV1 } from '../server/athleteLivingConsultOneShotV1/athleteGuRuntime.js';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 import { ATHLETE_APA_PARITY_V1 } from '../src/lib/athleteApaV1/parityProjection.js';
 
-const BOS_PATH = new URL('../api/engine/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
+const BOS_PATH = new URL('../server/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
 
 function testClock() {
   let time = Date.parse('2026-09-05T22:00:00.000Z');

@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
 import { Buffer } from 'node:buffer';
-import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import {
   createAthleteDomainAdapterV1,
   createAthleteLivingRelationshipScopeV1,
-} from '../../../src/lib/athleteLivingConsultOneShotV1/athleteDomainAdapter.js';
+} from '../../src/lib/athleteLivingConsultOneShotV1/athleteDomainAdapter.js';
 import { createPresentationSafeAthleteBosProjectionV1 } from './demoRuntime.js';
 
 const PREFIX = 'more:athlete-consulting-demo:v1';

@@ -14,7 +14,7 @@ const source = getFixture('synthetic-athlete-nia');
 const sha256 = value => crypto.createHash('sha256').update(value).digest('hex');
 const snapshot = () => ({ metadata: { fictional: true, assent: true, ageBand: '14–17' }, responses: Object.fromEntries(QUESTIONS.map(q => [q.id, { status: 'UNKNOWN', text: '', selected: [] }])) });
 async function store() { const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'athlete-bos-unit-')); const s = new AthleteLocalStore(dir); await s.init(); return s; }
-const PACKAGED_MIKA_ARTIFACT = new URL('../api/engine/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
+const PACKAGED_MIKA_ARTIFACT = new URL('../server/athleteLivingConsultOneShotV1/fixtures/mika-bos-v1.json', import.meta.url);
 const PACKAGED_MIKA_ARTIFACT_SHA256 = '21dad9299058dbdaa935bc89e66a0d3126d9c845c18b599bfa6afda3cd1ce6d0';
 async function packagedMikaArtifactAndSource() {
   const bytes = await fs.readFile(PACKAGED_MIKA_ARTIFACT);
