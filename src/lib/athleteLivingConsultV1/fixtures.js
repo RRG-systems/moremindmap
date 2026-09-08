@@ -43,4 +43,3 @@ export const SYNTHETIC_MARA_PRIVATE_BOS_READING = Object.freeze({
   ]),
   mutationAuthority: 'NONE_READ_ONLY',
 })
-
