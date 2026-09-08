@@ -26,10 +26,18 @@ const uniqueStrings = (value, max = 80) => Array.isArray(value) && value.length 
   && value.every((entry) => isString(entry)) && new Set(value).size === value.length;
 const exactKeys = (value, allowed) => isObject(value) && Object.keys(value).every((key) => allowed.includes(key));
 
+const BUSINESS_SCOPE_KEYS = Object.freeze(['subject_id', 'membership_id', 'tenant_id', 'profile_id', 'business_id']);
+const ATHLETE_SCOPE_KEYS = Object.freeze(['domain', 'subject_id', 'membership_id', 'tenant_id', 'profile_id', 'athlete_relationship_id']);
+
+function scopeKeys(scope) {
+  return scope?.domain === 'ATHLETE' ? ATHLETE_SCOPE_KEYS : BUSINESS_SCOPE_KEYS;
+}
+
 function validateScope(scope, path, errors) {
-  const keys = ['subject_id', 'membership_id', 'tenant_id', 'profile_id', 'business_id'];
+  const keys = scopeKeys(scope);
   if (!exactKeys(scope, keys)) errors.push({ code: 'SCOPE_FIELDS_INVALID', path });
-  for (const key of keys) {
+  if (scope?.domain != null && scope.domain !== 'ATHLETE') errors.push({ code: 'SCOPE_DOMAIN_INVALID', path: `${path}.domain` });
+  for (const key of keys.filter((item) => item !== 'domain')) {
     if (!isString(scope?.[key], key === 'tenant_id' ? 3 : 8, 128)) errors.push({ code: 'SCOPE_VALUE_INVALID', path: `${path}.${key}` });
   }
 }
@@ -42,7 +50,7 @@ function validateAuthority(authority, path, errors) {
 }
 
 function validateEvidenceRef(reference, path, errors) {
-  const domains = ['BUSINESS', 'WHOLE_PERSON_EXECUTION', 'PERSONAL_RSL', 'UNIVERSAL_RSL', 'EXTERNAL', 'SYSTEM'];
+  const domains = ['BUSINESS', 'WHOLE_PERSON_EXECUTION', 'ATHLETE_BOS', 'ATHLETE_APA', 'ATHLETE_SHARED_CONTEXT', 'ATHLETE_CURRENT_REALITY', 'PERSONAL_RSL', 'UNIVERSAL_RSL', 'EXTERNAL', 'SYSTEM'];
   const certainty = ['KNOWN', 'OBSERVED', 'INFERRED', 'MODELED', 'UNCERTAIN', 'MISSING', 'CONTRADICTED'];
   if (!exactKeys(reference, ['evidence_id', 'evidence_domain', 'content_hash', 'certainty'])) errors.push({ code: 'EVIDENCE_FIELDS_INVALID', path });
   if (!isString(reference?.evidence_id, 3, 160)) errors.push({ code: 'EVIDENCE_ID_INVALID', path: `${path}.evidence_id` });
@@ -267,8 +275,15 @@ export function scopeFingerprint(scope) {
 }
 
 export function sameScope(left, right) {
-  return ['subject_id', 'membership_id', 'tenant_id', 'profile_id', 'business_id']
-    .every((key) => left?.[key] && left[key] === right?.[key]);
+  if (!left || !right || (left.domain || 'BUSINESS') !== (right.domain || 'BUSINESS')) return false;
+  return scopeKeys(left).every((key) => left?.[key] && left[key] === right?.[key]);
+}
+
+export function relationshipIdentityForScope(scope) {
+  const errors = [];
+  validateScope(scope, '$.scope', errors);
+  if (errors.length) throw new TypeError('Exact Subscription V1 scope required');
+  return scope.domain === 'ATHLETE' ? scope.athlete_relationship_id : scope.business_id;
 }
 
 export function createAuthorityReference({ authority_id, authority_version, authority_hash = null }) {

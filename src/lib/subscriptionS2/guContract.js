@@ -449,8 +449,11 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
     for (const id of block.objectIds || []) selectedObjectIds.add(id);
     for (const id of block.evidenceIds || []) if (!evidenceIds.has(id)) errors.push(`S2_GU_EVIDENCE_SCOPE_DENIED:${id}`);
   }
+  const firstSessionWelcomeObjectId = world.domain === 'ATHLETE'
+    ? 's2-relationship-preferences'
+    : 's2-first-session-welcome';
   const requiredObjectByEvent = {
-    FIRST_SESSION_WELCOME: 's2-first-session-welcome',
+    FIRST_SESSION_WELCOME: firstSessionWelcomeObjectId,
     SESSION_OPENING: null,
     MAP_CHANGE: 's2-map-delta',
     SESSION_CLOSING: 's2-session-learning',
@@ -459,7 +462,7 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
   if (mandatory && candidate?.renderDecision?.render !== true) errors.push('S2_GU_MANDATORY_RENDER_REQUIRED');
   if (mandatory && list(candidate?.blocks).length < 1) errors.push('S2_GU_MANDATORY_BLOCK_REQUIRED');
   if (world.event === 'FIRST_SESSION_WELCOME' && list(candidate?.blocks).length !== 1) errors.push('S2_GU_FIRST_WELCOME_ONE_BLOCK_REQUIRED');
-  if (world.event === 'FIRST_SESSION_WELCOME' && (selectedObjectIds.size !== 1 || !selectedObjectIds.has('s2-first-session-welcome'))) errors.push('S2_GU_FIRST_WELCOME_ONLY_REQUIRED');
+  if (world.event === 'FIRST_SESSION_WELCOME' && (selectedObjectIds.size !== 1 || !selectedObjectIds.has(firstSessionWelcomeObjectId))) errors.push('S2_GU_FIRST_WELCOME_ONLY_REQUIRED');
   if (world.event === 'SESSION_OPENING' && list(candidate?.blocks).length !== 1) errors.push('S2_1_GU_OPENING_ONE_BLOCK_REQUIRED');
   if (!mandatory && candidate?.renderDecision?.render === false && list(candidate?.blocks).length) errors.push('S2_GU_RESTRAINED_NO_RENDER_BLOCK_DENIED');
   if (!mandatory && candidate?.renderDecision?.render === true && (list(candidate?.blocks).length < 1 || list(candidate?.blocks).length > 2)) errors.push('S2_GU_RESTRAINED_BLOCK_COUNT_INVALID');

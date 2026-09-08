@@ -23,6 +23,10 @@
     "api/internal/subscription-v1-runtime.js": {
       "maxDuration": 800
     },
+    "api/internal/athlete-living-consult-one-shot-v1.js": {
+      "maxDuration": 800,
+      "includeFiles": "api/engine/athleteLivingConsultOneShotV1/fixtures/**"
+    },
     "api/**/*.js": {
       "maxDuration": 180
     }

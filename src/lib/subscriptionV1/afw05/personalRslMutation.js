@@ -11,14 +11,14 @@ function evidenceEventType(proposal, effectiveItems) {
   if (proposal.proposal_type === 'CORRECTION_CANDIDATE') return 'CORRECTION';
   if (proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE') return 'PLAN_CHANGE';
   if (proposal.proposal_type === 'COMMITMENT_CANDIDATE') {
-    return effectiveItems.some((item) => item.field === 'commitment.intervention') ? 'INTERVENTION' : 'COMMITMENT';
+    return effectiveItems.some((item) => ['commitment.intervention', 'athlete_plan.intervention'].includes(item.field)) ? 'INTERVENTION' : 'COMMITMENT';
   }
   const fields = effectiveItems.map((item) => item.field.toLowerCase());
-  if (fields.some((field) => /^evidence\.(?:execution_)?outcome(?:_|$)/u.test(field))) return 'OUTCOME';
-  if (fields.some((field) => /^evidence\.(?:attempt|experiment)(?:_|$)/u.test(field))) return 'ATTEMPT';
-  if (fields.some((field) => /^evidence\.decision(?:_|$)/u.test(field))) return 'DECISION';
-  if (fields.some((field) => /^evidence\.friction(?:_|$)/u.test(field))) return 'FRICTION';
-  if (fields.some((field) => /^evidence\.(?:operating_change|changed_reality|state_change)(?:_|$)/u.test(field))) return 'STATE_CHANGE';
+  if (fields.some((field) => /^(?:evidence|athlete_evidence)\.(?:execution_)?outcome(?:_|$)/u.test(field))) return 'OUTCOME';
+  if (fields.some((field) => /^(?:evidence|athlete_evidence)\.(?:attempt|experiment|execution_degree)(?:_|$)/u.test(field))) return 'ATTEMPT';
+  if (fields.some((field) => /^(?:evidence|athlete_evidence)\.decision(?:_|$)/u.test(field))) return 'DECISION';
+  if (fields.some((field) => /^(?:evidence|athlete_evidence)\.friction(?:_|$)/u.test(field))) return 'FRICTION';
+  if (fields.some((field) => /^(?:evidence|athlete_evidence)\.(?:operating_change|changed_reality|state_change)(?:_|$)/u.test(field))) return 'STATE_CHANGE';
   return PROPOSAL_EVENT_TYPES[proposal.proposal_type];
 }
 
@@ -48,6 +48,8 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
     active_events: active_personal_rsl_events,
   });
   if (!lineage.ok) return lineage;
+  const athleteScope = proposal.scope?.domain === 'ATHLETE';
+  const primaryObject = proposal.affected_governed_objects[0];
   return createPersonalRslEvent({
     event_id,
     scope: proposal.scope,
@@ -55,10 +57,10 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
     event_type: eventType,
     effective_at: decision.decided_at,
     recorded_at,
-    source_class: 'CUSTOMER_SELF_REPORT',
+    source_class: athleteScope ? 'JOINT_HUMAN_AGREEMENT' : 'CUSTOMER_SELF_REPORT',
     actor: decision.actor,
     establishing_authority: createAuthorityReference({
-      authority_id: `customer_confirmation:${decision.decision_id}`,
+      authority_id: `${athleteScope ? 'athlete_instructor_joint_confirmation' : 'customer_confirmation'}:${decision.decision_id}`,
       authority_version: '1.0.0',
       authority_hash: decision.decision_hash,
     }),
@@ -71,8 +73,11 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
       affected_governed_objects: proposal.affected_governed_objects,
       items: decision.effective_items,
       summary: proposal.summary,
-      purpose: proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE' ? 'FINISH_PLAN_135' : 'WEEKLY_COACHING',
-      lens: proposal.affected_governed_objects[0] === 'PLAN_135' ? 'PLAN' : proposal.affected_governed_objects[0],
+      ...(athleteScope ? { original_reason: proposal.reason } : {}),
+      purpose: athleteScope ? 'ATHLETE_LIVING_CONSULT_SHARED'
+        : proposal.proposal_type === 'PLAN_CHANGE_CANDIDATE' ? 'FINISH_PLAN_135' : 'WEEKLY_COACHING',
+      lens: athleteScope ? (primaryObject === 'CURRENT_REALITY' ? 'YOUR_SPORT' : primaryObject)
+        : primaryObject === 'PLAN_135' ? 'PLAN' : primaryObject,
       privacy_classification: 'TENANT_PRIVATE',
       raw_transcript_persisted: false,
       lineage: lineage.lineage,

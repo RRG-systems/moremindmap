@@ -2,6 +2,7 @@
 
 import {
   authenticateLeadershipLauncher,
+  athleteConsultingDarrenDemoEnabled,
   clearLeadershipDemoCookies,
   consumeLeadershipEntryCsrf,
   consumeLeadershipLauncherCsrf,
@@ -11,6 +12,7 @@ import {
   issueLeadershipEntryCsrf,
   issueLeadershipLauncherCapability,
   issueLeadershipLauncherCsrf,
+  issueAthleteConsultingDemoCapability,
   issueRecruitingDemoCapability,
   leadershipDemoEnabled,
   sameOriginLeadershipDemoRequest,
@@ -48,6 +50,10 @@ export default async function leadershipDemoEntryHandler(req, res) {
             { id: 'recruiting', title: 'CONSULTING DEMONSTRATION' },
             { id: 'subscription-model-1', title: 'SUBSCRIPTION MODEL 1' },
             { id: 'subscription-model-2', title: 'SUBSCRIPTION MODEL 2' },
+            ...(athleteConsultingDarrenDemoEnabled(process.env)
+              && auth.capability.allowed_products?.includes('athlete-consulting-tool')
+              ? [{ id: 'athlete-consulting-tool', title: 'ATHLETE CONSULTING TOOL' }]
+              : []),
           ],
         });
       }
@@ -72,7 +78,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
       if (!exactLeadershipDemoCode(req.body?.access_code, process.env)) {
         return send(res, 401, { ok: false, code: 'LEADERSHIP_DEMO_CODE_INVALID' });
       }
-      const issued = await issueLeadershipLauncherCapability({ redis, req });
+      const issued = await issueLeadershipLauncherCapability({ redis, req, env: process.env });
       res.setHeader('Set-Cookie', issued.cookie);
       return send(res, 200, {
         ok: true,
@@ -100,6 +106,25 @@ export default async function leadershipDemoEntryHandler(req, res) {
         ok: true,
         code: 'LEADERSHIP_DEMO_RECRUITING_CAPABILITY_ISSUED',
         redirect_to: '/recruiting-gu-v1/demo',
+        synthetic_only: true,
+      });
+    }
+
+    if (action === 'LAUNCH_ATHLETE_CONSULTING_TOOL') {
+      if (!athleteConsultingDarrenDemoEnabled(process.env)) {
+        return send(res, 404, { ok: false, code: 'ATHLETE_CONSULTING_DEMO_DEFAULT_OFF' });
+      }
+      const issued = await issueAthleteConsultingDemoCapability({
+        redis,
+        req,
+        launcher: auth.capability,
+        env: process.env,
+      });
+      res.setHeader('Set-Cookie', issued.cookie);
+      return send(res, 200, {
+        ok: true,
+        code: 'LEADERSHIP_DEMO_ATHLETE_CONSULTING_CAPABILITY_ISSUED',
+        redirect_to: '/athlete-consulting-tool/demo',
         synthetic_only: true,
       });
     }

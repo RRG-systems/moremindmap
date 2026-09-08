@@ -3,6 +3,8 @@ import fs from 'node:fs';
 import test from 'node:test';
 import {
   LEADERSHIP_DEMO_AUTHORITY,
+  athleteConsultingDarrenDemoEnabled,
+  authenticateAthleteConsultingDemoRequest,
   authenticateLeadershipLauncher,
   authenticateRecruitingDemoRequest,
   consumeLeadershipEntryCsrf,
@@ -11,6 +13,7 @@ import {
   issueLeadershipEntryCsrf,
   issueLeadershipLauncherCapability,
   issueLeadershipLauncherCsrf,
+  issueAthleteConsultingDemoCapability,
   issueRecruitingDemoCapability,
   issueRecruitingDemoCsrf,
   consumeRecruitingDemoCsrf,
@@ -57,7 +60,8 @@ test('launcher entry is exact, same-origin, rate-limit ready, and protected by o
   const proof = await issueLeadershipEntryCsrf({ redis, req });
   assert.equal(await consumeLeadershipEntryCsrf({ redis, req, proof }), true);
   assert.equal(await consumeLeadershipEntryCsrf({ redis, req, proof }), false);
-  assert.equal(exactLeadershipDemoCode('darrendemo', {}), true);
+  assert.equal(exactLeadershipDemoCode('test-leadership-code', { LEADERSHIP_DEMO_ACCESS_CODE: 'test-leadership-code' }), true);
+  assert.equal(exactLeadershipDemoCode('darrendemo', {}), false);
   assert.equal(exactLeadershipDemoCode('DarrenDemo', {}), false);
   assert.equal(sameOriginLeadershipDemoRequest(req), true);
   assert.equal(sameOriginLeadershipDemoRequest(request({ origin: 'https://evil.example' })), false);
@@ -171,7 +175,31 @@ test('Subscription launcher exchange reuses the existing re-mid synthetic capabi
   assert.equal(issued.cookies.some((value) => value.startsWith('__Host-more_subscription_relationship=')), true);
 });
 
-test('Leadership launcher source exposes exactly three products with two opaque Subscription arms and no client-side provider authority', () => {
+test('Athlete Consulting is default-off and becomes an exact fourth, separately scoped launcher capability only under the composite gate', async () => {
+  const redis = new FakeRedis();
+  const req = request();
+  const baseEnv = {
+    RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED: 'true',
+    SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true',
+  };
+  assert.equal(athleteConsultingDarrenDemoEnabled(baseEnv), false);
+  const base = await issueLeadershipLauncherCapability({ redis, req, env: baseEnv });
+  assert.deepEqual(base.capability.allowed_products, ['recruiting', 'subscription']);
+  await assert.rejects(() => issueAthleteConsultingDemoCapability({ redis, req, launcher: base.capability, env: baseEnv }), /SCOPE_DENIED/u);
+
+  const enabledEnv = { ...baseEnv, ATHLETE_CONSULTING_DARREN_DEMO_ENABLED: 'true' };
+  const expanded = await issueLeadershipLauncherCapability({ redis, req, env: enabledEnv });
+  assert.deepEqual(expanded.capability.allowed_products, ['recruiting', 'subscription', 'athlete-consulting-tool']);
+  const athlete = await issueAthleteConsultingDemoCapability({ redis, req, launcher: expanded.capability, env: enabledEnv });
+  assert.match(athlete.cookie, /^__Host-more_athlete_consult_demo=/u);
+  assert.deepEqual(athlete.capability.allowed_subjects, ['mika', 'avery']);
+  assert.equal(athlete.capability.allowed_product, 'athlete-consulting-tool');
+  const athleteReq = request({ cookie: cookiePair(athlete.cookie) });
+  assert.equal((await authenticateAthleteConsultingDemoRequest({ redis, req: athleteReq, env: enabledEnv })).ok, true);
+  assert.equal((await authenticateAthleteConsultingDemoRequest({ redis, req: athleteReq, env: { ...enabledEnv, SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'false' } })).status, 404);
+});
+
+test('Leadership launcher source preserves the original three products and exposes Athlete Consulting only as exact fourth server choice', () => {
   const launcher = fs.readFileSync(new URL('../src/LeadershipDemo.jsx', import.meta.url), 'utf8');
   const portal = fs.readFileSync(new URL('../src/LeadershipPortal.jsx', import.meta.url), 'utf8');
   const launcherApi = fs.readFileSync(new URL('../api/internal/leadership-demo-entry.js', import.meta.url), 'utf8');
@@ -182,13 +210,15 @@ test('Leadership launcher source exposes exactly three products with two opaque 
   assert.equal((launcher.match(/title: 'CONSULTING DEMONSTRATION'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 1'/gu) || []).length, 1);
   assert.equal((launcher.match(/title: 'SUBSCRIPTION MODEL 2'/gu) || []).length, 1);
-  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 3);
+  assert.equal((launcher.match(/title: 'ATHLETE CONSULTING TOOL'/gu) || []).length, 1);
+  assert.equal((launcher.match(/action: 'LAUNCH_/gu) || []).length, 4);
   assert.match(launcher, /HOME → YOU → YOUR BUSINESS → PLAN/u);
-  assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription'\]/u);
+  assert.match(launcher, /\['\/recruiting-gu-v1\/demo', '\/subscription', '\/athlete-consulting-tool\/demo'\]/u);
   assert.match(launcherApi, /redirect_to: '\/recruiting-gu-v1\/demo'/u);
   assert.match(launcherApi, /title: 'CONSULTING DEMONSTRATION'/u);
   assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_1/u);
   assert.match(launcherApi, /LAUNCH_SUBSCRIPTION_MODEL_2/u);
+  assert.match(launcherApi, /LAUNCH_ATHLETE_CONSULTING_TOOL/u);
   assert.doesNotMatch(launcherApi, /action === 'LAUNCH_SUBSCRIPTION'/u);
   assert.doesNotMatch(launcher, /OpenAI|GPT|Grok|xAI|provider logo|pricing/u);
   assert.match(launcherApi, /action === 'LAUNCH_SUBSCRIPTION_MODEL_1' \? '1'/u);
@@ -197,7 +227,7 @@ test('Leadership launcher source exposes exactly three products with two opaque 
   assert.doesNotMatch(launcherApi, /title: 'Recruiting GU V1'/u);
   assert.doesNotMatch(launcherApi, /redirect_to: '\/recruiting\/demo'/u);
   assert.doesNotMatch(launcher, /Craig Fox|Executive \/ Board|Company Alignment|leadershipDemoSlides|slide-\d+/u);
-  assert.doesNotMatch(launcher, /Consulting Tool|Recruiting GU V1|Candidate intelligence/u);
+  assert.doesNotMatch(launcher, /Recruiting GU V1|Candidate intelligence/u);
   assert.match(consultingDemoApp, /<small>Consulting Demonstration<\/small>/u);
   assert.match(consultingDemoApp, /DEMONSTRATION SUBJECT/u);
   assert.match(consultingDemoApp, /data-demo-only-control="true"/u);

@@ -78,9 +78,22 @@ function appendRelationshipEpisodeEventsToState({ state, scope, events, appended
 }
 
 export class InMemoryLivingRelationshipStore {
-  constructor(snapshot = null) {
+  constructor(snapshot = null, { publication_adapter = null } = {}) {
     this.state = snapshot ? { ...emptyState(), ...clone(snapshot), relationship_episode_records: clone(snapshot.relationship_episode_records || []) } : emptyState();
+    this.publicationAdapter = publication_adapter;
     this.busy = false;
+  }
+
+  _validPublication(publication) {
+    return this.publicationAdapter?.validatePublication
+      ? this.publicationAdapter.validatePublication(publication)
+      : validatePublicationHash(publication);
+  }
+
+  _recomputePublication({ prior_publication, personal_rsl_replay, proposal, decision, authority_receipt, published_at }) {
+    return this.publicationAdapter?.recompute
+      ? this.publicationAdapter.recompute({ prior_publication, personal_rsl_replay, proposal, decision, authority_receipt, published_at })
+      : recomputeLivingBusinessTwin({ prior_publication, personal_rsl_replay, published_at });
   }
 
   async _persistSnapshot() { return { ok: true, status: 'IN_MEMORY_COMMITTED' }; }
@@ -109,7 +122,7 @@ export class InMemoryLivingRelationshipStore {
 
   async initialize({ scope, publication }) {
     return this._withTransaction(async (next) => {
-      if (!validatePublicationHash(publication) || !sameScope(scope, publication.scope)) return { commit: false, response: { ok: false, code: 'AFW05_INITIAL_PUBLICATION_INVALID' } };
+      if (!this._validPublication(publication) || !sameScope(scope, publication.scope)) return { commit: false, response: { ok: false, code: 'AFW05_INITIAL_PUBLICATION_INVALID' } };
       if (next.scope && !sameScope(next.scope, scope)) return { commit: false, response: { ok: false, code: 'AFW05_STORE_SCOPE_DENIED' } };
       if (next.current_publication_hash) {
         const current = next.publications[next.current_publication_hash];
@@ -153,13 +166,15 @@ export class InMemoryLivingRelationshipStore {
     });
   }
 
-  async commitDecision({ scope, proposal, decision, event = null, derived_events = [], idempotency_key, committed_at }) {
+  async commitDecision({ scope, proposal, decision, event = null, derived_events = [], authority_receipt = null, idempotency_key, committed_at }) {
     return this._withTransaction(async (next) => {
       const decisionValidation = validateProposalDecision(decision, proposal);
       if (!decisionValidation.valid || !sameScope(next.scope, scope) || !sameScope(proposal.scope, scope)) return { commit: false, response: { ok: false, code: 'AFW05_DECISION_STORE_DENIED', errors: decisionValidation.errors } };
       const staged = next.proposals[proposal.proposal_id];
       if (!staged || staged.proposal.proposal_hash !== proposal.proposal_hash) return { commit: false, response: { ok: false, code: 'AFW05_STAGED_PROPOSAL_REQUIRED' } };
-      const semanticHash = hashCanonicalJson({ proposal_hash: proposal.proposal_hash, decision_hash: decision.decision_hash, event_hash: event?.content_hash || null, derived_event_hashes: derived_events.map((item) => item.content_hash) });
+      const semanticBody = { proposal_hash: proposal.proposal_hash, decision_hash: decision.decision_hash, event_hash: event?.content_hash || null, derived_event_hashes: derived_events.map((item) => item.content_hash) };
+      if (scope?.domain === 'ATHLETE') semanticBody.authority_receipt_hash = authority_receipt?.receipt_hash || null;
+      const semanticHash = hashCanonicalJson(semanticBody);
       const existing = next.idempotency[idempotency_key];
       if (existing) return { commit: false, response: existing.semantic_hash === semanticHash
         ? { ok: true, code: 'IDEMPOTENT_REPLAY', ...clone(existing.result) }
@@ -197,8 +212,26 @@ export class InMemoryLivingRelationshipStore {
       }
       const replay = rsl.replay({ scope, effective_as_of: committed_at, recorded_as_of: committed_at });
       if (!replay.ok) return { commit: false, response: replay };
-      const recomputed = recomputeLivingBusinessTwin({ prior_publication: prior, personal_rsl_replay: replay, published_at: committed_at });
+      const recomputed = this._recomputePublication({
+        prior_publication: prior,
+        personal_rsl_replay: replay,
+        proposal,
+        decision,
+        authority_receipt,
+        published_at: committed_at,
+      });
       if (!recomputed.ok) return { commit: false, response: recomputed };
+      if (scope?.domain === 'ATHLETE' && !recomputed.delta_receipt) {
+        return {
+          commit: false,
+          response: {
+            ok: false,
+            code: 'ATHLETE_LIVING_MAP_NO_MATERIAL_CHANGE',
+            mutation_performed: false,
+            publication: clone(prior),
+          },
+        };
+      }
       next.personal_rsl_records = clone(rsl.read({ scope }).records);
       next.publications[recomputed.publication.publication_hash] = clone(recomputed.publication);
       next.current_publication_hash = recomputed.publication.publication_hash;
@@ -206,7 +239,7 @@ export class InMemoryLivingRelationshipStore {
       const agreement = createRelationshipEpisodeEvent({
         scope,
         session_id: proposal.source_session_id,
-        event_type: 'CUSTOMER_AGREEMENT',
+        event_type: scope?.domain === 'ATHLETE' ? 'JOINT_AGREEMENT' : 'CUSTOMER_AGREEMENT',
         summary: proposal.summary,
         occurred_at: committed_at,
         source_content_hash: decision.decision_hash,
@@ -220,6 +253,10 @@ export class InMemoryLivingRelationshipStore {
       next.transaction_count += 1;
       const receipt = transactionReceipt({ state: next, operation: 'CONFIRM_RECOMPUTE_PUBLISH', proposalId: proposal.proposal_id, decisionId: decision.decision_id, priorHash: prior.publication_hash, nextHash: recomputed.publication.publication_hash, status: 'ATOMICALLY_PUBLISHED', occurredAt: committed_at });
       const response = { mutation_performed: true, event: clone(event), derived_events: clone(derived_events), replay: clone(replay), publication: clone(recomputed.publication), receipt };
+      if (scope?.domain === 'ATHLETE') {
+        response.joint_authority_receipt = clone(authority_receipt);
+        response.map_delta_receipt = clone(recomputed.delta_receipt || null);
+      }
       next.idempotency[idempotency_key] = { semantic_hash: semanticHash, result: clone(response) };
       return { commit: true, response: { ok: true, code: 'AFW05_CONFIRMED_MUTATION_ATOMICALLY_PUBLISHED', ...response } };
     });

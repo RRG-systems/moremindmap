@@ -462,27 +462,44 @@ function humanProseBlocks(value) {
   return blocks;
 }
 
-function HumanRealizedSurface({ packet }) {
+export function HumanRealizedSurface({
+  packet,
+  detailContent,
+  detailLabel = 'Explore the evidence and operating detail',
+  editorialHeadline = null,
+  editorialEyebrow = null,
+  visualContent = null,
+  progressiveProse = false,
+  progressiveProseLabel = 'Read the full understanding',
+}) {
   const blocks = humanProseBlocks(packet.human_realization.customer_prose);
+  const leadBlocks = progressiveProse ? blocks.slice(0, 1) : blocks;
+  const laterBlocks = progressiveProse ? blocks.slice(1) : [];
+  const renderBlocks = (items, keyPrefix) => items.map((block, index) => {
+    const key = `${packet.surface_id}-${keyPrefix}-${index}`;
+    if (block.type === 'heading') return <h3 key={key}><HumanProseInline text={block.text} /></h3>;
+    if (block.type === 'quote') return <blockquote key={key}><HumanProseInline text={block.text} /></blockquote>;
+    if (block.type === 'unordered') return <ul key={key}>{block.items.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}><HumanProseInline text={item} /></li>)}</ul>;
+    if (block.type === 'ordered') return <ol key={key}>{block.items.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}><HumanProseInline text={item} /></li>)}</ol>;
+    return <p key={key}><HumanProseInline text={block.text} /></p>;
+  });
   return (
     <article className="nbos-surface nbos-human-surface" data-surface-id={packet.surface_id} data-testid={`surface-${packet.surface_id}`}>
       <header>
-        <span>{String(packet.surface_number).padStart(2, '0')}</span>
-        <h2>{packet.label}</h2>
+        <span>{String(packet.surface_number).padStart(2, '0')}{editorialEyebrow && <small>{editorialEyebrow}</small>}</span>
+        <h2>{editorialHeadline ? <HumanProseInline text={editorialHeadline} /> : packet.label}</h2>
       </header>
       <div className="nbos-human-prose">
-        {blocks.map((block, index) => {
-          const key = `${packet.surface_id}-${index}`;
-          if (block.type === 'heading') return <h3 key={key}><HumanProseInline text={block.text} /></h3>;
-          if (block.type === 'quote') return <blockquote key={key}><HumanProseInline text={block.text} /></blockquote>;
-          if (block.type === 'unordered') return <ul key={key}>{block.items.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}><HumanProseInline text={item} /></li>)}</ul>;
-          if (block.type === 'ordered') return <ol key={key}>{block.items.map((item, itemIndex) => <li key={`${key}-${itemIndex}`}><HumanProseInline text={item} /></li>)}</ol>;
-          return <p key={key}><HumanProseInline text={block.text} /></p>;
-        })}
+        {renderBlocks(leadBlocks, 'lead')}
       </div>
+      {visualContent}
+      {laterBlocks.length > 0 && <details className="nbos-narrative-detail">
+        <summary>{progressiveProseLabel} <span>+</span></summary>
+        <div className="nbos-human-prose">{renderBlocks(laterBlocks, 'detail')}</div>
+      </details>}
       <details className="nbos-governed-detail" open={packet.surface_id === 'evidence_certainty'}>
-        <summary>Explore the evidence and operating detail <span>+</span></summary>
-        <RichSurface packet={packet} embedded />
+        <summary>{detailLabel} <span>+</span></summary>
+        {detailContent === undefined ? <RichSurface packet={packet} embedded /> : detailContent}
       </details>
     </article>
   );

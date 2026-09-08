@@ -1,13 +1,13 @@
 import { hashCanonicalJson } from '../intelligenceFabric/hashing.js';
 import { deepFreeze } from '../intelligenceFabric/validation.js';
 import { recordExecutionEvidence, validateOutcome } from '../intelligenceFabric/runtime/outcomeValidation.js';
-import { sameScope, scopeFingerprint } from './contracts.js';
+import { relationshipIdentityForScope, sameScope, scopeFingerprint } from './contracts.js';
 import { createPersonalRslEvent } from './personalRsl.js';
 import { InMemoryUniversalCandidateCapture } from './universalCandidates.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const LINEAGE_ID = /^intervention_[a-f0-9]{24}$/u;
-const EPISODE_EVENT_TYPES = new Set(['CUSTOMER_DISCUSSION', 'MORE_SUGGESTION', 'CUSTOMER_AGREEMENT', 'SESSION_LEARNING']);
+const EPISODE_EVENT_TYPES = new Set(['CUSTOMER_DISCUSSION', 'MORE_SUGGESTION', 'CUSTOMER_AGREEMENT', 'JOINT_AGREEMENT', 'SESSION_LEARNING']);
 
 export const OPEN_LOOP_STATES = deepFreeze([
   'OPEN',
@@ -51,6 +51,10 @@ function itemValues(items = []) {
   return new Map(items.map((item) => [item.field, item.value]));
 }
 
+function lineageValue(values, scope, businessField, athleteField) {
+  return values.get(scope?.domain === 'ATHLETE' ? athleteField : businessField);
+}
+
 function lineageOf(event) {
   const lineage = event?.semantic_payload?.lineage;
   return lineage && LINEAGE_ID.test(lineage.intervention_lineage_id || '') ? lineage : null;
@@ -90,15 +94,18 @@ export function createRelationshipEpisodeEvent({
   proposal_id = null,
   decision_id = null,
   intervention_lineage_id = null,
+  supersedes_episode_event_id = null,
 }) {
   if (!EPISODE_EVENT_TYPES.has(event_type)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_EVENT_TYPE_INVALID' });
   if (typeof summary !== 'string' || !summary.trim() || summary.length > 1200) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SUMMARY_INVALID' });
   if (!/^[a-f0-9]{64}$/u.test(source_content_hash || '')) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SOURCE_HASH_REQUIRED' });
   if (intervention_lineage_id && !LINEAGE_ID.test(intervention_lineage_id)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_LINEAGE_INVALID' });
+  if (supersedes_episode_event_id && !/^episode_[a-f0-9]{24}$/u.test(supersedes_episode_event_id)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SUPERSESSION_INVALID' });
+  const supersession = supersedes_episode_event_id ? { supersedes_episode_event_id } : {};
   const body = {
     contract_id: 'subscription_relationship_episode_provenance_v1',
     schema_version: '1.0.0',
-    episode_event_id: `episode_${hashCanonicalJson({ scope: scopeFingerprint(scope), session_id, event_type, summary, occurred_at, source_content_hash, proposal_id, decision_id, intervention_lineage_id }).slice(0, 24)}`,
+    episode_event_id: `episode_${hashCanonicalJson({ scope: scopeFingerprint(scope), session_id, event_type, summary, occurred_at, source_content_hash, proposal_id, decision_id, intervention_lineage_id, ...supersession }).slice(0, 24)}`,
     scope: clone(scope),
     scope_hash: scopeFingerprint(scope),
     session_id,
@@ -108,6 +115,7 @@ export function createRelationshipEpisodeEvent({
     proposal_id,
     decision_id,
     intervention_lineage_id,
+    ...supersession,
     occurred_at: new Date(occurred_at).toISOString(),
     canonical_customer_truth: false,
     personal_rsl_event: false,
@@ -143,17 +151,17 @@ export function createConfirmedLineageMetadata({ proposal, decision, event_type,
         contract_id: 'subscription_personal_rsl_intervention_lineage_v1',
         intervention_lineage_id: interventionLineageId,
         stage: 'CUSTOMER_AGREED',
-        open_loop_state: normalizeLoopState(values.get('commitment.open_loop_state'), 'OPEN'),
-        due_at: iso(values.get('commitment.due_at')),
+        open_loop_state: normalizeLoopState(lineageValue(values, proposal.scope, 'commitment.open_loop_state', 'athlete_plan.open_loop_state'), 'OPEN'),
+        due_at: iso(lineageValue(values, proposal.scope, 'commitment.due_at', 'athlete_plan.due_at')),
         observation_window: {
-          start: iso(values.get('commitment.observation_window_start')),
-          end: iso(values.get('commitment.observation_window_end')),
+          start: iso(lineageValue(values, proposal.scope, 'commitment.observation_window_start', 'athlete_plan.observation_window_start')),
+          end: iso(lineageValue(values, proposal.scope, 'commitment.observation_window_end', 'athlete_plan.observation_window_end')),
         },
         execution_degree: 'NOT_ATTEMPTED',
         outcome_classification: null,
         confounders: [],
         external_shocks: [],
-        falsifiers: stringList(values.get('commitment.falsifiers')),
+        falsifiers: stringList(lineageValue(values, proposal.scope, 'commitment.falsifiers', 'athlete_plan.falsifiers')),
         causal_confidence: 'UNASSESSED',
         requested_attribution: 'ASSOCIATED_ONLY',
         parent_intervention_event_id: null,
@@ -161,7 +169,7 @@ export function createConfirmedLineageMetadata({ proposal, decision, event_type,
     });
   }
   if (!['ATTEMPT', 'OUTCOME'].includes(event_type)) return deepFreeze({ ok: true, lineage: null });
-  const interventionLineageId = String(values.get('evidence.intervention_lineage_id') || '').trim();
+  const interventionLineageId = String(lineageValue(values, proposal.scope, 'evidence.intervention_lineage_id', 'athlete_evidence.intervention_lineage_id') || '').trim();
   if (!LINEAGE_ID.test(interventionLineageId)) return deepFreeze({ ok: false, code: 'PERSONAL_RSL_INTERVENTION_LINEAGE_REQUIRED' });
   const linked = eventsForLineage(active_events, interventionLineageId);
   const intervention = linked.find((event) => event.event_type === 'INTERVENTION');
@@ -171,14 +179,16 @@ export function createConfirmedLineageMetadata({ proposal, decision, event_type,
   }
   const inherited = lineageOf(intervention);
   const executionDegree = event_type === 'ATTEMPT'
-    ? normalizeExecutionDegree(values.get('evidence.execution_degree'))
+    ? normalizeExecutionDegree(lineageValue(values, proposal.scope, 'evidence.execution_degree', 'athlete_evidence.execution_degree'))
     : linked.map(lineageOf).find((lineage) => lineage?.stage === 'EXECUTION_OBSERVED')?.execution_degree || null;
   if (event_type === 'ATTEMPT' && !executionDegree) return deepFreeze({ ok: false, code: 'PERSONAL_RSL_EXECUTION_DEGREE_REQUIRED' });
-  const outcomeClassification = event_type === 'OUTCOME' ? normalizeOutcomeClassification(values.get('evidence.outcome_classification')) : null;
+  const outcomeClassification = event_type === 'OUTCOME'
+    ? normalizeOutcomeClassification(lineageValue(values, proposal.scope, 'evidence.outcome_classification', 'athlete_evidence.outcome_classification'))
+    : null;
   if (event_type === 'OUTCOME' && !outcomeClassification) return deepFreeze({ ok: false, code: 'PERSONAL_RSL_OUTCOME_CLASSIFICATION_REQUIRED' });
-  const confounders = stringList(values.get('evidence.confounders'));
-  const externalShocks = stringList(values.get('evidence.external_shocks'));
-  const requestedLoop = values.get('evidence.open_loop_state');
+  const confounders = stringList(lineageValue(values, proposal.scope, 'evidence.confounders', 'athlete_evidence.confounders'));
+  const externalShocks = stringList(lineageValue(values, proposal.scope, 'evidence.external_shocks', 'athlete_evidence.external_shocks'));
+  const requestedLoop = lineageValue(values, proposal.scope, 'evidence.open_loop_state', 'athlete_evidence.open_loop_state');
   const openLoopState = event_type === 'ATTEMPT'
     ? normalizeLoopState(requestedLoop, executionDegree === 'COMPLETE' ? 'COMPLETED' : 'ATTEMPTED')
     : normalizeLoopState(requestedLoop, confounders.length || externalShocks.length || ['INCONCLUSIVE', 'CONFOUNDED'].includes(outcomeClassification) ? 'UNRESOLVED' : 'COMPLETED');
@@ -191,16 +201,18 @@ export function createConfirmedLineageMetadata({ proposal, decision, event_type,
       open_loop_state: openLoopState,
       due_at: inherited?.due_at || null,
       observation_window: {
-        start: iso(values.get('evidence.observation_window_start')) || inherited?.observation_window?.start || null,
-        end: iso(values.get('evidence.observation_window_end')) || inherited?.observation_window?.end || null,
+        start: iso(lineageValue(values, proposal.scope, 'evidence.observation_window_start', 'athlete_evidence.observation_window_start')) || inherited?.observation_window?.start || null,
+        end: iso(lineageValue(values, proposal.scope, 'evidence.observation_window_end', 'athlete_evidence.observation_window_end')) || inherited?.observation_window?.end || null,
       },
       execution_degree: executionDegree,
       outcome_classification: outcomeClassification,
       confounders,
       external_shocks: externalShocks,
-      falsifiers: stringList(values.get('evidence.falsifiers')).length ? stringList(values.get('evidence.falsifiers')) : inherited?.falsifiers || [],
+      falsifiers: stringList(lineageValue(values, proposal.scope, 'evidence.falsifiers', 'athlete_evidence.falsifiers')).length
+        ? stringList(lineageValue(values, proposal.scope, 'evidence.falsifiers', 'athlete_evidence.falsifiers'))
+        : inherited?.falsifiers || [],
       causal_confidence: 'UNASSESSED',
-      requested_attribution: String(values.get('evidence.requested_attribution') || 'ASSOCIATED_ONLY').trim().toUpperCase(),
+      requested_attribution: String(lineageValue(values, proposal.scope, 'evidence.requested_attribution', 'athlete_evidence.requested_attribution') || 'ASSOCIATED_ONLY').trim().toUpperCase(),
       parent_intervention_event_id: intervention.event_id,
     },
   });
@@ -217,11 +229,14 @@ export function createLinkedCausalReviewEvent({ scope, active_events, outcome_ev
   }
   const attemptLineage = lineageOf(attempt);
   const actualAction = attempt.semantic_payload?.summary || 'A linked execution observation was recorded.';
+  const scopeRef = scope?.domain === 'ATHLETE'
+    ? { domain: 'ATHLETE', tenant_id: scope.tenant_id, profile_id: scope.profile_id, athlete_relationship_id: relationshipIdentityForScope(scope) }
+    : { tenant_id: scope.tenant_id, business_id: relationshipIdentityForScope(scope), profile_id: scope.profile_id };
   const execution = recordExecutionEvidence({
     tenant_id: scope.tenant_id,
-    scope_ref: { tenant_id: scope.tenant_id, business_id: scope.business_id, profile_id: scope.profile_id },
+    scope_ref: scopeRef,
     intervention_id: outcomeLineage.intervention_lineage_id,
-    planned_action: intervention.semantic_payload?.summary || 'Customer-authorized intervention',
+    planned_action: intervention.semantic_payload?.summary || (scope?.domain === 'ATHLETE' ? 'Jointly authorized Athlete intervention' : 'Customer-authorized intervention'),
     actual_action: actualAction,
     start_time: attempt.effective_at,
     completion_time: attemptLineage.execution_degree === 'COMPLETE' ? attempt.effective_at : null,
@@ -347,6 +362,7 @@ export function derivePrivateLongitudinalScorecard({ scope, active_events = [], 
     return {
       intervention_lineage_id: lineageId,
       decided: intervention?.semantic_payload?.summary || null,
+      ...(scope?.domain === 'ATHLETE' ? { original_reason: intervention?.semantic_payload?.original_reason || null } : {}),
       agreed_at: intervention?.effective_at || null,
       actually_tried: attempts.map((event) => ({ summary: event.semantic_payload?.summary || null, at: event.effective_at, degree: lineageOf(event)?.execution_degree || null })),
       what_happened: outcomes.map((event) => ({ summary: event.semantic_payload?.summary || null, at: event.effective_at, classification: lineageOf(event)?.outcome_classification || null })),

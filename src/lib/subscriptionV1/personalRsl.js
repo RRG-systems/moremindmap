@@ -60,7 +60,8 @@ export function createPersonalRslEvent(input) {
   if (['SUBSCRIPTION_COACH_PROPOSAL', 'HUMAN_COACH_PROPOSAL'].includes(event.source_class) && event.event_type !== 'QUESTION') {
     return deepFreeze({ ok: false, code: 'COACH_PROPOSAL_CANNOT_ESTABLISH_CANONICAL_TRUTH' });
   }
-  if (event.source_class === 'CUSTOMER_SELF_REPORT' && event.event_type !== 'QUESTION' && !event.confirmation_event_id) {
+  if (['CUSTOMER_SELF_REPORT', 'ATHLETE_SELF_REPORT', 'INSTRUCTOR_OBSERVATION', 'JOINT_HUMAN_AGREEMENT'].includes(event.source_class)
+    && event.event_type !== 'QUESTION' && !event.confirmation_event_id) {
     return deepFreeze({ ok: false, code: 'CUSTOMER_CONFIRMATION_REQUIRED' });
   }
   return deepFreeze({ ok: true, code: 'PERSONAL_RSL_EVENT_CREATED', event });

@@ -77,6 +77,9 @@ export const RSL_EVENT_TYPES = deepFreeze([
 // subscription coach can author proposals, but neither becomes truth authority.
 export const ACTOR_TYPES = deepFreeze([
   'CUSTOMER',
+  'ATHLETE',
+  'INSTRUCTOR',
+  'JOINT_AUTHORITY',
   'SUBSCRIPTION_COACH',
   'HUMAN_COACH',
   'DETERMINISTIC_RUNTIME',
@@ -86,6 +89,9 @@ export const ACTOR_TYPES = deepFreeze([
 
 export const SOURCE_CLASSES = deepFreeze([
   'CUSTOMER_SELF_REPORT',
+  'ATHLETE_SELF_REPORT',
+  'INSTRUCTOR_OBSERVATION',
+  'JOINT_HUMAN_AGREEMENT',
   'SUBSCRIPTION_COACH_PROPOSAL',
   'HUMAN_COACH_PROPOSAL',
   'SYSTEM_OBSERVED',

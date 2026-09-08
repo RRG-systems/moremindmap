@@ -22,6 +22,13 @@ test/
 TEST_*.js
 test-*.js
 
+# Release 3 carries sealed predecessor modules only so their protected local
+# regression suites remain reproducible. They are not runtime dependencies of
+# the governed one-shot Athlete Consulting route and must never become Vercel
+# API function candidates.
+api/engine/athleteBosV1/**
+api/engine/athleteLivingConsultV1/**
+
 # The frozen BA authority library is runtime input for canonical New BA. Keep
 # this final so the global markdown/text exclusions above cannot remove it.
 !docs/ba-intelligence-authority-library-v1/

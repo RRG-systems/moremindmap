@@ -86,30 +86,42 @@ function messageUsesName(message, name) {
   return String(message || '').toLocaleLowerCase().includes(String(name || '').toLocaleLowerCase());
 }
 
-export function createFrontierConversationSeamV2({ transport, enabled = false, now = () => new Date().toISOString(), denied_customer_terms = [] }) {
+export function createFrontierConversationSeamV2({
+  transport,
+  enabled = false,
+  now = () => new Date().toISOString(),
+  denied_customer_terms = [],
+  domain_instruction = '',
+  web_search_enabled = true,
+  coaching_mission = FREE_GPT_V2_COACHING_MISSION,
+  coaching_demonstrations = SUBSCRIPTION_S1_DJ_COACHING_DEMONSTRATIONS,
+  customer_expression_boundary = FREE_GPT_V2_CUSTOMER_EXPRESSION_BOUNDARY,
+}) {
   if (typeof transport !== 'function') throw new TypeError('FREE_GPT_V2_CONVERSATION_TRANSPORT_REQUIRED');
   const inFlight = new Set();
   return deepFreeze({
-    inspect: () => deepFreeze({ ...FREE_GPT_V2_RUNTIME_POLICY, enabled, output_contract: 'CUSTOMER_MESSAGE_ONLY' }),
+    inspect: () => deepFreeze({ ...FREE_GPT_V2_RUNTIME_POLICY, enabled, web_search_enabled, output_contract: 'CUSTOMER_MESSAGE_ONLY' }),
     async coach({ packet, customer_message, mutation_performed = false }) {
       if (!enabled) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_PROVIDER_DEFAULT_OFF' });
       if (!packet?.packet_hash || !packet?.provider_understanding) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_PACKET_REQUIRED' });
       if (inFlight.has(packet.session_id)) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_ONE_REQUEST_IN_FLIGHT' });
       const request = {
         ...requestBase(FRONTIER_CONVERSATION_OUTPUT_SCHEMA_V2, FREE_GPT_V2_RUNTIME_POLICY.conversation_max_output_tokens),
-        tools: [{ type: 'web_search' }],
-        include: ['web_search_call.action.sources'],
+        tools: web_search_enabled ? [{ type: 'web_search' }] : [],
+        ...(web_search_enabled ? { include: ['web_search_call.action.sources'] } : {}),
         input: [
-          { role: 'system', content: FREE_GPT_V2_COACHING_MISSION },
+          { role: 'system', content: domain_instruction
+            ? `${coaching_mission}\n\nDOMAIN ADAPTER\n${domain_instruction}`
+            : coaching_mission },
           { role: 'user', content: JSON.stringify({
             whole_coaching_understanding: packet.provider_understanding,
-            coaching_demonstrations: SUBSCRIPTION_S1_DJ_COACHING_DEMONSTRATIONS,
+            coaching_demonstrations,
             customer_message,
             deterministic_transition: mutation_performed
               ? { mutation_performed: true, current_governed_state_reassembled: true }
               : { mutation_performed: false },
           }) },
-          { role: 'system', content: FREE_GPT_V2_CUSTOMER_EXPRESSION_BOUNDARY },
+          { role: 'system', content: customer_expression_boundary },
         ],
       };
       inFlight.add(packet.session_id);
@@ -141,7 +153,15 @@ export function createFrontierConversationSeamV2({ transport, enabled = false, n
   });
 }
 
-export function createSessionCloseSeamV1({ transport, enabled = false, now = () => new Date().toISOString(), denied_customer_terms = [] }) {
+export function createSessionCloseSeamV1({
+  transport,
+  enabled = false,
+  now = () => new Date().toISOString(),
+  denied_customer_terms = [],
+  domain_instruction = '',
+  coaching_mission = FREE_GPT_V2_COACHING_MISSION,
+  coaching_demonstrations = SUBSCRIPTION_S1_DJ_COACHING_DEMONSTRATIONS,
+}) {
   if (typeof transport !== 'function') throw new TypeError('SUBSCRIPTION_S1_1_SESSION_CLOSE_TRANSPORT_REQUIRED');
   const inFlight = new Set();
   return deepFreeze({
@@ -162,10 +182,10 @@ export function createSessionCloseSeamV1({ transport, enabled = false, now = () 
       const request = {
         ...requestBase(SESSION_CLOSE_OUTPUT_SCHEMA_V1, FREE_GPT_V2_RUNTIME_POLICY.session_close_max_output_tokens),
         input: [
-          { role: 'system', content: `${FREE_GPT_V2_COACHING_MISSION}\n\nThe substantive coaching episode is ending now. ${closeInstruction} Speak simply and naturally. Use the governed preferred conversational name near this close. Capture the seven session-learning fields from governed state and this ephemeral conversation without inventing facts. "Durable governed meaning" is only a candidate summary: never claim it was saved or authorized. If nothing was established for a field, say so plainly. Do not create a visual receipt; S2 owns that future surface.` },
+          { role: 'system', content: `${coaching_mission}${domain_instruction ? `\n\nDOMAIN ADAPTER\n${domain_instruction}` : ''}\n\nThe substantive coaching episode is ending now. ${closeInstruction} Speak simply and naturally. Use the governed preferred conversational name near this close. Capture the seven session-learning fields from governed state and this ephemeral conversation without inventing facts. "Durable governed meaning" is only a candidate summary: never claim it was saved or authorized. If nothing was established for a field, say so plainly. Do not create a visual receipt; S2 owns that future surface.` },
           { role: 'user', content: JSON.stringify({
             whole_coaching_understanding: packet.provider_understanding,
-            coaching_demonstrations: SUBSCRIPTION_S1_DJ_COACHING_DEMONSTRATIONS,
+            coaching_demonstrations,
             pending_proposal: pending_proposal ? {
               summary: pending_proposal.summary,
               reason: pending_proposal.reason,
