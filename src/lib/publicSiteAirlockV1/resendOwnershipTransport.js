@@ -1,6 +1,7 @@
 /* global process */
 import { boundedText } from './contracts.js';
 import { resolvePublicSiteOrigin } from './publicSiteOrigin.js';
+import { normalizeProfileOwnershipReturnPath } from './profileOwnership.js';
 
 const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 
@@ -34,7 +35,7 @@ export function createResendOwnershipTransport({ env = process.env, fetchImpl = 
         throw new Error('profile_ownership_transport_unavailable');
       }
       const origin = resolvePublicSiteOrigin(env);
-      const route = item.return_path === '/step-2' ? '/step-2' : '/step-1';
+      const route = normalizeProfileOwnershipReturnPath(item.return_path);
       const link = `${origin}${route}#more-profile-owner=${encodeURIComponent(token)}`;
       const response = await fetchImpl(RESEND_ENDPOINT, {
         method: 'POST',

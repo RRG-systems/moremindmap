@@ -13,7 +13,12 @@ const CHALLENGE_VERSION = 'more-public-profile-owner-challenge-v1';
 const ISSUER = 'MORE_MINDMAP_PUBLIC_PROFILE_OWNER';
 const STATE_LOCK_TTL_SECONDS = 30;
 const DEFAULT_MINIMUM_RESPONSE_DELAY_MS = 500;
-const ALLOWED_RETURN_PATHS = new Set(['/step-1', '/step-2']);
+const ALLOWED_RETURN_PATHS = new Set([
+  '/step-1',
+  '/step-2',
+  '/step-2?continue=complimentary',
+  '/recruiting/continue',
+]);
 
 function parse(raw) {
   if (!raw) return null;
@@ -91,7 +96,7 @@ function verifyReceipt(token, signingKey, nowMs, audience) {
   return claims;
 }
 
-function returnPath(value) {
+export function normalizeProfileOwnershipReturnPath(value) {
   const path = boundedText(value, 40);
   return ALLOWED_RETURN_PATHS.has(path) ? path : '/step-1';
 }
@@ -202,7 +207,7 @@ export function createProfileOwnershipAdapter({
           challenge_id: challengeId,
           profile_id: profileId,
           status: 'delivery_pending',
-          return_path: returnPath(input.return_path),
+          return_path: normalizeProfileOwnershipReturnPath(input.return_path),
           issued_at_ms: now,
           expires_at_ms: now + PROFILE_OWNER_CHALLENGE_TTL_SECONDS * 1000,
         };

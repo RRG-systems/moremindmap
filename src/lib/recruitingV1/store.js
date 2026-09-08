@@ -12,9 +12,35 @@ function normalizeMembership(item) {
   };
 }
 
+function normalizeInvitation(item) {
+  const invitation = clone(item);
+  const legacyState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.entitlement_state)
+    ? invitation.entitlement_state
+    : 'RELEASED';
+  const baStarted = ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(invitation.ba_readiness);
+  const bosState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.bos_entitlement_state)
+    ? invitation.bos_entitlement_state
+    : legacyState;
+  const baState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.ba_entitlement_state)
+    ? invitation.ba_entitlement_state
+    : legacyState === 'RELEASED'
+      ? 'RELEASED'
+      : baStarted
+        ? 'CONSUMED'
+        : invitation.accepted_at
+          ? 'RESERVED'
+          : legacyState;
+  return {
+    ...invitation,
+    paired_entitlement_version: 1,
+    bos_entitlement_state: bosState,
+    ba_entitlement_state: baState,
+  };
+}
+
 export function createEmptyRecruitingState(memberships = []) {
   return {
-    version: 3,
+    version: 4,
     memberships: Object.fromEntries(memberships.map((item) => [item.membership_id, normalizeMembership(item)])),
     manager_challenges: {},
     manager_sessions: {},
@@ -23,6 +49,7 @@ export function createEmptyRecruitingState(memberships = []) {
     manager_setup_sessions: {},
     manager_setup_csrf_proofs: {},
     invite_sessions: {},
+    profile_connection_challenges: {},
     invitations: {},
     opportunity_by_enterprise: {},
     evidence_by_candidate: {},
@@ -43,10 +70,14 @@ export function normalizeRecruitingState(input) {
   for (const key of Object.keys(empty)) {
     if (state[key] === undefined) state[key] = clone(empty[key]);
   }
-  state.version = 3;
+  state.version = 4;
   state.memberships = Object.fromEntries(Object.values(state.memberships || {}).map((item) => {
     const membership = normalizeMembership(item);
     return [membership.membership_id, membership];
+  }));
+  state.invitations = Object.fromEntries(Object.values(state.invitations || {}).map((item) => {
+    const invitation = normalizeInvitation(item);
+    return [invitation.invitation_id, invitation];
   }));
   return state;
 }

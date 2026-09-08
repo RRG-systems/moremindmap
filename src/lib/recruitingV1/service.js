@@ -44,30 +44,82 @@ function activePeriod(membership, now) {
   return entitlementPeriodFor(at(now));
 }
 
-function entitlementFor(state, membership, now) {
+const ACTIVE_ENTITLEMENT_STATES = Object.freeze(['RESERVED', 'CONSUMED']);
+
+function productEntitlementState(invitation, product) {
+  const explicit = invitation?.[`${product}_entitlement_state`];
+  if ([...ACTIVE_ENTITLEMENT_STATES, 'RELEASED'].includes(explicit)) return explicit;
+  const legacy = invitation?.entitlement_state;
+  if (![...ACTIVE_ENTITLEMENT_STATES, 'RELEASED'].includes(legacy)) return 'RELEASED';
+  if (product === 'bos' || legacy === 'RELEASED') return legacy;
+  if (['BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(invitation?.ba_readiness)) return 'CONSUMED';
+  return invitation?.accepted_at ? 'RESERVED' : legacy;
+}
+
+function productEntitlementFor(state, membership, now, product) {
   const period = activePeriod(membership, now);
   const active = Object.values(state.invitations).filter((invitation) =>
     invitation.membership_id === membership.membership_id
       && invitation.entitlement_period_start === period.period_start
-      && ['RESERVED', 'CONSUMED'].includes(invitation.entitlement_state));
+      && ACTIVE_ENTITLEMENT_STATES.includes(productEntitlementState(invitation, product)));
   const mode = membership.entitlement_mode || '5_per_month';
   const limit = mode === 'unlimited' ? null : MONTHLY_INVITATION_LIMIT;
   return {
     mode,
     limit,
     used: active.length,
-    reserved: active.filter((item) => item.entitlement_state === 'RESERVED').length,
-    consumed: active.filter((item) => item.entitlement_state === 'CONSUMED').length,
+    reserved: active.filter((item) => productEntitlementState(item, product) === 'RESERVED').length,
+    consumed: active.filter((item) => productEntitlementState(item, product) === 'CONSUMED').length,
     remaining: limit === null ? null : Math.max(0, limit - active.length),
     ...period,
   };
+}
+
+function entitlementsFor(state, membership, now) {
+  return {
+    bos: productEntitlementFor(state, membership, now, 'bos'),
+    ba: productEntitlementFor(state, membership, now, 'ba'),
+  };
+}
+
+function entitlementProjection(state, membership, now) {
+  const entitlements = entitlementsFor(state, membership, now);
+  return { entitlement: entitlements.bos, entitlements };
+}
+
+function assertPairCanReserve(entitlements, { bos = true, ba = true } = {}) {
+  const bosExhausted = bos && entitlements.bos.mode !== 'unlimited' && entitlements.bos.remaining < 1;
+  const baExhausted = ba && entitlements.ba.mode !== 'unlimited' && entitlements.ba.remaining < 1;
+  if (bosExhausted || baExhausted) throw new Error('RECRUITING_INVITATION_ALLOWANCE_EXHAUSTED');
+}
+
+function reserveEntitlementPair(state, membership, invitation, now) {
+  const bosNeedsReservation = !ACTIVE_ENTITLEMENT_STATES.includes(productEntitlementState(invitation, 'bos'));
+  const baNeedsReservation = !ACTIVE_ENTITLEMENT_STATES.includes(productEntitlementState(invitation, 'ba'));
+  if (!bosNeedsReservation && !baNeedsReservation) return entitlementsFor(state, membership, now);
+  assertPairCanReserve(entitlementsFor(state, membership, now), { bos: bosNeedsReservation, ba: baNeedsReservation });
+  const period = activePeriod(membership, now);
+  invitation.paired_entitlement_version = 1;
+  if (bosNeedsReservation) invitation.bos_entitlement_state = 'RESERVED';
+  if (baNeedsReservation) invitation.ba_entitlement_state = 'RESERVED';
+  invitation.entitlement_state = invitation.bos_entitlement_state;
+  invitation.entitlement_period_start = period.period_start;
+  invitation.entitlement_period_end = period.period_end;
+  return entitlementsFor(state, membership, now);
+}
+
+function releaseEntitlementPair(invitation) {
+  invitation.paired_entitlement_version = 1;
+  invitation.bos_entitlement_state = 'RELEASED';
+  invitation.ba_entitlement_state = 'RELEASED';
+  invitation.entitlement_state = 'RELEASED';
 }
 
 function expireDueInvitations(state, now) {
   for (const invitation of Object.values(state.invitations)) {
     if (!invitation.accepted_at && ['ISSUED', 'DELIVERED'].includes(invitation.state) && Date.parse(invitation.expires_at) <= at(now).getTime()) {
       invitation.state = 'EXPIRED';
-      invitation.entitlement_state = 'RELEASED';
+      releaseEntitlementPair(invitation);
       invitation.updated_at = iso(now);
       invitation.token_digest = null;
       audit(state, 'INVITATION_EXPIRED', { invitation_id: invitation.invitation_id, membership_id: invitation.membership_id }, now);
@@ -106,7 +158,7 @@ function membershipInAdminScope(state, admin, membershipId) {
 }
 
 function publicMembership(state, membership, now, { includeAudit = false } = {}) {
-  const entitlement = entitlementFor(state, membership, now);
+  const entitlementSummary = entitlementProjection(state, membership, now);
   const projected = {
     membership_id: membership.membership_id,
     manager_name: membership.manager_name,
@@ -115,7 +167,7 @@ function publicMembership(state, membership, now, { includeAudit = false } = {})
     enterprise_name: membership.enterprise_name,
     status: membership.status,
     setup_state: membership.setup_state,
-    entitlement,
+    ...entitlementSummary,
     setup_sent_at: membership.setup_sent_at || null,
     setup_completed_at: membership.setup_completed_at || null,
     suspended_at: membership.suspended_at || null,
@@ -162,6 +214,7 @@ function enqueue(state, { kind, recipient, membership, invitation, payload, toke
     membership_id: membership?.membership_id || invitation?.membership_id || null,
     enterprise_id: membership?.enterprise_id || invitation?.enterprise_id || null,
     invitation_id: invitation?.invitation_id || null,
+    invitation_token_generation: Number.isInteger(invitation?.token_generation) ? invitation.token_generation : null,
     payload: clone(payload),
     token_capsule: tokenCapsule,
     state: 'PENDING',
@@ -178,6 +231,38 @@ function addInbox(state, membershipId, notice, now) {
   if (current.some((item) => item.idempotency_key === notice.idempotency_key)) return;
   current.unshift({ notification_id: createOpaqueId('notice'), read: false, created_at: iso(now), ...clone(notice) });
   state.inbox_by_membership[membershipId] = current.slice(0, 100);
+}
+
+function bindBosProfileInState(state, invitation, normalizedProfileId, now) {
+  invitation.bos_profile_id = normalizedProfileId;
+  invitation.readiness_state = 'BOS_READY';
+  invitation.updated_at = iso(now);
+  const membership = state.memberships[invitation.membership_id];
+  const noticeKey = stableHash({
+    invitation_id: invitation.invitation_id,
+    event: 'BOS_READY',
+    profile_id: normalizedProfileId,
+  });
+  addInbox(state, invitation.membership_id, {
+    idempotency_key: noticeKey,
+    kind: 'BOS_READY',
+    candidate_id: invitation.candidate_id,
+    title: `${invitation.recruit_name}'s BOS is ready.`,
+    body: 'Recruiting Intelligence can now begin with explicit business missingness.',
+  }, now);
+  enqueue(state, {
+    kind: 'MANAGER_BOS_READY',
+    recipient: membership.manager_email,
+    membership,
+    invitation,
+    payload: { candidate_id: invitation.candidate_id, recruit_name: invitation.recruit_name },
+  }, now);
+  audit(state, 'CANDIDATE_BOS_READY', {
+    invitation_id: invitation.invitation_id,
+    candidate_id: invitation.candidate_id,
+    profile_id: normalizedProfileId,
+  }, now);
+  return publicInvitation(invitation);
 }
 
 function invalidateSetupChallenges(state, membershipId, now, reason) {
@@ -234,13 +319,21 @@ function issueSetupChallenge(state, membership, token, tokenWrapper, now) {
 }
 
 export class RecruitingV1Service {
-  constructor({ store, now = () => new Date(), transport = null, tokenWrapper = null, profileValidator = null }) {
+  constructor({
+    store,
+    now = () => new Date(),
+    transport = null,
+    tokenWrapper = null,
+    profileValidator = null,
+    profileOwnerReader = null,
+  }) {
     if (!store) throw new TypeError('RECRUITING_STORE_REQUIRED');
     this.store = store;
     this.now = now;
     this.transport = transport;
     this.tokenWrapper = tokenWrapper || createTokenWrapper('recruiting-v1-test-only-token-wrap-key');
     this.profileValidator = profileValidator || (async (profileId) => ({ found: Boolean(normalizeProfileId(profileId)), profile_id: normalizeProfileId(profileId) }));
+    this.profileOwnerReader = profileOwnerReader;
   }
 
   async requestManagerVerification(profileId) {
@@ -304,7 +397,7 @@ export class RecruitingV1Service {
       return {
         session,
         membership: clone(membership),
-        entitlement: entitlementFor(state, membership, now),
+        ...entitlementProjection(state, membership, now),
         capabilities: { master_control: Array.isArray(membership.admin_roles) && membership.admin_roles.includes('RECRUITING_ADMIN') },
       };
     });
@@ -317,7 +410,7 @@ export class RecruitingV1Service {
     return {
       session: clone(session),
       membership: clone(membership),
-      entitlement: entitlementFor(state, membership, now),
+      ...entitlementProjection(state, membership, now),
       capabilities: { master_control: Array.isArray(membership.admin_roles) && membership.admin_roles.includes('RECRUITING_ADMIN') },
     };
   }
@@ -711,11 +804,11 @@ export class RecruitingV1Service {
       const { membership } = membershipFromSession(state, sessionToken, now);
       const normalizedIdempotency = boundedText(idempotencyKey, 180);
       const replay = Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && item.idempotency_key === normalizedIdempotency);
-      if (replay) return { invitation: publicInvitation(replay), idempotent: true, entitlement: entitlementFor(state, membership, now) };
+      if (replay) return { invitation: publicInvitation(replay), idempotent: true, ...entitlementProjection(state, membership, now) };
       const duplicate = Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && item.recruit_email === recruitEmail && ['ISSUED', 'DELIVERED', 'ACCEPTED'].includes(item.state));
-      if (duplicate) return { invitation: publicInvitation(duplicate), idempotent: true, duplicate_active: true, entitlement: entitlementFor(state, membership, now) };
-      const entitlement = entitlementFor(state, membership, now);
-      if (entitlement.mode !== 'unlimited' && entitlement.remaining < 1) throw new Error('RECRUITING_INVITATION_ALLOWANCE_EXHAUSTED');
+      if (duplicate) return { invitation: publicInvitation(duplicate), idempotent: true, duplicate_active: true, ...entitlementProjection(state, membership, now) };
+      const entitlements = entitlementsFor(state, membership, now);
+      assertPairCanReserve(entitlements);
       const invitation = {
         invitation_id: createOpaqueId('invite'),
         candidate_id: createOpaqueId('candidate'),
@@ -729,9 +822,12 @@ export class RecruitingV1Service {
         readiness_state: 'INVITED',
         ba_readiness: 'BA_NOT_STARTED',
         delivery_state: 'PENDING',
+        paired_entitlement_version: 1,
+        bos_entitlement_state: 'RESERVED',
+        ba_entitlement_state: 'RESERVED',
         entitlement_state: 'RESERVED',
-        entitlement_period_start: entitlement.period_start,
-        entitlement_period_end: entitlement.period_end,
+        entitlement_period_start: entitlements.bos.period_start,
+        entitlement_period_end: entitlements.bos.period_end,
         idempotency_key: normalizedIdempotency || stableHash({ membership_id: membership.membership_id, recruitEmail, recruitName }),
         token_digest: digestToken(token),
         token_generation: 1,
@@ -749,7 +845,7 @@ export class RecruitingV1Service {
         tokenCapsule: this.tokenWrapper.wrap(token),
       }, now);
       audit(state, 'INVITATION_ISSUED', { invitation_id: invitation.invitation_id, membership_id: membership.membership_id }, now);
-      return { invitation: publicInvitation(invitation), invitation_token: token, outbox_id: outbox.outbox_id, idempotent: false, entitlement: entitlementFor(state, membership, now) };
+      return { invitation: publicInvitation(invitation), invitation_token: token, outbox_id: outbox.outbox_id, idempotent: false, ...entitlementProjection(state, membership, now) };
     });
     if (this.transport?.synthetic !== true) delete result.invitation_token;
     return result;
@@ -763,13 +859,7 @@ export class RecruitingV1Service {
       const { membership } = membershipFromSession(state, sessionToken, now);
       const invitation = invitationInScope(state, membership, invitationId);
       if (invitation.accepted_at || invitation.state === 'REVOKED') throw new Error('RECRUITING_INVITATION_RESEND_DENIED');
-      if (invitation.entitlement_state === 'RELEASED') {
-        const entitlement = entitlementFor(state, membership, now);
-        if (entitlement.mode !== 'unlimited' && entitlement.remaining < 1) throw new Error('RECRUITING_INVITATION_ALLOWANCE_EXHAUSTED');
-        invitation.entitlement_state = 'RESERVED';
-        invitation.entitlement_period_start = entitlement.period_start;
-        invitation.entitlement_period_end = entitlement.period_end;
-      }
+      reserveEntitlementPair(state, membership, invitation, now);
       invitation.state = 'ISSUED';
       invitation.delivery_state = 'PENDING';
       invitation.token_digest = digestToken(token);
@@ -784,7 +874,7 @@ export class RecruitingV1Service {
         tokenCapsule: this.tokenWrapper.wrap(token),
       }, now);
       audit(state, 'INVITATION_RESENT', { invitation_id: invitation.invitation_id, token_generation: invitation.token_generation }, now);
-      return { invitation: publicInvitation(invitation), invitation_token: token, outbox_id: outbox.outbox_id, entitlement: entitlementFor(state, membership, now) };
+      return { invitation: publicInvitation(invitation), invitation_token: token, outbox_id: outbox.outbox_id, ...entitlementProjection(state, membership, now) };
     });
     if (this.transport?.synthetic !== true) delete result.invitation_token;
     return result;
@@ -800,9 +890,9 @@ export class RecruitingV1Service {
       invitation.revoked_at = iso(now);
       invitation.updated_at = iso(now);
       invitation.token_digest = null;
-      invitation.entitlement_state = 'RELEASED';
+      releaseEntitlementPair(invitation);
       audit(state, 'INVITATION_REVOKED', { invitation_id: invitation.invitation_id }, now);
-      return { invitation: publicInvitation(invitation), entitlement: entitlementFor(state, membership, now) };
+      return { invitation: publicInvitation(invitation), ...entitlementProjection(state, membership, now) };
     });
   }
 
@@ -836,6 +926,9 @@ export class RecruitingV1Service {
       invitation.readiness_state = 'CONSENTED';
       invitation.accepted_at = iso(now);
       invitation.updated_at = iso(now);
+      invitation.paired_entitlement_version = 1;
+      invitation.bos_entitlement_state = 'CONSUMED';
+      invitation.ba_entitlement_state = 'RESERVED';
       invitation.entitlement_state = 'CONSUMED';
       invitation.token_digest = null;
       invitation.consent = { version: consent.version, accepted_at: iso(now), purpose: 'RECRUITING_INTELLIGENCE' };
@@ -857,11 +950,14 @@ export class RecruitingV1Service {
   async inspectInviteSession(inviteSessionToken) {
     const state = await this.store.read();
     const { session, invitation } = inviteFromSession(state, inviteSessionToken, this.now());
+    const invitationProjection = publicInvitation(invitation);
     return {
       invite_session: clone(session),
       relationship: {
         relationship_ref: invitation.invitation_id,
         candidate_id: invitation.candidate_id,
+        readiness_state: invitation.readiness_state,
+        progress_state: invitationProjection.progress_state,
         bos_profile_id: invitation.bos_profile_id || null,
         ba_assessment_id: invitation.ba_assessment_id || null,
         ba_readiness: invitation.ba_readiness,
@@ -902,11 +998,18 @@ export class RecruitingV1Service {
       item.state = outcome?.success ? 'DELIVERED' : 'FAILED';
       item.provider_receipt = outcome?.receipt ? boundedText(outcome.receipt, 300) : null;
       const invitation = item.invitation_id ? state.invitations[item.invitation_id] : null;
-      if (invitation && item.kind === 'RECRUIT_INVITATION') {
+      const currentInvitationOutbox = invitation && item.kind === 'RECRUIT_INVITATION'
+        ? Number.isInteger(item.invitation_token_generation)
+          ? item.invitation_token_generation === invitation.token_generation
+          : Object.values(state.outbox)
+            .filter((candidate) => candidate.kind === 'RECRUIT_INVITATION' && candidate.invitation_id === invitation.invitation_id)
+            .at(-1)?.outbox_id === item.outbox_id
+        : false;
+      if (currentInvitationOutbox) {
         invitation.delivery_state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
         invitation.state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
         invitation.updated_at = iso(now);
-        if (!outcome?.success && !invitation.accepted_at) invitation.entitlement_state = 'RELEASED';
+        if (!outcome?.success && !invitation.accepted_at) releaseEntitlementPair(invitation);
       }
       if (item.kind === 'MANAGER_SETUP' && item.membership_id && state.memberships[item.membership_id]) {
         state.memberships[item.membership_id].setup_delivery_state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
@@ -951,6 +1054,22 @@ export class RecruitingV1Service {
     return this.recordDelivery(outboxId, outcome);
   }
 
+  async projectBosInProgress(invitationId) {
+    return this.store.transaction((state) => {
+      const now = this.now();
+      const invitation = state.invitations[invitationId];
+      if (!invitation || !invitation.accepted_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+      if (invitation.readiness_state === 'BOS_IN_PROGRESS') return publicInvitation(invitation);
+      if (invitation.bos_profile_id || ['BOS_READY', 'BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(invitation.readiness_state)) {
+        return publicInvitation(invitation);
+      }
+      invitation.readiness_state = 'BOS_IN_PROGRESS';
+      invitation.updated_at = iso(now);
+      audit(state, 'CANDIDATE_BOS_IN_PROGRESS', { invitation_id: invitation.invitation_id, candidate_id: invitation.candidate_id }, now);
+      return publicInvitation(invitation);
+    });
+  }
+
   async bindBosProfile(invitationId, profileId, vaultReceipt = {}) {
     const normalized = normalizeProfileId(profileId);
     if (!normalized || vaultReceipt.verified !== true) throw new Error('RECRUITING_VERIFIED_BOS_VAULT_RECEIPT_REQUIRED');
@@ -959,15 +1078,51 @@ export class RecruitingV1Service {
       const invitation = state.invitations[invitationId];
       if (!invitation || !invitation.accepted_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
       if (invitation.bos_profile_id && invitation.bos_profile_id !== normalized) throw new Error('RECRUITING_BOS_PROFILE_REBIND_DENIED');
-      invitation.bos_profile_id = normalized;
-      invitation.readiness_state = 'BOS_READY';
-      invitation.updated_at = iso(now);
-      const membership = state.memberships[invitation.membership_id];
-      const noticeKey = stableHash({ invitation_id: invitation.invitation_id, event: 'BOS_READY', profile_id: normalized });
-      addInbox(state, invitation.membership_id, { idempotency_key: noticeKey, kind: 'BOS_READY', candidate_id: invitation.candidate_id, title: `${invitation.recruit_name}'s BOS is ready.`, body: 'Recruiting Intelligence can now begin with explicit business missingness.' }, now);
-      enqueue(state, { kind: 'MANAGER_BOS_READY', recipient: membership.manager_email, membership, invitation, payload: { candidate_id: invitation.candidate_id, recruit_name: invitation.recruit_name } }, now);
-      audit(state, 'CANDIDATE_BOS_READY', { invitation_id: invitation.invitation_id, candidate_id: invitation.candidate_id, profile_id: normalized }, now);
-      return publicInvitation(invitation);
+      if (invitation.bos_profile_id === normalized) return publicInvitation(invitation);
+      return bindBosProfileInState(state, invitation, normalized, now);
+    });
+  }
+
+  async connectOwnedExistingProfile(inviteSessionToken, { profile_id: profileId } = {}) {
+    const normalized = normalizeProfileId(profileId);
+    if (!normalized) throw new Error('RECRUITING_PROFILE_OWNER_RECEIPT_REQUIRED');
+    if (typeof this.profileOwnerReader !== 'function') {
+      throw new Error('RECRUITING_EXISTING_PROFILE_CONNECTION_UNAVAILABLE');
+    }
+
+    // Validate the accepted invitation before consulting any Profile record.
+    // The same invitation and email scope are checked again in the write.
+    const preflight = await this.store.read();
+    const { invitation: preflightInvitation } = inviteFromSession(preflight, inviteSessionToken, this.now());
+    const invitationEmail = normalizeEmail(preflightInvitation.recruit_email);
+    const [owner, validation] = await Promise.all([
+      this.profileOwnerReader(normalized),
+      this.profileValidator(normalized),
+    ]);
+    const canonicalOwnerEmail = normalizeEmail(owner?.recipient_email);
+    if (normalizeProfileId(owner?.profile_id) !== normalized || !canonicalOwnerEmail) {
+      throw new Error('RECRUITING_EXISTING_PROFILE_OWNERSHIP_SCOPE_DENIED');
+    }
+    if (canonicalOwnerEmail !== invitationEmail) {
+      throw new Error('RECRUITING_EXISTING_PROFILE_EMAIL_SCOPE_DENIED');
+    }
+    // A found canonical Profile is the persisted completion receipt for BOS.
+    if (validation?.found !== true
+        || normalizeProfileId(validation.profile_id || normalized) !== normalized) {
+      throw new Error('RECRUITING_COMPLETED_BOS_REQUIRED');
+    }
+
+    return this.store.transaction((state) => {
+      const now = this.now();
+      const { invitation } = inviteFromSession(state, inviteSessionToken, now);
+      if (normalizeEmail(invitation.recruit_email) !== canonicalOwnerEmail) {
+        throw new Error('RECRUITING_EXISTING_PROFILE_EMAIL_SCOPE_DENIED');
+      }
+      if (invitation.bos_profile_id && invitation.bos_profile_id !== normalized) {
+        throw new Error('RECRUITING_BOS_PROFILE_REBIND_DENIED');
+      }
+      if (invitation.bos_profile_id === normalized) return publicInvitation(invitation);
+      return bindBosProfileInState(state, invitation, normalized, now);
     });
   }
 
@@ -995,6 +1150,8 @@ export class RecruitingV1Service {
         && invitation.ba_readiness === baState
         && invitation.ba_assessment_id === assessment_id;
       if (sameReady || sameInterim) return publicInvitation(invitation);
+      invitation.paired_entitlement_version = 1;
+      invitation.ba_entitlement_state = 'CONSUMED';
       invitation.ba_assessment_id = assessment_id || invitation.ba_assessment_id;
       invitation.ba_readiness = baState;
       invitation.readiness_state = baState;
@@ -1030,7 +1187,7 @@ export class RecruitingV1Service {
           profile_id: membership.manager_profile_id,
           capabilities: { master_control: Array.isArray(membership.admin_roles) && membership.admin_roles.includes('RECRUITING_ADMIN') },
         },
-        entitlement: entitlementFor(state, membership, now),
+        ...entitlementProjection(state, membership, now),
         candidates: invitations.map(publicInvitation),
         notifications: clone(state.inbox_by_membership[membership.membership_id] || []),
         existing_recruit: { available: false, code: 'EXACT_SCOPE_CONSENT_AUTHORITY_REQUIRED', safe_action: 'INVITE_EXISTING_AGENT' },

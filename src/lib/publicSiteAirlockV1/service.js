@@ -22,6 +22,11 @@ import {
   validatePersistedVerticalBinding,
 } from '../../../api/business-assessment/verticalBinding.js';
 import { PRODUCTION_BA_CASSETTE_REGISTRY, buildCustomerConfirmedSelection } from '../baVerticalCassettesV1/index.js';
+import {
+  COMPLIMENTARY_FLOW_TTL_MS,
+  createComplimentaryFlowReceipt,
+  readComplimentaryFlowReceipt,
+} from './complimentaryFlow.js';
 
 const READY = new Set(['ready', 'complete']);
 const PURCHASE_INTENT_STATES = new Set(['awaiting_provider_checkout', 'granted']);
@@ -373,6 +378,7 @@ export function createPublicSiteService({
   startSigningKey,
   complimentaryPepper,
   complimentaryManifest = '[]',
+  complimentaryFlowAudience,
   profileStateReader = async () => ({ bos: 'unknown', ba: 'unknown' }),
   ownershipVerifier = async () => false,
   inquiryTransport = null,
@@ -582,17 +588,41 @@ export function createPublicSiteService({
     });
   }
 
-  async function redeemComplimentary(input = {}, requestContext = {}) {
-    const idem = requireIdempotencyKey(input.idempotency_key);
+  async function prepareComplimentaryFlow(input = {}) {
+    return {
+      state: 'complimentary_path_selected',
+      product_key: 'business_assessment',
+      receipt: createComplimentaryFlowReceipt({
+        productKey: input.product_key,
+        capability: input.capability,
+        idempotencyKey: requireIdempotencyKey(input.idempotency_key),
+        signingKey: startSigningKey,
+        pepper: complimentaryPepper,
+        audience: complimentaryFlowAudience,
+        nowMs: Number(clock()),
+      }),
+    };
+  }
+
+  function readPreparedComplimentaryFlow(requestContext = {}) {
+    const claims = readComplimentaryFlowReceipt(requestContext.cookie_header, {
+      signingKey: startSigningKey,
+      audience: complimentaryFlowAudience,
+      nowMs: Number(clock()),
+    });
+    return {
+      state: 'complimentary_path_selected',
+      product_key: claims.product_key,
+      claims,
+    };
+  }
+
+  async function redeemComplimentaryDigest(input = {}, requestContext = {}, preparedFlow = null) {
+    const idem = preparedFlow?.idempotency_key || requireIdempotencyKey(input.idempotency_key);
     const product = productForKey(input.product_key);
     if (!product || product.product_key === 'more_monthly_intelligence') throw new Error('complimentary_product_not_available');
-    const code = boundedText(input.capability, 240);
-    const digest = complimentaryDigest(code, complimentaryPepper);
-    const manifest = parseComplimentaryManifest(complimentaryManifest);
-    const capability = manifest.find((item) => item.digest === digest);
-    if (!capability || capability.product_key !== product.product_key || capability.status !== 'active') {
-      throw new Error('complimentary_capability_invalid');
-    }
+    const digest = preparedFlow?.capability_digest
+      || complimentaryDigest(boundedText(input.capability, 240), complimentaryPepper);
 
     const profileId = normalizeProfileId(input.profile_id);
     const rawEmail = boundedText(input.email, 254);
@@ -611,6 +641,30 @@ export function createPublicSiteService({
       if (!READY.has(profileState?.bos)) throw new Error('completed_bos_required');
       verticalSelection = currentConfirmedVerticalSelection(input.vertical_selection);
       verticalBinding = buildCustomerConfirmedVerticalBinding({ selection: verticalSelection, selectedAt: nowIso(clock) });
+    }
+    // A prepared BA code must not become a validity oracle. Establish the
+    // caller's owned, BOS-complete Profile and confirmed vertical before
+    // consulting the private capability manifest. Identical unauthenticated
+    // requests therefore receive the same prerequisite error for both valid
+    // and invalid codes. The direct BOS path reaches this check immediately.
+    const manifest = parseComplimentaryManifest(complimentaryManifest);
+    const capability = manifest.find((item) => item.digest === digest);
+    if (!capability || capability.product_key !== product.product_key || capability.status !== 'active') {
+      throw new Error('complimentary_capability_invalid');
+    }
+    if (preparedFlow) {
+      if (preparedFlow.product_key !== product.product_key) throw new Error('complimentary_flow_conflict');
+      const bindingKey = `public_product_v1:complimentary_flow_binding:${sha256(preparedFlow.flow_id)}`;
+      const bindingValue = sha256(canonicalJson({
+        product_key: product.product_key,
+        profile_id: profileId,
+        vertical_selection: verticalSelection,
+      }));
+      const ttlSeconds = Math.max(1, Math.ceil((preparedFlow.expires_at_ms - Number(clock())) / 1000));
+      if (ttlSeconds > Math.ceil(COMPLIMENTARY_FLOW_TTL_MS / 1000)) throw new Error('complimentary_flow_invalid');
+      if (!await store.setNx(bindingKey, bindingValue, ttlSeconds)) {
+        if (await store.get(bindingKey) !== bindingValue) throw new Error('complimentary_flow_conflict');
+      }
     }
     const subjectKey = profileId || email || 'unbound';
     const redemptionId = sha256(`${digest}:${product.product_key}:${subjectKey}:${idem}`);
@@ -730,6 +784,19 @@ export function createPublicSiteService({
       if (!persisted) throw new Error('complimentary_redemption_conflict');
       return { ...persisted, idempotent: outcome !== 'CREATED' };
     });
+  }
+
+  async function redeemComplimentary(input = {}, requestContext = {}) {
+    return redeemComplimentaryDigest(input, requestContext);
+  }
+
+  async function redeemPreparedComplimentary(input = {}, requestContext = {}) {
+    const prepared = readPreparedComplimentaryFlow(requestContext);
+    return redeemComplimentaryDigest({
+      profile_id: input.profile_id,
+      product_key: prepared.product_key,
+      vertical_selection: input.vertical_selection,
+    }, requestContext, prepared.claims);
   }
 
   async function lookupEntry(input = {}, requestContext = {}) {
@@ -972,7 +1039,10 @@ export function createPublicSiteService({
   return Object.freeze({
     createPurchaseIntent,
     recordPaymentGrant,
+    prepareComplimentaryFlow,
+    readPreparedComplimentaryFlow,
     redeemComplimentary,
+    redeemPreparedComplimentary,
     lookupEntry,
     createStartTokenForGrant,
     createStartTokenForSession,

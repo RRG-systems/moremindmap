@@ -24,6 +24,10 @@ import {
   suggestVerticalFromIndustry,
 } from './lib/baVerticalCassettesV1/index.js';
 import { renewStoredPublicStartToken } from './lib/publicProductStartSession.js';
+import {
+  openRecruitingBoundBa,
+  resolveRecruitingBaLanding,
+} from './lib/recruitingV1/continuation.js';
 
 const QUESTIONS = REAL_ESTATE_INTAKE_QUESTIONS;
 const SUPPORTED_VERTICALS = PRODUCTION_BA_CASSETTE_REGISTRY.listSupported();
@@ -246,6 +250,11 @@ export default function BusinessAssessment() {
   const [monthlyProfileGate, setMonthlyProfileGate] = useState(createMonthlyProfileGateState);
   const [devCodeProfileGate, setDevCodeProfileGate] = useState(createProfileGateState);
   const [recruitingProfileGate, setRecruitingProfileGate] = useState(createProfileGateState);
+  const [recruitingLandingState, setRecruitingLandingState] = useState({
+    status: recruitingMode ? 'loading' : 'idle',
+    progressState: '',
+    error: '',
+  });
   const [assessmentProfile, setAssessmentProfile] = useState(null);
   const [flowStarted, setFlowStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -332,29 +341,105 @@ export default function BusinessAssessment() {
 
   useEffect(() => {
     if (!recruitingMode) return;
+    const controller = new AbortController();
+    let cancelled = false;
     setRecruitingProfileGate((current) => ({ ...current, status: 'validating', error: '' }));
-    fetch('/api/recruiting/runtime?view=invite_session', {
-      credentials: 'same-origin',
-      cache: 'no-store',
-    }).then(async (response) => {
-      const payload = await response.json().catch(() => null);
-      if (!response.ok || payload?.ok !== true || !payload?.relationship?.bos_profile_id) {
-        throw new Error('Complete your invited MORE Profile before beginning the optional Business Assessment.');
+    setRecruitingLandingState({ status: 'loading', progressState: '', error: '' });
+
+    async function enterRecruitingBusinessAssessment() {
+      try {
+        const response = await fetch('/api/recruiting/runtime?view=invite_session', {
+          credentials: 'same-origin',
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        const payload = await response.json().catch(() => null);
+        if (!response.ok || payload?.ok !== true || !payload?.continuation) {
+          throw new Error('RECRUITING_BA_CONTINUATION_UNAVAILABLE');
+        }
+
+        const landing = resolveRecruitingBaLanding(payload.continuation);
+        if (cancelled) return;
+        setRecruitingProfileGate({
+          ...createProfileGateState(),
+          status: 'valid',
+          profile: {
+            id: landing.profile_id,
+            name: 'Invited recruit',
+            profileType: 'Verified MORE Profile',
+            industry: '',
+          },
+        });
+
+        if (landing.mode === 'BEGIN_NEW_BA') {
+          setRecruitingLandingState({
+            status: 'ready_to_begin',
+            progressState: landing.progress_state,
+            error: '',
+          });
+          return;
+        }
+
+        setRecruitingLandingState({
+          status: 'opening_bound',
+          progressState: landing.progress_state,
+          error: '',
+        });
+        const opened = await openRecruitingBoundBa({
+          continuation: payload.continuation,
+          retrieveBoundAssessment: async (assessmentId) => {
+            const retrieved = await retrieveBusinessAssessment(
+              assessmentId,
+              (path) => buildApiUrl(path, true),
+              {
+                credentials: 'same-origin',
+                cache: 'no-store',
+                signal: controller.signal,
+              },
+            );
+            return retrieved.payload;
+          },
+          resolveCurrentBa: (profileId) => resolveOrdinaryBaEntry(
+            profileId,
+            (url, options) => fetch(url, { ...options, signal: controller.signal }),
+          ),
+          navigate: (destination) => {
+            if (!cancelled) window.location.assign(destination);
+          },
+        });
+        if (cancelled || opened.status === 'OPENING_CURRENT_BA') return;
+        setRetrieveId(opened.landing.assessment_id);
+        setRetrieveState({ status: 'found', error: '', result: opened.payload });
+        setRecruitingLandingState({
+          status: 'recovered_bound',
+          progressState: opened.landing.progress_state,
+          error: '',
+        });
+      } catch (error) {
+        if (cancelled || error?.name === 'AbortError') return;
+        const recoveredPayload = error?.recovered_payload;
+        if (recoveredPayload?.assessment && error?.landing) {
+          setRetrieveId(error.landing.assessment_id);
+          setRetrieveState({ status: 'found', error: '', result: recoveredPayload });
+        }
+        const requiresBos = error?.message === 'RECRUITING_BA_PROFILE_BINDING_REQUIRED';
+        const message = requiresBos
+          ? 'Complete your invited MORE Profile before beginning the optional Business Assessment.'
+          : 'We could not open the saved Business Assessment right now. Nothing was replaced; return to your private continuation and try again.';
+        setRecruitingProfileGate((current) => ({ ...current, status: 'error', error: message }));
+        setRecruitingLandingState({
+          status: recoveredPayload?.assessment ? 'bound_unavailable' : 'error',
+          progressState: error?.landing?.progress_state || '',
+          error: message,
+        });
       }
-      setRecruitingProfileGate({
-        ...createProfileGateState(),
-        status: 'valid',
-        profile: {
-          id: payload.relationship.bos_profile_id,
-          name: 'Invited recruit',
-          profileType: 'Verified MORE Profile',
-          industry: '',
-        },
-      });
-    }).catch((error) => {
-      setRecruitingProfileGate((current) => ({ ...current, status: 'error', error: error.message }));
-      setSubmitState({ status: 'error', error: error.message, result: null });
-    });
+    }
+
+    void enterRecruitingBusinessAssessment();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, [recruitingMode]);
 
   useEffect(() => {
@@ -1353,27 +1438,81 @@ export default function BusinessAssessment() {
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-orange-300">
                 Optional Business Assessment
               </p>
-              <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
-                Confirm your business type before beginning.
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-white/62">
-                Your invitation identifies the correct MORE Profile. Business type remains a separate customer-confirmed choice.
-              </p>
-              {recruitingProfileGate.status === 'validating' && (
-                <p className="mt-6 text-sm text-white/62">Validating your invitation...</p>
+              {['loading', 'opening_bound'].includes(recruitingLandingState.status) && (
+                <>
+                  <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                    {recruitingLandingState.status === 'opening_bound'
+                      ? recruitingLandingState.progressState === 'BOTH_COMPLETE'
+                        ? 'Opening your completed Business Assessment…'
+                        : 'Returning to your saved Business Assessment…'
+                      : 'Checking your private progress…'}
+                  </h1>
+                  <p className="mt-3 text-sm leading-6 text-white/62" role="status">
+                    The accepted invitation is verifying the exact saved Assessment and MORE Profile before anything opens.
+                  </p>
+                </>
               )}
-              {recruitingProfileGate.status === 'error' && (
+
+              {['recovered_bound', 'bound_unavailable'].includes(recruitingLandingState.status) && retrieveState.result?.assessment && (
+                <>
+                  <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                    {retrievedNeedsGeneration
+                      ? 'Your saved Business Assessment is ready to continue.'
+                      : 'Your completed Business Assessment is open below.'}
+                  </h1>
+                  <p className="mt-3 text-sm leading-6 text-white/62">
+                    This is the same Assessment and MORE Profile held by your accepted invitation. A new intake was not started.
+                  </p>
+                  <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.07] p-4">
+                    <p className="text-sm font-semibold text-emerald-100">Saved Assessment verified.</p>
+                    <p className="mt-2 text-xs text-white/58">
+                      Assessment ID: <span className="font-mono text-white/78">{retrieveState.result.assessment.assessment_id}</span>
+                    </p>
+                    {retrievedNeedsGeneration && recruitingLandingState.status === 'recovered_bound' && (
+                      <button
+                        type="button"
+                        disabled={generationIsRunning}
+                        onClick={generateRetrievedAssessment}
+                        className="mt-4 w-full rounded-xl border border-emerald-200/40 px-4 py-3 text-xs font-bold uppercase tracking-[0.14em] text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-300/10 disabled:cursor-wait disabled:opacity-55"
+                        data-testid="recruiting-resume-bound-business-assessment"
+                      >
+                        {generationIsRunning
+                          ? generationState.phase || 'Continuing...'
+                          : 'Continue the saved Business Assessment'}
+                      </button>
+                    )}
+                  </div>
+                  {recruitingLandingState.error && (
+                    <p className="mt-4 text-sm leading-6 text-orange-100" role="alert">
+                      {recruitingLandingState.error}
+                    </p>
+                  )}
+                </>
+              )}
+
+              {recruitingLandingState.status === 'error' && (
                 <div className="mt-6 rounded-2xl border border-red-400/30 bg-red-500/[0.08] p-4 text-sm leading-6 text-red-100">
-                  {recruitingProfileGate.error}
+                  {recruitingLandingState.error || recruitingProfileGate.error}
                 </div>
               )}
-              {recruitingProfileGate.profile && (
+
+              {recruitingLandingState.status === 'ready_to_begin' && (
+                <>
+                  <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">
+                    Confirm your business type before beginning.
+                  </h1>
+                  <p className="mt-3 text-sm leading-6 text-white/62">
+                    Your invitation identifies the correct MORE Profile. Business type remains a separate customer-confirmed choice.
+                  </p>
+                </>
+              )}
+              {recruitingLandingState.status === 'ready_to_begin' && recruitingProfileGate.profile && (
                 <div className="mt-6 rounded-2xl border border-emerald-400/30 bg-emerald-400/[0.07] p-4">
                   <p className="text-sm font-semibold text-emerald-100">Invitation and MORE Profile validated.</p>
                   {renderVerticalSelectionGate('recruiting', recruitingProfileGate)}
                 </div>
               )}
-              {recruitingProfileGate.profile && (
+              {recruitingLandingState.status === 'ready_to_begin' && recruitingProfileGate.profile && (
                 <button
                   type="button"
                   disabled={!recruitingProfileGate.verticalSelection?.confirmedSelection}

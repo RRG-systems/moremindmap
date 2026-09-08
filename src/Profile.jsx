@@ -14,6 +14,13 @@ import {
   createBosDraftCoordinator,
   createBosDraftSnapshot,
 } from "./lib/bosIntakeDurability.js";
+import {
+  createBosSubmissionGuard,
+  hasUsableBosCompletedHtml,
+  normalizeBosCanonicalProfileId,
+  pollBosGenerationJob,
+  runBosGenerationRequest,
+} from "./lib/bosGenerationJourney.js";
 import { renewStoredPublicStartToken } from './lib/publicProductStartSession.js';
 
 // Complimentary authority is server-owned by publicSiteAirlockV1. No active
@@ -338,6 +345,13 @@ export default function Profile() {
   const [translatorSource, setTranslatorSource] = useState(null)
   const [savedDraftAvailable, setSavedDraftAvailable] = useState(false)
   const [draftState, setDraftState] = useState({ state: 'idle', message: '' })
+  const [generationJourney, setGenerationJourney] = useState({
+    mode: 'unknown',
+    state: 'idle',
+    stage: '',
+    message: '',
+    jobId: '',
+  })
   
   // Profile ID retrieval (recovery/testing path)
   const [profileId, setProfileId] = useState("")
@@ -348,6 +362,7 @@ export default function Profile() {
   const questions = MOREMINDMAP_QUESTIONS
   const [responses, setResponses] = useState({})
   const draftCoordinator = useMemo(() => createBosDraftCoordinator(), [])
+  const submissionGuard = useMemo(() => createBosSubmissionGuard(), [])
   const retrievedBosSectionPayloads = useMemo(() => {
     if (!(result?.success && result?.version === "retrieved" && result?.html)) return [];
     return buildBosSectionTranslatorPayloadsFromRenderedProfile(result.html, result.profile_id);
@@ -689,10 +704,244 @@ export default function Profile() {
     }
   }
 
-  async function submitAssessment() {
+  function discardCompletedBosDraft() {
+    const discardRequest = draftCoordinator.discard()
+    draftCoordinator.clear()
+    setSavedDraftAvailable(false)
+    void discardRequest.catch(() => {})
+  }
+
+  function settleOpenedBos(nextResult, jobId) {
+    setResult(nextResult)
+    setProcessing(false)
+    setGenerationJourney({
+      mode: 'async',
+      state: 'ready',
+      stage: 'complete',
+      message: 'Your Behavioral Operating System is ready.',
+      jobId,
+    })
+    discardCompletedBosDraft()
+  }
+
+  async function openCompletedBos(statusData, jobId, API) {
+    const canonicalProfileId = normalizeBosCanonicalProfileId(statusData?.canonical_profile_id)
+    if (!canonicalProfileId) {
+      setProcessing(false)
+      setResult({
+        success: false,
+        code: 'BOS_COMPLETED_PROFILE_UNAVAILABLE',
+        error: 'We could not verify the completed profile reference. Your answers are saved; check the same generation job again.',
+        retryable: true,
+        job_id: jobId,
+      })
+      return
+    }
+
+    console.log("[MINI-V2] Generation complete!")
+    setProfileId(canonicalProfileId)
+    setProfileIdLoading(true)
+    setGenerationJourney({
+      mode: 'async',
+      state: 'opening',
+      stage: 'complete',
+      message: 'Your BOS is complete. Opening the saved profile.',
+      jobId,
+    })
+
+    try {
+      const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(canonicalProfileId)}`)
+      const data = await runBosGenerationRequest({
+        request: async ({ signal }) => {
+          const res = await fetch(fullUrl, {
+            headers: publicStartHeaders(),
+            credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+            signal,
+          })
+          if (!res.ok) throw new Error(`Failed to fetch profile: ${res.status}`)
+          return res.json()
+        },
+      })
+      const retrievedProfileId = normalizeBosCanonicalProfileId(data?.profile_id)
+      const hasCanonicalDossier = data?.canonical_dossier
+        && typeof data.canonical_dossier === 'object'
+        && !Array.isArray(data.canonical_dossier)
+      if (data?.success !== true || retrievedProfileId !== canonicalProfileId || !hasCanonicalDossier) {
+        throw new Error('Completed profile retrieval returned an invalid contract')
+      }
+
+      settleOpenedBos({
+        success: true,
+        version: "web",
+        canonical_dossier: data.canonical_dossier,
+        behavioral_intelligence_v1: data.behavioral_intelligence_v1,
+        visual_dna: data.visual_dna,
+        profile_id: canonicalProfileId,
+        retrieved_at: data.retrieved_at
+      }, jobId)
+    } catch (error) {
+      if (hasUsableBosCompletedHtml(statusData)) {
+        console.error("[MINI-V2-ROUTE] Governed retrieval unavailable; using completed job payload:", error.message)
+        settleOpenedBos({
+          success: true,
+          version: "mini-v2",
+          html: statusData.html,
+          snapshot: statusData.metadata,
+          profile_id: canonicalProfileId
+        }, jobId)
+      } else {
+        console.error("[MINI-V2-ROUTE] Completed profile could not be opened:", error.message)
+        setProcessing(false)
+        setGenerationJourney({
+          mode: 'async',
+          state: 'status_unavailable',
+          stage: 'complete',
+          message: 'Your BOS completed, but the saved profile could not be opened yet.',
+          jobId,
+        })
+        setResult({
+          success: false,
+          code: 'BOS_COMPLETED_PROFILE_UNAVAILABLE',
+          error: 'Your BOS finished, but we could not safely open the completed profile. Your answers are saved; check the same generation job again.',
+          retryable: true,
+          job_id: jobId,
+        })
+      }
+    } finally {
+      setProfileIdLoading(false)
+    }
+  }
+
+  async function pollExistingBosJob(jobId, API) {
+    setGenerationJourney({
+      mode: 'async',
+      state: 'pending',
+      stage: 'queued',
+      message: 'Checking your saved BOS generation job.',
+      jobId,
+    })
+
+    const generationOutcome = await pollBosGenerationJob({
+      readStatus: async ({ signal } = {}) => {
+        const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`), {
+          headers: publicStartHeaders(),
+          credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+          signal,
+        })
+        const payload = await statusRes.json().catch(() => null)
+        return { ok: statusRes.ok, statusCode: statusRes.status, payload }
+      },
+      onProgress: (status) => {
+        console.log('[MINI-V2] Status:', status.stage)
+        setGenerationJourney({
+          mode: 'async',
+          state: 'pending',
+          stage: status.stage,
+          message: status.message,
+          jobId,
+        })
+      },
+    })
+
+    if (generationOutcome.state === 'complete') {
+      await openCompletedBos(generationOutcome.payload, jobId, API)
+      return
+    }
+
+    if (generationOutcome.state === 'failed') {
+      const terminalFailureMessage = 'Generation stopped before your BOS was ready. Your answers remain saved. This generation job is final, so checking its status again will not restart it.'
+      setProcessing(false)
+      setGenerationJourney({
+        mode: 'async',
+        state: 'failed',
+        stage: 'failed',
+        message: terminalFailureMessage,
+        jobId,
+      })
+      setResult({
+        success: false,
+        code: 'BOS_GENERATION_FAILED',
+        error: terminalFailureMessage,
+        retryable: false,
+        job_id: jobId,
+      })
+      return
+    }
+
+    const statusUnavailable = generationOutcome.state === 'status_unavailable'
+    setProcessing(false)
+    setGenerationJourney({
+      mode: 'async',
+      state: generationOutcome.state,
+      stage: generationOutcome.state,
+      message: statusUnavailable
+        ? 'We could not confirm the current job status after several checks.'
+        : 'Your saved generation job is taking longer than the expected window.',
+      jobId,
+    })
+    setResult({
+      success: false,
+      code: statusUnavailable ? 'BOS_GENERATION_STATUS_UNAVAILABLE' : 'BOS_GENERATION_SLOW',
+      error: statusUnavailable
+        ? 'We could not confirm the current status. Your answers are saved; check the same generation job again.'
+        : 'Your BOS is taking longer than expected. Your answers are saved; check the same generation job again.',
+      retryable: true,
+      job_id: jobId,
+    })
+  }
+
+  async function resumeExistingGeneration(jobId) {
+    if (!jobId || !submissionGuard.tryStart()) return
+
+    setSubmitting(true)
+    setProcessing(true)
+    setSubmitted(false)
+    setResult(null)
+    try {
+      const API = import.meta.env.VITE_API_URL || ""
+      if (publicBosAuthorized) await renewStoredPublicStartToken()
+      await pollExistingBosJob(jobId, API)
+    } catch {
+      setProcessing(false)
+      setResult({
+        success: false,
+        code: 'BOS_GENERATION_STATUS_UNAVAILABLE',
+        error: 'We could not confirm the current status. Your answers are saved; check the same generation job again.',
+        retryable: true,
+        job_id: jobId,
+      })
+    } finally {
+      setSubmitting(false)
+      setSubmitted(true)
+      submissionGuard.finish()
+    }
+  }
+
+  function retryBosGenerationStart() {
+    return submitAssessment({ reuseSavedSubmission: true })
+  }
+
+  async function submitAssessment({ reuseSavedSubmission = false } = {}) {
+    if (!submissionGuard.tryStart()) return
+
     console.log("SUBMIT FUNCTION TRIGGERED")
     setSubmitting(true)
     setProcessing(true)
+    setSubmitted(false)
+    setResult(null)
+    setGenerationJourney({
+      mode: 'unknown',
+      state: reuseSavedSubmission ? 'starting' : 'securing_answers',
+      stage: reuseSavedSubmission ? 'starting' : 'saving',
+      message: reuseSavedSubmission
+        ? 'Safely retrying generation from your saved answers.'
+        : 'Securely saving your final answers.',
+      jobId: '',
+    })
+    const savedSubmissionEnvelope = reuseSavedSubmission ? draftCoordinator.localEnvelope() : null
+    let shouldShowCompletion = true
+    let answersSaved = savedSubmissionEnvelope?.snapshot?.phase === 'READY_TO_SUBMIT'
+    let activeJobId = ''
     
     try {
       if (publicBosAuthorized) await renewStoredPublicStartToken()
@@ -703,19 +952,30 @@ export default function Profile() {
       })
 
       const metadata = currentDraftMetadata()
-      const draftEnvelope = await persistDraft({
-        phase: 'READY_TO_SUBMIT',
-        nextStep: questions.length - 1,
-        nextResponses: answers,
-        metadata
-      })
-      await draftCoordinator.flush()
+      const draftEnvelope = reuseSavedSubmission
+        ? savedSubmissionEnvelope
+        : await persistDraft({
+            phase: 'READY_TO_SUBMIT',
+            nextStep: questions.length - 1,
+            nextResponses: answers,
+            metadata
+          })
+      if (!reuseSavedSubmission) await draftCoordinator.flush()
       if (!draftEnvelope) {
-        setSubmitting(false)
         setProcessing(false)
-        setSubmitted(false)
+        shouldShowCompletion = false
         return
       }
+      if (draftEnvelope.snapshot?.phase !== 'READY_TO_SUBMIT') {
+        setProcessing(false)
+        return setResult({
+          success: false,
+          code: 'BOS_GENERATION_SAVED_SUBMISSION_UNAVAILABLE',
+          error: 'The saved final answers needed for this recovery are unavailable. Return to the assessment before trying again.',
+          retryable: false,
+        })
+      }
+      answersSaved = true
       const submissionAnswers = draftEnvelope.snapshot.responses
       const submissionMetadata = draftEnvelope.snapshot.metadata
 
@@ -733,159 +993,67 @@ export default function Profile() {
       if (useV2) {
         // ASYNC JOB FLOW for Mini V2
         console.log("[MINI-V2] Starting async job flow")
+        setGenerationJourney({
+          mode: 'async',
+          state: 'starting',
+          stage: 'starting',
+          message: 'Starting your saved BOS generation job.',
+          jobId: '',
+        })
         
         // Step 1: Start job
-        const startRes = await fetch(buildApiUrl(API, `/api/moremindmap/start`), {
-          method: "POST",
-          headers: publicStartHeaders({
-            "Content-Type": "application/json",
-            "X-BOS-Draft-Token": draftEnvelope.resume_token
-          }),
-          body: JSON.stringify({ 
-            answers: submissionAnswers,
-            metadata: submissionMetadata,
-            draft_reference: {
-              contract_version: 'bos_intake_draft_v1',
-              draft_id: draftEnvelope.draft_id,
-              revision: draftEnvelope.revision,
-              snapshot: draftEnvelope.snapshot
-            }
-          }),
-          credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+        const { response: startRes, payload: startData } = await runBosGenerationRequest({
+          request: async ({ signal }) => {
+            const response = await fetch(buildApiUrl(API, `/api/moremindmap/start`), {
+              method: "POST",
+              headers: publicStartHeaders({
+                "Content-Type": "application/json",
+                "X-BOS-Draft-Token": draftEnvelope.resume_token
+              }),
+              body: JSON.stringify({
+                answers: submissionAnswers,
+                metadata: submissionMetadata,
+                draft_reference: {
+                  contract_version: 'bos_intake_draft_v1',
+                  draft_id: draftEnvelope.draft_id,
+                  revision: draftEnvelope.revision,
+                  snapshot: draftEnvelope.snapshot
+                }
+              }),
+              credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+              signal,
+            })
+            const payload = response.ok ? await response.json().catch(() => null) : null
+            return { response, payload }
+          },
         })
         
         if (!startRes.ok) {
-          const text = await startRes.text()
-          console.error("[MINI-V2] Start failed:", text)
+          console.error("[MINI-V2] Start failed:", startRes.status)
           setProcessing(false)
           return setResult({
             success: false,
-            error: `Failed to start generation: ${text}`,
+            error: 'We could not confirm generation started. Your answers are saved; try generation again.',
+            retryable: true,
+            code: 'BOS_GENERATION_START_FAILED',
           })
         }
         
-        const startData = await startRes.json()
-        const jobId = startData.job_id
+        const jobId = String(startData?.job_id || '').trim()
+        if (!jobId) throw new Error('Generation started without a recoverable job reference.')
+        activeJobId = jobId
         console.log("[MINI-V2] Job started:", jobId)
-        
-        // Step 2: Poll for completion
-        const startTime = Date.now()
-        const maxWaitTime = 12 * 60 * 1000 // 12 minutes
-        const pollInterval = 3000 // 3 seconds
-        
-        let complete = false
-        let pollCount = 0
-        
-        while (!complete && (Date.now() - startTime) < maxWaitTime) {
-          pollCount++
-          console.log(`[MINI-V2] Poll #${pollCount} for job ${jobId}`)
-          
-          await new Promise(resolve => setTimeout(resolve, pollInterval))
-          
-          const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`), {
-            headers: publicStartHeaders(),
-            credentials: recruitingAuthorized ? 'same-origin' : 'omit'
-          })
-          
-          if (!statusRes.ok) {
-            console.error("[MINI-V2] Status check failed:", statusRes.status)
-            continue
-          }
-          
-          const statusData = await statusRes.json()
-          console.log(`[MINI-V2] Status:`, statusData.status, statusData.stage, statusData.progress_message)
-          
-          if (statusData.status === 'complete') {
-            console.log("[MINI-V2] Generation complete!")
-            complete = true
-            setProcessing(false)
-            
-            // ORCHESTRATION PARITY: Use exact same rendering pathway as Profile ID lookup
-            // Instead of rendering from job payload, route through validateProfileId()
-            if (statusData.canonical_profile_id) {
-              console.log("[MINI-V2] ✓ Routing through validateProfileId for consistency with manual Profile ID load")
-              setProfileId(statusData.canonical_profile_id)
-              // Small delay to ensure state updates, then validate
-              await new Promise(resolve => setTimeout(resolve, 50))
-              // Note: validateProfileId() expects to be called after profileId state is set
-              // Since state updates are async, we call it directly with the ID
-              setProfileIdLoading(true)
-              try {
-                const API = import.meta.env.VITE_API_URL || ""
-                const fullUrl = buildApiUrl(API, `/api/moremindmap/retrieve-profile?id=${encodeURIComponent(statusData.canonical_profile_id)}`)
-                const res = await fetch(fullUrl, {
-                  headers: publicStartHeaders(),
-                  credentials: recruitingAuthorized ? 'same-origin' : 'omit'
-                })
-                
-                if (!res.ok) {
-                  console.error('[MINI-V2-ROUTE] Fetch failed:', res.status)
-                  throw new Error(`Failed to fetch profile: ${res.status}`)
-                }
-                
-                const data = await res.json()
-                console.log("[MINI-V2-ROUTE] ✓ Profile retrieved, using web render path")
-                
-                // Use EXACT same setResult call as validateProfileId()
-                setResult({
-                  success: true,
-                  version: "web",
-                  canonical_dossier: data.canonical_dossier,
-                  behavioral_intelligence_v1: data.behavioral_intelligence_v1,
-                  visual_dna: data.visual_dna,
-                  profile_id: data.profile_id,
-                  retrieved_at: data.retrieved_at
-                })
-                
-                setSubmitted(true)
-                setProcessing(false)
-                await draftCoordinator.discard().catch(() => draftCoordinator.clear())
-              } catch (error) {
-                console.error("[MINI-V2-ROUTE] Error routing through validateProfileId:", error)
-                // Fallback: use direct job payload
-                console.log("[MINI-V2-ROUTE] Falling back to direct job payload rendering")
-                setResult({
-                  success: true,
-                  version: "mini-v2",
-                  html: statusData.html,
-                  snapshot: statusData.metadata,
-                  profile_id: statusData.canonical_profile_id
-                })
-                await draftCoordinator.discard().catch(() => draftCoordinator.clear())
-              } finally {
-                setProfileIdLoading(false)
-              }
-            } else {
-              setResult({
-                success: true,
-                version: "mini-v2",
-                html: statusData.html,
-                snapshot: statusData.metadata
-              })
-              await draftCoordinator.discard().catch(() => draftCoordinator.clear())
-            }
-          } else if (statusData.status === 'failed') {
-            console.error("[MINI-V2] Generation failed:", statusData.error)
-            complete = true
-            setProcessing(false)
-            setResult({
-              success: false,
-              error: statusData.error || 'Generation failed'
-            })
-          }
-        }
-        
-        if (!complete) {
-          console.error("[MINI-V2] Generation timed out after 12 minutes")
-          setProcessing(false)
-          setResult({
-            success: false,
-            error: "Report generation is taking longer than expected. Most reports complete in 3-6 minutes. Your job may still be processing. Job ID: " + jobId
-          })
-        }
+        await pollExistingBosJob(jobId, API)
       } else {
         // Synchronous legacy flow for callers outside the governed async path.
         console.log("[MINI-V1] Using synchronous endpoint")
+        setGenerationJourney({
+          mode: 'sync',
+          state: 'pending',
+          stage: 'generating',
+          message: 'Your completed answers are being analyzed.',
+          jobId: '',
+        })
         const endpoint = `${API}/api/moremindmap/mini-profile`
         
         const res = await fetch(endpoint, {
@@ -917,16 +1085,45 @@ export default function Profile() {
         setTimeout(() => {
           setProcessing(false)
           setResult(data)
+          setGenerationJourney({
+            mode: 'sync',
+            state: 'ready',
+            stage: 'complete',
+            message: 'Your Behavioral Operating System is ready.',
+            jobId: '',
+          })
         }, 2000)
       }
     } catch (error) {
       console.error("[SUBMIT] Assessment submission error:", error)
       console.error("[SUBMIT] Error stack:", error.stack)
       setProcessing(false)
-      setResult({ success: false, error: error.message || "Connection failed. Please try again." })
+      if (activeJobId) {
+        setResult({
+          success: false,
+          code: 'BOS_GENERATION_STATUS_UNAVAILABLE',
+          error: 'We could not confirm the current status. Your answers are saved; check the same generation job again.',
+          retryable: true,
+          job_id: activeJobId,
+        })
+      } else if (answersSaved) {
+        setResult({
+          success: false,
+          code: 'BOS_GENERATION_START_UNAVAILABLE',
+          error: 'We could not confirm generation started. Your answers are saved; try generation again.',
+          retryable: true,
+        })
+      } else {
+        setResult({
+          success: false,
+          error: 'We could not prepare your saved answers for generation. Return to the assessment and try again.',
+          retryable: false,
+        })
+      }
     } finally {
       setSubmitting(false)
-      setSubmitted(true)
+      setSubmitted(shouldShowCompletion)
+      submissionGuard.finish()
     }
   }
 
@@ -1058,20 +1255,7 @@ export default function Profile() {
 
           {/* SUBMITTING */}
           {submitting && (
-            <div className="space-y-8">
-              <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-8 md:p-10 shadow-2xl shadow-black/30 text-center">
-                <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.22em] text-white/60">
-                  Processing
-                </div>
-                <h1 className="mt-6 text-3xl md:text-4xl font-semibold tracking-tight">
-                  Building your MORE MindMap profile…
-                </h1>
-                <p className="mt-4 text-white/60 text-lg">This may take a moment.</p>
-                <div className="mt-8 flex justify-center">
-                  <LoadingDots />
-                </div>
-              </div>
-            </div>
+            <BosGenerationWaitingScreen journey={generationJourney} />
           )}
 
           {/* COMPLETION */}
@@ -1086,7 +1270,14 @@ export default function Profile() {
 
               {/* PROCESSING SCREEN */}
               {processing && (
-                <ProcessingScreen />
+                <BosGenerationWaitingScreen journey={generationJourney} />
+              )}
+
+              {!processing && result?.success && result?.profile_id && (
+                <ProfileIdentityCustody
+                  profileId={result.profile_id}
+                  offerRecruitingContinuation={recruitingAuthorized}
+                />
               )}
 
               {/* MINI V2: 10-PAGE HTML REPORT (CONTROLLED BETA) */}
@@ -1221,6 +1412,27 @@ export default function Profile() {
                   <p className="mt-6 text-lg text-white/72 leading-relaxed">
                     {result.error || "An unexpected error occurred. Please try again."}
                   </p>
+
+                  {result.retryable && (
+                    <button
+                      type="button"
+                      onClick={() => result.job_id
+                        ? resumeExistingGeneration(result.job_id)
+                        : retryBosGenerationStart()}
+                      className="mt-7 inline-flex items-center justify-center rounded-2xl bg-white px-6 py-4 text-base font-semibold text-black transition hover:bg-white/90"
+                      data-testid="bos-generation-check-again"
+                    >
+                      {result.job_id ? 'Check the same generation job' : 'Try generation again'}
+                    </button>
+                  )}
+
+                  {result.retryable && (
+                    <p className="mt-4 text-sm leading-relaxed text-white/50">
+                      {result.job_id
+                        ? 'This checks the same saved generation job. It does not submit another assessment.'
+                        : 'This uses the same saved assessment to try generation again. It does not submit a second assessment.'}
+                    </p>
+                  )}
 
                   <a
                     href="/"
@@ -1674,45 +1886,132 @@ function QuestionScreen({
   )
 }
 
-/* ── Processing Screen ── */
+/* ── Truthful BOS generation journey ── */
 
-function ProcessingScreen() {
-  const [messageIndex, setMessageIndex] = useState(0)
-  
-  const messages = [
-    "Analyzing behavioral patterns…",
-    "Mapping decision structure…",
-    "Detecting communication signals…",
-    "Evaluating relational awareness…",
-    "Generating profile…"
-  ]
-  
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMessageIndex((prev) => (prev + 1) % messages.length)
-    }, 400)
-    return () => clearInterval(interval)
-  }, [messages.length])
-  
+export function BosGenerationWaitingScreen({ journey }) {
+  const currentStatus = journey?.message || 'Securely saving your completed answers.'
+
   return (
-    <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-md p-12 md:p-16 shadow-2xl shadow-black/30">
-      <div className="flex flex-col items-center justify-center space-y-8">
-        <div className="space-y-2">
-          <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-center">
-            {messages[messageIndex]}
-          </h2>
-          <p className="text-white/40 text-sm text-center">
-            This analysis is unique to you.
-          </p>
-        </div>
-        
-        <div className="flex gap-2">
-          <div className="h-2 w-2 rounded-full bg-white/60 animate-pulse" style={{ animation: 'pulse 1s ease-in-out infinite' }} />
-          <div className="h-2 w-2 rounded-full bg-white/40 animate-pulse" style={{ animationDelay: '0.2s' }} />
-          <div className="h-2 w-2 rounded-full bg-white/20 animate-pulse" style={{ animationDelay: '0.4s' }} />
-        </div>
+    <section
+      className="space-y-8 rounded-[2rem] border border-white/15 bg-white/[0.07] p-8 text-center shadow-2xl shadow-black/30 backdrop-blur-md md:p-14"
+      role="status"
+      aria-live="polite"
+      data-testid="bos-generation-waiting-screen"
+    >
+      <div className="inline-flex items-center rounded-full border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-white/65">
+        BOS generation in progress
       </div>
-    </div>
+
+      <div className="mx-auto max-w-2xl space-y-5">
+        <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
+          We’re creating your Behavioral Operating System.
+        </h1>
+        <p className="text-lg font-medium text-white/88 md:text-xl">
+          Please keep this screen open.
+        </p>
+        <p className="text-base leading-relaxed text-white/65 md:text-lg">
+          Creating your BOS involves a detailed analysis and may take up to 10 minutes.
+          You do not need to submit your answers again.
+        </p>
+      </div>
+
+      <div className="mx-auto max-w-xl rounded-2xl border border-white/10 bg-black/25 px-5 py-4 text-left">
+        <p className="text-[0.68rem] font-semibold uppercase tracking-[0.2em] text-white/45">
+          Current confirmed status
+        </p>
+        <p className="mt-2 text-base text-white/80" data-testid="bos-generation-confirmed-status">
+          {currentStatus}
+        </p>
+      </div>
+
+      <div className="flex justify-center" aria-hidden="true">
+        <LoadingDots />
+      </div>
+
+      <div className="mx-auto max-w-2xl border-t border-white/10 pt-6 text-left">
+        <p className="font-semibold text-white">When your BOS opens, save your Profile ID.</p>
+        <p className="mt-2 text-sm leading-relaxed text-white/58 md:text-base">
+          It starts with mm and is your MORE reference number for retrieving your profile and
+          continuing through MORE MindMap. It is not a password, and the ID alone does not prove
+          ownership; existing access verification still applies.
+        </p>
+      </div>
+    </section>
+  )
+}
+
+export function ProfileIdentityCustody({ profileId, offerRecruitingContinuation = false }) {
+  const [copyState, setCopyState] = useState('idle')
+  const normalizedProfileId = String(profileId || '').trim()
+
+  async function copyProfileId() {
+    if (!normalizedProfileId || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+      setCopyState('unavailable')
+      return
+    }
+
+    try {
+      await navigator.clipboard.writeText(normalizedProfileId)
+      setCopyState('copied')
+    } catch {
+      setCopyState('unavailable')
+    }
+  }
+
+  return (
+    <section
+      className="rounded-[2rem] border-2 border-emerald-300/45 bg-emerald-300/[0.08] p-7 shadow-[0_0_60px_rgba(110,231,183,0.08)] md:p-10"
+      aria-labelledby="profile-id-custody-title"
+      data-testid="profile-id-custody"
+    >
+      <p className="text-xs font-bold uppercase tracking-[0.22em] text-emerald-200">
+        Save this now
+      </p>
+      <h2 id="profile-id-custody-title" className="mt-3 text-2xl font-semibold tracking-tight md:text-3xl">
+        Your Profile ID is your MORE reference number.
+      </h2>
+      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65 md:text-base">
+        It starts with mm. Save it so you can retrieve this profile and continue through MORE MindMap.
+      </p>
+
+      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-white/15 bg-black/35 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <code className="select-all break-all text-lg font-semibold tracking-[0.05em] text-white md:text-xl" data-testid="ready-profile-id">
+          {normalizedProfileId}
+        </code>
+        <button
+          type="button"
+          onClick={copyProfileId}
+          className="shrink-0 rounded-xl bg-white px-5 py-3 text-sm font-bold text-black transition hover:bg-white/90"
+          data-testid="copy-profile-id"
+        >
+          {copyState === 'copied' ? 'Copied' : 'Copy Profile ID'}
+        </button>
+      </div>
+
+      <p className="mt-3 text-sm leading-relaxed text-white/50" aria-live="polite">
+        {copyState === 'copied'
+          ? 'Profile ID copied. Save it somewhere you control.'
+          : copyState === 'unavailable'
+            ? 'Automatic copy is unavailable. Select the Profile ID above and copy it manually.'
+            : 'The ID is not a password and does not by itself prove ownership. Access verification still applies.'}
+      </p>
+
+      {offerRecruitingContinuation && (
+        <div className="mt-7 border-t border-emerald-200/15 pt-7">
+          <p className="text-sm leading-relaxed text-white/65">
+            Your completed BOS is connected to this recruiting invitation, so you do not need to enter
+            the Profile ID again for the next step.
+          </p>
+          <a
+            href="/recruiting/continue"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-emerald-200 px-6 py-4 text-base font-bold text-black transition hover:bg-emerald-100 sm:w-auto"
+            data-testid="continue-complimentary-business-assessment"
+          >
+            Continue to your complimentary Business Assessment
+          </a>
+        </div>
+      )}
+    </section>
   )
 }
 

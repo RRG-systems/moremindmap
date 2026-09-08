@@ -13,7 +13,7 @@ import {
   productExecutionFingerprint,
   releaseProductExecution,
 } from '../src/lib/publicSiteAirlockV1/productBoundary.js';
-import { createBosStartJob } from '../api/moremindmap/start.js';
+import { createBosStartJob, projectRecruitingBosStartIdempotently } from '../api/moremindmap/start.js';
 import { projectRecruitingBaStateIdempotently } from '../api/business-assessment/start.js';
 
 const NOW = Date.parse('2099-02-03T04:05:06.000Z');
@@ -380,6 +380,30 @@ test('Recruiting BA projection failure is retryable after commit while public BA
   assert.equal(attempts, 2);
 });
 
+test('Recruiting BOS-start projection failure exposes only a retryable post-commit signal', async () => {
+  let attempts = 0;
+  const project = async ({ relationshipRef }) => {
+    attempts += 1;
+    assert.equal(relationshipRef, 'relationship_bos_projection_retry');
+    if (attempts === 1) throw new Error('private recruiting storage detail');
+    return { projected: true, readiness_state: 'BOS_IN_PROGRESS' };
+  };
+  await assert.rejects(
+    projectRecruitingBosStartIdempotently({
+      relationshipRef: 'relationship_bos_projection_retry',
+      project,
+    }),
+    { message: 'RECRUITING_BOS_START_PROJECTION_PENDING' },
+  );
+  assert.deepEqual(await projectRecruitingBosStartIdempotently({
+    relationshipRef: 'relationship_bos_projection_retry',
+    project,
+  }), { projected: true, readiness_state: 'BOS_IN_PROGRESS' });
+  assert.equal(attempts, 2);
+  assert.equal(await projectRecruitingBosStartIdempotently({ relationshipRef: '', project }), undefined);
+  assert.equal(attempts, 2);
+});
+
 test('BA execution identity is deterministic and route binds exact governed inputs before atomic persistence', () => {
   const requestSha256 = productExecutionFingerprint('business_assessment', {
     owner_profile_id: 'mm-20990203-baexact1',
@@ -417,5 +441,9 @@ test('BA execution identity is deterministic and route binds exact governed inpu
   assert.ok(bosSource.indexOf('executionClaim = await claimProductExecution') < bosSource.indexOf('await createBosStartJob(jobPayload, { jobId })'));
   assert.match(bosSource, /claimedDraft\?\.job_id \|\| \(authorityRef[\s\S]*deterministicExecutionUuid/u);
   assert.match(bosSource, /createBosStartJob\(jobPayload, \{ jobId \}\)/u);
+  assert.match(bosSource, /if \(executionClaim\.code === 'REPLAY'\)[\s\S]*projectRecruitingBosStartIdempotently/u);
+  assert.ok(bosSource.indexOf('await commitProductExecution') < bosSource.lastIndexOf('await projectRecruitingBosStartIdempotently'));
+  assert.match(bosSource, /executionClaim\?\.code === 'ACQUIRED' && !executionCommitted/u);
+  assert.match(bosSource, /RECRUITING_BOS_START_PROJECTION_PENDING/u);
   assert.doesNotMatch(bosSource, /error: error\.message/u);
 });

@@ -1,6 +1,11 @@
 /* global process */
 
 import { getRecruitingService, generateCandidateIntelligence, getCandidateProjection, recruitingRuntimeEnabled, syntheticReviewEnabled } from './runtime.js';
+import { buildRecruitingInviteContinuation } from '../../../src/lib/recruitingV1/continuation.js';
+import {
+  readVerifiedProfileOwnerRequest,
+  resolveProfileOwnershipAudience,
+} from '../../../src/lib/publicSiteAirlockV1/profileOwnership.js';
 
 const MANAGER_COOKIE = '__Host-more_recruiting_manager';
 const INVITE_COOKIE = '__Host-more_recruiting_invite';
@@ -35,6 +40,25 @@ function clearCookie(name) {
   return `${name}=; Path=/; HttpOnly${secure}; SameSite=Strict; Max-Age=0`;
 }
 
+function verifiedProfileOwner(req) {
+  let audience;
+  try { audience = resolveProfileOwnershipAudience(process.env); }
+  catch { return null; }
+  return readVerifiedProfileOwnerRequest({
+    cookieHeader: req.headers?.cookie,
+    signingKey: process.env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
+    audience,
+  });
+}
+
+async function inviteContinuation(service, inviteSessionToken) {
+  const inspected = await service.inspectInviteSession(inviteSessionToken);
+  return {
+    ...inspected,
+    continuation: buildRecruitingInviteContinuation(inspected),
+  };
+}
+
 export function setRecruitingHeaders(res) {
   res.setHeader('Cache-Control', 'no-store, private, max-age=0');
   res.setHeader('Pragma', 'no-cache');
@@ -45,7 +69,7 @@ export function setRecruitingHeaders(res) {
 
 function statusFor(error) {
   const code = String(error?.message || 'RECRUITING_V1_FAILURE');
-  if (/SESSION_REQUIRED|CONSENT_REQUIRED|PREAPPROVAL_REQUIRED/.test(code)) return 401;
+  if (/SESSION_REQUIRED|CONSENT_REQUIRED|PREAPPROVAL_REQUIRED|PROFILE_OWNER_RECEIPT_REQUIRED/.test(code)) return 401;
   if (/SCOPE_DENIED|ORIGIN|CSRF|AUTHORITY_REQUIRED/.test(code)) return 403;
   if (/NOT_FOUND/.test(code)) return 404;
   if (/EXHAUSTED|REQUIRES_REVIEW|REBIND|RESEND_DENIED/.test(code)) return 409;
@@ -103,7 +127,7 @@ export async function recruitingHttpHandler(req, res) {
       if (view === 'invite_preview') return res.status(200).json({ ok: true, preview: await service.invitationPreview(req.query?.token) });
       if (view === 'manager_setup_preview') return res.status(200).json({ ok: true, preview: await service.managerSetupPreview(req.query?.token) });
       if (view === 'invite_session') {
-        const inspected = await service.inspectInviteSession(inviteToken);
+        const inspected = await inviteContinuation(service, inviteToken);
         const rotated = await service.rotateInviteSession(inviteToken);
         res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60));
         return res.status(200).json({ ok: true, ...inspected });
@@ -142,6 +166,22 @@ export async function recruitingHttpHandler(req, res) {
       const accepted = await service.acceptInvitation(req.body?.token, req.body?.consent);
       res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, accepted.invite_session_token, 30 * 24 * 60 * 60));
       return res.status(200).json({ ok: true, code: 'RECRUITING_INVITATION_ACCEPTED', invitation: accepted.invitation });
+    }
+    if (action === 'CONNECT_OWNED_PROFILE') {
+      const owner = verifiedProfileOwner(req);
+      if (!owner?.profile_id) throw new Error('RECRUITING_PROFILE_OWNER_RECEIPT_REQUIRED');
+      if (typeof service.connectOwnedExistingProfile !== 'function') {
+        throw new Error('RECRUITING_EXISTING_PROFILE_CONNECTION_UNAVAILABLE');
+      }
+      await service.connectOwnedExistingProfile(inviteToken, { profile_id: owner.profile_id });
+      const rotated = await service.rotateInviteSession(inviteToken);
+      const continuation = await inviteContinuation(service, rotated.invite_session_token);
+      res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60));
+      return res.status(200).json({
+        ok: true,
+        code: 'RECRUITING_EXISTING_PROFILE_CONNECTED',
+        ...continuation,
+      });
     }
     if (action === 'CREATE_INVITATION') {
       const created = await authenticatedMutation(service, req, res, managerToken, (token) =>

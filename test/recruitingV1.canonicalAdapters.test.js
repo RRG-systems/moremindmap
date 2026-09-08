@@ -6,6 +6,7 @@ import {
   authorizePublicOrRecruitingProductRequest,
   onRecruitingBosVaultVerified,
   projectRecruitingBaState,
+  projectRecruitingBosInProgress,
   reconcileRecruitingBosReadyFromCompletedJob,
   reconcileRecruitingCanonicalBaReady,
   reconcileRecruitingCanonicalBaReadySafely,
@@ -58,6 +59,25 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
   assert.equal(metadata.recruiting_mode, undefined);
   assert.equal(metadata.recruiting_untrusted_value, undefined);
 
+  const bosStarted = await projectRecruitingBosInProgress({
+    relationshipRef: invitation.invitation_id,
+    env: ENV,
+  });
+  assert.deepEqual(bosStarted, {
+    projected: true,
+    candidate_id: invitation.candidate_id,
+    readiness_state: 'BOS_IN_PROGRESS',
+    progress_state: 'BOS_IN_PROGRESS',
+  });
+  assert.deepEqual(
+    await projectRecruitingBosInProgress({ relationshipRef: invitation.invitation_id, env: ENV }),
+    bosStarted,
+  );
+  assert.deepEqual(await projectRecruitingBosInProgress({ relationshipRef: '', env: ENV }), {
+    projected: false,
+    reason: 'NOT_A_RECRUITING_JOB',
+  });
+
   await assert.rejects(
     resolveRecruitingBaOwnerProfile(req, 'mm-20990101-attacker1', { required: true, env: ENV }),
     /RECRUITING_BOS_READY_REQUIRED_FOR_BA/,
@@ -72,6 +92,10 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
     vaultResult: { success: true, vault_key: 'synthetic-vault-receipt' },
     env: ENV,
   });
+  assert.equal((await projectRecruitingBosInProgress({
+    relationshipRef: invitation.invitation_id,
+    env: ENV,
+  })).projected, true);
   const owner = await resolveRecruitingBaOwnerProfile(req, 'mm-20990101-attacker1', { required: true, env: ENV });
   assert.equal(owner.owner_profile_id, 'mm-20990101-recruit1');
   assert.notEqual(owner.owner_profile_id, 'mm-20990101-attacker1');

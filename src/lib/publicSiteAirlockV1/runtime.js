@@ -9,6 +9,7 @@ import {
   createResendInquiryTransportFromEnv,
   publicInquiryTransportConfigured,
 } from './resendInquiryTransport.js';
+import { resolvePublicSiteOrigin } from './publicSiteOrigin.js';
 
 export function createPublicRuntime(env = process.env, options = {}) {
   const store = options.store || createRedisPublicStore(env);
@@ -31,6 +32,7 @@ export function createPublicRuntime(env = process.env, options = {}) {
     startSigningKey: env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
     complimentaryPepper: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER,
     complimentaryManifest: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '[]',
+    complimentaryFlowAudience: options.complimentaryFlowAudience || resolvePublicSiteOrigin(env),
     profileStateReader: options.profileStateReader || createProfileStateReader(store),
     ownershipVerifier: options.ownershipVerifier || ((input) => ownership.verifyRequest(input)),
     inquiryTransport,

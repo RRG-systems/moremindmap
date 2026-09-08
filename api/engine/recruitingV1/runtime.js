@@ -8,6 +8,7 @@ import { RecruitingV1Service, createSyntheticNotificationTransport } from '../..
 import { assembleRecruitingContext, generateRecruitingIntelligence } from '../../../src/lib/recruitingV1/intelligence.js';
 import { SYNTHETIC_RECRUITING_FIXTURE } from '../../../src/lib/recruitingV1/syntheticFixture.js';
 import { createTokenWrapper } from '../../../src/lib/recruitingV1/contracts.js';
+import { createCanonicalProfileOwnerReader } from '../../../src/lib/publicSiteAirlockV1/canonicalProfileOwnerReader.js';
 import { RedisRecruitingStore, getRecruitingRedis } from './redisStore.js';
 import { LoopbackJsonRecruitingStore } from './loopbackJsonStore.js';
 import { createResendRecruitingTransport } from './resendTransport.js';
@@ -42,6 +43,11 @@ const SYNTHETIC_DARREN_ADMIN = Object.freeze({
   admin_roles: ['RECRUITING_ADMIN'],
   recruiting_governance: { all_enterprises: true, enterprise_ids: [] },
   synthetic_only: true,
+});
+
+const SYNTHETIC_EXISTING_PROFILE_OWNER = Object.freeze({
+  profile_id: 'mm-20990101-recru001',
+  recipient_email: 'continuation.recruit@example.test',
 });
 
 const SYNTHETIC_ROSTER_MEMBERSHIPS = Object.freeze([
@@ -114,6 +120,9 @@ export function getRecruitingService(env = process.env) {
       transport: createSyntheticNotificationTransport(),
       tokenWrapper: createTokenWrapper('recruiting-v1-synthetic-only-wrap-key'),
       profileValidator: async (profileId) => ({ found: /^mm-\d{8}-[a-z0-9]{8}$/u.test(profileId), profile_id: profileId }),
+      profileOwnerReader: async (profileId) => profileId === SYNTHETIC_EXISTING_PROFILE_OWNER.profile_id
+        ? SYNTHETIC_EXISTING_PROFILE_OWNER
+        : null,
     });
   } else {
     if (!recruitingRuntimeEnabled(env)) throw new Error('RECRUITING_V1_DEFAULT_OFF');
@@ -130,6 +139,7 @@ export function getRecruitingService(env = process.env) {
         const profile = await getCanonicalProfile(redis, profileId);
         return { found: profile.found === true, profile_id: profile.profile_id || profileId };
       },
+      profileOwnerReader: createCanonicalProfileOwnerReader(redis),
     });
   }
   return service;

@@ -9,7 +9,12 @@ export const MANAGER_SESSION_TTL_MS = 8 * 60 * 60 * 1000;
 export const MANAGER_CHALLENGE_TTL_MS = 15 * 60 * 1000;
 export const MANAGER_SETUP_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 export const MANAGER_SETUP_SESSION_TTL_MS = 30 * 60 * 1000;
+export const RECRUIT_PROFILE_CONNECTION_TTL_MS = 15 * 60 * 1000;
 export const RECRUITING_ADMIN_ROLE = 'RECRUITING_ADMIN';
+export const RECRUITING_ENTITLEMENT_PRODUCTS = Object.freeze({
+  BOS: 'behavior_operating_system',
+  BA: 'business_assessment',
+});
 
 export const MEMBERSHIP_STATES = Object.freeze(['PENDING_SETUP', 'ACTIVE', 'SUSPENDED', 'REVOKED']);
 export const MANAGER_SETUP_STATES = Object.freeze(['NOT_SENT', 'SETUP_SENT', 'EMAIL_VERIFIED', 'COMPLETE']);
@@ -33,6 +38,14 @@ export const READINESS_STATES = Object.freeze([
   'BA_INTAKE_SAVED',
   'BA_IN_PROGRESS',
   'BA_INTELLIGENCE_READY',
+]);
+
+export const RECRUITING_PROGRESS_STATES = Object.freeze([
+  'INVITED',
+  'BOS_IN_PROGRESS',
+  'BOS_COMPLETE',
+  'BA_IN_PROGRESS',
+  'BOTH_COMPLETE',
 ]);
 
 export const EVIDENCE_TYPES = Object.freeze([
@@ -181,6 +194,28 @@ export function assertManagerEvidence(item) {
 }
 
 export function publicInvitation(invitation) {
+  const legacyEntitlementState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.entitlement_state)
+    ? invitation.entitlement_state
+    : 'RELEASED';
+  const baStarted = ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(invitation.ba_readiness);
+  const projectedBaEntitlement = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.ba_entitlement_state)
+    ? invitation.ba_entitlement_state
+    : legacyEntitlementState === 'RELEASED'
+      ? 'RELEASED'
+      : baStarted
+        ? 'CONSUMED'
+        : invitation.accepted_at
+          ? 'RESERVED'
+          : legacyEntitlementState;
+  const progressState = invitation.ba_readiness === 'BA_INTELLIGENCE_READY'
+    ? 'BOTH_COMPLETE'
+    : ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS'].includes(invitation.ba_readiness)
+      ? 'BA_IN_PROGRESS'
+      : invitation.bos_profile_id
+        ? 'BOS_COMPLETE'
+        : invitation.readiness_state === 'BOS_IN_PROGRESS'
+          ? 'BOS_IN_PROGRESS'
+          : 'INVITED';
   return {
     invitation_id: invitation.invitation_id,
     candidate_id: invitation.candidate_id,
@@ -195,6 +230,13 @@ export function publicInvitation(invitation) {
     bos_profile_id: invitation.bos_profile_id || null,
     ba_assessment_id: invitation.ba_assessment_id || null,
     ba_readiness: invitation.ba_readiness || 'BA_NOT_STARTED',
+    progress_state: progressState,
+    complimentary_access: {
+      bos: invitation.bos_entitlement_state || legacyEntitlementState,
+      ba: projectedBaEntitlement,
+      same_profile_required: true,
+      second_manager_invitation_required: false,
+    },
     delivery_state: invitation.delivery_state,
     resend_count: invitation.resend_count || 0,
   };

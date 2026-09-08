@@ -2,6 +2,8 @@ import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './publicSiteV21.css';
 import { resolveProductionAthleteDestination } from './publicSiteV21Config.js';
+import { storePublicStartToken } from './lib/publicProductStartSession.js';
+import { resolveStep2OwnershipContinuation } from './lib/publicSiteAirlockV1/clientContinuation.js';
 
 function Icon({ name }) {
   const paths = {
@@ -81,7 +83,9 @@ function customerMessage(code) {
     ownership_verified: 'Ownership verified. Enter your MORE Profile ID again to continue.',
     missing: 'We could not find a completed result for that verified Profile.',
     completed_bos_required: 'Build or retrieve your MindMap first.',
+    valid_profile_id_required: 'Enter a valid MORE Profile ID (your MORE reference number).',
     profile_ownership_required: 'Verify that this MindMap belongs to you before continuing.',
+    complimentary_flow_required: 'Use the separate complimentary access form to continue.',
     purchase_already_granted: 'This purchase is already complete. Use your existing payment return or retrieve your result.',
     subscription_checkout_gated: 'Subscription checkout is not open yet. No payment was started.',
     request_unavailable: 'This action is not available right now. Nothing was changed.',
@@ -89,7 +93,9 @@ function customerMessage(code) {
   return messages[code] || 'We could not verify that request. Nothing was changed.';
 }
 
-function useProfileOwnershipLink(setState) {
+function useProfileOwnershipLink(setState, onVerified = null) {
+  const onVerifiedRef = useRef(onVerified);
+  useLayoutEffect(() => { onVerifiedRef.current = onVerified; }, [onVerified]);
   useLayoutEffect(() => {
     const prefix = '#more-profile-owner=';
     if (!window.location.hash.startsWith(prefix)) return;
@@ -102,7 +108,9 @@ function useProfileOwnershipLink(setState) {
       return;
     }
     postJson('/api/public-v1/profile-ownership', { action: 'verify', token })
-      .then(() => setState({ phase: 'idle', message: customerMessage('ownership_verified'), tone: 'success' }))
+      .then((payload) => onVerifiedRef.current
+        ? onVerifiedRef.current(payload.profile_id)
+        : setState({ phase: 'idle', message: customerMessage('ownership_verified'), tone: 'success' }))
       .catch((error) => setState({ phase: 'idle', message: customerMessage(error.message) }));
   }, [setState]);
 }
@@ -121,7 +129,18 @@ function Step1Page() {
   const [busy, setBusy] = useState(false);
   const checkoutKey = useMemo(() => idempotencyKey('bos-checkout'), []);
   const complimentaryAttempt = useRef({ fingerprint: '', key: '' });
-  useProfileOwnershipLink(setState);
+  useProfileOwnershipLink(setState, async (verifiedProfileId) => {
+    const payload = await postJson('/api/public-v1/access', {
+      action: 'lookup',
+      value: verifiedProfileId,
+      product_key: 'behavior_operating_system',
+    });
+    if (payload.state === 'ready' && payload.destination) {
+      navigate(`${payload.destination}?id=${encodeURIComponent(payload.profile_id)}`);
+      return;
+    }
+    setState({ message: customerMessage(payload.state) });
+  });
   async function checkout() {
     setBusy(true); setState({});
     try {
@@ -131,31 +150,35 @@ function Step1Page() {
   }
   async function retrieve(event) {
     event.preventDefault(); setBusy(true); setState({});
-    const value = new FormData(event.currentTarget).get('profileId');
+    const value = String(new FormData(event.currentTarget).get('profileId') || '').trim();
     try {
-      if (/^mm-/iu.test(String(value).trim())) {
-        const payload = await postJson('/api/public-v1/access', { action: 'lookup', value, product_key: 'behavior_operating_system' });
-        if (payload.state === 'ownership_verification_required') {
-          await requestProfileOwnership(value, '/step-1');
-          setState({ message: customerMessage(payload.state) });
-        } else if (payload.state === 'ready' && payload.destination) {
-          navigate(`${payload.destination}?id=${encodeURIComponent(payload.profile_id)}`);
-        } else {
-          setState({ message: customerMessage(payload.state) });
-        }
+      if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(value)) throw new Error('valid_profile_id_required');
+      const payload = await postJson('/api/public-v1/access', { action: 'lookup', value, product_key: 'behavior_operating_system' });
+      if (payload.state === 'ownership_verification_required') {
+        await requestProfileOwnership(value, '/step-1');
+        setState({ message: customerMessage(payload.state) });
+      } else if (payload.state === 'ready' && payload.destination) {
+        navigate(`${payload.destination}?id=${encodeURIComponent(payload.profile_id)}`);
       } else {
-        const capability = String(value || '').trim();
-        const redemptionKey = stableAttemptKey(complimentaryAttempt, 'bos-comp', capability);
-        const redeemed = await postJson('/api/public-v1/access', { action: 'redeem', product_key: 'behavior_operating_system', capability, idempotency_key: redemptionKey });
-        const token = await postJson('/api/public-v1/access', { action: 'create_start_token', grant_id: redeemed.grant.grant_id });
-        const started = await postJson('/api/public-v1/product-start', { start_token: token.start_token });
-        sessionStorage.setItem('more.public.start_token.v1', token.start_token);
-        navigate(started.destination);
+        setState({ message: customerMessage(payload.state) });
       }
     } catch (error) { setState({ message: customerMessage(error.message) }); }
     finally { setBusy(false); }
   }
-  return <StepShell step="STEP 1" title="BUILD YOUR MINDMAP" headline="See how you think, decide, communicate, lead, and operate." support="Your MindMap builds a deep picture of how you work as a whole person—not a personality type or a generic score." tone="mint"><section className="product-grid shell"><article className="surface-card value-card"><p className="eyebrow">WHAT YOU GET</p><ValueList items={['Your Personality DNA', 'How you operate', 'How people experience you', 'Your strengths and vulnerabilities', 'How you respond under pressure', 'Your Five Futures + One Move']} /></article><article className="surface-card purchase-card"><p className="eyebrow">BUILD YOUR MINDMAP</p><div className="price"><span>$149</span><small>one time</small></div><p>Answer a focused set of real-life questions. MORE turns your answers into a MindMap you can keep using.</p><button className="button button-primary button-wide" type="button" onClick={checkout} disabled={busy}>Build My MindMap <Icon name="arrow" /></button><Message state={state} /></article></section><section className="existing-card shell"><div><p className="eyebrow">ALREADY HAVE A MINDMAP?</p><h2>RETRIEVE YOUR PROFILE</h2><p>Your MindMap is connected to your MORE Profile ID.</p></div><form className="inline-form" onSubmit={retrieve}><label htmlFor="step1-profile">Enter your MORE Profile ID (starts with MM)</label><div className="field-action"><input id="step1-profile" name="profileId" autoComplete="off" inputMode="text" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-secondary" type="submit" disabled={busy}>Open My MindMap</button></div><Message state={state} /></form></section><section className="next-step shell"><div><span>WHEN YOU'RE READY</span><strong>Your MindMap becomes the foundation for understanding your business.</strong></div><Link to="/step-2">Continue to Step 2 <Icon name="arrow" /></Link></section></StepShell>;
+  async function complimentary(event) {
+    event.preventDefault(); setBusy(true); setState({});
+    const capability = String(new FormData(event.currentTarget).get('capability') || '').trim();
+    try {
+      const redemptionKey = stableAttemptKey(complimentaryAttempt, 'bos-comp', capability);
+      const redeemed = await postJson('/api/public-v1/access', { action: 'redeem', product_key: 'behavior_operating_system', capability, idempotency_key: redemptionKey });
+      const token = await postJson('/api/public-v1/access', { action: 'create_start_token', grant_id: redeemed.grant.grant_id });
+      const started = await postJson('/api/public-v1/product-start', { start_token: token.start_token });
+      if (!storePublicStartToken(token.start_token)) throw new Error('request_unavailable');
+      navigate(started.destination);
+    } catch (error) { setState({ message: customerMessage(error.message) }); }
+    finally { setBusy(false); }
+  }
+  return <StepShell step="STEP 1" title="BUILD YOUR MINDMAP" headline="See how you think, decide, communicate, lead, and operate." support="Your MindMap builds a deep picture of how you work as a whole person—not a personality type or a generic score." tone="mint"><section className="product-grid shell"><article className="surface-card value-card"><p className="eyebrow">WHAT YOU GET</p><ValueList items={['Your Personality DNA', 'How you operate', 'How people experience you', 'Your strengths and vulnerabilities', 'How you respond under pressure', 'Your Five Futures + One Move']} /></article><article className="surface-card purchase-card"><p className="eyebrow">BUILD YOUR MINDMAP</p><div className="price"><span>$149</span><small>one time</small></div><p>Answer a focused set of real-life questions. MORE turns your answers into a MindMap you can keep using.</p><button className="button button-primary button-wide" type="button" onClick={checkout} disabled={busy}>Build My MindMap <Icon name="arrow" /></button><form className="complimentary-code-form" onSubmit={complimentary}><label htmlFor="step1-capability">Complimentary access code</label><div className="field-action"><input id="step1-capability" name="capability" autoComplete="off" required /><button className="button button-secondary" type="submit" disabled={busy}>Use complimentary access</button></div></form><Message state={state} /></article></section><section className="existing-card shell"><div><p className="eyebrow">ALREADY HAVE A MINDMAP?</p><h2>RETRIEVE YOUR PROFILE</h2><p>Your MindMap is connected to your MORE Profile ID.</p></div><form className="inline-form" onSubmit={retrieve}><label htmlFor="step1-profile">Enter your MORE Profile ID (starts with MM)</label><div className="field-action"><input id="step1-profile" name="profileId" autoComplete="off" inputMode="text" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-secondary" type="submit" disabled={busy}>Open My MindMap</button></div><Message state={state} /></form></section><section className="next-step shell"><div><span>WHEN YOU'RE READY</span><strong>Your MindMap becomes the foundation for understanding your business.</strong></div><Link to="/step-2">Continue to Step 2 <Icon name="arrow" /></Link></section></StepShell>;
 }
 
 function Step2Page() {
@@ -163,34 +186,132 @@ function Step2Page() {
   const [state, setState] = useState({ phase: 'idle' });
   const [busy, setBusy] = useState(false);
   const checkoutAttempt = useRef({ fingerprint: '', key: '' });
-  useProfileOwnershipLink(setState);
+  const complimentaryAttempt = useRef({ fingerprint: '', key: '' });
+
+  async function inspectBos(profileId, access = 'paid') {
+    const payload = await postJson('/api/public-v1/access', {
+      action: 'lookup',
+      value: profileId,
+      product_key: 'behavior_operating_system',
+    });
+    if (payload.state === 'ownership_verification_required') {
+      await requestProfileOwnership(
+        profileId,
+        access === 'complimentary' ? '/step-2?continue=complimentary' : '/step-2',
+      );
+      setState({
+        phase: access === 'complimentary' ? 'complimentary_profile' : 'idle',
+        access,
+        message: customerMessage(payload.state),
+      });
+      return;
+    }
+    if (payload.state !== 'ready') {
+      setState({
+        phase: access === 'complimentary' ? 'complimentary_profile' : 'idle',
+        access,
+        message: 'That MORE Profile does not have a completed MindMap yet. Complete Step 1, then return here.',
+      });
+      return;
+    }
+    setState({ phase: 'vertical', access, profileId: payload.profile_id, message: '' });
+  }
+
+  useProfileOwnershipLink(setState, async (verifiedProfileId) => {
+    const complimentaryReturn = new URLSearchParams(window.location.search).get('continue') === 'complimentary';
+    try {
+      const access = await resolveStep2OwnershipContinuation({
+        complimentaryReturn,
+        readPrepared: () => postJson('/api/public-v1/access', { action: 'prepared_complimentary_status' }),
+      });
+      await inspectBos(verifiedProfileId, access);
+    } catch (error) {
+      setState({
+        phase: 'idle',
+        access: null,
+        message: error.message === 'complimentary_flow_invalid'
+          ? 'Your complimentary continuation expired or could not be verified. Enter the access code again to restart safely.'
+          : 'We could not confirm your complimentary continuation. No payment was started. Enter the access code again to resume safely.',
+      });
+    }
+  });
+
   async function begin(event) {
     event.preventDefault(); setBusy(true);
     const profileId = String(new FormData(event.currentTarget).get('profileId') || '').trim();
-    if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(profileId)) { setState({ message: 'Enter a valid MORE Profile ID.' }); setBusy(false); return; }
     try {
-      const payload = await postJson('/api/public-v1/access', { action: 'lookup', value: profileId, product_key: 'behavior_operating_system' });
-      if (payload.state === 'ownership_verification_required') {
-        await requestProfileOwnership(profileId, '/step-2');
-        setState({ phase: 'idle', message: customerMessage(payload.state) });
-      } else if (payload.state === 'ready') {
-        setState({ phase: 'vertical', profileId: payload.profile_id });
-      } else {
-        setState({ phase: 'idle', message: customerMessage('completed_bos_required') });
-      }
+      if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(profileId)) throw new Error('valid_profile_id_required');
+      await postJson('/api/public-v1/access', { action: 'discard_prepared_complimentary' });
+      await inspectBos(profileId, 'paid');
     } catch (error) { setState({ phase: 'idle', message: customerMessage(error.message) }); }
     finally { setBusy(false); }
   }
+
+  async function prepareComplimentary(event) {
+    event.preventDefault(); setBusy(true);
+    const capability = String(new FormData(event.currentTarget).get('capability') || '').trim();
+    try {
+      const prepareKey = stableAttemptKey(complimentaryAttempt, 'ba-comp', capability);
+      await postJson('/api/public-v1/access', {
+        action: 'prepare_complimentary',
+        product_key: 'business_assessment',
+        capability,
+        idempotency_key: prepareKey,
+      }, prepareKey);
+      setState({
+        phase: 'complimentary_profile',
+        access: 'complimentary',
+        message: 'Complimentary Business Assessment selected. We have not validated the access code yet. Enter your MORE Profile ID to continue securely.',
+        tone: 'success',
+      });
+    } catch (error) { setState({ phase: 'idle', message: customerMessage(error.message) }); }
+    finally { setBusy(false); }
+  }
+
+  async function continueComplimentary(event) {
+    event.preventDefault(); setBusy(true);
+    const profileId = String(new FormData(event.currentTarget).get('profileId') || '').trim();
+    if (!/^mm-\d{8}-[a-z0-9]{8}$/iu.test(profileId)) {
+      setState((current) => ({ ...current, message: 'Enter a valid MORE Profile ID (your MORE reference number).' }));
+      setBusy(false);
+      return;
+    }
+    try { await inspectBos(profileId, 'complimentary'); }
+    catch (error) { setState((current) => ({ ...current, message: customerMessage(error.message) })); }
+    finally { setBusy(false); }
+  }
+
   async function confirmVertical(event) {
     event.preventDefault(); setBusy(true);
     const vertical = new FormData(event.currentTarget).get('vertical');
     const verticalSelection = { vertical_id: vertical, confirmation: 'CUSTOMER_CONFIRMED' };
     try {
+      if (state.access === 'complimentary') {
+        const redeemed = await postJson('/api/public-v1/access', {
+          action: 'redeem_prepared_complimentary',
+          profile_id: state.profileId,
+          vertical_selection: verticalSelection,
+        });
+        const token = await postJson('/api/public-v1/access', { action: 'create_start_token', grant_id: redeemed.grant.grant_id });
+        const started = await postJson('/api/public-v1/product-start', { start_token: token.start_token });
+        if (!storePublicStartToken(token.start_token)) throw new Error('request_unavailable');
+        navigate(started.destination);
+        return;
+      }
       const checkoutFingerprint = JSON.stringify({ profile_id: state.profileId, vertical_selection: verticalSelection });
       const checkoutKey = stableAttemptKey(checkoutAttempt, 'ba-checkout', checkoutFingerprint);
       const payload = await postJson('/api/public-v1/purchase-intent', { product_key: 'business_assessment', profile_id: state.profileId, vertical_selection: verticalSelection }, checkoutKey);
       window.location.assign(payload.checkout_url);
-    } catch (error) { setState((current) => ({ ...current, message: customerMessage(error.message) })); setBusy(false); }
+    } catch (error) {
+      const restart = ['complimentary_capability_invalid', 'complimentary_capability_expired', 'complimentary_capability_exhausted', 'complimentary_flow_invalid'].includes(error.message);
+      setState((current) => ({
+        ...current,
+        ...(restart ? { phase: 'idle', access: null, profileId: null } : {}),
+        message: restart
+          ? 'We could not verify that complimentary access code. Check the code and begin this step again.'
+          : customerMessage(error.message),
+      }));
+    } finally { setBusy(false); }
   }
   async function retrieve(event) {
     event.preventDefault(); setBusy(true);
@@ -208,7 +329,7 @@ function Step2Page() {
     } catch (error) { setState({ phase: 'idle', message: customerMessage(error.message) }); }
     finally { setBusy(false); }
   }
-  return <StepShell step="STEP 2" title="ASSESS YOUR BUSINESS" headline="See where your business is now—and where it could go." support="Your Business Assessment builds a living Business Twin so you can see your Five Futures—and the One Move that matters most right now." tone="blue"><section className="product-grid shell"><article className="surface-card value-card"><p className="eyebrow">YOUR BUSINESS TWIN</p><ValueList items={['Where You Are', 'Five Possible Futures', 'Your One Move', 'Your Plan', 'Evidence']} /></article><article className="surface-card purchase-card"><p className="eyebrow">ASSESS YOUR BUSINESS</p><div className="price"><span>$49</span><small>one time</small></div><p>Your Business Assessment builds on the MindMap you completed in Step 1.</p><form onSubmit={begin}><label htmlFor="step2-profile">Enter your MORE Profile ID (starts with MM)</label><input id="step2-profile" name="profileId" autoComplete="off" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-primary button-wide" type="submit">Assess My Business <Icon name="arrow" /></button><Message state={state} /></form></article></section><section className="existing-card shell"><div><p className="eyebrow">ALREADY ASSESSED YOUR BUSINESS?</p><h2>RETRIEVE YOUR BUSINESS ASSESSMENT</h2><p>Use your MORE Profile ID to open your existing Business Assessment and Business Twin.</p></div><form className="inline-form" onSubmit={retrieve}><label htmlFor="step2-retrieval-profile">Enter your MORE Profile ID (starts with MM)</label><div className="field-action"><input id="step2-retrieval-profile" name="profileId" autoComplete="off" inputMode="text" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-secondary" type="submit" disabled={busy}>Open My Business Twin</button></div><Message state={state} /></form></section>{state.phase === 'vertical' && <section className="result-slot shell"><article className="ready-card vertical-confirmation-card"><div className="ready-icon"><Icon name="business" /></div><div><p className="eyebrow">CONFIRM YOUR BUSINESS</p><h2>Which business are we assessing?</h2><p>Choose the supported vertical that matches this business. MORE will not infer it for you.</p><form className="vertical-confirmation-form" onSubmit={confirmVertical}><label htmlFor="step2-vertical">Business vertical</label><select id="step2-vertical" name="vertical" required><option value="">Choose your business vertical</option><option value="real_estate">Real Estate</option></select><p className="field-note">Additional verticals will appear only after they are separately activated.</p><Message state={state} /><button className="button button-primary" type="submit" disabled={busy}>Confirm and Continue</button></form></div></article></section>}<section className="next-step shell"><div><span>WHEN YOUR BUSINESS TWIN IS READY</span><strong>Keep the understanding useful as reality changes.</strong></div><Link to="/step-3">Continue to Step 3 <Icon name="arrow" /></Link></section></StepShell>;
+  return <StepShell step="STEP 2" title="ASSESS YOUR BUSINESS" headline="See where your business is now—and where it could go." support="Your Business Assessment builds a living Business Twin so you can see your Five Futures—and the One Move that matters most right now." tone="blue"><section className="product-grid shell"><article className="surface-card value-card"><p className="eyebrow">YOUR BUSINESS TWIN</p><ValueList items={['Where You Are', 'Five Possible Futures', 'Your One Move', 'Your Plan', 'Evidence']} /></article><article className="surface-card purchase-card"><p className="eyebrow">ASSESS YOUR BUSINESS</p><div className="price"><span>$49</span><small>one time</small></div><p>Your Business Assessment builds on the MindMap you completed in Step 1.</p>{state.phase !== 'complimentary_profile' && <><form onSubmit={begin}><label htmlFor="step2-profile">Enter your MORE Profile ID (starts with MM)</label><input id="step2-profile" name="profileId" autoComplete="off" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-primary button-wide" type="submit" disabled={busy}>Assess My Business <Icon name="arrow" /></button></form><form className="complimentary-code-form" onSubmit={prepareComplimentary}><label htmlFor="step2-capability">Complimentary Business Assessment access code</label><div className="field-action"><input id="step2-capability" name="capability" autoComplete="off" required /><button className="button button-secondary" type="submit" disabled={busy}>Use complimentary access</button></div></form><Message state={state} /></>}{state.phase === 'complimentary_profile' && <form onSubmit={continueComplimentary}><p className="complimentary-selected">Complimentary Business Assessment selected.</p><label htmlFor="step2-complimentary-profile">Enter your MORE Profile ID (your MORE reference number)</label><input id="step2-complimentary-profile" name="profileId" autoComplete="off" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-primary button-wide" type="submit" disabled={busy}>Verify Profile and Continue <Icon name="arrow" /></button><Message state={state} /></form>}</article></section><section className="existing-card shell"><div><p className="eyebrow">ALREADY ASSESSED YOUR BUSINESS?</p><h2>RETRIEVE YOUR BUSINESS ASSESSMENT</h2><p>Use your MORE Profile ID to open your existing Business Assessment and Business Twin.</p></div><form className="inline-form" onSubmit={retrieve}><label htmlFor="step2-retrieval-profile">Enter your MORE Profile ID (starts with MM)</label><div className="field-action"><input id="step2-retrieval-profile" name="profileId" autoComplete="off" inputMode="text" placeholder="MM-YYYYMMDD-XXXXXXXX" required /><button className="button button-secondary" type="submit" disabled={busy}>Open My Business Twin</button></div></form></section>{state.phase === 'vertical' && <section className="result-slot shell"><article className="ready-card vertical-confirmation-card"><div className="ready-icon"><Icon name="business" /></div><div><p className="eyebrow">CONFIRM YOUR BUSINESS</p><h2>Which business are we assessing?</h2><p>{state.access === 'complimentary' ? 'Your complimentary access is prepared. ' : ''}Choose the supported vertical that matches this business. MORE will not infer it for you.</p><form className="vertical-confirmation-form" onSubmit={confirmVertical}><label htmlFor="step2-vertical">Business vertical</label><select id="step2-vertical" name="vertical" required><option value="">Choose your business vertical</option><option value="real_estate">Real Estate</option></select><p className="field-note">Additional verticals will appear only after they are separately activated.</p><Message state={state} /><button className="button button-primary" type="submit" disabled={busy}>{state.access === 'complimentary' ? 'Begin Complimentary Assessment' : 'Confirm and Continue'}</button></form></div></article></section>}<section className="next-step shell"><div><span>WHEN YOUR BUSINESS TWIN IS READY</span><strong>Keep the understanding useful as reality changes.</strong></div><Link to="/step-3">Continue to Step 3 <Icon name="arrow" /></Link></section></StepShell>;
 }
 
 function Step3Page() {

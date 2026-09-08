@@ -12,6 +12,7 @@ import { createBosIntakeDraftStore, normalizeBosIntakeDraftSnapshot } from '../e
 import { redis as getRedis } from '../engine/redisClient.js'
 import {
   authorizePublicOrRecruitingProductRequest,
+  projectRecruitingBosInProgress,
   resolveRecruitingBosStartMetadata,
 } from '../engine/recruitingV1/canonicalAdapters.js'
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js'
@@ -28,6 +29,24 @@ import { applyExactOriginCors } from '../../src/lib/publicSiteAirlockV1/security
 
 export async function createBosStartJob(jobPayload, { jobId = null, create = createJob } = {}) {
   return create(jobPayload, jobId ? { jobId } : undefined)
+}
+
+export async function projectRecruitingBosStartIdempotently({
+  relationshipRef,
+  project = projectRecruitingBosInProgress,
+} = {}) {
+  if (!relationshipRef) return undefined
+  try {
+    return await project({ relationshipRef })
+  } catch (recruitingProjectionError) {
+    console.error(JSON.stringify({
+      event: 'RECRUITING_BOS_START_PROJECTION_FAILED',
+      code: 'RECRUITING_BOS_START_PROJECTION_PENDING',
+      customer_payload_logged: false,
+    }))
+    void recruitingProjectionError
+    throw new Error('RECRUITING_BOS_START_PROJECTION_PENDING')
+  }
 }
 
 export default async function handler(req, res) {
@@ -47,6 +66,7 @@ export default async function handler(req, res) {
 
   let publicStore
   let executionClaim
+  let executionCommitted = false
   try {
     publicStore = new RedisPublicStore(getRedis())
     const publicAuthority = await authorizePublicOrRecruitingProductRequest({
@@ -174,6 +194,9 @@ export default async function handler(req, res) {
       if (!existingJob || existingJob.intake_payload_sha256 !== expectedPayloadSha256) {
         throw new Error('public_product_execution_artifact_mismatch')
       }
+      await projectRecruitingBosStartIdempotently({
+        relationshipRef: governedMetadata.recruiting_relationship_ref,
+      })
       return res.status(200).json(executionClaim.record.result || startResultFor(jobId))
     }
     if (executionClaim.code === 'IN_PROGRESS') return res.status(200).json(startResultFor(jobId))
@@ -185,17 +208,31 @@ export default async function handler(req, res) {
 
     await bindBosJobToGrant({ store: publicStore, grant: publicAuthority.grant, jobId })
 
-    await commitProductExecution({ store: publicStore, claim: executionClaim, result: startResult })
+    const committedExecution = await commitProductExecution({ store: publicStore, claim: executionClaim, result: startResult })
+    executionCommitted = ['COMMITTED', 'REPLAY'].includes(committedExecution.code)
+
+    if (executionCommitted) {
+      await projectRecruitingBosStartIdempotently({
+        relationshipRef: governedMetadata.recruiting_relationship_ref,
+      })
+    }
 
     // Return immediately - status endpoint will drive execution
     return res.status(200).json(startResult)
   } catch (error) {
-    if (publicStore && executionClaim?.code === 'ACQUIRED') {
+    if (publicStore && executionClaim?.code === 'ACQUIRED' && !executionCommitted) {
       try { await releaseProductExecution({ store: publicStore, claim: executionClaim }) } catch { /* lease expiry remains a recovery path */ }
     }
     console.error(JSON.stringify({ event: 'MINI_V2_START_FAILED', code: 'START_REQUEST_FAILED', customer_payload_logged: false }))
     if (/public_product_/u.test(error?.message || '')) {
       return res.status(403).json({ success: false, error: 'Product access could not be verified.' })
+    }
+    if (error?.message === 'RECRUITING_BOS_START_PROJECTION_PENDING') {
+      return res.status(503).json({
+        success: false,
+        retryable: true,
+        error: 'Report generation was queued, but Recruiting progress is pending. Retry the same submission.',
+      })
     }
     return res.status(500).json({
       success: false,

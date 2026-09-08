@@ -258,6 +258,26 @@ export async function resolveRecruitingBosStartMetadata(req, clientMetadata = {}
   };
 }
 
+export async function projectRecruitingBosInProgress({ relationshipRef, env = process.env } = {}) {
+  const normalizedRelationshipRef = String(relationshipRef || '').trim();
+  if (!normalizedRelationshipRef) return { projected: false, reason: 'NOT_A_RECRUITING_JOB' };
+  let invitation;
+  try {
+    invitation = await getRecruitingService(env).projectBosInProgress(normalizedRelationshipRef);
+  } catch (error) {
+    if (error?.message === 'RECRUITING_BOS_STATE_REGRESSION_DENIED') {
+      return { projected: true, already_advanced: true, reason: 'RECRUITING_BOS_ALREADY_ADVANCED' };
+    }
+    throw error;
+  }
+  return {
+    projected: true,
+    candidate_id: invitation.candidate_id,
+    readiness_state: invitation.readiness_state,
+    progress_state: invitation.progress_state,
+  };
+}
+
 export async function onRecruitingBosVaultVerified({ relationshipRef, profileId, vaultResult, env = process.env }) {
   if (!relationshipRef) return { projected: false, reason: 'NOT_A_RECRUITING_JOB' };
   if (vaultResult?.success !== true) throw new Error('RECRUITING_VERIFIED_BOS_VAULT_RECEIPT_REQUIRED');

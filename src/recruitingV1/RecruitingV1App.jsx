@@ -4,6 +4,7 @@ import { SYNTHETIC_RECRUITING_FIXTURE } from '../lib/recruitingV1/syntheticFixtu
 import { selectRecruitingCandidate } from '../lib/recruitingV1/candidateSelection.js';
 import RecruitingManagerSetup from './RecruitingManagerSetup.jsx';
 import RecruitingMasterControl from './RecruitingMasterControl.jsx';
+import RecruitingContinuation from './RecruitingContinuation.jsx';
 import { CandidateAnchor, DetailDrawer, JourneyMap, ProductHeader } from './RecruitingExperienceShell.jsx';
 import {
   RECRUITING_MANAGER_WORKSPACE_PATH,
@@ -39,8 +40,18 @@ const managerMapDestinations = [
 
 function syntheticFixtureForScenario(name) {
   const fixture = clone(SYNTHETIC_RECRUITING_FIXTURE);
+  fixture.entitlements = {
+    bos: clone(fixture.entitlement),
+    ba: clone(fixture.entitlement),
+  };
   if (name === 'empty') fixture.candidates = [];
-  if (name === 'exhausted') fixture.entitlement = { ...fixture.entitlement, remaining: 0, reserved: 3, consumed: 2 };
+  if (name === 'exhausted') {
+    fixture.entitlement = { ...fixture.entitlement, remaining: 0, reserved: 3, consumed: 2 };
+    fixture.entitlements = {
+      bos: clone(fixture.entitlement),
+      ba: clone(fixture.entitlement),
+    };
+  }
   if (name === 'provider-error') fixture.intelligence = null;
   if (name === 'stale') fixture.intelligence.stale = true;
   if (name === 'opportunity-empty') fixture.opportunity.items = [];
@@ -80,6 +91,7 @@ export default function RecruitingV1App() {
   const location = useLocation();
   if (location.pathname === '/recruiting/demo') return <Navigate to={RECRUITING_GU_V1_ENABLED ? '/recruiting-gu-v1/demo' : '/recruiting-v2/demo'} replace />;
   if (location.pathname.startsWith('/recruiting/accept/')) return <InvitationAcceptance />;
+  if (location.pathname === '/recruiting/continue') return <RecruitingContinuation synthetic={SYNTHETIC} />;
   if (location.pathname.startsWith('/recruiting/verify/')) return <ManagerVerification />;
   if (location.pathname.startsWith('/recruiting/setup')) return <RecruitingManagerSetup request={api} synthetic={SYNTHETIC} fixture={SYNTHETIC_RECRUITING_FIXTURE} />;
   return <ManagerExperience />;
@@ -96,6 +108,7 @@ function ManagerExperience() {
   const [sessionStatus, setSessionStatus] = useState(SYNTHETIC ? 'ready' : 'loading');
   const [error, setError] = useState(SYNTHETIC && syntheticScenario === 'error' ? 'Synthetic review: Recruiting Intelligence is temporarily unavailable.' : '');
   const [selectedCandidateId, setSelectedCandidateId] = useState('');
+  const [refreshingHome, setRefreshingHome] = useState(false);
   const selected = selectRecruitingCandidate(state?.candidates, selectedCandidateId);
 
   useEffect(() => {
@@ -130,6 +143,22 @@ function ManagerExperience() {
     if (SYNTHETIC) return;
     const payload = await api({ view: 'master_control' });
     setState((current) => ({ ...current, master_control: payload }));
+  }
+
+  async function refreshHome() {
+    setRefreshingHome(true);
+    setError('');
+    try {
+      if (SYNTHETIC) {
+        setState((current) => ({ ...current, refreshed_at: new Date().toISOString() }));
+      } else {
+        setState(await api({ view: 'home' }));
+      }
+    } catch (failure) {
+      setError(failure.message);
+    } finally {
+      setRefreshingHome(false);
+    }
   }
 
   useEffect(() => {
@@ -197,7 +226,7 @@ function ManagerExperience() {
       {candidateContextVisible && <CandidateAnchor candidate={selected} intelligence={state.intelligence} onChange={() => navigate('/recruiting/home?view=workspace')} />}
       <main className="recruiting-main">
           {managerMapVisible && <ManagerJourneyMap state={state} candidate={selected} navigate={openManagerDestination} />}
-          {active === 'home' && !managerMapVisible && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={SYNTHETIC} />}
+          {active === 'home' && !managerMapVisible && <HomeSurface state={state} navigate={navigateTo} openCandidate={openCandidate} demoAvailable={SYNTHETIC} onRefresh={refreshHome} refreshing={refreshingHome} />}
           {active === 'invite' && <InviteSurface state={state} setState={setState} setError={setError} navigate={navigateTo} />}
           {active === 'candidate' && <CandidateSurface state={state} candidate={selected} navigate={navigateTo} />}
           {active === 'opportunity' && <OpportunitySurface state={state} setState={setState} />}
@@ -229,16 +258,51 @@ function ManagerJourneyMap({ state, candidate, navigate }) {
   return <JourneyMap eyebrow="A · Candidate Journey Map · Closest to New BA" title="Recruit with understanding, one candidate at a time." subtitle="Six destinations turn Recruiting into a simple customer journey while preserving every governed product truth." cards={cards} onOpen={navigate} footerLeft={<><b>{candidateLine}</b><span>{readiness}</span></>} footerRight="No compatibility score." />;
 }
 
-function HomeSurface({ state, navigate, openCandidate, demoAvailable }) {
+function productEntitlements(state) {
+  const fallback = state?.entitlement || { mode: '5_per_month', used: 0, remaining: 0 };
+  return {
+    bos: state?.entitlements?.bos || fallback,
+    ba: state?.entitlements?.ba || fallback,
+  };
+}
+
+function entitlementAvailable(entitlement) {
+  return entitlement?.mode === 'unlimited' || Number(entitlement?.remaining) > 0;
+}
+
+function invitationPairAvailable(state) {
+  const entitlements = productEntitlements(state);
+  return entitlementAvailable(entitlements.bos) && entitlementAvailable(entitlements.ba);
+}
+
+function entitlementBalance(entitlement) {
+  if (entitlement?.mode === 'unlimited') return `${entitlement.used || 0} used · unlimited`;
+  return `${entitlement?.remaining || 0} remaining · ${entitlement?.used || 0} used`;
+}
+
+function ManagerProductBalances({ state }) {
+  const entitlements = productEntitlements(state);
+  return (
+    <section className="manager-product-balances" aria-label="Complimentary product balances">
+      <article><small>BOS invitations</small><strong>{entitlementBalance(entitlements.bos)}</strong></article>
+      <article><small>Business Assessment invitations</small><strong>{entitlementBalance(entitlements.ba)}</strong></article>
+    </section>
+  );
+}
+
+function HomeSurface({ state, navigate, openCandidate, demoAvailable, onRefresh, refreshing }) {
+  const canInvite = invitationPairAvailable(state);
   return (
     <section className="surface home-surface" data-surface="home">
       <p className="eyebrow green">Candidate Command Center</p>
       <h1>Walk into the next conversation understanding the person - and what you can honestly help them build.</h1>
       <p className="surface-subhead">Recruiting Intelligence separates recruit reality, recruiter reality, manager evidence, and local opportunity truth before it suggests a path.</p>
+      <div className="manager-readiness-controls"><ManagerProductBalances state={state} /><button type="button" onClick={onRefresh} disabled={refreshing}>{refreshing ? 'Refreshing…' : 'Refresh readiness'}</button></div>
       <div className="home-actions">
-        <button type="button" className="primary-action" onClick={() => navigate('invite')}><span>＋</span><div><small>Primary action</small><strong>Invite a Recruit</strong><p>Give someone a consent-first BOS and optional BA path.</p></div><b>→</b></button>
+        <button type="button" className="primary-action" onClick={() => navigate('invite')} disabled={!canInvite}><span>＋</span><div><small>Primary action</small><strong>Invite a Recruit</strong><p>{canInvite ? 'Give someone one consent-first BOS and BA path.' : 'Both a BOS and Business Assessment invitation must be available.'}</p></div><b>→</b></button>
         <article className="locked-action"><span>◇</span><div><small>Existing agent</small><strong>A private invitation is still required</strong><p>Invite the person so they can see the purpose and choose whether to share their profile.</p></div></article>
       </div>
+      <ManagerProgressNotifications notifications={state.notifications} />
       {demoAvailable && <button type="button" className="darren-demo-entry" onClick={() => navigate('demo')}><span>DEMO CANDIDATE — SYNTHETIC DATA</span><div><strong>Practice the full Recruiting Intelligence workflow with Jordan Lee.</strong><p>Darren-only, resettable, zero invitations, zero emails, and no real Recruiting relationship.</p></div><b>Open synthetic demo →</b></button>}
       <section className="candidate-section"><div className="section-heading"><div><p className="eyebrow teal">Candidate readiness</p><h2>Know what is ready - and what is still missing.</h2></div><span>{state.candidates.length} private relationships</span></div>
         <div className="candidate-grid">{state.candidates.map((candidate) => <CandidateCard key={candidate.candidate_id} candidate={candidate} onOpen={() => openCandidate(candidate.candidate_id)} />)}</div>
@@ -248,9 +312,29 @@ function HomeSurface({ state, navigate, openCandidate, demoAvailable }) {
   );
 }
 
+function ManagerProgressNotifications({ notifications = [] }) {
+  if (!notifications.length) return null;
+  return (
+    <section className="manager-progress-notifications" aria-label="Candidate progress notifications">
+      <header><div><p className="eyebrow violet">Progress notifications</p><h2>What became ready</h2></div><span>Readiness only · continuation stays with the recruit</span></header>
+      <div>
+        {notifications.slice(0, 4).map((notification) => (
+          <article key={notification.notification_id} className={notification.read ? 'read' : 'unread'}>
+            <span>{notification.read ? '✓' : '✦'}</span>
+            <div><strong>{notification.title}</strong><p>{notification.body}</p></div>
+            <small>{String(notification?.kind || 'progress').replaceAll('_', ' ')}</small>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function CandidateCard({ candidate, onOpen }) {
-  const readiness = candidate.readiness_state.replaceAll('_', ' ');
-  return <button type="button" className="candidate-card" onClick={onOpen}><div className="candidate-avatar">{candidate.recruit_name.split(' ').map((part) => part[0]).join('')}</div><div><small>{candidate.state === 'DELIVERED' ? 'Invitation pending' : 'Candidate relationship'}</small><h3>{candidate.recruit_name}</h3><p>{candidate.purpose}</p></div><span className={`status-pill status-${candidate.readiness_state.toLowerCase()}`}>{readiness}</span><footer><small>{candidate.ba_readiness.replaceAll('_', ' ')}</small><b>Open candidate →</b></footer></button>;
+  const readinessState = String(candidate?.progress_state || candidate?.readiness_state || 'INVITED');
+  const readiness = readinessState.replaceAll('_', ' ');
+  const baReadiness = String(candidate?.ba_readiness || 'BA_NOT_STARTED').replaceAll('_', ' ');
+  return <button type="button" className="candidate-card" onClick={onOpen}><div className="candidate-avatar">{String(candidate?.recruit_name || '').split(' ').map((part) => part[0]).join('')}</div><div><small>{candidate?.state === 'DELIVERED' ? 'Invitation pending' : 'Candidate relationship'}</small><h3>{candidate?.recruit_name || 'Recruit'}</h3><p>{candidate?.purpose || 'Purpose remains attached to the private invitation.'}</p></div><span className={`status-pill status-${readinessState.toLowerCase()}`}>{readiness}</span><footer><small>{baReadiness}</small><b>Open candidate →</b></footer></button>;
 }
 
 function InviteSurface({ state, setState, setError, navigate }) {
@@ -262,9 +346,16 @@ function InviteSurface({ state, setState, setError, navigate }) {
     try {
       if (SYNTHETIC) {
         if (!form.recruit_name.trim() || !form.recruit_email.includes('@')) throw new Error('Add a recruit name and valid email.');
-        if (state.entitlement.remaining < 1) throw new Error('This month’s invitation allowance is exhausted.');
+        if (!invitationPairAvailable(state)) throw new Error('A BOS and Business Assessment invitation must both be available.');
         const candidate = { invitation_id: `invite_synthetic_${Date.now()}`, candidate_id: `candidate_synthetic_${Date.now()}`, ...form, state: 'DELIVERED', readiness_state: 'INVITED', ba_readiness: 'BA_NOT_STARTED', delivery_state: 'DELIVERED', issued_at: new Date().toISOString(), expires_at: new Date(Date.now() + 7 * 86400000).toISOString() };
-        setState((current) => ({ ...current, candidates: [candidate, ...current.candidates], entitlement: { ...current.entitlement, remaining: current.entitlement.remaining - 1, reserved: current.entitlement.reserved + 1 } }));
+        setState((current) => {
+          const entitlements = productEntitlements(current);
+          const consume = (entitlement) => entitlement.mode === 'unlimited'
+            ? { ...entitlement, used: entitlement.used + 1, reserved: entitlement.reserved + 1 }
+            : { ...entitlement, used: entitlement.used + 1, remaining: entitlement.remaining - 1, reserved: entitlement.reserved + 1 };
+          const nextEntitlements = { bos: consume(entitlements.bos), ba: consume(entitlements.ba) };
+          return { ...current, candidates: [candidate, ...current.candidates], entitlement: nextEntitlements.bos, entitlements: nextEntitlements };
+        });
         setSent(candidate);
       } else {
         const payload = await api({ action: 'CREATE_INVITATION', body: form });
@@ -274,11 +365,14 @@ function InviteSurface({ state, setState, setError, navigate }) {
       }
     } catch (failure) { setError(failure.message); }
   }
+  const entitlements = productEntitlements(state);
+  const canInvite = invitationPairAvailable(state);
   if (sent) return <section className="surface invite-surface" data-surface="invite"><p className="eyebrow green">Invitation sent</p><h1>{sent.recruit_name} can decide with the purpose visible.</h1><div className="success-panel"><span>✓</span><div><h2>One clear invitation with no hidden commitment.</h2><p>The invitation expires in seven days. Resending replaces the link and extends the same invitation without using another slot.</p><dl><div><dt>Delivery</dt><dd>{SYNTHETIC ? 'Delivered to synthetic capture' : 'Sent'}</dd></div><div><dt>Readiness</dt><dd>Invitation pending</dd></div><div><dt>Invitation use</dt><dd>One slot reserved</dd></div></dl></div></div><button className="text-action" type="button" onClick={() => navigate('home')}>Return to Candidate Command Center →</button></section>;
   return (
     <section className="surface invite-surface" data-surface="invite">
       <p className="eyebrow green">Invite a Recruit</p><h1>Make the purpose clear before you ask for trust.</h1><p className="surface-subhead">The recruit sees who invited them, why, and what happens next before consent. One invitation governs BOS and optional BA continuity.</p>
-      <div className="invite-layout"><form className="panel invite-form" onSubmit={submit}><p className="eyebrow blue">Invitation details</p><label>Recruit name<input value={form.recruit_name} onChange={(event) => setForm({ ...form, recruit_name: event.target.value })} placeholder="e.g. Maya Chen" /></label><label>Recruit email<input type="email" value={form.recruit_email} onChange={(event) => setForm({ ...form, recruit_email: event.target.value })} placeholder="maya@example.com" /></label><label>Purpose visible to the recruit<textarea value={form.purpose} onChange={(event) => setForm({ ...form, purpose: event.target.value })} rows="5" /></label><button type="submit" className="solid-button" disabled={state.entitlement.mode !== 'unlimited' && state.entitlement.remaining < 1}>Send private invitation →</button><small>{state.entitlement.mode === 'unlimited' ? 'Unlimited invitation access.' : `${state.entitlement.remaining} invitations available.`} A delivery failure returns the slot before acceptance.</small></form>
+      <ManagerProductBalances state={state} />
+      <div className="invite-layout"><form className="panel invite-form" onSubmit={submit}><p className="eyebrow blue">Invitation details</p><label>Recruit name<input value={form.recruit_name} onChange={(event) => setForm({ ...form, recruit_name: event.target.value })} placeholder="e.g. Maya Chen" /></label><label>Recruit email<input type="email" value={form.recruit_email} onChange={(event) => setForm({ ...form, recruit_email: event.target.value })} placeholder="maya@example.com" /></label><label>Purpose visible to the recruit<textarea value={form.purpose} onChange={(event) => setForm({ ...form, purpose: event.target.value })} rows="5" /></label><button type="submit" className="solid-button" disabled={!canInvite}>Send private invitation →</button><small>{canInvite ? `${entitlementBalance(entitlements.bos)} BOS · ${entitlementBalance(entitlements.ba)} BA.` : 'A BOS and Business Assessment invitation must both be available.'} A delivery failure returns both reservations before acceptance.</small></form>
         <article className="panel recruit-preview"><p className="eyebrow violet">Recruit view preview</p><span className="gift-mark">✦</span><small>A private invitation from</small><h2>{state.manager.name}</h2><p>{form.purpose}</p><div><b>Before you accept</b><ul><li>You will see the invitation purpose first.</li><li>Your MORE MindMap Profile stays unchanged.</li><li>Your profile is shared only through the relationship you accept.</li></ul></div><button type="button">Review and decide</button></article></div>
       <section className="invite-policy"><div><b>7 days</b><span>Acceptance window</span></div><div><b>1</b><span>Invitation identity through resends</span></div><div><b>0</b><span>Extra credits for resend</span></div><div><b>Exact scope</b><span>Manager → invite → recruit</span></div></section>
     </section>
@@ -300,7 +394,6 @@ function CandidateSurface({ state, candidate, navigate, demo = false }) {
       <div className="candidate-detail-grid"><article className="panel"><p className="eyebrow teal">Known and usable</p><ul>{state.recruit.known.map((item) => <li key={item}>✓ <span>{item}</span></li>)}</ul></article><article className="panel"><p className="eyebrow amber">Still unknown</p><ul>{state.recruit.unknown.map((item) => <li key={item}>○ <span>{item}</span></li>)}</ul></article></div>
       <section className="profile-source-grid"><article className="panel"><small>Recruit Reality · MORE Profile</small><h3>How this person naturally works</h3><p>{state.recruit.bos_summary}</p><b>Recruit source · verified</b></article><article className="panel"><small>Recruit Reality · BA</small><h3>Whole-Business constraint evidence</h3><p>{state.recruit.ba_summary || 'Business evidence remains open until the recruit completes the optional BA.'}</p><b>{baReady ? 'Recruit source · intelligence ready' : 'Recruit source · not ready'}</b></article><article className="panel"><small>Manager-Supplied Evidence</small><h3>{(state.manager_evidence || []).length} separate evidence items</h3><p>Useful for hypotheses; never treated as something the recruit said.</p><b>Manager source · separately labeled</b></article></section>
       <button type="button" className="solid-button inline" onClick={() => navigate('intelligence')}>Open Recruiting Intelligence →</button>
-      {!demo && bosReady && !baReady && <a className="text-action" href="/business-assessment?recruiting=1">Begin optional Business Assessment →</a>}
     </section>
   );
 }
@@ -491,7 +584,7 @@ function InvitationAcceptance() {
     } catch (failure) { setError(failure.message); }
   }
   if (!preview) return <LoadingState message={error || 'Opening the private invitation…'} />;
-  return <main className="recruiting-invite-public" data-synthetic={SYNTHETIC ? 'true' : 'false'}><div className="public-brand"><span>+</span><strong>MORE MINDMAP</strong><small>{SYNTHETIC ? 'Synthetic founder review' : 'Private invitation'}</small></div>{status === 'preview' ? <article><p className="eyebrow green">A private invitation from</p><h1>{preview.inviter_name}</h1><h2>{preview.enterprise_name}</h2><div className="public-purpose"><small>Why you are receiving this</small><p>{preview.purpose}</p></div><section><h3>Before you accept</h3><ul><li>You choose whether to begin.</li><li>Your MORE MindMap Profile remains yours.</li><li>Your results connect only to the recruiting relationship you accept.</li><li>You can complete an optional Business Assessment later.</li></ul></section><button type="button" onClick={accept}>I understand - accept invitation →</button><small>Invitation expires {new Date(preview.expires_at).toLocaleDateString()} · No purchase required</small>{error && <strong role="alert">{error}</strong>}</article> : <article className="accepted"><span>✓</span><p className="eyebrow green">Invitation accepted</p><h1>Your choice is recorded.</h1><p>Begin your MORE MindMap Profile. It will connect to this invitation only after it is securely saved.</p><button type="button" onClick={() => navigate('/profile?recruiting=1')}>Begin my MORE Profile →</button></article>}</main>;
+  return <main className="recruiting-invite-public" data-synthetic={SYNTHETIC ? 'true' : 'false'}><div className="public-brand"><span>+</span><strong>MORE MINDMAP</strong><small>{SYNTHETIC ? 'Synthetic founder review' : 'Private invitation'}</small></div>{status === 'preview' ? <article><p className="eyebrow green">A private invitation from</p><h1>{preview.inviter_name}</h1><h2>{preview.enterprise_name}</h2><div className="public-purpose"><small>Why you are receiving this</small><p>{preview.purpose}</p></div><section><h3>Before you accept</h3><ul><li>You choose whether to begin.</li><li>Your MORE MindMap Profile remains yours.</li><li>Your results connect only to the recruiting relationship you accept.</li><li>You can complete an optional Business Assessment later.</li></ul></section><button type="button" onClick={accept}>I understand - accept invitation →</button><small>Invitation expires {new Date(preview.expires_at).toLocaleDateString()} · No purchase required</small>{error && <strong role="alert">{error}</strong>}</article> : <article className="accepted"><span>✓</span><p className="eyebrow green">Invitation accepted</p><h1>Your choice is recorded.</h1><p>Your private continuation keeps the Profile and optional Business Assessment connected to this one invitation.</p><button type="button" onClick={() => navigate('/recruiting/continue')}>Open my private continuation →</button></article>}</main>;
 }
 
 function ManagerVerification() {

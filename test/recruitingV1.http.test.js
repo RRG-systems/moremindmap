@@ -1,8 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import crypto from 'node:crypto';
+import { Buffer } from 'node:buffer';
 import process from 'node:process';
 import { recruitingHttpHandler } from '../api/engine/recruitingV1/http.js';
 import { resetSyntheticRecruitingRuntimeForTest } from '../api/engine/recruitingV1/runtime.js';
+import { canonicalJson } from '../src/lib/publicSiteAirlockV1/contracts.js';
+import {
+  PROFILE_OWNER_COOKIE,
+  resolveProfileOwnershipAudience,
+} from '../src/lib/publicSiteAirlockV1/profileOwnership.js';
 
 function invoke({ method = 'GET', query = {}, body = {}, headers = {} } = {}) {
   const responseHeaders = {};
@@ -25,6 +32,26 @@ function invoke({ method = 'GET', query = {}, body = {}, headers = {} } = {}) {
 function cookiePair(setCookie) {
   const value = Array.isArray(setCookie) ? setCookie[0] : setCookie;
   return String(value).split(';')[0];
+}
+
+function signedProfileOwnerCookie(profileId) {
+  const audience = resolveProfileOwnershipAudience(process.env);
+  const claims = {
+    version: 'more-public-profile-owner-receipt-v1',
+    issuer: 'MORE_MINDMAP_PUBLIC_PROFILE_OWNER',
+    audience,
+    purpose: 'PROFILE_BOUND_CUSTOMER_ENTRY',
+    profile_id: profileId,
+    challenge_receipt_ref: 'synthetic-http-owner-proof',
+    issued_at_ms: Date.now(),
+    expires_at_ms: Date.now() + 30 * 60 * 1000,
+  };
+  const body = Buffer.from(canonicalJson(claims)).toString('base64url');
+  const signature = crypto.createHmac(
+    'sha256',
+    process.env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
+  ).update(`mmm-public-profile-owner-receipt-v1\0${audience}\0${body}`).digest('base64url');
+  return `${PROFILE_OWNER_COOKIE}=${encodeURIComponent(`${body}.${signature}`)}`;
 }
 
 test('Recruiting HTTP is default-off unless the reviewed server feature flag is enabled', async () => {
@@ -168,4 +195,139 @@ test('Master Control HTTP is admin-scoped and manager setup exchanges the raw to
   const replay = await invoke({ method: 'POST', body: { action: 'BEGIN_MANAGER_SETUP', token: created.payload.setup_token } });
   assert.equal(replay.status, 422);
   assert.equal(replay.payload.code, 'RECRUITING_MANAGER_SETUP_TOKEN_INVALID');
+});
+
+test('accepted HttpOnly invite session exposes a server-derived recruit continuation and rotates without leaking authority', async () => {
+  process.env.RECRUITING_V1_SYNTHETIC_REVIEW = 'true';
+  resetSyntheticRecruitingRuntimeForTest();
+
+  const requested = await invoke({
+    method: 'POST',
+    body: { action: 'REQUEST_MANAGER_VERIFICATION', profile_id: 'mm-20990101-sophia01' },
+  });
+  const verified = await invoke({
+    method: 'POST',
+    body: { action: 'VERIFY_MANAGER', token: requested.payload.verification_token },
+  });
+  const home = await invoke({
+    query: { view: 'home' },
+    headers: { cookie: cookiePair(verified.headers['set-cookie']) },
+  });
+  const created = await invoke({
+    method: 'POST',
+    headers: {
+      cookie: cookiePair(home.headers['set-cookie']),
+      'x-recruiting-csrf': home.payload.csrf_token,
+      'idempotency-key': 'synthetic-http-continuation-1',
+    },
+    body: {
+      action: 'CREATE_INVITATION',
+      recruit_name: 'Continuation Recruit',
+      recruit_email: 'continuation.recruit@example.test',
+      purpose: 'Synthetic continuation contract proof.',
+    },
+  });
+  const accepted = await invoke({
+    method: 'POST',
+    body: {
+      action: 'ACCEPT_INVITATION',
+      token: created.payload.invitation_token,
+      consent: { accepted: true, version: 'recruiting_v1_consent_2026_08' },
+    },
+  });
+  const acceptedCookie = cookiePair(accepted.headers['set-cookie']);
+  const continuation = await invoke({
+    query: { view: 'invite_session' },
+    headers: { cookie: acceptedCookie },
+  });
+
+  assert.equal(continuation.status, 200);
+  assert.equal(continuation.payload.continuation.contract, 'recruiting_invite_continuation_v1');
+  assert.equal(continuation.payload.continuation.authority, 'accepted_invite_session');
+  assert.equal(continuation.payload.continuation.progress_state, 'INVITED');
+  assert.equal(continuation.payload.continuation.next_step.destination, '/profile?recruiting=1');
+  assert.equal(continuation.payload.continuation.requires_manual_profile_id, false);
+  assert.equal(continuation.payload.continuation.requires_new_manager_invitation, false);
+  assert.notEqual(cookiePair(continuation.headers['set-cookie']), acceptedCookie);
+  assert.match(String(continuation.headers['set-cookie']), /HttpOnly/u);
+  assert.doesNotMatch(JSON.stringify(continuation.payload), /invitation_token|invite_session_token/u);
+});
+
+test('existing Profile connection ignores body identity, requires both receipts, and rotates the accepted invite session', async () => {
+  process.env.RECRUITING_V1_SYNTHETIC_REVIEW = 'true';
+  process.env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY = 'synthetic-http-profile-owner-signing-key-123456';
+  process.env.PUBLIC_PROFILE_OWNERSHIP_ENVIRONMENT = 'test';
+  process.env.PUBLIC_SITE_URL = 'http://localhost:4173';
+  resetSyntheticRecruitingRuntimeForTest();
+
+  const requested = await invoke({
+    method: 'POST',
+    body: { action: 'REQUEST_MANAGER_VERIFICATION', profile_id: 'mm-20990101-sophia01' },
+  });
+  const verified = await invoke({
+    method: 'POST',
+    body: { action: 'VERIFY_MANAGER', token: requested.payload.verification_token },
+  });
+  const home = await invoke({
+    query: { view: 'home' },
+    headers: { cookie: cookiePair(verified.headers['set-cookie']) },
+  });
+  const created = await invoke({
+    method: 'POST',
+    headers: {
+      cookie: cookiePair(home.headers['set-cookie']),
+      'x-recruiting-csrf': home.payload.csrf_token,
+      'idempotency-key': 'synthetic-http-existing-profile-1',
+    },
+    body: {
+      action: 'CREATE_INVITATION',
+      recruit_name: 'Continuation Recruit',
+      recruit_email: 'continuation.recruit@example.test',
+      purpose: 'Synthetic existing-Profile continuation proof.',
+    },
+  });
+  const accepted = await invoke({
+    method: 'POST',
+    body: {
+      action: 'ACCEPT_INVITATION',
+      token: created.payload.invitation_token,
+      consent: { accepted: true, version: 'recruiting_v1_consent_2026_08' },
+    },
+  });
+  const acceptedCookie = cookiePair(accepted.headers['set-cookie']);
+
+  const denied = await invoke({
+    method: 'POST',
+    headers: { cookie: acceptedCookie },
+    body: { action: 'CONNECT_OWNED_PROFILE', profile_id: 'mm-20990101-attacker' },
+  });
+  assert.equal(denied.status, 401);
+  assert.equal(denied.payload.code, 'RECRUITING_PROFILE_OWNER_RECEIPT_REQUIRED');
+
+  const ownerCookie = signedProfileOwnerCookie('mm-20990101-recru001');
+  const connected = await invoke({
+    method: 'POST',
+    headers: { cookie: `${acceptedCookie}; ${ownerCookie}` },
+    body: {
+      action: 'CONNECT_OWNED_PROFILE',
+      profile_id: 'mm-20990101-wrong001',
+    },
+  });
+  assert.equal(connected.status, 200);
+  assert.equal(connected.payload.continuation.progress_state, 'BOS_COMPLETE');
+  assert.equal(connected.payload.continuation.profile_binding.profile_id, 'mm-20990101-recru001');
+  assert.equal(connected.payload.continuation.next_step.destination, '/business-assessment?recruiting=1');
+  assert.doesNotMatch(connected.payload.continuation.next_step.destination, /(?:\?|&)id=/u);
+  const rotatedCookie = cookiePair(connected.headers['set-cookie']);
+  assert.notEqual(rotatedCookie, acceptedCookie);
+  assert.match(String(connected.headers['set-cookie']), /HttpOnly/u);
+  assert.doesNotMatch(JSON.stringify(connected.payload), /invite_session_token|invitation_token/u);
+
+  const replayedOldSession = await invoke({
+    method: 'POST',
+    headers: { cookie: `${acceptedCookie}; ${ownerCookie}` },
+    body: { action: 'CONNECT_OWNED_PROFILE' },
+  });
+  assert.equal(replayedOldSession.status, 401);
+  assert.equal(replayedOldSession.payload.code, 'RECRUITING_INVITE_SESSION_REQUIRED');
 });

@@ -3,6 +3,7 @@ import { waitUntil as vercelWaitUntil } from '@vercel/functions';
 import { normalizeProfileId, publicCatalogProjection } from './contracts.js';
 import { applyExactOriginCors, runtimeFlags } from './security.js';
 import { profileOwnerCookie } from './profileOwnership.js';
+import { clearComplimentaryFlowCookie, complimentaryFlowCookie } from './complimentaryFlow.js';
 
 function jsonBody(req) {
   if (!req.body) return {};
@@ -15,6 +16,7 @@ function safeError(error) {
   const allowed = new Set([
     'active_grant_required', 'completed_bos_required', 'complimentary_capability_exhausted',
     'complimentary_capability_expired', 'complimentary_capability_invalid', 'complimentary_product_not_available',
+    'complimentary_flow_conflict', 'complimentary_flow_invalid', 'complimentary_flow_required',
     'grant_profile_binding_mismatch', 'grant_vertical_binding_required', 'idempotency_key_required',
     'inquiry_rejected', 'operation_in_progress', 'product_destination_gated', 'product_not_found',
     'rate_limited',
@@ -28,6 +30,7 @@ function safeError(error) {
 function statusFor(code) {
   if (code === 'ownership_verification_failed') return 401;
   if (code === 'operation_in_progress') return 409;
+  if (code.endsWith('_conflict')) return 409;
   if (code === 'rate_limited') return 429;
   if (code.endsWith('_gated')) return 409;
   if (code.includes('unavailable')) return 503;
@@ -65,6 +68,10 @@ export function createAccessHandler({ serviceFactory, env = process.env } = {}) 
     if (!prepare(req, res, { env, methods: 'POST,OPTIONS', allowCredentials: true })) return;
     if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'method_not_allowed' });
     const body = jsonBody(req);
+    if (body.action === 'discard_prepared_complimentary') {
+      res.setHeader('Set-Cookie', clearComplimentaryFlowCookie());
+      return res.status(200).json({ ok: true, state: 'complimentary_path_discarded' });
+    }
     let runtime;
     try {
       runtime = await serviceFactory();
@@ -73,7 +80,36 @@ export function createAccessHandler({ serviceFactory, env = process.env } = {}) 
       if (body.action === 'lookup') return res.status(200).json({ ok: true, ...(await runtime.service.lookupEntry(body, requestContext)) });
       if (body.action === 'redeem') {
         if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
+        // Direct redemption remains the established BOS path. BA must use the
+        // HttpOnly prepared-flow receipt so raw capability validity cannot be
+        // inferred from prerequisite-specific errors.
+        if (body.product_key !== 'behavior_operating_system') {
+          return res.status(400).json({ ok: false, error: 'complimentary_flow_required' });
+        }
         return res.status(200).json({ ok: true, ...(await runtime.service.redeemComplimentary(body, requestContext)) });
+      }
+      if (body.action === 'prepare_complimentary') {
+        if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
+        const prepared = await runtime.service.prepareComplimentaryFlow(body);
+        res.setHeader('Set-Cookie', complimentaryFlowCookie(prepared.receipt));
+        return res.status(202).json({
+          ok: true,
+          state: prepared.state,
+          product_key: prepared.product_key,
+        });
+      }
+      if (body.action === 'prepared_complimentary_status') {
+        if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
+        const prepared = runtime.service.readPreparedComplimentaryFlow(requestContext);
+        return res.status(200).json({
+          ok: true,
+          state: prepared.state,
+          product_key: prepared.product_key,
+        });
+      }
+      if (body.action === 'redeem_prepared_complimentary') {
+        if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
+        return res.status(200).json({ ok: true, ...(await runtime.service.redeemPreparedComplimentary(body, requestContext)) });
       }
       if (body.action === 'create_start_token') {
         return res.status(200).json({ ok: true, ...(await runtime.service.createStartTokenForGrant(body)) });
