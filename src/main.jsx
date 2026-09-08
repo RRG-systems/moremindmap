@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App.jsx'
 import PublicSiteV21 from './PublicSiteV21.jsx'
+import AthletePublicSiteV1 from './AthletePublicSiteV1.jsx'
 import Profile from './Profile.jsx'
 import Recovery from './Recovery.jsx'
 import Success from './Success.jsx'
@@ -44,6 +45,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         <Route path="/step-2" element={<PublicSiteV21 page="step2" />} />
         <Route path="/step-3" element={<PublicSiteV21 page="step3" />} />
         <Route path="/step-4" element={<PublicSiteV21 page="step4" />} />
+        <Route path="/athlete" element={<AthletePublicSiteV1 />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/recovery" element={<Recovery />} />
         <Route path="/success" element={<Success />} />
