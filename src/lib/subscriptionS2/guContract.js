@@ -278,7 +278,27 @@ function continuityObjects(providerUnderstanding) {
   const cadence = object(temporal['Coaching cadence'] || temporal.coaching_cadence);
   const communicationPreference = history.flatMap((item) => list(item?.Meaning?.Items || item?.meaning?.items))
     .find((item) => String(item?.Field || item?.field || '') === 'evidence.communication_preference');
+  const priorLearning = object(continuity['Prior session learning'] || continuity.prior_session_learning);
+  const priorNotes = list(priorLearning.Notes || priorLearning.notes);
   return [
+    priorNotes.length ? {
+      id: 's2-prior-session-learning', kind: 'PRIOR_SESSION_LEARNING', title: 'Our earlier conversation',
+      statement: 'These are notes from an earlier conversation, including what was left open.',
+      qualifier: 'Discussion alone does not create an agreement or change your plan.',
+      items: [],
+      // The upstream continuity projection has already checked exact scope,
+      // immutable custody, time eligibility, and the complete-field budget.
+      // Keep that full meaning for the compiler; do not truncate a negation or
+      // silently turn a closing note into a commitment in the rendered card.
+      priorSessionLearning: clone(priorLearning),
+      currentCorrectionContext: {
+        activeGovernedCorrections: clone(history.filter((item) => String(item.Kind || item.kind || '').toUpperCase() === 'CORRECTION')),
+        use: 'Current customer corrections and active governed meaning take precedence over these dated discussion notes. The supplied correction context is relevant retrieved history, not a claim that no other correction exists.',
+      },
+      canonicalCustomerTruth: false,
+      personalRslEvent: false,
+      sourceIds: ['s2-source-prior-session-learning', 's2-source-personal-rsl'],
+    } : null,
     commitments.length ? {
       id: 's2-prior-agreements', kind: 'COMMITMENTS', title: 'What we agreed to', statement: commitments.length ? 'These earlier agreements may matter today.' : 'There is no earlier agreement to bring into this session.',
       items: commitments.map((item) => ({ label: subscriptionS2CustomerText(firstText(item?.Meaning?.Summary, item?.meaning?.summary, item?.Summary, item?.summary, item.Kind, item.kind)), value: '', note: subscriptionS2CustomerText(firstText(item['Happened at'], item.happened_at, '')) })),
@@ -359,6 +379,7 @@ export function buildSubscriptionS2GuWorld({ event, packet, publication, viewMod
     source('s2-source-personal-rsl', 'Exact-scope governed relationship memory', 'PRIVATE_GOVERNED_SYNTHETIC'),
     source('s2-source-coaching-session', 'Current governed coaching-session orientation', 'SESSION_ONLY_NONCANONICAL'),
     source('s2-source-session-learning', 'Ephemeral mutually aligned session learning', 'SESSION_ONLY_NONCANONICAL'),
+    source('s2-source-prior-session-learning', 'Dated prior session discussion, not an authorized agreement', 'PRIVATE_SESSION_NOTES_NONCANONICAL'),
     source('s2-source-map-delta', 'Real AFW-05 publication delta', 'GOVERNED_SYNTHETIC'),
   ];
   const availableObjects = [...viewModelObjects(viewModel), ...continuityObjects(packet.provider_understanding)];
@@ -406,7 +427,7 @@ const KIND_BY_BLOCK = Object.freeze({
   METRIC_STRIP: ['PERSPECTIVE', 'PROGRESS'],
   BAR_CHART: ['PERSPECTIVE', 'PROGRESS'],
   COMPARISON: ['VISION', 'PERSPECTIVE', 'PROGRESS', 'MAP_DELTA'],
-  TIMELINE: ['COMMITMENTS', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'MAP_DELTA'],
+  TIMELINE: ['COMMITMENTS', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'PRIOR_SESSION_LEARNING', 'MAP_DELTA'],
   TRAJECTORY: ['FUTURES', 'VISION', 'PROGRESS'],
   FIVE_FUTURES: ['FUTURES'],
   RELATIONSHIP: ['RELATIONSHIP'],
@@ -414,8 +435,8 @@ const KIND_BY_BLOCK = Object.freeze({
   EVIDENCE_GAP: ['EVIDENCE_GAP', 'OPEN_LOOPS'],
   COMMITMENTS: ['COMMITMENTS', 'ONE_MOVE', 'SESSION_LEARNING'],
   DECISION: ['ONE_MOVE', 'SESSION_LEARNING', 'MAP_DELTA'],
-  PLAIN_LANGUAGE: ['WELCOME', 'VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'MAP_DELTA'],
-  QUESTION: ['VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'EVIDENCE_GAP', 'SESSION_LEARNING'],
+  PLAIN_LANGUAGE: ['WELCOME', 'VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'SESSION_LEARNING', 'PRIOR_SESSION_LEARNING', 'MAP_DELTA'],
+  QUESTION: ['VISION', 'PERSPECTIVE', 'ONE_MOVE', 'RELATIONSHIP', 'PROGRESS', 'OPEN_LOOPS', 'EVIDENCE_GAP', 'SESSION_LEARNING', 'PRIOR_SESSION_LEARNING'],
 });
 
 function numberTokens(value) {
@@ -445,6 +466,7 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
     if (!SUBSCRIPTION_S2_GU_BLOCK_TYPES.includes(block.type)) errors.push(`S2_GU_BLOCK_TYPE_DENIED:${block.type}`);
     const objects = list(block.objectIds).map((id) => objectMap.get(id));
     if (objects.some((item) => !item)) errors.push(`S2_GU_OBJECT_SCOPE_DENIED:${block.blockId}`);
+    if (objects.some((item) => item?.kind === 'PRIOR_SESSION_LEARNING') && !['PLAIN_LANGUAGE', 'QUESTION', 'TIMELINE'].includes(block.type)) errors.push(`S2_GU_PRIOR_DISCUSSION_BLOCK_DENIED:${block.blockId}`);
     if (objects.filter(Boolean).length && !objects.filter(Boolean).some((item) => list(KIND_BY_BLOCK[block.type]).includes(item.kind))) errors.push(`S2_GU_BLOCK_KIND_INCOMPATIBLE:${block.blockId}`);
     for (const id of block.objectIds || []) selectedObjectIds.add(id);
     for (const id of block.evidenceIds || []) if (!evidenceIds.has(id)) errors.push(`S2_GU_EVIDENCE_SCOPE_DENIED:${id}`);
@@ -468,7 +490,7 @@ export function validateSubscriptionS2GuPlan({ candidate, world }) {
   if (!mandatory && candidate?.renderDecision?.render === true && (list(candidate?.blocks).length < 1 || list(candidate?.blocks).length > 2)) errors.push('S2_GU_RESTRAINED_BLOCK_COUNT_INVALID');
   const requiredObject = requiredObjectByEvent[world.event];
   if (requiredObject && !selectedObjectIds.has(requiredObject)) errors.push(`S2_GU_REQUIRED_OBJECT_MISSING:${requiredObject}`);
-  if (world.event === 'SESSION_OPENING' && !['s2-vision', 's2-perspective', 's2-prior-agreements', 's2-progress', 's2-open-loops', 's2-one-move'].some((id) => selectedObjectIds.has(id))) errors.push('S2_GU_OPENING_ORIENTATION_MISSING');
+  if (world.event === 'SESSION_OPENING' && !['s2-vision', 's2-perspective', 's2-prior-agreements', 's2-progress', 's2-open-loops', 's2-one-move', 's2-prior-session-learning'].some((id) => selectedObjectIds.has(id))) errors.push('S2_GU_OPENING_ORIENTATION_MISSING');
   if (world.event === 'SESSION_OPENING' && selectedObjectIds.size > 2) errors.push('S2_1_GU_OPENING_OBJECT_LIMIT');
   const allowedNumbers = new Set(numberTokens(JSON.stringify(world)));
   for (const value of planProse(candidate)) for (const token of numberTokens(value)) if (!allowedNumbers.has(token)) errors.push(`S2_GU_INVENTED_NUMERIC_CLAIM:${token}`);

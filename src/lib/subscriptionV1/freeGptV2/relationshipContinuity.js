@@ -1,6 +1,8 @@
 import { deepFreeze } from '../../intelligenceFabric/validation.js';
+import { OUTCOME_CLASSIFICATIONS, validateRelationshipEpisodeEvent } from '../lineage.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
+const POSITIVE_OUTCOMES = new Set(['BENEFICIAL', 'POSITIVE', 'POSSIBLE_POSITIVE']);
 
 function iso(value) {
   if (!value || !Number.isFinite(Date.parse(value))) return null;
@@ -42,12 +44,60 @@ function explicitOpenLoop(event) {
 function outcomeDirection(event) {
   const explicit = String(event.semantic_payload?.outcome_direction || '').toUpperCase();
   if (['POSITIVE', 'IMPROVED', 'COMPLETED', 'SUCCESS'].includes(explicit)) return 'POSITIVE';
-  const values = eventItems(event).map((item) => String(item.value || '')).join(' ').toLowerCase();
-  if (/\b(?:completed|improved|worked|progress|grew|increased|released|succeeded)\b/u.test(values)) return 'POSSIBLE_POSITIVE';
+  if (OUTCOME_CLASSIFICATIONS.includes(explicit) || ['NEGATIVE', 'POSSIBLE_POSITIVE'].includes(explicit)) return explicit;
+  // Words such as "improved" or "completed" can appear in a negation or a
+  // confounded report. Without explicit classification, preserve uncertainty.
   return 'UNCLASSIFIED';
 }
 
+function priorSessionLearning({ scope, current_session_id, records, as_of_at }) {
+  const eligible = records.filter(({ event, appended_at }) => event?.event_type === 'SESSION_LEARNING'
+    && event.session_id !== current_session_id && validateRelationshipEpisodeEvent(event, scope)
+    && iso(event.occurred_at) && iso(appended_at)
+    && Date.parse(event.occurred_at) <= Date.parse(as_of_at) && Date.parse(appended_at) <= Date.parse(as_of_at))
+    .sort((left, right) => right.event.occurred_at.localeCompare(left.event.occurred_at)
+      || right.appended_at.localeCompare(left.appended_at)
+      || right.event.episode_event_id.localeCompare(left.event.episode_event_id));
+  const selected = [];
+  let characters = 0;
+  for (const record of eligible) {
+    const { event, appended_at } = record;
+    const size = event.session_learning
+      ? Object.values(event.session_learning).reduce((total, field) => total + field.length, 0)
+      : event.summary.length;
+    if (selected.length === 4 || characters + size > 8400) continue;
+    characters += size;
+    selected.push({
+      episode_event_id: event.episode_event_id,
+      event_hash: event.event_hash,
+      source_content_hash: event.source_content_hash,
+      session_id: event.session_id,
+      occurred_at: iso(event.occurred_at),
+      recorded_at: iso(appended_at),
+      ...(event.session_learning ? { meaning: clone(event.session_learning) } : { summary: event.summary }),
+      attribution: 'PRIOR_SESSION_CLOSING_NOTES',
+      provenance: 'EXACT_SCOPE_IMMUTABLE_RELATIONSHIP_EPISODE',
+      canonical_customer_truth: false,
+      personal_rsl_event: false,
+    });
+  }
+  return {
+    notes: selected.reverse(),
+    eligible_count: eligible.length,
+    omitted_count: eligible.length - selected.length,
+    selection: 'MOST_RECENT_PRIOR_SESSION_NOTES_WITHIN_BUDGET',
+    maximum_notes: 4,
+    maximum_meaning_characters: 8400,
+    use: 'Remember these as dated session discussion and shared understanding, including uncertainty and unresolved questions. They do not authorize commitments or establish current customer facts. Current customer corrections and active Personal RSL take precedence; consult the current correction and outcome context before reusing older notes. Omitted notes are not proof that nothing else was discussed.',
+    raw_transcript_required: false,
+    second_truth_store: false,
+  };
+}
+
 export function assembleRelationshipContinuityState({
+  scope,
+  current_session_id = null,
+  relationship_episode_records = [],
   active_personal_rsl_events = [],
   pending_proposal = null,
   canonical_artifacts = [],
@@ -141,12 +191,14 @@ export function assembleRelationshipContinuityState({
   const state = {
     contract: 'SUBSCRIPTION_FLAGSHIP_S1_1_RELATIONSHIP_CONTINUITY_V1',
     as_of_at: currentAt,
+    prior_session_learning: priorSessionLearning({ scope, current_session_id, records: relationship_episode_records, as_of_at: currentAt }),
     open_loops: openLoops.slice(-12),
     open_loop_use: 'Surface at most one only when it is relevant now. An open loop is not automatically a new canonical fact.',
     earned_progress_evidence: earnedProgress,
     earned_progress_use: 'Recognize only specific governed movement: prior state, attempt, observed change, and relationship to Vision. Do not generate generic praise.',
     maintain_course_evidence: {
-      observed_positive_or_possible_positive_outcomes: earnedProgress.filter((item) => item.outcome_direction !== 'UNCLASSIFIED'),
+      observed_positive_or_possible_positive_outcomes: earnedProgress.filter((item) => POSITIVE_OUTCOMES.has(item.outcome_direction)),
+      other_observed_outcomes: earnedProgress.filter((item) => !POSITIVE_OUTCOMES.has(item.outcome_direction)),
       current_counterevidence: clone(evidenceArtifact?.payload?.counterevidence || evidenceArtifact?.payload?.contradicted || []),
       current_missingness: clone(evidenceArtifact?.payload?.missing || []),
       frontier_judgment_required: true,

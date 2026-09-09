@@ -41,6 +41,8 @@
 .s2-gu-block-heading p, .s2-gu-qualifier { color: #89a1ac; font-size: .69rem; line-height: 1.45; }
 .s2-gu-object { display: grid; gap: .55rem; min-width: 0; }
 .s2-gu-statement { color: #c9ddd5; font-size: .78rem; line-height: 1.5; }
+.s2-gu-recap-link { color: #75dc7c; font-size: .78rem; line-height: 1.5; text-underline-offset: .18em; }
+.s2-gu-recap-link:focus-visible { outline: 2px solid #75dc7c; outline-offset: .2rem; }
 .s2-gu-items { display: grid; gap: .48rem; }
 .s2-gu-item { display: grid; grid-template-columns: minmax(6.5rem, .45fr) minmax(0, 1fr); gap: .16rem .65rem; align-items: baseline; padding: .58rem .65rem; border-radius: .62rem; background: rgba(112, 153, 173, .08); }
 .s2-gu-item > span { color: #75dc7c; font-size: .62rem; font-weight: 800; letter-spacing: .045em; text-transform: uppercase; }

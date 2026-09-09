@@ -1,5 +1,6 @@
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import { coachingEpisodeProjection, createRelationshipEpisodeEvent, validateSessionCloseOutputV1 } from '../../src/lib/subscriptionV1/index.js';
+import { SESSION_LEARNING_FIELDS, summarizeSessionLearning } from '../../src/lib/subscriptionV1/sessionLearning.js';
 import {
   appendDiagnostics,
   authenticateInternalDevRequest,
@@ -693,18 +694,13 @@ export function createSubscriptionV1RuntimeHandler({
       } catch (error) {
         return send(res, 422, { ok: false, code: error.code || 'SUBSCRIPTION_S2_CLOSING_GU_FAILED_CLOSED', csrf_token: nextCsrf, mutation_performed: false });
       }
+      const sessionLearningMeaning = Object.fromEntries(SESSION_LEARNING_FIELDS.map((field) => [field, closingLearning[field]]));
       const sessionLearningEpisode = createRelationshipEpisodeEvent({
         scope: closingLoaded.scope,
         session_id: bound.session.session_id,
         event_type: 'SESSION_LEARNING',
-        summary: [
-          closingLearning.what_mattered,
-          closingLearning.what_changed,
-          closingLearning.what_was_learned,
-          closingLearning.what_was_decided,
-          closingLearning.what_remains_open,
-          closingLearning.pick_up_next_time,
-        ].filter(Boolean).join(' ').slice(0, 1200),
+        summary: summarizeSessionLearning(sessionLearningMeaning),
+        session_learning: sessionLearningMeaning,
         occurred_at: now.toISOString(),
         source_content_hash: hashCanonicalJson(closingLearning),
       });

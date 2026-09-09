@@ -4,6 +4,7 @@ import { recordExecutionEvidence, validateOutcome } from '../intelligenceFabric/
 import { relationshipIdentityForScope, sameScope, scopeFingerprint } from './contracts.js';
 import { createPersonalRslEvent } from './personalRsl.js';
 import { InMemoryUniversalCandidateCapture } from './universalCandidates.js';
+import { validateSessionLearningMeaning } from './sessionLearning.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const LINEAGE_ID = /^intervention_[a-f0-9]{24}$/u;
@@ -95,22 +96,28 @@ export function createRelationshipEpisodeEvent({
   decision_id = null,
   intervention_lineage_id = null,
   supersedes_episode_event_id = null,
+  session_learning = null,
 }) {
   if (!EPISODE_EVENT_TYPES.has(event_type)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_EVENT_TYPE_INVALID' });
   if (typeof summary !== 'string' || !summary.trim() || summary.length > 1200) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SUMMARY_INVALID' });
   if (!/^[a-f0-9]{64}$/u.test(source_content_hash || '')) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SOURCE_HASH_REQUIRED' });
   if (intervention_lineage_id && !LINEAGE_ID.test(intervention_lineage_id)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_LINEAGE_INVALID' });
   if (supersedes_episode_event_id && !/^episode_[a-f0-9]{24}$/u.test(supersedes_episode_event_id)) return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SUPERSESSION_INVALID' });
+  if (session_learning !== null && (event_type !== 'SESSION_LEARNING' || !validateSessionLearningMeaning(session_learning))) {
+    return deepFreeze({ ok: false, code: 'RELATIONSHIP_EPISODE_SESSION_LEARNING_INVALID' });
+  }
+  const learning = session_learning === null ? {} : { session_learning: clone(session_learning) };
   const supersession = supersedes_episode_event_id ? { supersedes_episode_event_id } : {};
   const body = {
     contract_id: 'subscription_relationship_episode_provenance_v1',
     schema_version: '1.0.0',
-    episode_event_id: `episode_${hashCanonicalJson({ scope: scopeFingerprint(scope), session_id, event_type, summary, occurred_at, source_content_hash, proposal_id, decision_id, intervention_lineage_id, ...supersession }).slice(0, 24)}`,
+    episode_event_id: `episode_${hashCanonicalJson({ scope: scopeFingerprint(scope), session_id, event_type, summary, occurred_at, source_content_hash, proposal_id, decision_id, intervention_lineage_id, ...supersession, ...learning }).slice(0, 24)}`,
     scope: clone(scope),
     scope_hash: scopeFingerprint(scope),
     session_id,
     event_type,
     summary: summary.trim(),
+    ...learning,
     source_content_hash,
     proposal_id,
     decision_id,
@@ -129,6 +136,7 @@ export function validateRelationshipEpisodeEvent(event, scope) {
   if (!event || event.contract_id !== 'subscription_relationship_episode_provenance_v1' || event.schema_version !== '1.0.0') return false;
   if (!sameScope(event.scope, scope) || event.scope_hash !== scopeFingerprint(scope) || !EPISODE_EVENT_TYPES.has(event.event_type)) return false;
   if (event.canonical_customer_truth !== false || event.personal_rsl_event !== false || event.raw_customer_transcript_persisted !== false) return false;
+  if (Object.hasOwn(event, 'session_learning') && (event.event_type !== 'SESSION_LEARNING' || !validateSessionLearningMeaning(event.session_learning))) return false;
   const unsigned = clone(event);
   delete unsigned.event_hash;
   return event.event_hash === hashCanonicalJson(unsigned);

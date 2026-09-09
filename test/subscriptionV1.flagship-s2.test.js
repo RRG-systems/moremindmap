@@ -18,6 +18,7 @@ import { createSubscriptionS2GuRuntime } from '../api/engine/subscriptionS2/guRu
 import { internalDevKeys } from '../api/engine/subscriptionV1/internalDevInfrastructure.js';
 import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 import { subscriptionS2CustomerText, validateSubscriptionS2GuPlan } from '../src/lib/subscriptionS2/guContract.js';
+import { SESSION_LEARNING_FIELDS } from '../src/lib/subscriptionV1/sessionLearning.js';
 
 class FakeRedis {
   constructor() { this.values = new Map(); this.lists = new Map(); }
@@ -139,6 +140,197 @@ test('S2 opening is read-only until an explicit first-session start and the mand
   const returned = await invoke(handler, directRequest());
   assert.equal(returned.body.session.start_action, 'START_SESSION');
   assert.equal(returned.body.first_session_relationship_established, true);
+});
+
+test('S2 mutual close preserves all bounded note fields through durable storage and a fresh-session provider request', async () => {
+  const redis = new FakeRedis();
+  const capability = { relationship_key: 'rel_77777777777777777777', subject_key: 're-mid', synthetic_only: true };
+  const notes = Object.fromEntries(SESSION_LEARNING_FIELDS.map((field) => [field,
+    `Synthetic ${field}: ${'This was discussion, with no new commitment. '.repeat(22)} Final meaning for ${field}.`,
+  ]));
+  for (const value of Object.values(notes)) assert.ok(value.length <= 1200);
+  let lastConversationRequest;
+  const transport = async (request, { stage }) => {
+    if (stage === 'SESSION_CLOSE') return { output: { customer_message: 'Jordan, that reflects our discussion. We can revisit the unresolved question.', session_learning: notes }, usage: {}, latency_ms: 1 };
+    if (stage === 'CONVERSATION') {
+      lastConversationRequest = request;
+      return { output: { customer_message: 'Jordan, we can explore this question without changing your plan.' }, usage: {}, latency_ms: 1, external_evidence: [] };
+    }
+    return { output: { candidate: null }, usage: {}, latency_ms: 1 };
+  };
+  const loader = (args) => loadProductionIntendedSyntheticSubscriber({ ...args, transport });
+  const handler = createSubscriptionV1RuntimeHandler({
+    getRedis: () => redis,
+    authenticate: async () => ({ ok: true, capability, capability_hash: hashCanonicalJson(capability) }),
+    loadSubscriber: loader, generateGu: mockGu, env: { OPENAI_API_KEY: 'unused-test-key' },
+  });
+  const opened = await invoke(handler, directRequest());
+  const started = await invoke(handler, directRequest({ method: 'POST', csrf: opened.body.csrf_token, body: { action: 'START_MY_FIRST_SESSION' } }));
+  const sessionId = started.body.session.session_id;
+  const turn = await invoke(handler, directRequest({ method: 'POST', csrf: started.body.csrf_token, body: { action: 'TURN', session_id: sessionId, message: 'Explore this unresolved question without making a commitment.', conversation: [] } }));
+  assert.equal(turn.status, 200, JSON.stringify(turn.body));
+  const before = await loader({ redis, ...capability, session_id: sessionId, session_kind: 'WEEKLY', initial_conversation: [] });
+  const beforePublication = before.controller.current().publication.publication_hash;
+  const beforeRsl = before.store.readPersonalRsl({ scope: before.scope });
+  const draft = await invoke(handler, directRequest({ method: 'POST', csrf: turn.body.csrf_token, body: { action: 'END_SESSION', session_id: sessionId, conversation: [] } }));
+  assert.equal(draft.status, 200, JSON.stringify(draft.body));
+  assert.equal(draft.body.mutual_close.human_alignment_required, true);
+  const afterDraft = await loader({ redis, ...capability, session_id: sessionId, session_kind: 'WEEKLY', initial_conversation: [] });
+  assert.equal(afterDraft.store.readRelationshipEpisodes({ scope: afterDraft.scope }).records.some(({ event }) => event.event_type === 'SESSION_LEARNING'), false);
+  const closed = await invoke(handler, directRequest({ method: 'POST', csrf: draft.body.csrf_token, body: {
+    action: 'END_SESSION', session_id: sessionId, conversation: [], alignment_message: 'Yes, that is our shared understanding; no commitment was agreed.', prior_session_learning: notes,
+  } }));
+  assert.equal(closed.status, 200, JSON.stringify(closed.body));
+  assert.equal(closed.body.mutual_close.alignment_established, true);
+  const resumed = await loader({ redis, ...capability, session_id: 'session_888888888888888888888888', session_kind: 'WEEKLY', initial_conversation: [] });
+  const saved = resumed.store.readRelationshipEpisodes({ scope: resumed.scope }).records.find(({ event }) => event.event_type === 'SESSION_LEARNING');
+  assert.deepEqual(saved.event.session_learning, notes);
+  assert.equal(saved.event.canonical_customer_truth, false);
+  assert.equal(saved.event.personal_rsl_event, false);
+  assert.equal(saved.event.raw_customer_transcript_persisted, false);
+  assert.equal(resumed.store.verifyRelationshipEpisodes({ scope: resumed.scope }).ok, true);
+  assert.deepEqual(resumed.store.readPersonalRsl({ scope: resumed.scope }), beforeRsl);
+  assert.equal(resumed.controller.current().publication.publication_hash, beforePublication);
+  assert.deepEqual(resumed.controller.wholeUnderstandingPacket().provider_understanding.current_conversation, []);
+  const recalled = await resumed.controller.send({ message: 'What remains open from our last conversation?' });
+  assert.equal(recalled.ok, true, recalled.code);
+  const input = JSON.parse(lastConversationRequest.input[1].content).whole_coaching_understanding;
+  const remembered = input.relationship_continuity['Prior session learning'].Notes[0];
+  assert.equal(remembered['Canonical customer truth'], false);
+  for (const [field, value] of Object.entries(notes)) {
+    const label = field.replaceAll('_', ' ').replace(/^./u, (letter) => letter.toUpperCase());
+    assert.equal(remembered.Meaning[label], value);
+  }
+});
+
+test('aligned close reaches the actual fresh START_SESSION opening GU with complete notes and later correction context', async () => {
+  const redis = new FakeRedis();
+  const capability = { relationship_key: 'rel_99999999999999999999', subject_key: 're-mid', synthetic_only: true };
+  const draftNotes = Object.fromEntries(SESSION_LEARNING_FIELDS.map((field) => [field, `Synthetic ${field}: we will discuss this again.`]));
+  const notes = {
+    ...draftNotes,
+    what_mattered: 'Jordan asked about the effect of work on evenings at home.',
+    what_was_decided: 'No dinner assignment was agreed. No new commitment was authorized.',
+    what_remains_open: `${'The evening question remains unresolved. '.repeat(20)} The final qualification is that dinner is not an assignment.`,
+    durable_governed_meaning: 'No change to the plan or durable customer facts was authorized.',
+    pick_up_next_time: 'Ask what Jordan wants to explore, without assuming any dinner task was agreed.',
+  };
+  let nextCandidate = null;
+  let finalCloseRequest;
+  const transport = async (request, { stage }) => {
+    if (stage === 'SESSION_CLOSE') {
+      const input = JSON.parse(request.input[1].content);
+      const finalizing = Boolean(input.mutual_close?.human_alignment_response);
+      if (finalizing) finalCloseRequest = input;
+      return { output: { customer_message: 'Jordan, we can leave that as an open question.', session_learning: finalizing ? notes : draftNotes }, usage: {}, latency_ms: 1 };
+    }
+    if (stage === 'CANDIDATE_EXTRACTION') {
+      const candidate = nextCandidate;
+      nextCandidate = null;
+      return { output: { candidate }, usage: {}, latency_ms: 1 };
+    }
+    return { output: { customer_message: 'Jordan, we can discuss the question without adding a task.' }, usage: {}, latency_ms: 1, external_evidence: [] };
+  };
+  const loader = (args) => loadProductionIntendedSyntheticSubscriber({ ...args, transport });
+  const openingPackets = [];
+  const openingRequests = [];
+  const guRuntime = createSubscriptionS2GuRuntime({ maxAttempts: 1, transport: async (request) => {
+    const input = JSON.parse(request.input[1].content);
+    if (input.event === 'SESSION_OPENING') openingRequests.push(request);
+    const objectId = { FIRST_SESSION_WELCOME: 's2-first-session-welcome', SESSION_OPENING: 's2-prior-session-learning', SESSION_CLOSING: 's2-session-learning' }[input.event];
+    return {
+      output: {
+        renderDecision: { render: Boolean(objectId), reason: objectId ? 'One useful point from the conversation.' : 'The conversation is clear.' },
+        guidance: { summary: 'The evening question remains open, with no dinner assignment agreed.', nextCue: 'What would help today?' },
+        blocks: objectId ? [{ blockId: 's2-block-carried-forward', type: 'PLAIN_LANGUAGE', title: 'Our conversation', subtitle: '', objectIds: [objectId], evidenceIds: [], emphasis: 'PRIMARY', reason: 'Remember the question without adding a task.' }] : [],
+      },
+      receipt: { provider: 'deterministic test transport', model: request.model, reasoning_effort: request.reasoning.effort, store: request.store, background: request.background, tools: 0, latency_ms: 1 },
+    };
+  } });
+  const handler = createSubscriptionV1RuntimeHandler({
+    getRedis: () => redis,
+    authenticate: async () => ({ ok: true, capability, capability_hash: hashCanonicalJson(capability) }),
+    loadSubscriber: loader,
+    generateGu: async ({ event, loaded, keys, sessionLearning, mapDelta }) => {
+      const packet = loaded.controller.wholeUnderstandingPacket();
+      if (event === 'SESSION_OPENING') openingPackets.push(packet);
+      const current = loaded.controller.current();
+      return { ...await guRuntime.generate({ event, packet, publication: current.publication, viewModel: current.view_model, relationshipScopeHash: keys.scope_hash, sessionLearning, mapDelta }), current };
+    },
+    env: { OPENAI_API_KEY: 'unused-test-key' },
+  });
+  const opened = await invoke(handler, directRequest());
+  const started = await invoke(handler, directRequest({ method: 'POST', csrf: opened.body.csrf_token, body: { action: 'START_MY_FIRST_SESSION' } }));
+  assert.equal(started.status, 200, JSON.stringify(started.body));
+  const sessionId = started.body.session.session_id;
+  const load = () => loader({ redis, ...capability, session_id: sessionId, session_kind: 'WEEKLY', initial_conversation: [] });
+  const before = await load();
+  const beforePublication = before.controller.current().publication.publication_hash;
+  const beforeRsl = before.store.readPersonalRsl({ scope: before.scope });
+  const turn = await invoke(handler, directRequest({ method: 'POST', csrf: started.body.csrf_token, body: { action: 'TURN', session_id: sessionId, message: 'I want to explore evenings at home without adding an assignment.', conversation: [] } }));
+  assert.equal(turn.status, 200, JSON.stringify(turn.body));
+  const draft = await invoke(handler, directRequest({ method: 'POST', csrf: turn.body.csrf_token, body: { action: 'END_SESSION', session_id: sessionId, conversation: [] } }));
+  assert.equal(draft.status, 200, JSON.stringify(draft.body));
+  assert.equal(draft.body.mutual_close.human_alignment_required, true);
+  const afterDraft = await load();
+  assert.equal(afterDraft.store.readRelationshipEpisodes({ scope: afterDraft.scope }).records.some(({ event }) => event.event_type === 'SESSION_LEARNING'), false);
+  const alignment = 'Correction: dinner remains an open question, not an assignment. With that correction, yes, those are our notes.';
+  const closed = await invoke(handler, directRequest({ method: 'POST', csrf: draft.body.csrf_token, body: { action: 'END_SESSION', session_id: sessionId, conversation: [], alignment_message: alignment, prior_session_learning: draft.body.session_learning } }));
+  assert.equal(closed.status, 200, JSON.stringify(closed.body));
+  assert.equal(finalCloseRequest.mutual_close.human_alignment_response, alignment);
+  const afterClose = await load();
+  const saved = afterClose.store.readRelationshipEpisodes({ scope: afterClose.scope }).records.find(({ event }) => event.event_type === 'SESSION_LEARNING');
+  assert.deepEqual(saved.event.session_learning, notes);
+  assert.deepEqual(afterClose.store.readPersonalRsl({ scope: afterClose.scope }), beforeRsl);
+  assert.equal(afterClose.controller.current().publication.publication_hash, beforePublication);
+
+  // A separately authorized later correction must accompany older discussion.
+  // Neither the closing receipt nor the next opening authorizes this mutation.
+  for (const [index, value] of ['Lead with a proposed task.', 'Ask what I want to explore before suggesting tasks.'].entries()) {
+    const kind = index ? 'CORRECTION_CANDIDATE' : 'EVIDENCE_CANDIDATE';
+    nextCandidate = { candidate_type: kind, proposal_type: kind, target_contract: 'EVIDENCE_LEDGER', operation: 'PROPOSE', summary: value, items: [{ field: 'evidence.communication_preference', value }], reason: 'The customer explicitly requests this preference.', evidence_ref_ids: [], authority_ref_ids: [], confirmation_required: true, generalization_scope: 'CONTEXT_SPECIFIC_NOT_GENERALIZABLE' };
+    const staged = await afterClose.controller.send({ message: `${index ? 'Correction: ' : ''}${value}` });
+    assert.equal(staged.ok, true, staged.code);
+    const confirmed = await afterClose.controller.decide({ proposal_id: staged.proposal.proposal_id, decision: 'CONFIRM', idempotency_key: `opening-recall-preference-${index}` });
+    assert.equal(confirmed.ok, true, confirmed.code);
+  }
+  const beforeOpening = await load();
+  const currentPublication = beforeOpening.controller.current().publication.publication_hash;
+  const currentRsl = beforeOpening.store.readPersonalRsl({ scope: beforeOpening.scope });
+  const restarted = await invoke(handler, directRequest({ method: 'POST', csrf: closed.body.csrf_token, body: { action: 'START_SESSION', conversation: [] } }));
+  assert.equal(restarted.status, 200, JSON.stringify(restarted.body));
+  assert.notEqual(restarted.body.session.session_id, sessionId);
+  assert.equal(openingRequests.length, 1);
+  assert.deepEqual(openingPackets[0].provider_understanding.current_conversation, []);
+  const input = JSON.parse(openingRequests[0].input[1].content);
+  const world = input.governedWorld;
+  const carried = world.objects.find((item) => item.id === 's2-prior-session-learning');
+  assert.equal(carried.kind, 'PRIOR_SESSION_LEARNING');
+  assert.equal(carried.canonicalCustomerTruth, false);
+  assert.equal(carried.personalRslEvent, false);
+  assert.deepEqual(carried.priorSessionLearning, openingPackets[0].provider_understanding.relationship_continuity['Prior session learning']);
+  const remembered = carried.priorSessionLearning.Notes[0];
+  for (const [field, value] of Object.entries(notes)) assert.equal(remembered.Meaning[field.replaceAll('_', ' ').replace(/^./u, (letter) => letter.toUpperCase())], value);
+  assert.equal(remembered['Occurred at'], saved.event.occurred_at);
+  assert.equal(remembered['Recorded at'], saved.appended_at);
+  assert.equal(remembered.Attribution, 'Prior session closing notes');
+  assert.equal(carried.currentCorrectionContext.activeGovernedCorrections.length, 1);
+  assert.equal(carried.currentCorrectionContext.activeGovernedCorrections[0].Meaning.Items[0].Value, 'Ask what I want to explore before suggesting tasks.');
+  assert.match(carried.currentCorrectionContext.use, /take precedence/u);
+  assert.equal(world.evidence.find((item) => item.id === 's2-source-prior-session-learning').classification, 'PRIVATE_SESSION_NOTES_NONCANONICAL');
+  assert.equal(world.objects.some((item) => item.id === 's2-prior-agreements'), false);
+  assert.equal(restarted.body.gu_plan.blocks[0].objects[0].kind, 'PRIOR_SESSION_LEARNING');
+  for (const type of ['COMMITMENTS', 'DECISION']) {
+    const invalid = structuredClone(restarted.body.gu_plan);
+    invalid.blocks[0].type = type;
+    assert.ok(validateSubscriptionS2GuPlan({ candidate: invalid, world }).errors.includes('S2_GU_BLOCK_KIND_INCOMPATIBLE:s2-block-carried-forward'));
+    invalid.blocks[0].objectIds.push('s2-one-move');
+    assert.ok(validateSubscriptionS2GuPlan({ candidate: invalid, world }).errors.includes('S2_GU_PRIOR_DISCUSSION_BLOCK_DENIED:s2-block-carried-forward'));
+  }
+  const afterOpening = await load();
+  assert.equal(afterOpening.controller.current().publication.publication_hash, currentPublication);
+  assert.deepEqual(afterOpening.store.readPersonalRsl({ scope: afterOpening.scope }), currentRsl);
+  assert.equal(afterOpening.store.verifyRelationshipEpisodes({ scope: afterOpening.scope }).ok, true);
 });
 
 test('S2 GU keeps the exact frontier configuration, renders only supplied objects, and rejects internal jargon', async () => {

@@ -71,6 +71,8 @@ export function createFreeGptLivingRelationshipRuntimeV2({
     const activeRslEvents = rslReplay.state.active_events;
     const episodeRead = store.readRelationshipEpisodes({ scope });
     if (!episodeRead.ok) return episodeRead;
+    const episodeVerification = store.verifyRelationshipEpisodes({ scope });
+    if (!episodeVerification.ok) return episodeVerification;
     const scorecard = derivePrivateLongitudinalScorecard({
       scope,
       active_events: activeRslEvents,
@@ -89,6 +91,9 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       current_publication: publication.publication,
     });
     const relationshipContinuity = assembleRelationshipContinuityState({
+      scope,
+      current_session_id: session_id,
+      relationship_episode_records: episodeRead.records,
       active_personal_rsl_events: activeRslEvents,
       pending_proposal: pending?.ok ? pending.proposal : null,
       canonical_artifacts,
