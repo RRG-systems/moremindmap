@@ -15,6 +15,7 @@ const PROGRESS_STATES = new Set([
 
 const PROFILE_ID_PATTERN = /^mm-\d{8}-[a-z0-9]{8}$/iu;
 const ASSESSMENT_ID_PATTERN = /^ba-\d{8}-[a-f0-9]{8}$/iu;
+const BOS_JOB_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{2,179}$/iu;
 
 function boundedText(value, max = 240) {
   return String(value || '').trim().slice(0, max);
@@ -28,6 +29,11 @@ function normalizeProfileId(value) {
 function normalizeAssessmentId(value) {
   const assessmentId = boundedText(value, 80).toLowerCase();
   return ASSESSMENT_ID_PATTERN.test(assessmentId) ? assessmentId : null;
+}
+
+function normalizeBosJobId(value) {
+  const jobId = boundedText(value, 180);
+  return BOS_JOB_ID_PATTERN.test(jobId) ? jobId : null;
 }
 
 function nextDestination({ progressState }) {
@@ -133,6 +139,8 @@ export function buildRecruitingInviteContinuation(inspected = {}) {
   const sessionCandidateId = boundedText(session?.candidate_id, 160);
   const baReadiness = boundedText(relationship?.ba_readiness || 'BA_NOT_STARTED', 80);
   const relationshipProgress = boundedText(relationship?.progress_state, 80);
+  const suppliedBosJobId = boundedText(relationship?.bos_job_id, 180);
+  const bosJobId = normalizeBosJobId(suppliedBosJobId);
   const profileId = normalizeProfileId(relationship?.bos_profile_id);
   const assessmentId = normalizeAssessmentId(relationship?.ba_assessment_id);
 
@@ -157,6 +165,9 @@ export function buildRecruitingInviteContinuation(inspected = {}) {
       || (!baStarted && assessmentId)) {
     throw new Error('RECRUITING_INVITE_CONTINUATION_BINDING_INVALID');
   }
+  if (suppliedBosJobId && !bosJobId) {
+    throw new Error('RECRUITING_INVITE_CONTINUATION_BINDING_INVALID');
+  }
 
   const progressState = !profileId
     ? relationshipProgress === 'BOS_IN_PROGRESS' ? 'BOS_IN_PROGRESS' : 'INVITED'
@@ -168,6 +179,10 @@ export function buildRecruitingInviteContinuation(inspected = {}) {
   if (relationshipProgress && relationshipProgress !== progressState) {
     throw new Error('RECRUITING_INVITE_CONTINUATION_BINDING_INVALID');
   }
+  if ((progressState === 'BOS_IN_PROGRESS' && !bosJobId)
+      || (progressState === 'INVITED' && bosJobId)) {
+    throw new Error('RECRUITING_INVITE_CONTINUATION_BINDING_INVALID');
+  }
 
   return Object.freeze({
     contract: 'recruiting_invite_continuation_v1',
@@ -175,6 +190,10 @@ export function buildRecruitingInviteContinuation(inspected = {}) {
     relationship_ref: relationshipRef,
     candidate_id: candidateId,
     progress_state: progressState,
+    bos_resume: Object.freeze({
+      state: progressState === 'BOS_IN_PROGRESS' ? 'BOUND' : profileId ? 'COMPLETE' : 'NOT_STARTED',
+      job_id: progressState === 'BOS_IN_PROGRESS' ? bosJobId : null,
+    }),
     profile_binding: Object.freeze({
       state: profileId ? 'BOUND' : 'PENDING',
       profile_id: profileId,
@@ -197,10 +216,52 @@ export function isRecruitingInviteContinuation(value) {
     && value?.authority === 'accepted_invite_session'
     && value?.requires_manual_profile_id === false
     && value?.requires_new_manager_invitation === false
+    && ['NOT_STARTED', 'BOUND', 'COMPLETE'].includes(value?.bos_resume?.state)
     && Array.isArray(value?.progress)
     && Array.isArray(value?.notifications)
     && ['/profile?recruiting=1', '/business-assessment?recruiting=1'].includes(destination),
   );
+}
+
+export function resolveRecruitingBosLanding(continuation) {
+  if (!isRecruitingInviteContinuation(continuation)) {
+    throw new Error('RECRUITING_INVITE_CONTINUATION_INVALID');
+  }
+  if (continuation.progress_state === 'INVITED'
+      && continuation.next_step?.action === 'CONTINUE_BOS'
+      && continuation.bos_resume?.state === 'NOT_STARTED'
+      && !continuation.bos_resume?.job_id) {
+    return Object.freeze({
+      mode: 'BEGIN_NEW_BOS',
+      progress_state: 'INVITED',
+      job_id: null,
+    });
+  }
+
+  const jobId = normalizeBosJobId(continuation.bos_resume?.job_id);
+  if (continuation.progress_state !== 'BOS_IN_PROGRESS'
+      || continuation.next_step?.action !== 'CONTINUE_BOS'
+      || continuation.bos_resume?.state !== 'BOUND'
+      || !jobId) {
+    throw new Error('RECRUITING_BOS_CONTINUATION_BINDING_INVALID');
+  }
+  return Object.freeze({
+    mode: 'RESUME_BOUND_BOS',
+    progress_state: 'BOS_IN_PROGRESS',
+    job_id: jobId,
+  });
+}
+
+export async function resumeRecruitingBoundBos({ continuation, pollBoundJob } = {}) {
+  const landing = resolveRecruitingBosLanding(continuation);
+  if (landing.mode === 'BEGIN_NEW_BOS') {
+    return Object.freeze({ status: 'READY_TO_BEGIN', landing });
+  }
+  if (typeof pollBoundJob !== 'function') {
+    throw new TypeError('Recruiting BOS continuation poller is required');
+  }
+  const result = await pollBoundJob(landing.job_id);
+  return Object.freeze({ status: 'RESUMED_BOUND_BOS', landing, result });
 }
 
 export function resolveRecruitingBaLanding(continuation) {

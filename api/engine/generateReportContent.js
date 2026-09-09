@@ -1,3 +1,4 @@
+/* global process */
 // generateReportContent.js - GPT-5.5 Report Content Generation V1
 // Generated: Tue May 12, 2026 21:47 MST
 // Input: profile_input.json → Output: report_content.json
@@ -11,9 +12,47 @@ import { groupMissingFieldsByPage } from './miniV2FieldMap.js';
 import { getModelForRoute } from './config/modelRegistry.js';
 
 const MODEL = getModelForRoute('bos.report');
-const API_KEY = process.env.OPENAI_API_KEY;
 
-export async function generateReportContent(inputProfile = null, missingFields = null) {
+const DEFAULT_TEMPERATURE_MODEL_PATTERN = /^(gpt-5|o\d|o[134]|chatgpt-4o)/iu;
+
+export function usesDefaultBosReportTemperature(model) {
+  return DEFAULT_TEMPERATURE_MODEL_PATTERN.test(String(model || ''));
+}
+
+export function buildBosReportCompletionRequest({ prompt, model = MODEL } = {}) {
+  const resolvedModel = String(model || '').trim();
+  if (!resolvedModel) throw governedGenerationError('BOS_REPORT_MODEL_NOT_CONFIGURED');
+  const request = {
+    model: resolvedModel,
+    messages: [
+      {
+        role: 'user',
+        content: prompt,
+      },
+    ],
+    max_completion_tokens: 16000,
+    response_format: { type: 'json_object' },
+  };
+  if (!usesDefaultBosReportTemperature(resolvedModel)) request.temperature = 0.3;
+  return request;
+}
+
+function governedGenerationError(code) {
+  return new Error(code);
+}
+
+export function assertGovernedReportContent(reportContent) {
+  if (!reportContent
+      || typeof reportContent !== 'object'
+      || Array.isArray(reportContent)
+      || reportContent.generation_metadata?.generation_mode !== 'gpt'
+      || /\[mock\]/iu.test(JSON.stringify(reportContent))) {
+    throw governedGenerationError('BOS_REPORT_GOVERNED_CONTENT_REQUIRED');
+  }
+  return reportContent;
+}
+
+export async function generateReportContent(inputProfile = null, missingFields = null, providerOptions = {}) {
   const profileInput = inputProfile || loadProfileInputExample();
   
   // If this is a repair pass, group fields by page and use targeted repair prompt
@@ -30,21 +69,16 @@ export async function generateReportContent(inputProfile = null, missingFields =
     prompt = buildMiniV2ReportPrompt(profileInput);
   }
   
-  const result = await generateWithGPT(prompt);
-  
-  if (result.generation_mode === 'gpt') {
-    const content = validateAndProcessGPTOutput(result.output, missingFields ? true : false);
-    if (!missingFields) {
-      writeReportContent(content);
-    }
-    return content;
-  } else {
-    const mockContent = generateMockContent(profileInput);
-    if (!missingFields) {
-      writeReportContent(mockContent);
-    }
-    return mockContent;
+  const result = await generateWithGPT(prompt, providerOptions);
+  const content = validateAndProcessGPTOutput(result.output, Boolean(missingFields), {
+    model: result.model,
+    temperature: result.temperature,
+  });
+  assertGovernedReportContent(content);
+  if (!missingFields) {
+    writeReportContent(content);
   }
+  return content;
 }
 
 function loadProfileInputExample() {
@@ -59,42 +93,56 @@ function loadProfileInputExample() {
   return builder.build(rawAssessment);
 }
 
-async function generateWithGPT(prompt) {
-  if (!API_KEY) {
-    console.log('No OPENAI_API_KEY found. Using mock mode.');
-    return { generation_mode: 'mock' };
+export async function generateWithGPT(prompt, {
+  apiKey = process.env.OPENAI_API_KEY,
+  model = MODEL,
+  clientFactory = (resolvedApiKey) => new OpenAI({ apiKey: resolvedApiKey }),
+} = {}) {
+  if (!String(apiKey || '').trim()) {
+    throw governedGenerationError('BOS_REPORT_PROVIDER_NOT_CONFIGURED');
   }
 
-  const openai = new OpenAI({ apiKey: API_KEY });
-  
+  const request = buildBosReportCompletionRequest({ prompt, model });
+  let completion;
   try {
-    const completion = await openai.chat.completions.create({
-      model: MODEL,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      temperature: 0.3,
-      max_completion_tokens: 16000,
-      response_format: { type: 'json_object' }
-    });
-
-    const output = completion.choices[0].message.content;
-    return {
-      generation_mode: 'gpt',
-      model: MODEL,
-      output: JSON.parse(output),
-      raw_prompt: prompt.substring(0, 1000) + '...'
-    };
+    const openai = clientFactory(apiKey);
+    completion = await openai.chat.completions.create(request);
   } catch (error) {
-    console.error('GPT generation failed:', error.message);
-    return { generation_mode: 'mock', error: error.message };
+    console.error('BOS report provider request failed', {
+      status: Number.isInteger(error?.status) ? error.status : null,
+      code: 'BOS_REPORT_PROVIDER_REQUEST_FAILED',
+    });
+    throw governedGenerationError('BOS_REPORT_PROVIDER_REQUEST_FAILED');
   }
+
+  const responseText = completion?.choices?.[0]?.message?.content;
+  const responseModel = typeof completion?.model === 'string' ? completion.model.trim() : '';
+  if (typeof responseText !== 'string' || !responseText.trim() || !responseModel) {
+    throw governedGenerationError('BOS_REPORT_PROVIDER_RESPONSE_INVALID');
+  }
+
+  let output;
+  try {
+    output = JSON.parse(responseText);
+  } catch {
+    throw governedGenerationError('BOS_REPORT_PROVIDER_RESPONSE_INVALID');
+  }
+  if (!output || typeof output !== 'object' || Array.isArray(output)) {
+    throw governedGenerationError('BOS_REPORT_PROVIDER_RESPONSE_INVALID');
+  }
+
+  return {
+    generation_mode: 'gpt',
+    model: responseModel,
+    temperature: Object.hasOwn(request, 'temperature') ? request.temperature : null,
+    output,
+  };
 }
 
-function validateAndProcessGPTOutput(output, isRepairPass = false) {
+export function validateAndProcessGPTOutput(output, isRepairPass = false, {
+  model = MODEL,
+  temperature = null,
+} = {}) {
   // Log actual keys received from GPT for debugging
   console.log('[GPT OUTPUT] Top-level keys:', Object.keys(output).sort());
   
@@ -137,8 +185,8 @@ function validateAndProcessGPTOutput(output, isRepairPass = false) {
       written_integration_count: output.written_integration_count || 0,
       quality_flags: genericityHits.length === 0 ? ['high_diagnostic', 'no_genericity'] : [],
       generation_mode: 'gpt',
-      model_used: MODEL,
-      temperature: 0.3,
+      model_used: model,
+      temperature: temperature ?? 'provider_default',
       validation_passed: genericityHits.length === 0
     }
   };
@@ -148,62 +196,6 @@ function validateAndProcessGPTOutput(output, isRepairPass = false) {
   }
 
   return content;
-}
-
-function generateMockContent(profileInput) {
-  return {
-    metadata: {
-      profile_version: 'mini-v2',
-      generation_date: new Date().toISOString(),
-      generation_mode: 'mock'
-    },
-    page01_cover: {
-      profile_signature_interpretation: '[MOCK] Command-speed operator with relational blind spots. Moves fast, misses resistance.',
-      profile_code_string: 'V35F28L12H23S18X24',
-      core_edge_narrative: '[MOCK] Core edge: fast clarity in execution phases. Hidden cost: late discovery of stakeholder misalignment.',
-      confidence_level: 'Moderate',
-      profile_type: 'Command-Precision'
-    },
-    page02_operating_system_map: {
-      system_tension_warning: '[MOCK] Vector preference creates unread relational resistance.',
-      core_engine_heading: 'Command-Speed Engine',
-      primary_driver_name: 'Vector (Command)',
-      primary_driver_bullet_1: '[MOCK] Enters with direction forming',
-      // ... abbreviated for brevity
-    },
-    page03_executive_summary: {
-      summary_text: '[MOCK] High command + moderate precision creates execution strength with relational cost. Primary tension: speed vs stakeholder alignment.'
-    },
-    page04_operating_pattern: {
-      operating_pattern_body_1: '[MOCK] Natural operating pattern: identify problem → decide → explain → execute.'
-    },
-    page05_decision_architecture: {
-      decision_architecture_narrative_1: '[MOCK] Decision style: clarity-seeking. Prefers clear answer over multiple valid options.'
-    },
-    page06_communication_style: {
-      signal_matrix_explanation: '[MOCK] Moderate signal means you catch major dynamics but miss subtle resistance.'
-    },
-    page07_system_under_strain: {
-      pressure_response_explanation: '[MOCK] Under strain: tighter structure, faster decisions. Teams feel shutdown.'
-    },
-    page08_operating_environment_fit: {
-      high_traction_environments_body: '[MOCK] Thrives in execution-focused, clear-goal environments.'
-    },
-    page09_facilitator_notes: {
-      facilitator_interpretation_body: '[MOCK] Coaching note: Frame input-gathering as decision-making, not hesitation.'
-    },
-    page10_full_profile_unlocks: {
-      core_force_heading: 'Command Clarity',
-      hidden_cost_heading: 'Unread Resistance'
-    },
-    generation_metadata: {
-      genericity_score: 0.0,
-      banned_phrases_detected: [],
-      quality_flags: ['mock_mode', 'schema_complete'],
-      generation_mode: 'mock',
-      validation_passed: true
-    }
-  };
 }
 
 function writeReportContent(content) {

@@ -1,12 +1,15 @@
 /* global process */
 
+import { createHash } from 'node:crypto';
 import { getRecruitingService, syntheticReviewEnabled } from './runtime.js';
+import { RECRUITING_BOS_JOB_TTL_SECONDS } from '../miniV2JobManager.js';
 import { businessAssessmentByProfileKey, businessAssessmentKey } from '../../business-assessment/shared.js';
 import { normalizeRecruitingNamespace } from './redisStore.js';
 import {
   PRODUCT_EXECUTION_CONTRACT_VERSION,
   authorizeExistingProductRead,
   authorizeProductRequest,
+  productExecutionFingerprint,
 } from '../../../src/lib/publicSiteAirlockV1/productBoundary.js';
 import {
   readVerifiedProfileOwnerRequest,
@@ -14,6 +17,7 @@ import {
 } from '../../../src/lib/publicSiteAirlockV1/profileOwnership.js';
 
 const INVITE_COOKIE = '__Host-more_recruiting_invite';
+const BOS_JOB_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{2,179}$/iu;
 
 function parseCookies(header = '') {
   return Object.fromEntries(String(header).split(';').map((part) => part.trim()).filter(Boolean).map((part) => {
@@ -32,6 +36,11 @@ function normalizeProfileId(value) {
 function normalizeAssessmentId(value) {
   const match = String(value || '').trim().match(/^ba-(\d{8})-([a-f0-9]{8})$/iu);
   return match ? `ba-${match[1]}-${match[2].toLowerCase()}` : null;
+}
+
+function normalizeBosJobId(value) {
+  const jobId = String(value || '').trim();
+  return BOS_JOB_ID_PATTERN.test(jobId) ? jobId : null;
 }
 
 function parseRecord(raw) {
@@ -258,12 +267,16 @@ export async function resolveRecruitingBosStartMetadata(req, clientMetadata = {}
   };
 }
 
-export async function projectRecruitingBosInProgress({ relationshipRef, env = process.env } = {}) {
+export async function projectRecruitingBosInProgress({ relationshipRef, jobId, env = process.env } = {}) {
   const normalizedRelationshipRef = String(relationshipRef || '').trim();
   if (!normalizedRelationshipRef) return { projected: false, reason: 'NOT_A_RECRUITING_JOB' };
+  const normalizedJobId = String(jobId || '').trim();
+  if (!normalizedJobId) throw new Error('RECRUITING_BOS_JOB_BINDING_REQUIRED');
   let invitation;
   try {
-    invitation = await getRecruitingService(env).projectBosInProgress(normalizedRelationshipRef);
+    invitation = await getRecruitingService(env).projectBosInProgress(normalizedRelationshipRef, {
+      job_id: normalizedJobId,
+    });
   } catch (error) {
     if (error?.message === 'RECRUITING_BOS_STATE_REGRESSION_DENIED') {
       return { projected: true, already_advanced: true, reason: 'RECRUITING_BOS_ALREADY_ADVANCED' };
@@ -275,7 +288,96 @@ export async function projectRecruitingBosInProgress({ relationshipRef, env = pr
     candidate_id: invitation.candidate_id,
     readiness_state: invitation.readiness_state,
     progress_state: invitation.progress_state,
+    bos_job_id: normalizedJobId,
   };
+}
+
+/**
+ * Repair only the durable post-commit projection seam. The relationship comes
+ * from an already-inspected HttpOnly invite session; neither the relationship
+ * nor job locator is accepted from the browser. A still-existing job must
+ * independently agree with the committed execution receipt before mutation.
+ */
+export async function reconcileRecruitingBosStartFromCommittedExecution({
+  inspected,
+  store,
+  service = getRecruitingService(),
+} = {}) {
+  const relationship = inspected?.relationship;
+  const relationshipRef = String(relationship?.relationship_ref || '').trim();
+  const candidateId = String(relationship?.candidate_id || '').trim();
+  const session = inspected?.invite_session;
+  if (!relationshipRef
+      || !candidateId
+      || String(session?.invitation_id || '') !== relationshipRef
+      || String(session?.candidate_id || '') !== candidateId
+      || relationship?.purpose !== 'RECRUITING_INTELLIGENCE') {
+    throw new Error('RECRUITING_INVITE_SESSION_SCOPE_INVALID');
+  }
+
+  const progressState = String(relationship?.progress_state || '');
+  if (relationship?.bos_profile_id
+      || relationship?.bos_job_id
+      || !['INVITED', 'BOS_IN_PROGRESS'].includes(progressState)) {
+    return Object.freeze({ reconciled: false, reason: 'RECRUITING_BOS_BINDING_NOT_REQUIRED' });
+  }
+  if (typeof store?.get !== 'function' || typeof store?.expire !== 'function') {
+    throw new Error('RECRUITING_BOS_EXECUTION_STORE_REQUIRED');
+  }
+
+  const executionKey = `recruiting_v1:product_execution:${relationshipRef}:behavior_operating_system`;
+  const executionRaw = await store.get(executionKey);
+  if (!executionRaw) {
+    if (progressState === 'BOS_IN_PROGRESS') {
+      throw new Error('RECRUITING_BOS_EXECUTION_RECEIPT_REQUIRED');
+    }
+    return Object.freeze({ reconciled: false, reason: 'RECRUITING_BOS_NOT_STARTED' });
+  }
+
+  const execution = parseRecord(executionRaw);
+  const rawExecutionJobId = execution?.identifiers?.job_id;
+  const rawResultJobId = execution?.result?.job_id;
+  const jobId = normalizeBosJobId(rawExecutionJobId);
+  const resultJobId = normalizeBosJobId(rawResultJobId);
+  if (!execution
+      || execution.contract_version !== PRODUCT_EXECUTION_CONTRACT_VERSION
+      || execution.authority_type !== 'RECRUITING_RELATIONSHIP'
+      || execution.authority_ref !== relationshipRef
+      || execution.product_key !== 'behavior_operating_system'
+      || execution.state !== 'COMMITTED'
+      || !/^[a-f0-9]{64}$/u.test(String(execution.request_sha256 || ''))
+      || execution.result?.success !== true
+      || !jobId
+      || rawExecutionJobId !== jobId
+      || rawResultJobId !== jobId
+      || resultJobId !== jobId) {
+    throw new Error('RECRUITING_BOS_EXECUTION_RECEIPT_INVALID');
+  }
+
+  const jobKey = `job:${jobId}`;
+  const job = parseRecord(await store.get(jobKey));
+  if (!job
+      || job.job_id !== jobId
+      || normalizeBosJobId(job.job_id) !== jobId
+      || !job.payload
+      || typeof job.payload !== 'object'
+      || Array.isArray(job.payload)
+      || job.payload?.metadata?.recruiting_relationship_ref !== relationshipRef
+      || job.payload?.metadata?.recruiting_purpose !== 'RECRUITING_INTELLIGENCE'
+      || !/^[a-f0-9]{64}$/u.test(String(job.intake_payload_sha256 || ''))) {
+    throw new Error('RECRUITING_BOS_JOB_BINDING_INVALID');
+  }
+  const jobPayloadSha256 = createHash('sha256').update(JSON.stringify(job.payload)).digest('hex');
+  if (jobPayloadSha256 !== job.intake_payload_sha256
+      || productExecutionFingerprint('behavior_operating_system', job.payload) !== execution.request_sha256) {
+    throw new Error('RECRUITING_BOS_EXECUTION_PAYLOAD_MISMATCH');
+  }
+  if (await store.expire(jobKey, RECRUITING_BOS_JOB_TTL_SECONDS) !== 1) {
+    throw new Error('RECRUITING_BOS_JOB_RETENTION_FAILED');
+  }
+
+  await service.projectBosInProgress(relationshipRef, { job_id: jobId });
+  return Object.freeze({ reconciled: true, job_id: jobId });
 }
 
 export async function onRecruitingBosVaultVerified({ relationshipRef, profileId, vaultResult, env = process.env }) {

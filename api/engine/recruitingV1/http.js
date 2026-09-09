@@ -1,7 +1,12 @@
 /* global process */
 
 import { getRecruitingService, generateCandidateIntelligence, getCandidateProjection, recruitingRuntimeEnabled, syntheticReviewEnabled } from './runtime.js';
+import { redis as getRedis } from '../redisClient.js';
+import {
+  reconcileRecruitingBosStartFromCommittedExecution,
+} from './canonicalAdapters.js';
 import { buildRecruitingInviteContinuation } from '../../../src/lib/recruitingV1/continuation.js';
+import { RedisPublicStore } from '../../../src/lib/publicSiteAirlockV1/redisStore.js';
 import {
   readVerifiedProfileOwnerRequest,
   resolveProfileOwnershipAudience,
@@ -51,8 +56,21 @@ function verifiedProfileOwner(req) {
   });
 }
 
-async function inviteContinuation(service, inviteSessionToken) {
-  const inspected = await service.inspectInviteSession(inviteSessionToken);
+export async function inviteContinuation(service, inviteSessionToken, { executionStore } = {}) {
+  let inspected = await service.inspectInviteSession(inviteSessionToken);
+  const durableExecutionStore = executionStore === undefined && !syntheticReviewEnabled()
+    ? new RedisPublicStore(getRedis())
+    : executionStore;
+  if (durableExecutionStore) {
+    await reconcileRecruitingBosStartFromCommittedExecution({
+      inspected,
+      store: durableExecutionStore,
+      service,
+    });
+    // Re-read after the idempotent repair so a concurrent BOS completion wins
+    // and continuation never regresses or projects a stale locator.
+    inspected = await service.inspectInviteSession(inviteSessionToken);
+  }
   return {
     ...inspected,
     continuation: buildRecruitingInviteContinuation(inspected),

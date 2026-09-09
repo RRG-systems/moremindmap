@@ -114,6 +114,7 @@ export function classifyBosGenerationStatus(response) {
 export async function pollBosGenerationJob({
   readStatus,
   onProgress = () => {},
+  shouldContinue = () => true,
   now = () => Date.now(),
   sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds)),
   maxWaitMs = BOS_GENERATION_MAX_WAIT_MS,
@@ -121,13 +122,16 @@ export async function pollBosGenerationJob({
   statusFailureLimit = BOS_GENERATION_STATUS_FAILURE_LIMIT,
 } = {}) {
   if (typeof readStatus !== 'function') throw new TypeError('readStatus is required')
+  if (typeof shouldContinue !== 'function') throw new TypeError('shouldContinue must be a function')
 
   const startedAt = now()
   let consecutiveStatusFailures = 0
 
   while ((now() - startedAt) < maxWaitMs) {
+    if (!shouldContinue()) return { state: 'cancelled', retryable: true }
     const remainingMs = maxWaitMs - (now() - startedAt)
     await sleep(Math.min(pollIntervalMs, remainingMs))
+    if (!shouldContinue()) return { state: 'cancelled', retryable: true }
 
     const statusReadBudgetMs = maxWaitMs - (now() - startedAt)
     if (statusReadBudgetMs <= 0) break
@@ -148,6 +152,10 @@ export async function pollBosGenerationJob({
     })
     const readOutcome = await Promise.race([statusRead, waitExpired])
     clearTimeout(timeoutId)
+    if (!shouldContinue()) {
+      controller?.abort()
+      return { state: 'cancelled', retryable: true }
+    }
     if (readOutcome.kind === 'wait_expired') break
 
     const status = classifyBosGenerationStatus(readOutcome.response)

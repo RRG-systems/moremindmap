@@ -45,6 +45,12 @@ function activePeriod(membership, now) {
 }
 
 const ACTIVE_ENTITLEMENT_STATES = Object.freeze(['RESERVED', 'CONSUMED']);
+const BOS_JOB_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{2,179}$/iu;
+
+function normalizeBosJobId(value) {
+  const jobId = boundedText(value, 180);
+  return BOS_JOB_ID_PATTERN.test(jobId) ? jobId : null;
+}
 
 function productEntitlementState(invitation, product) {
   const explicit = invitation?.[`${product}_entitlement_state`];
@@ -958,6 +964,7 @@ export class RecruitingV1Service {
         candidate_id: invitation.candidate_id,
         readiness_state: invitation.readiness_state,
         progress_state: invitationProjection.progress_state,
+        bos_job_id: invitation.bos_job_id || null,
         bos_profile_id: invitation.bos_profile_id || null,
         ba_assessment_id: invitation.ba_assessment_id || null,
         ba_readiness: invitation.ba_readiness,
@@ -1054,15 +1061,23 @@ export class RecruitingV1Service {
     return this.recordDelivery(outboxId, outcome);
   }
 
-  async projectBosInProgress(invitationId) {
+  async projectBosInProgress(invitationId, { job_id: jobId } = {}) {
+    const normalizedJobId = normalizeBosJobId(jobId);
+    if (!normalizedJobId) throw new Error('RECRUITING_BOS_JOB_BINDING_REQUIRED');
     return this.store.transaction((state) => {
       const now = this.now();
       const invitation = state.invitations[invitationId];
       if (!invitation || !invitation.accepted_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
-      if (invitation.readiness_state === 'BOS_IN_PROGRESS') return publicInvitation(invitation);
+      if (invitation.bos_job_id && invitation.bos_job_id !== normalizedJobId) {
+        throw new Error('RECRUITING_BOS_JOB_REBIND_DENIED');
+      }
       if (invitation.bos_profile_id || ['BOS_READY', 'BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(invitation.readiness_state)) {
         return publicInvitation(invitation);
       }
+      if (invitation.readiness_state === 'BOS_IN_PROGRESS' && invitation.bos_job_id === normalizedJobId) {
+        return publicInvitation(invitation);
+      }
+      invitation.bos_job_id = normalizedJobId;
       invitation.readiness_state = 'BOS_IN_PROGRESS';
       invitation.updated_at = iso(now);
       audit(state, 'CANDIDATE_BOS_IN_PROGRESS', { invitation_id: invitation.invitation_id, candidate_id: invitation.candidate_id }, now);

@@ -99,7 +99,7 @@ test('verified existing BOS binds once, notifies the manager, and cannot be rebo
   assert.equal(bound.progress_state, 'BOS_COMPLETE');
   assert.equal(bound.bos_profile_id, PROFILE_ID);
   assert.equal(
-    (await harness.service.projectBosInProgress(harness.created.invitation.invitation_id)).progress_state,
+    (await harness.service.projectBosInProgress(harness.created.invitation.invitation_id, { job_id: 'bos-job-existing-profile-001' })).progress_state,
     'BOS_COMPLETE',
   );
 

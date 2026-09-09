@@ -26,6 +26,7 @@ const ENFORCED_ENV = {
   MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY: 'synthetic-profile-owner-signing-key-32-bytes',
 };
 const CONSENT = { accepted: true, version: 'recruiting_v1_consent_2026_08' };
+const BOS_JOB_ID = '22222222-2222-5222-a222-222222222222';
 const EMPTY_PUBLIC_STORE = Object.freeze({ async get() { return null; } });
 
 async function acceptedRelationship() {
@@ -61,6 +62,7 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
 
   const bosStarted = await projectRecruitingBosInProgress({
     relationshipRef: invitation.invitation_id,
+    jobId: BOS_JOB_ID,
     env: ENV,
   });
   assert.deepEqual(bosStarted, {
@@ -68,9 +70,10 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
     candidate_id: invitation.candidate_id,
     readiness_state: 'BOS_IN_PROGRESS',
     progress_state: 'BOS_IN_PROGRESS',
+    bos_job_id: BOS_JOB_ID,
   });
   assert.deepEqual(
-    await projectRecruitingBosInProgress({ relationshipRef: invitation.invitation_id, env: ENV }),
+    await projectRecruitingBosInProgress({ relationshipRef: invitation.invitation_id, jobId: BOS_JOB_ID, env: ENV }),
     bosStarted,
   );
   assert.deepEqual(await projectRecruitingBosInProgress({ relationshipRef: '', env: ENV }), {
@@ -94,6 +97,7 @@ test('canonical BOS and BA adapters derive authority from the accepted HttpOnly 
   });
   assert.equal((await projectRecruitingBosInProgress({
     relationshipRef: invitation.invitation_id,
+    jobId: BOS_JOB_ID,
     env: ENV,
   })).projected, true);
   const owner = await resolveRecruitingBaOwnerProfile(req, 'mm-20990101-attacker1', { required: true, env: ENV });

@@ -8,8 +8,9 @@ import { normalizeProfileOwnershipReturnPath } from '../src/lib/publicSiteAirloc
 import { createResendOwnershipTransport } from '../src/lib/publicSiteAirlockV1/resendOwnershipTransport.js';
 
 const PROFILE_ID = 'mm-20990101-recru001';
+const BOS_JOB_ID = '11111111-1111-5111-a111-111111111111';
 
-function inspected({ profileId = null, baReadiness = 'BA_NOT_STARTED', assessmentId = null, progressState = null } = {}) {
+function inspected({ profileId = null, baReadiness = 'BA_NOT_STARTED', assessmentId = null, progressState = null, bosJobId } = {}) {
   const projectedProgress = progressState || (!profileId
     ? 'INVITED'
     : baReadiness === 'BA_INTELLIGENCE_READY'
@@ -17,6 +18,9 @@ function inspected({ profileId = null, baReadiness = 'BA_NOT_STARTED', assessmen
       : ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS'].includes(baReadiness)
         ? 'BA_IN_PROGRESS'
         : 'BOS_COMPLETE');
+  const projectedBosJobId = bosJobId === undefined && projectedProgress === 'BOS_IN_PROGRESS'
+    ? BOS_JOB_ID
+    : bosJobId || null;
   return {
     invite_session: {
       invite_session_id: 'invite_session_synthetic_001',
@@ -30,6 +34,7 @@ function inspected({ profileId = null, baReadiness = 'BA_NOT_STARTED', assessmen
       ba_assessment_id: assessmentId,
       ba_readiness: baReadiness,
       progress_state: projectedProgress,
+      bos_job_id: projectedBosJobId,
       readiness_state: projectedProgress === 'INVITED' ? 'CONSENTED' : projectedProgress,
       purpose: 'RECRUITING_INTELLIGENCE',
     },
@@ -49,6 +54,7 @@ test('accepted invite session preserves invited readiness before BOS starts', ()
 
   const started = buildRecruitingInviteContinuation(inspected({ progressState: 'BOS_IN_PROGRESS' }));
   assert.equal(started.progress_state, 'BOS_IN_PROGRESS');
+  assert.deepEqual(started.bos_resume, { state: 'BOUND', job_id: BOS_JOB_ID });
   assert.deepEqual(started.progress.map((step) => step.state), ['COMPLETE', 'CURRENT', 'LOCKED']);
 });
 
@@ -101,6 +107,10 @@ test('continuation fails closed on cross-session identity or impossible BA state
 
   assert.throws(
     () => buildRecruitingInviteContinuation(inspected({ profileId: PROFILE_ID, progressState: 'INVITED' })),
+    /RECRUITING_INVITE_CONTINUATION_BINDING_INVALID/u,
+  );
+  assert.throws(
+    () => buildRecruitingInviteContinuation(inspected({ progressState: 'BOS_IN_PROGRESS', bosJobId: null })),
     /RECRUITING_INVITE_CONTINUATION_BINDING_INVALID/u,
   );
 });

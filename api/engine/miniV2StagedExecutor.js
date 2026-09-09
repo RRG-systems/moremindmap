@@ -4,7 +4,7 @@
  * Prevents serverless timeout by breaking pipeline into small chunks
  */
 
-import { getJob, updateJob, lockJob, unlockJob, JOB_STAGE, JOB_STATUS } from './miniV2JobManager.js'
+import { getJob, updateJob, JOB_STAGE, JOB_STATUS } from './miniV2JobManager.js'
 
 /**
  * Extract placeholder field names from HTML
@@ -27,6 +27,11 @@ function extractPlaceholdersFromHtml(html) {
   }
   
   return matches
+}
+
+async function governedReportContent(reportContent) {
+  const { assertGovernedReportContent } = await import('./generateReportContent.js')
+  return assertGovernedReportContent(reportContent)
 }
 
 /**
@@ -131,7 +136,8 @@ export async function executeFirstInjection(job) {
   const injectModule = await import('./injectReportContent.js')
   const injectReportContent = injectModule.default
   
-  const { reportContent } = job
+  const reportContent = await governedReportContent(job.reportContent)
+  const generationMode = reportContent.generation_metadata.generation_mode
   trace.push('got_reportContent_from_job')
   
   if (!reportContent) {
@@ -209,7 +215,7 @@ export async function executeFirstInjection(job) {
             placeholder_count: placeholderCount,
             pages_rendered: snapshot.pages_rendered,
             coverage_percent: snapshot.coverage_percent,
-            generation_mode: 'gpt'
+            generation_mode: generationMode
           },
           diagnostics: {
             ...job.diagnostics,
@@ -253,7 +259,7 @@ export async function executeFirstInjection(job) {
         placeholder_count: 0,
         pages_rendered: snapshot.pages_rendered,
         coverage_percent: snapshot.coverage_percent,
-        generation_mode: 'gpt'
+        generation_mode: generationMode
       },
       diagnostics: {
         ...job.diagnostics,
@@ -396,7 +402,8 @@ export async function executeFinalInjection(job) {
   const injectModule = await import('./injectReportContent.js')
   const injectReportContent = injectModule.default
   
-  const { reportContent } = job
+  const reportContent = await governedReportContent(job.reportContent)
+  const generationMode = reportContent.generation_metadata.generation_mode
   
   // Re-inject with repaired content
   const result = await injectReportContent(reportContent)
@@ -415,7 +422,7 @@ export async function executeFinalInjection(job) {
         placeholder_count: 0,
         pages_rendered: snapshot.pages_rendered,
         coverage_percent: snapshot.coverage_percent,
-        generation_mode: 'gpt'
+        generation_mode: generationMode
       },
       diagnostics: {
         ...job.diagnostics,
@@ -454,9 +461,10 @@ export async function executeNextStage(job) {
       case JOB_STAGE.RECEIVED:
         return await executeFirstPassGeneration(job)
       
-      case JOB_STAGE.CANONICAL_GENERATION:
+      case JOB_STAGE.CANONICAL_GENERATION: {
         const { executeCanonicalGeneration } = await import('./canonical/executeCanonicalGeneration.js')
         return await executeCanonicalGeneration(job)
+      }
       
       case JOB_STAGE.FIRST_INJECTION:
         return await executeFirstInjection(job)

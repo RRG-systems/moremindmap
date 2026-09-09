@@ -106,7 +106,7 @@ test('five BOS plus five BA reservations are atomic, separately summarized, and 
   );
 
   const invitationId = created[0].invitation.invitation_id;
-  const bosInProgress = await service.projectBosInProgress(invitationId);
+  const bosInProgress = await service.projectBosInProgress(invitationId, { job_id: 'bos-job-paired-001' });
   assert.equal(bosInProgress.progress_state, 'BOS_IN_PROGRESS');
   assert.equal(bosInProgress.complimentary_access.ba, 'RESERVED');
   assert.equal((await service.inspectManager(session)).entitlements.ba.consumed, 0);
@@ -283,9 +283,9 @@ test('manager home projects the five governed candidate progress states', async 
   for (let index = 1; index < invitations.length; index += 1) {
     await service.acceptInvitation(invitations[index].invitation_token, { accepted: true, version: 'recruiting_v1_consent_2026_08' });
   }
-  const bosInProgress = await service.projectBosInProgress(invitations[1].invitation.invitation_id);
+  const bosInProgress = await service.projectBosInProgress(invitations[1].invitation.invitation_id, { job_id: 'bos-job-progress-002' });
   assert.equal(bosInProgress.progress_state, 'BOS_IN_PROGRESS');
-  assert.equal((await service.projectBosInProgress(invitations[1].invitation.invitation_id)).progress_state, 'BOS_IN_PROGRESS');
+  assert.equal((await service.projectBosInProgress(invitations[1].invitation.invitation_id, { job_id: 'bos-job-progress-002' })).progress_state, 'BOS_IN_PROGRESS');
   await service.bindBosProfile(invitations[2].invitation.invitation_id, 'mm-20990101-prog0003', { verified: true });
   await service.bindBosProfile(invitations[3].invitation.invitation_id, 'mm-20990101-prog0004', { verified: true });
   await service.projectBaState(invitations[3].invitation.invitation_id, { assessment_id: 'ba-progress-004', state: 'BA_IN_PROGRESS' });

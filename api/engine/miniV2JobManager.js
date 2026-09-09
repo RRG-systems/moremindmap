@@ -6,9 +6,20 @@
 import { v4 as uuidv4 } from 'uuid'
 import { redisGet, redisSet, redis as getRedis } from './redisClient.js'
 import { createHash } from 'node:crypto'
+import { BOS_INTAKE_DRAFT_TTL_SECONDS } from './bosIntakeDraftV1.js'
 
 // Job TTL: 24 hours (86400 seconds)
-const JOB_TTL = 86400
+export const BOS_JOB_TTL_SECONDS = 86400
+export const RECRUITING_BOS_JOB_TTL_SECONDS = BOS_INTAKE_DRAFT_TTL_SECONDS
+
+export function resolveBosJobTtlSeconds(job) {
+  const metadata = job?.payload?.metadata
+  const relationshipRef = String(metadata?.recruiting_relationship_ref || '').trim()
+  const purpose = String(metadata?.recruiting_purpose || '').trim()
+  return relationshipRef && purpose === 'RECRUITING_INTELLIGENCE'
+    ? RECRUITING_BOS_JOB_TTL_SECONDS
+    : BOS_JOB_TTL_SECONDS
+}
 
 /**
  * Job statuses
@@ -77,10 +88,11 @@ export async function createJob(payload, { jobId: providedJobId = null } = {}) {
       timestamp: null
     }
   }
+  const ttlSeconds = resolveBosJobTtlSeconds(job)
   
   if (providedJobId) {
     const rc = getRedis()
-    const created = await rc.set(`job:${jobId}`, JSON.stringify(job), 'EX', JOB_TTL, 'NX')
+    const created = await rc.set(`job:${jobId}`, JSON.stringify(job), 'EX', ttlSeconds, 'NX')
     if (created !== 'OK') {
       const existing = await redisGet(`job:${jobId}`)
       if (existing?.intake_payload_sha256 !== intakePayloadSha256) {
@@ -89,7 +101,7 @@ export async function createJob(payload, { jobId: providedJobId = null } = {}) {
       return jobId
     }
   } else {
-    await redisSet(`job:${jobId}`, job, { ex: JOB_TTL })
+    await redisSet(`job:${jobId}`, job, { ex: ttlSeconds })
   }
   
   // Add to recent jobs list for diagnostics
@@ -119,14 +131,17 @@ export async function updateJob(jobId, patch) {
   if (!job) {
     throw new Error(`Job not found: ${jobId}`)
   }
+  const ttlSeconds = resolveBosJobTtlSeconds(job)
   
   const updated = {
     ...job,
     ...patch,
+    // Intake payload and its server-derived retention class are immutable.
+    payload: job.payload,
     updated_at: new Date().toISOString()
   }
   
-  await redisSet(`job:${jobId}`, updated, { ex: JOB_TTL })
+  await redisSet(`job:${jobId}`, updated, { ex: ttlSeconds })
   return updated
 }
 

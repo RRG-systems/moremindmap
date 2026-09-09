@@ -33,11 +33,12 @@ export async function createBosStartJob(jobPayload, { jobId = null, create = cre
 
 export async function projectRecruitingBosStartIdempotently({
   relationshipRef,
+  jobId,
   project = projectRecruitingBosInProgress,
 } = {}) {
   if (!relationshipRef) return undefined
   try {
-    return await project({ relationshipRef })
+    return await project({ relationshipRef, jobId })
   } catch (recruitingProjectionError) {
     console.error(JSON.stringify({
       event: 'RECRUITING_BOS_START_PROJECTION_FAILED',
@@ -196,6 +197,7 @@ export default async function handler(req, res) {
       }
       await projectRecruitingBosStartIdempotently({
         relationshipRef: governedMetadata.recruiting_relationship_ref,
+        jobId,
       })
       return res.status(200).json(executionClaim.record.result || startResultFor(jobId))
     }
@@ -214,6 +216,7 @@ export default async function handler(req, res) {
     if (executionCommitted) {
       await projectRecruitingBosStartIdempotently({
         relationshipRef: governedMetadata.recruiting_relationship_ref,
+        jobId,
       })
     }
 

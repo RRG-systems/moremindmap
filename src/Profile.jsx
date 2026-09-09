@@ -22,6 +22,10 @@ import {
   runBosGenerationRequest,
 } from "./lib/bosGenerationJourney.js";
 import { renewStoredPublicStartToken } from './lib/publicProductStartSession.js';
+import {
+  resolveRecruitingBosLanding,
+  resumeRecruitingBoundBos,
+} from './lib/recruitingV1/continuation.js';
 
 // Complimentary authority is server-owned by publicSiteAirlockV1. No active
 // capability value or digest may be shipped in this client bundle.
@@ -414,17 +418,52 @@ export default function Profile() {
 
   useEffect(() => {
     if (!recruitingRequested) return
+    let cancelled = false
     fetch('/api/recruiting/runtime?view=invite_session', {
       credentials: 'same-origin',
       cache: 'no-store'
     }).then(async (response) => {
       const payload = await response.json().catch(() => null)
+      if (cancelled) return
       if (!response.ok || payload?.ok !== true || !payload?.relationship?.relationship_ref) {
         throw new Error('Your recruiting invitation session is unavailable. Return to the invitation link and accept again.')
       }
+      const progressState = payload?.continuation?.progress_state
+      const bosLanding = ['INVITED', 'BOS_IN_PROGRESS'].includes(progressState)
+        ? resolveRecruitingBosLanding(payload.continuation)
+        : null
       setRecruitingAuthorized(true)
       setPaymentPassed(true)
-    }).catch((error) => setCheckoutError(error.message))
+      if (bosLanding?.mode === 'RESUME_BOUND_BOS') {
+        void resumeRecruitingBoundBos({
+          continuation: payload.continuation,
+          pollBoundJob: (jobId) => cancelled
+            ? undefined
+            : resumeExistingGeneration(jobId, {
+                recruiting: true,
+                isCancelled: () => cancelled,
+              }),
+        }).catch(() => {
+          if (cancelled) return
+          setProcessing(false)
+          setSubmitted(true)
+          setResult({
+            success: false,
+            code: 'BOS_GENERATION_RESUME_UNAVAILABLE',
+            error: 'We could not reopen the saved generation job. Return to your private continuation and try again; your assessment was not submitted again.',
+            retryable: false,
+          })
+        })
+      }
+    }).catch((error) => {
+      if (!cancelled) setCheckoutError(error.message)
+    })
+    return () => {
+      cancelled = true
+    }
+    // The accepted-invitation bootstrap runs once for this route request. Re-running
+    // when the local resume callback is recreated would poll the same job twice.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recruitingRequested])
 
   useEffect(() => {
@@ -724,7 +763,11 @@ export default function Profile() {
     discardCompletedBosDraft()
   }
 
-  async function openCompletedBos(statusData, jobId, API) {
+  async function openCompletedBos(statusData, jobId, API, {
+    recruiting = recruitingAuthorized,
+    isCancelled = () => false,
+  } = {}) {
+    if (isCancelled()) return
     const canonicalProfileId = normalizeBosCanonicalProfileId(statusData?.canonical_profile_id)
     if (!canonicalProfileId) {
       setProcessing(false)
@@ -755,13 +798,14 @@ export default function Profile() {
         request: async ({ signal }) => {
           const res = await fetch(fullUrl, {
             headers: publicStartHeaders(),
-            credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+            credentials: recruiting ? 'same-origin' : 'omit',
             signal,
           })
           if (!res.ok) throw new Error(`Failed to fetch profile: ${res.status}`)
           return res.json()
         },
       })
+      if (isCancelled()) return
       const retrievedProfileId = normalizeBosCanonicalProfileId(data?.profile_id)
       const hasCanonicalDossier = data?.canonical_dossier
         && typeof data.canonical_dossier === 'object'
@@ -780,6 +824,7 @@ export default function Profile() {
         retrieved_at: data.retrieved_at
       }, jobId)
     } catch (error) {
+      if (isCancelled()) return
       if (hasUsableBosCompletedHtml(statusData)) {
         console.error("[MINI-V2-ROUTE] Governed retrieval unavailable; using completed job payload:", error.message)
         settleOpenedBos({
@@ -808,11 +853,15 @@ export default function Profile() {
         })
       }
     } finally {
-      setProfileIdLoading(false)
+      if (!isCancelled()) setProfileIdLoading(false)
     }
   }
 
-  async function pollExistingBosJob(jobId, API) {
+  async function pollExistingBosJob(jobId, API, {
+    recruiting = recruitingAuthorized,
+    isCancelled = () => false,
+  } = {}) {
+    if (isCancelled()) return
     setGenerationJourney({
       mode: 'async',
       state: 'pending',
@@ -825,13 +874,14 @@ export default function Profile() {
       readStatus: async ({ signal } = {}) => {
         const statusRes = await fetch(buildApiUrl(API, `/api/moremindmap/status?job_id=${jobId}`), {
           headers: publicStartHeaders(),
-          credentials: recruitingAuthorized ? 'same-origin' : 'omit',
+          credentials: recruiting ? 'same-origin' : 'omit',
           signal,
         })
         const payload = await statusRes.json().catch(() => null)
         return { ok: statusRes.ok, statusCode: statusRes.status, payload }
       },
       onProgress: (status) => {
+        if (isCancelled()) return
         console.log('[MINI-V2] Status:', status.stage)
         setGenerationJourney({
           mode: 'async',
@@ -841,10 +891,13 @@ export default function Profile() {
           jobId,
         })
       },
+      shouldContinue: () => !isCancelled(),
     })
 
+    if (isCancelled() || generationOutcome.state === 'cancelled') return
+
     if (generationOutcome.state === 'complete') {
-      await openCompletedBos(generationOutcome.payload, jobId, API)
+      await openCompletedBos(generationOutcome.payload, jobId, API, { recruiting, isCancelled })
       return
     }
 
@@ -890,8 +943,11 @@ export default function Profile() {
     })
   }
 
-  async function resumeExistingGeneration(jobId) {
-    if (!jobId || !submissionGuard.tryStart()) return
+  async function resumeExistingGeneration(jobId, {
+    recruiting = recruitingAuthorized,
+    isCancelled = () => false,
+  } = {}) {
+    if (!jobId || isCancelled() || !submissionGuard.tryStart()) return
 
     setSubmitting(true)
     setProcessing(true)
@@ -900,8 +956,10 @@ export default function Profile() {
     try {
       const API = import.meta.env.VITE_API_URL || ""
       if (publicBosAuthorized) await renewStoredPublicStartToken()
-      await pollExistingBosJob(jobId, API)
+      if (isCancelled()) return
+      await pollExistingBosJob(jobId, API, { recruiting, isCancelled })
     } catch {
+      if (isCancelled()) return
       setProcessing(false)
       setResult({
         success: false,
@@ -911,8 +969,10 @@ export default function Profile() {
         job_id: jobId,
       })
     } finally {
-      setSubmitting(false)
-      setSubmitted(true)
+      if (!isCancelled()) {
+        setSubmitting(false)
+        setSubmitted(true)
+      }
       submissionGuard.finish()
     }
   }

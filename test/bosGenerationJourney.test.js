@@ -159,6 +159,30 @@ test('repeated status transport failures stop promptly instead of leaving a perm
   assert.equal(clock, 6)
 })
 
+test('polling cancellation stops before another status read', async () => {
+  let active = true
+  let reads = 0
+  let clock = 0
+
+  const outcome = await pollBosGenerationJob({
+    readStatus: async () => {
+      reads += 1
+      return { ok: true, payload: { status: 'processing' } }
+    },
+    shouldContinue: () => active,
+    now: () => clock,
+    sleep: async (milliseconds) => {
+      clock += milliseconds
+      active = false
+    },
+    maxWaitMs: 100,
+    pollIntervalMs: 3,
+  })
+
+  assert.deepEqual(outcome, { state: 'cancelled', retryable: true })
+  assert.equal(reads, 0)
+})
+
 test('an in-flight status request is aborted at the overall customer wait boundary', async () => {
   let aborted = false
 
@@ -231,7 +255,8 @@ test('Profile renders waiting, custody, and status-only recovery contracts', () 
   assert.match(openSource, /runBosGenerationRequest/u)
   assert.match(openSource, /hasUsableBosCompletedHtml/u)
   assert.match(openSource, /BOS_COMPLETED_PROFILE_UNAVAILABLE/u)
-  assert.match(resumeSource, /pollExistingBosJob\(jobId, API\)/u)
+  assert.match(resumeSource, /pollExistingBosJob\(jobId, API, \{ recruiting, isCancelled \}\)/u)
+  assert.match(source, /shouldContinue: \(\) => !isCancelled\(\)/u)
   assert.match(resumeSource, /publicBosAuthorized\) await renewStoredPublicStartToken\(\)/u)
   assert.doesNotMatch(resumeSource, /\/api\/moremindmap\/start/u)
   assert.match(retrySource, /submitAssessment\(\{ reuseSavedSubmission: true \}\)/u)

@@ -382,21 +382,24 @@ test('Recruiting BA projection failure is retryable after commit while public BA
 
 test('Recruiting BOS-start projection failure exposes only a retryable post-commit signal', async () => {
   let attempts = 0;
-  const project = async ({ relationshipRef }) => {
+  const project = async ({ relationshipRef, jobId }) => {
     attempts += 1;
     assert.equal(relationshipRef, 'relationship_bos_projection_retry');
+    assert.equal(jobId, 'bos-job-projection-retry');
     if (attempts === 1) throw new Error('private recruiting storage detail');
     return { projected: true, readiness_state: 'BOS_IN_PROGRESS' };
   };
   await assert.rejects(
     projectRecruitingBosStartIdempotently({
       relationshipRef: 'relationship_bos_projection_retry',
+      jobId: 'bos-job-projection-retry',
       project,
     }),
     { message: 'RECRUITING_BOS_START_PROJECTION_PENDING' },
   );
   assert.deepEqual(await projectRecruitingBosStartIdempotently({
     relationshipRef: 'relationship_bos_projection_retry',
+    jobId: 'bos-job-projection-retry',
     project,
   }), { projected: true, readiness_state: 'BOS_IN_PROGRESS' });
   assert.equal(attempts, 2);
