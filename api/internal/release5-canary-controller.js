@@ -78,9 +78,50 @@ const HISTORICAL_KEY_PATTERNS = Object.freeze([
   ['historical_release4_subscription_runtime', /^more:subscription-v1:internal-dev:v1:(?:relationship:[a-f0-9]{64}|capability:[a-f0-9]{64}|subject-switch-csrf:[a-f0-9]{64}:[a-f0-9]{64}|runtime-csrf:[a-f0-9]{64}:[a-f0-9]{64}|(?:living|living-backup|living-lock|allowance-backup|allowance-lock|research|diagnostics|s2-relationship):[a-f0-9]{64}|allowance:[a-f0-9]{64}:\d{4}-\d{2})$/u],
   ['historical_release4_subscription_blind', /^more:subscription-blind:v1:(?:selection:[a-f0-9]{64}|lock:[a-f0-9]{64}|history:rel_[a-f0-9]{20})$/u],
 ]);
+const BA_READY_RECOVERY_REQUIRED_CLASS_COUNTS = Object.freeze({
+  release5_new_bos_checkpoint: 21,
+  release5_synthetic_manager_profile: 2,
+  release5_new_ba_pointer: 1,
+  release5_new_ba_background: 3,
+  release5_new_bos_pointer: 1,
+  release5_synthetic_recruit_vault_index: 2,
+  historical_release4_subscription_blind: 3,
+  release5_new_ba_checkpoint: 3,
+  release5_synthetic_recruit_bos_execution: 1,
+  historical_release4_subscription_runtime: 13,
+  release5_shared_bos_job_index: 1,
+  release5_new_bos_artifact: 1,
+  release5_recruiting_state: 1,
+  release5_synthetic_recruit_ba_locator: 1,
+  release5_synthetic_recruit_ba_index: 2,
+  release5_synthetic_recruit_canonical: 1,
+  release5_synthetic_recruit_ba_job: 1,
+  release5_synthetic_recruit_bos_job: 1,
+  release5_synthetic_recruit_ba_execution: 1,
+  release5_shared_vault_count: 1,
+  release5_synthetic_recruit_ba: 1,
+  release5_new_ba_artifact: 1,
+});
+const BA_READY_RECOVERY_OPTIONAL_CLASS = 'release5_recruiting_projection_retry';
 
 function escapedPattern(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
+}
+
+export function __testBaReadyRecoveryKeyCustodyValid(inventory) {
+  if (inventory?.phase !== 'ba_ready' || !Number.isSafeInteger(inventory.total)) return false;
+  const optionalCount = inventory.classes?.[BA_READY_RECOVERY_OPTIONAL_CLASS] || 0;
+  if (!((inventory.total === 63 && optionalCount === 0)
+      || (inventory.total === 65 && optionalCount === 2))) return false;
+  const expected = {
+    ...BA_READY_RECOVERY_REQUIRED_CLASS_COUNTS,
+    ...(optionalCount ? { [BA_READY_RECOVERY_OPTIONAL_CLASS]: optionalCount } : {}),
+  };
+  const actual = Object.fromEntries(Object.entries(inventory.classes || {})
+    .filter(([, count]) => count !== 0));
+  return Object.keys(actual).length === Object.keys(expected).length
+    && Object.entries(expected).every(([classification, count]) =>
+      actual[classification] === count);
 }
 
 function json(res, status, body) {
@@ -1448,7 +1489,7 @@ async function recoverSyntheticSessions(redis, req, res) {
   }
   const expectedRecoveryMode = beforePendingRecoveryAudits.length === 0 ? 'FIRST' : 'RETRY';
   if (before.phase === 'ba_ready'
-      && (before.total !== 65
+      && (!__testBaReadyRecoveryKeyCustodyValid(before)
         || !((expectedRecoveryMode === 'FIRST' && before.auditCount === 37)
           || (expectedRecoveryMode === 'RETRY' && before.auditCount === 40)))) {
     throw new Error('RELEASE5_SESSION_RECOVERY_BA_AUDIT_CUSTODY_INVALID');
@@ -1658,7 +1699,8 @@ async function acknowledgeSyntheticSessionRecovery(redis, req) {
       || !Number.isInteger(before.auditCount)) {
     throw new Error('RELEASE5_SESSION_RECOVERY_ACK_PHASE_INVALID');
   }
-  if (before.phase === 'ba_ready' && (before.total !== 65 || before.auditCount !== 40)) {
+  if (before.phase === 'ba_ready'
+      && (!__testBaReadyRecoveryKeyCustodyValid(before) || before.auditCount !== 40)) {
     throw new Error('RELEASE5_SESSION_RECOVERY_ACK_BA_CUSTODY_INVALID');
   }
   const beforeState = await readState(redis);
