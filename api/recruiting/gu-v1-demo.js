@@ -7,6 +7,7 @@ import {
 } from '../engine/leadershipDemo/authority.js';
 import { getRecruitingRedis } from '../engine/recruitingV1/redisStore.js';
 import { getRecruitingGuV1DemoRuntime } from '../engine/recruitingGuV1/demoRuntime.js';
+import { publicRecruitingGuPayload } from '../../src/lib/recruitingGuV1/publicPayload.js';
 
 function requestOrigin(req) {
   const host = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '').split(',')[0].trim().toLowerCase();
@@ -61,8 +62,8 @@ export function createRecruitingGuV1DemoHandler({
       if (req.method === 'GET') {
         const view = String(req.query?.view || 'home');
         const csrf_token = await issueRecruitingDemoCsrf({ redis, capabilityHash: scope });
-        if (view === 'home') return res.status(200).json({ ok: true, ...(await getRuntime().home({ standard: String(req.query?.home_mode || '') === 'standard' })), csrf_token });
-        if (view === 'session') return res.status(200).json({ ok: true, session: await getRuntime().read(String(req.query?.session_id || '')), csrf_token });
+        if (view === 'home') return res.status(200).json({ ok: true, ...publicRecruitingGuPayload(await getRuntime().home({ standard: String(req.query?.home_mode || '') === 'standard' })), csrf_token });
+        if (view === 'session') return res.status(200).json({ ok: true, session: publicRecruitingGuPayload(await getRuntime().read(String(req.query?.session_id || ''))), csrf_token });
         return res.status(400).json({ ok: false, code: 'RECRUITING_GU_V1_VIEW_INVALID' });
       }
       if (req.method !== 'POST') return res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED' });
@@ -77,7 +78,7 @@ export function createRecruitingGuV1DemoHandler({
       else payload = await getRuntime().mutate(String(req.body?.session_id || ''), action, req.body || {});
       return res.status(200).json({
         ok: true,
-        ...payload,
+        ...publicRecruitingGuPayload(payload),
         csrf_token: await issueRecruitingDemoCsrf({ redis, capabilityHash: scope }),
         synthetic_only: payload?.session?.synthetic_only ?? true,
         experiment_only: true,

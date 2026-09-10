@@ -6,6 +6,7 @@ import { getRecruitingService, recruitingRuntimeEnabled } from '../engine/recrui
 import { getRecruitingRedis } from '../engine/recruitingV1/redisStore.js';
 import { createRecruitingGuV1RealRuntime } from '../engine/recruitingGuV1/realRuntime.js';
 import { issueRecruitingDemoCapabilityForManager } from '../engine/leadershipDemo/authority.js';
+import { publicRecruitingGuPayload } from '../../src/lib/recruitingGuV1/publicPayload.js';
 
 const MANAGER_COOKIE = '__Host-more_recruiting_manager';
 const approvalCsrf = new Map();
@@ -100,8 +101,8 @@ export function createRecruitingGuV1Handler({ env = process.env, service = null,
         res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, rotated.session_token, 8 * 60 * 60));
         const csrf_token = await recruitingService.issueManagerCsrf(rotated.session_token);
         const view = String(req.query?.view || 'home');
-        if (view === 'home') return res.status(200).json({ ok: true, ...(await recruitingRuntime.home(rotated.session_token)), csrf_token });
-        if (view === 'session') return res.status(200).json({ ok: true, session: await recruitingRuntime.read(rotated.session_token, String(req.query?.session_id || '')), csrf_token });
+        if (view === 'home') return res.status(200).json({ ok: true, ...publicRecruitingGuPayload(await recruitingRuntime.home(rotated.session_token)), csrf_token });
+        if (view === 'session') return res.status(200).json({ ok: true, session: publicRecruitingGuPayload(await recruitingRuntime.read(rotated.session_token, String(req.query?.session_id || ''))), csrf_token });
         return res.status(400).json({ ok: false, code: 'RECRUITING_GU_V1_VIEW_INVALID' });
       }
       if (req.method !== 'POST') return res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED' });
@@ -133,7 +134,7 @@ export function createRecruitingGuV1Handler({ env = process.env, service = null,
       else payload = await recruitingRuntime.mutate(managerToken, String(req.body?.session_id || ''), action, req.body || {});
       const rotated = await recruitingService.rotateManagerSession(managerToken);
       res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, rotated.session_token, 8 * 60 * 60));
-      return res.status(200).json({ ok: true, ...payload, csrf_token: await recruitingService.issueManagerCsrf(rotated.session_token) });
+      return res.status(200).json({ ok: true, ...publicRecruitingGuPayload(payload), csrf_token: await recruitingService.issueManagerCsrf(rotated.session_token) });
     } catch (error) {
       const code = String(error?.message || 'RECRUITING_GU_V1_FAILURE').slice(0, 180);
       console.error(JSON.stringify({ event: 'RECRUITING_GU_V1_REQUEST_FAILED', code, raw_payload_logged: false, token_logged: false, profile_logged: false }));
