@@ -51,6 +51,7 @@ const STANDARD_PROFILE_ID = 'mm-20990909-r5mgr001';
 const ADMIN_ENTERPRISE_ID = 'release5-canary-admin';
 const STANDARD_ENTERPRISE_ID = 'release5-canary-standard';
 const SYNTHETIC_MARKER = 'RELEASE5_RECRUITING_TWO_BOX_CANARY_SYNTHETIC_ONLY';
+const BROWSER_RUNTIME_RETRY_RESET = 'RELEASE5_BROWSER_RUNTIME_RETRY_RESET';
 const STABLE_HOST = 'moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app';
 const NEW_BOS_NAMESPACE = 'preview:new-bos:release5-two-box-20260909';
 const NEW_BA_NAMESPACE = 'preview:new-ba:release5-two-box-20260909';
@@ -1248,6 +1249,68 @@ async function bootstrap(redis) {
     managerProfilesCreated: profiles.created,
     adminCreated: admin.created,
     adminIdempotent: admin.idempotent,
+  };
+}
+
+async function resetRecruitingAfterBrowserRuntimeFailure(redis, req) {
+  if (req.body?.confirm !== SYNTHETIC_MARKER
+      || req.body?.reason !== BROWSER_RUNTIME_RETRY_RESET) {
+    throw new Error('RELEASE5_SYNTHETIC_RESET_CONFIRMATION_REQUIRED');
+  }
+  const resetKeys = [
+    RECRUITING_STATE_KEY,
+    `vault:profile:${ADMIN_PROFILE_ID}`,
+    `vault:profile:${STANDARD_PROFILE_ID}`,
+  ];
+  const expectedValues = await redis.mget(...resetKeys);
+  if (expectedValues.some((value) => value == null)) {
+    throw new Error('RELEASE5_SYNTHETIC_RESET_TARGET_MISSING');
+  }
+  const stateSnapshot = parseObject(expectedValues[0]);
+  assertRecruitingStateShape(stateSnapshot);
+  assertExactKeyedRecords(stateSnapshot.memberships, 'membership_id', 'RELEASE5_MEMBERSHIP_KEY_ID_MISMATCH');
+  assertExactKeyedRecords(stateSnapshot.invitations, 'invitation_id', 'RELEASE5_INVITATION_KEY_ID_MISMATCH');
+  const stateContext = release5StateContext(stateSnapshot, { expectedPhase: 'recruit_accepted' });
+  const profiles = expectedProfiles();
+  if (stateContext.phase !== 'recruit_accepted'
+      || expectedValues[1] !== JSON.stringify(profiles[ADMIN_PROFILE_ID])
+      || expectedValues[2] !== JSON.stringify(profiles[STANDARD_PROFILE_ID])) {
+    throw new Error('RELEASE5_SYNTHETIC_RESET_TARGET_INVALID');
+  }
+  const before = await inspectKeys(redis, { expectedPhase: 'recruit_accepted' });
+  const release5Classes = Object.entries(before.classes)
+    .filter(([classification, count]) => classification.startsWith('release5_') && count > 0);
+  if (!before.stable || before.unexpected !== 0 || before.phase !== 'recruit_accepted'
+      || before.classes.release5_recruiting_state !== 1
+      || before.classes.release5_synthetic_manager_profile !== 2
+      || release5Classes.length !== 2) {
+    throw new Error('RELEASE5_SYNTHETIC_RESET_SCOPE_INVALID');
+  }
+  const preservedFingerprints = Object.fromEntries(Object.entries(before.classFingerprints)
+    .filter(([classification]) => classification.startsWith('historical_release4_')));
+  const lockKey = `more:${RECRUITING_NAMESPACE}:lock:v1`;
+  const recordsDeleted = Number(await redis.eval(
+    "if redis.call('EXISTS',KEYS[4]) ~= 0 then return 0 end "
+      + "if redis.call('GET',KEYS[1]) ~= ARGV[1] or redis.call('GET',KEYS[2]) ~= ARGV[2] or redis.call('GET',KEYS[3]) ~= ARGV[3] then return 0 end "
+      + "return redis.call('DEL',KEYS[1],KEYS[2],KEYS[3])",
+    4,
+    ...resetKeys,
+    lockKey,
+    ...expectedValues,
+  ));
+  if (recordsDeleted !== 3) throw new Error('RELEASE5_SYNTHETIC_RESET_DELETE_INCOMPLETE');
+  const after = await inspectKeys(redis, { expectedPhase: 'empty' });
+  if (!after.stable || after.unexpected !== 0 || after.phase !== 'empty'
+      || after.total !== before.total - recordsDeleted
+      || Object.entries(after.classes).some(([classification, count]) => classification.startsWith('release5_') && count > 0)
+      || Object.entries(preservedFingerprints).some(([classification, fingerprint]) =>
+        after.classFingerprints[classification] !== fingerprint)) {
+    throw new Error('RELEASE5_SYNTHETIC_RESET_POSTCONDITION_INVALID');
+  }
+  return {
+    recordsDeleted,
+    remainingKeys: after.total,
+    protectedClassFingerprintCount: Object.keys(preservedFingerprints).length,
   };
 }
 
@@ -2946,6 +3009,10 @@ export default async function handler(req, res) {
     if (op === 'bootstrap' && req.method === 'POST') {
       if (req.body?.confirm !== SYNTHETIC_MARKER) return json(res, 422, { ok: false, code: 'RELEASE5_SYNTHETIC_CONFIRMATION_REQUIRED' });
       const result = await bootstrap(redis);
+      return json(res, 200, { ok: true, ...result, valuesExposed: false });
+    }
+    if (op === 'reset-recruiting-after-browser-runtime-failure' && req.method === 'POST') {
+      const result = await resetRecruitingAfterBrowserRuntimeFailure(redis, req);
       return json(res, 200, { ok: true, ...result, valuesExposed: false });
     }
     if (op === 'create-standard-manager' && req.method === 'POST') return createStandardManagerViaHttp(redis, req, res);
