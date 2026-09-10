@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  __testBaReadyRecoveryAuditCustodyValid as validAudit,
   __testBaReadyRecoveryKeyCustodyValid as valid,
 } from '../api/internal/release5-canary-controller.js';
 
@@ -55,4 +56,20 @@ test('recovery rejects count drift, optional receipt drift, missing required cla
   assert.equal(valid(inventory({ classes: { ...required, release5_new_ba_artifact: 0 } })), false);
   assert.equal(valid(inventory({ classes: { ...required, release5_new_ba_failure_ledger: 1 } })), false);
   assert.equal(valid({ ...inventory(), phase: 'bos_ready' }), false);
+});
+
+test('recovery accepts only the two exact preserved BA-ready audit checkpoints and their pending acknowledgements', () => {
+  assert.equal(validAudit(37, 'FIRST'), true);
+  assert.equal(validAudit(40, 'RETRY'), true);
+  assert.equal(validAudit(70, 'FIRST'), true);
+  assert.equal(validAudit(73, 'RETRY'), true);
+});
+
+test('recovery rejects audit drift and invalid recovery modes', () => {
+  for (const count of [36, 38, 39, 41, 69, 71, 72, 74, 120]) {
+    assert.equal(validAudit(count, 'FIRST'), false);
+    assert.equal(validAudit(count, 'RETRY'), false);
+  }
+  assert.equal(validAudit(37, 'UNKNOWN'), false);
+  assert.equal(validAudit(70.5, 'FIRST'), false);
 });

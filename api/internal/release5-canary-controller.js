@@ -103,6 +103,10 @@ const BA_READY_RECOVERY_REQUIRED_CLASS_COUNTS = Object.freeze({
   release5_new_ba_artifact: 1,
 });
 const BA_READY_RECOVERY_OPTIONAL_CLASS = 'release5_recruiting_projection_retry';
+const BA_READY_RECOVERY_BASE_AUDIT_COUNTS = new Set([
+  37, // preserved completion state before Consulting browser exercise
+  70, // preserved completion state after the first bounded Consulting exercise
+]);
 
 function escapedPattern(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');
@@ -122,6 +126,13 @@ export function __testBaReadyRecoveryKeyCustodyValid(inventory) {
   return Object.keys(actual).length === Object.keys(expected).length
     && Object.entries(expected).every(([classification, count]) =>
       actual[classification] === count);
+}
+
+export function __testBaReadyRecoveryAuditCustodyValid(auditCount, recoveryMode) {
+  if (!Number.isSafeInteger(auditCount)) return false;
+  if (recoveryMode === 'FIRST') return BA_READY_RECOVERY_BASE_AUDIT_COUNTS.has(auditCount);
+  if (recoveryMode === 'RETRY') return BA_READY_RECOVERY_BASE_AUDIT_COUNTS.has(auditCount - 3);
+  return false;
 }
 
 function json(res, status, body) {
@@ -1490,8 +1501,7 @@ async function recoverSyntheticSessions(redis, req, res) {
   const expectedRecoveryMode = beforePendingRecoveryAudits.length === 0 ? 'FIRST' : 'RETRY';
   if (before.phase === 'ba_ready'
       && (!__testBaReadyRecoveryKeyCustodyValid(before)
-        || !((expectedRecoveryMode === 'FIRST' && before.auditCount === 37)
-          || (expectedRecoveryMode === 'RETRY' && before.auditCount === 40)))) {
+        || !__testBaReadyRecoveryAuditCustodyValid(before.auditCount, expectedRecoveryMode))) {
     throw new Error('RELEASE5_SESSION_RECOVERY_BA_AUDIT_CUSTODY_INVALID');
   }
   const beforeStateFingerprint = stableHash(beforeState);
@@ -1510,8 +1520,7 @@ async function recoverSyntheticSessions(redis, req, res) {
     const recoveryMode = priorRecoveryAudits.length === 0 ? 'FIRST' : 'RETRY';
     if (recoveryMode !== expectedRecoveryMode
         || (before.phase === 'ba_ready'
-          && !((recoveryMode === 'FIRST' && state.audit.length === 37)
-            || (recoveryMode === 'RETRY' && state.audit.length === 40)))) {
+          && !__testBaReadyRecoveryAuditCustodyValid(state.audit.length, recoveryMode))) {
       throw new Error('RELEASE5_SESSION_RECOVERY_BA_AUDIT_CUSTODY_INVALID');
     }
     if (priorRecoveryAudits.length === 0 && state.audit.length > 117) {
@@ -1700,7 +1709,8 @@ async function acknowledgeSyntheticSessionRecovery(redis, req) {
     throw new Error('RELEASE5_SESSION_RECOVERY_ACK_PHASE_INVALID');
   }
   if (before.phase === 'ba_ready'
-      && (!__testBaReadyRecoveryKeyCustodyValid(before) || before.auditCount !== 40)) {
+      && (!__testBaReadyRecoveryKeyCustodyValid(before)
+        || !__testBaReadyRecoveryAuditCustodyValid(before.auditCount, 'RETRY'))) {
     throw new Error('RELEASE5_SESSION_RECOVERY_ACK_BA_CUSTODY_INVALID');
   }
   const beforeState = await readState(redis);
