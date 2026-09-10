@@ -52,6 +52,7 @@ const ADMIN_ENTERPRISE_ID = 'release5-canary-admin';
 const STANDARD_ENTERPRISE_ID = 'release5-canary-standard';
 const SYNTHETIC_MARKER = 'RELEASE5_RECRUITING_TWO_BOX_CANARY_SYNTHETIC_ONLY';
 const BROWSER_RUNTIME_RETRY_RESET = 'RELEASE5_BROWSER_RUNTIME_RETRY_RESET';
+const SESSION_RECOVERY_CONFIRMATION = 'RELEASE5_CANARY_SESSION_RECOVERY';
 const STABLE_HOST = 'moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app';
 const NEW_BOS_NAMESPACE = 'preview:new-bos:release5-two-box-20260909';
 const NEW_BA_NAMESPACE = 'preview:new-ba:release5-two-box-20260909';
@@ -1028,9 +1029,11 @@ async function release5ValueValid(redis, key, keyClassName, context) {
 async function inspectKeys(redis, { expectedPhase = 'auto' } = {}) {
   const before = await redis.dbsize();
   let stateContext = Object.freeze({ phase: 'invalid', profileId: null, assessmentId: null, invitationId: null, bosJobId: null });
+  let auditCount = null;
   let invalidScoped = 0;
   try {
     const state = await readState(redis);
+    auditCount = Array.isArray(state.audit) ? state.audit.length : null;
     stateContext = await enrichStateContext(redis, release5StateContext(state, { expectedPhase }));
     if (stateContext.profileId) stateContext = await enrichAuthoredContext(redis, stateContext);
     stateContext = Object.freeze({
@@ -1099,6 +1102,7 @@ async function inspectKeys(redis, { expectedPhase = 'auto' } = {}) {
     total: after,
     phase: stateContext.phase,
     profileIdSha256: stateContext.profileId ? sha256Text(stateContext.profileId) : null,
+    auditCount,
     classes,
     classFingerprints,
     unexpected: (classes.unclassified_preserved || 0)
@@ -1312,6 +1316,224 @@ async function resetRecruitingAfterBrowserRuntimeFailure(redis, req) {
     remainingKeys: after.total,
     protectedClassFingerprintCount: Object.keys(preservedFingerprints).length,
   };
+}
+
+async function recoverSyntheticSessions(redis, req, res) {
+  if (req.body?.confirm !== SYNTHETIC_MARKER
+      || req.body?.reason !== SESSION_RECOVERY_CONFIRMATION) {
+    throw new Error('RELEASE5_SESSION_RECOVERY_CONFIRMATION_REQUIRED');
+  }
+  const before = await inspectKeys(redis);
+  if (!before.stable || before.unexpected !== 0
+      || before.phase !== 'bos_ready'
+      || !Number.isInteger(before.auditCount)
+      || before.auditCount > 120) {
+    throw new Error('RELEASE5_SESSION_RECOVERY_PHASE_INVALID');
+  }
+  const tokens = Object.freeze({
+    ADMIN: createOpaqueToken(),
+    STANDARD: createOpaqueToken(),
+    RECRUIT: createOpaqueToken(),
+  });
+  const store = new RedisRecruitingStore(redis, { namespace: RECRUITING_NAMESPACE });
+  const recovered = await store.transaction((state) => {
+    const context = release5StateContext(state, { requireProfile: true });
+    if (context.phase !== before.phase) throw new Error('RELEASE5_SESSION_RECOVERY_STATE_CHANGED');
+    const memberships = Object.values(state.memberships || {});
+    const admin = memberships.find((item) => item.manager_profile_id === ADMIN_PROFILE_ID);
+    const standard = memberships.find((item) => item.manager_profile_id === STANDARD_PROFILE_ID);
+    if (!admin || !standard) throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_SCOPE_INVALID');
+    assertAdminMembershipExact(admin);
+    assertStandardMembershipExact(standard);
+    if (standard.status !== 'ACTIVE' || standard.setup_state !== 'COMPLETE') {
+      throw new Error('RELEASE5_STANDARD_MANAGER_STATE_MISMATCH');
+    }
+    const managerSessions = Object.entries(state.manager_sessions || {});
+    const sessionsByRole = Object.freeze({
+      ADMIN: managerSessions.filter(([, session]) => session?.membership_id === admin.membership_id),
+      STANDARD: managerSessions.filter(([, session]) => session?.membership_id === standard.membership_id),
+    });
+    if (managerSessions.length !== sessionsByRole.ADMIN.length + sessionsByRole.STANDARD.length) {
+      throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_SCOPE_INVALID');
+    }
+    const inviteSessions = Object.entries(state.invite_sessions || {});
+    for (const [role, membership] of [['ADMIN', admin], ['STANDARD', standard]]) {
+      const sessions = sessionsByRole[role];
+      if (sessions.length < 1 || sessions.some(([, session]) =>
+        session?.manager_subject_id !== membership.manager_subject_id
+          || session?.enterprise_id !== membership.enterprise_id
+          || !Number.isSafeInteger(session.rotation)
+          || session.rotation < 0)) {
+        throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_SCOPE_INVALID');
+      }
+    }
+    const allPriorManagerSessionIds = new Set(managerSessions.map(([, session]) => session.session_id));
+    if (Object.values(state.manager_csrf_proofs || {}).some((proof) =>
+      !allPriorManagerSessionIds.has(proof?.session_id))) {
+      throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_CSRF_SCOPE_INVALID');
+    }
+    if (inviteSessions.length < 1 || inviteSessions.some(([, session]) =>
+      session?.invitation_id !== context.invitationId
+        || session?.candidate_id !== context.candidateId
+        || session?.enterprise_id !== STANDARD_ENTERPRISE_ID
+        || !Number.isSafeInteger(session.rotation)
+        || session.rotation < 0)) {
+      throw new Error('RELEASE5_INVITE_SESSION_RECOVERY_SCOPE_INVALID');
+    }
+
+    const priorRecoveryAudits = state.audit.filter((event) =>
+      event?.authority_source === SESSION_RECOVERY_CONFIRMATION);
+    if (![0, 3].includes(priorRecoveryAudits.length)) {
+      throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_SET_INVALID');
+    }
+    if (priorRecoveryAudits.length === 0 && state.audit.length > 117) {
+      throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_HEADROOM_REQUIRED');
+    }
+    if (priorRecoveryAudits.length === 3) {
+      const byRole = new Map();
+      for (const event of priorRecoveryAudits) {
+        const role = String(event?.recovery_role || '');
+        if (!['ADMIN', 'STANDARD', 'RECRUIT'].includes(role) || byRole.has(role)) {
+          throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_SET_INVALID');
+        }
+        byRole.set(role, event);
+      }
+      const adminEvent = byRole.get('ADMIN');
+      const standardEvent = byRole.get('STANDARD');
+      const recruitEvent = byRole.get('RECRUIT');
+      if (adminEvent?.event_type !== 'MANAGER_SESSION_ROTATED'
+          || adminEvent?.membership_id !== admin.membership_id
+          || !sessionsByRole.ADMIN.some(([, session]) =>
+            session?.session_id === adminEvent.session_id && session?.rotation === adminEvent.rotation)
+          || standardEvent?.event_type !== 'MANAGER_SESSION_ROTATED'
+          || standardEvent?.membership_id !== standard.membership_id
+          || !sessionsByRole.STANDARD.some(([, session]) =>
+            session?.session_id === standardEvent.session_id && session?.rotation === standardEvent.rotation)
+          || recruitEvent?.event_type !== 'INVITE_SESSION_ROTATED'
+          || recruitEvent?.invitation_id !== context.invitationId
+          || !inviteSessions.some(([, session]) =>
+            session?.invite_session_id === recruitEvent.invite_session_id
+              && session?.rotation === recruitEvent.rotation)) {
+        throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_SET_INVALID');
+      }
+    }
+    state.audit = state.audit.filter((event) =>
+      event?.authority_source !== SESSION_RECOVERY_CONFIRMATION);
+    if (state.audit.length > 117) throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_HEADROOM_REQUIRED');
+
+    const now = new Date();
+    const timestamp = now.toISOString();
+    for (const [role, membership] of [['ADMIN', admin], ['STANDARD', standard]]) {
+      const sessions = sessionsByRole[role];
+      const priorSessionIds = new Set(sessions.map(([, session]) => session.session_id));
+      const rotation = Math.max(...sessions.map(([, session]) => session.rotation)) + 1;
+      if (!Number.isSafeInteger(rotation) || rotation < 1) {
+        throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_ROTATION_INVALID');
+      }
+      for (const [digest] of sessions) delete state.manager_sessions[digest];
+      for (const [digest, proof] of Object.entries(state.manager_csrf_proofs || {})) {
+        if (priorSessionIds.has(proof?.session_id)) delete state.manager_csrf_proofs[digest];
+      }
+      const session = {
+        session_id: createOpaqueId('manager_session'),
+        membership_id: membership.membership_id,
+        manager_subject_id: membership.manager_subject_id,
+        enterprise_id: membership.enterprise_id,
+        issued_at: timestamp,
+        expires_at: new Date(now.getTime() + MANAGER_SESSION_TTL_MS).toISOString(),
+        rotation,
+      };
+      state.manager_sessions[digestToken(tokens[role])] = session;
+      state.audit.push({
+        event_id: createOpaqueId('audit'),
+        event_type: 'MANAGER_SESSION_ROTATED',
+        occurred_at: timestamp,
+        membership_id: membership.membership_id,
+        session_id: session.session_id,
+        rotation,
+        authority_source: SESSION_RECOVERY_CONFIRMATION,
+        recovery_role: role,
+      });
+    }
+    const recruitRotation = Math.max(...inviteSessions
+      .map(([, session]) => session.rotation)) + 1;
+    if (!Number.isSafeInteger(recruitRotation) || recruitRotation < 1) {
+      throw new Error('RELEASE5_INVITE_SESSION_RECOVERY_ROTATION_INVALID');
+    }
+    for (const [digest] of inviteSessions) delete state.invite_sessions[digest];
+    const inviteSession = {
+      invite_session_id: createOpaqueId('invite_session'),
+      invitation_id: context.invitationId,
+      candidate_id: context.candidateId,
+      enterprise_id: STANDARD_ENTERPRISE_ID,
+      issued_at: timestamp,
+      expires_at: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+      rotation: recruitRotation,
+    };
+    state.invite_sessions[digestToken(tokens.RECRUIT)] = inviteSession;
+    state.audit.push({
+      event_id: createOpaqueId('audit'),
+      event_type: 'INVITE_SESSION_ROTATED',
+      occurred_at: timestamp,
+      invitation_id: context.invitationId,
+      invite_session_id: inviteSession.invite_session_id,
+      rotation: recruitRotation,
+      authority_source: SESSION_RECOVERY_CONFIRMATION,
+      recovery_role: 'RECRUIT',
+    });
+    if (state.audit.length > 120) throw new Error('RELEASE5_SESSION_RECOVERY_AUDIT_BOUND_EXCEEDED');
+    return {
+      ...context,
+      priorRecoveryAuditCount: priorRecoveryAudits.length,
+      auditCount: state.audit.length,
+    };
+  });
+  const service = getRecruitingService(process.env);
+  for (const role of ['ADMIN', 'STANDARD']) {
+    const inspected = await service.inspectManagerReadOnly(tokens[role]);
+    const expectedProfile = role === 'ADMIN' ? ADMIN_PROFILE_ID : STANDARD_PROFILE_ID;
+    if (inspected?.membership?.manager_profile_id !== expectedProfile
+        || Boolean(inspected?.capabilities?.master_control) !== (role === 'ADMIN')) {
+      throw new Error('RELEASE5_MANAGER_SESSION_RECOVERY_VERIFICATION_FAILED');
+    }
+  }
+  const inspectedRecruit = await service.inspectInviteSession(tokens.RECRUIT);
+  if (inspectedRecruit?.relationship?.relationship_ref !== recovered.invitationId
+      || inspectedRecruit?.relationship?.candidate_id !== recovered.candidateId) {
+    throw new Error('RELEASE5_INVITE_SESSION_RECOVERY_VERIFICATION_FAILED');
+  }
+  const after = await inspectKeys(redis, { expectedPhase: before.phase });
+  const auditDelta = 3 - recovered.priorRecoveryAuditCount;
+  const recoveryMode = recovered.priorRecoveryAuditCount === 0 ? 'FIRST' : 'RETRY';
+  if (!after.stable || after.unexpected !== 0 || after.total !== before.total
+      || ![0, 3].includes(auditDelta)
+      || after.auditCount !== before.auditCount + auditDelta
+      || after.auditCount !== recovered.auditCount
+      || stableHash(after.classes) !== stableHash(before.classes)
+      || Object.entries(before.classFingerprints).some(([classification, fingerprint]) =>
+        classification !== 'release5_recruiting_state'
+          && after.classFingerprints[classification] !== fingerprint)) {
+    throw new Error('RELEASE5_SESSION_RECOVERY_POSTCONDITION_INVALID');
+  }
+  res.setHeader('Set-Cookie', [
+    secureCookie('__Host-more_release5_recovery_admin', tokens.ADMIN, 10 * 60),
+    secureCookie('__Host-more_release5_recovery_standard', tokens.STANDARD, 10 * 60),
+    secureCookie('__Host-more_release5_recovery_recruit', tokens.RECRUIT, 10 * 60),
+  ]);
+  return json(res, 200, {
+    ok: true,
+    rolesRotated: 3,
+    cookieCount: 3,
+    auditDelta,
+    recoveryMode,
+    workflowPhase: recovered.phase,
+    invitationId: recovered.invitationId,
+    candidateId: recovered.candidateId,
+    profileId: recovered.profileId,
+    bosJobId: recovered.bosJobId,
+    assessmentId: recovered.assessmentId,
+    valuesExposed: false,
+  });
 }
 
 function managerCookiePair(header) {
@@ -2998,6 +3220,7 @@ export default async function handler(req, res) {
         stable: inventory.stable,
         workflowPhase: inventory.phase,
         profileIdSha256: inventory.profileIdSha256,
+        auditCount: inventory.auditCount,
         totalKeys: inventory.total,
         keyClasses: inventory.classes,
         classFingerprints: inventory.classFingerprints,
@@ -3014,6 +3237,9 @@ export default async function handler(req, res) {
     if (op === 'reset-recruiting-after-browser-runtime-failure' && req.method === 'POST') {
       const result = await resetRecruitingAfterBrowserRuntimeFailure(redis, req);
       return json(res, 200, { ok: true, ...result, valuesExposed: false });
+    }
+    if (op === 'recover-synthetic-sessions' && req.method === 'POST') {
+      return recoverSyntheticSessions(redis, req, res);
     }
     if (op === 'create-standard-manager' && req.method === 'POST') return createStandardManagerViaHttp(redis, req, res);
     if (op === 'create-recruit-invitation' && req.method === 'POST') return createRecruitInviteViaHttp(redis, req, res);
