@@ -149,7 +149,6 @@ async function deliverQueued(service, result) {
     ...result,
     delivery: {
       state,
-      provider_receipt: delivered.item.provider_receipt || null,
     },
   };
 }

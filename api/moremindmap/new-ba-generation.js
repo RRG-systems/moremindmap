@@ -4,6 +4,7 @@ import process from 'node:process';
 import { createReadOnlyBaAuthorityReader } from '../engine/newBaProductionReadinessV1/canonicalReader.js';
 import { authorizeNewBaRead, readNewBaProductionConfig } from '../engine/newBaProductionReadinessV1/config.js';
 import { createRedisNewBaRealizationStore } from '../engine/newBaProductionReadinessV1/launchSafeRealizationStore.js';
+import { timingSafeHeaderMatch } from '../../src/lib/publicSiteAirlockV1/security.js';
 import {
   REAL_PROFILE_NEW_BA_STAGES,
   createRealProfileNewBaGenerationCampaign,
@@ -34,6 +35,16 @@ function validateCampaignRuntime() {
   if (!config.staged || (!config.customerActive && !config.canaryEnabled) || !config.providerEnabled || !config.persistenceEnabled) throw new Error('new_ba_real_profile_generation_runtime_not_enabled');
 }
 
+export function assertNewBaGenerationOperatorAuthority(request, runtimeConfig = config) {
+  if (!runtimeConfig.customerActive) return;
+  if (!timingSafeHeaderMatch(
+    request.headers?.['x-more-platform-authority'],
+    runtimeConfig.platformAuthoritySecret,
+  )) {
+    throw new Error('new_ba_real_profile_generation_access_denied');
+  }
+}
+
 export default async function newBaRealProfileGenerationRoute(request, response) {
   response.setHeader('cache-control', 'private, no-store, max-age=0');
   response.setHeader('x-content-type-options', 'nosniff');
@@ -42,6 +53,7 @@ export default async function newBaRealProfileGenerationRoute(request, response)
   let redis;
   try {
     validateCampaignRuntime();
+    assertNewBaGenerationOperatorAuthority(request);
     const profileId = authorizeNewBaRead({ config, profileId: request.query?.id, suppliedToken: tokenFromRequest(request) });
     const operation = String(request.query?.operation || 'status');
     if (!OPERATIONS.has(operation)) throw new Error('new_ba_real_profile_generation_operation_invalid');

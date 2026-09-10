@@ -533,10 +533,14 @@ test('HTTP current-consent refresh is same-origin, CSRF-bound, token-private and
   assert.equal(requested.body.ok, true);
   assert.equal(requested.body.invitation.invitation_id, original.invitation.invitation_id);
   assert.equal(requested.body.invitation_token, undefined);
-  assert.equal(requested.body.delivery.state, 'DELIVERED');
+  assert.deepEqual(requested.body.delivery, { state: 'DELIVERED' });
+  assert.doesNotMatch(JSON.stringify(requested.body), /provider_receipt|synthetic-http-current-consent/u);
   assert.equal(providerSends, 1);
   assert.ok(deliveredToken);
   assert.match(String(requested.headers['Set-Cookie']), /__Host-more_recruiting_manager=/u);
+  const deliveredState = await store.read();
+  const deliveredOutbox = Object.values(deliveredState.outbox).find((item) => item.kind === 'RECRUIT_CURRENT_CONSENT');
+  assert.equal(deliveredOutbox.provider_receipt, 'synthetic-http-current-consent');
 
   const accepted = response();
   await handler({

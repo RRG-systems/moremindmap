@@ -7,6 +7,7 @@ import {
 } from '../api/engine/newBaProductionReadinessV1/config.js';
 import { createNewBaRouteHandler } from '../api/engine/newBaProductionReadinessV1/routeHandler.js';
 import { createNewBosProductionRouteHandler } from '../api/engine/newBosProductionReadinessV1/routeHandler.js';
+import { assertNewBaGenerationOperatorAuthority } from '../api/moremindmap/new-ba-generation.js';
 
 const PLATFORM_AUTHORITY = 'synthetic-platform-authority-secret-1234567890';
 
@@ -201,4 +202,30 @@ test('New BA platform authority is server-configured and missing authority fails
   assert.equal(configured.platformAuthoritySecret, PLATFORM_AUTHORITY);
   assert.equal(NEW_BA_PRODUCTION_ENVIRONMENT_CONTRACT.includes('NEW_BA_PLATFORM_AUTHORITY_SECRET'), true);
   assert.equal(readNewBaProductionConfig({}).platformAuthoritySecret, '');
+});
+
+test('customer-active New BA generation operations require exact platform authority', () => {
+  const config = customerActiveConfig();
+  assert.throws(
+    () => assertNewBaGenerationOperatorAuthority({ headers: {} }, config),
+    /new_ba_real_profile_generation_access_denied/u,
+  );
+  assert.throws(
+    () => assertNewBaGenerationOperatorAuthority({
+      headers: { 'x-more-platform-authority': 'wrong-platform-authority-secret-1234567890' },
+    }, config),
+    /new_ba_real_profile_generation_access_denied/u,
+  );
+  assert.doesNotThrow(() => assertNewBaGenerationOperatorAuthority({
+    headers: { 'x-more-platform-authority': PLATFORM_AUTHORITY },
+  }, config));
+});
+
+test('private canary New BA generation retains its exact canary-token authority path', () => {
+  assert.doesNotThrow(() => assertNewBaGenerationOperatorAuthority({ headers: {} }, {
+    staged: true,
+    canaryEnabled: true,
+    customerActive: false,
+    platformAuthoritySecret: '',
+  }));
 });
