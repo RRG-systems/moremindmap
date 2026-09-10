@@ -199,6 +199,15 @@ function agreementService({ failFirstTwo = false } = {}) {
     membership_id: membership.membership_id, manager_subject_id: membership.manager_subject_id,
     enterprise_id: membership.enterprise_id, recruit_name: 'Taylor Person', recruit_email: 'person@example.test',
     state: 'ACCEPTED', accepted_at: NOW.toISOString(), token_generation: 1,
+    bos_profile_id: session.subject_binding.profile_id,
+    consent: { version: 'recruiting_v1_consent_2026_08', accepted_at: NOW.toISOString() },
+  };
+  state.consultation_relationships[session.relationship_id] = {
+    relationship_id: session.relationship_id, status: 'ACTIVE',
+    membership_id: membership.membership_id, manager_subject_id: membership.manager_subject_id,
+    enterprise_id: membership.enterprise_id, profile_id: session.subject_binding.profile_id,
+    candidate_id: session.subject_binding.candidate_id, consent_state: 'RECRUITING_INVITATION_ACCEPTED',
+    canonical_write_authority: false,
   };
   state.shared_business_sessions[session.session_id] = structuredClone(session);
   const requests = [];
@@ -255,4 +264,44 @@ test('email failure preserves acceptance and bounded retry keeps the same outbox
   assert.equal(requests.length, 3);
   assert.equal(requests[0].idempotencyKey, requests[2].idempotencyKey);
   assert.deepEqual(snapshot.shared_business_sessions[session.session_id].accepted_plan_snapshot, session.accepted_plan_snapshot);
+});
+
+test('agreement delivery and retry fail closed after relationship revocation or subject rebinding', async () => {
+  for (const mutation of ['revoked', 'profile', 'manager', 'consent']) {
+    const { session, store, requests, service } = agreementService();
+    await store.transaction((state) => {
+      const invitation = state.invitations.invitation_consulting_email_test;
+      if (mutation === 'revoked') state.consultation_relationships[session.relationship_id].status = 'REVOKED';
+      if (mutation === 'profile') invitation.bos_profile_id = 'mm-20990101-other001';
+      if (mutation === 'manager') invitation.manager_subject_id = 'another-manager';
+      if (mutation === 'consent') delete invitation.consent;
+      return true;
+    });
+    await assert.rejects(service.deliverAgreedPlanEmails({ sessionId: session.session_id, acceptanceId: session.accepted_plan_snapshot.acceptance_id }), /CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED/u);
+    assert.equal(requests.length, 0);
+    assert.deepEqual((await store.read()).shared_business_sessions[session.session_id].accepted_plan_snapshot, session.accepted_plan_snapshot);
+  }
+
+  const { session, store, requests, service } = agreementService({ failFirstTwo: true });
+  const acceptanceId = session.accepted_plan_snapshot.acceptance_id;
+  await service.deliverAgreedPlanEmails({ sessionId: session.session_id, acceptanceId });
+  await store.transaction((state) => { state.invitations.invitation_consulting_email_test.state = 'REVOKED'; return true; });
+  await assert.rejects(service.retryAgreedPlanEmail({ sessionId: session.session_id, acceptanceId, recipientRole: 'PERSON' }), /CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED/u);
+  assert.equal(requests.length, 2);
+  assert.equal(Object.values((await store.read()).outbox).every((item) => item.state === 'FAILED'), true);
+});
+
+test('pending agreed-plan outbox cannot send if the canonical subject changes after queueing', async () => {
+  const { session, store, requests, service } = agreementService({ failFirstTwo: true });
+  await service.deliverAgreedPlanEmails({ sessionId: session.session_id, acceptanceId: session.accepted_plan_snapshot.acceptance_id });
+  const snapshot = await store.read();
+  const pendingId = Object.values(snapshot.outbox).find((item) => item.payload.recipient_role === 'PERSON').outbox_id;
+  await store.transaction((state) => {
+    state.outbox[pendingId].state = 'PENDING';
+    state.invitations.invitation_consulting_email_test.bos_profile_id = 'mm-20990101-other001';
+    return true;
+  });
+  await assert.rejects(service.deliverOutbox(pendingId), /CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED/u);
+  assert.equal(requests.length, 2);
+  assert.deepEqual((await store.read()).shared_business_sessions[session.session_id].accepted_plan_snapshot, session.accepted_plan_snapshot);
 });

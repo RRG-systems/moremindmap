@@ -11,6 +11,7 @@ import {
   assertOpportunityItem,
   assertRecruitingAdmin,
   boundedText,
+  consultingReadinessFor,
   createOpaqueId,
   createOpaqueToken,
   createTokenWrapper,
@@ -90,21 +91,41 @@ function entitlementsFor(state, membership, now) {
 
 function entitlementProjection(state, membership, now) {
   const entitlements = entitlementsFor(state, membership, now);
-  return { entitlement: entitlements.bos, entitlements };
+  const { bos, ba } = entitlements;
+  const activeInvitations = Object.values(state.invitations).filter((invitation) => invitation.membership_id === membership.membership_id
+    && invitation.entitlement_period_start === bos.period_start
+    && [productEntitlementState(invitation, 'bos'), productEntitlementState(invitation, 'ba')].some((status) => ACTIVE_ENTITLEMENT_STATES.includes(status)));
+  const used = new Set(activeInvitations.map((invitation) => invitation.invitation_id)).size;
+  const consumed = new Set(activeInvitations.filter((invitation) => [productEntitlementState(invitation, 'bos'), productEntitlementState(invitation, 'ba')].includes('CONSUMED'))
+    .map((invitation) => invitation.invitation_id)).size;
+  const invitationAllowance = {
+    ...bos,
+    products: ['BOS', 'BA'],
+    used,
+    reserved: used - consumed,
+    consumed,
+    remaining: bos.mode === 'unlimited' ? null : Math.min(bos.remaining, ba.remaining, Math.max(0, MONTHLY_INVITATION_LIMIT - used)),
+  };
+  return { entitlement: bos, entitlements, invitation_allowance: invitationAllowance };
 }
 
-function assertPairCanReserve(entitlements, { bos = true, ba = true } = {}) {
+function assertPairCanReserve(entitlements, { bos = true, ba = true, invitationRemaining = null } = {}) {
   const bosExhausted = bos && entitlements.bos.mode !== 'unlimited' && entitlements.bos.remaining < 1;
   const baExhausted = ba && entitlements.ba.mode !== 'unlimited' && entitlements.ba.remaining < 1;
-  if (bosExhausted || baExhausted) throw new Error('RECRUITING_INVITATION_ALLOWANCE_EXHAUSTED');
+  if (bosExhausted || baExhausted || (invitationRemaining !== null && invitationRemaining < 1)) throw new Error('RECRUITING_INVITATION_ALLOWANCE_EXHAUSTED');
 }
 
 function reserveEntitlementPair(state, membership, invitation, now) {
   const bosNeedsReservation = !ACTIVE_ENTITLEMENT_STATES.includes(productEntitlementState(invitation, 'bos'));
   const baNeedsReservation = !ACTIVE_ENTITLEMENT_STATES.includes(productEntitlementState(invitation, 'ba'));
   if (!bosNeedsReservation && !baNeedsReservation) return entitlementsFor(state, membership, now);
-  assertPairCanReserve(entitlementsFor(state, membership, now), { bos: bosNeedsReservation, ba: baNeedsReservation });
   const period = activePeriod(membership, now);
+  const alreadyInCurrentUnion = invitation.entitlement_period_start === period.period_start
+    && (!bosNeedsReservation || !baNeedsReservation);
+  assertPairCanReserve(entitlementsFor(state, membership, now), {
+    bos: bosNeedsReservation, ba: baNeedsReservation,
+    invitationRemaining: alreadyInCurrentUnion ? null : entitlementProjection(state, membership, now).invitation_allowance.remaining,
+  });
   invitation.paired_entitlement_version = 1;
   if (bosNeedsReservation) invitation.bos_entitlement_state = 'RESERVED';
   if (baNeedsReservation) invitation.ba_entitlement_state = 'RESERVED';
@@ -193,7 +214,12 @@ function inviteFromSession(state, inviteSessionToken, now) {
   const session = state.invite_sessions[digest];
   if (!session || Date.parse(session.expires_at) <= at(now).getTime()) throw new Error('RECRUITING_INVITE_SESSION_REQUIRED');
   const invitation = state.invitations[session.invitation_id];
-  if (!invitation || !invitation.accepted_at || invitation.candidate_id !== session.candidate_id || invitation.enterprise_id !== session.enterprise_id) {
+  if (!invitation || !invitation.accepted_at || invitation.state !== 'ACCEPTED' || invitation.revoked_at
+      || invitation.candidate_id !== session.candidate_id || invitation.enterprise_id !== session.enterprise_id) {
+    throw new Error('RECRUITING_INVITE_SESSION_SCOPE_INVALID');
+  }
+  const membership = assertMembership(state.memberships[invitation.membership_id]);
+  if (invitation.manager_subject_id !== membership.manager_subject_id || invitation.enterprise_id !== membership.enterprise_id) {
     throw new Error('RECRUITING_INVITE_SESSION_SCOPE_INVALID');
   }
   return { session, invitation, digest };
@@ -201,10 +227,56 @@ function inviteFromSession(state, inviteSessionToken, now) {
 
 function invitationInScope(state, membership, invitationId) {
   const invitation = state.invitations[invitationId];
-  if (!invitation || invitation.membership_id !== membership.membership_id || invitation.enterprise_id !== membership.enterprise_id) {
+  if (!invitation || invitation.membership_id !== membership.membership_id || invitation.enterprise_id !== membership.enterprise_id
+      || invitation.manager_subject_id !== membership.manager_subject_id) {
     throw new Error('RECRUITING_INVITATION_SCOPE_DENIED');
   }
   return invitation;
+}
+
+function agreedPlanEmailAuthority(state, session) {
+  const membership = state.memberships?.[session?.manager_binding?.membership_id];
+  const relationship = state.consultation_relationships?.[session?.relationship_id];
+  if (!membership || membership.status !== 'ACTIVE' || membership.setup_state !== 'COMPLETE'
+      || !normalizeEmail(membership.manager_email)
+      || session.manager_binding.subject_id !== membership.manager_subject_id
+      || session.manager_binding.enterprise_id !== membership.enterprise_id) {
+    throw new Error('CONSULTING_MANAGER_EMAIL_AUTHORITY_REQUIRED');
+  }
+  if (!relationship || relationship.status !== 'ACTIVE' || !normalizeProfileId(session.subject_binding.profile_id)
+      || relationship.membership_id !== membership.membership_id
+      || relationship.manager_subject_id !== membership.manager_subject_id
+      || relationship.enterprise_id !== membership.enterprise_id
+      || normalizeProfileId(relationship.profile_id) !== normalizeProfileId(session.subject_binding.profile_id)) {
+    throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+  }
+  let invitation = null;
+  let personEmail = null;
+  if (session.subject_binding.candidate_id) {
+    invitation = Object.values(state.invitations || {}).find((item) => item.candidate_id === session.subject_binding.candidate_id);
+    if (!invitation || invitation.state !== 'ACCEPTED' || !invitation.accepted_at || invitation.revoked_at
+        || invitation.consent?.version !== 'recruiting_v1_consent_2026_08' || !invitation.consent?.accepted_at
+        || invitation.membership_id !== membership.membership_id
+        || invitation.manager_subject_id !== membership.manager_subject_id || invitation.enterprise_id !== membership.enterprise_id
+        || relationship.candidate_id !== invitation.candidate_id || relationship.consent_state !== 'RECRUITING_INVITATION_ACCEPTED'
+        || normalizeProfileId(invitation.bos_profile_id) !== normalizeProfileId(session.subject_binding.profile_id)) {
+      throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+    }
+    personEmail = normalizeEmail(invitation.recruit_email);
+  } else {
+    const request = state.consultation_requests?.[session.subject_binding.consultation_request_id];
+    if (!request || request.status !== 'APPROVED' || request.relationship_id !== relationship.relationship_id
+        || relationship.consultation_request_id !== request.request_id
+        || relationship.consent_state !== 'OWNER_APPROVED_MORE_ID_CONSULTATION'
+        || request.membership_id !== membership.membership_id || request.manager_subject_id !== membership.manager_subject_id
+        || request.enterprise_id !== membership.enterprise_id
+        || normalizeProfileId(request.profile_id) !== normalizeProfileId(session.subject_binding.profile_id)) {
+      throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+    }
+    personEmail = normalizeEmail(request.owner_email);
+  }
+  if (!personEmail) throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+  return { membership, invitation, personEmail };
 }
 
 function enqueue(state, { kind, recipient, membership, invitation, payload, tokenCapsule = null, idempotencyKey = null }, now) {
@@ -332,6 +404,7 @@ export class RecruitingV1Service {
     tokenWrapper = null,
     profileValidator = null,
     profileOwnerReader = null,
+    canonicalReadinessReader = null,
   }) {
     if (!store) throw new TypeError('RECRUITING_STORE_REQUIRED');
     this.store = store;
@@ -340,6 +413,40 @@ export class RecruitingV1Service {
     this.tokenWrapper = tokenWrapper || createTokenWrapper('recruiting-v1-test-only-token-wrap-key');
     this.profileValidator = profileValidator || (async (profileId) => ({ found: Boolean(normalizeProfileId(profileId)), profile_id: normalizeProfileId(profileId) }));
     this.profileOwnerReader = profileOwnerReader;
+    this.canonicalReadinessReader = canonicalReadinessReader;
+  }
+
+  async projectConsultingReadiness(invitation, membership) {
+    const projection = publicInvitation(invitation, membership);
+    if (!projection.consulting_ready || typeof this.canonicalReadinessReader !== 'function') return projection;
+    let current;
+    try {
+      current = await this.canonicalReadinessReader({
+        membership: clone(membership),
+        invitation: clone(projection),
+        canonical_readiness: {
+          bos_profile_id: invitation.bos_profile_id,
+          ba_assessment_id: invitation.ba_assessment_id,
+          ba_realization_receipt: clone(invitation.ba_realization_receipt),
+        },
+      });
+    } catch {
+      return { ...projection, consulting_ready: false, consulting_blocker: 'RECRUITING_CONSULTING_CANONICAL_VERIFICATION_UNAVAILABLE', progress_label: 'Results need verification', progress_state: 'BOS_COMPLETE' };
+    }
+    const receipt = invitation.ba_realization_receipt;
+    const currentMatches = current?.ready === true
+      && normalizeProfileId(current.profile_id) === normalizeProfileId(invitation.bos_profile_id)
+      && current.assessment_id === invitation.ba_assessment_id
+      && current.realization_id === receipt.realization_id
+      && current.realization_sha256 === receipt.realization_sha256
+      && current.artifact_sha256 === receipt.artifact_sha256;
+    return currentMatches ? projection : {
+      ...projection,
+      consulting_ready: false,
+      consulting_blocker: 'RECRUITING_CONSULTING_CURRENT_CANONICAL_MISMATCH',
+      progress_label: 'Results need verification',
+      progress_state: 'BOS_COMPLETE',
+    };
   }
 
   async requestManagerVerification(profileId) {
@@ -809,12 +916,13 @@ export class RecruitingV1Service {
       expireDueInvitations(state, now);
       const { membership } = membershipFromSession(state, sessionToken, now);
       const normalizedIdempotency = boundedText(idempotencyKey, 180);
-      const replay = Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && item.idempotency_key === normalizedIdempotency);
-      if (replay) return { invitation: publicInvitation(replay), idempotent: true, ...entitlementProjection(state, membership, now) };
-      const duplicate = Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && item.recruit_email === recruitEmail && ['ISSUED', 'DELIVERED', 'ACCEPTED'].includes(item.state));
-      if (duplicate) return { invitation: publicInvitation(duplicate), idempotent: true, duplicate_active: true, ...entitlementProjection(state, membership, now) };
+      const replay = normalizedIdempotency && Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && item.idempotency_key === normalizedIdempotency);
+      if (replay && normalizeEmail(replay.recruit_email) !== recruitEmail) throw new Error('RECRUITING_INVITATION_IDEMPOTENCY_IDENTITY_MISMATCH');
+      if (replay) return { invitation: publicInvitation(invitationInScope(state, membership, replay.invitation_id), membership), idempotent: true, ...entitlementProjection(state, membership, now) };
+      const duplicate = Object.values(state.invitations).find((item) => item.membership_id === membership.membership_id && normalizeEmail(item.recruit_email) === recruitEmail);
+      if (duplicate) return { invitation: publicInvitation(invitationInScope(state, membership, duplicate.invitation_id), membership), idempotent: true, duplicate_active: true, ...entitlementProjection(state, membership, now) };
       const entitlements = entitlementsFor(state, membership, now);
-      assertPairCanReserve(entitlements);
+      assertPairCanReserve(entitlements, { invitationRemaining: entitlementProjection(state, membership, now).invitation_allowance.remaining });
       const invitation = {
         invitation_id: createOpaqueId('invite'),
         candidate_id: createOpaqueId('candidate'),
@@ -854,10 +962,13 @@ export class RecruitingV1Service {
       return { invitation: publicInvitation(invitation), invitation_token: token, outbox_id: outbox.outbox_id, idempotent: false, ...entitlementProjection(state, membership, now) };
     });
     if (this.transport?.synthetic !== true) delete result.invitation_token;
+    if (result.idempotent && result.invitation.consulting_ready && this.canonicalReadinessReader) {
+      result.invitation = (await this.candidateContext(sessionToken, result.invitation.candidate_id)).invitation;
+    }
     return result;
   }
 
-  async resendInvitation(sessionToken, invitationId) {
+  async resendInvitation(sessionToken, invitationId, { expectedResendCount = null, idempotencyKey = null } = {}) {
     const token = createOpaqueToken();
     const result = await this.store.transaction((state) => {
       const now = this.now();
@@ -865,12 +976,19 @@ export class RecruitingV1Service {
       const { membership } = membershipFromSession(state, sessionToken, now);
       const invitation = invitationInScope(state, membership, invitationId);
       if (invitation.accepted_at || invitation.state === 'REVOKED') throw new Error('RECRUITING_INVITATION_RESEND_DENIED');
+      if (expectedResendCount !== null && (!Number.isInteger(expectedResendCount) || expectedResendCount < 0)) throw new Error('RECRUITING_INVITATION_RESEND_REVISION_INVALID');
+      const resendKey = boundedText(idempotencyKey, 180);
+      if ((resendKey && invitation.last_resend_idempotency_key === resendKey)
+          || (expectedResendCount !== null && expectedResendCount !== Number(invitation.resend_count || 0))) {
+        return { invitation: publicInvitation(invitation, membership), idempotent: true, resend_superseded: true, ...entitlementProjection(state, membership, now) };
+      }
       reserveEntitlementPair(state, membership, invitation, now);
       invitation.state = 'ISSUED';
       invitation.delivery_state = 'PENDING';
       invitation.token_digest = digestToken(token);
-      invitation.token_generation += 1;
-      invitation.resend_count += 1;
+      invitation.token_generation = Number(invitation.token_generation || 0) + 1;
+      invitation.resend_count = Number(invitation.resend_count || 0) + 1;
+      if (resendKey) invitation.last_resend_idempotency_key = resendKey;
       invitation.issued_at = iso(now);
       invitation.expires_at = iso(new Date(at(now).getTime() + INVITATION_TTL_MS));
       invitation.updated_at = iso(now);
@@ -927,6 +1045,7 @@ export class RecruitingV1Service {
       expireDueInvitations(state, now);
       const invitation = Object.values(state.invitations).find((item) => item.token_digest === digestToken(token));
       if (!invitation || !['ISSUED', 'DELIVERED'].includes(invitation.state)) throw new Error('RECRUITING_INVITATION_TOKEN_INVALID');
+      assertMembership(state.memberships[invitation.membership_id]);
       if (consent?.accepted !== true || boundedText(consent?.version, 80) !== 'recruiting_v1_consent_2026_08') throw new Error('RECRUITING_INVITATION_CONSENT_REQUIRED');
       invitation.state = 'ACCEPTED';
       invitation.readiness_state = 'CONSENTED';
@@ -1014,7 +1133,9 @@ export class RecruitingV1Service {
         : false;
       if (currentInvitationOutbox) {
         invitation.delivery_state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
-        invitation.state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
+        if (!invitation.accepted_at && !['REVOKED', 'EXPIRED'].includes(invitation.state)) {
+          invitation.state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
+        }
         invitation.updated_at = iso(now);
         if (!outcome?.success && !invitation.accepted_at) releaseEntitlementPair(invitation);
       }
@@ -1036,6 +1157,16 @@ export class RecruitingV1Service {
       const staleSending = item.state === 'SENDING'
         && Date.parse(item.delivery_started_at || item.updated_at || item.created_at) <= at(now).getTime() - 2 * 60 * 1000;
       if (item.state !== 'PENDING' && !staleSending) return { item: clone(item), deliver: false, idempotent: false };
+      if (item.kind === 'CONSULTING_AGREED_PLAN') {
+        const session = Object.values(state.shared_business_sessions || {}).find((candidate) => candidate.accepted_plan_snapshot?.acceptance_id === item.payload?.acceptance_id);
+        const authority = agreedPlanEmailAuthority(state, session);
+        const expectedRecipient = item.payload.recipient_role === 'PERSON' ? authority.personEmail
+          : item.payload.recipient_role === 'MANAGER' ? normalizeEmail(authority.membership.manager_email) : null;
+        if (session.status !== 'COMPLETED' || expectedRecipient !== normalizeEmail(item.recipient)
+            || stableHash(session.accepted_plan_snapshot) !== stableHash(item.payload.accepted_plan_snapshot)) {
+          throw new Error('CONSULTING_AGREED_PLAN_OUTBOX_AUTHORITY_MISMATCH');
+        }
+      }
       item.state = 'SENDING';
       item.delivery_started_at = iso(now);
       item.updated_at = iso(now);
@@ -1146,13 +1277,21 @@ export class RecruitingV1Service {
     if (baState === 'BA_INTELLIGENCE_READY'
         && (canonical_receipt?.contract !== 'recruiting_canonical_new_ba_ready_receipt_v1'
           || canonical_receipt?.assessment_id !== assessment_id
-          || canonical_receipt?.completeness !== 'PASS')) {
+          || canonical_receipt?.completeness !== 'PASS'
+          || canonical_receipt?.customer_projection_completeness !== 'COMPLETE'
+          || !canonical_receipt?.realization_id
+          || !/^[a-f0-9]{64}$/u.test(String(canonical_receipt?.realization_sha256 || ''))
+          || !/^[a-f0-9]{64}$/u.test(String(canonical_receipt?.artifact_sha256 || '')))) {
       throw new Error('RECRUITING_CANONICAL_BA_RECEIPT_REQUIRED');
     }
     return this.store.transaction((state) => {
       const now = this.now();
       const invitation = state.invitations[invitationId];
       if (!invitation?.bos_profile_id) throw new Error('RECRUITING_BOS_READY_REQUIRED_FOR_BA');
+      if (!invitation.accepted_at || invitation.state !== 'ACCEPTED' || invitation.revoked_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+      if (canonical_receipt && normalizeProfileId(canonical_receipt.profile_id) !== normalizeProfileId(invitation.bos_profile_id)) {
+        throw new Error('RECRUITING_CANONICAL_BA_PROFILE_MISMATCH');
+      }
       const rank = { BA_NOT_STARTED: 0, BA_INTAKE_SAVED: 1, BA_IN_PROGRESS: 2, BA_INTELLIGENCE_READY: 3 };
       if ((rank[invitation.ba_readiness || 'BA_NOT_STARTED'] || 0) > rank[baState]) {
         throw new Error('RECRUITING_BA_STATE_REGRESSION_DENIED');
@@ -1190,12 +1329,15 @@ export class RecruitingV1Service {
   }
 
   async home(sessionToken) {
-    return this.store.transaction((state) => {
+    const snapshot = await this.store.transaction((state) => {
       const now = this.now();
       expireDueInvitations(state, now);
       const { membership } = membershipFromSession(state, sessionToken, now);
-      const invitations = Object.values(state.invitations).filter((item) => item.membership_id === membership.membership_id).sort((a, b) => b.updated_at.localeCompare(a.updated_at));
+      const invitations = Object.values(state.invitations).filter((item) => item.membership_id === membership.membership_id
+        && item.manager_subject_id === membership.manager_subject_id && item.enterprise_id === membership.enterprise_id)
+        .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
       return {
+        membership: clone(membership),
         manager: {
           name: membership.manager_name,
           enterprise_name: membership.enterprise_name,
@@ -1203,11 +1345,27 @@ export class RecruitingV1Service {
           capabilities: { master_control: Array.isArray(membership.admin_roles) && membership.admin_roles.includes('RECRUITING_ADMIN') },
         },
         ...entitlementProjection(state, membership, now),
-        candidates: invitations.map(publicInvitation),
+        invitations: clone(invitations),
         notifications: clone(state.inbox_by_membership[membership.membership_id] || []),
         existing_recruit: { available: false, code: 'EXACT_SCOPE_CONSENT_AUTHORITY_REQUIRED', safe_action: 'INVITE_EXISTING_AGENT' },
       };
     });
+    const candidates = await Promise.all(snapshot.invitations.map((invitation) => this.projectConsultingReadiness(invitation, snapshot.membership)));
+    // Canonical reads happen outside the mutation lock. Recheck relationship
+    // authority afterward so a revoke/rebind cannot publish a stale ready row.
+    const current = await this.store.read();
+    const { membership } = membershipFromSession(current, sessionToken, this.now());
+    const permitted = candidates.flatMap((candidate, index) => {
+      const invitation = current.invitations[candidate.invitation_id];
+      if (!invitation || invitation.membership_id !== membership.membership_id
+          || invitation.manager_subject_id !== membership.manager_subject_id || invitation.enterprise_id !== membership.enterprise_id) return [];
+      if (stableHash(invitation) !== stableHash(snapshot.invitations[index])) {
+        return [{ ...publicInvitation(invitation, membership), consulting_ready: false, consulting_blocker: 'RECRUITING_CONSULTING_READINESS_CHANGED_RETRY', progress_label: 'Refresh to check results', progress_state: invitation.bos_profile_id ? 'BOS_COMPLETE' : 'INVITED' }];
+      }
+      return [candidate];
+    });
+    const { invitations: _invitations, membership: _membership, ...result } = snapshot;
+    return { ...result, candidates: permitted };
   }
 
   async saveOpportunity(sessionToken, items) {
@@ -1268,10 +1426,23 @@ export class RecruitingV1Service {
     const now = this.now();
     const { membership } = membershipFromSession(state, sessionToken, now);
     const invitation = Object.values(state.invitations).find((item) => item.candidate_id === candidateId);
-    if (!invitation || invitation.membership_id !== membership.membership_id || invitation.enterprise_id !== membership.enterprise_id) throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+    if (!invitation || invitation.membership_id !== membership.membership_id || invitation.enterprise_id !== membership.enterprise_id
+        || invitation.manager_subject_id !== membership.manager_subject_id) throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+    const projection = await this.projectConsultingReadiness(invitation, membership);
+    const current = await this.store.read();
+    membershipFromSession(current, sessionToken, this.now());
+    if (stableHash(current.invitations[invitation.invitation_id]) !== stableHash(invitation)
+        || stableHash(current.memberships[membership.membership_id]) !== stableHash(membership)) {
+      throw new Error('RECRUITING_CONSULTING_READINESS_CHANGED_RETRY');
+    }
     return {
       membership: clone(membership),
-      invitation: publicInvitation(invitation),
+      invitation: projection,
+      canonical_readiness: consultingReadinessFor(invitation, membership).ready ? {
+        bos_profile_id: invitation.bos_profile_id,
+        ba_assessment_id: invitation.ba_assessment_id,
+        ba_realization_receipt: clone(invitation.ba_realization_receipt),
+      } : null,
       opportunity: clone(state.opportunity_by_enterprise[membership.enterprise_id] || { items: [] }),
       manager_evidence: clone(state.evidence_by_candidate[candidateId] || []),
       intelligence: clone(state.intelligence_by_candidate[candidateId] || null),
@@ -1287,22 +1458,7 @@ export class RecruitingV1Service {
         throw new Error('CONSULTING_AGREED_PLAN_ACCEPTANCE_REQUIRED');
       }
       if (stableHash(accepted.plan) !== accepted.snapshot_hash) throw new Error('CONSULTING_AGREED_PLAN_SNAPSHOT_DRIFT');
-      const membership = state.memberships?.[session.manager_binding.membership_id];
-      if (!membership || membership.status !== 'ACTIVE' || membership.setup_state !== 'COMPLETE' || !normalizeEmail(membership.manager_email)) {
-        throw new Error('CONSULTING_MANAGER_EMAIL_AUTHORITY_REQUIRED');
-      }
-      const invitation = session.subject_binding.candidate_id
-        ? Object.values(state.invitations || {}).find((item) => item.candidate_id === session.subject_binding.candidate_id)
-        : null;
-      const consultationRequest = session.subject_binding.consultation_request_id
-        ? state.consultation_requests?.[session.subject_binding.consultation_request_id]
-        : null;
-      const personEmail = invitation?.accepted_at
-        ? normalizeEmail(invitation.recruit_email)
-        : consultationRequest?.status === 'APPROVED'
-          ? normalizeEmail(consultationRequest.owner_email)
-          : null;
-      if (!personEmail) throw new Error('CONSULTING_PERSON_EMAIL_AUTHORITY_REQUIRED');
+      const { membership, invitation, personEmail } = agreedPlanEmailAuthority(state, session);
       const recipients = [
         { recipient_role: 'PERSON', recipient: personEmail, recipient_name: session.subject_binding.name },
         { recipient_role: 'MANAGER', recipient: normalizeEmail(membership.manager_email), recipient_name: session.manager_binding.name },
@@ -1353,6 +1509,7 @@ export class RecruitingV1Service {
       if (!session?.accepted_plan_snapshot || session.accepted_plan_snapshot.acceptance_id !== acceptanceId) {
         throw new Error('CONSULTING_AGREED_PLAN_ACCEPTANCE_REQUIRED');
       }
+      agreedPlanEmailAuthority(state, session);
       const recipient = session.agreement_delivery?.recipients?.find((item) => item.recipient_role === recipientRole);
       const outbox = Object.values(state.outbox || {}).find((item) => item.idempotency_key === recipient?.idempotency_key);
       if (!outbox || outbox.kind !== 'CONSULTING_AGREED_PLAN' || outbox.payload?.acceptance_id !== acceptanceId) {

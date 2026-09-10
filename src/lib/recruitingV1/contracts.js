@@ -193,7 +193,38 @@ export function assertManagerEvidence(item) {
   return item;
 }
 
-export function publicInvitation(invitation) {
+export function consultingReadinessFor(invitation, membership = null) {
+  const blocked = (blocker) => ({ ready: false, blocker });
+  if (membership && (membership.status !== 'ACTIVE' || membership.setup_state !== 'COMPLETE'
+      || invitation?.membership_id !== membership.membership_id
+      || invitation?.manager_subject_id !== membership.manager_subject_id
+      || invitation?.enterprise_id !== membership.enterprise_id)) {
+    return blocked('RECRUITING_CONSULTING_RELATIONSHIP_SCOPE_DENIED');
+  }
+  if (invitation?.state !== 'ACCEPTED' || !invitation.accepted_at || invitation.revoked_at
+      || invitation.consent?.version !== 'recruiting_v1_consent_2026_08'
+      || !invitation.consent?.accepted_at) {
+    return blocked('RECRUITING_CONSULTING_ACCEPTED_CONSENT_REQUIRED');
+  }
+  const profileId = normalizeProfileId(invitation.bos_profile_id);
+  if (!profileId) return blocked('RECRUITING_CONSULTING_BOS_NOT_READY');
+  if (invitation.ba_readiness !== 'BA_INTELLIGENCE_READY' || !invitation.ba_assessment_id) {
+    return blocked('RECRUITING_CONSULTING_BA_NOT_READY');
+  }
+  const receipt = invitation.ba_realization_receipt;
+  if (receipt?.contract !== 'recruiting_canonical_new_ba_ready_receipt_v1'
+      || normalizeProfileId(receipt.profile_id) !== profileId
+      || receipt.assessment_id !== invitation.ba_assessment_id
+      || !receipt.realization_id
+      || !/^[a-f0-9]{64}$/u.test(String(receipt.realization_sha256 || ''))
+      || !/^[a-f0-9]{64}$/u.test(String(receipt.artifact_sha256 || ''))
+      || receipt.completeness !== 'PASS' || receipt.customer_projection_completeness !== 'COMPLETE') {
+    return blocked('RECRUITING_CONSULTING_CANONICAL_BA_RECEIPT_INVALID');
+  }
+  return { ready: true, blocker: null };
+}
+
+export function publicInvitation(invitation, membership = null) {
   const legacyEntitlementState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.entitlement_state)
     ? invitation.entitlement_state
     : 'RELEASED';
@@ -207,7 +238,8 @@ export function publicInvitation(invitation) {
         : invitation.accepted_at
           ? 'RESERVED'
           : legacyEntitlementState;
-  const progressState = invitation.ba_readiness === 'BA_INTELLIGENCE_READY'
+  const consultingReadiness = consultingReadinessFor(invitation, membership);
+  const progressState = consultingReadiness.ready
     ? 'BOTH_COMPLETE'
     : ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS'].includes(invitation.ba_readiness)
       ? 'BA_IN_PROGRESS'
@@ -216,6 +248,13 @@ export function publicInvitation(invitation) {
         : invitation.readiness_state === 'BOS_IN_PROGRESS'
           ? 'BOS_IN_PROGRESS'
           : 'INVITED';
+  const progressLabel = invitation.state === 'REVOKED' ? 'Revoked'
+    : invitation.state === 'EXPIRED' ? 'Expired'
+      : invitation.state === 'DELIVERY_FAILED' ? 'Delivery failed'
+        : consultingReadiness.ready ? 'Ready'
+          : invitation.ba_readiness === 'BA_INTELLIGENCE_READY' ? 'Results need verification'
+            : invitation.bos_profile_id || ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS'].includes(invitation.ba_readiness) ? 'Taking BA'
+              : invitation.accepted_at || invitation.readiness_state === 'BOS_IN_PROGRESS' ? 'Taking BOS' : 'Invited';
   return {
     invitation_id: invitation.invitation_id,
     candidate_id: invitation.candidate_id,
@@ -231,6 +270,9 @@ export function publicInvitation(invitation) {
     ba_assessment_id: invitation.ba_assessment_id || null,
     ba_readiness: invitation.ba_readiness || 'BA_NOT_STARTED',
     progress_state: progressState,
+    progress_label: progressLabel,
+    consulting_ready: consultingReadiness.ready,
+    consulting_blocker: consultingReadiness.blocker,
     complimentary_access: {
       bos: invitation.bos_entitlement_state || legacyEntitlementState,
       ba: projectedBaEntitlement,

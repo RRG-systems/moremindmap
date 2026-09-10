@@ -46,7 +46,7 @@ function statusFor(code) {
   if (/SESSION_REQUIRED|APPROVAL_INVALID/.test(code)) return 401;
   if (/SCOPE_DENIED|ORIGIN|CSRF/.test(code)) return 403;
   if (/NOT_FOUND|NOT_READY/.test(code)) return 404;
-  if (/STALE|COMPLETED|PENDING/.test(code)) return 409;
+  if (/STALE|COMPLETED|PENDING|ACTIVE_SESSION_EXISTS|SUPERSEDED_READ_ONLY/.test(code)) return 409;
   if (/INVALID|REQUIRED|REFUSED|DENIED|UNAVAILABLE/.test(code)) return 422;
   return 503;
 }

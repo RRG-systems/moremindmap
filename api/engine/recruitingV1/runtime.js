@@ -14,6 +14,7 @@ import { LoopbackJsonRecruitingStore } from './loopbackJsonStore.js';
 import { createResendRecruitingTransport } from './resendTransport.js';
 import { readNewBaProductionConfig } from '../newBaProductionReadinessV1/config.js';
 import { createRedisNewBaRealizationStore } from '../newBaProductionReadinessV1/launchSafeRealizationStore.js';
+import { readCurrentAuthoredSurfaces } from '../recruitingGuV1/authoredSurfaces.js';
 
 const SYNTHETIC_MEMBERSHIP = Object.freeze({
   membership_id: 'membership_synthetic_harborline_sophia',
@@ -104,6 +105,23 @@ export function recruitingRuntimeEnabled(env = process.env) {
   return syntheticReviewEnabled(env) || env.RECRUITING_V1_ENABLED === 'true';
 }
 
+export function createRecruitingCanonicalReadinessReader({ redis, env = process.env } = {}) {
+  return async ({ invitation }) => {
+    const authored = await readCurrentAuthoredSurfaces({ redis, profileId: invitation.bos_profile_id, env });
+    const bos = authored.receipts?.bos;
+    const ba = authored.receipts?.ba;
+    return {
+      ready: Boolean(authored.bos && authored.ba && bos?.complete_surface_count === 15 && ba?.complete === true
+        && String(bos.profile_id).toLowerCase() === String(invitation.bos_profile_id).toLowerCase()),
+      profile_id: ba?.profile_id,
+      assessment_id: ba?.assessment_id,
+      realization_id: ba?.realization_id,
+      realization_sha256: ba?.realization_sha256,
+      artifact_sha256: ba?.artifact_sha256,
+    };
+  };
+}
+
 export function getRecruitingService(env = process.env) {
   if (service) return service;
   if (syntheticReviewEnabled(env)) {
@@ -140,6 +158,7 @@ export function getRecruitingService(env = process.env) {
         return { found: profile.found === true, profile_id: profile.profile_id || profileId };
       },
       profileOwnerReader: createCanonicalProfileOwnerReader(redis),
+      canonicalReadinessReader: createRecruitingCanonicalReadinessReader({ redis, env }),
     });
   }
   return service;

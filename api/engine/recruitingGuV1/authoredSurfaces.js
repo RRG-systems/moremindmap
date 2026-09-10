@@ -44,8 +44,8 @@ export async function readCurrentAuthoredSurfaces({ redis, profileId, env = proc
     bos: bosEnvelope.artifact,
     ba,
     receipts: {
-      bos: { source: 'canonical_derived_read', realization_id: bosEnvelope.realization_id, artifact_sha256: bosEnvelope.artifact_sha256, complete_surface_count: bosEnvelope.complete_surface_count },
-      ba: baEnvelope ? { source: 'canonical_derived_read', realization_id: baEnvelope.realization_id, artifact_sha256: baEnvelope.artifact_sha256, complete: baEnvelope.completeness?.status === 'PASS' } : { source: 'canonical_derived_read', complete: false, missing: true },
+      bos: { source: 'canonical_derived_read', profile_id: bosEnvelope.profile_id, realization_id: bosEnvelope.realization_id, artifact_sha256: bosEnvelope.artifact_sha256, complete_surface_count: bosEnvelope.complete_surface_count, created_at: bosEnvelope.created_at },
+      ba: baEnvelope ? { source: 'canonical_derived_read', profile_id: baEnvelope.profile_id, assessment_id: baEnvelope.assessment_id, realization_id: baEnvelope.realization_id, realization_sha256: baEnvelope.realization_identity.sha256, artifact_sha256: baEnvelope.artifact_sha256, complete: baEnvelope.completeness?.status === 'PASS', created_at: baEnvelope.created_at } : { source: 'canonical_derived_read', complete: false, missing: true },
     },
   });
 }

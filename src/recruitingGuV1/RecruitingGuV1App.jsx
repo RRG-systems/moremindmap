@@ -4,13 +4,13 @@ import NewBosExperience from '../components/newBosPersonalityDnaV1/NewBosExperie
 import BusinessTwinApp from '../lab/baProgressiveDisclosureV1/BusinessTwinApp.jsx';
 import RecruitingV2Renderer from '../recruitingV2/RecruitingV2Renderer.jsx';
 import { fetchApprovalPreview, fetchGuHome, fetchGuSession, mutateGu, decideApproval, resetGuDemoSubject } from '../lib/recruitingGuV1/client.js';
+import { acceptedPlanPointerKey, acceptedPlanReceiptMatches, acceptedPlanStorageKey, preferredDemoRecoverySubject } from '../lib/recruitingGuV1/acceptedPlanStorage.js';
 import { visibleConversationForRoom } from '../lib/recruitingGuV1/session.js';
 import '../recruitingV2/recruitingV2.css';
 import '../components/baProductionReadinessV1/newBaProductionCanary.css';
 import './recruitingGuV1.css';
 
 const ROOMS = ['HOME', 'YOU', 'YOUR_BUSINESS', 'PLAN'];
-const ACCEPTED_PLAN_SESSION_KEY = 'more-consulting-accepted-plan-session-v1';
 const LABEL = { HOME: 'HOME', YOU: 'YOU', YOUR_BUSINESS: 'YOUR BUSINESS', PLAN: 'PLAN' };
 const SUGGESTIONS = Object.freeze({
   YOU: [
@@ -23,14 +23,14 @@ const SUGGESTIONS = Object.freeze({
   ],
 });
 
-function MoreMark() {
-  return <div className="gu-brand"><span>M</span><div><strong>MORE</strong><small>Consulting Demonstration</small></div></div>;
+function MoreMark({ real = false }) {
+  return <div className="gu-brand"><span>M</span><div><strong>MORE</strong>{real ? <small>Consulting Tool</small> : <small>Consulting Demonstration</small>}</div></div>;
 }
 
-function AppHeader({ room, manager, synthetic, onRoom }) {
+function AppHeader({ room, manager, synthetic, onRoom, real, navigationDisabled = false }) {
   return <header className="gu-header">
-    <MoreMark />
-    <nav aria-label="Consulting demonstration rooms">{ROOMS.map((item) => <button type="button" key={item} className={room === item ? 'active' : ''} onClick={() => onRoom(item)}>{LABEL[item]}</button>)}</nav>
+    <MoreMark real={real} />
+    <nav aria-label={real ? 'Consulting rooms' : 'Consulting demonstration rooms'}>{ROOMS.map((item) => <button type="button" key={item} disabled={navigationDisabled} className={room === item ? 'active' : ''} onClick={() => onRoom(item)}>{LABEL[item]}</button>)}</nav>
     <div className="gu-account"><button type="button" aria-label="Help">?</button>{synthetic && <span className="gu-synthetic-pill">SYNTHETIC · LOCAL ONLY</span>}<div><b>{manager?.name || 'Manager'}</b><small>{manager?.entitlement_mode === 'unlimited' ? 'admin / unlimited' : 'Manager'}</small></div></div>
   </header>;
 }
@@ -62,7 +62,7 @@ function HomeCard({ tone, icon, title, copy, button, footer, onClick, disabled =
   return <article className={`gu-home-card gu-home-card--${tone}`}><span className="gu-home-card__icon"><HomeIcon type={icon} /></span><h2>{title}</h2><p>{copy}</p><button type="button" disabled={disabled} onClick={onClick}>{button}</button><footer>{footer}<span>›</span></footer></article>;
 }
 
-function Home({ data, selected, onContinue, onOpenCandidate, onOpenRelationship, onDemo, onMoreId }) {
+function Home({ data, selected, onContinue, onOpenCandidate, onOpenRelationship, onDemo, onMoreId, real, onPlan }) {
   const [chooser, setChooser] = useState(false);
   const [showMoreId, setShowMoreId] = useState(false);
   const [moreId, setMoreId] = useState('');
@@ -75,6 +75,14 @@ function Home({ data, selected, onContinue, onOpenCandidate, onOpenRelationship,
     setPending('Sending an owner-controlled approval request…');
     try { await onMoreId(moreId); setPending('Request sent. Their MORE ID did not grant access; the owner must approve.'); } catch (error) { setPending(error.message); }
   }
+  if (real) return <main className="gu-home">
+    <section className="gu-home__hero"><div><p className="gu-kicker">CONSULTING TOOL</p><h1>{selected ? `Your consultation with ${selected.name}.` : 'Choose who you are meeting with.'}</h1><p>{selected ? 'Explore Personality DNA, Business Assessment, and build a shared plan together with MORE guiding the conversation.' : 'Your invitation list connects the person and their complete BOS and BA results.'}</p></div><OrbitGraphic /></section>
+    {selected ? <section className="gu-home-grid">
+      <HomeCard tone="green" icon="person" title={`Continue with ${selected.name}`} copy="Explore their complete BOS and BA. Your conversation stays in this shared session." button="Open YOU" footer="Person selected · session continuous" onClick={onContinue} />
+      <HomeCard tone="blue" icon="people" title="Plan together" copy="Talk through commitments, conditions and timing, then decide on the shared next steps." button="Open PLAN" footer="Review together before accepting" onClick={onPlan} />
+    </section> : <section className="gu-home-picker"><h2>No consultation is selected.</h2><p>Choose a ready person from your authorized invitation list.</p><button type="button" onClick={() => window.location.assign('/recruiting/consulting')}>Back to My Recruits →</button></section>}
+    <footer className="gu-trust">▢ &nbsp; Secure. Private. Built on trust.</footer>
+  </main>;
   return <main className="gu-home">
     <section className="gu-home__hero"><div><p className="gu-kicker">CONSULTING DEMONSTRATION</p><h1>Where would you<br />like to begin?</h1><p>Explore Personality DNA, Business Assessment, and build a shared plan together with MORE guiding the conversation.</p></div><OrbitGraphic /></section>
     <p className="gu-kicker gu-start-label">START A CONSULTATION</p>
@@ -93,7 +101,7 @@ function ThinkingProgress({ stage }) {
   return <div className="gu-thinking" role="status"><span className="gu-thinking__mark">M</span><div><strong>MORE is building the current thinking environment.</strong><p>{stage}</p></div><i /></div>;
 }
 
-function ConversationRail({ room, session, busy, progress, error, onSubmit, onSuggestion }) {
+function ConversationRail({ room, session, busy, progress, error, onSubmit, onSuggestion, readOnly = false }) {
   const [value, setValue] = useState('');
   const listRef = useRef(null);
   const submissionLocked = useRef(false);
@@ -102,7 +110,7 @@ function ConversationRail({ room, session, busy, progress, error, onSubmit, onSu
   async function submit(event) {
     event.preventDefault();
     const clean = value.trim();
-    if (!clean || busy || submissionLocked.current) return;
+    if (!clean || busy || readOnly || submissionLocked.current) return;
     submissionLocked.current = true;
     try {
       setValue('');
@@ -122,8 +130,8 @@ function ConversationRail({ room, session, busy, progress, error, onSubmit, onSu
   return <aside className="gu-chat" aria-label="MORE conversation">
     <header>{adjustingPlan ? 'PLAN ADJUSTMENT' : room === 'PLAN' ? 'PLAN CONVERSATION' : 'MORE CONVERSATION'}</header>
     <div className="gu-chat__thread" ref={listRef}><span className="gu-chat__m">M</span>{visibleConversation.map((turn) => <article key={turn.turn_id} className={`gu-turn gu-turn--${turn.actor.toLowerCase()}`}><small>{turn.actor === 'MANAGER' ? session.manager_binding.name : turn.actor === 'INVITEE' ? session.subject_binding.name : 'MORE'}</small>{turn.actor === 'MORE' && turn.insight ? <><strong className="gu-turn__insight">{turn.insight}</strong><p>{turn.explanation}</p><p className="gu-turn__question">{turn.question}</p></> : <p>{turn.text}</p>}</article>)}{busy && <ThinkingProgress stage={progress} />}{error && <p className="gu-chat__error" role="alert">{error}</p>}</div>
-    <div className="gu-chat__bottom">{suggestions.length > 0 && <section className="gu-suggestions"><p>SUGGESTED QUESTIONS</p>{suggestions.map((item) => <button type="button" key={item} disabled={busy} onClick={() => onSuggestion(item)}>{item}</button>)}</section>}
-      <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} placeholder={adjustingPlan ? 'Say what should change—commitments, conditions, or timing…' : room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Enter to send · Shift+Enter for a new line</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>
+    <div className="gu-chat__bottom">{suggestions.length > 0 && !readOnly && <section className="gu-suggestions"><p>SUGGESTED QUESTIONS</p>{suggestions.map((item) => <button type="button" key={item} disabled={busy} onClick={() => onSuggestion(item)}>{item}</button>)}</section>}
+      {readOnly ? <p className="gu-trust">This completed consultation is available for review.</p> : <form onSubmit={submit}><textarea value={value} onChange={(event) => setValue(event.target.value)} onKeyDown={handleKeyDown} placeholder={adjustingPlan ? 'Say what should change—commitments, conditions, or timing…' : room === 'PLAN' ? 'Type naturally. Share what you’re willing to do…' : 'What are you trying to understand together?'} /><div><span>Enter to send · Shift+Enter for a new line</span><button type="submit" className="gu-send" disabled={!value.trim() || busy}>↑</button></div></form>}
     </div>
   </aside>;
 }
@@ -131,6 +139,18 @@ function ConversationRail({ room, session, busy, progress, error, onSubmit, onSu
 function EvidenceDrawer({ evidence, onClose }) {
   if (!evidence?.length) return null;
   return <div className="gu-evidence-layer" role="dialog" aria-modal="true" aria-label="Governed evidence"><button type="button" className="gu-evidence-scrim" onClick={onClose} aria-label="Close evidence" /><aside><header><p className="gu-kicker">GOVERNED EVIDENCE</p><button type="button" onClick={onClose}>×</button></header>{evidence.map((item) => <article key={item.id}><small>{item.truthClass || item.confidence}</small><h3>{item.title}</h3><p>{item.statement}</p><footer>{item.source} · {item.sourceDate}</footer></article>)}</aside></div>;
+}
+
+function PreviousPlansDrawer({ plans, onClose }) {
+  const closeRef = useRef(null);
+  useEffect(() => {
+    const previous = document.activeElement;
+    closeRef.current?.focus();
+    const onKeyDown = (event) => { if (event.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => { document.removeEventListener('keydown', onKeyDown); previous?.focus?.(); };
+  }, [onClose]);
+  return <div className="gu-evidence-layer" role="dialog" aria-modal="true" aria-label="Previous agreed plans"><button type="button" className="gu-evidence-scrim" onClick={onClose} aria-label="Close previous agreed plans" /><aside><header><p className="gu-kicker">PREVIOUS AGREED PLANS</p><button ref={closeRef} type="button" onClick={onClose} aria-label="Close plan history">×</button></header>{plans.map((item) => <section key={item.session_id}><p className="gu-kicker">Agreed {new Date(item.completed_at).toLocaleDateString()}</p><PlanProposal proposal={{ version: item.accepted_plan_snapshot.version, proposal: item.accepted_plan_snapshot.plan }} actions={false} /></section>)}</aside></div>;
 }
 
 function Projection({ projection, scenarioValues, onScenarioChange, onScenarioApply, onEvidence, onHypothesis, onClose }) {
@@ -147,17 +167,24 @@ function AuthoredRoom({ room, surfaces, projection, showProjection, projectionPr
   </div>;
 }
 
-function PlanRoom({ session, busy, onDecision, onSecondOffer }) {
+function PlanRoom({ session, busy, onDecision, onSecondOffer, real }) {
   const proposal = session.proposals?.find((item) => item.proposal_id === session.current_proposal_id);
   const lastDecision = session.decisions?.at(-1)?.decision;
   const receipt = session.effect_receipts?.at(-1);
   const accepted = session.accepted_plan_snapshot;
   if (session.status === 'COMPLETED' && lastDecision === 'YES') return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">THE ANSWER THE TWO OF YOU REACHED.</p><h1>Congratulations — let’s get started.</h1><p>The exact agreed plan is recorded in this Shared Business Session.</p><PlanProposal proposal={accepted ? { version: accepted.version, proposal: accepted.plan } : proposal} actions={false} /><AgreementDeliveryStatus delivery={session.agreement_delivery} /></main>;
+  if (real && session.status === 'COMPLETED' && receipt) return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">MEETING COMPLETE</p><h1>This consultation has ended.</h1><p>No sponsored MORE access is confirmed here.</p></main>;
   if (session.status === 'COMPLETED' && receipt) return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">STAY CONNECTED</p><h1>{session.subject_binding.name} accepted 3 months of MORE.</h1><div className="gu-receipt"><p>One-time sponsor payment <b>simulated</b></p><p>Activation email <b>simulated</b></p><p>3-month MORE entitlement <b>simulated</b></p><p>90-day follow-up <b>scheduled</b></p><p>Reminders <b>simulated</b></p></div></main>;
   if (session.status === 'COMPLETED' && lastDecision === 'CLOSE_GRACEFULLY') return <main className="gu-plan gu-plan--complete"><p className="gu-kicker">MEETING COMPLETE</p><h1>Thank you for the honest conversation.</h1><p>No plan, payment, entitlement, email, or follow-up was created.</p></main>;
+  if (real && session.status === 'SECOND_OFFER') return <main className="gu-plan gu-plan--offer"><p className="gu-kicker">NO PLAN ACCEPTED</p><h1>That’s okay.</h1><p>A three-month sponsored MORE option is not available in this consultation. You can close the conversation without accepting a plan or activating anything.</p><div><button type="button" disabled={busy} onClick={() => onSecondOffer('CLOSE_GRACEFULLY')}>Close Gracefully</button></div></main>;
   if (session.status === 'SECOND_OFFER') return <main className="gu-plan gu-plan--offer"><p className="gu-kicker">ONE MORE OPTION</p><h1>That’s okay.</h1><p>Darren would still like to give you 3 months of MORE and reconnect in 90 days.</p><div><button type="button" disabled={busy} onClick={() => onSecondOffer('STAY_CONNECTED')}>YES — Stay Connected</button><button type="button" disabled={busy} onClick={() => onSecondOffer('CLOSE_GRACEFULLY')}>NO — Close Gracefully</button></div></main>;
   if (proposal?.status === 'ADJUSTMENT_REQUESTED') return <main className="gu-plan gu-plan--adjusting"><p className="gu-kicker">ADJUSTING THIS SHARED PLAN</p><h1>What should change?</h1><p>The current draft is preserved below. Use the same PLAN conversation to say what should change about the commitments, conditions, or timing. MORE will revise this draft and bring back a clean plan for YES / ADJUST / NOT NOW.</p><PlanProposal proposal={proposal} actions={false} /></main>;
   return <main className="gu-plan"><p className="gu-kicker">PLAN TOGETHER</p><h1>Let’s decide together<br />on a few next steps.</h1><i /><p>Share what you’re willing to do to support this person’s business<br />and what outcome you want to create together.</p><p>I’ll turn your commitments into a clear plan we can decide on—together.</p>{proposal ? <PlanProposal proposal={proposal} onDecision={onDecision} busy={busy} /> : <div className="gu-plan__start"><span>◯</span><strong>Start the conversation</strong><p>Type what you’re willing to do, what outcome<br />you want, and any conditions or timing.</p></div>}</main>;
+}
+
+function ArchivedConsultation({ bundle }) {
+  const accepted = bundle.session?.accepted_plan_snapshot;
+  return <main className="gu-plan gu-plan--complete" data-archived-consultation="true"><p className="gu-kicker">EARLIER CONSULTATION</p><h1>This consultation uses an earlier record.</h1><p>{bundle.archive?.message || 'Your saved plan is retained. Start another consultation to use the current record.'}</p>{accepted && <PlanProposal proposal={{ version: accepted.version, proposal: accepted.plan }} actions={false} />}</main>;
 }
 
 function AgreementDeliveryStatus({ delivery }) {
@@ -191,6 +218,13 @@ function ApprovalPage({ token }) {
 
 export default function RecruitingGuV1App() {
   const location = useLocation();
+  return <ConsultingExperience key={`${location.pathname}${location.search}`} />;
+}
+
+function ConsultingExperience() {
+  const location = useLocation();
+  const realConsulting = !location.pathname.includes('/demo');
+  const selectedCandidateId = new URLSearchParams(location.search).get('candidate_id');
   const approvalToken = location.pathname.includes('/approve/') ? location.pathname.split('/approve/')[1] : '';
   const [home, setHome] = useState(null);
   const [bundle, setBundle] = useState(null);
@@ -201,40 +235,56 @@ export default function RecruitingGuV1App() {
   const [scenarioValues, setScenarioValues] = useState({});
   const [evidence, setEvidence] = useState(null);
   const [activeSubject, setActiveSubject] = useState(null);
+  const [reviewRoom, setReviewRoom] = useState(null);
+  const [previousPlansVisible, setPreviousPlansVisible] = useState(false);
   const session = bundle?.session;
-  const room = session?.current_room || 'HOME';
+  const room = bundle?.requires_new_consultation ? 'HOME' : reviewRoom || session?.current_room || 'HOME';
   const progressTimer = useRef(null);
   const initialized = useRef(false);
+  const newConsultationLocked = useRef(false);
 
   useEffect(() => {
     if (approvalToken) return;
     if (initialized.current) return;
     initialized.current = true;
-    fetchGuHome().then((payload) => {
+    fetchGuHome().then(async (payload) => {
       setHome(payload);
-      const selected = new URLSearchParams(location.search).get('candidate_id');
-      if (selected) return openCandidate(selected);
-      const acceptedSessionId = window.sessionStorage.getItem(ACCEPTED_PLAN_SESSION_KEY);
-      if (acceptedSessionId) return fetchGuSession(acceptedSessionId).then((recovered) => {
-        if (recovered.session?.status === 'COMPLETED' && recovered.session?.accepted_plan_snapshot) {
-          setActiveSubject(payload.active_subject);
-          setBundle({ session: recovered.session, manager: payload.manager });
-          setProjectionVisible(false);
-          return;
-        }
-        window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY);
-      }).catch(() => window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY));
+      if (selectedCandidateId && realConsulting) return openCandidate(selectedCandidateId);
+      // A real consultation is opened by its server-verified candidate relationship.
+      // Browser state never selects a person or a demo capability for a real manager.
+      if (realConsulting) return null;
+      const managerId = payload.manager?.subject_id;
+      const pointerKey = acceptedPlanPointerKey('demo', managerId);
+      const persistedSubject = preferredDemoRecoverySubject({ rememberedSubject: pointerKey ? window.sessionStorage.getItem(pointerKey) : null, activeSubject: payload.active_subject, allowedSubjects: payload.experiment_subjects?.map((item) => item.id) || (payload.synthetic_only ? ['SYNTHETIC'] : []) });
+      const receiptScope = { mode: 'demo', managerId, subjectId: persistedSubject };
+      const receiptKey = acceptedPlanStorageKey(receiptScope);
+      let receipt;
+      try { receipt = receiptKey ? JSON.parse(window.sessionStorage.getItem(receiptKey)) : null; } catch { receipt = null; }
+      if (receipt?.sessionId && receipt.mode === receiptScope.mode && receipt.managerId === managerId && receipt.subjectId === persistedSubject) {
+        try {
+          const recovered = await fetchGuSession(receipt.sessionId);
+          if (acceptedPlanReceiptMatches(recovered.session, receipt, receiptScope)) {
+            setActiveSubject(persistedSubject);
+            setBundle({ session: recovered.session, manager: payload.manager });
+            setProjectionVisible(false);
+            return;
+          }
+          window.sessionStorage.removeItem(receiptKey);
+        } catch { window.sessionStorage.removeItem(receiptKey); }
+      }
       if (payload.active_session_id && payload.experiment_only) return mutateGu('OPEN_EXPERIMENT_SUBJECT', { subject: payload.active_subject }).then((opened) => { setActiveSubject(payload.active_subject); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
       if (payload.active_session_id && payload.synthetic_only) return mutateGu('OPEN_SYNTHETIC_DEMO').then((opened) => { setActiveSubject('SYNTHETIC'); setBundle(opened); setProjectionVisible(Boolean(opened.session.current_projection)); });
       return null;
     }).catch((failure) => setError(failure.message));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [approvalToken]);
+  }, [approvalToken, selectedCandidateId, realConsulting]);
 
   useEffect(() => () => clearInterval(progressTimer.current), []);
   const projection = session?.current_projection;
   const showProjection = projectionVisible && projection?.room === room;
   const manager = bundle?.manager || home?.manager;
+  const storageManagerId = session?.manager_binding?.subject_id || manager?.subject_id;
+  const storageSubjectId = realConsulting ? session?.subject_binding?.candidate_id : activeSubject;
+  const acceptedPlanKey = acceptedPlanStorageKey({ mode: realConsulting ? 'real' : 'demo', managerId: storageManagerId, subjectId: storageSubjectId });
 
   function beginProgress() {
     const stages = ['Understanding what matters most now…', 'Preparing one useful coaching thought…', 'Getting the question clear…'];
@@ -245,7 +295,7 @@ export default function RecruitingGuV1App() {
   }
 
   async function openCandidate(candidateId) {
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setBundle(null); setScenarioValues({}); setEvidence(null);
     try { const payload = await mutateGu('OPEN_CANDIDATE', { candidate_id: candidateId }); setBundle(payload); setProjectionVisible(Boolean(payload.session.current_projection)); }
     catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
@@ -272,6 +322,8 @@ export default function RecruitingGuV1App() {
     try {
       const payload = await mutateGu('OPEN_EXPERIMENT_SUBJECT', { subject });
       setActiveSubject(subject);
+      const pointerKey = acceptedPlanPointerKey('demo', payload.session.manager_binding.subject_id);
+      if (pointerKey) window.sessionStorage.setItem(pointerKey, subject);
       setBundle(payload);
       setProjectionVisible(Boolean(payload.session.current_projection));
     } catch (failure) { setError(failure.message); }
@@ -284,7 +336,9 @@ export default function RecruitingGuV1App() {
     try {
       const receipt = await resetGuDemoSubject(subject);
       if (receipt.reset !== true || receipt.subject !== subject || receipt.external_mutation !== false || receipt.canonical_mutation !== false) throw new Error('DEMO_RESET_RECEIPT_INVALID');
-      window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY);
+      if (acceptedPlanKey) window.sessionStorage.removeItem(acceptedPlanKey);
+      const pointerKey = acceptedPlanPointerKey('demo', storageManagerId);
+      if (pointerKey) window.sessionStorage.removeItem(pointerKey);
       setBundle(null);
       setActiveSubject(null);
       setProjectionVisible(false);
@@ -298,10 +352,22 @@ export default function RecruitingGuV1App() {
   }
   async function navigateRoom(nextRoom) {
     setError('');
-    if (nextRoom === 'HOME') { window.sessionStorage.removeItem(ACCEPTED_PLAN_SESSION_KEY); setBundle(null); return; }
+    if (bundle?.requires_new_consultation) return;
+    if (realConsulting && session?.status === 'COMPLETED') { setReviewRoom(nextRoom); return; }
+    if (nextRoom === 'HOME' && !realConsulting) { if (acceptedPlanKey) window.sessionStorage.removeItem(acceptedPlanKey); setBundle(null); return; }
     if (!session || busy || nextRoom === room) return;
     try { const payload = await mutateGu('CHANGE_ROOM', { session_id: session.session_id, room: nextRoom, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); setProjectionVisible(Boolean(payload.session.current_projection?.room === nextRoom)); }
     catch (failure) { setError(failure.message); }
+  }
+  async function startAnotherConsultation() {
+    if (!realConsulting || (!bundle?.requires_new_consultation && session?.status !== 'COMPLETED') || busy || newConsultationLocked.current) return;
+    newConsultationLocked.current = true;
+    setBusy(true); setError('');
+    try {
+      const opened = await mutateGu('START_ANOTHER_CONSULTATION', { session_id: session.session_id, expected_revision: session.revision });
+      setBundle(opened); setReviewRoom(null); setProjectionVisible(false); setScenarioValues({}); setEvidence(null); setPreviousPlansVisible(false);
+    } catch (failure) { setError(failure.message); }
+    finally { newConsultationLocked.current = false; setBusy(false); }
   }
   async function submit(message, actor = 'MANAGER') {
     if (!session || busy) return;
@@ -347,15 +413,22 @@ export default function RecruitingGuV1App() {
     setBusy(true); setError('');
     try {
       const payload = await mutateGu('PLAN_DECISION', { session_id: session.session_id, decision, expected_revision: session.revision });
-      if (decision === 'YES' && payload.session?.accepted_plan_snapshot) window.sessionStorage.setItem(ACCEPTED_PLAN_SESSION_KEY, payload.session.session_id);
+      if (decision === 'YES' && payload.session?.accepted_plan_snapshot && acceptedPlanKey) {
+        const saved = payload.session;
+        window.sessionStorage.setItem(acceptedPlanKey, JSON.stringify({ mode: realConsulting ? 'real' : 'demo', subjectId: storageSubjectId, sessionId: saved.session_id, managerId: saved.manager_binding.subject_id, profileId: saved.subject_binding.profile_id, candidateId: saved.subject_binding.candidate_id || null }));
+        if (!realConsulting) window.sessionStorage.setItem(acceptedPlanPointerKey('demo', storageManagerId), activeSubject);
+      }
       setBundle((current) => ({ ...current, session: payload.session }));
     }
     catch (failure) { setError(failure.message); }
     finally { setBusy(false); }
   }
   async function secondOffer(decision) {
+    if (busy) return;
+    setBusy(true); setError('');
     try { const payload = await mutateGu('SECOND_OFFER_DECISION', { session_id: session.session_id, decision, expected_revision: session.revision }); setBundle((current) => ({ ...current, session: payload.session })); }
     catch (failure) { setError(failure.message); }
+    finally { setBusy(false); }
   }
   const projectionProps = useMemo(() => ({
     scenarioValues,
@@ -368,19 +441,22 @@ export default function RecruitingGuV1App() {
   }), [scenarioValues, session?.revision, busy]);
 
   if (approvalToken) return <ApprovalPage token={approvalToken} />;
-  if (!home) return <main className="gu-loading"><MoreMark /><h1>{error || 'Opening Consulting Demonstration…'}</h1></main>;
-  return <div className="recruiting-gu-v1" data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
-    <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} />
+  if (!home) return <main className="gu-loading"><MoreMark real={realConsulting} /><h1>{error || (realConsulting ? 'Opening Consulting Tool…' : 'Opening Consulting Demonstration…')}</h1></main>;
+  return <div className="recruiting-gu-v1" data-real-consulting={realConsulting ? 'true' : 'false'} data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
+    <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} real={realConsulting} navigationDisabled={bundle?.requires_new_consultation} />
+    {realConsulting && <section className="gu-selected-person" aria-label="Selected consultation"><div><small>CONSULTING WITH</small><strong>{session?.subject_binding?.name || (busy ? 'Opening selected person…' : 'No person selected')}</strong></div><nav>{Boolean(bundle?.previous_accepted_plans?.length) && <button type="button" onClick={() => setPreviousPlansVisible(true)}>Previous agreed plans ({bundle.previous_accepted_plans.length})</button>}{(session?.status === 'COMPLETED' || bundle?.requires_new_consultation) && <button type="button" disabled={busy} onClick={startAnotherConsultation}>Start another consultation</button>}<button type="button" onClick={() => window.location.assign(home.manager?.capabilities?.master_control ? '/recruiting/invite' : '/recruiting/consulting')}>← Back to My Recruits</button></nav></section>}
+    {error && room === 'HOME' && <p className="gu-chat__error" role="alert">{error}</p>}
     <SubjectTabs subjects={home.experiment_subjects} activeSubject={activeSubject} busy={busy} onSubject={openSubject} onReset={resetSelectedSubject} />
-    {room === 'HOME' ? <Home data={home} selected={session?.subject_binding ? { name: session.subject_binding.name } : null} onContinue={() => navigateRoom('YOU')} onOpenCandidate={openCandidate} onOpenRelationship={openRelationship} onDemo={openDemo} onMoreId={(profileId) => mutateGu('REQUEST_MORE_ID', { profile_id: profileId })} /> : <>
+    {bundle?.requires_new_consultation ? <ArchivedConsultation bundle={bundle} /> : room === 'HOME' ? <Home data={home} real={realConsulting} onPlan={() => navigateRoom('PLAN')} selected={session?.subject_binding ? { name: session.subject_binding.name } : null} onContinue={() => navigateRoom('YOU')} onOpenCandidate={openCandidate} onOpenRelationship={openRelationship} onDemo={openDemo} onMoreId={(profileId) => mutateGu('REQUEST_MORE_ID', { profile_id: profileId })} /> : <>
       <div className="gu-room-layout">
-        {room === 'YOU' || room === 'YOUR_BUSINESS' ? <AuthoredRoom room={room} surfaces={bundle.authored_surfaces} projection={projection} showProjection={showProjection} projectionProps={projectionProps} /> : <PlanRoom session={session} busy={busy} onDecision={planDecision} onSecondOffer={secondOffer} />}
-        <ConversationRail room={room} session={session} busy={busy} progress={progress} error={error} onSubmit={submit} onSuggestion={(question) => submit(question, 'MANAGER')} />
+        {room === 'YOU' || room === 'YOUR_BUSINESS' ? <AuthoredRoom room={room} surfaces={bundle.authored_surfaces} projection={projection} showProjection={showProjection} projectionProps={projectionProps} /> : <PlanRoom session={session} real={realConsulting} busy={busy} onDecision={planDecision} onSecondOffer={secondOffer} />}
+        <ConversationRail room={room} session={session} busy={busy} readOnly={realConsulting && session.status === 'COMPLETED'} progress={progress} error={error} onSubmit={submit} onSuggestion={(question) => submit(question, 'MANAGER')} />
       </div>
-      <p className="gu-boundary">{session?.synthetic_only ? 'Synthetic Darren/Jordan demonstration. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, real-product, or Production mutation.' : 'Patricia demonstration: canonical BOS/BA read only. YOU is BOS-only; YOUR BUSINESS is BOS + BA / Business Twin. No canonical/customer write, email, fulfillment, external action, or Production mutation.'}</p>
+      <p className="gu-boundary">{realConsulting ? 'BOS and BA are read through the accepted relationship. Shared PLAN decisions are recorded in this consultation; agreed-plan email status is shown after acceptance.' : session?.synthetic_only ? 'Synthetic Darren/Jordan demonstration. No Stripe, email, entitlement, reminder, follow-ups, customer, canonical, real-product, or Production mutation.' : 'Patricia demonstration: canonical BOS/BA read only. YOU is BOS-only; YOUR BUSINESS is BOS + BA / Business Twin. No canonical/customer write, email, fulfillment, external action, or Production mutation.'}</p>
       <BottomNav room={room} onRoom={navigateRoom} />
     </>}
     {evidence && <EvidenceDrawer evidence={evidence} onClose={() => setEvidence(null)} />}
+    {previousPlansVisible && <PreviousPlansDrawer plans={bundle.previous_accepted_plans} onClose={() => setPreviousPlansVisible(false)} />}
     {busy && room === 'HOME' && <ThinkingProgress stage="Opening the governed consultation…" />}
   </div>;
 }

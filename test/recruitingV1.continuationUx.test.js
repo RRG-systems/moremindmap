@@ -45,11 +45,20 @@ test('public recruit path owns BA continuation while the manager receives readin
   assert.match(profileSource, /href="\/recruiting\/continue"/u);
   assert.match(continuationSource, /return_path: '\/recruiting\/continue'/u);
   assert.match(continuationSource, /action: 'CONNECT_OWNED_PROFILE'/u);
-  assert.match(appSource, /String\(notification\?\.kind \|\| 'progress'\)\.replaceAll/u);
-  assert.match(appSource, /candidate\?\.progress_state \|\| candidate\?\.readiness_state/u);
-  assert.match(appSource, /<ManagerProductBalances state=\{state\}/u);
+  assert.match(appSource, /presentRecruitingNotification\(notification, candidates\)/u);
+  assert.match(appSource, /recruitProgressLabel\(candidate\)/u);
+  assert.match(appSource, /<ManagerInvitationBalance state=\{state\}/u);
   assert.match(appSource, /Refresh readiness/u);
-  assert.match(appSource, /disabled=\{!canInvite\}/u);
+  assert.match(appSource, /disabled=\{sending \|\| !allowance\}/u);
+  assert.match(appSource, /Check existing invitation/u);
+  assert.match(appSource, /action: 'RESEND_INVITATION', body: \{ invitation_id: person\.invitation_id, expected_resend_count: person\.resend_count \|\| 0 \}/u);
+  assert.match(appSource, /await refreshAfterFailure\(failure\)/u);
+  for (const name of ['refreshAfterFailure(failure)', 'resend(person)', 'submit(event)']) {
+    const start = appSource.indexOf(`async function ${name}`, appSource.indexOf('function InviteSurface'));
+    const nextTry = appSource.indexOf('try {', start);
+    const clearNotice = appSource.indexOf('setSent(null);', start);
+    assert.ok(clearNotice > start && clearNotice < nextTry, `${name} clears prior success before work or failure recovery`);
+  }
 });
 
 test('continuation and manager progress remain responsive and accessible', () => {

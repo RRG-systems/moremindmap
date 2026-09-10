@@ -2,6 +2,20 @@ import { stableHash } from '../recruitingV1/contracts.js';
 import { createRecruitingV2SyntheticWorld } from '../recruitingV2/syntheticWorld.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
+export const RECRUITING_GU_WORLD_IDENTITY_VERSION = 'more_recruiting_gu_current_evidence_identity_v2';
+
+function sourceDate(value) {
+  const timestamp = typeof value === 'string' && value.trim() ? Date.parse(value) : NaN;
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString().slice(0, 10) : 'UNKNOWN';
+}
+
+function sourceDateSet(items) {
+  const sourceDates = [...new Set((items || []).map((item) => sourceDate(item.source_date)))].sort();
+  return {
+    sourceDate: sourceDates.length === 1 ? sourceDates[0] : sourceDates.length ? 'MULTIPLE_SOURCE_DATES' : 'UNKNOWN',
+    sourceDates,
+  };
+}
 
 function bounded(value, max = 1800) {
   return String(value || '').trim().replace(/\s+/gu, ' ').slice(0, max);
@@ -80,7 +94,7 @@ export function rankRecruitingGuWorldForCompiler(world, semanticMeaning) {
   });
 }
 
-export function createRecruitingGuWorld({ relationship, candidate, manager, bosArtifact, baViewModel, opportunity = { items: [] }, managerEvidence = [] } = {}) {
+export function createRecruitingGuWorld({ relationship, candidate, manager, bosArtifact, baViewModel, canonicalReceipts = null, opportunity = { items: [] }, managerEvidence = [] } = {}) {
   if (!relationship?.relationship_id || !candidate?.profile_id || !manager?.subject_id) throw new Error('RECRUITING_GU_V1_WORLD_BINDING_REQUIRED');
   const profileName = bounded(candidate.name || 'MORE member', 140);
   const bosSummary = firstText(bosArtifact, ['executive_summary', 'summary', 'orientation', 'headline']) || 'A complete governed BOS is available in the YOU room.';
@@ -88,10 +102,10 @@ export function createRecruitingGuWorld({ relationship, candidate, manager, bosA
   const constraint = firstText(baViewModel, ['governing_constraint', 'constraint', 'primary_constraint']) || 'The governing constraint remains a revisable business hypothesis.';
   const goal = firstText(baViewModel, ['goal', 'desired_future', 'destination']) || 'The desired direction remains governed by the Business Twin evidence.';
   const evidence = [
-    { id: 'ev-subject-bos', title: `${profileName} BOS`, statement: bosSummary, source: 'Canonical BOS realization', sourceDate: new Date().toISOString().slice(0, 10), truthClass: 'CANONICAL_READ', confidence: 'KNOWN' },
-    { id: 'ev-subject-ba', title: `${profileName} Business Twin`, statement: businessReality, source: 'Canonical BA realization', sourceDate: new Date().toISOString().slice(0, 10), truthClass: 'CANONICAL_READ', confidence: baViewModel ? 'KNOWN' : 'MISSING' },
-    { id: 'ev-manager-opportunity', title: 'Local Opportunity authority', statement: bounded(opportunity.items?.map((item) => item.statement).join(' ') || 'No supported local opportunity claim is available.'), source: 'Recruiting V1 Local Opportunity', sourceDate: new Date().toISOString().slice(0, 10), truthClass: 'ENTERPRISE_AUTHORITY', confidence: opportunity.items?.length ? 'KNOWN' : 'OPEN' },
-    { id: 'ev-manager-observations', title: 'Manager-supplied evidence', statement: bounded(managerEvidence.map((item) => item.claim).join(' ') || 'No manager observations are recorded.'), source: 'Recruiting V1 manager evidence', sourceDate: new Date().toISOString().slice(0, 10), truthClass: 'MANAGER_SUPPLIED', confidence: managerEvidence.length ? 'REPORTED' : 'OPEN' },
+    { id: 'ev-subject-bos', title: `${profileName} BOS`, statement: bosSummary, source: 'Canonical BOS realization', sourceDate: sourceDate(canonicalReceipts?.bos?.created_at || bosArtifact?.created_at), truthClass: 'CANONICAL_READ', confidence: 'KNOWN' },
+    { id: 'ev-subject-ba', title: `${profileName} Business Twin`, statement: businessReality, source: 'Canonical BA realization', sourceDate: sourceDate(canonicalReceipts?.ba?.created_at || baViewModel?.created_at), truthClass: 'CANONICAL_READ', confidence: baViewModel ? 'KNOWN' : 'MISSING' },
+    { id: 'ev-manager-opportunity', title: 'Local Opportunity authority', statement: bounded(opportunity.items?.map((item) => item.statement).join(' ') || 'No supported local opportunity claim is available.'), source: 'Recruiting V1 Local Opportunity', ...sourceDateSet(opportunity.items), truthClass: 'ENTERPRISE_AUTHORITY', confidence: opportunity.items?.length ? 'KNOWN' : 'OPEN' },
+    { id: 'ev-manager-observations', title: 'Manager-supplied evidence', statement: bounded(managerEvidence.map((item) => item.claim).join(' ') || 'No manager observations are recorded.'), source: 'Recruiting V1 manager evidence', ...sourceDateSet(managerEvidence), truthClass: 'MANAGER_SUPPLIED', confidence: managerEvidence.length ? 'REPORTED' : 'OPEN' },
   ];
   const objects = [
     { id: 'obj-subject-person', kind: 'PERSON', title: profileName, role: 'MORE member and business owner', summary: bosSummary, motivation: goal, caution: 'Whole-person evidence can guide the conversation; it does not prove business causation.', sourceIds: ['ev-subject-bos'], truthClass: 'CANONICAL_READ' },
@@ -101,11 +115,24 @@ export function createRecruitingGuWorld({ relationship, candidate, manager, bosA
     { id: 'obj-local-capabilities', kind: 'LOCAL_OPPORTUNITY', title: 'What is actually supported locally', items: opportunity.items || [], sourceIds: ['ev-manager-opportunity'], truthClass: 'ENTERPRISE_AUTHORITY' },
     { id: 'obj-evidence-gap', kind: 'EVIDENCE_GAP', title: 'What the evidence does not establish', missing: [!baViewModel && 'A complete Business Twin is not yet available.', !managerEvidence.length && 'No manager observations are recorded.'].filter(Boolean), counterevidence: [], mindChange: 'New verified evidence or either human correcting the working hypothesis.', sourceIds: ['ev-subject-ba', 'ev-manager-observations'], truthClass: 'GOVERNED_MISSINGNESS' },
   ];
-  const identity = stableHash({ relationship: relationship.relationship_id, profile: candidate.profile_id, bos: bosArtifact?.realization_id || bosArtifact?.profile_id, ba: baViewModel?.version || null, evidence });
+  const identity = stableHash({
+    identity_version: RECRUITING_GU_WORLD_IDENTITY_VERSION,
+    relationship: { id: relationship.relationship_id, consent: relationship.consent_state, status: relationship.status },
+    manager: { subject_id: manager.subject_id, membership_id: manager.membership_id, enterprise_id: manager.enterprise_id, name: manager.name },
+    profile: candidate.profile_id,
+    person_name: profileName,
+    bos_artifact_sha256: stableHash(bosArtifact || null),
+    ba_presentation_sha256: stableHash(baViewModel || null),
+    canonical_receipts_sha256: stableHash(canonicalReceipts || null),
+    opportunity_sha256: stableHash(opportunity),
+    manager_evidence_sha256: stableHash(managerEvidence),
+    evidence,
+  });
   return Object.freeze({
     contract: 'more_recruiting_gu_v1_relationship_read_projection_v1',
     worldId: `recruiting-gu-v1-${identity.slice(0, 20)}`,
-    version: `gu-world-${identity.slice(0, 16)}`,
+    version: `gu-world-v2-${identity.slice(0, 16)}`,
+    identityVersion: RECRUITING_GU_WORLD_IDENTITY_VERSION,
     asOf: new Date().toISOString(), syntheticOnly: false,
     relationship: { id: relationship.relationship_id, recruiter: bounded(manager.name, 140), candidate: profileName, consent: relationship.consent_state, status: relationship.status },
     authority: { canonicalReads: 'Referenced only', localOpportunity: 'Cannot create a candidate gap', sessionAssertions: 'Session-only', modelOutput: 'Revisable hypothesis', mutations: 'Shared Business Session only' },

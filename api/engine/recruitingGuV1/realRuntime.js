@@ -3,6 +3,7 @@
 import {
   createOpaqueId,
   createOpaqueToken,
+  consultingReadinessFor,
   digestToken,
   normalizeProfileId,
   stableHash,
@@ -59,8 +60,64 @@ function sessionAuthority(membership, relationship) {
   });
 }
 
-async function relationshipBinding({ service, redis, membership, relationship, env }) {
-  const authored = await readCurrentAuthoredSurfaces({ redis, profileId: relationship.profile_id, env });
+function assertRelationshipScope(relationship, membership) {
+  if (!relationship || !membership || membership.status !== 'ACTIVE' || membership.setup_state !== 'COMPLETE'
+      || relationship.status !== 'ACTIVE' || relationship.membership_id !== membership.membership_id
+      || relationship.enterprise_id !== membership.enterprise_id || relationship.manager_subject_id !== membership.manager_subject_id
+      || !normalizeProfileId(relationship.profile_id) || relationship.canonical_write_authority !== false) {
+    throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
+  }
+}
+
+function assertCandidateBinding(candidate, relationship = null) {
+  if (!candidate?.invitation?.consulting_ready || !candidate.invitation.accepted_at) {
+    throw new Error('RECRUITING_GU_V1_BOTH_ASSESSMENTS_NOT_READY');
+  }
+  const profile = normalizeProfileId(candidate.invitation.bos_profile_id);
+  if (!profile || (relationship && (candidate.invitation.candidate_id !== relationship.candidate_id
+      || profile !== normalizeProfileId(relationship.profile_id)
+      || relationship.consent_state !== 'RECRUITING_INVITATION_ACCEPTED'))) {
+    throw new Error('RECRUITING_GU_V1_CANDIDATE_BINDING_SCOPE_DENIED');
+  }
+  return profile;
+}
+
+function assertCompleteAuthoredSurfaces(authored, profileId, canonicalReadiness = null) {
+  const profile = normalizeProfileId(profileId);
+  const bos = authored?.receipts?.bos;
+  const ba = authored?.receipts?.ba;
+  if (!authored?.bos || !authored?.ba || bos?.complete_surface_count !== 15 || ba?.complete !== true) {
+    throw new Error('RECRUITING_GU_V1_BOTH_ASSESSMENTS_NOT_READY');
+  }
+  if (!profile || normalizeProfileId(authored.bos.profile_id) !== profile
+      || normalizeProfileId(bos.profile_id) !== profile || normalizeProfileId(ba.profile_id) !== profile) {
+    throw new Error('RECRUITING_GU_V1_CANONICAL_SUBJECT_SCOPE_DENIED');
+  }
+  if (canonicalReadiness) {
+    const receipt = canonicalReadiness.ba_realization_receipt;
+    if (normalizeProfileId(canonicalReadiness.bos_profile_id) !== profile
+        || canonicalReadiness.ba_assessment_id !== ba.assessment_id
+        || normalizeProfileId(receipt?.profile_id) !== profile
+        || receipt?.assessment_id !== ba.assessment_id
+        || receipt?.realization_id !== ba.realization_id
+        || receipt?.realization_sha256 !== ba.realization_sha256
+        || receipt?.artifact_sha256 !== ba.artifact_sha256) {
+      throw new Error('RECRUITING_GU_V1_CANONICAL_READINESS_STALE');
+    }
+  }
+}
+
+async function relationshipBinding({ service, redis, membership, relationship, env, authoredSurfacesReader }) {
+  assertRelationshipScope(relationship, membership);
+  let candidateContext = null;
+  if (relationship.candidate_id) {
+    candidateContext = await service.candidateContext(relationship.session_token, relationship.candidate_id);
+    assertCandidateBinding(candidateContext, relationship);
+  } else if (relationship.consent_state !== 'OWNER_APPROVED_MORE_ID_CONSULTATION') {
+    throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
+  }
+  const authored = await authoredSurfacesReader({ redis, profileId: relationship.profile_id, env });
+  assertCompleteAuthoredSurfaces(authored, relationship.profile_id, candidateContext?.canonical_readiness);
   const manager = {
     name: membership.manager_name,
     subject_id: membership.manager_subject_id,
@@ -68,28 +125,62 @@ async function relationshipBinding({ service, redis, membership, relationship, e
     enterprise_id: membership.enterprise_id,
     enterprise_name: membership.enterprise_name,
     entitlement_mode: membership.entitlement_mode,
-    capabilities: { master_control: membership.admin_roles?.includes('RECRUITING_ADMIN') === true },
+    capabilities: { master_control: membership.admin_roles?.includes('RECRUITING_ADMIN') === true, sponsored_follow_up: false },
   };
-  let candidateContext = null;
-  if (relationship.candidate_id) candidateContext = await service.candidateContext(relationship.session_token, relationship.candidate_id);
   const invitee = {
     candidate_id: relationship.candidate_id || null,
     consultation_request_id: relationship.consultation_request_id || null,
     profile_id: relationship.profile_id,
-    name: relationship.owner_name,
-    readiness_state: authored.ba ? 'BA_INTELLIGENCE_READY' : 'BOS_READY',
-    ba_readiness: authored.ba ? 'BA_INTELLIGENCE_READY' : 'BA_NOT_STARTED',
+    name: candidateContext?.invitation.recruit_name || relationship.owner_name,
+    readiness_state: 'BA_INTELLIGENCE_READY',
+    ba_readiness: 'BA_INTELLIGENCE_READY',
   };
   const world = createRecruitingGuWorld({
     relationship, candidate: invitee, manager,
     bosArtifact: authored.bos, baViewModel: authored.ba,
+    canonicalReceipts: authored.receipts,
     opportunity: candidateContext?.opportunity || { items: [] },
     managerEvidence: candidateContext?.manager_evidence || [],
   });
-  return { manager, invitee, authored_surfaces: authored, synthetic_only: false, world };
+  return { manager, invitee, authored_surfaces: authored, synthetic_only: false, resume_completed_session: true, earlier_record_recovery: true, world };
 }
 
-export function createRecruitingGuV1RealRuntime({ env = process.env, service = getRecruitingService(env), redis = getRecruitingRedis(env), frontierTransport = null } = {}) {
+export function createRecruitingGuV1RealRuntime({
+  env = process.env, service = getRecruitingService(env), redis = getRecruitingRedis(env), frontierTransport = null,
+  authoredSurfacesReader = readCurrentAuthoredSurfaces, canonicalContextResolver = createCanonicalPurposeRankedContext,
+} = {}) {
+  function assertStateAuthority(state, authority) {
+    const managerSession = state.manager_sessions?.[digestToken(authority.session_token)];
+    if (!managerSession || managerSession.membership_id !== authority.membership_id
+        || managerSession.enterprise_id !== authority.enterprise_id || managerSession.manager_subject_id !== authority.manager_subject_id
+        || !(Date.parse(managerSession.expires_at) > new Date(service.now()).getTime())) {
+      throw new Error('RECRUITING_MANAGER_SESSION_REQUIRED');
+    }
+    const membership = state.memberships?.[authority.membership_id];
+    const relationship = state.consultation_relationships?.[authority.relationship_id];
+    assertRelationshipScope(relationship, membership);
+    if (membership.manager_subject_id !== authority.manager_subject_id || membership.enterprise_id !== authority.enterprise_id
+        || normalizeProfileId(relationship.profile_id) !== normalizeProfileId(authority.profile_id)
+        || (relationship.candidate_id || null) !== (authority.candidate_id || null)) {
+      throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
+    }
+    if (relationship.candidate_id) {
+      const invitation = Object.values(state.invitations || {}).find((item) => item.candidate_id === relationship.candidate_id);
+      if (!consultingReadinessFor(invitation, membership).ready
+          || normalizeProfileId(invitation?.bos_profile_id) !== normalizeProfileId(relationship.profile_id)
+          || relationship.consent_state !== 'RECRUITING_INVITATION_ACCEPTED') {
+        throw new Error('RECRUITING_GU_V1_CANDIDATE_BINDING_SCOPE_DENIED');
+      }
+    } else {
+      const request = state.consultation_requests?.[relationship.consultation_request_id];
+      if (relationship.consent_state !== 'OWNER_APPROVED_MORE_ID_CONSULTATION' || request?.status !== 'APPROVED'
+          || request.relationship_id !== relationship.relationship_id || request.membership_id !== membership.membership_id
+          || request.enterprise_id !== membership.enterprise_id || normalizeProfileId(request.profile_id) !== normalizeProfileId(relationship.profile_id)) {
+        throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
+      }
+    }
+    return { membership, relationship };
+  }
   const experimentTransport = frontierTransport || createRecruitingGuExperiment2OpenAiTransport({
     apiKey: env.OPENAI_API_KEY,
     modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
@@ -99,19 +190,18 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
     frontierTransport: experimentTransport,
     modelConfig: RECRUITING_GU_EXPERIMENT_2_MODEL_CONFIG,
     experimentCondition: RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
+    stateAuthorityValidator: assertStateAuthority,
+    publicationAuthorityValidator: ({ authority, session }) => withSessionAuthority(authority.session_token, session.session_id),
+    effectAdapter: () => { throw new Error('RECRUITING_GU_V1_SPONSORED_FOLLOW_UP_UNAVAILABLE'); },
     worldResolver: async ({ authority }) => {
       const state = await service.store.read();
-      const relationship = state.consultation_relationships?.[authority.relationship_id];
-      if (!relationship || relationship.membership_id !== authority.membership_id || relationship.enterprise_id !== authority.enterprise_id || relationship.status !== 'ACTIVE') {
-        throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
-      }
-      const membership = state.memberships[authority.membership_id];
-      const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: authority.session_token }, env });
+      const { relationship, membership } = assertStateAuthority(state, authority);
+      const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: authority.session_token }, env, authoredSurfacesReader });
       return binding.world;
     },
     contextResolver: async ({ authority, room, purpose }) => {
-      const authoredSurfaces = await readCurrentAuthoredSurfaces({ redis, profileId: authority.profile_id, env });
-      return createCanonicalPurposeRankedContext({
+      const authoredSurfaces = await authoredSurfacesReader({ redis, profileId: authority.profile_id, env });
+      return canonicalContextResolver({
         redis,
         env,
         profileId: authority.profile_id,
@@ -141,13 +231,21 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
 
   async function ensureCandidateRelationship(sessionToken, candidateId) {
     const candidate = await service.candidateContext(sessionToken, candidateId);
-    if (!candidate.invitation?.accepted_at || !candidate.invitation?.bos_profile_id) throw new Error('RECRUITING_GU_V1_ACCEPTED_BOS_RELATIONSHIP_REQUIRED');
+    assertCandidateBinding(candidate);
     const membership = candidate.membership;
+    const authored = await authoredSurfacesReader({ redis, profileId: candidate.invitation.bos_profile_id, env });
+    assertCompleteAuthoredSurfaces(authored, candidate.invitation.bos_profile_id, candidate.canonical_readiness);
     const id = `gu_rel_${stableHash({ membership_id: membership.membership_id, candidate_id: candidateId, profile_id: candidate.invitation.bos_profile_id }).slice(0, 24)}`;
     const relationship = await service.store.transaction((state) => {
       state.consultation_relationships ||= {};
+      const currentMembership = state.memberships?.[membership.membership_id];
+      const currentInvitation = Object.values(state.invitations || {}).find((item) => item.candidate_id === candidateId);
+      if (!consultingReadinessFor(currentInvitation, currentMembership).ready
+          || normalizeProfileId(currentInvitation?.bos_profile_id) !== normalizeProfileId(candidate.invitation.bos_profile_id)) {
+        throw new Error('RECRUITING_GU_V1_CANDIDATE_BINDING_SCOPE_DENIED');
+      }
       const current = state.consultation_relationships[id];
-      if (current) return current;
+      if (current) { assertRelationshipScope(current, currentMembership); return current; }
       const created = {
         relationship_id: id,
         membership_id: membership.membership_id,
@@ -175,6 +273,8 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
       contract: 'more_recruiting_gu_v1_home_v1',
       manager: {
         name: manager.membership.manager_name,
+        subject_id: manager.membership.manager_subject_id,
+        membership_id: manager.membership.membership_id,
         enterprise_name: manager.membership.enterprise_name,
         entitlement_mode: manager.membership.entitlement_mode,
         entitlement: manager.entitlement,
@@ -189,7 +289,7 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
 
   async function openCandidate(sessionToken, candidateId) {
     const { relationship, membership } = await ensureCandidateRelationship(sessionToken, candidateId);
-    const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: sessionToken }, env });
+    const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: sessionToken }, env, authoredSurfacesReader });
     return runtime.open({ authority: { ...sessionAuthority(membership, relationship), session_token: sessionToken }, binding });
   }
 
@@ -198,7 +298,8 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
     const state = await service.store.read();
     const relationship = state.consultation_relationships?.[relationshipId];
     if (!relationship || relationship.membership_id !== manager.membership.membership_id || relationship.status !== 'ACTIVE') throw new Error('RECRUITING_GU_V1_RELATIONSHIP_SCOPE_DENIED');
-    const binding = await relationshipBinding({ service, redis, membership: manager.membership, relationship: { ...relationship, session_token: sessionToken }, env });
+    assertStateAuthority(state, { ...sessionAuthority(manager.membership, relationship), session_token: sessionToken });
+    const binding = await relationshipBinding({ service, redis, membership: manager.membership, relationship: { ...relationship, session_token: sessionToken }, env, authoredSurfacesReader });
     return runtime.open({ authority: { ...sessionAuthority(manager.membership, relationship), session_token: sessionToken }, binding });
   }
 
@@ -289,26 +390,37 @@ export function createRecruitingGuV1RealRuntime({ env = process.env, service = g
       request_id: request.request_id,
       manager_name: request.manager_name,
       enterprise_name: request.enterprise_name,
-      purpose: 'Open a co-present business consultation using your complete BOS and available Business Twin.',
+      purpose: 'Open a co-present business consultation when your complete BOS and Business Twin are both ready.',
       profile_id_is_authority: false,
       consent_controls_read_access_only: true,
       expires_at: request.expires_at,
     };
   }
 
-  async function withSessionAuthority(sessionToken, sessionId) {
+  async function withSessionAuthority(sessionToken, sessionId, { requireCurrentWorld = true } = {}) {
     const manager = await managerContext(sessionToken);
     const state = await service.store.read();
     const session = state.shared_business_sessions?.[sessionId];
     const relationship = session ? state.consultation_relationships?.[session.relationship_id] : null;
     if (!relationship || relationship.membership_id !== manager.membership.membership_id) throw new Error('RECRUITING_GU_V1_SESSION_SCOPE_DENIED');
-    return { ...sessionAuthority(manager.membership, relationship), session_token: sessionToken };
+    const authority = { ...sessionAuthority(manager.membership, relationship), session_token: sessionToken };
+    assertStateAuthority(state, authority);
+    const binding = await relationshipBinding({ service, redis, membership: manager.membership, relationship: { ...relationship, session_token: sessionToken }, env, authoredSurfacesReader });
+    if (requireCurrentWorld && session.world_version !== binding.world.version) throw new Error('RECRUITING_GU_V1_GOVERNED_WORLD_STALE');
+    return authority;
   }
 
   return Object.freeze({
     home, openCandidate, openRelationship, requestMoreId, approveMoreId, approvalPreview,
     async read(sessionToken, sessionId) { return runtime.read({ authority: await withSessionAuthority(sessionToken, sessionId), sessionId }); },
     async mutate(sessionToken, sessionId, action, payload) {
+      if (action === 'START_ANOTHER_CONSULTATION') {
+        const authority = await withSessionAuthority(sessionToken, sessionId, { requireCurrentWorld: false });
+        const state = await service.store.read();
+        const { membership, relationship } = assertStateAuthority(state, authority);
+        const binding = await relationshipBinding({ service, redis, membership, relationship: { ...relationship, session_token: sessionToken }, env, authoredSurfacesReader });
+        return runtime.startAnother({ authority, sessionId, binding, expectedRevision: payload.expected_revision });
+      }
       const authority = await withSessionAuthority(sessionToken, sessionId);
       if (action === 'CHAT') return runtime.chat({ authority, sessionId, payload });
       if (action === 'COMPILE_GU') return runtime.compileGu({ authority, sessionId, payload });

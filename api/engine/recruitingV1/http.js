@@ -35,30 +35,30 @@ function sameOrigin(req, allowMissingGet = false) {
   try { return new URL(supplied).origin === requestOrigin(req); } catch { return false; }
 }
 
-function secureCookie(name, value, maxAge) {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+function secureCookie(name, value, maxAge, env = process.env) {
+  const secure = env.NODE_ENV === 'production' ? '; Secure' : '';
   return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly${secure}; SameSite=Strict; Max-Age=${maxAge}`;
 }
 
-function clearCookie(name) {
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+function clearCookie(name, env = process.env) {
+  const secure = env.NODE_ENV === 'production' ? '; Secure' : '';
   return `${name}=; Path=/; HttpOnly${secure}; SameSite=Strict; Max-Age=0`;
 }
 
-function verifiedProfileOwner(req) {
+function verifiedProfileOwner(req, env = process.env) {
   let audience;
-  try { audience = resolveProfileOwnershipAudience(process.env); }
+  try { audience = resolveProfileOwnershipAudience(env); }
   catch { return null; }
   return readVerifiedProfileOwnerRequest({
     cookieHeader: req.headers?.cookie,
-    signingKey: process.env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
+    signingKey: env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
     audience,
   });
 }
 
-export async function inviteContinuation(service, inviteSessionToken, { executionStore } = {}) {
+export async function inviteContinuation(service, inviteSessionToken, { executionStore, env = process.env } = {}) {
   let inspected = await service.inspectInviteSession(inviteSessionToken);
-  const durableExecutionStore = executionStore === undefined && !syntheticReviewEnabled()
+  const durableExecutionStore = executionStore === undefined && !syntheticReviewEnabled(env)
     ? new RedisPublicStore(getRedis())
     : executionStore;
   if (durableExecutionStore) {
@@ -90,29 +90,31 @@ function statusFor(error) {
   if (/SESSION_REQUIRED|CONSENT_REQUIRED|PREAPPROVAL_REQUIRED|PROFILE_OWNER_RECEIPT_REQUIRED/.test(code)) return 401;
   if (/SCOPE_DENIED|ORIGIN|CSRF|AUTHORITY_REQUIRED/.test(code)) return 403;
   if (/NOT_FOUND/.test(code)) return 404;
-  if (/EXHAUSTED|REQUIRES_REVIEW|REBIND|RESEND_DENIED/.test(code)) return 409;
+  if (/EXHAUSTED|REQUIRES_REVIEW|REBIND|RESEND_DENIED|IDEMPOTENCY_IDENTITY_MISMATCH|READINESS_CHANGED_RETRY/.test(code)) return 409;
   if (/INVALID|REQUIRED|DENIED/.test(code)) return 422;
   return 503;
 }
 
-async function rotateManagerAndIssueCsrf(service, res, sessionToken) {
+async function rotateManagerAndIssueCsrf(service, res, sessionToken, env) {
   const rotated = await service.rotateManagerSession(sessionToken);
-  res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, rotated.session_token, 8 * 60 * 60));
+  res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, rotated.session_token, 8 * 60 * 60, env));
   return {
     session_token: rotated.session_token,
     csrf_token: await service.issueManagerCsrf(rotated.session_token),
   };
 }
 
-async function authenticatedRead(service, res, sessionToken, read) {
-  const auth = await rotateManagerAndIssueCsrf(service, res, sessionToken);
+async function authenticatedRead(service, res, sessionToken, read, env, onRotate) {
+  const auth = await rotateManagerAndIssueCsrf(service, res, sessionToken, env);
+  onRotate?.(auth);
   return { ...(await read(auth.session_token)), csrf_token: auth.csrf_token };
 }
 
-async function authenticatedMutation(service, req, res, sessionToken, mutate) {
+async function authenticatedMutation(service, req, res, sessionToken, mutate, env, onRotate) {
   await service.consumeManagerCsrf(sessionToken, req.headers?.['x-recruiting-csrf']);
   const result = await mutate(sessionToken);
-  const auth = await rotateManagerAndIssueCsrf(service, res, sessionToken);
+  const auth = await rotateManagerAndIssueCsrf(service, res, sessionToken, env);
+  onRotate?.(auth);
   return { ...result, csrf_token: auth.csrf_token };
 }
 
@@ -130,36 +132,51 @@ async function deliverQueued(service, result) {
   };
 }
 
-export async function recruitingHttpHandler(req, res) {
+export function createRecruitingHttpHandler({ service: suppliedService = null, env = process.env, candidateProjection = null, generateIntelligence = null, executionStore } = {}) {
+  const projection = candidateProjection || (suppliedService
+    ? async () => { throw new Error('RECRUITING_INJECTED_PROJECTION_REQUIRED'); }
+    : (input) => getCandidateProjection({ ...input, env }));
+  const generate = generateIntelligence || (suppliedService
+    ? async () => { throw new Error('RECRUITING_INJECTED_INTELLIGENCE_REQUIRED'); }
+    : (input) => generateCandidateIntelligence({ ...input, env }));
+  const continuationOptions = { env, executionStore: suppliedService && executionStore === undefined ? null : executionStore };
+  return async function recruitingRequest(req, res) {
   setRecruitingHeaders(res);
-  if (!recruitingRuntimeEnabled()) return res.status(404).json({ ok: false, code: 'NOT_FOUND' });
+  if (!recruitingRuntimeEnabled(env)) return res.status(404).json({ ok: false, code: 'NOT_FOUND' });
   if (!sameOrigin(req, true)) return res.status(403).json({ ok: false, code: 'RECRUITING_ORIGIN_DENIED' });
   const parsedCookies = cookies(req.headers?.cookie);
   const managerToken = parsedCookies[MANAGER_COOKIE];
   const inviteToken = parsedCookies[INVITE_COOKIE];
   const setupToken = parsedCookies[SETUP_COOKIE];
+  let currentManagerToken = managerToken;
+  let recoveryCsrf = null;
+  let requestService = null;
+  const rotated = (auth) => { currentManagerToken = auth.session_token; recoveryCsrf = auth.csrf_token; };
   try {
-    const service = getRecruitingService();
+    const service = suppliedService || getRecruitingService(env);
+    requestService = service;
+    const read = (callback) => authenticatedRead(service, res, managerToken, callback, env, rotated);
+    const mutate = (callback) => authenticatedMutation(service, req, res, managerToken, callback, env, rotated);
     if (req.method === 'GET') {
       const view = String(req.query?.view || 'session');
       if (view === 'invite_preview') return res.status(200).json({ ok: true, preview: await service.invitationPreview(req.query?.token) });
       if (view === 'manager_setup_preview') return res.status(200).json({ ok: true, preview: await service.managerSetupPreview(req.query?.token) });
       if (view === 'invite_session') {
-        const inspected = await inviteContinuation(service, inviteToken);
+        const inspected = await inviteContinuation(service, inviteToken, continuationOptions);
         const rotated = await service.rotateInviteSession(inviteToken);
-        res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60));
+        res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60, env));
         return res.status(200).json({ ok: true, ...inspected });
       }
-      if (view === 'session') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, (token) => service.inspectManager(token))) });
-      if (view === 'home') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, (token) => service.home(token))) });
-      if (view === 'opportunity') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, async (token) => ({ opportunity: await service.getOpportunity(token) }))) });
-      if (view === 'candidate') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, async (token) => ({ candidate: await getCandidateProjection({ sessionToken: token, candidateId: req.query?.candidate_id }) }))) });
-      if (view === 'master_control') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, (token) => service.masterControl(token))) });
-      if (view === 'master_control_membership') return res.status(200).json({ ok: true, ...(await authenticatedRead(service, res, managerToken, (token) => service.masterControlMembership(token, req.query?.membership_id))) });
+      if (view === 'session') return res.status(200).json({ ok: true, ...(await read((token) => service.inspectManager(token))) });
+      if (view === 'home') return res.status(200).json({ ok: true, ...(await read((token) => service.home(token))) });
+      if (view === 'opportunity') return res.status(200).json({ ok: true, ...(await read(async (token) => ({ opportunity: await service.getOpportunity(token) }))) });
+      if (view === 'candidate') return res.status(200).json({ ok: true, ...(await read(async (token) => ({ candidate: await projection({ sessionToken: token, candidateId: req.query?.candidate_id }) }))) });
+      if (view === 'master_control') return res.status(200).json({ ok: true, ...(await read((token) => service.masterControl(token))) });
+      if (view === 'master_control_membership') return res.status(200).json({ ok: true, ...(await read((token) => service.masterControlMembership(token, req.query?.membership_id))) });
       return res.status(400).json({ ok: false, code: 'RECRUITING_VIEW_INVALID' });
     }
     if (req.method === 'DELETE') {
-      res.setHeader('Set-Cookie', [clearCookie(MANAGER_COOKIE), clearCookie(INVITE_COOKIE), clearCookie(SETUP_COOKIE)]);
+      res.setHeader('Set-Cookie', [clearCookie(MANAGER_COOKIE, env), clearCookie(INVITE_COOKIE, env), clearCookie(SETUP_COOKIE, env)]);
       return res.status(200).json({ ok: true, code: 'RECRUITING_SESSION_CLEARED' });
     }
     if (req.method !== 'POST') return res.status(405).json({ ok: false, code: 'METHOD_NOT_ALLOWED' });
@@ -167,34 +184,34 @@ export async function recruitingHttpHandler(req, res) {
     if (action === 'REQUEST_MANAGER_VERIFICATION') return res.status(200).json({ ok: true, ...(await deliverQueued(service, await service.requestManagerVerification(req.body?.profile_id))) });
     if (action === 'VERIFY_MANAGER') {
       const verified = await service.verifyManager(req.body?.token);
-      res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, verified.session_token, 8 * 60 * 60));
+      res.setHeader('Set-Cookie', secureCookie(MANAGER_COOKIE, verified.session_token, 8 * 60 * 60, env));
       return res.status(200).json({ ok: true, code: 'RECRUITING_MANAGER_VERIFIED', membership: verified.membership });
     }
     if (action === 'BEGIN_MANAGER_SETUP') {
       const started = await service.beginManagerSetup(req.body?.token);
-      res.setHeader('Set-Cookie', secureCookie(SETUP_COOKIE, started.setup_session_token, 30 * 60));
+      res.setHeader('Set-Cookie', secureCookie(SETUP_COOKIE, started.setup_session_token, 30 * 60, env));
       return res.status(200).json({ ok: true, code: 'RECRUITING_MANAGER_SETUP_EMAIL_VERIFIED', membership: started.membership, csrf_token: started.csrf_token });
     }
     if (action === 'COMPLETE_MANAGER_SETUP') {
       const completed = await service.completeManagerSetup(setupToken, req.headers?.['x-recruiting-setup-csrf'], req.body?.profile_id);
-      res.setHeader('Set-Cookie', [secureCookie(MANAGER_COOKIE, completed.manager_session_token, 8 * 60 * 60), clearCookie(SETUP_COOKIE)]);
+      res.setHeader('Set-Cookie', [secureCookie(MANAGER_COOKIE, completed.manager_session_token, 8 * 60 * 60, env), clearCookie(SETUP_COOKIE, env)]);
       return res.status(200).json({ ok: true, code: 'RECRUITING_MANAGER_SETUP_COMPLETE', membership: completed.membership });
     }
     if (action === 'ACCEPT_INVITATION') {
       const accepted = await service.acceptInvitation(req.body?.token, req.body?.consent);
-      res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, accepted.invite_session_token, 30 * 24 * 60 * 60));
+      res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, accepted.invite_session_token, 30 * 24 * 60 * 60, env));
       return res.status(200).json({ ok: true, code: 'RECRUITING_INVITATION_ACCEPTED', invitation: accepted.invitation });
     }
     if (action === 'CONNECT_OWNED_PROFILE') {
-      const owner = verifiedProfileOwner(req);
+      const owner = verifiedProfileOwner(req, env);
       if (!owner?.profile_id) throw new Error('RECRUITING_PROFILE_OWNER_RECEIPT_REQUIRED');
       if (typeof service.connectOwnedExistingProfile !== 'function') {
         throw new Error('RECRUITING_EXISTING_PROFILE_CONNECTION_UNAVAILABLE');
       }
       await service.connectOwnedExistingProfile(inviteToken, { profile_id: owner.profile_id });
       const rotated = await service.rotateInviteSession(inviteToken);
-      const continuation = await inviteContinuation(service, rotated.invite_session_token);
-      res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60));
+      const continuation = await inviteContinuation(service, rotated.invite_session_token, continuationOptions);
+      res.setHeader('Set-Cookie', secureCookie(INVITE_COOKIE, rotated.invite_session_token, 30 * 24 * 60 * 60, env));
       return res.status(200).json({
         ok: true,
         code: 'RECRUITING_EXISTING_PROFILE_CONNECTED',
@@ -202,38 +219,47 @@ export async function recruitingHttpHandler(req, res) {
       });
     }
     if (action === 'CREATE_INVITATION') {
-      const created = await authenticatedMutation(service, req, res, managerToken, (token) =>
+      const created = await mutate((token) =>
         service.createInvitation(token, req.body, req.headers?.['idempotency-key']));
       return res.status(200).json({ ok: true, ...(await deliverQueued(service, created)) });
     }
     if (action === 'RESEND_INVITATION') {
-      const resent = await authenticatedMutation(service, req, res, managerToken, (token) =>
-        service.resendInvitation(token, req.body?.invitation_id));
+      if (!Number.isInteger(req.body?.expected_resend_count) || req.body.expected_resend_count < 0) throw new Error('RECRUITING_INVITATION_RESEND_REVISION_REQUIRED');
+      const resent = await mutate((token) =>
+        service.resendInvitation(token, req.body?.invitation_id, { expectedResendCount: req.body.expected_resend_count, idempotencyKey: req.headers?.['idempotency-key'] }));
       return res.status(200).json({ ok: true, ...(await deliverQueued(service, resent)) });
     }
-    if (action === 'REVOKE_INVITATION') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, (token) => service.revokeInvitation(token, req.body?.invitation_id))) });
-    if (action === 'SAVE_OPPORTUNITY') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, async (token) => ({ opportunity: await service.saveOpportunity(token, req.body?.items) }))) });
-    if (action === 'ADD_EVIDENCE') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, async (token) => ({ evidence: await service.addEvidence(token, req.body?.candidate_id, req.body?.evidence) }))) });
-    if (action === 'GENERATE_INTELLIGENCE') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, async (token) => ({ intelligence: await generateCandidateIntelligence({ sessionToken: token, candidateId: req.body?.candidate_id }) }))) });
-    if (action === 'RECORD_EXPORT') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, async (token) => ({ code: 'RECRUITING_EXPORT_RECORDED', export: await service.recordExport(token, req.body?.candidate_id, req.body?.mode, req.body?.details_included), synthetic_review: syntheticReviewEnabled() }))) });
+    if (action === 'REVOKE_INVITATION') return res.status(200).json({ ok: true, ...(await mutate((token) => service.revokeInvitation(token, req.body?.invitation_id))) });
+    if (action === 'SAVE_OPPORTUNITY') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ opportunity: await service.saveOpportunity(token, req.body?.items) }))) });
+    if (action === 'ADD_EVIDENCE') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ evidence: await service.addEvidence(token, req.body?.candidate_id, req.body?.evidence) }))) });
+    if (action === 'GENERATE_INTELLIGENCE') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ intelligence: await generate({ sessionToken: token, candidateId: req.body?.candidate_id }) }))) });
+    if (action === 'RECORD_EXPORT') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ code: 'RECRUITING_EXPORT_RECORDED', export: await service.recordExport(token, req.body?.candidate_id, req.body?.mode, req.body?.details_included), synthetic_review: syntheticReviewEnabled(env) }))) });
     if (action === 'ADMIN_CREATE_MANAGER') {
-      const created = await authenticatedMutation(service, req, res, managerToken, (token) => service.createManagerMembership(token, req.body));
+      const created = await mutate((token) => service.createManagerMembership(token, req.body));
       return res.status(200).json({ ok: true, ...(await deliverQueued(service, created)) });
     }
-    if (action === 'ADMIN_UPDATE_PENDING_MANAGER') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, (token) => service.updatePendingManager(token, req.body?.membership_id, req.body))) });
+    if (action === 'ADMIN_UPDATE_PENDING_MANAGER') return res.status(200).json({ ok: true, ...(await mutate((token) => service.updatePendingManager(token, req.body?.membership_id, req.body))) });
     if (action === 'ADMIN_RESEND_MANAGER_SETUP') {
-      const resent = await authenticatedMutation(service, req, res, managerToken, (token) => service.resendManagerSetup(token, req.body?.membership_id));
+      const resent = await mutate((token) => service.resendManagerSetup(token, req.body?.membership_id));
       return res.status(200).json({ ok: true, ...(await deliverQueued(service, resent)) });
     }
-    if (action === 'ADMIN_ACTIVATE_MANAGER') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, (token) => service.activateManagerMembership(token, req.body?.membership_id))) });
-    if (action === 'ADMIN_SUSPEND_MANAGER') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, (token) => service.suspendManagerMembership(token, req.body?.membership_id))) });
-    if (action === 'ADMIN_REVOKE_MANAGER') return res.status(200).json({ ok: true, ...(await authenticatedMutation(service, req, res, managerToken, (token) => service.revokeManagerMembership(token, req.body?.membership_id))) });
+    if (action === 'ADMIN_ACTIVATE_MANAGER') return res.status(200).json({ ok: true, ...(await mutate((token) => service.activateManagerMembership(token, req.body?.membership_id))) });
+    if (action === 'ADMIN_SUSPEND_MANAGER') return res.status(200).json({ ok: true, ...(await mutate((token) => service.suspendManagerMembership(token, req.body?.membership_id))) });
+    if (action === 'ADMIN_REVOKE_MANAGER') return res.status(200).json({ ok: true, ...(await mutate((token) => service.revokeManagerMembership(token, req.body?.membership_id))) });
     return res.status(400).json({ ok: false, code: 'RECRUITING_ACTION_INVALID' });
   } catch (error) {
     const code = String(error?.message || 'RECRUITING_V1_FAILURE').slice(0, 180);
     console.error(JSON.stringify({ event: 'RECRUITING_V1_REQUEST_FAILED', code, raw_payload_logged: false, token_logged: false, email_logged: false }));
-    return res.status(statusFor(error)).json({ ok: false, code });
+    if (!recoveryCsrf && currentManagerToken && requestService && !/CSRF/u.test(code)) {
+      try { recoveryCsrf = await requestService.issueManagerCsrf(currentManagerToken); } catch { recoveryCsrf = null; }
+    }
+    return res.status(statusFor(error)).json({ ok: false, code, ...(recoveryCsrf ? { csrf_token: recoveryCsrf } : {}) });
   }
+  };
+}
+
+export async function recruitingHttpHandler(req, res) {
+  return createRecruitingHttpHandler()(req, res);
 }
 
 export const RECRUITING_HTTP = Object.freeze({ manager_cookie: MANAGER_COOKIE, invite_cookie: INVITE_COOKIE, setup_cookie: SETUP_COOKIE, profile_id_is_credential: false });

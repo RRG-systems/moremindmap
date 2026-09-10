@@ -17,13 +17,13 @@ test('server-resolved Recruiting Admin capability lands on Master Control', () =
   }), RECRUITING_ADMIN_LANDING_PATH);
 });
 
-test('explicit Admin workspace entry remains on the manager journey', () => {
+test('legacy Admin workspace query cannot expose a third destination', () => {
   assert.equal(resolveAuthenticatedRecruitingLanding({
     pathname: '/recruiting/home',
     search: '?view=workspace',
     manager: admin,
-  }), null);
-  assert.equal(RECRUITING_MANAGER_WORKSPACE_PATH, '/recruiting/home?view=workspace');
+  }), RECRUITING_ADMIN_LANDING_PATH);
+  assert.equal(RECRUITING_MANAGER_WORKSPACE_PATH, '/recruiting/home');
 });
 
 test('standard managers and unauthenticated state never receive an Admin landing', () => {

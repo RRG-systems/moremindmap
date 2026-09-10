@@ -49,11 +49,11 @@ async function establishManager(profileId) {
 }
 
 test('ManagerExperience claims home hydration once even when navigate changes identity', () => {
-  const refIndex = appSource.indexOf('const homeHydrationStarted = useRef(false);');
-  const guardIndex = appSource.indexOf('if (SYNTHETIC || homeHydrationStarted.current) return;');
-  const claimIndex = appSource.indexOf('homeHydrationStarted.current = true;');
+  const refIndex = appSource.indexOf('const hydrationStarted = useRef(false);');
+  const guardIndex = appSource.indexOf('if (SYNTHETIC || hydrationStarted.current) return;');
+  const claimIndex = appSource.indexOf('hydrationStarted.current = true;');
   const homeReadIndex = appSource.indexOf("api({ view: 'home' })", claimIndex);
-  const dependencyIndex = appSource.indexOf('}, [navigate]);', homeReadIndex);
+  const dependencyIndex = appSource.indexOf('}, []);', homeReadIndex);
   assert.ok(refIndex > -1);
   assert.ok(guardIndex > refIndex);
   assert.ok(claimIndex > guardIndex);

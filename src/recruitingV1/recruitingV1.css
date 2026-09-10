@@ -1058,6 +1058,12 @@
   .demo-walkthrough-overlay { position: static; align-items: flex-start; flex-direction: column; }
 }
 
+.campaign-map-two-box .campaign-map-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); min-width: 0; }
+.campaign-shell .invite-surface > .manager-product-balances { margin: 24px 0 18px; }
+@media (max-width: 760px) {
+  .campaign-map-two-box .campaign-map-cards { grid-template-columns: minmax(0, 1fr); }
+}
+
 @page { size: Letter portrait; margin: 0; }
 
 @media print {

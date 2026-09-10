@@ -46,7 +46,7 @@ export function CandidateAnchor({ candidate, intelligence, onChange, demo = fals
 
 export function JourneyMap({ eyebrow, title, subtitle, cards, footerLeft, footerRight, onOpen, variant = 'manager' }) {
   return (
-    <section className={`campaign-map campaign-map-${variant}`} data-layer="00">
+    <section className={`campaign-map campaign-map-${variant}${cards.length === 2 ? ' campaign-map-two-box' : ''}`} data-layer="00">
       <div className="campaign-map-copy">
         <p className="campaign-kicker">{eyebrow}</p>
         <h1>{title}</h1>

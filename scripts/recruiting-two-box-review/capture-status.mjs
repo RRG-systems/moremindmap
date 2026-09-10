@@ -1,0 +1,12 @@
+import { writeFile, mkdir } from 'node:fs/promises';
+import { resolve, dirname } from 'node:path';
+const port = Number(process.argv[2] || 5269);
+const output = resolve(process.argv[3] || 'docs/recruiting-two-box-consulting-v1/final-runtime-proof.json');
+if (![5269, 5270].includes(port)) throw new Error('REVIEW_PORT_REQUIRED');
+const response = await fetch(`http://127.0.0.1:${port}/__review/status`);
+if (!response.ok) throw new Error('REVIEW_STATUS_UNAVAILABLE');
+const payload = await response.json();
+if (!payload.synthetic_only || payload.credentials_loaded || payload.egress_attempts.length) throw new Error('REVIEW_ISOLATION_GATE_FAILED');
+await mkdir(dirname(output), { recursive: true });
+await writeFile(output, JSON.stringify({ captured_at: new Date().toISOString(), port, ...payload }, null, 2));
+console.log(JSON.stringify({ captured: output, counts: payload.counts, egress_attempts: 0 }));

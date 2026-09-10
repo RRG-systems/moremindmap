@@ -59,6 +59,11 @@ function sessionFrom(state, sessionId, authority) {
       || session.relationship_id !== authority.relationship_id) {
     throw new Error('RECRUITING_GU_V1_SESSION_SCOPE_DENIED');
   }
+  if (!session.synthetic_only && (session.manager_binding.membership_id !== authority.membership_id
+      || session.subject_binding.profile_id !== String(authority.profile_id || '').toLowerCase()
+      || (session.subject_binding.candidate_id || null) !== (authority.candidate_id || null))) {
+    throw new Error('RECRUITING_GU_V1_SESSION_SUBJECT_SCOPE_DENIED');
+  }
   return session;
 }
 
@@ -160,6 +165,8 @@ export function createRecruitingGuV1Runtime({
   modelConfig = FRONTIER_MODEL_CONFIG,
   frontierTransport = null,
   contextResolver = null,
+  stateAuthorityValidator = null,
+  publicationAuthorityValidator = null,
   experimentCondition = RECRUITING_GU_EXPERIMENT_2_CONDITIONS.DEMONSTRATIONS,
   effectAdapter = createSyntheticEffectAdapter(),
   agreementDeliveryAdapter = createSyntheticAgreementDeliveryAdapter(),
@@ -172,41 +179,117 @@ export function createRecruitingGuV1Runtime({
   if (!Object.values(RECRUITING_GU_EXPERIMENT_2_CONDITIONS).includes(experimentCondition)) throw new Error('RECRUITING_GU_V1_EXPERIMENT_CONDITION_INVALID');
   const coachRuntime = createRecruitingGuCoachRuntime({ transport, modelConfig });
 
+  function authorizedSession(state, sessionId, authority) {
+    stateAuthorityValidator?.(state, authority);
+    return sessionFrom(state, sessionId, authority);
+  }
+
+  function writableSession(state, sessionId, authority) {
+    const session = authorizedSession(state, sessionId, authority);
+    const successor = Object.values(state.shared_business_sessions || {}).some((item) =>
+      item.relationship_id === authority.relationship_id && item.predecessor_session_id === sessionId);
+    if (successor) throw new Error('RECRUITING_GU_V1_SESSION_SUPERSEDED_READ_ONLY');
+    return session;
+  }
+
+  function previousAcceptedPlans(state, authority, currentSessionId) {
+    return Object.values(state.shared_business_sessions || {})
+      .filter((item) => item.relationship_id === authority.relationship_id && item.session_id !== currentSessionId && item.accepted_plan_snapshot)
+      .sort((left, right) => Date.parse(right.completed_at) - Date.parse(left.completed_at))
+      .map((item) => {
+        const scoped = authorizedSession(state, item.session_id, authority);
+        return { session_id: scoped.session_id, completed_at: scoped.completed_at, evidence_state: 'EARLIER_SESSION_PLAN_NOT_CURRENT_EVIDENCE', accepted_plan_snapshot: clone(scoped.accepted_plan_snapshot) };
+      });
+  }
+
+  function currentRelationshipSessions(state, authority) {
+    const sessions = Object.values(state.shared_business_sessions || {}).filter((item) => item.relationship_id === authority.relationship_id);
+    const predecessors = new Set(sessions.map((item) => item.predecessor_session_id).filter(Boolean));
+    return sessions.filter((item) => !predecessors.has(item.session_id));
+  }
+
+  function newSession(authority, binding, world) {
+    return createRecruitingGuSession({
+      relationshipId: authority.relationship_id,
+      manager: {
+        subject_id: authority.manager_subject_id, membership_id: authority.membership_id,
+        enterprise_id: authority.enterprise_id, name: binding.manager.name, entitlement_mode: binding.manager.entitlement_mode,
+      },
+      invitee: binding.invitee, subjectProfileId: binding.invitee.profile_id,
+      syntheticOnly: binding.synthetic_only, worldVersion: world.version, now: now(),
+    });
+  }
+
+  function sessionBundle(session, world, binding, previousPlans, archive = false) {
+    return {
+      session,
+      world: archive ? null : world,
+      authored_surfaces: archive ? null : binding.authored_surfaces,
+      manager: binding.manager,
+      invitee: binding.invitee,
+      previous_accepted_plans: previousPlans,
+      requires_new_consultation: archive,
+      ...(archive ? { archive: {
+        read_only: true,
+        code: 'EARLIER_GOVERNED_RECORD',
+        message: 'This consultation uses an earlier record. Your saved plan is retained. Start a new consultation to use the current record.',
+      } } : {}),
+    };
+  }
+
   async function open({ authority, binding }) {
     const world = await worldResolver({ authority, binding });
-    const session = await store.transaction((state) => {
+    const result = await store.transaction((state) => {
+      stateAuthorityValidator?.(state, authority);
       state.shared_business_sessions ||= {};
-      const existing = Object.values(state.shared_business_sessions).find((item) => item.relationship_id === authority.relationship_id && item.status !== 'COMPLETED');
-      if (existing) return existing;
-      return put(state, createRecruitingGuSession({
-        relationshipId: authority.relationship_id,
-        manager: {
-          subject_id: authority.manager_subject_id,
-          membership_id: authority.membership_id,
-          enterprise_id: authority.enterprise_id,
-          name: binding.manager.name,
-          entitlement_mode: binding.manager.entitlement_mode,
-        },
-        invitee: binding.invitee,
-        subjectProfileId: binding.invitee.profile_id,
-        syntheticOnly: binding.synthetic_only,
-        worldVersion: world.version,
-        now: now(),
-      }));
+      const existing = currentRelationshipSessions(state, authority)
+        .filter((item) => item.status !== 'COMPLETED' || binding.resume_completed_session === true)
+        .sort((left, right) => Number(left.status === 'COMPLETED') - Number(right.status === 'COMPLETED') || Date.parse(right.updated_at) - Date.parse(left.updated_at))[0];
+      if (existing) {
+        const resumed = authorizedSession(state, existing.session_id, authority);
+        const archive = Boolean(stateAuthorityValidator && resumed.world_version !== world.version);
+        if (archive && binding.earlier_record_recovery !== true) throw new Error('RECRUITING_GU_V1_GOVERNED_WORLD_STALE');
+        return { session: resumed, previousPlans: previousAcceptedPlans(state, authority, resumed.session_id), archive };
+      }
+      const session = put(state, newSession(authority, binding, world));
+      return { session, previousPlans: previousAcceptedPlans(state, authority, session.session_id) };
     });
-    return { session, world, authored_surfaces: binding.authored_surfaces, manager: binding.manager, invitee: binding.invitee };
+    return sessionBundle(result.session, world, binding, result.previousPlans, result.archive);
+  }
+
+  async function startAnother({ authority, sessionId, binding, expectedRevision }) {
+    const world = await worldResolver({ authority, binding });
+    const result = await store.transaction((state) => {
+      const predecessor = authorizedSession(state, sessionId, authority);
+      const successor = Object.values(state.shared_business_sessions || {}).find((item) => item.relationship_id === authority.relationship_id && item.predecessor_session_id === sessionId);
+      if (successor) {
+        const resumed = authorizedSession(state, successor.session_id, authority);
+        return { session: resumed, previousPlans: previousAcceptedPlans(state, authority, resumed.session_id), idempotent: true, archive: resumed.world_version !== world.version };
+      }
+      const incompatiblePredecessor = binding.earlier_record_recovery === true && predecessor.world_version !== world.version;
+      if (predecessor.status !== 'COMPLETED' && !incompatiblePredecessor) throw new Error('RECRUITING_GU_V1_COMPLETED_PREDECESSOR_REQUIRED');
+      if (!Number.isInteger(expectedRevision) || predecessor.revision !== expectedRevision) {
+        const error = new Error('RECRUITING_GU_V1_STALE_SESSION_REFUSED');
+        error.current_revision = predecessor.revision;
+        throw error;
+      }
+      if (currentRelationshipSessions(state, authority).some((item) => item.session_id !== sessionId && item.status !== 'COMPLETED')) throw new Error('RECRUITING_GU_V1_ACTIVE_SESSION_EXISTS');
+      const session = put(state, { ...newSession(authority, binding, world), predecessor_session_id: sessionId });
+      return { session, previousPlans: previousAcceptedPlans(state, authority, session.session_id), idempotent: false };
+    });
+    return { ...sessionBundle(result.session, world, binding, result.previousPlans, result.archive), idempotent: result.idempotent };
   }
 
   async function read({ authority, sessionId }) {
     const state = await store.read();
-    return clone(sessionFrom(state, sessionId, authority));
+    return clone(authorizedSession(state, sessionId, authority));
   }
 
   async function mutateSimple({ authority, sessionId, action, payload }) {
     if (action === 'RETRY_AGREEMENT_EMAIL') {
       if (typeof agreementDeliveryAdapter.retry !== 'function') throw new Error('RECRUITING_GU_V1_AGREEMENT_RETRY_UNAVAILABLE');
       const snapshot = await store.read();
-      const current = sessionFrom(snapshot, sessionId, authority);
+      const current = writableSession(snapshot, sessionId, authority);
       const acceptanceId = current.accepted_plan_snapshot?.acceptance_id;
       const results = await agreementDeliveryAdapter.retry({
         session: clone(current),
@@ -214,12 +297,12 @@ export function createRecruitingGuV1Runtime({
         recipientRole: payload.recipient_role,
       });
       return store.transaction((state) => {
-        const latest = sessionFrom(state, sessionId, authority);
+        const latest = writableSession(state, sessionId, authority);
         return put(state, recordAgreementDelivery(latest, { acceptanceId, results }, now()));
       });
     }
     const session = await store.transaction((state) => {
-      const current = sessionFrom(state, sessionId, authority);
+      const current = writableSession(state, sessionId, authority);
       let next;
       if (action === 'CHANGE_ROOM') next = changeRoom(current, { room: payload.room, expectedRevision: payload.expected_revision, actor: 'MANAGER' }, now());
       else if (action === 'SCENARIO_CHANGE') next = recordScenarioChange(current, { values: payload.values, expectedRevision: payload.expected_revision, actor: 'MANAGER' }, now());
@@ -247,17 +330,21 @@ export function createRecruitingGuV1Runtime({
     }
     try {
       return await store.transaction((state) => {
-        const current = sessionFrom(state, sessionId, authority);
+        const current = writableSession(state, sessionId, authority);
         return put(state, recordAgreementDelivery(current, { acceptanceId, results }, now()));
       });
     } catch {
-      return session;
+      // Acceptance is durable even if recording delivery fails. A fresh scoped
+      // read must still authorize the response; revocation cannot return a
+      // previously captured accepted-plan payload to a former relationship.
+      const current = await store.read();
+      return clone(authorizedSession(current, sessionId, authority));
     }
   }
 
   async function chat({ authority, sessionId, payload }) {
     const afterHuman = await store.transaction((state) => {
-      const current = sessionFrom(state, sessionId, authority);
+      const current = writableSession(state, sessionId, authority);
       const next = appendConversationTurn(current, {
         actor: payload.actor || 'MANAGER', message: payload.message, room: current.current_room,
         expectedRevision: payload.expected_revision,
@@ -267,8 +354,9 @@ export function createRecruitingGuV1Runtime({
     const startedAt = performance.now();
     if (afterHuman.current_room === 'PLAN') {
       const response = await draftPlan({ transport, session: afterHuman, humanPurpose: payload.message });
+      await publicationAuthorityValidator?.({ authority, session: afterHuman });
       const session = await store.transaction((state) => {
-        const current = sessionFrom(state, sessionId, authority);
+        const current = writableSession(state, sessionId, authority);
         const next = recordPlanProposal(current, { proposal: response.parsed, basedOnRevision: afterHuman.revision }, now());
         return put(state, next);
       });
@@ -290,8 +378,9 @@ export function createRecruitingGuV1Runtime({
         purposeContext: contextResult?.context || null,
         demonstrations: usesDjDemonstrations(experimentCondition) ? DJ_COACHING_DEMONSTRATIONS : [],
       });
+      await publicationAuthorityValidator?.({ authority, session: afterHuman });
       const session = await store.transaction((state) => {
-        const current = sessionFrom(state, sessionId, authority);
+        const current = writableSession(state, sessionId, authority);
         const next = recordCoachMove(current, {
           move: result.move,
           receipt: result.receipt,
@@ -319,8 +408,9 @@ export function createRecruitingGuV1Runtime({
     }
     const planner = createRecruitingV2FrontierRuntime({ transport, modelConfig, governedWorld: world });
     const result = await planner.planSurface({ purpose: payload.message, sessionContext: frontierSessionContext(afterHuman) });
+    await publicationAuthorityValidator?.({ authority, session: afterHuman });
     const session = await store.transaction((state) => {
-      const current = sessionFrom(state, sessionId, authority);
+      const current = writableSession(state, sessionId, authority);
       const next = recordFrontierProjection(current, { plan: result.plan, receipt: result.receipt, basedOnRevision: afterHuman.revision }, now());
       return put(state, next);
     });
@@ -330,7 +420,7 @@ export function createRecruitingGuV1Runtime({
   async function compileGu({ authority, sessionId, payload }) {
     if (!isCoachFirstCondition(experimentCondition)) throw new Error('RECRUITING_GU_V1_OPTIONAL_COMPILER_NOT_ACTIVE');
     const state = await store.read();
-    const current = sessionFrom(state, sessionId, authority);
+    const current = writableSession(state, sessionId, authority);
     if (current.revision !== payload.expected_revision) {
       const error = new Error('RECRUITING_GU_V1_STALE_SESSION_REFUSED');
       error.current_revision = current.revision;
@@ -354,8 +444,9 @@ export function createRecruitingGuV1Runtime({
       sessionContext: frontierSessionContext(current, { roomScoped: ranked }),
       coachingMove: coachRecord.move,
     });
+    await publicationAuthorityValidator?.({ authority, session: current });
     const session = await store.transaction((nextState) => {
-      const latest = sessionFrom(nextState, sessionId, authority);
+      const latest = writableSession(nextState, sessionId, authority);
       const next = recordCompiledProjection(latest, {
         plan: result.plan,
         receipt: result.receipt,
@@ -379,5 +470,5 @@ export function createRecruitingGuV1Runtime({
     };
   }
 
-  return Object.freeze({ open, read, chat, compileGu, mutateSimple, modelConfig, experimentCondition });
+  return Object.freeze({ open, startAnother, read, chat, compileGu, mutateSimple, modelConfig, experimentCondition });
 }

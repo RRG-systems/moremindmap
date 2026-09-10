@@ -237,7 +237,8 @@ test('Leadership launcher source preserves the original three products and expos
   assert.match(consultingDemoApp, /new-ba-production-experience/u);
   assert.match(launcher, /addEventListener\('pageshow'/u);
   assert.match(consultingDemoApp, /YOU is BOS-only; YOUR BUSINESS is BOS \+ BA \/ Business Twin/u);
-  assert.doesNotMatch(consultingDemoApp, /Consulting Tool|Recruiting GU V1|RECRUITING \/ BUSINESS CONSULTATION|through Recruiting|READY INVITEES/u);
+  assert.match(consultingDemoApp, /real \? <small>Consulting Tool<\/small> : <small>Consulting Demonstration<\/small>/u);
+  assert.doesNotMatch(consultingDemoApp, /Recruiting GU V1|RECRUITING \/ BUSINESS CONSULTATION|through Recruiting|READY INVITEES/u);
   assert.doesNotMatch(portal, /darrendemo|leadershipDemoAccess/u);
   assert.match(portal, /x-leadership-demo-entry-csrf/u);
   assert.doesNotMatch(recruitingApi, /more_recruiting_manager|MANAGER_COOKIE/u);
