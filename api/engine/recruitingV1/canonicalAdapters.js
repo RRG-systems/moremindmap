@@ -302,6 +302,7 @@ export async function reconcileRecruitingBosStartFromCommittedExecution({
   inspected,
   store,
   service = getRecruitingService(),
+  validateExistingJob = false,
 } = {}) {
   const relationship = inspected?.relationship;
   const relationshipRef = String(relationship?.relationship_ref || '').trim();
@@ -316,8 +317,9 @@ export async function reconcileRecruitingBosStartFromCommittedExecution({
   }
 
   const progressState = String(relationship?.progress_state || '');
+  const existingJobId = normalizeBosJobId(relationship?.bos_job_id);
   if (relationship?.bos_profile_id
-      || relationship?.bos_job_id
+      || (relationship?.bos_job_id && !validateExistingJob)
       || !['INVITED', 'BOS_IN_PROGRESS'].includes(progressState)) {
     return Object.freeze({ reconciled: false, reason: 'RECRUITING_BOS_BINDING_NOT_REQUIRED' });
   }
@@ -353,6 +355,9 @@ export async function reconcileRecruitingBosStartFromCommittedExecution({
       || resultJobId !== jobId) {
     throw new Error('RECRUITING_BOS_EXECUTION_RECEIPT_INVALID');
   }
+  if (relationship?.bos_job_id && (!existingJobId || existingJobId !== jobId)) {
+    throw new Error('RECRUITING_BOS_EXECUTION_JOB_MISMATCH');
+  }
 
   const jobKey = `job:${jobId}`;
   const job = parseRecord(await store.get(jobKey));
@@ -372,11 +377,24 @@ export async function reconcileRecruitingBosStartFromCommittedExecution({
       || productExecutionFingerprint('behavior_operating_system', job.payload) !== execution.request_sha256) {
     throw new Error('RECRUITING_BOS_EXECUTION_PAYLOAD_MISMATCH');
   }
+  if (inspected?.preparation_authority) {
+    if (typeof service?.assertCandidatePreparationAuthority !== 'function') {
+      throw new Error('RECRUITING_CONSULTING_PREPARATION_AUTHORITY_RECHECK_REQUIRED');
+    }
+    await service.assertCandidatePreparationAuthority(inspected.preparation_authority);
+  }
   if (await store.expire(jobKey, RECRUITING_BOS_JOB_TTL_SECONDS) !== 1) {
     throw new Error('RECRUITING_BOS_JOB_RETENTION_FAILED');
   }
 
-  await service.projectBosInProgress(relationshipRef, { job_id: jobId });
+  if (existingJobId) {
+    return Object.freeze({ reconciled: false, validated: true, job_id: jobId });
+  }
+
+  await service.projectBosInProgress(relationshipRef, {
+    job_id: jobId,
+    ...(inspected?.preparation_authority ? { preparation_authority: inspected.preparation_authority } : {}),
+  });
   return Object.freeze({ reconciled: true, job_id: jobId });
 }
 
@@ -402,8 +420,9 @@ export async function reconcileRecruitingBosReadyFromCompletedJob({
   authority,
   job,
   env = process.env,
+  service = null,
 } = {}) {
-  if (authority?.mode !== 'recruiting_invite_session') {
+  if (!['recruiting_invite_session', 'recruiting_manager_candidate_preparation'].includes(authority?.mode)) {
     return { projected: false, reason: 'NOT_A_RECRUITING_JOB' };
   }
   if (job?.status !== 'complete') {
@@ -413,6 +432,10 @@ export async function reconcileRecruitingBosReadyFromCompletedJob({
   const profileId = normalizeProfileId(job.canonical_profile_id);
   if (!relationshipRef || relationshipRef !== authority.relationship_ref) {
     throw new Error('RECRUITING_COMPLETED_BOS_RELATIONSHIP_MISMATCH');
+  }
+  if (authority.mode === 'recruiting_manager_candidate_preparation'
+      && (!authority.candidate_id || authority.bos_job_id !== job.job_id)) {
+    throw new Error('RECRUITING_COMPLETED_BOS_JOB_AUTHORITY_MISMATCH');
   }
   if (!profileId) throw new Error('RECRUITING_COMPLETED_BOS_PROFILE_REQUIRED');
   if (authority.profile_id) {
@@ -434,17 +457,14 @@ export async function reconcileRecruitingBosReadyFromCompletedJob({
     throw new Error('RECRUITING_COMPLETED_BOS_VAULT_IDENTITY_MISMATCH');
   }
 
-  const projected = await onRecruitingBosVaultVerified({
-    relationshipRef,
-    profileId,
-    vaultResult: {
+  const recruitingService = service || getRecruitingService(env);
+  const invitation = await recruitingService.bindBosProfile(relationshipRef, profileId, {
       success: true,
+      verified: true,
       vault_key: vaultKey,
       created_at: vault.created_at || null,
-    },
-    env,
-  });
-  return { ...projected, reconciled: true };
+  }, authority.mode === 'recruiting_manager_candidate_preparation' ? { preparationAuthority: authority } : {});
+  return { projected: true, candidate_id: invitation.candidate_id, readiness_state: invitation.readiness_state, reconciled: true };
 }
 
 export async function resolveRecruitingBaOwnerProfile(req, clientOwnerProfileId, {
@@ -506,37 +526,112 @@ function canonicalReadyReceipt(result) {
   });
 }
 
-export async function projectRecruitingBaState({ relationshipRef, assessmentId, state, canonicalReceipt = null, env = process.env }) {
+async function readCanonicalBaSource(redis, receipt) {
+  const profileId = normalizeProfileId(receipt?.profile_id);
+  const assessmentId = normalizeAssessmentId(receipt?.assessment_id);
+  if (!profileId || !assessmentId) {
+    throw new Error('RECRUITING_CANONICAL_BA_ASSESSMENT_POINTER_MISMATCH');
+  }
+  const pointerKey = businessAssessmentByProfileKey(profileId);
+  const pointerRaw = await redis.get(pointerKey);
+  if (typeof pointerRaw !== 'string' || normalizeAssessmentId(pointerRaw) !== assessmentId) {
+    throw new Error('RECRUITING_CANONICAL_BA_ASSESSMENT_POINTER_MISMATCH');
+  }
+  const assessmentKey = businessAssessmentKey(assessmentId);
+  const assessmentRaw = await redis.get(assessmentKey);
+  if (typeof assessmentRaw !== 'string' || !assessmentRaw) {
+    throw new Error('RECRUITING_CANONICAL_BA_ASSESSMENT_NOT_FOUND');
+  }
+  const guards = Object.freeze([
+    Object.freeze({ key: pointerKey, expected: pointerRaw }),
+    Object.freeze({ key: assessmentKey, expected: assessmentRaw }),
+  ]);
+  return Object.freeze({
+    assessment: JSON.parse(assessmentRaw),
+    canonicalSourceGuard: Object.freeze({
+      guards,
+      async assertCurrent() {
+        const current = await Promise.all(guards.map((guard) => redis.get(guard.key)));
+        if (guards.some((guard, index) => current[index] !== guard.expected)) {
+          throw new Error('RECRUITING_CANONICAL_BA_SOURCE_GUARD_CHANGED');
+        }
+      },
+    }),
+  });
+}
+
+function validateCanonicalBaSourceGuard(receipt, canonicalSourceGuard) {
+  const profileId = normalizeProfileId(receipt?.profile_id);
+  const assessmentId = normalizeAssessmentId(receipt?.assessment_id);
+  const pointerKey = profileId ? businessAssessmentByProfileKey(profileId) : null;
+  const assessmentKey = assessmentId ? businessAssessmentKey(assessmentId) : null;
+  const guards = canonicalSourceGuard?.guards;
+  if (!pointerKey || !assessmentKey
+      || !Array.isArray(guards)
+      || guards.length !== 2
+      || typeof canonicalSourceGuard.assertCurrent !== 'function') {
+    throw new Error('RECRUITING_CANONICAL_BA_SOURCE_GUARD_INVALID');
+  }
+  const pointer = guards.find((guard) => guard?.key === pointerKey);
+  const assessment = guards.find((guard) => guard?.key === assessmentKey);
+  if (typeof pointer?.expected !== 'string'
+      || normalizeAssessmentId(pointer.expected) !== assessmentId
+      || typeof assessment?.expected !== 'string'
+      || !assessment.expected) {
+    throw new Error('RECRUITING_CANONICAL_BA_SOURCE_GUARD_INVALID');
+  }
+  let record;
+  try { record = JSON.parse(assessment.expected); } catch {
+    throw new Error('RECRUITING_CANONICAL_BA_SOURCE_GUARD_INVALID');
+  }
+  return Object.freeze({ assessment: record, canonicalSourceGuard });
+}
+
+export async function projectRecruitingBaState({ relationshipRef, assessmentId, state, canonicalReceipt = null, canonicalSourceGuard = null, env = process.env, service = null, authority = null }) {
   if (!relationshipRef) return { projected: false, reason: 'NOT_A_RECRUITING_ASSESSMENT' };
   const readyReceipt = state === 'BA_INTELLIGENCE_READY'
     ? validateCanonicalBaReadyReceipt(canonicalReceipt, { assessmentId })
     : null;
-  const invitation = await getRecruitingService(env).projectBaState(relationshipRef, {
+  const recruitingService = service || getRecruitingService(env);
+  const invitation = await recruitingService.projectBaState(relationshipRef, {
     assessment_id: assessmentId,
     state,
     canonical_receipt: readyReceipt,
+    ...(authority?.mode === 'recruiting_manager_candidate_preparation' ? { preparation_authority: authority } : {}),
+    ...(canonicalSourceGuard ? { canonical_source_guard: canonicalSourceGuard } : {}),
   });
   return { projected: true, candidate_id: invitation.candidate_id, ba_readiness: invitation.ba_readiness };
 }
 
-export async function reconcileRecruitingCanonicalBaReady({ redis, result, env = process.env }) {
+export async function reconcileRecruitingCanonicalBaReady({ redis, result, env = process.env, service = null, authority = null, canonicalSourceGuard = null }) {
   const receipt = canonicalReadyReceipt(result);
   if (!receipt) return { projected: false, reason: 'CANONICAL_BA_NOT_COMPLETE' };
   if (typeof redis?.get !== 'function') throw new Error('RECRUITING_CANONICAL_BA_REDIS_REQUIRED');
-  const raw = await redis.get(businessAssessmentKey(receipt.assessment_id));
-  if (!raw) throw new Error('RECRUITING_CANONICAL_BA_ASSESSMENT_NOT_FOUND');
-  const assessment = JSON.parse(raw);
+  const source = canonicalSourceGuard
+    ? validateCanonicalBaSourceGuard(receipt, canonicalSourceGuard)
+    : await readCanonicalBaSource(redis, receipt);
+  const { assessment } = source;
   if (String(assessment.owner_profile_id || '').toLowerCase() !== String(receipt.profile_id || '').toLowerCase()
       || assessment.assessment_id !== receipt.assessment_id) {
     throw new Error('RECRUITING_CANONICAL_BA_ASSESSMENT_IDENTITY_MISMATCH');
   }
   const relationshipRef = assessment.metadata?.recruiting_relationship_ref || null;
+  if (authority?.mode === 'recruiting_manager_candidate_preparation'
+      && (!authority.candidate_id
+        || relationshipRef !== authority.relationship_ref
+        || normalizeProfileId(authority.profile_id) !== normalizeProfileId(receipt.profile_id)
+        || String(authority.assessment_id || '').trim().toLowerCase() !== receipt.assessment_id)) {
+    throw new Error('RECRUITING_CANONICAL_BA_PREPARATION_AUTHORITY_MISMATCH');
+  }
   return projectRecruitingBaState({
     relationshipRef,
     assessmentId: receipt.assessment_id,
     state: 'BA_INTELLIGENCE_READY',
     canonicalReceipt: receipt,
+    canonicalSourceGuard: source.canonicalSourceGuard,
     env,
+    service,
+    authority,
   });
 }
 
@@ -545,16 +640,28 @@ function projectionRetryKey(env, receipt) {
   return `more:${namespace}:projection-retry:v1:${String(receipt.profile_id).toLowerCase()}:${receipt.realization_id}`;
 }
 
-export async function reconcileRecruitingCanonicalBaReadySafely({ redis, result, env = process.env }) {
+function managerPreparationAuthorityFailure(error) {
+  const code = String(error?.message || '').split(':')[0];
+  return /^RECRUITING_(?:MANAGER_(?:SESSION_(?:REQUIRED|SCOPE_INVALID)|MEMBERSHIP_INACTIVE|SETUP_INCOMPLETE)|CANDIDATE_SCOPE_DENIED|CONSULTING_(?:ACCEPTED_CONSENT_REQUIRED|PREPARATION_AUTHORITY_CHANGED)|CANONICAL_BA_(?:(?:PREPARATION_AUTHORITY|ASSESSMENT_POINTER)_MISMATCH|SOURCE_GUARD_(?:CHANGED|INVALID))|ACCEPTED_RELATIONSHIP_REQUIRED)$/u.test(code);
+}
+
+export async function reconcileRecruitingCanonicalBaReadySafely({ redis, result, env = process.env, service = null, authority = null, canonicalSourceGuard = null }) {
   const receipt = canonicalReadyReceipt(result);
   if (!receipt) return { projected: false, reason: 'CANONICAL_BA_NOT_COMPLETE' };
   try {
-    const projected = await reconcileRecruitingCanonicalBaReady({ redis, result, env });
+    const projected = await reconcileRecruitingCanonicalBaReady({ redis, result, env, service, authority, canonicalSourceGuard });
     if (projected.projected && typeof redis?.del === 'function' && !syntheticReviewEnabled(env)) {
       await redis.del(projectionRetryKey(env, receipt));
     }
     return projected;
   } catch (error) {
+    // A manager-preparation authorization loss is terminal for this request,
+    // not a projection outage. Never persist a retry receipt that could later
+    // replay a result after the manager/session/relationship was revoked.
+    if (authority?.mode === 'recruiting_manager_candidate_preparation'
+        && managerPreparationAuthorityFailure(error)) {
+      throw error;
+    }
     if (typeof redis?.set === 'function' && !syntheticReviewEnabled(env)) {
       const retryReceipt = Object.freeze({
         contract: 'recruiting_canonical_ba_projection_retry_receipt_v1',

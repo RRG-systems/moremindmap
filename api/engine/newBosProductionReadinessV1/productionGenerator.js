@@ -69,6 +69,58 @@ const ZERO_USAGE = Object.freeze({
   reasoning_tokens: 0,
 });
 
+const AUTHORITY_GUARDED_CHECKPOINT_MUTATIONS = new Set([
+  'prepare',
+  'accept',
+  'rejectSemantic',
+]);
+
+export function authorityGuardedCheckpointStore(store, assertCurrentAuthority) {
+  const guarded = {};
+  for (const property of Reflect.ownKeys(store)) {
+    const value = store[property];
+    if (typeof value !== 'function') {
+      guarded[property] = value;
+    } else if (AUTHORITY_GUARDED_CHECKPOINT_MUTATIONS.has(property)) {
+      guarded[property] = async (...args) => {
+        await assertCurrentAuthority();
+        return value.apply(store, args);
+      };
+    } else {
+      guarded[property] = value.bind(store);
+    }
+  }
+  return Object.freeze(guarded);
+}
+
+async function assertProviderAuthority(assertCurrentAuthority) {
+  try {
+    await assertCurrentAuthority();
+  } catch (error) {
+    const denied = new Error(error?.message || 'new_bos_provider_submission_authority_changed', { cause: error });
+    denied.provider_submission_blocked_by_authority = true;
+    throw denied;
+  }
+}
+
+export function authorityGuardedProviderClient(client, assertCurrentAuthority) {
+  const create = authorityGuardedProviderTransport(client.responses.create.bind(client.responses), assertCurrentAuthority);
+  const retrieve = authorityGuardedProviderTransport(client.responses.retrieve.bind(client.responses), assertCurrentAuthority);
+  return Object.freeze({
+    responses: Object.freeze({
+      create,
+      retrieve,
+    }),
+  });
+}
+
+export function authorityGuardedProviderTransport(transport, assertCurrentAuthority) {
+  return async (...args) => {
+    await assertProviderAuthority(assertCurrentAuthority);
+    return transport(...args);
+  };
+}
+
 export function createProductionNewBosGenerator({
   apiKey,
   repositoryRoot,
@@ -139,13 +191,26 @@ export function createProductionNewBosGenerator({
     }
   }
 
-  const generate = async function generate({ rawEvidence, providerModel, realizationIdentity }) {
+  const generate = async function generate({
+    rawEvidence,
+    providerModel,
+    realizationIdentity,
+    assertCurrentAuthority = async () => {},
+  }) {
     if (providerModel !== model) throw new Error('new_bos_production_generator_requested_model_mismatch');
     if (!realizationIdentity?.sha256) throw new Error('new_bos_production_generator_realization_identity_required');
+    if (typeof assertCurrentAuthority !== 'function') throw new Error('new_bos_production_generator_authority_assertion_invalid');
+    const guardedReasoningClient = authorityGuardedProviderClient(reasoningClient, assertCurrentAuthority);
+    const guardedCheckpointStore = authorityGuardedCheckpointStore(resumableGenerationStore, assertCurrentAuthority);
     const privacyTokens = deriveProviderIdentityTokens(rawEvidence);
     let currentExecutionUsage = ZERO_USAGE;
     let surfaceCalls = 0;
     let reusedSurfaces = 0;
+    const submitSurfaceRequest = authorityGuardedProviderTransport(async (request) => {
+      if (surfaceCalls >= SURFACES.length) throw new Error('new_bos_surface_provider_call_boundary_exceeded');
+      surfaceCalls += 1;
+      return surfaceClient.responses.create(request);
+    }, assertCurrentAuthority);
 
     const surfaceRealizer = createNewBosHumanRealizationProvider({
       model,
@@ -168,11 +233,9 @@ export function createProductionNewBosGenerator({
         }));
       },
       transport: async (request) => {
-        if (surfaceCalls >= SURFACES.length) throw new Error('new_bos_surface_provider_call_boundary_exceeded');
         const privacy = inspectProviderPrivacy(request, privacyTokens);
         if (!privacy.valid) throw Object.assign(new Error('new_bos_surface_provider_privacy_gate_failed'), { failures: privacy.failures });
-        surfaceCalls += 1;
-        return surfaceClient.responses.create(request);
+        return submitSurfaceRequest(request);
       },
     });
 
@@ -182,8 +245,8 @@ export function createProductionNewBosGenerator({
       governedContext,
       realizationIdentity,
       model,
-      client: reasoningClient,
-      checkpointStore: resumableGenerationStore,
+      client: guardedReasoningClient,
+      checkpointStore: guardedCheckpointStore,
       privacyTokens,
       interactiveWaitMs,
       onTechnicalEvent,
@@ -206,7 +269,7 @@ export function createProductionNewBosGenerator({
       artifact: governedArtifact,
       providerModel: model,
       surfaceRealizer,
-      checkpointStore: resumableGenerationStore,
+      checkpointStore: guardedCheckpointStore,
       campaignIdentity: semantic.campaign_identity,
       onSurfaceCheckpoint: async ({ reused, usage, provider_submissions: providerSubmissions }) => {
         if (reused) reusedSurfaces += 1;

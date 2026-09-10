@@ -16,6 +16,22 @@ function serializedSha256(serialized) {
   return crypto.createHash('sha256').update(String(serialized)).digest('hex');
 }
 
+function normalizeSourceGuards(sourceGuards = []) {
+  if (!Array.isArray(sourceGuards) || sourceGuards.length > 8) {
+    throw new Error('new_ba_store_source_guards_invalid');
+  }
+  const keys = new Set();
+  return Object.freeze(sourceGuards.map((guard) => {
+    const key = typeof guard?.key === 'string' ? guard.key.trim() : '';
+    const expected = guard?.expected;
+    if (!key || keys.has(key) || (expected !== null && typeof expected !== 'string')) {
+      throw new Error('new_ba_store_source_guards_invalid');
+    }
+    keys.add(key);
+    return Object.freeze({ key, expected });
+  }));
+}
+
 export function buildLaunchSafeNewBaEnvelope({ profileId, realizationIdentity, artifact, compatibility, providerAccounting, createdAt = new Date().toISOString() } = {}) {
   const profile = normalizeProfileId(profileId);
   if (!isSupportedNewBaRealizationIdentityVersion(realizationIdentity?.version)) throw new Error('new_ba_store_identity_version_invalid');
@@ -158,12 +174,14 @@ function createStoreCore({ namespace, getValue, setImmutable, replaceCorrupt, co
       }
       return Object.freeze({ written: true, idempotent: false, realization_id: envelope.realization_id });
     },
-    async advancePointer({ profileId, expectedCurrentId = null, nextRealizationId }) {
+    async advancePointer({ profileId, expectedCurrentId = null, nextRealizationId, sourceGuards = [] }) {
       const profile = normalizeProfileId(profileId);
       const next = await readArtifact(profile, nextRealizationId);
       if (!next) throw new Error('new_ba_store_publish_target_missing');
-      const result = await compareAndSetPointer(pointerKey(profile), expectedCurrentId, nextRealizationId);
+      const guards = normalizeSourceGuards(sourceGuards);
+      const result = await compareAndSetPointer(pointerKey(profile), expectedCurrentId, nextRealizationId, guards);
       if (!result.updated) {
+        if (result.sourceChanged) throw new Error('new_ba_store_source_authority_changed');
         const error = new Error('new_ba_store_stale_writer_rejected');
         error.current_realization_id = result.current || null;
         throw error;
@@ -193,9 +211,12 @@ export function createMemoryNewBaRealizationStore({ namespace = 'preview:new-ba:
       values.set(key, replacementSerialized);
       return { updated: true };
     },
-    compareAndSetPointer: async (key, expected, next) => {
-      const current = values.get(key) || null;
+    compareAndSetPointer: async (key, expected, next, sourceGuards = []) => {
+      const current = values.has(key) ? values.get(key) : null;
       if (current !== expected) return { updated: false, current };
+      if (sourceGuards.some((guard) => (values.has(guard.key) ? values.get(guard.key) : null) !== guard.expected)) {
+        return { updated: false, current, sourceChanged: true };
+      }
       values.set(key, next);
       return { updated: true, current: next };
     },
@@ -209,6 +230,15 @@ if expected == '' then
   if current then return {0, current} end
 elseif current ~= expected then
   return {0, current or ''}
+end
+for i=2,#KEYS do
+  local expected_source = ARGV[i + 1]
+  local actual_source = redis.call('GET', KEYS[i])
+  if string.sub(expected_source, 1, 1) == '0' then
+    if actual_source then return {-1, current or ''} end
+  elseif not actual_source or actual_source ~= string.sub(expected_source, 2) then
+    return {-1, current or ''}
+  end
 end
 redis.call('SET', KEYS[1], ARGV[2])
 return {1, ARGV[2]}
@@ -236,10 +266,16 @@ export function createRedisNewBaRealizationStore({ redis, namespace, persistence
       const result = await redis.eval(CORRUPT_REPAIR_SCRIPT, 2, key, archiveKey, expectedSerialized, replacementSerialized);
       return { updated: Number(result?.[0]) === 1 };
     },
-    compareAndSetPointer: async (key, expected, next) => {
+    compareAndSetPointer: async (key, expected, next, sourceGuards = []) => {
       if (!persistenceEnabled) throw new Error('new_ba_store_persistence_default_off');
-      const result = await redis.eval(POINTER_CAS_SCRIPT, 1, key, expected || '', next);
-      return { updated: Number(result?.[0]) === 1, current: result?.[1] || null };
+      const keys = [key, ...sourceGuards.map((guard) => guard.key)];
+      const expectedSources = sourceGuards.map((guard) => guard.expected === null ? '0' : `1${guard.expected}`);
+      const result = await redis.eval(POINTER_CAS_SCRIPT, keys.length, ...keys, expected || '', next, ...expectedSources);
+      return {
+        updated: Number(result?.[0]) === 1,
+        current: result?.[1] || null,
+        sourceChanged: Number(result?.[0]) === -1,
+      };
     },
   });
 }

@@ -61,6 +61,35 @@ function terminalEvent(error) {
   });
 }
 
+export async function recordSurfaceTransportFailure({
+  error,
+  checkpointStore,
+  prepared,
+  campaignSha256,
+  unit,
+} = {}) {
+  if (error?.provider_submission_blocked_by_authority
+      && typeof checkpointStore?.recordAuthorityAbortBeforeSubmission === 'function') {
+    await checkpointStore.recordAuthorityAbortBeforeSubmission({
+      campaignSha256,
+      unitId: unit.unit_id,
+      unitIdentitySha256: unit.unit_identity_sha256,
+      requestSha256: unit.request_sha256,
+      expectedRecord: prepared.record,
+    });
+  }
+  const terminal = terminalEvent(error);
+  if (terminal.provider_response_id) {
+    await checkpointStore.observe({
+      campaignSha256,
+      unitId: unit.unit_id,
+      unitIdentitySha256: unit.unit_identity_sha256,
+      requestSha256: unit.request_sha256,
+      event: terminal,
+    });
+  }
+}
+
 async function realizeSurface({
   artifact,
   packet,
@@ -114,12 +143,12 @@ async function realizeSurface({
       }),
     });
   } catch (error) {
-    await checkpointStore.observe({
+    await recordSurfaceTransportFailure({
+      error,
+      checkpointStore,
+      prepared,
       campaignSha256: campaignIdentity.sha256,
-      unitId: unit.unit_id,
-      unitIdentitySha256: unit.unit_identity_sha256,
-      requestSha256: unit.request_sha256,
-      event: terminalEvent(error),
+      unit,
     });
     if (error?.semantic_rejection || error?.provider_status === 'completed') {
       await checkpointStore.rejectSemantic({

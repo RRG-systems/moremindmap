@@ -239,6 +239,36 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
     const key = rootKey(namespace, campaignSha256, unitId);
     const existing = parse(await redis.get(key));
     if (existing) {
+      if (existing.state === 'AUTHORITY_ABORTED_BEFORE_SUBMISSION') {
+        if (existing.unit_identity_sha256 !== unitIdentitySha256) throw new Error('new_bos_resumable_store_unit_identity_mismatch');
+        if (existing.request_sha256 !== requestSha256) throw new Error('new_bos_resumable_store_request_hash_mismatch');
+        const intent = Object.freeze({
+          ...existing,
+          state: 'SUBMISSION_INTENT',
+          claim_token_sha256: sha256Stable(crypto.randomUUID()),
+          observation: null,
+          prior_authority_abort_sha256: sha256Stable(existing),
+          resumed_at: new Date().toISOString(),
+        });
+        if (typeof redis?.eval !== 'function') throw new Error('new_bos_resumable_store_atomic_authority_resume_required');
+        const resumed = await redis.eval(
+          "if redis.call('GET',KEYS[1]) ~= ARGV[1] then return 0 end redis.call('SET',KEYS[1],ARGV[2]); return 1",
+          1,
+          key,
+          JSON.stringify(existing),
+          JSON.stringify(intent),
+        );
+        if (resumed !== 1) return prepare({ campaignSha256, unitId, unitIdentitySha256, requestSha256 });
+        return Object.freeze({
+          disposition: intent.attempt === 1 ? 'START_INITIAL' : 'START_REPLACEMENT',
+          record: intent,
+          classification: Object.freeze({
+            state: 'AUTHORITY_ABORTED_BEFORE_SUBMISSION',
+            disposition: intent.attempt === 1 ? 'START_INITIAL' : 'START_REPLACEMENT',
+            reason: 'authority_changed_before_provider_submission',
+          }),
+        });
+      }
       if (existing.state === 'DEPENDENCY_INVALIDATED') {
         if (unitId !== VECTOR_FREE_DEPENDENT_STAGE4_UNIT
           || existing.invalidated_by_unit !== VECTOR_FREE_STAGE3_UNIT
@@ -350,6 +380,42 @@ export function createRedisNewBosResumableGenerationStore({ redis, namespace } =
     },
 
     prepare,
+
+    async recordAuthorityAbortBeforeSubmission({
+      campaignSha256,
+      unitId,
+      unitIdentitySha256,
+      requestSha256,
+      expectedRecord,
+      now = new Date(),
+    } = {}) {
+      if (typeof redis?.eval !== 'function') throw new Error('new_bos_resumable_store_atomic_authority_abort_required');
+      assertIdentity(unitIdentitySha256, 'unit_identity');
+      assertIdentity(requestSha256, 'request_hash');
+      const key = rootKey(namespace, campaignSha256, unitId);
+      if (expectedRecord?.state !== 'SUBMISSION_INTENT'
+          || expectedRecord.unit_identity_sha256 !== unitIdentitySha256
+          || expectedRecord.request_sha256 !== requestSha256
+          || expectedRecord.observation !== null
+          || !SHA256.test(String(expectedRecord.claim_token_sha256 || ''))) {
+        throw new Error('new_bos_resumable_store_authority_abort_receipt_invalid');
+      }
+      const aborted = Object.freeze({
+        ...expectedRecord,
+        state: 'AUTHORITY_ABORTED_BEFORE_SUBMISSION',
+        authority_abort_reason: 'authority_changed_before_provider_submission',
+        provider_submission_count: 0,
+        aborted_at: now instanceof Date ? now.toISOString() : new Date(now).toISOString(),
+      });
+      const committed = await redis.eval(
+        "if redis.call('GET',KEYS[1]) ~= ARGV[1] then return 0 end redis.call('SET',KEYS[1],ARGV[2]); return 1",
+        1,
+        key,
+        JSON.stringify(expectedRecord),
+        JSON.stringify(aborted),
+      );
+      return Object.freeze({ recorded: committed === 1, record: committed === 1 ? aborted : null });
+    },
 
     async retireSemanticRejectedStage3AndPrepareReplacement({
       campaignSha256,

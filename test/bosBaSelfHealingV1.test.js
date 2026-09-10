@@ -5,14 +5,15 @@ import test from 'node:test';
 
 import { createRedisNewBosBackgroundResponseStore } from '../api/engine/newBosProductionReadinessV1/backgroundResponseStore.js';
 import { createRedisNewBaBackgroundResponseStore } from '../api/engine/newBaProductionReadinessV1/backgroundResponseStore.js';
-import { createAuthorizedSyntheticTopSource } from '../api/engine/newBaProductionReadinessV1/canonicalReader.js';
+import { createAuthorizedSyntheticTopSource, createReadOnlyBaAuthorityReader } from '../api/engine/newBaProductionReadinessV1/canonicalReader.js';
 import { createFrozenCanaryRealizationGenerator } from '../api/engine/newBaProductionReadinessV1/canaryRealizationFactory.js';
 import { classifyNewBaCompatibility } from '../api/engine/newBaProductionReadinessV1/compatibility.js';
-import { buildLaunchSafeNewBaEnvelope, createMemoryNewBaRealizationStore } from '../api/engine/newBaProductionReadinessV1/launchSafeRealizationStore.js';
+import { buildLaunchSafeNewBaEnvelope, createMemoryNewBaRealizationStore, createRedisNewBaRealizationStore } from '../api/engine/newBaProductionReadinessV1/launchSafeRealizationStore.js';
 import { createNewBaModernizationService } from '../api/engine/newBaProductionReadinessV1/modernizationService.js';
 import { buildNewBaRealizationIdentityV3 } from '../api/engine/newBaProductionReadinessV1/realizationIdentity.js';
 import { createNewBaRouteHandler } from '../api/engine/newBaProductionReadinessV1/routeHandler.js';
-import { buildLaunchSafeRealizationEnvelope, createMemoryLaunchSafeRealizationStore } from '../api/engine/newBosProductionReadinessV1/launchSafeRealizationStore.js';
+import { createReadOnlyCanonicalReader } from '../api/engine/newBosProductionReadinessV1/canonicalReader.js';
+import { buildLaunchSafeRealizationEnvelope, createMemoryLaunchSafeRealizationStore, createRedisLaunchSafeRealizationStore } from '../api/engine/newBosProductionReadinessV1/launchSafeRealizationStore.js';
 import { createNewBosModernizationService } from '../api/engine/newBosProductionReadinessV1/modernizationService.js';
 import { buildNewBosRealizationIdentity } from '../api/engine/newBosProductionReadinessV1/realizationIdentity.js';
 import { createNewBosProductionRouteHandler } from '../api/engine/newBosProductionReadinessV1/routeHandler.js';
@@ -149,6 +150,333 @@ function redisFixture() {
   };
 }
 
+test('canonical BOS reader guards an absent higher-priority key and the exact selected Vault source', async () => {
+  const values = new Map();
+  const lowerKey = 'vault:profile:mm-20990101-selfheal';
+  const legacyKey = 'vault:profile:MM-20990101-selfheal';
+  const raw = JSON.stringify(canonicalEnvelope());
+  values.set(legacyKey, raw);
+  const reader = createReadOnlyCanonicalReader({ redis: { get: async (key) => values.get(key) ?? null } });
+
+  const guarded = await reader.readWithSourceGuards(PROFILE);
+  assert.equal(guarded.source.profile_id, PROFILE);
+  assert.equal(Object.hasOwn(guarded.source, 'sourceGuards'), false);
+  assert.deepEqual(guarded.sourceGuards, [
+    { key: lowerKey, expected: null },
+    { key: legacyKey, expected: raw },
+  ]);
+});
+
+test('canonical BA reader guards its exact assessment and BOS authority source records', async () => {
+  const values = new Map();
+  const assessmentId = 'ba-20990101-a1b2c3d4';
+  const relationshipRef = 'invite-canonical-source-guard';
+  const assessmentPointerKey = `business_assessment_by_profile:${PROFILE.toLowerCase()}`;
+  const assessmentKey = `business_assessment:${assessmentId}`;
+  const bosNamespace = 'nonprod:new-bos:canonical-source-guard';
+  const bosEnvelope = syntheticBosEnvelope(PROFILE);
+  const bosPointerKey = `${bosNamespace}:latest-compatible:${PROFILE}`;
+  const bosArtifactKey = `${bosNamespace}:artifact:${PROFILE}:${bosEnvelope.realization_id}`;
+  const assessmentRaw = JSON.stringify({
+    owner_profile_id: PROFILE,
+    assessment_id: assessmentId,
+    status: 'intake_saved',
+    version: 'business_assessment_v1_intake',
+    assessment_type: 'real_estate_team',
+    created_at: '2099-01-01T00:00:00.000Z',
+    updated_at: '2099-01-01T00:00:00.000Z',
+    inputs: {
+      answers: Object.fromEntries(Array.from({ length: 12 }, (_, index) => [
+        `q${index + 1}`,
+        `Synthetic governed business evidence answer ${index + 1}`,
+      ])),
+    },
+    metadata: { recruiting_relationship_ref: relationshipRef },
+  });
+  const bosRaw = JSON.stringify(bosEnvelope);
+  values.set(assessmentPointerKey, assessmentId);
+  values.set(assessmentKey, assessmentRaw);
+  values.set(bosPointerKey, bosEnvelope.realization_id);
+  values.set(bosArtifactKey, bosRaw);
+  const reader = createReadOnlyBaAuthorityReader({
+    redis: { get: async (key) => values.get(key) ?? null },
+    bosNamespace,
+  });
+
+  const guarded = await reader.readWithSourceGuards(PROFILE, {
+    expectedAssessmentId: assessmentId,
+    expectedRelationshipRef: relationshipRef,
+  });
+  assert.equal(guarded.source.assessment_id, assessmentId);
+  assert.equal(Object.hasOwn(guarded.source, 'sourceGuards'), false);
+  assert.deepEqual(guarded.sourceGuards, [
+    { key: assessmentPointerKey, expected: assessmentId },
+    { key: assessmentKey, expected: assessmentRaw },
+    { key: bosPointerKey, expected: bosEnvelope.realization_id },
+    { key: bosArtifactKey, expected: bosRaw },
+  ]);
+});
+
+test('New BOS pointer publication atomically rejects selected-source replacement and higher-priority source creation', async () => {
+  const envelope = syntheticBosEnvelope(PROFILE);
+  const namespace = 'nonprod:new-bos:source-cas-test';
+  const values = new Map();
+  const selectedKey = 'vault:profile:MM-20990101-selfheal';
+  const higherPriorityKey = 'vault:profile:mm-20990101-selfheal';
+  values.set(selectedKey, 'source-v1');
+  const store = createMemoryLaunchSafeRealizationStore({ namespace, values });
+  await store.persistImmutable(envelope);
+  const sourceGuards = [
+    { key: higherPriorityKey, expected: null },
+    { key: selectedKey, expected: 'source-v1' },
+  ];
+
+  values.set(higherPriorityKey, 'new-canonical-source');
+  await assert.rejects(
+    store.advancePointer({ profileId: PROFILE, expectedCurrentId: null, nextRealizationId: envelope.realization_id, sourceGuards }),
+    /new_bos_launch_store_source_authority_changed/u,
+  );
+  assert.equal(values.has(`${namespace}:latest-compatible:${PROFILE}`), false);
+
+  values.delete(higherPriorityKey);
+  values.set(selectedKey, 'source-v2');
+  await assert.rejects(
+    store.advancePointer({ profileId: PROFILE, expectedCurrentId: null, nextRealizationId: envelope.realization_id, sourceGuards }),
+    /new_bos_launch_store_source_authority_changed/u,
+  );
+  assert.equal(values.has(`${namespace}:latest-compatible:${PROFILE}`), false);
+
+  values.set(selectedKey, 'source-v1');
+  assert.equal((await store.advancePointer({
+    profileId: PROFILE,
+    expectedCurrentId: null,
+    nextRealizationId: envelope.realization_id,
+    sourceGuards,
+  })).updated, true);
+});
+
+test('New BA pointer publication atomically rejects an assessment source change', async () => {
+  const envelope = await syntheticBaEnvelope();
+  const namespace = 'nonprod:new-ba:source-cas-test';
+  const values = new Map([['business_assessment:synthetic', 'assessment-v1']]);
+  const store = createMemoryNewBaRealizationStore({ namespace, values });
+  await store.persistImmutable(envelope);
+  values.set('business_assessment:synthetic', 'assessment-v2');
+
+  await assert.rejects(
+    store.advancePointer({
+      profileId: envelope.profile_id,
+      expectedCurrentId: null,
+      nextRealizationId: envelope.realization_id,
+      sourceGuards: [{ key: 'business_assessment:synthetic', expected: 'assessment-v1' }],
+    }),
+    /new_ba_store_source_authority_changed/u,
+  );
+  assert.equal(values.has(`${namespace}:latest-compatible:${envelope.profile_id}`), false);
+});
+
+test('New BOS modernization cannot publish across the final source-check-to-pointer race', async () => {
+  const namespace = 'nonprod:new-bos:modernization-source-cas';
+  const values = new Map();
+  const canonicalKey = 'vault:profile:mm-20990101-selfheal';
+  values.set(canonicalKey, JSON.stringify(canonicalEnvelope()));
+  const canonicalReader = createReadOnlyCanonicalReader({ redis: { get: async (key) => values.get(key) ?? null } });
+  const baseStore = createMemoryLaunchSafeRealizationStore({ namespace, values });
+  const realizationStore = {
+    inspect: (input) => baseStore.inspect(input),
+    persistImmutable: (input, options) => baseStore.persistImmutable(input, options),
+    async advancePointer(input) {
+      values.set(canonicalKey, `${values.get(canonicalKey)} `);
+      return baseStore.advancePointer(input);
+    },
+  };
+  const service = createNewBosModernizationService({
+    config: {
+      staged: true, customerActive: true, canaryEnabled: false, providerEnabled: true, persistenceEnabled: true,
+      baFusionValidated: true, allowedProfileIds: [], namespace, providerModel: 'gpt-5.6-sol',
+    },
+    canonicalReader,
+    realizationStore,
+    singleFlight: { run: async (_key, task) => task() },
+    generator: async () => ({ artifact: syntheticBosEnvelope(PROFILE).artifact, provider_accounting: { calls: 0, store: false } }),
+  });
+
+  await assert.rejects(service.retrieve({ profileId: PROFILE }), /new_bos_launch_store_source_authority_changed/u);
+  assert.equal(values.has(`${namespace}:latest-compatible:${PROFILE}`), false);
+});
+
+test('New BA modernization cannot publish across the final source-check-to-pointer race', async () => {
+  const namespace = 'nonprod:new-ba:modernization-source-cas';
+  const source = createAuthorizedSyntheticTopSource();
+  const values = new Map([['canonical:ba:source', 'source-v1']]);
+  const baseStore = createMemoryNewBaRealizationStore({ namespace, values });
+  const frozen = createFrozenCanaryRealizationGenerator();
+  const authorityReader = {
+    async read() { return source; },
+    async readWithSourceGuards() {
+      return {
+        source,
+        sourceGuards: [{ key: 'canonical:ba:source', expected: 'source-v1' }],
+      };
+    },
+  };
+  const realizationStore = {
+    inspect: (input) => baseStore.inspect(input),
+    persistImmutable: (input, options) => baseStore.persistImmutable(input, options),
+    async advancePointer(input) {
+      values.set('canonical:ba:source', 'source-v2');
+      return baseStore.advancePointer(input);
+    },
+  };
+  const service = createNewBaModernizationService({
+    config: {
+      staged: true, customerActive: true, fusionValidated: true, canaryEnabled: false, providerEnabled: true,
+      persistenceEnabled: true, allowedProfileIds: [], namespace, providerModel: 'gpt-5.6-sol',
+    },
+    authorityReader,
+    realizationStore,
+    singleFlight: { run: async (_key, task) => task() },
+    generator: { generate: (input) => frozen.generate(input) },
+  });
+
+  await assert.rejects(service.retrieve({ profileId: source.profile_id }), /new_ba_store_source_authority_changed/u);
+  assert.equal(values.has(`${namespace}:latest-compatible:${source.profile_id}`), false);
+});
+
+test('Redis realization pointer CAS carries exact present and absent source guards without persisting them', async () => {
+  const envelope = syntheticBosEnvelope(PROFILE);
+  const namespace = 'nonprod:new-bos:redis-source-cas-test';
+  const artifactKey = `${namespace}:artifact:${PROFILE}:${envelope.realization_id}`;
+  let evalCall = null;
+  const redis = {
+    async get(key) { return key === artifactKey ? JSON.stringify(envelope) : null; },
+    async set() { return 'OK'; },
+    async eval(...args) { evalCall = args; return [-1, '']; },
+  };
+  const store = createRedisLaunchSafeRealizationStore({ redis, namespace, persistenceEnabled: true });
+
+  await assert.rejects(
+    store.advancePointer({
+      profileId: PROFILE,
+      expectedCurrentId: null,
+      nextRealizationId: envelope.realization_id,
+      sourceGuards: [
+        { key: 'source:present', expected: 'exact-private-source' },
+        { key: 'source:absent', expected: null },
+      ],
+    }),
+    /new_bos_launch_store_source_authority_changed/u,
+  );
+  assert.equal(evalCall[1], 3);
+  assert.deepEqual(evalCall.slice(2, 5), [
+    `${namespace}:latest-compatible:${PROFILE}`,
+    'source:present',
+    'source:absent',
+  ]);
+  assert.deepEqual(evalCall.slice(5), ['', envelope.realization_id, '1exact-private-source', '0']);
+});
+
+test('New BOS and New BA memory-store rollback remains a pointer-only CAS after guarded publication', async () => {
+  const bosPrior = syntheticBosEnvelope(PROFILE);
+  const bosNextIdentity = buildNewBosRealizationIdentity({
+    profileId: PROFILE,
+    canonicalSourceSha256: 'd'.repeat(64),
+    rawEvidenceVersion: 'synthetic-self-heal-v1',
+    providerModel: 'gpt-5.6-sol',
+    compatibilityClass: 'A',
+  });
+  const bosNext = buildLaunchSafeRealizationEnvelope({
+    profileId: PROFILE,
+    realizationIdentity: bosNextIdentity,
+    artifact: bosPrior.artifact,
+    compatibility: { class: 'A', label: 'FULLY_COMPATIBLE' },
+    providerAccounting: { calls: 0, store: false },
+  });
+  const bosStore = createMemoryLaunchSafeRealizationStore({ namespace: 'nonprod:new-bos:rollback-regression' });
+  await bosStore.persistImmutable(bosPrior);
+  await bosStore.persistImmutable(bosNext);
+  await bosStore.advancePointer({ profileId: PROFILE, nextRealizationId: bosPrior.realization_id });
+  await bosStore.advancePointer({ profileId: PROFILE, expectedCurrentId: bosPrior.realization_id, nextRealizationId: bosNext.realization_id });
+  assert.deepEqual(await bosStore.rollbackPointer({
+    profileId: PROFILE,
+    expectedCurrentId: bosNext.realization_id,
+    priorRealizationId: bosPrior.realization_id,
+  }), { rolled_back: true, from: bosNext.realization_id, to: bosPrior.realization_id });
+
+  const baPrior = await syntheticBaEnvelope();
+  const baSource = createAuthorizedSyntheticTopSource();
+  const baCompatibility = classifyNewBaCompatibility(baSource);
+  const baNextIdentity = buildNewBaRealizationIdentityV3({
+    profileId: baSource.profile_id,
+    assessmentId: baSource.assessment_id,
+    evidenceSha256: 'e'.repeat(64),
+    bosAuthoritySha256: baSource.bos_authority.sha256,
+    bosFusionContractSha256: baSource.bos_authority.fusion_contract_sha256,
+    bosEvidenceBoundarySha256: baSource.bos_authority.evidence_boundary_sha256,
+    compatibilityClass: baCompatibility.class,
+    providerModel: 'gpt-5.6-sol',
+    verticalBinding: baSource.business_evidence.vertical_binding,
+  });
+  const baNext = buildLaunchSafeNewBaEnvelope({
+    profileId: baSource.profile_id,
+    realizationIdentity: baNextIdentity,
+    artifact: baPrior.artifact,
+    compatibility: baCompatibility,
+    providerAccounting: { calls: 0, store: false },
+  });
+  const baStore = createMemoryNewBaRealizationStore({ namespace: 'nonprod:new-ba:rollback-regression' });
+  await baStore.persistImmutable(baPrior);
+  await baStore.persistImmutable(baNext);
+  await baStore.advancePointer({ profileId: baSource.profile_id, nextRealizationId: baPrior.realization_id });
+  await baStore.advancePointer({ profileId: baSource.profile_id, expectedCurrentId: baPrior.realization_id, nextRealizationId: baNext.realization_id });
+  assert.deepEqual(await baStore.rollbackPointer({
+    profileId: baSource.profile_id,
+    expectedCurrentId: baNext.realization_id,
+    priorRealizationId: baPrior.realization_id,
+  }), { rolled_back: true, from: baNext.realization_id, to: baPrior.realization_id });
+});
+
+test('New BOS and New BA Redis-store rollback emits the legacy one-key pointer CAS', async () => {
+  const bosEnvelope = syntheticBosEnvelope(PROFILE);
+  const baEnvelope = await syntheticBaEnvelope();
+  const cases = [
+    {
+      namespace: 'nonprod:new-bos:redis-rollback-regression',
+      profileId: PROFILE,
+      envelope: bosEnvelope,
+      createStore: createRedisLaunchSafeRealizationStore,
+    },
+    {
+      namespace: 'nonprod:new-ba:redis-rollback-regression',
+      profileId: baEnvelope.profile_id,
+      envelope: baEnvelope,
+      createStore: createRedisNewBaRealizationStore,
+    },
+  ];
+  for (const item of cases) {
+    const artifactKey = `${item.namespace}:artifact:${item.profileId}:${item.envelope.realization_id}`;
+    let evalCall = null;
+    const redis = {
+      async get(key) { return key === artifactKey ? JSON.stringify(item.envelope) : null; },
+      async set() { return 'OK'; },
+      async eval(...args) { evalCall = args; return [1, item.envelope.realization_id]; },
+    };
+    const store = item.createStore({ redis, namespace: item.namespace, persistenceEnabled: true });
+    const result = await store.rollbackPointer({
+      profileId: item.profileId,
+      expectedCurrentId: 'current-realization',
+      priorRealizationId: item.envelope.realization_id,
+    });
+    assert.equal(result.rolled_back, true);
+    assert.equal(evalCall[1], 1);
+    assert.deepEqual(evalCall.slice(2), [
+      `${item.namespace}:latest-compatible:${item.profileId}`,
+      'current-realization',
+      item.envelope.realization_id,
+    ]);
+  }
+});
+
 test('recovery contract distinguishes truth-safe machinery recovery from human review', () => {
   assert.equal(classifyProviderCheckpoint(null).state, REALIZATION_RECOVERY_STATES.MISSING);
   assert.equal(classifyProviderCheckpoint({ provider_status: 'in_progress' }).state, REALIZATION_RECOVERY_STATES.RESUMABLE_BACKGROUND);
@@ -219,6 +547,137 @@ test('New BOS modernization forwards only the exact corruption receipt and recor
   assert.ok(service.diagnostics.snapshot().some(({ event_type: type }) => type === 'corrupt_derived_recovered'));
 });
 
+function authorityGuardedBosModernization({ failAuthorityCheckAt }) {
+  const artifact = syntheticBosEnvelope(PROFILE).artifact;
+  const calls = { authority: 0, generator: 0, persist: 0, pointer: 0 };
+  const service = createNewBosModernizationService({
+    config: {
+      staged: true, customerActive: true, canaryEnabled: false, providerEnabled: true, persistenceEnabled: true,
+      baFusionValidated: true, allowedProfileIds: [], namespace: 'nonprod:new-bos:manager-authority-test', providerModel: 'gpt-5.6-sol',
+    },
+    canonicalReader: { read: async () => canonicalEnvelope() },
+    realizationStore: {
+      inspect: async () => ({ state: 'missing', current: null, pointer: null }),
+      persistImmutable: async () => { calls.persist += 1; return { written: true }; },
+      advancePointer: async () => { calls.pointer += 1; return { updated: true }; },
+    },
+    singleFlight: { run: async (_key, task) => task() },
+    generator: async ({ assertCurrentAuthority }) => {
+      calls.generator += 1;
+      assert.equal(typeof assertCurrentAuthority, 'function');
+      return { artifact, provider_accounting: { calls: 0, store: false } };
+    },
+  });
+  const assertCurrentAuthority = async () => {
+    calls.authority += 1;
+    if (calls.authority === failAuthorityCheckAt) throw new Error('RECRUITING_MANAGER_SESSION_REQUIRED');
+  };
+  return { service, calls, assertCurrentAuthority };
+}
+
+test('New BOS manager preparation rechecks live authority before entering provider generation', async () => {
+  const setup = authorityGuardedBosModernization({ failAuthorityCheckAt: 1 });
+  await assert.rejects(
+    setup.service.retrieve({ profileId: PROFILE, assertCurrentAuthority: setup.assertCurrentAuthority }),
+    /RECRUITING_MANAGER_SESSION_REQUIRED/u,
+  );
+  assert.deepEqual(setup.calls, { authority: 1, generator: 0, persist: 0, pointer: 0 });
+});
+
+test('New BOS manager preparation rechecks live authority immediately before immutable persistence', async () => {
+  const setup = authorityGuardedBosModernization({ failAuthorityCheckAt: 3 });
+  await assert.rejects(
+    setup.service.retrieve({ profileId: PROFILE, assertCurrentAuthority: setup.assertCurrentAuthority }),
+    /RECRUITING_MANAGER_SESSION_REQUIRED/u,
+  );
+  assert.deepEqual(setup.calls, { authority: 3, generator: 1, persist: 0, pointer: 0 });
+});
+
+test('New BOS manager preparation leaves only an immutable orphan when authority is lost before pointer advance', async () => {
+  const setup = authorityGuardedBosModernization({ failAuthorityCheckAt: 4 });
+  await assert.rejects(
+    setup.service.retrieve({ profileId: PROFILE, assertCurrentAuthority: setup.assertCurrentAuthority }),
+    /RECRUITING_MANAGER_SESSION_REQUIRED/u,
+  );
+  assert.deepEqual(setup.calls, { authority: 4, generator: 1, persist: 1, pointer: 0 });
+});
+
+test('New BOS refuses immutable persistence when canonical source identity changes during generation', async () => {
+  const artifact = syntheticBosEnvelope(PROFILE).artifact;
+  let canonicalChanged = false;
+  let persisted = 0;
+  let published = 0;
+  const service = createNewBosModernizationService({
+    config: {
+      staged: true, customerActive: true, canaryEnabled: false, providerEnabled: true, persistenceEnabled: true,
+      baFusionValidated: true, allowedProfileIds: [], namespace: 'nonprod:new-bos:canonical-race-test', providerModel: 'gpt-5.6-sol',
+    },
+    canonicalReader: {
+      read: async () => {
+        const envelope = canonicalEnvelope();
+        if (canonicalChanged) {
+          envelope.canonical_dossier.canonical_profile_json.intake_answers[0].answer_text += ' Canonical revision.';
+        }
+        return envelope;
+      },
+    },
+    realizationStore: {
+      inspect: async () => ({ state: 'missing', current: null, pointer: null }),
+      persistImmutable: async () => { persisted += 1; return { written: true }; },
+      advancePointer: async () => { published += 1; return { updated: true }; },
+    },
+    singleFlight: { run: async (_key, task) => task() },
+    generator: async () => {
+      canonicalChanged = true;
+      return { artifact, provider_accounting: { calls: 0, store: false } };
+    },
+  });
+
+  await assert.rejects(
+    service.retrieve({ profileId: PROFILE }),
+    /new_bos_canonical_source_authority_changed/u,
+  );
+  assert.equal(persisted, 0);
+  assert.equal(published, 0);
+});
+
+test('New BOS refuses orphan pointer repair when canonical source identity changes after inspection', async () => {
+  const current = syntheticBosEnvelope(PROFILE);
+  let canonicalChanged = false;
+  let published = 0;
+  const service = createNewBosModernizationService({
+    config: {
+      staged: true, customerActive: true, canaryEnabled: false, providerEnabled: true, persistenceEnabled: true,
+      baFusionValidated: true, allowedProfileIds: [], namespace: 'nonprod:new-bos:pointer-race-test', providerModel: 'gpt-5.6-sol',
+    },
+    canonicalReader: {
+      read: async () => {
+        const envelope = canonicalEnvelope();
+        if (canonicalChanged) {
+          envelope.canonical_dossier.canonical_profile_json.intake_answers[0].answer_text += ' Canonical revision.';
+        }
+        return envelope;
+      },
+    },
+    realizationStore: {
+      inspect: async () => {
+        canonicalChanged = true;
+        return { state: 'publishable_orphan', current, pointer: null };
+      },
+      persistImmutable: async () => ({ written: false }),
+      advancePointer: async () => { published += 1; return { updated: true }; },
+    },
+    singleFlight: { run: async (_key, task) => task() },
+    generator: async () => ({ artifact: current.artifact, provider_accounting: { calls: 0, store: false } }),
+  });
+
+  await assert.rejects(
+    service.retrieve({ profileId: PROFILE }),
+    /new_bos_canonical_source_authority_changed/u,
+  );
+  assert.equal(published, 0);
+});
+
 test('New BA applies the same exact-hash corrupt-derived recovery without changing governed identity', async () => {
   const envelope = await syntheticBaEnvelope();
   const namespace = 'preview:new-ba:corrupt-recovery-test';
@@ -264,7 +723,18 @@ test('New BA modernization reconstructs a proven corrupt derived artifact withou
       advancePointer: async () => ({ updated: true }),
     },
     singleFlight: { run: async (_key, task) => task() },
-    generator: { advance: async () => ({ complete: true, artifact: envelope.artifact, provider_accounting: { calls: 0, store: false } }) },
+    generator: {
+      advance: async () => ({
+        complete: true,
+        artifact: envelope.artifact,
+        provider_accounting: { calls: 0, store: false },
+        source_realization_identity: {
+          version: envelope.realization_identity.version,
+          realization_id: envelope.realization_identity.realization_id,
+          sha256: envelope.realization_identity.sha256,
+        },
+      }),
+    },
   });
   const result = await service.retrieve({ profileId: source.profile_id });
   assert.equal(result.receipt.path, 'rebuilt_corrupt_derived');

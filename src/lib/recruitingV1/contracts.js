@@ -239,6 +239,11 @@ export function publicInvitation(invitation, membership = null) {
           ? 'RESERVED'
           : legacyEntitlementState;
   const consultingReadiness = consultingReadinessFor(invitation, membership);
+  const consultingPreparationEligible = invitation.state === 'ACCEPTED'
+    && Boolean(invitation.accepted_at)
+    && !invitation.revoked_at
+    && invitation.consent?.version === 'recruiting_v1_consent_2026_08'
+    && Boolean(invitation.consent?.accepted_at);
   const progressState = consultingReadiness.ready
     ? 'BOTH_COMPLETE'
     : ['BA_INTAKE_SAVED', 'BA_IN_PROGRESS'].includes(invitation.ba_readiness)
@@ -273,6 +278,12 @@ export function publicInvitation(invitation, membership = null) {
     progress_label: progressLabel,
     consulting_ready: consultingReadiness.ready,
     consulting_blocker: consultingReadiness.blocker,
+    consulting_preparation_eligible: consultingPreparationEligible,
+    consulting_preparation_blocker: consultingPreparationEligible
+      ? null
+      : invitation.state === 'ACCEPTED' && Boolean(invitation.accepted_at)
+        ? 'RECRUITING_CONSULTING_CURRENT_CONSENT_REQUIRED'
+        : 'RECRUITING_CONSULTING_RELATIONSHIP_NOT_ACCEPTED',
     complimentary_access: {
       bos: invitation.bos_entitlement_state || legacyEntitlementState,
       ba: projectedBaEntitlement,
@@ -281,6 +292,9 @@ export function publicInvitation(invitation, membership = null) {
     },
     delivery_state: invitation.delivery_state,
     resend_count: invitation.resend_count || 0,
+    current_consent_request_generation: Number(invitation.current_consent_request?.generation || 0),
+    current_consent_request_delivery_state: invitation.current_consent_request?.delivery_state || null,
+    current_consent_request_expires_at: invitation.current_consent_request?.expires_at || null,
   };
 }
 

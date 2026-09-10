@@ -14,6 +14,10 @@ function normalizeMembership(item) {
 
 function normalizeInvitation(item) {
   const invitation = clone(item);
+  const legacyConsentMigration = invitation.legacy_consent_migration_v1 === true
+    || (!Object.hasOwn(invitation, 'consent')
+      && invitation.state === 'ACCEPTED'
+      && Boolean(invitation.accepted_at));
   const legacyState = ['RESERVED', 'CONSUMED', 'RELEASED'].includes(invitation.entitlement_state)
     ? invitation.entitlement_state
     : 'RELEASED';
@@ -32,6 +36,7 @@ function normalizeInvitation(item) {
           : legacyState;
   return {
     ...invitation,
+    legacy_consent_migration_v1: legacyConsentMigration,
     paired_entitlement_version: 1,
     bos_entitlement_state: bosState,
     ba_entitlement_state: baState,
@@ -113,10 +118,22 @@ export class InMemoryRecruitingStore {
     await this.queue;
     return result;
   }
+
+  async transactionWithExternalStringGuards(operation, { assertCurrent } = {}) {
+    if (typeof assertCurrent !== 'function') {
+      throw new Error('RECRUITING_V1_EXTERNAL_GUARD_ASSERTION_REQUIRED');
+    }
+    return this.transaction(async (state) => {
+      const value = await operation(state);
+      await assertCurrent();
+      return value;
+    });
+  }
 }
 
 export const RECRUITING_STORE_CONTRACT = Object.freeze({
   read: 'returns an immutable snapshot',
   transaction: 'serializes mutation and commits the whole snapshot atomically',
+  transactionWithExternalStringGuards: 'commits only while exact external Redis strings still match',
   canonical_bos_ba_storage: false,
 });

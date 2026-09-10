@@ -81,4 +81,33 @@ export class RedisRecruitingStore {
       await release(this.redis, this.keys.lock, owner);
     }
   }
+
+  async transactionWithExternalStringGuards(operation, { guards } = {}) {
+    if (!Array.isArray(guards) || guards.length < 1
+        || guards.some((guard) => !guard?.key || typeof guard.expected !== 'string')) {
+      throw new Error('RECRUITING_V1_EXTERNAL_GUARD_INVALID');
+    }
+    const owner = await acquire(this.redis, this.keys.lock);
+    try {
+      const state = await this.read();
+      const value = await operation(state);
+      const serialized = JSON.stringify(state);
+      if (Buffer.byteLength(serialized) > 6 * 1024 * 1024) throw new Error('RECRUITING_V1_DURABLE_STATE_TOO_LARGE');
+      const committed = await this.redis.eval(
+        "if redis.call('GET',KEYS[1]) ~= ARGV[1] then return 0 end for i=3,#KEYS do if redis.call('GET',KEYS[i]) ~= ARGV[i] then return -1 end end redis.call('SET',KEYS[2],ARGV[2]); return 1",
+        2 + guards.length,
+        this.keys.lock,
+        this.keys.state,
+        ...guards.map((guard) => guard.key),
+        owner,
+        serialized,
+        ...guards.map((guard) => guard.expected),
+      );
+      if (committed === -1) throw new Error('RECRUITING_CANONICAL_BA_SOURCE_GUARD_CHANGED');
+      if (committed !== 1) throw new Error('RECRUITING_V1_STATE_LOCK_LOST');
+      return value;
+    } finally {
+      await release(this.redis, this.keys.lock, owner);
+    }
+  }
 }

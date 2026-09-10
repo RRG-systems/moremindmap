@@ -14,10 +14,16 @@ const MEMBERSHIP_B = {
   manager_profile_id: 'mm-20990101-manag002', manager_name: 'Synthetic Manager B',
   manager_email: 'manager.b@example.test', enterprise_name: 'Synthetic Enterprise B', status: 'ACTIVE', synthetic_only: true,
 };
+const MEMBERSHIP_ADMIN = {
+  membership_id: 'membership_admin', manager_subject_id: 'manager_admin', enterprise_id: 'enterprise_admin',
+  manager_profile_id: 'mm-20990101-admin001', manager_name: 'Synthetic Recruiting Admin',
+  manager_email: 'admin@example.test', enterprise_name: 'Synthetic Admin Enterprise', status: 'ACTIVE', synthetic_only: true,
+  admin_roles: ['RECRUITING_ADMIN'], recruiting_governance: { all_enterprises: true, enterprise_ids: [] },
+};
 
 function harness() {
   let now = new Date('2026-08-05T12:00:00.000Z');
-  const store = new InMemoryRecruitingStore(createEmptyRecruitingState([MEMBERSHIP_A, MEMBERSHIP_B]));
+  const store = new InMemoryRecruitingStore(createEmptyRecruitingState([MEMBERSHIP_A, MEMBERSHIP_B, MEMBERSHIP_ADMIN]));
   const service = new RecruitingV1Service({ store, now: () => new Date(now), transport: createSyntheticNotificationTransport() });
   return { service, store, advance(ms) { now = new Date(now.getTime() + ms); }, setNow(value) { now = new Date(value); } };
 }
@@ -126,6 +132,111 @@ test('manager sessions rotate, CSRF proofs are one-time, and scope blocks anothe
   const sessionB = await managerSession(service, MEMBERSHIP_B.manager_profile_id);
   await assert.rejects(service.resendInvitation(sessionB, created.invitation.invitation_id), /RECRUITING_INVITATION_SCOPE_DENIED/);
   await assert.rejects(service.candidateContext(sessionB, created.invitation.candidate_id), /RECRUITING_CANDIDATE_SCOPE_DENIED/);
+});
+
+test('candidate preparation authority is exact for the owning manager, denies admin crossover, and fails after revocation', async () => {
+  const { service, store } = harness();
+  const ownerToken = await managerSession(service, MEMBERSHIP_A.manager_profile_id);
+  const created = await invite(service, ownerToken, 1);
+  await service.acceptInvitation(created.invitation_token, { accepted: true, version: 'recruiting_v1_consent_2026_08' });
+
+  const owner = await service.inspectCandidatePreparationAuthority(ownerToken, created.invitation.candidate_id);
+  assert.equal(owner.mode, 'recruiting_manager_candidate_preparation');
+  assert.equal(owner.actor_role, 'OWNING_MANAGER');
+  assert.equal(owner.relationship_ref, created.invitation.invitation_id);
+  assert.equal(owner.actor_membership_id, MEMBERSHIP_A.membership_id);
+  assert.equal(owner.actor_enterprise_id, MEMBERSHIP_A.enterprise_id);
+  assert.equal(owner.actor_manager_subject_id, MEMBERSHIP_A.manager_subject_id);
+  assert.match(owner.actor_session_digest, /^[a-f0-9]{64}$/u);
+
+  const otherToken = await managerSession(service, MEMBERSHIP_B.manager_profile_id);
+  await assert.rejects(
+    service.inspectCandidatePreparationAuthority(otherToken, created.invitation.candidate_id),
+    /RECRUITING_CANDIDATE_SCOPE_DENIED/u,
+  );
+  const adminToken = await managerSession(service, MEMBERSHIP_ADMIN.manager_profile_id);
+  await assert.rejects(
+    service.inspectCandidatePreparationAuthority(adminToken, created.invitation.candidate_id),
+    /RECRUITING_CANDIDATE_SCOPE_DENIED/u,
+  );
+
+  await store.transaction((state) => {
+    delete state.invitations[created.invitation.invitation_id].consent;
+    return true;
+  });
+  await assert.rejects(
+    service.inspectCandidatePreparationAuthority(ownerToken, created.invitation.candidate_id),
+    /RECRUITING_CONSULTING_ACCEPTED_CONSENT_REQUIRED/u,
+  );
+  await store.transaction((state) => {
+    state.invitations[created.invitation.invitation_id].consent = {
+      version: 'recruiting_v1_consent_2026_08',
+      accepted_at: '2026-08-05T12:00:00.000Z',
+      purpose: 'RECRUITING_INTELLIGENCE',
+    };
+    return true;
+  });
+
+  await store.transaction((state) => {
+    const invitation = state.invitations[created.invitation.invitation_id];
+    invitation.state = 'REVOKED';
+    invitation.revoked_at = '2026-08-05T12:01:00.000Z';
+    return true;
+  });
+  await assert.rejects(
+    service.inspectCandidatePreparationAuthority(ownerToken, created.invitation.candidate_id),
+    /RECRUITING_CONSULTING_ACCEPTED_CONSENT_REQUIRED/u,
+  );
+});
+
+test('candidate preparation write authority fails closed after manager suspension or session revocation', async () => {
+  const suspended = harness();
+  const suspendedToken = await managerSession(suspended.service, MEMBERSHIP_A.manager_profile_id);
+  const suspendedCreated = await invite(suspended.service, suspendedToken, 1);
+  await suspended.service.acceptInvitation(suspendedCreated.invitation_token, {
+    accepted: true,
+    version: 'recruiting_v1_consent_2026_08',
+  });
+  const suspendedAuthority = await suspended.service.inspectCandidatePreparationAuthority(
+    suspendedToken,
+    suspendedCreated.invitation.candidate_id,
+  );
+  await suspended.store.transaction((state) => {
+    state.memberships[MEMBERSHIP_A.membership_id].status = 'SUSPENDED';
+    return true;
+  });
+  await assert.rejects(
+    suspended.service.projectBosInProgress(suspendedCreated.invitation.invitation_id, {
+      job_id: 'bos-job-stale-authority-001',
+      preparation_authority: suspendedAuthority,
+    }),
+    /RECRUITING_MANAGER_MEMBERSHIP_INACTIVE/u,
+  );
+
+  const revoked = harness();
+  const revokedToken = await managerSession(revoked.service, MEMBERSHIP_A.manager_profile_id);
+  const revokedCreated = await invite(revoked.service, revokedToken, 1);
+  await revoked.service.acceptInvitation(revokedCreated.invitation_token, {
+    accepted: true,
+    version: 'recruiting_v1_consent_2026_08',
+  });
+  const revokedAuthority = await revoked.service.inspectCandidatePreparationAuthority(
+    revokedToken,
+    revokedCreated.invitation.candidate_id,
+  );
+  await revoked.store.transaction((state) => {
+    delete state.manager_sessions[revokedAuthority.actor_session_digest];
+    return true;
+  });
+  await assert.rejects(
+    revoked.service.bindBosProfile(
+      revokedCreated.invitation.invitation_id,
+      'mm-20990101-stale001',
+      { verified: true },
+      { preparationAuthority: revokedAuthority },
+    ),
+    /RECRUITING_MANAGER_SESSION_REQUIRED/u,
+  );
 });
 
 test('BOS and BA readiness project only through an accepted relationship and verified vault receipt', async () => {

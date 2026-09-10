@@ -55,6 +55,30 @@ test('manager verification email carries the public route, opaque token, and exp
   assert.match(body.text, /expires 15 minutes after it was requested/u);
 });
 
+test('current-consent email uses the same private acceptance route and promises no result replacement', async () => {
+  const calls = [];
+  const transport = createResendRecruitingTransport({
+    apiKey: 'synthetic-provider-key-not-a-secret',
+    from: 'MORE Recruiting <recruiting@example.test>',
+    baseUrl: 'https://preview.example.test',
+    fetchImpl: async (url, init) => {
+      calls.push({ url, init });
+      return { ok: true, status: 200, async json() { return { id: 'email_current_consent' }; } };
+    },
+  });
+  const outcome = await transport.deliver({
+    outbox_id: 'outbox_current_consent',
+    kind: 'RECRUIT_CURRENT_CONSENT',
+    recipient: 'existing.person@example.test',
+    delivery_token: 'opaque-current-consent-token',
+  });
+  const body = JSON.parse(calls[0].init.body);
+  assert.equal(outcome.success, true);
+  assert.match(body.subject, /current consent/u);
+  assert.match(body.text, /\/recruiting\/accept\/opaque-current-consent-token/u);
+  assert.match(body.text, /completed results remain unchanged/u);
+});
+
 test('Resend transport fails closed for unsupported notification kinds and sanitizes provider failure', async () => {
   const transport = createResendRecruitingTransport({
     apiKey: 'synthetic-provider-key-not-a-secret',

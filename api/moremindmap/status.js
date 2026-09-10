@@ -6,8 +6,10 @@
  * This handles cases where background execution didn't continue after start response.
  */
 
-import { getJob, formatJobResponse, lockJob, unlockJob, isStaleLock, JOB_STATUS, JOB_STAGE } from '../engine/miniV2JobManager.js'
-import { executeNextStage } from '../engine/miniV2StagedExecutor.js'
+/* global process */
+
+import { getJob, formatJobResponse, JOB_STATUS, miniV2ExecutionAllowed } from '../engine/miniV2JobManager.js'
+import { advanceMiniV2JobOnce } from '../engine/miniV2JobAdvancer.js'
 import { redis as getRedis } from '../engine/redisClient.js'
 import {
   authorizePublicOrRecruitingProductRequest,
@@ -31,6 +33,17 @@ async function reconcileCompletedBosBindings({ job, authority, store }) {
     profileId: response.canonical_profile_id,
   })
   return response
+}
+
+function canonicalProductionRequest(req, env = process.env) {
+  // Host is the platform-routed destination. Forwarded values are not
+  // sufficient authority to open the canonical execution transition gate.
+  const host = String(req.headers?.host || '').split(',')[0].trim().toLowerCase()
+  return String(env.VERCEL_ENV || '').trim().toLowerCase() === 'production' && host === 'moremindmap.com'
+}
+
+function productionTargetRequest(env = process.env) {
+  return String(env.VERCEL_ENV || '').trim().toLowerCase() === 'production'
 }
 
 export default async function handler(req, res) {
@@ -71,13 +84,17 @@ export default async function handler(req, res) {
     }
 
     const publicStore = new RedisPublicStore(getRedis())
-    const publicAuthority = await authorizePublicOrRecruitingProductRequest({
-      req,
-      store: publicStore,
-      productKey: 'behavior_operating_system',
-      relationshipRef: job.payload?.metadata?.recruiting_relationship_ref || '',
-    })
-    await assertBosExecutionAuthority({ store: publicStore, authority: publicAuthority, jobId: job_id })
+    const authorizeJob = async (currentJob) => {
+      const authority = await authorizePublicOrRecruitingProductRequest({
+        req,
+        store: publicStore,
+        productKey: 'behavior_operating_system',
+        relationshipRef: currentJob.payload?.metadata?.recruiting_relationship_ref || '',
+      })
+      await assertBosExecutionAuthority({ store: publicStore, authority, jobId: job_id })
+      return authority
+    }
+    let publicAuthority = await authorizeJob(job)
 
     // If already complete or failed, return final result
     if (job.status === JOB_STATUS.COMPLETE || job.status === JOB_STATUS.FAILED) {
@@ -85,40 +102,24 @@ export default async function handler(req, res) {
       return res.status(response.success ? 200 : 500).json(response)
     }
 
-    // Check if job is locked by another poll
-    if (job.locked) {
-      if (isStaleLock(job)) {
-        // Stale lock, unlock and proceed
-        console.log('[MINI-V2-STATUS] Releasing stale job lock')
-        await unlockJob(job_id)
-        job = await getJob(job_id)
-      } else {
-        // Recently locked, another poll is processing
-        return res.status(200).json(formatJobResponse(job))
-      }
-    }
-
-    // Job is ready to advance - lock it
-    await lockJob(job_id)
-    job = await getJob(job_id)
-
     try {
-      // Execute next stage
-      await executeNextStage(job)
-      
-      // Unlock job
-      await unlockJob(job_id)
-      
-      // Reload job to get updated state
-      job = await getJob(job_id)
+      const canonicalProduction = canonicalProductionRequest(req)
+      const advanced = await advanceMiniV2JobOnce({
+        jobId: job_id,
+        allowLegacyDrainStart: canonicalProduction,
+        executionAllowed: miniV2ExecutionAllowed({
+          productionTarget: productionTargetRequest(),
+          canonicalProduction,
+        }),
+        beforeExecute: async (currentJob) => { publicAuthority = await authorizeJob(currentJob) },
+      })
+      job = advanced.job
       
       // Return current status
       const response = await reconcileCompletedBosBindings({ job, authority: publicAuthority, store: publicStore })
       return res.status(response.success ? 200 : 500).json(response)
-    } catch {
-      // Unlock on error
-      await unlockJob(job_id)
-      
+    } catch (error) {
+      if (/public_product_|RECRUITING_/u.test(String(error?.message || ''))) throw error
       console.error('[MINI-V2-STATUS] Stage execution failed')
       
       // Reload job (may have error state)

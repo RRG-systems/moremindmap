@@ -1,3 +1,5 @@
+/* global process */
+
 /**
  * Mini V2 Job Manager
  * Manages async report generation jobs using Redis storage via ioredis
@@ -11,6 +13,36 @@ import { BOS_INTAKE_DRAFT_TTL_SECONDS } from './bosIntakeDraftV1.js'
 // Job TTL: 24 hours (86400 seconds)
 export const BOS_JOB_TTL_SECONDS = 86400
 export const RECRUITING_BOS_JOB_TTL_SECONDS = BOS_INTAKE_DRAFT_TTL_SECONDS
+const JOB_EXECUTION_LEASE_TTL_MS = 30 * 60 * 1000
+export const JOB_EXECUTION_PROTOCOL_VERSION = 2
+export const LEGACY_JOB_EXECUTION_DRAIN_MS = 800 * 1000
+export const MINI_V2_EXECUTION_ACTIVATION_ENV = 'MINI_V2_EXECUTION_ACTIVATION_ID'
+export const MINI_V2_EXECUTION_DISABLED_ENV = 'MINI_V2_EXECUTION_DISABLED'
+export const LEGACY_JOB_EXECUTION_DRAIN_KEY = 'mini-v2:execution-protocol:v2:legacy-drain-started-at-ms'
+
+export function resolveMiniV2ExecutionActivationId(env = process.env) {
+  const configured = String(env?.[MINI_V2_EXECUTION_ACTIVATION_ENV] || '').trim()
+  if (configured) return configured
+  if (String(env?.VERCEL_ENV || '').trim().toLowerCase() === 'production') {
+    throw new Error('BOS_JOB_EXECUTION_ACTIVATION_ID_REQUIRED')
+  }
+  return String(env?.VERCEL_URL || '').trim() || 'local-development'
+}
+
+export function miniV2ExecutionActivationSha256(activationId) {
+  const normalized = String(activationId || '').trim()
+  if (!normalized) throw new Error('BOS_JOB_EXECUTION_ACTIVATION_ID_REQUIRED')
+  return createHash('sha256').update(normalized).digest('hex')
+}
+
+export function miniV2ExecutionAllowed({
+  env = process.env,
+  productionTarget = false,
+  canonicalProduction = false,
+} = {}) {
+  if (String(env?.[MINI_V2_EXECUTION_DISABLED_ENV] || '').trim().toLowerCase() === 'true') return false
+  return !productionTarget || canonicalProduction
+}
 
 export function resolveBosJobTtlSeconds(job) {
   const metadata = job?.payload?.metadata
@@ -52,7 +84,10 @@ function payloadDigest(payload) {
   return createHash('sha256').update(JSON.stringify(payload)).digest('hex')
 }
 
-export async function createJob(payload, { jobId: providedJobId = null } = {}) {
+export async function createJob(payload, {
+  jobId: providedJobId = null,
+  activationId = resolveMiniV2ExecutionActivationId(),
+} = {}) {
   const jobId = providedJobId || uuidv4()
   const now = new Date().toISOString()
   const intakePayloadSha256 = payloadDigest(payload)
@@ -66,6 +101,8 @@ export async function createJob(payload, { jobId: providedJobId = null } = {}) {
     updated_at: now,
     locked: false,
     locked_at: null,
+    execution_lock_protocol_version: JOB_EXECUTION_PROTOCOL_VERSION,
+    execution_lock_activation_sha256: miniV2ExecutionActivationSha256(activationId),
     payload,
     intake_payload_sha256: intakePayloadSha256,
     profileInput: null,
@@ -207,6 +244,118 @@ export async function unlockJob(jobId) {
     locked: false,
     locked_at: null
   })
+}
+
+/**
+ * Acquire a Redis-owned execution lease without rewriting the job document.
+ * SET NX makes concurrent status requests mutually exclusive; the TTL bounds
+ * recovery when a serverless invocation disappears mid-stage.
+ */
+export async function acquireJobExecutionLease(jobId, {
+  redis = getRedis(),
+  owner = uuidv4(),
+  ttlMs = JOB_EXECUTION_LEASE_TTL_MS,
+} = {}) {
+  const normalizedJobId = String(jobId || '').trim()
+  if (!normalizedJobId) throw new Error('BOS_JOB_EXECUTION_LEASE_JOB_ID_REQUIRED')
+  if (!owner || !Number.isInteger(ttlMs) || ttlMs < 1000) {
+    throw new Error('BOS_JOB_EXECUTION_LEASE_INVALID')
+  }
+  const acquired = await redis.set(`job-execution-lease:${normalizedJobId}`, owner, 'PX', ttlMs, 'NX')
+  return acquired === 'OK' ? owner : null
+}
+
+/** Release only the lease owned by this invocation. */
+export async function releaseJobExecutionLease(jobId, owner, { redis = getRedis() } = {}) {
+  const normalizedJobId = String(jobId || '').trim()
+  if (!normalizedJobId || !owner) return false
+  const released = await redis.eval(
+    "if redis.call('GET',KEYS[1]) == ARGV[1] then return redis.call('DEL',KEYS[1]) else return 0 end",
+    1,
+    `job-execution-lease:${normalizedJobId}`,
+    owner,
+  )
+  return released === 1
+}
+
+/**
+ * Establish an activation-scoped, Redis-server-timed drain barrier. Every
+ * canonical v1-to-v2 activation waits the full outgoing function window before
+ * any nonterminal job advances, including jobs whose forward-compatible v2
+ * marker survived a rollback through v1.
+ */
+export async function ensureLegacyJobExecutionDrain({
+  redis = getRedis(),
+  drainMs = LEGACY_JOB_EXECUTION_DRAIN_MS,
+  activationId = resolveMiniV2ExecutionActivationId(),
+  key = null,
+} = {}) {
+  if (!Number.isInteger(drainMs) || drainMs < 1000) {
+    throw new Error('BOS_LEGACY_JOB_EXECUTION_DRAIN_INVALID')
+  }
+  const drainKey = key || `${LEGACY_JOB_EXECUTION_DRAIN_KEY}:${miniV2ExecutionActivationSha256(activationId)}`
+  const result = await redis.eval(
+    "local t=redis.call('TIME'); local now=(tonumber(t[1])*1000)+math.floor(tonumber(t[2])/1000); local started=redis.call('GET',KEYS[1]); if not started then started=tostring(now); redis.call('SET',KEYS[1],started,'NX'); started=redis.call('GET',KEYS[1]); end; return {started,tostring(now)}",
+    1,
+    drainKey,
+  )
+  const startedAtMs = Number(result?.[0])
+  const serverNowMs = Number(result?.[1])
+  if (!Number.isFinite(startedAtMs) || !Number.isFinite(serverNowMs) || serverNowMs < startedAtMs) {
+    throw new Error('BOS_LEGACY_JOB_EXECUTION_DRAIN_RECEIPT_INVALID')
+  }
+  const ageMs = serverNowMs - startedAtMs
+  return Object.freeze({
+    ready: ageMs >= drainMs,
+    age_ms: ageMs,
+    retry_after_ms: Math.max(0, drainMs - ageMs),
+  })
+}
+
+/**
+ * Atomically publish the legacy job-document lock after the owner lease is
+ * held. expectedLockedAt is a compare-and-set receipt from the immediately
+ * preceding job read, so an intervening legacy writer cannot be overwritten.
+ */
+export async function claimLegacyJobExecutionLock(jobId, owner, {
+  redis = getRedis(),
+  expectedLockedAt = null,
+  now = new Date(),
+  activationId = resolveMiniV2ExecutionActivationId(),
+} = {}) {
+  const normalizedJobId = String(jobId || '').trim()
+  if (!normalizedJobId || !owner) throw new Error('BOS_JOB_LEGACY_LOCK_INVALID')
+  const acquiredAt = now.toISOString()
+  const legacyVisibleUntil = new Date(now.getTime() + JOB_EXECUTION_LEASE_TTL_MS).toISOString()
+  const activationSha256 = miniV2ExecutionActivationSha256(activationId)
+  const result = await redis.eval(
+    "if redis.call('GET',KEYS[2]) ~= ARGV[1] then return 0 end; local raw=redis.call('GET',KEYS[1]); if not raw then return -1 end; local job=cjson.decode(raw); local expected=ARGV[2]; if job.locked == true then if expected == '' or tostring(job.locked_at or '') ~= expected then return 0 end else if expected ~= '' then return 0 end end; job.locked=true; job.locked_at=ARGV[3]; job.execution_lock_acquired_at=ARGV[4]; job.execution_lock_owner=ARGV[1]; job.execution_lock_protocol_version=tonumber(ARGV[5]); job.execution_lock_activation_sha256=ARGV[6]; job.updated_at=ARGV[4]; redis.call('SET',KEYS[1],cjson.encode(job),'KEEPTTL'); return 1",
+    2,
+    `job:${normalizedJobId}`,
+    `job-execution-lease:${normalizedJobId}`,
+    owner,
+    expectedLockedAt || '',
+    legacyVisibleUntil,
+    acquiredAt,
+    String(JOB_EXECUTION_PROTOCOL_VERSION),
+    activationSha256,
+  )
+  return result === 1
+}
+
+/** Clear the legacy bridge only while the same invocation still owns it. */
+export async function releaseLegacyJobExecutionLock(jobId, owner, { redis = getRedis(), now = new Date() } = {}) {
+  const normalizedJobId = String(jobId || '').trim()
+  if (!normalizedJobId || !owner) return false
+  const result = await redis.eval(
+    "if redis.call('GET',KEYS[2]) ~= ARGV[1] then return 0 end; local raw=redis.call('GET',KEYS[1]); if not raw then return 0 end; local job=cjson.decode(raw); if job.execution_lock_owner ~= ARGV[1] then return 0 end; job.locked=false; job.locked_at=cjson.null; job.execution_lock_acquired_at=cjson.null; job.execution_lock_owner=cjson.null; job.updated_at=ARGV[2]; redis.call('SET',KEYS[1],cjson.encode(job),'KEEPTTL'); return 1",
+    2,
+    `job:${normalizedJobId}`,
+    `job-execution-lease:${normalizedJobId}`,
+    owner,
+    now.toISOString(),
+  )
+  return result === 1
 }
 
 /**

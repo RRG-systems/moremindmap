@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { MANAGER_DESTINATIONS, allowanceLabel, allowanceResetLabel, consultingCandidatePath, consultingCandidates, invitationAllowance, invitationErrorMessage, mayResendInvitation, presentRecruitingNotification, recruitProgressLabel, uniqueCandidateNotifications } from '../src/lib/recruitingV1/workspacePresentation.js';
+import { MANAGER_DESTINATIONS, allowanceLabel, allowanceResetLabel, consultingCandidatePath, consultingCandidates, consultingPreparationCandidates, invitationAllowance, invitationErrorMessage, mayResendInvitation, presentRecruitingNotification, reconcileConsultingPreparationReceipts, recruitProgressLabel, uniqueCandidateNotifications } from '../src/lib/recruitingV1/workspacePresentation.js';
 import { resolveRecruitingWorkspaceRoute } from '../src/lib/recruitingV1/landing.js';
 import { acceptedPlanPointerKey, acceptedPlanReceiptMatches, acceptedPlanStorageKey, preferredDemoRecoverySubject } from '../src/lib/recruitingGuV1/acceptedPlanStorage.js';
 
@@ -23,20 +23,42 @@ test('legacy manager routes and old workspace query cannot expose a third destin
 });
 
 test('only server-confirmed accepted and both-ready people can open Consulting', () => {
-  const ready = { candidate_id: 'ready', state: 'ACCEPTED', consulting_ready: true, ba_readiness: 'BA_INTELLIGENCE_READY' };
+  const accepted_at = '2026-09-10T00:00:00.000Z';
+  const ready = { candidate_id: 'ready', state: 'ACCEPTED', accepted_at, consulting_ready: true, ba_readiness: 'BA_INTELLIGENCE_READY' };
   const people = [
     ready,
-    { candidate_id: 'bos', state: 'ACCEPTED', bos_profile_id: 'mm-1', ba_readiness: 'BA_NOT_STARTED' },
-    { candidate_id: 'running', state: 'ACCEPTED', ba_readiness: 'BA_IN_PROGRESS' },
-    { candidate_id: 'mismatch', state: 'ACCEPTED', ba_readiness: 'BA_INTELLIGENCE_READY', consulting_ready: false, progress_label: 'Ready' },
+    { candidate_id: 'bos', state: 'ACCEPTED', accepted_at, bos_profile_id: 'mm-1', ba_readiness: 'BA_NOT_STARTED', consulting_preparation_eligible: true },
+    { candidate_id: 'running', state: 'ACCEPTED', accepted_at, ba_readiness: 'BA_IN_PROGRESS', consulting_preparation_eligible: true },
+    { candidate_id: 'mismatch', state: 'ACCEPTED', accepted_at, ba_readiness: 'BA_INTELLIGENCE_READY', consulting_ready: false, progress_label: 'Ready', consulting_preparation_eligible: true },
     { ...ready, candidate_id: 'revoked', state: 'REVOKED' },
   ];
   assert.deepEqual(consultingCandidates(people), [ready]);
+  assert.deepEqual(consultingPreparationCandidates(people), people.slice(1, 4));
+  assert.deepEqual(consultingPreparationCandidates([{ candidate_id: 'unaccepted', state: 'ACCEPTED', consulting_ready: false }]), []);
+  assert.deepEqual(consultingPreparationCandidates([{ candidate_id: 'legacy', state: 'ACCEPTED', accepted_at, consulting_ready: false, consulting_preparation_eligible: false }]), []);
   assert.equal(recruitProgressLabel(people[1]), 'Taking BA');
   assert.equal(recruitProgressLabel(people[2]), 'Taking BA');
   assert.equal(recruitProgressLabel(people[3]), 'Results need verification');
   assert.equal(recruitProgressLabel(people[4]), 'Revoked');
   assert.equal(people.length, 5, 'presentation never removes completed or blocked people from the invitation list');
+});
+
+test('readiness refresh clears only stale intake blockers so saved work can resume', () => {
+  const receipts = {
+    bos: { state: 'BOS_INTAKE_REQUIRED' },
+    ba: { state: 'BA_INTAKE_REQUIRED' },
+    pending: { state: 'NEW_BA_PREPARING' },
+  };
+  assert.deepEqual(reconcileConsultingPreparationReceipts(receipts, [
+    { candidate_id: 'bos', consulting_ready: false, progress_state: 'BOS_IN_PROGRESS', readiness_state: 'BOS_IN_PROGRESS' },
+    { candidate_id: 'ba', consulting_ready: false, progress_state: 'BA_IN_PROGRESS', ba_readiness: 'BA_INTAKE_SAVED', ba_assessment_id: 'ba-saved' },
+    { candidate_id: 'pending', consulting_ready: false, progress_state: 'BA_IN_PROGRESS', ba_readiness: 'BA_IN_PROGRESS' },
+  ]), { pending: receipts.pending });
+  assert.deepEqual(reconcileConsultingPreparationReceipts(receipts, [
+    { candidate_id: 'bos', consulting_ready: false, progress_state: 'INVITED', readiness_state: 'CONSENTED' },
+    { candidate_id: 'ba', consulting_ready: false, progress_state: 'BOS_COMPLETE', ba_readiness: 'BA_NOT_STARTED' },
+    { candidate_id: 'pending', consulting_ready: true, progress_state: 'BOTH_COMPLETE', ba_readiness: 'BA_INTELLIGENCE_READY' },
+  ]), { bos: receipts.bos, ba: receipts.ba });
 });
 
 test('combined allowance uses server truth and renders its actual UTC reset', () => {

@@ -174,6 +174,16 @@
 .candidate-card footer { grid-column: 1 / -1; display: flex; justify-content: space-between; align-self: end; padding-top: 13px; border-top: 1px solid #edf1f3; }
 .candidate-card footer b { color: var(--ri-green); font-size: 9px; }
 .status-pill { display: inline-flex; align-items: center; width: fit-content; padding: 5px 8px; border-radius: 999px; color: #47616c; background: #eef2f4; font-size: 7px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.consulting-preparation { margin-bottom: 26px; }
+.preparation-announcement { margin: 14px auto 0; width: min(1180px, calc(100% - 36px)); padding: 10px 14px; border: 1px solid rgba(35,147,108,.24); border-radius: 7px; color: #176d56; background: #eaf7f2; font-size: 10px; font-weight: 700; }
+.preparation-announcement:empty { display: none; }
+.preparation-card { cursor: default; }
+.preparation-card:hover { transform: none; }
+.preparation-status { grid-column: 1 / -1; min-height: 58px; padding: 12px 14px; border: 1px solid rgba(176,109,248,.24); border-radius: 7px; background: rgba(176,109,248,.055); }
+.preparation-status p { color: inherit; font-size: 9px; line-height: 1.55; }
+.preparation-status small { display: block; margin-top: 7px; line-height: 1.45; text-transform: none; }
+.preparation-card footer button { margin-left: 18px; border: 0; background: transparent; cursor: pointer; font-size: 9px; font-weight: 800; }
+.preparation-card footer button:disabled { cursor: wait; opacity: .55; }
 .status-ba_intelligence_ready,
 .status-bos_ready { color: #176d56; background: #e2f3ed; }
 .truth-boundary { display: grid; grid-template-columns: 38px 1fr repeat(4, auto); gap: 13px; align-items: center; margin-top: 20px; padding: 18px 22px; border: 1px solid #d5d1e5; border-radius: 10px; background: #f6f4fa; }

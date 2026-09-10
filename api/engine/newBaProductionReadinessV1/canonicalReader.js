@@ -198,13 +198,20 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
 }
 
 async function readBosAuthority(redis, bosNamespace, profileId) {
-  const pointer = await redis.get(`${bosNamespace}:latest-compatible:${profileId}`);
+  const pointerKey = `${bosNamespace}:latest-compatible:${profileId}`;
+  const pointer = await redis.get(pointerKey);
   if (!pointer) {
     const bundled = resolveBundledBosAuthority(profileId);
-    if (bundled) return bundled;
+    if (bundled) {
+      return Object.freeze({
+        source: bundled,
+        sourceGuards: Object.freeze([Object.freeze({ key: pointerKey, expected: null })]),
+      });
+    }
     throw new Error('new_ba_compatible_bos_authority_missing');
   }
-  const raw = await redis.get(`${bosNamespace}:artifact:${profileId}:${pointer}`);
+  const artifactKey = `${bosNamespace}:artifact:${profileId}:${pointer}`;
+  const raw = await redis.get(artifactKey);
   if (!raw) throw new Error('new_ba_bos_authority_pointer_target_missing');
   const envelope = JSON.parse(raw);
   if (envelope.profile_id !== profileId || envelope.realization_id !== pointer) throw new Error('new_ba_bos_authority_profile_isolation_failure');
@@ -218,42 +225,88 @@ async function readBosAuthority(redis, bosNamespace, profileId) {
     realizationVersion: envelope.realization_identity?.version,
   });
   return Object.freeze({
-    compatible: true,
-    realization_id: pointer,
-    sha256: envelope.artifact_sha256,
-    version: envelope.realization_identity?.version,
-    profile_id: profileId,
-    fusion_authority: fusionAuthority,
-    fusion_contract_sha256: fusionAuthority.contract_sha256,
-    evidence_boundary_sha256: fusionAuthority.evidence_boundary_sha256,
-    identity_context: envelope.artifact?.identity_context || null,
+    source: Object.freeze({
+      compatible: true,
+      realization_id: pointer,
+      sha256: envelope.artifact_sha256,
+      version: envelope.realization_identity?.version,
+      profile_id: profileId,
+      fusion_authority: fusionAuthority,
+      fusion_contract_sha256: fusionAuthority.contract_sha256,
+      evidence_boundary_sha256: fusionAuthority.evidence_boundary_sha256,
+      identity_context: envelope.artifact?.identity_context || null,
+    }),
+    sourceGuards: Object.freeze([
+      Object.freeze({ key: pointerKey, expected: pointer }),
+      Object.freeze({ key: artifactKey, expected: raw }),
+    ]),
   });
 }
 
 export function createReadOnlyBaAuthorityReader({ redis, bosNamespace, fixtureReader = null } = {}) {
   if (typeof redis?.get !== 'function') throw new Error('new_ba_canonical_reader_redis_required');
-  return Object.freeze({
-    async read(profileId) {
-      const profile = normalizeProfileId(profileId);
-      if (typeof fixtureReader === 'function') {
-        const fixture = await fixtureReader(profile);
-        if (fixture) return fixture;
+  async function readWithSourceGuards(profileId, { expectedAssessmentId = null, expectedRelationshipRef = null } = {}) {
+    const profile = normalizeProfileId(profileId);
+    const expectedAssessment = expectedAssessmentId === null || expectedAssessmentId === undefined
+      ? null
+      : normalizeAssessmentId(expectedAssessmentId);
+    const expectedRelationship = expectedRelationshipRef === null || expectedRelationshipRef === undefined
+      ? null
+      : String(expectedRelationshipRef).trim();
+    if (expectedRelationshipRef !== null && expectedRelationshipRef !== undefined && !expectedRelationship) {
+      throw new Error('new_ba_manager_preparation_relationship_authority_mismatch');
+    }
+    if (typeof fixtureReader === 'function') {
+      const fixture = await fixtureReader(profile);
+      if (fixture) {
+        if (expectedAssessment && normalizeAssessmentId(fixture.assessment_id) !== expectedAssessment) {
+          throw new Error('new_ba_manager_preparation_assessment_authority_mismatch');
+        }
+        const fixtureRelationship = String(fixture.recruiting_relationship_ref || '').trim();
+        if (expectedRelationship && fixtureRelationship !== expectedRelationship) {
+          throw new Error('new_ba_manager_preparation_relationship_authority_mismatch');
+        }
+        return Object.freeze({ source: fixture, sourceGuards: Object.freeze([]) });
       }
-      const assessmentId = await redis.get(businessAssessmentByProfileKey(profile));
-      if (!assessmentId) throw new Error('new_ba_business_assessment_not_found');
-      const raw = await redis.get(businessAssessmentKey(normalizeAssessmentId(assessmentId)));
-      if (!raw) throw new Error('new_ba_business_assessment_pointer_target_missing');
-      const businessEvidence = normalizeGovernedAssessmentRecord(JSON.parse(raw), profile);
-      const bosAuthority = await readBosAuthority(redis, bosNamespace, profile);
-      return Object.freeze({
+    }
+    const assessmentPointerKey = businessAssessmentByProfileKey(profile);
+    const pointer = await redis.get(assessmentPointerKey);
+    if (!pointer) throw new Error('new_ba_business_assessment_not_found');
+    const assessmentId = normalizeAssessmentId(pointer);
+    if (expectedAssessment && assessmentId !== expectedAssessment) {
+      throw new Error('new_ba_manager_preparation_assessment_authority_mismatch');
+    }
+    const assessmentRecordKey = businessAssessmentKey(assessmentId);
+    const raw = await redis.get(assessmentRecordKey);
+    if (!raw) throw new Error('new_ba_business_assessment_pointer_target_missing');
+    const record = JSON.parse(raw);
+    const relationshipRef = String(record?.metadata?.recruiting_relationship_ref || '').trim();
+    if (expectedRelationship && relationshipRef !== expectedRelationship) {
+      throw new Error('new_ba_manager_preparation_relationship_authority_mismatch');
+    }
+    const businessEvidence = normalizeGovernedAssessmentRecord(record, profile);
+    const bosRead = await readBosAuthority(redis, bosNamespace, profile);
+    return Object.freeze({
+      source: Object.freeze({
         profile_id: profile,
         assessment_id: businessEvidence.assessment_id,
         source_kind: 'SAVED_BUSINESS_ASSESSMENT',
         business_evidence: businessEvidence,
-        bos_authority: bosAuthority,
-        identity_context: bosAuthority.identity_context || null,
-      });
+        bos_authority: bosRead.source,
+        identity_context: bosRead.source.identity_context || null,
+      }),
+      sourceGuards: Object.freeze([
+        Object.freeze({ key: assessmentPointerKey, expected: pointer }),
+        Object.freeze({ key: assessmentRecordKey, expected: raw }),
+        ...bosRead.sourceGuards,
+      ]),
+    });
+  }
+  return Object.freeze({
+    async read(profileId, expectedAuthority) {
+      return (await readWithSourceGuards(profileId, expectedAuthority)).source;
     },
+    readWithSourceGuards,
   });
 }
 

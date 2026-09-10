@@ -10,6 +10,10 @@ import { authorizeNewBosOperatorInspection } from '../api/engine/newBosProductio
 import { inspectNewBosResumableRuntimeState } from '../api/engine/newBosProductionReadinessV1/runtimeStateInspector.js';
 import { realizePersonalityDnaArtifactBounded } from '../api/engine/newBosProductionReadinessV1/boundedSurfaceRealization.js';
 import {
+  authorityGuardedCheckpointStore,
+  authorityGuardedProviderClient,
+} from '../api/engine/newBosProductionReadinessV1/productionGenerator.js';
+import {
   buildNewBosSemanticUnitPlan,
   runNewBosResumableSemanticGeneration,
 } from '../api/engine/newBosProductionReadinessV1/resumableGenerationOrchestrator.js';
@@ -48,6 +52,11 @@ function fakeRedis() {
     async eval(_script, keyCount, ...args) {
       const keys = args.slice(0, keyCount);
       const argv = args.slice(keyCount);
+      if (keyCount === 1) {
+        if (values.get(keys[0]) !== argv[0]) return 0;
+        values.set(keys[0], argv[1]);
+        return 1;
+      }
       if (keyCount === 3) {
         if (values.get(keys[0]) !== argv[0]) return 'STAGE3_CHANGED';
         const archive = values.get(keys[1]);
@@ -434,6 +443,55 @@ function semanticRejectionHarness({ profileId, sourceHash, namespace }) {
     }),
   };
 }
+
+test('semantic authority loss after intent but before provider create records a resumable zero-submission abort', async () => {
+  const harness = semanticRejectionHarness({
+    profileId: 'MM-SYNTHETIC-AUTHORITY-ABORT',
+    sourceHash: '9'.repeat(64),
+    namespace: 'nonprod:new-bos:semantic-authority-abort-test',
+  });
+  let authorityChecks = 0;
+  let providerCalls = 0;
+  const assertCurrentAuthority = async () => {
+    authorityChecks += 1;
+    if (authorityChecks > 1) throw new Error('RECRUITING_CONSULTING_PREPARATION_AUTHORITY_CHANGED');
+  };
+  const checkpointStore = authorityGuardedCheckpointStore(harness.store, assertCurrentAuthority);
+  const client = authorityGuardedProviderClient({
+    responses: {
+      async create() { providerCalls += 1; throw new Error('provider must not be called'); },
+      async retrieve() { providerCalls += 1; throw new Error('provider must not be called'); },
+    },
+  }, assertCurrentAuthority);
+
+  await assert.rejects(
+    runNewBosResumableSemanticGeneration({
+      ...harness,
+      model: 'gpt-5.6-sol',
+      client,
+      checkpointStore,
+    }),
+    /RECRUITING_CONSULTING_PREPARATION_AUTHORITY_CHANGED/u,
+  );
+  assert.equal(providerCalls, 0);
+  const aborted = await harness.store.inspect({
+    campaignSha256: harness.campaign.sha256,
+    unitId: 'semantic:causal_foundation',
+  });
+  assert.equal(aborted.record.state, 'AUTHORITY_ABORTED_BEFORE_SUBMISSION');
+  assert.equal(aborted.record.observation, null);
+  assert.equal(aborted.record.provider_submission_count, 0);
+
+  const resumed = await harness.store.prepare({
+    campaignSha256: harness.campaign.sha256,
+    unitId: aborted.record.unit_id,
+    unitIdentitySha256: aborted.record.unit_identity_sha256,
+    requestSha256: aborted.record.request_sha256,
+  });
+  assert.equal(resumed.disposition, 'START_INITIAL');
+  assert.equal(resumed.record.attempt, 1);
+  assert.equal(resumed.record.prior_authority_abort_sha256, sha256Stable(aborted.record));
+});
 
 test('fresh vector-free stage-3 rejection persists the typed validator receipt and can never be accepted', async () => {
   const harness = semanticRejectionHarness({

@@ -39,11 +39,14 @@ export function createNewBosModernizationService({
   if (typeof realizationStore?.inspect !== 'function') throw new Error('new_bos_modernization_store_required');
   if (typeof singleFlight?.run !== 'function') throw new Error('new_bos_modernization_single_flight_required');
 
-  async function desiredState(profileId) {
-    const canonicalEnvelope = await canonicalReader.read(profileId);
+  async function desiredState(profileId, { recordDiagnostics = true } = {}) {
+    const canonicalRead = typeof canonicalReader.readWithSourceGuards === 'function'
+      ? await canonicalReader.readWithSourceGuards(profileId)
+      : { source: await canonicalReader.read(profileId), sourceGuards: [] };
+    const canonicalEnvelope = canonicalRead.source;
     const rawEvidence = adaptCanonicalProfileToNewBosRawEvidence({ envelope: canonicalEnvelope, expectedProfileId: profileId });
     const compatibility = classifyNewBosCompatibility(rawEvidence);
-    diagnostics.record('compatibility_classified', { profile_id: profileId, compatibility_class: compatibility.class });
+    if (recordDiagnostics) diagnostics.record('compatibility_classified', { profile_id: profileId, compatibility_class: compatibility.class });
     if (!compatibility.automatic_rebuild) {
       const error = new Error(`new_bos_modernization_requires_evidence_or_review:${compatibility.class}`);
       error.compatibility = compatibility;
@@ -56,7 +59,7 @@ export function createNewBosModernizationService({
       providerModel: config.providerModel,
       compatibilityClass: compatibility.class,
     });
-    return { rawEvidence, compatibility, identity };
+    return { rawEvidence, compatibility, identity, sourceGuards: canonicalRead.sourceGuards || [] };
   }
 
   async function serveEnvelope(envelope, path) {
@@ -102,12 +105,14 @@ export function createNewBosModernizationService({
     });
   }
 
-  async function repairExactPointer(profileId, inspection) {
+  async function repairExactPointer(profileId, inspection, desired, assertCurrentAuthority = async () => {}) {
     if (inspection.state !== 'publishable_orphan') return null;
+    await assertCurrentAuthority();
     await realizationStore.advancePointer({
       profileId,
       expectedCurrentId: inspection.pointer,
       nextRealizationId: inspection.current.realization_id,
+      sourceGuards: desired.sourceGuards,
     });
     diagnostics.record('pointer_self_healed', {
       profile_id: profileId,
@@ -333,10 +338,20 @@ export function createNewBosModernizationService({
         diagnostics: diagnostics.snapshot(),
       });
     },
-    async retrieve({ profileId, suppliedToken = '', readOnly = false }) {
+    async retrieve({ profileId, suppliedToken = '', readOnly = false, assertCurrentAuthority = null }) {
       const normalized = authorizeNewBosRead({ config, profileId, suppliedToken });
+      if (assertCurrentAuthority !== null && typeof assertCurrentAuthority !== 'function') {
+        throw new Error('new_bos_manager_preparation_authority_assertion_invalid');
+      }
       diagnostics.record('request_authorized', { profile_id: normalized, feature_state: config.customerActive ? 'customer_active' : 'canary' });
       const desired = await desiredState(normalized);
+      const assertCurrent = async () => {
+        if (assertCurrentAuthority) await assertCurrentAuthority();
+        const currentDesired = await desiredState(normalized, { recordDiagnostics: false });
+        if (currentDesired.identity.sha256 !== desired.identity.sha256) {
+          throw new Error('new_bos_canonical_source_authority_changed');
+        }
+      };
       const initial = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
       if (initial.state === 'current') {
         diagnostics.record('current_fast_path', { profile_id: normalized, realization_id: initial.pointer, completeness_count: initial.current.complete_surface_count });
@@ -346,26 +361,29 @@ export function createNewBosModernizationService({
         diagnostics.record('provider_disabled', { profile_id: normalized, realization_state: initial.state });
         throw new Error('public_product_current_artifact_unavailable');
       }
-      const repaired = await repairExactPointer(normalized, initial);
+      const repaired = await repairExactPointer(normalized, initial, desired, assertCurrent);
       if (repaired) return repaired;
       if (!config.providerEnabled || typeof generator !== 'function') {
         diagnostics.record('provider_disabled', { profile_id: normalized, realization_state: initial.state });
         throw new Error('new_bos_modernization_provider_default_off');
       }
 
+      await assertCurrent();
       return singleFlight.run(desired.identity.sha256, async () => {
         const rechecked = await realizationStore.inspect({ profileId: normalized, desiredIdentity: desired.identity });
         if (rechecked.state === 'current') return serveEnvelope(rechecked.current, 'joined_or_rechecked_current');
-        const repairedAfterJoin = await repairExactPointer(normalized, rechecked);
+        const repairedAfterJoin = await repairExactPointer(normalized, rechecked, desired, assertCurrent);
         if (repairedAfterJoin) return repairedAfterJoin;
         diagnostics.record('rebuild_started', { profile_id: normalized, realization_id: desired.identity.realization_id, prior_state: rechecked.state });
         const startedAt = Date.now();
         try {
+          await assertCurrent();
           const generated = await generator({
             rawEvidence: desired.rawEvidence,
             providerModel: config.providerModel,
             compatibility: desired.compatibility,
             realizationIdentity: desired.identity,
+            assertCurrentAuthority: assertCurrent,
           });
           const completed = completeNewBosCandidate(generated.artifact || generated).candidate;
           const projected = attachCustomerTopProjection(completed);
@@ -377,6 +395,7 @@ export function createNewBosModernizationService({
             compatibility: desired.compatibility,
             providerAccounting: generated.provider_accounting || {},
           });
+          await assertCurrent();
           const persistence = await realizationStore.persistImmutable(envelope, {
             corruptRecovery: rechecked.state === 'corrupt_derived' ? rechecked.corruption : null,
           });
@@ -388,10 +407,12 @@ export function createNewBosModernizationService({
               corrupt_archive_sha256: persistence.corrupt_archive_sha256,
             });
           }
+          await assertCurrent();
           await realizationStore.advancePointer({
             profileId: normalized,
             expectedCurrentId: rechecked.pointer,
             nextRealizationId: envelope.realization_id,
+            sourceGuards: desired.sourceGuards,
           });
           diagnostics.record('pointer_advanced', { profile_id: normalized, realization_id: envelope.realization_id });
           diagnostics.record('rebuild_succeeded', {

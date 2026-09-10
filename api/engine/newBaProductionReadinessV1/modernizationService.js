@@ -3,7 +3,7 @@ import { classifyNewBaCompatibility } from './compatibility.js';
 import { validateCompleteNewBaRealization } from './completeness.js';
 import { createNewBaDiagnostics } from './diagnostics.js';
 import { buildLaunchSafeNewBaEnvelope } from './launchSafeRealizationStore.js';
-import { buildNewBaRealizationIdentityV3 } from './realizationIdentity.js';
+import { buildNewBaRealizationIdentityV3, sameNewBaRealizationIdentity } from './realizationIdentity.js';
 import { buildCustomerSafePresentationViewModel } from '../../../src/lib/baProgressiveDisclosureV1/customerPresentationSanitizer.js';
 import { classifyCompatiblePriorRealization } from './compatibilitySelection.js';
 import { classifyRealizationInspection } from '../realizationRecoveryV1/recoveryContract.js';
@@ -43,8 +43,12 @@ export function createNewBaModernizationService({
   if (typeof realizationStore?.inspect !== 'function') throw new Error('new_ba_service_realization_store_required');
   if (typeof singleFlight?.run !== 'function') throw new Error('new_ba_service_single_flight_required');
 
-  async function desiredState(profileId) {
-    const source = await authorityReader.read(profileId);
+  async function desiredState(profileId, expectedAuthority = null) {
+    if (typeof expectedAuthority?.assertCurrent === 'function') await expectedAuthority.assertCurrent();
+    const authorityRead = typeof authorityReader.readWithSourceGuards === 'function'
+      ? await authorityReader.readWithSourceGuards(profileId, expectedAuthority || undefined)
+      : { source: await authorityReader.read(profileId, expectedAuthority || undefined), sourceGuards: [] };
+    const source = authorityRead.source;
     if (source.profile_id !== profileId || source.business_evidence?.profile_id !== profileId || source.bos_authority?.profile_id !== profileId) throw new Error('new_ba_service_cross_profile_contamination');
     const compatibility = classifyNewBaCompatibility(source);
     diagnostics.record('compatibility_classified', { profile_id: profileId, compatibility_class: compatibility.class });
@@ -60,7 +64,15 @@ export function createNewBaModernizationService({
       providerModel: config.providerModel,
       verticalBinding: source.business_evidence.vertical_binding,
     });
-    return Object.freeze({ source, compatibility, identity });
+    return Object.freeze({ source, compatibility, identity, sourceGuards: authorityRead.sourceGuards || [] });
+  }
+
+  async function assertDesiredAuthorityCurrent(profile, desired, expectedAuthority) {
+    if (!expectedAuthority) return;
+    const current = await desiredState(profile, expectedAuthority);
+    if (current.identity.sha256 !== desired.identity.sha256) {
+      throw new Error('new_ba_manager_preparation_source_authority_mismatch');
+    }
   }
 
   function serve(envelope, path) {
@@ -103,9 +115,15 @@ export function createNewBaModernizationService({
     });
   }
 
-  async function repairExactPointer(profile, inspection) {
+  async function repairExactPointer(profile, inspection, desired, expectedAuthority) {
     if (inspection.state !== 'publishable_orphan') return null;
-    await realizationStore.advancePointer({ profileId: profile, expectedCurrentId: inspection.pointer, nextRealizationId: inspection.current.realization_id });
+    await assertDesiredAuthorityCurrent(profile, desired, expectedAuthority);
+    await realizationStore.advancePointer({
+      profileId: profile,
+      expectedCurrentId: inspection.pointer,
+      nextRealizationId: inspection.current.realization_id,
+      sourceGuards: desired.sourceGuards,
+    });
     diagnostics.record('pointer_self_healed', { profile_id: profile, realization_id: inspection.current.realization_id, prior_pointer: inspection.pointer });
     return serve(inspection.current, 'exact_realization_pointer_self_healed');
   }
@@ -144,10 +162,10 @@ export function createNewBaModernizationService({
         diagnostics: diagnostics.snapshot(),
       });
     },
-    async retrieve({ profileId, suppliedToken = '', readOnly = false }) {
+    async retrieve({ profileId, suppliedToken = '', readOnly = false, expectedAuthority = null }) {
       const profile = authorizeNewBaRead({ config, profileId, suppliedToken });
       diagnostics.record('request_authorized', { profile_id: profile, feature_state: config.customerActive ? 'customer_active' : 'private_canary' });
-      const desired = await desiredState(profile);
+      const desired = await desiredState(profile, expectedAuthority);
       const initial = await realizationStore.inspect({ profileId: profile, desiredIdentity: desired.identity });
       if (initial.state === 'current') {
         diagnostics.record('current_fast_path', { profile_id: profile, realization_id: initial.pointer });
@@ -167,7 +185,7 @@ export function createNewBaModernizationService({
         diagnostics.record('provider_disabled', { profile_id: profile, realization_state: initial.state });
         throw new Error('public_product_current_artifact_unavailable');
       }
-      const repaired = await repairExactPointer(profile, initial);
+      const repaired = await repairExactPointer(profile, initial, desired, expectedAuthority);
       if (repaired) return repaired;
       if (!config.persistenceEnabled || (typeof generator?.generate !== 'function' && typeof generator?.advance !== 'function')) {
         diagnostics.record('provider_disabled', { profile_id: profile, realization_state: initial.state });
@@ -176,17 +194,20 @@ export function createNewBaModernizationService({
       return singleFlight.run(desired.identity.sha256, async () => {
         const rechecked = await realizationStore.inspect({ profileId: profile, desiredIdentity: desired.identity });
         if (rechecked.state === 'current') return serve(rechecked.current, 'joined_or_rechecked_current');
-        const repairedAfterJoin = await repairExactPointer(profile, rechecked);
+        const repairedAfterJoin = await repairExactPointer(profile, rechecked, desired, expectedAuthority);
         if (repairedAfterJoin) return repairedAfterJoin;
         diagnostics.record('rebuild_started', { profile_id: profile, realization_id: desired.identity.realization_id, prior_state: rechecked.state });
         const started = Date.now();
         try {
           const generated = typeof generator.advance === 'function'
-            ? await generator.advance({ source: desired.source, realizationIdentity: desired.identity, compatibility: desired.compatibility })
-            : await generator.generate({ source: desired.source, realizationIdentity: desired.identity, compatibility: desired.compatibility });
+            ? await generator.advance({ source: desired.source, realizationIdentity: desired.identity, compatibility: desired.compatibility, expectedAuthority })
+            : await generator.generate({ source: desired.source, realizationIdentity: desired.identity, compatibility: desired.compatibility, expectedAuthority });
           if (generated?.complete === false) {
             diagnostics.record('generation_stage_accepted', { profile_id: profile, accepted_stage: generated.accepted_stage, next_stage: generated.next_stage, latency_ms: Date.now() - started });
             return pending(profile, desired, 'generation_stage_accepted', generated);
+          }
+          if (typeof generator.advance === 'function' && !sameNewBaRealizationIdentity(generated?.source_realization_identity, desired.identity)) {
+            throw new Error('new_ba_generation_source_identity_mismatch');
           }
           validateCompleteNewBaRealization(generated.artifact, { profileId: profile, assessmentId: desired.source.assessment_id });
           const envelope = buildLaunchSafeNewBaEnvelope({
@@ -196,6 +217,7 @@ export function createNewBaModernizationService({
             compatibility: desired.compatibility,
             providerAccounting: generated.provider_accounting,
           });
+          await assertDesiredAuthorityCurrent(profile, desired, expectedAuthority);
           const persistence = await realizationStore.persistImmutable(envelope, {
             corruptRecovery: rechecked.state === 'corrupt_derived' ? rechecked.corruption : null,
           });
@@ -207,7 +229,13 @@ export function createNewBaModernizationService({
               corrupt_archive_sha256: persistence.corrupt_archive_sha256,
             });
           }
-          await realizationStore.advancePointer({ profileId: profile, expectedCurrentId: rechecked.pointer, nextRealizationId: envelope.realization_id });
+          await assertDesiredAuthorityCurrent(profile, desired, expectedAuthority);
+          await realizationStore.advancePointer({
+            profileId: profile,
+            expectedCurrentId: rechecked.pointer,
+            nextRealizationId: envelope.realization_id,
+            sourceGuards: desired.sourceGuards,
+          });
           diagnostics.record('pointer_advanced', { profile_id: profile, realization_id: envelope.realization_id });
           diagnostics.record('rebuild_succeeded', { profile_id: profile, realization_id: envelope.realization_id, latency_ms: Date.now() - started, provider_calls: envelope.provider_accounting.calls || 0 });
           const rebuiltPath = rechecked.state === 'missing'

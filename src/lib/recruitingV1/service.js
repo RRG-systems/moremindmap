@@ -151,6 +151,20 @@ function expireDueInvitations(state, now) {
       invitation.token_digest = null;
       audit(state, 'INVITATION_EXPIRED', { invitation_id: invitation.invitation_id, membership_id: invitation.membership_id }, now);
     }
+    const consentRequest = invitation.current_consent_request;
+    if (requiresGovernedCurrentConsentReinvitation(invitation)
+        && ['PENDING', 'DELIVERED'].includes(consentRequest?.delivery_state)
+        && Date.parse(consentRequest?.expires_at) <= at(now).getTime()) {
+      consentRequest.delivery_state = 'EXPIRED';
+      consentRequest.updated_at = iso(now);
+      if (consentRequest.token_generation === invitation.token_generation) invitation.token_digest = null;
+      invitation.updated_at = iso(now);
+      audit(state, 'CURRENT_CONSENT_REQUEST_EXPIRED', {
+        invitation_id: invitation.invitation_id,
+        candidate_id: invitation.candidate_id,
+        generation: consentRequest.generation,
+      }, now);
+    }
   }
 }
 
@@ -232,6 +246,66 @@ function invitationInScope(state, membership, invitationId) {
     throw new Error('RECRUITING_INVITATION_SCOPE_DENIED');
   }
   return invitation;
+}
+
+function assertAcceptedPreparationRelationship(invitation) {
+  if (!invitation?.accepted_at || invitation.state !== 'ACCEPTED' || invitation.revoked_at
+      || invitation.consent?.version !== 'recruiting_v1_consent_2026_08'
+      || !invitation.consent?.accepted_at) {
+    throw new Error('RECRUITING_CONSULTING_ACCEPTED_CONSENT_REQUIRED');
+  }
+  return invitation;
+}
+
+function assertContinuableRecruitingRelationship(invitation) {
+  const versionedConsent = invitation?.consent?.version === 'recruiting_v1_consent_2026_08'
+    && Boolean(invitation?.consent?.accepted_at);
+  // Normalization marks only accepted records that arrived without a consent
+  // field, preserving the pre-version migration contract without weakening
+  // the new preparation path's exact versioned-consent requirement.
+  const governedLegacyConsent = !invitation?.consent && invitation?.legacy_consent_migration_v1 === true;
+  if (!invitation?.accepted_at || invitation.state !== 'ACCEPTED' || invitation.revoked_at
+      || (!versionedConsent && !governedLegacyConsent)) {
+    throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+  }
+  return invitation;
+}
+
+function requiresGovernedCurrentConsentReinvitation(invitation) {
+  return invitation?.state === 'ACCEPTED'
+    && Boolean(invitation.accepted_at)
+    && !invitation.revoked_at
+    && invitation.legacy_consent_migration_v1 === true
+    && invitation.consent?.version !== 'recruiting_v1_consent_2026_08';
+}
+
+function assertPreparationMutationAuthority(state, invitation, authority, now) {
+  if (authority?.mode !== 'recruiting_manager_candidate_preparation'
+      || authority.relationship_ref !== invitation?.invitation_id
+      || authority.candidate_id !== invitation?.candidate_id
+      || (authority.bos_job_id || null) !== (invitation?.bos_job_id || null)
+      || normalizeProfileId(authority.profile_id) !== normalizeProfileId(invitation?.bos_profile_id)
+      || (authority.assessment_id || null) !== (invitation?.ba_assessment_id || null)) {
+    throw new Error('RECRUITING_CONSULTING_PREPARATION_AUTHORITY_CHANGED');
+  }
+  const sessionDigest = String(authority.actor_session_digest || '');
+  const session = state.manager_sessions?.[sessionDigest];
+  if (!session || Date.parse(session.expires_at) <= at(now).getTime()) {
+    throw new Error('RECRUITING_MANAGER_SESSION_REQUIRED');
+  }
+  const membership = assertMembership(state.memberships?.[authority.actor_membership_id]);
+  if (session.membership_id !== authority.actor_membership_id
+      || session.enterprise_id !== authority.actor_enterprise_id
+      || session.manager_subject_id !== authority.actor_manager_subject_id
+      || membership.membership_id !== authority.actor_membership_id
+      || membership.enterprise_id !== authority.actor_enterprise_id
+      || membership.manager_subject_id !== authority.actor_manager_subject_id
+      || invitation.membership_id !== membership.membership_id
+      || invitation.enterprise_id !== membership.enterprise_id
+      || invitation.manager_subject_id !== membership.manager_subject_id) {
+    throw new Error('RECRUITING_MANAGER_SESSION_SCOPE_INVALID');
+  }
+  return assertAcceptedPreparationRelationship(invitation);
 }
 
 function agreedPlanEmailAuthority(state, session) {
@@ -1004,6 +1078,89 @@ export class RecruitingV1Service {
     return result;
   }
 
+  async requestCurrentConsent(sessionToken, invitationId, { expectedGeneration = null, idempotencyKey = null } = {}) {
+    const token = createOpaqueToken();
+    const result = await this.store.transaction((state) => {
+      const now = this.now();
+      expireDueInvitations(state, now);
+      const { membership } = membershipFromSession(state, sessionToken, now);
+      const invitation = invitationInScope(state, membership, invitationId);
+      if (invitation.consent?.version === 'recruiting_v1_consent_2026_08' && invitation.consent?.accepted_at) {
+        return { invitation: publicInvitation(invitation, membership), idempotent: true, consent_current: true, ...entitlementProjection(state, membership, now) };
+      }
+      if (!requiresGovernedCurrentConsentReinvitation(invitation)) {
+        throw new Error('RECRUITING_CURRENT_CONSENT_REQUEST_DENIED');
+      }
+      if (!Number.isInteger(expectedGeneration) || expectedGeneration < 0) {
+        throw new Error('RECRUITING_CURRENT_CONSENT_REVISION_REQUIRED');
+      }
+      const currentGeneration = Number(invitation.current_consent_request?.generation || 0);
+      const currentOutbox = state.outbox?.[invitation.current_consent_request?.outbox_id];
+      if (expectedGeneration !== currentGeneration) {
+        return {
+          invitation: publicInvitation(invitation, membership),
+          outbox_id: currentOutbox?.state === 'PENDING' ? currentOutbox.outbox_id : undefined,
+          idempotent: true,
+          request_superseded: true,
+          ...entitlementProjection(state, membership, now),
+        };
+      }
+      const activeRequest = invitation.current_consent_request
+        && Date.parse(invitation.current_consent_request.expires_at) > at(now).getTime()
+        && ['PENDING', 'DELIVERED'].includes(invitation.current_consent_request.delivery_state);
+      if (activeRequest) {
+        return {
+          invitation: publicInvitation(invitation, membership),
+          outbox_id: currentOutbox?.state === 'PENDING' ? currentOutbox.outbox_id : undefined,
+          idempotent: true,
+          request_active: true,
+          ...entitlementProjection(state, membership, now),
+        };
+      }
+      const generation = currentGeneration + 1;
+      const expiresAt = iso(new Date(at(now).getTime() + INVITATION_TTL_MS));
+      invitation.token_digest = digestToken(token);
+      invitation.token_generation = Number(invitation.token_generation || 0) + 1;
+      invitation.current_consent_request = {
+        generation,
+        token_generation: invitation.token_generation,
+        delivery_state: 'PENDING',
+        requested_at: iso(now),
+        expires_at: expiresAt,
+        idempotency_key: boundedText(idempotencyKey, 180) || null,
+      };
+      invitation.updated_at = iso(now);
+      const outbox = enqueue(state, {
+        kind: 'RECRUIT_CURRENT_CONSENT',
+        recipient: invitation.recruit_email,
+        invitation,
+        payload: {
+          recruit_name: invitation.recruit_name,
+          inviter_name: membership.manager_name,
+          enterprise_name: membership.enterprise_name,
+          purpose: invitation.purpose,
+          consent_version: 'recruiting_v1_consent_2026_08',
+        },
+        tokenCapsule: this.tokenWrapper.wrap(token),
+      }, now);
+      invitation.current_consent_request.outbox_id = outbox.outbox_id;
+      audit(state, 'CURRENT_CONSENT_REQUESTED', {
+        invitation_id: invitation.invitation_id,
+        candidate_id: invitation.candidate_id,
+        generation,
+      }, now);
+      return {
+        invitation: publicInvitation(invitation, membership),
+        invitation_token: token,
+        outbox_id: outbox.outbox_id,
+        idempotent: false,
+        ...entitlementProjection(state, membership, now),
+      };
+    });
+    if (this.transport?.synthetic !== true) delete result.invitation_token;
+    return result;
+  }
+
   async revokeInvitation(sessionToken, invitationId) {
     return this.store.transaction((state) => {
       const now = this.now();
@@ -1025,7 +1182,11 @@ export class RecruitingV1Service {
       const now = this.now();
       expireDueInvitations(state, now);
       const invitation = Object.values(state.invitations).find((item) => item.token_digest === digestToken(token));
-      if (!invitation || !['ISSUED', 'DELIVERED'].includes(invitation.state)) throw new Error('RECRUITING_INVITATION_TOKEN_INVALID');
+      const consentRefresh = invitation
+        && requiresGovernedCurrentConsentReinvitation(invitation)
+        && invitation.current_consent_request?.token_generation === invitation.token_generation
+        && Date.parse(invitation.current_consent_request?.expires_at) > at(now).getTime();
+      if (!invitation || (!['ISSUED', 'DELIVERED'].includes(invitation.state) && !consentRefresh)) throw new Error('RECRUITING_INVITATION_TOKEN_INVALID');
       const membership = assertMembership(state.memberships[invitation.membership_id]);
       return {
         invitation_id: invitation.invitation_id,
@@ -1033,7 +1194,8 @@ export class RecruitingV1Service {
         inviter_name: membership.manager_name,
         enterprise_name: membership.enterprise_name,
         purpose: invitation.purpose,
-        expires_at: invitation.expires_at,
+        expires_at: consentRefresh ? invitation.current_consent_request.expires_at : invitation.expires_at,
+        current_consent_refresh: Boolean(consentRefresh),
       };
     });
   }
@@ -1044,19 +1206,32 @@ export class RecruitingV1Service {
       const now = this.now();
       expireDueInvitations(state, now);
       const invitation = Object.values(state.invitations).find((item) => item.token_digest === digestToken(token));
-      if (!invitation || !['ISSUED', 'DELIVERED'].includes(invitation.state)) throw new Error('RECRUITING_INVITATION_TOKEN_INVALID');
+      const consentRefresh = invitation
+        && requiresGovernedCurrentConsentReinvitation(invitation)
+        && invitation.current_consent_request?.token_generation === invitation.token_generation
+        && Date.parse(invitation.current_consent_request?.expires_at) > at(now).getTime();
+      if (!invitation || (!['ISSUED', 'DELIVERED'].includes(invitation.state) && !consentRefresh)) throw new Error('RECRUITING_INVITATION_TOKEN_INVALID');
       assertMembership(state.memberships[invitation.membership_id]);
       if (consent?.accepted !== true || boundedText(consent?.version, 80) !== 'recruiting_v1_consent_2026_08') throw new Error('RECRUITING_INVITATION_CONSENT_REQUIRED');
-      invitation.state = 'ACCEPTED';
-      invitation.readiness_state = 'CONSENTED';
-      invitation.accepted_at = iso(now);
+      if (!consentRefresh) {
+        invitation.state = 'ACCEPTED';
+        invitation.readiness_state = 'CONSENTED';
+        invitation.accepted_at = iso(now);
+        invitation.paired_entitlement_version = 1;
+        invitation.bos_entitlement_state = 'CONSUMED';
+        invitation.ba_entitlement_state = 'RESERVED';
+        invitation.entitlement_state = 'CONSUMED';
+      }
       invitation.updated_at = iso(now);
-      invitation.paired_entitlement_version = 1;
-      invitation.bos_entitlement_state = 'CONSUMED';
-      invitation.ba_entitlement_state = 'RESERVED';
-      invitation.entitlement_state = 'CONSUMED';
       invitation.token_digest = null;
       invitation.consent = { version: consent.version, accepted_at: iso(now), purpose: 'RECRUITING_INTELLIGENCE' };
+      if (consentRefresh) {
+        invitation.current_consent_request = {
+          ...invitation.current_consent_request,
+          delivery_state: 'ACCEPTED',
+          accepted_at: iso(now),
+        };
+      }
       const session = {
         invite_session_id: createOpaqueId('invite_session'),
         invitation_id: invitation.invitation_id,
@@ -1066,7 +1241,7 @@ export class RecruitingV1Service {
         expires_at: iso(new Date(at(now).getTime() + 30 * 24 * 60 * 60 * 1000)),
       };
       state.invite_sessions[digestToken(inviteSessionToken)] = session;
-      audit(state, 'INVITATION_ACCEPTED', { invitation_id: invitation.invitation_id, candidate_id: invitation.candidate_id }, now);
+      audit(state, consentRefresh ? 'CURRENT_CONSENT_ACCEPTED' : 'INVITATION_ACCEPTED', { invitation_id: invitation.invitation_id, candidate_id: invitation.candidate_id }, now);
       return { invitation: publicInvitation(invitation), invite_session: session };
     });
     return { ...result, invite_session_token: inviteSessionToken };
@@ -1115,6 +1290,7 @@ export class RecruitingV1Service {
   async recordDelivery(outboxId, outcome) {
     return this.store.transaction((state) => {
       const now = this.now();
+      expireDueInvitations(state, now);
       const item = state.outbox[outboxId];
       if (!item) throw new Error('RECRUITING_OUTBOX_ITEM_NOT_FOUND');
       if (item.state === 'DELIVERED') return { item, idempotent: true };
@@ -1139,6 +1315,16 @@ export class RecruitingV1Service {
         invitation.updated_at = iso(now);
         if (!outcome?.success && !invitation.accepted_at) releaseEntitlementPair(invitation);
       }
+      const currentConsentOutbox = invitation && item.kind === 'RECRUIT_CURRENT_CONSENT'
+        && item.invitation_token_generation === invitation.token_generation
+        && invitation.current_consent_request?.token_generation === invitation.token_generation
+        && invitation.current_consent_request?.delivery_state === 'PENDING'
+        && !invitation.current_consent_request?.accepted_at;
+      if (currentConsentOutbox) {
+        invitation.current_consent_request.delivery_state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
+        invitation.current_consent_request.updated_at = iso(now);
+        invitation.updated_at = iso(now);
+      }
       if (item.kind === 'MANAGER_SETUP' && item.membership_id && state.memberships[item.membership_id]) {
         state.memberships[item.membership_id].setup_delivery_state = outcome?.success ? 'DELIVERED' : 'DELIVERY_FAILED';
         state.memberships[item.membership_id].updated_at = iso(now);
@@ -1151,12 +1337,48 @@ export class RecruitingV1Service {
   async claimOutbox(outboxId) {
     return this.store.transaction((state) => {
       const now = this.now();
+      expireDueInvitations(state, now);
       const item = state.outbox[outboxId];
       if (!item) throw new Error('RECRUITING_OUTBOX_ITEM_NOT_FOUND');
       if (item.state === 'DELIVERED') return { item: clone(item), deliver: false, idempotent: true };
       const staleSending = item.state === 'SENDING'
         && Date.parse(item.delivery_started_at || item.updated_at || item.created_at) <= at(now).getTime() - 2 * 60 * 1000;
       if (item.state !== 'PENDING' && !staleSending) return { item: clone(item), deliver: false, idempotent: false };
+      if (item.kind === 'RECRUIT_CURRENT_CONSENT') {
+        const invitation = state.invitations?.[item.invitation_id];
+        const request = invitation?.current_consent_request;
+        let membershipActive = false;
+        try {
+          const membership = assertMembership(state.memberships?.[invitation?.membership_id]);
+          membershipActive = invitation.manager_subject_id === membership.manager_subject_id
+            && invitation.enterprise_id === membership.enterprise_id;
+        } catch { membershipActive = false; }
+        const authorized = membershipActive
+          && requiresGovernedCurrentConsentReinvitation(invitation)
+          && request?.outbox_id === item.outbox_id
+          && request?.token_generation === invitation.token_generation
+          && item.invitation_token_generation === invitation.token_generation
+          && request?.delivery_state === 'PENDING'
+          && Date.parse(request.expires_at) > at(now).getTime();
+        if (!authorized) {
+          const exactCurrentRequest = request?.outbox_id === item.outbox_id
+            && request?.token_generation === invitation?.token_generation
+            && item.invitation_token_generation === invitation?.token_generation;
+          if (exactCurrentRequest && request.delivery_state === 'PENDING') {
+            request.delivery_state = 'CANCELLED';
+            request.updated_at = iso(now);
+            invitation.token_digest = null;
+            invitation.updated_at = iso(now);
+          }
+          item.state = 'CANCELLED';
+          item.updated_at = iso(now);
+          audit(state, 'CURRENT_CONSENT_DELIVERY_CANCELLED', {
+            outbox_id: item.outbox_id,
+            invitation_id: item.invitation_id,
+          }, now);
+          return { item: clone(item), deliver: false, idempotent: false };
+        }
+      }
       if (item.kind === 'CONSULTING_AGREED_PLAN') {
         const session = Object.values(state.shared_business_sessions || {}).find((candidate) => candidate.accepted_plan_snapshot?.acceptance_id === item.payload?.acceptance_id);
         const authority = agreedPlanEmailAuthority(state, session);
@@ -1192,13 +1414,14 @@ export class RecruitingV1Service {
     return this.recordDelivery(outboxId, outcome);
   }
 
-  async projectBosInProgress(invitationId, { job_id: jobId } = {}) {
+  async projectBosInProgress(invitationId, { job_id: jobId, preparation_authority: preparationAuthority = null } = {}) {
     const normalizedJobId = normalizeBosJobId(jobId);
     if (!normalizedJobId) throw new Error('RECRUITING_BOS_JOB_BINDING_REQUIRED');
     return this.store.transaction((state) => {
       const now = this.now();
       const invitation = state.invitations[invitationId];
-      if (!invitation || !invitation.accepted_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+      if (preparationAuthority) assertPreparationMutationAuthority(state, invitation, preparationAuthority, now);
+      else assertContinuableRecruitingRelationship(invitation);
       if (invitation.bos_job_id && invitation.bos_job_id !== normalizedJobId) {
         throw new Error('RECRUITING_BOS_JOB_REBIND_DENIED');
       }
@@ -1216,13 +1439,14 @@ export class RecruitingV1Service {
     });
   }
 
-  async bindBosProfile(invitationId, profileId, vaultReceipt = {}) {
+  async bindBosProfile(invitationId, profileId, vaultReceipt = {}, { preparationAuthority = null } = {}) {
     const normalized = normalizeProfileId(profileId);
     if (!normalized || vaultReceipt.verified !== true) throw new Error('RECRUITING_VERIFIED_BOS_VAULT_RECEIPT_REQUIRED');
     return this.store.transaction((state) => {
       const now = this.now();
       const invitation = state.invitations[invitationId];
-      if (!invitation || !invitation.accepted_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+      if (preparationAuthority) assertPreparationMutationAuthority(state, invitation, preparationAuthority, now);
+      else assertContinuableRecruitingRelationship(invitation);
       if (invitation.bos_profile_id && invitation.bos_profile_id !== normalized) throw new Error('RECRUITING_BOS_PROFILE_REBIND_DENIED');
       if (invitation.bos_profile_id === normalized) return publicInvitation(invitation);
       return bindBosProfileInState(state, invitation, normalized, now);
@@ -1272,7 +1496,13 @@ export class RecruitingV1Service {
     });
   }
 
-  async projectBaState(invitationId, { assessment_id = null, state: baState, canonical_receipt = null }) {
+  async projectBaState(invitationId, {
+    assessment_id = null,
+    state: baState,
+    canonical_receipt = null,
+    preparation_authority: preparationAuthority = null,
+    canonical_source_guard: canonicalSourceGuard = null,
+  }) {
     if (!['BA_INTAKE_SAVED', 'BA_IN_PROGRESS', 'BA_INTELLIGENCE_READY'].includes(baState)) throw new Error('RECRUITING_BA_STATE_INVALID');
     if (baState === 'BA_INTELLIGENCE_READY'
         && (canonical_receipt?.contract !== 'recruiting_canonical_new_ba_ready_receipt_v1'
@@ -1284,11 +1514,17 @@ export class RecruitingV1Service {
           || !/^[a-f0-9]{64}$/u.test(String(canonical_receipt?.artifact_sha256 || '')))) {
       throw new Error('RECRUITING_CANONICAL_BA_RECEIPT_REQUIRED');
     }
-    return this.store.transaction((state) => {
+    if (canonicalSourceGuard
+        && (!['BA_INTAKE_SAVED', 'BA_INTELLIGENCE_READY'].includes(baState)
+          || typeof this.store.transactionWithExternalStringGuards !== 'function')) {
+      throw new Error('RECRUITING_CANONICAL_BA_ATOMIC_SOURCE_GUARD_REQUIRED');
+    }
+    const mutate = (state) => {
       const now = this.now();
       const invitation = state.invitations[invitationId];
       if (!invitation?.bos_profile_id) throw new Error('RECRUITING_BOS_READY_REQUIRED_FOR_BA');
-      if (!invitation.accepted_at || invitation.state !== 'ACCEPTED' || invitation.revoked_at) throw new Error('RECRUITING_ACCEPTED_RELATIONSHIP_REQUIRED');
+      if (preparationAuthority) assertPreparationMutationAuthority(state, invitation, preparationAuthority, now);
+      else assertContinuableRecruitingRelationship(invitation);
       if (canonical_receipt && normalizeProfileId(canonical_receipt.profile_id) !== normalizeProfileId(invitation.bos_profile_id)) {
         throw new Error('RECRUITING_CANONICAL_BA_PROFILE_MISMATCH');
       }
@@ -1325,7 +1561,10 @@ export class RecruitingV1Service {
       }
       audit(state, `CANDIDATE_${baState}`, { invitation_id: invitation.invitation_id, assessment_id: invitation.ba_assessment_id }, now);
       return publicInvitation(invitation);
-    });
+    };
+    return canonicalSourceGuard
+      ? this.store.transactionWithExternalStringGuards(mutate, canonicalSourceGuard)
+      : this.store.transaction(mutate);
   }
 
   async home(sessionToken) {
@@ -1447,6 +1686,67 @@ export class RecruitingV1Service {
       manager_evidence: clone(state.evidence_by_candidate[candidateId] || []),
       intelligence: clone(state.intelligence_by_candidate[candidateId] || null),
     };
+  }
+
+  /**
+   * Private server authority for preparing a candidate's already-consented
+   * Consulting inputs. It exposes durable locators only to the coordinator;
+   * the HTTP action returns the public candidate projection instead.
+   */
+  async inspectCandidatePreparationAuthority(sessionToken, candidateId) {
+    const state = await this.store.read();
+    const now = this.now();
+    const { membership: actor, digest: actorSessionDigest } = membershipFromSession(state, sessionToken, now);
+    const matches = Object.values(state.invitations).filter((item) => item.candidate_id === candidateId);
+    if (matches.length !== 1) throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+    const invitation = matches[0];
+    const targetMembership = state.memberships[invitation.membership_id];
+    if (!targetMembership) throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+
+    const directOwner = invitation.membership_id === actor.membership_id
+      && invitation.enterprise_id === actor.enterprise_id
+      && invitation.manager_subject_id === actor.manager_subject_id;
+    if (!directOwner) throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+    assertMembership(targetMembership);
+    if (invitation.membership_id !== targetMembership.membership_id
+        || invitation.enterprise_id !== targetMembership.enterprise_id
+        || invitation.manager_subject_id !== targetMembership.manager_subject_id) {
+      throw new Error('RECRUITING_CANDIDATE_SCOPE_DENIED');
+    }
+    assertAcceptedPreparationRelationship(invitation);
+
+    return Object.freeze({
+      mode: 'recruiting_manager_candidate_preparation',
+      actor_role: 'OWNING_MANAGER',
+      actor_session_digest: actorSessionDigest,
+      actor_membership_id: actor.membership_id,
+      actor_enterprise_id: actor.enterprise_id,
+      actor_manager_subject_id: actor.manager_subject_id,
+      relationship_ref: invitation.invitation_id,
+      candidate_id: invitation.candidate_id,
+      purpose: 'RECRUITING_INTELLIGENCE',
+      bos_job_id: invitation.bos_job_id || null,
+      profile_id: normalizeProfileId(invitation.bos_profile_id),
+      assessment_id: invitation.ba_assessment_id || null,
+      ba_readiness: invitation.ba_readiness || 'BA_NOT_STARTED',
+      ba_realization_receipt: clone(invitation.ba_realization_receipt || null),
+      progress_state: publicInvitation(invitation, targetMembership).progress_state,
+      candidate: publicInvitation(invitation, targetMembership),
+    });
+  }
+
+  /**
+   * Revalidate the exact private preparation authority at a downstream write
+   * boundary without accepting a browser session token again. This binds the
+   * write to the same live manager session, membership, enterprise, subject,
+   * relationship, and accepted consent that the coordinator inspected.
+   */
+  async assertCandidatePreparationAuthority(authority) {
+    const state = await this.store.read();
+    const now = this.now();
+    const invitation = state.invitations[authority?.relationship_ref];
+    assertPreparationMutationAuthority(state, invitation, authority, now);
+    return { valid: true };
   }
 
   async deliverAgreedPlanEmails({ sessionId, acceptanceId }) {

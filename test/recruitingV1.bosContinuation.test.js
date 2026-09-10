@@ -57,7 +57,7 @@ async function acceptedRelationship() {
     accepted: true,
     version: 'recruiting_v1_consent_2026_08',
   });
-  return { store, service, created, accepted };
+  return { store, service, manager, created, accepted };
 }
 
 function committedBosExecution(relationshipRef, jobId, payload, overrides = {}) {
@@ -218,6 +218,80 @@ test('a strict committed execution receipt lazily repairs both missed and legacy
       service,
     })).reconciled, false);
   }
+});
+
+test('manager preparation revalidates an already-bound BOS job against its committed execution before resume', async () => {
+  const { service, created, accepted } = await acceptedRelationship();
+  const relationshipRef = created.invitation.invitation_id;
+  const publicStore = expirationTrackingStore();
+  await storeCommittedBos(publicStore, relationshipRef, BOS_JOB_ID);
+  await service.projectBosInProgress(relationshipRef, { job_id: BOS_JOB_ID });
+  const inspected = await service.inspectInviteSession(accepted.invite_session_token);
+  const validated = await reconcileRecruitingBosStartFromCommittedExecution({
+    inspected,
+    store: publicStore,
+    service,
+    validateExistingJob: true,
+  });
+  assert.deepEqual(validated, { reconciled: false, validated: true, job_id: BOS_JOB_ID });
+  assert.deepEqual(publicStore.expirations, [[`job:${BOS_JOB_ID}`, RECRUITING_BOS_JOB_TTL_SECONDS]]);
+
+  const mismatchedJob = durableBosJob(relationshipRef, BOS_JOB_ID, {
+    payload: {
+      answers: { q1: { choice: 'B' } },
+      metadata: { recruiting_relationship_ref: relationshipRef, recruiting_purpose: 'RECRUITING_INTELLIGENCE' },
+    },
+  });
+  await publicStore.set(`job:${BOS_JOB_ID}`, JSON.stringify(mismatchedJob));
+  await assert.rejects(
+    reconcileRecruitingBosStartFromCommittedExecution({ inspected, store: publicStore, service, validateExistingJob: true }),
+    /RECRUITING_BOS_EXECUTION_PAYLOAD_MISMATCH|RECRUITING_BOS_JOB_BINDING_INVALID/u,
+  );
+});
+
+test('manager preparation forwards its exact authority into the BOS transaction and rejects revocation between inspect and write', async () => {
+  const { store, service, manager, created } = await acceptedRelationship();
+  const relationshipRef = created.invitation.invitation_id;
+  const preparationAuthority = await service.inspectCandidatePreparationAuthority(
+    manager.session_token,
+    created.invitation.candidate_id,
+  );
+  const publicStore = expirationTrackingStore();
+  await storeCommittedBos(publicStore, relationshipRef, BOS_JOB_ID);
+
+  await store.transaction((state) => {
+    const invitation = state.invitations[relationshipRef];
+    invitation.state = 'REVOKED';
+    invitation.revoked_at = '2026-08-05T12:01:00.000Z';
+    return true;
+  });
+
+  await assert.rejects(
+    reconcileRecruitingBosStartFromCommittedExecution({
+      inspected: {
+        preparation_authority: preparationAuthority,
+        invite_session: {
+          invitation_id: relationshipRef,
+          candidate_id: created.invitation.candidate_id,
+        },
+        relationship: {
+          relationship_ref: relationshipRef,
+          candidate_id: created.invitation.candidate_id,
+          purpose: 'RECRUITING_INTELLIGENCE',
+          progress_state: 'INVITED',
+          bos_job_id: null,
+          bos_profile_id: null,
+        },
+      },
+      store: publicStore,
+      service,
+      validateExistingJob: true,
+    }),
+    /RECRUITING_CONSULTING_ACCEPTED_CONSENT_REQUIRED/u,
+  );
+  assert.deepEqual(publicStore.expirations, []);
+  const snapshot = await store.read();
+  assert.equal(snapshot.invitations[relationshipRef].bos_job_id ?? null, null);
 });
 
 test('missing jobs and failed retention extension cannot mutate the Recruiting relationship', async () => {

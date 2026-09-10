@@ -50,6 +50,13 @@ function notificationContent(item, baseUrl) {
       text: `Review your private invitation and consent before continuing: ${baseUrl}/recruiting/accept/${token}`,
     };
   }
+  if (item.kind === 'RECRUIT_CURRENT_CONSENT') {
+    if (!token) throw new Error('RECRUITING_DELIVERY_TOKEN_REQUIRED');
+    return {
+      subject: 'Review current consent for your MORE recruiting relationship',
+      text: `Review the current consent terms for your existing recruiting relationship. Your completed results remain unchanged: ${baseUrl}/recruiting/accept/${token}`,
+    };
+  }
   if (item.kind === 'CONSULTATION_APPROVAL') {
     if (!token) throw new Error('RECRUITING_DELIVERY_TOKEN_REQUIRED');
     return {

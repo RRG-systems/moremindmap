@@ -7,6 +7,29 @@ export function consultingCandidates(candidates = []) {
   return candidates.filter((person) => person?.consulting_ready === true && person?.state === 'ACCEPTED' && person?.candidate_id);
 }
 
+export function consultingPreparationCandidates(candidates = []) {
+  return candidates.filter((person) => person?.consulting_ready !== true
+    && person?.consulting_preparation_eligible === true
+    && person?.state === 'ACCEPTED'
+    && Boolean(person?.accepted_at)
+    && Boolean(person?.candidate_id));
+}
+
+export function reconcileConsultingPreparationReceipts(receipts = {}, candidates = []) {
+  const candidatesById = new Map(candidates.filter((person) => person?.candidate_id).map((person) => [person.candidate_id, person]));
+  return Object.fromEntries(Object.entries(receipts).filter(([candidateId, receipt]) => {
+    const person = candidatesById.get(candidateId);
+    if (!person || person.consulting_ready === true) return false;
+    if (receipt?.state === 'BOS_INTAKE_REQUIRED') {
+      return person.progress_state === 'INVITED' && person.readiness_state !== 'BOS_IN_PROGRESS';
+    }
+    if (receipt?.state === 'BA_INTAKE_REQUIRED') {
+      return (person.ba_readiness || 'BA_NOT_STARTED') === 'BA_NOT_STARTED' && !person.ba_assessment_id;
+    }
+    return true;
+  }));
+}
+
 export function recruitProgressLabel(person) {
   if (person?.consulting_ready === true && person?.state === 'ACCEPTED') return 'Ready';
   if (person?.progress_label && person.progress_label !== 'Ready') return person.progress_label;

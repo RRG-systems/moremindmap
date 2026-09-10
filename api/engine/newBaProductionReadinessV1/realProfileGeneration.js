@@ -218,21 +218,69 @@ export function createRealProfileGenerationContext({ source, displayName, reques
   return deepFreeze({ input, context, mission, schema, identityTokens, library, cassetteRegistry, providerPreflight });
 }
 
-function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_model_v1', backgroundResponseStore = null, generationIdentitySha256 = null, profileId = null }) {
+export function authorityGuardedBaProviderClient(client, assertCurrentAuthority) {
+  return Object.freeze({
+    responses: Object.freeze({
+      create: async (...args) => {
+        await assertCurrentAuthority();
+        return client.responses.create(...args);
+      },
+      retrieve: async (...args) => {
+        await assertCurrentAuthority();
+        return client.responses.retrieve(...args);
+      },
+    }),
+  });
+}
+
+export function authorityGuardedBaBackgroundStore(store, assertCurrentAuthority) {
+  return Object.freeze({
+    load: (...args) => store.load(...args),
+    prepare: typeof store.prepare === 'function'
+      ? async (...args) => {
+        await assertCurrentAuthority();
+        return store.prepare(...args);
+      }
+      : null,
+    // A provider response may already exist by the time authority changes.
+    // Preserve its opaque ID/status checkpoint so a later authorized request
+    // resumes the same response instead of submitting a duplicate.
+    save: (...args) => store.save(...args),
+  });
+}
+
+function makeProvider({
+  apiKey,
+  identityTokens,
+  startingStage = 'whole_business_model_v1',
+  backgroundResponseStore = null,
+  generationIdentitySha256 = null,
+  profileId = null,
+  assertCurrentAuthority = async () => {},
+}) {
   invariant(typeof apiKey === 'string' && apiKey.length > 20, 'new_ba_real_profile_openai_binding_missing');
+  invariant(typeof assertCurrentAuthority === 'function', 'new_ba_manager_preparation_authority_assertion_invalid');
   const streaming = backgroundResponseStore ? null : createStreamingOpenAITransport({ apiKey });
-  const backgroundClient = backgroundResponseStore ? new OpenAI({ apiKey, maxRetries: 0, timeout: 700_000 }) : null;
+  const guardedBackgroundStore = backgroundResponseStore
+    ? authorityGuardedBaBackgroundStore(backgroundResponseStore, assertCurrentAuthority)
+    : null;
+  const backgroundClient = backgroundResponseStore
+    ? authorityGuardedBaProviderClient(new OpenAI({ apiKey, maxRetries: 0, timeout: 700_000 }), assertCurrentAuthority)
+    : null;
   const transport = async (request) => {
     validateBaProviderEgressPayload(request);
     const privacy = inspectProviderPrivacy(request, identityTokens);
     invariant(privacy.valid, 'new_ba_real_profile_provider_request_privacy_failed', privacy.failures);
-    if (!backgroundResponseStore) return streaming.transport(request);
-    const preparation = backgroundResponseStore.prepare
-      ? await backgroundResponseStore.prepare({ profileId, generationIdentitySha256, stage: startingStage })
+    if (!guardedBackgroundStore) {
+      await assertCurrentAuthority();
+      return streaming.transport(request);
+    }
+    const preparation = guardedBackgroundStore.prepare
+      ? await guardedBackgroundStore.prepare({ profileId, generationIdentitySha256, stage: startingStage, assertCurrentAuthority })
       : null;
     const checkpoint = preparation
       ? preparation.checkpoint
-      : await backgroundResponseStore.load({ profileId, generationIdentitySha256, stage: startingStage });
+      : await guardedBackgroundStore.load({ profileId, generationIdentitySha256, stage: startingStage });
     let legacyCompletedReplay = false;
     if (checkpoint) {
       const inspection = inspectNewBosBackgroundTransportDiff({ scientificRequest: request, executionRequest: buildNewBosBackgroundExecutionRequest(request) });
@@ -244,7 +292,7 @@ function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_
     }
     const onEvent = legacyCompletedReplay
       ? async () => null
-      : (event) => backgroundResponseStore.save({ profileId, generationIdentitySha256, stage: startingStage, event });
+      : (event) => guardedBackgroundStore.save({ profileId, generationIdentitySha256, stage: startingStage, event });
     try {
       const result = checkpoint
         ? await resumeNewBosBackgroundResponse({ client: backgroundClient, responseId: checkpoint.provider_response_id, scientificRequest: request, maxWaitMs: INTERACTIVE_BACKGROUND_WAIT_MS, onEvent })
@@ -276,9 +324,9 @@ async function callWithRetry(provider, args) {
   throw lastError;
 }
 
-export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, backgroundResponseStore = null, generationIdentitySha256 = null, assertCurrentAuthority = async () => {} }) {
   const generation = createRealProfileGenerationContext({ source, displayName, requestedAt, library, cassetteRegistry });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens: generation.identityTokens, backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens: generation.identityTokens, backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, assertCurrentAuthority });
   const synthesisAdapter = createFrontierSynthesisAdapter({
     synthesize: async ({ mission }) => {
       const governedMission = applyWbmFieldMissionOwnership(mission);
@@ -301,9 +349,9 @@ export async function generateRealProfileWbm({ source, displayName, apiKey, requ
   });
 }
 
-export async function generateRealProfileFutures({ source, displayName, apiKey, wbm, backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileFutures({ source, displayName, apiKey, wbm, backgroundResponseStore = null, generationIdentitySha256 = null, assertCurrentAuthority = async () => {} }) {
   const identityTokens = providerIdentityTokens({ source, displayName });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'five_futures_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'five_futures_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, assertCurrentAuthority });
   const schema = buildFiveFuturesSemanticSchema({ mechanismIds: wbm.causal_model.mechanisms.map((item) => item.mechanism_id), evidenceIds: wbm.source_integrity.evidence_refs });
   validateStrictSchemaShape(schema);
   const trajectoryAdapter = createTrajectoryGenerationAdapter({ generate: async ({ mission }) => {
@@ -315,9 +363,9 @@ export async function generateRealProfileFutures({ source, displayName, apiKey, 
   return deepFreeze({ result, provider: { accepted_calls: provider.acceptedCallCount(), submissions: provider.callCount(), receipts: provider.receipts(), attempts: provider.attemptReceipts(), transport: streaming.traces() } });
 }
 
-export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null, assertCurrentAuthority = async () => {} }) {
   const identityTokens = providerIdentityTokens({ source, displayName });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'one_move_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'one_move_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, assertCurrentAuthority });
   const candidateAdapter = createCandidateGenerationAdapter({ generate: async ({ mission }) => {
     const governedMission = applyOneMoveFieldMissionOwnership(mission);
     const schema = buildOneMoveCandidateSchema({

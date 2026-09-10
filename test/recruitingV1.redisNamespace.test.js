@@ -24,6 +24,9 @@ class FakeRedis {
       return 1;
     }
     if (this.values.get(keys[0]) !== argv[0]) return 0;
+    for (let index = 2; index < keys.length; index += 1) {
+      if (this.values.get(keys[index]) !== argv[index]) return -1;
+    }
     this.values.set(keys[1], argv[1]);
     return 1;
   }
@@ -46,4 +49,35 @@ test('Recruiting Redis namespaces are explicit, bounded, and isolate Preview fro
 
   const restartedPreview = new RedisRecruitingStore(redis, { namespace: 'preview:recruiting-v1:airlock' });
   assert.equal((await restartedPreview.read()).audit[0].event_id, 'preview-only');
+});
+
+test('Recruiting Redis guarded transaction CASes exact external strings with the state commit', async () => {
+  const redis = new FakeRedis();
+  const store = new RedisRecruitingStore(redis, { namespace: 'nonprod:recruiting-v1:ba-source-cas' });
+  const pointerKey = 'business_assessment_by_profile:mm-20990101-guard001';
+  const assessmentKey = 'business_assessment:ba-20990101-acde0001';
+  const pointerRaw = ' BA-20990101-ACDE0001 ';
+  const assessmentRaw = '{"assessment_id":"ba-20990101-acde0001","revision":1}\n';
+  await redis.set(pointerKey, pointerRaw);
+  await redis.set(assessmentKey, assessmentRaw);
+
+  await store.transactionWithExternalStringGuards((state) => {
+    state.audit.push({ event_id: 'exact-source-committed' });
+  }, { guards: [
+    { key: pointerKey, expected: pointerRaw },
+    { key: assessmentKey, expected: assessmentRaw },
+  ] });
+  assert.equal((await store.read()).audit.at(-1).event_id, 'exact-source-committed');
+
+  await assert.rejects(
+    store.transactionWithExternalStringGuards((state) => {
+      state.audit.push({ event_id: 'stale-source-must-not-commit' });
+      redis.values.set(assessmentKey, '{"assessment_id":"ba-20990101-acde0001","revision":2}');
+    }, { guards: [
+      { key: pointerKey, expected: pointerRaw },
+      { key: assessmentKey, expected: assessmentRaw },
+    ] }),
+    /RECRUITING_CANONICAL_BA_SOURCE_GUARD_CHANGED/u,
+  );
+  assert.equal((await store.read()).audit.some((event) => event.event_id === 'stale-source-must-not-commit'), false);
 });

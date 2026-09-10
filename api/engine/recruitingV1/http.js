@@ -6,6 +6,8 @@ import {
   reconcileRecruitingBosStartFromCommittedExecution,
 } from './canonicalAdapters.js';
 import { buildRecruitingInviteContinuation } from '../../../src/lib/recruitingV1/continuation.js';
+import { getConsultingPreparationCoordinator } from './preparationRuntime.js';
+import { miniV2ExecutionAllowed } from '../miniV2JobManager.js';
 import { RedisPublicStore } from '../../../src/lib/publicSiteAirlockV1/redisStore.js';
 import {
   readVerifiedProfileOwnerRequest,
@@ -24,7 +26,7 @@ function cookies(header = '') {
 }
 
 function requestOrigin(req) {
-  const host = String(req.headers?.['x-forwarded-host'] || req.headers?.host || '').split(',')[0].trim().toLowerCase();
+  const host = String(req.headers?.host || '').split(',')[0].trim().toLowerCase();
   const proto = String(req.headers?.['x-forwarded-proto'] || (host.startsWith('127.0.0.1') || host.startsWith('localhost') ? 'http' : 'https')).split(',')[0].trim();
   return `${proto}://${host}`;
 }
@@ -33,6 +35,17 @@ function sameOrigin(req, allowMissingGet = false) {
   const supplied = String(req.headers?.origin || req.headers?.referer || '').trim();
   if (!supplied && allowMissingGet && req.method === 'GET') return true;
   try { return new URL(supplied).origin === requestOrigin(req); } catch { return false; }
+}
+
+function canonicalProductionRequest(req, env = process.env) {
+  // Host is the platform-routed destination. Do not let a forwarded value
+  // supplied upstream masquerade as the canonical alias for execution gates.
+  const host = String(req.headers?.host || '').split(',')[0].trim().toLowerCase();
+  return String(env.VERCEL_ENV || '').trim().toLowerCase() === 'production' && host === 'moremindmap.com';
+}
+
+function productionTargetRequest(env = process.env) {
+  return String(env.VERCEL_ENV || '').trim().toLowerCase() === 'production';
 }
 
 function secureCookie(name, value, maxAge, env = process.env) {
@@ -88,9 +101,9 @@ export function setRecruitingHeaders(res) {
 function statusFor(error) {
   const code = String(error?.message || 'RECRUITING_V1_FAILURE');
   if (/SESSION_REQUIRED|CONSENT_REQUIRED|PREAPPROVAL_REQUIRED|PROFILE_OWNER_RECEIPT_REQUIRED/.test(code)) return 401;
-  if (/SCOPE_DENIED|ORIGIN|CSRF|AUTHORITY_REQUIRED/.test(code)) return 403;
+  if (/SCOPE_(?:DENIED|INVALID)|ORIGIN|CSRF|AUTHORITY_REQUIRED|MANAGER_(?:MEMBERSHIP_INACTIVE|SETUP_INCOMPLETE)/.test(code)) return 403;
   if (/NOT_FOUND/.test(code)) return 404;
-  if (/EXHAUSTED|REQUIRES_REVIEW|REBIND|RESEND_DENIED|IDEMPOTENCY_IDENTITY_MISMATCH|READINESS_CHANGED_RETRY/.test(code)) return 409;
+  if (/EXHAUSTED|REQUIRES_REVIEW|REBIND|RESEND_DENIED|IDEMPOTENCY_IDENTITY_MISMATCH|READINESS_CHANGED_RETRY|PREPARATION_AUTHORITY_CHANGED/.test(code)) return 409;
   if (/INVALID|REQUIRED|DENIED/.test(code)) return 422;
   return 503;
 }
@@ -118,6 +131,15 @@ async function authenticatedMutation(service, req, res, sessionToken, mutate, en
   return { ...result, csrf_token: auth.csrf_token };
 }
 
+// Provider-backed preparation can outlive a browser/CDN response. Keep the
+// already-authenticated HttpOnly session stable so a lost response can recover
+// with a fresh GET, while still consuming and replacing the one-time CSRF.
+async function authenticatedResumableMutation(service, req, sessionToken, mutate) {
+  await service.consumeManagerCsrf(sessionToken, req.headers?.['x-recruiting-csrf']);
+  const result = await mutate(sessionToken);
+  return { ...result, csrf_token: await service.issueManagerCsrf(sessionToken) };
+}
+
 async function deliverQueued(service, result) {
   if (!result?.outbox_id) return result;
   const delivered = await service.deliverOutbox(result.outbox_id);
@@ -132,13 +154,16 @@ async function deliverQueued(service, result) {
   };
 }
 
-export function createRecruitingHttpHandler({ service: suppliedService = null, env = process.env, candidateProjection = null, generateIntelligence = null, executionStore } = {}) {
+export function createRecruitingHttpHandler({ service: suppliedService = null, env = process.env, candidateProjection = null, generateIntelligence = null, prepareConsultingResults = null, executionStore } = {}) {
   const projection = candidateProjection || (suppliedService
     ? async () => { throw new Error('RECRUITING_INJECTED_PROJECTION_REQUIRED'); }
     : (input) => getCandidateProjection({ ...input, env }));
   const generate = generateIntelligence || (suppliedService
     ? async () => { throw new Error('RECRUITING_INJECTED_INTELLIGENCE_REQUIRED'); }
     : (input) => generateCandidateIntelligence({ ...input, env }));
+  const prepare = prepareConsultingResults || (suppliedService
+    ? async () => { throw new Error('RECRUITING_INJECTED_CONSULTING_PREPARATION_REQUIRED'); }
+    : (input) => getConsultingPreparationCoordinator(env)(input));
   const continuationOptions = { env, executionStore: suppliedService && executionStore === undefined ? null : executionStore };
   return async function recruitingRequest(req, res) {
   setRecruitingHeaders(res);
@@ -229,10 +254,41 @@ export function createRecruitingHttpHandler({ service: suppliedService = null, e
         service.resendInvitation(token, req.body?.invitation_id, { expectedResendCount: req.body.expected_resend_count, idempotencyKey: req.headers?.['idempotency-key'] }));
       return res.status(200).json({ ok: true, ...(await deliverQueued(service, resent)) });
     }
+    if (action === 'REQUEST_CURRENT_CONSENT') {
+      if (!Number.isInteger(req.body?.expected_generation) || req.body.expected_generation < 0) throw new Error('RECRUITING_CURRENT_CONSENT_REVISION_REQUIRED');
+      const requested = await mutate((token) => service.requestCurrentConsent(token, req.body?.invitation_id, {
+        expectedGeneration: req.body.expected_generation,
+        idempotencyKey: req.headers?.['idempotency-key'],
+      }));
+      return res.status(200).json({ ok: true, ...(await deliverQueued(service, requested)) });
+    }
     if (action === 'REVOKE_INVITATION') return res.status(200).json({ ok: true, ...(await mutate((token) => service.revokeInvitation(token, req.body?.invitation_id))) });
     if (action === 'SAVE_OPPORTUNITY') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ opportunity: await service.saveOpportunity(token, req.body?.items) }))) });
     if (action === 'ADD_EVIDENCE') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ evidence: await service.addEvidence(token, req.body?.candidate_id, req.body?.evidence) }))) });
     if (action === 'GENERATE_INTELLIGENCE') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ intelligence: await generate({ sessionToken: token, candidateId: req.body?.candidate_id }) }))) });
+    if (action === 'PREPARE_CONSULTING_RESULTS') {
+      const canonicalProduction = canonicalProductionRequest(req, env);
+      const preparationExecutionAllowed = miniV2ExecutionAllowed({
+        env,
+        productionTarget: productionTargetRequest(env),
+        canonicalProduction,
+      });
+      return res.status(200).json({
+        ok: true,
+        ...(await authenticatedResumableMutation(
+          service,
+          req,
+          managerToken,
+          (token) => prepare({
+            sessionToken: token,
+            candidateId: req.body?.candidate_id,
+            allowLegacyDrainStart: canonicalProduction,
+            allowBosExecution: preparationExecutionAllowed,
+            preparationExecutionAllowed,
+          }),
+        )),
+      });
+    }
     if (action === 'RECORD_EXPORT') return res.status(200).json({ ok: true, ...(await mutate(async (token) => ({ code: 'RECRUITING_EXPORT_RECORDED', export: await service.recordExport(token, req.body?.candidate_id, req.body?.mode, req.body?.details_included), synthetic_review: syntheticReviewEnabled(env) }))) });
     if (action === 'ADMIN_CREATE_MANAGER') {
       const created = await mutate((token) => service.createManagerMembership(token, req.body));
@@ -250,7 +306,7 @@ export function createRecruitingHttpHandler({ service: suppliedService = null, e
   } catch (error) {
     const code = String(error?.message || 'RECRUITING_V1_FAILURE').slice(0, 180);
     console.error(JSON.stringify({ event: 'RECRUITING_V1_REQUEST_FAILED', code, raw_payload_logged: false, token_logged: false, email_logged: false }));
-    if (!recoveryCsrf && currentManagerToken && requestService && !/CSRF/u.test(code)) {
+    if (!recoveryCsrf && currentManagerToken && requestService) {
       try { recoveryCsrf = await requestService.issueManagerCsrf(currentManagerToken); } catch { recoveryCsrf = null; }
     }
     return res.status(statusFor(error)).json({ ok: false, code, ...(recoveryCsrf ? { csrf_token: recoveryCsrf } : {}) });

@@ -15,23 +15,6 @@ import {
 } from './resumableSemanticContract.js';
 import { classifySemanticValidationError } from './completedStage3ValidationDiagnostic.js';
 
-function terminalObservation(error) {
-  const response = error?.providerResponse;
-  return Object.freeze({
-    provider_response_id: response?.id || error?.responseId || null,
-    provider_request_id: response?._request_id || null,
-    status: response?.status || error?.status || 'failed',
-    incomplete_details_reason: response?.incomplete_details?.reason || null,
-    error_code: response?.error?.code || (error?.responseId ? null : 'transport_error'),
-    model: response?.model || null,
-    service_tier: response?.service_tier || null,
-    created_at: response?.created_at || null,
-    completed_at: response?.completed_at || null,
-    usage: response?.usage || null,
-    observed_at: new Date().toISOString(),
-  });
-}
-
 function humanReviewError(stageId, classification) {
   return Object.assign(new Error(`new_bos_resumable_stage_${classification?.state || 'unavailable'}:${stageId}`), {
     human_review_required: true,
@@ -189,17 +172,19 @@ export async function runNewBosResumableSemanticGeneration({
             + (result.transport_evidence.mode === 'background_resume_existing' ? 1 : 0);
           return result.response;
         } catch (error) {
-          if (['background_poll_timeout', 'background_resume_poll_timeout'].includes(error?.code)) {
-            error.code = 'new_bos_provider_background_in_progress';
-            error.background_pending = true;
-          } else if (!error?.providerResponse && !error?.responseId) {
-            await checkpointStore.observe({
+          if (error?.provider_submission_blocked_by_authority
+              && ['START_INITIAL', 'START_REPLACEMENT'].includes(prepared.disposition)
+              && typeof checkpointStore.recordAuthorityAbortBeforeSubmission === 'function') {
+            await checkpointStore.recordAuthorityAbortBeforeSubmission({
               campaignSha256: campaignIdentity.sha256,
               unitId,
               unitIdentitySha256,
               requestSha256,
-              event: terminalObservation(error),
+              expectedRecord: prepared.record,
             });
+          } else if (['background_poll_timeout', 'background_resume_poll_timeout'].includes(error?.code)) {
+            error.code = 'new_bos_provider_background_in_progress';
+            error.background_pending = true;
           }
           throw error;
         }

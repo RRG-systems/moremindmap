@@ -114,7 +114,8 @@ test('compatible-prior selection requires a complete artifact and internally mat
 
 test('ordinary New BA route keeps generalized generation while packaging frozen authorities', () => {
   const route = fs.readFileSync('api/moremindmap/new-ba.js', 'utf8');
-  assert.match(route, /campaign\.advance\(source\.profile_id\)/u);
+  const productionService = fs.readFileSync('api/engine/newBaProductionReadinessV1/productionService.js', 'utf8');
+  assert.match(`${route}\n${productionService}`, /campaign\.advance\([\s\S]*source\.profile_id,[\s\S]*expectedAuthority,[\s\S]*realizationIdentity,[\s\S]*\)/u);
   const deployment = JSON.parse(fs.readFileSync('vercel.json', 'utf8'));
   const includeFiles = deployment.functions['api/moremindmap/new-ba.js'].includeFiles;
   assert.equal(includeFiles, 'docs/ba-intelligence-authority-library-v1/**');

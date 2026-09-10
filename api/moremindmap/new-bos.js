@@ -1,14 +1,9 @@
 import Redis from 'ioredis';
 import process from 'node:process';
 
-import { createReadOnlyCanonicalReader } from '../engine/newBosProductionReadinessV1/canonicalReader.js';
 import { readNewBosProductionConfig } from '../engine/newBosProductionReadinessV1/config.js';
-import { createRedisLaunchSafeRealizationStore } from '../engine/newBosProductionReadinessV1/launchSafeRealizationStore.js';
-import { createNewBosModernizationService } from '../engine/newBosProductionReadinessV1/modernizationService.js';
-import { createProductionNewBosGenerator } from '../engine/newBosProductionReadinessV1/productionGenerator.js';
-import { createRedisNewBosResumableGenerationStore } from '../engine/newBosProductionReadinessV1/resumableGenerationStore.js';
+import { createNewBosProductionService } from '../engine/newBosProductionReadinessV1/productionService.js';
 import { createNewBosProductionRouteHandler } from '../engine/newBosProductionReadinessV1/routeHandler.js';
-import { createRedisSingleFlightCoordinator } from '../engine/newBosProductionReadinessV1/singleFlight.js';
 import { authorizePublicOrRecruitingProductRequest } from '../engine/recruitingV1/canonicalAdapters.js';
 import { RedisPublicStore } from '../../src/lib/publicSiteAirlockV1/redisStore.js';
 
@@ -40,33 +35,11 @@ const handler = createNewBosProductionRouteHandler({
       enableReadyCheck: true,
       lazyConnect: true,
     });
-    const canonicalReader = createReadOnlyCanonicalReader({ redis });
-    const realizationStore = createRedisLaunchSafeRealizationStore({
+    return createNewBosProductionService({
       redis,
-      namespace: config.namespace,
-      persistenceEnabled: config.persistenceEnabled,
-    });
-    const singleFlight = createRedisSingleFlightCoordinator({ redis, namespace: config.namespace });
-    const resumableGenerationStore = createRedisNewBosResumableGenerationStore({
-      redis,
-      namespace: config.namespace,
-    });
-    const generator = config.providerEnabled
-      ? createProductionNewBosGenerator({
-        apiKey: process.env.OPENAI_API_KEY,
-        repositoryRoot: process.cwd(),
-        model: config.providerModel,
-        resumableGenerationStore,
-      })
-      : null;
-    return createNewBosModernizationService({
       config,
-      canonicalReader,
-      realizationStore,
-      singleFlight,
-      generator,
-      resumableGenerationStore,
-      redisUrl: process.env.REDIS_URL,
+      env: process.env,
+      repositoryRoot: process.cwd(),
     });
   },
 });

@@ -31,7 +31,7 @@ export class LoopbackJsonRecruitingStore {
 
   async transaction(operation) {
     let result;
-    this.queue = this.queue.then(async () => {
+    const pending = this.queue.then(async () => {
       const state = await this.readUnlocked();
       result = await operation(state);
       await fs.mkdir(path.dirname(this.filePath), { recursive: true });
@@ -39,7 +39,33 @@ export class LoopbackJsonRecruitingStore {
       await fs.writeFile(temporary, JSON.stringify(state, null, 2), { mode: 0o600 });
       await fs.rename(temporary, this.filePath);
     });
-    await this.queue;
+    this.queue = pending.catch(() => {});
+    await pending;
+    return clone(result);
+  }
+
+  async transactionWithExternalStringGuards(operation, { assertCurrent } = {}) {
+    if (typeof assertCurrent !== 'function') {
+      throw new Error('RECRUITING_V1_EXTERNAL_GUARD_ASSERTION_REQUIRED');
+    }
+    let result;
+    const pending = this.queue.then(async () => {
+      const state = await this.readUnlocked();
+      result = await operation(state);
+      await fs.mkdir(path.dirname(this.filePath), { recursive: true });
+      const temporary = `${this.filePath}.${process.pid}.guarded.tmp`;
+      let renamed = false;
+      try {
+        await fs.writeFile(temporary, JSON.stringify(state, null, 2), { mode: 0o600 });
+        await assertCurrent();
+        await fs.rename(temporary, this.filePath);
+        renamed = true;
+      } finally {
+        if (!renamed) await fs.unlink(temporary).catch(() => {});
+      }
+    });
+    this.queue = pending.catch(() => {});
+    await pending;
     return clone(result);
   }
 
@@ -57,5 +83,6 @@ export const RECRUITING_SYNTHETIC_STORE_CONTRACT = Object.freeze({
   network_scope: 'LOOPBACK_ONLY',
   production_allowed: false,
   atomic_write: 'temporary file then rename',
+  guarded_atomic_write: 'external assertion immediately before temporary-file rename',
   contains_real_customer_data: false,
 });

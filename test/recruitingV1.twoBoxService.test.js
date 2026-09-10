@@ -22,10 +22,10 @@ const receipt = Object.freeze({
 });
 const currentReceipt = () => ({ ready: true, ...receipt });
 
-function harness({ membership = MANAGER, store = null, reader = currentReceipt } = {}) {
+function harness({ membership = MANAGER, store = null, reader = currentReceipt, now = () => NOW } = {}) {
   const source = store || new InMemoryRecruitingStore(createEmptyRecruitingState([membership]));
   const service = new RecruitingV1Service({
-    store: source, now: () => NOW, transport: createSyntheticNotificationTransport(), canonicalReadinessReader: reader,
+    store: source, now, transport: createSyntheticNotificationTransport(), canonicalReadinessReader: reader,
   });
   return { store: source, service };
 }
@@ -274,13 +274,178 @@ test('ready requires both complete current canonical results, exact profile, con
     { ...invitation, manager_subject_id: 'wrong' }, { ...invitation, enterprise_id: 'wrong' },
     { ...invitation, ba_realization_receipt: { ...receipt, profile_id: 'mm-20990101-other001' } },
   ]) assert.equal(consultingReadinessFor(altered, snapshot.memberships[MANAGER.membership_id]).ready, false);
-  assert.equal(publicInvitation({ ...invitation, consent: null }).progress_label, 'Results need verification');
+  const legacyConsentProjection = publicInvitation({ ...invitation, consent: null, legacy_consent_migration_v1: true });
+  assert.equal(legacyConsentProjection.progress_label, 'Results need verification');
+  assert.equal(legacyConsentProjection.consulting_preparation_eligible, false);
+  assert.equal(legacyConsentProjection.consulting_preparation_blocker, 'RECRUITING_CONSULTING_CURRENT_CONSENT_REQUIRED');
+  assert.equal(publicInvitation(invitation).consulting_preparation_eligible, true);
   for (const field of ['profile_id', 'assessment_id', 'realization_id', 'realization_sha256', 'artifact_sha256']) {
     current = { ...currentReceipt(), [field]: 'mismatch' };
     assert.equal((await service.home(token)).candidates[0].consulting_ready, false, field);
   }
   service.canonicalReadinessReader = async () => { throw new Error('synthetic unavailable'); };
   assert.equal((await service.home(token)).candidates[0].consulting_blocker, 'RECRUITING_CONSULTING_CANONICAL_VERIFICATION_UNAVAILABLE');
+});
+
+test('accepted legacy consent refresh preserves the exact candidate, completed pair and exhausted allowance', async () => {
+  const { service, store } = harness();
+  const token = await authenticate(service);
+  const original = await acceptedReady(service, token);
+  for (let index = 2; index <= 5; index += 1) await service.createInvitation(token, input(index), `fill-after-legacy-${index}`);
+  await store.transaction((state) => {
+    const invitation = state.invitations[original.invitation.invitation_id];
+    delete invitation.consent;
+    invitation.legacy_consent_migration_v1 = true;
+    return true;
+  });
+  const historical = (await store.read()).invitations[original.invitation.invitation_id];
+  const allowanceBefore = (await service.home(token)).invitation_allowance;
+  assert.equal(allowanceBefore.remaining, 0);
+
+  const attempts = await Promise.all(Array.from({ length: 8 }, (_, index) => service.requestCurrentConsent(
+    token, original.invitation.invitation_id, { expectedGeneration: 0, idempotencyKey: `legacy-current-consent-${index}` },
+  )));
+  assert.equal(new Set(attempts.map((item) => item.invitation.invitation_id)).size, 1);
+  assert.equal(attempts[0].invitation.invitation_id, original.invitation.invitation_id);
+  assert.equal(attempts.filter((item) => item.idempotent === false).length, 1);
+  const issued = attempts.find((item) => item.invitation_token);
+
+  let snapshot = await store.read();
+  let refreshed = snapshot.invitations[original.invitation.invitation_id];
+  assert.equal(refreshed.invitation_id, historical.invitation_id);
+  assert.equal(refreshed.candidate_id, historical.candidate_id);
+  assert.equal(refreshed.accepted_at, historical.accepted_at);
+  assert.equal(refreshed.bos_profile_id, historical.bos_profile_id);
+  assert.equal(refreshed.ba_assessment_id, historical.ba_assessment_id);
+  assert.deepEqual(refreshed.ba_realization_receipt, historical.ba_realization_receipt);
+  assert.equal(refreshed.bos_entitlement_state, historical.bos_entitlement_state);
+  assert.equal(refreshed.ba_entitlement_state, historical.ba_entitlement_state);
+  assert.equal(Object.values(snapshot.outbox).filter((item) => item.kind === 'RECRUIT_CURRENT_CONSENT').length, 1);
+  assert.equal(snapshot.audit.filter((item) => item.event_type === 'CURRENT_CONSENT_REQUESTED').length, 1);
+  assert.deepEqual((await service.home(token)).invitation_allowance, allowanceBefore);
+  assert.equal((await service.invitationPreview(issued.invitation_token)).current_consent_refresh, true);
+  await service.deliverOutbox(issued.outbox_id);
+  snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.delivery_state, 'DELIVERED');
+  const stillActive = await service.requestCurrentConsent(token, original.invitation.invitation_id, {
+    expectedGeneration: 1,
+    idempotencyKey: 'must-not-rotate-active-current-consent',
+  });
+  assert.equal(stillActive.idempotent, true);
+  assert.equal(stillActive.request_active, true);
+  assert.equal(stillActive.outbox_id, undefined);
+  snapshot = await store.read();
+  assert.equal(Object.values(snapshot.outbox).filter((item) => item.kind === 'RECRUIT_CURRENT_CONSENT').length, 1);
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.generation, 1);
+  assert.equal((await service.invitationPreview(issued.invitation_token)).current_consent_refresh, true);
+
+  await store.transaction((state) => {
+    state.invitations[original.invitation.invitation_id].current_consent_request.expires_at = '2026-09-09T17:59:59.000Z';
+    return true;
+  });
+  await assert.rejects(service.invitationPreview(issued.invitation_token), /RECRUITING_INVITATION_TOKEN_INVALID/u);
+  const replacement = await service.requestCurrentConsent(token, original.invitation.invitation_id, {
+    expectedGeneration: 1,
+    idempotencyKey: 'legacy-current-consent-replacement',
+  });
+  await assert.rejects(service.acceptInvitation(issued.invitation_token, consent), /RECRUITING_INVITATION_TOKEN_INVALID/u);
+  await service.claimOutbox(replacement.outbox_id);
+  await service.acceptInvitation(replacement.invitation_token, consent);
+  await service.recordDelivery(replacement.outbox_id, { success: false });
+  const candidates = (await service.home(token)).candidates;
+  const candidate = candidates.find((item) => item.invitation_id === original.invitation.invitation_id);
+  assert.equal(candidate.consulting_preparation_eligible, true);
+  assert.equal(candidate.consulting_ready, true);
+  snapshot = await store.read();
+  refreshed = snapshot.invitations[original.invitation.invitation_id];
+  assert.equal(refreshed.invitation_id, historical.invitation_id);
+  assert.equal(refreshed.candidate_id, historical.candidate_id);
+  assert.equal(refreshed.accepted_at, historical.accepted_at);
+  assert.equal(refreshed.bos_profile_id, historical.bos_profile_id);
+  assert.equal(refreshed.ba_assessment_id, historical.ba_assessment_id);
+  assert.deepEqual(refreshed.ba_realization_receipt, historical.ba_realization_receipt);
+  assert.equal(refreshed.current_consent_request.delivery_state, 'ACCEPTED');
+  assert.equal(refreshed.consent.version, 'recruiting_v1_consent_2026_08');
+  assert.deepEqual((await service.home(token)).invitation_allowance, allowanceBefore);
+  const alreadyCurrent = await service.requestCurrentConsent(token, original.invitation.invitation_id, { expectedGeneration: 2 });
+  assert.equal(alreadyCurrent.consent_current, true);
+  assert.equal(alreadyCurrent.outbox_id, undefined);
+});
+
+test('expired current-consent work never sends a stale link or overwrites the terminal expiry', async () => {
+  let providerSends = 0;
+  const { service, store } = harness();
+  service.transport = {
+    synthetic: true,
+    async deliver() { providerSends += 1; return { success: true, receipt: 'synthetic-current-consent' }; },
+  };
+  const token = await authenticate(service);
+  const original = await service.createInvitation(token, input(1), 'legacy-expiry-original');
+  await service.acceptInvitation(original.invitation_token, consent);
+  await store.transaction((state) => {
+    const invitation = state.invitations[original.invitation.invitation_id];
+    delete invitation.consent;
+    invitation.legacy_consent_migration_v1 = true;
+    return true;
+  });
+  const first = await service.requestCurrentConsent(token, original.invitation.invitation_id, { expectedGeneration: 0 });
+  await store.transaction((state) => {
+    state.invitations[original.invitation.invitation_id].current_consent_request.expires_at = '2026-09-09T17:59:59.000Z';
+    return true;
+  });
+  const declined = await service.deliverOutbox(first.outbox_id);
+  assert.equal(declined.deliver, false);
+  assert.equal(declined.item.state, 'CANCELLED');
+  assert.equal(providerSends, 0);
+  let snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.delivery_state, 'EXPIRED');
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].token_digest, null);
+
+  const replacement = await service.requestCurrentConsent(token, original.invitation.invitation_id, { expectedGeneration: 1 });
+  await service.claimOutbox(replacement.outbox_id);
+  await store.transaction((state) => {
+    state.invitations[original.invitation.invitation_id].current_consent_request.expires_at = '2026-09-09T17:59:59.000Z';
+    return true;
+  });
+  await service.recordDelivery(replacement.outbox_id, { success: true, receipt: 'late-provider-result' });
+  snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.delivery_state, 'EXPIRED');
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].token_digest, null);
+});
+
+test('authority cancellation clears only the exact consent request and permits a governed retry', async () => {
+  const { service, store } = harness();
+  const token = await authenticate(service);
+  const original = await service.createInvitation(token, input(1), 'legacy-authority-original');
+  await service.acceptInvitation(original.invitation_token, consent);
+  await store.transaction((state) => {
+    const invitation = state.invitations[original.invitation.invitation_id];
+    delete invitation.consent;
+    invitation.legacy_consent_migration_v1 = true;
+    return true;
+  });
+  const first = await service.requestCurrentConsent(token, original.invitation.invitation_id, { expectedGeneration: 0 });
+  await store.transaction((state) => {
+    state.memberships[MANAGER.membership_id].status = 'SUSPENDED';
+    return true;
+  });
+  const cancelled = await service.claimOutbox(first.outbox_id);
+  assert.equal(cancelled.deliver, false);
+  assert.equal(cancelled.item.state, 'CANCELLED');
+  let snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.delivery_state, 'CANCELLED');
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].token_digest, null);
+
+  await store.transaction((state) => {
+    state.memberships[MANAGER.membership_id].status = 'ACTIVE';
+    return true;
+  });
+  const replacement = await service.requestCurrentConsent(token, original.invitation.invitation_id, { expectedGeneration: 1 });
+  assert.equal(replacement.idempotent, false);
+  assert.ok(replacement.invitation_token);
+  snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.generation, 2);
+  assert.notEqual(snapshot.invitations[original.invitation.invitation_id].token_digest, null);
 });
 
 test('manager isolation and revocation during canonical verification cannot expose a ready row', async () => {
@@ -320,6 +485,80 @@ test('late invitation delivery cannot overwrite an accepted relationship or resu
 function response() {
   return { headers: {}, statusCode: null, body: null, setHeader(name, value) { this.headers[name] = value; }, status(code) { this.statusCode = code; return this; }, json(body) { this.body = body; return this; } };
 }
+test('HTTP current-consent refresh is same-origin, CSRF-bound, token-private and single-use', async () => {
+  const { service, store } = harness();
+  const token = await authenticate(service);
+  const original = await acceptedReady(service, token);
+  await store.transaction((state) => {
+    const invitation = state.invitations[original.invitation.invitation_id];
+    delete invitation.consent;
+    invitation.legacy_consent_migration_v1 = true;
+    return true;
+  });
+  let deliveredToken = null;
+  let providerSends = 0;
+  service.transport = {
+    synthetic: false,
+    async deliver(item) {
+      providerSends += 1;
+      assert.equal(item.kind, 'RECRUIT_CURRENT_CONSENT');
+      deliveredToken = item.delivery_token;
+      return { success: true, receipt: 'synthetic-http-current-consent' };
+    },
+  };
+  const handler = createRecruitingHttpHandler({ service, env: { RECRUITING_V1_ENABLED: 'true', NODE_ENV: 'production' } });
+  const csrf = await service.issueManagerCsrf(token);
+  const denied = response();
+  await handler({
+    method: 'POST',
+    headers: { host: '127.0.0.1:5269', cookie: `__Host-more_recruiting_manager=${token}`, 'x-recruiting-csrf': csrf },
+    body: { action: 'REQUEST_CURRENT_CONSENT', invitation_id: original.invitation.invitation_id, expected_generation: 0 },
+  }, denied);
+  assert.equal(denied.statusCode, 403);
+  assert.equal(providerSends, 0);
+
+  const requested = response();
+  await handler({
+    method: 'POST',
+    headers: {
+      host: '127.0.0.1:5269',
+      origin: 'http://127.0.0.1:5269',
+      cookie: `__Host-more_recruiting_manager=${token}`,
+      'x-recruiting-csrf': csrf,
+      'idempotency-key': 'http-current-consent',
+    },
+    body: { action: 'REQUEST_CURRENT_CONSENT', invitation_id: original.invitation.invitation_id, expected_generation: 0 },
+  }, requested);
+  assert.equal(requested.statusCode, 200);
+  assert.equal(requested.body.ok, true);
+  assert.equal(requested.body.invitation.invitation_id, original.invitation.invitation_id);
+  assert.equal(requested.body.invitation_token, undefined);
+  assert.equal(requested.body.delivery.state, 'DELIVERED');
+  assert.equal(providerSends, 1);
+  assert.ok(deliveredToken);
+  assert.match(String(requested.headers['Set-Cookie']), /__Host-more_recruiting_manager=/u);
+
+  const accepted = response();
+  await handler({
+    method: 'POST',
+    headers: { host: '127.0.0.1:5269', origin: 'http://127.0.0.1:5269' },
+    body: { action: 'ACCEPT_INVITATION', token: deliveredToken, consent },
+  }, accepted);
+  assert.equal(accepted.statusCode, 200);
+  assert.match(String(accepted.headers['Set-Cookie']), /__Host-more_recruiting_invite=/u);
+  const snapshot = await store.read();
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].consent.version, consent.version);
+  assert.equal(snapshot.invitations[original.invitation.invitation_id].current_consent_request.delivery_state, 'ACCEPTED');
+
+  const replay = response();
+  await handler({
+    method: 'POST',
+    headers: { host: '127.0.0.1:5269', origin: 'http://127.0.0.1:5269' },
+    body: { action: 'ACCEPT_INVITATION', token: deliveredToken, consent },
+  }, replay);
+  assert.equal(replay.statusCode, 422);
+  assert.equal(replay.body.code, 'RECRUITING_INVITATION_TOKEN_INVALID');
+});
 test('injected actual HTTP handler uses scoped service and refuses implicit canonical/provider fallbacks', async () => {
   const { service } = harness();
   const handler = createRecruitingHttpHandler({ service, env: { RECRUITING_V1_ENABLED: 'true', NODE_ENV: 'development' } });

@@ -20,6 +20,10 @@
       "maxDuration": 800,
       "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
     },
+    "api/recruiting/runtime.js": {
+      "maxDuration": 800,
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
+    },
     "api/internal/subscription-v1-runtime.js": {
       "maxDuration": 800
     },

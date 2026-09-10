@@ -42,7 +42,8 @@ export function createRedisNewBaBackgroundResponseStore({ redis, namespace, ttlM
       if (parsed?.version === 'realization_terminal_checkpoint_retired_v1') return null;
       return validateRecord(parsed, { profileId, generationIdentitySha256, stage });
     },
-    async prepare({ profileId, generationIdentitySha256, stage }) {
+    async prepare({ profileId, generationIdentitySha256, stage, assertCurrentAuthority = async () => {} }) {
+      if (typeof assertCurrentAuthority !== 'function') throw new Error('new_ba_background_store_authority_assertion_invalid');
       const key = keyFor(namespace, profileId, generationIdentitySha256, stage);
       const raw = await redis.get(key);
       if (!raw) {
@@ -72,6 +73,7 @@ export function createRedisNewBaBackgroundResponseStore({ redis, namespace, ttlM
         claimed_at: claimedAt,
         maximum_replacement_submissions: 1,
       });
+      await assertCurrentAuthority();
       const claimed = await redis.set(recoveryKey(namespace, profileId, generationIdentitySha256, stage), JSON.stringify(claim), 'NX');
       if (claimed !== 'OK') {
         await onRecoveryEvent(Object.freeze({ event_type: 'automatic_recovery_exhausted', stage, provider_status: checkpoint.provider_status, human_review_required: true }));

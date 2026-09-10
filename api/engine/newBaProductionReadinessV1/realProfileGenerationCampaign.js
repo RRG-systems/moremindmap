@@ -9,7 +9,7 @@ import {
   generateRealProfileWbm,
 } from './realProfileGeneration.js';
 import { buildRealProfileNewBaRealization } from './realProfileRealizationFactory.js';
-import { buildNewBaRealizationIdentityV3 } from './realizationIdentity.js';
+import { buildNewBaRealizationIdentityV3, sameNewBaRealizationIdentity } from './realizationIdentity.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 
 const REFERENCE_PROFILES = Object.freeze({
@@ -79,14 +79,29 @@ function failureKey(namespace, profileId) {
   return `${campaignRoot(namespace, profileId)}:failure-ledger`;
 }
 
-function generationIdentityFor(source) {
-  return sha256Stable({
-    profile_id: source.profile_id,
-    assessment_id: source.assessment_id,
-    business_evidence_sha256: source.business_evidence.evidence_sha256,
-    bos_authority_sha256: source.bos_authority.sha256,
-    bos_fusion_contract_sha256: source.bos_authority.fusion_contract_sha256,
-    bos_evidence_boundary_sha256: source.bos_authority.evidence_boundary_sha256,
+function generationIdentityFor(source, providerModel) {
+  return realizationIdentityFor(source, classifyNewBaCompatibility(source), providerModel).sha256;
+}
+
+function realizationIdentityFor(source, compatibility, providerModel) {
+  return buildNewBaRealizationIdentityV3({
+    profileId: source.profile_id,
+    assessmentId: source.assessment_id,
+    evidenceSha256: source.business_evidence.evidence_sha256,
+    bosAuthoritySha256: source.bos_authority.sha256,
+    bosFusionContractSha256: source.bos_authority.fusion_contract_sha256,
+    bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
+    compatibilityClass: compatibility.class,
+    verticalBinding: source.business_evidence.vertical_binding,
+    providerModel,
+  });
+}
+
+function sourceIdentityReceipt(identity) {
+  return Object.freeze({
+    version: identity.version,
+    realization_id: identity.realization_id,
+    sha256: identity.sha256,
   });
 }
 
@@ -203,20 +218,43 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
   invariant(typeof realizationStore?.inspect === 'function', 'new_ba_real_profile_campaign_realization_store_invalid');
   invariant(typeof apiKey === 'string' && apiKey.length > 20, 'new_ba_real_profile_campaign_openai_binding_missing');
 
-  async function sourceFor(profile) {
-    const source = await authorityReader.read(profile.profile);
+  async function sourceSnapshotFor(profile, expectedAuthority = null, expectedRealizationIdentity = null) {
+    if (typeof expectedAuthority?.assertCurrent === 'function') await expectedAuthority.assertCurrent();
+    const authorityRead = typeof authorityReader.readWithSourceGuards === 'function'
+      ? await authorityReader.readWithSourceGuards(profile.profile, expectedAuthority || undefined)
+      : { source: await authorityReader.read(profile.profile, expectedAuthority || undefined), sourceGuards: [] };
+    const source = authorityRead.source;
     invariant(source.profile_id === profile.profile, 'new_ba_real_profile_campaign_source_identity_mismatch');
     if (profile.assessment_id) invariant(source.assessment_id === profile.assessment_id, 'new_ba_real_profile_campaign_reference_assessment_mismatch');
     invariant(source.business_evidence.profile_id === profile.profile && source.bos_authority.profile_id === profile.profile, 'new_ba_real_profile_campaign_cross_profile_source');
     const compatibility = classifyNewBaCompatibility(source);
     invariant(compatibility.automatic_rebuild, 'new_ba_real_profile_campaign_business_evidence_insufficient', compatibility.evidence_sufficiency);
     invariant(source.bos_authority.fusion_authority.claims.every((claim) => claim.business_cause_authority === false), 'new_ba_real_profile_campaign_bos_business_cause_prohibited');
-    return source;
+    const identity = realizationIdentityFor(source, compatibility, config.providerModel);
+    if (expectedRealizationIdentity) {
+      invariant(
+        sameNewBaRealizationIdentity(identity, expectedRealizationIdentity),
+        'new_ba_real_profile_campaign_expected_realization_identity_mismatch',
+      );
+    }
+    return Object.freeze({ source, sourceGuards: authorityRead.sourceGuards || [], compatibility, identity });
   }
 
-  async function contextFor(profileId) {
+  async function sourceFor(profile, expectedAuthority = null, expectedRealizationIdentity = null) {
+    return (await sourceSnapshotFor(profile, expectedAuthority, expectedRealizationIdentity)).source;
+  }
+
+  async function assertSourceAuthorityCurrent(profile, source, expectedAuthority, expectedRealizationIdentity = null) {
+    const current = await sourceFor(profile, expectedAuthority, expectedRealizationIdentity);
+    invariant(
+      generationIdentityFor(current, config.providerModel) === generationIdentityFor(source, config.providerModel),
+      'new_ba_manager_preparation_source_authority_mismatch',
+    );
+  }
+
+  async function contextFor(profileId, expectedAuthority = null, expectedRealizationIdentity = null) {
     const reference = profileReference(profileId);
-    const source = await sourceFor(reference);
+    const { source, sourceGuards, compatibility, identity } = await sourceSnapshotFor(reference, expectedAuthority, expectedRealizationIdentity);
     return {
       profile: {
         ...reference,
@@ -224,12 +262,15 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
         display_name: displayNameFor(source, reference),
       },
       source,
+      sourceGuards,
+      compatibility,
+      identity,
     };
   }
 
-  async function status(profileId) {
-    const { profile, source } = await contextFor(profileId);
-    const generationIdentitySha256 = generationIdentityFor(source);
+  async function status(profileId, expectedAuthority = null) {
+    const { profile, source } = await contextFor(profileId, expectedAuthority);
+    const generationIdentitySha256 = generationIdentityFor(source, config.providerModel);
     const checkpoints = await Promise.all(STAGES.map((stage) => readCheckpoint(redis, config, profile, generationIdentitySha256, stage)));
     const failureLedgerKey = failureKey(config.namespace, profile.profile);
     const failures = await redis.llen(failureLedgerKey);
@@ -237,17 +278,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       ? JSON.parse(await redis.lindex(failureLedgerKey, -1))
       : null;
     const compatibility = classifyNewBaCompatibility(source);
-    const identity = buildNewBaRealizationIdentityV3({
-      profileId: profile.profile,
-      assessmentId: source.assessment_id,
-      evidenceSha256: source.business_evidence.evidence_sha256,
-      bosAuthoritySha256: source.bos_authority.sha256,
-      bosFusionContractSha256: source.bos_authority.fusion_contract_sha256,
-      bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
-      compatibilityClass: compatibility.class,
-      verticalBinding: source.business_evidence.vertical_binding,
-      providerModel: config.providerModel,
-    });
+    const identity = realizationIdentityFor(source, compatibility, config.providerModel);
     const current = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
     return deepFreeze({
       status: 'ok', profile_id: profile.profile, assessment_id: profile.assessment_id,
@@ -269,8 +300,8 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     });
   }
 
-  async function preflight(profileId) {
-    const { profile, source } = await contextFor(profileId);
+  async function preflight(profileId, expectedAuthority = null) {
+    const { profile, source } = await contextFor(profileId, expectedAuthority);
     const generation = createRealProfileGenerationContext({ source, displayName: profile.display_name });
     return deepFreeze({
       status: 'PASS',
@@ -293,9 +324,9 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     });
   }
 
-  async function relationshipDiagnostic(profileId) {
-    const { profile, source } = await contextFor(profileId);
-    const generationIdentitySha256 = generationIdentityFor(source);
+  async function relationshipDiagnostic(profileId, expectedAuthority = null) {
+    const { profile, source } = await contextFor(profileId, expectedAuthority);
+    const generationIdentitySha256 = generationIdentityFor(source, config.providerModel);
     const checkpoint = await readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1');
     invariant(checkpoint, 'new_ba_real_profile_campaign_wbm_checkpoint_required');
     const authorityClaims = source.bos_authority.fusion_authority.claims;
@@ -325,46 +356,52 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     });
   }
 
-  async function generateStage(profileId, stage) {
-    const { profile, source } = await contextFor(profileId);
+  async function generateStage(profileId, stage, expectedAuthority = null, expectedRealizationIdentity = null) {
+    const { profile, source } = await contextFor(profileId, expectedAuthority, expectedRealizationIdentity);
     invariant(STAGES.includes(stage), 'new_ba_real_profile_campaign_stage_invalid');
-    const generationIdentitySha256 = generationIdentityFor(source);
+    const generationIdentitySha256 = generationIdentityFor(source, config.providerModel);
     const existing = await readCheckpoint(redis, config, profile, generationIdentitySha256, stage);
     if (existing) return deepFreeze({ status: 'PASS', path: 'current_checkpoint', profile_id: profile.profile, assessment_id: profile.assessment_id, checkpoint: checkpointSummary(existing), provider_calls: 0 });
     try {
+      const assertCurrentAuthority = () => assertSourceAuthorityCurrent(profile, source, expectedAuthority, expectedRealizationIdentity);
       let generated;
       if (stage === 'whole_business_model_v1') {
-        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, backgroundResponseStore, generationIdentitySha256 });
+        await assertCurrentAuthority();
+        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
       } else if (stage === 'five_futures_v2') {
         const wbm = await readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1');
         invariant(wbm, 'new_ba_real_profile_campaign_wbm_checkpoint_required');
-        generated = await generateRealProfileFutures({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, backgroundResponseStore, generationIdentitySha256 });
+        await assertCurrentAuthority();
+        generated = await generateRealProfileFutures({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
       } else {
         const [wbm, futures] = await Promise.all([
           readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1'),
           readCheckpoint(redis, config, profile, generationIdentitySha256, 'five_futures_v2'),
         ]);
         invariant(wbm && futures, 'new_ba_real_profile_campaign_upstream_checkpoints_required');
-        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256 });
+        await assertCurrentAuthority();
+        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
       }
       const artifact = stage === 'whole_business_model_v1' ? generated.result.model : stage === 'five_futures_v2' ? generated.result.artifact : generated.result.one_move;
       const receipt = buildSanitizedStageReceipt({ profileId: profile.profile, stage, artifact, provider: generated.provider });
       invariant(receipt.accepted_calls === 1, 'new_ba_real_profile_campaign_one_accepted_call_per_stage_required');
       const checkpoint = wrapCheckpoint({ profileId: profile.profile, assessmentId: profile.assessment_id, generationIdentitySha256, stage, artifact, receipt });
+      await assertCurrentAuthority();
       const persistence = await persistCheckpoint(redis, config, checkpoint);
       return deepFreeze({ status: 'PASS', path: 'generated_validated_checkpoint', profile_id: profile.profile, assessment_id: profile.assessment_id, checkpoint: checkpointSummary(checkpoint), persistence });
     } catch (error) {
       if (error?.background_pending) {
         return deepFreeze({ status: 'ADVANCING', path: 'provider_background_in_progress', profile_id: profile.profile, assessment_id: profile.assessment_id, active_stage: stage, provider_calls: 0 });
       }
+      await assertSourceAuthorityCurrent(profile, source, expectedAuthority, expectedRealizationIdentity);
       await appendFailure(redis, config, profile.profile, stage, error);
       throw error;
     }
   }
 
-  async function assembleCandidate(profileId) {
-    const { profile, source } = await contextFor(profileId);
-    const generationIdentitySha256 = generationIdentityFor(source);
+  async function assembleCandidate(profileId, expectedAuthority = null, expectedRealizationIdentity = null) {
+    const { profile, source, sourceGuards, compatibility, identity } = await contextFor(profileId, expectedAuthority, expectedRealizationIdentity);
+    const generationIdentitySha256 = generationIdentityFor(source, config.providerModel);
     const checkpoints = await Promise.all(STAGES.map((stage) => readCheckpoint(redis, config, profile, generationIdentitySha256, stage)));
     invariant(checkpoints.every(Boolean), 'new_ba_real_profile_campaign_all_checkpoints_required');
     const providerAccounting = aggregateProviderAccounting(checkpoints);
@@ -377,39 +414,28 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       providerAccounting,
     });
     const validation = validateCompleteNewBaRealization(artifact, { profileId: profile.profile, assessmentId: profile.assessment_id });
-    const compatibility = classifyNewBaCompatibility(source);
-    const identity = buildNewBaRealizationIdentityV3({
-      profileId: profile.profile,
-      assessmentId: source.assessment_id,
-      evidenceSha256: source.business_evidence.evidence_sha256,
-      bosAuthoritySha256: source.bos_authority.sha256,
-      bosFusionContractSha256: source.bos_authority.fusion_contract_sha256,
-      bosEvidenceBoundarySha256: source.bos_authority.evidence_boundary_sha256,
-      compatibilityClass: compatibility.class,
-      verticalBinding: source.business_evidence.vertical_binding,
-      providerModel: config.providerModel,
-    });
-    return deepFreeze({ profile, source, checkpoints, providerAccounting, artifact, validation, compatibility, identity });
+    return deepFreeze({ profile, source, sourceGuards, checkpoints, providerAccounting, artifact, validation, compatibility, identity });
   }
 
-  async function generate(profileId) {
-    for (const stage of STAGES) await generateStage(profileId, stage);
-    const candidate = await assembleCandidate(profileId);
+  async function generate(profileId, expectedAuthority = null, expectedRealizationIdentity = null) {
+    for (const stage of STAGES) await generateStage(profileId, stage, expectedAuthority, expectedRealizationIdentity);
+    const candidate = await assembleCandidate(profileId, expectedAuthority, expectedRealizationIdentity);
     return deepFreeze({
       artifact: candidate.artifact,
       provider_accounting: candidate.providerAccounting,
       validation: candidate.validation,
+      source_realization_identity: sourceIdentityReceipt(candidate.identity),
     });
   }
 
-  async function advance(profileId) {
-    const { profile, source } = await contextFor(profileId);
-    const generationIdentitySha256 = generationIdentityFor(source);
+  async function advance(profileId, expectedAuthority = null, expectedRealizationIdentity = null) {
+    const { profile, source } = await contextFor(profileId, expectedAuthority, expectedRealizationIdentity);
+    const generationIdentitySha256 = generationIdentityFor(source, config.providerModel);
     const checkpoints = await Promise.all(STAGES.map((stage) => readCheckpoint(redis, config, profile, generationIdentitySha256, stage)));
     const nextStageIndex = checkpoints.findIndex((checkpoint) => !checkpoint);
     if (nextStageIndex >= 0) {
       const nextStage = STAGES[nextStageIndex];
-      const advanced = await generateStage(profile.profile, nextStage);
+      const advanced = await generateStage(profile.profile, nextStage, expectedAuthority, expectedRealizationIdentity);
       if (advanced.status === 'ADVANCING') {
         return deepFreeze({ complete: false, status: 'ADVANCING', profile_id: profile.profile, assessment_id: profile.assessment_id, accepted_stage: null, active_stage: nextStage, next_stage: nextStage });
       }
@@ -425,27 +451,35 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
         });
       }
     }
-    const candidate = await assembleCandidate(profile.profile);
+    const candidate = await assembleCandidate(profile.profile, expectedAuthority, expectedRealizationIdentity);
     return deepFreeze({
       complete: true,
       status: 'COMPLETE',
       artifact: candidate.artifact,
       provider_accounting: candidate.providerAccounting,
       validation: candidate.validation,
+      source_realization_identity: sourceIdentityReceipt(candidate.identity),
     });
   }
 
-  async function publish(profileId) {
-    const candidate = await assembleCandidate(profileId);
-    const { profile, providerAccounting, artifact, validation, compatibility, identity } = candidate;
+  async function publish(profileId, expectedAuthority = null, expectedRealizationIdentity = null) {
+    const candidate = await assembleCandidate(profileId, expectedAuthority, expectedRealizationIdentity);
+    const { profile, sourceGuards, providerAccounting, artifact, validation, compatibility, identity } = candidate;
     const before = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
     if (before.state === 'current') {
       invariant(before.current.artifact_sha256 === sha256Stable(artifact), 'new_ba_real_profile_campaign_existing_current_conflict');
       return deepFreeze({ status: 'PASS', path: 'current_fast_path', profile_id: profile.profile, assessment_id: profile.assessment_id, realization_id: before.pointer, artifact_sha256: before.current.artifact_sha256, validation, provider_accounting: providerAccounting });
     }
     const envelope = buildLaunchSafeNewBaEnvelope({ profileId: profile.profile, realizationIdentity: identity, artifact, compatibility, providerAccounting });
+    await assertSourceAuthorityCurrent(profile, candidate.source, expectedAuthority, expectedRealizationIdentity);
     const persistence = await realizationStore.persistImmutable(envelope);
-    const pointer = await realizationStore.advancePointer({ profileId: profile.profile, expectedCurrentId: before.pointer, nextRealizationId: envelope.realization_id });
+    await assertSourceAuthorityCurrent(profile, candidate.source, expectedAuthority, expectedRealizationIdentity);
+    const pointer = await realizationStore.advancePointer({
+      profileId: profile.profile,
+      expectedCurrentId: before.pointer,
+      nextRealizationId: envelope.realization_id,
+      sourceGuards,
+    });
     const after = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
     invariant(after.state === 'current' && after.pointer === envelope.realization_id, 'new_ba_real_profile_campaign_atomic_publication_failed');
     return deepFreeze({
