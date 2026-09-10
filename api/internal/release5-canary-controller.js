@@ -1413,34 +1413,226 @@ function assertExactKeyedRecords(bucket, idField, code) {
   }
 }
 
+function release5AgreementMutationScope(state, { memberships, invitation, profileId = null, assessmentId = null }) {
+  const agreementsWithDeliveryEvidence = Object.entries(state.shared_business_sessions || {})
+    .filter(([, session]) => session?.invariants?.external_mutation === true
+      || session?.agreement_delivery?.recipients?.some((recipient) =>
+        ['DELIVERED', 'FAILED'].includes(recipient?.state)));
+  if (agreementsWithDeliveryEvidence.length === 0) {
+    return Object.freeze({ sessionId: null, path: null, agreementComplete: false });
+  }
+
+  const invalid = () => {
+    throw new Error('RELEASE5_RECRUITING_STATE_IDENTITY_SCOPE_INVALID');
+  };
+  if (agreementsWithDeliveryEvidence.length !== 1 || !invitation) invalid();
+
+  const [sessionKey, session] = agreementsWithDeliveryEvidence[0];
+  const membership = memberships.find((item) => item.manager_profile_id === STANDARD_PROFILE_ID) || null;
+  const relationship = state.consultation_relationships?.[session?.relationship_id] || null;
+  const accepted = session?.accepted_plan_snapshot;
+  const delivery = session?.agreement_delivery;
+  const recipients = delivery?.recipients;
+  const proposals = session?.proposals;
+  const decisions = session?.decisions;
+  const acceptedProposals = Array.isArray(proposals)
+    ? proposals.filter((item) => item?.proposal_id === accepted?.proposal_id)
+    : null;
+  const acceptedProposal = acceptedProposals?.[0] || null;
+  const acceptedDecisions = Array.isArray(decisions)
+    ? decisions.filter((item) => item?.acceptance_id === accepted?.acceptance_id)
+    : [];
+  const acceptedDecision = acceptedDecisions[0] || null;
+  const normalizedProfile = String(profileId || invitation.bos_profile_id || '').trim().toLowerCase();
+  const normalizedAssessment = String(assessmentId || invitation.ba_assessment_id || '').trim().toLowerCase();
+
+  if (!membership
+      || membership.status !== 'ACTIVE'
+      || membership.setup_state !== 'COMPLETE'
+      || membership.manager_profile_id !== STANDARD_PROFILE_ID
+      || membership.manager_email !== approvedRecipients().standard
+      || membership.enterprise_id !== STANDARD_ENTERPRISE_ID
+      || sessionKey !== session.session_id
+      || session.contract !== 'more_recruiting_gu_v1_shared_business_session_v1'
+      || session.status !== 'COMPLETED'
+      || session.synthetic_only !== false
+      || session.invariants?.canonical_mutation !== false
+      || session.invariants?.recruiting_v1_mutation !== false
+      || session.invariants?.model_output_is_canonical !== false
+      || session.manager_binding?.membership_id !== membership.membership_id
+      || session.manager_binding?.subject_id !== membership.manager_subject_id
+      || session.manager_binding?.enterprise_id !== membership.enterprise_id
+      || session.manager_binding?.name !== membership.manager_name
+      || session.manager_binding?.entitlement_mode !== membership.entitlement_mode
+      || session.subject_binding?.candidate_id !== invitation.candidate_id
+      || session.subject_binding?.consultation_request_id != null
+      || String(session.subject_binding?.profile_id || '').toLowerCase() !== normalizedProfile
+      || session.subject_binding?.name !== invitation.recruit_name
+      || invitation.state !== 'ACCEPTED'
+      || invitation.delivery_state !== 'DELIVERED'
+      || !Number.isFinite(Date.parse(invitation.accepted_at || ''))
+      || invitation.revoked_at
+      || invitation.consent?.version !== 'recruiting_v1_consent_2026_08'
+      || invitation.consent?.accepted_at !== invitation.accepted_at
+      || invitation.membership_id !== membership.membership_id
+      || invitation.manager_subject_id !== membership.manager_subject_id
+      || invitation.enterprise_id !== membership.enterprise_id
+      || invitation.recruit_email !== approvedRecipients().recruit
+      || invitation.ba_readiness !== 'BA_INTELLIGENCE_READY'
+      || String(invitation.bos_profile_id || '').toLowerCase() !== normalizedProfile
+      || String(invitation.ba_assessment_id || '').toLowerCase() !== normalizedAssessment
+      || !normalizedProfile
+      || !normalizedAssessment
+      || relationship?.relationship_id !== session.relationship_id
+      || relationship.status !== 'ACTIVE'
+      || relationship.membership_id !== membership.membership_id
+      || relationship.manager_subject_id !== membership.manager_subject_id
+      || relationship.enterprise_id !== membership.enterprise_id
+      || relationship.candidate_id !== invitation.candidate_id
+      || String(relationship.profile_id || '').toLowerCase() !== normalizedProfile
+      || relationship.owner_name !== invitation.recruit_name
+      || relationship.consent_state !== 'RECRUITING_INVITATION_ACCEPTED'
+      || relationship.source !== 'RECRUITING_V1_ACCEPTED_INVITATION'
+      || relationship.authorized_at !== invitation.accepted_at
+      || relationship.canonical_write_authority !== false
+      || accepted?.contract !== 'more_consulting_accepted_plan_snapshot_v1'
+      || !accepted.acceptance_id
+      || accepted.session_id !== session.session_id
+      || accepted.accepted_by !== 'MANAGER'
+      || accepted.accepted_at !== session.completed_at
+      || !accepted.plan
+      || typeof accepted.plan !== 'object'
+      || Array.isArray(accepted.plan)
+      || stableHash(accepted.plan) !== accepted.snapshot_hash
+      || !Array.isArray(proposals)
+      || acceptedProposals.length !== 1
+      || proposals.filter((item) => item?.status === 'ACCEPTED').length !== 1
+      || acceptedProposal?.status !== 'ACCEPTED'
+      || acceptedProposal.proposal_id !== session.current_proposal_id
+      || acceptedProposal.version !== accepted.version
+      || !acceptedProposal.proposal
+      || stableHash(acceptedProposal.proposal) !== stableHash(accepted.plan)
+      || accepted.acceptance_id !== `plan-acceptance-${stableHash({
+        session_id: session.session_id,
+        proposal_id: accepted.proposal_id,
+        version: accepted.version,
+        snapshot_hash: accepted.snapshot_hash,
+      }).slice(0, 24)}`
+      || acceptedDecisions.length !== 1
+      || decisions.at(-1) !== acceptedDecision
+      || acceptedDecision.decision !== 'YES'
+      || acceptedDecision.proposal_id !== accepted.proposal_id
+      || acceptedDecision.actor !== accepted.accepted_by
+      || acceptedDecision.decided_at !== accepted.accepted_at
+      || delivery?.contract !== 'more_consulting_agreed_plan_delivery_v1'
+      || delivery.acceptance_id !== accepted.acceptance_id
+      || !Array.isArray(recipients)
+      || recipients.length !== 2
+      || new Set(recipients.map((item) => item?.recipient_role)).size !== 2
+      || !recipients.some((item) => item?.recipient_role === 'PERSON')
+      || !recipients.some((item) => item?.recipient_role === 'MANAGER')) invalid();
+
+  const agreementOutboxes = Object.values(state.outbox || {})
+    .filter((item) => item?.kind === 'CONSULTING_AGREED_PLAN');
+  if (agreementOutboxes.length !== 2
+      || new Set(recipients.map((item) => item.outbox_id)).size !== 2
+      || agreementOutboxes.some((item) => !recipients.some((recipient) => recipient.outbox_id === item.outbox_id))) invalid();
+
+  let deliveredCount = 0;
+  let failedCount = 0;
+  for (const recipient of recipients) {
+    const expectedRecipient = recipient.recipient_role === 'PERSON'
+      ? approvedRecipients().recruit
+      : recipient.recipient_role === 'MANAGER' ? approvedRecipients().standard : null;
+    const expectedRecipientName = recipient.recipient_role === 'PERSON'
+      ? invitation.recruit_name
+      : recipient.recipient_role === 'MANAGER' ? membership.manager_name : null;
+    const expectedIdempotencyKey = stableHash({
+      acceptance_id: accepted.acceptance_id,
+      recipient_role: recipient.recipient_role,
+      snapshot_hash: accepted.snapshot_hash,
+    });
+    const outbox = state.outbox?.[recipient.outbox_id];
+    const retryAudits = (state.audit || []).filter((event) =>
+      event?.event_type === 'CONSULTING_AGREED_PLAN_RETRY_AUTHORIZED'
+        && event.outbox_id === recipient.outbox_id
+        && event.acceptance_id === accepted.acceptance_id
+        && event.recipient_role === recipient.recipient_role
+        && Number.isFinite(Date.parse(event.occurred_at || '')));
+    const retryAudit = retryAudits.at(-1) || null;
+    const retryAt = Date.parse(retryAudit?.occurred_at || '');
+    const recipientAttemptedAt = Date.parse(recipient.attempted_at || '');
+    const outboxUpdatedAt = Date.parse(outbox?.updated_at || '');
+    const retryAuthorized = Boolean(retryAudit)
+      && retryAt >= recipientAttemptedAt
+      && retryAt <= outboxUpdatedAt;
+    if (!expectedRecipient
+        || !expectedRecipientName
+        || recipient.idempotency_key !== expectedIdempotencyKey
+        || recipient.synthetic !== false
+        || recipient.recipient_masked !== expectedRecipient.replace(/^(.{2}).*(@.*)$/u, '$1***$2')
+        || !Number.isFinite(Date.parse(recipient.attempted_at || ''))
+        || !outbox
+        || outbox.outbox_id !== recipient.outbox_id
+        || outbox.idempotency_key !== recipient.idempotency_key
+        || outbox.kind !== 'CONSULTING_AGREED_PLAN'
+        || outbox.membership_id !== membership.membership_id
+        || outbox.enterprise_id !== membership.enterprise_id
+        || outbox.invitation_id !== invitation.invitation_id
+        || outbox.recipient !== expectedRecipient
+        || outbox.payload?.recipient_role !== recipient.recipient_role
+        || outbox.payload?.acceptance_id !== accepted.acceptance_id
+        || outbox.payload?.recipient_name !== expectedRecipientName
+        || outbox.payload?.manager_name !== membership.manager_name
+        || outbox.payload?.person_name !== invitation.recruit_name
+        || !outbox.payload?.accepted_plan_snapshot
+        || stableHash(outbox.payload?.accepted_plan_snapshot) !== stableHash(accepted)
+        || !Number.isInteger(outbox.attempts)
+        || outbox.attempts < 1
+        || !Number.isFinite(outboxUpdatedAt)
+        || outbox.token_capsule != null) invalid();
+    if (recipient.state === 'DELIVERED') {
+      if (outbox.state !== 'DELIVERED'
+          || outbox.provider_receipt !== recipient.provider_receipt
+          || !String(recipient.provider_receipt || '').startsWith('resend:')) invalid();
+      deliveredCount += 1;
+    } else if (recipient.state === 'FAILED') {
+      const priorFailureReceipt = /^resend_/u.test(String(recipient.provider_receipt || ''));
+      const stableFailure = outbox.state === 'FAILED'
+        && outbox.provider_receipt === recipient.provider_receipt;
+      const retryPending = ['PENDING', 'SENDING'].includes(outbox.state)
+        && outbox.provider_receipt === recipient.provider_receipt
+        && (outbox.state !== 'SENDING' || Number.isFinite(Date.parse(outbox.delivery_started_at || '')));
+      const retryFinished = outbox.attempts >= 2 && (
+        (outbox.state === 'DELIVERED' && String(outbox.provider_receipt || '').startsWith('resend:'))
+        || (outbox.state === 'FAILED' && /^resend_/u.test(String(outbox.provider_receipt || '')))
+      );
+      if (!priorFailureReceipt
+          || (!stableFailure && !(retryAuthorized && (retryPending || retryFinished)))) invalid();
+      failedCount += 1;
+    } else invalid();
+  }
+
+  const agreementComplete = deliveredCount === 2 && failedCount === 0 && delivery.status === 'DELIVERED';
+  const retryablePartial = deliveredCount === 1 && failedCount === 1 && delivery.status === 'PARTIAL_FAILURE';
+  const retryableFailure = deliveredCount === 0 && failedCount === 2 && delivery.status === 'FAILED';
+  const expectedExternalMutation = deliveredCount > 0;
+  if (session.invariants.external_mutation !== expectedExternalMutation
+      || !agreementComplete && !retryablePartial && !retryableFailure) invalid();
+  return Object.freeze({
+    sessionId: session.session_id,
+    path: expectedExternalMutation
+      ? Object.freeze(['shared_business_sessions', session.session_id, 'invariants', 'external_mutation'])
+      : null,
+    agreementComplete,
+  });
+}
+
 function release5IdentityClosure(state, { profileId = null, assessmentId = null } = {}) {
   const memberships = Object.values(state.memberships || {});
   const invitation = Object.values(state.invitations || {})[0] || null;
-  const agreementSessions = Object.values(state.shared_business_sessions || {})
-    .filter((session) => session?.invariants?.external_mutation === true);
-  const externalMutationAuthorized = agreementSessions.length <= 1 && agreementSessions.every((session) => {
-    const accepted = session.accepted_plan_snapshot;
-    const recipients = session.agreement_delivery?.recipients || [];
-    if (!accepted?.acceptance_id || stableHash(accepted.plan) !== accepted.snapshot_hash
-        || recipients.length !== 2
-        || new Set(recipients.map((item) => item.recipient_role)).size !== 2) return false;
-    return recipients.every((receipt) => {
-      const outbox = state.outbox?.[receipt.outbox_id];
-      const expectedRecipient = receipt.recipient_role === 'PERSON'
-        ? approvedRecipients().recruit
-        : receipt.recipient_role === 'MANAGER' ? approvedRecipients().standard : null;
-      return expectedRecipient
-        && receipt.state === 'DELIVERED'
-        && receipt.synthetic === false
-        && String(receipt.provider_receipt || '').startsWith('resend:')
-        && outbox?.kind === 'CONSULTING_AGREED_PLAN'
-        && outbox.state === 'DELIVERED'
-        && outbox.recipient === expectedRecipient
-        && outbox.payload?.recipient_role === receipt.recipient_role
-        && outbox.payload?.acceptance_id === accepted.acceptance_id
-        && stableHash(outbox.payload?.accepted_plan_snapshot) === stableHash(accepted)
-        && outbox.provider_receipt === receipt.provider_receipt;
-    });
+  const agreement = release5AgreementMutationScope(state, {
+    memberships, invitation, profileId, assessmentId,
   });
   return Object.freeze({
     emails: new Set(Object.values(approvedRecipients())),
@@ -1451,7 +1643,9 @@ function release5IdentityClosure(state, { profileId = null, assessmentId = null 
     memberships: new Set(memberships.map((item) => item.membership_id)),
     managerSubjects: new Set(memberships.map((item) => item.manager_subject_id)),
     enterprises: new Set([ADMIN_ENTERPRISE_ID, STANDARD_ENTERPRISE_ID]),
-    externalMutationAuthorized,
+    agreementSessionId: agreement.sessionId,
+    agreementMutationPath: agreement.path,
+    agreementComplete: agreement.agreementComplete,
   });
 }
 
@@ -1465,16 +1659,18 @@ function assertRelease5PayloadIsolation(value, closure, code = 'RELEASE5_RECRUIT
       || assessments.some((item) => !closure.assessments.has(String(item).toLowerCase()))) {
     throw new Error(code);
   }
-  const visit = (node) => {
+  const exactPath = (left, right) => Array.isArray(left) && Array.isArray(right)
+    && left.length === right.length && left.every((item, index) => item === right[index]);
+  const visit = (node, path = []) => {
     if (!node || typeof node !== 'object') return;
     if (Array.isArray(node)) {
-      node.forEach(visit);
+      node.forEach((item, index) => visit(item, [...path, index]));
       return;
     }
     for (const [key, item] of Object.entries(node)) {
       const normalizedKey = key.toLowerCase();
       if (normalizedKey === 'external_mutation' && item === true
-          && closure.externalMutationAuthorized !== true) throw new Error(code);
+          && !exactPath([...path, key], closure.agreementMutationPath)) throw new Error(code);
       if ((normalizedKey.includes('phone')
           || ['customer_id', 'person_id', 'stripe_customer_id', 'stripe_subscription_id'].includes(normalizedKey))
           && item != null && String(item).trim()) throw new Error(code);
@@ -1503,7 +1699,7 @@ function assertRelease5PayloadIsolation(value, closure, code = 'RELEASE5_RECRUIT
           if (/^ba-/iu.test(exact) && !closure.assessments.has(exact.toLowerCase())) throw new Error(code);
         }
       }
-      visit(item);
+      visit(item, [...path, key]);
     }
   };
   visit(value);
@@ -2776,4 +2972,16 @@ export default async function handler(req, res) {
   }
 }
 
-export { newBosCheckpointValueValid as __testNewBosCheckpointValueValid };
+function testRelease5AgreementMutationGuard(state, { profileId = null, assessmentId = null } = {}) {
+  const closure = release5IdentityClosure(state, { profileId, assessmentId });
+  assertRelease5PayloadIsolation(state, closure);
+  return Object.freeze({
+    sessionId: closure.agreementSessionId,
+    agreementComplete: closure.agreementComplete,
+  });
+}
+
+export {
+  newBosCheckpointValueValid as __testNewBosCheckpointValueValid,
+  testRelease5AgreementMutationGuard as __testRelease5AgreementMutationGuard,
+};
