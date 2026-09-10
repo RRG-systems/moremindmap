@@ -108,6 +108,7 @@ const BA_READY_RECOVERY_BASE_AUDIT_COUNTS = new Set([
   70, // preserved completion state after the first bounded Consulting exercise
   81, // preserved state after opening Consulting and retaining its correction turns
   83, // same preserved turns after read-only protected response inspection
+  85, // same preserved turns after confirming the exact validator mismatch
 ]);
 
 function escapedPattern(value) {

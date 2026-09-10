@@ -67,10 +67,12 @@ test('recovery accepts only the two exact preserved BA-ready audit checkpoints a
   assert.equal(validAudit(84, 'RETRY'), true);
   assert.equal(validAudit(83, 'FIRST'), true);
   assert.equal(validAudit(86, 'RETRY'), true);
+  assert.equal(validAudit(85, 'FIRST'), true);
+  assert.equal(validAudit(88, 'RETRY'), true);
 });
 
 test('recovery rejects audit drift and invalid recovery modes', () => {
-  for (const count of [36, 38, 39, 41, 69, 71, 72, 74, 80, 82, 85, 87, 120]) {
+  for (const count of [36, 38, 39, 41, 69, 71, 72, 74, 80, 82, 87, 89, 120]) {
     assert.equal(validAudit(count, 'FIRST'), false);
     assert.equal(validAudit(count, 'RETRY'), false);
   }
