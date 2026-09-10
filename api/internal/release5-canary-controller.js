@@ -1088,6 +1088,7 @@ async function inspectKeys(redis, { expectedPhase = 'auto' } = {}) {
   let stateContext = Object.freeze({ phase: 'invalid', profileId: null, assessmentId: null, invitationId: null, bosJobId: null });
   let auditCount = null;
   let invalidScoped = 0;
+  let scopeFailureCode = null;
   try {
     const state = await readState(redis);
     auditCount = Array.isArray(state.audit) ? state.audit.length : null;
@@ -1101,8 +1102,9 @@ async function inspectKeys(redis, { expectedPhase = 'auto' } = {}) {
       }),
     });
     if (['empty', 'bootstrap'].includes(stateContext.phase)) assertBootstrapStateSafe(state);
-  } catch {
+  } catch (error) {
     invalidScoped += 1;
+    scopeFailureCode = safeErrorCode(error);
   }
   let cursor = '0';
   const keys = new Set();
@@ -1162,6 +1164,7 @@ async function inspectKeys(redis, { expectedPhase = 'auto' } = {}) {
     auditCount,
     classes,
     classFingerprints,
+    scopeFailureCode,
     unexpected: (classes.unclassified_preserved || 0)
       + (classes.live_lock_forbidden || 0)
       + (classes.inactive_lock_forbidden || 0)
@@ -3460,6 +3463,7 @@ export default async function handler(req, res) {
       const inventory = await inspectKeys(redis, { expectedPhase: String(req.query?.phase || 'auto') });
       return json(res, inventory.stable && inventory.unexpected === 0 ? 200 : 409, {
         ok: inventory.stable && inventory.unexpected === 0,
+        code: inventory.scopeFailureCode || (inventory.unexpected > 0 ? 'RELEASE5_REDIS_INSPECTION_NOT_GREEN' : null),
         stable: inventory.stable,
         workflowPhase: inventory.phase,
         profileIdSha256: inventory.profileIdSha256,
