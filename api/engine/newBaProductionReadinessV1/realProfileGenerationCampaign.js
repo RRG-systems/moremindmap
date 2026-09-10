@@ -195,7 +195,7 @@ function aggregateProviderAccounting(checkpoints) {
   });
 }
 
-export function createRealProfileNewBaGenerationCampaign({ config, redis, authorityReader, realizationStore, backgroundResponseStore = null, apiKey }) {
+export function createRealProfileNewBaGenerationCampaign({ config, redis, authorityReader, realizationStore, backgroundResponseStore = null, apiKey, backgroundRequestTimeoutMs = 700_000 }) {
   invariant(config?.staged && (config.customerActive || config.canaryEnabled) && config.providerEnabled && config.persistenceEnabled, 'new_ba_real_profile_campaign_runtime_not_enabled');
   invariant(config.providerModel === 'gpt-5.6-sol', 'new_ba_real_profile_campaign_model_invalid');
   invariant(typeof redis?.get === 'function' && typeof redis?.set === 'function' && typeof redis?.rpush === 'function' && typeof redis?.llen === 'function', 'new_ba_real_profile_campaign_redis_invalid');
@@ -334,18 +334,18 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     try {
       let generated;
       if (stage === 'whole_business_model_v1') {
-        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, backgroundResponseStore, generationIdentitySha256 });
+        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, backgroundResponseStore, generationIdentitySha256, backgroundRequestTimeoutMs });
       } else if (stage === 'five_futures_v2') {
         const wbm = await readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1');
         invariant(wbm, 'new_ba_real_profile_campaign_wbm_checkpoint_required');
-        generated = await generateRealProfileFutures({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, backgroundResponseStore, generationIdentitySha256 });
+        generated = await generateRealProfileFutures({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, backgroundResponseStore, generationIdentitySha256, backgroundRequestTimeoutMs });
       } else {
         const [wbm, futures] = await Promise.all([
           readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1'),
           readCheckpoint(redis, config, profile, generationIdentitySha256, 'five_futures_v2'),
         ]);
         invariant(wbm && futures, 'new_ba_real_profile_campaign_upstream_checkpoints_required');
-        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256 });
+        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256, backgroundRequestTimeoutMs });
       }
       const artifact = stage === 'whole_business_model_v1' ? generated.result.model : stage === 'five_futures_v2' ? generated.result.artifact : generated.result.one_move;
       const receipt = buildSanitizedStageReceipt({ profileId: profile.profile, stage, artifact, provider: generated.provider });

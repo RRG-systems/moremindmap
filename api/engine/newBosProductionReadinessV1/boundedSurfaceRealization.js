@@ -190,6 +190,7 @@ export async function realizePersonalityDnaArtifactBounded({
   campaignIdentity,
   onSurfaceCheckpoint = async () => {},
   concurrency = NEW_BOS_PRODUCTION_SURFACE_CONCURRENCY,
+  maxNewSurfaces = Number.POSITIVE_INFINITY,
 } = {}) {
   invariant(artifact?.real_profile_gate === true, 'Bounded production realization requires an authorized real-profile artifact');
   invariant(
@@ -201,21 +202,35 @@ export async function realizePersonalityDnaArtifactBounded({
   invariant(campaignIdentity?.sha256, 'Bounded production surface campaign identity is required');
   invariant(typeof onSurfaceCheckpoint === 'function', 'Bounded production surface checkpoint observer invalid');
   invariant(Number.isInteger(concurrency) && concurrency >= 1 && concurrency <= SURFACES.length, 'Bounded production surface concurrency invalid');
+  invariant(
+    maxNewSurfaces === Number.POSITIVE_INFINITY
+      || (Number.isSafeInteger(maxNewSurfaces) && maxNewSurfaces >= 1),
+    'Bounded production surface step limit invalid',
+  );
   invariant(artifact.surface_packets?.length === SURFACES.length, 'Bounded production realization requires exactly 15 surfaces');
 
   const realizedSurfaces = new Array(artifact.surface_packets.length);
+  const priorInspections = await Promise.all(artifact.surface_packets.map((packet) => checkpointStore.inspect({
+    campaignSha256: campaignIdentity.sha256,
+    unitId: `surface:${packet.surface_id}`,
+  })));
+  const reusedIndexes = [];
+  const newIndexes = [];
+  priorInspections.forEach((inspection, index) => {
+    if (inspection?.classification?.state === 'ACCEPTED') reusedIndexes.push(index);
+    else if (newIndexes.length < maxNewSurfaces) newIndexes.push(index);
+  });
+  const workIndexes = [...reusedIndexes, ...newIndexes];
   let nextIndex = 0;
   let firstFailure = null;
   const worker = async () => {
     while (!firstFailure) {
-      const index = nextIndex;
+      const workIndex = nextIndex;
       nextIndex += 1;
-      if (index >= artifact.surface_packets.length) return;
+      if (workIndex >= workIndexes.length) return;
+      const index = workIndexes[workIndex];
       try {
-        const prior = await checkpointStore.inspect({
-          campaignSha256: campaignIdentity.sha256,
-          unitId: `surface:${artifact.surface_packets[index].surface_id}`,
-        });
+        const prior = priorInspections[index];
         realizedSurfaces[index] = await realizeSurface({
           artifact,
           packet: artifact.surface_packets[index],
@@ -240,12 +255,20 @@ export async function realizePersonalityDnaArtifactBounded({
     }
   };
   await Promise.all(Array.from(
-    { length: Math.min(concurrency, artifact.surface_packets.length) },
+    { length: Math.min(concurrency, workIndexes.length) },
     () => worker(),
   ));
   if (firstFailure) throw firstFailure;
 
-  invariant(realizedSurfaces.every(Boolean), 'Every governed surface must be realized or fail closed');
+  if (realizedSurfaces.filter(Boolean).length !== artifact.surface_packets.length) {
+    throw Object.assign(new Error('new_bos_bounded_surface_step_complete'), {
+      code: 'new_bos_bounded_surface_step_complete',
+      background_pending: true,
+      recovery_phase: 'BUILDING_EXPLANATION_SURFACES',
+      accepted_surface_count: reusedIndexes.length + newIndexes.length,
+    });
+  }
+
   const candidate = Object.freeze({
     ...artifact,
     surface_packets: Object.freeze(realizedSurfaces),

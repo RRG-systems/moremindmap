@@ -51,9 +51,14 @@ export async function runNewBosResumableSemanticGeneration({
   checkpointStore,
   privacyTokens = [],
   interactiveWaitMs = 12_000,
+  maxNewSemanticUnits = Number.POSITIVE_INFINITY,
   onTechnicalEvent = async () => {},
   onUsage = async () => {},
 } = {}) {
+  if (!(maxNewSemanticUnits === Number.POSITIVE_INFINITY
+      || (Number.isSafeInteger(maxNewSemanticUnits) && maxNewSemanticUnits >= 1))) {
+    throw new Error('new_bos_resumable_semantic_unit_limit_invalid');
+  }
   const evidenceIds = rawEvidence.evidence.map(({ evidence_id: evidenceId }) => evidenceId);
   const campaignIdentity = buildNewBosResumableCampaignIdentity({ realizationIdentity, evidenceIds });
   const accepted = [];
@@ -61,6 +66,7 @@ export async function runNewBosResumableSemanticGeneration({
   let acceptedSubmissionCount = 0;
   let submissionCount = 0;
   let retrievalCount = 0;
+  let newlyAcceptedUnits = 0;
 
   for (const stage of NEW_BOS_SEMANTIC_STAGES) {
     const acceptedDependencies = accepted
@@ -239,6 +245,17 @@ export async function runNewBosResumableSemanticGeneration({
         usage: record.observation?.usage || null,
         provider_submissions: acceptedAttempts,
       }));
+      newlyAcceptedUnits += 1;
+      if (newlyAcceptedUnits >= maxNewSemanticUnits
+          && accepted.length < NEW_BOS_SEMANTIC_STAGES.length) {
+        throw Object.assign(new Error('new_bos_bounded_semantic_step_complete'), {
+          code: 'new_bos_bounded_semantic_step_complete',
+          background_pending: true,
+          recovery_phase: accepted.length < 2
+            ? 'UNDERSTANDING_PROFILE'
+            : 'BUILDING_WHOLE_PERSON_MAP',
+        });
+      }
     } catch (error) {
       if (error?.background_pending || error?.human_review_required) throw error;
       const rejection = classifySemanticValidationError(error);

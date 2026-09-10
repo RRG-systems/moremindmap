@@ -218,10 +218,15 @@ export function createRealProfileGenerationContext({ source, displayName, reques
   return deepFreeze({ input, context, mission, schema, identityTokens, library, cassetteRegistry, providerPreflight });
 }
 
-function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_model_v1', backgroundResponseStore = null, generationIdentitySha256 = null, profileId = null }) {
+function makeProvider({ apiKey, identityTokens, startingStage = 'whole_business_model_v1', backgroundResponseStore = null, generationIdentitySha256 = null, profileId = null, backgroundRequestTimeoutMs = 700_000 }) {
   invariant(typeof apiKey === 'string' && apiKey.length > 20, 'new_ba_real_profile_openai_binding_missing');
+  invariant(Number.isSafeInteger(backgroundRequestTimeoutMs)
+    && backgroundRequestTimeoutMs >= 5_000
+    && backgroundRequestTimeoutMs <= 700_000, 'new_ba_real_profile_background_timeout_invalid');
   const streaming = backgroundResponseStore ? null : createStreamingOpenAITransport({ apiKey });
-  const backgroundClient = backgroundResponseStore ? new OpenAI({ apiKey, maxRetries: 0, timeout: 700_000 }) : null;
+  const backgroundClient = backgroundResponseStore
+    ? new OpenAI({ apiKey, maxRetries: 0, timeout: backgroundRequestTimeoutMs })
+    : null;
   const transport = async (request) => {
     validateBaProviderEgressPayload(request);
     const privacy = inspectProviderPrivacy(request, identityTokens);
@@ -276,9 +281,9 @@ async function callWithRetry(provider, args) {
   throw lastError;
 }
 
-export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileWbm({ source, displayName, apiKey, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, backgroundResponseStore = null, generationIdentitySha256 = null, backgroundRequestTimeoutMs = 700_000 }) {
   const generation = createRealProfileGenerationContext({ source, displayName, requestedAt, library, cassetteRegistry });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens: generation.identityTokens, backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens: generation.identityTokens, backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, backgroundRequestTimeoutMs });
   const synthesisAdapter = createFrontierSynthesisAdapter({
     synthesize: async ({ mission }) => {
       const governedMission = applyWbmFieldMissionOwnership(mission);
@@ -301,9 +306,9 @@ export async function generateRealProfileWbm({ source, displayName, apiKey, requ
   });
 }
 
-export async function generateRealProfileFutures({ source, displayName, apiKey, wbm, backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileFutures({ source, displayName, apiKey, wbm, backgroundResponseStore = null, generationIdentitySha256 = null, backgroundRequestTimeoutMs = 700_000 }) {
   const identityTokens = providerIdentityTokens({ source, displayName });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'five_futures_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'five_futures_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, backgroundRequestTimeoutMs });
   const schema = buildFiveFuturesSemanticSchema({ mechanismIds: wbm.causal_model.mechanisms.map((item) => item.mechanism_id), evidenceIds: wbm.source_integrity.evidence_refs });
   validateStrictSchemaShape(schema);
   const trajectoryAdapter = createTrajectoryGenerationAdapter({ generate: async ({ mission }) => {
@@ -315,9 +320,9 @@ export async function generateRealProfileFutures({ source, displayName, apiKey, 
   return deepFreeze({ result, provider: { accepted_calls: provider.acceptedCallCount(), submissions: provider.callCount(), receipts: provider.receipts(), attempts: provider.attemptReceipts(), transport: streaming.traces() } });
 }
 
-export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null }) {
+export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null, backgroundRequestTimeoutMs = 700_000 }) {
   const identityTokens = providerIdentityTokens({ source, displayName });
-  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'one_move_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id });
+  const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'one_move_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, backgroundRequestTimeoutMs });
   const candidateAdapter = createCandidateGenerationAdapter({ generate: async ({ mission }) => {
     const governedMission = applyOneMoveFieldMissionOwnership(mission);
     const schema = buildOneMoveCandidateSchema({

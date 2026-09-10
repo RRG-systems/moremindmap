@@ -1281,7 +1281,7 @@ test('invalid accepted stage 3 and its stage-4 dependency retire atomically whil
   assert.equal(stage4Replacement.record.retry_sequence, 'stage3_vector_free_dependency_replacement');
 });
 
-test('all 15 accepted surface checkpoints survive restart and suppress regeneration', async () => {
+test('surface checkpoints advance in exact four-surface waves and suppress regeneration', async () => {
   const interpreted = assembleNewBosReasoningDraftV1({ fragments: splitFixture() });
   const base = await runPersonalityDnaProductionContract({
     activation: 'synthetic_lab',
@@ -1334,13 +1334,25 @@ test('all 15 accepted surface checkpoints survive restart and suppress regenerat
     },
   };
   const campaignIdentity = { sha256: 'f'.repeat(64) };
-  const first = await realizePersonalityDnaArtifactBounded({
+  const runWave = () => realizePersonalityDnaArtifactBounded({
     artifact,
     providerModel: 'gpt-5.6-sol',
     surfaceRealizer,
     checkpointStore: store,
     campaignIdentity,
+    maxNewSurfaces: 4,
   });
+  for (const expectedCalls of [4, 8, 12]) {
+    await assert.rejects(runWave(), (error) => {
+      assert.equal(error.message, 'new_bos_bounded_surface_step_complete');
+      assert.equal(error.code, 'new_bos_bounded_surface_step_complete');
+      assert.equal(error.background_pending, true);
+      assert.equal(error.accepted_surface_count, expectedCalls);
+      return true;
+    });
+    assert.equal(calls, expectedCalls);
+  }
+  const first = await runWave();
   assert.equal(calls, 15);
   const second = await realizePersonalityDnaArtifactBounded({
     artifact,
@@ -1348,13 +1360,14 @@ test('all 15 accepted surface checkpoints survive restart and suppress regenerat
     surfaceRealizer,
     checkpointStore: store,
     campaignIdentity,
+    maxNewSurfaces: 4,
   });
   assert.equal(calls, 15);
   assert.equal(first.surface_packets.length, 15);
   assert.equal(sha256Stable(first.surface_packets), sha256Stable(second.surface_packets));
 });
 
-test('four-stage provider execution resumes entirely from accepted semantic checkpoints', async () => {
+test('four-stage provider execution advances one new semantic unit per request and then replays', async () => {
   const redis = fakeRedis();
   const store = createRedisNewBosResumableGenerationStore({ redis, namespace: 'nonprod:new-bos:semantic-restart-test' });
   const fragments = splitFixture();
@@ -1393,26 +1406,29 @@ test('four-stage provider execution resumes entirely from accepted semantic chec
       authorities: [{ id: 1, title: 'Synthetic doctrine', sha256: 'e'.repeat(64), bounded_block: 'Use governed evidence without invention.' }],
     },
   }];
-  const first = await runNewBosResumableSemanticGeneration({
+  const runStep = () => runNewBosResumableSemanticGeneration({
     rawEvidence,
     governedContext,
     realizationIdentity,
     model: 'gpt-5.6-sol',
     client,
     checkpointStore: store,
+    maxNewSemanticUnits: 1,
   });
+  for (const expectedCreates of [1, 2, 3]) {
+    await assert.rejects(runStep(), (error) => {
+      assert.equal(error.code, 'new_bos_bounded_semantic_step_complete');
+      assert.equal(error.background_pending, true);
+      return true;
+    });
+    assert.equal(creates, expectedCreates);
+  }
+  const first = await runStep();
   assert.equal(creates, 4);
   assert.equal(first.accepted_stages.length, 4);
   assert.equal(first.campaign_provider_submissions, 4);
-  assert.equal(first.provider_submissions, 4);
-  const second = await runNewBosResumableSemanticGeneration({
-    rawEvidence,
-    governedContext,
-    realizationIdentity,
-    model: 'gpt-5.6-sol',
-    client,
-    checkpointStore: store,
-  });
+  assert.equal(first.provider_submissions, 1);
+  const second = await runStep();
   assert.equal(creates, 4);
   assert.equal(second.campaign_provider_submissions, 4);
   assert.equal(second.provider_submissions, 0);

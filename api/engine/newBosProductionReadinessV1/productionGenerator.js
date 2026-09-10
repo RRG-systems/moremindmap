@@ -76,6 +76,8 @@ export function createProductionNewBosGenerator({
   reasoningTimeoutMs = 7_200_000,
   interactiveWaitMs = 12_000,
   surfaceTimeoutMs = 900_000,
+  maxNewSemanticUnits = Number.POSITIVE_INFINITY,
+  maxNewSurfaces = Number.POSITIVE_INFINITY,
   resumableGenerationStore = null,
   onTechnicalEvent = async () => {},
 } = {}) {
@@ -186,6 +188,7 @@ export function createProductionNewBosGenerator({
       checkpointStore: resumableGenerationStore,
       privacyTokens,
       interactiveWaitMs,
+      maxNewSemanticUnits,
       onTechnicalEvent,
       onUsage: async (response) => {
         currentExecutionUsage = addUsage(currentExecutionUsage, providerUsage(response));
@@ -213,6 +216,7 @@ export function createProductionNewBosGenerator({
         acceptedSurfaceSubmissionCount += providerSubmissions;
         acceptedSurfaceUsage.push(storedUsage(usage));
       },
+      maxNewSurfaces,
     });
     if (semantic.accepted_stages.length !== 4 || artifact.surface_packets.length !== SURFACES.length) {
       throw new Error('new_bos_production_generator_checkpoint_completeness_mismatch');
