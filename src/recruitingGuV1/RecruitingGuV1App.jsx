@@ -155,7 +155,7 @@ function PreviousPlansDrawer({ plans, onClose }) {
 
 function Projection({ projection, scenarioValues, onScenarioChange, onScenarioApply, onEvidence, onHypothesis, onClose }) {
   if (!projection?.plan) return null;
-  return <section className="gu-projection" aria-label="MORE generated thinking environment" data-total-latency={projection.receipt?.totalLatencyMs || projection.receipt?.provider?.latencyMs || ''} data-provider-model={projection.receipt?.provider?.modelReturned || projection.receipt?.provider?.modelRequested || ''}><header><div><p className="gu-kicker">MORE · CURRENT THINKING ENVIRONMENT</p><h1>{projection.plan.guidance.headline}</h1><p>{projection.plan.guidance.summary}</p></div><button type="button" onClick={onClose}>Return to full product</button></header><RecruitingV2Renderer plan={projection.plan} onEvidence={onEvidence} onHypothesis={onHypothesis} scenarioValues={scenarioValues} onScenarioChange={onScenarioChange} onScenarioApply={onScenarioApply} /></section>;
+  return <section className="gu-projection" aria-label="MORE generated thinking environment" data-total-latency={projection.receipt?.totalLatencyMs || ''}><header><div><p className="gu-kicker">MORE · CURRENT THINKING ENVIRONMENT</p><h1>{projection.plan.guidance.headline}</h1><p>{projection.plan.guidance.summary}</p></div><button type="button" onClick={onClose}>Return to full product</button></header><RecruitingV2Renderer plan={projection.plan} onEvidence={onEvidence} onHypothesis={onHypothesis} scenarioValues={scenarioValues} onScenarioChange={onScenarioChange} onScenarioApply={onScenarioApply} /></section>;
 }
 
 function AuthoredRoom({ room, surfaces, projection, showProjection, projectionProps }) {
@@ -389,7 +389,7 @@ function ConsultingExperience() {
         } catch (visualFailure) {
           setError(`The coaching thought is ready. Optional visual unavailable: ${visualFailure.message}`);
         }
-      } else if (payload.experiment_condition) {
+      } else if (payload.projection_deferred === true) {
         setProjectionVisible(false);
       } else {
         setProjectionVisible(true);
@@ -442,7 +442,7 @@ function ConsultingExperience() {
 
   if (approvalToken) return <ApprovalPage token={approvalToken} />;
   if (!home) return <main className="gu-loading"><MoreMark real={realConsulting} /><h1>{error || (realConsulting ? 'Opening Consulting Tool…' : 'Opening Consulting Demonstration…')}</h1></main>;
-  return <div className="recruiting-gu-v1" data-real-consulting={realConsulting ? 'true' : 'false'} data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'} data-experiment-condition={home.experiment_condition || ''}>
+  return <div className="recruiting-gu-v1" data-real-consulting={realConsulting ? 'true' : 'false'} data-room={room} data-synthetic={session?.synthetic_only ? 'true' : 'false'}>
     <AppHeader room={room} manager={manager} synthetic={home.synthetic_only} onRoom={navigateRoom} real={realConsulting} navigationDisabled={bundle?.requires_new_consultation} />
     {realConsulting && <section className="gu-selected-person" aria-label="Selected consultation"><div><small>CONSULTING WITH</small><strong>{session?.subject_binding?.name || (busy ? 'Opening selected person…' : 'No person selected')}</strong></div><nav>{Boolean(bundle?.previous_accepted_plans?.length) && <button type="button" onClick={() => setPreviousPlansVisible(true)}>Previous agreed plans ({bundle.previous_accepted_plans.length})</button>}{(session?.status === 'COMPLETED' || bundle?.requires_new_consultation) && <button type="button" disabled={busy} onClick={startAnotherConsultation}>Start another consultation</button>}<button type="button" onClick={() => window.location.assign(home.manager?.capabilities?.master_control ? '/recruiting/invite' : '/recruiting/consulting')}>← Back to My Recruits</button></nav></section>}
     {error && room === 'HOME' && <p className="gu-chat__error" role="alert">{error}</p>}
