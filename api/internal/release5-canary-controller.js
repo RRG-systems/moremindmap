@@ -106,6 +106,7 @@ const BA_READY_RECOVERY_OPTIONAL_CLASS = 'release5_recruiting_projection_retry';
 const BA_READY_RECOVERY_BASE_AUDIT_COUNTS = new Set([
   37, // preserved completion state before Consulting browser exercise
   70, // preserved completion state after the first bounded Consulting exercise
+  81, // preserved state after opening Consulting and retaining its correction turns
 ]);
 
 function escapedPattern(value) {
