@@ -44,7 +44,7 @@ import { createEmptyRecruitingState } from '../../src/lib/recruitingV1/store.js'
 import { SURFACES } from '../../src/lib/newBosPersonalityDnaV1/constants.js';
 
 const CUSTOM_ENVIRONMENT = 'subscription-canary';
-const CONTROLLER_BRANCH = 'codex/home-base-v2-release5-canary-controller-v1';
+const CONTROLLER_BRANCH = 'codex/home-base-v2-release5-agreement-guard-v1';
 const RECRUITING_NAMESPACE = 'preview:recruiting-v1:release5_20260909_v1';
 const ADMIN_PROFILE_ID = 'mm-20990909-r5adm001';
 const STANDARD_PROFILE_ID = 'mm-20990909-r5mgr001';
