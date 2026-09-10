@@ -65,8 +65,7 @@ function boundaryValid() {
     && Boolean(process.env.REDIS_URL)
     && Boolean(process.env.RECRUITING_TOKEN_WRAP_KEY)
     && Boolean(process.env.RECRUITING_RESEND_API_KEY)
-    && Boolean(process.env.RECRUITING_EMAIL_FROM)
-    && Boolean(process.env.PUBLIC_INQUIRY_EMAIL_TO);
+    && Boolean(process.env.RECRUITING_EMAIL_FROM);
 }
 
 function requestHost(req) {
@@ -74,12 +73,18 @@ function requestHost(req) {
 }
 
 function approvedRecipients() {
-  const configuredSender = String(process.env.RECRUITING_EMAIL_FROM || '').trim();
-  const senderMatch = configuredSender.match(/<([^<>]+)>\s*$/u);
-  const admin = normalizeEmail(senderMatch?.[1] || configuredSender);
-  const standard = normalizeEmail(process.env.PUBLIC_INQUIRY_EMAIL_TO);
-  if (!admin || !standard || admin === standard) throw new Error('RELEASE5_DISTINCT_APPROVED_TEST_RECIPIENTS_REQUIRED');
-  return Object.freeze({ admin, standard, recruit: standard });
+  // Resend's canonical non-human delivery sink supports distinct +labels,
+  // keeping each synthetic identity separate without reaching a person.
+  const recipients = Object.freeze({
+    admin: 'delivered+release5-admin@resend.dev',
+    standard: 'delivered+release5-standard@resend.dev',
+    recruit: 'delivered+release5-recruit@resend.dev',
+  });
+  if (new Set(Object.values(recipients).map(normalizeEmail)).size !== 3
+      || Object.values(recipients).some((recipient) => normalizeEmail(recipient) !== recipient)) {
+    throw new Error('RELEASE5_DISTINCT_APPROVED_TEST_RECIPIENTS_REQUIRED');
+  }
+  return recipients;
 }
 
 function profileEnvelope(profileId, personName, primary, secondary) {
