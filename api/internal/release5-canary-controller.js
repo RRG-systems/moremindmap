@@ -1658,8 +1658,21 @@ async function acknowledgeSyntheticSessionRecovery(redis, req) {
       || !Number.isInteger(before.auditCount)) {
     throw new Error('RELEASE5_SESSION_RECOVERY_ACK_PHASE_INVALID');
   }
+  if (before.phase === 'ba_ready' && (before.total !== 65 || before.auditCount !== 40)) {
+    throw new Error('RELEASE5_SESSION_RECOVERY_ACK_BA_CUSTODY_INVALID');
+  }
+  const beforeState = await readState(redis);
+  const beforeScope = exactRecoverySessionScope(beforeState, before.phase);
+  exactPendingRecoveryAudits(beforeState, beforeScope);
+  if (beforeState.audit.length !== before.auditCount) {
+    throw new Error('RELEASE5_SESSION_RECOVERY_ACK_STATE_CHANGED');
+  }
+  const beforeStateFingerprint = stableHash(beforeState);
   const store = new RedisRecruitingStore(redis, { namespace: RECRUITING_NAMESPACE });
   const acknowledged = await store.transaction((state) => {
+    if (stableHash(state) !== beforeStateFingerprint || state.audit.length !== before.auditCount) {
+      throw new Error('RELEASE5_SESSION_RECOVERY_ACK_STATE_CHANGED');
+    }
     const scope = exactRecoverySessionScope(state, before.phase);
     const pending = exactPendingRecoveryAudits(state, scope);
     const byRole = new Map(pending.map((event) => [event.recovery_role, event]));
