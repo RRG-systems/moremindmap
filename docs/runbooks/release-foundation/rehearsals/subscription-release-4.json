@@ -1,0 +1,99 @@
+{
+  "schema": "more.home-base.release-rehearsal/v1",
+  "release_id": "subscription-continuity-release-4",
+  "authority": {
+    "source": "Founder-approved Home Base Release 4 canonical closeout",
+    "home_base_owner": true,
+    "production_mutation_authorized": false
+  },
+  "candidate": {
+    "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+    "tree": "fd209e905836fef6fe09e3605380c95f77383355",
+    "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+    "ready_state": "READY"
+  },
+  "baseline": {
+    "commit": "5be9a3ae517a5ca245693b1bebbb73b107faf045",
+    "tree": "ccf5424ab62b0a5038f2da330bd0365fe236bb18",
+    "deployment": "dpl_GvuYPDQtHXJYt3fmtRmvs5NcxtkE"
+  },
+  "environment": {
+    "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+    "name": "subscription-canary",
+    "target": "preview",
+    "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "metadata_binding_attested": true,
+    "provider_assignments_hidden": true,
+    "secret_values_read": false,
+    "customer_mutations": 0,
+    "production_mutations": 0
+  },
+  "requirements": {
+    "browser": true,
+    "provider": true,
+    "email": false,
+    "persistence": true
+  },
+  "progress": {
+    "canonical_completion": {
+      "phase": "canonical-assessment",
+      "status": "complete"
+    },
+    "authored_completion": {
+      "phase": "authored-continuity-and-recap",
+      "status": "complete"
+    }
+  },
+  "operation_auth": {
+    "inspect": [],
+    "status": [],
+    "advance": [
+      "private-subject-session"
+    ]
+  },
+  "checks": {
+    "core": [
+      { "id": "exact-custody", "status": "pass", "evidence": "Canonical Release 4 source/tree/deployment receipt" },
+      { "id": "authority", "status": "pass", "evidence": "Founder Release 4 execution authority and Home Base closeout" },
+      { "id": "identity-isolation", "status": "pass", "evidence": "Synthetic private identities only; no customer identity" },
+      { "id": "permissions", "status": "pass", "evidence": "Private session-scoped access; no elevated manager dependency" },
+      { "id": "profile-continuity", "status": "pass", "evidence": "Same synthetic Profile and invitation across Model 1 and Model 2" },
+      { "id": "durable-save-reopen", "status": "pass", "evidence": "Canary continuity, closing recap and refresh receipts" },
+      { "id": "protected-product-boundaries", "status": "pass", "evidence": "Subscription and protected regression matrices green" },
+      { "id": "routing-origin-alignment", "status": "pass", "evidence": "Stable private host and exact allowed Origin reconciled" },
+      { "id": "browser-launch", "status": "pass", "evidence": "Saved exact-tree responsive browser receipts" },
+      { "id": "rendered-browser", "status": "pass", "evidence": "Six exact-tree canary browser receipts" },
+      { "id": "provider-operation", "status": "pass", "evidence": "Frozen Model 1 and Model 2 real-provider canary receipts" },
+      { "id": "email-sink", "status": "not-required", "evidence": "Release 4 changed no mail adapter", "rationale": "No email behavior changed" },
+      { "id": "privacy-security", "status": "pass", "evidence": "No customer, charge, email or secret-value exposure" },
+      { "id": "rollback-compatibility", "status": "pass", "evidence": "Immediate prior source retained and compatible with continuity state" }
+    ],
+    "change_specific": [
+      { "id": "model-1-continuity", "status": "pass", "evidence": "Sealed Model 1 continuing-relationship receipt" },
+      { "id": "model-2-continuity", "status": "pass", "evidence": "Sealed Model 2 continuing-relationship receipt" },
+      { "id": "closing-recap-fidelity", "status": "pass", "evidence": "Closing recap source, provider and rendered-browser gates" }
+    ]
+  },
+  "rollback": {
+    "strategy": "compatibility-aware",
+    "from_protocol": "subscription-continuity-v1",
+    "to_protocol": "subscription-pre-continuity-v1",
+    "requires_quarantine": false,
+    "direct_switch_allowed": true,
+    "maximum_inflight_seconds": 0,
+    "steps": [
+      { "type": "verify-target", "target_role": "private-prior-candidate" },
+      { "type": "switch", "target_role": "private-prior-candidate" },
+      { "type": "verify", "target_role": "private-prior-candidate" }
+    ]
+  },
+  "manual_steps": [
+    "Confirm the saved secure-binding metadata receipt without reading values.",
+    "Approve any real provider spend separately when a future change requires it."
+  ],
+  "limitations": [
+    "This rehearsal replays sealed private evidence; it does not repeat provider calls.",
+    "No public alias or Production configuration is exercised."
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schema": "more.home-base.release-foundation-validation/v1",
+  "verdict": "HOME_BASE_REUSABLE_RELEASE_SETUP_VALIDATION_GREEN",
+  "foundation_tests": {
+    "passed": 13,
+    "failed": 0
+  },
+  "protected_product_smoke": {
+    "passed": 42,
+    "failed": 0,
+    "areas": [
+      "P0 diagnostic quarantine",
+      "Leadership launcher",
+      "public provider gates",
+      "Athlete Consulting prepromotion",
+      "Subscription session continuity"
+    ]
+  },
+  "build": {
+    "status": "pass",
+    "modules_transformed": 208,
+    "product_runtime_source_changed": false
+  },
+  "scoped_lint": {
+    "status": "pass",
+    "errors": 0,
+    "warnings": 0,
+    "scope": "releaseFoundation.test.js"
+  },
+  "maintained_script_syntax": {
+    "status": "pass",
+    "files": 5,
+    "failures": 0
+  },
+  "diff_check": "pass",
+  "secret_pattern_scan": {
+    "status": "pass",
+    "matches": 0
+  },
+  "saved_plan_validation": {
+    "release_4": "pass",
+    "release_5": "pass"
+  },
+  "browser_preflight": "BROWSER_LAUNCH_AND_CLOSE_GREEN",
+  "public_production_after_validation": {
+    "deployment": "dpl_F81jd5AsvoSN5jmqfSBGezX5pgi4",
+    "ready_state": "READY",
+    "changed": false
+  },
+  "provider_calls": 0,
+  "email_sends": 0,
+  "charges": 0,
+  "customer_mutations": 0,
+  "production_mutations": 0,
+  "secret_values_read": false
+}

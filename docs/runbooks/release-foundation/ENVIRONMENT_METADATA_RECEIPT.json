@@ -1,0 +1,44 @@
+{
+  "schema": "more.home-base.private-environment-metadata-receipt/v1",
+  "observed_date": "2026-09-10",
+  "project": "moremindmap",
+  "environment": {
+    "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+    "name": "subscription-canary",
+    "type": "preview",
+    "branch_matcher": "codex/home-base-v2-recruiting-two-box-release-v1",
+    "custom_domain_count": 0,
+    "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "access_protection": "vercel-sso-redirect-observed",
+    "current_deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+    "current_source": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "ready_state": "READY"
+  },
+  "binding_metadata": {
+    "record_count": 48,
+    "sensitive_count": 47,
+    "encrypted_count": 1,
+    "branch_scoped_count": 41,
+    "unbranched_count": 7,
+    "required_provider_classes_attached_by_existing_record_reference": true,
+    "isolated_custom_environment_store_record_present": true,
+    "general_production_preview_store_record_not_attached": true,
+    "payment_binding_not_required_for_release_foundation": true,
+    "provider_assignments_hidden": true,
+    "secret_values_queried": false
+  },
+  "guards": {
+    "ordinary_preview_stateful_rehearsal_allowed": false,
+    "new_branch_must_prove_required_bindings_materialize": true,
+    "missing_binding_fallback_allowed": false,
+    "metadata_only_attachment_preserves_existing_targets_and_values": true,
+    "public_aliases_unchanged": true,
+    "production_mutations": 0,
+    "customer_mutations": 0
+  },
+  "limitations": [
+    "Metadata proves record identity and scope, not secret values or provider mode.",
+    "Branch-scoped records must be re-attested for each exact candidate branch before stateful work.",
+    "The environment is reused and preserved; the account currently exposes no slot for a second no-cost Custom Environment."
+  ]
+}

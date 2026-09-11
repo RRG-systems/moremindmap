@@ -1,0 +1,103 @@
+{
+  "completed_at": "2026-09-11T01:16:08.045Z",
+  "custody": {
+    "baseline": {
+      "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+      "deployment": "dpl_FRkPwRHbP4693amfvvFSfF5obD1T",
+      "tree": "fd209e905836fef6fe09e3605380c95f77383355"
+    },
+    "candidate": {
+      "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+      "ready_state": "READY",
+      "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+    },
+    "environment": {
+      "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+      "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+      "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+      "metadata_binding_attested": true,
+      "name": "subscription-canary",
+      "provider_assignments_hidden": true,
+      "secret_values_read": false,
+      "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+      "target": "preview"
+    },
+    "release_id": "recruiting-two-box-consulting-release-5"
+  },
+  "customer_mutations": 0,
+  "environment_sha256": "6a421aed421d5505ba23b6483859523017d8bccd236c4cf884ea0bc65abcb559",
+  "external_mutations": 0,
+  "history": [
+    {
+      "phase": "prepared",
+      "sequence": 1
+    },
+    {
+      "phase": "validated",
+      "replayed_exact_plan": true,
+      "sequence": 2
+    },
+    {
+      "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+      "phase": "private-candidate-selected",
+      "sequence": 3
+    },
+    {
+      "checks_sha256": "3ed042fd8b5338b5f0fb710d11e7dd1e339a52c8d55311611d3cac3e01f86625",
+      "phase": "private-runtime-verified",
+      "prior_email_evidence_replayed": true,
+      "prior_provider_evidence_replayed": true,
+      "sequence": 4
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-quarantine",
+      "seconds": null,
+      "sequence": 5,
+      "target_role": "disabled-exact-source"
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-drain",
+      "seconds": 800,
+      "sequence": 6,
+      "target_role": null
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-switch",
+      "seconds": null,
+      "sequence": 7,
+      "target_role": "private-prior-candidate"
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-verify",
+      "seconds": null,
+      "sequence": 8,
+      "target_role": "private-prior-candidate"
+    },
+    {
+      "direct_switch_allowed": false,
+      "phase": "private-rollback-verified",
+      "requires_quarantine": true,
+      "sequence": 9
+    },
+    {
+      "phase": "complete",
+      "sequence": 10
+    }
+  ],
+  "phase": "complete",
+  "plan_sha256": "027fd559813461ed3553a19fbecfa6b6d3a56401c22902acced8c36409a01b1d",
+  "production_mutations": 0,
+  "provider_calls_replayed_not_repeated": true,
+  "release_id": "recruiting-two-box-consulting-release-5",
+  "resume_count": 0,
+  "run_id": "da90d1db-1321-4952-b3bf-63930e2d5a42",
+  "schema": "more.home-base.release-rehearsal-state/v1",
+  "started_at": "2026-09-11T01:16:08.042Z",
+  "tool_sha256": "f09dc05458a102817381edc5be642fe031b00ac697bdb163ea0131c905e043e7",
+  "tool_version": "home-base-release-foundation-v1"
+}

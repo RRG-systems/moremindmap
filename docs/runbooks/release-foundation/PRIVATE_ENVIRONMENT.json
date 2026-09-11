@@ -1,0 +1,30 @@
+{
+  "schema": "more.home-base.private-release-environment/v1",
+  "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+  "name": "subscription-canary",
+  "provider": "vercel",
+  "project": "moremindmap",
+  "target": "preview",
+  "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+  "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+  "production_independent": true,
+  "customer_records": "isolated-synthetic-only",
+  "binding_strategy": "metadata-reference-only",
+  "provider_assignments_hidden": true,
+  "secret_values_stored": false,
+  "subscription_experimentation_sandbox_preserved": true,
+  "secure_binding_classes": [
+    "isolated-state",
+    "private-access-controls",
+    "approved-model-runtime",
+    "non-human-delivery-sink"
+  ],
+  "invariants": [
+    "Never attach a Production data store to this environment.",
+    "Never print, copy, decrypt or persist a secure binding value.",
+    "Keep provider assignments and blind model assignments undisclosed.",
+    "Use synthetic identities and non-human delivery destinations only.",
+    "Do not retarget or delete the preserved Subscription experimentation sandbox.",
+    "A private rehearsal cannot move a public Production alias."
+  ]
+}

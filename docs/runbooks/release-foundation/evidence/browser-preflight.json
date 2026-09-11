@@ -1,0 +1,14 @@
+{
+  "browser_executable_name": "Google Chrome",
+  "closed": true,
+  "data_url_only": true,
+  "duration_ms": 1054,
+  "exit_code": 0,
+  "exit_signal": null,
+  "external_navigation": false,
+  "launched": true,
+  "schema": "more.home-base.browser-preflight/v1",
+  "stderr_bytes_observed_not_persisted": 1141,
+  "timed_out": false,
+  "verdict": "BROWSER_LAUNCH_AND_CLOSE_GREEN"
+}

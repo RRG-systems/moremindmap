@@ -1,0 +1,101 @@
+{
+  "schema": "more.home-base.release-rehearsal/v1",
+  "release_id": "recruiting-two-box-consulting-release-5",
+  "authority": {
+    "source": "Founder-approved Home Base Release 5 canonical closeout",
+    "home_base_owner": true,
+    "production_mutation_authorized": false
+  },
+  "candidate": {
+    "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57",
+    "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+    "ready_state": "READY"
+  },
+  "baseline": {
+    "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+    "tree": "fd209e905836fef6fe09e3605380c95f77383355",
+    "deployment": "dpl_FRkPwRHbP4693amfvvFSfF5obD1T"
+  },
+  "environment": {
+    "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+    "name": "subscription-canary",
+    "target": "preview",
+    "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "metadata_binding_attested": true,
+    "provider_assignments_hidden": true,
+    "secret_values_read": false,
+    "customer_mutations": 0,
+    "production_mutations": 0
+  },
+  "requirements": {
+    "browser": true,
+    "provider": true,
+    "email": true,
+    "persistence": true
+  },
+  "progress": {
+    "canonical_completion": {
+      "phase": "canonical-bos-ba-completion",
+      "status": "complete"
+    },
+    "authored_completion": {
+      "phase": "consulting-surface-authoring",
+      "status": "complete"
+    }
+  },
+  "operation_auth": {
+    "inspect": [],
+    "status": [],
+    "advance": [
+      "recruit-session"
+    ]
+  },
+  "checks": {
+    "core": [
+      { "id": "exact-custody", "status": "pass", "evidence": "Release 5 exact canary source/tree/deployment receipt" },
+      { "id": "authority", "status": "pass", "evidence": "Founder Release 5 authority and Home Base canonical closeout" },
+      { "id": "identity-isolation", "status": "pass", "evidence": "Synthetic manager, recruit, Profile and non-human sink only" },
+      { "id": "permissions", "status": "pass", "evidence": "Admin, standard-manager, wrong-manager and recruit scopes exercised" },
+      { "id": "profile-continuity", "status": "pass", "evidence": "Same synthetic invitation/Profile across BOS and BA" },
+      { "id": "durable-save-reopen", "status": "pass", "evidence": "Redis persistence, reload and deployment-restart receipts" },
+      { "id": "protected-product-boundaries", "status": "pass", "evidence": "450/450 protected and release checks" },
+      { "id": "routing-origin-alignment", "status": "pass", "evidence": "Private host and exact allowed Origin reconciled" },
+      { "id": "browser-launch", "status": "pass", "evidence": "Desktop, iPad and mobile canary browser receipts" },
+      { "id": "rendered-browser", "status": "pass", "evidence": "Manager, Darren, recruit and Consulting responsive receipts" },
+      { "id": "provider-operation", "status": "pass", "evidence": "Bounded synthetic frontier-provider operation receipt" },
+      { "id": "email-sink", "status": "pass", "evidence": "Exactly two non-human deliveries; retry and idempotency green" },
+      { "id": "privacy-security", "status": "pass", "evidence": "P0, CORS, secret, privacy and customer-isolation gates" },
+      { "id": "rollback-compatibility", "status": "pass", "evidence": "Quarantine-first 800-second compatibility contract" }
+    ],
+    "change_specific": [
+      { "id": "manager-two-box", "status": "pass", "evidence": "Standard Manager exactly two cards and monthly limit 5" },
+      { "id": "darren-unlimited-authority", "status": "pass", "evidence": "Protected exact-candidate Darren/admin canary proof" },
+      { "id": "consulting-four-room-lineage", "status": "pass", "evidence": "HOME, YOU, YOUR BUSINESS and PLAN with revision lineage" },
+      { "id": "duplicate-and-resume", "status": "pass", "evidence": "Duplicate-event, partial-failure and idempotent resume proof" }
+    ]
+  },
+  "rollback": {
+    "strategy": "compatibility-aware",
+    "from_protocol": "mini-v2-owner-lease",
+    "to_protocol": "legacy-document-lock",
+    "requires_quarantine": true,
+    "direct_switch_allowed": false,
+    "maximum_inflight_seconds": 800,
+    "steps": [
+      { "type": "quarantine", "target_role": "disabled-exact-source" },
+      { "type": "drain", "seconds": 800 },
+      { "type": "switch", "target_role": "private-prior-candidate" },
+      { "type": "verify", "target_role": "private-prior-candidate" }
+    ]
+  },
+  "manual_steps": [
+    "Confirm the metadata-only binding receipt and stable private Origin.",
+    "Approve a real provider operation only when the change-specific plan requires it."
+  ],
+  "limitations": [
+    "This rehearsal replays sealed private evidence; it does not repeat provider or email operations.",
+    "Authenticated Darren and manager workflows were proven on the exact-candidate canary, not repeated against public Production."
+  ]
+}

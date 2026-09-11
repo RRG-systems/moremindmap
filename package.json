@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release:foundation:validate": "node scripts/release-foundation/validate.mjs",
+    "release:foundation:rehearse": "node scripts/release-foundation/rehearse.mjs",
+    "release:foundation:browser-preflight": "node scripts/release-foundation/browser-preflight.mjs",
+    "release:foundation:test": "node --test test/releaseFoundation.test.js"
   },
   "dependencies": {
     "@vercel/blob": "^2.4.0",

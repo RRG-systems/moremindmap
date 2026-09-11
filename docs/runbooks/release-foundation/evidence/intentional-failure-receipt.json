@@ -1,0 +1,46 @@
+{
+  "activation_attempted": false,
+  "baseline": {
+    "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+    "deployment": "dpl_FRkPwRHbP4693amfvvFSfF5obD1T",
+    "tree": "fd209e905836fef6fe09e3605380c95f77383355"
+  },
+  "candidate": {
+    "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+    "ready_state": "READY",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "customer_mutations": 0,
+  "diagnostics": [
+    {
+      "code": "CHANGE_CHECK_NOT_GREEN",
+      "field": "checks.change_specific.manager-two-box",
+      "http_status": null,
+      "phase": "acceptance"
+    }
+  ],
+  "duration_ms": 3,
+  "environment": {
+    "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+    "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+    "metadata_binding_attested": true,
+    "name": "subscription-canary",
+    "provider_assignments_hidden": true,
+    "secret_values_read": false,
+    "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "target": "preview"
+  },
+  "environment_sha256": "6a421aed421d5505ba23b6483859523017d8bccd236c4cf884ea0bc65abcb559",
+  "external_mutations": 0,
+  "plan_sha256": "9eddbe32b6fed1e33177814c4f55a99f81fdff597277f6910c5852d61b4434b6",
+  "production_mutations": 0,
+  "release_id": "recruiting-two-box-consulting-release-5",
+  "run_id": "51df8a7e-e502-4969-9d21-534de766ca08",
+  "schema": "more.home-base.release-rehearsal-receipt/v1",
+  "secret_values_read": false,
+  "tool_sha256": "f09dc05458a102817381edc5be642fe031b00ac697bdb163ea0131c905e043e7",
+  "tool_version": "home-base-release-foundation-v1",
+  "verdict": "PROMOTION_BLOCKED"
+}

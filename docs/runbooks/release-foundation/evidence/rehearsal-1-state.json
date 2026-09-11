@@ -1,0 +1,111 @@
+{
+  "completed_at": "2026-09-11T01:15:57.759Z",
+  "custody": {
+    "baseline": {
+      "commit": "5be9a3ae517a5ca245693b1bebbb73b107faf045",
+      "deployment": "dpl_GvuYPDQtHXJYt3fmtRmvs5NcxtkE",
+      "tree": "ccf5424ab62b0a5038f2da330bd0365fe236bb18"
+    },
+    "candidate": {
+      "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+      "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+      "ready_state": "READY",
+      "tree": "fd209e905836fef6fe09e3605380c95f77383355"
+    },
+    "environment": {
+      "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+      "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+      "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+      "metadata_binding_attested": true,
+      "name": "subscription-canary",
+      "provider_assignments_hidden": true,
+      "secret_values_read": false,
+      "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+      "target": "preview"
+    },
+    "release_id": "subscription-continuity-release-4"
+  },
+  "customer_mutations": 0,
+  "environment_sha256": "6a421aed421d5505ba23b6483859523017d8bccd236c4cf884ea0bc65abcb559",
+  "external_mutations": 0,
+  "history": [
+    {
+      "phase": "prepared",
+      "sequence": 1
+    },
+    {
+      "phase": "validated",
+      "replayed_exact_plan": true,
+      "sequence": 2
+    },
+    {
+      "from_durable_state": true,
+      "phase": "resumed",
+      "sequence": 3
+    },
+    {
+      "phase": "validated",
+      "replayed_exact_plan": true,
+      "sequence": 4
+    },
+    {
+      "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+      "phase": "private-candidate-selected",
+      "sequence": 5
+    },
+    {
+      "checks_sha256": "c846b49057832b604a6905ef1a9707f45d1a962b715764f66ff4367f7b56b590",
+      "phase": "private-runtime-verified",
+      "prior_email_evidence_replayed": false,
+      "prior_provider_evidence_replayed": true,
+      "sequence": 6
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-verify-target",
+      "seconds": null,
+      "sequence": 7,
+      "target_role": "private-prior-candidate"
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-switch",
+      "seconds": null,
+      "sequence": 8,
+      "target_role": "private-prior-candidate"
+    },
+    {
+      "evidence_replay_only": true,
+      "phase": "rollback-verify",
+      "seconds": null,
+      "sequence": 9,
+      "target_role": "private-prior-candidate"
+    },
+    {
+      "direct_switch_allowed": true,
+      "phase": "private-rollback-verified",
+      "requires_quarantine": false,
+      "sequence": 10
+    },
+    {
+      "phase": "complete",
+      "sequence": 11
+    },
+    {
+      "idempotent_resume": true,
+      "phase": "complete",
+      "sequence": 12
+    }
+  ],
+  "phase": "complete",
+  "plan_sha256": "8a0a0a4bdf1b21a563586a421c1d1d89bbfb1737c67599afacbabf116e2cb293",
+  "production_mutations": 0,
+  "provider_calls_replayed_not_repeated": true,
+  "release_id": "subscription-continuity-release-4",
+  "resume_count": 2,
+  "run_id": "063cdb4f-727f-4d85-974c-096756849d43",
+  "schema": "more.home-base.release-rehearsal-state/v1",
+  "started_at": "2026-09-11T01:15:52.964Z",
+  "tool_sha256": "f09dc05458a102817381edc5be642fe031b00ac697bdb163ea0131c905e043e7",
+  "tool_version": "home-base-release-foundation-v1"
+}

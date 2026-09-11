@@ -1,0 +1,38 @@
+{
+  "baseline": {
+    "commit": "5be9a3ae517a5ca245693b1bebbb73b107faf045",
+    "deployment": "dpl_GvuYPDQtHXJYt3fmtRmvs5NcxtkE",
+    "tree": "ccf5424ab62b0a5038f2da330bd0365fe236bb18"
+  },
+  "candidate": {
+    "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+    "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+    "ready_state": "READY",
+    "tree": "fd209e905836fef6fe09e3605380c95f77383355"
+  },
+  "customer_mutations": 0,
+  "durable_resume_required": true,
+  "duration_ms": 3,
+  "environment": {
+    "allowed_origin": "https://moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "deployment": "dpl_CLbo4VwR7Nh7ttLhanS98aXB1QCr",
+    "id": "env_M70a2uAYcMBZ9m6afKtSvBFaHGwv",
+    "metadata_binding_attested": true,
+    "name": "subscription-canary",
+    "provider_assignments_hidden": true,
+    "secret_values_read": false,
+    "stable_host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+    "target": "preview"
+  },
+  "environment_sha256": "6a421aed421d5505ba23b6483859523017d8bccd236c4cf884ea0bc65abcb559",
+  "external_mutations": 0,
+  "plan_sha256": "8a0a0a4bdf1b21a563586a421c1d1d89bbfb1737c67599afacbabf116e2cb293",
+  "production_mutations": 0,
+  "release_id": "subscription-continuity-release-4",
+  "run_id": "063cdb4f-727f-4d85-974c-096756849d43",
+  "schema": "more.home-base.release-rehearsal-receipt/v1",
+  "secret_values_read": false,
+  "tool_sha256": "f09dc05458a102817381edc5be642fe031b00ac697bdb163ea0131c905e043e7",
+  "tool_version": "home-base-release-foundation-v1",
+  "verdict": "PAUSED_AFTER_VALIDATION"
+}
