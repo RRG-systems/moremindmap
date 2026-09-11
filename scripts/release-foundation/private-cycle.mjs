@@ -602,7 +602,13 @@ async function restoreAndVerifyBaseline(args, state, rollback, environmentDigest
   const prior = await exactRollbackBaseline(state, rollback, rollback.worktree);
   const aliases = await readAliases(rollback.worktree);
   assertAliasCustody(aliases, { expectedProduction: args['expected-production'] });
-  if (aliases.get(ENVIRONMENT.stableHost) !== state.pre_cycle.baseline.id) {
+  const currentStable = aliases.get(ENVIRONMENT.stableHost);
+  if (currentStable !== state.pre_cycle.baseline.id) {
+    assert(
+      DEPLOYMENT.test(state.candidate_deployment?.id || '')
+        && currentStable === state.candidate_deployment.id,
+      'PRIVATE_STABLE_ALIAS_OWNERSHIP_CHANGED',
+    );
     await setPrivateStableAlias(state.pre_cycle.baseline, rollback.worktree);
   }
   const guards = await verifyGlobalGuards(

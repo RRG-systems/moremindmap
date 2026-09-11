@@ -45,6 +45,8 @@ ignores the already-satisfied stop marker, re-resolves the deployment, aliases,
 environment metadata and worktrees, then finishes verification and rollback.
 Any digest or custody drift is refused. A failed-and-restored run cannot be
 resumed into activation; start a new cycle with new state and receipt paths.
+Recovery also refuses to overwrite the private stable alias if it now belongs
+to any deployment other than this run's candidate or its captured baseline.
 
 ## Hard refusals
 
