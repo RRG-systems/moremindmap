@@ -15,6 +15,7 @@ import {
 } from '../scripts/release-foundation/contract.mjs';
 import {
   assertAliasCustody,
+  isFailedRunLatched,
   PrivateCycleBoundaryError,
   projectEnvironmentMetadata,
 } from '../scripts/release-foundation/private-cycle.mjs';
@@ -200,6 +201,23 @@ test('actual private-cycle environment fingerprint excludes values and detects m
   const changed = structuredClone(fixture);
   changed.envs[0].gitBranch = 'codex/changed';
   assert.notEqual(projectEnvironmentMetadata(changed).projection_sha256, projection.projection_sha256);
+});
+
+test('actual private-cycle failure latch survives an interrupted restore-only process', () => {
+  assert.equal(isFailedRunLatched({ phase: 'failure-private-baseline-restored', history: [] }), true);
+  assert.equal(isFailedRunLatched({
+    phase: 'resumed',
+    failure_code: 'PRIVATE_RUNTIME_FAILED',
+    history: [{ phase: 'failure-private-baseline-restored' }, { phase: 'resumed' }],
+  }), true);
+  assert.equal(isFailedRunLatched({
+    phase: 'resumed',
+    history: [{ phase: 'manual-private-baseline-recovery-complete' }, { phase: 'resumed' }],
+  }), true);
+  assert.equal(isFailedRunLatched({
+    phase: 'resumed',
+    history: [{ phase: 'private-target-selected' }, { phase: 'resumed' }],
+  }), false);
 });
 
 test('sealed receipts prove two distinct rehearsals, blocking, restart and rollback', () => {

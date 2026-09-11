@@ -516,6 +516,17 @@ function addHistory(state, phase, details = {}) {
   state.history.push({ sequence: state.history.length + 1, phase, at: new Date().toISOString(), ...details });
 }
 
+export function isFailedRunLatched(state) {
+  const recoveredFailurePhases = new Set([
+    'failure-private-baseline-restored',
+    'failure-private-baseline-restore-failed',
+    'manual-private-baseline-recovery-complete',
+  ]);
+  return typeof state?.failure_code === 'string'
+    || recoveredFailurePhases.has(state?.phase)
+    || state?.history?.some((entry) => recoveredFailurePhases.has(String(entry?.phase || ''))) === true;
+}
+
 async function verifyProductionDeployment(args, cwd) {
   const value = await deployment(args['expected-production'], cwd, 'PRODUCTION_CUSTODY');
   assert((value?.readyState || value?.state) === 'READY', 'PRODUCTION_NOT_READY');
@@ -942,12 +953,7 @@ async function runCycle(args) {
     assert(state?.invocation_sha256 === digest, 'RESUME_CUSTODY_DRIFT');
     assert(state?.tool_sha256 === toolSha256, 'RESUME_TOOL_DRIFT');
     assert(state?.phase !== 'promotion-blocked', 'RESUME_PHASE_REFUSED');
-    const recoveredFailurePhases = new Set([
-      'failure-private-baseline-restored',
-      'failure-private-baseline-restore-failed',
-      'manual-private-baseline-recovery-complete',
-    ]);
-    assert(!recoveredFailurePhases.has(state?.phase) || args['restore-only'],
+    assert(!isFailedRunLatched(state) || args['restore-only'],
       'FAILED_RUN_NORMAL_RESUME_REFUSED');
     if (state?.phase === 'complete') {
       assert(!args['restore-only'], 'RESTORE_ONLY_COMPLETED_RUN_REFUSED');
