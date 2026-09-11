@@ -12,6 +12,7 @@
   "binding_strategy": "metadata-reference-only",
   "provider_assignments_hidden": true,
   "secret_values_stored": false,
+  "binding_metadata_projection_sha256": "3fb9a182aef71d4c8664f0a5e69b1be3f11f2b2c8e19db8c0b8ad498f8d35d89",
   "subscription_experimentation_sandbox_preserved": true,
   "secure_binding_classes": [
     "isolated-state",

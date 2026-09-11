@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "release:foundation:validate": "node scripts/release-foundation/validate.mjs",
     "release:foundation:rehearse": "node scripts/release-foundation/rehearse.mjs",
+    "release:foundation:private-cycle": "node scripts/release-foundation/private-cycle.mjs",
     "release:foundation:browser-preflight": "node scripts/release-foundation/browser-preflight.mjs",
     "release:foundation:test": "node --test test/releaseFoundation.test.js"
   },

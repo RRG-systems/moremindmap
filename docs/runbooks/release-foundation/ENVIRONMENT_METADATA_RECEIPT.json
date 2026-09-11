@@ -20,6 +20,7 @@
     "encrypted_count": 1,
     "branch_scoped_count": 41,
     "unbranched_count": 7,
+    "projection_sha256": "3fb9a182aef71d4c8664f0a5e69b1be3f11f2b2c8e19db8c0b8ad498f8d35d89",
     "required_provider_classes_attached_by_existing_record_reference": true,
     "isolated_custom_environment_store_record_present": true,
     "general_production_preview_store_record_not_attached": true,

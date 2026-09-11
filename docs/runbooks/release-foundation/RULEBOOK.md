@@ -82,17 +82,25 @@ customers. Do not retarget or delete the Subscription experimentation sandbox.
    change-specific tests, build, scoped lint, syntax/diff and secret/privacy
    checks.
 5. Deploy only to the named Custom Environment when a fresh deployment is
-   required. Verify exact source/tree/config custody. Use isolated records and
-   only the provider/email operations required by the change.
+   required. With the supported Vercel client, this target selection also moves
+   the Custom Environment's one stable private alias; there is no unaliased
+   Custom Environment stage. Gate before spawning the deployment and never use
+   generic `promote` or project-wide `rollback` for this lane. Verify exact
+   source/tree/config custody. Use isolated records and only the provider/email
+   operations required by the change.
 6. Run rendered desktop, iPad and mobile checks when applicable. Record fixed
    phases, numeric HTTP status and bounded error classes; never persist bodies,
    credentials or provider assignments.
-7. Run `rehearse.mjs` with a durable state path. A stopped process resumes from
+7. Use `private-cycle.mjs` for an actual private deployment/target-selection/
+   runtime/rollback cycle. Run `rehearse.mjs` only to replay a sealed Product
+   evidence packet. Both use durable state paths. A stopped process resumes from
    the same plan/environment digests; drift is refused. Completed provider work
    is replayed from sealed receipts, not regenerated.
-8. Exercise the declared private rollback. Direct switching is allowed only
-   when protocols are compatible. Otherwise quarantine, drain for at least the
-   maximum in-flight duration, switch, then verify.
+8. Exercise the declared private rollback. The actual-cycle tool may restore
+   only its pre-captured stable private alias to a READY deployment in the same
+   Custom Environment. Direct switching is allowed only when protocols are
+   compatible and no stateful work occurred. Otherwise quarantine, drain for at
+   least the maximum in-flight duration, switch, then verify.
 9. Seal sanitized receipts, durations, manual steps, limitations and hashes.
 10. Only after separate Production authority: re-resolve Production again,
     create the exact Production-target candidate, validate it unaliased, promote
@@ -125,6 +133,7 @@ then perform customer-safe read-only availability checks.
 ## Maintained assets
 
 - Environment contract: `docs/runbooks/release-foundation/PRIVATE_ENVIRONMENT.json`
+- Actual private-cycle contract: `docs/runbooks/release-foundation/ACTUAL_PRIVATE_CYCLE.md`
 - Rehearsal plans: `docs/runbooks/release-foundation/rehearsals/`
 - Contract and resumable runner: `scripts/release-foundation/`
 - Tests: `test/releaseFoundation.test.js`

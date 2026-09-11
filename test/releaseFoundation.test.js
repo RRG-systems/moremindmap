@@ -13,6 +13,11 @@ import {
   validateEnvironmentDefinition,
   validateReleasePlan,
 } from '../scripts/release-foundation/contract.mjs';
+import {
+  assertAliasCustody,
+  PrivateCycleBoundaryError,
+  projectEnvironmentMetadata,
+} from '../scripts/release-foundation/private-cycle.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const environmentPath = resolve(root, 'docs/runbooks/release-foundation/PRIVATE_ENVIRONMENT.json');
@@ -145,7 +150,56 @@ test('maintained release files pass syntax checks', () => {
     'scripts/release-foundation/rehearse.mjs',
     'scripts/release-foundation/browser-preflight.mjs',
     'scripts/release-foundation/evidence-manifest.mjs',
+    'scripts/release-foundation/private-cycle.mjs',
   ]) execFileSync(process.execPath, ['--check', resolve(root, file)]);
+});
+
+test('actual private-cycle alias guard refuses any public alias drift', () => {
+  const aliases = new Map([
+    ['moremindmap.com', 'dpl_Production'],
+    ['www.moremindmap.com', 'dpl_Production'],
+    ['moremindmap.vercel.app', 'dpl_Production'],
+    ['moremindmap-rrg-systems-projects.vercel.app', 'dpl_Production'],
+    ['moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app', 'dpl_Private'],
+  ]);
+  assert.equal(assertAliasCustody(aliases, {
+    expectedProduction: 'dpl_Production',
+    expectedStable: 'dpl_Private',
+  }).public_alias_count, 4);
+  aliases.set('moremindmap.com', 'dpl_Wrong');
+  assert.throws(
+    () => assertAliasCustody(aliases, { expectedProduction: 'dpl_Production' }),
+    (error) => error instanceof PrivateCycleBoundaryError && error.message === 'PUBLIC_ALIAS_CUSTODY_CHANGED',
+  );
+});
+
+test('actual private-cycle environment fingerprint excludes values and detects metadata drift', () => {
+  const fixture = {
+    envs: [
+      {
+        id: 'row_b', key: 'SECOND', type: 'sensitive', target: ['preview'], gitBranch: 'codex/example',
+        customEnvironmentIds: ['env_M70a2uAYcMBZ9m6afKtSvBFaHGwv'], value: 'must-not-project',
+      },
+      {
+        id: 'row_a', key: 'FIRST', type: 'encrypted', target: ['preview'], gitBranch: null,
+        customEnvironmentIds: ['env_M70a2uAYcMBZ9m6afKtSvBFaHGwv'], value: 'must-not-project-either',
+      },
+      {
+        id: 'row_other', key: 'OTHER', type: 'sensitive', target: ['production'], gitBranch: null,
+        customEnvironmentIds: [], value: 'outside-scope',
+      },
+    ],
+  };
+  const projection = projectEnvironmentMetadata(fixture);
+  assert.equal(projection.record_count, 2);
+  assert.equal(projection.sensitive_count, 1);
+  assert.equal(projection.encrypted_count, 1);
+  assert.equal(projection.branch_scoped_count, 1);
+  assert.equal(projection.unbranched_count, 1);
+  assert.doesNotMatch(JSON.stringify(projection), /must-not-project/u);
+  const changed = structuredClone(fixture);
+  changed.envs[0].gitBranch = 'codex/changed';
+  assert.notEqual(projectEnvironmentMetadata(changed).projection_sha256, projection.projection_sha256);
 });
 
 test('sealed receipts prove two distinct rehearsals, blocking, restart and rollback', () => {

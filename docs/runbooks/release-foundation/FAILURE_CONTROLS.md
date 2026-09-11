@@ -13,3 +13,6 @@
 | In-memory sessions were lost at closeout | Resume persists only nonsecret plan/state digests; inspect/status need no session and advance declares one minimal subject session |
 | Clean-candidate lint fell through to whole-repository lint | The rulebook requires an explicit file list and defines an empty list as a successful no-op |
 | A Production-target build moved an auxiliary alias | Pre/post public-alias snapshots are mandatory; any unrequested movement blocks and permits only the exact authorized restoration |
+| Generic promotion of a Custom Environment candidate would create Production state | `private-cycle.mjs` refuses that command family; gate before the custom-target deploy and restore only the allowlisted private stable alias |
+| Custom Environment `--skip-domain` was assumed available | Rulebook records that current Vercel custom-target selection is the activation; no unaliased claim is permitted |
+| A temporary Release 5 controller push was rejected by automatic review | Preserve the rejection as binding; do not retry, import, publish or route around the temporary controller path |
