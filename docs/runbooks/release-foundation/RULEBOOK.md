@@ -100,7 +100,9 @@ customers. Do not retarget or delete the Subscription experimentation sandbox.
    is replayed from sealed receipts, not regenerated.
 8. Exercise the declared private rollback. The actual-cycle tool may restore
    only its pre-captured stable private alias to a READY deployment in the same
-   Custom Environment. Direct switching is allowed only when protocols are
+   Custom Environment, and only while that alias still belongs to this run's
+   candidate or captured baseline. A third deployment owner stops recovery
+   without mutation. Direct switching is allowed only when protocols are
    compatible and no stateful work occurred. Otherwise quarantine, drain for at
    least the maximum in-flight duration, switch, then verify.
 9. Seal sanitized receipts, durations, manual steps, limitations and hashes.

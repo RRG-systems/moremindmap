@@ -243,6 +243,75 @@ test('sealed receipts prove two distinct rehearsals, blocking, restart and rollb
   assert.equal(browser.verdict, 'BROWSER_LAUNCH_AND_CLOSE_GREEN');
 });
 
+test('actual private cycles prove blocked activation, two deployments, restart and exact restoration', () => {
+  const evidence = resolve(root, 'docs/runbooks/release-foundation/evidence');
+  const blocked = JSON.parse(readFileSync(resolve(evidence, 'actual-intentional-failure.json')));
+  const first = JSON.parse(readFileSync(resolve(evidence, 'actual-rehearsal-1-release4.json')));
+  const firstSecondAttempt = JSON.parse(readFileSync(
+    resolve(evidence, 'actual-rehearsal-2-first-attempt-blocked-restored.json'),
+  ));
+  const paused = JSON.parse(readFileSync(resolve(evidence, 'actual-rehearsal-2-release5-paused.json')));
+  const second = JSON.parse(readFileSync(resolve(evidence, 'actual-rehearsal-2-release5-complete.json')));
+  const production = 'dpl_F81jd5AsvoSN5jmqfSBGezX5pgi4';
+  const baseline = 'dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY';
+  const release5 = '8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6';
+  const release5Tree = 'a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57';
+
+  assert.equal(blocked.verdict, 'PROMOTION_BLOCKED');
+  assert.equal(blocked.activation_attempted, false);
+  assert.equal(blocked.deployment_command_spawned, false);
+  assert.equal(blocked.private_alias_mutations, 0);
+  assert.equal(firstSecondAttempt.verdict, 'PROMOTION_BLOCKED_PRIVATE_BASELINE_RESTORED');
+  assert.equal(firstSecondAttempt.blocker, 'PRIVATE_STABLE_ALIAS_PROPAGATION_TIMEOUT');
+  assert.equal(firstSecondAttempt.private_baseline_restored, true);
+
+  assert.equal(first.verdict, 'ACTUAL_PRIVATE_RELEASE_REHEARSAL_GREEN');
+  assert.equal(second.verdict, 'ACTUAL_PRIVATE_RELEASE_REHEARSAL_GREEN');
+  assert.notEqual(first.run_id, second.run_id);
+  assert.notEqual(first.candidate_deployment.id, second.candidate_deployment.id);
+  assert.equal(first.exact_candidate.commit, '87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf');
+  assert.equal(first.exact_candidate.tree, 'fd209e905836fef6fe09e3605380c95f77383355');
+  assert.equal(second.exact_candidate.commit, release5);
+  assert.equal(second.exact_candidate.tree, release5Tree);
+  assert.equal(paused.run_id, second.run_id);
+  assert.equal(paused.candidate_deployment.id, second.candidate_deployment.id);
+  assert.equal(paused.candidate_deployment.selection_method, 'explicit-allowlisted-private-alias');
+  assert.equal(second.resume_count, 1);
+  assert.equal(second.restart_recovery_proven, true);
+
+  for (const receipt of [first, second]) {
+    assert.equal(receipt.private_baseline_restored.id, baseline);
+    assert.equal(receipt.public_production.id, production);
+    assert.equal(receipt.public_production.source, release5);
+    assert.equal(receipt.public_production.tree, release5Tree);
+    assert.equal(receipt.public_aliases_unchanged, true);
+    assert.equal(receipt.private_stable_alias_restored, true);
+    assert.equal(receipt.private_sso_protection_verified, true);
+    assert.equal(receipt.direct_and_stable_runtime_verified, true);
+    assert.equal(receipt.rollback_exercised, true);
+    assert.equal(receipt.provider_operations_repeated, false);
+    assert.equal(receipt.rendered_product_campaign_repeated, false);
+    assert.equal(receipt.public_production_mutations, 0);
+    assert.equal(receipt.customer_mutations, 0);
+    assert.equal(receipt.stateful_runtime_requests, 0);
+    assert.equal(receipt.provider_operations, 0);
+    assert.equal(receipt.customer_emails, 0);
+    assert.equal(receipt.real_charges, 0);
+    assert.equal(receipt.secret_values_read, false);
+    assert.equal(receipt.provider_assignments_disclosed, false);
+    for (const scope of ['direct', 'stable']) {
+      assert.equal(receipt.candidate_runtime_checks[scope].length, 6);
+      assert.equal(receipt.rollback_runtime_checks[scope].length, 6);
+      for (const check of receipt.candidate_runtime_checks[scope]) {
+        assert.equal(check.actual_status, check.expected_status);
+      }
+      for (const check of receipt.rollback_runtime_checks[scope]) {
+        assert.equal(check.actual_status, check.expected_status);
+      }
+    }
+  }
+});
+
 test('evidence manifest rehashes every committed receipt byte-for-byte', () => {
   const evidence = resolve(root, 'docs/runbooks/release-foundation/evidence');
   const manifest = JSON.parse(readFileSync(resolve(evidence, 'MANIFEST.json')));

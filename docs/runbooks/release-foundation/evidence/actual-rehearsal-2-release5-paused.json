@@ -1,0 +1,27 @@
+{
+  "candidate_deployment": {
+    "host": "moremindmap-hqp6uqmkl-rrg-systems-projects.vercel.app",
+    "id": "dpl_Bawoh9N5b7jDEyHu53EcuaSbLGbi",
+    "ready_state": "READY",
+    "selection_method": "explicit-allowlisted-private-alias"
+  },
+  "customer_emails": 0,
+  "customer_mutations": 0,
+  "cycle_id": "release5-actual-private-cycle-resume-v2",
+  "exact_candidate": {
+    "branch": "codex/home-base-v2-recruiting-two-box-release-v1",
+    "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "private_sso_protection_verified": true,
+  "provider_assignments_disclosed": false,
+  "provider_operations": 0,
+  "public_aliases_unchanged": true,
+  "real_charges": 0,
+  "restart_recovery_required": true,
+  "run_id": "ca7e2e95-84c5-4d88-9f86-c1d1f54ac9b0",
+  "schema": "more.home-base.actual-private-cycle-receipt/v1",
+  "secret_values_read": false,
+  "stateful_runtime_requests": 0,
+  "verdict": "PAUSED_AFTER_PRIVATE_TARGET_SELECTION"
+}

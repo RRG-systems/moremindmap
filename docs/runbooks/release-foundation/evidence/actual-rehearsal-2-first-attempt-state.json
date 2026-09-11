@@ -1,0 +1,101 @@
+{
+  "candidate": {
+    "branch": "codex/home-base-v2-recruiting-two-box-release-v1",
+    "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "candidate_deployment": {
+    "host": "moremindmap-7ropzztcd-rrg-systems-projects.vercel.app",
+    "id": "dpl_3qXpaQVA7SCQCVXAKGfsZiJPC3jK",
+    "ready_state": "BUILDING"
+  },
+  "cycle_id": "release5-actual-private-cycle-resume",
+  "environment_metadata_sha256": "3fb9a182aef71d4c8664f0a5e69b1be3f11f2b2c8e19db8c0b8ad498f8d35d89",
+  "evidence_bundle": {
+    "evidence_mode": "sealed-product-evidence-plus-actual-private-release-cycle",
+    "manifest_file_count": 11,
+    "manifest_sha256": "f1ebe10dde6df7620a55438ebddbf70f6031fafc18fb2bdc759936d9122b6ee3",
+    "plan_sha256": "027fd559813461ed3553a19fbecfa6b6d3a56401c22902acced8c36409a01b1d"
+  },
+  "failed_at": "2026-09-11T02:01:59.698Z",
+  "failure_code": "PRIVATE_STABLE_ALIAS_PROPAGATION_TIMEOUT",
+  "history": [
+    {
+      "at": "2026-09-11T01:58:06.522Z",
+      "phase": "prepared",
+      "sequence": 1
+    },
+    {
+      "at": "2026-09-11T01:58:08.089Z",
+      "custom_environment": "subscription-canary",
+      "phase": "candidate-deploying",
+      "sequence": 2
+    },
+    {
+      "at": "2026-09-11T01:58:09.868Z",
+      "deployment": "dpl_3qXpaQVA7SCQCVXAKGfsZiJPC3jK",
+      "phase": "private-target-created",
+      "sequence": 3
+    },
+    {
+      "at": "2026-09-11T02:01:59.698Z",
+      "failure_code": "PRIVATE_STABLE_ALIAS_PROPAGATION_TIMEOUT",
+      "phase": "failure-private-baseline-restored",
+      "sequence": 4
+    }
+  ],
+  "invocation_sha256": "b161ee6cd6b1b29ee2c1551b58636055b56784c764ca7cb0eaaf7a80bd6f5e97",
+  "phase": "failure-private-baseline-restored",
+  "pre_cycle": {
+    "aliases": {
+      "public_alias_count": 4,
+      "public_deployment": "dpl_F81jd5AsvoSN5jmqfSBGezX5pgi4",
+      "stable_deployment": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY"
+    },
+    "baseline": {
+      "branch": "codex/home-base-v2-recruiting-two-box-release-v1",
+      "host": "moremindmap-dn5d3nmdu-rrg-systems-projects.vercel.app",
+      "id": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+      "ready_state": "READY",
+      "source": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+    },
+    "environment": {
+      "branch_scoped_count": 41,
+      "encrypted_count": 1,
+      "projection_sha256": "3fb9a182aef71d4c8664f0a5e69b1be3f11f2b2c8e19db8c0b8ad498f8d35d89",
+      "record_count": 48,
+      "sensitive_count": 47,
+      "unbranched_count": 7
+    },
+    "production": {
+      "id": "dpl_F81jd5AsvoSN5jmqfSBGezX5pgi4",
+      "source": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+    },
+    "protection": {
+      "direct": {
+        "host": "moremindmap-dn5d3nmdu-rrg-systems-projects.vercel.app",
+        "redirect_host": "vercel.com",
+        "redirect_path": "/sso-api",
+        "status": 302
+      },
+      "stable": {
+        "host": "moremindmap-env-subscription-canary-rrg-systems-projects.vercel.app",
+        "redirect_host": "vercel.com",
+        "redirect_path": "/sso-api",
+        "status": 302
+      }
+    }
+  },
+  "resume_count": 0,
+  "rollback": {
+    "branch": "codex/home-base-v2-recruiting-two-box-release-v1",
+    "commit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "run_id": "49b2cf58-cd1f-4e64-b806-eb75a6ebe535",
+  "schema": "more.home-base.actual-private-cycle-state/v1",
+  "started_at": "2026-09-11T01:58:06.520Z",
+  "tool_sha256": "ec0a780d42a88b2fd15067f3582c8ab696d797d6bfdc740f28cd8d6d5ec96efa"
+}

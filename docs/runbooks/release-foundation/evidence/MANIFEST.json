@@ -1,17 +1,52 @@
 {
   "algorithm": "SHA-256",
   "excludes_self": true,
-  "file_count": 11,
+  "file_count": 18,
   "files": [
     {
-      "bytes": 1325,
-      "path": "FINAL_VALIDATION.json",
-      "sha256": "c333803a6f678b18f2eb0c019157be36d4d58104afaf7ae0a4479bb74f7ef272"
+      "bytes": 5338,
+      "path": "ACTUAL_REHEARSAL_SUMMARY.md",
+      "sha256": "95c744785eaf45857088612d05df3bb7c0d9b9e574633b1840b6aa1332b1f513"
     },
     {
-      "bytes": 4149,
+      "bytes": 2316,
+      "path": "FINAL_VALIDATION.json",
+      "sha256": "fe7212aaf1267f625d061f62ed956d7cd82fe7bb196ae6f5bb9bb69fd1a864d3"
+    },
+    {
+      "bytes": 4400,
       "path": "REHEARSAL_SUMMARY.md",
-      "sha256": "7fdadd13fb024a92aa67095c04f28459388ee7b1ef0897a2d70bbff7870933e0"
+      "sha256": "7fd022601bbd720fb90bcba1271f479635dffb9458cdf4857831f625eb36cc71"
+    },
+    {
+      "bytes": 1994,
+      "path": "actual-intentional-failure.json",
+      "sha256": "fee7acaa3e34ab65048d72a0507939db903ea94a579d8d0d5713533b1c1300a3"
+    },
+    {
+      "bytes": 6496,
+      "path": "actual-rehearsal-1-release4.json",
+      "sha256": "96d43271b034a03c9668874db907d128a443041be37a2d72b6ea2c76c4952455"
+    },
+    {
+      "bytes": 601,
+      "path": "actual-rehearsal-2-first-attempt-blocked-restored.json",
+      "sha256": "76e322d94cef822a4294cfbae82aa7de6153e110ad8c78a8499c8ed980416c79"
+    },
+    {
+      "bytes": 3658,
+      "path": "actual-rehearsal-2-first-attempt-state.json",
+      "sha256": "339330e4ecb5e46394e2304912b55ca4806438b941ee1697b57b065d722d188a"
+    },
+    {
+      "bytes": 6499,
+      "path": "actual-rehearsal-2-release5-complete.json",
+      "sha256": "f00392e6698f9bb6e401f8d62a8870353899e07853518f289f67ef1fbddccfb9"
+    },
+    {
+      "bytes": 996,
+      "path": "actual-rehearsal-2-release5-paused.json",
+      "sha256": "0abda220d22eb5b8974ea5d2df4c6171c96ef2afdf6aab30e308c851902e1fea"
     },
     {
       "bytes": 375,

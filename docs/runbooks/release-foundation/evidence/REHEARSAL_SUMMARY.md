@@ -2,6 +2,11 @@
 
 Verdict: `HOME_BASE_REUSABLE_RELEASE_SETUP_REHEARSALS_GREEN`
 
+This file records the deterministic sealed-evidence replays. The subsequent
+real Custom Environment deployments, stop/restart proof and exact private
+rollback are recorded separately in `ACTUAL_REHEARSAL_SUMMARY.md` and the
+`actual-*.json` receipts.
+
 These are two consecutive, non-mutating replays of already sealed private
 rehearsals. They exercise the maintained acceptance/state/rollback procedure
 without repeating model calls, email sends, state writes, deployments or alias

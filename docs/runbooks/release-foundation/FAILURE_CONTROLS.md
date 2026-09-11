@@ -15,4 +15,7 @@
 | A Production-target build moved an auxiliary alias | Pre/post public-alias snapshots are mandatory; any unrequested movement blocks and permits only the exact authorized restoration |
 | Generic promotion of a Custom Environment candidate would create Production state | `private-cycle.mjs` refuses that command family; gate before the custom-target deploy and restore only the allowlisted private stable alias |
 | Custom Environment `--skip-domain` was assumed available | Rulebook records that current Vercel custom-target selection is the activation; no unaliased claim is permitted |
+| A READY Custom Environment deployment remained unselected instead of advancing its stable alias | After exact source/tree/run, SSO and public-alias checks, select only the one allowlisted private stable host; preserve the failed attempt and restore baseline on any error |
+| A failed or restore-only run could be resumed after its phase changed | Preserve an immutable failure/history latch; only restore-only may reopen it and activation always requires a new state path |
+| An old run could overwrite a newer private canary selection during recovery | Before rollback, require the stable host to belong to this run's candidate or its captured baseline; any third target fails closed without mutation |
 | A temporary Release 5 controller push was rejected by automatic review | Preserve the rejection as binding; do not retry, import, publish or route around the temporary controller path |

@@ -1,0 +1,218 @@
+{
+  "actual_private_target_selections": 2,
+  "candidate_deployment": {
+    "host": "moremindmap-c34fgukmf-rrg-systems-projects.vercel.app",
+    "id": "dpl_3EgbzQ9pkAKBJby6qQgjpUi6Vnnr",
+    "ready_state": "READY"
+  },
+  "candidate_runtime_checks": {
+    "direct": [
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-root",
+        "path": "/"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-step-1",
+        "path": "/step-1"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "leadership-entry-render-route",
+        "path": "/leadership"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "catalog-allowed-origin",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 403,
+        "expected_status": 403,
+        "id": "catalog-hostile-origin-denied",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 404,
+        "expected_status": 404,
+        "id": "p0-diagnostic-quarantined",
+        "path": "/api/diagnostic/list-all-profiles"
+      }
+    ],
+    "stable": [
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-root",
+        "path": "/"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-step-1",
+        "path": "/step-1"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "leadership-entry-render-route",
+        "path": "/leadership"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "catalog-allowed-origin",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 403,
+        "expected_status": 403,
+        "id": "catalog-hostile-origin-denied",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 404,
+        "expected_status": 404,
+        "id": "p0-diagnostic-quarantined",
+        "path": "/api/diagnostic/list-all-profiles"
+      }
+    ]
+  },
+  "completed_at": "2026-09-11T01:57:21.583Z",
+  "customer_emails": 0,
+  "customer_mutations": 0,
+  "cycle_id": "release4-actual-private-cycle",
+  "direct_and_stable_runtime_verified": true,
+  "duration_ms": 131425,
+  "environment_metadata_sha256": "3fb9a182aef71d4c8664f0a5e69b1be3f11f2b2c8e19db8c0b8ad498f8d35d89",
+  "environment_metadata_unchanged": true,
+  "exact_candidate": {
+    "branch": "codex/home-base-v2-subscription-continuity-release4-v1",
+    "commit": "87a4a1e9fd0b7a32bdc244edc44ce1b11be574cf",
+    "tree": "fd209e905836fef6fe09e3605380c95f77383355"
+  },
+  "historical_product_evidence_reused": {
+    "evidence_mode": "sealed-product-evidence-plus-actual-private-release-cycle",
+    "manifest_file_count": 11,
+    "manifest_sha256": "f1ebe10dde6df7620a55438ebddbf70f6031fafc18fb2bdc759936d9122b6ee3",
+    "plan_sha256": "8a0a0a4bdf1b21a563586a421c1d1d89bbfb1737c67599afacbabf116e2cb293"
+  },
+  "prior_controller_push_rejection_preserved": true,
+  "private_baseline_restored": {
+    "branch": "codex/home-base-v2-recruiting-two-box-release-v1",
+    "host": "moremindmap-dn5d3nmdu-rrg-systems-projects.vercel.app",
+    "id": "dpl_3EYk1UKzmGbTDWMUBBtDUyX3sfkY",
+    "ready_state": "READY",
+    "source": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "private_sso_protection_verified": true,
+  "private_stable_alias_restored": true,
+  "provider_assignments_disclosed": false,
+  "provider_operations": 0,
+  "provider_operations_repeated": false,
+  "public_aliases_unchanged": true,
+  "public_production": {
+    "id": "dpl_F81jd5AsvoSN5jmqfSBGezX5pgi4",
+    "source": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+    "tree": "a2d975d526f6f6e124e9fe2af6e1bb05ed9b3c57"
+  },
+  "public_production_mutations": 0,
+  "real_charges": 0,
+  "rendered_product_campaign_repeated": false,
+  "restart_recovery_proven": false,
+  "resume_count": 0,
+  "rollback_compatibility": "stateless-read-only-cycle-to-ready-prior-custom-environment-deployment",
+  "rollback_drain_required": false,
+  "rollback_exercised": true,
+  "rollback_runtime_checks": {
+    "direct": [
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-root",
+        "path": "/"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-step-1",
+        "path": "/step-1"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "leadership-entry-render-route",
+        "path": "/leadership"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "catalog-allowed-origin",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 403,
+        "expected_status": 403,
+        "id": "catalog-hostile-origin-denied",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 404,
+        "expected_status": 404,
+        "id": "p0-diagnostic-quarantined",
+        "path": "/api/diagnostic/list-all-profiles"
+      }
+    ],
+    "stable": [
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-root",
+        "path": "/"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "public-step-1",
+        "path": "/step-1"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "leadership-entry-render-route",
+        "path": "/leadership"
+      },
+      {
+        "actual_status": 200,
+        "expected_status": 200,
+        "id": "catalog-allowed-origin",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 403,
+        "expected_status": 403,
+        "id": "catalog-hostile-origin-denied",
+        "path": "/api/public-v1/catalog"
+      },
+      {
+        "actual_status": 404,
+        "expected_status": 404,
+        "id": "p0-diagnostic-quarantined",
+        "path": "/api/diagnostic/list-all-profiles"
+      }
+    ]
+  },
+  "run_id": "082bc7b4-e8c9-4e9e-8dd1-b0a2620d76c8",
+  "schema": "more.home-base.actual-private-cycle-receipt/v1",
+  "secret_values_read": false,
+  "started_at": "2026-09-11T01:55:10.158Z",
+  "stateful_runtime_requests": 0,
+  "tool_sha256": "ec0a780d42a88b2fd15067f3582c8ab696d797d6bfdc740f28cd8d6d5ec96efa",
+  "verdict": "ACTUAL_PRIVATE_RELEASE_REHEARSAL_GREEN"
+}
