@@ -40,9 +40,11 @@ It then restores only the pre-captured stable private alias to its READY prior
 deployment and repeats the runtime and custody checks.
 
 Use `--stop-after private-target-selected` to prove interruption recovery. A
-fresh invocation with the same arguments and `--resume` must load the atomic
-state, re-resolve the deployment, aliases, environment metadata and worktrees,
-then finish verification and rollback. Any digest or custody drift is refused.
+fresh invocation with the same arguments and `--resume` loads the atomic state,
+ignores the already-satisfied stop marker, re-resolves the deployment, aliases,
+environment metadata and worktrees, then finishes verification and rollback.
+Any digest or custody drift is refused. A failed-and-restored run cannot be
+resumed into activation; start a new cycle with new state and receipt paths.
 
 ## Hard refusals
 

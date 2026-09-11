@@ -356,7 +356,7 @@ async function waitReady(id, spec, cwd) {
 }
 
 async function findDeploymentForRun(runId, spec, cwd) {
-  for (let attempt = 1; attempt <= 3; attempt += 1) {
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
     const payload = await vercelApi(
       `/v6/deployments?projectId=${PROJECT_ID}&teamId=${TEAM_ID}&limit=50`,
       cwd,
@@ -372,7 +372,7 @@ async function findDeploymentForRun(runId, spec, cwd) {
       assert(String(exact?.meta?.candidateTree || '') === spec.tree, 'RUN_DEPLOYMENT_TREE_CHANGED');
       return exact;
     }
-    if (attempt < 3) await new Promise((resolvePromise) => setTimeout(resolvePromise, 1500));
+    if (attempt < 30) await new Promise((resolvePromise) => setTimeout(resolvePromise, 2000));
   }
   return null;
 }
@@ -797,8 +797,7 @@ async function reconcileSelectedCandidate({ args, state, candidate, rollback, en
         };
         assert(state.candidate_deployment.id !== state.pre_cycle.baseline.id, 'NEW_PRIVATE_DEPLOYMENT_NOT_DISTINCT');
       } else {
-        await selectCandidate({ args, state, candidate, environmentDigest, statePath });
-        return;
+        stop('RESUME_DEPLOYMENT_NOT_FOUND_START_NEW_CYCLE');
       }
     }
   } else {
@@ -854,7 +853,13 @@ async function sealCompletedCycle({
   addHistory(state, 'complete');
   state.completed_at = new Date().toISOString();
   await atomicWriteJson(statePath, state);
-  const receipt = {
+  const receipt = completedReceipt(state, environmentDigest, toolSha256);
+  await atomicWriteJson(receiptPath, receipt);
+  process.stdout.write(`${JSON.stringify({ verdict: receipt.verdict, cycle_id: receipt.cycle_id, duration_ms: receipt.duration_ms, restart_recovery_proven: receipt.restart_recovery_proven })}\n`);
+}
+
+function completedReceipt(state, environmentDigest, toolSha256, { idempotentResume = false } = {}) {
+  return {
     schema: RECEIPT_SCHEMA,
     verdict: 'ACTUAL_PRIVATE_RELEASE_REHEARSAL_GREEN',
     run_id: state.run_id,
@@ -893,9 +898,8 @@ async function sealCompletedCycle({
     secret_values_read: false,
     provider_assignments_disclosed: false,
     tool_sha256: toolSha256,
+    ...(idempotentResume ? { idempotent_resume: true } : {}),
   };
-  await atomicWriteJson(receiptPath, receipt);
-  process.stdout.write(`${JSON.stringify({ verdict: receipt.verdict, cycle_id: receipt.cycle_id, duration_ms: receipt.duration_ms, restart_recovery_proven: receipt.restart_recovery_proven })}\n`);
 }
 
 async function runCycle(args) {
@@ -931,7 +935,23 @@ async function runCycle(args) {
     assert(state?.schema === STATE_SCHEMA, 'RESUME_STATE_SCHEMA_CHANGED');
     assert(state?.invocation_sha256 === digest, 'RESUME_CUSTODY_DRIFT');
     assert(state?.tool_sha256 === toolSha256, 'RESUME_TOOL_DRIFT');
-    assert(!['complete', 'promotion-blocked'].includes(state?.phase), 'RESUME_PHASE_REFUSED');
+    assert(state?.phase !== 'promotion-blocked', 'RESUME_PHASE_REFUSED');
+    const recoveredFailurePhases = new Set([
+      'failure-private-baseline-restored',
+      'failure-private-baseline-restore-failed',
+      'manual-private-baseline-recovery-complete',
+    ]);
+    assert(!recoveredFailurePhases.has(state?.phase) || args['restore-only'],
+      'FAILED_RUN_NORMAL_RESUME_REFUSED');
+    if (state?.phase === 'complete') {
+      assert(!args['restore-only'], 'RESTORE_ONLY_COMPLETED_RUN_REFUSED');
+      await Promise.all([verifyWorktree(candidate), verifyWorktree(rollback)]);
+      await restoreAndVerifyBaseline(args, state, rollback, environmentDigest, { runtime: false });
+      const receipt = completedReceipt(state, environmentDigest, toolSha256, { idempotentResume: true });
+      await atomicWriteJson(receiptPath, receipt);
+      process.stdout.write(`${JSON.stringify({ verdict: receipt.verdict, cycle_id: receipt.cycle_id, idempotent_resume: true })}\n`);
+      return;
+    }
     state.resume_count += 1;
     addHistory(state, 'resumed', { from_durable_state: true, prior_phase: state.phase });
     await atomicWriteJson(statePath, state);
@@ -1019,7 +1039,7 @@ async function runCycle(args) {
       } else {
         await selectCandidate({ args, state, candidate, environmentDigest, statePath });
       }
-      if (args['stop-after'] === 'private-target-selected') {
+      if (!args.resume && args['stop-after'] === 'private-target-selected') {
         const paused = {
           schema: RECEIPT_SCHEMA,
           verdict: 'PAUSED_AFTER_PRIVATE_TARGET_SELECTION',
