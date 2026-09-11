@@ -82,10 +82,12 @@ customers. Do not retarget or delete the Subscription experimentation sandbox.
    change-specific tests, build, scoped lint, syntax/diff and secret/privacy
    checks.
 5. Deploy only to the named Custom Environment when a fresh deployment is
-   required. With the supported Vercel client, this target selection also moves
-   the Custom Environment's one stable private alias; there is no unaliased
-   Custom Environment stage. Gate before spawning the deployment and never use
-   generic `promote` or project-wide `rollback` for this lane. Verify exact
+   required. The supported Vercel client may move the Custom Environment's one
+   stable private alias automatically or leave the READY deployment unaliased;
+   it does not support `--skip-domain` for this target. After exact metadata and
+   SSO protection are proven, the adapter may select only that allowlisted
+   private alias. Gate before either action and never use generic `promote` or
+   project-wide `rollback` for this lane. Verify exact
    source/tree/config custody. Use isolated records and only the provider/email
    operations required by the change.
 6. Run rendered desktop, iPad and mobile checks when applicable. Record fixed

@@ -28,10 +28,14 @@ exits nonzero. Use new state and receipt paths for the corrected cycle.
 
 ## Actual cycle
 
-Run without `--resume`. Vercel Custom Environments do not support an unaliased
-deployment through the maintained CLI, so the custom-target deploy is the one
-private activation action. The tool verifies exact deployment metadata, the
-stable alias, every public alias and six status-only, read-only runtime checks.
+Run without `--resume`. Vercel Custom Environments do not support
+`--skip-domain` through the maintained CLI. A custom-target deploy can either
+advance the private system alias automatically or remain unaliased. After the
+deployment is READY, exact and SSO-protected, the tool selects it only through
+the one allowlisted private stable alias when Vercel has not already done so.
+The pre-deployment gate therefore blocks both actions. The tool verifies exact
+deployment metadata, the stable alias, every public alias and six status-only,
+read-only runtime checks.
 It then restores only the pre-captured stable private alias to its READY prior
 deployment and repeats the runtime and custody checks.
 

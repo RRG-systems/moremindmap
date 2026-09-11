@@ -386,7 +386,13 @@ async function waitStable(expectedId, cwd) {
   stop('PRIVATE_STABLE_ALIAS_PROPAGATION_TIMEOUT');
 }
 
-async function deployExact(spec, cwd, runId, role, onCreated = null) {
+async function deployExact(
+  spec,
+  cwd,
+  runId,
+  role,
+  { expectedProduction, expectedBaseline, onCreated = null },
+) {
   const result = await runCaptured('vercel', [
     'deploy', `--target=${ENVIRONMENT.name}`, '--force', '--yes', '--no-wait', '--format=json',
     '--meta', 'githubDeployment=1',
@@ -408,8 +414,15 @@ async function deployExact(spec, cwd, runId, role, onCreated = null) {
   assert(HOST.test(host), 'DEPLOYMENT_HOST_INVALID');
   if (onCreated) await onCreated({ id, host, ready_state: 'BUILDING' });
   const exact = await waitReady(id, spec, cwd);
-  await waitStable(id, cwd);
-  return assertExactDeployment(exact, spec);
+  const projected = assertExactDeployment(exact, spec);
+  assert(String(exact?.meta?.releaseFoundationRun || '') === runId, 'DEPLOYMENT_RUN_CHANGED');
+  assert(String(exact?.meta?.releaseFoundationRole || '') === role, 'DEPLOYMENT_ROLE_CHANGED');
+  await verifySsoProtection(projected.host, cwd, 'PRIVATE_CANDIDATE_DIRECT');
+  const selectionMethod = await ensurePrivateStableSelection(projected, cwd, {
+    expectedProduction,
+    expectedBaseline,
+  });
+  return { ...projected, selection_method: selectionMethod };
 }
 
 async function verifySsoProtection(host, cwd, label) {
@@ -428,12 +441,31 @@ async function verifySsoProtection(host, cwd, label) {
   return { host, status: 302, redirect_host: location.hostname, redirect_path: location.pathname };
 }
 
-async function restoreStableAlias(baseline, cwd) {
+async function setPrivateStableAlias(deploymentValue, cwd) {
+  assert(DEPLOYMENT.test(deploymentValue?.id || ''), 'PRIVATE_ALIAS_TARGET_INVALID');
   await runCaptured('vercel', [
-    'alias', 'set', baseline.id, ENVIRONMENT.stableHost,
+    'alias', 'set', deploymentValue.id, ENVIRONMENT.stableHost,
     '--scope', TEAM, '--no-color', '--non-interactive',
-  ], { cwd, label: 'PRIVATE_ALIAS_RESTORE', timeoutMs: 120_000 });
-  await waitStable(baseline.id, cwd);
+  ], { cwd, label: 'PRIVATE_ALIAS_SET', timeoutMs: 120_000 });
+  await waitStable(deploymentValue.id, cwd);
+}
+
+async function ensurePrivateStableSelection(
+  deploymentValue,
+  cwd,
+  { expectedProduction, expectedBaseline },
+) {
+  assert(DEPLOYMENT.test(expectedBaseline || ''), 'EXPECTED_PRIVATE_BASELINE_INVALID');
+  const aliases = await readAliases(cwd);
+  assertAliasCustody(aliases, { expectedProduction });
+  const currentStable = aliases.get(ENVIRONMENT.stableHost);
+  assert(
+    currentStable === deploymentValue.id || currentStable === expectedBaseline,
+    'PRIVATE_STABLE_ALIAS_UNEXPECTED',
+  );
+  if (currentStable === deploymentValue.id) return 'automatic-custom-environment-alias';
+  await setPrivateStableAlias(deploymentValue, cwd);
+  return 'explicit-allowlisted-private-alias';
 }
 
 async function statusOnlyRequest(check, deploymentId, cwd) {
@@ -571,7 +603,7 @@ async function restoreAndVerifyBaseline(args, state, rollback, environmentDigest
   const aliases = await readAliases(rollback.worktree);
   assertAliasCustody(aliases, { expectedProduction: args['expected-production'] });
   if (aliases.get(ENVIRONMENT.stableHost) !== state.pre_cycle.baseline.id) {
-    await restoreStableAlias(state.pre_cycle.baseline, rollback.worktree);
+    await setPrivateStableAlias(state.pre_cycle.baseline, rollback.worktree);
   }
   const guards = await verifyGlobalGuards(
     args,
@@ -709,7 +741,11 @@ async function selectCandidate({ args, state, candidate, environmentDigest, stat
     candidate.worktree,
     state.run_id,
     'candidate',
-    (created) => recordCreatedDeployment(state, created, statePath),
+    {
+      expectedProduction: args['expected-production'],
+      expectedBaseline: state.pre_cycle.baseline.id,
+      onCreated: (created) => recordCreatedDeployment(state, created, statePath),
+    },
   );
   assert(state.candidate_deployment.id !== state.pre_cycle.baseline.id, 'NEW_PRIVATE_DEPLOYMENT_NOT_DISTINCT');
   addHistory(state, 'private-target-selected', { deployment: state.candidate_deployment.id });
@@ -731,16 +767,34 @@ async function reconcileSelectedCandidate({ args, state, candidate, rollback, en
   if (stableId === state.pre_cycle.baseline.id) {
     if (state.candidate_deployment?.id) {
       const exact = await waitReady(state.candidate_deployment.id, candidate, candidate.worktree);
-      await waitStable(state.candidate_deployment.id, candidate.worktree);
-      state.candidate_deployment = assertExactDeployment(exact, candidate);
+      assert(String(exact?.meta?.releaseFoundationRun || '') === state.run_id,
+        'RESUME_PRIVATE_TARGET_RUN_CHANGED');
+      const projected = assertExactDeployment(exact, candidate);
+      await verifySsoProtection(projected.host, candidate.worktree, 'PRIVATE_CANDIDATE_DIRECT');
+      state.candidate_deployment = {
+        ...projected,
+        selection_method: await ensurePrivateStableSelection(projected, candidate.worktree, {
+          expectedProduction: args['expected-production'],
+          expectedBaseline: state.pre_cycle.baseline.id,
+        }),
+      };
       assert(state.candidate_deployment.id !== state.pre_cycle.baseline.id, 'NEW_PRIVATE_DEPLOYMENT_NOT_DISTINCT');
     } else {
       const found = await findDeploymentForRun(state.run_id, candidate, candidate.worktree);
       if (found) {
         const id = String(found.id || found.uid);
         const exact = await waitReady(id, candidate, candidate.worktree);
-        await waitStable(id, candidate.worktree);
-        state.candidate_deployment = assertExactDeployment(exact, candidate);
+        assert(String(exact?.meta?.releaseFoundationRun || '') === state.run_id,
+          'RESUME_PRIVATE_TARGET_RUN_CHANGED');
+        const projected = assertExactDeployment(exact, candidate);
+        await verifySsoProtection(projected.host, candidate.worktree, 'PRIVATE_CANDIDATE_DIRECT');
+        state.candidate_deployment = {
+          ...projected,
+          selection_method: await ensurePrivateStableSelection(projected, candidate.worktree, {
+            expectedProduction: args['expected-production'],
+            expectedBaseline: state.pre_cycle.baseline.id,
+          }),
+        };
         assert(state.candidate_deployment.id !== state.pre_cycle.baseline.id, 'NEW_PRIVATE_DEPLOYMENT_NOT_DISTINCT');
       } else {
         await selectCandidate({ args, state, candidate, environmentDigest, statePath });
