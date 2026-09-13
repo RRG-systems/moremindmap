@@ -2,6 +2,7 @@ import { validatePersistedVerticalBinding } from '../business-assessment/vertica
 import { normalizeGovernedAssessmentRecord } from '../engine/newBaProductionReadinessV1/canonicalReader.js';
 import { validateCompleteNewBaRealization } from '../engine/newBaProductionReadinessV1/completeness.js';
 import { validateLaunchSafeNewBaEnvelope } from '../engine/newBaProductionReadinessV1/launchSafeRealizationStore.js';
+import { classifyCompatiblePriorRealization } from '../engine/newBaProductionReadinessV1/compatibilitySelection.js';
 import {
   NEW_BA_REALIZATION_IDENTITY_VERSION_V3,
   buildNewBaRealizationIdentityV3,
@@ -11,9 +12,11 @@ import {
   normalizeProfileId as normalizeNewBaProfileId,
   sha256Stable,
 } from '../engine/newBaProductionReadinessV1/stable.js';
+import { validatePaidSubscriberRuntimeCustody } from '../engine/subscriptionV1/paidSubscriberCustody.js';
 import { normalizeProfileId } from '../../src/lib/publicSiteAirlockV1/contracts.js';
 
 export const DEFAULT_PAID_NEW_BA_READINESS_NAMESPACE = 'nonprod:new-ba:v1';
+export const DEFAULT_PAID_NEW_BOS_READINESS_NAMESPACE = 'nonprod:new-bos:production-canary:v1';
 
 function reconciliationRequired() {
   throw new Error('paid_current_new_ba_readiness_reconciliation_required');
@@ -23,6 +26,14 @@ function readinessNamespace(value) {
   const namespace = String(value || DEFAULT_PAID_NEW_BA_READINESS_NAMESPACE).trim();
   if (!namespace.startsWith('preview:new-ba:') && !namespace.startsWith('nonprod:new-ba:')) {
     throw new Error('paid_current_new_ba_readiness_namespace_invalid');
+  }
+  return namespace;
+}
+
+function bosReadinessNamespace(value) {
+  const namespace = String(value || DEFAULT_PAID_NEW_BOS_READINESS_NAMESPACE).trim();
+  if (!namespace.startsWith('preview:new-bos:') && !namespace.startsWith('nonprod:new-bos:')) {
+    throw new Error('paid_current_new_bos_readiness_namespace_invalid');
   }
   return namespace;
 }
@@ -51,6 +62,32 @@ function exactAssessmentAuthority(assessment, profileId) {
       verticalBinding,
       businessEvidenceSha256: governedEvidence.evidence_sha256,
     };
+  } catch {
+    reconciliationRequired();
+  }
+}
+
+function desiredV3Identity(envelope, {
+  profileId,
+  assessmentId,
+  verticalBinding,
+  businessEvidenceSha256,
+}) {
+  const artifact = envelope?.artifact || {};
+  const lineage = artifact.lineage || {};
+  const fusionBos = artifact.fusion?.bos_authority || {};
+  try {
+    return buildNewBaRealizationIdentityV3({
+      profileId: normalizeNewBaProfileId(profileId),
+      assessmentId,
+      evidenceSha256: businessEvidenceSha256,
+      bosAuthoritySha256: lineage.bos_authority_sha256,
+      bosFusionContractSha256: lineage.bos_fusion_contract_sha256,
+      bosEvidenceBoundarySha256: fusionBos.evidence_boundary_sha256,
+      compatibilityClass: envelope.compatibility?.class,
+      providerModel: envelope.realization_identity?.components?.provider_model,
+      verticalBinding,
+    });
   } catch {
     reconciliationRequired();
   }
@@ -88,22 +125,12 @@ function validateCurrentEnvelope(envelope, {
   const projectedVertical = artifact?.customer_view_model?.vertical || {};
   const artifactProvider = artifact?.provider_accounting || {};
   const envelopeProvider = envelope?.provider_accounting || {};
-  let expectedIdentity;
-  try {
-    expectedIdentity = buildNewBaRealizationIdentityV3({
-      profileId: newBaProfileId,
-      assessmentId,
-      evidenceSha256: businessEvidenceSha256,
-      bosAuthoritySha256: lineage.bos_authority_sha256,
-      bosFusionContractSha256: lineage.bos_fusion_contract_sha256,
-      bosEvidenceBoundarySha256: fusionBos.evidence_boundary_sha256,
-      compatibilityClass: envelope.compatibility?.class,
-      providerModel: components.provider_model,
-      verticalBinding,
-    });
-  } catch {
-    reconciliationRequired();
-  }
+  const expectedIdentity = desiredV3Identity(envelope, {
+    profileId,
+    assessmentId,
+    verticalBinding,
+    businessEvidenceSha256,
+  });
   const expectedRealizationId = expectedIdentity.realization_id;
   const verticalIdentityFields = [
     'vertical_id',
@@ -211,6 +238,44 @@ function validateCurrentEnvelope(envelope, {
   });
 }
 
+function validateRuntimeCompatiblePriorEnvelope(envelope, {
+  profileId,
+  assessmentId,
+  verticalBinding,
+  businessEvidenceSha256,
+  pointer,
+}) {
+  try { validateLaunchSafeNewBaEnvelope(envelope, { profileId: normalizeNewBaProfileId(profileId) }); }
+  catch { reconciliationRequired(); }
+  if (pointer !== envelope.realization_id || envelope.assessment_id !== assessmentId) {
+    reconciliationRequired();
+  }
+  const desiredIdentity = desiredV3Identity(envelope, {
+    profileId,
+    assessmentId,
+    verticalBinding,
+    businessEvidenceSha256,
+  });
+  const compatibility = classifyCompatiblePriorRealization({
+    current: envelope,
+    desiredIdentity,
+  });
+  if (compatibility.serveable !== true) reconciliationRequired();
+  return Object.freeze({
+    ready: true,
+    code: 'PAID_CURRENT_NEW_BA_MEMBERSHIP_READY',
+    source: 'CURRENT_NEW_BA_LAUNCH_SAFE_REALIZATION',
+    profile_id: profileId,
+    assessment_id: assessmentId,
+    realization_id: envelope.realization_id,
+    artifact_sha256: envelope.artifact_sha256,
+    vertical_binding_sha256: verticalBinding.binding_sha256,
+    compatibility_class: envelope.compatibility?.class,
+    provider_store: false,
+    mutation_performed: false,
+  });
+}
+
 /**
  * Read-only bridge from the current immutable New BA pointer to paid
  * membership readiness. It never creates legacy assessment output fields and
@@ -219,9 +284,11 @@ function validateCurrentEnvelope(envelope, {
 export function createCurrentNewBaMembershipReadinessReader({
   store,
   namespace = DEFAULT_PAID_NEW_BA_READINESS_NAMESPACE,
+  bosNamespace = DEFAULT_PAID_NEW_BOS_READINESS_NAMESPACE,
 } = {}) {
   if (typeof store?.get !== 'function') throw new Error('paid_current_new_ba_readiness_store_required');
   const boundedNamespace = readinessNamespace(namespace);
+  const boundedBosNamespace = bosReadinessNamespace(bosNamespace);
 
   return async function readCurrentNewBaMembershipReadiness({ profile_id, assessment } = {}) {
     const profileId = normalizeProfileId(profile_id);
@@ -257,23 +324,67 @@ export function createCurrentNewBaMembershipReadinessReader({
     const artifactKey = `${boundedNamespace}:artifact:${newBaProfileId}:${pointer}`;
     const artifactRaw = await store.get(artifactKey);
     const envelope = parseEnvelope(artifactRaw);
-    const receipt = validateCurrentEnvelope(envelope, {
-      profileId,
-      assessmentId,
-      verticalBinding,
-      businessEvidenceSha256,
-      pointer,
+    const baseReceipt = envelope.realization_identity?.version === NEW_BA_REALIZATION_IDENTITY_VERSION_V3
+      ? validateCurrentEnvelope(envelope, {
+        profileId,
+        assessmentId,
+        verticalBinding,
+        businessEvidenceSha256,
+        pointer,
+      })
+      : validateRuntimeCompatiblePriorEnvelope(envelope, {
+        profileId,
+        assessmentId,
+        verticalBinding,
+        businessEvidenceSha256,
+        pointer,
+      });
+    const bosRealizationId = envelope.artifact?.fusion?.bos_authority?.realization_id;
+    if (typeof bosRealizationId !== 'string' || !bosRealizationId) reconciliationRequired();
+    const bosArtifactKey = `${boundedBosNamespace}:artifact:${newBaProfileId}:${bosRealizationId}`;
+    const bosArtifactRaw = await store.get(bosArtifactKey);
+    const bosEnvelope = bosArtifactRaw ? parseEnvelope(bosArtifactRaw) : null;
+    let runtimeCustody;
+    try {
+      runtimeCustody = validatePaidSubscriberRuntimeCustody({
+        profile_id: profileId,
+        assessment_id: assessmentId,
+        realization_record: envelope,
+        bos_realization_record: bosEnvelope,
+      });
+    } catch {
+      reconciliationRequired();
+    }
+    if (runtimeCustody.vertical_binding_sha256 !== verticalBinding.binding_sha256
+      || runtimeCustody.realization_id !== baseReceipt.realization_id
+      || runtimeCustody.artifact_sha256 !== baseReceipt.artifact_sha256) {
+      reconciliationRequired();
+    }
+    const receipt = Object.freeze({
+      ...baseReceipt,
+      runtime_compatible_bos_ready: true,
+      bos_realization_id: runtimeCustody.bos_realization_id,
+      bos_artifact_sha256: runtimeCustody.bos_artifact_sha256,
+      bos_custody_source: runtimeCustody.bos_custody_source,
     });
-    const [finalAssessmentPointer, finalAssessmentRaw, finalPointer, finalArtifactRaw] = await Promise.all([
+    const [
+      finalAssessmentPointer,
+      finalAssessmentRaw,
+      finalPointer,
+      finalArtifactRaw,
+      finalBosArtifactRaw,
+    ] = await Promise.all([
       store.get(assessmentPointerKey),
       store.get(assessmentRecordKey),
       store.get(pointerKey),
       store.get(artifactKey),
+      store.get(bosArtifactKey),
     ]);
     if (finalAssessmentPointer !== assessmentPointer
       || finalAssessmentRaw !== assessmentRaw
       || finalPointer !== pointer
-      || finalArtifactRaw !== artifactRaw) {
+      || finalArtifactRaw !== artifactRaw
+      || finalBosArtifactRaw !== bosArtifactRaw) {
       reconciliationRequired();
     }
     return receipt;

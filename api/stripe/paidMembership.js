@@ -6,7 +6,6 @@ import {
 } from '../../src/lib/subscriptionV1/identity.js';
 import { validateSubscriptionV1Contract } from '../../src/lib/subscriptionV1/contracts.js';
 import { canonicalJson, normalizeEmail, normalizeProfileId, sha256 } from '../../src/lib/publicSiteAirlockV1/contracts.js';
-import { isExactLegacyBusinessAssessmentComplete } from '../../src/lib/publicSiteAirlockV1/profileStateReader.js';
 import { validatePersistedVerticalBinding } from '../business-assessment/verticalBinding.js';
 
 export const PAID_MEMBERSHIP_NAMESPACE = 'more:subscription-v1:paid:v1';
@@ -250,6 +249,14 @@ function validCurrentNewBaReadinessReceipt(receipt, {
     && SHA256_HEX.test(String(receipt.artifact_sha256 || ''))
     && SHA256_HEX.test(String(receipt.vertical_binding_sha256 || ''))
     && receipt.vertical_binding_sha256 === verticalBinding.binding_sha256
+    && receipt.runtime_compatible_bos_ready === true
+    && typeof receipt.bos_realization_id === 'string'
+    && receipt.bos_realization_id.length > 0
+    && SHA256_HEX.test(String(receipt.bos_artifact_sha256 || ''))
+    && [
+      'EXACT_RECORDED_LAUNCH_SAFE_BOS_REALIZATION',
+      'FROZEN_REPOSITORY_BOS_REFERENCE',
+    ].includes(receipt.bos_custody_source)
     && realizationId.startsWith(expectedRealizationPrefix)
     && SHA256_HEX.test(realizationIdentitySha256);
 }
@@ -284,15 +291,14 @@ export function createPaidMembershipBinder({
     if (owner?.profile_id !== profileId || !normalizeEmail(owner?.recipient_email)) {
       throw new Error('authenticated_profile_owner_required');
     }
-    // The broader Profile state is useful for BOS custody only. BA readiness
-    // must be derived from the exact assessment record fetched by this bind.
-    const legacyBaReady = isExactLegacyBusinessAssessmentComplete(assessment);
+    // The broader Profile state is useful for BOS custody only. Every paid BA
+    // must also have the exact launch-safe realization required by the runtime;
+    // legacy output fields alone cannot authorize a charge.
     let effectiveProfileState = {
       ...(profileState || {}),
-      ba: legacyBaReady ? 'ready' : 'pending',
+      ba: 'pending',
     };
     if (READY.has(profileState?.bos)
-      && !legacyBaReady
       && assessment
       && typeof currentNewBaReadinessReader === 'function') {
       let currentNewBaReadiness = null;

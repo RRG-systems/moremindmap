@@ -57,6 +57,13 @@ test('public purchase and complimentary retries reuse a stable idempotency key f
   assert.doesNotMatch(publicSite, /purchase-intent'[\s\S]{0,180}idempotencyKey\('(?:bos|ba)-checkout'\)/u);
 });
 
+test('paid Subscription copy names the pinned Real Estate library without promising live web research', () => {
+  const publicSite = source('src/PublicSiteV21.jsx');
+  assert.match(publicSite, /draws from MORE’s Real Estate library when useful/u);
+  assert.match(publicSite, /Uses MORE’s Real Estate library when useful/u);
+  assert.doesNotMatch(publicSite, /researches when needed|Researches when you need current answers/u);
+});
+
 test('public BOS authority selects the deployed async start and status flow', () => {
   const profile = source('src/Profile.jsx');
   assert.match(profile, /payload\?\.product_key === 'behavior_operating_system'/u);

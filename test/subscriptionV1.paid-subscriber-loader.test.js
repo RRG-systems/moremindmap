@@ -512,6 +512,31 @@ function completedCurrentAveryEnvelope({
   });
 }
 
+function completedCurrentAveryV2Envelope({
+  assessment = currentAveryAssessment(),
+  bosEnvelope = DEFAULT_BOS_ENVELOPE,
+} = {}) {
+  const v3Envelope = completedCurrentAveryEnvelope({ assessment, bosEnvelope });
+  const artifact = v3Envelope.artifact;
+  const identity = buildNewBaRealizationIdentity({
+    profileId: REALIZATION_PROFILE_ID,
+    assessmentId: ASSESSMENT_ID,
+    evidenceSha256: artifact.lineage.business_evidence_sha256,
+    bosAuthoritySha256: artifact.lineage.bos_authority_sha256,
+    bosFusionContractSha256: artifact.lineage.bos_fusion_contract_sha256,
+    bosEvidenceBoundarySha256: artifact.fusion.bos_authority.evidence_boundary_sha256,
+    compatibilityClass: 'A',
+  });
+  return buildLaunchSafeNewBaEnvelope({
+    profileId: REALIZATION_PROFILE_ID,
+    realizationIdentity: identity,
+    artifact,
+    compatibility: { class: 'A', label: 'Compatible prior V2 Real Estate contract' },
+    providerAccounting: artifact.provider_accounting,
+    createdAt: CREATED_AT,
+  });
+}
+
 async function seedCurrentAveryCustody(store, {
   assessment = currentAveryAssessment(),
   envelope = completedCurrentAveryEnvelope({ assessment }),
@@ -927,6 +952,7 @@ test('current New BA bridges signed Avery ownership to provider-free paid readin
   const currentNewBaReadinessReader = createCurrentNewBaMembershipReadinessReader({
     store,
     namespace: CURRENT_NEW_BA_NAMESPACE,
+    bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
   });
   const readiness = await currentNewBaReadinessReader({
     profile_id: PROFILE_ID,
@@ -935,6 +961,10 @@ test('current New BA bridges signed Avery ownership to provider-free paid readin
   assert.equal(readiness.ready, true);
   assert.equal(readiness.source, 'CURRENT_NEW_BA_LAUNCH_SAFE_REALIZATION');
   assert.equal(readiness.realization_id, envelope.realization_id);
+  assert.equal(readiness.runtime_compatible_bos_ready, true);
+  assert.equal(readiness.bos_realization_id, DEFAULT_BOS_ENVELOPE.realization_id);
+  assert.equal(readiness.bos_artifact_sha256, DEFAULT_BOS_ENVELOPE.artifact_sha256);
+  assert.equal(readiness.bos_custody_source, 'EXACT_RECORDED_LAUNCH_SAFE_BOS_REALIZATION');
   assert.equal(readiness.mutation_performed, false);
 
   const nowMs = Date.parse(RUNTIME_AT);
@@ -1169,8 +1199,8 @@ test('current New BA bridges signed Avery ownership to provider-free paid readin
   assert.equal(forbiddenKey, undefined);
 });
 
-test('current New BA paid-readiness bridge preserves legacy behavior and fails closed before paid writes', async (t) => {
-  await t.test('legacy-complete BA does not invoke the optional current reader', async () => {
+test('current New BA paid-readiness bridge requires runtime-compatible custody and fails closed before paid writes', async (t) => {
+  await t.test('legacy-complete BA cannot bypass current runtime readiness', async () => {
     const store = new MemoryPublicStore();
     const assessment = {
       ...currentAveryAssessment(),
@@ -1189,10 +1219,75 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
       currentNewBaReadinessReader: async () => { currentReaderCalls += 1; return { ready: false }; },
       clock: () => Date.parse(RUNTIME_AT),
     });
+    await assert.rejects(
+      binder({ profile_id: PROFILE_ID, cookie_header: 'synthetic' }),
+      /completed_bos_and_business_assessment_required/u,
+    );
+    assert.equal(currentReaderCalls, 1);
+    assert.equal(isExactLegacyBusinessAssessmentComplete(assessment), true);
+    assert.equal(
+      [...store.values.keys()].some((key) => key.startsWith(`${PAID_MEMBERSHIP_NAMESPACE}:`)),
+      false,
+    );
+  });
+
+  await t.test('legacy-complete BA remains eligible when exact current runtime readiness exists', async () => {
+    const store = new MemoryPublicStore();
+    const assessment = {
+      ...currentAveryAssessment(),
+      output: legacyCompleteBaOutput(),
+    };
+    await seedCurrentAveryCustody(store, { assessment });
+    const profileStateReader = createProfileStateReader(store);
+    const exactReader = createCurrentNewBaMembershipReadinessReader({
+      store,
+      namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+    });
+    let currentReaderCalls = 0;
+    const binder = createPaidMembershipBinder({
+      store,
+      ownershipVerifier: async () => true,
+      ownerReader: async () => ({ profile_id: PROFILE_ID, recipient_email: 'avery.collins@example.test' }),
+      profileStateReader,
+      currentNewBaReadinessReader: async (input) => {
+        currentReaderCalls += 1;
+        return exactReader(input);
+      },
+      clock: () => Date.parse(RUNTIME_AT),
+    });
     const result = await binder({ profile_id: PROFILE_ID, cookie_header: 'synthetic' });
     assert.equal(result.membership_verified, true);
-    assert.equal(currentReaderCalls, 0);
+    assert.equal(currentReaderCalls, 1);
     assert.equal(isExactLegacyBusinessAssessmentComplete(assessment), true);
+  });
+
+  await t.test('compatible prior V2 Real Estate custody remains eligible when the runtime can load it', async () => {
+    const store = new MemoryPublicStore();
+    const assessment = {
+      ...currentAveryAssessment(),
+      output: legacyCompleteBaOutput(),
+    };
+    const envelope = completedCurrentAveryV2Envelope({ assessment });
+    await seedCurrentAveryCustody(store, { assessment, envelope });
+    const reader = createCurrentNewBaMembershipReadinessReader({
+      store,
+      namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+    });
+    const receipt = await reader({ profile_id: PROFILE_ID, assessment });
+    assert.equal(receipt.ready, true);
+    assert.equal(receipt.realization_id, envelope.realization_id);
+    assert.equal(receipt.runtime_compatible_bos_ready, true);
+    const binder = createPaidMembershipBinder({
+      store,
+      ownershipVerifier: async () => true,
+      ownerReader: async () => ({ profile_id: PROFILE_ID, recipient_email: 'avery.collins@example.test' }),
+      profileStateReader: createProfileStateReader(store),
+      currentNewBaReadinessReader: reader,
+      clock: () => Date.parse(RUNTIME_AT),
+    });
+    assert.equal((await binder({ profile_id: PROFILE_ID, cookie_header: 'synthetic' })).membership_verified, true);
   });
 
   await t.test('stale legacy-ready profile state cannot authorize an exact incomplete assessment', async () => {
@@ -1224,6 +1319,12 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
           output: legacyCompleteBaOutput(),
         };
         await seedCurrentAveryCustody(store, { assessment });
+        const readinessReader = createCurrentNewBaMembershipReadinessReader({
+          store,
+          namespace: CURRENT_NEW_BA_NAMESPACE,
+          bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+        });
+        const readinessReceipt = await readinessReader({ profile_id: PROFILE_ID, assessment });
         const pointerKey = `business_assessment_by_profile:${PROFILE_ID}`;
         const recordKey = `business_assessment:${ASSESSMENT_ID}`;
         const storeGet = store.get.bind(store);
@@ -1255,6 +1356,7 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
           ownershipVerifier: async () => true,
           ownerReader: async () => ({ profile_id: PROFILE_ID, recipient_email: 'avery.collins@example.test' }),
           profileStateReader: async () => ({ bos: 'ready', ba: 'ready' }),
+          currentNewBaReadinessReader: async () => readinessReceipt,
           clock: () => Date.parse(RUNTIME_AT),
         });
         await assert.rejects(
@@ -1295,7 +1397,11 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
     const store = new MemoryPublicStore();
     const { assessment, envelope } = await seedCurrentAveryCustody(store);
     await store.del(`${CURRENT_NEW_BA_NAMESPACE}:latest-compatible:${REALIZATION_PROFILE_ID}`);
-    const reader = createCurrentNewBaMembershipReadinessReader({ store, namespace: CURRENT_NEW_BA_NAMESPACE });
+    const reader = createCurrentNewBaMembershipReadinessReader({
+      store,
+      namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+    });
     assert.equal((await reader({ profile_id: PROFILE_ID, assessment })).ready, false);
     const binder = createPaidMembershipBinder({
       store,
@@ -1326,12 +1432,41 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
     assert.equal([...store.values.keys()].some((key) => key.startsWith(`${PAID_MEMBERSHIP_NAMESPACE}:`)), false);
   });
 
+  await t.test('missing recorded BOS custody fails before any paid membership write', async () => {
+    const store = new MemoryPublicStore();
+    const { assessment, envelope } = await seedCurrentAveryCustody(store);
+    await store.del(`${CURRENT_NEW_BOS_NAMESPACE}:artifact:${REALIZATION_PROFILE_ID}:${bosEnvelopeId(envelope)}`);
+    const reader = createCurrentNewBaMembershipReadinessReader({
+      store,
+      namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+    });
+    await assert.rejects(
+      reader({ profile_id: PROFILE_ID, assessment }),
+      /paid_current_new_ba_readiness_reconciliation_required/u,
+    );
+    const binder = createPaidMembershipBinder({
+      store,
+      ownershipVerifier: async () => true,
+      ownerReader: async () => ({ profile_id: PROFILE_ID, recipient_email: 'avery.collins@example.test' }),
+      profileStateReader: async () => ({ bos: 'ready', ba: 'ready' }),
+      currentNewBaReadinessReader: reader,
+      clock: () => Date.parse(RUNTIME_AT),
+    });
+    await assert.rejects(
+      binder({ profile_id: PROFILE_ID, cookie_header: 'synthetic' }),
+      /completed_bos_and_business_assessment_required/u,
+    );
+    assert.equal([...store.values.keys()].some((key) => key.startsWith(`${PAID_MEMBERSHIP_NAMESPACE}:`)), false);
+  });
+
   await t.test('malformed ready receipts cannot authorize paid membership writes', async () => {
     const store = new MemoryPublicStore();
     const { assessment } = await seedCurrentAveryCustody(store);
     const reader = createCurrentNewBaMembershipReadinessReader({
       store,
       namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
     });
     const validReceipt = await reader({ profile_id: PROFILE_ID, assessment });
     const malformedReceipts = [
@@ -1340,6 +1475,10 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
       { ...validReceipt, provider_store: true },
       { ...validReceipt, vertical_binding_sha256: '0'.repeat(64) },
       { ...validReceipt, realization_id: `${validReceipt.realization_id}-forged` },
+      { ...validReceipt, runtime_compatible_bos_ready: false },
+      { ...validReceipt, bos_realization_id: '' },
+      { ...validReceipt, bos_artifact_sha256: '0'.repeat(63) },
+      { ...validReceipt, bos_custody_source: 'UNVERIFIED' },
     ];
     for (const receipt of malformedReceipts) {
       const binder = createPaidMembershipBinder({
@@ -1367,6 +1506,7 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
     const reader = createCurrentNewBaMembershipReadinessReader({
       store,
       namespace: CURRENT_NEW_BA_NAMESPACE,
+      bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
     });
     const validReceipt = await reader({ profile_id: PROFILE_ID, assessment });
     const mismatchedAssessment = clone(assessment);
@@ -1404,7 +1544,11 @@ test('current New BA paid-readiness bridge preserves legacy behavior and fails c
       envelope.artifact_sha256 = sha256Stable(envelope.artifact);
       envelope.completeness.artifact_sha256 = envelope.artifact_sha256;
       await seedCurrentAveryCustody(store, { assessment, envelope });
-      const reader = createCurrentNewBaMembershipReadinessReader({ store, namespace: CURRENT_NEW_BA_NAMESPACE });
+      const reader = createCurrentNewBaMembershipReadinessReader({
+        store,
+        namespace: CURRENT_NEW_BA_NAMESPACE,
+        bosNamespace: CURRENT_NEW_BOS_NAMESPACE,
+      });
       await assert.rejects(
         reader({ profile_id: PROFILE_ID, assessment }),
         /paid_current_new_ba_readiness_reconciliation_required/u,

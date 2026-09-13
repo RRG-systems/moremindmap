@@ -39,6 +39,7 @@ export function createPublicRuntime(env = process.env, options = {}) {
     || (flags.subscription_checkout_enabled ? createCurrentNewBaMembershipReadinessReader({
       store,
       namespace: env.NEW_BA_DERIVED_NAMESPACE,
+      bosNamespace: env.NEW_BA_BOS_NAMESPACE,
     }) : null);
   const monthlyMembershipBinder = options.monthlyMembershipBinder
     || (flags.subscription_checkout_enabled ? createPaidMembershipBinder({

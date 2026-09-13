@@ -133,15 +133,16 @@ test('real membership binding keeps an identical monthly purchase replay idempot
   const verticalSelection = buildCustomerConfirmedSelection(
     PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical('real_estate'),
   );
+  const verticalBinding = buildCustomerConfirmedVerticalBinding({
+    selection: verticalSelection,
+    selectedAt: '2026-09-11T20:00:00.000Z',
+  });
   await store.set(`business_assessment_by_profile:${profileId}`, assessmentId);
   await store.set(`business_assessment:${assessmentId}`, JSON.stringify({
     assessment_id: assessmentId,
     owner_profile_id: profileId,
     output: legacyCompleteBaOutput(),
-    vertical_binding: buildCustomerConfirmedVerticalBinding({
-      selection: verticalSelection,
-      selectedAt: '2026-09-11T20:00:00.000Z',
-    }),
+    vertical_binding: verticalBinding,
   }));
   let now = Date.parse('2026-09-11T20:00:00.000Z');
   const binder = createPaidMembershipBinder({
@@ -149,6 +150,23 @@ test('real membership binding keeps an identical monthly purchase replay idempot
     ownershipVerifier: async () => true,
     ownerReader: async () => ({ profile_id: profileId, recipient_email: ownerEmail }),
     profileStateReader: async () => ({ bos: 'ready', ba: 'ready' }),
+    currentNewBaReadinessReader: async () => ({
+      ready: true,
+      code: 'PAID_CURRENT_NEW_BA_MEMBERSHIP_READY',
+      source: 'CURRENT_NEW_BA_LAUNCH_SAFE_REALIZATION',
+      profile_id: profileId,
+      assessment_id: assessmentId,
+      realization_id: `new-ba:${profileId.toUpperCase()}:${assessmentId}:${'a'.repeat(64)}`,
+      artifact_sha256: 'b'.repeat(64),
+      vertical_binding_sha256: verticalBinding.binding_sha256,
+      compatibility_class: 'A',
+      runtime_compatible_bos_ready: true,
+      bos_realization_id: `new-bos:${profileId.toUpperCase()}:${'c'.repeat(64)}`,
+      bos_artifact_sha256: 'd'.repeat(64),
+      bos_custody_source: 'EXACT_RECORDED_LAUNCH_SAFE_BOS_REALIZATION',
+      provider_store: false,
+      mutation_performed: false,
+    }),
     clock: () => now,
   });
   const service = createPublicSiteService({
@@ -215,6 +233,10 @@ test('public runtime wires current New BA readiness into the normal monthly memb
         artifact_sha256: 'b'.repeat(64),
         vertical_binding_sha256: verticalBinding.binding_sha256,
         compatibility_class: 'A',
+        runtime_compatible_bos_ready: true,
+        bos_realization_id: `new-bos:${profileId.toUpperCase()}:${'c'.repeat(64)}`,
+        bos_artifact_sha256: 'd'.repeat(64),
+        bos_custody_source: 'EXACT_RECORDED_LAUNCH_SAFE_BOS_REALIZATION',
         provider_store: false,
         mutation_performed: false,
       };
@@ -256,6 +278,39 @@ test('an unsafe current New BA namespace fail-closes monthly checkout without di
   });
   assert.equal(runtimeFlags(unsafeEnv).subscription_checkout_enabled, false);
   assert.doesNotThrow(() => createPublicRuntime(unsafeEnv, options));
+});
+
+test('runtime-custody rejection stops before any Stripe checkout provider call', async () => {
+  let checkoutProviderCalls = 0;
+  let runtimeCloseCalls = 0;
+  const handler = createPurchaseIntentHandler({
+    env: enabledEnv(),
+    serviceFactory: async () => ({
+      service: {
+        async enforceRateLimit() { return { allowed: true }; },
+        async createPurchaseIntent() { throw new Error('completed_bos_and_business_assessment_required'); },
+      },
+      async close() { runtimeCloseCalls += 1; },
+    }),
+    checkoutProviderFactory: () => {
+      checkoutProviderCalls += 1;
+      return { async create() { throw new Error('must_not_create_checkout'); } };
+    },
+  });
+  const res = response();
+  await handler({
+    method: 'POST',
+    headers: { 'idempotency-key': 'runtime-custody-rejection-0001' },
+    body: { product_key: 'more_monthly_intelligence', profile_id: profileId },
+    socket: {},
+  }, res);
+  assert.equal(res.statusCode, 400);
+  assert.deepEqual(res.payload, {
+    ok: false,
+    error: 'completed_bos_and_business_assessment_required',
+  });
+  assert.equal(checkoutProviderCalls, 0);
+  assert.equal(runtimeCloseCalls, 1);
 });
 
 test('governed monthly Checkout grants only the exact membership and subscription scope', async () => {
