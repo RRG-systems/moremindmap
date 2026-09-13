@@ -72,9 +72,11 @@ export const SESSION_CLOSE_OUTPUT_SCHEMA_V1 = deepFreeze({
   name: 'subscription_flagship_s1_1_session_close_v1',
   strict: true,
   schema: {
-    type: 'object', additionalProperties: false, required: ['customer_message', 'session_learning'],
+    type: 'object', additionalProperties: false, required: ['customer_message', 'session_learning', 'close_intent', 'recap_confirmed'],
     properties: {
       customer_message: { type: 'string', minLength: 1 },
+      close_intent: { type: 'string', enum: ['REVIEW', 'CONTINUE', 'FINISH', 'LEAVE'] },
+      recap_confirmed: { type: 'boolean', description: 'True only when the current human reply explicitly confirms the recap content. A request to finish, a correction alone, or an unanswered recap is not confirmation.' },
       session_learning: {
         type: 'object', additionalProperties: false, required: SESSION_LEARNING_KEYS,
         properties: Object.fromEntries(SESSION_LEARNING_KEYS.map((key) => [key, { type: 'string', minLength: 1, maxLength: 1200 }])),
@@ -108,11 +110,15 @@ export const DURABLE_CANDIDATE_OUTPUT_SCHEMA_V1 = deepFreeze({
   name: 'subscription_v1_post_response_candidate_v1',
   strict: true,
   schema: {
-    type: 'object', additionalProperties: false, required: ['candidate'],
+    type: 'object', additionalProperties: false, required: ['candidate', 'replaces_pending_proposal_hashes'],
     properties: {
       candidate: {
         description: 'Return the candidate object for a customer-authored durable request. Return null only when the exchange contains no new durable candidate or exactly duplicates durable relationship memory.',
         anyOf: [candidateObjectSchema, { type: 'null', description: 'No new durable customer-specific candidate exists in this exchange.' }],
+      },
+      replaces_pending_proposal_hashes: {
+        type: 'array', maxItems: 8, items: { type: 'string', pattern: '^[a-f0-9]{64}$' },
+        description: 'Exact unconfirmed pending draft hashes the current customer explicitly replaces or narrows; empty for an additional action, unrelated discussion, or uncertain relationship. This changes review eligibility only, never customer authority.',
       },
     },
   },
@@ -144,7 +150,10 @@ export function validateConversationOutputV2(value) {
 
 export function validateSessionCloseOutputV1(value) {
   const errors = [];
-  if (!exactKeys(value, ['customer_message', 'session_learning'])) errors.push('SESSION_CLOSE_FIELDS_INVALID');
+  // Historical fixtures/drafts remain readable; absent confirmation is never assent.
+  if (!exactKeys(value, ['customer_message', 'session_learning', ...(Object.hasOwn(value || {}, 'close_intent') ? ['close_intent'] : []), ...(Object.hasOwn(value || {}, 'recap_confirmed') ? ['recap_confirmed'] : [])])) errors.push('SESSION_CLOSE_FIELDS_INVALID');
+  if (Object.hasOwn(value || {}, 'close_intent') && !['REVIEW', 'CONTINUE', 'FINISH', 'LEAVE'].includes(value.close_intent)) errors.push('SESSION_CLOSE_INTENT_INVALID');
+  if (Object.hasOwn(value || {}, 'recap_confirmed') && typeof value.recap_confirmed !== 'boolean') errors.push('SESSION_CLOSE_RECAP_CONFIRMATION_INVALID');
   if (typeof value?.customer_message !== 'string' || !value.customer_message.trim()) errors.push('SESSION_CLOSE_CUSTOMER_MESSAGE_INVALID');
   if (!exactKeys(value?.session_learning, SESSION_LEARNING_KEYS)
     || !SESSION_LEARNING_KEYS.every((key) => Object.hasOwn(value?.session_learning || {}, key))) errors.push('SESSION_LEARNING_FIELDS_INVALID');
@@ -162,10 +171,16 @@ function validItems(items) {
       && typeof item.value === 'string' && item.value.length > 0 && item.value.length <= 600);
 }
 
-export function validateDurableCandidateOutput(value, { allowed_evidence_refs = [], allowed_authority_refs = [], allowed_intervention_lineage_ids = [] } = {}) {
+export function validateDurableCandidateOutput(value, { allowed_evidence_refs = [], allowed_authority_refs = [], allowed_intervention_lineage_ids = [], allowed_pending_proposal_hashes = [] } = {}) {
   const errors = [];
-  if (!exactKeys(value, ['candidate'])) errors.push('CANDIDATE_OUTPUT_FIELDS_INVALID');
-  if (value?.candidate === null) return deepFreeze({ valid: errors.length === 0, errors, candidate: null });
+  // Legacy extraction outputs cannot withdraw another draft's review eligibility.
+  const replacesPending = Object.hasOwn(value || {}, 'replaces_pending_proposal_hashes') ? value.replaces_pending_proposal_hashes : [];
+  if (!exactKeys(value, ['candidate', ...(Object.hasOwn(value || {}, 'replaces_pending_proposal_hashes') ? ['replaces_pending_proposal_hashes'] : [])])) errors.push('CANDIDATE_OUTPUT_FIELDS_INVALID');
+  if (!Array.isArray(replacesPending) || replacesPending.length > 8
+    || replacesPending.some((hash) => typeof hash !== 'string' || !HASH.test(hash) || !allowed_pending_proposal_hashes.includes(hash))
+    || new Set(replacesPending).size !== replacesPending.length) errors.push('PENDING_PROPOSAL_REPLACEMENT_BINDING_INVALID');
+  if (Array.isArray(replacesPending) && replacesPending.length && !value?.candidate) errors.push('PENDING_PROPOSAL_REPLACEMENT_CANDIDATE_REQUIRED');
+  if (value?.candidate === null) return deepFreeze({ valid: errors.length === 0, errors, candidate: null, replaces_pending_proposal_hashes: [] });
   const candidate = value?.candidate;
   const keys = ['candidate_type', 'proposal_type', 'target_contract', 'operation', 'summary', 'items', 'reason', 'evidence_ref_ids', 'authority_ref_ids', 'confirmation_required', 'generalization_scope'];
   if (!exactKeys(candidate, keys)) errors.push('CANDIDATE_FIELDS_INVALID');
@@ -187,14 +202,14 @@ export function validateDurableCandidateOutput(value, { allowed_evidence_refs = 
   }
   if (isAttempt && !['PARTIAL', 'COMPLETE'].includes(String(itemMap.get('evidence.execution_degree') || '').toUpperCase())) errors.push('EXECUTION_DEGREE_REQUIRED');
   if (isOutcome && !['BENEFICIAL', 'STERILE', 'ADVERSE', 'MIXED', 'INCONCLUSIVE', 'NOT_TESTED_INSUFFICIENT_EXECUTION', 'CONFOUNDED', 'INTELLIGENTLY_ABANDONED'].includes(String(itemMap.get('evidence.outcome_classification') || '').toUpperCase().replace(/[ /-]+/gu, '_'))) errors.push('OUTCOME_CLASSIFICATION_REQUIRED');
-  if (errors.length) return deepFreeze({ valid: false, errors, candidate: null });
+  if (errors.length) return deepFreeze({ valid: false, errors, candidate: null, replaces_pending_proposal_hashes: [] });
   const normalized = clone(candidate);
   normalized.target_contract = canonicalTarget(candidate);
   if (!GOVERNED_MUTATION_TARGETS.includes(normalized.target_contract)
     || (ALLOWED_MUTATION_TARGETS[normalized.proposal_type] && !ALLOWED_MUTATION_TARGETS[normalized.proposal_type].includes(normalized.target_contract))) {
-    return deepFreeze({ valid: false, errors: ['CANDIDATE_MUTATION_TARGET_UNRESOLVED'], candidate: null });
+    return deepFreeze({ valid: false, errors: ['CANDIDATE_MUTATION_TARGET_UNRESOLVED'], candidate: null, replaces_pending_proposal_hashes: [] });
   }
-  return deepFreeze({ valid: true, errors: [], candidate: normalized });
+  return deepFreeze({ valid: true, errors: [], candidate: normalized, replaces_pending_proposal_hashes: [...replacesPending] });
 }
 
 export function createHiddenCandidateFromExtraction({ session_id, scope_hash, state_packet_hash, candidate, created_at }) {
@@ -226,7 +241,8 @@ export function validateNaturalAuthorizationOutput(value, proposal) {
   if (typeof value?.unambiguous !== 'boolean') errors.push('AUTHORIZATION_CERTAINTY_INVALID');
   const actionable = ['CONFIRM', 'EDIT', 'DEFER', 'REJECT'].includes(value?.decision);
   if (actionable && value?.unambiguous !== true) errors.push('AUTHORIZATION_NOT_UNAMBIGUOUS');
-  if (!actionable && value?.unambiguous === true) errors.push('AUTHORIZATION_AMBIGUITY_CONTRACT_INVALID');
+  // Certainty that no authorization exists does not authorize a decision.
+  if (value?.decision === 'AMBIGUOUS' && value?.unambiguous === true) errors.push('AUTHORIZATION_AMBIGUITY_CONTRACT_INVALID');
   return deepFreeze({ valid: errors.length === 0, errors });
 }
 

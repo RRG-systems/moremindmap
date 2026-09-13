@@ -45,11 +45,34 @@ function stripeEnv(overrides = {}) {
     PUBLIC_STRIPE_MODE: 'test',
     STRIPE_SECRET_KEY: testKey,
     STRIPE_PRICE_BEHAVIOR_OS: 'price_bos_test_14900',
+    STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE: 'price_monthly_test_3895',
     VERCEL_ENV: 'preview',
     VERCEL_URL: previewHostname,
     ...overrides,
   };
 }
+
+const monthlyIntent = Object.freeze({
+  intent_id: 'pi_more_synthetic_monthly_0001',
+  product_key: 'more_monthly_intelligence',
+  access_type: 'more_monthly_intelligence',
+  expected_price_minor: 3895,
+  currency: 'usd',
+  cadence: 'monthly',
+  profile_id: 'mm-20260911-a1b2c3d4',
+  email: 'member@example.test',
+  vertical_binding: null,
+  membership_binding: Object.freeze({
+    subject_id: 'subject_synthetic_0001',
+    membership_id: 'membership_synthetic_0001',
+    tenant_id: 'tenant_synthetic_0001',
+    profile_id: 'mm-20260911-a1b2c3d4',
+    business_id: 'business_synthetic_0001',
+    assessment_id: 'assessment_synthetic_0001',
+    binding_source: 'AUTHENTICATED_SERVER_CONTEXT',
+    membership_verified: true,
+  }),
+});
 
 function fakeStripe({ price = {}, session = {} } = {}) {
   const calls = { retrieve: [], create: [] };
@@ -158,6 +181,57 @@ test('sandbox Stripe checkout validates Price before creating one idempotent can
   assert.equal(payload.cancel_url, `${previewOrigin}/payment-cancelled?product=behavior_operating_system`);
   assert.equal(payload.metadata.purchase_intent_id, bosIntent.intent_id);
   assert.equal(options.idempotencyKey, bosIntent.intent_id);
+});
+
+test('monthly Stripe checkout is exact-price and server-membership bound on both Session and Subscription', async () => {
+  const { calls, client } = fakeStripe({
+    price: {
+      unit_amount: 3895,
+      type: 'recurring',
+      recurring: { interval: 'month', interval_count: 1 },
+    },
+    session: { mode: 'subscription' },
+  });
+  const result = await createStripeCheckoutProvider(stripeEnv(), { stripeClient: client })
+    .create({ intent: monthlyIntent });
+  assert.equal(result.id, 'cs_test_synthetic_checkout_0001');
+  assert.deepEqual(calls.retrieve, ['price_monthly_test_3895']);
+  const [{ payload, options }] = calls.create;
+  assert.equal(payload.mode, 'subscription');
+  assert.equal(payload.client_reference_id, monthlyIntent.membership_binding.membership_id);
+  assert.equal(payload.metadata.membership_id, monthlyIntent.membership_binding.membership_id);
+  assert.equal(payload.metadata.binding_source, 'AUTHENTICATED_SERVER_CONTEXT');
+  assert.equal(payload.metadata.membership_verified, 'true');
+  assert.deepEqual(payload.subscription_data.metadata, payload.metadata);
+  assert.equal(options.idempotencyKey, monthlyIntent.intent_id);
+});
+
+test('monthly Stripe checkout refuses missing or client-shaped membership authority before provider calls', async () => {
+  const { calls, client } = fakeStripe({
+    price: {
+      unit_amount: 3895,
+      type: 'recurring',
+      recurring: { interval: 'month', interval_count: 1 },
+    },
+    session: { mode: 'subscription' },
+  });
+  await assert.rejects(
+    createStripeCheckoutProvider(stripeEnv(), { stripeClient: client }).create({
+      intent: { ...monthlyIntent, membership_binding: null },
+    }),
+    /stripe_monthly_membership_binding_required/u,
+  );
+  await assert.rejects(
+    createStripeCheckoutProvider(stripeEnv(), { stripeClient: client }).create({
+      intent: {
+        ...monthlyIntent,
+        membership_binding: { ...monthlyIntent.membership_binding, binding_source: 'CLIENT_REQUEST' },
+      },
+    }),
+    /stripe_monthly_membership_binding_required/u,
+  );
+  assert.deepEqual(calls.retrieve, []);
+  assert.deepEqual(calls.create, []);
 });
 
 test('Stripe test/live authority and Price mismatches fail before Session creation', async () => {

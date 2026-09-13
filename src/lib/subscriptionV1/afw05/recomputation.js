@@ -1,6 +1,7 @@
 import { hashCanonicalJson } from '../../intelligenceFabric/hashing.js';
 import { deepFreeze } from '../../intelligenceFabric/validation.js';
 import { sameScope } from '../contracts.js';
+import { isAgreedIntervention } from '../lineage.js';
 import { LIVING_TWIN_BOXES } from './constants.js';
 import { validatePublicationHash } from './contracts.js';
 
@@ -144,7 +145,7 @@ function applyActiveEvent(state, event) {
   if (event.event_type === 'COMMITMENT' && !(payload.items || []).some((item) => item.field.startsWith('commitment.'))) {
     state.engagement.commitments.push({ commitment: payload.summary, field: 'general' });
   }
-  if (event.event_type === 'INTERVENTION') state.engagement.interventions.push({ intervention: payload.summary, event_id: event.event_id });
+  if (isAgreedIntervention(event)) state.engagement.interventions.push({ intervention: payload.summary, event_id: event.event_id });
   if (event.event_type === 'OUTCOME') state.engagement.outcomes.push({ outcome: payload.summary, event_id: event.event_id });
   if (event.event_type === 'CORRECTION') state.EVIDENCE.corrections.push({ event_id: event.event_id, summary: payload.summary });
   return { ok: true, changed };

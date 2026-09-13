@@ -72,18 +72,21 @@ const req = (cookie = '') => ({
 test('internal Leadership entitlement uses one-time CSRF, exact human code, opaque cookies, and synthetic-only binding', async () => {
   const redis = new FakeRedis();
   const request = req();
+  const accessCode = 'synthetic-private-access-code-at-least-32-characters';
   const proof = await issueEntryCsrf({ redis, req: request });
   assert.equal(await consumeEntryCsrf({ redis, req: request, proof }), true);
   assert.equal(await consumeEntryCsrf({ redis, req: request, proof }), false);
-  assert.equal(exactJordanCode('jordanTEST'), true);
-  assert.equal(exactJordanCode('jordantest'), false);
+  assert.equal(exactJordanCode(accessCode, { SUBSCRIPTION_V1_INTERNAL_ACCESS_CODE: accessCode }), true);
+  assert.equal(exactJordanCode(`${accessCode}x`, { SUBSCRIPTION_V1_INTERNAL_ACCESS_CODE: accessCode }), false);
+  assert.equal(exactJordanCode(accessCode, {}), false);
+  assert.equal(exactJordanCode('too-short', { SUBSCRIPTION_V1_INTERNAL_ACCESS_CODE: 'too-short' }), false);
   const issued = await issueInternalDevCapability({ redis, req: request });
   assert.equal(issued.capability.subject_key, 're-mid');
   assert.equal(issued.capability.synthetic_only, true);
   assert.equal(issued.capability.billing_evidence, false);
   assert.equal(issued.capability.stripe_subscription_created, false);
   assert.equal(issued.cookies.every((value) => /HttpOnly; Secure; SameSite=Strict/u.test(value)), true);
-  assert.equal(issued.cookies.some((value) => value.includes('jordanTEST')), false);
+  assert.equal(issued.cookies.some((value) => value.includes(accessCode)), false);
   const runtimeCsrf = await issueRuntimeCsrf({ redis, capabilityHash: 'a'.repeat(64) });
   assert.equal(await consumeRuntimeCsrf({ redis, capabilityHash: 'a'.repeat(64), proof: runtimeCsrf }), true);
   assert.equal(await consumeRuntimeCsrf({ redis, capabilityHash: 'a'.repeat(64), proof: runtimeCsrf }), false);

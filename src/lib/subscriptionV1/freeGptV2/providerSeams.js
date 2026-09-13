@@ -25,14 +25,21 @@ function requestBase(schema, maxOutputTokens = FREE_GPT_V2_RUNTIME_POLICY.max_ou
 }
 
 function receipt(stage, request, response, now) {
-  return createFreeGptProviderReceipt({
-    stage, request_hash: hashCanonicalJson(request), response_hash: hashCanonicalJson(response.output),
+  const base = createFreeGptProviderReceipt({
+    stage, request_hash: response.request_hash || hashCanonicalJson(request), response_hash: hashCanonicalJson(response.output),
     usage: response.usage || {}, latency_ms: response.latency_ms || 0,
     web_search_calls: response.web_search_calls || 0,
     attempt_count: response.attempt_count || 1,
     estimated_token_cost_microusd: response.estimated_cost_microusd || 0,
     created_at: now(),
   });
+  return response.source_library ? deepFreeze({ ...base, governed_reference_material: {
+    contract_id: 'governed_reference_material_receipt_v1',
+    library_registry_sha256: response.source_library.registry_sha256,
+    internal_source_calls: response.internal_source_calls || 0,
+    calls: response.internal_source_receipts || [],
+    customer_truth_override_allowed: false,
+  } }) : base;
 }
 
 function durableStateProjection(packet) {
@@ -130,11 +137,15 @@ export function createFrontierConversationSeamV2({
         const schema = validateConversationOutputV2(response?.output);
         if (!schema.valid) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CONVERSATION_OUTPUT_INVALID', errors: schema.errors });
         const openingName = preferredNameRequirement(packet, 'STARTED');
-        if (!openingName.valid || (openingName.required && !messageUsesName(response.output.customer_message, openingName.name))) {
+        // Governed name context must be valid; ordinary coaching need not repeat it in every answer.
+        if (!openingName.valid) {
           return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_PREFERRED_NAME_OPENING_REQUIRED' });
         }
         const integrity = validateCatastrophicIntegrityV2({ message: response.output.customer_message, mutation_performed, denied_customer_terms, contradicted_claims: packet.catastrophic_constraints?.contradicted_claims || [] });
         if (!integrity.valid) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CATASTROPHIC_INTEGRITY_REJECTED', errors: integrity.failures });
+        if (response.source_library && /more\.(?:ba-bible|dj-field-doctrine)\.|\b[a-f0-9]{64}\b|\/(?:Users|private|home)\/|\bSOURCE_[A-Z_]+\b/u.test(response.output.customer_message)) {
+          return deepFreeze({ ok: false, code: 'MORE_SOURCE_CUSTOMER_INTERNALS_REJECTED' });
+        }
         return deepFreeze({
           ok: true,
           code: 'FREE_GPT_V2_CONVERSATION_ACCEPTED',
@@ -144,6 +155,12 @@ export function createFrontierConversationSeamV2({
             used: Number(response.web_search_calls || 0) > 0,
             web_search_calls: Number(response.web_search_calls || 0),
             source_count: Array.isArray(response.external_evidence) ? response.external_evidence.length : 0,
+            ...(response.source_library ? {
+              internal_source_calls: response.internal_source_calls || 0,
+              internal_source_receipts: response.internal_source_receipts || [],
+              source_library: response.source_library,
+              transport_trace: response.transport_trace,
+            } : {}),
           },
           receipt: receipt('CONVERSATION', request, response, now),
           mutation_performed,
@@ -170,19 +187,21 @@ export function createSessionCloseSeamV1({
       if (!enabled) return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_SESSION_CLOSE_DEFAULT_OFF' });
       if (!packet?.packet_hash || !packet?.provider_understanding) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_PACKET_REQUIRED' });
       if (inFlight.has(packet.session_id)) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_ONE_REQUEST_IN_FLIGHT' });
-      if (!['REQUEST_ALIGNMENT', 'FINALIZE'].includes(mode)) return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_SESSION_CLOSE_MODE_INVALID' });
-      if (mode === 'FINALIZE' && (typeof alignment_message !== 'string' || !alignment_message.trim())) return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_MUTUAL_CLOSE_ALIGNMENT_REQUIRED' });
+      if (!['REQUEST_ALIGNMENT', 'REVIEW_RESPONSE', 'FINALIZE'].includes(mode)) return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_SESSION_CLOSE_MODE_INVALID' });
+      if (mode === 'REVIEW_RESPONSE' && (typeof alignment_message !== 'string' || !alignment_message.trim())) return deepFreeze({ ok: false, code: 'SUBSCRIPTION_S1_1_MUTUAL_CLOSE_ALIGNMENT_REQUIRED' });
       const priorValidation = prior_session_learning
         ? validateSessionCloseOutputV1({ customer_message: 'Ephemeral mutual-close draft.', session_learning: prior_session_learning })
         : null;
       const safePriorLearning = priorValidation?.valid ? prior_session_learning : null;
       const closeInstruction = mode === 'REQUEST_ALIGNMENT'
         ? 'This is the first half of a mutual close. Briefly reflect where you believe the session landed, then ask one natural question that lets the human agree, correct, or add what matters before the session is fully closed. The session-learning fields are an ephemeral draft, not final understanding.'
-        : 'This is the final half of a mutual close. The human has now answered the closing reflection. Curiously accept any correction or addition and make the final session-learning fields reflect the shared understanding rather than your earlier interpretation. Close warmly without adding a new coaching problem.';
+        : mode === 'FINALIZE'
+          ? 'The human explicitly selected Finish session. Produce an accurate final recap and close warmly. This authorizes ending the session only, never a business commitment or map change. Preserve unresolved matters and any uncertainty about the recap. This final response is shown with the session closed. Do not ask for another reply or correction before closing; leave unconfirmed points open to revisit or correct in the next session.'
+          : 'The human has responded during the closing review. Understand their intent and update the draft with any correction. Set close_intent to REVIEW for correction-only replies, questions about the recap, or any ambiguity about ending; CONTINUE when they want to resume coaching; FINISH only when they clearly agree to finish; or LEAVE when they need to stop without confirming the recap. A correction is not agreement. For CONTINUE, respond naturally to the reopened concern without a farewell. For REVIEW, keep the recap open for review. Never turn discussion into a commitment.';
       const request = {
         ...requestBase(SESSION_CLOSE_OUTPUT_SCHEMA_V1, FREE_GPT_V2_RUNTIME_POLICY.session_close_max_output_tokens),
         input: [
-          { role: 'system', content: `${coaching_mission}${domain_instruction ? `\n\nDOMAIN ADAPTER\n${domain_instruction}` : ''}\n\nThe substantive coaching episode is ending now. ${closeInstruction} Speak simply and naturally. Use the governed preferred conversational name near this close. Capture the seven session-learning fields from governed state and this ephemeral conversation without inventing facts. "Durable governed meaning" is only a candidate summary: never claim it was saved or authorized. If nothing was established for a field, say so plainly. Do not create a visual receipt; S2 owns that future surface.` },
+          { role: 'system', content: `${coaching_mission}${domain_instruction ? `\n\nDOMAIN ADAPTER\n${domain_instruction}` : ''}\n\nThe coaching episode is in its closing review. ${closeInstruction} Set recap_confirmed true only when the current human reply explicitly confirms the recap content; a request to finish, a correction alone, and an unanswered recap are not confirmation. Return close_intent REVIEW for the initial reflection. Speak simply and naturally. Use the governed preferred conversational name near this close. Capture the seven session-learning fields from governed state and this conversation without inventing facts. "Durable governed meaning" is only a candidate summary: never claim it was saved or authorized. If nothing was established for a field, say so plainly. Do not create a visual receipt; S2 owns that surface.` },
           { role: 'user', content: JSON.stringify({
             whole_coaching_understanding: packet.provider_understanding,
             coaching_demonstrations,
@@ -193,9 +212,10 @@ export function createSessionCloseSeamV1({
             } : null,
             mutual_close: {
               mode,
-              human_alignment_response: mode === 'FINALIZE' ? alignment_message.trim() : null,
+              human_alignment_response: mode !== 'REQUEST_ALIGNMENT' ? String(alignment_message || '').trim() : null,
               prior_ephemeral_draft: safePriorLearning,
               final_learning_must_reflect_shared_understanding: true,
+              explicit_finish_selected: mode === 'FINALIZE',
             },
             close_contract: {
               relationship_continues: true,
@@ -217,13 +237,15 @@ export function createSessionCloseSeamV1({
         }
         const integrity = validateCatastrophicIntegrityV2({ message: response.output.customer_message, mutation_performed: false, denied_customer_terms, contradicted_claims: packet.catastrophic_constraints?.contradicted_claims || [] });
         if (!integrity.valid) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CATASTROPHIC_INTEGRITY_REJECTED', errors: integrity.failures });
+        const intent = mode === 'REQUEST_ALIGNMENT' ? 'REVIEW' : mode === 'FINALIZE' ? 'FINISH' : response.output.close_intent || 'REVIEW';
+        const finished = ['FINISH', 'LEAVE'].includes(intent);
         return deepFreeze({
           ok: true,
-          code: mode === 'REQUEST_ALIGNMENT' ? 'SUBSCRIPTION_S1_1_MUTUAL_CLOSE_ALIGNMENT_REQUESTED' : 'SUBSCRIPTION_S1_1_SESSION_LEARNING_NOTES_READY',
+          code: intent === 'CONTINUE' ? 'SUBSCRIPTION_SESSION_COACHING_RESUMED' : finished ? 'SUBSCRIPTION_S1_1_SESSION_LEARNING_NOTES_READY' : 'SUBSCRIPTION_S1_1_MUTUAL_CLOSE_ALIGNMENT_REQUESTED',
           customer_message: response.output.customer_message,
-          session_learning: {
+          session_learning: intent === 'CONTINUE' ? null : {
             contract: 'SUBSCRIPTION_FLAGSHIP_S1_1_SESSION_LEARNING_V1',
-            status: mode === 'REQUEST_ALIGNMENT' ? 'DRAFT_AWAITING_ALIGNMENT' : 'NOTES_READY',
+            status: finished ? 'NOTES_READY' : 'DRAFT_AWAITING_ALIGNMENT',
             ...response.output.session_learning,
             persisted: false,
             canonical_mutation_performed: false,
@@ -232,9 +254,12 @@ export function createSessionCloseSeamV1({
           },
           mutual_close: {
             mode,
-            human_alignment_required: mode === 'REQUEST_ALIGNMENT',
-            alignment_established: mode === 'FINALIZE',
-            human_correction_applied: mode === 'FINALIZE',
+            close_intent: intent,
+            human_alignment_required: intent === 'REVIEW',
+            alignment_established: mode === 'REVIEW_RESPONSE' && intent === 'FINISH' && response.output.recap_confirmed === true,
+            continue_coaching: intent === 'CONTINUE',
+            human_response_reviewed: mode === 'REVIEW_RESPONSE',
+            draft_revised: Boolean(safePriorLearning && hashCanonicalJson(safePriorLearning) !== hashCanonicalJson(response.output.session_learning)),
           },
           receipt: receipt('SESSION_CLOSE', request, response, now),
           mutation_performed: false,
@@ -248,15 +273,23 @@ export function createPostResponseCandidateExtractorV1({ transport, enabled = fa
   if (typeof transport !== 'function') throw new TypeError('FREE_GPT_V2_EXTRACTOR_TRANSPORT_REQUIRED');
   return deepFreeze({
     inspect: () => deepFreeze({ enabled, output_contract: 'CANDIDATE_OR_NULL', mutation_authority: false }),
-    async extract({ packet, customer_message, coach_message, correction_records = [] }) {
+    async extract({ packet, customer_message, coach_message, correction_records = [], pending_proposals = [] }) {
       if (!enabled) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_EXTRACTOR_DEFAULT_OFF' });
       const authorityRefs = [...packet.allowed_refs.authority, ...correction_records.map((record) => record.authority_ref)];
       const request = {
         ...requestBase(DURABLE_CANDIDATE_OUTPUT_SCHEMA_V1, FREE_GPT_V2_RUNTIME_POLICY.candidate_max_output_tokens),
         input: [
           { role: 'system', content: 'Extract only a durable customer-specific candidate that the customer actually stated, corrected, challenged, committed to, decided, attempted, reported as an outcome, or explicitly co-created. Preserve potential durable candidates; exact confirmation downstream prevents mutation. Do not turn ordinary reflection, brainstorming, questions, coach suggestions, or transient emotion into durable state. Return null when no durable candidate exists, including when the customer merely restates the exact current durable relationship state. The current customer and coach messages are ephemeral evidence for this extraction and are intentionally not part of current_durable_relationship_state. The customer message is authoritative for what the customer asked MORE to remember or change. A coach statement that no memory update has completed is the expected pre-proposal condition; it is not evidence against extracting the customer’s candidate and must not cause null. Never infer consent. Never mutate state. Bind references only from the governed allowlists. Use only the governed AFW-05 target contracts and exact executable field paths in the schema. A newly stated durable communication preference maps to PERSONAL_RSL_CANDIDATE with an EVIDENCE_CANDIDATE proposal at evidence.communication_preference. A newly stated preferred coaching cadence maps to PERSONAL_RSL_CANDIDATE with an EVIDENCE_CANDIDATE proposal at evidence.coaching_cadence_preference; the coach may acknowledge the intended adjustment, but the preference is not durable until exact downstream authorization. A commitment or action item maps to COMMITMENT_CANDIDATE. A customer-authorized bounded action or experiment that should later be evaluated uses commitment.intervention. Include explicit due date, observation-window dates, falsifiers, or open-loop state as additional commitment.* items only when the customer actually supplied them. Other commitments use commitment.action. A durable customer decision maps to EVIDENCE_CANDIDATE at evidence.decision. A concrete attempt or experiment maps to EVIDENCE_CANDIDATE at evidence.attempt and MUST include evidence.intervention_lineage_id copied exactly from active_intervention_lineages plus evidence.execution_degree as PARTIAL or COMPLETE. A reported result maps to OUTCOME_CANDIDATE at evidence.outcome and MUST include the same exact evidence.intervention_lineage_id plus evidence.outcome_classification. Include observation-window dates, confounders, external shocks, falsifiers, requested attribution, and open-loop state only when supported. Never attach an attempt or outcome to a lineage by date, similarity, or guesswork. Return null if the customer has not identified which active intervention they mean. A lasting operating change maps to EVIDENCE_CANDIDATE at evidence.operating_change. Use CORRECTION_CANDIDATE only when the customer corrects an exact durable field already present in current_durable_relationship_state, preserving the same field path so deterministic code can bind the superseded event. Otherwise treat newly changed reality as a new evidence or operating-change candidate. Each is still only a proposal and requires later exact customer confirmation. When the customer explicitly asks MORE to remember a semantically new communication preference or coaching cadence, return that proposal. Related BOS guidance, business intelligence, coaching doctrine, or the current ephemeral exchange is not durable relationship memory and cannot make the request a duplicate. For a communication preference or coaching cadence, return null for duplication only when the same semantic preference already appears in current_durable_relationship_state. For other durable meaning, return null for duplication only when the same semantic meaning already appears there. A plan way value must be a JSON object with a title and exactly five customer-supported strategies. Map Futures or One Move challenges to evidence or a challenge field without directly rewriting the canonical model. Map external research to RESEARCH_CANDIDATE.' },
-          { role: 'user', content: JSON.stringify({ customer_message, coach_message, current_durable_relationship_state: durableStateProjection(packet), correction_records, allowed_evidence_ref_ids: packet.allowed_refs.evidence, allowed_authority_ref_ids: authorityRefs }) },
+          { role: 'user', content: JSON.stringify({ customer_message, coach_message, current_durable_relationship_state: durableStateProjection(packet),
+            ...(pending_proposals.length ? { unconfirmed_pending_proposals: pending_proposals.map((proposal) => ({
+              status: 'UNCONFIRMED_DRAFT_NOT_DURABLE_CUSTOMER_STATE',
+              proposal_hash: proposal.proposal_hash,
+              summary: proposal.summary,
+              proposed_items: proposal.proposed_items,
+            })) } : {}),
+            correction_records, allowed_evidence_ref_ids: packet.allowed_refs.evidence, allowed_authority_ref_ids: authorityRefs }) },
           { role: 'system', content: 'Exact correction record boundary v1: a shared field name is not a record identity. For a correction, use the exact customer-identified record from correction_records, copy its authority_ref into authority_ref_ids, and preserve all of its items including unchanged context. Never attach a new follow-up attempt to an older tracking exercise just because both have an execution degree. A linked observation must retain its exact intervention_lineage_id. Do not guess a target by field similarity, dates, or the coach’s mistaken recollection. If the customer’s intended target does not exist or is unclear, return null; conversation may clarify without mutation. A conditional request must not be split into an unconditional partial correction.' },
+          ...(pending_proposals.length ? [{ role: 'system', content: 'Pending draft review boundary: unconfirmed_pending_proposals are proposed words awaiting review, not accepted customer commitments or durable truth. Set replaces_pending_proposal_hashes only for exact listed drafts that the current customer explicitly replaces, narrows, or revises. A shared field, similar wording, a new additional action, a reported attempt, or an uncertain relationship is not replacement. Use an empty array in those cases. Preserve the distinction between the original total work and remaining work; never subtract counts or rewrite the original history. Preserve any customer conditions in the new candidate. This annotation changes draft review eligibility only and never confirms, rejects, or commits customer state.' }] : []),
         ],
       };
       const response = await transport(deepFreeze(request), { stage: 'CANDIDATE_EXTRACTION' });
@@ -264,9 +297,10 @@ export function createPostResponseCandidateExtractorV1({ transport, enabled = fa
         allowed_evidence_refs: packet.allowed_refs.evidence,
         allowed_authority_refs: authorityRefs,
         allowed_intervention_lineage_ids: allowedInterventionLineageIds(packet),
+        allowed_pending_proposal_hashes: pending_proposals.map((proposal) => proposal.proposal_hash),
       });
       if (!validation.valid) return deepFreeze({ ok: false, code: 'FREE_GPT_V2_CANDIDATE_OUTPUT_INVALID', errors: validation.errors });
-      return deepFreeze({ ok: true, code: validation.candidate ? 'FREE_GPT_V2_DURABLE_CANDIDATE_EXTRACTED' : 'FREE_GPT_V2_NO_DURABLE_CANDIDATE', candidate: validation.candidate, receipt: receipt('CANDIDATE_EXTRACTION', request, response, now), mutation_performed: false });
+      return deepFreeze({ ok: true, code: validation.candidate ? 'FREE_GPT_V2_DURABLE_CANDIDATE_EXTRACTED' : 'FREE_GPT_V2_NO_DURABLE_CANDIDATE', candidate: validation.candidate, replaces_pending_proposal_hashes: validation.replaces_pending_proposal_hashes || [], receipt: receipt('CANDIDATE_EXTRACTION', request, response, now), mutation_performed: false });
     },
   });
 }

@@ -132,6 +132,7 @@ export function assembleRelationshipContinuityState({
     for (const lineage of stableLineages.slice(-8)) {
       openLoops.push({
         kind: 'STABLE_INTERVENTION_LINEAGE',
+        ...(lineage.lineage_recovery ? { tracking_recovery: clone(lineage.lineage_recovery) } : {}),
         intervention_lineage_id: lineage.intervention_lineage_id,
         summary: lineage.decided,
         status: lineage.open_loop_state,

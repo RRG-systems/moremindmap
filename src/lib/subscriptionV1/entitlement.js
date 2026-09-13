@@ -63,11 +63,14 @@ export function projectPaidEntitlement({
       fabricated: false,
     });
   }
-  const state = normalizeStripeSubscriptionState({
+  let state = normalizeStripeSubscriptionState({
     status: latest.status,
     cancel_at_period_end: latest.cancel_at_period_end,
     event_type: latest.event_type,
   });
+  if (latest.payment_status === 'failed' && ['ACTIVE', 'ACTIVE_CANCELING', 'PENDING'].includes(state)) {
+    state = 'SUSPENDED_PAYMENT';
+  }
   const body = {
     ...contractHeader('paid_entitlement'),
     entitlement_id: `entitlement_${hashCanonicalJson({ scope, subscriptionId }).slice(0, 24)}`,

@@ -5,6 +5,16 @@ function parse(raw) {
   try { return JSON.parse(raw); } catch { return null; }
 }
 
+export function isExactLegacyBusinessAssessmentComplete(assessment) {
+  const output = assessment?.output || {};
+  return Boolean(
+    output.business_intelligence_draft
+      && output.executive_diagnostic_briefing_v1
+      && output.five_futures_v1
+      && output.one_move_v1,
+  );
+}
+
 export function createProfileStateReader(store) {
   return async function readProfileState(value) {
     const profileId = normalizeProfileId(value);
@@ -18,13 +28,7 @@ export function createProfileStateReader(store) {
     const assessmentId = await store.get(`business_assessment_by_profile:${profileId}`);
     if (!assessmentId) return { bos, ba: 'missing' };
     const assessment = parse(await store.get(`business_assessment:${assessmentId}`));
-    const output = assessment?.output || {};
-    const ba = output.business_intelligence_draft
-      && output.executive_diagnostic_briefing_v1
-      && output.five_futures_v1
-      && output.one_move_v1
-      ? 'ready'
-      : 'pending';
+    const ba = isExactLegacyBusinessAssessmentComplete(assessment) ? 'ready' : 'pending';
     return { bos, ba };
   };
 }

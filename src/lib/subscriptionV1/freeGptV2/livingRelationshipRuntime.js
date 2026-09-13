@@ -160,6 +160,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           external_evidence: currentExternalEvidence,
         }),
         active_personal_rsl_events: replay.state.active_events,
+        historical_personal_rsl_events: rslStore.read({ scope }).records.map(record => record.event),
         event_id: `rsl_${hashCanonicalJson({ proposal_id: proposal.proposal_id, decision_hash: created.decision.decision_hash }).slice(0, 24)}`,
         recorded_at: decidedAt,
       });
@@ -169,6 +170,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         const review = createLinkedCausalReviewEvent({
           scope,
           active_events: [...replay.state.active_events, event],
+          historical_events: [...rslStore.read({ scope }).records.map(record => record.event), event],
           outcome_event: event,
           event_id: `rsl_review_${hashCanonicalJson({ outcome: event.content_hash, at: decidedAt }).slice(0, 20)}`,
           recorded_at: decidedAt,
@@ -230,10 +232,13 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       transcript.push({ role: 'customer', content: normalizedTurn });
       let authorization = null;
       let decisionResult = null;
+      let pendingBeforeTurn = null;
 
       if (pendingProposalId) {
         const found = store.readProposal({ scope, proposal_id: pendingProposalId });
         if (!found.ok) return found;
+        if (found.workflow_status !== 'AWAITING_CUSTOMER_DECISION') return deepFreeze({ ok: false, code: 'AFW05_PROPOSAL_REVIEW_REQUIRED' });
+        pendingBeforeTurn = found.proposal;
         const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
         if (!replay.ok) return replay;
         const binding = correctionTargetContext({ scope, proposal: found.proposal, active_events: replay.state.active_events });
@@ -286,14 +291,14 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         if (!researched.ok) return researched;
       }
 
-      if (decisionResult || (authorization && ['AMBIGUOUS', 'NONE'].includes(authorization.decision))) {
+      if (decisionResult) {
         const publication = store.readCurrent({ scope });
         return deepFreeze({
           ok: true,
-          code: decisionResult ? 'FREE_GPT_V2_NATURAL_AUTHORIZATION_TURN_COMPLETE' : 'FREE_GPT_V2_AMBIGUOUS_AUTHORIZATION_TURN_COMPLETE',
+          code: 'FREE_GPT_V2_NATURAL_AUTHORIZATION_TURN_COMPLETE',
           customer_message: coaching.customer_message,
-          proposal: decisionResult ? null : store.readProposal({ scope, proposal_id: pendingProposalId }).proposal,
-          confirmation_required: !decisionResult,
+          proposal: null,
+          confirmation_required: false,
           authorization,
           decision: decisionResult?.decision || null,
           publication: publication.publication,
@@ -301,7 +306,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           provider_receipts: [authorization?.receipt, coaching.receipt].filter(Boolean),
           research: coaching.research,
           external_evidence: clone(coaching.external_evidence || []),
-          extraction: { candidate: null, skipped: true, reason: decisionResult ? 'AUTHORIZATION_HANDLED' : 'PENDING_PROPOSAL_REMAINS' },
+          extraction: { candidate: null, skipped: true, reason: 'AUTHORIZATION_HANDLED' },
           context_selection_receipt: currentUnderstanding.context_selection_receipt,
           timing: {
             time_to_first_useful_ms: Math.max(0, coachingReadyAt - turnStartedAt),
@@ -316,8 +321,15 @@ export function createFreeGptLivingRelationshipRuntimeV2({
       const extractionStartedAt = monotonic_clock();
       const activeRead = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
       if (!activeRead.ok) return activeRead;
+      const pendingForExtraction = Object.values(store.snapshot().proposals || {})
+        .filter((entry) => entry.workflow_status === 'AWAITING_CUSTOMER_DECISION'
+          && entry.proposal.proposal_class === 'DURABLE_MUTATION_PROPOSED'
+          && entry.proposal.expected_prior_publication_hash === extractionPacket.base_state_packet.current_state.living_publication_hash
+          && entry.proposal.expected_prior_publication_version === extractionPacket.base_state_packet.current_state.living_publication_version)
+        .map((entry) => entry.proposal);
       const extraction = await candidate_extractor.extract({ packet: extractionPacket, customer_message: normalizedTurn, coach_message: coaching.customer_message,
         correction_records: correctionRecordCatalog({ scope, active_events: activeRead.state.active_events }),
+        pending_proposals: pendingForExtraction,
       });
       if (!extraction.ok) return extraction;
       const extractionCompletedAt = monotonic_clock();
@@ -331,7 +343,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           code: 'FREE_GPT_V2_POST_RESPONSE_EXTRACTION_STALE',
           customer_message: coaching.customer_message,
           mutation_performed: false,
-          provider_receipts: [coaching.receipt, extraction.receipt],
+          provider_receipts: [authorization?.receipt, coaching.receipt, extraction.receipt].filter(Boolean),
           extraction: { candidate: null, skipped: false, discarded: true, reason: 'STATE_CHANGED_DURING_CANDIDATE_EXTRACTION' },
           context_selection_receipt: extractionPacket.context_selection_receipt,
           timing: {
@@ -342,8 +354,12 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           },
         });
       }
-      let proposal = null;
-      if (extraction.candidate) {
+      let proposal = pendingBeforeTurn;
+      const samePendingItems = pendingBeforeTurn && extraction.candidate
+        && pendingBeforeTurn.proposal_type === extraction.candidate.proposal_type
+        && pendingBeforeTurn.target_contract === extraction.candidate.target_contract
+        && hashCanonicalJson(pendingBeforeTurn.proposed_items) === hashCanonicalJson(extraction.candidate.items);
+      if (extraction.candidate && !samePendingItems) {
         let supersedesEventIds = [];
         if (extraction.candidate.proposal_type === 'CORRECTION_CANDIDATE') {
           const replay = store.buildPersonalRslStore({ scope }).replay({ scope, effective_as_of: clock(), recorded_as_of: clock() });
@@ -388,14 +404,21 @@ export function createFreeGptLivingRelationshipRuntimeV2({
           proposal_id: governed.proposal.proposal_id,
         });
         if (!customerDiscussion.ok || !moreSuggestion.ok) return deepFreeze({ ok: false, code: customerDiscussion.code || moreSuggestion.code });
+        // Only an explicit, allowlisted extraction annotation may withdraw older
+        // draft eligibility. Field overlap alone does not mean replacement.
+        const supersededPending = (extraction.replaces_pending_proposal_hashes || []).map((hash) => {
+          const previous = pendingForExtraction.find((pending) => pending.proposal_hash === hash);
+          return { proposal_id: previous?.proposal_id, proposal_hash: hash };
+        });
         const saved = await store.saveProposal({
           scope,
           proposal: governed.proposal,
           saved_at: clock(),
           relationship_episode_events: [customerDiscussion.event, moreSuggestion.event],
+          supersedes_pending_proposals: supersededPending,
         });
         if (!saved.ok) return saved;
-        proposal = governed.proposal;
+        proposal = governed.proposal.proposal_class === 'DURABLE_MUTATION_PROPOSED' ? governed.proposal : pendingBeforeTurn || governed.proposal;
         if (proposal.proposal_class === 'DURABLE_MUTATION_PROPOSED') pendingProposalId = proposal.proposal_id;
       }
       return deepFreeze({
@@ -404,10 +427,10 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         customer_message: coaching.customer_message,
         proposal,
         confirmation_required: proposal?.proposal_class === 'DURABLE_MUTATION_PROPOSED',
-        authorization: null,
+        authorization,
         publication: publication.publication,
         mutation_performed: false,
-        provider_receipts: [coaching.receipt, extraction.receipt],
+        provider_receipts: [authorization?.receipt, coaching.receipt, extraction.receipt].filter(Boolean),
         research: coaching.research,
         external_evidence: clone(coaching.external_evidence || []),
         extraction: { candidate: extraction.candidate, skipped: false },
@@ -433,7 +456,7 @@ export function createFreeGptLivingRelationshipRuntimeV2({
         purpose: 'WEEKLY_COACHING',
         active_lens,
         visible_customer_context,
-        customer_message: mode === 'FINALIZE' ? String(alignment_message || '').trim() : '',
+        customer_message: mode !== 'REQUEST_ALIGNMENT' ? String(alignment_message || '').trim() : '',
       });
       if (!assembled.ok) return assembled;
       const pending = pendingProposalId ? store.readProposal({ scope, proposal_id: pendingProposalId }) : null;

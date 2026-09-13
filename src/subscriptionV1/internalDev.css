@@ -60,6 +60,13 @@
 .living-composer .s2-end-session { flex: 0 0 auto; align-self: center; width: auto; min-width: 7.5rem; min-height: 2.6rem; padding: .55rem .78rem; border-color: rgba(119, 166, 197, .34); color: #a9c2ce; background: rgba(15, 40, 55, .72); font-size: .68rem; font-weight: 700; letter-spacing: .015em; line-height: 1.15; white-space: nowrap; }
 .living-composer .s2-end-session:hover:not(:disabled) { border-color: rgba(105, 226, 112, .55); color: #dff7e3; background: rgba(23, 64, 67, .82); }
 .living-composer .s2-end-session:focus-visible { outline: 2px solid #69e270; outline-offset: 2px; }
+.living-composer .s2-closing-actions { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); gap: .5rem; width: 100%; min-width: 0; }
+.living-composer .s2-closing-actions button { width: 100%; min-width: 0; min-height: 44px; margin: 0; padding: .6rem .65rem; border: 1px solid rgba(119, 166, 197, .34); border-radius: .65rem; color: #c8dce5; background: rgba(15, 40, 55, .72); font-size: .72rem; font-weight: 700; line-height: 1.25; letter-spacing: normal; white-space: normal; overflow-wrap: normal; }
+.living-composer .s2-closing-actions button:last-child { grid-column: 1 / -1; }
+.living-composer .s2-closing-actions button:nth-child(2) { border-color: rgba(105, 226, 112, .55); color: #e2f8e6; background: rgba(36, 106, 53, .6); }
+.living-composer .s2-closing-actions button:hover:not(:disabled) { border-color: #69e270; color: #f2fff5; }
+.living-composer .s2-closing-actions button:focus-visible { outline: 2px solid #69e270; outline-offset: 2px; }
+.living-composer .s2-closing-actions button:disabled { border-color: rgba(110, 150, 177, .2); color: #718391; background: rgba(31, 55, 72, .5); cursor: not-allowed; }
 .internal-session-boundary { display: flex; align-items: center; gap: .55rem; padding: .55rem .7rem; border-bottom: 1px solid rgba(119, 166, 197, .14); color: #8fa8b5; background: rgba(4, 15, 24, .72); font-size: .62rem; }
 .internal-session-boundary span { padding: .3rem .45rem; border: 1px solid rgba(119, 166, 197, .16); border-radius: 999px; }
 .internal-session-boundary button { margin-left: auto; border: 0; color: #a9c7d4; background: transparent; font: inherit; cursor: pointer; }
@@ -83,3 +90,13 @@
   .s2-gu-item { grid-template-columns: 1fr; }
   .s2-gu-item > small { grid-column: 1; }
 }
+
+/* Preserve readable closing/opening commitment prose. */
+.s2-gu-session_closing .s2-gu-item { grid-template-columns: minmax(0, 1fr); align-items: start; }
+.s2-gu-session_closing .s2-gu-item > strong { overflow-wrap: break-word; word-break: normal; }
+.s2-gu-session_closing .s2-gu-item > small { grid-column: 1; }
+.s2-gu-session_opening .s2-gu-object-commitments .s2-gu-item { grid-template-columns: minmax(0, 1fr); align-items: start; }
+.s2-gu-session_opening .s2-gu-object-commitments .s2-gu-item > span { min-width: 0; color: #e7f2ed; font-size: .74rem; font-weight: 650; line-height: 1.4; letter-spacing: 0; text-transform: none; overflow-wrap: anywhere; word-break: normal; }
+.s2-gu-session_opening .s2-gu-object-commitments .s2-gu-item > strong { min-width: 0; overflow-wrap: anywhere; word-break: normal; }
+.s2-gu-session_opening .s2-gu-object-commitments .s2-gu-item > small { grid-column: 1; min-width: 0; overflow-wrap: anywhere; word-break: normal; }
+.subscription-capability-note { margin: 0; padding: .65rem 1rem; color: #b8cbd2; font-size: .82rem; line-height: 1.5; grid-column: 1 / -1; }

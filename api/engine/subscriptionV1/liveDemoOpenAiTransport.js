@@ -1,5 +1,6 @@
 import OpenAI from 'openai';
 import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+import { runSourceEnabledConversation } from './sourceConversationTransport.js';
 
 const ALLOWED_STAGES = new Set(['CONVERSATION', 'CANDIDATE_EXTRACTION', 'NATURAL_AUTHORIZATION', 'SESSION_CLOSE']);
 const PRIVATE_CUSTOMER_PATTERN = /\bMM-\d{8}-[A-Z0-9]{8}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/iu;
@@ -12,7 +13,14 @@ function assertRequest(request, stage) {
   if (PRIVATE_CUSTOMER_PATTERN.test(JSON.stringify(request))) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_REAL_CUSTOMER_DATA_DENIED');
   const tools = Array.isArray(request.tools) ? request.tools : [];
   if (stage === 'CONVERSATION') {
-    if (tools.length !== 1 || tools[0]?.type !== 'web_search') throw new TypeError('SUBSCRIPTION_LIVE_DEMO_RESEARCH_TOOL_CONTRACT_INVALID');
+    if (!Array.isArray(request.tools) || tools.length > 1
+      || (tools.length === 1 && (tools[0]?.type !== 'web_search' || Object.keys(tools[0]).length !== 1))) {
+      throw new TypeError('SUBSCRIPTION_LIVE_DEMO_RESEARCH_TOOL_CONTRACT_INVALID');
+    }
+    if (!tools.length && (Object.hasOwn(request, 'max_tool_calls') || Object.hasOwn(request, 'tool_choice')
+      || request.include?.some(value => String(value).startsWith('web_search_call')))) {
+      throw new TypeError('SUBSCRIPTION_LIVE_DEMO_DISABLED_WEB_FIELDS_DENIED');
+    }
   } else if (tools.length !== 0) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_NONCONVERSATION_TOOLS_DENIED');
 }
 
@@ -77,11 +85,20 @@ function researchTrace(response, retrievedAt) {
   return { calls: searches.length, evidence };
 }
 
-export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 180000, maxTransportRetries = 1, client: suppliedClient = null }) {
+export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 180000, maxTransportRetries = 1, client: suppliedClient = null, sourceLibrary = null }) {
   if (!apiKey) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_OPENAI_API_KEY_REQUIRED');
   const client = suppliedClient || new OpenAI({ apiKey, maxRetries: 0, timeout: timeoutMs });
   return async function subscriptionLiveDemoTransport(request, { stage }) {
     assertRequest(request, stage);
+    if (sourceLibrary && stage === 'CONVERSATION') return runSourceEnabledConversation({
+      request,
+      client,
+      library: typeof sourceLibrary === 'function' ? sourceLibrary() : sourceLibrary,
+      timeoutMs,
+      maxTransportRetries: 0,
+      parseOutput: parseSubscriptionStructuredOutput,
+      researchTrace,
+    });
     const started = Date.now();
     let response;
     let output;
@@ -91,6 +108,10 @@ export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 
       attemptCount += 1;
       try {
         response = await client.responses.create(request, { signal: AbortSignal.timeout(timeoutMs) });
+        if (stage === 'CONVERSATION' && request.tools.length === 0
+          && response.output?.some(item => item?.type === 'web_search_call')) {
+          throw new TypeError('SUBSCRIPTION_LIVE_DEMO_DISABLED_WEB_CALL_DENIED');
+        }
         if (response.status === 'completed') {
           try {
             output = parseSubscriptionStructuredOutput(response);

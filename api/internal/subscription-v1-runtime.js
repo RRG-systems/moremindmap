@@ -1,5 +1,10 @@
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
-import { coachingEpisodeProjection, createRelationshipEpisodeEvent, validateSessionCloseOutputV1 } from '../../src/lib/subscriptionV1/index.js';
+import {
+  coachingEpisodeProjection,
+  createRelationshipEpisodeEvent,
+  entitlementAllowsCoaching,
+  validateSessionCloseOutputV1,
+} from '../../src/lib/subscriptionV1/index.js';
 import { SESSION_LEARNING_FIELDS, summarizeSessionLearning } from '../../src/lib/subscriptionV1/sessionLearning.js';
 import {
   appendDiagnostics,
@@ -33,6 +38,36 @@ function publicIdentity(loaded) {
 
 function publicDemoSubject(auth) {
   return auth?.demo_subject || auth?.capability?.demo_subject_id || 'synthetic';
+}
+
+function defaultEntitlementResolver({ scope, now }) {
+  return createInternalSyntheticEntitlement({ scope, asOf: now });
+}
+
+async function runPreloadEntitlementPreflight({
+  resolvePreloadScope,
+  resolveEntitlement,
+  redis,
+  keys,
+  auth,
+  req,
+  now,
+}) {
+  if (typeof resolvePreloadScope !== 'function') return { ok: true, enabled: false };
+  try {
+    const scope = await resolvePreloadScope({ redis, keys, auth, req, now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
+    const access = entitlementAllowsCoaching(entitlement, now.toISOString());
+    if (!access.allowed) {
+      if (access.code === 'ENTITLEMENT_CONTRACT_INVALID') {
+        return { ok: false, status: 503, code: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE' };
+      }
+      return { ok: false, status: 409, code: access.code };
+    }
+    return { ok: true, enabled: true };
+  } catch {
+    return { ok: false, status: 503, code: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE' };
+  }
 }
 
 function send(res, status, body) {
@@ -78,6 +113,14 @@ function safeSessionLearningDraft(value) {
   const draft = Object.fromEntries(fields.map((field) => [field, value[field]]));
   const validation = validateSessionCloseOutputV1({ customer_message: 'Ephemeral mutual-close draft.', session_learning: draft });
   return validation.valid ? clone(draft) : null;
+}
+
+function replaySessionCloseMessage(learning) {
+  const labels = [
+    ['What mattered', 'what_mattered'], ['What changed', 'what_changed'], ['What we learned', 'what_was_learned'],
+    ['What was decided', 'what_was_decided'], ['What remains open', 'what_remains_open'], ['Next time', 'pick_up_next_time'],
+  ];
+  return `Your session is closed. Here is the saved recap:\n\n${labels.map(([label, field]) => `${label}: ${learning[field]}`).join('\n\n')}`;
 }
 
 const LENS_BY_SURFACE = Object.freeze({
@@ -181,9 +224,9 @@ function publicPreSession(allowance, firstSessionEstablished) {
   };
 }
 
-export async function inspectSessionAvailability({ redis, keys, scope, now }) {
+export async function inspectSessionAvailability({ redis, keys, scope, now, resolveEntitlement = defaultEntitlementResolver }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     const inspected = ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() });
@@ -200,9 +243,9 @@ export async function inspectSessionAvailability({ redis, keys, scope, now }) {
   }});
 }
 
-export async function beginExplicitSession({ redis, keys, scope, now }) {
+export async function beginExplicitSession({ redis, keys, scope, now, resolveEntitlement = defaultEntitlementResolver }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     let inspected = ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() });
@@ -320,7 +363,7 @@ function deterministicMapChangeReceipt({ loaded, keys, mapDelta, providerError }
   };
 }
 
-async function generateS2Gu({ event, loaded, keys, sessionLearning = null, mapDelta = null, env = globalThis.process?.env || {} }) {
+async function generateS2Gu({ event, loaded, keys, sessionLearning = null, mapDelta = null, currentExchange = null, env = globalThis.process?.env || {} }) {
   const current = loaded.controller.current();
   if (!current.ok) throw new Error(current.code || 'SUBSCRIPTION_S2_CURRENT_STATE_REQUIRED');
   const packet = loaded.controller.wholeUnderstandingPacket();
@@ -331,14 +374,15 @@ async function generateS2Gu({ event, loaded, keys, sessionLearning = null, mapDe
     viewModel: current.view_model,
     sessionLearning,
     mapDelta,
+    currentExchange,
     relationshipScopeHash: keys.scope_hash,
   });
   return { ...gu, current };
 }
 
-export async function ensureActiveSession({ redis, keys, scope, capabilityHash, now }) {
+export async function ensureActiveSession({ redis, keys, scope, capabilityHash, now, resolveEntitlement = defaultEntitlementResolver }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     let inspected = ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() });
@@ -374,21 +418,21 @@ export async function ensureActiveSession({ redis, keys, scope, capabilityHash, 
   }});
 }
 
-async function inspectBoundSession({ redis, keys, scope, sessionId, now }) {
+async function inspectBoundSession({ redis, keys, scope, sessionId, now, resolveEntitlement = defaultEntitlementResolver, allowCompleted = false }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     const inspected = ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() });
     const session = inspected.sessions.find((item) => item.session_id === sessionId);
-    if (!session || session.state !== 'ACTIVE') return { ok: false, code: 'SUBSCRIPTION_V1_ACTIVE_SESSION_REQUIRED' };
+    if (!session || !(session.state === 'ACTIVE' || (allowCompleted && ['CONSUMED', 'RELEASED'].includes(session.state)))) return { ok: false, code: 'SUBSCRIPTION_V1_ACTIVE_SESSION_REQUIRED' };
     return { ok: true, session, allowance: inspected.ledger, session_history: inspected.sessions };
   }});
 }
 
-async function recordValidResponse({ redis, keys, scope, sessionId, responseHash, now }) {
+async function recordValidResponse({ redis, keys, scope, sessionId, responseHash, now, resolveEntitlement = defaultEntitlementResolver }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     const charged = ledger.recordFirstValidResponse({ session_id: sessionId, scope, response_hash: responseHash, now: now.toISOString() });
@@ -397,14 +441,14 @@ async function recordValidResponse({ redis, keys, scope, sessionId, responseHash
   }});
 }
 
-async function completeSession({ redis, keys, scope, sessionId, cumulativeSeconds, now }) {
+async function completeSession({ redis, keys, scope, sessionId, cumulativeSeconds, now, resolveEntitlement = defaultEntitlementResolver }) {
   return withDurableAllowanceLedger({ redis, keys, operation: async (ledger) => {
-    const entitlement = createInternalSyntheticEntitlement({ scope, asOf: now });
+    const entitlement = await resolveEntitlement({ redis, keys, scope, now });
     const cycle = ledger.createCycle(entitlement);
     if (!cycle.ok) return cycle;
     const completed = ledger.complete({ session_id: sessionId, scope, now: now.toISOString(), cumulative_active_seconds: cumulativeSeconds });
     if (!completed.ok) return completed;
-    return { ok: true, session: completed.session, allowance: completed.ledger };
+    return { ok: true, session: completed.session, allowance: completed.ledger || ledger.inspect({ ledger_id: cycle.ledger.ledger_id, scope, now: now.toISOString() }).ledger };
   }});
 }
 
@@ -424,6 +468,10 @@ export function createSubscriptionV1RuntimeHandler({
   authenticate = authenticateInternalDevRequest,
   loadSubscriber = defaultLoadSubscriber,
   generateGu = generateS2Gu,
+  resolveEntitlement = defaultEntitlementResolver,
+  resolveKeys = internalDevKeys,
+  resolvePreloadScope = null,
+  firstSessionSyntheticOnly = true,
   env = globalThis.process?.env || {},
 } = {}) {
   return async function handler(req, res) {
@@ -443,8 +491,29 @@ export function createSubscriptionV1RuntimeHandler({
       }));
       return send(res, auth.status, { ok: false, code: auth.code, reentry_required: auth.status === 401 });
     }
-    const keys = internalDevKeys({ relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key });
     const now = new Date();
+    const keys = resolveKeys({
+      relationship_key: auth.capability.relationship_key,
+      subject_key: auth.capability.subject_key,
+      auth,
+      now,
+    });
+    const entitlementPreflight = await runPreloadEntitlementPreflight({
+      resolvePreloadScope,
+      resolveEntitlement,
+      redis,
+      keys,
+      auth,
+      req,
+      now,
+    });
+    if (!entitlementPreflight.ok) {
+      return send(res, entitlementPreflight.status, {
+        ok: false,
+        code: entitlementPreflight.code,
+        mutation_performed: false,
+      });
+    }
 
     if (req.method === 'GET' && req.query?.view === 'diagnostics') {
       const csrf_token = await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash });
@@ -465,7 +534,7 @@ export function createSubscriptionV1RuntimeHandler({
       });
       const firstRelationshipEvent = await readS2FirstSessionRelationshipEvent({ redis, key: keys.s2_relationship, relationshipScopeHash: keys.scope_hash });
       if (!firstRelationshipEvent.ok) return send(res, 409, { ok: false, code: firstRelationshipEvent.code });
-      const availability = await inspectSessionAvailability({ redis, keys, scope: provisional.scope, now });
+      const availability = await inspectSessionAvailability({ redis, keys, scope: provisional.scope, now, resolveEntitlement });
       if (!availability.ok) return send(res, 409, { ok: false, code: availability.code });
       if (!availability.session || availability.session.state === 'RESERVED') {
         const firstSessionEstablished = Boolean(firstRelationshipEvent.event);
@@ -545,7 +614,7 @@ export function createSubscriptionV1RuntimeHandler({
       const firstSessionEstablished = Boolean(existingFirstEvent.event);
       if (action === 'START_MY_FIRST_SESSION' && firstSessionEstablished) return send(res, 409, { ok: false, code: 'SUBSCRIPTION_S2_FIRST_SESSION_ALREADY_ESTABLISHED', csrf_token: nextCsrf });
       if (action === 'START_SESSION' && !firstSessionEstablished) return send(res, 409, { ok: false, code: 'SUBSCRIPTION_S2_FIRST_SESSION_START_REQUIRED', csrf_token: nextCsrf });
-      const started = await beginExplicitSession({ redis, keys, scope: provisional.scope, now });
+      const started = await beginExplicitSession({ redis, keys, scope: provisional.scope, now, resolveEntitlement });
       if (!started.ok) return send(res, 409, { ok: false, code: started.code, csrf_token: nextCsrf });
       const sessionKind = started.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
       const loaded = await loadSubscriber({
@@ -581,6 +650,7 @@ export function createSubscriptionV1RuntimeHandler({
           relationshipScopeHash: keys.scope_hash,
           sessionId: started.session.session_id,
           establishedAt: now,
+          syntheticOnly: firstSessionSyntheticOnly,
         });
         if (!firstEvent.ok) {
           if (started.code === 'SUBSCRIPTION_S2_SESSION_EXPLICITLY_STARTED') {
@@ -619,20 +689,36 @@ export function createSubscriptionV1RuntimeHandler({
         session_id: req.body?.session_id, session_kind: 'WEEKLY', initial_conversation: [], coaching_episode_phase: 'IDLE',
         env,
       });
-      const bound = await inspectBoundSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, now });
+      const bound = await inspectBoundSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, now, resolveEntitlement, allowCompleted: true });
       if (!bound.ok) return send(res, 409, { ok: false, code: bound.code, csrf_token: nextCsrf });
       const conversation = safeConversation(req.body?.conversation);
       const alignmentMessage = String(req.body?.alignment_message || '').trim().slice(0, 5000);
-      const closeMode = alignmentMessage ? 'FINALIZE' : 'REQUEST_ALIGNMENT';
+      const closeDecision = req.body?.close_decision || null;
+      if (closeDecision && !['CONTINUE', 'FINISH', 'LEAVE'].includes(closeDecision)) return send(res, 400, { ok: false, code: 'SUBSCRIPTION_CLOSE_DECISION_INVALID', csrf_token: nextCsrf });
+      const closeMode = closeDecision === 'FINISH' ? 'FINALIZE' : alignmentMessage ? 'REVIEW_RESPONSE' : 'REQUEST_ALIGNMENT';
       const priorSessionLearning = safeSessionLearningDraft(req.body?.prior_session_learning);
       let closeResult = null;
-      let closingLoaded = null;
-      if (bound.session.charge_point_reached) {
-        const sessionKind = bound.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
-        closingLoaded = await loadSubscriber({
-          redis, relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key,
-          session_id: bound.session.session_id, session_kind: sessionKind, initial_conversation: conversation, coaching_episode_phase: 'ENDING', session_temporal_context: { session_history: bound.session_history }, env,
+      const sessionKind = bound.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
+      const closingLoaded = await loadSubscriber({
+        redis, relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key,
+        session_id: bound.session.session_id, session_kind: sessionKind, initial_conversation: conversation, coaching_episode_phase: 'ENDING', session_temporal_context: { session_history: bound.session_history }, env,
+      });
+      // A completed learning append is the immutable close checkpoint. A retry
+      // must reuse it even when the later allowance completion write failed.
+      const savedClose = closingLoaded.store.readRelationshipEpisodes({ scope: closingLoaded.scope }).records
+        .find(({ event }) => event.event_type === 'SESSION_LEARNING' && event.session_id === bound.session.session_id && event.session_learning)?.event;
+      if (bound.session.state !== 'ACTIVE' && !savedClose) return send(res, 409, { ok: false, code: 'SUBSCRIPTION_SAVED_CLOSE_REQUIRED', csrf_token: nextCsrf });
+      if (closeDecision === 'CONTINUE' && !savedClose) {
+        return send(res, 200, {
+          ok: true, code: 'SUBSCRIPTION_SESSION_COACHING_RESUMED', csrf_token: nextCsrf,
+          session: publicSession(bound.session, bound.allowance, 'ACTIVE'), session_learning: null,
+          mutual_close: { close_intent: 'CONTINUE', continue_coaching: true, human_alignment_required: false, alignment_established: false },
+          coaching_episode: coachingEpisodeProjection({ phase: 'ACTIVE', transitions: ['ENDING', 'ACTIVE'] }),
+          confirmation_required: Boolean(closingLoaded.controller.pendingProposal()), pending_proposal: publicPendingProposal(closingLoaded.controller.pendingProposal()),
+          mutation_performed: false,
         });
+      }
+      if (bound.session.charge_point_reached && closeDecision !== 'LEAVE' && !savedClose) {
         const visible = safeVisibleContext(req.body?.visible_customer_context);
         closeResult = await closingLoaded.controller.endSession({
           active_lens: visible.active_lens,
@@ -644,6 +730,15 @@ export function createSubscriptionV1RuntimeHandler({
         if (!closeResult.ok) return send(res, 422, { ok: false, code: closeResult.code, csrf_token: nextCsrf, mutation_performed: false });
       }
       const closeReceipts = closeResult?.receipt ? [closeResult.receipt] : [];
+      if (closeResult?.mutual_close?.continue_coaching) {
+        return send(res, 200, {
+          ok: true, code: 'SUBSCRIPTION_SESSION_COACHING_RESUMED', csrf_token: nextCsrf,
+          customer_message: closeResult.customer_message, session_learning: null, mutual_close: closeResult.mutual_close,
+          confirmation_required: Boolean(closeResult.confirmation_required), pending_proposal: publicPendingProposal(closeResult.proposal),
+          mutation_performed: false, usage: usageSummary(closeReceipts), session: publicSession(bound.session, bound.allowance, 'ACTIVE'),
+          coaching_episode: coachingEpisodeProjection({ phase: 'ACTIVE', transitions: ['ENDING', 'ACTIVE'] }),
+        });
+      }
       if (closeResult?.mutual_close?.human_alignment_required) {
         await appendDiagnostics({ redis, key: keys.diagnostics, event: 'SESSION_MUTUAL_CLOSE_ALIGNMENT_REQUESTED', receipts: closeReceipts });
         return send(res, 200, {
@@ -662,15 +757,17 @@ export function createSubscriptionV1RuntimeHandler({
           raw_provider_payload_persisted: false,
         });
       }
-      if (!closingLoaded) {
-        const sessionKind = bound.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
-        closingLoaded = await loadSubscriber({
-          redis, relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key,
-          session_id: bound.session.session_id, session_kind: sessionKind, initial_conversation: conversation,
-          coaching_episode_phase: 'ENDING', session_temporal_context: { session_history: bound.session_history }, env,
-        });
-      }
-      const closingLearning = closeResult?.session_learning || {
+      const leftWithoutAlignment = !savedClose && (closeDecision === 'LEAVE' || closeResult?.mutual_close?.close_intent === 'LEAVE');
+      const closingLearning = savedClose ? { status: 'NOTES_READY', ...savedClose.session_learning, persisted: true } : leftWithoutAlignment ? {
+        status: 'NOTES_READY',
+        what_mattered: 'The customer chose to stop with the session review still open.',
+        what_changed: 'Ending the session did not authorize a Business Twin change.',
+        what_was_learned: 'No closing recap was confirmed. Consult earlier authorized history for established understanding.',
+        what_was_decided: 'The customer ended this session without confirming the closing recap or creating a new commitment.',
+        what_remains_open: 'The session recap was not agreed. Revisit the open discussion with the customer.',
+        durable_governed_meaning: 'No new durable customer truth was authorized by leaving.',
+        pick_up_next_time: 'Ask what still matters from the unfinished discussion before proposing the next step.',
+      } : closeResult?.session_learning || {
         status: 'NOTES_READY',
         what_mattered: 'The customer chose to end before a substantive coaching exchange was completed.',
         what_changed: 'The governed Business Twin did not change.',
@@ -683,19 +780,24 @@ export function createSubscriptionV1RuntimeHandler({
       const closingMapDelta = currentSessionMapDelta(closingLoaded, bound.session.session_id);
       let closingGu;
       try {
-        closingGu = await generateGu({
-          event: 'SESSION_CLOSING',
-          loaded: closingLoaded,
-          keys,
-          sessionLearning: closingLearning,
-          mapDelta: closingMapDelta,
-          env,
-        });
+        // Leaving is a direct exit; a retry replays stored notes rather than
+        // asking a provider to reinterpret an already immutable close.
+        if (leftWithoutAlignment || savedClose) closingGu = { plan: null, receipt: null };
+        else {
+          closingGu = await generateGu({
+            event: 'SESSION_CLOSING',
+            loaded: closingLoaded,
+            keys,
+            sessionLearning: closingLearning,
+            mapDelta: closingMapDelta,
+            env,
+          });
+        }
       } catch (error) {
         return send(res, 422, { ok: false, code: error.code || 'SUBSCRIPTION_S2_CLOSING_GU_FAILED_CLOSED', csrf_token: nextCsrf, mutation_performed: false });
       }
       const sessionLearningMeaning = Object.fromEntries(SESSION_LEARNING_FIELDS.map((field) => [field, closingLearning[field]]));
-      const sessionLearningEpisode = createRelationshipEpisodeEvent({
+      const sessionLearningEpisode = savedClose ? { ok: true, event: savedClose } : createRelationshipEpisodeEvent({
         scope: closingLoaded.scope,
         session_id: bound.session.session_id,
         event_type: 'SESSION_LEARNING',
@@ -705,22 +807,31 @@ export function createSubscriptionV1RuntimeHandler({
         source_content_hash: hashCanonicalJson(closingLearning),
       });
       if (!sessionLearningEpisode.ok) return send(res, 422, { ok: false, code: sessionLearningEpisode.code, csrf_token: nextCsrf, mutation_performed: false });
-      const sessionLearningAppend = await closingLoaded.store.appendRelationshipEpisodeEvents({
+      // Stable per-session identity prevents competing or retried finalizations
+      // from creating two distinct closing-note episodes. Conflict fails closed.
+      const stableCloseBody = { ...sessionLearningEpisode.event,
+        close_intent: leftWithoutAlignment ? 'LEAVE' : closeResult?.mutual_close?.close_intent || 'FINISH',
+        alignment_established: !leftWithoutAlignment && closeResult?.mutual_close?.alignment_established === true,
+        episode_event_id: `episode_${hashCanonicalJson({ scope: keys.scope_hash, session_id: bound.session.session_id, purpose: 'FINAL_SESSION_LEARNING' }).slice(0, 24)}` };
+      delete stableCloseBody.event_hash;
+      const finalCloseEvent = savedClose || { ...stableCloseBody, event_hash: hashCanonicalJson(stableCloseBody) };
+      const sessionLearningAppend = savedClose ? { ok: true } : await closingLoaded.store.appendRelationshipEpisodeEvents({
         scope: closingLoaded.scope,
-        events: [sessionLearningEpisode.event],
+        events: [finalCloseEvent],
         appended_at: now.toISOString(),
       });
       if (!sessionLearningAppend.ok) return send(res, 409, { ok: false, code: sessionLearningAppend.code, csrf_token: nextCsrf, mutation_performed: false });
-      const completed = await completeSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, cumulativeSeconds: Math.max(0, Math.min(7200, Number(req.body?.cumulative_active_seconds) || 0)), now });
+      const completed = await completeSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, cumulativeSeconds: Math.max(0, Math.min(7200, Number(req.body?.cumulative_active_seconds) || 0)), now, resolveEntitlement });
       if (!completed.ok) return send(res, 409, { ok: false, code: completed.code, csrf_token: nextCsrf });
-      await appendDiagnostics({ redis, key: keys.diagnostics, event: 'SESSION_COMPLETED', receipts: [...closeReceipts, closingGu.receipt.provider] });
+      await appendDiagnostics({ redis, key: keys.diagnostics, event: 'SESSION_COMPLETED', receipts: [...closeReceipts, closingGu.receipt?.provider].filter(Boolean) });
       return send(res, 200, {
         ok: true,
         code: 'SUBSCRIPTION_V1_SESSION_COMPLETED',
         csrf_token: nextCsrf,
-        customer_message: closeResult?.customer_message || null,
-        session_learning: closingLearning,
-        mutual_close: closeResult?.mutual_close || null,
+        customer_message: savedClose ? replaySessionCloseMessage(closingLearning) : leftWithoutAlignment ? 'Your session is closed with the discussion still open. We can pick it up next time.' : closeResult?.customer_message || null,
+        session_learning: { ...closingLearning, persisted: true },
+        mutual_close: savedClose ? { close_intent: savedClose.close_intent || 'FINISH', human_alignment_required: false, alignment_established: savedClose.alignment_established === true, recovered_saved_close: true }
+          : closeResult?.mutual_close || { close_intent: leftWithoutAlignment ? 'LEAVE' : 'FINISH', human_alignment_required: false, alignment_established: false },
         confirmation_required: Boolean(closeResult?.confirmation_required),
         pending_proposal: publicPendingProposal(closeResult?.proposal),
         mutation_performed: false,
@@ -736,7 +847,7 @@ export function createSubscriptionV1RuntimeHandler({
         }),
         raw_provider_payload_persisted: false,
         session_learning_episode: {
-          event_hash: sessionLearningEpisode.event.event_hash,
+          event_hash: finalCloseEvent.event_hash,
           canonical_customer_truth_mutated: false,
           personal_rsl_mutated: false,
           raw_transcript_persisted: false,
@@ -749,7 +860,7 @@ export function createSubscriptionV1RuntimeHandler({
       redis, relationship_key: auth.capability.relationship_key, subject_key: auth.capability.subject_key,
       session_id: req.body?.session_id, session_kind: 'WEEKLY', initial_conversation: [], env,
     });
-    const bound = await inspectBoundSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, now });
+    const bound = await inspectBoundSession({ redis, keys, scope: provisional.scope, sessionId: req.body?.session_id, now, resolveEntitlement });
     if (!bound.ok) return send(res, 409, { ok: false, code: bound.code, csrf_token: nextCsrf });
     const sessionKind = bound.session.session_class === 'ONBOARDING_INCLUDED' ? 'FIRST_EVER' : 'WEEKLY';
     const coachingEpisodePhase = bound.session.charge_point_reached ? 'ACTIVE' : 'STARTED';
@@ -760,6 +871,7 @@ export function createSubscriptionV1RuntimeHandler({
     });
     const beforeCurrent = loaded.controller.current();
     let result;
+    let currentExchange = null;
     const progressive = action === 'TURN' && wantsProgressiveTurn(req);
     const turnStartedAt = Date.now();
     let coachingDelivered = false;
@@ -778,6 +890,7 @@ export function createSubscriptionV1RuntimeHandler({
             sessionId: bound.session.session_id,
             responseHash: hashCanonicalJson({ customer_message: displayedCustomerMessage }),
             now,
+            resolveEntitlement,
           });
           if (!charged.ok) throw new Error(charged.code);
           bound.session = charged.session;
@@ -812,6 +925,7 @@ export function createSubscriptionV1RuntimeHandler({
           await mergeExternalEvidence({ redis, key: keys.research, additions: coaching.external_evidence || [] });
         } : null,
       });
+      if (result?.ok && result.customer_message) currentExchange = Object.freeze({ customer_message: message, coach_message: result.customer_message });
     } else {
       result = await loaded.controller.decide({
         proposal_id: String(req.body?.proposal_id || ''),
@@ -844,7 +958,7 @@ export function createSubscriptionV1RuntimeHandler({
     }
     const receipts = result.provider_receipts || [];
     if (action === 'TURN' && !coachingDelivered) {
-      const charged = await recordValidResponse({ redis, keys, scope: loaded.scope, sessionId: bound.session.session_id, responseHash: hashCanonicalJson({ customer_message: result.customer_message }), now });
+      const charged = await recordValidResponse({ redis, keys, scope: loaded.scope, sessionId: bound.session.session_id, responseHash: hashCanonicalJson({ customer_message: result.customer_message }), now, resolveEntitlement });
       if (!charged.ok) return send(res, 409, { ok: false, code: charged.code, csrf_token: nextCsrf, mutation_performed: false });
       bound.session = charged.session;
       bound.allowance = charged.allowance;
@@ -868,7 +982,7 @@ export function createSubscriptionV1RuntimeHandler({
     }
     if (action === 'TURN' && !mapDelta?.material) {
       try {
-        const optionalGu = await generateGu({ event: 'COACHING_MOMENT', loaded, keys, env });
+        const optionalGu = await generateGu({ event: 'COACHING_MOMENT', loaded, keys, currentExchange, env });
         if (optionalGu.plan?.renderDecision?.render === true) {
           mapGu = optionalGu;
           await appendDiagnostics({ redis, key: keys.diagnostics, event: 'S2_RESTRAINED_COACHING_GU_RENDERED', receipts: [optionalGu.receipt.provider] });
@@ -936,17 +1050,55 @@ export function createSubscriptionV1RuntimeHandler({
 }
 
 const ordinaryHandler = createSubscriptionV1RuntimeHandler();
-export default async function subscriptionRuntimeEntry(req, res) {
-  // Only the authenticated DarrenDemo launcher enters the blind experiment.
-  // Existing direct synthetic and all canonical runtime composition stay intact.
-  let redis, auth;
-  try {
-    redis = getSubscriptionRedis();
-    auth = await authenticateInternalDevRequest({ redis, req });
-  } catch { return ordinaryHandler(req, res); }
-  if (auth.ok && hasDarrenDemoAuthority(auth.capability)) {
-    const { handleBlindDemo } = await import('../engine/subscriptionBlindDemo/runtime.js');
-    return handleBlindDemo({ req, res, redis, auth, env: globalThis.process?.env || {} });
-  }
-  return ordinaryHandler(req, res);
+
+async function defaultBlindDemoHandler(args) {
+  const { handleBlindDemo } = await import('../engine/subscriptionBlindDemo/runtime.js');
+  return handleBlindDemo(args);
 }
+
+async function defaultPaidRuntimeFactory({ redis, env }) {
+  const { createPaidSubscriptionV1RuntimeComposition } = await import('../engine/subscriptionV1/paidRuntimeComposition.js');
+  return createPaidSubscriptionV1RuntimeComposition({ redis, env });
+}
+
+export function createSubscriptionV1RuntimeEntry({
+  ordinary = ordinaryHandler,
+  getRedis = getSubscriptionRedis,
+  authenticateInternal = authenticateInternalDevRequest,
+  blindDemoHandler = defaultBlindDemoHandler,
+  paidRuntimeFactory = defaultPaidRuntimeFactory,
+  env = globalThis.process?.env || {},
+} = {}) {
+  return async function subscriptionRuntimeEntry(req, res) {
+    let redis;
+    let auth = null;
+    try {
+      redis = getRedis(env);
+      auth = await authenticateInternal({ redis, req });
+    } catch {
+      // A customer entrance must still be allowed to reach the separately
+      // authenticated paid boundary when the internal capability is absent.
+    }
+
+    if (auth?.ok === true) {
+      if (auth.ok && hasDarrenDemoAuthority(auth.capability)) {
+        return blindDemoHandler({ req, res, redis, auth, env });
+      }
+      return ordinary(req, res);
+    }
+
+    if (env.PUBLIC_SUBSCRIPTION_RUNTIME_ENABLED === 'true') {
+      if (!redis) return send(res, 503, { ok: false, code: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE' });
+      try {
+        const paid = await paidRuntimeFactory({ redis, env });
+        return paid(req, res);
+      } catch {
+        return send(res, 503, { ok: false, code: 'SUBSCRIPTION_V1_PAID_RUNTIME_UNAVAILABLE' });
+      }
+    }
+
+    return ordinary(req, res);
+  };
+}
+
+export default createSubscriptionV1RuntimeEntry();

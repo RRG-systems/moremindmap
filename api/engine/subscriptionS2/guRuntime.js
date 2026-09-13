@@ -1,5 +1,6 @@
 import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
 import { CREATION_LANGUAGE_CONTRACT } from '../../../src/lib/recruitingV2/creationLanguage.js';
+import { SUBSCRIPTION_LOCKED_NORTH_STAR } from '../../../src/lib/subscriptionV1/freeGptV2/constants.js';
 import {
   SUBSCRIPTION_S2_GU_OUTPUT_SCHEMA,
   SUBSCRIPTION_S2_GU_PLAN_VERSION,
@@ -13,12 +14,12 @@ const EVENT_MISSION = Object.freeze({
   FIRST_SESSION_WELCOME: {
     eyebrow: 'WELCOME TO MORE',
     headline: 'WELCOME TO MORE',
-    mission: 'Create an extremely restrained premium welcome. Do not display goals, Business Twin state, personality, plan, evidence, or relationship preferences. Use only the supplied welcome object and end with one short natural invitation into the conversation.',
+    mission: 'Welcome someone we already know something about. Briefly recognize a relevant available operating pattern, business reality or chosen outcome as a revisable understanding, not a diagnosis. Make correction welcome and introduce MORE’s accountability role naturally. End with a purposeful invitation into useful work; relationship preferences can emerge through that work. Choose a small relevant subset, not a report or another intake. When context is missing, acknowledge the gap instead of inventing recognition.',
   },
   SESSION_OPENING: {
     eyebrow: 'HERE’S WHERE WE ARE',
     headline: 'Here’s where we left off',
-    mission: 'Show one important orientation for today. Use only what exists and matters from direction, a real earlier agreement, what happened, or what matters now. Do not recap the whole business. If there is no earlier agreement, omit it. If nothing meaningful changed, say that simply. Make accountability feel like continuity, not inspection.',
+    mission: 'Continue the real prior work. Select one relevant dated agreement, reported result, correction or unresolved issue, then invite an honest update or useful work today. Unknown outcomes stay unknown: elapsed absence establishes neither failure nor completion, and priorities may have changed. Current corrections take precedence. With no agreement, pick up the actual open question; do not replace it with a generic business plan. Keep the orientation compact and let an urgent present concern change the agenda.',
   },
   COACHING_MOMENT: {
     eyebrow: 'A CLEARER VIEW',
@@ -33,11 +34,13 @@ const EVENT_MISSION = Object.freeze({
   SESSION_CLOSING: {
     eyebrow: 'UNTIL NEXT TIME',
     headline: 'Here’s what we’re carrying forward',
-    mission: 'Turn the mutually aligned session learning into a concise closing receipt: what mattered, what changed or did not change, what was agreed, what remains open, and what should be picked up next. Never imply a map change unless the real delta is supplied. Never imply that ephemeral notes became canonical or Personal RSL truth.',
+    mission: 'Turn the session closing notes into a concise closing receipt: what mattered, what changed or did not change, what was agreed, what remains open, and what should be picked up next. Never imply a map change unless the real delta is supplied. Never imply that ephemeral notes became canonical or Personal RSL truth.',
   },
 });
 
 const SYSTEM = `You are MORE's governed visual compiler for the flagship private Subscription relationship.
+
+${SUBSCRIPTION_LOCKED_NORTH_STAR}
 
 The deterministic product has already chosen the mandatory GU event. Your job is to select the smallest useful composition from the supplied governed objects. The Free Frontier coach remains responsible for the middle conversation; do not create a workflow, coaching script, dashboard, or a new business interpretation.
 
@@ -69,9 +72,9 @@ function requestFor({ world, event, repair = null }) {
           interactions: [],
         },
         instruction: event === 'COACHING_MOMENT'
-          ? 'Choose whether a visual materially improves this moment. Usually it will not. If render is false, return zero blocks. If render is true, return one or two blocks. Each sentence should carry one clear idea. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
+          ? 'Choose whether a visual materially improves the exact current exchange. Usually it will not. Respect what the human asked for and what the coach just did; do not create a plan or comprehensive environment that contradicts that exchange. The current exchange is ephemeral context only and creates no fact, object, agreement, commitment, evidence, or authority. If render is false, return zero blocks. If render is true, return one or two blocks. Each sentence should carry one clear idea. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
           : event === 'FIRST_SESSION_WELCOME'
-            ? 'Set render to true. Select exactly one PLAIN_LANGUAGE block containing only the required first-session-welcome object. This is a quick welcome, not a Business Twin report, relationship summary, or onboarding form. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue to one short sentence each. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
+            ? 'Set render to true. Select exactly one PLAIN_LANGUAGE block containing only the required first-session-welcome object. Use its recognitionContext to write a brief grounded welcome in guidance.summary; the customer will see it. Make room for correction, then use guidance.nextCue for a purposeful invitation. Keep the complete opening brief; do not list the supplied context or start an intake. Copy the mandatory eyebrow and headline exactly. Do not expose internal architecture or source labels.'
           : event === 'SESSION_OPENING'
             ? 'Set render to true. Select exactly one block and no more than two closely related objects. Put the important point first. Omit empty prior agreements and empty progress. Do not show a metric inventory or full state report. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue short. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.'
             : 'Set render to true. Select one or two blocks. Use the required event object. Copy the mandatory eyebrow and headline exactly. Keep the summary and next cue short. Each sentence should carry one clear idea. Do not expose internal architecture, contracts, hashes, RSL, AFW, provenance, state binding, model, or provider mechanics.',
@@ -84,8 +87,8 @@ function requestFor({ world, event, repair = null }) {
 export function createSubscriptionS2GuRuntime({ apiKey, transport = null, maxAttempts = 2 } = {}) {
   const callFrontier = transport || createSubscriptionS2OpenAiTransport({ apiKey });
   return Object.freeze({
-    async generate({ event, packet, publication, viewModel, sessionLearning = null, mapDelta = null, relationshipScopeHash }) {
-      const world = buildSubscriptionS2GuWorld({ event, packet, publication, viewModel, sessionLearning, mapDelta, relationshipScopeHash });
+    async generate({ event, packet, publication, viewModel, sessionLearning = null, mapDelta = null, currentExchange = null, relationshipScopeHash }) {
+      const world = buildSubscriptionS2GuWorld({ event, packet, publication, viewModel, sessionLearning, mapDelta, currentExchange, relationshipScopeHash });
       const attempts = [];
       let repair = null;
       for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {

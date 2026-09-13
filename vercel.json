@@ -25,7 +25,8 @@
       "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
     },
     "api/internal/subscription-v1-runtime.js": {
-      "maxDuration": 800
+      "maxDuration": 800,
+      "includeFiles": "api/engine/subscriptionV1/sourceLibrary/**"
     },
     "api/internal/athlete-living-consult-one-shot-v1.js": {
       "maxDuration": 800,

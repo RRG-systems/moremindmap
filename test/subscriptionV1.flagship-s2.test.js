@@ -151,7 +151,10 @@ test('S2 mutual close preserves all bounded note fields through durable storage 
   for (const value of Object.values(notes)) assert.ok(value.length <= 1200);
   let lastConversationRequest;
   const transport = async (request, { stage }) => {
-    if (stage === 'SESSION_CLOSE') return { output: { customer_message: 'Jordan, that reflects our discussion. We can revisit the unresolved question.', session_learning: notes }, usage: {}, latency_ms: 1 };
+    if (stage === 'SESSION_CLOSE') {
+      const close = JSON.parse(request.input[1].content).mutual_close;
+      return { output: { customer_message: 'Jordan, that reflects our discussion. We can revisit the unresolved question.', session_learning: notes, close_intent: close.mode === 'REQUEST_ALIGNMENT' ? 'REVIEW' : 'FINISH', recap_confirmed: close.human_alignment_response === 'Yes, that is our shared understanding; no commitment was agreed.' }, usage: {}, latency_ms: 1 };
+    }
     if (stage === 'CONVERSATION') {
       lastConversationRequest = request;
       return { output: { customer_message: 'Jordan, we can explore this question without changing your plan.' }, usage: {}, latency_ms: 1, external_evidence: [] };
@@ -222,7 +225,7 @@ test('aligned close reaches the actual fresh START_SESSION opening GU with compl
       const input = JSON.parse(request.input[1].content);
       const finalizing = Boolean(input.mutual_close?.human_alignment_response);
       if (finalizing) finalCloseRequest = input;
-      return { output: { customer_message: 'Jordan, we can leave that as an open question.', session_learning: finalizing ? notes : draftNotes }, usage: {}, latency_ms: 1 };
+      return { output: { customer_message: 'Jordan, we can leave that as an open question.', session_learning: finalizing ? notes : draftNotes, close_intent: finalizing ? 'FINISH' : 'REVIEW' }, usage: {}, latency_ms: 1 };
     }
     if (stage === 'CANDIDATE_EXTRACTION') {
       const candidate = nextCandidate;
@@ -349,7 +352,7 @@ test('S2 GU keeps the exact frontier configuration, renders only supplied object
     return {
       output: {
         renderDecision: { render: true, reason: 'A small welcome view makes the start clear.' },
-        guidance: { eyebrow: 'ignored', headline: 'ignored', summary: 'Start with one clear goal and remember that the entire relationship can adapt as the coach learns what helps the customer think, decide, and act.', nextCue: 'What would make today useful, and what way of working together would help you think most clearly right now?' },
+        guidance: { eyebrow: 'ignored', headline: 'ignored', summary: 'Jordan, you want room to grow without every task coming back to you. We can work on that together; please correct anything I have misunderstood.', nextCue: 'Which part of the work is most important to make easier today?' },
         blocks: [{ blockId: 's2-block-welcome', type: 'PLAIN_LANGUAGE', title: 'Welcome to MORE', subtitle: 'You can change the pace at any time.', objectIds: ['s2-first-session-welcome'], evidenceIds: ['s2-source-coaching-session'], emphasis: 'PRIMARY', reason: 'This helps the first conversation feel clear.' }],
       },
       receipt: { provider: 'OpenAI Responses API', model: request.model, reasoning_effort: request.reasoning.effort, store: request.store, background: request.background, tools: 0, latency_ms: 1 },
@@ -372,12 +375,14 @@ test('S2 GU keeps the exact frontier configuration, renders only supplied object
   assert.equal(captured.text.format.schema.properties.blocks.maxItems, 2);
   assert.match(captured.input[0].content, /fifth grader/iu);
   assert.match(captured.input[0].content, /lead generation/iu);
-  assert.match(captured.input[1].content, /quick welcome, not a Business Twin report/iu);
+  assert.match(captured.input[1].content, /recognitionContext/iu);
+  assert.deepEqual(result.world.objects[0].recognitionContext.wholePerson, loaded.controller.wholeUnderstandingPacket().provider_understanding.whole_person);
+  assert.deepEqual(result.world.objects[0].recognitionContext.chosenDirection, loaded.controller.wholeUnderstandingPacket().provider_understanding.plan);
   assert.equal(result.plan.blocks[0].objects[0].id, 's2-first-session-welcome');
-  assert.equal(result.plan.blocks[0].objects[0].statement, 'Congratulations, Jordan. Your coaching relationship starts here.');
+  assert.equal(result.plan.blocks[0].objects[0].statement, 'Welcome, Jordan. We can turn what matters to you into useful action.');
   assert.deepEqual(result.plan.blocks[0].objects[0].items, []);
-  assert.ok(result.plan.guidance.summary.split(/\s+/u).length <= 18);
-  assert.ok(result.plan.guidance.nextCue.split(/\s+/u).length <= 18);
+  assert.equal(result.plan.guidance.summary, 'Jordan, you want room to grow without every task coming back to you. We can work on that together; please correct anything I have misunderstood.');
+  assert.equal(result.plan.guidance.nextCue, 'Which part of the work is most important to make easier today?');
   assert.equal(result.plan.blocks[0].subtitle, '');
   assert.deepEqual(result.world.objects.map((item) => item.id), ['s2-first-session-welcome']);
   const overfilledWelcome = structuredClone(result.plan);
@@ -577,27 +582,12 @@ test('rendered S2 change surface supports explicit start, mandatory GU, Syntheti
   assert.doesNotMatch(ui, /setTimeout\([^)]*30\s*\*\s*60/iu);
 });
 
-test('S2 GU projection translates complex business language before it reaches rendered customer cards', () => {
-  const translated = subscriptionS2CustomerText('The business does not yet have enough reconciled opportunity-and-capacity evidence to know whether doubling production requires more qualified flow, better conversion, stronger operating discipline, first leverage, or a combination.');
-  assert.equal(translated, 'We still need to learn whether growth requires more good leads, better conversion, stronger work routines, the right help, or a combination.');
-  assert.doesNotMatch(translated, /reconciled|capacity|qualified flow|operating discipline|first leverage|constraint|hypothesis|governed|epistemic/iu);
-
-  const plan = subscriptionS2CustomerText('Four-week opportunity-and-capacity baseline. For four weeks, reconcile opportunity stages and sources while tracking time by client-value work, opportunity-creation, transaction coordination, rework, and work that could have a different owner. The record identifies the dominant growth roadblock and defines a bounded assistant outcome—or proves that hiring is not yet the next move. Reconcile the current pipeline. Define qualified relationship and opportunity stages. Protect opportunity-creation time. Use four weeks of evidence to decide the leverage test.');
-  assert.match(plan, /four-week look at leads and time/iu);
-  assert.match(plan, /check which leads are real and where they came from/iu);
-  assert.match(plan, /work that directly helps clients/iu);
-  assert.match(plan, /sets a clear result for testing an assistant/iu);
-  assert.doesNotMatch(plan, /baseline|reconcile|client-value|opportunity-creation|transaction coordination|rework|dominant growth roadblock|bounded assistant outcome|leverage test/iu);
-
-  const openItems = subscriptionS2CustomerText('The customer ended this bounded session before a substantive coaching exchange. Open loops remain. Reconciled 90-day source-to-close conversion by stage. Open evidence gap. Current qualified-relationship count. Time study separating client-value work and rework. Gross commission, expense, and margin reconciliation sufficient for a hire decision.');
-  assert.match(openItems, /past 90 days of leads, appointments, and closings/iu);
-  assert.match(openItems, /number of real prospects/iu);
-  assert.match(openItems, /income, expenses, and profit/iu);
-  assert.doesNotMatch(openItems, /bounded|substantive coaching exchange|open loops|reconciled|source-to-close|evidence gap|qualified-relationship|time study|client-value|rework|margin reconciliation/iu);
-
-  const patricia = subscriptionS2CustomerText('Opportunity generation is judged insufficient and remains relationship-led. Goals progress from two monthly closings toward a delegated multi-agent business. A combined relationship base exists but lacks complete, segmented, system-governed records. External coaching covers development and recruiting, while operating accountability is mostly self-held or absent. Core workflows are articulated, but execution and follow-through remain leader-centered. Production, gross, and expense figures are reported, but their periods, reconciliation, and owner economics remain unresolved. Organization, time management, and distraction are the operator-identified constraints. Equal profit and business contribution coexist with a reported concentration of work on the operator. Additional help, delegation, and daily CRM use are identified as necessary capacity changes. Leader-centered execution without a governed relationship, delegation, measurement, and accountability system. Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion. Customer-reported snapshot. Supported hypothesis. Financial bridge. Unreconciled. Material open evidence. Research when purpose requires it.');
-  assert.match(patricia, /New business still comes mainly from relationships/iu);
-  assert.match(patricia, /Hand off one repeat task with clear ownership/iu);
-  assert.match(patricia, /What you told MORE/iu);
-  assert.doesNotMatch(patricia, /system-|operator-identified|leader-centered|decision rights|quality boundaries|exception rules|inspected completion|supported hypothesis|financial bridge|unreconciled|material open evidence/iu);
+test('S2 GU projection preserves complete customer prose rather than replacing vocabulary inside it', () => {
+  const examples = [
+    'The business does not yet have enough reconciled opportunity-and-capacity evidence to know whether doubling production requires more qualified flow, better conversion, stronger operating discipline, first leverage, or a combination.',
+    'Four-week opportunity-and-capacity baseline. For four weeks, reconcile opportunity stages and sources while tracking time by client-value work, opportunity-creation, transaction coordination, rework, and work that could have a different owner. The record identifies the dominant growth roadblock and defines a bounded assistant outcome—or proves that hiring is not yet the next move. Reconcile the current pipeline. Define qualified relationship and opportunity stages. Protect opportunity-creation time. Use four weeks of evidence to decide the leverage test.',
+    'The customer ended this bounded session before a substantive coaching exchange. Open loops remain. Reconciled 90-day source-to-close conversion by stage. Open evidence gap. Current qualified-relationship count. Time study separating client-value work and rework. Gross commission, expense, and margin reconciliation sufficient for a hire decision.',
+    'Opportunity generation is judged insufficient and remains relationship-led. Goals progress from two monthly closings toward a delegated multi-agent business. A combined relationship base exists but lacks complete, segmented, system-governed records. External coaching covers development and recruiting, while operating accountability is mostly self-held or absent. Core workflows are articulated, but execution and follow-through remain leader-centered. Production, gross, and expense figures are reported, but their periods, reconciliation, and owner economics remain unresolved. Organization, time management, and distraction are the operator-identified constraints. Equal profit and business contribution coexist with a reported concentration of work on the operator. Additional help, delegation, and daily CRM use are identified as necessary capacity changes. Leader-centered execution without a governed relationship, delegation, measurement, and accountability system. Transfer one recurring workflow with explicit decision rights, quality boundaries, exception rules, and inspected completion. Customer-reported snapshot. Supported hypothesis. Financial bridge. Unreconciled. Material open evidence. Research when purpose requires it.',
+  ];
+  for (const prose of examples) assert.equal(subscriptionS2CustomerText(prose), prose);
 });

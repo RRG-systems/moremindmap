@@ -38,6 +38,16 @@ class FakeRedis {
   constructor() { this.values = new Map(); this.sets = new Map(); }
   async get(key) { return this.values.get(key) || null; }
   async set(key, value) { this.values.set(key, value); return 'OK'; }
+  async setNx(key, value) {
+    if (this.values.has(key)) return false;
+    this.values.set(key, value);
+    return true;
+  }
+  async compareDel(key, expected) {
+    if (this.values.get(key) !== expected) return 0;
+    this.values.delete(key);
+    return 1;
+  }
   async sadd(key, value) { const set = this.sets.get(key) || new Set(); set.add(value); this.sets.set(key, set); return 1; }
   async smembers(key) { return [...(this.sets.get(key) || [])]; }
 }

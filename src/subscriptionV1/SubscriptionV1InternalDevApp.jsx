@@ -67,9 +67,12 @@ function AllowanceBoundary({ session }) {
   </aside>
 }
 
-function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost, onBusyChange }) {
+function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost, onBusyChange, ephemeralStorageEnabled = true }) {
   const initiallyPreSession = Boolean(bootstrap.session?.pre_session_state)
-  const [messages, setMessages] = useState(() => bootstrap.blind_demo ? (bootstrap.conversation || []) : initiallyPreSession ? [] : readEphemeralMessages(demoSubject))
+  const paidConversation = bootstrap.subscriber?.kind === 'PAID_SUBSCRIBER'
+  const [messages, setMessages] = useState(() => bootstrap.blind_demo || bootstrap.subscriber?.kind === 'PAID_SUBSCRIBER'
+    ? (bootstrap.conversation || [])
+    : initiallyPreSession || !ephemeralStorageEnabled ? [] : readEphemeralMessages(demoSubject))
   const [draft, setDraft] = useState('')
   const [pending, setPending] = useState(bootstrap.pending_proposal || null)
   const [busy, setBusy] = useState(false)
@@ -95,14 +98,14 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
     return () => globalThis.removeEventListener('ba-pd:destination', handler)
   }, [])
   useEffect(() => {
-    if (bootstrap.blind_demo) {
+    if (bootstrap.blind_demo || !ephemeralStorageEnabled) {
       endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
       return
     }
     if (preSession) sessionStorage.removeItem(messageStorageKey(demoSubject))
     else sessionStorage.setItem(messageStorageKey(demoSubject), JSON.stringify(messages.slice(-24)))
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [messages, pending, preSession, demoSubject, bootstrap.blind_demo])
+  }, [messages, pending, preSession, demoSubject, bootstrap.blind_demo, ephemeralStorageEnabled])
 
   function visibleCustomerContext() {
     const visibleBySurface = {
@@ -130,7 +133,11 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
     const response = await fetch('/api/internal/subscription-v1-runtime', {
       method: 'POST', credentials: 'same-origin', cache: 'no-store',
       headers: { 'content-type': 'application/json', accept: progressive ? 'application/x-ndjson' : 'application/json', 'x-subscription-runtime-csrf': requestCsrf },
-      body: JSON.stringify({ ...body, subject: demoSubject, ...(bootstrap.blind_demo ? { view_token: bootstrap.blind_demo.view_token } : {}) }),
+      body: JSON.stringify({
+        ...body,
+        ...(demoSubject ? { subject: demoSubject } : {}),
+        ...(bootstrap.blind_demo ? { view_token: bootstrap.blind_demo.view_token } : {}),
+      }),
     })
     if (response.headers.get('content-type')?.startsWith('application/x-ndjson')) {
       if (!response.ok || !response.body) throw new Error('SUBSCRIPTION_V1_PROGRESSIVE_RESPONSE_INVALID')
@@ -204,6 +211,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
           cumulative_active_seconds: episodeStartedAt.current ? Math.floor((Date.now() - episodeStartedAt.current) / 1000) : 0,
           conversation: [...history, { role: 'customer', content: message }],
           alignment_message: message,
+          close_request_id: globalThis.crypto.randomUUID(),
           prior_session_learning: sessionLearning,
           visible_customer_context: visibleCustomerContext(),
         })
@@ -211,8 +219,9 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
         if (result.gu_plan) setMessages((current) => [...current, { role: 'gu', plan: result.gu_plan }])
         setSessionLearning(result.session_learning || null)
         setUsage(result.usage || null)
-        setSession(result.next_pre_session || result.session); setPreSession(Boolean(result.next_pre_session)); setPending(null)
-        episodeStartedAt.current = null
+        setSession(result.next_pre_session || result.session); setPreSession(Boolean(result.next_pre_session))
+        setPending(result.confirmation_required ? result.pending_proposal : null)
+        if (result.next_pre_session) episodeStartedAt.current = null
         return
       }
       const result = await post(
@@ -237,9 +246,11 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       if (result.gu_error) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated, but the new visual could not be shown safely.' }])
     } catch (failure) {
       if (failure?.status === 401 && failure?.reentryRequired === true) return
-      setError(coachDelivered
-        ? 'You received the coaching response, but the follow-up check failed closed. Nothing was proposed or changed.'
-        : 'That turn could not be carried forward safely. Your Business Twin has not changed. Please try again.')
+      setError(paidConversation
+        ? 'We could not finish this turn safely. Reload to check your saved conversation and map before trying again.'
+        : coachDelivered
+          ? 'You received the coaching response, but the follow-up check failed closed. Nothing was proposed or changed.'
+          : 'That turn could not be carried forward safely. Your Business Twin has not changed. Please try again.')
     } finally { submitLockRef.current = false; setBusy(false); setPostResponseBusy(false) }
   }
 
@@ -260,10 +271,10 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       setMessages((current) => [...current, { role: 'system', content: result.mutation_performed ? 'Your Business Twin is updated. We’ll continue from this new view.' : decision === 'REJECT' ? 'Understood. That proposed change was not used.' : 'No change was made. We can return to it later.' }])
       if (result.gu_plan) setMessages((current) => [...current, { role: 'gu', plan: result.gu_plan }])
       if (result.gu_error) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated, but the new visual could not be shown safely.' }])
-    } catch { setError('That update could not be applied safely. Your prior Business Twin remains current.') } finally { setBusy(false) }
+    } catch { setError(paidConversation ? 'We could not confirm the saved result. Reload to check your map before trying the update again.' : 'That update could not be applied safely. Your prior Business Twin remains current.') } finally { setBusy(false) }
   }
 
-  async function endSession() {
+  async function endSession(closeDecision = null) {
     if (busy || endSessionLockRef.current) return
     endSessionLockRef.current = true
     setBusy(true); setError('')
@@ -271,6 +282,8 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       const conversation = messages.filter((item) => ['customer', 'coach'].includes(item.role)).slice(-24)
       const result = await post({
         action: 'END_SESSION',
+        ...(closeDecision ? { close_decision: closeDecision } : {}),
+        close_request_id: globalThis.crypto.randomUUID(),
         session_id: session.session_id,
         cumulative_active_seconds: episodeStartedAt.current ? Math.floor((Date.now() - episodeStartedAt.current) / 1000) : 0,
         conversation,
@@ -284,9 +297,9 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
         if (result.gu_plan) setMessages((current) => [...current, { role: 'gu', plan: result.gu_plan }])
         setSession(result.next_pre_session || result.session)
         setPreSession(Boolean(result.next_pre_session))
-        episodeStartedAt.current = null
+        if (result.next_pre_session) episodeStartedAt.current = null
       }
-    } catch { setError('The session could not be closed cleanly yet. Your governed state remains safe.') } finally { endSessionLockRef.current = false; setBusy(false) }
+    } catch { setError(paidConversation ? 'We could not confirm the session close. Reload to check the saved session before trying again.' : 'The session could not be closed cleanly yet. Your governed state remains safe.') } finally { endSessionLockRef.current = false; setBusy(false) }
   }
 
   async function startSession() {
@@ -300,7 +313,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       setSession(result.session); setPreSession(false)
       onCurrent({ view_model: result.view_model, publication: result.publication })
       episodeStartedAt.current = Date.now()
-    } catch { setError('The session did not start because the required opening view could not be established safely. Nothing was changed or consumed.') } finally { startSessionLockRef.current = false; setBusy(false) }
+    } catch { setError(paidConversation ? 'We could not confirm the session opening. Reload to check your session before trying again.' : 'The session did not start because the required opening view could not be established safely. Nothing was changed or consumed.') } finally { startSessionLockRef.current = false; setBusy(false) }
   }
 
   return <aside className="living-conversation internal-dev-conversation" aria-label="Talk with MORE" data-coaching-episode-phase={session.coaching_episode_phase || 'IDLE'} data-session-learning-status={sessionLearning?.status || 'NOT_READY'}>
@@ -325,11 +338,19 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       {postResponseBusy && <div className="living-thinking post-response"><i /><i /><i /><span>Checking whether anything you said is worth keeping…</span></div>}
       <div ref={endRef} />
     </div>
-    {!preSession && <form className="living-composer" onSubmit={send}><label htmlFor="subscription-living-message">{session.coaching_episode_phase === 'ENDING' ? 'Close together' : 'Talk naturally'}</label><textarea id="subscription-living-message" value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleComposerKeyDown} placeholder={session.coaching_episode_phase === 'ENDING' ? 'Say what helped, or tell MORE what it missed…' : 'Ask a question, share what changed, or say what is on your mind…'} rows="2" /><button type="submit" disabled={!draft.trim() || busy} aria-label="Send message">↑</button><div className="s2-composer-meta"><small>{usage ? `Enter to send · Shift+Enter for a new line${usage.web_search_calls ? ' · Current outside information was checked' : ''}` : 'Enter to send · Shift+Enter for a new line. Only changes you approve update your Business Twin.'}</small><button className="s2-end-session" type="button" disabled={busy || session.coaching_episode_phase === 'ENDING'} onClick={endSession}>{session.coaching_episode_phase === 'ENDING' ? 'Closing together…' : 'End this session'}</button></div></form>}
+    {!preSession && <form className="living-composer" onSubmit={send}><label htmlFor="subscription-living-message">{session.coaching_episode_phase === 'ENDING' ? 'Review our session' : 'Talk naturally'}</label><textarea id="subscription-living-message" value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={handleComposerKeyDown} placeholder={session.coaching_episode_phase === 'ENDING' ? 'Correct the recap, ask to continue, or say you are ready to finish…' : 'Ask a question, share what changed, or say what is on your mind…'} rows="2" /><button type="submit" disabled={!draft.trim() || busy} aria-label="Send message">↑</button><div className="s2-composer-meta"><small>{usage ? `Enter to send · Shift+Enter for a new line${usage.web_search_calls ? ' · Current outside information was checked' : ''}` : 'Enter to send · Shift+Enter for a new line. Only changes you approve update your Business Twin.'}</small>{session.coaching_episode_phase !== 'ENDING' && <button className="s2-end-session" type="button" disabled={busy} onClick={() => endSession()}>End this session</button>}</div>
+      <div className="s2-closing-actions" aria-label="Session choices">
+        {session.coaching_episode_phase === 'ENDING' && <>
+          <button type="button" disabled={busy} onClick={() => endSession('CONTINUE')}>Continue coaching</button>
+          <button type="button" disabled={busy || Boolean(draft.trim())} title={draft.trim() ? 'Send your recap changes before finishing.' : undefined} onClick={() => endSession('FINISH')}>Finish session</button>
+        </>}
+        <button type="button" disabled={busy} onClick={() => endSession('LEAVE')}>Leave with open items</button>
+      </div>
+    </form>}
   </aside>
 }
 
-export default function SubscriptionV1InternalDevApp() {
+export default function SubscriptionV1InternalDevApp({ allowModelSelection = true } = {}) {
   const [state, setState] = useState({ loading: true, error: null, bootstrap: null })
   const [current, setCurrent] = useState(null)
   const [resetVersion, setResetVersion] = useState(0)
@@ -354,7 +375,7 @@ export default function SubscriptionV1InternalDevApp() {
   }, [resetVersion])
   async function selectModel(selection) {
     const blind = state.bootstrap?.blind_demo
-    if (!blind || switching || coachingBusy || selection === blind.selection) return
+    if (!allowModelSelection || !blind || switching || coachingBusy || selection === blind.selection) return
     setSwitching(true)
     setSwitchError('')
     try {
@@ -395,14 +416,19 @@ export default function SubscriptionV1InternalDevApp() {
       setState((value) => ({ ...value, error: error?.message || 'SUBSCRIPTION_DEMO_RESET_UNAVAILABLE' }))
     } finally { setResetting(false) }
   }
-  if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying the synthetic entitlement and governed state.</p></main>
+  if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying your entitlement and governed state.</p></main>
+  if (/^(?:SUBSCRIPTION_V1_PAID_|ENTITLEMENT_)/u.test(String(state.error || ''))) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Subscription access required.</h1><p>Return to your Profile to verify ownership and active membership, then enter Subscription again.</p><Link to="/profile">Return to Profile</Link></main>
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
   const handleEntitlementLost = (code) => setState({ loading: false, error: code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
-  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">
-    <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>
+  const paidSubscriber = state.bootstrap?.subscriber?.kind === 'PAID_SUBSCRIBER'
+  const content = <>
+    {paidSubscriber && <p className="subscription-capability-note" role="note">Your coach can use MORE’s Real Estate library. Live web research is not available in this version.</p>}
+    {!paidSubscriber && <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{allowModelSelection && state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>}
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />
-      : <RemoteConversation key={`${DEMO_SUBJECT}:${state.bootstrap.blind_demo?.selection || 'ordinary'}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={DEMO_SUBJECT} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} onBusyChange={setCoachingBusy} />}
-  </main>
+      : <RemoteConversation key={`${paidSubscriber ? 'paid' : DEMO_SUBJECT}:${state.bootstrap.blind_demo?.selection || 'ordinary'}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={paidSubscriber ? null : DEMO_SUBJECT} ephemeralStorageEnabled={!paidSubscriber} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} onBusyChange={setCoachingBusy} />}
+  </>
+  if (paidSubscriber) return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="false" data-layer-max="2">{content}</main>
+  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">{content}</main>
 }

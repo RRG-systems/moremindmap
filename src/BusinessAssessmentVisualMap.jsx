@@ -13,7 +13,7 @@ import PrivateRuntimeAttachmentHost from './components/businessAssessment/Privat
 import { normalizeBusinessVisualArtifactData } from './lib/businessAssessment/normalizeBusinessVisualArtifactData.js';
 import { projectBusinessEngineVisualV2 } from './lib/businessEngine/projectBusinessEngineVisualV2.js';
 import { loadBusinessAssessmentVisualRecord } from './lab/loadBusinessAssessmentVisualRecord.js';
-import { startStripeCheckout } from './lib/stripeCheckout.js';
+import { createCheckoutIdempotencyKey, startStripeCheckout } from './lib/stripeCheckout.js';
 import {
   buildMonthlyIntelligenceCheckoutPayload,
   CTA_PAYMENT_SETUP_MESSAGE,
@@ -110,6 +110,10 @@ function ErrorState({ profileId, message, returnTo }) {
  * - MAKE YOUR MAP ALIVE renders as unscaledFooter so tablet/mobile reflow natively.
  */
 export default function BusinessAssessmentVisualMap() {
+  const checkoutIdempotencyKey = useMemo(
+    () => createCheckoutIdempotencyKey('subscription-map-checkout'),
+    [],
+  );
   const [searchParams] = useSearchParams();
   const profileId = searchParams.get('id') || '';
   const returnTo = resolveReturnTo(searchParams, profileId);
@@ -180,8 +184,8 @@ export default function BusinessAssessmentVisualMap() {
 
     setCheckoutState({ loading: resolved.payload.product_key, error: '' });
     try {
-      // Canonical Stripe ingress — existing create-checkout-session product key.
-      await startStripeCheckout(resolved.payload);
+      // Canonical governed purchase-intent ingress with a stable retry key.
+      await startStripeCheckout(resolved.payload, { idempotencyKey: checkoutIdempotencyKey });
     } catch {
       setCheckoutState({ loading: '', error: CTA_PAYMENT_SETUP_MESSAGE });
     }

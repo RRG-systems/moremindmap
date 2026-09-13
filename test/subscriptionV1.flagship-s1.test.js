@@ -249,7 +249,8 @@ test('S1 source keeps protected runtime fixed and enables progressive NDJSON wit
   assert.equal(FREE_GPT_V2_RUNTIME_POLICY.reasoning_effort, 'xhigh');
   assert.equal(FREE_GPT_V2_RUNTIME_POLICY.store, false);
   assert.equal(FREE_GPT_V2_RUNTIME_POLICY.universal_rsl_runtime_read, false);
-  assert.match(constants, /Use web research only when current external truth materially improves the answer/u);
+  assert.match(constants, /Use external research only when current outside truth helps/u);
+  assert.match(constants, /keeping its source distinct from customer evidence/u);
   assert.match(runtime, /application\/x-ndjson/u);
   assert.match(runtime, /COACHING_READY/u);
   assert.match(ui, /Checking whether anything you said is worth keeping/u);

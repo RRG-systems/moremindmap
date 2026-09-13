@@ -18,7 +18,11 @@ function safeError(error) {
     'complimentary_capability_expired', 'complimentary_capability_invalid', 'complimentary_product_not_available',
     'complimentary_flow_conflict', 'complimentary_flow_invalid', 'complimentary_flow_required',
     'grant_profile_binding_mismatch', 'grant_vertical_binding_required', 'idempotency_key_required',
+    'authenticated_membership_context_required', 'authenticated_profile_owner_required',
+    'business_assessment_profile_mismatch', 'business_assessment_vertical_authority_required',
+    'client_supplied_identity_override_denied', 'completed_bos_and_business_assessment_required',
     'inquiry_rejected', 'operation_in_progress', 'product_destination_gated', 'product_not_found',
+    'paid_entitlement_reconciliation_required',
     'rate_limited',
     'profile_id_required', 'profile_ownership_required', 'provider_payment_confirmation_required', 'purchase_intent_not_found',
     'subscription_checkout_gated', 'valid_email_required', 'valid_inquiry_fields_required',
@@ -31,6 +35,7 @@ function statusFor(code) {
   if (code === 'ownership_verification_failed') return 401;
   if (code === 'operation_in_progress') return 409;
   if (code.endsWith('_conflict')) return 409;
+  if (code === 'paid_entitlement_reconciliation_required') return 409;
   if (code === 'rate_limited') return 429;
   if (code.endsWith('_gated')) return 409;
   if (code.includes('unavailable')) return 503;
@@ -143,6 +148,10 @@ export function createPurchaseIntentHandler({ serviceFactory, checkoutProviderFa
     let runtime;
     try {
       const body = jsonBody(req);
+      if (body.product_key === 'more_monthly_intelligence'
+        && !runtimeFlags(env).subscription_checkout_enabled) {
+        return res.status(404).json({ ok: false, error: 'not_found' });
+      }
       runtime = await serviceFactory();
       await runtime.service.enforceRateLimit({ scope: 'purchase_intent', identity: requestFingerprint(req), limit: 10 });
       const intent = await runtime.service.createPurchaseIntent(

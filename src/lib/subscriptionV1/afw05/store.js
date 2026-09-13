@@ -139,15 +139,36 @@ export class InMemoryLivingRelationshipStore {
     });
   }
 
-  async saveProposal({ scope, proposal, saved_at, relationship_episode_events = [] }) {
+  async saveProposal({ scope, proposal, saved_at, relationship_episode_events = [], supersedes_pending_proposals = [] }) {
     return this._withTransaction(async (next) => {
       const validation = validateGovernedChangeProposal(proposal);
       if (!validation.valid || !sameScope(scope, proposal.scope) || !sameScope(next.scope, scope)) return { commit: false, response: { ok: false, code: 'AFW05_PROPOSAL_STORE_DENIED' } };
+      if (!Array.isArray(supersedes_pending_proposals)) return { commit: false, response: { ok: false, code: 'AFW05_PENDING_PROPOSAL_RECONCILIATION_STALE' } };
       if (!Array.isArray(relationship_episode_events)) return { commit: false, response: { ok: false, code: 'RELATIONSHIP_EPISODE_EVENT_INVALID' } };
       const existing = next.proposals[proposal.proposal_id];
       if (existing) return { commit: false, response: existing.proposal.proposal_hash === proposal.proposal_hash
         ? { ok: true, code: 'IDEMPOTENT_REPLAY', proposal: existing.proposal }
         : { ok: false, code: 'AFW05_PROPOSAL_ID_CONFLICT' } };
+      for (const expected of supersedes_pending_proposals) {
+        const previous = next.proposals[expected?.proposal_id];
+        if (!previous || previous.workflow_status !== 'AWAITING_CUSTOMER_DECISION'
+          || !sameScope(previous.proposal.scope, scope)
+          || previous.proposal.proposal_hash !== expected.proposal_hash
+          || previous.proposal.proposal_class !== 'DURABLE_MUTATION_PROPOSED'
+          || proposal.proposal_class !== 'DURABLE_MUTATION_PROPOSED'
+          || next.current_publication_hash !== proposal.expected_prior_publication_hash
+          || next.publications[next.current_publication_hash]?.publication_version !== proposal.expected_prior_publication_version
+          || previous.proposal.expected_prior_publication_hash !== proposal.expected_prior_publication_hash
+          || previous.proposal.expected_prior_publication_version !== proposal.expected_prior_publication_version) {
+          return { commit: false, response: { ok: false, code: 'AFW05_PENDING_PROPOSAL_RECONCILIATION_STALE' } };
+        }
+        // Workflow custody only: this is not a customer rejection, commitment or RSL mutation.
+        next.proposals[previous.proposal.proposal_id] = { ...previous,
+          workflow_status: 'SUPERSEDED_FOR_REVIEW',
+          superseded_by_proposal_id: proposal.proposal_id,
+          superseded_at: saved_at,
+        };
+      }
       next.proposals[proposal.proposal_id] = { proposal: clone(proposal), workflow_status: proposal.status, persisted_at: saved_at, decision_id: null, canonical_event_id: null };
       const episodeAppend = appendRelationshipEpisodeEventsToState({ state: next, scope, events: relationship_episode_events, appended_at: saved_at });
       if (!episodeAppend.ok) return { commit: false, response: episodeAppend };
@@ -179,6 +200,13 @@ export class InMemoryLivingRelationshipStore {
       if (existing) return { commit: false, response: existing.semantic_hash === semanticHash
         ? { ok: true, code: 'IDEMPOTENT_REPLAY', ...clone(existing.result) }
         : { ok: false, code: 'AFW05_IDEMPOTENCY_CONFLICT' } };
+      // An exact retry of an already applied decision is handled above. A new
+      // decision may never authorize an older draft after a later review replaced it.
+      const awaitingGovernedDecision = staged.workflow_status === 'AWAITING_CUSTOMER_DECISION'
+        || staged.workflow_status === 'AWAITING_JOINT_DECISION';
+      if (!awaitingGovernedDecision) {
+        return { commit: false, response: { ok: false, code: 'AFW05_PROPOSAL_REVIEW_REQUIRED', workflow_status: staged.workflow_status } };
+      }
       const prior = next.publications[next.current_publication_hash];
       if (!prior || prior.publication_version !== decision.expected_prior_publication_version
         || prior.publication_hash !== decision.expected_prior_publication_hash) {

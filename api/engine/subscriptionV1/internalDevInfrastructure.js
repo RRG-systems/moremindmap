@@ -118,8 +118,12 @@ export async function enforceEntryRateLimit({ redis, req }) {
   return { allowed: count <= 12, remaining: Math.max(0, 12 - count) };
 }
 
-export function exactJordanCode(value) {
-  const expected = Buffer.from('jordanTEST');
+export function exactJordanCode(value, env = globalThis.process?.env || {}) {
+  const configured = typeof env.SUBSCRIPTION_V1_INTERNAL_ACCESS_CODE === 'string'
+    ? env.SUBSCRIPTION_V1_INTERNAL_ACCESS_CODE.trim()
+    : '';
+  if (configured.length < 32) return false;
+  const expected = Buffer.from(configured);
   const supplied = Buffer.from(String(value || ''));
   return expected.length === supplied.length && crypto.timingSafeEqual(expected, supplied);
 }
@@ -360,7 +364,14 @@ export async function readS2FirstSessionRelationshipEvent({ redis, key, relation
   return { ok: true, code: 'SUBSCRIPTION_S2_FIRST_SESSION_ESTABLISHED', event };
 }
 
-export async function establishS2FirstSessionRelationshipEvent({ redis, key, relationshipScopeHash, sessionId, establishedAt }) {
+export async function establishS2FirstSessionRelationshipEvent({
+  redis,
+  key,
+  relationshipScopeHash,
+  sessionId,
+  establishedAt,
+  syntheticOnly = true,
+}) {
   if (!/^[a-f0-9]{64}$/u.test(relationshipScopeHash || '') || !/^session_[a-f0-9]{24}$/u.test(sessionId || '')) {
     return { ok: false, code: 'SUBSCRIPTION_S2_RELATIONSHIP_EVENT_BINDING_INVALID', event: null };
   }
@@ -370,7 +381,7 @@ export async function establishS2FirstSessionRelationshipEvent({ redis, key, rel
     session_id: sessionId,
     event_type: 'FIRST_SESSION_DELIBERATELY_STARTED',
     authority: 'EXACT_CUSTOMER_START_ACTION',
-    synthetic_only: true,
+    synthetic_only: syntheticOnly === true,
     canonical_mutation_performed: false,
     personal_rsl_mutation_performed: false,
     established_at: new Date(establishedAt).toISOString(),
@@ -475,6 +486,11 @@ export async function appendDiagnostics({ redis, key, receipts = [], event }) {
     latency_ms: receipt.latency_ms,
     attempt_count: receipt.attempt_count,
     estimated_token_cost_microusd: receipt.estimated_token_cost_microusd,
+    // Pinned reference custody only; no raw prompt, search text, excerpt or
+    // reasoning payload. Paid diagnostics remain private to the server.
+    ...(receipt.governed_reference_material ? {
+      governed_reference_material: clone(receipt.governed_reference_material),
+    } : {}),
     created_at: receipt.created_at,
     raw_payload_persisted: false,
   }));

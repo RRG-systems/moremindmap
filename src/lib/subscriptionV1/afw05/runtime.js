@@ -137,6 +137,7 @@ export function createLivingBusinessRelationshipRuntime({
           decision: created.decision,
           evidence_catalog,
           active_personal_rsl_events: replay.state.active_events,
+        historical_personal_rsl_events: rslStore.read({ scope }).records.map(record => record.event),
           event_id: `rsl_${hashCanonicalJson({ proposal_id, decision_hash: created.decision.decision_hash }).slice(0, 24)}`,
           recorded_at: decidedAt,
         });

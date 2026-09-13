@@ -10,6 +10,28 @@ export function parseBoolean(value) {
   return String(value || '').trim().toLowerCase() === 'true';
 }
 
+function nonproductionNamespace(value, domain) {
+  const namespace = String(value || '').trim();
+  return namespace.startsWith(`preview:${domain}:`) || namespace.startsWith(`nonprod:${domain}:`);
+}
+
+export function publicSubscriptionAccessConfigured(env = process.env) {
+  return parseBoolean(env.PUBLIC_SUBSCRIPTION_RUNTIME_ENABLED)
+    && parseBoolean(env.PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED)
+    && String(env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY || '').length >= 32
+    && String(env.PUBLIC_SUBSCRIPTION_DESTINATION || '').trim() === '/subscription'
+    && Boolean(String(env.REDIS_URL || '').trim());
+}
+
+function publicSubscriptionSaleInfrastructureConfigured(env) {
+  return publicSubscriptionAccessConfigured(env)
+    && /^whsec_[A-Za-z0-9_=-]{16,512}$/u.test(String(env.STRIPE_WEBHOOK_SECRET || '').trim())
+    && profileOwnershipConfigured(env)
+    && nonproductionNamespace(env.NEW_BA_DERIVED_NAMESPACE, 'new-ba')
+    && nonproductionNamespace(env.NEW_BA_BOS_NAMESPACE, 'new-bos')
+    && String(env.NEW_BA_PROVIDER_MODEL || '').trim() === 'gpt-5.6-sol';
+}
+
 export function runtimeFlags(env = process.env) {
   const productStartEnforcement = parseBoolean(env.PUBLIC_PRODUCT_START_ENFORCEMENT_ENABLED);
   const checkoutRequested = parseBoolean(env.PUBLIC_CHECKOUT_ENABLED);
@@ -22,6 +44,8 @@ export function runtimeFlags(env = process.env) {
   const stripeReady = stripeModeMatches
     && /^price_[A-Za-z0-9_]{4,180}$/u.test(String(env.STRIPE_PRICE_BEHAVIOR_OS || '').trim())
     && /^price_[A-Za-z0-9_]{4,180}$/u.test(String(env.STRIPE_PRICE_BUSINESS_ASSESSMENT || '').trim());
+  const monthlyStripeReady = stripeModeMatches
+    && /^price_[A-Za-z0-9_]{4,180}$/u.test(String(env.STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE || '').trim());
   const startReady = String(env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY || '').length >= 32;
   const inquiryReady = publicInquiryTransportConfigured(env)
     && String(env.MOREMINDMAP_SERVER_ONLY_INQUIRY_OUTBOX_DRAIN_SECRET || '').length >= 32;
@@ -39,8 +63,8 @@ export function runtimeFlags(env = process.env) {
       && checkoutRequested
       && productStartEnforcement
       && startReady
-      && stripeReady
-      && Boolean(String(env.PUBLIC_SUBSCRIPTION_DESTINATION || '').trim()),
+      && monthlyStripeReady
+      && publicSubscriptionSaleInfrastructureConfigured(env),
     legacy_checkout_enabled: parseBoolean(env.PUBLIC_LEGACY_STRIPE_CHECKOUT_ENABLED),
   });
 }

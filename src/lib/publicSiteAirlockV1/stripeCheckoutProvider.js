@@ -5,6 +5,7 @@ import { resolvePublicSiteOrigin } from './publicSiteOrigin.js';
 const PRICE_ENV = Object.freeze({
   behavior_operating_system: 'STRIPE_PRICE_BEHAVIOR_OS',
   business_assessment: 'STRIPE_PRICE_BUSINESS_ASSESSMENT',
+  more_monthly_intelligence: 'STRIPE_PRICE_MORE_MONTHLY_INTELLIGENCE',
 });
 
 const SECRET_PREFIXES = Object.freeze({
@@ -48,6 +49,32 @@ function requireExpectedIntent(intent) {
     throw new Error('stripe_intent_contract_invalid');
   }
   return { amount, currency, cadence, checkoutMode: expectedCheckoutMode(intent) };
+}
+
+function requireMonthlyMembershipMetadata(intent) {
+  if (intent?.cadence !== 'monthly') return null;
+  const binding = intent?.membership_binding;
+  const metadata = {
+    subject_id: String(binding?.subject_id || '').trim(),
+    membership_id: String(binding?.membership_id || '').trim(),
+    tenant_id: String(binding?.tenant_id || '').trim(),
+    profile_id: String(binding?.profile_id || '').trim(),
+    business_id: String(binding?.business_id || '').trim(),
+    assessment_id: String(binding?.assessment_id || '').trim(),
+    binding_source: String(binding?.binding_source || '').trim(),
+    membership_verified: binding?.membership_verified === true ? 'true' : 'false',
+  };
+  if (!metadata.subject_id
+    || !metadata.membership_id
+    || !metadata.tenant_id
+    || !metadata.profile_id
+    || !metadata.business_id
+    || !metadata.assessment_id
+    || metadata.binding_source !== 'AUTHENTICATED_SERVER_CONTEXT'
+    || metadata.membership_verified !== 'true') {
+    throw new Error('stripe_monthly_membership_binding_required');
+  }
+  return metadata;
 }
 
 export function assertStripePriceBinding(price, { priceId, mode, intent }) {
@@ -106,23 +133,27 @@ export function createStripeCheckoutProvider(env = process.env, options = {}) {
   return {
     async create({ intent }) {
       const expected = requireExpectedIntent(intent);
+      const monthlyMembership = requireMonthlyMembershipMetadata(intent);
       const price = requirePriceId(env[PRICE_ENV[intent.product_key]]);
       const site = resolvePublicSiteOrigin(env);
       const priceObject = await stripe.prices.retrieve(price);
       assertStripePriceBinding(priceObject, { priceId: price, mode, intent });
+      const metadata = {
+        product_key: intent.product_key,
+        access_type: intent.access_type,
+        purchase_intent_id: intent.intent_id,
+        profile_id: monthlyMembership?.profile_id || intent.profile_id || '',
+        vertical_binding_sha256: intent.vertical_binding?.binding_sha256 || '',
+        internal_version: 'mmm-public-product-v1',
+        ...(monthlyMembership || {}),
+      };
       const session = await stripe.checkout.sessions.create({
         mode: expected.checkoutMode,
         line_items: [{ price, quantity: 1 }],
         ...(intent.email ? { customer_email: intent.email } : {}),
-        client_reference_id: intent.profile_id || intent.intent_id,
-        metadata: {
-          product_key: intent.product_key,
-          access_type: intent.access_type,
-          purchase_intent_id: intent.intent_id,
-          profile_id: intent.profile_id || '',
-          vertical_binding_sha256: intent.vertical_binding?.binding_sha256 || '',
-          internal_version: 'mmm-public-product-v1',
-        },
+        client_reference_id: monthlyMembership?.membership_id || intent.profile_id || intent.intent_id,
+        metadata,
+        ...(monthlyMembership ? { subscription_data: { metadata } } : {}),
         success_url: `${site}/payment-success?product=${encodeURIComponent(intent.product_key)}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${site}/payment-cancelled?product=${encodeURIComponent(intent.product_key)}`,
       }, { idempotencyKey: intent.intent_id });

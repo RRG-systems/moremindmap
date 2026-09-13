@@ -4,7 +4,7 @@ import WebProfileReport from "./components/reports/WebProfileReport.jsx";
 import Page0A_OrganizationalContext from "./components/Page0A_OrganizationalContext.jsx";
 import Page0B_ContextualSignals from "./components/Page0B_ContextualSignals.jsx";
 import MOREMINDMAP_QUESTIONS from "./lib/assessments/moremindmap-questions";
-import { startStripeCheckout } from "./lib/stripeCheckout.js";
+import { createCheckoutIdempotencyKey, startStripeCheckout } from "./lib/stripeCheckout.js";
 import UniversalTranslatorDrawer from "./components/universalTranslator/UniversalTranslatorDrawer.jsx";
 import {
   ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE,
@@ -321,6 +321,10 @@ function buildApiUrl(baseUrl, endpoint) {
 }
 
 export default function Profile() {
+  const checkoutIdempotencyKey = useMemo(
+    () => createCheckoutIdempotencyKey('bos-checkout'),
+    [],
+  )
   const ownerRouteProfileId = typeof window !== 'undefined'
     ? new URLSearchParams(window.location.search).get('id') || ''
     : ''
@@ -708,7 +712,7 @@ export default function Profile() {
         product_key: "behavior_operating_system",
         email: email.trim(),
         source_context: "behavior_operating_system_profile"
-      })
+      }, { idempotencyKey: checkoutIdempotencyKey })
     } catch {
       setCheckoutError("Payment setup is not available yet. Please try again shortly.")
       setCheckoutLoading(false)

@@ -10,12 +10,18 @@ import {
   publicInquiryTransportConfigured,
 } from './resendInquiryTransport.js';
 import { resolvePublicSiteOrigin } from './publicSiteOrigin.js';
+import { publicSubscriptionAccessConfigured, runtimeFlags } from './security.js';
+import { createPaidMembershipBinder } from '../../../api/stripe/paidMembership.js';
+import { createCurrentNewBaMembershipReadinessReader } from '../../../api/stripe/paidMembershipReadiness.js';
+import { resolvePaidEntitlementFromStore } from '../../../api/engine/subscriptionV1/paidRuntimeInfrastructure.js';
 
 export function createPublicRuntime(env = process.env, options = {}) {
   const store = options.store || createRedisPublicStore(env);
+  const ownerReader = options.ownerReader || createCanonicalProfileOwnerReader(store);
+  const profileStateReader = options.profileStateReader || createProfileStateReader(store);
   const ownership = options.ownership || createProfileOwnershipAdapter({
     store,
-    ownerReader: options.ownerReader || createCanonicalProfileOwnerReader(store),
+    ownerReader,
     transport: options.ownershipTransport || createResendOwnershipTransport({ env }),
     signingKey: env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_SIGNING_KEY,
     audience: options.ownershipAudience || resolveProfileOwnershipAudience(env),
@@ -27,14 +33,36 @@ export function createPublicRuntime(env = process.env, options = {}) {
   });
   const inquiryTransport = options.inquiryTransport
     || (publicInquiryTransportConfigured(env) ? createResendInquiryTransportFromEnv(env) : null);
+  const flags = runtimeFlags(env);
+  const ownershipVerifier = options.ownershipVerifier || ((input) => ownership.verifyRequest(input));
+  const currentNewBaReadinessReader = options.currentNewBaReadinessReader
+    || (flags.subscription_checkout_enabled ? createCurrentNewBaMembershipReadinessReader({
+      store,
+      namespace: env.NEW_BA_DERIVED_NAMESPACE,
+    }) : null);
+  const monthlyMembershipBinder = options.monthlyMembershipBinder
+    || (flags.subscription_checkout_enabled ? createPaidMembershipBinder({
+      store,
+      ownerReader,
+      profileStateReader,
+      ownershipVerifier,
+      currentNewBaReadinessReader,
+      clock: options.clock,
+    }) : null);
   const service = createPublicSiteService({
     store,
     startSigningKey: env.MOREMINDMAP_SERVER_ONLY_PRODUCT_START_SIGNING_KEY,
     complimentaryPepper: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_PEPPER,
     complimentaryManifest: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '[]',
     complimentaryFlowAudience: options.complimentaryFlowAudience || resolvePublicSiteOrigin(env),
-    profileStateReader: options.profileStateReader || createProfileStateReader(store),
-    ownershipVerifier: options.ownershipVerifier || ((input) => ownership.verifyRequest(input)),
+    profileStateReader,
+    ownershipVerifier,
+    monthlyMembershipBinder,
+    monthlyCheckoutEnabled: flags.subscription_checkout_enabled,
+    monthlyEntitlementResolver: options.monthlyEntitlementResolver || resolvePaidEntitlementFromStore,
+    subscriptionDestination: publicSubscriptionAccessConfigured(env)
+      ? env.PUBLIC_SUBSCRIPTION_DESTINATION
+      : null,
     inquiryTransport,
   });
   return { store, service, ownership };

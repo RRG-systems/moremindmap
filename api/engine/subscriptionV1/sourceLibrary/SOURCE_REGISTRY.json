@@ -1,0 +1,1864 @@
+{
+  "contract": "MORE_SUBSCRIPTION_SOURCE_REGISTRY_V1",
+  "version": "1.0.0",
+  "documents": [
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-01",
+      "title": "Residential Real Estate Business Model & Transaction Economics",
+      "version": "1.0.0",
+      "sha256": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d",
+      "relativePath": "real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-01 — Residential Real Estate Business Model & Transaction Economics",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 21
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 28
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 43
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 50
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 60
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 67
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 75
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 82
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 87
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 93
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 97
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 101
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 112
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 116
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 120
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 132
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 140
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 151
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 157
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 163
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-02",
+      "title": "Relationship / MET / Database Asset Intelligence",
+      "version": "1.0.0",
+      "sha256": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec",
+      "relativePath": "real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-02 — Relationship / MET / Database Asset Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 22
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 29
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 43
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 50
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 61
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 69
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 78
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 85
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 90
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 96
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 100
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 104
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 114
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 122
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 134
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 142
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 152
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 158
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 164
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-03",
+      "title": "Short-Term Mindshare & Relationship Qualification",
+      "version": "1.0.0",
+      "sha256": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96",
+      "relativePath": "real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-03 — Short-Term Mindshare & Relationship Qualification",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 22
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 29
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 43
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 50
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 61
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 69
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 77
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 84
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 89
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 95
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 99
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 103
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 113
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 117
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 121
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 133
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 141
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 151
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 157
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 163
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-04",
+      "title": "Long-Term Relationship, Repeat & Referral System",
+      "version": "1.0.0",
+      "sha256": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed",
+      "relativePath": "real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-04 — Long-Term Relationship, Repeat & Referral System",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 23
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 30
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 44
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 51
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 62
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 70
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 78
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 85
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 90
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 96
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 100
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 104
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 114
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 122
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 134
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 142
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 152
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 158
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 164
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-05",
+      "title": "Real Estate Demand Generation Portfolio & Agent-Channel Fit",
+      "version": "1.0.0",
+      "sha256": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157",
+      "relativePath": "real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-05 — Real Estate Demand Generation Portfolio & Agent-Channel Fit",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 45
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 62
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 70
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 78
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 85
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 90
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 96
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 100
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 104
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 115
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 119
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 123
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 135
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 143
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 153
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 159
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 165
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-06",
+      "title": "Lead Conversion, Follow-Up & Pipeline Intelligence",
+      "version": "1.0.0",
+      "sha256": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f",
+      "relativePath": "real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-06 — Lead Conversion, Follow-Up & Pipeline Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 21
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 28
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 43
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 51
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 62
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 70
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 78
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 85
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 90
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 96
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 100
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 104
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 114
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 122
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 134
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 142
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 153
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 159
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 165
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-07",
+      "title": "Geographic Farming Intelligence",
+      "version": "1.0.0",
+      "sha256": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb",
+      "relativePath": "real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-07 — Geographic Farming Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 45
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 64
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 72
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 80
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 87
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 92
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 98
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 102
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 106
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 116
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 120
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 124
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 136
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 144
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 155
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 161
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 167
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-08",
+      "title": "Open House Opportunity Intelligence",
+      "version": "1.0.0",
+      "sha256": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03",
+      "relativePath": "real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-08 — Open House Opportunity Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 45
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 64
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 72
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 79
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 86
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 91
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 97
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 101
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 105
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 115
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 119
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 123
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 135
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 143
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 153
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 159
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 165
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-09",
+      "title": "Listing Business Intelligence",
+      "version": "1.0.0",
+      "sha256": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359",
+      "relativePath": "real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-09 — Listing Business Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 25
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 32
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 47
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 55
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 67
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 76
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 85
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 92
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 97
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 103
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 107
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 111
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 121
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 125
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 129
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 141
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 149
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 160
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 166
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 172
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-10",
+      "title": "Buyer Representation & Service Intelligence",
+      "version": "1.0.0",
+      "sha256": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b",
+      "relativePath": "real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-10 — Buyer Representation & Service Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 45
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 64
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 72
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 80
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 87
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 92
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 98
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 102
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 106
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 116
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 120
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 124
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 136
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 144
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 155
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 161
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 167
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-11",
+      "title": "Residential Transaction & Client Delivery Intelligence",
+      "version": "1.0.0",
+      "sha256": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437",
+      "relativePath": "real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-11 — Residential Transaction & Client Delivery Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 23
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 30
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 45
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 64
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 72
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 80
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 87
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 92
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 98
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 102
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 106
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 116
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 120
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 124
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 136
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 144
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 155
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 161
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 167
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-12",
+      "title": "Agent Operating Rhythm & E-to-P Intelligence",
+      "version": "1.0.0",
+      "sha256": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d",
+      "relativePath": "real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-12 — Agent Operating Rhythm & E-to-P Intelligence",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 46
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 54
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 66
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 74
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 82
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 89
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 94
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 100
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 104
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 108
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 122
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 126
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 138
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 146
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 157
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 163
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 169
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-13",
+      "title": "Agent Stage, Growth & Leverage Readiness",
+      "version": "1.0.0",
+      "sha256": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c",
+      "relativePath": "real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-13 — Agent Stage, Growth & Leverage Readiness",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 23
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 30
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 43
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 51
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 63
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 71
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 79
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 86
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 91
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 97
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 101
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 105
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 114
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 122
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 134
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 142
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 153
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 159
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 165
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-14",
+      "title": "Team Economics, Organization & Productivity",
+      "version": "1.0.0",
+      "sha256": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b",
+      "relativePath": "real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-14 — Team Economics, Organization & Productivity",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 46
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 54
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 66
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 74
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 82
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 89
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 94
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 100
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 104
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 108
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 118
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 122
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 126
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 138
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 146
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 157
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 163
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 169
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-15",
+      "title": "Recruiting, Onboarding & Agent Development",
+      "version": "1.0.0",
+      "sha256": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182",
+      "relativePath": "real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-15 — Recruiting, Onboarding & Agent Development",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 24
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 31
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 46
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 54
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 68
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 77
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 85
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 93
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 98
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 104
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 108
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 112
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 122
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 126
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 130
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 142
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 150
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 162
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 168
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 174
+        }
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.real-estate",
+      "documentId": "RE-16",
+      "title": "Financial, Profitability & Commission-to-Wealth Transition",
+      "version": "1.0.0",
+      "sha256": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a",
+      "relativePath": "real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_BA_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen Canon V1 library bytes match the exact current Production source commit recorded by the freshly fetched Ship's Log. This is source-custody proof, not a fresh live runtime-retrieval or deployment probe.",
+        "This document is domain reference, not customer evidence, a personality diagnosis, an authorized plan change, or a mandatory dialogue sequence.",
+        "Named source/framework references do not establish third-party license rights or permission to copy external reading material."
+      ],
+      "sourcePath": "/Users/rrg/.openclaw/workspace/moremindmap-home-base-v2/docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "recordedProductionCommit": "8afa8d4a6c8bf222c8fc41c566a1492f4b1207d6",
+      "sections": [
+        {
+          "heading": "# RE-16 — Financial, Profitability & Commission-to-Wealth Transition",
+          "startLine": 1
+        },
+        {
+          "heading": "## 1. Mission",
+          "startLine": 9
+        },
+        {
+          "heading": "## 2. Scope",
+          "startLine": 13
+        },
+        {
+          "heading": "## 3. Non-Scope",
+          "startLine": 23
+        },
+        {
+          "heading": "## 4. Core Primitives",
+          "startLine": 30
+        },
+        {
+          "heading": "## 5. Causal Mechanisms",
+          "startLine": 44
+        },
+        {
+          "heading": "## 6. Evidence Inputs",
+          "startLine": 52
+        },
+        {
+          "heading": "## 7. Diagnostic Questions",
+          "startLine": 64
+        },
+        {
+          "heading": "## 8. Strong Patterns",
+          "startLine": 72
+        },
+        {
+          "heading": "## 9. Failure Modes",
+          "startLine": 81
+        },
+        {
+          "heading": "## 10. Counterexamples and Confounds",
+          "startLine": 88
+        },
+        {
+          "heading": "## 11. Cross-Authority Interactions",
+          "startLine": 93
+        },
+        {
+          "heading": "## 12. Business-Model Differences",
+          "startLine": 99
+        },
+        {
+          "heading": "## 13. Vertical Boundary",
+          "startLine": 103
+        },
+        {
+          "heading": "## 14. Dynamic External-Research Triggers",
+          "startLine": 107
+        },
+        {
+          "heading": "## 15. Whole-Person Interaction Boundary",
+          "startLine": 117
+        },
+        {
+          "heading": "## 16. Team and Organization Boundary",
+          "startLine": 121
+        },
+        {
+          "heading": "## 17. Evidence, Confidence and Uncertainty",
+          "startLine": 125
+        },
+        {
+          "heading": "## 18. Falsifiers",
+          "startLine": 137
+        },
+        {
+          "heading": "## 19. Intervention Relevance",
+          "startLine": 145
+        },
+        {
+          "heading": "## 20. Five Futures State-Contribution Contract",
+          "startLine": 156
+        },
+        {
+          "heading": "## 21. Source Foundation and Provenance",
+          "startLine": 162
+        },
+        {
+          "heading": "## 22. Open Questions and Known Gaps",
+          "startLine": 168
+        }
+      ]
+    },
+    {
+      "namespace": "more.dj-field-doctrine.real-estate",
+      "documentId": "DJ-MARKET-DOMINATION-COMPATIBLE",
+      "title": "D.J. Real Estate Field Doctrine — compatible analysis and income worksheet excerpt",
+      "version": "2026-09-11-compatible-excerpt-v1",
+      "sha256": "55b6caeaca491a7de1af8c4ccf7d2b224715266f11a60be2931247b01616735e",
+      "relativePath": "DJ_REAL_ESTATE_FIELD_DOCTRINE_COMPATIBLE_EXCERPT.md",
+      "sourceUrl": "https://app.notion.com/p/3d8c0cd728dc81c09b38e5572bf0d766?pvs=204",
+      "authorityClass": "SUBORDINATE_FOUNDER_FIELD_REFERENCE",
+      "authorityNotes": [
+        "Verbatim partial extract only: authority treatment, compatible integration analysis and income worksheet transcription; not the full historical course.",
+        "Subordinate to current canonical Real Estate authority, Coaching Intelligence Doctrine and governed customer evidence. Its high-authority wording is a proposed practical classification, not an override.",
+        "Lenses may inform natural reasoning; no fixed choreography, benchmarks as customer facts, income guarantees, historical DISC import or automatic Personal RSL authority.",
+        "Excluded: complete historical course, producer-income examples, third-party readings and the 3M values example. This registration grants no third-party license.",
+        "Notion native verification is unverified; source freshness is content and edit-time parity, not scientific validation."
+      ],
+      "sourcePageId": "3d8c0cd7-28dc-81c0-9b38-e5572bf0d766",
+      "sourcePageLastEditedAt": "2026-09-11T03:59:30.615Z",
+      "sourceFullCaptureSha256": "3364546555f91b48e1d1b5538c0c2cd06aa0b790d2f1b3b3daaaaa5be120474f",
+      "sourceSelectedLineRange": {
+        "start": 15,
+        "end": 207
+      },
+      "sections": [
+        {
+          "heading": "## AUTHORITY STATUS",
+          "startLine": 1
+        },
+        {
+          "heading": "## FUTURE SPOCK VERDICT",
+          "startLine": 18
+        },
+        {
+          "heading": "## THE CORE REASONING CHAIN TO ADD / STRENGTHEN",
+          "startLine": 32
+        },
+        {
+          "heading": "## WHERE THIS SHOULD LIVE INSIDE MORE",
+          "startLine": 48
+        },
+        {
+          "heading": "### 1. Real Estate Business Model / Vertical Authority — HIGH PRIORITY EXTRACTION",
+          "startLine": 49
+        },
+        {
+          "heading": "### 2. Subscription / Coaching Intelligence — HIGH PRIORITY LENS LIBRARY",
+          "startLine": 63
+        },
+        {
+          "heading": "### 3. Business Assessment / Adaptive Discovery — VERY HIGH VALUE",
+          "startLine": 78
+        },
+        {
+          "heading": "### 4. BOS / Whole-Person Authority — PRINCIPLE ONLY, NOT DISC IMPORT",
+          "startLine": 99
+        },
+        {
+          "heading": "### 5. Business Twin / 1–3–5 / Plan",
+          "startLine": 104
+        },
+        {
+          "heading": "### 6. Five Futures / One Move",
+          "startLine": 116
+        },
+        {
+          "heading": "## WHAT SHOULD NOT BECOME CANONICAL WITHOUT FURTHER EVIDENCE",
+          "startLine": 125
+        },
+        {
+          "heading": "## RETRIEVAL / MODEL-USAGE GUIDANCE",
+          "startLine": 139
+        },
+        {
+          "heading": "## SOURCE IMAGE TRANSCRIPTIONS",
+          "startLine": 170
+        },
+        {
+          "heading": "### Source image — Income Goal Sheet",
+          "startLine": 171
+        }
+      ]
+    }
+  ]
+}

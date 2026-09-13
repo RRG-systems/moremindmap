@@ -82,7 +82,7 @@ export async function handleBlindDemo({ req, res, redis, auth, env,
     const provider = () => providers || (providers = providerFactory({ scope, env }));
     const messages = history.messages.filter((m) => m.session_id === req.body?.session_id && ['customer', 'coach'].includes(m.role)).slice(-24).map(({ role, content }) => ({ role, content }));
     // Browser history and close-draft fields are never authoritative in either arm.
-    const body = { ...req.body, conversation: messages, prior_session_learning: history.session_learning };
+    const body = { ...req.body, conversation: messages, prior_session_learning: history.session_id === req.body?.session_id ? history.session_learning : null };
     if (body.action === 'END_SESSION' && body.alignment_message) body.conversation = [...messages, { role: 'customer', content: String(body.alignment_message).slice(0, 5000) }].slice(-24);
     const forwarded = { ...req, body, query: {}, headers: { ...req.headers } };
     const inner = runtimeFactory({ getRedis: () => redis, authenticate: async () => scopedAuth, env: {},
@@ -104,7 +104,11 @@ export async function handleBlindDemo({ req, res, redis, auth, env,
       if (clean.ok && req.method === 'GET') {
         clean.blind_demo = { label: `MODEL ${selection.selection}`, selection: selection.selection, view_token: selection.revision };
         clean.conversation = history.messages.filter((m) => m.session_id === clean.session?.session_id).map((message) => message.role === 'gu' ? { role: 'gu', plan: message.plan } : { role: message.role, content: message.content });
-        clean.session_learning = history.session_learning;
+        const sameSession = history.session_id === clean.session?.session_id;
+        clean.session_learning = sameSession ? history.session_learning : null;
+        if (sameSession && history.coaching_episode_phase === 'ENDING' && history.session_learning?.status === 'DRAFT_AWAITING_ALIGNMENT') {
+          clean.session.coaching_episode_phase = 'ENDING';
+        }
         // Reset is not retained for this blind experiment. No shared reset can
         // erase another arm's evolution; the existing direct demo is unchanged.
         clean.demo_reset_enabled = false;
@@ -130,12 +134,19 @@ export async function handleBlindDemo({ req, res, redis, auth, env,
     const useful = events.find((e) => e.phase === 'COACHING_READY') || events.find((e) => e.ok && e.customer_message);
     if (req.method === 'POST' && (final?.ok || useful)) {
       const sessionId = final?.session?.session_id || body.session_id;
-      if (body.action === 'START_SESSION' || body.action === 'START_MY_FIRST_SESSION') history.session_id = sessionId;
+      if (body.action === 'START_SESSION' || body.action === 'START_MY_FIRST_SESSION') {
+        history.session_id = sessionId;
+        history.session_learning = null;
+      }
       const customer = body.action === 'TURN' ? body.message : body.alignment_message;
-      if (customer) history.messages.push({ role: 'customer', content: String(customer).slice(0, 5000), session_id: sessionId });
+      const requestId = typeof body.close_request_id === 'string' && /^[a-zA-Z0-9-]{1,80}$/u.test(body.close_request_id) ? body.close_request_id : null;
+      const alreadyRecorded = requestId && history.messages.some((message) => message.request_id === requestId && message.session_id === sessionId);
+      if (customer && !alreadyRecorded) history.messages.push({ role: 'customer', content: String(customer).slice(0, 5000), session_id: sessionId, ...(requestId ? { request_id: requestId } : {}) });
       if (useful?.customer_message) history.messages.push({ role: 'coach', content: useful.customer_message, session_id: sessionId });
       if (final?.gu_plan) history.messages.push({ role: 'gu', plan: blindPublicProjection(final.gu_plan), session_id: sessionId });
-      history.session_learning = final?.session_learning || history.session_learning;
+      history.coaching_episode_phase = final?.session?.coaching_episode_phase || history.coaching_episode_phase;
+      if (Object.hasOwn(final || {}, 'session_learning')) history.session_learning = final.session_learning;
+      if (final?.next_pre_session || history.coaching_episode_phase === 'ACTIVE') history.session_learning = null;
       await redis.set(historyKey, JSON.stringify(history));
     }
     if (stream) return res.end();

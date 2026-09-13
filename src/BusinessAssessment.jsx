@@ -14,7 +14,7 @@ import {
   normalizeOrdinaryCustomerProfileId,
   resolveOrdinaryBaEntry,
 } from './lib/customerEntry/ordinaryCustomerEntryRouting.js';
-import { startStripeCheckout } from './lib/stripeCheckout.js';
+import { createCheckoutIdempotencyKey, startStripeCheckout } from './lib/stripeCheckout.js';
 import {
   BA_VERTICAL_CUSTOMER_SAFE_CONFIRMATION_MESSAGE,
   BA_VERTICAL_CUSTOMER_SAFE_UNAVAILABLE_MESSAGE,
@@ -238,6 +238,10 @@ function PremiumPreviewHeader({ personName }) {
 }
 
 export default function BusinessAssessment() {
+  const checkoutIdempotencyKeys = useMemo(() => Object.freeze({
+    business_assessment: createCheckoutIdempotencyKey('ba-checkout'),
+    more_monthly_intelligence: createCheckoutIdempotencyKey('subscription-checkout'),
+  }), []);
   const [searchParams] = useSearchParams();
   const recruitingMode = searchParams.get('recruiting') === '1';
   const [publicStartStatus, setPublicStartStatus] = useState(() => (
@@ -713,8 +717,11 @@ export default function BusinessAssessment() {
         product_key: productKey,
         profile_id: profileId,
         assessment_id: assessmentId,
-        source_context: sourceContext
-      });
+        source_context: sourceContext,
+        ...(productKey === 'business_assessment'
+          ? { vertical_selection: checkoutProfileGate.verticalSelection.confirmedSelection }
+          : {}),
+      }, { idempotencyKey: checkoutIdempotencyKeys[productKey] });
     } catch {
       setCheckoutState({ loading: '', error: 'Payment setup is not available yet.' });
     }

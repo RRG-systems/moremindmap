@@ -22,7 +22,7 @@ function evidenceEventType(proposal, effectiveItems) {
   return PROPOSAL_EVENT_TYPES[proposal.proposal_type];
 }
 
-export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], active_personal_rsl_events = [], event_id, recorded_at }) {
+export function createConfirmedPersonalRslMutation({ proposal, decision, evidence_catalog = [], active_personal_rsl_events = [], historical_personal_rsl_events = active_personal_rsl_events, event_id, recorded_at }) {
   const proposalValidation = validateGovernedChangeProposal(proposal);
   const decisionValidation = validateProposalDecision(decision, proposal);
   if (!proposalValidation.valid || !decisionValidation.valid) return deepFreeze({ ok: false, code: 'AFW05_MUTATION_AUTHORITY_INVALID' });
@@ -46,6 +46,7 @@ export function createConfirmedPersonalRslMutation({ proposal, decision, evidenc
     event_type: eventType,
     effective_items: decision.effective_items,
     active_events: active_personal_rsl_events,
+    historical_events: historical_personal_rsl_events,
   });
   if (!lineage.ok) return lineage;
   const athleteScope = proposal.scope?.domain === 'ATHLETE';

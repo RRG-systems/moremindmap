@@ -36,7 +36,7 @@ export default function SubscriptionS2GuRenderer({ plan }) {
     <header className="s2-gu-heading">
       {!firstSessionWelcome && <span>{plan.guidance.eyebrow}</span>}
       <h3>{firstSessionWelcome ? 'WELCOME TO MORE' : plan.guidance.headline}</h3>
-      <p>{firstSessionWelcome ? welcomeStatement : plan.guidance.summary}</p>
+      <p>{plan.guidance.summary || (firstSessionWelcome ? welcomeStatement : null)}</p>
     </header>
     {!firstSessionWelcome && <div className="s2-gu-grid">{plan.blocks.map((block) => <article key={block.blockId} className={`s2-gu-block s2-gu-${String(block.type).toLowerCase()}`}>
       <div className="s2-gu-block-heading"><h4>{block.title}</h4>{block.subtitle && <p>{block.subtitle}</p>}</div>

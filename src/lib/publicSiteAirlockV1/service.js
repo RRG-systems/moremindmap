@@ -27,6 +27,8 @@ import {
   createComplimentaryFlowReceipt,
   readComplimentaryFlowReceipt,
 } from './complimentaryFlow.js';
+import { resolveMonthlyCheckoutBinding } from '../../../api/stripe/subscriptionV1Foundation.js';
+import { entitlementAllowsCoaching } from '../subscriptionV1/entitlement.js';
 
 const READY = new Set(['ready', 'complete']);
 const PURCHASE_INTENT_STATES = new Set(['awaiting_provider_checkout', 'granted']);
@@ -50,14 +52,16 @@ function isFiniteTimestamp(value) {
   return typeof value === 'string' && value.length > 0 && Number.isFinite(Date.parse(value));
 }
 
-function purchaseIntentRequestDigest({ productKey, email, profileId, verticalSelection }) {
-  return sha256(canonicalJson({
+function purchaseIntentRequestDigest({ productKey, email, profileId, verticalSelection, membershipBinding = null }) {
+  const payload = {
     contract_version: PURCHASE_INTENT_REQUEST_CONTRACT_VERSION,
     product_key: productKey,
     email,
     profile_id: profileId,
     vertical_selection: verticalSelection,
-  }));
+  };
+  if (membershipBinding) payload.membership_binding = membershipBinding;
+  return sha256(canonicalJson(payload));
 }
 
 function purchaseIntentSelectionFromBinding(binding) {
@@ -72,7 +76,7 @@ function purchaseIntentSelectionFromBinding(binding) {
 }
 
 function immutablePurchaseIntent(intent) {
-  return {
+  const immutable = {
     intent_id: intent.intent_id,
     contract_version: intent.contract_version,
     product_key: intent.product_key,
@@ -86,6 +90,22 @@ function immutablePurchaseIntent(intent) {
     request_sha256: intent.request_sha256,
     created_at: intent.created_at,
   };
+  if (intent.membership_binding) immutable.membership_binding = intent.membership_binding;
+  return immutable;
+}
+
+function validMonthlyMembershipBinding(binding, profileId) {
+  if (!binding || typeof binding !== 'object' || Array.isArray(binding)) return false;
+  const allowed = new Set([
+    'subject_id', 'membership_id', 'tenant_id', 'profile_id', 'business_id',
+    'assessment_id', 'binding_source', 'membership_verified',
+  ]);
+  return Object.keys(binding).every((key) => allowed.has(key))
+    && ['subject_id', 'membership_id', 'tenant_id', 'business_id', 'assessment_id']
+      .every((key) => boundedText(binding[key], 160).length >= 8)
+    && normalizeProfileId(binding.profile_id) === profileId
+    && binding.binding_source === 'AUTHENTICATED_SERVER_CONTEXT'
+    && binding.membership_verified === true;
 }
 
 function assertMatchingPurchaseIntentAuthority(candidate, canonical) {
@@ -191,7 +211,6 @@ export function assertPersistedPurchaseIntentContract(intent, {
     && intent.contract_version === PUBLIC_PRODUCT_CONTRACT_VERSION
     && Boolean(product)
     && intent.product_key === product.product_key
-    && product.product_key !== 'more_monthly_intelligence'
     && intent.access_type === product.access_type
     && Number.isSafeInteger(intent.expected_price_minor)
     && intent.expected_price_minor === product.price_minor
@@ -206,6 +225,15 @@ export function assertPersistedPurchaseIntentContract(intent, {
     && PURCHASE_INTENT_STATES.has(intent.status)
     && isFiniteTimestamp(intent.created_at);
   if (!exact) throw new Error('purchase_intent_contract_invalid');
+
+  const monthly = product.product_key === 'more_monthly_intelligence';
+  if (monthly && (!rawEmail || !rawProfileId
+    || !validMonthlyMembershipBinding(intent.membership_binding, rawProfileId))) {
+    throw new Error('purchase_intent_contract_invalid');
+  }
+  if (!monthly && intent.membership_binding !== undefined) {
+    throw new Error('purchase_intent_contract_invalid');
+  }
 
   if (product.product_key === 'business_assessment') {
     if (!rawProfileId) throw new Error('purchase_intent_contract_invalid');
@@ -223,6 +251,7 @@ export function assertPersistedPurchaseIntentContract(intent, {
     email: intent.email,
     profileId: intent.profile_id,
     verticalSelection: purchaseIntentSelectionFromBinding(intent.vertical_binding),
+    membershipBinding: intent.membership_binding || null,
   });
   if (intent.request_sha256 !== expectedRequestSha256) {
     throw new Error('purchase_intent_contract_invalid');
@@ -271,6 +300,8 @@ function buildAuthoritativePaymentGrant({
   eventId,
   sessionId,
   customerEmail,
+  customerId,
+  subscriptionId,
   existingGrant,
   clock,
 }) {
@@ -278,6 +309,13 @@ function buildAuthoritativePaymentGrant({
   const providerEmail = normalizeEmail(customerEmail);
   const expectedEmail = providerEmail || intent.email;
   const intentProfileId = normalizeProfileId(intent.profile_id);
+  const monthlyBinding = intent.product_key === 'more_monthly_intelligence'
+    ? intent.membership_binding
+    : null;
+  if (monthlyBinding
+    && (!boundedText(subscriptionId, 160) || !boundedText(customerId, 160))) {
+    throw new Error('payment_binding_required');
+  }
   let profileId = intentProfileId;
 
   if (existingGrant) {
@@ -293,6 +331,24 @@ function buildAuthoritativePaymentGrant({
     const verticalMatches = existingGrant.vertical_binding === undefined
       || existingGrant.vertical_binding === null
       || canonicalJson(existingGrant.vertical_binding) === canonicalJson(intent.vertical_binding);
+    const monthlyMatches = !monthlyBinding || (
+      existingGrant.assessment_id === monthlyBinding.assessment_id
+      && existingGrant.subject_id === monthlyBinding.subject_id
+      && existingGrant.membership_id === monthlyBinding.membership_id
+      && existingGrant.tenant_id === monthlyBinding.tenant_id
+      && existingGrant.business_id === monthlyBinding.business_id
+      && canonicalJson(existingGrant.scope) === canonicalJson({
+        subject_id: monthlyBinding.subject_id,
+        membership_id: monthlyBinding.membership_id,
+        tenant_id: monthlyBinding.tenant_id,
+        profile_id: monthlyBinding.profile_id,
+        business_id: monthlyBinding.business_id,
+      })
+      && existingGrant.binding_source === 'AUTHENTICATED_SERVER_CONTEXT'
+      && existingGrant.membership_verified === true
+      && existingGrant.subscription_id === boundedText(subscriptionId, 160)
+      && existingGrant.customer_id === boundedText(customerId, 160)
+    );
     const exact = existingGrant.grant_id === grantId
       && existingGrant.checkout_session_id === sessionId
       && existingGrant.product_key === intent.product_key
@@ -302,6 +358,7 @@ function buildAuthoritativePaymentGrant({
       && (!existingEmailRaw || existingEmail === existingEmailRaw)
       && (!expectedEmail || !existingEmail || existingEmail === expectedEmail)
       && verticalMatches
+      && monthlyMatches
       && (!existingGrant.contract_version
         || existingGrant.contract_version === PUBLIC_ACCESS_CONTRACT_VERSION)
       && (!existingGrant.purchase_intent_id || existingGrant.purchase_intent_id === intent.intent_id)
@@ -322,6 +379,24 @@ function buildAuthoritativePaymentGrant({
     email: expectedEmail || normalizeEmail(existingGrant?.email),
     profile_id: profileId,
     vertical_binding: intent.vertical_binding,
+    ...(monthlyBinding ? {
+      assessment_id: monthlyBinding.assessment_id,
+      subject_id: monthlyBinding.subject_id,
+      membership_id: monthlyBinding.membership_id,
+      tenant_id: monthlyBinding.tenant_id,
+      business_id: monthlyBinding.business_id,
+      scope: {
+        subject_id: monthlyBinding.subject_id,
+        membership_id: monthlyBinding.membership_id,
+        tenant_id: monthlyBinding.tenant_id,
+        profile_id: monthlyBinding.profile_id,
+        business_id: monthlyBinding.business_id,
+      },
+      binding_source: 'AUTHENTICATED_SERVER_CONTEXT',
+      membership_verified: true,
+      subscription_id: boundedText(subscriptionId, 160),
+      customer_id: boundedText(customerId, 160),
+    } : {}),
     source: 'paid_stripe',
     status: 'active',
     checkout_session_id: sessionId,
@@ -381,9 +456,33 @@ export function createPublicSiteService({
   complimentaryFlowAudience,
   profileStateReader = async () => ({ bos: 'unknown', ba: 'unknown' }),
   ownershipVerifier = async () => false,
+  monthlyMembershipBinder = null,
+  monthlyCheckoutEnabled = false,
+  monthlyEntitlementResolver = null,
+  subscriptionDestination = null,
   inquiryTransport = null,
 } = {}) {
   if (!store) throw new Error('public_store_required');
+
+  async function requireMonthlyEntitlement(grant) {
+    if (grant?.product_key !== 'more_monthly_intelligence') return null;
+    if (typeof monthlyEntitlementResolver !== 'function' || !grant.scope) {
+      throw new Error('paid_entitlement_reconciliation_required');
+    }
+    let entitlement;
+    try {
+      entitlement = await monthlyEntitlementResolver({
+        redis: store,
+        scope: grant.scope,
+        now: new Date(clock()),
+      });
+    } catch {
+      throw new Error('paid_entitlement_reconciliation_required');
+    }
+    const access = entitlementAllowsCoaching(entitlement, nowIso(clock));
+    if (!access.allowed) throw new Error('paid_entitlement_reconciliation_required');
+    return entitlement;
+  }
 
   async function withLock(key, work) {
     if (typeof store.compareDel !== 'function') throw new Error('atomic_lock_release_required');
@@ -406,16 +505,16 @@ export function createPublicSiteService({
   async function createPurchaseIntent(input = {}, requestContext = {}) {
     const idem = requireIdempotencyKey(input.idempotency_key);
     const product = productForKey(input.product_key);
-    const email = normalizeEmail(input.email);
+    let email = normalizeEmail(input.email);
     const profileId = normalizeProfileId(input.profile_id);
     if (!product) throw new Error('product_not_found');
     if (input.email && !email) throw new Error('valid_email_required');
     if (product.product_key !== 'behavior_operating_system' && !profileId) throw new Error('profile_id_required');
-    if (product.product_key === 'more_monthly_intelligence') throw new Error('subscription_checkout_gated');
 
     let profileState = null;
     let verticalBinding = null;
     let verticalSelection = null;
+    let membershipBinding = null;
     if (product.product_key === 'business_assessment') {
       const verified = await ownershipVerifier({
         profile_id: profileId,
@@ -427,12 +526,41 @@ export function createPublicSiteService({
       verticalSelection = currentConfirmedVerticalSelection(input.vertical_selection);
       verticalBinding = buildCustomerConfirmedVerticalBinding({ selection: verticalSelection, selectedAt: nowIso(clock) });
     }
+    if (product.product_key === 'more_monthly_intelligence') {
+      if (!monthlyCheckoutEnabled || typeof monthlyMembershipBinder !== 'function') {
+        throw new Error('subscription_checkout_gated');
+      }
+      const membershipContext = await monthlyMembershipBinder({
+        profile_id: profileId,
+        cookie_header: requestContext.cookie_header,
+      });
+      const decision = resolveMonthlyCheckoutBinding({
+        product_key: product.product_key,
+        request_context: membershipContext,
+        body: input,
+        enabled: true,
+      });
+      if (!decision.ok) {
+        if (decision.code === 'CLIENT_SUPPLIED_IDENTITY_OVERRIDE_DENIED') {
+          throw new Error('client_supplied_identity_override_denied');
+        }
+        throw new Error('authenticated_membership_context_required');
+      }
+      email = decision.email;
+      membershipBinding = membershipContext.membership_binding;
+      if (!validMonthlyMembershipBinding(membershipBinding, profileId)
+        || membershipBinding.membership_id !== decision.client_reference_id
+        || membershipBinding.assessment_id !== decision.metadata.assessment_id) {
+        throw new Error('authenticated_membership_context_required');
+      }
+    }
 
     const requestSha256 = purchaseIntentRequestDigest({
       productKey: product.product_key,
       email,
       profileId,
       verticalSelection,
+      membershipBinding,
     });
 
     const key = `public_product_v1:purchase_intent_by_idempotency:${sha256(idem)}`;
@@ -474,6 +602,7 @@ export function createPublicSiteService({
         email,
         profile_id: profileId,
         vertical_binding: verticalBinding,
+        ...(membershipBinding ? { membership_binding: membershipBinding } : {}),
         request_sha256: requestSha256,
         status: 'awaiting_provider_checkout',
         created_at: nowIso(clock),
@@ -488,7 +617,7 @@ export function createPublicSiteService({
     });
   }
 
-  async function recordPaymentGrant(input = {}) {
+  async function inspectPaymentGrant(input = {}) {
     const eventId = boundedText(input.event_id, 160);
     const sessionId = boundedText(input.checkout_session_id, 160);
     const intentId = boundedText(input.intent_id, 160);
@@ -517,7 +646,16 @@ export function createPublicSiteService({
       productKey: initialProduct.product_key,
     });
     if (initialJournal?.phase === 'complete') {
-      return { ...initialJournal.result, idempotent: true };
+      return {
+        eventId,
+        sessionId,
+        intentId,
+        eventKey,
+        intentKey,
+        grantId,
+        grantKey,
+        completedResult: { ...initialJournal.result, idempotent: true },
+      };
     }
     const initialGrantRaw = await store.get(grantKey);
     const initialGrant = parse(initialGrantRaw);
@@ -527,9 +665,41 @@ export function createPublicSiteService({
       eventId,
       sessionId,
       customerEmail: input.customer_email,
+      customerId: input.customer_id,
+      subscriptionId: input.subscription_id,
       existingGrant: initialGrant,
       clock,
     });
+
+    return {
+      eventId,
+      sessionId,
+      intentId,
+      eventKey,
+      intentKey,
+      grantId,
+      grantKey,
+      completedResult: null,
+    };
+  }
+
+  async function preflightPaymentGrant(input = {}) {
+    const inspection = await inspectPaymentGrant(input);
+    return inspection.completedResult || { validated: true, idempotent: false };
+  }
+
+  async function recordPaymentGrant(input = {}) {
+    const {
+      eventId,
+      sessionId,
+      intentId,
+      eventKey,
+      intentKey,
+      grantId,
+      grantKey,
+      completedResult,
+    } = await inspectPaymentGrant(input);
+    if (completedResult) return completedResult;
 
     return withLock(`${eventKey}:lock`, async () => {
       const previousRaw = await store.get(eventKey);
@@ -562,12 +732,17 @@ export function createPublicSiteService({
         eventId,
         sessionId,
         customerEmail: input.customer_email,
+        customerId: input.customer_id,
+        subscriptionId: input.subscription_id,
         existingGrant,
         clock,
       });
       await store.set(grantKey, json(grant));
       if (grant.email) await store.sadd(`access_grant_by_email:${grant.email}`, grantId);
       if (grant.profile_id) await store.sadd(`access_grant_by_profile:${grant.profile_id}`, grantId);
+      if (grant.assessment_id) await store.sadd(`access_grant_by_assessment:${grant.assessment_id}`, grantId);
+      if (grant.membership_id) await store.sadd(`access_grant_by_membership:${grant.membership_id}`, grantId);
+      if (grant.subscription_id) await store.sadd(`access_grant_by_subscription:${grant.subscription_id}`, grantId);
       await store.sadd(`access_grant_by_session:${sessionId}`, grantId);
       await store.set(intentKey, json({
         ...intent,
@@ -828,6 +1003,7 @@ export function createPublicSiteService({
   async function createStartTokenForGrant(input = {}) {
     const grant = parse(await store.get(`access_grant:${boundedText(input.grant_id, 180)}`));
     if (!grant || grant.status !== 'active') throw new Error('active_grant_required');
+    await requireMonthlyEntitlement(grant);
     const exchangeKey = `public_product_v1:start_token_exchange:${grant.grant_id}`;
     const now = Number(clock());
     const proposed = {
@@ -906,6 +1082,7 @@ export function createPublicSiteService({
       || start.status !== 'ready') {
       throw new Error('active_grant_required');
     }
+    await requireMonthlyEntitlement(grant);
     const ttl = Math.min(PUBLIC_START_TOKEN_TTL_MS, renewableUntil - now);
     return {
       start_token: sealStartToken({
@@ -923,8 +1100,12 @@ export function createPublicSiteService({
     const claims = verifyStartToken(input.start_token, startSigningKey, clock());
     const grant = parse(await store.get(`access_grant:${claims.grant_id}`));
     if (!grant || grant.status !== 'active' || grant.product_key !== claims.product_key) throw new Error('active_grant_required');
+    await requireMonthlyEntitlement(grant);
     const product = productForKey(grant.product_key);
-    if (!product?.destination) throw new Error('product_destination_gated');
+    const destination = product?.product_key === 'more_monthly_intelligence'
+      ? (boundedText(subscriptionDestination, 120) === '/subscription' ? '/subscription' : null)
+      : product?.destination;
+    if (!destination) throw new Error('product_destination_gated');
     const profileId = normalizeProfileId(input.profile_id || grant.profile_id);
     if (product.product_key === 'business_assessment') {
       if (!profileId || profileId !== grant.profile_id) throw new Error('grant_profile_binding_mismatch');
@@ -940,7 +1121,7 @@ export function createPublicSiteService({
       profile_id: profileId,
       vertical_binding: grant.vertical_binding || null,
       status: 'ready',
-      destination: product.destination,
+      destination,
       created_at: nowIso(clock),
     };
     await store.setNx(startKey, json(start));
@@ -1038,6 +1219,7 @@ export function createPublicSiteService({
 
   return Object.freeze({
     createPurchaseIntent,
+    preflightPaymentGrant,
     recordPaymentGrant,
     prepareComplimentaryFlow,
     readPreparedComplimentaryFlow,
