@@ -138,6 +138,9 @@ function internalArtifact(scope, artifactType, payload, sourceHash, createdAt, {
   parentArtifactIds = [],
   domainBoundary = null,
 } = {}) {
+  const authoritySource = scope?.tenant_id === 'synthetic_qa'
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
+    : 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION';
   const projectedPayload = semanticSource(payload);
   const contentHash = hashCanonicalJson({
     contract: 'paid-subscriber-canonical-artifact-projection-v1',
@@ -166,13 +169,16 @@ function internalArtifact(scope, artifactType, payload, sourceHash, createdAt, {
     bindings: clone(bindings),
     payload: projectedPayload,
     domain_boundary: domainBoundary || {
-      source: 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION',
+      source: authoritySource,
       raw_profile_forwarded: false,
     },
   });
 }
 
 function canonicalArtifacts({ scope, artifact, hashes, createdAt, bosFusionAuthority }) {
+  const authoritySource = scope?.tenant_id === 'synthetic_qa'
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
+    : 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION';
   const wbm = artifact.business_reality;
   const futuresSource = artifact.five_futures;
   const moveSource = artifact.one_move;
@@ -224,7 +230,7 @@ function canonicalArtifacts({ scope, artifact, hashes, createdAt, bosFusionAutho
     domainBoundary: {
       business_causes: 'BUSINESS_EVIDENCE_ONLY',
       whole_person_role: 'EXECUTION_FEASIBILITY_ONLY',
-      source: 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION',
+      source: authoritySource,
       raw_profile_forwarded: false,
     },
   });
@@ -338,12 +344,17 @@ export function projectCompletedRealProfileToSubscription({
   realization_record,
   bos_realization_record,
   resolveBundledBosAuthorityForProfile = resolveBundledBosAuthority,
+  assertBusinessScope = assertPaidBusinessScope,
+  synthetic_only = false,
+  scope_authority_id = null,
 } = {}) {
   const profileId = normalizePaidProfileId(scope?.profile_id);
   requireCondition(profileId && scope?.profile_id === profileId
     && profile_lookup?.found === true
     && profile_lookup.profile_id === profileId
     && profile_lookup.dossier && typeof profile_lookup.dossier === 'object', 'PAID_SUBSCRIBER_CANONICAL_OWNED_PROFILE_REQUIRED');
+  requireCondition((scope?.tenant_id === 'synthetic_qa') === (synthetic_only === true),
+    'SUBSCRIBER_SYNTHETIC_AUTHORITY_CLASSIFICATION_MISMATCH');
   const realizationProfileId = normalizeNewBaProfileId(profileId);
   const completed = completedRealization(realization_record, realizationProfileId, assessment_id);
   const hashes = assertCanonicalLineage(completed.artifact, realization_record.realization_identity || null);
@@ -354,7 +365,13 @@ export function projectCompletedRealProfileToSubscription({
     baIdentity: realization_record.realization_identity,
     resolveBundledBosAuthorityForProfile,
   });
-  assertPaidBusinessScope(scope, completed.assessment_id, hashes.vertical_binding);
+  requireFunction(assertBusinessScope, 'SUBSCRIBER_BUSINESS_SCOPE_VALIDATOR_REQUIRED');
+  assertBusinessScope(
+    scope,
+    completed.assessment_id,
+    hashes.vertical_binding,
+    scope_authority_id,
+  );
   const baseViewModel = clone(completed.artifact.customer_view_model);
   assertCustomerProjectionBoundary(baseViewModel, scope, completed.assessment_id, realizationProfileId);
   initialLivingStateFromBusinessTwin(baseViewModel);
@@ -393,22 +410,28 @@ export function projectCompletedRealProfileToSubscription({
       ? 'EXACT_RECORDED_LAUNCH_SAFE_BOS_REALIZATION'
       : 'RECORDED_NEW_BA_COMPACT_COMPATIBILITY',
     assessment_binding_source: 'COMPLETED_REALIZATION_CROSS_CHECKED_TO_PROFILE_SCOPE',
+    synthetic_only: synthetic_only === true,
     raw_canonical_profile_forwarded: false,
     raw_bos_artifact_forwarded: false,
   });
 }
 
 function relationshipContext(projection, sessionKind) {
+  const profileAuthority = projection.synthetic_only
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE'
+    : 'CANONICAL_OWNED_PROFILE';
   return deepFreeze({
     session_kind: sessionKind,
     preferred_conversational_name: projection.preferred_name,
-    preferred_name_authority: 'CANONICAL_OWNED_PROFILE',
+    preferred_name_authority: profileAuthority,
     mission: sessionKind === 'FIRST_EVER'
       ? 'Begin a continuing coaching relationship from the completed governed Business Twin without repeating the completed assessment or exposing private source detail.'
       : 'Continue from the current governed Business Twin, durable relationship history, attempts, outcomes, and open loops.',
     bos_validation: { status: 'ESTABLISHED', repeat_weekly: false, reassessment_allowed: false },
     privacy_boundary: 'Use only the governed semantic projection. Never expose raw profile custody, private identifiers, internal hashes, or raw assessment evidence.',
-    source_authority: 'CANONICAL_OWNED_PROFILE_AND_COMPLETED_BOS_BA_REALIZATION',
+    source_authority: projection.synthetic_only
+      ? 'CANONICAL_SYNTHETIC_QA_PROFILE_AND_COMPLETED_BOS_BA_REALIZATION'
+      : 'CANONICAL_OWNED_PROFILE_AND_COMPLETED_BOS_BA_REALIZATION',
     capability_context: {
       live_web_research_available: false,
       knowledge_library: 'MORE Real Estate knowledge and a separately labeled D.J. field-doctrine extract, available through optional read-only source tools.',
@@ -487,7 +510,9 @@ export async function createPaidSubscriberRuntimeFromProjection({
     coaching_session: createCoachingEpisodeContext({
       phase: coaching_episode_phase,
       preferred_conversational_name: projection.preferred_name,
-      preferred_name_authority: 'CANONICAL_OWNED_PROFILE',
+      preferred_name_authority: projection.synthetic_only
+        ? 'CANONICAL_SYNTHETIC_QA_PROFILE'
+        : 'CANONICAL_OWNED_PROFILE',
       session_kind,
     }),
     session_temporal_context,
@@ -565,6 +590,12 @@ export function createPaidSubscriberLoader({
   openRelationshipStore = defaultStoreOpener,
   readExternalEvidenceForRuntime = defaultExternalEvidenceReader,
   createTransport = defaultTransportFactory,
+  resolveSubscriberAuthority = exactPaidMembershipContext,
+  resolveRuntimeKeys = paidRuntimeKeys,
+  resolveRuntimeRelationshipKey = paidRuntimeRelationshipKey,
+  assertBusinessScope = assertPaidBusinessScope,
+  syntheticOnly = false,
+  loaderId = 'subscription_v1_paid_canonical_profile_runtime_loader_v1',
 } = {}) {
   requireFunction(readCanonicalProfile, 'PAID_SUBSCRIBER_CANONICAL_PROFILE_READER_REQUIRED');
   requireFunction(readCompletedRealization, 'PAID_SUBSCRIBER_REALIZATION_READER_REQUIRED');
@@ -573,6 +604,10 @@ export function createPaidSubscriberLoader({
   requireFunction(openRelationshipStore, 'PAID_SUBSCRIBER_RELATIONSHIP_STORE_FACTORY_REQUIRED');
   requireFunction(readExternalEvidenceForRuntime, 'PAID_SUBSCRIBER_EXTERNAL_EVIDENCE_READER_REQUIRED');
   requireFunction(createTransport, 'PAID_SUBSCRIBER_TRANSPORT_FACTORY_REQUIRED');
+  requireFunction(resolveSubscriberAuthority, 'SUBSCRIBER_AUTHORITY_RESOLVER_REQUIRED');
+  requireFunction(resolveRuntimeKeys, 'SUBSCRIBER_RUNTIME_KEYS_RESOLVER_REQUIRED');
+  requireFunction(resolveRuntimeRelationshipKey, 'SUBSCRIBER_RELATIONSHIP_KEY_RESOLVER_REQUIRED');
+  requireFunction(assertBusinessScope, 'SUBSCRIBER_BUSINESS_SCOPE_VALIDATOR_REQUIRED');
 
   return async function loadPaidSubscriber({
     redis,
@@ -588,9 +623,9 @@ export function createPaidSubscriberLoader({
     transport = null,
     now = () => new Date().toISOString(),
   } = {}) {
-    const authority = exactPaidMembershipContext(membership_context);
+    const authority = resolveSubscriberAuthority(membership_context);
     requireCondition(subject_key === authority.scope.subject_id
-      && relationship_key === paidRuntimeRelationshipKey(authority.scope), 'PAID_SUBSCRIBER_RUNTIME_IDENTITY_BINDING_MISMATCH');
+      && relationship_key === resolveRuntimeRelationshipKey(authority.scope), 'PAID_SUBSCRIBER_RUNTIME_IDENTITY_BINDING_MISMATCH');
     const membershipAssessmentId = membership_context.assessment_id
       || membership_context.membership_binding?.assessment_id
       || null;
@@ -619,8 +654,11 @@ export function createPaidSubscriberLoader({
       realization_record: realizationRecord,
       bos_realization_record: bosRealizationRecord,
       resolveBundledBosAuthorityForProfile,
+      assertBusinessScope,
+      synthetic_only: syntheticOnly,
+      scope_authority_id: membership_context?.authority_id || null,
     });
-    const keys = paidRuntimeKeys({ scope: authority.scope });
+    const keys = resolveRuntimeKeys({ scope: authority.scope });
     const [store, externalEvidence] = await Promise.all([
       openRelationshipStore({ redis, keys, scope: authority.scope }),
       readExternalEvidenceForRuntime({ redis, keys, scope: authority.scope }),
@@ -654,17 +692,18 @@ export function createPaidSubscriberLoader({
       identity: {
         first_name: projection.preferred_name,
         vertical: projection.vertical,
-        synthetic_only: false,
+        synthetic_only: syntheticOnly,
         demo_copy_only: false,
       },
       relationship_context: loaded.relationship_context,
       architecture: {
-        loader_id: 'subscription_v1_paid_canonical_profile_runtime_loader_v1',
+        loader_id: loaderId,
         exact_scope_hash: authority.scope_hash,
         required_artifact_types: [...PAID_SUBSCRIBER_REQUIRED_ARTIFACT_TYPES],
         free_gpt_v2: true,
         afw05_core_reused: true,
-        canonical_owned_profile_loaded: true,
+        canonical_owned_profile_loaded: !syntheticOnly,
+        ...(syntheticOnly ? { canonical_synthetic_qa_profile_loaded: true } : {}),
         completed_bos_ba_realization_loaded: true,
         completed_recorded_bos_realization_loaded: Boolean(bosRealizationRecord),
         governed_whole_person_claim_count: projection.bos_authority_claim_count,

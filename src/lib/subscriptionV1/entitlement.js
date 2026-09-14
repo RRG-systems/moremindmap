@@ -94,6 +94,16 @@ export function entitlementAllowsCoaching(entitlement, as_of_at) {
   const validation = validateSubscriptionV1Contract(entitlement);
   if (!validation.valid) return deepFreeze({ allowed: false, code: 'ENTITLEMENT_CONTRACT_INVALID' });
   if (!['ACTIVE', 'ACTIVE_CANCELING'].includes(entitlement.state)) return deepFreeze({ allowed: false, code: `ENTITLEMENT_${entitlement.state}` });
+  if (entitlement.contract_id === 'synthetic_qa_entitlement') {
+    const asOf = Date.parse(as_of_at);
+    const accessEndsAt = Date.parse(entitlement.access_ends_at);
+    if (!Number.isFinite(asOf) || !Number.isFinite(accessEndsAt)) {
+      return deepFreeze({ allowed: false, code: 'ENTITLEMENT_TIME_INVALID' });
+    }
+    if (asOf >= accessEndsAt) {
+      return deepFreeze({ allowed: false, code: 'ENTITLEMENT_TERMINATED' });
+    }
+  }
   if (entitlement.state === 'ACTIVE_CANCELING' && Date.parse(as_of_at) >= Date.parse(entitlement.access_ends_at || entitlement.billing_cycle_end)) return deepFreeze({ allowed: false, code: 'ENTITLEMENT_TERMINATED' });
   return deepFreeze({ allowed: true, code: 'ENTITLEMENT_ACTIVE', entitlement_id: entitlement.entitlement_id });
 }

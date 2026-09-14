@@ -105,7 +105,7 @@ function copyPublicValue(value, seen, path = []) {
   return Object.fromEntries(entries);
 }
 
-function paidGetProjection(payload) {
+export function paidGetProjection(payload) {
   const projected = { ...payload };
   delete projected.demo_subject;
   delete projected.demo_subject_switching;
@@ -129,14 +129,23 @@ function paidFailureProjection(payload) {
   return payload;
 }
 
-export function redactPaidRuntimePayload(payload, { successful_get = false } = {}) {
+export function redactPaidRuntimePayload(payload, {
+  successful_get = false,
+  successful_get_projector = paidGetProjection,
+  failure_projector = paidFailureProjection,
+} = {}) {
   const projected = successful_get && payload?.ok === true
-    ? paidGetProjection(payload)
-    : paidFailureProjection(payload);
+    ? successful_get_projector(payload)
+    : failure_projector(payload);
   return copyPublicValue(projected, new Set());
 }
 
-function responseBoundary(res, { successfulGet, transform }) {
+function responseBoundary(res, {
+  successfulGet,
+  successfulGetProjector,
+  failureProjector,
+  transform,
+}) {
   let statusCode = Number(res.statusCode || 200);
   let pending = '';
   let queue = Promise.resolve();
@@ -155,11 +164,16 @@ function responseBoundary(res, { successfulGet, transform }) {
     return enqueue(async () => {
       const clean = redactPaidRuntimePayload(value, {
         successful_get: successfulGet && originalStatus >= 200 && originalStatus < 300,
+        successful_get_projector: successfulGetProjector,
+        failure_projector: failureProjector,
       });
       const result = await transform(clean, originalStatus);
+      const finalPayload = redactPaidRuntimePayload(result.payload, {
+        failure_projector: failureProjector,
+      });
       res.status(result.status);
-      if (json && !streaming) res.json(result.payload);
-      else res.write(`${JSON.stringify(result.payload)}\n`);
+      if (json && !streaming) res.json(finalPayload);
+      else res.write(`${JSON.stringify(finalPayload)}\n`);
     });
   }
 
@@ -257,6 +271,12 @@ export function createPaidSubscriptionV1RuntimeHandler({
   resolveEntitlement,
   resolveKeys,
   generateGu,
+  resolveAccessContext = paidMembershipContext,
+  projectSuccessfulGet = paidGetProjection,
+  projectFailure = paidFailureProjection,
+  firstSessionSyntheticOnly = false,
+  issueCsrf = null,
+  consumeCsrf = null,
   env = {},
 } = {}) {
   if (!redis || typeof redis !== 'object') throw new Error('SUBSCRIPTION_V1_PAID_REDIS_REQUIRED');
@@ -264,6 +284,13 @@ export function createPaidSubscriptionV1RuntimeHandler({
   requireFunction(loadSubscriber, 'SUBSCRIPTION_V1_PAID_SUBSCRIBER_LOADER_REQUIRED');
   requireFunction(resolveEntitlement, 'SUBSCRIPTION_V1_PAID_ENTITLEMENT_RESOLVER_REQUIRED');
   requireFunction(resolveKeys, 'SUBSCRIPTION_V1_PAID_KEYS_RESOLVER_REQUIRED');
+  requireFunction(resolveAccessContext, 'SUBSCRIPTION_V1_RUNTIME_ACCESS_CONTEXT_RESOLVER_REQUIRED');
+  requireFunction(projectSuccessfulGet, 'SUBSCRIPTION_V1_RUNTIME_RESPONSE_PROJECTOR_REQUIRED');
+  requireFunction(projectFailure, 'SUBSCRIPTION_V1_RUNTIME_FAILURE_PROJECTOR_REQUIRED');
+  if (issueCsrf !== null || consumeCsrf !== null) {
+    requireFunction(issueCsrf, 'SUBSCRIPTION_V1_RUNTIME_CSRF_ISSUER_REQUIRED');
+    requireFunction(consumeCsrf, 'SUBSCRIPTION_V1_RUNTIME_CSRF_CONSUMER_REQUIRED');
+  }
   if (generateGu != null) requireFunction(generateGu, 'SUBSCRIPTION_V1_PAID_GU_GENERATOR_INVALID');
 
   return async function paidSubscriptionRuntimeHandler(req, res) {
@@ -290,22 +317,23 @@ export function createPaidSubscriptionV1RuntimeHandler({
       if (!SHA256_PATTERN.test(result.capability_hash || '')) {
         throw new Error('SUBSCRIPTION_V1_PAID_CAPABILITY_HASH_REQUIRED');
       }
-      const membership_context = paidMembershipContext(result);
+      const membership_context = resolveAccessContext(result);
       authenticated = {
         ...result,
         membership_context,
         capability: {
           ...(result.capability || {}),
           authenticated: true,
-          membership_verified: true,
-          binding_source: 'AUTHENTICATED_SERVER_CONTEXT',
+          membership_verified: membership_context.membership_verified === true,
+          ...(membership_context.capability_verified === true ? { capability_verified: true } : {}),
+          binding_source: membership_context.binding_source,
           scope: membership_context.scope,
           membership_context,
         },
       };
       return authenticated;
     };
-    const membershipContext = () => paidMembershipContext(authenticated);
+    const membershipContext = () => resolveAccessContext(authenticated);
     const paidLoadSubscriber = async (args) => {
       if (!historyStore) {
         historyStore = createPaidConversationHistory({ redis, scope: membershipContext().scope, keys: runtimeKeys });
@@ -365,8 +393,15 @@ export function createPaidSubscriptionV1RuntimeHandler({
       runtimeKeys = resolveKeys({ ...args, scope: membershipContext().scope, membership_context: membershipContext() });
       return runtimeKeys;
     };
+    const scopedResolveEntitlement = (args) => resolveEntitlement({
+      ...args,
+      auth: authenticated,
+      membership_context: membershipContext(),
+    });
     output = responseBoundary(res, {
       successfulGet: req.method === 'GET',
+      successfulGetProjector: projectSuccessfulGet,
+      failureProjector: projectFailure,
       transform: async (payload, status) => {
         if (payload.csrf_token) nextCsrf = payload.csrf_token;
         if (duplicate) return { ...duplicate, payload: { ...duplicate.payload, csrf_token: nextCsrf } };
@@ -403,10 +438,11 @@ export function createPaidSubscriptionV1RuntimeHandler({
       getRedis: () => redis,
       authenticate: paidAuthenticate,
       loadSubscriber: paidLoadSubscriber,
-      resolveEntitlement,
+      resolveEntitlement: scopedResolveEntitlement,
       resolveKeys: paidResolveKeys,
       resolvePreloadScope: () => membershipContext().scope,
-      firstSessionSyntheticOnly: false,
+      firstSessionSyntheticOnly,
+      ...(issueCsrf ? { issueCsrf, consumeCsrf } : {}),
       ...(generateGu ? { generateGu } : {}),
       env,
     });
@@ -414,11 +450,14 @@ export function createPaidSubscriptionV1RuntimeHandler({
       await inner(forwarded, output.boundary);
       await output.settle();
     } catch {
-      const failure = { ok: false, code: 'SUBSCRIPTION_V1_PAID_HISTORY_UNAVAILABLE', csrf_token: nextCsrf, reload_required: true };
+      const failure = redactPaidRuntimePayload(
+        { ok: false, code: 'SUBSCRIPTION_V1_PAID_HISTORY_UNAVAILABLE', csrf_token: nextCsrf, reload_required: true },
+        { failure_projector: projectFailure },
+      );
       if (output.isStreaming()) {
         if (!res.headersSent) res.status(503);
         res.end(`${JSON.stringify(failure)}\n`);
-      } else res.status(503).json(failure);
+      } else if (!res.headersSent) res.status(503).json(failure);
     } finally {
       await historyStore?.release();
     }
