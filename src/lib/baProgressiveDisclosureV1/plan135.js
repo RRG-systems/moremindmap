@@ -5,6 +5,7 @@ import {
   findById,
   invariant,
 } from './utils.js'
+import { isLoanOriginatorProjection } from './verticalScope.js'
 
 function allNumericalCards(viewModel) {
   return [
@@ -125,11 +126,23 @@ function wayDefinition(mode, viewModel) {
   return { title: 'Build Your Relationship Engine + Begin Leverage', destination_state: 'A measured relationship engine supports the stated production goal while the One Move tests durable ownership.', why_priority: viewModel.why.whyStronger }
 }
 
+
 export function validateGeneralizedPlan135V1(artifact) {
   invariant(artifact?.contract_id === 'generalized-1-3-5-plan-v1', 'BA_PD_PLAN_CONTRACT_ID')
   invariant(artifact?.version === '1.0.0', 'BA_PD_PLAN_VERSION')
   invariant(artifact.goal && artifact.goal.title && artifact.goal.source_ref, 'BA_PD_PLAN_GOAL_MISSING')
   invariant(Array.isArray(artifact.ways) && artifact.ways.length === 3, 'BA_PD_PLAN_WAY_COUNT')
+  if (artifact.bindings?.verticalId === 'loan_originator' || artifact.plan_state === 'LO_OPEN_DRAFT') {
+    invariant(artifact.bindings?.verticalId === 'loan_originator' && artifact.plan_state === 'LO_OPEN_DRAFT', 'BA_PD_LO_OPEN_PLAN_SCOPE')
+    invariant(artifact.bindings.verticalAuthorityRefs?.length > 0 && artifact.bindings.verticalAuthorityRefs.every((id) => typeof id === 'string' && id.startsWith('loan-originator-intelligence-module-')), 'BA_PD_LO_OPEN_PLAN_AUTHORITY')
+    invariant(artifact.ways.every((way) => way.status === 'OPEN' && way.title === null && way.destination_state === null && Array.isArray(way.strategies) && way.strategies.length === 0 && way.open_strategy_positions === 5), 'BA_PD_LO_UNESTABLISHED_WAYS_MUST_REMAIN_OPEN')
+    invariant(Array.isArray(artifact.strategies) && artifact.strategies.length === 0 && artifact.open_strategy_positions === 15, 'BA_PD_LO_UNESTABLISHED_STRATEGIES_MUST_REMAIN_OPEN')
+    invariant(artifact.customer_boundary?.customer_agreed === false && artifact.customer_boundary?.all_ways_intentionally_open === true, 'BA_PD_LO_OPEN_PLAN_AGREEMENT_BOUNDARY')
+    invariant(artifact.one_move?.status === 'ALONGSIDE_PLAN_NOT_A_STRATEGY' && artifact.one_move.proposal_status === 'PROPOSED_NOT_CUSTOMER_AGREED' && artifact.one_move.source_ref && artifact.one_move.title && artifact.one_move.intervention && artifact.one_move.first_action?.text && artifact.one_move.first_action.source_ref && artifact.one_move.proof?.length && artifact.one_move.failure_or_stop?.length, 'BA_PD_LO_ONE_MOVE_PROPOSAL_INCOMPLETE')
+    invariant(artifact.validation?.selected_way_count === 0 && artifact.validation?.strategy_count === 0 && artifact.validation?.open_strategy_positions === 15, 'BA_PD_LO_OPEN_PLAN_COMPLETENESS_INFLATION')
+    invariant(!/guaranteed|will definitely|certain success/iu.test(JSON.stringify(artifact)), 'BA_PD_PLAN_CERTAINTY_INFLATION')
+    return true
+  }
   invariant(artifact.ways[0].status === 'SELECTED_COMPLETE', 'BA_PD_PLAN_WAY_ONE_STATUS')
   invariant(artifact.ways[1].status === 'OPEN' && artifact.ways[2].status === 'OPEN', 'BA_PD_PLAN_OPEN_WAYS')
   invariant(artifact.ways[1].title === null && artifact.ways[2].title === null, 'BA_PD_PLAN_OPEN_WAY_CONTENT')
@@ -146,30 +159,36 @@ export function validateGeneralizedPlan135V1(artifact) {
 export function createGeneralizedPlan135V1({ viewModel, probability, bindings = {} }) {
   invariant(viewModel?.identity && viewModel?.why && viewModel?.move, 'BA_PD_PLAN_SOURCE_MISSING')
   invariant(probability?.contract_id === 'five-futures-probability-v1', 'BA_PD_PLAN_PROBABILITY_BINDING')
+  const loanOriginator = isLoanOriginatorProjection(viewModel, bindings)
   const monthlyGoal = card(viewModel, 'monthly-closing-goal')
   const annualGoal = card(viewModel, 'annual-closing-goal')
   invariant(monthlyGoal || annualGoal, 'BA_PD_PLAN_EXPLICIT_GOAL_MISSING')
-  const mode = constraintMode(viewModel)
-  const way = wayDefinition(mode, viewModel)
+  const mode = loanOriginator ? 'LO_OPEN_DRAFT' : constraintMode(viewModel)
+  const way = loanOriginator ? { title: null } : wayDefinition(mode, viewModel)
+  if (loanOriginator) {
+    invariant(typeof viewModel.plan?.objective === 'string' && viewModel.plan.objective.trim(), 'BA_PD_LO_STATED_GOAL_MISSING')
+    invariant(viewModel.move.firstSteps?.[0]?.text && viewModel.move.firstSteps[0].inspectorId, 'BA_PD_LO_FIRST_ACTION_EVIDENCE_MISSING')
+    invariant(viewModel.move.proof?.length && viewModel.move.failure?.length, 'BA_PD_LO_PROOF_BOUNDARY_MISSING')
+  }
   const annualValue = annualGoal?.value
-  const goalTitle = annualValue
+  const goalTitle = loanOriginator ? viewModel.plan.objective : annualValue
     ? `Build toward ${annualValue} closings a year while ${mode === 'RELATIONSHIP_ENGINE_WITH_LEVERAGE' ? 'beginning to create leverage' : mode === 'VISIBLE_CONVERSION_SYSTEM' ? 'making conversion visible and repeatable' : 'distributing operating ownership'}.`
     : `Build toward ${monthlyGoal.value} while ${way.destination_state.toLowerCase()}`
   const goal = {
     goal_id: 'goal-1',
     title: goalTitle,
-    monthly_display: monthlyGoal?.value || null,
-    annual_display: annualGoal?.value || null,
+    monthly_display: loanOriginator ? null : monthlyGoal?.value || null,
+    annual_display: loanOriginator ? null : annualGoal?.value || null,
     horizon: 'The stated goal horizon from the governed business state.',
-    epistemic_class: classifyEpistemic(annualGoal?.qualifier || monthlyGoal?.qualifier),
-    source_ref: annualGoal?.inspectorId || monthlyGoal?.inspectorId,
+    epistemic_class: loanOriginator ? 'DESIRED_STATE_NOT_CURRENT_PERFORMANCE' : classifyEpistemic(annualGoal?.qualifier || monthlyGoal?.qualifier),
+    source_ref: loanOriginator ? monthlyGoal.inspectorId : annualGoal?.inspectorId || monthlyGoal?.inspectorId,
     current_gap: viewModel.numerical?.comparisons?.map((comparison) => comparison.gap) || [],
   }
   const constraint = viewModel.why.title
   const mechanism = viewModel.why.mechanisms?.[0]?.label || viewModel.why.summary
   const verticalAuthorityRefs = bindings.verticalAuthorityRefs || ['EXISTING_VERTICAL_INTELLIGENCE']
   const context = { viewModel, goal: goal.title, way: way.title, constraint, mechanism, verticalAuthorityRefs }
-  const strategies = mode === 'VISIBLE_CONVERSION_SYSTEM'
+  const strategies = loanOriginator ? [] : mode === 'VISIBLE_CONVERSION_SYSTEM'
     ? conversionStrategies(context)
     : mode === 'DISTRIBUTED_DECISION_RIGHTS'
       ? decisionRightsStrategies(context)
@@ -177,6 +196,7 @@ export function createGeneralizedPlan135V1({ viewModel, probability, bindings = 
   const artifact = {
     contract_id: 'generalized-1-3-5-plan-v1',
     version: '1.0.0',
+    ...(loanOriginator ? { plan_state: 'LO_OPEN_DRAFT' } : {}),
     identity: {
       subject_key: bindings.subjectKey || viewModel.identity.business,
       business: viewModel.identity.business,
@@ -190,22 +210,29 @@ export function createGeneralizedPlan135V1({ viewModel, probability, bindings = 
       constraint_title: constraint,
     },
     goal,
-    ways: [
+    ways: loanOriginator ? [1, 2, 3].map((position) => ({ way_id: `way-${position}`, status: 'OPEN', title: null, destination_state: null, strategies: [], open_strategy_positions: 5 })) : [
       { way_id: 'way-1', status: 'SELECTED_COMPLETE', title: way.title, destination_state: way.destination_state, why_priority: way.why_priority, constraint_relationship: constraint, future_relationship: 'Way 1 is the highest-priority governed path for changing the present trajectory field; it does not guarantee a Future.', business_stage_fit: mode, prerequisites: viewModel.plan?.prerequisites || [], confidence: 'MODERATE', evidence_lineage_refs: boundedList([viewModel.why.inspectorId, goal.source_ref], 4) },
       { way_id: 'way-2', status: 'OPEN', title: null, destination_state: null, strategies: [] },
       { way_id: 'way-3', status: 'OPEN', title: null, destination_state: null, strategies: [] },
     ],
     strategies,
-    open_strategy_positions: 10,
+    open_strategy_positions: loanOriginator ? 15 : 10,
     one_move: {
       status: 'ALONGSIDE_PLAN_NOT_A_STRATEGY',
       title: viewModel.move.title,
       intervention: viewModel.move.intervention,
-      why_alongside: 'The plan builds the selected business path while the One Move runs as a bounded proof experiment against the governing mechanism.',
+      why_alongside: loanOriginator ? 'The One Move is a proposal to discuss. Business strategies and any commitment to act remain open.' : 'The plan builds the selected business path while the One Move runs as a bounded proof experiment against the governing mechanism.',
       proof_boundary: 'Effectiveness must be observed through the canonical proof and failure conditions.',
       source_ref: viewModel.move.inspectorId,
+      ...(loanOriginator ? {
+        proposal_status: 'PROPOSED_NOT_CUSTOMER_AGREED',
+        first_action: { text: viewModel.move.firstSteps[0].text, source_ref: viewModel.move.firstSteps[0].inspectorId },
+        proof: viewModel.move.proof.map((item) => ({ text: item.label, source_ref: item.inspectorId || viewModel.move.inspectorId })),
+        failure_or_stop: [...viewModel.move.failure],
+      } : {}),
     },
     customer_boundary: {
+      ...(loanOriginator ? { proposed_plan_not_customer_commitment: true, customer_agreed: false, all_ways_intentionally_open: true } : {}),
       ways_two_three_intentionally_open: true,
       build_the_rest_myself: true,
       living_map_bridge_explanatory_only: true,
@@ -214,9 +241,9 @@ export function createGeneralizedPlan135V1({ viewModel, probability, bindings = 
     validation: {
       goal_count: 1,
       way_socket_count: 3,
-      selected_way_count: 1,
+      selected_way_count: loanOriginator ? 0 : 1,
       strategy_count: strategies.length,
-      open_strategy_positions: 10,
+      open_strategy_positions: loanOriginator ? 15 : 10,
       one_move_outside_strategy_count: true,
       source_and_class_preservation: 'PASS',
     },

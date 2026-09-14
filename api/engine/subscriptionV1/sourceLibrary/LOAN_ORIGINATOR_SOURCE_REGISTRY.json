@@ -1,0 +1,231 @@
+{
+  "contract": "MORE_SUBSCRIPTION_LOAN_ORIGINATOR_SOURCE_REGISTRY_V1",
+  "version": "1.0.0",
+  "vertical_id": "loan_originator",
+  "documents": [
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-02",
+      "title": "Canonical LO Product Doctrine V1",
+      "version": "1.0.0",
+      "sha256": "788d76a8c69567e1dfebe9d86e25bd6da3dc90109cd6e7b24634778ed9828c67",
+      "relativePath": "loan-originator-cassette/02_CANONICAL_LO_PRODUCT_DOCTRINE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-03",
+      "title": "Canonical LO Intake Question Contract V1 - Exact 12 Core + 3 Conditional",
+      "version": "1.0.0",
+      "sha256": "e3ba0de40e066a2fbd9ad6c4febb95d2509c15d1b4e39c570feb93287aa29f46",
+      "relativePath": "loan-originator-cassette/03_CANONICAL_LO_INTAKE_QUESTION_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-06",
+      "title": "Canonical LO Definitions and Terminology Registry V1",
+      "version": "1.0.0",
+      "sha256": "c4d9ce4d15d0ffc14c6980cc06034eac36f5410a079bf964b9af57fd2a1b0719",
+      "relativePath": "loan-originator-cassette/06_CANONICAL_LO_TERMINOLOGY_REGISTRY_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-07",
+      "title": "Canonical LO Observation Window, Cohort, and Event Definition Registry V1",
+      "version": "1.0.0",
+      "sha256": "bce6d4d5d3654512d4afbe29221651227c3c71fd665b0dc99ccf74e1bed78fac",
+      "relativePath": "loan-originator-cassette/07_CANONICAL_LO_EVENT_OBSERVATION_WINDOW_REGISTRY_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-08",
+      "title": "Canonical LO Opportunity Source Network and Customer Relationship Network Contract V1",
+      "version": "1.0.0",
+      "sha256": "660607f9bd39aea7a330173775f283c74cc89c5a6ec62cb2be052677288870f8",
+      "relativePath": "loan-originator-cassette/08_CANONICAL_LO_OSN_CRN_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-09",
+      "title": "Canonical LO Systems Measurement Contract V1",
+      "version": "1.0.0",
+      "sha256": "0996535830dee468c5ea582370d1cd85a26afb9efaeb31c28570b89c41e28bdc",
+      "relativePath": "loan-originator-cassette/09_CANONICAL_LO_SYSTEMS_MEASUREMENT_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-10",
+      "title": "Canonical LO Goal, Backsolve, and Economics Contract V1",
+      "version": "1.0.0",
+      "sha256": "b2f653867ed4f2396d49f4cc3367ee541318b03c65afbb636c2ae19ba5f8bb8b",
+      "relativePath": "loan-originator-cassette/10_CANONICAL_LO_GOAL_BACKSOLVE_ECONOMICS_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-11",
+      "title": "Canonical LO Opportunity Sufficiency and Constraint Contract V1",
+      "version": "1.0.0",
+      "sha256": "a3b6f42b562ada19303d98affe946d501b75476dab29126145e149641d8d65a6",
+      "relativePath": "loan-originator-cassette/11_CANONICAL_LO_SUFFICIENCY_CONSTRAINT_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-12",
+      "title": "Canonical Founder One Move Contract V1",
+      "version": "1.0.0",
+      "sha256": "ae99620ae3c495271e1caa1955caa89355835b4ec47f65bee9590f9f45b32ec9",
+      "relativePath": "loan-originator-cassette/12_CANONICAL_LO_FOUNDER_ONE_MOVE_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-13",
+      "title": "Canonical LO Evidence, Missingness, Provenance, and Contradiction Contract V1",
+      "version": "1.0.0",
+      "sha256": "82df2f5c0c98e17b355ac01991e164e1a9533323b27f691f084cde01be222d90",
+      "relativePath": "loan-originator-cassette/13_CANONICAL_LO_EVIDENCE_TRUTH_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-14",
+      "title": "Canonical LO Box 1 Five-Surface Projection Contract V1",
+      "version": "1.0.0",
+      "sha256": "dbd59e1e7c8ce691f7340a49de27157659ee56d3e6587b5b4329f0390429faa9",
+      "relativePath": "loan-originator-cassette/14_CANONICAL_LO_BOX_1_PROJECTION_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-15",
+      "title": "Canonical Durable 16-Domain LO Intelligence Authority and Module Bindings V1",
+      "version": "1.0.0",
+      "sha256": "ea624fea3cf43fd869f1b6a93703bace91bc198c601e0487ae465f38e472fd6e",
+      "relativePath": "loan-originator-cassette/15_CANONICAL_LO_DURABLE_AUTHORITY_MODULE_BINDINGS_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-16",
+      "title": "Canonical Universal Coaching to LO Translation Contract V1",
+      "version": "1.0.0",
+      "sha256": "b6e8cc7dcea03c631208f40e311567042bd459c8f8a34f6df58a25eb3b76c19a",
+      "relativePath": "loan-originator-cassette/16_CANONICAL_UNIVERSAL_COACHING_TO_LO_TRANSLATION_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-17",
+      "title": "Canonical LO Downstream Governed Projection Contract V1",
+      "version": "1.0.0",
+      "sha256": "e4dc28d789363912331d3341029b475000cea4dabaa9cc756add076a1371fe5e",
+      "relativePath": "loan-originator-cassette/17_CANONICAL_LO_DOWNSTREAM_PROJECTION_CONTRACT_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-18",
+      "title": "Canonical LO Privacy, Compliance, and Scope Boundary Contract V1",
+      "version": "1.0.0",
+      "sha256": "f62ac7fbdf87624d88bb1044c6619b936567077aaa906f083a9e87568a45cda2",
+      "relativePath": "loan-originator-cassette/18_CANONICAL_LO_PRIVACY_COMPLIANCE_SCOPE_BOUNDARY_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    },
+    {
+      "namespace": "more.ba-bible.loan-originator",
+      "documentId": "LO-19",
+      "title": "Canonical Domain-Expert Late-Authority Update Envelope V1",
+      "version": "1.0.0",
+      "sha256": "d5414d36babbfb5423831e5a5c8709ad50efa6ce710cc3f994f8ad304d12896f",
+      "relativePath": "loan-originator-cassette/19_CANONICAL_LO_DOMAIN_EXPERT_UPDATE_ENVELOPE_V1.md",
+      "sourceUrl": null,
+      "authorityClass": "MORE_CANONICAL_LO_VERTICAL_REFERENCE",
+      "authorityNotes": [
+        "Frozen canonical Loan Originator authority bytes; source reference only.",
+        "This document is not customer evidence, authorization, a plan commitment, or a substitute for current regulated facts."
+      ]
+    }
+  ]
+}

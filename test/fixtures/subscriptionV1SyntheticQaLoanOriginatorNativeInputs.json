@@ -1,0 +1,1962 @@
+{
+  "cases": [
+    {
+      "case_id": "COHORT-V1-LO-A",
+      "native_inputs_sha256": "bdd67e51b9a28ee0adada7cd7ee5d9113e6858f07fab989d0456e102322649f9",
+      "native_inputs": {
+        "answers": {
+          "LO_COND_13_CONVERSION_FALLOUT_CYCLE": null,
+          "LO_COND_14_ECONOMICS": null,
+          "LO_COND_15_CONTRADICTION_CLARIFICATION": null,
+          "LO_CORE_01_BUSINESS_SCOPE": "I am an individual originator at a retail mortgage lender. I do not own the company or manage the processing and underwriting staff. Shared staff are assigned through the company.\n\nI have no direct reports or team member MORE Profile IDs. The processors and underwriters are shared colleagues. I have not done a time study or worked out a cost case for more support.",
+          "LO_CORE_02_PRIMARY_GOAL": "I want to go from 24 funded loans to 36 over the next twelve months. At the same average loan size that would be $12.6M. I have not filled out a detailed 1-3-5 plan yet.\n\nI want 36 funded loans with good service and a week I can sustain. Tuesday and Thursday from three-thirty are family and pickup time; other mornings and some early evenings can work. In two years I would like less variation in the business and in how late I am working. In three years I would like to be sharing more of what I know with colleagues. In five to seven years I want a steady practice and time for my family. I have not attached a production number to every one of those stages.",
+          "LO_CORE_03_PRODUCTION_WINDOWS": "From September 1, 2025 through August 31, 2026, I funded 24 loans totaling $8,400,000, averaging $350,000. There were 20 purchase loans and 4 refinances. That is my production, not the lender's total. I have not pulled my compensation and expense records together for this. I do not have a useful breakdown of the cost of shared support either.",
+          "LO_CORE_04_PURPOSE_APPLICABILITY": "From September 1, 2025 through August 31, 2026, I funded 24 loans totaling $8,400,000, averaging $350,000. There were 20 purchase loans and 4 refinances. That is my production, not the lender's total. I have not pulled my compensation and expense records together for this. I do not have a useful breakdown of the cost of shared support either.",
+          "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.\n\nI would follow up with a professional I know about something they asked me, then contact a past customer. I like a useful one-to-one conversation. I have a partner presentation I have put off while working on the slides, which is frustrating because I know the subject. I would need to use material the company allows. I would try to get meetings on the calendar, though I would not know how many I could arrange today.",
+          "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.",
+          "LO_CORE_07_OPPORTUNITY_FUNNEL": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.\n\nI have not supplied the application drop-off reasons, partner contribution report, service timing, follow-up record, workload study, compensation and expenses, or company requirements. Those would need to be pulled together.",
+          "LO_CORE_08_RELATIONSHIP_SYSTEMS": "Active files live in the loan origination system. I use the company CRM, a calendar and checklists for conversations and handoffs. I coordinate with processing and underwriting. I do not have good cycle-time or follow-up completion figures to give you. I have not included our company rules or approved materials in this intake.\n\nMy manager reviews active work, but partner development does not get the same regular attention. My partner and I compare our family schedule on Sunday. File preparation and checklists are dependable for me; reaching out is easier to move to next week. I tried a revised customer explanation after my manager approved it and kept some of the changes. I have not settled on a regular outside accountability arrangement.",
+          "LO_CORE_09_TEAM_CAPACITY": "I have no direct reports or team member MORE Profile IDs. The processors and underwriters are shared colleagues. I have not done a time study or worked out a cost case for more support.\n\nI am an individual originator at a retail mortgage lender. I do not own the company or manage the processing and underwriting staff. Shared staff are assigned through the company.",
+          "LO_CORE_10_PLATFORM_CAPABILITY": "Active files live in the loan origination system. I use the company CRM, a calendar and checklists for conversations and handoffs. I coordinate with processing and underwriting. I do not have good cycle-time or follow-up completion figures to give you. I have not included our company rules or approved materials in this intake.\n\nI will make individual partner calls and ask for feedback on how I explain things. I would like to get that presentation done too. I will not guess about a customer's options or promise an approval. The approved material matters, but I can spend longer on the wording than I meant to. I would like to feel more ready to put a date in the calendar.",
+          "LO_CORE_11_OPERATOR_DIAGNOSIS": "I keep getting ready for the next conversation without always having it. The presentation I postponed still bothers me. Then I can sit down with one person and have a good conversation without any slides. I do not quite understand why one feels so much harder. Some of the extra preparation is useful, but I cannot honestly say all of it is.",
+          "LO_CORE_12_ACCOUNTABILITY_EXECUTION": "My manager reviews active work, but partner development does not get the same regular attention. My partner and I compare our family schedule on Sunday. File preparation and checklists are dependable for me; reaching out is easier to move to next week. I tried a revised customer explanation after my manager approved it and kept some of the changes. I have not settled on a regular outside accountability arrangement.\n\nI will make individual partner calls and ask for feedback on how I explain things. I would like to get that presentation done too. I will not guess about a customer's options or promise an approval. The approved material matters, but I can spend longer on the wording than I meant to. I would like to feel more ready to put a date in the calendar."
+        },
+        "question_states": {
+          "LO_COND_13_CONVERSION_FALLOUT_CYCLE": "UNANSWERED",
+          "LO_COND_14_ECONOMICS": "UNANSWERED",
+          "LO_COND_15_CONTRADICTION_CLARIFICATION": "UNANSWERED",
+          "LO_CORE_01_BUSINESS_SCOPE": "ANSWERED",
+          "LO_CORE_02_PRIMARY_GOAL": "ANSWERED",
+          "LO_CORE_03_PRODUCTION_WINDOWS": "ANSWERED",
+          "LO_CORE_04_PURPOSE_APPLICABILITY": "ANSWERED",
+          "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK": "ANSWERED",
+          "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK": "ANSWERED",
+          "LO_CORE_07_OPPORTUNITY_FUNNEL": "UNANSWERED",
+          "LO_CORE_08_RELATIONSHIP_SYSTEMS": "ANSWERED",
+          "LO_CORE_09_TEAM_CAPACITY": "ANSWERED",
+          "LO_CORE_10_PLATFORM_CAPABILITY": "UNANSWERED",
+          "LO_CORE_11_OPERATOR_DIAGNOSIS": "ANSWERED",
+          "LO_CORE_12_ACCOUNTABILITY_EXECUTION": "UNANSWERED"
+        },
+        "typed_evidence": {
+          "accountability_priorities": {
+            "period_or_not_temporal": "CURRENT_AND_TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "application_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "approval_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "business_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "capacity_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "close_fund_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "compensation_revenue_basis": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_corrected_claim": {
+            "period_or_not_temporal": "DECLARED_BY_CORRECTION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_evidence_ids": {
+            "period_or_not_temporal": "SAME_AS_CONFLICTING_CLAIMS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_explanation": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_resolution_state": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_supersession_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_type": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_unresolved_reason": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_affected_scope": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_customer_explanation": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_displayed_derived_rate": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_materiality": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_trigger_evidence": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_authority_source_date": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_categories": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "Business comes from professional relationships, past customers and direct inquiries.",
+              "json_pointer": "/business_source_observations/relationships_and_pipeline_evidence",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "PAST_CUSTOMER"
+            ]
+          },
+          "crn_contact_use_authority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_data_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_maintained_state": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_meaningful_size": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_recapture_authority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_repeat_refi_referral_outcomes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_servicing_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "cycle_aging_measure": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "decision_control_scope": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_assumption_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_currency_units": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_scope": {
+            "period_or_not_temporal": "TRAILING_AND_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_sensitivity_range": {
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_sustainable_capacity": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fallout_count": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fallout_reason_categories": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fixed_business_cost": {
+            "period_or_not_temporal": "TRAILING_OR_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_terminal_definition": {
+            "period_or_not_temporal": "CURRENT_DEFINITION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_12m": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": {
+              "as_of": "2026-08-31",
+              "basis": "FUNDINGS_REPORTED_IN_WINDOW",
+              "end": "2026-08-31",
+              "start": "2025-09-01",
+              "unit": "funded loans"
+            },
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 24
+          },
+          "funded_units_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_by_purpose_12m": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_by_purpose_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_volume_12m": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": {
+              "as_of": "2026-08-31",
+              "basis": "FUNDINGS_REPORTED_IN_WINDOW",
+              "end": "2026-08-31",
+              "start": "2025-09-01",
+              "unit": "USD funded principal volume"
+            },
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 8400000
+          },
+          "funded_volume_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_volume_by_purpose_12m": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_cohort_basis": {
+            "period_or_not_temporal": "DECLARED_COHORT",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_data_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_purpose": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_window": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_metric": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "FUNDED_UNITS"
+          },
+          "goal_priority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_purpose_scope": {
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "goal_target_value": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 36
+          },
+          "goal_unit_currency": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "funded loans"
+          },
+          "goal_why_narrative": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "provenance": {
+              "exact_excerpt": "I want 36 funded loans with good service and a week I can sustain. Tuesday and Thursday from three-thirty are family and pickup time; other mornings and some early evenings can work. In two years I would like less variation in the business and in how late I am working. In three years I would like to be sharing more of what I know with colleagues. In five to seven years I want a steady practice and time for my family. I have not attached a production number to every one of those stages.",
+              "json_pointer": "/business_source_observations/goal_meaning_and_horizons",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "I want 36 funded loans with good service and a week I can sustain. Tuesday and Thursday from three-thirty are family and pickup time; other mornings and some early evenings can work. In two years I would like less variation in the business and in how late I am working. In three years I would like to be sharing more of what I know with colleagues. In five to seven years I want a steady practice and time for my family. I have not attached a production number to every one of those stages."
+          },
+          "gross_amount_per_funded_or_period": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "highest_value_lo_work": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "lock_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "mixed_cohort_separability": {
+            "period_or_not_temporal": "SAME_AS_METRIC",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_affected_scope": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_alternative_explanations": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_confidence": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_desired_compounding_outcome": {
+            "period_or_not_temporal": "FORWARD_LOOKING",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_hypothesis_description": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I keep getting ready for the next conversation without always having it. The presentation I postponed still bothers me. Then I can sit down with one person and have a good conversation without any slides. I do not quite understand why one feels so much harder. Some of the extra preparation is useful, but I cannot honestly say all of it is.",
+              "json_pointer": "/business_source_observations/perceived_constraint_and_counterexample",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "I keep getting ready for the next conversation without always having it. The presentation I postponed still bothers me. Then I can sit down with one person and have a good conversation without any slides. I do not quite understand why one feels so much harder. Some of the extra preparation is useful, but I cannot honestly say all of it is."
+          },
+          "operator_hypothesis_type": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_supporting_observations": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "opportunity_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "opportunity_generation_model": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_active_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_activity_cadence": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_attribution_quality": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_meaningful_size_or_scope": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_outcomes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_productive_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_relationship_or_channel": {
+            "period_or_not_temporal": "CURRENT_CLASSIFICATION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_source_type": {
+            "period_or_not_temporal": "CURRENT_CLASSIFICATION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_sources": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "provenance": {
+              "exact_excerpt": "Business comes from professional relationships, past customers and direct inquiries.",
+              "json_pointer": "/business_source_observations/relationships_and_pipeline_evidence",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "professional relationships",
+              "past customers",
+              "direct inquiries"
+            ]
+          },
+          "osn_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "other_purpose_applicability": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "other_residential_purposes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "overflow_backlog": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "pending_open_share": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_affected_scope": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_business_effect": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limit_category": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limit_description": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limits": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_materiality": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_models": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "RETAIL_DIRECT"
+            ]
+          },
+          "platform_volatile_fact_flag": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_workaround": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_actual_execution": {
+            "period_or_not_temporal": "TRAILING_90_DAYS_OR_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_commitment": {
+            "period_or_not_temporal": "CURRENT_COMMITMENT_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_learning": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_miss_reason": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_next_review": {
+            "period_or_not_temporal": "FUTURE_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_outcome": {
+            "period_or_not_temporal": "TRAILING_90_DAYS_OR_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_state": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_strategy_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_target_cadence": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "producing_status": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "PRODUCING"
+          },
+          "production_as_of_date": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "AS_OF_DATE",
+            "provenance": {
+              "exact_excerpt": "From September 1, 2025 through August 31, 2026",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "2026-08-31"
+          },
+          "production_data_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_precision": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_purpose_segments": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "SAME_AS_METRIC",
+            "provenance": {
+              "exact_excerpt": "That is my production, not the lender's total.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "purchase_active_transaction": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "purchase_applicability": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "There were 20 purchase loans and 4 refinances.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "APPLICABLE"
+          },
+          "purchase_qualified_preapproved": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "purpose_stage_applicability": {
+            "period_or_not_temporal": "CURRENT_DEFINITION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "refinance_active_loan": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "refinance_applicability": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "There were 20 purchase loans and 4 refinances.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "APPLICABLE"
+          },
+          "refinance_qualified": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "relationship_systems": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_REVIEW_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "role_types": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "INDIVIDUAL_PRODUCER"
+            ]
+          },
+          "salary_draw_branch_distinctions": {
+            "period_or_not_temporal": "TRAILING_OR_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "service_quality_effect": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "sustainable_capacity": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_action": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "provenance": {
+              "exact_excerpt": "I use the company CRM, a calendar and checklists for conversations and handoffs.",
+              "json_pointer": "/business_source_observations/systems_and_service",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "conversations and handoffs"
+          },
+          "system_automation_personal": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_delivery_channel": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_frequency": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_leading_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_network_audience": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_observed_outcome": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_relationship_depth": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_segmentation": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_stop_adapt_condition": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_tool": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I use the company CRM, a calendar and checklists for conversations and handoffs.",
+              "json_pointer": "/business_source_observations/systems_and_service",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "company CRM, a calendar and checklists"
+          },
+          "team_support_state": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "The processors and underwriters are shared colleagues.",
+              "json_pointer": "/business_source_observations/team_and_scope",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-A.BA_RAW.json",
+              "raw_sha256": "9290a2f13c1ef960b8af206c76320b7e5407181597c07b83569d22f5fdec3669"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "SUPPORTED"
+          },
+          "variable_business_cost_per_funded": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "vertical_confirmation": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_category": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_load": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_owner_handoff": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_ownership_rows": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          }
+        }
+      }
+    },
+    {
+      "case_id": "COHORT-V1-LO-B",
+      "native_inputs_sha256": "3ea3bb3f9f21482db2f4219cdba96be6848c2e50a12e010bfa3044f6a77b27db",
+      "native_inputs": {
+        "answers": {
+          "LO_COND_13_CONVERSION_FALLOUT_CYCLE": null,
+          "LO_COND_14_ECONOMICS": null,
+          "LO_COND_15_CONTRADICTION_CLARIFICATION": null,
+          "LO_CORE_01_BUSINESS_SCOPE": "I am an individual originator at a retail mortgage lender. I do not own the company or manage the processing and underwriting staff. Shared staff are assigned through the company.\n\nI have no direct reports or team member MORE Profile IDs. The processors and underwriters are shared colleagues. I have not done a time study or worked out a cost case for more support.",
+          "LO_CORE_02_PRIMARY_GOAL": "I want to go from 24 funded loans to 36 over the next twelve months. At the same average loan size that would be $12.6M. I have not filled out a detailed 1-3-5 plan yet.\n\nI want 36 funded loans and less of the feeling that I am catching up all the time. We compare family schedules each week because the same hours are not always free. In two years I want the business to be more predictable, and in three I would like to have money put aside without feeling constantly on call. In five to seven years I want room for family and community as well as work. I have not worked out whether that means a team or a different way of running my own week.",
+          "LO_CORE_03_PRODUCTION_WINDOWS": "From September 1, 2025 through August 31, 2026, I funded 24 loans totaling $8,400,000, averaging $350,000. There were 20 purchase loans and 4 refinances. That is my production, not the lender's total. I have not pulled my compensation and expense records together for this. I do not have a useful breakdown of the cost of shared support either.",
+          "LO_CORE_04_PURPOSE_APPLICABILITY": "From September 1, 2025 through August 31, 2026, I funded 24 loans totaling $8,400,000, averaging $350,000. There were 20 purchase loans and 4 refinances. That is my production, not the lender's total. I have not pulled my compensation and expense records together for this. I do not have a useful breakdown of the cost of shared support either.",
+          "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.\n\nI would contact a past customer or professional I know, ask what was happening and see whether I could help or make an introduction. I enjoy explaining something that has been confusing. I often come away from a meeting with a lot of energy. The follow-up might be only a small thing, but if it stays in phone notes it can get lost. That happened recently and I felt terrible about it.",
+          "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.",
+          "LO_CORE_07_OPPORTUNITY_FUNNEL": "Business comes from professional relationships, past customers and direct inquiries. I have not matched every funded loan back to a partner, so I cannot give you a dependable partner contribution report. The contact export has 300 rows, including older inquiries that need review. I have not counted which of those are real working relationships. I also have not lined up applications and fundings with the reasons files stopped along the way.\n\nI have not supplied the application drop-off reasons, partner contribution report, service timing, follow-up record, workload study, compensation and expenses, or company requirements. Those would need to be pulled together.",
+          "LO_CORE_08_RELATIONSHIP_SYSTEMS": "Active files live in the loan origination system. I use the company CRM, a calendar and checklists for conversations and handoffs. I coordinate with processing and underwriting. I do not have good cycle-time or follow-up completion figures to give you. I have not included our company rules or approved materials in this intake.\n\nMy manager is there for active-file questions, but we are not regularly looking at relationship follow-up. Sending client updates after our file review has worked well, even during busy weeks. The fixed daily admin hour I tried before that kept getting moved. I would like help keeping track of the smaller promises too. I have not picked a new routine or a regular check-in time yet.",
+          "LO_CORE_09_TEAM_CAPACITY": "I have no direct reports or team member MORE Profile IDs. The processors and underwriters are shared colleagues. I have not done a time study or worked out a cost case for more support.\n\nI am an individual originator at a retail mortgage lender. I do not own the company or manage the processing and underwriting staff. Shared staff are assigned through the company.",
+          "LO_CORE_10_PLATFORM_CAPABILITY": "Active files live in the loan origination system. I use the company CRM, a calendar and checklists for conversations and handoffs. I coordinate with processing and underwriting. I do not have good cycle-time or follow-up completion figures to give you. I have not included our company rules or approved materials in this intake.\n\nI am willing to call people, ask for introductions and be more organized about what I promise. I do not want to mislead someone or promise a result I cannot control. I find it hard to say no when somebody needs help, even when my day is already full. A fixed daily timetable has not worked very well with our family schedule. I am open to trying another way of keeping the work visible.",
+          "LO_CORE_11_OPERATOR_DIAGNOSIS": "I think I make more promises than I can hold in my head. I can leave a meeting feeling good, then discover later that I have not done a simple follow-up. I do not know how often that happens or how much business it costs. The client updates are much more reliable now. I wish the other loose ends were as easy to see.",
+          "LO_CORE_12_ACCOUNTABILITY_EXECUTION": "My manager is there for active-file questions, but we are not regularly looking at relationship follow-up. Sending client updates after our file review has worked well, even during busy weeks. The fixed daily admin hour I tried before that kept getting moved. I would like help keeping track of the smaller promises too. I have not picked a new routine or a regular check-in time yet.\n\nI am willing to call people, ask for introductions and be more organized about what I promise. I do not want to mislead someone or promise a result I cannot control. I find it hard to say no when somebody needs help, even when my day is already full. A fixed daily timetable has not worked very well with our family schedule. I am open to trying another way of keeping the work visible."
+        },
+        "question_states": {
+          "LO_COND_13_CONVERSION_FALLOUT_CYCLE": "UNANSWERED",
+          "LO_COND_14_ECONOMICS": "UNANSWERED",
+          "LO_COND_15_CONTRADICTION_CLARIFICATION": "UNANSWERED",
+          "LO_CORE_01_BUSINESS_SCOPE": "ANSWERED",
+          "LO_CORE_02_PRIMARY_GOAL": "ANSWERED",
+          "LO_CORE_03_PRODUCTION_WINDOWS": "ANSWERED",
+          "LO_CORE_04_PURPOSE_APPLICABILITY": "ANSWERED",
+          "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK": "ANSWERED",
+          "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK": "ANSWERED",
+          "LO_CORE_07_OPPORTUNITY_FUNNEL": "UNANSWERED",
+          "LO_CORE_08_RELATIONSHIP_SYSTEMS": "ANSWERED",
+          "LO_CORE_09_TEAM_CAPACITY": "ANSWERED",
+          "LO_CORE_10_PLATFORM_CAPABILITY": "UNANSWERED",
+          "LO_CORE_11_OPERATOR_DIAGNOSIS": "ANSWERED",
+          "LO_CORE_12_ACCOUNTABILITY_EXECUTION": "UNANSWERED"
+        },
+        "typed_evidence": {
+          "accountability_priorities": {
+            "period_or_not_temporal": "CURRENT_AND_TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "application_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "approval_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "business_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "capacity_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "close_fund_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "compensation_revenue_basis": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_corrected_claim": {
+            "period_or_not_temporal": "DECLARED_BY_CORRECTION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_evidence_ids": {
+            "period_or_not_temporal": "SAME_AS_CONFLICTING_CLAIMS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_explanation": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_resolution_state": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_supersession_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_type": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "contradiction_unresolved_reason": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_affected_scope": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_customer_explanation": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_displayed_derived_rate": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_materiality": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "conversion_trigger_evidence": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_authority_source_date": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_categories": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "Business comes from professional relationships, past customers and direct inquiries.",
+              "json_pointer": "/business_source_observations/relationships_and_pipeline_evidence",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "PAST_CUSTOMER"
+            ]
+          },
+          "crn_contact_use_authority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_data_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_maintained_state": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_meaningful_size": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_recapture_authority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_repeat_refi_referral_outcomes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_servicing_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "crn_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "cycle_aging_measure": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "decision_control_scope": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_assumption_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_currency_units": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_scope": {
+            "period_or_not_temporal": "TRAILING_AND_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_sensitivity_range": {
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "economic_sustainable_capacity": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fallout_count": {
+            "period_or_not_temporal": "SAME_AS_TRIGGER",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fallout_reason_categories": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "fixed_business_cost": {
+            "period_or_not_temporal": "TRAILING_OR_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_terminal_definition": {
+            "period_or_not_temporal": "CURRENT_DEFINITION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_12m": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": {
+              "as_of": "2026-08-31",
+              "basis": "FUNDINGS_REPORTED_IN_WINDOW",
+              "end": "2026-08-31",
+              "start": "2025-09-01",
+              "unit": "funded loans"
+            },
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 24
+          },
+          "funded_units_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_by_purpose_12m": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_units_by_purpose_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_volume_12m": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": {
+              "as_of": "2026-08-31",
+              "basis": "FUNDINGS_REPORTED_IN_WINDOW",
+              "end": "2026-08-31",
+              "start": "2025-09-01",
+              "unit": "USD funded principal volume"
+            },
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 8400000
+          },
+          "funded_volume_90d": {
+            "period_or_not_temporal": "TRAILING_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funded_volume_by_purpose_12m": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_cohort_basis": {
+            "period_or_not_temporal": "DECLARED_COHORT",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_data_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_purpose": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "funnel_window": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_metric": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "FUNDED_UNITS"
+          },
+          "goal_priority": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_purpose_scope": {
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "goal_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "goal_target_value": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": 36
+          },
+          "goal_unit_currency": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "FORWARD_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "I want to go from 24 funded loans to 36 over the next twelve months.",
+              "json_pointer": "/business_source_observations/desired_business_quantity",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "funded loans"
+          },
+          "goal_why_narrative": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "provenance": {
+              "exact_excerpt": "I want 36 funded loans and less of the feeling that I am catching up all the time. We compare family schedules each week because the same hours are not always free. In two years I want the business to be more predictable, and in three I would like to have money put aside without feeling constantly on call. In five to seven years I want room for family and community as well as work. I have not worked out whether that means a team or a different way of running my own week.",
+              "json_pointer": "/business_source_observations/goal_meaning_and_horizons",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "I want 36 funded loans and less of the feeling that I am catching up all the time. We compare family schedules each week because the same hours are not always free. In two years I want the business to be more predictable, and in three I would like to have money put aside without feeling constantly on call. In five to seven years I want room for family and community as well as work. I have not worked out whether that means a team or a different way of running my own week."
+          },
+          "gross_amount_per_funded_or_period": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "highest_value_lo_work": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "lock_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "mixed_cohort_separability": {
+            "period_or_not_temporal": "SAME_AS_METRIC",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_affected_scope": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_alternative_explanations": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_confidence": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_desired_compounding_outcome": {
+            "period_or_not_temporal": "FORWARD_LOOKING",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_hypothesis_description": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I think I make more promises than I can hold in my head. I can leave a meeting feeling good, then discover later that I have not done a simple follow-up. I do not know how often that happens or how much business it costs. The client updates are much more reliable now. I wish the other loose ends were as easy to see.",
+              "json_pointer": "/business_source_observations/perceived_constraint_and_counterexample",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "I think I make more promises than I can hold in my head. I can leave a meeting feeling good, then discover later that I have not done a simple follow-up. I do not know how often that happens or how much business it costs. The client updates are much more reliable now. I wish the other loose ends were as easy to see."
+          },
+          "operator_hypothesis_type": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "operator_supporting_observations": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "opportunity_count_definition": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "opportunity_generation_model": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_active_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_activity_cadence": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_attribution_quality": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_meaningful_size_or_scope": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_outcomes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_productive_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_relationship_or_channel": {
+            "period_or_not_temporal": "CURRENT_CLASSIFICATION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_source_type": {
+            "period_or_not_temporal": "CURRENT_CLASSIFICATION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "osn_sources": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "provenance": {
+              "exact_excerpt": "Business comes from professional relationships, past customers and direct inquiries.",
+              "json_pointer": "/business_source_observations/relationships_and_pipeline_evidence",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "professional relationships",
+              "past customers",
+              "direct inquiries"
+            ]
+          },
+          "osn_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "other_purpose_applicability": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "other_residential_purposes": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "overflow_backlog": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "pending_open_share": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_affected_scope": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_business_effect": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_control_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limit_category": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limit_description": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_limits": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_materiality": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_models": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "RETAIL_DIRECT"
+            ]
+          },
+          "platform_volatile_fact_flag": {
+            "period_or_not_temporal": "AS_OF_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "platform_workaround": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_actual_execution": {
+            "period_or_not_temporal": "TRAILING_90_DAYS_OR_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_commitment": {
+            "period_or_not_temporal": "CURRENT_COMMITMENT_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_learning": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_miss_reason": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_next_review": {
+            "period_or_not_temporal": "FUTURE_DATE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_outcome": {
+            "period_or_not_temporal": "TRAILING_90_DAYS_OR_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_state": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_strategy_system_link": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "priority_target_cadence": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "producing_status": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I funded 24 loans totaling $8,400,000",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "PRODUCING"
+          },
+          "production_as_of_date": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "AS_OF_DATE",
+            "provenance": {
+              "exact_excerpt": "From September 1, 2025 through August 31, 2026",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "2026-08-31"
+          },
+          "production_data_source": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_precision": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_purpose_segments": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "production_subject_scope": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "SAME_AS_METRIC",
+            "provenance": {
+              "exact_excerpt": "That is my production, not the lender's total.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "INDIVIDUAL"
+          },
+          "purchase_active_transaction": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "purchase_applicability": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "There were 20 purchase loans and 4 refinances.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "APPLICABLE"
+          },
+          "purchase_qualified_preapproved": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "purpose_stage_applicability": {
+            "period_or_not_temporal": "CURRENT_DEFINITION",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "refinance_active_loan": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "refinance_applicability": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "provenance": {
+              "exact_excerpt": "There were 20 purchase loans and 4 refinances.",
+              "json_pointer": "/business_source_observations/production_and_financial_reality",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "APPLICABLE"
+          },
+          "refinance_qualified": {
+            "period_or_not_temporal": "SAME_AS_FUNNEL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "relationship_systems": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_REVIEW_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "role_types": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I am an individual originator at a retail mortgage lender.",
+              "json_pointer": "/business_source_observations/business_and_role",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": [
+              "INDIVIDUAL_PRODUCER"
+            ]
+          },
+          "salary_draw_branch_distinctions": {
+            "period_or_not_temporal": "TRAILING_OR_FORWARD_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "service_quality_effect": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "sustainable_capacity": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_action": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "provenance": {
+              "exact_excerpt": "I use the company CRM, a calendar and checklists for conversations and handoffs.",
+              "json_pointer": "/business_source_observations/systems_and_service",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "conversations and handoffs"
+          },
+          "system_automation_personal": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_delivery_channel": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_frequency": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_leading_measure": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_network_audience": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_observed_outcome": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_owner": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_relationship_depth": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_segmentation": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_stop_adapt_condition": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "system_tool": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "I use the company CRM, a calendar and checklists for conversations and handoffs.",
+              "json_pointer": "/business_source_observations/systems_and_service",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "company CRM, a calendar and checklists"
+          },
+          "team_support_state": {
+            "confidence": "FICTIONAL_CUSTOMER_REPORT_NOT_VERIFIED",
+            "evidence_class": "OBSERVED",
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "provenance": {
+              "exact_excerpt": "The processors and underwriters are shared colleagues.",
+              "json_pointer": "/business_source_observations/team_and_scope",
+              "kind": "AUTHOR_CREATED_FICTIONAL_RAW_INTAKE",
+              "raw_file": "COHORT-V1-LO-B.BA_RAW.json",
+              "raw_sha256": "d611c9984c0c07049de6b8dc6f944dd93d36bfce2b01062c1be2efe14708e729"
+            },
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": "SUPPORTED"
+          },
+          "variable_business_cost_per_funded": {
+            "period_or_not_temporal": "TRAILING_12_MONTHS",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "vertical_confirmation": {
+            "period_or_not_temporal": "NOT_TEMPORAL",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_category": {
+            "period_or_not_temporal": "CURRENT_SCOPE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_load": {
+            "period_or_not_temporal": "DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_owner_handoff": {
+            "period_or_not_temporal": "CURRENT_AS_OF_CAPTURE",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          },
+          "work_ownership_rows": {
+            "period_or_not_temporal": "CURRENT_AND_DECLARED_WINDOW",
+            "subject_scope": "FICTIONAL_INDIVIDUAL_DRAFT_NOT_LIVE_CONFIRMED",
+            "value": null
+          }
+        }
+      }
+    }
+  ],
+  "contract_id": "subscription-v1-synthetic-qa-lo-native-input-fixtures-v1",
+  "data_status": "FICTIONAL_OFFLINE_TEST_FIXTURE_ONLY"
+}

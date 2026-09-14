@@ -8,6 +8,8 @@ import {
   textArray,
   unique,
 } from './utils.js'
+import { isLoanOriginatorProjection } from './verticalScope.js'
+import { validateGeneralizedPlan135V1 } from './plan135.js'
 
 const NAV = Object.freeze([
   ['where', 'Where You Are'],
@@ -205,8 +207,12 @@ export function validateProgressiveBusinessTwin(projection) {
   invariant(Object.values(customer.objects).every((object) => object.object_id && object.destination && object.display_payload && Array.isArray(object.drawer_payload) && object.return_state_id), 'BA_PD_MEANINGFUL_OBJECT_CONTRACT')
   invariant(Object.values(projection.internalTrace.objects).every((object) => object.source_authority && Array.isArray(object.lineage_refs)), 'BA_PD_INTERNAL_LINEAGE_MISSING')
   invariant(customer.destinations.futures.items.reduce((sum, future) => sum + future.probability, 0) === 100, 'BA_PD_CUSTOMER_PROBABILITY_TOTAL')
-  invariant(customer.destinations.plan.ways.length === 3 && customer.destinations.plan.ways.filter((way) => way.status === 'OPEN').length === 2, 'BA_PD_CUSTOMER_PLAN_WAYS')
-  invariant(customer.destinations.plan.strategies.length === 5, 'BA_PD_CUSTOMER_PLAN_STRATEGIES')
+  const loOpenPlan = projection.internalTrace.bindings?.verticalId === 'loan_originator'
+  invariant(customer.destinations.plan.ways.length === 3 && customer.destinations.plan.ways.filter((way) => way.status === 'OPEN').length === (loOpenPlan ? 3 : 2), 'BA_PD_CUSTOMER_PLAN_WAYS')
+  invariant(customer.destinations.plan.strategies.length === (loOpenPlan ? 0 : 5), 'BA_PD_CUSTOMER_PLAN_STRATEGIES')
+  if (loOpenPlan) {
+    invariant(customer.destinations.plan.planState === 'LO_OPEN_DRAFT' && customer.destinations.plan.openStrategyPositions === 15 && customer.destinations.plan.ways.every((way) => way.title === null) && !customer.destinations.plan.completion.way1 && !customer.destinations.plan.completion.way2 && !customer.destinations.plan.completion.way3, 'BA_PD_CUSTOMER_LO_OPEN_PLAN_STATE')
+  }
   invariant(customer.layerContract.stop_after === 2 && customer.layerContract.layer_3_exists === false, 'BA_PD_LAYER_THREE_PROHIBITED')
   const customerText = JSON.stringify(customer)
   const technicalLeak = customerText.match(/(?:[a-f0-9]{64}|source(?:[_ ]?path|[_ ]?ref|[_ ]?future[_ ]?id)|evidence[_ ]?ref|lineage[_ ]?ref|vertical[_ ]?authority[_ ]?ref|inspector[_ ]?id|profile[_ ]?id|assessment[_ ]?id|chain.of.thought|relative support|not probability|how we calculate these probabilities)/iu)
@@ -218,6 +224,11 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
   invariant(source?.identity && source?.inspectors, 'BA_PD_SOURCE_VIEW_MODEL_MISSING')
   invariant(probability?.contract_id === 'five-futures-probability-v1', 'BA_PD_SOURCE_PROBABILITY_MISSING')
   invariant(plan135?.contract_id === 'generalized-1-3-5-plan-v1', 'BA_PD_SOURCE_PLAN_MISSING')
+  const loanOriginator = isLoanOriginatorProjection(source, bindings)
+  if (loanOriginator) {
+    validateGeneralizedPlan135V1(plan135)
+    invariant(plan135.plan_state === 'LO_OPEN_DRAFT', 'BA_PD_CUSTOMER_LO_PLAN_SCOPE')
+  }
   const customerObjects = {}
   const internalObjects = {}
   const projectionTrace = []
@@ -249,6 +260,11 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
   }
 
   const cards = allCards(source)
+  if (loanOriginator) {
+    const requiredIds = ['combined-soi-current', 'attributed-contacts-estimate', 'top-of-mind-current', 'monthly-closing-goal', 'annual-closing-goal', 'current-live-contacts', 'current-active-pipeline', 'relationship-asset-target', 'live-contact-goal-pace', 'combined-pipeline-target']
+    invariant(requiredIds.every((id) => findById(cards, id)?.inspectorId), 'BA_PD_LO_SOURCE_CARDS_INCOMPLETE')
+    invariant(requiredIds.every((id) => !/\bSOI\b|\bclosings?\b|\blistings?\b|\bbuyers?\b/iu.test(findById(cards, id).label)), 'BA_PD_LO_SOURCE_CARD_DOMAIN_MISMATCH')
+  }
   const combined = findById(cards, 'combined-soi-current') || findByLabel(cards, /combined soi|contacts/iu)
   const attributed = findById(cards, 'attributed-contacts-estimate') || findByLabel(cards, /attributed contacts/iu)
   const topMind = findById(cards, 'top-of-mind-current') || findByLabel(cards, /top.of.mind/iu)
@@ -259,12 +275,12 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
   const relationshipTarget = findById(cards, 'relationship-asset-target')
   const liveTarget = findById(cards, 'live-contact-goal-pace')
   const pipelineTarget = findById(cards, 'combined-pipeline-target')
-  const listingTarget = cards.find((item) => /active listing|listing target/iu.test(item.label) && /goal.supporting|modeled/iu.test(item.qualifier || ''))
-  const buyerTarget = cards.find((item) => /active buyer|buyer target/iu.test(item.label) && /goal.supporting|modeled/iu.test(item.qualifier || ''))
+  const listingTarget = !loanOriginator && cards.find((item) => /active listing|listing target/iu.test(item.label) && /goal.supporting|modeled/iu.test(item.qualifier || ''))
+  const buyerTarget = !loanOriginator && cards.find((item) => /active buyer|buyer target/iu.test(item.label) && /goal.supporting|modeled/iu.test(item.qualifier || ''))
   const shortTerm = findById(cards, 'short-term-mindshare') || findByLabel(cards, /short.term.*mindshare/iu)
   const longTerm = findById(cards, 'long-term-touch-floor') || findByLabel(cards, /long.term.*cadence/iu)
 
-  const headlineDisplays = [
+  const headlineDisplays = loanOriginator ? [combined, attributed, topMind, monthlyGoal].filter(Boolean).map(displayFromCard) : [
     combined && { ...displayFromCard(combined), title: 'Combined SOI / Contacts' },
     attributed && { ...displayFromCard(attributed), title: `Estimated ${source.identity.firstName}-attributed contacts` },
     topMind && { ...displayFromCard(topMind), title: 'Believed top-of-mind relationships' },
@@ -277,7 +293,7 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
   }))
   invariant(whereMetrics.length === 4, 'BA_PD_WHERE_HEADLINE_METRICS_INCOMPLETE')
 
-  const todayDisplays = [
+  const todayDisplays = loanOriginator ? [attributed, topMind, currentLive, currentPipeline].filter(Boolean).map(displayFromCard) : [
     attributed && { ...displayFromCard(attributed), title: `${source.identity.firstName}-attributed contacts` },
     topMind && { ...displayFromCard(topMind), title: 'Top-of-mind relationships' },
     currentLive && { ...displayFromCard(currentLive), value: compactUnknown(currentLive.value), title: 'Current live-contact pace' },
@@ -286,14 +302,14 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
   const todaySources = [attributed, topMind, currentLive, currentPipeline].filter(Boolean)
   const todayCards = todaySources.map((item, index) => ({ ...todayDisplays[index], objectId: register({ objectId: `where-today-${index + 1}`, destination: 'where', surface: 'today_state', display: todayDisplays[index], inspectorId: item.inspectorId, sourceAuthority: item.inspectorId, drawerType: 'number' }) }))
 
-  const goalDisplays = [
+  const goalDisplays = loanOriginator ? [monthlyGoal, annualGoal].filter(Boolean).map(displayFromCard) : [
     monthlyGoal && { ...displayFromCard(monthlyGoal), title: 'Closings' },
     annualGoal && { ...displayFromCard(annualGoal), value: annualizedValue(annualGoal.value), title: 'Closings' },
   ].filter(Boolean)
   const goalSources = [monthlyGoal, annualGoal].filter(Boolean)
   const goalCards = goalSources.map((item, index) => ({ ...goalDisplays[index], objectId: register({ objectId: `where-goal-${index + 1}`, destination: 'where', surface: 'goal_state', display: goalDisplays[index], inspectorId: item.inspectorId, sourceAuthority: item.inspectorId, drawerType: 'number' }) }))
 
-  const requiredSpecs = [
+  const requiredSpecs = loanOriginator ? [relationshipTarget, liveTarget, pipelineTarget].filter(Boolean).map((item) => ({ source: item, display: displayFromCard(item) })) : [
     relationshipTarget && { source: relationshipTarget, display: { ...displayFromCard(relationshipTarget), title: 'Qualified relationship asset', qualifier: 'Goal-Supporting Model' } },
     liveTarget && { source: liveTarget, display: { ...displayFromCard(liveTarget), title: 'Live contacts', qualifier: 'Goal-Supporting Model' } },
     pipelineTarget && { source: pipelineTarget, display: { ...displayFromCard(pipelineTarget), value: monthlyValue(pipelineTarget.value), title: 'Active opportunities', qualifier: 'Goal-Supporting Model' } },
@@ -308,8 +324,12 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
 
   const relationshipInspector = source.businessMap?.engines?.find((engine) => /relationship/iu.test(engine.title))?.inspectorId
   const ownerMechanism = source.why?.mechanisms?.find((mechanism) => /owner|leader|decision|return/iu.test(`${mechanism.label} ${source.why.title}`)) || source.why?.mechanisms?.[0]
-  const ownershipTransfer = isOwnershipTransfer(source)
-  const realitySpecs = [
+  const ownershipTransfer = !loanOriginator && isOwnershipTransfer(source)
+  const realitySpecs = loanOriginator ? [
+    { title: 'Business evidence', text: source.businessMap?.helping?.[0]?.label || 'Review the reported business state and what remains unknown.', inspectorId: combined.inspectorId, tone: 'green' },
+    { title: 'Current constraint', text: source.why.summary, inspectorId: source.why.inspectorId, tone: 'amber' },
+    { title: 'Working explanation', text: ownerMechanism?.label || source.why.title, inspectorId: ownerMechanism?.inspectorId || source.why.inspectorId, tone: 'green' },
+  ] : [
     { title: 'Relationship Asset', text: topMind ? 'You have meaningful relationship equity, but only a relatively small portion is currently believed to be top-of-mind.' : source.businessMap?.helping?.[0]?.label, inspectorId: relationshipInspector || combined.inspectorId, tone: 'green' },
     { title: 'Operating System', text: ownershipTransfer ? 'Follow-up, database management, measurement, and accountability are incomplete or only partially systematic.' : source.why?.mechanisms?.[0]?.label || source.why.summary, inspectorId: source.why?.mechanisms?.[0]?.inspectorId || source.why.inspectorId, tone: 'green' },
     { title: 'Owner Dependence', text: ownershipTransfer ? 'Too much of the operating load still appears to return to you, limiting repeatability and leverage.' : ownerMechanism?.label || source.why.title, inspectorId: ownerMechanism?.inspectorId || source.why.inspectorId, tone: 'green' },
@@ -320,7 +340,7 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
     missing: source.evidence?.categories?.find((item) => item.id === 'missing')?.summary,
     mindChange: source.evidence?.mindChanges,
   }
-  const realities = realitySpecs.map((item, index) => ({ title: item.title, text: item.text, tone: item.tone, objectId: register({ objectId: `where-reality-${index + 1}`, destination: 'where', surface: 'critical_reality', display: { title: item.title, value: item.text, tone: item.tone }, inspectorId: item.inspectorId, sourceAuthority: item.inspectorId, drawerType: index === 0 ? 'territory' : 'mechanism', drawerPayload: index === 0 ? relationshipDrawer(sourceInspector(source, item.inspectorId), relationshipContext) : undefined }) }))
+  const realities = realitySpecs.map((item, index) => ({ title: item.title, text: item.text, tone: item.tone, objectId: register({ objectId: `where-reality-${index + 1}`, destination: 'where', surface: 'critical_reality', display: { title: item.title, value: item.text, tone: item.tone }, inspectorId: item.inspectorId, sourceAuthority: item.inspectorId, drawerType: index === 0 ? 'territory' : 'mechanism', drawerPayload: !loanOriginator && index === 0 ? relationshipDrawer(sourceInspector(source, item.inspectorId), relationshipContext) : undefined }) }))
 
   const probabilityObjects = probability.as_of_state.map((future) => {
     const sourceFuture = source.futures.items.find((item) => item.role === future.role)
@@ -413,15 +433,18 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
     'Quality holds without hidden intervention.',
     'Capacity is actually released instead of creating more management work.',
   ]
-  const proofLabels = moveCustomer?.proof || defaultProofLabels
+  const proofLabels = loanOriginator ? source.move.proof?.map((item) => item.label) : moveCustomer?.proof || defaultProofLabels
+  invariant(proofLabels?.length, 'BA_PD_MOVE_PROOF_EVIDENCE_MISSING')
   const moveProof = proofLabels.map((label, index) => ({ label, objectId: register({ objectId: `move-proof-${index + 1}`, destination: 'move', surface: 'proof_condition', display: { title: label, qualifier: 'Future observation target', tone: 'green' }, inspectorId: source.move.proof?.[Math.min(index, (source.move.proof?.length || 1) - 1)]?.inspectorId || moveInspectorId, epistemicClass: 'FUTURE_OBSERVATION_TARGET', sourceAuthority: source.move.proof?.[Math.min(index, (source.move.proof?.length || 1) - 1)]?.inspectorId || moveInspectorId, drawerType: 'move', fallback: { confidence: 'This is a proof condition to observe, not a current fact.' } }) }))
   const startHere = source.move.firstSteps?.[0]
   invariant(startHere, 'BA_PD_MOVE_START_HERE_MISSING')
   const customerStart = moveCustomer?.start || startHere.text
-  const startObjectId = register({ objectId: 'move-start-here', destination: 'move', surface: 'start_here', display: { title: 'Start Here', value: customerStart, qualifier: 'Small enough to transfer · important enough to matter · repeated often enough to observe', tone: 'violet' }, inspectorId: startHere.inspectorId, sourceAuthority: startHere.inspectorId, drawerType: 'move', drawerPayload: moveDrawer(sourceInspector(source, startHere.inspectorId), source) })
+  const startQualifier = loanOriginator ? 'A proposed first step to discuss and adapt before agreeing to act.' : 'Small enough to transfer · important enough to matter · repeated often enough to observe'
+  const startObjectId = register({ objectId: 'move-start-here', destination: 'move', surface: 'start_here', display: { title: 'Start Here', value: customerStart, qualifier: startQualifier, tone: 'violet' }, inspectorId: startHere.inspectorId, sourceAuthority: startHere.inspectorId, drawerType: 'move', drawerPayload: moveDrawer(sourceInspector(source, startHere.inspectorId), source) })
   const deepDiveObjectId = register({ objectId: 'move-deep-dive', destination: 'move', surface: 'deep_intelligence_entrance', display: { title: 'Why MORE chose this move', value: 'See the deeper intelligence and evidence behind this recommendation.', tone: 'blue' }, inspectorId: moveInspectorId, sourceAuthority: moveInspectorId, drawerType: 'move', drawerPayload: moveDrawer(sourceInspector(source, moveInspectorId), source) })
 
   function projectStrategy(strategy) {
+    if (loanOriginator) return { title: strategy.title, headline: strategy.headline, supportingText: strategy.cadence, flow: [], supportingModel: [strategy.numerical_target?.qualifier].filter(Boolean) }
     if (strategy.mission === 'GROW_RELATIONSHIP_ASSET' && relationshipTarget) {
       const target = firstNumber(relationshipTarget.value)
       const weekly = Number.isFinite(target) ? Math.max(1, Math.round(target / 50)) : null
@@ -512,7 +535,7 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
     { label: 'WHY — Governing Constraint', title: source.why.title, summary: source.why.summary, inspectorId: source.why.inspectorId, tone: 'green' },
     { label: 'Five Futures', title: 'Five conditional trajectories', summary: probabilityObjects.map((item) => item.label).join(', '), inspectorId: source.futures.items[0].inspectorId, tone: 'violet' },
     { label: 'One Move', title: source.move.title, summary: source.move.intervention, inspectorId: moveInspectorId, tone: 'amber' },
-    { label: 'Plan', title: '1 Goal → 1 selected Way → 5 Strategies', summary: plan135.goal.title, inspectorId: plan135.goal.source_ref, tone: 'blue' },
+    { label: 'Plan', title: loanOriginator ? '1 Goal · 3 Ways Open · Strategies Not Yet Established' : '1 Goal → 1 selected Way → 5 Strategies', summary: plan135.goal.title, inspectorId: plan135.goal.source_ref, tone: 'blue' },
   ]
   const evidenceTraceCards = traceCardSpecs.map((item, index) => ({
     label: item.label,
@@ -528,10 +551,10 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
 
   const sortedFutures = [...probabilityObjects].sort((left, right) => right.probability - left.probability)
   const mapCardObjects = {
-    where: register({ objectId: 'layer0-where', destination: 'where', surface: 'layer0_card', display: { title: 'Where You Are', value: combined.value, qualifier: 'Total relationships in your database', tone: 'green' }, inspectorId: combined.inspectorId, sourceAuthority: combined.inspectorId, drawerType: 'number' }),
+    where: register({ objectId: 'layer0-where', destination: 'where', surface: 'layer0_card', display: { title: 'Where You Are', value: combined.value, qualifier: loanOriginator ? combined.label : 'Total relationships in your database', tone: 'green' }, inspectorId: combined.inspectorId, sourceAuthority: combined.inspectorId, drawerType: 'number' }),
     futures: register({ objectId: 'layer0-futures', destination: 'futures', surface: 'layer0_card', display: { title: 'Five Possible Futures', value: `${sortedFutures[0].probability}%`, qualifier: sortedFutures[0].label, tone: 'violet' }, inspectorId: source.futures.items.find((item) => item.role === sortedFutures[0].role)?.inspectorId, sourceAuthority: probability.as_of_state.find((item) => item.role === sortedFutures[0].role)?.source_future_id, drawerType: 'future' }),
     move: register({ objectId: 'layer0-move', destination: 'move', surface: 'layer0_card', display: { title: 'Your One Move', value: source.move.title, qualifier: moveCustomer?.intervention || source.move.intervention, tone: 'amber' }, inspectorId: moveInspectorId, sourceAuthority: moveInspectorId, drawerType: 'move', drawerPayload: moveDrawer(sourceInspector(source, moveInspectorId), source) }),
-    plan: register({ objectId: 'layer0-plan', destination: 'plan', surface: 'layer0_card', display: { title: 'Your Plan', value: '1 Goal · 1 Selected Way · 5 Strategies', qualifier: 'Ways 2 and 3 remain open', tone: 'blue' }, inspectorId: plan135.goal.source_ref, sourceAuthority: plan135.contract_id, drawerType: 'strategy' }),
+    plan: register({ objectId: 'layer0-plan', destination: 'plan', surface: 'layer0_card', display: { title: 'Your Plan', value: loanOriginator ? '1 Goal · 3 Ways Open' : '1 Goal · 1 Selected Way · 5 Strategies', qualifier: loanOriginator ? 'Business strategies are not yet established' : 'Ways 2 and 3 remain open', tone: 'blue' }, inspectorId: plan135.goal.source_ref, sourceAuthority: plan135.contract_id, drawerType: 'strategy' }),
     evidence: register({ objectId: 'layer0-evidence', destination: 'evidence', surface: 'layer0_card', display: { title: 'Evidence', value: `${evidenceCategories[0].value} things known`, qualifier: `${evidenceCategories[1].value} inferred · ${evidenceCategories[2].value} missing`, tone: 'teal' }, inspectorId: evidenceCategorySpecs[0].inspectorId, sourceAuthority: evidenceCategorySpecs[0].inspectorId, drawerType: 'evidence' }),
   }
 
@@ -550,7 +573,7 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
         {
           id: 'where', objectId: mapCardObjects.where, ...customerObjects[mapCardObjects.where].display_payload,
           description: 'See your business as it stands today.',
-          details: [
+          details: loanOriginator ? [topMind, monthlyGoal, pipelineTarget, attributed].map((item) => ({ value: item.value, label: item.label, epistemicClass: classifyEpistemic(item.qualifier) })) : [
             { value: topMind.value, label: 'Top-of-mind relationships', epistemicClass: classifyEpistemic(topMind.qualifier) },
             { value: monthlyGoal.value, label: 'Current closing goal', epistemicClass: classifyEpistemic(monthlyGoal.qualifier) },
             { value: pipelineTarget.value, label: 'Active opportunities in your pipeline', epistemicClass: classifyEpistemic(pipelineTarget.qualifier) },
@@ -569,8 +592,8 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
         },
         {
           id: 'plan', objectId: mapCardObjects.plan, ...customerObjects[mapCardObjects.plan].display_payload,
-          description: 'Turn the move into an observable plan.', icon: '✓',
-          value: 'Execute the plan. Track progress. Create momentum.', qualifier: 'Simple steps. Clear focus. Measurable results.', cta: 'View your plan',
+          description: loanOriginator ? 'Choose the business paths and strategies together.' : 'Turn the move into an observable plan.', icon: '✓',
+          value: loanOriginator ? 'Your goal is clear. The plan is still open.' : 'Execute the plan. Track progress. Create momentum.', qualifier: loanOriginator ? 'No business strategies or action commitments have been established.' : 'Simple steps. Clear focus. Measurable results.', cta: 'View your plan',
         },
         {
           id: 'evidence', objectId: mapCardObjects.evidence, ...customerObjects[mapCardObjects.evidence].display_payload,
@@ -599,15 +622,16 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
       },
       move: {
         eyebrow: 'Your One Move', headline: source.move.title, subhead: moveCustomer?.intervention || source.move.intervention, logic: moveLogic, reasons: moveReasons, proof: moveProof,
-        startHere: { text: customerStart, qualifier: 'Small enough to transfer. Important enough to matter. Repeated often enough to observe.', objectId: startObjectId }, deepDiveObjectId,
+        startHere: { text: customerStart, qualifier: loanOriginator ? startQualifier : 'Small enough to transfer. Important enough to matter. Repeated often enough to observe.', objectId: startObjectId }, deepDiveObjectId,
       },
       plan: {
-        eyebrow: 'Your 1–3–5 Plan', headline: ownershipTransfer && annualGoal ? `Build a business that consistently closes ${annualGoal.value} units a year — while beginning to create leverage.` : plan135.goal.title, subhead: 'One goal. Three ways to get there. Five strategies for Way 1.',
-        goal: { title: plan135.goal.title, monthly: plan135.goal.monthly_display?.replace(/\s*\/\s*month/iu, ''), monthlyLabel: 'closings / month', annual: plan135.goal.annual_display?.replace(/\s*\/\s*year/iu, ''), annualLabel: 'closings / year', horizon: plan135.goal.horizon, classification: plan135.goal.epistemic_class },
+        eyebrow: 'Your 1–3–5 Plan', headline: ownershipTransfer && annualGoal ? `Build a business that consistently closes ${annualGoal.value} units a year — while beginning to create leverage.` : plan135.goal.title, subhead: loanOriginator ? 'Your goal is recorded. All three business paths and their strategies remain open. The One Move below is a separate proposal; any action or timing requires your agreement.' : 'One goal. Three ways to get there. Five strategies for Way 1.',
+        ...(loanOriginator ? { planState: 'LO_OPEN_DRAFT', openStrategyPositions: 15 } : {}),
+        goal: { title: plan135.goal.title, monthly: plan135.goal.monthly_display?.replace(/\s*\/\s*month/iu, ''), monthlyLabel: loanOriginator ? null : 'closings / month', annual: plan135.goal.annual_display?.replace(/\s*\/\s*year/iu, ''), annualLabel: loanOriginator ? null : 'closings / year', horizon: plan135.goal.horizon, classification: plan135.goal.epistemic_class },
         ways: plan135.ways.map((way) => ({ status: way.status, title: way.title, destinationState: way.destination_state || null, whyPriority: way.why_priority || null })),
         strategies: planStrategyObjects,
         oneMove: { status: plan135.one_move.status, title: plan135.one_move.title, intervention: moveCustomer?.intervention || plan135.one_move.intervention, whyAlongside: ownershipTransfer ? 'Build production while beginning leverage. These two work together.' : plan135.one_move.why_alongside, proofBoundary: plan135.one_move.proof_boundary },
-        completion: { goal: true, way1: true, way2: false, way3: false },
+        completion: { goal: true, way1: !loanOriginator, way2: false, way3: false },
       },
       evidence: {
         eyebrow: 'The Evidence', headline: 'See exactly what MORE knows — and how we know it.', subhead: 'Every important conclusion connects to customer evidence, bounded calculations, modeled requirements, or explicitly identified inference.',
@@ -649,7 +673,7 @@ export function buildProgressiveBusinessTwin({ sourceViewModel: source, probabil
       network_calls: 0,
       customer_mutation: false,
     }),
-    validation: deepFreeze({ status: 'PASS', destinations: 5, layer3: false, probabilityTotal: probability.as_of_state.reduce((sum, item) => sum + item.probability, 0), planStrategies: plan135.strategies.length, waysOpen: 2, meaningfulObjects: Object.keys(customerObjects).length }),
+    validation: deepFreeze({ status: 'PASS', destinations: 5, layer3: false, probabilityTotal: probability.as_of_state.reduce((sum, item) => sum + item.probability, 0), planStrategies: plan135.strategies.length, waysOpen: loanOriginator ? 3 : 2, meaningfulObjects: Object.keys(customerObjects).length }),
   }
   validateProgressiveBusinessTwin(projection)
   return deepFreeze(projection)

@@ -3,19 +3,31 @@ import { deepFreeze } from '../../../src/lib/intelligenceFabric/validation.js';
 import { normalizeProfileId as normalizePaidProfileId } from '../../../src/lib/publicSiteAirlockV1/contracts.js';
 import {
   createAuthorityReference,
-  createCoachingEpisodeContext,
   createEvidenceReference,
+  sameScope,
+  scopeFingerprint,
+} from '../../../src/lib/subscriptionV1/contracts.js';
+import {
+  createCoachingEpisodeContext,
+} from '../../../src/lib/subscriptionV1/freeGptV2/sessionEpisode.js';
+import {
   createFreeGptLivingRelationshipRuntimeV2,
+} from '../../../src/lib/subscriptionV1/freeGptV2/livingRelationshipRuntime.js';
+import {
   createFrontierConversationSeamV2,
-  createInitialLivingBusinessTwinPublication,
-  createLivingConversationController,
   createNaturalAuthorizationInterpreterV1,
   createPostResponseCandidateExtractorV1,
   createSessionCloseSeamV1,
+} from '../../../src/lib/subscriptionV1/freeGptV2/providerSeams.js';
+import {
+  createInitialLivingBusinessTwinPublication,
+} from '../../../src/lib/subscriptionV1/afw05/recomputation.js';
+import {
+  createLivingConversationController,
+} from '../../../src/lib/subscriptionV1/afw06/conversationController.js';
+import {
   initialLivingStateFromBusinessTwin,
-  sameScope,
-  scopeFingerprint,
-} from '../../../src/lib/subscriptionV1/index.js';
+} from '../../../src/lib/subscriptionV1/afw06/viewModelProjection.js';
 import { retrieveCoachingDoctrine } from '../../../src/lib/subscriptionV1/afw04/index.js';
 import { getCanonicalProfile, extractProfileContext } from '../../business-assessment/shared.js';
 import { resolveBundledBosAuthority } from '../newBaProductionReadinessV1/canonicalReader.js';
@@ -27,8 +39,12 @@ import {
   assertPaidBusinessScope,
   completedBosFusionAuthority,
   completedRealization,
+  paidSubscriberCompletenessPolicy,
 } from './paidSubscriberCustody.js';
-import { pinnedSubscriptionSources } from './pinnedSources.js';
+import {
+  pinnedLoanOriginatorSubscriptionSources,
+  pinnedSubscriptionSources,
+} from './pinnedSources.js';
 import { paidRuntimeKeys, paidRuntimeRelationshipKey } from './paidRuntimeInfrastructure.js';
 
 export const PAID_SUBSCRIBER_REQUIRED_ARTIFACT_TYPES = deepFreeze([
@@ -53,6 +69,73 @@ const PRIVATE_VALUE_KEYS = new Set([
 ]);
 const SENSITIVE_STRING = /\bMM-[A-Z0-9-]+\b|\bba-\d{8}-[a-f0-9]{8}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/giu;
 const CUSTOMER_PROJECTION_SENSITIVE = /\bMM-[A-Z0-9-]+\b|\bba-\d{8}-[a-f0-9]{8}\b|\b[a-f0-9]{64}\b|\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b|\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b/iu;
+const PRIVATE_RUNTIME_FAMILY_TEXT = /\b(?:openai|xai|anthropic|codex|claude(?:[\s._-]*[a-z0-9]+)*|deepseek(?:[\s._-]*[a-z0-9]+)*|gemini(?:[\s._-]*[a-z0-9]+)*|gpt(?:[\s._-]*[a-z0-9]+)*|grok(?:[\s._-]*[a-z0-9]+)*|llama(?:[\s._-]*[a-z0-9]+)*|mistral(?:[\s._-]*[a-z0-9]+)*|qwen(?:[\s._-]*[a-z0-9]+)*|o[1-9](?:[\s._-]*[a-z0-9]+)*)\b/iu;
+const PRIVATE_RUNTIME_ASSIGNMENT_TEXT = /\b(?:(?:internal\s+)?assignment\s*:\s*(?:model|provider|engine|backend|deployment)|(?:assigned|routed)\s+(?:to|through|via)\b|(?:inference|runtime)\s+(?:backend|engine|provider|model|deployment)\b|(?:backend|engine|deployment)\s+(?:assignment|selection|arm|route|routing)\b|(?:provider|model)\s+(?:assignment|selection|arm|route|routing)\b|(?:provider|model)\s+[a-z0-9._-]+\s+(?:handled|served|generated|processed)\b)/iu;
+const PRIVATE_RUNTIME_DIRECT_ASSIGNMENT_TEXT = /\b(?:(?:we\s+)?(?:used|selected|chose)\s+(?:the\s+)?(?:model|provider|engine|backend|deployment)\b|(?:model|provider|engine|backend|deployment)\s+(?:used|selected|chosen)\s*:?|(?:model|provider|engine|backend|deployment)\s*:\s*[a-z0-9]|(?:generated|served|processed|handled)\s+by\s+(?:the\s+)?(?:model|provider|engine|backend|deployment)\b|open\s+ai\s+deployment\b)/iu;
+const PRIVATE_RUNTIME_DECLARATIVE_ASSIGNMENT_TEXT = /\b(?:(?:model|provider|backend|engine|deployment|runtime)\s+(?:is|was)\s+[a-z0-9]|(?:using|uses|chosen|assigned)\s+(?:the\s+)?(?:model|provider|backend|engine|deployment|runtime)\b|(?:running\s+on|powered\s+by)\s+(?:the\s+)?(?:model|provider|backend|engine|deployment|runtime)\b|runtime\s*:\s*[a-z0-9]|(?:generated|served|processed|handled)\s+by\s+[a-z0-9._-]+\s+(?:model|provider|backend|engine|deployment)\b|[a-z0-9._-]+\s+(?:model|provider|backend|engine|deployment)\s+(?:handled|served|generated|processed)\b)/iu;
+const PRIVATE_RUNTIME_JOINED_ASSIGNMENT_TEXT = /\b(?:(?:model|provider|backend|engine|deployment|runtime)\s*(?:=|-|\/)\s*[a-z0-9][a-z0-9._-]*|(?:via|using|used|uses|run|runs|chose|chosen|current|our|selected|assigned|on|running\s+on|powered\s+by)\s+(?:the\s+)?(?:(?:model|provider|backend|engine|deployment|runtime)\s+[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-9._-]*\s+(?:model|provider|backend|engine|deployment|runtime))\b)/iu;
+const PRIVATE_RUNTIME_REPLACEMENT = 'Private runtime configuration is not exposed.';
+const SAFE_PUBLIC_BUSINESS_RUNTIME_KEYS = new Set([
+  'business_model',
+  'business_model_analysis',
+  'business_engine',
+  'business_growth_engine',
+  'causal_model',
+  'confidence_engine',
+  'deployment_of_staff_capacity',
+  'engine_of_business_growth',
+  'growth_engine',
+  'model_home',
+  'model_home_sales',
+  'model_date',
+  'operating_model',
+  'operating_model_design',
+  'operating_engine',
+  'primary_engine',
+  'service_provider',
+  'service_provider_relationships',
+  'staff_deployment',
+  'staff_deployment_capacity',
+  'view_model',
+]);
+const PRIVATE_RUNTIME_CONFIG_KEY_TOKEN = /(?:^|_)(?:model|provider|backend|engine|deployment|runtime|inference)(?:$|_)/u;
+
+function containsPrivateRuntimeAssignmentText(value) {
+  const withoutSafeBusinessLanguage = value
+    .replace(/\bbusiness\s+model\b/giu, 'business construct')
+    .replace(/\boperating\s+model\s+design\b/giu, 'operating construct design')
+    .replace(/\bmodel\s+home\s+sales\b/giu, 'residential home sales')
+    .replace(/\bservice\s+provider\s+relationships\b/giu, 'service partner relationships')
+    .replace(/\bdeployment\s+of\s+staff\s+capacity\b/giu, 'allocation of staff capacity')
+    .replace(/\bengine\s+of\s+business\s+growth\b/giu, 'driver of business growth');
+  return PRIVATE_RUNTIME_FAMILY_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_DIRECT_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_DECLARATIVE_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_JOINED_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage);
+}
+
+function normalizePrivateRuntimeKey(key) {
+  return String(key)
+    .replace(/([a-z0-9])([A-Z])/gu, '$1_$2')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '_')
+    .replace(/^_+|_+$/gu, '');
+}
+
+function isPrivateRuntimeAssignmentKey(key) {
+  const normalized = normalizePrivateRuntimeKey(key);
+  return !SAFE_PUBLIC_BUSINESS_RUNTIME_KEYS.has(normalized)
+    && PRIVATE_RUNTIME_CONFIG_KEY_TOKEN.test(normalized);
+}
+
+function isPrivateSemanticSourceKey(key) {
+  const normalized = normalizePrivateRuntimeKey(key);
+  if (SAFE_PUBLIC_BUSINESS_RUNTIME_KEYS.has(normalized)) return false;
+  return PRIVATE_VALUE_KEYS.has(normalized)
+    || /(?:^|_)(?:hash|hashes|ref|refs|lineage|raw|internal)(?:$|_)/u.test(normalized)
+    || isPrivateRuntimeAssignmentKey(normalized);
+}
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -85,12 +168,16 @@ function boundedStatements(values, limit = 20) {
 }
 
 function semanticSource(value) {
-  if (typeof value === 'string') return value.replace(SENSITIVE_STRING, 'governed private record');
+  if (typeof value === 'string') {
+    const privateIdentifiersRemoved = value.replace(SENSITIVE_STRING, 'governed private record');
+    return containsPrivateRuntimeAssignmentText(privateIdentifiersRemoved)
+      ? PRIVATE_RUNTIME_REPLACEMENT
+      : privateIdentifiersRemoved;
+  }
   if (value == null || typeof value !== 'object') return value;
   if (Array.isArray(value)) return value.map(semanticSource);
   return Object.fromEntries(Object.entries(value)
-    .filter(([key]) => !PRIVATE_VALUE_KEYS.has(key)
-      && !/(?:^|_)(?:hash|hashes|ref|refs|lineage|provider|raw|internal)(?:$|_)/iu.test(key))
+    .filter(([key]) => !isPrivateSemanticSourceKey(key))
     .map(([key, child]) => [key, semanticSource(child)]));
 }
 
@@ -137,6 +224,9 @@ function internalArtifact(scope, artifactType, payload, sourceHash, createdAt, {
   bindings = {},
   parentArtifactIds = [],
   domainBoundary = null,
+  status = 'COMPLETE',
+  validationStatus = 'PASS',
+  compatibilityStatus = 'COMPATIBLE',
 } = {}) {
   const authoritySource = scope?.tenant_id === 'synthetic_qa'
     ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
@@ -163,9 +253,9 @@ function internalArtifact(scope, artifactType, payload, sourceHash, createdAt, {
     created_at: createdAt,
     supersedes_artifact_id: null,
     scope: clone(scope),
-    status: 'COMPLETE',
-    validation_status: 'PASS',
-    compatibility_status: 'COMPATIBLE',
+    status,
+    validation_status: validationStatus,
+    compatibility_status: compatibilityStatus,
     bindings: clone(bindings),
     payload: projectedPayload,
     domain_boundary: domainBoundary || {
@@ -184,6 +274,20 @@ function canonicalArtifacts({ scope, artifact, hashes, createdAt, bosFusionAutho
   const moveSource = artifact.one_move;
   const customerView = artifact.customer_view_model;
   const evidenceState = wbm.epistemic_state || {};
+  const loanOriginatorCassette = artifact.cassette_binding?.vertical_id === 'loan_originator';
+  const loanOriginatorOpenPlan = artifact.plan_135?.plan_state === 'LO_OPEN_DRAFT';
+  requireCondition(loanOriginatorCassette === loanOriginatorOpenPlan,
+    'PAID_SUBSCRIBER_LO_PLAN_VERTICAL_AUTHORITY_MISMATCH');
+  const planOpen = loanOriginatorCassette && loanOriginatorOpenPlan;
+  const openPlanPolicy = paidSubscriberCompletenessPolicy({
+    verticalId: loanOriginatorCassette ? 'loan_originator' : null,
+    syntheticOnly: scope?.tenant_id === 'synthetic_qa',
+  });
+  const openPlanAuthority = planOpen ? {
+    vertical_id: 'loan_originator',
+    vertical_binding_hash: hashes.vertical_binding,
+    completeness_policy: openPlanPolicy,
+  } : {};
   const newBaRuntimeHash = hashCanonicalJson({
     contract: 'paid-subscriber-new-ba-runtime-projection-v1',
     business_evidence_sha256: hashes.business_evidence,
@@ -201,7 +305,10 @@ function canonicalArtifacts({ scope, artifact, hashes, createdAt, bosFusionAutho
     current_business_reality: wbm.current_business_reality || {},
     governed_business_evidence: wbm.governed_business_evidence || [],
     evidence_summary: artifact.evidence,
-  }, newBaRuntimeHash, createdAt, { version: artifact.version });
+  }, newBaRuntimeHash, createdAt, {
+    version: artifact.version,
+    ...(planOpen ? { bindings: openPlanAuthority } : {}),
+  });
 
   const fusion = internalArtifact(scope, 'BOS_BA_FUSION', {
     relationships: artifact.fusion.relationships,
@@ -278,8 +385,21 @@ function canonicalArtifacts({ scope, artifact, hashes, createdAt, bosFusionAutho
 
   const plan = internalArtifact(scope, 'PLAN_135', artifact.plan_135, hashes.plan, createdAt, {
     version: artifact.plan_135.version || '1.0.0',
-    bindings: { one_move_hash: move.content_hash, wbm_hash: wholeBusinessModel.content_hash },
+    bindings: {
+      one_move_hash: move.content_hash,
+      wbm_hash: wholeBusinessModel.content_hash,
+      ...(planOpen ? {
+        ...openPlanAuthority,
+        plan_state: 'LO_OPEN_DRAFT',
+        customer_plan_status: 'OPEN_NOT_CUSTOMER_AGREED',
+        customer_plan_complete: false,
+      } : {}),
+    },
     parentArtifactIds: [move.artifact_id, wholeBusinessModel.artifact_id],
+    ...(planOpen ? {
+      status: 'OPEN_NOT_CUSTOMER_AGREED',
+      validationStatus: 'PASS_WITH_OPEN_PLAN',
+    } : {}),
   });
 
   const evidencePayload = {
@@ -323,6 +443,23 @@ function verticalLabel(artifact) {
 }
 
 function doctrineVerticalId(artifact) {
+  const governedIds = [
+    artifact.cassette_binding?.vertical_id,
+    artifact.business_reality?.assessment_identity?.vertical,
+    artifact.lineage?.vertical_id,
+    artifact.customer_view_model?.vertical?.vertical_id,
+  ].filter((value) => typeof value === 'string' && value.trim());
+  if (governedIds.length && new Set(governedIds).size !== 1) {
+    deny('PAID_SUBSCRIBER_VERTICAL_AUTHORITY_MISMATCH');
+  }
+  const governed = governedIds[0] || null;
+  if (governed === 'real_estate') return 'REAL_ESTATE';
+  if (governed === 'loan_originator') {
+    requireCondition(artifact.cassette_binding?.vertical_id === 'loan_originator',
+      'PAID_SUBSCRIBER_LOAN_ORIGINATOR_CASSETTE_AUTHORITY_REQUIRED');
+    return 'LOAN_ORIGINATOR';
+  }
+  if (governed === 'professional_services') return 'PROFESSIONAL_SERVICES';
   const value = `${artifact.lineage?.vertical_id || ''} ${verticalLabel(artifact)}`.toUpperCase();
   if (value.includes('REAL') && value.includes('ESTATE')) return 'REAL_ESTATE';
   if (value.includes('PROFESSIONAL') && value.includes('SERVICE')) return 'PROFESSIONAL_SERVICES';
@@ -356,7 +493,15 @@ export function projectCompletedRealProfileToSubscription({
   requireCondition((scope?.tenant_id === 'synthetic_qa') === (synthetic_only === true),
     'SUBSCRIBER_SYNTHETIC_AUTHORITY_CLASSIFICATION_MISMATCH');
   const realizationProfileId = normalizeNewBaProfileId(profileId);
-  const completed = completedRealization(realization_record, realizationProfileId, assessment_id);
+  const sourceVerticalId = realization_record?.artifact?.cassette_binding?.vertical_id
+    || realization_record?.cassette_binding?.vertical_id
+    || null;
+  const completed = completedRealization(realization_record, realizationProfileId, assessment_id, {
+    completenessPolicy: paidSubscriberCompletenessPolicy({
+      verticalId: sourceVerticalId,
+      syntheticOnly: synthetic_only,
+    }),
+  });
   const hashes = assertCanonicalLineage(completed.artifact, realization_record.realization_identity || null);
   const bosFusionAuthority = completedBosFusionAuthority(bos_realization_record, {
     profileId: realizationProfileId,
@@ -372,7 +517,7 @@ export function projectCompletedRealProfileToSubscription({
     hashes.vertical_binding,
     scope_authority_id,
   );
-  const baseViewModel = clone(completed.artifact.customer_view_model);
+  const baseViewModel = semanticSource(clone(completed.artifact.customer_view_model));
   assertCustomerProjectionBoundary(baseViewModel, scope, completed.assessment_id, realizationProfileId);
   initialLivingStateFromBusinessTwin(baseViewModel);
   const preferredName = safePreferredName(profile_lookup, profileId);
@@ -420,6 +565,11 @@ function relationshipContext(projection, sessionKind) {
   const profileAuthority = projection.synthetic_only
     ? 'CANONICAL_SYNTHETIC_QA_PROFILE'
     : 'CANONICAL_OWNED_PROFILE';
+  const knowledgeLibrary = projection.doctrine_vertical_id === 'LOAN_ORIGINATOR'
+    ? 'MORE canonical Loan Originator knowledge, available through optional read-only source tools; no Real Estate script library is substituted.'
+    : projection.doctrine_vertical_id === 'REAL_ESTATE'
+      ? 'MORE Real Estate knowledge and a separately labeled D.J. field-doctrine extract, available through optional read-only source tools.'
+      : 'MORE universal coaching knowledge is available; no unrelated vertical library is substituted.';
   return deepFreeze({
     session_kind: sessionKind,
     preferred_conversational_name: projection.preferred_name,
@@ -434,7 +584,7 @@ function relationshipContext(projection, sessionKind) {
       : 'CANONICAL_OWNED_PROFILE_AND_COMPLETED_BOS_BA_REALIZATION',
     capability_context: {
       live_web_research_available: false,
-      knowledge_library: 'MORE Real Estate knowledge and a separately labeled D.J. field-doctrine extract, available through optional read-only source tools.',
+      knowledge_library: knowledgeLibrary,
       customer_notice: 'This version does not search the live web. Current web facts have not been checked.',
     },
   });
@@ -552,13 +702,23 @@ async function defaultExternalEvidenceReader({ redis, keys }) {
   return readExternalEvidence({ redis, key: keys.research });
 }
 
-function defaultTransportFactory({ env }) {
+function defaultTransportFactory({ env, sourceLibrary = pinnedSubscriptionSources() }) {
   return createSubscriptionLiveDemoOpenAiTransport({
     apiKey: env.OPENAI_API_KEY,
     timeoutMs: 300_000,
     maxTransportRetries: 1,
-    sourceLibrary: pinnedSubscriptionSources,
+    sourceLibrary,
   });
+}
+
+export function resolvePaidSourceLibrary({ projection, synthetic_only = false } = {}) {
+  requireCondition(projection?.synthetic_only === (synthetic_only === true),
+    'PAID_SUBSCRIBER_SOURCE_SCOPE_MISMATCH');
+  if (projection.doctrine_vertical_id === 'REAL_ESTATE') return pinnedSubscriptionSources();
+  if (projection.doctrine_vertical_id === 'LOAN_ORIGINATOR') {
+    return pinnedLoanOriginatorSubscriptionSources();
+  }
+  deny('PAID_SUBSCRIBER_SOURCE_VERTICAL_UNSUPPORTED');
 }
 
 export function createCurrentRealProfileRealizationReader({ realizationStore } = {}) {
@@ -590,6 +750,7 @@ export function createPaidSubscriberLoader({
   openRelationshipStore = defaultStoreOpener,
   readExternalEvidenceForRuntime = defaultExternalEvidenceReader,
   createTransport = defaultTransportFactory,
+  resolveSourceLibrary = resolvePaidSourceLibrary,
   resolveSubscriberAuthority = exactPaidMembershipContext,
   resolveRuntimeKeys = paidRuntimeKeys,
   resolveRuntimeRelationshipKey = paidRuntimeRelationshipKey,
@@ -604,6 +765,7 @@ export function createPaidSubscriberLoader({
   requireFunction(openRelationshipStore, 'PAID_SUBSCRIBER_RELATIONSHIP_STORE_FACTORY_REQUIRED');
   requireFunction(readExternalEvidenceForRuntime, 'PAID_SUBSCRIBER_EXTERNAL_EVIDENCE_READER_REQUIRED');
   requireFunction(createTransport, 'PAID_SUBSCRIBER_TRANSPORT_FACTORY_REQUIRED');
+  requireFunction(resolveSourceLibrary, 'PAID_SUBSCRIBER_SOURCE_LIBRARY_RESOLVER_REQUIRED');
   requireFunction(resolveSubscriberAuthority, 'SUBSCRIBER_AUTHORITY_RESOLVER_REQUIRED');
   requireFunction(resolveRuntimeKeys, 'SUBSCRIBER_RUNTIME_KEYS_RESOLVER_REQUIRED');
   requireFunction(resolveRuntimeRelationshipKey, 'SUBSCRIBER_RELATIONSHIP_KEY_RESOLVER_REQUIRED');
@@ -637,6 +799,14 @@ export function createPaidSubscriberLoader({
       realizationRecord,
       normalizeNewBaProfileId(authority.scope.profile_id),
       membershipAssessmentId,
+      {
+        completenessPolicy: paidSubscriberCompletenessPolicy({
+          verticalId: realizationRecord?.artifact?.cassette_binding?.vertical_id
+            || realizationRecord?.cassette_binding?.vertical_id
+            || null,
+          syntheticOnly,
+        }),
+      },
     );
     const recordedBosRealizationId = preliminary.artifact.fusion?.bos_authority?.realization_id;
     requireCondition(typeof recordedBosRealizationId === 'string' && recordedBosRealizationId,
@@ -658,6 +828,13 @@ export function createPaidSubscriberLoader({
       synthetic_only: syntheticOnly,
       scope_authority_id: membership_context?.authority_id || null,
     });
+    const sourceLibrary = resolveSourceLibrary({
+      projection,
+      scope: authority.scope,
+      synthetic_only: syntheticOnly,
+    });
+    requireCondition(sourceLibrary?.info && typeof sourceLibrary.execute === 'function',
+      'PAID_SUBSCRIBER_SOURCE_LIBRARY_INVALID');
     const keys = resolveRuntimeKeys({ scope: authority.scope });
     const [store, externalEvidence] = await Promise.all([
       openRelationshipStore({ redis, keys, scope: authority.scope }),
@@ -666,7 +843,12 @@ export function createPaidSubscriberLoader({
     requireCondition(Array.isArray(externalEvidence), 'PAID_SUBSCRIBER_EXTERNAL_EVIDENCE_INVALID');
     let deferredTransport = transport;
     const providerTransport = async (...args) => {
-      if (!deferredTransport) deferredTransport = createTransport({ env, scope: authority.scope });
+      if (!deferredTransport) deferredTransport = createTransport({
+        env,
+        scope: authority.scope,
+        projection,
+        sourceLibrary,
+      });
       requireFunction(deferredTransport, 'PAID_SUBSCRIBER_PROVIDER_TRANSPORT_REQUIRED');
       return deferredTransport(...args);
     };

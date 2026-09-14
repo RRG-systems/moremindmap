@@ -81,6 +81,11 @@ export function retrieveCoachingDoctrine({ purpose, vertical_id = null, max_item
   // bounded complete kernel and applicable cassette and decides what matters.
   const selectedUniversal = universal.slice(0, Math.max(1, Math.min(max_items, universal.length)));
   const selectedVertical = (cassette || []).slice(0, Math.max(0, max_items - selectedUniversal.length));
+  const retrievalDescription = selectedVertical.length > 0
+    ? `Complete bounded Universal Kernel plus the ${vertical_id} cassette made available`
+    : vertical_id
+      ? `Complete bounded Universal Kernel only made available; no embedded ${vertical_id} cassette was retrieved`
+      : 'Complete bounded Universal Kernel with no mature vertical cassette made available';
   const body = {
     doctrine_id: FOUNDER_COACHING_DOCTRINE.doctrine_id,
     doctrine_version: FOUNDER_COACHING_DOCTRINE.version,
@@ -92,7 +97,7 @@ export function retrieveCoachingDoctrine({ purpose, vertical_id = null, max_item
       vertical_cassette: selectedVertical,
     },
     selected_authority_refs: [...selectedUniversal, ...selectedVertical].map((item) => item.authority_ref),
-    retrieval_reason: `Complete bounded Universal Kernel${vertical_id ? ` plus the ${vertical_id} cassette` : ' with no mature vertical cassette'} made available for the ${purpose} mission; no framework or conversational sequence was selected by code.`,
+    retrieval_reason: `${retrievalDescription} for the ${purpose} mission; no framework or conversational sequence was selected by code.`,
     max_items,
   };
   return deepFreeze({ ...body, retrieval_hash: hashCanonicalJson(body) });

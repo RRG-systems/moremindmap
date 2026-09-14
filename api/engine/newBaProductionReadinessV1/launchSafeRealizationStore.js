@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 
-import { validateCompleteNewBaRealization } from './completeness.js';
+import { NEW_BA_COMPLETENESS_STATUS, validateCompleteNewBaRealization } from './completeness.js';
 import { isSupportedNewBaRealizationIdentityVersion, sameNewBaRealizationIdentity } from './realizationIdentity.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 
@@ -60,7 +60,19 @@ export function validateLaunchSafeNewBaEnvelope(envelope, { profileId = envelope
   if (envelope.profile_id !== profile || envelope.realization_identity?.components?.profile_id !== profile || envelope.artifact?.profile_id !== profile) throw new Error('new_ba_store_profile_isolation_failure');
   if (envelope.realization_id !== envelope.realization_identity.realization_id) throw new Error('new_ba_store_realization_id_mismatch');
   if (sha256Stable(envelope.artifact) !== envelope.artifact_sha256) throw new Error('new_ba_store_artifact_hash_mismatch');
-  validateCompleteNewBaRealization(envelope.artifact, { profileId: profile, assessmentId: envelope.assessment_id, allowLegacyContract: true });
+  const validation = validateCompleteNewBaRealization(envelope.artifact, { profileId: profile, assessmentId: envelope.assessment_id, allowLegacyContract: true });
+  if (envelope.completeness?.status !== validation.status
+    || envelope.completeness?.artifact_sha256 !== validation.artifact_sha256) {
+    throw new Error('new_ba_store_completeness_receipt_mismatch');
+  }
+  if (validation.status === NEW_BA_COMPLETENESS_STATUS.VALID_ANALYSIS_WITH_OPEN_PLAN
+    && (envelope.completeness?.plan_state !== 'LO_OPEN_DRAFT'
+      || envelope.completeness?.plan_customer_commitment !== false
+      || envelope.completeness?.customer_plan_status !== 'OPEN_NOT_CUSTOMER_AGREED'
+      || envelope.completeness?.customer_plan_complete !== false
+      || envelope.completeness?.storage_eligible !== true)) {
+    throw new Error('new_ba_store_open_plan_receipt_invalid');
+  }
   return envelope;
 }
 

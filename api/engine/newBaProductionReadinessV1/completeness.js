@@ -1,7 +1,13 @@
+import { validateGeneralizedPlan135V1 } from '../../../src/lib/baProgressiveDisclosureV1/plan135.js';
 import { normalizeAssessmentId, normalizeProfileId, sha256Stable } from './stable.js';
 import { validateBosBaFusionProof } from './fusionAssembler.js';
 
 const FUTURE_ROLES = Object.freeze(['current_course', 'emerging_future', 'better_future', 'bold_future', 'downside_future']);
+
+export const NEW_BA_COMPLETENESS_STATUS = Object.freeze({
+  COMPLETE: 'PASS',
+  VALID_ANALYSIS_WITH_OPEN_PLAN: 'PASS_WITH_OPEN_PLAN',
+});
 
 export function validateCompleteNewBaRealization(artifact, { profileId = artifact?.profile_id, assessmentId = artifact?.assessment_id, allowLegacyContract = false } = {}) {
   const profile = normalizeProfileId(profileId);
@@ -17,11 +23,49 @@ export function validateCompleteNewBaRealization(artifact, { profileId = artifac
   if (JSON.stringify(futureItems.map((item) => item.role)) !== JSON.stringify(FUTURE_ROLES)) throw new Error('new_ba_realization_future_role_drift');
   if (futureItems.reduce((sum, item) => sum + Number(item.probability), 0) !== 100) throw new Error('new_ba_realization_future_probability_total_invalid');
   if (!artifact.customer_view_model?.destinations?.move?.headline || !artifact.one_move?.title) throw new Error('new_ba_realization_one_move_incomplete');
-  if (artifact.plan_135?.ways?.length !== 3 || artifact.plan_135?.strategies?.length !== 5) throw new Error('new_ba_realization_plan_incomplete');
+  const loOpenPlan = artifact.cassette_binding?.vertical_id === 'loan_originator';
+  const plan = artifact.plan_135;
+  const nonLoanOriginatorWithOpenPlanAuthority = !loOpenPlan
+    && (plan?.plan_state === 'LO_OPEN_DRAFT'
+      || plan?.bindings?.verticalId === 'loan_originator'
+      || plan?.bindings?.verticalAuthorityRefs?.some(
+        (id) => typeof id === 'string' && id.startsWith('loan-originator-intelligence-module-'),
+      ));
+  if (nonLoanOriginatorWithOpenPlanAuthority) {
+    throw new Error('new_ba_realization_lo_open_plan_scope_invalid');
+  }
+  if (loOpenPlan) {
+    const expectedAuthorities = Object.keys(artifact.business_reality?.source_integrity?.authority_hashes || {}).filter(id => id.startsWith('loan-originator-intelligence-module-')).sort();
+    if (artifact.business_reality?.assessment_identity?.vertical !== 'loan_originator'
+      || artifact.lineage?.vertical_id !== 'loan_originator'
+      || artifact.customer_view_model?.vertical?.vertical_id !== 'loan_originator'
+      || plan?.plan_state !== 'LO_OPEN_DRAFT'
+      || plan.bindings?.verticalId !== 'loan_originator'
+      || plan.bindings?.subjectKey !== profile
+      || expectedAuthorities.length === 0
+      || JSON.stringify([...(plan.bindings?.verticalAuthorityRefs || [])].sort()) !== JSON.stringify(expectedAuthorities)) throw new Error('new_ba_realization_lo_open_plan_scope_invalid');
+    validateGeneralizedPlan135V1(plan);
+  } else if (artifact.plan_135?.ways?.length !== 3 || artifact.plan_135?.strategies?.length !== 5) throw new Error('new_ba_realization_plan_incomplete');
   if (!artifact.customer_view_model?.destinations?.evidence || !artifact.evidence?.categories?.length) throw new Error('new_ba_realization_evidence_incomplete');
   if (artifact.customer_view_model?.layerContract?.stop_after !== 2 || artifact.customer_view_model?.layerContract?.layer_3_exists !== false) throw new Error('new_ba_realization_layer_contract_invalid');
   if (Object.keys(artifact.customer_view_model?.objects || {}).length < 30) throw new Error('new_ba_realization_projection_depth_incomplete');
   if (artifact.provider_accounting?.store !== false) throw new Error('new_ba_realization_provider_store_false_missing');
   if (!legacy) validateBosBaFusionProof(artifact.fusion, { profileId: profile, assessmentId: assessment });
-  return Object.freeze({ status: 'PASS', contract_version: legacy ? 1 : 2, fusion_validated: !legacy, destination_count: 5, future_count: 5, plan_strategy_count: 5, inspectable_object_count: Object.keys(artifact.customer_view_model.objects).length, artifact_sha256: sha256Stable(artifact) });
+  return Object.freeze({
+    status: loOpenPlan ? NEW_BA_COMPLETENESS_STATUS.VALID_ANALYSIS_WITH_OPEN_PLAN : NEW_BA_COMPLETENESS_STATUS.COMPLETE,
+    contract_version: legacy ? 1 : 2,
+    fusion_validated: !legacy,
+    destination_count: 5,
+    future_count: 5,
+    plan_strategy_count: loOpenPlan ? 0 : 5,
+    ...(loOpenPlan ? {
+      plan_state: 'LO_OPEN_DRAFT',
+      plan_customer_commitment: false,
+      customer_plan_status: 'OPEN_NOT_CUSTOMER_AGREED',
+      customer_plan_complete: false,
+      storage_eligible: true,
+    } : {}),
+    inspectable_object_count: Object.keys(artifact.customer_view_model.objects).length,
+    artifact_sha256: sha256Stable(artifact),
+  });
 }

@@ -1,10 +1,8 @@
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
-import {
-  coachingEpisodeProjection,
-  createRelationshipEpisodeEvent,
-  entitlementAllowsCoaching,
-  validateSessionCloseOutputV1,
-} from '../../src/lib/subscriptionV1/index.js';
+import { entitlementAllowsCoaching } from '../../src/lib/subscriptionV1/entitlement.js';
+import { createRelationshipEpisodeEvent } from '../../src/lib/subscriptionV1/lineage.js';
+import { validateSessionCloseOutputV1 } from '../../src/lib/subscriptionV1/freeGptV2/contracts.js';
+import { coachingEpisodeProjection } from '../../src/lib/subscriptionV1/freeGptV2/sessionEpisode.js';
 import { SESSION_LEARNING_FIELDS, summarizeSessionLearning } from '../../src/lib/subscriptionV1/sessionLearning.js';
 import {
   appendDiagnostics,

@@ -152,6 +152,16 @@ export function getAuthority(library, authorityId) {
 }
 
 export function selectAuthoritySections(authority, requestedTitles = DEFAULT_AUTHORITY_SECTIONS) {
+  if (authority.authority_id?.startsWith('loan-originator-intelligence-module-')
+    && authority.section_selection_mode === 'BOUNDED_CANONICAL_SOURCE_SECTIONS_V1') {
+    integrity(authority.sections.length > 0 && authority.sections.length <= 11, 'MALFORMED_STATE', 'LO section selection exceeds unchanged context budget');
+    return authority.sections.map(section => ({
+      section_id: `${authority.authority_id}:${section.source_path}:${section.normalized_title.replace(/[^a-z0-9]+/gu, '_')}`,
+      title: section.title, content: section.markdown,
+      source_path: section.source_path, source_sha256: section.source_sha256,
+      section_sha256: section.section_sha256, selection_sha256: authority.section_selection_sha256,
+    }));
+  }
   const normalized = new Set(requestedTitles.map(normalizeSectionTitle));
   const selected = authority.sections.filter((section) => normalized.has(section.normalized_title));
   integrity(selected.length > 0, 'MALFORMED_STATE', `No governed sections selected for ${authority.authority_id}`);

@@ -6,7 +6,7 @@ import {
 } from '../../src/lib/subscriptionV1/identity.js';
 import { validateSubscriptionV1Contract } from '../../src/lib/subscriptionV1/contracts.js';
 import { canonicalJson, normalizeEmail, normalizeProfileId, sha256 } from '../../src/lib/publicSiteAirlockV1/contracts.js';
-import { validatePersistedVerticalBinding } from '../business-assessment/verticalBinding.js';
+import { validateSubscriptionAssessmentVerticalBinding } from '../engine/subscriptionV1/assessmentAuthority.js';
 
 export const PAID_MEMBERSHIP_NAMESPACE = 'more:subscription-v1:paid:v1';
 export const PAID_PROFILE_OWNER_ISSUER = 'MORE_MINDMAP_PROFILE_OWNER';
@@ -30,7 +30,7 @@ function assessmentIdentity(assessment, profileId) {
     throw new Error('business_assessment_profile_mismatch');
   }
   let verticalBinding;
-  try { verticalBinding = validatePersistedVerticalBinding(assessment?.vertical_binding); }
+  try { verticalBinding = validateSubscriptionAssessmentVerticalBinding(assessment?.vertical_binding); }
   catch { throw new Error('business_assessment_vertical_authority_required'); }
   return { assessmentId, verticalBinding };
 }
@@ -230,7 +230,7 @@ function validCurrentNewBaReadinessReceipt(receipt, {
 } = {}) {
   if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) return false;
   let verticalBinding;
-  try { verticalBinding = validatePersistedVerticalBinding(assessment?.vertical_binding); }
+  try { verticalBinding = validateSubscriptionAssessmentVerticalBinding(assessment?.vertical_binding); }
   catch { return false; }
   const boundedAssessmentId = String(assessmentId || '').trim();
   if (!boundedAssessmentId

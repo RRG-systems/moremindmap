@@ -45,6 +45,18 @@ test('AFW-04 doctrine is version/hash-bound and retrieves all three intelligence
   assert.equal(realEstate.layers.universal_kernel.some((item) => /6x6|8x8|FSBO/u.test(item.guidance)), false);
 });
 
+test('AFW-04 retrieves kernel-only truth for Loan Originator without borrowing another vertical cassette', () => {
+  const loanOriginator = retrieveCoachingDoctrine({ purpose: 'WEEKLY_COACHING', vertical_id: 'LOAN_ORIGINATOR' });
+  assert.equal(loanOriginator.doctrine_hash, FOUNDER_COACHING_DOCTRINE_HASH);
+  assert.equal(loanOriginator.vertical_id, 'LOAN_ORIGINATOR');
+  assert.equal(loanOriginator.layers.universal_kernel.length, 18);
+  assert.deepEqual(loanOriginator.layers.vertical_cassette, []);
+  assert.equal(loanOriginator.selected_authority_refs.every((ref) => ref.startsWith('universal_kernel:')), true);
+  assert.doesNotMatch(JSON.stringify(loanOriginator.layers.vertical_cassette), /REAL_ESTATE|PROFESSIONAL_SERVICES|RE-\d{2}|PS-\d{2}/u);
+  assert.match(loanOriginator.retrieval_reason, /no embedded LOAN_ORIGINATOR cassette was retrieved/u);
+  assert.doesNotMatch(loanOriginator.retrieval_reason, /plus the LOAN_ORIGINATOR cassette/u);
+});
+
 test('AFW-04 provider is default-off, server-shaped, store:false, strict-schema and no-tool', async () => {
   let calls = 0;
   const runtime = createAfw04ProviderRuntime({ transport: async () => { calls += 1; return {}; } });

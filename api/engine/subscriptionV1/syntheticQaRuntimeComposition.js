@@ -1,16 +1,14 @@
-import { readNewBaProductionConfig } from '../newBaProductionReadinessV1/config.js';
-import { createRedisNewBaRealizationStore } from '../newBaProductionReadinessV1/launchSafeRealizationStore.js';
-import { createRedisLaunchSafeRealizationStore as createRedisNewBosRealizationStore } from '../newBosProductionReadinessV1/launchSafeRealizationStore.js';
 import { sameScope } from '../../../src/lib/subscriptionV1/contracts.js';
 import { createPaidSubscriptionV1RuntimeHandler } from './paidRuntimeHandler.js';
+import { createPaidSubscriberLoader } from './paidSubscriberLoader.js';
 import {
-  createCurrentRealProfileRealizationReader,
-  createPaidSubscriberLoader,
-  createRecordedBosRealizationReader,
-} from './paidSubscriberLoader.js';
+  pinnedLoanOriginatorSubscriptionSources,
+  pinnedSubscriptionSources,
+} from './pinnedSources.js';
 import {
   authenticateSyntheticQaRuntimeRequest,
   syntheticQaAccessContext,
+  syntheticQaRuntimeCustodySnapshot,
 } from './syntheticQaRuntimeAuth.js';
 import {
   assertSyntheticQaBusinessScope,
@@ -22,23 +20,8 @@ import {
 } from './syntheticQaRuntimeInfrastructure.js';
 import { requirePinnedPaidWinnerAcceptance } from './winnerIntake.js';
 
-const SYNTHETIC_QA_PROVIDER_HOLD = 'SUBSCRIPTION_V1_SYNTHETIC_QA_PROVIDER_BUDGET_NOT_AUTHORIZED';
-
-export function syntheticQaProviderEnabled() {
-  return false;
-}
-
-export function createSyntheticQaProviderBoundary() {
-  const deny = () => {
-    const error = new Error(SYNTHETIC_QA_PROVIDER_HOLD);
-    error.code = SYNTHETIC_QA_PROVIDER_HOLD;
-    throw error;
-  };
-  return Object.freeze({
-    createTransport: deny,
-    generateGu: async () => deny(),
-  });
-}
+import { createSyntheticQaProviderBoundary } from './syntheticQaProviderBoundary.js';
+export { createSyntheticQaProviderBoundary, syntheticQaProviderEnabled } from './syntheticQaProviderBoundary.js';
 
 export function syntheticQaGetProjection(payload) {
   const projected = { ...payload };
@@ -78,6 +61,63 @@ function exactSyntheticQaSubscriberAuthority(context) {
   return { scope: resolved.scope, scope_hash: resolved.scope_hash };
 }
 
+export function resolveSyntheticQaSourceLibrary({ projection } = {}) {
+  if (projection?.synthetic_only !== true) {
+    throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_SOURCE_SCOPE_REQUIRED');
+  }
+  if (projection.doctrine_vertical_id === 'REAL_ESTATE') {
+    return pinnedSubscriptionSources();
+  }
+  if (projection.doctrine_vertical_id === 'LOAN_ORIGINATOR') {
+    return pinnedLoanOriginatorSubscriptionSources();
+  }
+  throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_SOURCE_VERTICAL_UNSUPPORTED');
+}
+
+function exactSyntheticQaCustodySnapshot(membershipContext) {
+  const snapshot = syntheticQaRuntimeCustodySnapshot(membershipContext);
+  if (!snapshot
+    || snapshot.byte_stable_across_reads !== true
+    || snapshot.read_only !== true
+    || snapshot.mutation_performed !== false) {
+    throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_CUSTODY_SNAPSHOT_REQUIRED');
+  }
+  return snapshot;
+}
+
+async function readSyntheticQaCanonicalProfile({ membership_context } = {}) {
+  return exactSyntheticQaCustodySnapshot(membership_context).profile_lookup;
+}
+
+async function readSyntheticQaCompletedRealization({ profile_id, membership_context } = {}) {
+  const snapshot = exactSyntheticQaCustodySnapshot(membership_context);
+  if (snapshot.profile_id.toUpperCase() !== String(profile_id || '').toUpperCase()) {
+    throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_CUSTODY_PROFILE_MISMATCH');
+  }
+  return snapshot.realization_record;
+}
+
+async function readSyntheticQaRecordedBosRealization({
+  profile_id,
+  realization_id,
+  membership_context,
+} = {}) {
+  const snapshot = exactSyntheticQaCustodySnapshot(membership_context);
+  if (snapshot.profile_id.toUpperCase() !== String(profile_id || '').toUpperCase()
+    || snapshot.bos_realization_record?.realization_id !== realization_id) {
+    throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_CUSTODY_BOS_MISMATCH');
+  }
+  return snapshot.bos_realization_record;
+}
+
+export function createSyntheticQaCustodyReaders() {
+  return Object.freeze({
+    readCanonicalProfile: readSyntheticQaCanonicalProfile,
+    readCompletedRealization: readSyntheticQaCompletedRealization,
+    readCompletedBosRealization: readSyntheticQaRecordedBosRealization,
+  });
+}
+
 export async function resolveSyntheticQaEntitlement({ scope, membership_context, now = new Date() } = {}) {
   const authority = syntheticQaAccessContext({ ok: true, membership_context });
   if (!sameScope(scope, authority.scope)) {
@@ -107,30 +147,16 @@ export function createSyntheticQaSubscriptionV1RuntimeComposition({
   if (!redis || typeof redis !== 'object') {
     throw new Error('SUBSCRIPTION_V1_SYNTHETIC_QA_REDIS_REQUIRED');
   }
-  const realizationConfig = readNewBaProductionConfig(env);
-  const realizationStore = createRedisNewBaRealizationStore({
-    redis,
-    namespace: realizationConfig.namespace,
-    persistenceEnabled: false,
-  });
-  const bosRealizationStore = createRedisNewBosRealizationStore({
-    redis,
-    namespace: realizationConfig.bosNamespace,
-    persistenceEnabled: false,
-  });
-  const readCompletedRealization = createCurrentRealProfileRealizationReader({ realizationStore });
-  const readCompletedBosRealization = createRecordedBosRealizationReader({
-    realizationStore: bosRealizationStore,
-  });
-  const providerBoundary = createSyntheticQaProviderBoundary();
+  const providerBoundary = createSyntheticQaProviderBoundary({ redis, env, winnerAcceptance });
+  const custodyReaders = createSyntheticQaCustodyReaders();
   const loadSubscriber = createPaidSubscriberLoader({
-    readCompletedRealization,
-    readCompletedBosRealization,
+    ...custodyReaders,
     resolveSubscriberAuthority: exactSyntheticQaSubscriberAuthority,
     resolveRuntimeKeys: syntheticQaRuntimeKeys,
     resolveRuntimeRelationshipKey: syntheticQaRuntimeRelationshipKey,
     assertBusinessScope: assertSyntheticQaBusinessScope,
     createTransport: providerBoundary.createTransport,
+    resolveSourceLibrary: resolveSyntheticQaSourceLibrary,
     syntheticOnly: true,
     loaderId: 'subscription_v1_exact_full_person_synthetic_qa_runtime_loader_v1',
   });

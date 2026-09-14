@@ -1,5 +1,3 @@
-import { validatePersistedVerticalBinding } from '../business-assessment/verticalBinding.js';
-import { normalizeGovernedAssessmentRecord } from '../engine/newBaProductionReadinessV1/canonicalReader.js';
 import { validateCompleteNewBaRealization } from '../engine/newBaProductionReadinessV1/completeness.js';
 import { validateLaunchSafeNewBaEnvelope } from '../engine/newBaProductionReadinessV1/launchSafeRealizationStore.js';
 import { classifyCompatiblePriorRealization } from '../engine/newBaProductionReadinessV1/compatibilitySelection.js';
@@ -12,7 +10,12 @@ import {
   normalizeProfileId as normalizeNewBaProfileId,
   sha256Stable,
 } from '../engine/newBaProductionReadinessV1/stable.js';
-import { validatePaidSubscriberRuntimeCustody } from '../engine/subscriptionV1/paidSubscriberCustody.js';
+import { normalizeSubscriptionGovernedAssessment } from '../engine/subscriptionV1/assessmentAuthority.js';
+import {
+  isPaidSubscriberCompletenessAccepted,
+  paidSubscriberCompletenessPolicy,
+  validatePaidSubscriberRuntimeCustody,
+} from '../engine/subscriptionV1/paidSubscriberCustody.js';
 import { normalizeProfileId } from '../../src/lib/publicSiteAirlockV1/contracts.js';
 
 export const DEFAULT_PAID_NEW_BA_READINESS_NAMESPACE = 'nonprod:new-ba:v1';
@@ -51,12 +54,11 @@ function parseEnvelope(raw) {
 
 function exactAssessmentAuthority(assessment, profileId) {
   try {
-    const governedEvidence = normalizeGovernedAssessmentRecord(
+    const { governedEvidence, verticalBinding } = normalizeSubscriptionGovernedAssessment(
       assessment,
       normalizeNewBaProfileId(profileId),
     );
     const assessmentId = normalizeAssessmentId(governedEvidence.assessment_id);
-    const verticalBinding = validatePersistedVerticalBinding(governedEvidence.vertical_binding);
     return {
       assessmentId,
       verticalBinding,
@@ -132,6 +134,10 @@ function validateCurrentEnvelope(envelope, {
     businessEvidenceSha256,
   });
   const expectedRealizationId = expectedIdentity.realization_id;
+  const completenessPolicy = paidSubscriberCompletenessPolicy({
+    verticalId: verticalBinding.vertical_id,
+    syntheticOnly: false,
+  });
   const verticalIdentityFields = [
     'vertical_id',
     'cassette_id',
@@ -201,7 +207,11 @@ function validateCurrentEnvelope(envelope, {
     || cassetteBinding.binding_sha256 !== verticalBinding.binding_sha256
     || projectedVertical.vertical_id !== verticalBinding.vertical_id
     || !['A', 'B'].includes(envelope.compatibility?.class)
-    || currentCompleteness.status !== 'PASS'
+    || !isPaidSubscriberCompletenessAccepted({
+      validation: currentCompleteness,
+      record: envelope,
+      policy: completenessPolicy,
+    })
     || currentCompleteness.contract_version !== 2
     || currentCompleteness.fusion_validated !== true
     || envelope.completeness?.artifact_sha256 !== currentCompleteness.artifact_sha256
@@ -351,6 +361,10 @@ export function createCurrentNewBaMembershipReadinessReader({
         assessment_id: assessmentId,
         realization_record: envelope,
         bos_realization_record: bosEnvelope,
+        completeness_policy: paidSubscriberCompletenessPolicy({
+          verticalId: verticalBinding.vertical_id,
+          syntheticOnly: false,
+        }),
       });
     } catch {
       reconciliationRequired();

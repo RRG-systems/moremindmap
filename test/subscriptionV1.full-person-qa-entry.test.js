@@ -2,8 +2,15 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
   FULL_PERSON_QA_CAPABILITY_COOKIE,
+  fullPersonQaAssessmentDigest,
+  fullPersonQaBaRealizationIdDigest,
+  fullPersonQaBosRealizationIdDigest,
   fullPersonQaCapabilityLookup,
+  fullPersonQaCustodySha256,
   fullPersonQaProfileDigest,
+  fullPersonQaSyntheticProvenance,
+  fullPersonQaSyntheticProvenanceSha256,
+  fullPersonQaVerticalAuthoritySha256,
   verifyFullPersonQaCapability,
 } from '../api/engine/subscriptionV1/fullPersonQaAccess.js';
 import {
@@ -15,6 +22,7 @@ import {
   createSubscriptionV1QaEntryHandler,
   fullPersonQaCapabilityReceiptKey,
 } from '../api/internal/subscription-v1-qa-entry.js';
+import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 
 const NOW = new Date('2026-09-13T18:00:00.000Z');
 const EXPIRES = '2026-09-30T00:00:00.000Z';
@@ -25,6 +33,12 @@ const PROFILE_IDS = Object.freeze([
   'mm-20260913-b2c3d4e5',
   'mm-20260913-c3d4e5f6',
   'mm-20260913-d4e5f6g7',
+]);
+const CASE_IDS = Object.freeze([
+  'COHORT-V1-RE-A',
+  'COHORT-V1-RE-B',
+  'COHORT-V1-LO-A',
+  'COHORT-V1-LO-B',
 ]);
 
 class FakeRedis {
@@ -150,13 +164,73 @@ class FakeRedis {
 }
 
 function qaManifest(entriesTransform = (entries) => entries) {
-  const entries = PROFILE_IDS.map((profileId, index) => ({
-    authority_id: `synthetic_qa_person_${index + 1}`,
+  const entries = PROFILE_IDS.map((profileId, index) => {
+    const verticalId = index < 2 ? 'real_estate' : 'loan_originator';
+    const verticalAuthorityBinding = {
+      binding_version: 'ba-vertical-binding-v1',
+      box_1_projection_adapter_id: `${verticalId}-adapter-v1`,
+      box_1_projection_contract_id: `${verticalId}-projection-v1`,
+      box_1_projection_contract_sha256: hashCanonicalJson({ kind: 'projection', verticalId }),
+      box_1_projection_contract_version: '1.0.0',
+      cassette_id: `${verticalId}-cassette-v1`,
+      cassette_manifest_sha256: hashCanonicalJson({ kind: 'cassette-manifest', verticalId }),
+      cassette_registry_sha256: hashCanonicalJson({ kind: 'cassette-registry', verticalId }),
+      cassette_version: '1.0.0',
+      evidence_contract_id: `${verticalId}-evidence-v1`,
+      evidence_contract_sha256: hashCanonicalJson({ kind: 'evidence', verticalId }),
+      evidence_contract_version: '1.0.0',
+      intake_contract_id: `${verticalId}-intake-v1`,
+      intake_contract_sha256: hashCanonicalJson({ kind: 'intake', verticalId }),
+      intake_contract_version: '1.0.0',
+      selection_contract_version: 'ba-vertical-selection-v1',
+      vertical_id: verticalId,
+      vertical_label: verticalId === 'real_estate' ? 'Real Estate' : 'Loan Originator',
+    };
+    const authorityId = `synthetic_qa_person_${index + 1}`;
+    const caseId = CASE_IDS[index];
+    return ({
+    assessment_digest: fullPersonQaAssessmentDigest(
+      `ba-20260913-${String(index + 1).padStart(8, '0')}`,
+      DIGEST_KEY,
+    ),
+    assessment_evidence_sha256: hashCanonicalJson({ kind: 'assessment-evidence', index }),
+    authority_id: authorityId,
+    ba_artifact_sha256: hashCanonicalJson({ kind: 'ba-artifact', index }),
+    ba_envelope_sha256: hashCanonicalJson({ kind: 'ba-envelope', index }),
+    ba_realization_id_digest: fullPersonQaBaRealizationIdDigest(
+      `new-ba:${profileId.toUpperCase()}:fixture-${index + 1}`,
+      DIGEST_KEY,
+    ),
+    ba_realization_identity_sha256: hashCanonicalJson({ kind: 'ba-identity', index }),
+    bos_artifact_sha256: hashCanonicalJson({ kind: 'bos-artifact', index }),
+    bos_canonical_source_sha256: hashCanonicalJson({ kind: 'bos-source', index }),
+    bos_envelope_sha256: hashCanonicalJson({ kind: 'bos-envelope', index }),
+    bos_realization_id_digest: fullPersonQaBosRealizationIdDigest(
+      `new-bos:${profileId.toUpperCase()}:fixture-${index + 1}`,
+      DIGEST_KEY,
+    ),
+    bos_realization_identity_sha256: hashCanonicalJson({ kind: 'bos-identity', index }),
+    canonical_profile_artifact_sha256: hashCanonicalJson({ kind: 'profile-artifact', index }),
+    case_id: caseId,
     expires_at: EXPIRES,
     profile_digest: fullPersonQaProfileDigest(profileId, DIGEST_KEY),
     status: 'active',
-  }));
-  return JSON.stringify(entriesTransform(entries));
+    synthetic_provenance_sha256: fullPersonQaSyntheticProvenanceSha256(
+      fullPersonQaSyntheticProvenance({ authority_id: authorityId, case_id: caseId }),
+    ),
+    vertical_authority_sha256: fullPersonQaVerticalAuthoritySha256(verticalAuthorityBinding),
+    vertical_binding_sha256: hashCanonicalJson({
+      kind: 'vertical-binding',
+      index,
+      vertical: verticalId,
+    }),
+    vertical_id: verticalId,
+    });
+  });
+  return JSON.stringify(entriesTransform(entries).map((entry) => ({
+    ...entry,
+    custody_sha256: fullPersonQaCustodySha256(entry),
+  })));
 }
 
 function environment(overrides = {}) {

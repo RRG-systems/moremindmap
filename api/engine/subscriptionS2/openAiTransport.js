@@ -14,7 +14,7 @@ function outputText(response) {
 }
 
 export function createSubscriptionS2OpenAiTransport({ apiKey, timeoutMs = 300_000, maxTransportRetries = 1, client: suppliedClient = null } = {}) {
-  if (!apiKey) throw new TypeError('SUBSCRIPTION_S2_OPENAI_API_KEY_REQUIRED');
+  if (!apiKey && !suppliedClient) throw new TypeError('SUBSCRIPTION_S2_OPENAI_API_KEY_REQUIRED');
   const client = suppliedClient || new OpenAI({ apiKey, maxRetries: 0, timeout: timeoutMs });
   return async function subscriptionS2Transport(request) {
     if (request?.model !== 'gpt-5.6-sol' || request?.store !== false || request?.background !== false || request?.reasoning?.effort !== 'xhigh') {

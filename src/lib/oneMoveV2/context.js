@@ -4,7 +4,7 @@ import { bindFrozenWholeBusinessModel } from '../fiveFuturesV2/wbmBinding.js';
 import { validateFiveFuturesV2 } from '../fiveFuturesV2/validator.js';
 import { AUTHORITY_ROUTE_BY_CONSTRAINT, FUTURE_ROLES } from './constants.js';
 import { integrity } from './errors.js';
-import { loadFrozenScriptIntelligence, selectRelevantScriptIntelligence } from './scriptLibrary.js';
+import { bindScopedScriptAbsence, loadFrozenScriptIntelligence, selectRelevantScriptIntelligence } from './scriptLibrary.js';
 
 const INTERVENTION_SECTIONS = Object.freeze([
   'Causal Mechanisms',
@@ -14,13 +14,37 @@ const INTERVENTION_SECTIONS = Object.freeze([
   'Intervention Relevance',
 ]);
 
-function selectInterventionAuthorities(wbm, library) {
+export function oneMoveScopedSelectionHash({ authorityRouteByConstraint, scriptSelection }) {
+  return canonicalHash({ authority_route_by_constraint: authorityRouteByConstraint, script_selection: scriptSelection });
+}
+
+function selectInterventionAuthorities(wbm, library, authorityRouteByConstraint) {
   const allowed = new Set(wbm.authority_receipts[0].selected_authority_ids);
-  const route = AUTHORITY_ROUTE_BY_CONSTRAINT[wbm.governing_constraint.constraint_type] || AUTHORITY_ROUTE_BY_CONSTRAINT.mixed;
+  const routes = authorityRouteByConstraint === undefined ? AUTHORITY_ROUTE_BY_CONSTRAINT : authorityRouteByConstraint;
+  if (authorityRouteByConstraint !== undefined) {
+    integrity(routes && typeof routes === 'object' && !Array.isArray(routes), 'AUTHORITY_CORRUPTION', 'Cassette-owned authority routes are required');
+    for (const ids of Object.values(routes)) {
+      integrity(Array.isArray(ids) && ids.length > 0 && ids.every(id => typeof id === 'string' && id.length > 0)
+        && new Set(ids).size === ids.length, 'AUTHORITY_CORRUPTION', 'Invalid cassette-owned authority route');
+      // Validate the complete supplied route, including currently unselected IDs.
+      // A foreign authority may not disappear silently through intersection.
+      ids.forEach(id => getAuthority(library, id));
+    }
+  }
+  const route = routes[wbm.governing_constraint.constraint_type] || routes.mixed;
+  integrity(Array.isArray(route), 'AUTHORITY_CORRUPTION', 'No cassette-owned authority route for this constraint');
   const selectedIds = route.filter((authorityId) => allowed.has(authorityId)).slice(0, 6);
   integrity(selectedIds.length > 0 && selectedIds.length < 12, 'AUTHORITY_CORRUPTION', 'One Move authority selection must be selective');
+  if (wbm.assessment_identity.vertical !== 'real_estate') {
+    const verticalIds = new Set((library.vertical_bibles || []).map(item => item.authority_id));
+    integrity(selectedIds.some(id => verticalIds.has(id)), 'AUTHORITY_CORRUPTION', 'One Move must retain selected authority from its own vertical');
+  }
   return selectedIds.map((authorityId) => {
     const authority = getAuthority(library, authorityId);
+    if (authorityRouteByConstraint !== undefined) {
+      integrity(wbm.source_integrity.authority_hashes[authorityId] === authority.sha256,
+        'AUTHORITY_CORRUPTION', 'Selected cassette authority differs from the frozen WBM source');
+    }
     const sections = selectAuthoritySections(authority, INTERVENTION_SECTIONS);
     return Object.freeze({
       authority_id: authorityId,
@@ -43,11 +67,20 @@ export function buildOneMoveContext(wholeBusinessModel, fiveFutures, options = {
   verifyFiveFutures(fiveFutures, binding);
   integrity(fiveFutures.business_id === wholeBusinessModel.assessment_identity.business_id, 'WRONG_BUSINESS_PROFILE', 'WBM and Five Futures business identity differ');
   integrity(fiveFutures.owner_profile_id === wholeBusinessModel.assessment_identity.owner_profile_id, 'WRONG_BUSINESS_PROFILE', 'WBM and Five Futures owner identity differ');
+  const vertical = wholeBusinessModel.assessment_identity.vertical;
+  const scoped = vertical !== 'real_estate' || options.authorityRouteByConstraint !== undefined || options.scriptSelection !== undefined;
+  if (scoped) {
+    integrity(options.library && options.authorityRouteByConstraint && options.scriptSelection,
+      'AUTHORITY_CORRUPTION', 'Scoped One Move requires its own library, authority route and explicit script selection');
+    integrity(options.library.vertical_id === vertical, 'AUTHORITY_CORRUPTION', 'One Move library belongs to a different vertical');
+    integrity(options.scriptLibrary === undefined, 'AUTHORITY_CORRUPTION', 'Scoped script absence may not fall back to a separate script catalog');
+  }
   const library = options.library || loadFrozenAuthorityLibrary(options);
-  const selectedAuthorities = selectInterventionAuthorities(wholeBusinessModel, library);
+  const selectedAuthorities = selectInterventionAuthorities(wholeBusinessModel, library, options.authorityRouteByConstraint);
   const base = { wbm: wholeBusinessModel };
-  const scriptLibrary = options.scriptLibrary || loadFrozenScriptIntelligence(options);
-  const scripts = selectRelevantScriptIntelligence(base, scriptLibrary);
+  const scriptLibrary = scoped ? bindScopedScriptAbsence(options.scriptSelection, library, vertical)
+    : options.scriptLibrary || loadFrozenScriptIntelligence(options);
+  const scripts = scoped ? scriptLibrary.scripts : selectRelevantScriptIntelligence(base, scriptLibrary);
   const context = {
     context_contract: 'one-move-v2-governed-context-v1',
     binding: {
@@ -61,6 +94,7 @@ export function buildOneMoveContext(wholeBusinessModel, fiveFutures, options = {
       bos_hash: binding.bos_hash,
       script_registry_hash: scriptLibrary.registry_hash,
       script_library_hash: scriptLibrary.library_hash,
+      ...(scoped ? { scoped_selection_hash: oneMoveScopedSelectionHash(options) } : {}),
     },
     governing_constraint: wholeBusinessModel.governing_constraint,
     causal_mechanisms: wholeBusinessModel.causal_model.mechanisms,
@@ -90,6 +124,8 @@ export function buildOneMoveContext(wholeBusinessModel, fiveFutures, options = {
       selected_section_ids: selectedAuthorities.flatMap((authority) => authority.selected_sections.map((section) => section.section_id)),
       selected_script_ids: scripts.map((script) => script.script_id),
       excluded_all_authority_dump: true,
+      ...(scoped ? { script_selection: scriptLibrary.selection,
+        authority_route_hash: canonicalHash(options.authorityRouteByConstraint) } : {}),
     },
     customer_prose_input: false,
     rsl_input: false,
@@ -97,4 +133,3 @@ export function buildOneMoveContext(wholeBusinessModel, fiveFutures, options = {
   context.context_hash = canonicalHash(context);
   return Object.freeze(context);
 }
-

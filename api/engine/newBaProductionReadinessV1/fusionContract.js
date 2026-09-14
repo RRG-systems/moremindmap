@@ -204,7 +204,7 @@ export function validateBosFusionAuthority(authority, { profileId = authority?.p
   return Object.freeze({ ...normalized, contract_sha256: contractSha256, evidence_boundary_sha256: evidenceBoundarySha256 });
 }
 
-export function validateFusionRelationship(relationship, authority, assessmentId) {
+export function validateFusionRelationship(relationship, authority, assessmentId, { approvedBusinessEvidenceRefs = null } = {}) {
   const claim = authority.claims.find((candidate) => candidate.claim_ref === relationship?.whole_person_claim_ref);
   invariant(claim, `new_ba_bos_fusion_relationship_claim_unavailable:${relationship?.relationship_id || 'unknown'}`);
   const contribution = relationshipContribution(relationship, claim);
@@ -213,7 +213,8 @@ export function validateFusionRelationship(relationship, authority, assessmentId
   invariant(relationship.business_cause_established_by_personality === false, `new_ba_bos_fusion_personality_business_cause_prohibited:${relationship.relationship_id}`);
   invariant(typeof relationship.business_mechanism_ref === 'string' && relationship.business_mechanism_ref, `new_ba_bos_fusion_business_mechanism_missing:${relationship.relationship_id}`);
   invariant(Array.isArray(relationship.business_evidence_refs) && relationship.business_evidence_refs.length > 0, `new_ba_bos_fusion_business_evidence_missing:${relationship.relationship_id}`);
-  invariant(relationship.business_evidence_refs.every((ref) => String(ref).startsWith(`${assessmentId}-q`)), `new_ba_bos_fusion_business_evidence_scope_invalid:${relationship.relationship_id}`);
+  if (approvedBusinessEvidenceRefs !== null) invariant(Array.isArray(approvedBusinessEvidenceRefs) && approvedBusinessEvidenceRefs.length > 0 && approvedBusinessEvidenceRefs.every(ref => String(ref).startsWith(`${assessmentId}-lo-`)), 'new_ba_bos_fusion_approved_scope_invalid');
+  invariant(relationship.business_evidence_refs.every((ref) => approvedBusinessEvidenceRefs === null ? String(ref).startsWith(`${assessmentId}-q`) : approvedBusinessEvidenceRefs.includes(ref)), `new_ba_bos_fusion_business_evidence_scope_invalid:${relationship.relationship_id}`);
   invariant(Array.isArray(relationship.alternative_explanations) && relationship.alternative_explanations.length > 0, `new_ba_bos_fusion_alternative_explanation_missing:${relationship.relationship_id}`);
   invariant(typeof relationship.falsifier === 'string' && relationship.falsifier, `new_ba_bos_fusion_falsifier_missing:${relationship.relationship_id}`);
   return Object.freeze({ ...relationship, allowed_contribution: contribution });

@@ -27,6 +27,12 @@ export function validateOneMoveV2(oneMove, context, selectionReceipt) {
   integrity(isSha256(oneMove.whole_business_model_binding.hash) && isSha256(oneMove.five_futures_binding.hash), 'HASH_CORRUPTION', 'One Move upstream hashes must be SHA-256');
   integrity(canonicalHash(oneMove.authority_versions.business_intelligence) === canonicalHash(context.binding.authority_hashes), 'AUTHORITY_CORRUPTION', 'One Move authority hashes drifted');
   integrity(oneMove.authority_versions.script_registry === context.binding.script_registry_hash && oneMove.authority_versions.script_library === context.binding.script_library_hash, 'AUTHORITY_CORRUPTION', 'One Move script hashes drifted');
+  if (context.binding.scoped_selection_hash) {
+    integrity(oneMove.provenance.context_hash === context.context_hash, 'AUTHORITY_CORRUPTION', 'One Move scoped authority or script selection drifted');
+    const scripts = new Set(context.selected_script_intelligence.map(item => item.script_id));
+    integrity(Array.isArray(oneMove.script_intelligence_refs) && oneMove.script_intelligence_refs.every(id => scripts.has(id)),
+      'AUTHORITY_CORRUPTION', 'One Move references scripts outside its scoped selection');
+  }
   integrity(oneMove.governing_constraint_id === context.governing_constraint.constraint_id, 'UNBOUND_INTERVENTION', 'One Move governing constraint drifted');
   const mechanisms = new Set(context.causal_mechanisms.map((item) => item.mechanism_id));
   integrity(oneMove.primary_mechanism_ids.length > 0 && oneMove.primary_mechanism_ids.every((id) => mechanisms.has(id)), 'UNBOUND_INTERVENTION', 'One Move is not bound to a governed mechanism');
@@ -62,4 +68,3 @@ export function validateOneMoveV2(oneMove, context, selectionReceipt) {
   receipt.receipt_hash = canonicalHash(receipt);
   return Object.freeze(receipt);
 }
-

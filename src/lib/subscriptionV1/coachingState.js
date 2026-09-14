@@ -31,14 +31,109 @@ export function createLineageVersionIdentity(artifact) {
   return deepFreeze({ ok: true, code: 'LINEAGE_IDENTITY_CREATED', lineage });
 }
 
+function hasOpenPlanState(artifact) {
+  return artifact?.artifact_type === 'PLAN_135' && (
+    artifact.status === 'OPEN_NOT_CUSTOMER_AGREED'
+    || artifact.validation_status === 'PASS_WITH_OPEN_PLAN'
+    || artifact.bindings?.plan_state === 'LO_OPEN_DRAFT'
+    || artifact.bindings?.customer_plan_status === 'OPEN_NOT_CUSTOMER_AGREED'
+    || artifact.payload?.plan_state === 'LO_OPEN_DRAFT'
+    || artifact.payload?.customer_boundary?.proposed_plan_not_customer_commitment === true
+    || artifact.payload?.one_move?.proposal_status === 'PROPOSED_NOT_CUSTOMER_AGREED'
+  );
+}
+
+// This is the narrow LO projection admitted by the loader's custody validator.
+// Paid and synthetic authority classes remain distinct, and both preserve the
+// plan as an open proposal rather than a completed/agreed customer commitment.
+function isCompatibleLoanOriginatorOpenPlan(artifact) {
+  const plan = artifact.payload;
+  const synthetic = artifact.scope?.tenant_id === 'synthetic_qa';
+  const expectedSource = synthetic
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
+    : 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION';
+  const expectedPolicy = synthetic
+    ? 'SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN'
+    : 'CANONICAL_PAID_LO_OPEN_PLAN';
+  return artifact.domain_boundary?.source === expectedSource
+    && artifact.status === 'OPEN_NOT_CUSTOMER_AGREED'
+    && artifact.validation_status === 'PASS_WITH_OPEN_PLAN'
+    && artifact.compatibility_status === 'COMPATIBLE'
+    && artifact.bindings?.vertical_id === 'loan_originator'
+    && /^[a-f0-9]{64}$/u.test(artifact.bindings?.vertical_binding_hash || '')
+    && artifact.bindings?.completeness_policy === expectedPolicy
+    && artifact.bindings?.plan_state === 'LO_OPEN_DRAFT'
+    && artifact.bindings?.customer_plan_status === 'OPEN_NOT_CUSTOMER_AGREED'
+    && artifact.bindings?.customer_plan_complete === false
+    && plan?.plan_state === 'LO_OPEN_DRAFT'
+    && plan.bindings?.verticalId === 'loan_originator'
+    && plan.customer_boundary?.customer_agreed === false
+    && plan.customer_boundary?.proposed_plan_not_customer_commitment === true
+    && plan.customer_boundary?.all_ways_intentionally_open === true
+    && Array.isArray(plan.ways) && plan.ways.length === 3
+    && plan.ways.every((way) => way.status === 'OPEN' && way.title === null
+      && Array.isArray(way.strategies) && way.strategies.length === 0 && way.open_strategy_positions === 5)
+    && Array.isArray(plan.strategies) && plan.strategies.length === 0 && plan.open_strategy_positions === 15
+    && plan.one_move?.status === 'ALONGSIDE_PLAN_NOT_A_STRATEGY'
+    && plan.one_move?.proposal_status === 'PROPOSED_NOT_CUSTOMER_AGREED'
+    && plan.validation?.selected_way_count === 0 && plan.validation?.strategy_count === 0
+    && plan.validation?.open_strategy_positions === 15
+    && artifact.authority?.authority_id === 'canonical_real_profile_plan_135'
+    && /^[a-f0-9]{64}$/u.test(artifact.authority?.authority_hash || '')
+    && artifact.content_hash === hashCanonicalJson({
+      contract: 'paid-subscriber-canonical-artifact-projection-v1',
+      artifact_type: 'PLAN_135',
+      source_sha256: artifact.authority.authority_hash,
+      payload: plan,
+    });
+}
+
+function isCompatibleCustomerAgreedPlanSuccessor(artifact, openPlans) {
+  const predecessor = openPlans.find((openPlan) => (
+    openPlan.artifact_id === artifact.supersedes_artifact_id
+    && openPlan.scope?.tenant_id === artifact.scope?.tenant_id
+  ));
+  if (!predecessor) return false;
+  return artifact.status === 'COMPLETE'
+    && artifact.validation_status === 'PASS'
+    && artifact.compatibility_status === 'COMPATIBLE'
+    && artifact.domain_boundary?.source === predecessor.domain_boundary?.source
+    && artifact.bindings?.vertical_id === 'loan_originator'
+    && artifact.bindings?.vertical_binding_hash === predecessor.bindings?.vertical_binding_hash
+    && artifact.bindings?.completeness_policy === predecessor.bindings?.completeness_policy
+    && artifact.bindings?.plan_state === 'CUSTOMER_AGREED'
+    && artifact.bindings?.customer_plan_status === 'CUSTOMER_AGREED'
+    && artifact.bindings?.customer_plan_complete === true
+    && artifact.payload?.plan_state === 'CUSTOMER_AGREED'
+    && artifact.payload?.customer_boundary?.customer_agreed === true
+    && artifact.payload?.one_move?.proposal_status === 'CUSTOMER_AGREED';
+}
+
 function selectNewestCompatible(artifacts, artifactType) {
   const candidates = artifacts.filter((artifact) => artifact.artifact_type === artifactType);
-  const compatible = candidates.filter((artifact) => artifact.status === 'COMPLETE'
+  const recencyOrder = (left, right) => right.created_at.localeCompare(left.created_at)
+    || right.version.localeCompare(left.version)
+    || left.artifact_id.localeCompare(right.artifact_id);
+  const newest = [...candidates].sort(recencyOrder)[0] || null;
+  // A newest open-plan record is an authority frontier: if malformed it must
+  // fail closed instead of falling back to an older completed plan. An older
+  // open draft cannot, however, shadow a newer valid customer-agreed plan.
+  const exactOpenPlans = artifactType === 'PLAN_135'
+    ? candidates.filter(isCompatibleLoanOriginatorOpenPlan)
+    : [];
+  const guardedPlanFrontier = artifactType === 'PLAN_135'
+    && (hasOpenPlanState(newest) || exactOpenPlans.length > 0);
+  const candidatePool = guardedPlanFrontier
+    ? [newest]
+    : candidates;
+  const compatible = candidatePool.filter((artifact) => hasOpenPlanState(artifact)
+    ? isCompatibleLoanOriginatorOpenPlan(artifact)
+    : exactOpenPlans.length > 0
+      ? isCompatibleCustomerAgreedPlanSuccessor(artifact, exactOpenPlans)
+      : artifact.status === 'COMPLETE'
     && artifact.validation_status === 'PASS'
     && artifact.compatibility_status === 'COMPATIBLE');
-  compatible.sort((left, right) => right.created_at.localeCompare(left.created_at)
-    || right.version.localeCompare(left.version)
-    || left.artifact_id.localeCompare(right.artifact_id));
+  compatible.sort(recencyOrder);
   return { selected: compatible[0] || null, rejected: candidates.filter((candidate) => candidate !== compatible[0]) };
 }
 
@@ -61,6 +156,14 @@ function validateCrossArtifactBindings(selected) {
   if (futures.bindings?.wbm_hash !== wbm.content_hash) return 'FIVE_FUTURES_WBM_BINDING_INVALID';
   if (move.bindings?.wbm_hash !== wbm.content_hash || !move.payload?.mechanism_id || move.payload?.selected !== true) return 'ONE_MOVE_BINDING_INVALID';
   if (plan.bindings?.one_move_hash !== move.content_hash || plan.bindings?.wbm_hash !== wbm.content_hash) return 'PLAN_BINDING_INVALID';
+  const expectedOpenPlanSource = plan.scope?.tenant_id === 'synthetic_qa'
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
+    : 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION';
+  if (hasOpenPlanState(plan) && (ba.bindings?.vertical_id !== 'loan_originator'
+    || ba.bindings?.vertical_binding_hash !== plan.bindings.vertical_binding_hash
+    || ba.bindings?.completeness_policy !== plan.bindings.completeness_policy
+    || ba.domain_boundary?.source !== expectedOpenPlanSource
+    || plan.domain_boundary?.source !== expectedOpenPlanSource)) return 'PLAN_VERTICAL_AUTHORITY_BINDING_INVALID';
   if (evidence.bindings?.ba_hash !== ba.content_hash || evidence.bindings?.wbm_hash !== wbm.content_hash) return 'EVIDENCE_BINDING_INVALID';
   return null;
 }

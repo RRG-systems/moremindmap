@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "result": "PASS",
+  "approved_candidate_zip_sha256": "859edd59809e68776fee4a1a5ba10d333df0d06ed3cf351aca011f5f2605224a",
+  "question_architecture_fingerprint": "a01b65214f47b5bc999ea1312618ef53cec277b48deda34ce7bf5f3df69b8207",
+  "check_count": 7,
+  "pass_count": 7,
+  "fail_count": 0,
+  "checks": [
+    {
+      "name": "exact_customer_wording",
+      "status": "PASS",
+      "detail": {"count": 15}
+    },
+    {
+      "name": "exact_mission_ids",
+      "status": "PASS",
+      "detail": {"count": 15}
+    },
+    {
+      "name": "field_contract_semantics",
+      "status": "PASS",
+      "detail": true
+    },
+    {
+      "name": "all_145_field_semantics",
+      "status": "PASS",
+      "detail": {"screens": 15, "fields": 145}
+    },
+    {
+      "name": "branching_semantics",
+      "status": "PASS",
+      "detail": true
+    },
+    {
+      "name": "synthetic_replay_semantics",
+      "status": "PASS",
+      "detail": {"paths": 11}
+    },
+    {
+      "name": "approved_source_hashes",
+      "status": "PASS",
+      "detail": {
+        "04_STRUCTURED_ANSWER_EVIDENCE_FIELD_REGISTRY.json": "4a501f2b5610e26850be96cc9ceaad97d6f71088264117e5e2951bdf37ffda3c",
+        "05_BRANCHING_APPLICABILITY_SKIP_REGISTRY.json": "0db141f73796c071255e3ddd6bda45e5c27d9b73d6815112c6c302354ef2c250",
+        "20_SYNTHETIC_COVERAGE_FOCUSED_REPLAY.json": "91d3fc92deebd3bf49223d0b502b181b3b1be032aff3958f8457d56176c3d046"
+      }
+    }
+  ]
+}

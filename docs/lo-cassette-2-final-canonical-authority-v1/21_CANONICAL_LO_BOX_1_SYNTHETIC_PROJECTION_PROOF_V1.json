@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "authority_status": "CANONICAL_SUPPORTING_ACCEPTANCE_PROOF",
+  "data_status": "FICTIONAL_SYNTHETIC_PRODUCT_EVIDENCE_ONLY",
+  "scope": "VISIBLE_BOX_1_SURFACE_IDENTITY_AND_ONE_TO_ONE_MISSION_MAPPING_ONLY",
+  "authority": {
+    "final_canonical_authorization_page_id": "3c9c0cd7-28dc-8177-ab99-c04d75f4ef3f",
+    "freeze_candidate_authorization_page_id": "3c8c0cd7-28dc-81eb-9925-c24143c24c8a",
+    "bounded_review_packet_page_id": "3c8c0cd7-28dc-8164-8175-fccc77f408a2",
+    "founder_user_instruction_date": "2026-08-26"
+  },
+  "locked_visible_surfaces": [
+    "Your Business Now",
+    "Where Your Business Comes From",
+    "Your Business Pipeline",
+    "Your System & Capacity",
+    "What’s Holding You Back"
+  ],
+  "surface_mission_mapping": {
+    "Your Business Now": {
+      "missions": ["LO_CORE_02_PRIMARY_GOAL", "LO_CORE_03_PRODUCTION_WINDOWS", "LO_CORE_04_PURPOSE_APPLICABILITY", "LO_COND_14_ECONOMICS"],
+      "preserves": ["TRAILING_12_MONTH_BASELINE", "COMPATIBLE_90_DAY_TRAJECTORY", "FUNDED_UNITS_VOLUME", "PURCHASE_REFINANCE_MIX", "GOAL", "APPLICABLE_ECONOMICS"]
+    },
+    "Where Your Business Comes From": {
+      "missions": ["LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK", "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK", "LO_CORE_08_RELATIONSHIP_SYSTEMS"],
+      "preserves": ["OSN_VISIBLE_SEPARATE", "CRN_VISIBLE_SEPARATE", "SOURCE_MIX", "PRODUCTIVITY", "CONCENTRATION", "RELATIONSHIP_CONDITION", "AUTHORITY_QUALIFIERS"]
+    },
+    "Your Business Pipeline": {
+      "missions": ["LO_CORE_04_PURPOSE_APPLICABILITY", "LO_CORE_07_OPPORTUNITY_FUNNEL", "LO_COND_13_CONVERSION_FALLOUT_CYCLE", "LO_COND_15_CONTRADICTION_CLARIFICATION"],
+      "preserves": ["PURCHASE_PATH_APPLICABILITY", "REFINANCE_PATH_APPLICABILITY", "OPPORTUNITY_TO_FUNDED_FUNNEL", "CONVERSION", "PULL_THROUGH", "FALLOUT", "CYCLE", "CONTRADICTION_ABSTENTION"]
+    },
+    "Your System & Capacity": {
+      "missions": ["LO_CORE_08_RELATIONSHIP_SYSTEMS", "LO_CORE_09_TEAM_CAPACITY", "LO_CORE_10_PLATFORM_CAPABILITY", "LO_CORE_12_ACCOUNTABILITY_EXECUTION"],
+      "preserves": ["SYSTEMS_HAVE_NUMBERS", "TOOLS_ARE_NOT_SYSTEMS", "TEAM_SUPPORT_WORK_OWNERSHIP", "CAPACITY", "PLATFORM_CONSTRAINTS", "CONTROL_OWNER", "EXECUTION_ACCOUNTABILITY"]
+    },
+    "What’s Holding You Back": {
+      "missions": ["LO_CORE_02_PRIMARY_GOAL", "LO_CORE_07_OPPORTUNITY_FUNNEL", "LO_CORE_10_PLATFORM_CAPABILITY", "LO_CORE_11_OPERATOR_DIAGNOSIS", "LO_COND_13_CONVERSION_FALLOUT_CYCLE", "LO_COND_14_ECONOMICS", "LO_COND_15_CONTRADICTION_CLARIFICATION"],
+      "preserves": ["OPPORTUNITY_GAP", "OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT", "ON_TRACK", "INSUFFICIENT_EVIDENCE", "PRIMARY_SECONDARY_CONSTRAINT_DISCIPLINE", "CONFIDENCE", "MISSINGNESS", "CONTRADICTION", "NO_MANUFACTURED_PROBLEM"]
+    }
+  },
+  "path_surface_coverage": [
+    {"id":"CASE_01","in_scope":true,"surfaces":{"Your Business Now":"FULL","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE","Your Business Pipeline":"FULL","Your System & Capacity":"FULL","What’s Holding You Back":"OPPORTUNITY_GAP"}},
+    {"id":"CASE_02","in_scope":true,"surfaces":{"Your Business Now":"FULL","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE","Your Business Pipeline":"FULL_CONVERSION_EXPLANATION","Your System & Capacity":"FULL","What’s Holding You Back":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT"}},
+    {"id":"CASE_03","in_scope":true,"surfaces":{"Your Business Now":"FULL","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE_CONCENTRATION_VISIBLE","Your Business Pipeline":"FULL","Your System & Capacity":"FULL_CAPACITY_LEVERAGE_NO_PROCESSOR_FIRST","What’s Holding You Back":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT"}},
+    {"id":"CASE_04","in_scope":true,"surfaces":{"Your Business Now":"FULL_PURCHASE_REFINANCE_APPLICABILITY","Where Your Business Comes From":"FULL_CRN_PROVENANCE_PRESERVED","Your Business Pipeline":"FULL_PURCHASE_STAGES_NOT_APPLICABLE","Your System & Capacity":"FULL","What’s Holding You Back":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT"}},
+    {"id":"CASE_05","in_scope":true,"surfaces":{"Your Business Now":"FULL","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE","Your Business Pipeline":"FULL_MATERIAL_EXPLANATION","Your System & Capacity":"FULL_PLATFORM_CONTROL_OWNER_VISIBLE","What’s Holding You Back":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT"}},
+    {"id":"CASE_06","in_scope":true,"surfaces":{"Your Business Now":"FULL_ON_TRACK_RECOGNITION","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE","Your Business Pipeline":"FULL","Your System & Capacity":"FULL","What’s Holding You Back":"ON_TRACK_NO_MANUFACTURED_PROBLEM"}},
+    {"id":"CASE_07","in_scope":true,"surfaces":{"Your Business Now":"NARROW","Where Your Business Comes From":"NARROW_OSN_CRN_SEPARATE","Your Business Pipeline":"ABSTAIN_UNDEFINED_LEADS_NOT_OPPORTUNITIES","Your System & Capacity":"NARROW","What’s Holding You Back":"INSUFFICIENT_EVIDENCE"}},
+    {"id":"CASE_08","in_scope":true,"surfaces":{"Your Business Now":"CONTRADICTORY_WHERE_AFFECTED","Where Your Business Comes From":"NARROW_IF_UNAFFECTED_OSN_CRN_SEPARATE","Your Business Pipeline":"ABSTAIN_UNRESOLVED_CONTRADICTION","Your System & Capacity":"NARROW_IF_UNAFFECTED","What’s Holding You Back":"INSUFFICIENT_EVIDENCE_CONTRADICTION_VISIBLE"}},
+    {"id":"CASE_09","in_scope":true,"surfaces":{"Your Business Now":"FULL_ECONOMICS_SENSITIVITY","Where Your Business Comes From":"FULL_OSN_CRN_SEPARATE","Your Business Pipeline":"FULL","Your System & Capacity":"FULL_CAPACITY_FEASIBILITY","What’s Holding You Back":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT"}},
+    {"id":"CASE_10A","in_scope":false,"surfaces":{"Your Business Now":"OUT_OF_SCOPE","Where Your Business Comes From":"OUT_OF_SCOPE","Your Business Pipeline":"OUT_OF_SCOPE","Your System & Capacity":"OUT_OF_SCOPE","What’s Holding You Back":"OUT_OF_SCOPE"}},
+    {"id":"CASE_10B","in_scope":true,"surfaces":{"Your Business Now":"FULL_OR_NARROW","Where Your Business Comes From":"NARROW_OSN_CRN_SEPARATE_AUTHORITY_MISSING_VISIBLE","Your Business Pipeline":"FULL_OR_NARROW","Your System & Capacity":"NARROW_SYSTEM_MEASURES_AUTHORITY_VISIBLE","What’s Holding You Back":"ON_TRACK_WITH_AUTHORITY_QUALIFIER"}}
+  ],
+  "preserved_question_architecture_fingerprint": {
+    "algorithm": "SHA256_CANONICAL_JSON_OF_15_MISSION_IDS_15_EXACT_QUESTIONS_145_FIELDS_CORE_CONDITIONAL_ORDER_AND_CEILINGS",
+    "before": "a01b65214f47b5bc999ea1312618ef53cec277b48deda34ce7bf5f3df69b8207",
+    "after": "a01b65214f47b5bc999ea1312618ef53cec277b48deda34ce7bf5f3df69b8207",
+    "unchanged": true
+  },
+  "preserved_source_hashes": {
+    "04_STRUCTURED_ANSWER_EVIDENCE_FIELD_REGISTRY.json": "4a501f2b5610e26850be96cc9ceaad97d6f71088264117e5e2951bdf37ffda3c",
+    "05_BRANCHING_APPLICABILITY_SKIP_REGISTRY.json": "0db141f73796c071255e3ddd6bda45e5c27d9b73d6815112c6c302354ef2c250",
+    "20_SYNTHETIC_COVERAGE_FOCUSED_REPLAY.json": "91d3fc92deebd3bf49223d0b502b181b3b1be032aff3958f8457d56176c3d046"
+  },
+  "bounded_replay_checks": {
+    "exact_five_locked_labels_in_order": true,
+    "all_10_producing_cases_have_all_five_surfaces": true,
+    "out_of_scope_control_has_all_five_out_of_scope": true,
+    "osn_crn_visible_on_dedicated_source_surface": true,
+    "systems_and_capacity_combined_without_typed_semantic_loss": true,
+    "sparse_contradictory_on_track_gap_sufficient_and_out_of_scope_truthful": true,
+    "question_count_and_branching_unchanged": true,
+    "all_145_fields_retain_lineage_provenance_applicability": true,
+    "downstream_privacy_recruiting_real_estate_coaching_runtime_production_boundaries_unchanged": true,
+    "no_implementation_or_production_mutation": true
+  },
+  "result": "PASS"
+}

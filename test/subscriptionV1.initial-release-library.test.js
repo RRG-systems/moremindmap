@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { Buffer } from 'node:buffer';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { createHash } from 'node:crypto';
@@ -16,6 +17,18 @@ const response=(output,n)=>({id:`offline-release-${n}`,status:'completed',output
 const final=(message,n)=>response([{type:'message',role:'assistant',content:[{type:'output_text',text:JSON.stringify({customer_message:message}),annotations:[]}]}],n);
 const call=(name,args,n)=>response([{type:'reasoning',id:`opaque-${n}`,summary:[],encrypted_content:`offline-opaque-${n}`},{type:'function_call',call_id:`call-${n}`,name,arguments:JSON.stringify(args),status:'completed'}],n);
 const request=()=>({model:'gpt-5.6-sol',reasoning:{effort:'xhigh'},store:false,background:false,max_output_tokens:2000,tools:[],text:{format:{type:'json_schema',name:'offline',strict:true,schema:{type:'object'}}},input:[{role:'user',content:'Use MORE references to help think about relationship choices. Keep the work uncommitted.'}]});
+const EXPECTED_RUNTIME_INCLUDE_GLOB = '{api/engine/subscriptionV1/{syntheticQaProviderCandidate.json,sourceLibrary/**},docs/{ba-intelligence-authority-library-v1/**,lo-cassette-2-final-canonical-authority-v1/{0[2-9]_*,1?_*,2[0-4]_*,SOURCE*}},package*.json,vercel.json}';
+const runtimeIncludeGlobCovers = path => path === 'api/engine/subscriptionV1/syntheticQaProviderCandidate.json'
+  || path.startsWith('api/engine/subscriptionV1/sourceLibrary/')
+  || path.startsWith('docs/ba-intelligence-authority-library-v1/')
+  || /^docs\/lo-cassette-2-final-canonical-authority-v1\/(?:0[2-9]_|1._|2[0-4]_|SOURCE)/u.test(path)
+  || /^package.*\.json$/u.test(path)
+  || path === 'vercel.json';
+const isFileLoadedRuntimeAsset = path => path.startsWith('api/engine/subscriptionV1/sourceLibrary/')
+  || path.startsWith('docs/ba-intelligence-authority-library-v1/')
+  || path.startsWith('docs/lo-cassette-2-final-canonical-authority-v1/')
+  || /^package.*\.json$/u.test(path)
+  || path === 'vercel.json';
 
 test('ordinary seam executes pinned search/read/final with no web and retains private source custody',async()=>{
   const library=pinnedSubscriptionSources();assert.equal(library.info.status,'AVAILABLE');assert.equal(library.info.document_count,17);
@@ -62,12 +75,32 @@ test('current-exchange GU preserves negation and adds no governed object or clos
 });
 
 test('source receipt merge preserves HB close/extraction implementation and ordinary mission',()=>{
- const original=readFileSync('/private/tmp/moremindmap-home-base-v2-paid-subscription-integration-v1/src/lib/subscriptionV1/freeGptV2/providerSeams.js','utf8');const candidate=readFileSync(new URL('../src/lib/subscriptionV1/freeGptV2/providerSeams.js',import.meta.url),'utf8');const marker='export function createSessionCloseSeamV1';assert.equal(candidate.slice(candidate.indexOf(marker)),original.slice(original.indexOf(marker)));
- const mission='../src/lib/subscriptionV1/freeGptV2/constants.js';assert.equal(readFileSync(new URL(mission,import.meta.url),'utf8'),readFileSync('/private/tmp/moremindmap-home-base-v2-paid-subscription-integration-v1/src/lib/subscriptionV1/freeGptV2/constants.js','utf8'));
+ const sha=value=>createHash('sha256').update(value).digest('hex');
+ const candidate=readFileSync(new URL('../src/lib/subscriptionV1/freeGptV2/providerSeams.js',import.meta.url),'utf8');const marker='export function createSessionCloseSeamV1';
+ assert.equal(sha(candidate.slice(candidate.indexOf(marker))),'e5f450ef73373e3b11dae7f51074e23c6b21c8c2c7b36bcd76c46f4da46de6a2');
+ assert.equal(sha(readFileSync(new URL('../src/lib/subscriptionV1/freeGptV2/constants.js',import.meta.url))),'3dbf988ca358de87de065fd667a90103f131a4a5339075b636cae95a65071063');
 });
 
-test('paid function explicitly bundles only the pinned library at its declared path',()=>{
+test('paid function bundles pinned libraries plus the exact synthetic QA runtime custody set',()=>{
  const config=JSON.parse(readFileSync(new URL('../vercel.json',import.meta.url),'utf8'));
- assert.equal(config.functions['api/internal/subscription-v1-runtime.js'].includeFiles,'api/engine/subscriptionV1/sourceLibrary/**');
+ const includeFiles=config.functions['api/internal/subscription-v1-runtime.js'].includeFiles;
+ assert.equal(includeFiles,EXPECTED_RUNTIME_INCLUDE_GLOB);
+ assert.ok(Buffer.byteLength(includeFiles)<=256);
+ assert.equal(includeFiles.includes('api/**'),false);
+ assert.equal(includeFiles.includes('src/lib/**'),false);
+ const candidate=JSON.parse(readFileSync(new URL('../api/engine/subscriptionV1/syntheticQaProviderCandidate.json',import.meta.url),'utf8'));
+ assert.ok(runtimeIncludeGlobCovers('api/engine/subscriptionV1/syntheticQaProviderCandidate.json'));
+ assert.equal(candidate.contract,'SYNTHETIC_QA_PROVIDER_CANDIDATE_CLOSURE_V3');
+ const paths=new Set(candidate.files.map(file=>file.path));
+ assert.equal(paths.size,candidate.files.length);
+ assert.ok(candidate.files.length<=300);
+ for(const required of [
+  'docs/ba-intelligence-authority-library-v1/freeze/BA_INTELLIGENCE_AUTHORITY_LIBRARY_MANIFEST_V1.json',
+  'docs/lo-cassette-2-final-canonical-authority-v1/23_AUTHORITY_DEPENDENCY_MANIFEST_V1.json',
+  'docs/lo-cassette-2-final-canonical-authority-v1/24_CANONICAL_AUTHORITY_ROOT_V1.json',
+ ]) assert.ok(paths.has(required),required);
+ for(const file of candidate.files.filter(file=>isFileLoadedRuntimeAsset(file.path))) {
+  assert.ok(runtimeIncludeGlobCovers(file.path),file.path);
+ }
  assert.equal(pinnedSubscriptionSources().info.status,'AVAILABLE');
 });
