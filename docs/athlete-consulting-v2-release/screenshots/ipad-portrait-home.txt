@@ -1,0 +1,52 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME" [active]
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - main:
+    - generic: YOUR LIFE. YOUR SPORT. YOUR DIRECTION.
+    - heading "Your goals. One clear plan." [level=1]:
+      - text: Your goals.
+      - text: One clear plan.
+    - paragraph: MORE is your AI coaching partner. It brings together who you are, your sport and the rest of your life.
+    - generic: M
+    - generic: YOU
+    - generic: SPORT
+    - generic: PLAN
+    - generic: ◎
+    - generic: YOUR CONVERSATION
+    - heading "Here’s where we are." [level=2]
+    - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - button "Continue with MORE →"
+    - generic: ◇
+    - generic: YOUR CHOICES, IN ONE PLACE
+    - heading "Your current plan." [level=2]
+    - generic: AGREED
+    - heading "Ask your coach to review one attacking choice." [level=3]
+    - list:
+      - listitem: Ask your coach to review one attacking choice.
+    - paragraph: "Check in: On September 21, you check what happened: agreement, an actual review, then any later chance to use it. No later chance means usefulness remains untested. Continue, change or stop; ask the coach if the football meaning is unclear."
+    - button "See your plan →"
+    - button "YOU Understand your personality ↗":
+      - generic: YOU
+      - text: Understand your personality ↗
+    - button "YOUR SPORT Explore your four areas ↗":
+      - generic: YOUR SPORT
+      - text: Explore your four areas ↗
+  - button "Talk with MORE ↗":
+    - text: Talk with MORE
+    - generic: ↗

@@ -1,0 +1,75 @@
+{
+  "at": "2026-09-15T22:08:22.882Z",
+  "real_provider_calls": 0,
+  "real_redis_connections": 0,
+  "original_5285_untouched": true,
+  "cookie_security_unchanged": true,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/leadership",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-BAGputK9.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-B-s7jKuH.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.svg",
+      "kind": null,
+      "athlete": null,
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    }
+  ],
+  "replay_attempts": [],
+  "denied_outbound": [],
+  "states": []
+}

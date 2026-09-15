@@ -1,0 +1,103 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures" [active]:
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+      - main:
+        - paragraph: BOX 2 · FIVE FUTURES
+        - heading "Five ways the next weeks could go." [level=1]
+        - paragraph: Now through November 2. Possibilities shaped by what happens next.
+        - navigation "Five possible paths":
+          - button "1 Current course Some good starts, but no steady pattern yet" [pressed]:
+            - generic: "1"
+            - generic: Current course
+            - strong: Some good starts, but no steady pattern yet
+          - button "2 Already beginning Your own choice is already appearing sooner":
+            - generic: "2"
+            - generic: Already beginning
+            - strong: Your own choice is already appearing sooner
+          - button "3 A better path Clear boundaries free attention for purposeful decisions":
+            - generic: "3"
+            - generic: A better path
+            - strong: Clear boundaries free attention for purposeful decisions
+          - button "4 Your stretch You earn the start without shrinking the rest of you":
+            - generic: "4"
+            - generic: Your stretch
+            - strong: You earn the start without shrinking the rest of you
+          - button "5 A risk to avoid Repeated lost starts eat into your revision time":
+            - generic: "5"
+            - generic: A risk to avoid
+            - strong: Repeated lost starts eat into your revision time
+        - article:
+          - paragraph: Current course
+          - heading "Some good starts, but no steady pattern yet" [level=2]
+          - heading "What could be different" [level=3]
+          - paragraph: Through November 2, you keep linking play and sometimes attack decisively. Some study starts go well; others slip. Your existing week still fits, but isolated good moments have not become a dependable pattern.
+          - heading "What would have to happen" [level=3]
+          - paragraph: "This path holds if the present mix continues: occasional useful feedback and protected starts, with no repeated loss of the study time you planned."
+          - heading "The first sign to watch" [level=3]
+          - paragraph: The week includes a purposeful attack or a study start that goes well, alongside another moment you would handle differently.
+          - button "Why this path is possible":
+            - text: Why this path is possible
+            - generic: →
+        - button "See the One Move worth trying first":
+          - text: See the One Move worth trying first
+          - generic: →
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

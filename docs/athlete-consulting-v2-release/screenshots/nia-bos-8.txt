@@ -1,0 +1,106 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive" [selected]
+  - article:
+    - generic: What helps you thrive
+    - heading "Clarity without being boxed in" [level=1]
+    - paragraph: You seem to fit situations that make the destination clear without controlling every step. Knowing the main goal and when it is due gives you something to move toward. Room to choose the route lets you experiment, make the result your own, and adjust when circumstances change. A larger or unfamiliar project may sometimes need more planning, but a huge list at the beginning can hide the point that would actually get you started.
+    - paragraph: "Help works well when it is exact and leaves you with a real part to do. The same is true of feedback: one clear moment or change is easier to use than a public speech or repeated correction. In group work, another kind of clarity matters too. If your first idea is understood as a starting option rather than the final answer, you can keep your useful pace while other people still have a real chance to affect the plan."
+    - paragraph: Your social fit needs some variety. Close friends can give you energy, while a whole day of unfamiliar people can tire you. After an intense event, quiet company with your brother may suit you better than more conversation. That does not mean you always need people or always need space. It means the right amount depends on familiarity, how long the interaction lasts, and what else the day has already asked from you.
+    - paragraph: It also helps that your life has several meaningful places to stand. Basketball matters, drawing gives you something you value without an audience, friends offer shared energy, and your brother brings affection and responsibility. Drawing was present while one disappointment settled, but it is not a proven answer to every hard day. This test-heavy week may make ordinary friction sharper for a while. A setting that sees your current load and your different interests is more likely to see the whole you than one role or one difficult moment.
+    - blockquote: You tend to fit settings with a clear point, a flexible route, exact help, and room for different parts of life.
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What matters most to you outside sport?
+      - paragraph: My little brother and drawing clothes. I want to make clothes people actually wear. Basketball matters a lot but I would still do the drawing if nobody saw it.
+    - blockquote:
+      - strong: What makes you want to put effort into something?
+      - paragraph: If I can make it my own I get into it. I stayed up finishing a jacket sketch for my friend. Copying definitions for class is harder even when I know it counts.
+    - blockquote:
+      - strong: How do you approach something new or unfamiliar?
+      - paragraph: I want to have a go first. I tried a sewing machine at school and got stuck. Once the teacher showed me how to thread it I wanted to do the rest myself.
+    - blockquote:
+      - strong: When something gets boring or difficult, what do you do?
+      - paragraph: I start fast then the middle can get boring. I left a comic half done. With the jacket I kept changing bits because it was for my friend and I wanted her to like it.
+    - blockquote:
+      - strong: How much of a plan do you like before you start?
+      - paragraph: Just the main thing and when it is due. A huge list makes me want to leave it. The gym closed last week so we played outside instead. I did forget my water because I grabbed my bag without checking.
+    - blockquote:
+      - strong: When you do not understand something, what do you try?
+      - paragraph: I try it and then ask someone a specific question. For a maths problem my friend showed me one step and I finished the others. A long video is usually too much at once.
+    - blockquote:
+      - strong: What kind of feedback is easiest for you to use?
+      - paragraph: Tell me the actual bit to change. A coach said my pass was late and pointed out the moment. That helped. Getting a whole speech in front of everyone makes me want to answer back.
+    - blockquote:
+      - strong: What drains you, and what helps you feel like yourself again?
+      - paragraph: Being corrected over and over drains me. Music, drawing, my brother. This week I have two tests and I am a bit snappy. That is not every week.
+    - blockquote:
+      - strong: After a disappointment, what helps you find your footing?
+      - paragraph: After a bad game I wanted to practice immediately. My mum said we were going home. I drew for a bit and the next morning it did not feel as huge. I do not know if drawing was the reason.
+    - blockquote:
+      - strong: After spending time with other people, how do you usually feel?
+      - paragraph: Usually I want more time with friends. A whole day of meeting new people is tiring though. After a tournament I like sitting with my brother and watching something without talking much.
+    - blockquote:
+      - strong: What makes you feel respected or fairly treated?
+      - paragraph: Let me explain even if you disagree. I try to do that for my brother when he gets upset. I am more patient with him than I am with people in my class.
+    - blockquote:
+      - strong: What else should MORE understand about you?
+      - paragraph: I do finish important things. This makes me sound like I never finish anything. I got the jacket design done and I always collect my brother on my day. I am not sure what I want basketball to be long term.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "First chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

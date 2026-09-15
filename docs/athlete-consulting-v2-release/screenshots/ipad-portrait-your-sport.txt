@@ -1,0 +1,122 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT" [active]
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe:
+      - main:
+        - generic "MORE Athlete":
+          - generic: ✧
+          - strong:
+            - text: MORE
+            - text: ATHLETE
+        - button "How this works ⓘ"
+        - paragraph: YOUR ATHLETE PERFORMANCE ASSESSMENT
+        - heading "Sofia, this is your next chapter." [level=1]
+        - paragraph: You already help attacks and people move. Now you are practicing choosing before checking whether everyone else needs something.
+        - region "Your APA boxes":
+          - article:
+            - generic: "1"
+            - paragraph: Where you are
+            - paragraph: Four parts of your life. One clear picture.
+            - strong: "4"
+            - generic: Goals that belong to you
+            - strong: Sport
+            - generic: Earn a starting place through purposeful attacking choices.
+            - strong: Training
+            - generic: Recognize a one-on-one chance and commit to it.
+            - strong: Warrior Mindset
+            - generic: Back my own choice while staying a supportive teammate.
+            - strong: School
+            - generic: Finish my fieldwork report draft by October 2.
+            - button "Open Where you are":
+              - text: See your four areas
+              - generic: →
+          - article:
+            - generic: "2"
+            - paragraph: Five Futures
+            - paragraph: Five possible paths to November 2.
+            - strong: Current course
+            - generic: Some good starts, but no steady pattern yet
+            - strong: Already beginning
+            - generic: Your own choice is already appearing sooner
+            - strong: A better path
+            - generic: Clear boundaries free attention for purposeful decisions
+            - strong: Your stretch
+            - generic: You earn the start without shrinking the rest of you
+            - strong: A risk to avoid
+            - generic: Repeated lost starts eat into your revision time
+            - button "Open Five Futures":
+              - text: Explore the paths
+              - generic: →
+          - article:
+            - generic: "3"
+            - paragraph: One Move
+            - paragraph: One useful thing to do next.
+            - generic: ⌾
+            - generic: Ask your coach to review one attacking choice.
+            - paragraph: Chosen to fit your goals, your personality, and your week.
+            - button "Open One Move":
+              - text: See your move
+              - generic: →
+          - article:
+            - generic: "4"
+            - paragraph: Your plan
+            - paragraph: Keep the next step simple.
+            - generic: ✓
+            - generic: Try. Notice. Review.
+            - paragraph: A proposal for you to consider. Review on September 21.
+            - button "Open Your plan":
+              - text: See the proposal
+              - generic: →
+          - article:
+            - generic: "5"
+            - paragraph: Why MORE says this
+            - paragraph: Your words. Your personality. The reasoning.
+            - generic: ▤
+            - strong: "20"
+            - generic: Answers from you
+            - strong: "4"
+            - generic: Goals you confirmed
+            - strong: BOS
+            - generic: Your whole-person profile
+            - button "Open Why MORE says this":
+              - text: See the reasons
+              - generic: →
+        - button "How the four parts of your life connect":
+          - generic: ✦
+          - paragraph: The whole picture
+          - heading "Your next step deserves the same space you give the team." [level=2]
+          - paragraph: "Your football and school goals meet at the same practical choice: whether your own first step gets protected before other people's signals take over. On the wing, you already link teammates, yet sometimes check for another option instead of attacking. In study time, routine team messages have delayed your written start. Your mindset goal is not to stop noticing people; it is to keep that strength while choosing sooner. Existing training gives you a place to test this, and protected library blocks give school its own positive place in the week."
+          - generic: →
+        - generic: ✓
+        - paragraph: Your chosen priority
+        - heading "Protect my own first step instead of responding to everyone else first." [level=2]
+        - paragraph: One practical next step, with room for the rest of your life.
+        - button "See your next step":
+          - text: See your next step
+          - generic: →
+        - generic: ▢
+        - strong: Your voice comes first.
+        - paragraph: This is a suggestion to discuss. You choose what to try.
+  - button "Talk with MORE ↗":
+    - text: Talk with MORE
+    - generic: ↗

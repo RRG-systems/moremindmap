@@ -100,6 +100,13 @@ function isLocalEngineModule(requestUrl = '') {
 }
 
 export default defineConfig({
+  build: {
+    rollupOptions: { input: {
+      main: new URL('./index.html', import.meta.url).pathname,
+      athleteWorkspace: new URL('./athlete-consulting-tool/demo/workspace.html', import.meta.url).pathname,
+      athleteApa: new URL('./athlete-consulting-tool/demo/apa-reading.html', import.meta.url).pathname,
+    } },
+  },
   plugins: [
     react(),
     subscriptionV1LiveDemoVitePlugin({ enabled: String(globalThis.process?.env?.VITE_SUBSCRIPTION_V1_LIVE_FRONTIER_DEMO).toLowerCase() === 'true' }),

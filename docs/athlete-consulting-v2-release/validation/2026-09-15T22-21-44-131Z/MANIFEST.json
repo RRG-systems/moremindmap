@@ -1,0 +1,224 @@
+{
+  "files": [
+    {
+      "file": "01-focused.receipt.json",
+      "bytes": 1129,
+      "sha256": "d32fa50b9966bfe562b59de2baea671287edff6fac8c6d72a100631564bcea32"
+    },
+    {
+      "file": "01-focused.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "01-focused.stdout.log",
+      "bytes": 10620,
+      "sha256": "48dbff1e881599c472f711d9e731691468f31ba419bac4f9eb0fb1f0d682f527"
+    },
+    {
+      "file": "02-protected.receipt.json",
+      "bytes": 1534,
+      "sha256": "e9aa1616ce078b8cfc3746af3a238321b66de963a28e5f1e9923205c1a8516e9"
+    },
+    {
+      "file": "02-protected.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "02-protected.stdout.log",
+      "bytes": 26202,
+      "sha256": "2ac1f4344cbe4cbece72b5e642e453839c3071e867e0cd793e4d67fc8acce10e"
+    },
+    {
+      "file": "03-v1-ui-isolated.receipt.json",
+      "bytes": 944,
+      "sha256": "27ed257ac8985970e6d257657b225ad75cad3c494de8d6264befac8a86d40ac7"
+    },
+    {
+      "file": "03-v1-ui-isolated.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "03-v1-ui-isolated.stdout.log",
+      "bytes": 2871,
+      "sha256": "bb21d412b733cd77191ae5456ae1302eb06545af161345d3a6cfb8d29d639440"
+    },
+    {
+      "file": "04-scoped-lint.receipt.json",
+      "bytes": 1326,
+      "sha256": "60f6cc9f990af2f5df03febbd98a5c86edfbb8ac9fbebb0f5bb29f5b7e6f0fd5"
+    },
+    {
+      "file": "04-scoped-lint.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "04-scoped-lint.stdout.log",
+      "bytes": 10286,
+      "sha256": "894252588e2b8406507b64276b1f5ee807cbe48e06c7c7ab57c74af48200a37f"
+    },
+    {
+      "file": "05-syntax.receipt.json",
+      "bytes": 1197,
+      "sha256": "2a28d049102321bcdb5a95e3ed3bbcc9ef247a60c5ac69855f64ada88c928fc8"
+    },
+    {
+      "file": "05-syntax.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "05-syntax.stdout.log",
+      "bytes": 1738,
+      "sha256": "6b29906ac78996affd7497997c4450358e1e09f0c914a3b833cae831a1197fc1"
+    },
+    {
+      "file": "06-build.receipt.json",
+      "bytes": 1267,
+      "sha256": "f35c8a273e9f1ab7c637340d32925760d8b54e6ee6925ad002319c840ce52308"
+    },
+    {
+      "file": "06-build.stderr.log",
+      "bytes": 733,
+      "sha256": "1173b42e899c8820346c3acf69d7efe522762ab54d2345e93ab45561fda01ea5"
+    },
+    {
+      "file": "06-build.stdout.log",
+      "bytes": 2231,
+      "sha256": "14fa9dbcd9cc537f71c2cc263efaf3af7f5e267c4e654d78054eccc7d5e426b6"
+    },
+    {
+      "file": "07-diff-check.receipt.json",
+      "bytes": 665,
+      "sha256": "bbfa1f549d7eb0070d65a7ccc38911d7824202b2173351169ace66f1e74b1fd4"
+    },
+    {
+      "file": "07-diff-check.stderr.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "07-diff-check.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "CUSTODY.json",
+      "bytes": 891,
+      "sha256": "74908b5e45407831b9b0792a62caecaf092e2b34f9af54249c0757f3f73caa74"
+    },
+    {
+      "file": "FROZEN_SOURCE_PROOF.json",
+      "bytes": 34484,
+      "sha256": "2e9030bd6338910f85f6889fcf395b3807186d1284f93a1c8de074be330a064f"
+    },
+    {
+      "file": "LINT_FILES.json",
+      "bytes": 1509,
+      "sha256": "0bcaad09026ee455b2c4dbecfc51b3978f027ecbf1cc451ac3bd08f6e3623e1e"
+    },
+    {
+      "file": "PRESERVED_FIRST_FAILURES.json",
+      "bytes": 1057,
+      "sha256": "c6cd5e9f258af83035d5346277d97a18adda1b0af2ccd5ac03855d2f087384b2"
+    },
+    {
+      "file": "PRIOR_VALIDATION_RUNS.json",
+      "bytes": 543,
+      "sha256": "a72de438279aa36de51feab641f35b57912efd4eaf8b7d8b0d9235f31a5f1d20"
+    },
+    {
+      "file": "SOURCE_AFTER.json",
+      "bytes": 6970,
+      "sha256": "4efa939cbccebf15bbae67f31f80ab517fd868162d27b6b10a437cf6f0c2f954"
+    },
+    {
+      "file": "SOURCE_BEFORE.json",
+      "bytes": 6970,
+      "sha256": "4efa939cbccebf15bbae67f31f80ab517fd868162d27b6b10a437cf6f0c2f954"
+    },
+    {
+      "file": "SUMMARY.json",
+      "bytes": 10598,
+      "sha256": "38f5246164f89c8b48cb6bbf3f5655e46a5e37ff66a7c1f6b97a65fbb1e13a49"
+    },
+    {
+      "file": "build-dist/assets/athleteApa-n815-XZg.js",
+      "bytes": 54951,
+      "sha256": "75bb696e8342e00e920dc7adc6fc317951ac212f517265a42178d29b44bbe9f9"
+    },
+    {
+      "file": "build-dist/assets/athleteApa-zTDoup9f.css",
+      "bytes": 47927,
+      "sha256": "a5fe8ca4316e3ef8b23c8fe61320ec37202c606b956b82816bfa82b4d55761a5"
+    },
+    {
+      "file": "build-dist/assets/athleteWorkspace-BrN0hYOw.js",
+      "bytes": 35472,
+      "sha256": "0bb8d4a94424c4d812d8d97642262991fb83523465c8140475829f2064dfc2f3"
+    },
+    {
+      "file": "build-dist/assets/athleteWorkspace-DjphKLI8.css",
+      "bytes": 24287,
+      "sha256": "222586df4b1956ec55b5abd111cc64c35fef98200212f9b060c867d1a33e61cd"
+    },
+    {
+      "file": "build-dist/assets/jsx-runtime-DnSktVOR.js",
+      "bytes": 190834,
+      "sha256": "e5f661cf59ba2c260c236c6947ba764e7f67ebe438a8748dffa081cfa68bfe8e"
+    },
+    {
+      "file": "build-dist/assets/main-B-s7jKuH.css",
+      "bytes": 408452,
+      "sha256": "3ba73994d24b1316335c5dbce2ad0ec9f7a3e3f7f841a4ad13add75c435c631f"
+    },
+    {
+      "file": "build-dist/assets/main-BAGputK9.js",
+      "bytes": 1984846,
+      "sha256": "b0839f2ddb03aaee0e91a50bff4efd3cbd26b2e14485d03aef98e01a249c55aa"
+    },
+    {
+      "file": "build-dist/assets/transport-DAOeb3Bi.js",
+      "bytes": 920,
+      "sha256": "7ec5da5eeda5e534567934b237f3e8540fb62ff36c6165d9f5efcbcdcf4e2bcf"
+    },
+    {
+      "file": "build-dist/athlete-consulting-tool/demo/apa-reading.html",
+      "bytes": 592,
+      "sha256": "e47eb7f911d59c22649e010c371b6407578f9af2003cd39b900887e5c17aa030"
+    },
+    {
+      "file": "build-dist/athlete-consulting-tool/demo/workspace.html",
+      "bytes": 596,
+      "sha256": "7db8f263e86ed09be73e8154282a755d2e2beaec9e23136ac3b0aaa3bb29a876"
+    },
+    {
+      "file": "build-dist/favicon.svg",
+      "bytes": 9522,
+      "sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66"
+    },
+    {
+      "file": "build-dist/icons.svg",
+      "bytes": 5031,
+      "sha256": "b45fa506195cfcdef406ba9f0c77b36ddc1a7c224040926ec70abc2fdea7b93a"
+    },
+    {
+      "file": "build-dist/index.html",
+      "bytes": 541,
+      "sha256": "70e58a76335416de2f3ec705d8d47faccff5b3cf77e817f624481ccd43df0a23"
+    },
+    {
+      "file": "build-dist/visual-dna-test/marcus-vale.png",
+      "bytes": 1770973,
+      "sha256": "966779455f4ef9f74238a82458496180e04aef5f1903cebc73b567fda61334da"
+    },
+    {
+      "file": "build-dist/visual-dna-test/nora-bell.png",
+      "bytes": 1738327,
+      "sha256": "9fa8f689a69771cf42f599394039d971ce78457fe07c2cca8e7a37e478d92ade"
+    }
+  ]
+}

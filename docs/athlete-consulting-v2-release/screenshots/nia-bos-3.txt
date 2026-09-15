@@ -1,0 +1,97 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate" [selected]
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: How you communicate
+    - heading "Direct works best with room" [level=1]
+    - paragraph: With peers, your message often begins with the actual idea or disagreement. You do not need a long introduction before saying what you think. That directness can clear away confusion and get a task moving. It can also make a possible starting point sound like a finished decision. You know people sometimes read you as bossy, and you honestly admit that sometimes you are being bossy. At other times, you are trying to end the waiting rather than control everyone.
+    - paragraph: Your listening side is easiest to see when another person gives you a clear signal. When your friend said she had a different science-project idea, you backed up and liked her route after hearing it. When she named the interruption, you apologized and let her finish. That is real flexibility. The next step for your communication is not becoming less direct; it is making room for useful information before the objection has to become sharp.
+    - paragraph: You use feedback best when it names the exact part and moment to change. A long speech in front of everyone, or correction piled on top of correction, can make you want to defend yourself before the useful point has landed. That does not mean correction itself is the problem. The difference between a precise comment that helped and public or repeated messages that drained you shows how much delivery affects what you can take in.
+    - paragraph: When embarrassment rises, your outside message may also hide part of the inside one. Talking louder or joking can look as if the mistake does not matter, even when you care and want attention moved away from it. This came from one watched presentation, so it need not describe every joke. Your quietness with older relatives also shows that fast, outspoken communication is not how you speak in every relationship.
+    - blockquote: Your point lands better when directness includes a real pause for the other person's side.
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What kind of feedback is easiest for you to use?
+      - paragraph: Tell me the actual bit to change. A coach said my pass was late and pointed out the moment. That helped. Getting a whole speech in front of everyone makes me want to answer back.
+    - blockquote:
+      - strong: What drains you, and what helps you feel like yourself again?
+      - paragraph: Being corrected over and over drains me. Music, drawing, my brother. This week I have two tests and I am a bit snappy. That is not every week.
+    - blockquote:
+      - strong: When you are upset, what might someone else notice?
+      - paragraph: I talk louder or make a joke. They might think I do not care. Sometimes I am embarrassed and want the attention off the mistake. I know that because I did it after losing my place in a presentation.
+    - blockquote:
+      - strong: What changes about you when the pressure rises?
+      - paragraph: I speed up and want to fix everything at once. At that presentation I lost my place and started talking faster. Usually I can laugh and start again, but with the class watching I rushed.
+    - blockquote:
+      - strong: What do people sometimes get wrong about you?
+      - paragraph: People think I am trying to be bossy when I have an idea. Sometimes I am! But sometimes everyone is waiting and I just want us to start. With my older cousins I barely say anything.
+    - blockquote:
+      - strong: When you disagree with someone, what usually happens?
+      - paragraph: I say it straight away. My friend said I kept interrupting her about our science project. I said sorry and let her finish. At home with my uncle I wait because he goes on for ages and I do not want another argument.
+    - blockquote:
+      - strong: In a group, how do you usually get involved?
+      - paragraph: I usually say the first idea. In a group science project I chose a plan before everyone had talked. My friend said she already had a different idea and I had to back up. I liked her idea when she explained it.
+    - blockquote:
+      - strong: What do you bring to a group that is useful?
+      - paragraph: I get people going. For a school stall I asked two friends to do signs while I arranged the table. One was annoyed because I had not asked what she wanted to do. We swapped jobs.
+    - blockquote:
+      - strong: What makes you feel respected or fairly treated?
+      - paragraph: Let me explain even if you disagree. I try to do that for my brother when he gets upset. I am more patient with him than I am with people in my class.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

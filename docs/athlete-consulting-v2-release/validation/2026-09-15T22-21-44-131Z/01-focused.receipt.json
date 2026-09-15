@@ -1,0 +1,35 @@
+{
+  "name": "01-focused",
+  "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+  "args": [
+    "--import",
+    "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+    "--test",
+    "--test-reporter=tap",
+    "--test-concurrency=1",
+    "test/athleteConsultingV2Coach.test.js",
+    "test/athleteConsultingV2Store.test.js",
+    "test/athleteConsultingV2Handler.test.js",
+    "test/athleteConsultingV2Transport.test.js"
+  ],
+  "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "child_environment_keys": [
+    "LANG",
+    "TZ",
+    "CI"
+  ],
+  "inherited_environment": false,
+  "started_at": "2026-09-15T22:21:44.232Z",
+  "duration_ms": 690,
+  "exit_code": 0,
+  "signal": null,
+  "counts": {
+    "tests": 47,
+    "pass": 47,
+    "fail": 0,
+    "skipped": 0
+  },
+  "stdout_sha256": "48dbff1e881599c472f711d9e731691468f31ba419bac4f9eb0fb1f0d682f527",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "expected_tests": 47
+}

@@ -1,0 +1,117 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+      - main:
+        - paragraph: BOX 3 · ONE MOVE
+        - heading "Ask your coach to review one attacking choice." [level=1]
+        - paragraph: Start here because your coach has identified a place in Thursday’s wing game to review a decision. Asking uses existing training and supports backing your own read. The library idea stays relevant, but its urgent-contact arrangement is still unresolved. This move does not settle your school plan.
+        - heading "When" [level=3]
+        - paragraph: "Before Thursday, September 17 training, ask: “Could you watch one one-on-one and tell me afterward what you saw and whether my choice fit our team plan?”"
+        - heading "Who helps" [level=3]
+        - paragraph: If the coach agrees, you make your choice in the game, then hear their view. You decide what to take forward. If unavailable, ask about another existing session; no review is assumed.
+        - heading "Did I try it?" [level=3]
+        - paragraph: You asked, and the coach agreed, declined or suggested another opportunity. If agreed, note whether a relevant moment and the short review actually happened.
+        - heading "Did it help?" [level=3]
+        - paragraph: At a later suitable one-on-one, do you recognize the opening and choose sooner? Your account explains what you saw; coach feedback, if available, checks whether the choice fit the team plan.
+        - paragraph: Built around you
+        - paragraph: You usually understand choices better through concrete situations, examples and someone available to ask. You also receive honest feedback best when its purpose is clear and it is not framed against another player. An in-context coach question fits both patterns while leaving the final sporting judgment with the coach, though one helpful Thursday moment does not show that this format will always work.
+        - button "Why MORE chose this move":
+          - text: Why MORE chose this move
+          - generic: →
+        - heading "Review on September 21" [level=3]
+        - paragraph: "On September 21, you check what happened: agreement, an actual review, then any later chance to use it. No later chance means usefulness remains untested. Continue, change or stop; ask the coach if the football meaning is unclear."
+        - heading "Change or stop if…" [level=3]
+        - paragraph: Change or stop if no relevant one-on-one occurs, the coach cannot review it, tactical advice conflicts with team instructions, or the format increases comparison instead of clarity.
+        - button "Put the suggestion in one place":
+          - text: Put the suggestion in one place
+          - generic: →
+      - button "Close deep dive"
+      - dialog "Why this move fits you":
+        - banner:
+          - paragraph: Your One Move — Why MORE says this
+          - heading "Why this move fits you" [level=2]
+          - button "Close deep dive" [active]: ×
+        - generic: Suggestion to discuss
+        - paragraph: A. Your personality matters
+        - paragraph: You usually understand choices better through concrete situations, examples and someone available to ask. You also receive honest feedback best when its purpose is clear and it is not framed against another player. An in-context coach question fits both patterns while leaving the final sporting judgment with the coach, though one helpful Thursday moment does not show that this format will always work.
+        - paragraph: B. Why this first
+        - paragraph: Start here because your coach has identified a place in Thursday’s wing game to review a decision. Asking uses existing training and supports backing your own read. The library idea stays relevant, but its urgent-contact arrangement is still unresolved. This move does not settle your school plan.
+        - paragraph: C. Other options we considered
+        - list:
+          - listitem: "Possible alternative: Ask the captain how urgent changes can reach you during library time. This directly tests your chosen priority where the evidence is clearest: routine replies have delayed your report starts even though the library blocks do not clash with training. A separate urgent route could protect school while keeping genuine team changes reachable. It may also reduce the habit of treating every social signal as yours to answer immediately."
+          - listitem: "Possible alternative: After each existing team session or match through September 21, note one relevant choice: what you saw, chose and checked first. The coach cannot tell why every pass happens, and the current evidence mixes several possibilities: a missed cue, a search for permission, or a purposeful pass. This short inquiry separates those explanations before anyone prescribes more practice. It also checks your chosen priority across real football moments rather than treating one completed note as improvement."
+          - listitem: "Not recommended this week: Add a separate weekly solo attacking session before clarifying with the coach which situations and practice are appropriate. You explicitly asked to keep the existing sessions, and there is no athlete-owned request for additional solo training. No actual recovery window or suitable extra-training slot is confirmed; the named open blocks are being protected for school. No qualified coach has identified the need or approved safe, relevant content for a separate attacking session. The current physical work is already included in team training, while recovery needs are unknown and school blocks need protection. The general idea of extra practice is clear, but the safe football content and relevant situations are intentionally unspecified and therefore not executable."
+        - paragraph: D. Fits your real week
+        - list:
+          - listitem: You asked for contextual training, task-specific feedback and the chance to back a choice you can explain.
+          - listitem: The inquiry and review fit inside the existing Thursday wing game rather than requiring another session.
+          - listitem: The university coach judges the tactical decision and has said the decision can be discussed in the existing wing game.
+          - listitem: The action adds no training volume and leaves the non-overlapping school blocks and current physical programme unchanged.
+          - listitem: "The action has a clear setting, helper and question: review one relevant choice in context without comparing you with another player."
+        - paragraph: E. Your current answers
+        - list:
+          - listitem: "Athlete · What part of your performance would you most like to improve?: I have been passing up a chance to attack one-on-one because I keep checking whether someone else wants the ball. I want to choose when to go myself. I was left out of the starting lineup last week."
+          - listitem: "Athlete · What do you most want your training to help you do better?: I want practice to help me recognize when the one-on-one is on and commit to it. I want context, not comparison with a teammate."
+          - listitem: "Athlete · Which part of your training seems to be helping most?: The opposed wing game helps. Last Thursday I chose to go once after the coach explained where the space was. It was one practice moment, not proof it is now automatic."
+          - listitem: "Athlete · After a mistake or a bad performance, what helps you get back into it?: Being heard before making a plan. In play I respond to a direct, task-specific reminder. I do not want to be compared with another player."
+          - listitem: "Athlete · What would you most like to handle better mentally in your sport?: Back a choice I can explain, even if it does not work. I want to be a supportive teammate without asking permission for every attack."
+          - listitem: "Coach: Sofia links teammates well. In Thursday wing practice she attacked the space after a short explanation. In the last match I saw her pass up an opportunity to go herself. I cannot infer why every time."
+          - listitem: "Coach: My football priority is an earlier purposeful choice when the one-on-one is available. Starting places depend on team needs and other performances too. I do not know the detail of her school work."
+          - listitem: "Coach: We can discuss her decision in the existing Thursday wing game. Routine messages do not require an immediate answer. She should agree a separate urgent-change contact with the captain; that arrangement is not in place yet."
+          - listitem: "Athlete confirmation: Sport: Earn a starting place through purposeful attacking choices. Training: Recognize a one-on-one chance and commit to it. Warrior Mindset: Back my own choice while staying a supportive teammate. School: Finish my fieldwork report draft by October 2. Your chosen priority: Protect my own first step instead of responding to everyone else first. Review your move on September 21; look ahead to November 2."
+        - paragraph: F. Your saved BOS
+        - list:
+          - listitem: "Make the Unknown Concrete: When a choice is difficult, you bring it down from labels to lived reality. For your fieldwork module, reasons mattered, but hearing what an actual week would be like helped you decide. Talking with someone seems to give you useful material for your own judgment rather than automatically handing them the choice. Sometimes reassurance may help as well; those two things are not always easy to separate. You approach new interests in a similarly practical way. Trying guitar with borrowed equipment let you learn before making a bigger commitment. You do not need every step explained in advance, but it helps to know that a person or resource is available if you get stuck. Your openness is not necessarily reckless; you often make the first step small enough that you can learn and revise. When you do not understand something, you ask for a different explanation or a clear example. In group work, you also use simple tools to make the problem visible, such as setting up a shared document so gaps can be seen. You seem to prefer making understanding easier to share over privately struggling through or redoing every part yourself. This style lets you explore before you have a complete map. It also means concrete experience may carry more weight than an impressive-sounding option with little detail behind it. Most of your examples involve study, group work, or a fairly reversible experiment. A costly or hard-to-reverse decision could bring out more caution, so this is a usual approach rather than a rule for every choice."
+          - listitem: "Room First, Clarity Next: Your first communication move is often to make room. In groups, you bring people into the conversation and build on what is already there. When you disagree, you usually try to understand the other side before pushing your own. This can keep a discussion open, but it does not mean you have no position or that agreement matters more than everything else. You can use honest, direct feedback when its purpose is clear and it stays focused on the task. You do not seem to need every message softened. What makes feedback harder is being compared with a teammate, because the comparison can pull attention away from the useful part and toward how you are being judged beside someone else. Context helps you know what to do with the message. When the subject is more personal, your first signal may not contain your full reaction. You have described carrying on cheerfully and only later realizing that an argument still needed attention. That could mean the feeling becomes clearer in private, or that you know something is wrong but initially choose calm, time, or privacy. Either way, an early statement that things are fine may not be your final answer. Your disagreement over an uneven workload shows the other half of your style. You delayed naming the problem, but you eventually asked for a clearer split and returned to it when the first agreement did not fully hold. Once you speak plainly, you often make the issue practical. Your communication is not simply indirect or direct; it tends to move from understanding and de-escalation toward clearer words when the problem remains."
+          - listitem: "Freedom With a Few Rails: You seem to have more of yourself available when life contains meaningful work, enjoyable people, and room to explore without requiring a complete future plan. You do not need every hour controlled, but total vagueness is not ideal either. A deadline, clear ownership, or visible next step can protect what matters while leaving enough space for curiosity and adjustment. In learning and work, it helps when support is nearby without taking over. You may use another explanation, a practical example, a shared document, or someone quietly working beside you. Honest feedback can fit too, especially when you know its purpose and it stays focused on your task rather than comparing you with somebody else. Clear help appears more useful than either constant supervision or being left to redo everything alone. Your social environment also works best as a mix. People often energize you, and shared purpose can increase your effort. Yet constant access can drain attention and leave no evening that belongs to you. Walks and guitar without an audience give you room to settle. Being asked rather than assumed available helps keep connection chosen, which may let your generosity stay genuine instead of becoming an automatic obligation. This term, you have fewer work shifts and feel that you have more room than last term. Other changes may be helping too, so there is no need to turn that into a permanent rule. It is still a useful reminder that your surroundings matter. You are unlikely to fit one perfect setup for every task: dull work may benefit from company, personal practice may suit quiet, and uncertain choices may need conversation plus freedom to decide."
+        - contentinfo:
+          - generic: ▢
+          - text: Your answers and your saved BOS. Suggestions can be corrected.
+          - button "Back to Your One Move"
+  - button "Talk with MORE ↗":
+    - text: Talk with MORE
+    - generic: ↗

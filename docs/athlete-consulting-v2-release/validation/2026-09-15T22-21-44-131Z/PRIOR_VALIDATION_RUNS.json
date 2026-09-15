@@ -1,0 +1,13 @@
+{
+  "runs": [
+    {
+      "directory": "docs/athlete-consulting-v2-release/validation/2026-09-15T22-19-49-674Z",
+      "summary_sha256": "41bbe86117500b69b2c2162bb9165498a97e99e2da9473286a647f7d647bf4fe",
+      "pass": false,
+      "failed_phases": [
+        "04-scoped-lint"
+      ]
+    }
+  ],
+  "note": "Earlier failed evidence is retained unchanged. The first scoped lint attempt duplicated source-declared process as an ambient built-in; only the validation globals configuration was corrected, with no Product or test assertion edits."
+}

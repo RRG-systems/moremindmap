@@ -1,0 +1,33 @@
+{
+  "name": "03-v1-ui-isolated",
+  "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+  "args": [
+    "--import",
+    "./scripts/athlete-consulting-v2-review/isolated-v1-ui-preload.mjs",
+    "--test",
+    "--test-reporter=tap",
+    "--test-concurrency=1",
+    "test/athleteLivingConsultOneShotV1.ui.test.js"
+  ],
+  "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "child_environment_keys": [
+    "LANG",
+    "TZ",
+    "CI"
+  ],
+  "inherited_environment": false,
+  "started_at": "2026-09-15T22:22:08.760Z",
+  "duration_ms": 1239,
+  "exit_code": 0,
+  "signal": null,
+  "counts": {
+    "tests": 10,
+    "pass": 10,
+    "fail": 0,
+    "skipped": 0
+  },
+  "stdout_sha256": "bb21d412b733cd77191ae5456ae1302eb06545af161345d3a6cfb8d29d639440",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "expected_tests": 10,
+  "unchanged_assertions": true
+}

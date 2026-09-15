@@ -1,0 +1,68 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate" [selected]
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: How you communicate
+    - heading "Room First, Clarity Next" [level=1]
+    - paragraph: Your first communication move is often to make room. In groups, you bring people into the conversation and build on what is already there. When you disagree, you usually try to understand the other side before pushing your own. This can keep a discussion open, but it does not mean you have no position or that agreement matters more than everything else.
+    - paragraph: You can use honest, direct feedback when its purpose is clear and it stays focused on the task. You do not seem to need every message softened. What makes feedback harder is being compared with a teammate, because the comparison can pull attention away from the useful part and toward how you are being judged beside someone else. Context helps you know what to do with the message.
+    - paragraph: When the subject is more personal, your first signal may not contain your full reaction. You have described carrying on cheerfully and only later realizing that an argument still needed attention. That could mean the feeling becomes clearer in private, or that you know something is wrong but initially choose calm, time, or privacy. Either way, an early statement that things are fine may not be your final answer.
+    - paragraph: Your disagreement over an uneven workload shows the other half of your style. You delayed naming the problem, but you eventually asked for a clearer split and returned to it when the first agreement did not fully hold. Once you speak plainly, you often make the issue practical. Your communication is not simply indirect or direct; it tends to move from understanding and de-escalation toward clearer words when the problem remains.
+    - blockquote: You often listen and lower the temperature first, then become practical and firm if the issue still needs an answer.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

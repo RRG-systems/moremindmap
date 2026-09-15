@@ -1,0 +1,68 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort" [selected]
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: What brings out your effort
+    - heading "Meaning Starts the Work" [level=1]
+    - paragraph: Your effort is selective rather than simply high or low. You are more likely to invest when you can see a reason, feel part of something, or care about the result itself. Work that feels like ticking boxes can lose its hold even if you began with energy. When something more interesting appears, an unconvincing task has a harder time keeping your attention.
+    - paragraph: You do not seem to need a tightly controlled plan to work well. A rough plan, a real deadline, visible gaps, or clearly owned jobs may be enough. These are useful rails rather than a full timetable. They protect what must happen while leaving you room to change the route. If roles stay vague for too long, however, you may end up covering work before asking for a clearer split.
+    - paragraph: Working near someone can also help hold a task in place. You finished an essay after arranging a library session with a friend who was doing their own work. Their presence may have helped, but the location, appointment, or deadline could have mattered just as much. The broader point is that a light outer commitment can sometimes steady effort without anyone supervising or doing the task for you.
+    - paragraph: "Music protects an important exception. When you care about how a section sounds, you can repeat it for a long time. That means novelty and company are not always required; personal meaning can sustain careful repetition. The tradeoff sits at both ends: seeing possibilities can create too many commitments, while a valued detail can sometimes receive more time than the wider situation needs."
+    - blockquote: Purpose draws you in, while light structure can keep less interesting work from slipping behind everything else.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

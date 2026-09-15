@@ -1,0 +1,23 @@
+{
+  "original_protected_run": {
+    "tests": 107,
+    "pass": 102,
+    "fail": 5,
+    "failure": "EPERM while Vite bundled repository config under Home Base node_modules/.vite-temp through dependency symlink",
+    "evidence": "Original parent tool receipts retained; this is a provenance note, not a recreated raw log."
+  },
+  "prior_isolated_ui_rerun": {
+    "tests": 10,
+    "pass": 10,
+    "fail": 0,
+    "duration_ms": 1188.108459,
+    "outbound_attempts": 0,
+    "test_unchanged": true
+  },
+  "original_coach_custody_failure": "First pre-crash run was 16/17 because the imported mission lacked its frozen trailing blank line; root restored the byte and retained the unchanged test.",
+  "validation_artifact_permission_check": {
+    "at": "2026-09-15T22:19:28.287Z",
+    "outcome": "EPERM creating the candidate validation output directory under the initial sandbox; no test or build ran; a narrowly scoped escalation was requested."
+  },
+  "distinction": "Legacy V1 tests are rollback/preservation proof, not Nia/Sofia V2 or browser/provider proof."
+}

@@ -24,7 +24,7 @@ import SubscriptionV1InternalDevApp from './subscriptionV1/SubscriptionV1Interna
 import RecruitingV1App from './recruitingV1/RecruitingV1App.jsx'
 import RecruitingV2DemoApp from './recruitingV2Demo/RecruitingV2DemoApp.jsx'
 import RecruitingGuV1App from './recruitingGuV1/RecruitingGuV1App.jsx'
-import AthleteLivingConsultOneShotV1App from './athleteLivingConsultOneShotV1/App.jsx'
+import AthleteLivingConsultOneShotV1App from './athleteConsultingV2/Route.jsx'
 import './index.css'
 
 const newBosProductionRenderEnabled = import.meta.env.VITE_NEW_BOS_PRODUCTION_RENDER_ENABLED === 'true'

@@ -1,0 +1,142 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Nia Brooks · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - generic "MORE Athlete":
+          - generic: ✧
+          - strong:
+            - text: MORE
+            - text: ATHLETE
+        - paragraph: Your performance assessment
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+        - generic: "N"
+        - strong: Nia
+        - generic: Basketball
+        - generic: ▢
+        - strong: Your saved assessment
+        - generic: Your answers today, connected to your saved personality profile (BOS).
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+        - generic: September 14, 2026 · MM-20260913-D702ACBF
+      - main:
+        - paragraph: BOX 2 · FIVE FUTURES
+        - heading "Five ways the next weeks could go." [level=1]
+        - paragraph: Now through November 2. Possibilities shaped by what happens next.
+        - navigation "Five possible paths":
+          - button "1 Current course Your vision stays useful, but resets remain uneven":
+            - generic: "1"
+            - generic: Current course
+            - strong: Your vision stays useful, but resets remain uneven
+          - button "2 Already beginning The breath and look start helping in practice":
+            - generic: "2"
+            - generic: Already beginning
+            - strong: The breath and look start helping in practice
+          - button "3 A better path Maths gets unstuck, with basketball still inside team time":
+            - generic: "3"
+            - generic: A better path
+            - strong: Maths gets unstuck, with basketball still inside team time
+          - button "4 Your stretch You make useful game decisions when the pressure matters":
+            - generic: "4"
+            - generic: Your stretch
+            - strong: You make useful game decisions when the pressure matters
+          - button "5 A risk to avoid Extra shooting takes homework time without fixing the passing problem" [pressed]:
+            - generic: "5"
+            - generic: A risk to avoid
+            - strong: Extra shooting takes homework time without fixing the passing problem
+        - article:
+          - paragraph: A risk to avoid
+          - heading "Extra shooting takes homework time without fixing the passing problem" [level=2]
+          - heading "What could be different" [level=3]
+          - paragraph: By 2026-11-02, the urge to fix poor games with extra shooting could keep using homework time while leaving the passing reset untested. Your normal strengths remain, but the added effort answers the wrong question.
+          - heading "What would have to happen" [level=3]
+          - paragraph: This risk grows only if disappointment repeatedly triggers optional extra work, especially on Wednesday, without checking whether that work targets the rushed next decision.
+          - heading "The first sign to watch" [level=3]
+          - paragraph: Extra shooting returns after a passing mistake, and maths starts later without any clearer evidence about the next passing choice.
+          - button "Why this path is possible":
+            - text: Why this path is possible
+            - generic: →
+        - button "See the One Move worth trying first":
+          - text: See the One Move worth trying first
+          - generic: →
+      - button "Close deep dive"
+      - dialog "Extra shooting takes homework time without fixing the passing problem":
+        - banner:
+          - paragraph: Five Possible Futures — Why MORE says this
+          - heading "Extra shooting takes homework time without fixing the passing problem" [level=2]
+          - button "Close deep dive" [active]: ×
+        - generic: Conditional possibility
+        - paragraph: A. Why this path is possible
+        - paragraph: "This risk is supported by two past attempts, not a prediction that it will continue. The urge to act after disappointment can send effort toward shooting even when the mistake was a rushed pass. That crowds the maths goal and produces little information about the reset. The preventable part is the mismatch: if extra work begins again, ask whether it tests the next decision or only quiets the urge to repair."
+        - paragraph: B. Your current answers
+        - list:
+          - listitem: "Athlete · What part of your performance would you most like to improve?: I rush after I lose the ball. Last game I threw another pass before looking properly and lost it again. I want to make the next play instead of fixing the last one all at once."
+          - listitem: "Athlete · Which part feels confusing, hard to keep up with, or not useful?: After a bad game I want to add shooting, even if the problem was a rushed pass. I tried twenty extra minutes twice and was late starting homework. It did not tell me whether my decisions were better."
+          - listitem: "Athlete · What would make your training week work better for you?: Keep the team week and art club. Use something inside practice. I do not want another session. I collect my brother after school on Thursday."
+          - listitem: "Athlete · Which parts of school feel strongest, and which need help?: I finish the design work I care about. I handed in two maths homework tasks late in the last fortnight. I can do the examples with one step of help, then lose time putting it off. I do not want to guess a grade."
+          - listitem: "Athlete · How are school and sport fitting together in your week?: Monday and Friday practice fit. Extra Wednesday shooting was where homework got pushed. I want the reset practice to stay in team time so art, collecting my brother and homework still fit."
+        - paragraph: C. Your saved BOS
+        - list:
+          - listitem: "Pressure turns up your speed: In ordinary difficulty, you say you can often laugh and start again. Under visible pressure, that same speed and humor can change shape. When you lost your place during a class presentation, you began talking faster and joked while feeling embarrassed. The joke moved attention away from the mistake, but it could also make your concern harder to see. That was one watched event, so private mistakes or different kinds of pressure may look different. After a bad game, your first urge was to practise immediately. That fits the wider way you often deal with a problem by doing something. Under strain, though, action may become an attempt to fix everything at once rather than a useful first experiment. It is possible that immediate action makes the mistake feel more manageable or less exposed. You have not said that directly, so it remains one possible explanation rather than the answer to every fast response. On that bad-game occasion, you went home, drew for a while, and found that the disappointment felt less huge the next morning. Drawing, being at home, and time were all part of that evening. You are not sure which part helped. What is clear is that the first urgent feeling did not stay at the same size. Some distance from the moment gave another view a chance to appear, even though the exact reason is unknown. Correction can add pressure when it is public, repeated, or much longer than the useful point. One exact change is easier for you to use. This week also includes two tests, and you have noticed yourself being somewhat snappy. You were clear that this is not every week. Temporary load can turn up an existing reaction without becoming your whole personality."
+          - listitem: "Meaning carries the middle: You get more involved when you can put something of yourself into the result. Drawing clothes, adapting a design for a friend, or trying the rest of a task after one helpful explanation all leave space for your choices. Work becomes harder to care about when it mainly involves copying, following a huge list, or receiving information without doing much with it. Enjoyment and familiarity may help too, but personal ownership seems to be an important part of the pull. Your effort should not be described as either always persistent or never finishing. You left a comic halfway, and you also completed the jacket design. That jacket is one project, so it cannot promise the same ending every time. Still, it directly shows that you can work through repeated changes when the result matters. Collecting your brother on your assigned day is a separate kind of follow-through: less about creative excitement and more about dependable responsibility. The middle of a task is where your energy may change. You can start fast, but once the newness fades, a weak reason may not carry you. Meaning can also slow you down in a useful way. You might answer another question before taking in every word, then spend ages refining one sleeve because that detail feels connected to the whole design. Your standards are selective: exactness rises when you can see why a detail deserves it. You prefer the main goal and deadline over a long map of every step. That light structure gives you room to adapt and make the route yours. It can also leave small checks behind, such as checking a bag or asking what role another person wants. The useful balance for you is probably not more instructions everywhere. It is enough clarity to protect the important checks without burying the reason you wanted to begin."
+          - listitem: "More than one important role: You are building a life with more than one center. Basketball matters, but so do making clothes, being a friend, and showing up for your little brother. Drawing has a special place because it is both private and useful: you would do it without an audience, yet you also imagine clothes that real people would choose to wear. That suggests you care about having your own idea and giving it a life beyond the page. Your brother is not just someone you name as important. He appears in the way you settle after intense days, the patience you try to offer when he is upset, and the regular job of collecting him on your day. That makes care concrete for you. It is affection, but it is also quiet company and doing what you said you would do. Another part of you is the value you place on having a voice. Respect means being allowed to explain, even when agreement never comes. You try to give that room to your brother. In fast peer groups, though, your plan can arrive before classmates get the same chance. That does not cancel the value. It shows where your speed and fairness can pull against each other, and why listening before a decision is different from repairing afterward. Choosing art club over one extra basketball session did not settle which matters more forever. It did show that athlete is not the only role allowed to guide your choices. You can care deeply about basketball now without already knowing its long-term place. Your clothing ideas can be serious without having to become a finished life plan at fifteen. What feels most like you may keep being the mix of chosen interests, relationships, and responsibilities rather than one label."
+        - contentinfo:
+          - generic: ▢
+          - text: Your answers and your saved BOS. Suggestions can be corrected.
+          - button "Back to Five Possible Futures"
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

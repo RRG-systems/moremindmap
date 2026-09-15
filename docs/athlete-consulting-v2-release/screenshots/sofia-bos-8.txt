@@ -1,0 +1,68 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive" [selected]
+  - article:
+    - generic: What helps you thrive
+    - heading "Freedom With a Few Rails" [level=1]
+    - paragraph: You seem to have more of yourself available when life contains meaningful work, enjoyable people, and room to explore without requiring a complete future plan. You do not need every hour controlled, but total vagueness is not ideal either. A deadline, clear ownership, or visible next step can protect what matters while leaving enough space for curiosity and adjustment.
+    - paragraph: In learning and work, it helps when support is nearby without taking over. You may use another explanation, a practical example, a shared document, or someone quietly working beside you. Honest feedback can fit too, especially when you know its purpose and it stays focused on your task rather than comparing you with somebody else. Clear help appears more useful than either constant supervision or being left to redo everything alone.
+    - paragraph: Your social environment also works best as a mix. People often energize you, and shared purpose can increase your effort. Yet constant access can drain attention and leave no evening that belongs to you. Walks and guitar without an audience give you room to settle. Being asked rather than assumed available helps keep connection chosen, which may let your generosity stay genuine instead of becoming an automatic obligation.
+    - paragraph: "This term, you have fewer work shifts and feel that you have more room than last term. Other changes may be helping too, so there is no need to turn that into a permanent rule. It is still a useful reminder that your surroundings matter. You are unlikely to fit one perfect setup for every task: dull work may benefit from company, personal practice may suit quiet, and uncertain choices may need conversation plus freedom to decide."
+    - blockquote: You tend to thrive with meaningful choice, clear but light support, enjoyable connection, and time that is not already claimed.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "First chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

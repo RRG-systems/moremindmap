@@ -1,0 +1,29 @@
+{
+  "name": "06-build",
+  "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+  "args": [
+    "--import",
+    "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1&buildOut=%2FUsers%2Frrg%2F.openclaw%2Fworkspace%2Fmoremindmap-athlete-consulting-v2-locked-release-2026-09-15%2Fdocs%2Fathlete-consulting-v2-release%2Fvalidation%2F2026-09-15T22-21-44-131Z%2Fbuild-dist",
+    "scripts/athlete-consulting-v2-review/build.mjs"
+  ],
+  "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "child_environment_keys": [
+    "LANG",
+    "TZ",
+    "CI"
+  ],
+  "inherited_environment": false,
+  "started_at": "2026-09-15T22:22:12.254Z",
+  "duration_ms": 1615,
+  "exit_code": 0,
+  "signal": null,
+  "counts": {
+    "tests": 0,
+    "pass": 0,
+    "fail": 0,
+    "skipped": 0
+  },
+  "stdout_sha256": "14fa9dbcd9cc537f71c2cc263efaf3af7f5e267c4e654d78054eccc7d5e426b6",
+  "stderr_sha256": "1173b42e899c8820346c3acf69d7efe522762ab54d2345e93ab45561fda01ea5",
+  "build_delta": "Only outDir changes to this validation run/build-dist; existing no-env build.mjs and all input/options preserved. Active review dist untouched."
+}

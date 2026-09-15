@@ -1,0 +1,121 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled] [selected]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - heading "Sofia, this is you." [level=1]:
+    - text: Sofia,
+    - emphasis: this is you.
+  - generic: Your personality at a glance
+  - heading "A pattern. A whole person." [level=2]:
+    - text: A pattern.
+    - text: A whole person.
+  - paragraph: You make room for people, possibilities, and work that feels worthwhile. Your easygoing side helps you stay open, while a firmer, more exact side appears when something truly matters or your limits need protecting.
+  - button "Read This Is You ↗"
+  - img "Eight-vector personality map":
+    - generic: M
+  - generic: Each direction has value. This is not a grade.
+  - button "Direction ↗":
+    - text: Direction
+    - generic: ↗
+  - button "Pace ↗":
+    - text: Pace
+    - generic: ↗
+  - button "People ↗":
+    - text: People
+    - generic: ↗
+  - button "Detail ↗":
+    - text: Detail
+    - generic: ↗
+  - button "Resourcefulness ↗":
+    - text: Resourcefulness
+    - generic: ↗
+  - button "Change ↗":
+    - text: Change
+    - generic: ↗
+  - button "Structure ↗":
+    - text: Structure
+    - generic: ↗
+  - button "Outlook ↗":
+    - text: Outlook
+    - generic: ↗
+  - button "01 What makes you, you →":
+    - generic: "01"
+    - strong: What makes you, you
+    - generic: →
+  - button "02 How your mind works →":
+    - generic: "02"
+    - strong: How your mind works
+    - generic: →
+  - button "03 How you communicate →":
+    - generic: "03"
+    - strong: How you communicate
+    - generic: →
+  - button "04 How you connect and belong →":
+    - generic: "04"
+    - strong: How you connect and belong
+    - generic: →
+  - button "05 What brings out your effort →":
+    - generic: "05"
+    - strong: What brings out your effort
+    - generic: →
+  - button "06 When things get difficult →":
+    - generic: "06"
+    - strong: When things get difficult
+    - generic: →
+  - button "07 Your strengths, in real life →":
+    - generic: "07"
+    - strong: Your strengths, in real life
+    - generic: →
+  - button "08 What helps you thrive →":
+    - generic: "08"
+    - strong: What helps you thrive
+    - generic: →
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

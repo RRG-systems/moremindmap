@@ -1,0 +1,68 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works" [selected]
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: How your mind works
+    - heading "Make the Unknown Concrete" [level=1]
+    - paragraph: When a choice is difficult, you bring it down from labels to lived reality. For your fieldwork module, reasons mattered, but hearing what an actual week would be like helped you decide. Talking with someone seems to give you useful material for your own judgment rather than automatically handing them the choice. Sometimes reassurance may help as well; those two things are not always easy to separate.
+    - paragraph: You approach new interests in a similarly practical way. Trying guitar with borrowed equipment let you learn before making a bigger commitment. You do not need every step explained in advance, but it helps to know that a person or resource is available if you get stuck. Your openness is not necessarily reckless; you often make the first step small enough that you can learn and revise.
+    - paragraph: When you do not understand something, you ask for a different explanation or a clear example. In group work, you also use simple tools to make the problem visible, such as setting up a shared document so gaps can be seen. You seem to prefer making understanding easier to share over privately struggling through or redoing every part yourself.
+    - paragraph: This style lets you explore before you have a complete map. It also means concrete experience may carry more weight than an impressive-sounding option with little detail behind it. Most of your examples involve study, group work, or a fairly reversible experiment. A costly or hard-to-reverse decision could bring out more caution, so this is a usual approach rather than a rule for every choice.
+    - blockquote: You think more clearly when an option becomes something you can picture, test, or discuss in real life.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

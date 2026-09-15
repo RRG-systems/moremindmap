@@ -1,0 +1,153 @@
+{
+  "recovered_at": "2026-09-15T21:57:27.228Z",
+  "method": "Parse literal JSON apply_patch arguments without executing historical JavaScript; replace only missing temporary target prefix. Original frozen source import preserved separately. Source and reconstructed results require fresh validation.",
+  "old_target": "/private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "new_target": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "records": [
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/08/24/rollout-2026-08-24T10-54-31-01a034e8-deec-7d02-8dca-3af6a72c11d7.jsonl",
+      "line": 20263,
+      "call_id": "call_imBKehNJLl5cIEn7otl7snNj",
+      "sha256": "b483d89db07b65c163503714fd595f51820bb0195587ab814e6ec64d2271ae02",
+      "source_patch_bytes": 1987,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/RECOVERY.md"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/08/24/rollout-2026-08-24T10-54-31-01a034e8-deec-7d02-8dca-3af6a72c11d7.jsonl",
+      "line": 20271,
+      "call_id": "call_v6XqRLOSemaXup0W2EY2LDlG",
+      "sha256": "52484e48f1f89ea75f8b48f48c3daa4f3ff1912aaee28ec7345169eddf9146fe",
+      "source_patch_bytes": 10481,
+      "targets": [
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/api/engine/leadershipDemo/authority.js",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/api/internal/athlete-living-consult-one-shot-v1.js",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/bundles.js",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/handler.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/08/24/rollout-2026-08-24T10-54-31-01a034e8-deec-7d02-8dca-3af6a72c11d7.jsonl",
+      "line": 20278,
+      "call_id": "call_kc0duCuai25NRjH3qJdsZ32u",
+      "sha256": "c7425c9a02b18bc9b5a02d54ee0f477b5c8b707b03b6b85b106ce40e7e9de9d4",
+      "source_patch_bytes": 10829,
+      "targets": [
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/App.jsx",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/transport.js",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/handler.js",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/Reports.jsx",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/approved-apa/main.jsx",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/main.jsx",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/Route.jsx",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/athlete-consulting-tool/demo/workspace.html",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/athlete-consulting-tool/demo/apa-reading.html",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/main.jsx",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/vite.config.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/08/24/rollout-2026-08-24T10-54-31-01a034e8-deec-7d02-8dca-3af6a72c11d7.jsonl",
+      "line": 20340,
+      "call_id": "call_U8Todg2mr36gAUoCmlflr2L4",
+      "sha256": "ee319f8fa36c169115fa77a2331a31ea53d2a58cf52a532c1b8ef54fc09ff795",
+      "source_patch_bytes": 364,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/build.mjs"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/08/24/rollout-2026-08-24T10-54-31-01a034e8-deec-7d02-8dca-3af6a72c11d7.jsonl",
+      "line": 20377,
+      "call_id": "call_TlMYfIQlQmRDMTaou48I7j7h",
+      "sha256": "60a71cb76e72c3df590bc7b5b6a7952b3bd00b16dcd0ec5a1b8bdda1de04861d",
+      "source_patch_bytes": 1445,
+      "targets": [
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/handler.js",
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/src/athleteConsultingV2/transport.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-11-01a0a5a3-d093-7060-b804-6920cd1e7b7c.jsonl",
+      "line": 152,
+      "call_id": "call_iRrU3lFaMJTpJTCWoNHkLRu3",
+      "sha256": "80ca38d91c4217a0c8a0e687599e4c1c3dd8fc367013e4c1645bc986205021a1",
+      "source_patch_bytes": 10253,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/coach.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-11-01a0a5a3-d093-7060-b804-6920cd1e7b7c.jsonl",
+      "line": 161,
+      "call_id": "call_6bVzP5SoIMBuU9YOis8HPY8S",
+      "sha256": "b25d41c226279f37a9b02feee85d497d19b2c8bfc59423c1c9d703cba131085c",
+      "source_patch_bytes": 10208,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/test/athleteConsultingV2Coach.test.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-11-01a0a5a3-d093-7060-b804-6920cd1e7b7c.jsonl",
+      "line": 220,
+      "call_id": "call_jhOJhjOt4qpELRScgwGnFEEF",
+      "sha256": "6c0618db1164f3bb33ec7fdbc679c80b6f0acb5f2edaa463ee5753a04b0ce964",
+      "source_patch_bytes": 5242,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/fakeRedis.mjs"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-11-01a0a5a3-d093-7060-b804-6920cd1e7b7c.jsonl",
+      "line": 254,
+      "call_id": "call_w7alhtN38CbinWJzDCHncqu1",
+      "sha256": "4312a4757d642f633efeea9bbb90bb956ff71f12f1a5e01a09cf4cda0cf0e2cb",
+      "source_patch_bytes": 20678,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/test/athleteConsultingV2Handler.test.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-11-01a0a5a3-d093-7060-b804-6920cd1e7b7c.jsonl",
+      "line": 277,
+      "call_id": "call_ag48YyD5aUAitWMdQSukON31",
+      "sha256": "23d41d19639c6b61dc68ce67261f2da0d3fa83c5ee4c2d7b87d050eba7d15155",
+      "source_patch_bytes": 346,
+      "targets": [
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/test/athleteConsultingV2Handler.test.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-20-01a0a5a3-f39b-7ed0-94c4-e517a5f55fa2.jsonl",
+      "line": 133,
+      "call_id": "call_FUIGVi1ojCQD7LpRT6ZfIjZH",
+      "sha256": "0e86a212180d4233f14fbfad812ad593350f03cc47b220b394860b02dd2a54b1",
+      "source_patch_bytes": 20114,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/state.js",
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/server/athleteConsultingV2/store.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-20-01a0a5a3-f39b-7ed0-94c4-e517a5f55fa2.jsonl",
+      "line": 144,
+      "call_id": "call_rsbWzTRcg4b0M6STnDUtQL29",
+      "sha256": "67dac55c41dba0418e9a721ec7ecd7d432a5db6879b6fb56c4d6a22aa7edbbfb",
+      "source_patch_bytes": 17531,
+      "targets": [
+        "*** Add File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/test/athleteConsultingV2Store.test.js"
+      ]
+    },
+    {
+      "file": "/Users/rrg/.codex/sessions/2026/09/15/rollout-2026-09-15T08-16-20-01a0a5a3-f39b-7ed0-94c4-e517a5f55fa2.jsonl",
+      "line": 167,
+      "call_id": "call_BvWU8mNIxBemHtgVZMz0K1xZ",
+      "sha256": "e6f27c84ad3e51b023127b7f446913dfdd3c589b6ea0db5bb7766a601748a362",
+      "source_patch_bytes": 3250,
+      "targets": [
+        "*** Update File: /private/tmp/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/test/athleteConsultingV2Store.test.js"
+      ]
+    }
+  ]
+}

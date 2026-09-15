@@ -52,7 +52,7 @@ export default async function leadershipDemoEntryHandler(req, res) {
             { id: 'subscription-model-2', title: 'SUBSCRIPTION MODEL 2' },
             ...(athleteConsultingDarrenDemoEnabled(process.env)
               && auth.capability.allowed_products?.includes('athlete-consulting-tool')
-              ? [{ id: 'athlete-consulting-tool', title: 'ATHLETE CONSULTING TOOL' }]
+              ? [{ id: 'athlete-consulting-tool', title: 'ATHLETE CONSULTING TOOL', ...(process.env.ATHLETE_CONSULTING_V2_ENABLED === 'true' ? { version: 2 } : {}) }]
               : []),
           ],
         });

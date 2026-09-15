@@ -1,0 +1,117 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Nia Brooks · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - generic "MORE Athlete":
+          - generic: ✧
+          - strong:
+            - text: MORE
+            - text: ATHLETE
+        - paragraph: Your performance assessment
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures" [active]:
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+        - generic: "N"
+        - strong: Nia
+        - generic: Basketball
+        - generic: ▢
+        - strong: Your saved assessment
+        - generic: Your answers today, connected to your saved personality profile (BOS).
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+        - generic: September 14, 2026 · MM-20260913-D702ACBF
+      - main:
+        - paragraph: BOX 2 · FIVE FUTURES
+        - heading "Five ways the next weeks could go." [level=1]
+        - paragraph: Now through November 2. Possibilities shaped by what happens next.
+        - navigation "Five possible paths":
+          - button "1 Current course Your vision stays useful, but resets remain uneven" [pressed]:
+            - generic: "1"
+            - generic: Current course
+            - strong: Your vision stays useful, but resets remain uneven
+          - button "2 Already beginning The breath and look start helping in practice":
+            - generic: "2"
+            - generic: Already beginning
+            - strong: The breath and look start helping in practice
+          - button "3 A better path Maths gets unstuck, with basketball still inside team time":
+            - generic: "3"
+            - generic: A better path
+            - strong: Maths gets unstuck, with basketball still inside team time
+          - button "4 Your stretch You make useful game decisions when the pressure matters":
+            - generic: "4"
+            - generic: Your stretch
+            - strong: You make useful game decisions when the pressure matters
+          - button "5 A risk to avoid Extra shooting takes homework time without fixing the passing problem":
+            - generic: "5"
+            - generic: A risk to avoid
+            - strong: Extra shooting takes homework time without fixing the passing problem
+        - article:
+          - paragraph: Current course
+          - heading "Your vision stays useful, but resets remain uneven" [level=2]
+          - heading "What could be different" [level=3]
+          - paragraph: By 2026-11-02, you keep creating early passing chances, while some turnovers are still followed by a rushed next decision. Basketball, art, family responsibilities and school remain in the same basic balance.
+          - heading "What would have to happen" [level=3]
+          - paragraph: This is the path if no deliberate reset is used consistently and the current mix of normal team practice, occasional extra shooting and informal feedback continues.
+          - heading "The first sign to watch" [level=3]
+          - paragraph: "The next practices or games show the familiar mix: early vision in some possessions and an immediate rushed pass to make up for the mistake after some turnovers."
+          - button "Why this path is possible":
+            - text: Why this path is possible
+            - generic: →
+        - button "See the One Move worth trying first":
+          - text: See the One Move worth trying first
+          - generic: →
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

@@ -1,0 +1,105 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this" [active]:
+            - generic: "5"
+            - text: Why MORE says this
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+      - main:
+        - paragraph: BOX 5 · WHY MORE SAYS THIS
+        - heading "Your voice is the starting point." [level=1]
+        - paragraph: Your APA answers explain your life now. Your saved BOS helps MORE understand how to support you.
+        - heading "Your coach’s perspective" [level=2]
+        - paragraph: You and your coach agree that you link teammates well, have attacked after a clear explanation and have also passed up an opportunity to go yourself. The coach shares the priority of an earlier purposeful choice but cannot infer why every pass happens. They can discuss a decision in the existing Thursday game; no new feedback format or urgent-contact arrangement has yet been agreed.
+        - paragraph: A coach’s observation is their perspective. A new suggestion still needs your agreement.
+        - article:
+          - heading "Sport" [level=2]
+          - paragraph: You often influence groups by connecting people rather than taking the final say, which matches your strength as a linking midfielder. The useful exception is that you can choose when a purpose is clear, so becoming more attacking does not require becoming less supportive; it requires bringing your own read forward sooner.
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "Training" [level=2]
+          - paragraph: You tend to learn by making an unknown concrete through an example, a manageable test and someone available to ask. That fits the opposed wing game, where a short explanation helped once. Your preference for light, useful structure suggests a clear review point may fit better than adding a complicated new programme.
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "Warrior Mindset" [level=2]
+          - paragraph: "Your calm first response can hide a fuller feeling, yet your firmer side appears when purpose or choice matters: you declined another committee and later asked the coach for help. Courage here is not ignoring disappointment; it is noticing it, getting heard if needed, and still backing an explainable decision."
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "School" [level=2]
+          - paragraph: Meaningful, practical work tends to draw your effort, while light supports can hold a harder solo start. Environmental fieldwork has that meaning, and a library appointment with quiet company has helped before. Your social energy is not the problem by itself; constant access is the risk when messages can enter work that needs a protected beginning.
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - heading "What we still need to understand" [level=2]
+        - list:
+          - listitem: Whether each passed one-on-one comes from a missed cue, a purposeful tactical pass or checking for another person's approval.
+          - listitem: What exact evidence the coach will use when judging progress toward a starting place.
+          - listitem: How far the fieldwork report has progressed and what its required sections are.
+          - listitem: Whether an authorized urgent-change contact can be agreed before the next library blocks.
+          - listitem: Whether your delayed fuller reaction reflects delayed recognition, chosen privacy or both.
+        - button "Open all saved answers and BOS sections":
+          - text: Open all saved answers and BOS sections
+          - generic: →
+        - paragraph: Something no longer fits? Use Review or correct answers at the top. A corrected assessment becomes a new version; your saved reading is preserved.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

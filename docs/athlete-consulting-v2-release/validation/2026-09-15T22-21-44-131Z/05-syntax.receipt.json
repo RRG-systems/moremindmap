@@ -1,0 +1,30 @@
+{
+  "name": "05-syntax",
+  "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+  "args": [
+    "--import",
+    "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+    "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs",
+    "--syntax",
+    "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/validation/2026-09-15T22-21-44-131Z/LINT_FILES.json"
+  ],
+  "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "child_environment_keys": [
+    "LANG",
+    "TZ",
+    "CI"
+  ],
+  "inherited_environment": false,
+  "started_at": "2026-09-15T22:22:11.252Z",
+  "duration_ms": 1002,
+  "exit_code": 0,
+  "signal": null,
+  "counts": {
+    "tests": 0,
+    "pass": 0,
+    "fail": 0,
+    "skipped": 0
+  },
+  "stdout_sha256": "6b29906ac78996affd7497997c4450358e1e09f0c914a3b833cae831a1197fc1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+}

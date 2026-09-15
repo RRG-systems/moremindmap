@@ -1,0 +1,61 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - main:
+    - generic: YOUR LIFE. YOUR SPORT. YOUR DIRECTION.
+    - heading "Your goals. One clear plan." [level=1]:
+      - text: Your goals.
+      - text: One clear plan.
+    - paragraph: MORE is your AI coaching partner. It brings together who you are, your sport and the rest of your life.
+    - generic: M
+    - generic: YOU
+    - generic: SPORT
+    - generic: PLAN
+    - generic: ◎
+    - generic: A STARTING POINT THAT KNOWS YOU
+    - heading "Welcome, Sofia." [level=2]
+    - paragraph: You already help attacks and people move. Now you are practicing choosing before checking whether everyone else needs something.
+    - paragraph:
+      - text: "Your BOS:"
+      - strong: Room for People, Room for You
+    - button "Start my first session →"
+    - generic: ◇
+    - generic: YOUR CHOICES, IN ONE PLACE
+    - heading "Your current plan." [level=2]
+    - paragraph: You haven’t chosen a plan yet. Start with what matters to you, then decide what feels useful.
+    - text: YOUR APA PRIORITY
+    - paragraph: Protect my own first step instead of responding to everyone else first.
+    - button "Explore your next step →"
+    - button "YOU Understand your personality ↗":
+      - generic: YOU
+      - text: Understand your personality ↗
+    - button "YOUR SPORT Explore your four areas ↗":
+      - generic: YOUR SPORT
+      - text: Explore your four areas ↗
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - generic: M
+    - heading "A little more clarity. A lot more you." [level=2]:
+      - text: A little more clarity.
+      - text: A lot more you.
+    - paragraph: I’m MORE, your AI coaching partner. Your BOS and APA are here with us.
+    - paragraph: Start when you’re ready.
+    - button "Start my first session →"

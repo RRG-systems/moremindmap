@@ -1,0 +1,78 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult" [selected]
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: When things get difficult
+    - heading "When Attention Moves Outward" [level=1]
+    - paragraph: Pressure seems to change where your attention goes. In an ordinary week, you can put your phone away more easily. During a busy project week, you kept checking how everyone else was doing and answering group messages while your own part stayed late. The group became hard to tune out, even though your own work still needed a protected start.
+    - paragraph: Something similar may happen with feelings, although the reason is not completely clear. You can keep moving and appear cheerful before your own reaction has had full space. After an argument, you first said things were fine and later realized that you needed to talk. You may recognize the feeling late, or you may choose privacy and calm before sharing it; either route can delay the fuller message.
+    - paragraph: Disagreement can follow a related shape. You may begin by understanding the other side or trying not to make the situation bigger. If the problem continues, you can become concrete and firm, as when you asked for a clearer work split and later revisited it. The possible cost is carrying extra work or frustration during the time before the boundary becomes clear.
+    - paragraph: After the lineup disappointment, being heard by your sister came before asking your coach what you could work on. The practical step did not erase the disappointment, and it did not need to. On that occasion, recovery meant making space for the feeling and then finding something usable to do. Your current term also has fewer work shifts and more room, reminding you that pressure is shaped by what the week is asking, not just by personality.
+    - blockquote: Under strain, other people and group steadiness may get your attention first; your own feeling, task, or boundary can arrive later.
+    - heading "trigger" [level=3]
+    - paragraph: You face busy shared work, unresolved disagreement, or a visible disappointment.
+    - heading "interpretation" [level=3]
+    - paragraph: You may notice other people's needs or group steadiness before your own task, feeling, or limit.
+    - heading "response" [level=3]
+    - paragraph: You may keep replying or seem cheerful while your own work or fuller message arrives later.
+    - heading "recovery" [level=3]
+    - paragraph: After the lineup disappointment, your sister listened first. You later asked your coach what you could work on.
+    - heading "claim ids" [level=3]
+    - paragraph: C21C22C23C25C26C32C33
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

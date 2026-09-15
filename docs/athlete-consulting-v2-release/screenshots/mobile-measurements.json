@@ -1,0 +1,34 @@
+[
+  {
+    "room": "HOME",
+    "measure": {
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "identity": true
+  },
+  {
+    "room": "YOU",
+    "measure": {
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "identity": true
+  },
+  {
+    "room": "YOUR SPORT",
+    "measure": {
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "identity": true
+  },
+  {
+    "room": "PLAN",
+    "measure": {
+      "scrollWidth": 390,
+      "width": 390
+    },
+    "identity": true
+  }
+]

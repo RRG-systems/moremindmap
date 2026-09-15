@@ -1,0 +1,592 @@
+{
+  "at": "2026-09-15T22:15:30.350Z",
+  "real_provider_calls": 0,
+  "real_redis_connections": 0,
+  "original_5285_untouched": true,
+  "cookie_security_unchanged": true,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/leadership",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-BAGputK9.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-B-s7jKuH.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.svg",
+      "kind": null,
+      "athlete": null,
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/leadership-demo-entry",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-BAGputK9.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-B-s7jKuH.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo/workspace.html",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteWorkspace-BrN0hYOw.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/transport-DAOeb3Bi.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteWorkspace-DjphKLI8.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "registry",
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "state",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo/apa-reading.html",
+      "kind": null,
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-n815-XZg.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-zTDoup9f.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/transport-DAOeb3Bi.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo",
+      "kind": null,
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-BAGputK9.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/main-B-s7jKuH.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo/workspace.html",
+      "kind": null,
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteWorkspace-BrN0hYOw.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/transport-DAOeb3Bi.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteWorkspace-DjphKLI8.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "registry",
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "state",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "nia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "state",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo/apa-reading.html",
+      "kind": null,
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-n815-XZg.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-zTDoup9f.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/transport-DAOeb3Bi.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/athlete-consulting-tool/demo/apa-reading.html",
+      "kind": null,
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-n815-XZg.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/jsx-runtime-DnSktVOR.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/athleteApa-zTDoup9f.css",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/assets/transport-DAOeb3Bi.js",
+      "kind": null,
+      "athlete": null,
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "bundle",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "sofia",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/internal/athlete-living-consult-one-shot-v1",
+      "kind": "action",
+      "athlete": "sofia",
+      "status": 200
+    }
+  ],
+  "replay_attempts": [
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "nia",
+      "task": "OPENING",
+      "fixture_id": "ece41f34-1242-4a16-ad45-c4c2b8e009ae",
+      "fixture_sha256": "341804617a85ee68cbca1c078c6bba5150240ff41cae9f565b3c841a9bf143f3",
+      "input_sha256": "8b674674034fcea2daf75049f9abca980ca5fcea2cc90098fe759bd82482c22e",
+      "at": "2026-09-15T22:08:57.606Z"
+    },
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "nia",
+      "task": "CHAT",
+      "fixture_id": "c220f8dd-6574-45de-a3ce-e2306d9d5ea1",
+      "fixture_sha256": "63f4a6ddb11fc2de5a978c78321894a0ac34c2753198300803f6ca5fa01b160a",
+      "input_sha256": "ea13f451b00e6d02b9961a7cd2b89e5a0575a10244077e4bd4c6ea2d5182cc84",
+      "at": "2026-09-15T22:11:06.732Z"
+    },
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "nia",
+      "task": "CHAT",
+      "fixture_id": "ee8bd8a0-95d3-4bdc-bae2-8953c57f039c",
+      "fixture_sha256": "59fbe980413661a7105e09b52d5c29bea08b8c3e3f73b9402774cef2921dc79d",
+      "input_sha256": "5fde99366560b733c958e4941472a5dbc159e375db2a6ee2a77c38ecd81ec6ce",
+      "at": "2026-09-15T22:11:20.048Z"
+    },
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "nia",
+      "task": "CLOSE",
+      "fixture_id": "d822a1ce-fa00-4d6e-bfcd-7173b29b0436",
+      "fixture_sha256": "ee8c667e3e4a20304654735e7f0c92c9f60103140397afb45a8a4e22dfee880d",
+      "input_sha256": "60d9c3491a8563f2a5e52bfc0de046c3b61c06f11c216e4088837e4f61e36bd7",
+      "at": "2026-09-15T22:11:40.653Z"
+    },
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "nia",
+      "task": "OPENING",
+      "fixture_id": "ee0a6e08-d564-42d7-8315-8fc3efc48e93",
+      "fixture_sha256": "d05d4841dcf128f827c7da4fad4829dd949d09414bf7e951b9248d8630880d7e",
+      "input_sha256": "996bc48a51fec00e2dd0f0a22b331740efd78ba9546e04e6d818cd35e65a6bfe",
+      "at": "2026-09-15T22:11:51.989Z"
+    },
+    {
+      "kind": "FROZEN_RESPONSE_REPLAY_NOT_NEW_COACHING_PROOF",
+      "slug": "sofia",
+      "task": "OPENING",
+      "fixture_id": "66e1497a-7b0d-4629-9aa2-26c336bfbc99",
+      "fixture_sha256": "fe5049b0f4794e177e370d64703cd45fb47964f5f309398f85d366f9a8439436",
+      "input_sha256": "cef145d7af70e7a241676b85dcae6666dbfbab4059c2e03a6dfc54a71dacf3d8",
+      "at": "2026-09-15T22:13:13.498Z"
+    }
+  ],
+  "denied_outbound": [],
+  "states": [
+    {
+      "key_sha256": "c53ef21a0928108ef441782812d6234c1274d5ab3829e3c0a0838e3a6b992a20",
+      "revision": 14,
+      "status": "active",
+      "messages": 14,
+      "sessions": 1,
+      "plan": "Synthetic shared review plan — revised",
+      "draft": null,
+      "learning": 1
+    },
+    {
+      "key_sha256": "d7d76b4679a1f3d006ec5c37cee7a2ff56db2a6cf60f7875efcd21c737b23e80",
+      "revision": 3,
+      "status": "active",
+      "messages": 3,
+      "sessions": 0,
+      "plan": "Ask your coach to review one attacking choice.",
+      "draft": null,
+      "learning": 0
+    }
+  ]
+}

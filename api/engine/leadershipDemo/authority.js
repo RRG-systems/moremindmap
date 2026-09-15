@@ -13,6 +13,9 @@ const LAUNCHER_COOKIE = '__Host-more_leadership_demo';
 const RECRUITING_DEMO_COOKIE = '__Host-more_recruiting_demo';
 const ATHLETE_CONSULTING_DEMO_COOKIE = '__Host-more_athlete_consult_demo';
 const ATHLETE_CONSULTING_SUBJECTS = Object.freeze(['mika', 'avery']);
+const ATHLETE_CONSULTING_V2_SUBJECTS = Object.freeze(['nia', 'sofia']);
+const athleteSubjects = (env) => env.ATHLETE_CONSULTING_V2_ENABLED === 'true'
+  ? ATHLETE_CONSULTING_V2_SUBJECTS : ATHLETE_CONSULTING_SUBJECTS;
 const HASH = /^[a-f0-9]{64}$/u;
 
 const digest = (value) => crypto.createHash('sha256').update(String(value)).digest('hex');
@@ -262,7 +265,7 @@ export async function issueAthleteConsultingDemoCapability({
     contract: 'athlete_consulting_demo_capability_v1',
     demo_scope_id: launcher.launcher_scope_id,
     allowed_product: 'athlete-consulting-tool',
-    allowed_subjects: [...ATHLETE_CONSULTING_SUBJECTS],
+    allowed_subjects: [...athleteSubjects(env)],
     synthetic_only: true,
     issued_at: now.toISOString(),
     expires_at: new Date(now.getTime() + ATHLETE_CONSULTING_DEMO_TTL_SECONDS * 1000).toISOString(),
@@ -291,7 +294,7 @@ export async function authenticateAthleteConsultingDemoRequest({
   try { capability = raw ? JSON.parse(raw) : null; } catch { capability = null; }
   if (!capability || capability.contract !== 'athlete_consulting_demo_capability_v1'
     || capability.allowed_product !== 'athlete-consulting-tool'
-    || JSON.stringify(capability.allowed_subjects) !== JSON.stringify(ATHLETE_CONSULTING_SUBJECTS)
+    || JSON.stringify(capability.allowed_subjects) !== JSON.stringify(athleteSubjects(env))
     || capability.synthetic_only !== true || !capability.demo_scope_id
     || capability.browser_binding_hash !== clientKey(req) || !isCurrent(capability.expires_at, now)) {
     return { ok: false, code: 'ATHLETE_CONSULTING_DEMO_CAPABILITY_INVALID', status: 401 };
@@ -351,7 +354,8 @@ export async function enforceAthleteConsultingDemoRateLimit({ redis, capabilityH
 }
 
 export function deriveAthleteConsultingActorCapabilities({ capabilityToken, fixtureId }) {
-  if (typeof capabilityToken !== 'string' || capabilityToken.length < 32 || !ATHLETE_CONSULTING_SUBJECTS.includes(fixtureId)) {
+  if (typeof capabilityToken !== 'string' || capabilityToken.length < 32
+    || ![...ATHLETE_CONSULTING_SUBJECTS, ...ATHLETE_CONSULTING_V2_SUBJECTS].includes(fixtureId)) {
     throw new TypeError('ATHLETE_CONSULTING_ACTOR_CAPABILITY_BINDING_INVALID');
   }
   const derive = (role) => crypto.createHmac('sha256', capabilityToken)

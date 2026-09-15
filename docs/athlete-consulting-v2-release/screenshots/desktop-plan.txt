@@ -1,0 +1,57 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN" [active]
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - main:
+    - generic: PLAN · YOUR NEXT STEP
+    - heading "Make room for what matters." [level=1]:
+      - text: Make room for
+      - text: what matters.
+    - paragraph: Choose something that fits. Try it. Learn from what happens.
+    - generic: YOUR CURRENT PLAN
+    - heading "Ask your coach to review one attacking choice." [level=2]
+    - paragraph: Start here because your coach has identified a place in Thursday’s wing game to review a decision. Asking uses existing training and supports backing your own read. The library idea stays relevant, but its urgent-contact arrangement is still unresolved. This move does not settle your school plan.
+    - list:
+      - generic: "01"
+      - text: YOUR STEP
+      - heading "Ask your coach to review one attacking choice." [level=3]
+      - paragraph: "Before Thursday, September 17 training, ask: “Could you watch one one-on-one and tell me afterward what you saw and whether my choice fit our team plan?”"
+      - paragraph: Notice At a later suitable one-on-one, do you recognize the opening and choose sooner? Your account explains what you saw; coach feedback, if available, checks whether the choice fit the team plan.
+    - paragraph:
+      - strong: Check in
+      - text: "On September 21, you check what happened: agreement, an actual review, then any later chance to use it. No later chance means usefulness remains untested. Continue, change or stop; ask the coach if the football meaning is unclear."
+    - button "Tell MORE how it went →"
+    - button "Something changed"
+    - paragraph: Your original BOS and APA remain available. This is the plan you can develop together over time.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

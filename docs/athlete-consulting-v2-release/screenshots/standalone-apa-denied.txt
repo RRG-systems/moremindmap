@@ -1,0 +1,2 @@
+- main:
+  - alert: Open this reading inside the consulting tool.

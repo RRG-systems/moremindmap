@@ -1,0 +1,125 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN": PLAN
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Nia Brooks · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe:
+      - complementary:
+        - generic "MORE Athlete":
+          - generic: ✧
+          - strong:
+            - text: MORE
+            - text: ATHLETE
+        - paragraph: Your performance assessment
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+        - generic: "N"
+        - strong: Nia
+        - generic: Basketball
+        - generic: ▢
+        - strong: Your saved assessment
+        - generic: Your answers today, connected to your saved personality profile (BOS).
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+        - generic: September 14, 2026 · MM-20260913-D702ACBF
+      - main:
+        - paragraph: BOX 5 · WHY MORE SAYS THIS
+        - heading "Your voice is the starting point." [level=1]
+        - paragraph: Your APA answers explain your life now. Your saved BOS helps MORE understand how to support you.
+        - heading "Your coach’s perspective" [level=2]
+        - paragraph: "Your coach independently identifies the same priority: your next decision after losing the ball. The coach also sees your early vision and attacking instinct as strengths worth protecting, and confirms that the Wednesday response was only one practice example. The observations are aligned, but no new cue, feedback routine or practice plan has been agreed with you yet."
+        - paragraph: A coach’s observation is their perspective. A new suggestion still needs your agreement.
+        - article:
+          - heading "Sport" [level=2]
+          - paragraph: Your quick-start strength helps you turn rebounds into early chances, and your willingness to change course means one turnover does not have to decide the next possession. The tradeoff is that pressure can turn speed into passing before looking, so a short look before acting protects rather than removes your attacking instinct.
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "Training" [level=2]
+          - paragraph: "You usually use information best when it is brief, specific and attached to a real attempt. That matches the small-sided game: one late-pass comment can lead straight into another go. You also protect several important roles, so fitting the test inside team practice respects how basketball, art, school and family share your week."
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "Warrior Mindset" [level=2]
+          - paragraph: "Visible pressure can turn up your normal speed and humor, but that is not your only response: you can also accept a clear cue, restart and change course. Because long or repeated correction can crowd the useful point, one precise reminder may give your courage and decision-making more room than a speech would."
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - article:
+          - heading "School" [level=2]
+          - paragraph: You often learn by trying, finding the exact snag and using one clear piece of help before taking the work back yourself. That fits the maths evidence better than a large study plan. Purpose and responsibility also support your follow-through, so linking the question to an actual submission deadline may help carry the less interesting middle.
+          - button "See the answers behind this":
+            - text: See the answers behind this
+            - generic: →
+        - heading "What we still need to understand" [level=2]
+        - list:
+          - listitem: Can you deliberately use the one-breath, look-up reset during a game, or did Wednesday depend on the coach supplying the cue?
+          - listitem: How your coach defines close-game trust beyond the quality of one next possession.
+          - listitem: Whether a close finish that gives you a fair opportunity will occur before 2026-11-02.
+          - listitem: Which maths deadlines fall before the review and how quickly qualified school help is available.
+          - listitem: How often extra training urges appear after disappointment when school load is lighter.
+        - button "Open all saved answers and BOS sections":
+          - text: Open all saved answers and BOS sections
+          - generic: →
+        - paragraph: Something no longer fits? Use Review or correct answers at the top. A corrected assessment becomes a new version; your saved reading is preserved.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - article:
+      - text: NIA
+      - paragraph: Nia here. This week maths is the priority. Please prepare a draft with just one 15-minute block tomorrow to work through two confusing maths problems, then ask my teacher about the one I still cannot solve. No extra basketball work. Tell me briefly why that fits my BOS. Also, for future coaching, ask what happened before assuming I avoided something.
+    - article:
+      - text: MORE
+      - paragraph: Here’s the draft. It fits your BOS because you often work best by trying first, finding the exact snag, and asking for one focused piece of help. One short block gives you structure without a long list and protects maths as this week’s priority. No extra basketball work is included. Use the visible control if you want to accept the plan. I’ve also proposed your future coaching preference for confirmation.
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

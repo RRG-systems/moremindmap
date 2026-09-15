@@ -1,0 +1,94 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort" [selected]
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: What brings out your effort
+    - heading "Meaning carries the middle" [level=1]
+    - paragraph: You get more involved when you can put something of yourself into the result. Drawing clothes, adapting a design for a friend, or trying the rest of a task after one helpful explanation all leave space for your choices. Work becomes harder to care about when it mainly involves copying, following a huge list, or receiving information without doing much with it. Enjoyment and familiarity may help too, but personal ownership seems to be an important part of the pull.
+    - paragraph: "Your effort should not be described as either always persistent or never finishing. You left a comic halfway, and you also completed the jacket design. That jacket is one project, so it cannot promise the same ending every time. Still, it directly shows that you can work through repeated changes when the result matters. Collecting your brother on your assigned day is a separate kind of follow-through: less about creative excitement and more about dependable responsibility."
+    - paragraph: "The middle of a task is where your energy may change. You can start fast, but once the newness fades, a weak reason may not carry you. Meaning can also slow you down in a useful way. You might answer another question before taking in every word, then spend ages refining one sleeve because that detail feels connected to the whole design. Your standards are selective: exactness rises when you can see why a detail deserves it."
+    - paragraph: You prefer the main goal and deadline over a long map of every step. That light structure gives you room to adapt and make the route yours. It can also leave small checks behind, such as checking a bag or asking what role another person wants. The useful balance for you is probably not more instructions everywhere. It is enough clarity to protect the important checks without burying the reason you wanted to begin.
+    - blockquote: You do finish; purpose, people, and clear responsibility help the less exciting middle matter.
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What matters most to you outside sport?
+      - paragraph: My little brother and drawing clothes. I want to make clothes people actually wear. Basketball matters a lot but I would still do the drawing if nobody saw it.
+    - blockquote:
+      - strong: What makes you want to put effort into something?
+      - paragraph: If I can make it my own I get into it. I stayed up finishing a jacket sketch for my friend. Copying definitions for class is harder even when I know it counts.
+    - blockquote:
+      - strong: How do you approach something new or unfamiliar?
+      - paragraph: I want to have a go first. I tried a sewing machine at school and got stuck. Once the teacher showed me how to thread it I wanted to do the rest myself.
+    - blockquote:
+      - strong: When something gets boring or difficult, what do you do?
+      - paragraph: I start fast then the middle can get boring. I left a comic half done. With the jacket I kept changing bits because it was for my friend and I wanted her to like it.
+    - blockquote:
+      - strong: How much of a plan do you like before you start?
+      - paragraph: Just the main thing and when it is due. A huge list makes me want to leave it. The gym closed last week so we played outside instead. I did forget my water because I grabbed my bag without checking.
+    - blockquote:
+      - strong: When you do not understand something, what do you try?
+      - paragraph: I try it and then ask someone a specific question. For a maths problem my friend showed me one step and I finished the others. A long video is usually too much at once.
+    - blockquote:
+      - strong: When can one of your strengths get in your way?
+      - paragraph: Being fast. Sometimes I answer before I understand the question. But with a drawing I can spend ages getting one sleeve right. It depends whether I care about that detail.
+    - blockquote:
+      - strong: What else should MORE understand about you?
+      - paragraph: I do finish important things. This makes me sound like I never finish anything. I got the jacket design done and I always collect my brother on my day. I am not sure what I want basketball to be long term.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

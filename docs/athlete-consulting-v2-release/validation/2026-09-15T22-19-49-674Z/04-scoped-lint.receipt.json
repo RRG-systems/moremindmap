@@ -1,0 +1,32 @@
+{
+  "name": "04-scoped-lint",
+  "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+  "args": [
+    "--import",
+    "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+    "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs",
+    "--lint",
+    "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/validation/2026-09-15T22-19-49-674Z/LINT_FILES.json"
+  ],
+  "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+  "child_environment_keys": [
+    "LANG",
+    "TZ",
+    "CI"
+  ],
+  "inherited_environment": false,
+  "started_at": "2026-09-15T22:20:16.534Z",
+  "duration_ms": 1261,
+  "exit_code": 1,
+  "signal": null,
+  "counts": {
+    "tests": 0,
+    "pass": 0,
+    "fail": 0,
+    "skipped": 0
+  },
+  "stdout_sha256": "bdca0f8c322add261c1d703cb3b5d466d1dfe4a694ba66ef012d2a208ce516d9",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "explicit_nonempty_file_count": 33,
+  "globals": "browser + Node; mjs recommended rules included; no Product lint cleanup"
+}

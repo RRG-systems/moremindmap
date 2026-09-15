@@ -1,0 +1,24 @@
+[
+  {
+    "mm": "MM-20260913-D702ACBF",
+    "name": "Nia Brooks",
+    "slug": "nia",
+    "age": 15,
+    "gender": "girl",
+    "pronouns": "she/her",
+    "sport": "Basketball",
+    "synthetic": true,
+    "reading_sha256": "61a9676d2a5bd224e2e397237a3955339fc2df9c15d8c256bc7681d0cdb5d481"
+  },
+  {
+    "mm": "MM-20260913-6184D6D9",
+    "name": "Sofia Chen",
+    "slug": "sofia",
+    "age": 19,
+    "gender": "woman",
+    "pronouns": "she/her",
+    "sport": "Soccer",
+    "synthetic": true,
+    "reading_sha256": "3a46f13c62c86289572b68989e9c8845337f07ed978ee91069b5c56b4f34b4c4"
+  }
+]

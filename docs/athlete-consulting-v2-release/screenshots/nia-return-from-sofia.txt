@@ -1,0 +1,4 @@
+- iframe [active]:
+  - main:
+    - generic: M
+    - heading "Opening your Athlete workspace…" [level=1]

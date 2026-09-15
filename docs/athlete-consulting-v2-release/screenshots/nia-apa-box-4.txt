@@ -1,0 +1,103 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Nia Brooks · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - generic "MORE Athlete":
+          - generic: ✧
+          - strong:
+            - text: MORE
+            - text: ATHLETE
+        - paragraph: Your performance assessment
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan" [active]:
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+        - generic: "N"
+        - strong: Nia
+        - generic: Basketball
+        - generic: ▢
+        - strong: Your saved assessment
+        - generic: Your answers today, connected to your saved personality profile (BOS).
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+        - generic: September 14, 2026 · MM-20260913-D702ACBF
+      - main:
+        - paragraph: BOX 4 · YOUR PLAN
+        - heading "One step. Then see what happens." [level=1]
+        - paragraph: This is your proposed next step. You have not agreed to it yet.
+        - generic: SUGGESTED · YOUR CHOICE
+        - heading "Your priority" [level=3]
+        - paragraph: Reset after a turnover, so I can choose the next pass.
+        - heading "Ask your coach to try a next-play reset in practice." [level=2]
+        - heading "Try" [level=3]
+        - paragraph: "Before Wednesday practice, ask: “Can I try next play after a turnover, get one brief private comment, and check it with you before Monday’s practice?” No extra session. If your coach agrees, you take one breath, look up, then choose the next useful pass. Your coach observes the next possession and keeps feedback brief and private."
+        - heading "Notice" [level=3]
+        - paragraph: "Your coach describes one next possession: did you look and choose a useful pass, or rush to make up for the mistake? You say whether the reminder helped you settle."
+        - heading "Review · September 21" [level=3]
+        - paragraph: On September 21 before practice, start the brief check if your coach agreed; otherwise review your own note and ask when they can comment. No suitable turnover means untested. Continue, adjust or stop; keep maths and recovery time.
+        - button "Read the full One Move":
+          - text: Read the full One Move
+          - generic: →
+        - paragraph: Your four goals stay in view. Trying one step does not mean dropping the others.
+        - strong: Sport
+        - paragraph: Earn trust with the ball in a close game.
+        - strong: Training
+        - paragraph: Practice calmer passing decisions inside the team week.
+        - strong: Warrior Mindset
+        - paragraph: Make the next useful play after a mistake.
+        - strong: School
+        - paragraph: Hand in maths homework on time for three weeks.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

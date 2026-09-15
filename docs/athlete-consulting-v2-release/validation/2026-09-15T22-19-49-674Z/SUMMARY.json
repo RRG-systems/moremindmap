@@ -1,0 +1,253 @@
+{
+  "at": "2026-09-15T22:20:20.430Z",
+  "directory": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/validation/2026-09-15T22-19-49-674Z",
+  "custody": {
+    "at": "2026-09-15T22:19:49.871Z",
+    "worktree": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+    "branch": "codex/athlete-consulting-v2-durable-recovery-2026-09-15",
+    "head": "63da55d72fc5e6b082114ffd70584902d15c36f3",
+    "tree": "ddba657e4dc80ffce4b6f2d5336cc60a9accc892",
+    "status": " M api/engine/leadershipDemo/authority.js\n M api/internal/athlete-living-consult-one-shot-v1.js\n M api/internal/leadership-demo-entry.js\n M src/LeadershipDemo.jsx\n M src/main.jsx\n M vite.config.js\n?? athlete-consulting-tool/\n?? docs/athlete-consulting-v2-release/\n?? scripts/athlete-consulting-v2-review/\n?? server/athleteConsultingV2/\n?? src/athleteConsultingV2/\n?? test/athleteConsultingV2Coach.test.js\n?? test/athleteConsultingV2Handler.test.js\n?? test/athleteConsultingV2Store.test.js\n?? test/athleteConsultingV2Transport.test.js\n"
+  },
+  "lock_pass": true,
+  "locked_files": 89,
+  "visual_byte_parity": 9,
+  "mission_byte_parity": true,
+  "source_unchanged_during_validation": true,
+  "phases": [
+    {
+      "name": "01-focused",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+        "--test",
+        "--test-reporter=tap",
+        "--test-concurrency=1",
+        "test/athleteConsultingV2Coach.test.js",
+        "test/athleteConsultingV2Store.test.js",
+        "test/athleteConsultingV2Handler.test.js",
+        "test/athleteConsultingV2Transport.test.js"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:19:50.019Z",
+      "duration_ms": 679,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 47,
+        "pass": 47,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "7a732db03a4a58f45de3a29e843be64e95a182d0a136f3a51b1468f8cd22ebf0",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_tests": 47
+    },
+    {
+      "name": "02-protected",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+        "--test",
+        "--test-reporter=tap",
+        "--test-concurrency=1",
+        "test/leadershipDemo.launcher.test.js",
+        "test/athleteLivingConsultOneShotV1.durable.test.js",
+        "test/athleteLivingConsultOneShotV1.server.test.js",
+        "test/athleteLivingConsultOneShotV1.runtime.test.js",
+        "test/athleteLivingConsultOneShotV1.adapters.test.js",
+        "test/athleteConsultingToolPrepromotion.test.js",
+        "test/subscriptionV1.darrenDemoUxCleanup.test.js",
+        "test/subscriptionV1.demoSubjectAuthority.test.js",
+        "test/subscriptionV1.internal-dev-production.test.js",
+        "test/recruitingGuV1.demoResetCsrf.test.js",
+        "test/releaseFoundation.test.js"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:19:50.698Z",
+      "duration_ms": 24571,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 97,
+        "pass": 97,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "bc4292c8e5660e1d8fc2ed1bef184d58dec93b22165a0909b3b1239fe72256b3",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_tests": 97
+    },
+    {
+      "name": "03-v1-ui-isolated",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "./scripts/athlete-consulting-v2-review/isolated-v1-ui-preload.mjs",
+        "--test",
+        "--test-reporter=tap",
+        "--test-concurrency=1",
+        "test/athleteLivingConsultOneShotV1.ui.test.js"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:20:15.269Z",
+      "duration_ms": 1265,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 10,
+        "pass": 10,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "8e20b62203473f13494d323f43d917a3092a5769e3677c9b27c41a25e3678d19",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "expected_tests": 10,
+      "unchanged_assertions": true
+    },
+    {
+      "name": "04-scoped-lint",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+        "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs",
+        "--lint",
+        "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/validation/2026-09-15T22-19-49-674Z/LINT_FILES.json"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:20:16.534Z",
+      "duration_ms": 1261,
+      "exit_code": 1,
+      "signal": null,
+      "counts": {
+        "tests": 0,
+        "pass": 0,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "bdca0f8c322add261c1d703cb3b5d466d1dfe4a694ba66ef012d2a208ce516d9",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "explicit_nonempty_file_count": 33,
+      "globals": "browser + Node; mjs recommended rules included; no Product lint cleanup"
+    },
+    {
+      "name": "05-syntax",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1",
+        "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs",
+        "--syntax",
+        "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/docs/athlete-consulting-v2-release/validation/2026-09-15T22-19-49-674Z/LINT_FILES.json"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:20:17.795Z",
+      "duration_ms": 1011,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 0,
+        "pass": 0,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "6b29906ac78996affd7497997c4450358e1e09f0c914a3b833cae831a1197fc1",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "06-build",
+      "executable": "/opt/homebrew/Cellar/node/25.6.1_1/bin/node",
+      "args": [
+        "--import",
+        "file:///Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15/scripts/athlete-consulting-v2-review/validate.mjs?offline=1&buildOut=%2FUsers%2Frrg%2F.openclaw%2Fworkspace%2Fmoremindmap-athlete-consulting-v2-locked-release-2026-09-15%2Fdocs%2Fathlete-consulting-v2-release%2Fvalidation%2F2026-09-15T22-19-49-674Z%2Fbuild-dist",
+        "scripts/athlete-consulting-v2-review/build.mjs"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:20:18.806Z",
+      "duration_ms": 1568,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 0,
+        "pass": 0,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "b4b4231d3624b528f941059e8a29035f13ec12486f2c677ef3c02381736f9d9e",
+      "stderr_sha256": "1173b42e899c8820346c3acf69d7efe522762ab54d2345e93ab45561fda01ea5",
+      "build_delta": "Only outDir changes to this validation run/build-dist; existing no-env build.mjs and all input/options preserved. Active review dist untouched."
+    },
+    {
+      "name": "07-diff-check",
+      "executable": "/usr/bin/git",
+      "args": [
+        "diff",
+        "--check"
+      ],
+      "cwd": "/Users/rrg/.openclaw/workspace/moremindmap-athlete-consulting-v2-locked-release-2026-09-15",
+      "child_environment_keys": [
+        "LANG",
+        "TZ",
+        "CI"
+      ],
+      "inherited_environment": false,
+      "started_at": "2026-09-15T22:20:20.375Z",
+      "duration_ms": 20,
+      "exit_code": 0,
+      "signal": null,
+      "counts": {
+        "tests": 0,
+        "pass": 0,
+        "fail": 0,
+        "skipped": 0
+      },
+      "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "pass": false,
+  "limits": [
+    "No fresh provider, hosted Redis, deployment, or browser proof is claimed.",
+    "Original 102/107 EPERM failure retained as a separate historical receipt note.",
+    "Home Base must reconcile current source/runtime and prove external binding, private routing and rollback."
+  ]
+}

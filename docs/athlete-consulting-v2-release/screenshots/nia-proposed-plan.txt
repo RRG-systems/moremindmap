@@ -1,0 +1,69 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN" [active]: PLAN
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - main:
+    - generic: PLAN · YOUR NEXT STEP
+    - heading "Make room for what matters." [level=1]:
+      - text: Make room for
+      - text: what matters.
+    - paragraph: Choose something that fits. Try it. Learn from what happens.
+    - generic: PROPOSED · YOUR CHOICE
+    - heading "One 15-minute maths block" [level=2]
+    - paragraph: Try both problems, identify the exact sticking point, and ask one focused question without adding a large study plan or extra basketball work.
+    - list:
+      - generic: "01"
+      - text: YOUR STEP
+      - heading "Set a 15-minute timer and work through the two confusing maths problems. If one is still unsolved when time ends, circle the exact step where you became stuck and write one clear question. Stop when the timer ends." [level=3]
+      - paragraph: Tomorrow, Wednesday, September 16, during your first available homework time.
+      - paragraph: Notice which step stops you and whether you can turn it into one specific question.
+      - generic: "02"
+      - text: YOUR STEP
+      - heading "Ask your maths teacher the prepared question about the problem you still cannot solve. If both problems are solved during the block, no question is needed." [level=3]
+      - paragraph: At your next available opportunity after the block, using your normal school route.
+      - paragraph: Notice whether the explanation makes the confusing step clear. If your teacher is unavailable, the request is pending—not avoided.
+    - paragraph:
+      - strong: Check in
+      - text: After asking, check whether the 15-minute limit helped you make progress and identify the exact help you needed.
+    - button "Use this plan"
+    - button "Adjust it"
+    - button "Not now"
+    - paragraph: Your original BOS and APA remain available. This is the plan you can develop together over time.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - article:
+      - text: NIA
+      - paragraph: Nia here. This week maths is the priority. Please prepare a draft with just one 15-minute block tomorrow to work through two confusing maths problems, then ask my teacher about the one I still cannot solve. No extra basketball work. Tell me briefly why that fits my BOS. Also, for future coaching, ask what happened before assuming I avoided something.
+    - article:
+      - text: MORE
+      - paragraph: Here’s the draft. It fits your BOS because you often work best by trying first, finding the exact snag, and asking for one focused piece of help. One short block gives you structure without a long list and protects maths as this week’s priority. No extra basketball work is included. Use the visible control if you want to accept the plan. I’ve also proposed your future coaching preference for confirmation.
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

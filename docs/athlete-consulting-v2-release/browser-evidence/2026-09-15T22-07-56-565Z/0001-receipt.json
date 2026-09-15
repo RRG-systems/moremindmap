@@ -1,0 +1,11 @@
+{
+  "at": "2026-09-15T22:07:56.610Z",
+  "real_provider_calls": 0,
+  "real_redis_connections": 0,
+  "original_5285_untouched": true,
+  "cookie_security_unchanged": true,
+  "requests": [],
+  "replay_attempts": [],
+  "denied_outbound": [],
+  "states": []
+}

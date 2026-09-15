@@ -1,0 +1,127 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life" [selected]
+      - option "8. What helps you thrive"
+  - article:
+    - generic: Your strengths, in real life
+    - heading "You start, then reshape" [level=1]
+    - paragraph: One of your strongest combinations is that you can begin without needing the first route to stay untouched. You give a waiting group something to react to, try an unfamiliar tool, or keep a changed activity moving when the gym closes. Then, if a friend offers a better idea or points out a problem, you can revise. Starting and changing course belong together for you. That is more useful than simply being the person who speaks first.
+    - paragraph: You are also good at turning a vague blockage into a focused question. With sewing and maths, you first found where you were stuck, then used one piece of help and finished the next part yourself. This lets support help without taking the work away from you. The tradeoff is that not every problem fits into one neat question. Sometimes the wider explanation may matter even when a long explanation is not your favorite format.
+    - paragraph: "Your creative side joins imagination with care about real use. You do not only want to draw clothes as ideas; you picture people actually wearing them. While designing for a friend, her likely response helped you keep adjusting the result. Your brother shows this practical care in another form: you offer patience, quiet company, and reliable action. These examples suggest that care becomes especially strong for you when it can take a visible form rather than staying as a general feeling."
+    - paragraph: Each strength has a timing cost. Your first direction can arrive before other people speak. Your speed can skip a basic check. Your close attention can gather around one meaningful detail while routine parts receive less. None of that cancels the strength. It shows that your most distinctive ability is not speed by itself, but speed joined to checking, listening, and a willingness to reshape what you started.
+    - blockquote: Your strongest contribution joins a quick start with a real willingness to change course.
+    - heading "Starting and changing course" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: You get a group moving and can use a better idea without abandoning the goal.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: You may decide or assign roles before people have shared what they know or want.
+    - heading "A possibility" [level=3]
+    - paragraph: It may help to call your first idea a draft and invite one other route.
+    - heading "Focused help, your own work" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: You try first, ask a clear question, and continue without handing over the whole problem.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: Looking only for one step may miss a bigger issue when the problem cannot be neatly divided.
+    - heading "A possibility" [level=3]
+    - paragraph: It may help to ask whether one more piece of context would change the next step.
+    - heading "Care that carries effort" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: Meaning, responsibility, or a real person can hold your attention through slower parts.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: Small routine checks may disappear when they feel separate from the reason you care.
+    - heading "A possibility" [level=3]
+    - paragraph: It may help to link one dull step to the person or purpose it serves.
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What matters most to you outside sport?
+      - paragraph: My little brother and drawing clothes. I want to make clothes people actually wear. Basketball matters a lot but I would still do the drawing if nobody saw it.
+    - blockquote:
+      - strong: What makes you want to put effort into something?
+      - paragraph: If I can make it my own I get into it. I stayed up finishing a jacket sketch for my friend. Copying definitions for class is harder even when I know it counts.
+    - blockquote:
+      - strong: How do you approach something new or unfamiliar?
+      - paragraph: I want to have a go first. I tried a sewing machine at school and got stuck. Once the teacher showed me how to thread it I wanted to do the rest myself.
+    - blockquote:
+      - strong: When something gets boring or difficult, what do you do?
+      - paragraph: I start fast then the middle can get boring. I left a comic half done. With the jacket I kept changing bits because it was for my friend and I wanted her to like it.
+    - blockquote:
+      - strong: In a group, how do you usually get involved?
+      - paragraph: I usually say the first idea. In a group science project I chose a plan before everyone had talked. My friend said she already had a different idea and I had to back up. I liked her idea when she explained it.
+    - blockquote:
+      - strong: How much of a plan do you like before you start?
+      - paragraph: Just the main thing and when it is due. A huge list makes me want to leave it. The gym closed last week so we played outside instead. I did forget my water because I grabbed my bag without checking.
+    - blockquote:
+      - strong: What do you bring to a group that is useful?
+      - paragraph: I get people going. For a school stall I asked two friends to do signs while I arranged the table. One was annoyed because I had not asked what she wanted to do. We swapped jobs.
+    - blockquote:
+      - strong: When you disagree with someone, what usually happens?
+      - paragraph: I say it straight away. My friend said I kept interrupting her about our science project. I said sorry and let her finish. At home with my uncle I wait because he goes on for ages and I do not want another argument.
+    - blockquote:
+      - strong: When can one of your strengths get in your way?
+      - paragraph: Being fast. Sometimes I answer before I understand the question. But with a drawing I can spend ages getting one sleeve right. It depends whether I care about that detail.
+    - blockquote:
+      - strong: What else should MORE understand about you?
+      - paragraph: I do finish important things. This makes me sound like I never finish anything. I got the jacket design done and I always collect my brother on my day. I am not sure what I want basketball to be long term.
+    - blockquote:
+      - strong: When you do not understand something, what do you try?
+      - paragraph: I try it and then ask someone a specific question. For a maths problem my friend showed me one step and I finished the others. A long video is usually too much at once.
+    - blockquote:
+      - strong: What do people sometimes get wrong about you?
+      - paragraph: People think I am trying to be bossy when I have an idea. Sometimes I am! But sometimes everyone is waiting and I just want us to start. With my older cousins I barely say anything.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

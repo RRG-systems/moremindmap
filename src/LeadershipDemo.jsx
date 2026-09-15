@@ -53,6 +53,7 @@ export default function LeadershipDemo() {
   const [busyProduct, setBusyProduct] = useState('')
   const [error, setError] = useState('')
   const [availableProductIds, setAvailableProductIds] = useState(BASE_PRODUCT_IDS)
+  const [athleteVersion, setAthleteVersion] = useState(1)
 
   const hydrateLauncher = useCallback(async () => {
     setStatus('loading')
@@ -68,6 +69,7 @@ export default function LeadershipDemo() {
         return
       }
       setAvailableProductIds(receivedIds)
+      setAthleteVersion(payload.choices.find(choice => choice.id === 'athlete-consulting-tool')?.version === 2 ? 2 : 1)
       setCsrfToken(payload.csrf_token)
       setStatus('ready')
     } catch {
@@ -139,7 +141,11 @@ export default function LeadershipDemo() {
         {error && <div className="mt-8 rounded-2xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-sm text-red-100" role="alert">{error}</div>}
 
         <section className={`mt-12 grid gap-6 ${availableProducts.length === 4 ? 'lg:grid-cols-2 xl:grid-cols-4' : 'lg:grid-cols-3'}`} aria-label="Product demos">
-          {availableProducts.map((product) => (
+          {availableProducts.map((original) => {
+            const product = original.id === 'athlete-consulting-tool' && athleteVersion === 2
+              ? { ...original, description: original.description.replace('Mika and Avery', 'Nia and Sofia'), detail: 'Ages 15 and 19 · Synthetic fixtures only · No customer access' }
+              : original
+            return (
             <button
               key={product.id}
               type="button"
@@ -162,7 +168,8 @@ export default function LeadershipDemo() {
                 </strong>
               </div>
             </button>
-          ))}
+            )
+          })}
         </section>
 
         <footer className="mt-10 flex items-center gap-3 text-sm text-white/38"><span aria-hidden="true">◇</span> Demo capabilities are bounded, browser-bound, synthetic-only, and expire automatically.</footer>

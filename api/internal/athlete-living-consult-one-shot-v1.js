@@ -1,4 +1,5 @@
 import { Buffer } from 'node:buffer';
+import { createAthleteConsultingV2Handler } from '../../server/athleteConsultingV2/handler.js';
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
 import {
   athleteConsultingDarrenDemoEnabled,
@@ -204,6 +205,7 @@ export function createAthleteLivingConsultOneShotHandlerV1({
   allowReset = true,
   clock = () => new Date(),
 } = {}) {
+  const v2Handler = createAthleteConsultingV2Handler({ env, redis: injectedRedis, authenticate });
   const runtimeFactory = createRuntime || ((fixtureId, { runtime_snapshot = null } = {}) => (
     createAthleteLivingConsultOneShotDemoRuntimeV1({
       env,
@@ -279,6 +281,10 @@ export function createAthleteLivingConsultOneShotHandlerV1({
       if (!athleteConsultingDarrenDemoEnabled(env)) {
         return send(response, 404, { ok: false, code: 'ATHLETE_CONSULTING_DEMO_DEFAULT_OFF' });
       }
+      if (request.method === 'GET' && requestUrl(request).searchParams.get('version_only') === '1') {
+        return send(response, 200, { version: env.ATHLETE_CONSULTING_V2_ENABLED === 'true' ? 2 : 1 });
+      }
+      if (env.ATHLETE_CONSULTING_V2_ENABLED === 'true') return await v2Handler(request, response);
       const method = String(request.method || 'GET').toUpperCase();
       if (!sameOriginLeadershipDemoRequest(request, { allowMissingForGet: method === 'GET' })) {
         return send(response, 403, { ok: false, code: 'ATHLETE_LIVING_CONSULT_ORIGIN_DENIED' });

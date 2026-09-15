@@ -1,0 +1,103 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works" [selected]
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: How your mind works
+    - heading "You learn by getting into it" [level=1]
+    - paragraph: You often understand a task by entering it rather than standing outside it for a long time. You try the sewing machine, attempt the maths problem, or put forward a starting idea. Once something goes wrong, the question becomes clearer. Then you can ask for the exact missing step and continue. This is not about refusing help; it is about wanting help that returns the work to your hands instead of replacing your part in it.
+    - paragraph: Information seems easier to use when it is short, specific, and connected to what is happening now. Copying definitions, facing a huge list, or watching a long explanation can make the useful point harder to find. The amount and presentation may matter as much as the subject itself. A coach pointing to the exact moment of a late pass worked because you could connect the message to a real decision, not because you need every task made easy.
+    - paragraph: Your choices can happen quickly too. You chose art club fast, then worried that the team might feel let down, although nobody had said that. In that one decision, the wider social question became louder after the choice. That may happen at other times, or it may have been normal doubt around a difficult clash. How you decide when the choice is major and hard to undo is still open.
+    - paragraph: Speed does not make you closed-minded. A friend's better project idea, a closed gym, or a problem with a first attempt can all lead you to change route. You seem comfortable treating a first move as something that can teach you, not something you must defend forever. Most examples so far were easy to revise, so bigger commitments may bring out a more deliberate side.
+    - blockquote: Your thinking often opens up once you can try, find the snag, and use one clear piece of information.
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What makes you want to put effort into something?
+      - paragraph: If I can make it my own I get into it. I stayed up finishing a jacket sketch for my friend. Copying definitions for class is harder even when I know it counts.
+    - blockquote:
+      - strong: How much of a plan do you like before you start?
+      - paragraph: Just the main thing and when it is due. A huge list makes me want to leave it. The gym closed last week so we played outside instead. I did forget my water because I grabbed my bag without checking.
+    - blockquote:
+      - strong: When you do not understand something, what do you try?
+      - paragraph: I try it and then ask someone a specific question. For a maths problem my friend showed me one step and I finished the others. A long video is usually too much at once.
+    - blockquote:
+      - strong: In a group, how do you usually get involved?
+      - paragraph: I usually say the first idea. In a group science project I chose a plan before everyone had talked. My friend said she already had a different idea and I had to back up. I liked her idea when she explained it.
+    - blockquote:
+      - strong: When a choice is difficult, how do you decide?
+      - paragraph: I picked art club over an extra basketball session. I wanted both but the times clashed. I said art pretty fast then worried I was letting the team down. Nobody actually said that to me.
+    - blockquote:
+      - strong: How do you approach something new or unfamiliar?
+      - paragraph: I want to have a go first. I tried a sewing machine at school and got stuck. Once the teacher showed me how to thread it I wanted to do the rest myself.
+    - blockquote:
+      - strong: When something gets boring or difficult, what do you do?
+      - paragraph: I start fast then the middle can get boring. I left a comic half done. With the jacket I kept changing bits because it was for my friend and I wanted her to like it.
+    - blockquote:
+      - strong: When you disagree with someone, what usually happens?
+      - paragraph: I say it straight away. My friend said I kept interrupting her about our science project. I said sorry and let her finish. At home with my uncle I wait because he goes on for ages and I do not want another argument.
+    - blockquote:
+      - strong: When can one of your strengths get in your way?
+      - paragraph: Being fast. Sometimes I answer before I understand the question. But with a drawing I can spend ages getting one sleeve right. It depends whether I care about that detail.
+    - blockquote:
+      - strong: What do you bring to a group that is useful?
+      - paragraph: I get people going. For a school stall I asked two friends to do signs while I arranged the table. One was annoyed because I had not asked what she wanted to do. We swapped jobs.
+    - blockquote:
+      - strong: What kind of feedback is easiest for you to use?
+      - paragraph: Tell me the actual bit to change. A coach said my pass was late and pointed out the moment. That helped. Getting a whole speech in front of everyone makes me want to answer back.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

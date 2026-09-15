@@ -1,0 +1,7 @@
+- iframe:
+  - main:
+    - generic: M
+    - heading "Opening your Athlete workspace…" [level=1]
+    - alert: Please enter through the shared Leadership gate.
+    - link "Return to Leadership":
+      - /url: /leadership

@@ -1,0 +1,56 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - main:
+    - generic: YOUR LIFE. YOUR SPORT. YOUR DIRECTION.
+    - heading "Your goals. One clear plan." [level=1]:
+      - text: Your goals.
+      - text: One clear plan.
+    - paragraph: MORE is your AI coaching partner. It brings together who you are, your sport and the rest of your life.
+    - generic: ◎
+    - generic: YOUR CONVERSATION
+    - heading "Here’s where we are." [level=2]
+    - paragraph: Nia, tomorrow’s 10-minute maths block is set, with no teacher step or extra basketball work. Has something changed, or is there anything you want help with now?
+    - button "Continue with MORE →"
+    - generic: ◇
+    - generic: YOUR CHOICES, IN ONE PLACE
+    - heading "Your current plan." [level=2]
+    - generic: AGREED
+    - heading "Synthetic shared review plan — revised" [level=3]
+    - list:
+      - listitem: Set a 10-minute timer and work on the two confusing maths problems. Stop when the timer ends.
+      - listitem: Offer one brief check-in after the next team practice.
+    - paragraph: "Check in: Review remains open: whether the short block helped you make progress."
+    - button "See your plan →"
+    - button "YOU Understand your personality ↗":
+      - generic: YOU
+      - text: Understand your personality ↗
+    - button "YOUR SPORT Explore your four areas ↗":
+      - generic: YOUR SPORT
+      - text: Explore your four areas ↗
+  - button "Talk with MORE ↗":
+    - text: Talk with MORE
+    - generic: ↗
+  - dialog:
+    - banner:
+      - heading "Restart Nia’s demo?" [level=2]
+      - button "Close dialog" [active]: ×
+    - paragraph: This starts a fresh conversation and plan for Nia. Their BOS and APA stay the same. The other athlete’s demo stays as it is.
+    - button "Restart demo"
+    - button "Keep this session"

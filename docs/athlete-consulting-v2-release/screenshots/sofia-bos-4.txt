@@ -1,0 +1,68 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong" [selected]
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: How you connect and belong
+    - heading "Connection Without Constant Access" [level=1]
+    - paragraph: You usually feel energized by people and enjoy meeting them. Your version of belonging, though, is not just having company around. You help people take part. You notice related interests, connect classmates who may be useful to each other, and bring someone back in when they are being talked over. Connection seems most satisfying when it creates real participation rather than just noise or a full calendar.
+    - paragraph: You also care about how connection feels. Being asked instead of assumed available matters because it leaves you with a choice. When you were disappointed about the lineup, you first wanted someone who would listen before turning immediately to a plan. At least in that moment, trust involved having room for the feeling without being rushed past it.
+    - paragraph: There is a tension here. You like people, see possibilities, and are ready to help, so your time can fill before you notice what has disappeared from it. You may protect another person's place in the conversation sooner than you protect your own evening or workload. When that happens, something genuinely enjoyable—friendship and shared activity—can start to feel like being available all the time.
+    - paragraph: A quiet walk or guitar without an audience gives you a different kind of space. That does not cancel your social side or mean you always need to withdraw. It suggests that solitude can restore choice after too much access. The useful difference for you may not be people versus being alone, but chosen connection versus a week in which everyone can reach you and nothing feels fully yours.
+    - blockquote: You enjoy belonging most when connection includes choice, participation, and some time that remains your own.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

@@ -1,0 +1,132 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan":
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+      - main:
+        - paragraph: BOX 1 · WHERE YOU ARE
+        - heading "Four parts. All you." [level=1]
+        - paragraph: What you want, where you are, and what would help. Your personality profile (BOS) connects the whole picture.
+        - text: What matters most right now
+        - paragraph: Protect my own first step instead of responding to everyone else first.
+        - navigation "Explore your four areas":
+          - button "Sport"
+          - button "Training"
+          - button "Warrior Mindset"
+          - button "School"
+        - region "Four distinct areas":
+          - article:
+            - paragraph: 01 · Sport
+            - heading "Earn a starting place through purposeful attacking choices." [level=2]
+            - heading "Right now — your strength" [level=3]
+            - paragraph: You link teammates, offer passing options and have already helped build attacks from the wing.
+            - heading "What you want to improve" [level=3]
+            - paragraph: You sometimes pass up a one-on-one while checking whether someone else wants the ball, and selection feedback is not yet clear.
+            - heading "What would help" [level=3]
+            - paragraph: A task-specific conversation with your coach in the existing Thursday wing game could clarify what you saw and what purposeful choice came earlier.
+            - button "How your BOS connects":
+              - text: How your BOS connects
+              - generic: →
+          - article:
+            - paragraph: 02 · Training
+            - heading "Recognize a one-on-one chance and commit to it." [level=2]
+            - heading "Right now — your strength" [level=3]
+            - paragraph: The opposed wing game provides useful context, and you attacked the space after a short explanation last Thursday.
+            - heading "What you want to improve" [level=3]
+            - paragraph: That was one helpful practice moment, so recognition and commitment are not yet established as a repeatable match behavior.
+            - heading "What would help" [level=3]
+            - paragraph: Your coach could review one decision inside the existing wing game while keeping the feedback task-specific and free from teammate comparison.
+            - button "How your BOS connects":
+              - text: How your BOS connects
+              - generic: →
+          - article:
+            - paragraph: 03 · Warrior Mindset
+            - heading "Back my own choice while staying a supportive teammate." [level=2]
+            - heading "Right now — your strength" [level=3]
+            - paragraph: You can stay aware of teammates and still take responsibility when you understand why the choice is useful.
+            - heading "What you want to improve" [level=3]
+            - paragraph: Under pressure, your attention can move outward first, while disappointment or your own decision receives space later.
+            - heading "What would help" [level=3]
+            - paragraph: A short, self-chosen question about what you see could help you act from your read before seeking reassurance.
+            - button "How your BOS connects":
+              - text: How your BOS connects
+              - generic: →
+          - article:
+            - paragraph: 04 · School
+            - heading "Finish my fieldwork report draft by October 2." [level=2]
+            - heading "Right now — your strength" [level=3]
+            - paragraph: Your fieldwork feels meaningful, and group discussion and field notes are current academic strengths.
+            - heading "What you want to improve" [level=3]
+            - paragraph: Starting the written analysis alone is harder, and team messages have interrupted earlier attempts.
+            - heading "What would help" [level=3]
+            - paragraph: The two chosen library blocks, quiet company and an agreed urgent-contact route could protect a reliable start without reducing team training.
+            - button "How your BOS connects":
+              - text: How your BOS connects
+              - generic: →
+        - paragraph: How it all fits
+        - heading "Your next step deserves the same space you give the team." [level=2]
+        - paragraph: "Your football and school goals meet at the same practical choice: whether your own first step gets protected before other people's signals take over. On the wing, you already link teammates, yet sometimes check for another option instead of attacking. In study time, routine team messages have delayed your written start. Your mindset goal is not to stop noticing people; it is to keep that strength while choosing sooner. Existing training gives you a place to test this, and protected library blocks give school its own positive place in the week."
+        - button "Why MORE sees this":
+          - text: Why MORE sees this
+          - generic: →
+        - button "See your Five Futures":
+          - text: See your Five Futures
+          - generic: →
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

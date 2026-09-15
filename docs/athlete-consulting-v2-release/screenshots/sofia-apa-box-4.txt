@@ -1,0 +1,89 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - region "Your saved Athlete Performance Assessment":
+    - generic: Sofia Chen · Your saved APA
+    - button "Discuss this APA →"
+    - button "My current plan →"
+    - iframe [active]:
+      - complementary:
+        - button "⌂ Overview":
+          - generic: ⌂
+          - text: Overview
+        - navigation "Your APA":
+          - button "1 Where you are":
+            - generic: "1"
+            - text: Where you are
+          - button "2 Five Futures":
+            - generic: "2"
+            - text: Five Futures
+          - button "3 One Move":
+            - generic: "3"
+            - text: One Move
+          - button "4 Your plan" [active]:
+            - generic: "4"
+            - text: Your plan
+          - button "5 Why MORE says this":
+            - generic: "5"
+            - text: Why MORE says this
+      - banner:
+        - button "← Back to your APA"
+        - button "How this works ⓘ"
+      - main:
+        - paragraph: BOX 4 · YOUR PLAN
+        - heading "One step. Then see what happens." [level=1]
+        - paragraph: This is your proposed next step. You have not agreed to it yet.
+        - generic: SUGGESTED · YOUR CHOICE
+        - heading "Your priority" [level=3]
+        - paragraph: Protect my own first step instead of responding to everyone else first.
+        - heading "Ask your coach to review one attacking choice." [level=2]
+        - heading "Try" [level=3]
+        - paragraph: "Before Thursday, September 17 training, ask: “Could you watch one one-on-one and tell me afterward what you saw and whether my choice fit our team plan?” If the coach agrees, you make your choice in the game, then hear their view. You decide what to take forward. If unavailable, ask about another existing session; no review is assumed."
+        - heading "Notice" [level=3]
+        - paragraph: At a later suitable one-on-one, do you recognize the opening and choose sooner? Your account explains what you saw; coach feedback, if available, checks whether the choice fit the team plan.
+        - heading "Review · September 21" [level=3]
+        - paragraph: "On September 21, you check what happened: agreement, an actual review, then any later chance to use it. No later chance means usefulness remains untested. Continue, change or stop; ask the coach if the football meaning is unclear."
+        - button "Read the full One Move":
+          - text: Read the full One Move
+          - generic: →
+        - paragraph: Your four goals stay in view. Trying one step does not mean dropping the others.
+        - strong: Sport
+        - paragraph: Earn a starting place through purposeful attacking choices.
+        - strong: Training
+        - paragraph: Recognize a one-on-one chance and commit to it.
+        - strong: Warrior Mindset
+        - paragraph: Back my own choice while staying a supportive teammate.
+        - strong: School
+        - paragraph: Finish my fieldwork report draft by October 2.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

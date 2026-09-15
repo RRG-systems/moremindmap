@@ -1,0 +1,81 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - main:
+    - generic: PLAN · YOUR NEXT STEP
+    - heading "Make room for what matters." [level=1]:
+      - text: Make room for
+      - text: what matters.
+    - paragraph: Choose something that fits. Try it. Learn from what happens.
+    - generic: YOUR CURRENT PLAN
+    - heading "Synthetic shared review plan — revised" [level=2]
+    - paragraph: A short attempt lets you get into the real problems without creating a long plan.
+    - list:
+      - generic: "01"
+      - text: YOUR STEP
+      - heading "Set a 10-minute timer and work on the two confusing maths problems. Stop when the timer ends." [level=3]
+      - paragraph: Tomorrow, Wednesday, September 16, during your first available homework time.
+      - paragraph: Notice what becomes clearer and the exact point where you are still stuck.
+      - generic: "02"
+      - text: COACH’S COMMITMENT
+      - heading "Offer one brief check-in after the next team practice." [level=3]
+      - paragraph: After the next team practice.
+      - paragraph: Notice Whether the check-in happened; no outcome assumed.
+    - paragraph:
+      - strong: Check in
+      - text: "Review remains open: whether the short block helped you make progress."
+    - button "Tell MORE how it went →"
+    - button "Something changed"
+    - paragraph: Your original BOS and APA remain available. This is the plan you can develop together over time.
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - article:
+      - text: NIA
+      - paragraph: Nia here. This week maths is the priority. Please prepare a draft with just one 15-minute block tomorrow to work through two confusing maths problems, then ask my teacher about the one I still cannot solve. No extra basketball work. Tell me briefly why that fits my BOS. Also, for future coaching, ask what happened before assuming I avoided something.
+    - article:
+      - text: MORE
+      - paragraph: Here’s the draft. It fits your BOS because you often work best by trying first, finding the exact snag, and asking for one focused piece of help. One short block gives you structure without a long list and protects maths as this week’s priority. No extra basketball work is included. Use the visible control if you want to accept the plan. I’ve also proposed your future coaching preference for confirmation.
+    - article:
+      - text: NIA
+      - paragraph: "Change that draft: only one 10-minute maths block tomorrow. Remove the teacher step entirely. Keep it to one short action and do not approve it yet."
+    - article:
+      - text: MORE
+      - paragraph: "Revised: one 10-minute maths block tomorrow, with no teacher step and no extra basketball work. This is still a draft and has not been approved."
+    - article:
+      - text: MORE
+      - paragraph: "Recap: Maths became this week’s priority. Your accepted plan is one 10-minute block tomorrow, Wednesday, September 16, working on the two confusing problems and stopping when the timer ends. There is no teacher step and no extra basketball work."
+      - paragraph: "We discussed how this fits you: a short attempt lets you get into the real problem without a long list. Still open is what becomes clearer and where you remain stuck. You also asked me to check what happened before assuming you avoided something; I’ve offered that preference below for your confirmation."
+    - article:
+      - text: MORE
+      - paragraph: Nia, tomorrow’s 10-minute maths block is set, with no teacher step or extra basketball work. Has something changed, or is there anything you want help with now?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

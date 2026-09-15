@@ -1,0 +1,95 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=nia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU"
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: PRIVATE DEMO
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball" [selected]
+      - option "Sofia Chen · Soccer"
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Nia Brooks · 15 · Basketball
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult" [selected]
+      - option "7. Your strengths, in real life"
+      - option "8. What helps you thrive"
+  - article:
+    - generic: When things get difficult
+    - heading "Pressure turns up your speed" [level=1]
+    - paragraph: In ordinary difficulty, you say you can often laugh and start again. Under visible pressure, that same speed and humor can change shape. When you lost your place during a class presentation, you began talking faster and joked while feeling embarrassed. The joke moved attention away from the mistake, but it could also make your concern harder to see. That was one watched event, so private mistakes or different kinds of pressure may look different.
+    - paragraph: After a bad game, your first urge was to practise immediately. That fits the wider way you often deal with a problem by doing something. Under strain, though, action may become an attempt to fix everything at once rather than a useful first experiment. It is possible that immediate action makes the mistake feel more manageable or less exposed. You have not said that directly, so it remains one possible explanation rather than the answer to every fast response.
+    - paragraph: On that bad-game occasion, you went home, drew for a while, and found that the disappointment felt less huge the next morning. Drawing, being at home, and time were all part of that evening. You are not sure which part helped. What is clear is that the first urgent feeling did not stay at the same size. Some distance from the moment gave another view a chance to appear, even though the exact reason is unknown.
+    - paragraph: Correction can add pressure when it is public, repeated, or much longer than the useful point. One exact change is easier for you to use. This week also includes two tests, and you have noticed yourself being somewhat snappy. You were clear that this is not every week. Temporary load can turn up an existing reaction without becoming your whole personality.
+    - blockquote: Pressure may turn speed into rushing, while time and distance can make the problem feel less huge.
+    - heading "trigger" [level=3]
+    - paragraph: Pressure may rise for you after a watched mistake, sport disappointment, or public or repeated correction; this week's tests may add temporary strain.
+    - heading "interpretation" [level=3]
+    - paragraph: You may read the moment as needing immediate repair, especially when a mistake feels exposed; that reason is still uncertain.
+    - heading "response" [level=3]
+    - paragraph: You may speed up, talk louder, joke, answer back, or try to fix everything at once.
+    - heading "recovery" [level=3]
+    - paragraph: You went home and drew after the game. It felt smaller by morning; you are not sure what helped.
+    - heading "claim ids" [level=3]
+    - paragraph: C16C17C18C19C20C21C24C31
+    - generic "Why this fits" [active]
+    - paragraph: Your answers behind this interpretation. You can add context in your conversation with MORE.
+    - blockquote:
+      - strong: What kind of feedback is easiest for you to use?
+      - paragraph: Tell me the actual bit to change. A coach said my pass was late and pointed out the moment. That helped. Getting a whole speech in front of everyone makes me want to answer back.
+    - blockquote:
+      - strong: What drains you, and what helps you feel like yourself again?
+      - paragraph: Being corrected over and over drains me. Music, drawing, my brother. This week I have two tests and I am a bit snappy. That is not every week.
+    - blockquote:
+      - strong: When you are upset, what might someone else notice?
+      - paragraph: I talk louder or make a joke. They might think I do not care. Sometimes I am embarrassed and want the attention off the mistake. I know that because I did it after losing my place in a presentation.
+    - blockquote:
+      - strong: What changes about you when the pressure rises?
+      - paragraph: I speed up and want to fix everything at once. At that presentation I lost my place and started talking faster. Usually I can laugh and start again, but with the class watching I rushed.
+    - blockquote:
+      - strong: After a disappointment, what helps you find your footing?
+      - paragraph: After a bad game I wanted to practice immediately. My mum said we were going home. I drew for a bit and the next morning it did not feel as huge. I do not know if drawing was the reason.
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure.
+  - generic: MM-20260913-D702ACBF · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Nia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: "Hi Nia — I understand the main thing you want right now: after a turnover, settle enough to look up and choose the next useful pass, without adding training that crowds out maths, art, or family time. You can correct that if today feels different. What would be most useful to work through first—the reset in practice, maths, or something else on your mind?"
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Nia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"

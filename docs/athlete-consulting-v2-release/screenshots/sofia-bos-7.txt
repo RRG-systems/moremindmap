@@ -1,0 +1,89 @@
+- iframe [active]:
+  - link "Skip to main view":
+    - /url: "#main-view"
+  - banner:
+    - link "M MORE / ATHLETE Your AI coaching partner":
+      - /url: "?athlete=sofia#home"
+      - generic: M
+      - text: MORE / ATHLETE
+      - generic: Your AI coaching partner
+    - navigation "Main navigation":
+      - button "HOME"
+      - button "YOU" [active]
+      - button "YOUR SPORT"
+      - button "PLAN"
+    - generic: Choose athlete
+    - combobox "Choose athlete":
+      - option "Nia Brooks · Basketball"
+      - option "Sofia Chen · Soccer" [selected]
+    - button "↻ Restart demo"
+  - generic: YOU · YOUTH BOS V2
+  - generic: Sofia Chen · 19 · Soccer
+  - navigation "BOS sections":
+    - button "Personality map"
+    - button "This Is You"
+    - combobox "Choose a BOS chapter":
+      - option "Eight chapters" [disabled]
+      - option "1. What makes you, you"
+      - option "2. How your mind works"
+      - option "3. How you communicate"
+      - option "4. How you connect and belong"
+      - option "5. What brings out your effort"
+      - option "6. When things get difficult"
+      - option "7. Your strengths, in real life" [selected]
+      - option "8. What helps you thrive"
+  - article:
+    - generic: Your strengths, in real life
+    - heading "Influence Through Useful Links" [level=1]
+    - paragraph: One of your more distinctive strengths is the way you connect people, ideas, and pieces of work. You notice when two classmates have related interests, when someone needs bringing back into a conversation, or when a group needs a shared view of what is missing. These are practical links, not just friendly gestures. They can help participation and progress happen at the same time.
+    - paragraph: You also tend to organize shared effort without needing to own everything. You can give different people real jobs, use a simple tool to show gaps, and accept relief when someone else handles a detail. This is not the same as stepping away from responsibility. At your best, you help responsibility become visible and spread across the people who are meant to carry it.
+    - paragraph: Adaptability adds to that strength. You can start with a rough plan, respond when conditions change, and find another route instead of treating disruption as the end. You can also make a practical decision when nobody else is doing so. Your influence does not depend on always being the official leader, although groups may sometimes need you to decide sooner who actually owns the next move.
+    - paragraph: "Every part of this combination has a tradeoff. Seeing links and possibilities can create extra invitations, open messages, and new commitments. Watching the group can draw attention away from your own part. Flexible planning can leave an important detail unnamed. Your selective exactness is useful here: when something truly matters, you can slow down and care closely. The challenge is deciding which details, needs, and possibilities genuinely deserve that attention."
+    - blockquote: You often help groups move by connecting what belongs together, sharing ownership, and changing the route when needed.
+    - heading "Connecting people and ideas" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: Brings overlooked voices, related interests, and shared ownership into view.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: Other people's gaps can receive attention before your own work or limits.
+    - heading "A possibility" [level=3]
+    - paragraph: A quick check of whether this needs your help, coordination, or only a named owner.
+    - heading "Flexible exploration" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: Lets you begin, learn from reality, and change route when conditions change.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: Fresh possibilities can pull attention from important work or create too many commitments.
+    - heading "A possibility" [level=3]
+    - paragraph: One fixed essential outcome, with freedom to change the route.
+    - heading "Selective depth" [level=2]
+    - heading "When it helps" [level=3]
+    - paragraph: Keeps ordinary planning light while allowing close repetition when quality has personal meaning.
+    - heading "When it gets stretched" [level=3]
+    - paragraph: Valued details may get too much time while low-meaning essentials get too little.
+    - heading "A possibility" [level=3]
+    - paragraph: A simple definition of ready before deciding how much detail this moment deserves.
+    - generic "Why this fits"
+    - paragraph: Does this sound like you?
+    - button "That fits"
+    - button "Partly"
+    - button "That misses me"
+    - button "Talk about this with MORE →"
+    - button "← Personality map"
+    - button "Next chapter →"
+  - paragraph: If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy.
+  - generic: MM-20260913-6184D6D9 · Accepted Youth BOS V2
+  - complementary "Talk with MORE":
+    - strong: Talk with MORE
+    - generic: Sofia’s continuing conversation
+    - article:
+      - text: MORE
+      - paragraph: Sofia, welcome. You’re not trying to become less supportive—you’re working on giving your own first read and first step enough space, both on the wing and in your study time. I may not have every part right, so correct me as we go. What feels most useful to work through today?
+    - generic: Message MORE
+    - textbox "Message MORE":
+      - /placeholder: Ask, reflect, or tell MORE what changed…
+    - text: Speaking as
+    - combobox "Speaking as":
+      - option "Sofia" [selected]
+      - option "Coach"
+    - button "Send message" [disabled]: ↑
+    - button "Finish & review"
+    - button "What we’re keeping"
