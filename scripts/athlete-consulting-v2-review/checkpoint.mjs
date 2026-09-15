@@ -6,7 +6,7 @@ import { resolve } from 'node:path'
 const root = resolve(import.meta.dirname, '../..')
 const base = '63da55d72fc5e6b082114ffd70584902d15c36f3'
 const destination = '/Users/rrg/.codex/.chatgpt-projects/g-p-6996ab388f80819194f3951033f470fc/research/athlete-consulting-v2-release-2026-09-15/recovery-checkpoints'
-const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 })
+const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 })
 const sha = value => createHash('sha256').update(value).digest('hex')
 const label = process.argv[2] || 'checkpoint'
 if (!/^[a-z0-9-]+$/.test(label)) throw Error('INVALID_LABEL')
