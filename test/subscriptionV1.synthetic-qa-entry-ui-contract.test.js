@@ -1,8 +1,10 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const ui = fs.readFileSync(new URL('../src/subscriptionV1/SubscriptionV1InternalDevApp.jsx', import.meta.url), 'utf8');
+const livingTwinUi = fs.readFileSync(new URL('../src/lab/subscriptionLivingBusinessRelationshipV1/LivingBusinessTwinApp.jsx', import.meta.url), 'utf8');
 
 test('synthetic QA denial entry uses a one-time server proof and never persists or echoes the MM ID', () => {
   assert.match(ui, /fetch\('\/api\/internal\/subscription-v1-qa-entry'/u);
@@ -17,6 +19,31 @@ test('synthetic QA denial entry uses a one-time server proof and never persists 
   assert.match(ui, /globalThis\.location\.reload\(\)/u);
   assert.doesNotMatch(ui, /(?:localStorage|sessionStorage)\.(?:setItem|getItem)\([^\n]*profile/iu);
   assert.doesNotMatch(ui, /console\.(?:log|warn|error)/u);
+});
+
+test('Casey-only entry copy stays cohort-neutral and open plan fallbacks preserve all three ordinals', () => {
+  assert.match(ui, /<p>Enter an authorized synthetic MM ID\.<\/p>/u);
+  assert.doesNotMatch(ui, /one of the four authorized synthetic MM IDs/iu);
+  assert.match(livingTwinUi, /const WAY_ORDINALS = Object\.freeze\(\['First', 'Second', 'Third'\]\)/u);
+  assert.match(livingTwinUi, /const wayOrdinal = \(index\) => WAY_ORDINALS\[index\] \|\| String\(index \+ 1\)/u);
+  assert.match(livingTwinUi, /way\.title \|\| `Your \$\{wayOrdinal\(index\)\} Way`/u);
+  assert.doesNotMatch(livingTwinUi, /index === 1 \? 'Second' : 'Third'/u);
+});
+
+test('paid capability copy names the governed Loan Originator or Real Estate library without changing retrieval', () => {
+  const labelExpression = ui.match(/const paidSourceLibraryLabel = ([\s\S]*?\n {2}: 'Real Estate')/u);
+  assert.ok(labelExpression);
+  const labelFor = runInNewContext(`(${labelExpression[1]})`);
+  assert.equal(labelFor('Residential Loan Originator'), 'Loan Originator');
+  assert.equal(labelFor('Loan Originator'), 'Loan Originator');
+  assert.equal(labelFor('loan_originator'), 'Loan Originator');
+  assert.equal(labelFor('Residential Real Estate'), 'Real Estate');
+  assert.equal(labelFor(undefined), 'Real Estate');
+  assert.match(ui, /\['loan_originator', 'Loan Originator', 'Residential Loan Originator'\]\.includes\(String\(vertical \|\| ''\)\.trim\(\)\)/u);
+  assert.match(ui, /\? 'Loan Originator'\s*: 'Real Estate'/u);
+  assert.match(ui, /paidLibrary = paidSourceLibraryLabel\(current\.view_model\.identity\?\.vertical\)/u);
+  assert.match(ui, /Your coach can use MORE’s \{paidLibrary\} library\. Live web research is not available in this version\./u);
+  assert.doesNotMatch(ui, /paidSubscriber && <p[^>]*>Your coach can use MORE’s Real Estate library\./u);
 });
 
 test('synthetic QA subscriber is durable and visibly nonbilling without demo or provider controls', () => {

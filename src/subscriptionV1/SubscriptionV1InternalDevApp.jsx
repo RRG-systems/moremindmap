@@ -142,12 +142,16 @@ function SyntheticQaEntryForm({ initialProof, compact = false, activeSynthetic =
     <span aria-hidden="true">✦</span>
     <p className="synthetic-qa-entry-kicker">SYNTHETIC QA</p>
     <h1>Open a synthetic Subscription person.</h1>
-    <p>Enter one of the four authorized synthetic MM IDs.</p>
+    <p>Enter an authorized synthetic MM ID.</p>
     {form}
     {error && <p className="synthetic-qa-entry-error" role="alert">{error}</p>}
     <small>No paid subscription</small>
   </main>
 }
+
+const paidSourceLibraryLabel = (vertical) => ['loan_originator', 'Loan Originator', 'Residential Loan Originator'].includes(String(vertical || '').trim())
+  ? 'Loan Originator'
+  : 'Real Estate'
 
 function AllowanceBoundary({ session }) {
   return <aside className="living-conversation internal-dev-conversation allowance-boundary" aria-label="Subscription allowance state">
@@ -535,9 +539,10 @@ export default function SubscriptionV1InternalDevApp({ allowModelSelection = tru
   const handleEntitlementLost = (code) => setState({ loading: false, error: code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
   const paidSubscriber = state.bootstrap?.subscriber?.kind === 'PAID_SUBSCRIBER'
   const syntheticQaSubscriber = state.bootstrap?.subscriber?.kind === 'SYNTHETIC_QA_SUBSCRIBER'
+  const paidLibrary = paidSourceLibraryLabel(current.view_model.identity?.vertical)
   const content = <>
     {qaEntry.proof && <SyntheticQaEntryForm initialProof={qaEntry.proof} compact activeSynthetic={syntheticQaSubscriber} />}
-    {paidSubscriber && <p className="subscription-capability-note" role="note">Your coach can use MORE’s Real Estate library. Live web research is not available in this version.</p>}
+    {paidSubscriber && <p className="subscription-capability-note" role="note">Your coach can use MORE’s {paidLibrary} library. Live web research is not available in this version.</p>}
     {!paidSubscriber && <nav className="s2-demo-toolbar" aria-label={syntheticQaSubscriber ? 'Synthetic QA Subscription person' : 'Synthetic Subscription demonstration'}>{syntheticQaSubscriber
       ? <div className="s2-synthetic-qa-label"><strong>SYNTHETIC QA</strong><span>No paid subscription</span></div>
       : <><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{allowModelSelection && state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</>}</nav>}
