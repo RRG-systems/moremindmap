@@ -1,5 +1,6 @@
 import fs from 'node:fs/promises';
 import { Buffer } from 'node:buffer';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
@@ -11,6 +12,8 @@ import {
 import { getSubscriptionRedis } from '../../api/engine/subscriptionV1/internalDevInfrastructure.js';
 
 const ROOT = fileURLToPath(new URL('./', import.meta.url));
+const PRIVATE_BOS_KEY = 'more:darren-library:v1:private:bos:bailea';
+const PRIVATE_BOS_SHA256 = 'acb4c0c4842210b26c0fc813fab255e0fe9eb3cc0cab84e9305865f69980cdcc';
 const SYNTHETIC_MM = Object.freeze({
   nia: 'MM-20260913-D702ACBF',
   eli: 'MM-20260913-6A49112B',
@@ -28,6 +31,7 @@ const CONTENT_TYPES = Object.freeze({
   '.webp': 'image/webp',
   '.pdf': 'application/pdf',
   '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+  '.json': 'application/json; charset=utf-8',
 });
 const BOS_FIELDS = [
   'version', 'synthetic', 'record_kind', 'mm', 'intake_mode', 'subject',
@@ -75,6 +79,15 @@ async function syntheticReading(kind, slug, readFile) {
   };
 }
 
+async function approvedPrivateReading(redis) {
+  const bytes = await redis.getBuffer(PRIVATE_BOS_KEY);
+  if (!bytes) return null;
+  if (crypto.createHash('sha256').update(bytes).digest('hex') !== PRIVATE_BOS_SHA256) {
+    throw new Error('PRIVATE_BOS_HASH_MISMATCH');
+  }
+  return bytes;
+}
+
 export function createDarrenDemoLibraryHandler({
   env = globalThis.process?.env || {},
   getRedis = getSubscriptionRedis,
@@ -97,10 +110,26 @@ export function createDarrenDemoLibraryHandler({
     const route = exactRoute(req);
     if (route === null) return sendJson(res, 404, { ok: false, code: 'LIBRARY_ROUTE_NOT_FOUND' }, method);
     try {
-      const auth = await authenticate({ redis: getRedis(env), req });
+      const redis = getRedis(env);
+      const auth = await authenticate({ redis, req });
       if (!auth.ok) return sendJson(res, auth.status || 401, { ok: false, code: auth.code || 'LEADERSHIP_DEMO_LAUNCHER_REQUIRED' }, method);
       if (auth.capability?.library_read_scope !== 'approved_saved_bos_v1') {
         return sendJson(res, 403, { ok: false, code: 'DARREN_LIBRARY_SCOPE_DENIED' }, method);
+      }
+
+      if (route === 'api/report-card/private-bos') {
+        const reading = await (privateReading ? privateReading({ redis }) : approvedPrivateReading(redis));
+        if (!reading) return sendJson(res, 503, { ok: false, code: 'PRIVATE_READING_NOT_BOUND' }, method);
+        const parsed = Buffer.isBuffer(reading) ? JSON.parse(reading.toString('utf8')) : reading;
+        const subject = parsed?.artifact?.subject;
+        if (typeof subject?.name !== 'string' || typeof subject?.sport !== 'string' || !Number.isInteger(subject?.age)) {
+          throw new Error('PRIVATE_BOS_SUBJECT_INVALID');
+        }
+        return sendJson(res, 200, {
+          ok: true,
+          subject: { name: subject.name, sport: subject.sport, age: subject.age },
+          href: '/darren-library/bos.html?athlete=bailea',
+        }, method);
       }
 
       const report = route.match(/^api\/report\/(bos|apa)\/(nia|eli|rowan|sofia|bailea)$/);
@@ -108,8 +137,11 @@ export function createDarrenDemoLibraryHandler({
         const [, kind, slug] = report;
         if (slug === 'bailea') {
           if (kind !== 'bos') return sendJson(res, 404, { ok: false, code: 'PRIVATE_APA_NOT_IN_LIBRARY' }, method);
-          if (!privateReading) return sendJson(res, 503, { ok: false, code: 'PRIVATE_READING_NOT_BOUND' }, method);
-          return sendJson(res, 200, await privateReading(), method);
+          const reading = await (privateReading ? privateReading({ redis }) : approvedPrivateReading(redis));
+          if (!reading) return sendJson(res, 503, { ok: false, code: 'PRIVATE_READING_NOT_BOUND' }, method);
+          return Buffer.isBuffer(reading)
+            ? sendBytes(res, 200, reading, 'protected-reading.json', method)
+            : sendJson(res, 200, reading, method);
         }
         return sendJson(res, 200, await syntheticReading(kind, slug, readFile), method);
       }

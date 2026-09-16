@@ -6,6 +6,12 @@ const people=[{slug:'nia',name:'Nia Brooks',sport:'Basketball',age:15},{slug:'el
 const BASE='/darren-library';
 function Header({back=false}){return <header className="header"><a href="/leadership-demo" className="brand">MORE<span> / LEADERSHIP</span></a><div>{back&&<a href="/leadership-demo">← DarrenDemo</a>}<span className="preview">Protected library</span></div></header>}
 function ReportCard({p,kind}){return <a className={'report-card '+(kind==='bos'?'blue':'green')} href={`${BASE}/${kind}.html?athlete=${p.slug}`}><div className="report-symbol" aria-hidden="true">{kind==='bos'?'✳':'◎'}</div><div className="report-type">YOUTH {kind.toUpperCase()}</div><h3>{p.name}</h3><p>{p.sport} · {p.age}</p><span className="report-label">Synthetic athlete</span><strong>Open full {kind.toUpperCase()} <span>→</span></strong></a>}
+function PrivateReportCard(){
+ const [card,setCard]=useState(null);
+ useEffect(()=>{let mounted=true;fetch(`${BASE}/api/report-card/private-bos`,{credentials:'same-origin',cache:'no-store'}).then(async response=>{if(!response.ok)throw Error('PRIVATE_READING_UNAVAILABLE');return response.json();}).then(payload=>{if(mounted&&payload?.ok===true)setCard(payload);}).catch(()=>{});return()=>{mounted=false;};},[]);
+ if(!card)return <div className="report-card blue" aria-label="Private report unavailable"><div className="report-symbol" aria-hidden="true">✳</div><div className="report-type">YOUTH BOS</div><h3>Private participant</h3><p>Protected reading</p><span className="report-label">Not available right now</span><strong>Access held</strong></div>;
+ return <a className="report-card blue" href={card.href}><div className="report-symbol" aria-hidden="true">✳</div><div className="report-type">YOUTH BOS</div><h3>{card.subject.name}</h3><p>{card.subject.sport} · {card.subject.age}</p><span className="report-label">Private participant</span><strong>Open full BOS <span>→</span></strong></a>;
+}
 function Library(){return <><Header back/><main className="container library">
   <span className="eyebrow gold-text">DARRENDEMO LIBRARY</span><h1>Presentations &<br/>Athlete Reports</h1><p className="intro">See the vision. Get to know the athletes.</p>
   <nav className="library-nav" aria-label="Library sections"><a href="#presentations">Presentations <span>02</span></a><a href="#bos">Youth BOS <span>05</span></a><a href="#apa">Youth APA <span>04</span></a></nav>
@@ -14,7 +20,7 @@ function Library(){return <><Header back/><main className="container library">
   </section>
   <section id="bos" className="library-section"><div className="section-heading"><div><span className="eyebrow blue-text">02 / YOUTH BOS</span><h2>Meet the whole person.</h2></div><p>Personality map. This Is You. All eight chapters.</p></div>
     <div className="report-grid">{people.map(p=><ReportCard key={p.slug} p={p} kind="bos"/>)}</div>
-    <div className="private-report"><div><span className="eyebrow">PRIVATE PARTICIPANT READING</span><h3>Protected BOS</h3><p>The fifth saved reading is held for separate participant-data authorization. It is not part of the synthetic library package.</p></div><div className="report-card blue" aria-label="Private report held"><div className="report-symbol" aria-hidden="true">✳</div><div className="report-type">YOUTH BOS</div><h3>Private participant</h3><p>Access pending</p><span className="report-label">Not available in this candidate</span><strong>Protected reading held</strong></div></div>
+    <div className="private-report"><div><span className="eyebrow">A REAL PARTICIPANT’S READING</span><h3>Protected BOS</h3><p>One saved personality profile, kept separate from the fictional athlete examples and available only inside DarrenDemo.</p></div><PrivateReportCard/></div>
   </section>
   <section id="apa" className="library-section"><div className="section-heading"><div><span className="eyebrow green-text">03 / YOUTH APA</span><h2>See their next chapter.</h2></div><p>Four areas. Five Futures. One Move.<br/>The complete assessment for each athlete.</p></div><div className="report-grid">{people.map(p=><ReportCard key={p.slug} p={p} kind="apa"/>)}</div></section>
   <footer className="library-footer"><a href="/leadership-demo">← Back to DarrenDemo</a><a href="#presentations">Back to top ↑</a></footer>
@@ -31,4 +37,4 @@ function SlideViewer({deck}){
 const path=location.pathname;const deck=decks.find(d=>path===`${BASE}/presentation/${d.slug}`);
 function App(){useEffect(()=>{if(!deck&&location.hash)document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({behavior:'instant'});},[]);return deck?<SlideViewer deck={deck}/>:<Library/>;}
 createRoot(document.getElementById('root')).render(<App/>);
-export { Header, ReportCard, Library, SlideViewer, App };
+export { Header, ReportCard, PrivateReportCard, Library, SlideViewer, App };

@@ -34,7 +34,7 @@ function response() {
   };
 }
 
-function handler({ env = ENABLED, getRedis = () => ({}), authenticate = async () => ({ ok: true, capability: { library_read_scope: 'approved_saved_bos_v1' } }), readFile = fs.promises.readFile, privateReading = null } = {}) {
+function handler({ env = ENABLED, getRedis = () => ({ getBuffer: async () => null }), authenticate = async () => ({ ok: true, capability: { library_read_scope: 'approved_saved_bos_v1' } }), readFile = fs.promises.readFile, privateReading = null } = {}) {
   return createDarrenDemoLibraryHandler({ env, getRedis, authenticate, readFile, privateReading });
 }
 
@@ -42,6 +42,7 @@ class FakeRedis {
   constructor() { this.values = new Map(); }
   async set(key, value) { this.values.set(key, String(value)); return 'OK'; }
   async get(key) { return this.values.get(key) ?? null; }
+  async getBuffer(key) { const value = this.values.get(key); return value ? Buffer.from(value) : null; }
 }
 
 test('library defaults off and denies mutation, foreign origin, and missing session', async () => {
@@ -166,11 +167,22 @@ test('private BOS is held without binding and can be exercised only with a synth
   assert.equal(held.statusCode, 503);
   assert.equal(held.json().code, 'PRIVATE_READING_NOT_BOUND');
 
-  const syntheticPrivate = { artifact: { mm: 'MM-SYNTHETIC-PRIVATE-TEST' }, source: { answers: [] } };
+  const syntheticPrivate = { artifact: { mm: 'MM-SYNTHETIC-PRIVATE-TEST', subject: { name: 'Fixture Person', sport: 'Fixture Sport', age: 18 } }, source: { answers: [] } };
   const injected = response();
   await handler({ privateReading: async () => syntheticPrivate })(request('api/report/bos/bailea'), injected);
   assert.equal(injected.statusCode, 200);
   assert.deepEqual(injected.json(), syntheticPrivate);
+
+  const card = response();
+  await handler({ privateReading: async () => syntheticPrivate })(request('api/report-card/private-bos'), card);
+  assert.equal(card.statusCode, 200);
+  assert.deepEqual(card.json().subject, syntheticPrivate.artifact.subject);
+  assert.equal(card.json().href, '/darren-library/bos.html?athlete=bailea');
+
+  const wrongBytes = response();
+  await handler({ getRedis: () => ({ getBuffer: async () => Buffer.from('{}') }) })(request('api/report/bos/bailea'), wrongBytes);
+  assert.equal(wrongBytes.statusCode, 500);
+  assert.equal(wrongBytes.json().code, 'LIBRARY_READ_FAILED');
 });
 
 test('client source and built client bundles contain no private participant identity or source', () => {
