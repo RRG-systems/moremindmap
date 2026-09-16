@@ -6,6 +6,7 @@ import {
   clearLeadershipDemoCookies,
   consumeLeadershipEntryCsrf,
   consumeLeadershipLauncherCsrf,
+  darrenDemoLibraryEnabled,
   enforceLeadershipEntryRateLimit,
   enforceLeadershipLaunchRateLimit,
   exactLeadershipDemoCode,
@@ -56,6 +57,10 @@ export default async function leadershipDemoEntryHandler(req, res) {
                 ? { title: 'ATHLETE CONSULTING TOOL V2', version: 2 }
                 : { title: 'ATHLETE CONSULTING TOOL' }) }]
               : []),
+            ...(darrenDemoLibraryEnabled(process.env)
+              && auth.capability.library_read_scope === 'approved_saved_bos_v1'
+              ? [{ id: 'presentations-athlete-reports', title: 'PRESENTATIONS & ATHLETE REPORTS' }]
+              : []),
           ],
         });
       }
@@ -100,6 +105,18 @@ export default async function leadershipDemoEntryHandler(req, res) {
     if (!csrfOk) return send(res, 403, { ok: false, code: 'LEADERSHIP_DEMO_LAUNCH_CSRF_DENIED' });
     const rate = await enforceLeadershipLaunchRateLimit({ redis, capabilityHash: auth.capability_hash });
     if (!rate.allowed) return send(res, 429, { ok: false, code: 'LEADERSHIP_DEMO_LAUNCH_RATE_LIMITED' });
+
+    if (action === 'OPEN_DARREN_LIBRARY') {
+      if (!darrenDemoLibraryEnabled(process.env)
+        || auth.capability.library_read_scope !== 'approved_saved_bos_v1') {
+        return send(res, 404, { ok: false, code: 'DARREN_DEMO_LIBRARY_DEFAULT_OFF' });
+      }
+      return send(res, 200, {
+        ok: true,
+        code: 'DARREN_DEMO_LIBRARY_READY',
+        redirect_to: '/darren-library/library',
+      });
+    }
 
     if (action === 'LAUNCH_RECRUITING') {
       const issued = await issueRecruitingDemoCapability({ redis, req, launcher: auth.capability });

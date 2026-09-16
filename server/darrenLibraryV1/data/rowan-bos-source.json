@@ -1,0 +1,357 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-99A1DB45",
+  "slug": "rowan",
+  "name": "Rowan Ellis",
+  "age": 17,
+  "gender": "nonbinary",
+  "pronouns": "they/them",
+  "sport": "Climbing",
+  "answers": [
+    {
+      "question_id": "Q01",
+      "text": "Making things, having time to myself, a few people I trust. Maybe engineering or repair work. I do not need my hobby to become my job. I want to be good at something useful.",
+      "event_root": "answer-Q01"
+    },
+    {
+      "question_id": "Q02",
+      "text": "People sometimes hear me being rude when I am asking for the missing information. I have been told that. I do care about them. I just do not always know what they want me to say.",
+      "event_root": "answer-Q02"
+    },
+    {
+      "question_id": "Q03",
+      "text": "A problem I can work out. I repaired an old speaker because I wanted to know why it stopped working. I struggle with tasks where the instructions change but nobody explains why.",
+      "event_root": "answer-Q03"
+    },
+    {
+      "question_id": "Q04",
+      "text": "I like seeing a friend, then I need space. Groups wear me out if lots of conversations happen at once. I can talk for ages to someone about a shared interest.",
+      "event_root": "answer-Q04"
+    },
+    {
+      "question_id": "Q05",
+      "text": "I speak if I think I can move it forward. In robotics I proposed a way to test two designs. I was happy for someone else to present. I do not need to be in charge of the whole group.",
+      "event_root": "answer-Q05"
+    },
+    {
+      "question_id": "Q06",
+      "text": "I compare what each option would actually involve. I changed a school subject after reading the course outline and talking to the teacher. I wanted something I would still want to do a year later.",
+      "event_root": "answer-Q06"
+    },
+    {
+      "question_id": "Q07",
+      "text": "I read a bit then try. I like unfamiliar problems, less so unfamiliar social events. A climbing route can be interesting because my first solution fails and I have to work out another.",
+      "event_root": "answer-Q07"
+    },
+    {
+      "question_id": "Q08",
+      "text": "A clear sequence helps. I like knowing what done means. If the method fails I will change the method. When our robotics part broke I used a different connection, but I kept the same test plan.",
+      "event_root": "answer-Q08"
+    },
+    {
+      "question_id": "Q09",
+      "text": "If there is a reason I keep at it. If I am repeating something that does not work I want to change it. I stopped an online course because it was mostly things I already knew.",
+      "event_root": "answer-Q09"
+    },
+    {
+      "question_id": "Q10",
+      "text": "I look for a diagram, manual or example and then ask a person who knows. I posted a clear question about the speaker repair with a photo. Someone pointed out a connection I had missed.",
+      "event_root": "answer-Q10"
+    },
+    {
+      "question_id": "Q11",
+      "text": "Say what is wrong and what the result needs to be. I can use that. Hints like you know what I mean are hard. I do not always know. A teacher writing it down helped.",
+      "event_root": "answer-Q11"
+    },
+    {
+      "question_id": "Q12",
+      "text": "Short answers. I may leave the conversation. I usually know I need time but I do not always say it. Once a friend thought I was angry with them when I was frustrated with the project.",
+      "event_root": "answer-Q12"
+    },
+    {
+      "question_id": "Q13",
+      "text": "I ask what we disagree about. In robotics someone said I was dismissing their idea. I thought we were comparing designs. I asked them to explain and then suggested we test both. I do not know if they felt fully heard.",
+      "event_root": "answer-Q13"
+    },
+    {
+      "question_id": "Q14",
+      "text": "A clear account of what happened. I did not finish a route and wrote down the bit I could not solve. Later I tried a different approach. I also sometimes just want to go home.",
+      "event_root": "answer-Q14"
+    },
+    {
+      "question_id": "Q15",
+      "text": "I can separate a big problem into smaller tests. I find useful information and share it. I ask who wants to do which part because doing all of it myself takes too long.",
+      "event_root": "answer-Q15"
+    },
+    {
+      "question_id": "Q16",
+      "text": "I can keep searching for an exact explanation when we only need a workable one. I spent too long comparing parts and we nearly missed an order deadline. Someone pointed out the time and I picked.",
+      "event_root": "answer-Q16"
+    },
+    {
+      "question_id": "Q17",
+      "text": "Clear words and taking my answer seriously. I try not to pretend I agree. I can forget that a person might want me to listen before I suggest a solution.",
+      "event_root": "answer-Q17"
+    },
+    {
+      "question_id": "Q18",
+      "text": "I get more exact and less talkative. If people keep asking several questions I lose track. With one problem and time to think I am usually okay. It depends on how many things are happening.",
+      "event_root": "answer-Q18"
+    },
+    {
+      "question_id": "Q19",
+      "text": "Noise and being expected to answer instantly. A quiet walk or working alone on something small. My week is okay at the moment. I still need unplanned time even though I like plans.",
+      "event_root": "answer-Q19"
+    },
+    {
+      "question_id": "Q20",
+      "text": "I change my mind when a test shows something different. Being organised does not mean I hate change. Also I make terrible jokes with my friends. I do not talk like a manual all the time.",
+      "event_root": "answer-Q20"
+    }
+  ],
+  "corrections": [],
+  "intake_mode": "static",
+  "questions": [
+    {
+      "id": "Q01",
+      "prompt": "What matters most to you outside sport?",
+      "followup": "What would you like your life to make room for, now or later?",
+      "chapters": [
+        "identity",
+        "thriving"
+      ],
+      "vectors": [
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q02",
+      "prompt": "What do people sometimes get wrong about you?",
+      "followup": "What would they understand better if they heard your side?",
+      "chapters": [
+        "identity",
+        "communication",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q03",
+      "prompt": "What makes you want to put effort into something?",
+      "followup": "Tell us about something you chose to do, and something you found hard to care about.",
+      "chapters": [
+        "identity",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q04",
+      "prompt": "After spending time with other people, how do you usually feel?",
+      "followup": "Is it different with close friends and an unfamiliar group?",
+      "chapters": [
+        "connection",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q05",
+      "prompt": "In a group, how do you usually get involved?",
+      "followup": "When do you speak up, choose a direction, or leave room for someone else?",
+      "chapters": [
+        "communication",
+        "connection"
+      ],
+      "vectors": [
+        "command",
+        "tempo"
+      ]
+    },
+    {
+      "id": "Q06",
+      "prompt": "When a choice is difficult, how do you decide?",
+      "followup": "Think of a recent choice. What mattered, and how long did you need?",
+      "chapters": [
+        "mind",
+        "identity"
+      ],
+      "vectors": [
+        "command",
+        "tempo",
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q07",
+      "prompt": "How do you approach something new or unfamiliar?",
+      "followup": "What makes you curious, and what makes you hold back?",
+      "chapters": [
+        "mind",
+        "effort"
+      ],
+      "vectors": [
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q08",
+      "prompt": "How much of a plan do you like before you start?",
+      "followup": "What happened the last time your plan changed?",
+      "chapters": [
+        "effort",
+        "mind"
+      ],
+      "vectors": [
+        "structure",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q09",
+      "prompt": "When something gets boring or difficult, what do you do?",
+      "followup": "Describe a time you kept going, changed your approach, or decided to stop.",
+      "chapters": [
+        "effort",
+        "strengths"
+      ],
+      "vectors": [
+        "tempo",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q10",
+      "prompt": "When you do not understand something, what do you try?",
+      "followup": "What happened the last time? Did another person or a tool help?",
+      "chapters": [
+        "mind",
+        "thriving"
+      ],
+      "vectors": [
+        "leverage",
+        "precision"
+      ]
+    },
+    {
+      "id": "Q11",
+      "prompt": "What kind of feedback is easiest for you to use?",
+      "followup": "Describe feedback that helped, and anything that made it harder to take in.",
+      "chapters": [
+        "communication",
+        "mind"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q12",
+      "prompt": "When you are upset, what might someone else notice?",
+      "followup": "What might they miss? Only tell us what you want to share.",
+      "chapters": [
+        "pressure",
+        "communication"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q13",
+      "prompt": "When you disagree with someone, what usually happens?",
+      "followup": "Can you remember an example, including what the other person actually said or did?",
+      "chapters": [
+        "connection",
+        "communication",
+        "pressure"
+      ],
+      "vectors": [
+        "command",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q14",
+      "prompt": "After a disappointment, what helps you find your footing?",
+      "followup": "What happened on one occasion? It is okay if you are still figuring this out.",
+      "chapters": [
+        "pressure",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q15",
+      "prompt": "What do you bring to a group that is useful?",
+      "followup": "Think of school, home, friends or sport. How do you share the work?",
+      "chapters": [
+        "strengths",
+        "connection"
+      ],
+      "vectors": [
+        "leverage",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q16",
+      "prompt": "When can one of your strengths get in your way?",
+      "followup": "How do you notice it, and is there a situation where it works differently?",
+      "chapters": [
+        "strengths",
+        "effort"
+      ],
+      "vectors": [
+        "precision"
+      ]
+    },
+    {
+      "id": "Q17",
+      "prompt": "What makes you feel respected or fairly treated?",
+      "followup": "How do you try to offer that to someone else?",
+      "chapters": [
+        "identity",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q18",
+      "prompt": "What changes about you when the pressure rises?",
+      "followup": "Compare an ordinary situation with a difficult one. What was going on around you?",
+      "chapters": [
+        "pressure",
+        "mind"
+      ],
+      "vectors": [
+        "tempo",
+        "precision",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q19",
+      "prompt": "What drains you, and what helps you feel like yourself again?",
+      "followup": "Is anything about your current week making a difference?",
+      "chapters": [
+        "thriving",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q20",
+      "prompt": "What else should MORE understand about you?",
+      "followup": "Where have your answers missed the full picture? What are you still figuring out?",
+      "chapters": [
+        "identity",
+        "mind",
+        "communication",
+        "connection",
+        "effort",
+        "pressure",
+        "strengths",
+        "thriving"
+      ],
+      "vectors": []
+    }
+  ]
+}

@@ -42,10 +42,22 @@ const products = [
     detail: 'Ages 18–20 · Synthetic fixtures only · No customer access',
     tone: 'blue',
   },
+  {
+    id: 'presentations-athlete-reports',
+    action: 'OPEN_DARREN_LIBRARY',
+    number: '05',
+    eyebrow: 'The story. The whole person.',
+    title: 'PRESENTATIONS & ATHLETE REPORTS',
+    description: 'View Lisa’s and Darren’s presentations. Explore the complete Youth BOS and APA reports, one athlete at a time.',
+    detail: '2 presentations · 5 BOS reports · 4 APA reports',
+    tone: 'gold',
+  },
 ]
 
 const BASE_PRODUCT_IDS = ['recruiting', 'subscription-model-1', 'subscription-model-2']
 const ATHLETE_PRODUCT_IDS = [...BASE_PRODUCT_IDS, 'athlete-consulting-tool']
+const LIBRARY_PRODUCT_IDS = [...BASE_PRODUCT_IDS, 'presentations-athlete-reports']
+const ATHLETE_LIBRARY_PRODUCT_IDS = [...ATHLETE_PRODUCT_IDS, 'presentations-athlete-reports']
 
 export default function LeadershipDemo() {
   const [status, setStatus] = useState('loading')
@@ -64,7 +76,9 @@ export default function LeadershipDemo() {
       const receivedIds = Array.isArray(payload?.choices) ? payload.choices.map((choice) => choice?.id) : []
       const exactBase = JSON.stringify(receivedIds) === JSON.stringify(BASE_PRODUCT_IDS)
       const exactAthlete = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_PRODUCT_IDS)
-      if (!response.ok || payload?.ok !== true || !payload.csrf_token || (!exactBase && !exactAthlete)) {
+      const exactLibrary = JSON.stringify(receivedIds) === JSON.stringify(LIBRARY_PRODUCT_IDS)
+      const exactAthleteLibrary = JSON.stringify(receivedIds) === JSON.stringify(ATHLETE_LIBRARY_PRODUCT_IDS)
+      if (!response.ok || payload?.ok !== true || !payload.csrf_token || (!exactBase && !exactAthlete && !exactLibrary && !exactAthleteLibrary)) {
         setStatus('locked')
         return
       }
@@ -104,7 +118,7 @@ export default function LeadershipDemo() {
         body: JSON.stringify({ action: product.action }),
       })
       const payload = await response.json().catch(() => null)
-      if (!response.ok || payload?.ok !== true || !['/recruiting-gu-v1/demo', '/subscription', '/athlete-consulting-tool/demo'].includes(payload.redirect_to)) {
+      if (!response.ok || payload?.ok !== true || !['/recruiting-gu-v1/demo', '/subscription', '/athlete-consulting-tool/demo', '/darren-library/library'].includes(payload.redirect_to)) {
         throw new Error(payload?.code || 'LEADERSHIP_DEMO_LAUNCH_FAILED')
       }
       window.location.assign(payload.redirect_to)
@@ -134,13 +148,13 @@ export default function LeadershipDemo() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
           <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProducts.length === 4 ? 'Four' : 'Three'} products. One bounded demo area.</h1>
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose the experience you want to demonstrate. Each opens with narrow demonstration authority; none grants access to a real customer product.</p>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProducts.length === 5 ? 'Four product demos. Presentations and athlete reports.' : `${availableProducts.length} products. One bounded demo area.`}</h1>
+          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose what you’d like to explore. Each experience stays inside the protected DarrenDemo boundary.</p>
         </section>
 
         {error && <div className="mt-8 rounded-2xl border border-red-400/25 bg-red-500/10 px-5 py-4 text-sm text-red-100" role="alert">{error}</div>}
 
-        <section className={`mt-12 grid gap-6 ${availableProducts.length === 4 ? 'lg:grid-cols-2 xl:grid-cols-4' : 'lg:grid-cols-3'}`} aria-label="Product demos">
+        <section className={`mt-12 grid gap-6 ${availableProducts.length >= 4 ? 'lg:grid-cols-2 xl:grid-cols-3' : 'lg:grid-cols-3'}`} aria-label="Product demos">
           {availableProducts.map((original) => {
             const product = original.id === 'athlete-consulting-tool' && athleteVersion === 2
               ? { ...original, title: 'ATHLETE CONSULTING TOOL V2', description: original.description.replace('Mika and Avery', 'Nia and Sofia'), detail: 'Ages 15 and 19 · Synthetic fixtures only · No customer access' }
@@ -151,19 +165,19 @@ export default function LeadershipDemo() {
               type="button"
               onClick={() => launch(product)}
               disabled={Boolean(busyProduct) || !csrfToken}
-              className={`group min-h-[360px] rounded-[2rem] border p-8 text-left shadow-[0_24px_90px_rgba(0,0,0,0.42)] backdrop-blur-md transition hover:-translate-y-1 focus:outline-none focus:ring-4 disabled:cursor-wait disabled:opacity-55 ${product.tone === 'green' ? 'border-emerald-300/24 bg-[linear-gradient(145deg,rgba(13,62,40,.58),rgba(4,17,15,.92))] focus:ring-emerald-300/15' : product.tone === 'blue' ? 'border-sky-300/24 bg-[linear-gradient(145deg,rgba(18,68,92,.62),rgba(6,16,28,.94))] focus:ring-sky-300/15' : 'border-violet-300/24 bg-[linear-gradient(145deg,rgba(53,35,88,.62),rgba(10,12,24,.94))] focus:ring-violet-300/15'}`}
+              className={`group min-h-[360px] rounded-[2rem] border p-8 text-left shadow-[0_24px_90px_rgba(0,0,0,0.42)] backdrop-blur-md transition hover:-translate-y-1 focus:outline-none focus:ring-4 disabled:cursor-wait disabled:opacity-55 ${product.tone === 'green' ? 'border-emerald-300/24 bg-[linear-gradient(145deg,rgba(13,62,40,.58),rgba(4,17,15,.92))] focus:ring-emerald-300/15' : product.tone === 'blue' ? 'border-sky-300/24 bg-[linear-gradient(145deg,rgba(18,68,92,.62),rgba(6,16,28,.94))] focus:ring-sky-300/15' : product.tone === 'gold' ? 'border-amber-300/30 bg-[linear-gradient(145deg,rgba(87,65,20,.7),rgba(18,16,9,.96))] focus:ring-amber-300/20' : 'border-violet-300/24 bg-[linear-gradient(145deg,rgba(53,35,88,.62),rgba(10,12,24,.94))] focus:ring-violet-300/15'}`}
             >
               <div className="flex items-start justify-between gap-6">
-                <span className={`text-sm font-semibold tracking-[0.2em] ${product.tone === 'green' ? 'text-emerald-300' : product.tone === 'blue' ? 'text-sky-300' : 'text-violet-300'}`}>{product.number}</span>
-                <span className="rounded-full border border-white/12 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/54">Synthetic demo</span>
+                <span className={`text-sm font-semibold tracking-[0.2em] ${product.tone === 'green' ? 'text-emerald-300' : product.tone === 'blue' ? 'text-sky-300' : product.tone === 'gold' ? 'text-amber-200' : 'text-violet-300'}`}>{product.number}</span>
+                <span className="rounded-full border border-white/12 bg-black/25 px-3 py-1 text-[10px] uppercase tracking-[0.18em] text-white/54">{product.tone === 'gold' ? 'Protected library' : 'Synthetic demo'}</span>
               </div>
               <div className="mt-16 text-xs uppercase tracking-[0.24em] text-white/42">{product.eyebrow}</div>
               <h2 className="mt-4 text-3xl font-semibold tracking-tight md:text-4xl">{product.title}</h2>
               <p className="mt-5 max-w-xl text-base leading-7 text-white/62">{product.description}</p>
               <div className="mt-8 border-t border-white/10 pt-6">
                 <small className="block text-xs leading-5 text-white/42">{product.detail}</small>
-                <strong className={`mt-5 flex items-center justify-between text-sm ${product.tone === 'green' ? 'text-emerald-200' : product.tone === 'blue' ? 'text-sky-200' : 'text-violet-200'}`}>
-                  {busyProduct === product.id ? 'Opening synthetic experience…' : `Open ${product.title}`}
+                <strong className={`mt-5 flex items-center justify-between text-sm ${product.tone === 'green' ? 'text-emerald-200' : product.tone === 'blue' ? 'text-sky-200' : product.tone === 'gold' ? 'text-amber-100' : 'text-violet-200'}`}>
+                  {busyProduct === product.id ? 'Opening experience…' : `Open ${product.title}`}
                   <span aria-hidden="true">→</span>
                 </strong>
               </div>
@@ -172,7 +186,7 @@ export default function LeadershipDemo() {
           })}
         </section>
 
-        <footer className="mt-10 flex items-center gap-3 text-sm text-white/38"><span aria-hidden="true">◇</span> Demo capabilities are bounded, browser-bound, synthetic-only, and expire automatically.</footer>
+        <footer className="mt-10 flex items-center gap-3 text-sm text-white/38"><span aria-hidden="true">◇</span> Access is bounded, browser-bound, and expires automatically. The library labels its private reading separately from fictional athletes.</footer>
       </main>
     </div>
   )

@@ -1,0 +1,1490 @@
+{
+  "version": "youth-apa-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-6A49112B",
+  "identity": {
+    "mm": "MM-20260913-6A49112B",
+    "name": "Eli Moreno",
+    "slug": "eli",
+    "age": 16,
+    "gender": "boy",
+    "pronouns": "he/him",
+    "sport": "Swimming",
+    "synthetic": true,
+    "reading_sha256": "69f673054eb68100e57ce23158ef95d3fcd01c4c88447b8548573fd768852f46"
+  },
+  "source_sha256": "f34188a1dcc764a3970894e69c24d7166b16de0ecf3dce870284548ff3a58fec",
+  "bos_sha256": "69f673054eb68100e57ce23158ef95d3fcd01c4c88447b8548573fd768852f46",
+  "confirmation": {
+    "goals": {
+      "sport": "Race the whole 100 freestyle and work toward a personal best.",
+      "training": "Understand one useful turn change without adding pool hours.",
+      "mindset": "Leave an imperfect turn behind during the race.",
+      "school": "Solve mixed maths questions independently."
+    },
+    "priority": "Understand one turn focus, then stay with the next length.",
+    "assessment_date": "2026-09-14",
+    "review_date": "2026-09-21",
+    "horizon_date": "2026-11-02",
+    "confirmed": true
+  },
+  "sources": [
+    {
+      "id": "A01",
+      "text": "Swimming. Club squad, mainly 100 metre freestyle. We have a local meet on November 2. I swim other events too, but this is my focus.",
+      "source": "Athlete",
+      "question": "What sport are we focusing on right now?"
+    },
+    {
+      "id": "A02",
+      "text": "I want a personal best in the 100 freestyle. I care about competing, even if I am quiet. I also want time for family, cooking and friends.",
+      "source": "Athlete",
+      "question": "What would you love to achieve in your sport, and why does it matter to you?"
+    },
+    {
+      "id": "A03",
+      "text": "I keep my pace through the middle better now. My last two coached race-pace sets were more even than the earlier ones. I do not have the split sheet with me, so please do not put exact numbers on it.",
+      "source": "Athlete",
+      "question": "What feels strongest about the way you are performing right now?"
+    },
+    {
+      "id": "A04",
+      "text": "The turn unsettles me. If it feels wrong I keep thinking about it during the next length. I want to understand what to change rather than check everything.",
+      "source": "Athlete",
+      "question": "What part of your performance would you most like to improve?"
+    },
+    {
+      "id": "A05",
+      "text": "At the November meet I want to stay with my race after a turn I do not like. A personal best would be great, but handling that moment is something I can work on first.",
+      "source": "Athlete",
+      "question": "What would make the next six to eight weeks feel successful in your sport?"
+    },
+    {
+      "id": "A06",
+      "text": "Four pool sessions: Monday, Tuesday, Thursday and Saturday, 75 minutes each. Coach plans them. I have a short Saturday cafe shift later. Wednesday and Sunday have no scheduled training.",
+      "source": "Athlete",
+      "question": "What does a normal training week look like for you?"
+    },
+    {
+      "id": "A07",
+      "text": "I want to know what a useful turn feels like, and carry it into the next length. I do not want to add pool hours during exams.",
+      "source": "Athlete",
+      "question": "What do you most want your training to help you do better?"
+    },
+    {
+      "id": "A08",
+      "text": "Watching one clip with my coach the following day helped me see one part of a turn. I used the example in the next session. I still need my coach to tell me what to look for technically.",
+      "source": "Athlete",
+      "question": "Which part of your training seems to be helping most?"
+    },
+    {
+      "id": "A09",
+      "text": "At the end of practice I can ask about three different things and come away checking all of them. I wrote a long list once and kept rereading it before a set. That made it harder to settle.",
+      "source": "Athlete",
+      "question": "Which part feels confusing, hard to keep up with, or not useful?"
+    },
+    {
+      "id": "A10",
+      "text": "A brief one-to-one explanation and one written thing to try in the existing set. I want the plan decided before the week gets busy. Exams start October 5.",
+      "source": "Athlete",
+      "question": "What would make your training week work better for you?"
+    },
+    {
+      "id": "A11",
+      "text": "I am clear about the first thing to do and then I swim. I do not need to talk a lot to feel competitive.",
+      "source": "Athlete",
+      "question": "When you are playing with confidence, what is different about you?"
+    },
+    {
+      "id": "A12",
+      "text": "I narrow in on the turn. At the last meet I replayed one missed turn while I still had a length to swim. When someone asked instantly what happened I said fine because I did not have the words yet.",
+      "source": "Athlete",
+      "question": "When the pressure goes up, what usually happens for you?"
+    },
+    {
+      "id": "A13",
+      "text": "On the night I need dinner and a break. The next day I can use one clip with my coach. During a race I do not yet have a reset that I trust.",
+      "source": "Athlete",
+      "question": "After a mistake or a bad performance, what helps you get back into it?"
+    },
+    {
+      "id": "A14",
+      "text": "Leave one imperfect turn behind and race the length I am in. I would like to test a simple reset, but I do not want someone promising it will fix my time.",
+      "source": "Athlete",
+      "question": "What would you most like to handle better mentally in your sport?"
+    },
+    {
+      "id": "A15",
+      "text": "A specific example, preferably privately, and a little time to think. Please do not take silence as agreement. My parents are happy to leave the coaching to the coach.",
+      "source": "Athlete",
+      "question": "What do you need from the people around you to compete at your best?"
+    },
+    {
+      "id": "A16",
+      "text": "Grade 11. I am preparing for exams in early October. I am keeping up, but want more quiet revision time for the next few weeks.",
+      "source": "Athlete",
+      "question": "How is school going for you right now?"
+    },
+    {
+      "id": "A17",
+      "text": "Biology is going well. In maths I follow a worked example but hesitate on my own. I completed four of six questions independently on the last practice sheet. That is one sheet, not a grade.",
+      "source": "Athlete",
+      "question": "Which parts of school feel strongest, and which need help?"
+    },
+    {
+      "id": "A18",
+      "text": "Be able to solve the next set of mixed maths revision questions without needing the first step shown each time.",
+      "source": "Athlete",
+      "question": "What would you like to achieve in school this term?"
+    },
+    {
+      "id": "A19",
+      "text": "I might study food or hospitality after school. I have only helped at the cafe twice before this new short shift, so I want to explore before deciding.",
+      "source": "Athlete",
+      "question": "Where would you like school to lead for you?"
+    },
+    {
+      "id": "A20",
+      "text": "The four pool sessions fit if no extra hours are added. I have two 40-minute maths revision slots on Wednesday and Sunday. I want to keep those and a quiet evening with family.",
+      "source": "Athlete",
+      "question": "How are school and sport fitting together in your week?"
+    },
+    {
+      "id": "COACH1",
+      "text": "Eli has held a more even pace in the last two race-pace sets. I have seen him continue looking for explanations after a turn. I cannot tell exactly what he thinks during a race.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH2",
+      "text": "I would start with one turn focus that I can show him, then observe whether he carries on with the next length. I will choose the technical cue after we look at the example together.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH3",
+      "text": "A five-minute discussion can replace the first five minutes of our existing Monday review. It does not add pool time. I can give him one written cue. He has not yet chosen or agreed a reset with me.",
+      "source": "Coach"
+    },
+    {
+      "id": "CONFIRM",
+      "source": "Athlete confirmation",
+      "text": "{\"goals\":{\"sport\":\"Race the whole 100 freestyle and work toward a personal best.\",\"training\":\"Understand one useful turn change without adding pool hours.\",\"mindset\":\"Leave an imperfect turn behind during the race.\",\"school\":\"Solve mixed maths questions independently.\"},\"priority\":\"Understand one turn focus, then stay with the next length.\",\"assessment_date\":\"2026-09-14\",\"review_date\":\"2026-09-21\",\"horizon_date\":\"2026-11-02\",\"confirmed\":true}"
+    }
+  ],
+  "bos_sources": [
+    {
+      "id": "BOS:portrait",
+      "headline": "Quiet first, firm when it matters",
+      "text": "Your quiet side can make your determination less visible than it really is. You often listen, sort out your wording, and only then step in. But once something matters and you have thought it through, you can be competitive, direct, and even stubborn about the choice. With your closest friends, the same person who can miss an opening in class may be the one talking most. Your pace changes with trust, timing, and pressure; it is not the same everywhere.\n\nYou are serious about improvement without needing to be the center of attention. You want faster swim times, and getting something a little better can be satisfying even when nobody is watching. At the same time, sport is not meant to swallow your whole life. Family, a couple of close friends, and cooking matter, and you want time left for people even if sport becomes more serious. Choosing fewer weekend shifts protected swimming and friendships, though you still noticed the money you were giving up. You do not make tradeoffs carelessly.\n\nMuch of your organization seems connected to care. A phone list, early notice, and a remembered agreement help you be someone other people can plan around. You can rearrange a week when practice changes; what bothers you more is a sudden change that collides with a promise. That makes your structure less about controlling every moment and more about keeping different parts of life from letting each other down. The harder side is that you may say yes to avoid trouble, then end up carrying too much sorting and checking yourself.\n\nYour mind often looks for a solid first foothold. For a difficult choice, you may write down the options, talk to one trusted person, and let the decision sit for a few days. When learning, one worked example or a clear first step gives you something real to test against your own attempt. This does not mean you need full certainty before acting. Trusted company, low stakes, or familiarity can bring out a much more experimental side.\n\nSocially, you seem to want closeness more than constant contact. Small groups suit you, while a large team day can be genuinely fun and still leave you wanting an evening without plans. New people are easier when everyone is doing something together, because the activity gives the meeting a natural shape. Your need for space can grow after a packed schedule, but that does not erase the talkative side that close friends get to see.\n\nYou usually make room for people, but you are not only a follower. If a group has no plan, you can suggest one and ask whether it works for everyone. You notice who has not spoken, remember what was agreed, and bring in another person for a useful check. In disagreement, you may wait while an issue seems small. Once you name it, though, you can explain the practical effect and help create a workable agreement. To you, respect seems closely tied to following through and giving honest notice.\n\nUnder pressure, your usual broad view can shrink around one mistake. You may still do the other parts, but that one detail keeps pulling your attention back, and being asked to explain immediately can leave your words behind. When upset, you can become even quieter and say you are fine before you are ready. Your way back seems to have stages: ordinary comfort and less analysis first, then one understandable piece to review later. Quiet time, cooking with music, or a walk with one friend can help you feel more like yourself.\n\nCooking brings many sides of you into the same room. It gives you detail and repetition when you want to master something, freedom when a recipe is familiar, calm when life is crowded, and a possible future worth exploring. You are interested in cooking for a living, but you also know that helping at a café twice is not enough to settle that question. That combination says something important about you: you can care deeply without pretending to be certain. You build clarity so you can commit, then quietly try to make both the work and the people around it more reliable.",
+      "takeaway": "Full accepted personality portrait",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C10",
+        "C12",
+        "C13",
+        "C14",
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C21",
+        "C22",
+        "C23",
+        "C25",
+        "C26",
+        "C28",
+        "C29",
+        "C30",
+        "C32",
+        "C33",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:identity",
+      "headline": "More than one finish line",
+      "text": "Your life does not seem organized around one role. Swimming matters, but so do family, a couple of close friends, and cooking. You want room for those people even if sport becomes more serious. That is not a lack of ambition; it is a wish for ambition to live inside a fuller life instead of taking every available space.\n\nYou have been clear that you like competing and want to improve your times. What matters less is being the person everyone watches. Your drive seems to come more from making progress and meeting your own commitment than from becoming the center of the room. This is why a quiet presentation can give an incomplete picture of how much you care.\n\nCooking holds an unusual amount of meaning for you. It can be careful craft, a place to experiment, a way to settle after a packed week, and a possible kind of work. You have not turned that interest into a fixed career story: after helping at a café only twice, you know you have more to learn about the work. Your interest is real, and your uncertainty is honest.\n\nYour choice to reduce weekend shifts shows how you are balancing things now: money mattered, but so did swimming and friendship. You still wondered about the money afterward, which suggests that choosing one value does not make the others disappear. Future tradeoffs may look different, but the direction is already clear: success would not feel complete if it left no time for the people and interests that make life yours.",
+      "takeaway": "You want to improve seriously without shrinking your whole identity to one result.",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C32",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:mind",
+      "headline": "You make choices visible",
+      "text": "When a decision matters, you tend to put it somewhere you can see it. Writing the options down, talking with one person, and taking a few days helped you choose fewer work shifts. This gives several concerns a fair chance to count instead of letting the loudest or nearest one decide everything.\n\nYou can keep friendship, sport, money, promises, and future time in mind together. That gives your judgment range, but it can also keep the cost of the unchosen path alive after you have acted. Wondering whether you should have saved more did not undo your choice; it showed that no option protected everything. Sometimes careful thinking may slide into second-guessing.\n\nLearning often becomes easier when you have one concrete starting point. A worked maths example let you try the next problem yourself and compare the result. A complete recipe gives you the shape before you begin. You seem to use a model as a launch point, not as a substitute for your own effort. This may fit step-by-step tasks especially well; other subjects may bring out a different approach.\n\nPreparation is not an absolute rule for you. With a friend and low stakes, you tried kayaking without knowing much. In familiar cooking, you change recipes just to see what happens. Once you know enough to stand on, curiosity can take over from caution. The opposite tradeoff is that a decision you have fully considered may become hard to reopen, even when rearranging ordinary plans is easy.",
+      "takeaway": "A clear foothold helps you think independently, while settled choices may take more effort to reopen.",
+      "claim_ids": [
+        "C10",
+        "C11",
+        "C13",
+        "C14",
+        "C18",
+        "C19",
+        "C33"
+      ]
+    },
+    {
+      "id": "BOS:communication",
+      "headline": "Your thoughts need a fair opening",
+      "text": "There is often a gap between having a view and getting it into the conversation. You usually have an opinion, but you may still be arranging the words. In a fast class discussion, the opening can close before you are ready. With your two best friends, you can be the person who talks most, so the important difference is not whether you have things to say; it is the setting and the time available.\n\nFeedback works best for you when it contains something usable. Specific, explained, one-to-one comments tell you what worked or what needs changing. “Good job” is pleasant but too vague to guide the next attempt. You can take a direct correction, especially when you are allowed a moment to think instead of having to react on the spot.\n\nWhen you are upset or under pressure, less of your inner experience may reach other people. You can get quieter, say you are fine too soon, and keep replaying the issue. An instant request for an explanation can make words harder to find. That means someone may hear a shorter answer than the thought behind it, without either side realizing how much is missing.\n\nIn disagreement, you may leave a small problem alone at first. When a friend’s changing meeting times kept affecting your plans, you eventually described the effect, heard that he had not realized, and helped agree on a clearer arrangement. In that conversation, waiting did not mean you had no boundary. Still, bringing up a concern earlier may sometimes save you from carrying it privately until it grows.",
+      "takeaway": "Your view becomes clearer to others when there is enough time, detail, and room to answer honestly.",
+      "claim_ids": [
+        "C05",
+        "C09",
+        "C20",
+        "C21",
+        "C22",
+        "C23"
+      ]
+    },
+    {
+      "id": "BOS:connection",
+      "headline": "Closeness grows through doing",
+      "text": "You seem to build closeness through a small circle rather than through being socially available all the time. A couple of close friends matter a lot, small groups feel good, and big team days can still be fun. Needing an evening without plans afterward does not cancel the enjoyment; both can be true.\n\nShared activity makes unfamiliar people easier for you to meet. Working or moving alongside someone gives the interaction a purpose, so connection does not have to begin with instant personal conversation. Trusted company and low stakes may also free your more spontaneous side, although that may not work the same way in every unfamiliar setting.\n\nYou also make belonging practical. You notice when someone has not had a turn, invite them in, remember what the group promised, and care about early notice when plans change. Fairness, for you, seems less about everyone always agreeing and more about treating one another’s time and responsibilities as real. You try to offer the same follow-through you want from others.\n\nThe tension is that your wish not to cause trouble can make your own limits arrive late. You sometimes say yes and then have too much to sort out, or postpone a small disagreement while it keeps taking up space. A pause can be useful if it helps you choose your words; it is less useful when it only leaves you carrying the inconvenience. With close friends, enough trust may make that boundary easier to show.",
+      "takeaway": "You build trust through shared time, practical care, and promises people can rely on.",
+      "claim_ids": [
+        "C05",
+        "C06",
+        "C14",
+        "C16",
+        "C22",
+        "C24",
+        "C25",
+        "C26"
+      ]
+    },
+    {
+      "id": "BOS:effort",
+      "headline": "A promise gives work weight",
+      "text": "Two things seem to give effort weight for you: improvement and ownership. You like getting something a little better, and you want people to be able to rely on you. Either one can keep you moving. Together, they create a steady kind of persistence that does not need a crowd watching it.\n\nMaking the same bread across four weekends was not just repetition; each attempt had a result you cared about refining. A boring part of a class project worked differently. The task itself did not interest you, but it was yours, so finishing still mattered. One effort came from craft, the other from commitment.\n\nThose strengths can compete with your other responsibilities. You can spend too long perfecting one small part, check an email twice and still delay sending it, or say yes before making room for the new promise. The problem is not that detail or reliability is bad. It is that one promise can receive so much protection that the next promise gets less time.\n\nYou are not driven only by duty. In familiar cooking, you alter recipes for the fun of finding out what happens. In sport, you genuinely like competition and want better times, even though attention is not the reward you care about most. Your effort is strongest when there is something real to improve, explore, or stand behind—not merely a request to look busy.",
+      "takeaway": "Improvement and ownership keep you going; the challenge is giving each commitment the right amount of care.",
+      "claim_ids": [
+        "C04",
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C32",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:pressure",
+      "headline": "First space, then sense-making",
+      "text": "On an ordinary day, you can notice a mistake and move on. Under pressure, that same mistake can keep pulling your attention back. You may still complete the other parts, so this is not a total stop. It is more like the view becomes narrower, with less room left for the whole performance or problem.\n\nYour outside signal may also get smaller while the inside stays busy. You have described becoming quieter, saying you are fine before you are ready, and replaying what happened. If someone asks for words immediately, you may struggle to explain. The quiet response can therefore hide how active the issue still is for you.\n\nYour way back seems to happen in stages. On the night of a disappointing swim, you wanted dinner and no analysis. The next day, looking at one part of the turn with your coach was useful. Quiet time, cooking with music, or walking with one friend can also help. The exact reason each helps is not fully clear, but none requires you to solve everything at once.\n\nIt is not yet clear whether this narrowing mainly belongs to sport and visible evaluation or also appears in exams, work, cooking, and friendship problems. Exams are coming up now, and you need more quiet than usual, so this week is carrying extra load. Your present need for space should not be mistaken for your permanent level.",
+      "takeaway": "When pressure narrows your view, space first and one clear piece later may fit your natural timing.",
+      "claim_ids": [
+        "C22",
+        "C28",
+        "C29",
+        "C30",
+        "C31"
+      ]
+    },
+    {
+      "id": "BOS:strengths",
+      "headline": "You lead without taking over",
+      "text": "One of your more distinctive strengths is quiet coordination. You listen before acting, but you do not simply wait for someone else forever. When there is no plan, you can offer one. You often phrase direction as something the group can respond to, which lets you create movement without taking all the room.\n\nYou connect inclusion with completion. Noticing who has not spoken helps more people enter the work; tracking agreements helps the work continue after the conversation. Asking someone else to check project references shows that you can use another set of eyes while still owning your part. Those actions do more than include people or organize details: they join people awareness with practical follow-through.\n\nThe tradeoff is that your leadership may become least visible exactly when it is most needed. Waiting for the perfect opening can let a discussion move on. Softening a proposal too much can make ownership unclear. Because assigning jobs is uncomfortable, you may keep extra coordination in your own hands. You have described this most clearly in groups of peers.\n\nYour competitive side adds firmness to this quieter style. You want to improve and can stick with a considered decision, so making room for others does not mean you lack direction. When the balance works, you protect both the standard and the group. When overused, the same combination can become stubbornness about the decision or too much checking of the standard.",
+      "takeaway": "You can create direction, inclusion, and follow-through without needing to control the room.",
+      "claim_ids": [
+        "C07",
+        "C08",
+        "C15",
+        "C17",
+        "C26",
+        "C27",
+        "C32",
+        "C33"
+      ]
+    },
+    {
+      "id": "BOS:thriving",
+      "headline": "Clear rails, room to breathe",
+      "text": "You seem to do best with clear rails rather than a cage. Knowing the week, getting early notice, and seeing a first step help you coordinate school, sport, friendships, and other promises. Because you can rearrange plans, structure is not about keeping everything unchanged. It is about making enough of the shape visible that one part of life does not unexpectedly knock into another.\n\nIn learning and feedback, useful detail matters. One example to work through, a reason behind a correction, and a little time to process can help you turn input into your own next step. Public, instant answers may reveal less of your thinking. A direct, private conversation often gives your actual view more room to appear.\n\nYou also need a mix of people and unclaimed time. Small groups, close friends, and shared activities can feel connecting; a packed weekend or many last-minute messages can drain you. After dense social or performance time, an evening without plans may restore some room. Cooking with music and walking with one friend are two ways you have said help you feel like yourself again.\n\nCooking may be especially fitting because it contains both sides of you: recipes, timers, and patient improvement on one side; familiar experimentation and play on the other. Thriving for you is not only quiet, certainty, or routine—you can enjoy team days and try something unfamiliar. The amount of recovery space you need can change with the week, rather than defining you all the time.",
+      "takeaway": "You need enough structure to coordinate life and enough open space to stay curious, connected, and fully yourself.",
+      "claim_ids": [
+        "C01",
+        "C06",
+        "C12",
+        "C19",
+        "C20",
+        "C21",
+        "C30",
+        "C31",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:command",
+      "headline": "Your command pattern",
+      "text": "You usually listen and make room first, then offer a direction when no plan exists. Your style is collaborative, but a choice you have considered carefully can become firm. You can move a group forward without treating other people’s ideas as obstacles. Waiting for broad agreement may cost you the opening, while a settled decision can become hard to revisit. With peers, you make room before directing; in class, waiting can cost you the chance to speak.",
+      "takeaway": "You usually listen and make room first, then offer a direction when no plan exists. Your style is collaborative, but a choice you have considered carefully can become firm.",
+      "claim_ids": [
+        "C07",
+        "C08",
+        "C33"
+      ]
+    },
+    {
+      "id": "BOS:tempo",
+      "headline": "Your tempo pattern",
+      "text": "You tend to let thoughts form before speaking or committing. Once ready, you can act steadily, but fast exchanges may move beyond your preferred pace. A pause lets you compare options, choose words, and give an answer you can stand behind. Class discussions or instant questions may end before your full view becomes visible. This slower pace shows most in difficult choices, feedback, public questions, and pressure—not in every task.",
+      "takeaway": "You tend to let thoughts form before speaking or committing. Once ready, you can act steadily, but fast exchanges may move beyond your preferred pace.",
+      "claim_ids": [
+        "C05",
+        "C10",
+        "C20",
+        "C21",
+        "C28"
+      ]
+    },
+    {
+      "id": "BOS:relational_awareness",
+      "headline": "Your relational awareness pattern",
+      "text": "You notice airtime, promises, and how changed plans affect people. You often check by asking or agreeing together rather than assuming you know what everyone wants. You can include quieter voices and protect shared expectations without needing to dominate. Trying not to cause trouble can lead to a quick yes, a late boundary, or extra work for you. Your people focus centers on participation and reliability; it does not mean you catch every subtle signal.",
+      "takeaway": "You notice airtime, promises, and how changed plans affect people. You often check by asking or agreeing together rather than assuming you know what everyone wants.",
+      "claim_ids": [
+        "C12",
+        "C16",
+        "C25",
+        "C26"
+      ]
+    },
+    {
+      "id": "BOS:precision",
+      "headline": "Your precision pattern",
+      "text": "Details and errors pull your attention enough that you check, compare, and refine. Familiarity can loosen this: known recipes become a place to experiment. Examples, timers, review, and repetition can help you protect the parts that truly need accuracy. A small detail can delay sending, starting the next task, or moving on after a mistake. Pressure makes error focus stronger, while familiar cooking is a clear exception to your usual care.",
+      "takeaway": "Details and errors pull your attention enough that you check, compare, and refine. Familiarity can loosen this: known recipes become a place to experiment.",
+      "claim_ids": [
+        "C17",
+        "C18",
+        "C28",
+        "C29"
+      ]
+    },
+    {
+      "id": "BOS:leverage",
+      "headline": "Your leverage pattern",
+      "text": "You keep ownership of the work while bringing in focused help: one adviser, example, coach, timer, or second checker. Targeted support gives you a model, another view, or a clearer next independent step. Public asking and assigning work feel less comfortable, so you may still carry more than necessary. This may look different if you are responsible for a large team rather than one piece of shared work.",
+      "takeaway": "You keep ownership of the work while bringing in focused help: one adviser, example, coach, timer, or second checker.",
+      "claim_ids": [
+        "C10",
+        "C19",
+        "C26",
+        "C30"
+      ]
+    },
+    {
+      "id": "BOS:adaptability",
+      "headline": "Your adaptability pattern",
+      "text": "You like a starting map, but you are not tied to one route. Familiarity, low stakes, and trusted company can make experimenting easier. You can protect the important commitment while changing the route used to meet it. Changes affecting a promise feel costly, and a carefully settled decision may resist reopening. Your flexibility depends strongly on the situation; major new information may test it differently.",
+      "takeaway": "You like a starting map, but you are not tied to one route. Familiarity, low stakes, and trusted company can make experimenting easier.",
+      "claim_ids": [
+        "C12",
+        "C13",
+        "C14",
+        "C18",
+        "C33"
+      ]
+    },
+    {
+      "id": "BOS:structure",
+      "headline": "Your structure pattern",
+      "text": "You like visible weeks, written options, and clear agreements. Plans mainly help you coordinate, since you can rearrange them when needed. A visible plan helps commitments coexist and makes hidden clashes easier to catch. Last-minute messages can disrupt several promises at once, especially when detailed checking is already taking time. You show planned flexibility, not a need for every moment to stay unchanged.",
+      "takeaway": "You like visible weeks, written options, and clear agreements. Plans mainly help you coordinate, since you can rearrange them when needed.",
+      "claim_ids": [
+        "C10",
+        "C12",
+        "C23",
+        "C26"
+      ]
+    },
+    {
+      "id": "BOS:perspective",
+      "headline": "Your perspective pattern",
+      "text": "You connect present choices with later effects on sport, people, money, work, and time. More than one future can stay active after you choose. You can look beyond the nearest reward and protect several important parts of life. The cost of the unchosen option can turn useful reflection into second-guessing. Your longer-range ideas about sport and cooking are still open, so this outlook is exploratory rather than settled.",
+      "takeaway": "You connect present choices with later effects on sport, people, money, work, and time. More than one future can stay active after you choose.",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C10",
+        "C11"
+      ]
+    }
+  ],
+  "existing_plan": null,
+  "report": {
+    "headline": "One clear focus. Then swim the next length.",
+    "opening": "You are quietly competitive: you want a personal best, not a spotlight. One clear example helps you begin, then you want to make it your own—in the pool, in maths and when you cook.",
+    "domains": [
+      {
+        "id": "sport",
+        "goal": "Race the whole 100 freestyle and work toward a personal best.",
+        "strength": "You have held a more even pace through the middle in your last two coached race-pace sets.",
+        "gap": "A turn that feels wrong can stay in your thoughts and take attention from the next length.",
+        "help": "Your coach could choose one turn focus and something to watch on the next length, while you say what helped you carry on.",
+        "bos_connection": "Your personality profile shows that improvement and ownership can drive steady effort without public attention. That fits your quiet competitiveness and your wish to race the whole 100. The watch-out is dependable craft becoming over-attention to one detail, especially when pressure makes an error harder to leave.",
+        "detail": "Your present sport picture includes a real strength: both you and your coach noticed more even pacing in the last two coached race-pace sets, although no split sheet was supplied for this assessment. The performance problem is narrower: at the last meet you replayed one missed turn with a length still to swim. That does not show your whole 100 is weak, and your coach cannot see exactly what you think in a race. Your chosen success marker is therefore sensible: after any imperfect turn on November 2, return attention to the length you are racing. That is within your influence; a personal best remains a wanted outcome, not something this assessment can promise. We still need to see whether one clear focus changes both turn understanding and how you swim the next length.",
+        "unknowns": [
+          "Which technical part of the turn your coach will choose after reviewing an example with you.",
+          "How often turn replay appears across races, rather than in the reported meet example.",
+          "What observable sign best shows that you have fully rejoined the next length."
+        ],
+        "refs": [
+          "A01",
+          "A02",
+          "A03",
+          "A04",
+          "A05",
+          "A12",
+          "COACH1",
+          "COACH2",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:effort",
+          "BOS:pressure"
+        ]
+      },
+      {
+        "id": "training",
+        "goal": "Understand one useful turn change without adding pool hours.",
+        "strength": "You used one coach-reviewed clip to see one part of a turn and try the example in your next session.",
+        "gap": "Multiple questions and a long cue list can turn useful detail into too many things to check.",
+        "help": "Using five minutes of an existing Monday review for one coach-selected example and one written reminder could create a focused test without adding pool time.",
+        "bos_connection": "Your personality profile shows that a specific, private example often works as a launch point rather than a substitute for your effort. That makes one coach-led cue a better fit than a full checklist. It also respects your preference for visible plans while leaving the actual technical decision with the qualified coach.",
+        "detail": "Your training week is already defined by four coach-planned pool sessions, and you have said it fits only if no extra pool hours are added. The useful evidence is not that video always works; it is that one next-day clip helped you see one part and use the example in the following session. In contrast, asking about three things or rereading a long list made settling harder. Your coach has offered a practical opening: five minutes can replace part of Monday’s existing review, and the coach can choose one technical cue after viewing the example with you. No new turn plan is yet recorded as agreed. The test is whether one cue becomes understandable and usable inside existing work without turning into another checklist.",
+        "unknowns": [
+          "Which written technical cue your coach will select.",
+          "Which existing coach-planned set will be suitable for observing the cue and the following length.",
+          "Whether the cue feels clear to you after explanation, rather than merely sounding clear to someone else."
+        ],
+        "refs": [
+          "A06",
+          "A07",
+          "A08",
+          "A09",
+          "A10",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:communication",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "id": "mindset",
+        "goal": "Leave an imperfect turn behind during the race.",
+        "strength": "When the first action is clear, you can commit to it and swim without needing to talk a lot.",
+        "gap": "Under race pressure, one missed turn can narrow your attention while the rest of the race is still happening.",
+        "help": "A brief reset that points your attention toward the next length could be tested with your coach, without claiming it will fix your time.",
+        "bos_connection": "Your personality profile describes pressure as narrowing your view around one error while your outside response becomes quieter. That helps explain why “fine” may not mean settled and why instant analysis may miss your real thinking. The important exception is that you keep functioning; the aim is to widen attention, not become invulnerable.",
+        "detail": "The mindset task is not to pretend the turn was fine or force yourself to feel calm. It is to notice that the turn is over and make attention available for the length still happening. You already know that immediate post-race analysis does not suit you: dinner and a break help first, while one clip the next day can be useful. Race time is different because there is no overnight pause. You have asked to test a simple reset, but neither you nor your coach has selected or agreed one, and no evidence yet shows which words or action you could recall under pressure. A useful trial would therefore judge return to the next length, not whether the reset sounded impressive or produced a promised time.",
+        "unknowns": [
+          "What brief reset would feel natural and understandable to you.",
+          "Whether that reset remains available when a turn feels wrong under race pressure.",
+          "Whether words, a physical action, or another simple reminder would best return your attention without creating more checking."
+        ],
+        "refs": [
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A15",
+          "COACH1",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:communication",
+          "BOS:portrait"
+        ]
+      },
+      {
+        "id": "school",
+        "goal": "Solve mixed maths questions independently.",
+        "strength": "Biology is going well, and on one maths practice sheet you completed four of six questions independently.",
+        "gap": "You can follow a worked example but may hesitate when you have to choose the first step by yourself.",
+        "help": "Within your existing Wednesday and Sunday revision slots, one model followed by an independent mixed question could help show where support is still needed.",
+        "bos_connection": "Your personality profile suggests that a worked example can give you a starting point for independent effort, especially in step-by-step learning. Your care with detail can protect accuracy, but it may also make the first unsupported move feel bigger than it is. Familiar cooking shows you can experiment once the base feels usable.",
+        "detail": "School is carrying its own worthwhile target, not merely limiting swimming. You are keeping up in Grade 11, biology is going well, and exams start October 5, so independent mixed maths work matters now. The clearest current evidence is one practice sheet on which you completed four of six questions independently; that is not a grade or a full measure of the subject. You can follow a worked example but hesitate when beginning alone. Your two existing Wednesday and Sunday revision slots provide a place to test whether one model leads into an independent mixed attempt without adding study around pool sessions. We do not yet know which maths topics create the hesitation, whether it is choosing the first operation or understanding the concept, or what checking support is available.",
+        "unknowns": [
+          "Which topics in the mixed questions most often stop you from choosing a first step.",
+          "Whether the hesitation comes from understanding the concept, selecting a method, or checking too early.",
+          "Whether your current revision material includes suitable worked mixed-question examples and reliable answers."
+        ],
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A20",
+          "CONFIRM",
+          "A10"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ]
+      }
+    ],
+    "connection": "Your four goals meet around how you use a clear first step. In swimming, your pace is becoming more even, but an unsatisfying turn can follow you into the next length. One coach-guided example has already helped you try one part, much as a worked maths example can support your own attempt. Exams make your existing week important: four planned pool sessions, two maths slots, and family time already fit if nothing extra is added. A clear cue could help, but racing on, learning independently, and protecting recovery still need separate practice and evidence.",
+    "main_obstacle": "A plausible main obstacle is that one unclear turn creates several checks, then keeps claiming attention when you need to commit to the next length.",
+    "what_we_dont_know": [
+      "Which turn feature your coach will select as the single technical focus.",
+      "What short reset you would understand, remember, and trust during a race.",
+      "How consistently turn replay occurs across meets and race-pace training.",
+      "Whether an existing set before the review date will provide a fair test of an imperfect-feeling turn and the next length.",
+      "Which mixed maths topics create hesitation and what kind of support they actually require."
+    ],
+    "coach_view": {
+      "status": "aligned_observations",
+      "summary": "You and your coach independently describe more even recent pacing and continued searching for explanations after turns. Your coach’s preference for one turn focus, one example, and observation of the next length also matches your stated priority. The coach has confirmed that a short discussion can fit an existing review, but your coach still needs to choose the technical cue after you look at the example together. No reset has been selected or agreed, and your coach cannot know your exact race thoughts; those are unfinished questions, not disagreements.",
+      "refs": [
+        "A03",
+        "A04",
+        "A08",
+        "A14",
+        "COACH1",
+        "COACH2",
+        "COACH3",
+        "CONFIRM"
+      ]
+    },
+    "futures": [
+      {
+        "role": "current_course",
+        "headline": "Even pace continues while the turn stays noisy",
+        "what": "By November 2, your four-session plan continues and your recent even-pacing strength remains useful, but turns can still trigger several questions and follow you into the next length. Your maths slots and family time remain protected because training volume does not expand.",
+        "conditions": "No single cue or race reset becomes agreed and usable, while the existing pool and revision schedule stays unchanged.",
+        "first_sign": "You leave practice with several turn questions or keep reviewing the turn while the next length is already underway.",
+        "details": "This branch does not assume you get worse. It carries forward what is present: coach-planned volume, improving evenness, no trusted race reset, and a habit of expanding turn questions. Exams keep extra hours unattractive, while maths slots and family time remain protected if the week stays unchanged. The unresolved issue is whether current practice alone gives enough clarity to prevent turn replay under meet pressure; the coach can observe continuation, but not your exact thoughts.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A03",
+          "A06",
+          "A09",
+          "A12",
+          "A13",
+          "A20",
+          "COACH1",
+          "COACH3",
+          "CONFIRM",
+          "COACH2"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:pressure",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "role": "emerging_future",
+        "headline": "One example helps you understand the turn",
+        "what": "By November 2, the pattern already starting—one clip becoming one usable attempt and recent pace becoming more even—develops into a clearer sense of one useful turn change inside coach-planned sessions.",
+        "conditions": "Your coach continues using one-part examples, you try each focus in existing work, and the process does not expand into a long list of reminders or extra hours.",
+        "first_sign": "In an existing set, you identify the single turn focus from feel and carry the planned effort into the next length without adding checks.",
+        "details": "This path grows from two current signs rather than a promise: your last two race-pace sets were more even, and one coach-reviewed clip led to an attempt in the next session. Keeping the learning unit small could let you build your own feel while preserving maths revision and recovery. It would still not show that you can reset during a race; that transfer needs an imperfect-feeling turn under pressure and an observable next-length response.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A03",
+          "A07",
+          "A08",
+          "A09",
+          "A20",
+          "COACH1",
+          "COACH2"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "role": "better_future",
+        "headline": "You begin the maths without waiting for the first step",
+        "what": "Through November 2, you become more able to start mixed maths questions yourself. Your Wednesday and Sunday revision slots work toward their own school goal, while swimming stays within its four sessions and you keep the quiet family time you want.",
+        "conditions": "This path needs suitable worked examples, reliable ways to check your answers, and a fresh question to try alone. If you cannot choose the first step, ask for help with that exact gap. No new study hours are assumed.",
+        "first_sign": "In an existing revision slot, you choose a first step and solve a fresh mixed question correctly without someone starting it for you.",
+        "details": "This is a different route from improving a turn: school becomes more independent through the examples and attempts you already use. Four of six questions on one sheet shows some independent work, not a grade or proof that every topic is secure. Your personality profile suggests a clear example can help you begin, then ownership matters. We still need to know which topics stop you and what checking material or help is available. Success here would not prove that race-time overthinking has changed.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A10",
+          "A16",
+          "A17",
+          "A18",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "role": "bold_future",
+        "headline": "You race the whole 100, whatever the turn",
+        "what": "On November 2, you race the whole 100, return to the next length after a turn you dislike, and give yourself a real chance to work toward a personal best. The result is not promised.",
+        "conditions": "The coach-selected cue becomes familiar in existing sets, a simple reset proves usable during race-pace work, and exams, revision, recovery, and family time remain protected.",
+        "first_sign": "In a coached 100 effort, you keep racing after a turn you dislike and describe the next length rather than replaying the turn.",
+        "details": "This is bold because it joins several athlete-owned aims: use a useful turn change, leave an imperfect turn, race the whole 100, and work toward a personal best. Your more even recent pacing gives a base, but no split sheet or tested reset supports a time prediction. Exams and family time remain part of the route; adding hours would not automatically help. The key unknown is whether a simple practice response stays available when the result matters.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A02",
+          "A03",
+          "A05",
+          "A07",
+          "A14",
+          "A20",
+          "COACH1",
+          "CONFIRM",
+          "COACH2",
+          "A08"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:effort",
+          "BOS:pressure"
+        ]
+      },
+      {
+        "role": "downside_future",
+        "headline": "Too many checks crowd the race and revision",
+        "what": "If turn work expands into multiple cues or extra hours, you reach November 2 with the same replay risk and less room for quiet maths revision and family recovery. This is preventable, not a predicted decline.",
+        "conditions": "You leave sessions checking several things, reread a long list, or add pool time during exams instead of protecting the existing schedule.",
+        "first_sign": "Your turn note becomes a list, or swimming begins taking time already reserved for maths, recovery, or family.",
+        "details": "One earlier long list made it harder to settle, and you have said several end-of-practice questions can become several checks. During exams, extra pool work could also displace the quiet revision and family time that make the current week fit. The likely cost is not automatic performance decline; it is arriving with more things competing for attention and no clearer race response. We do not know whether anyone would actually propose extra work, so the warning sign—not the story—should guide prevention.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A07",
+          "A09",
+          "A10",
+          "A16",
+          "A20",
+          "COACH3"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:pressure",
+          "BOS:thriving"
+        ]
+      }
+    ],
+    "candidates": [
+      {
+        "candidate_id": "M1",
+        "domain": "training",
+        "action": "Ask your coach for one clear turn focus.",
+        "why": "Your priority is understanding one turn focus and carrying on with the next length. One clip previously helped you see and use one part, while several questions created checking. Your coach can replace five minutes of the existing review, choose the technical cue, and observe the next length without adding pool time.",
+        "when": "SETUP · September 21: ask your coach to demonstrate one focus and choose a planned set.\nTRY · Use that existing session if agreed; otherwise propose the existing September 22 session.\nCHECK · Agree a check-in after that set, before you leave.",
+        "who": "Ask your coach to show one focus, choose a set and name one visible next-length sign. Write that sign beside the focus. Your coach chooses the technique; you say whether you understand. Without agreement, the test waits.",
+        "action_signal": "You can explain the focus, have it written down, and know the agreed set and check-in. Without those agreements, setup is still pending.",
+        "progress_signal": "Your coach describes whether you carried on with the next length as planned. You say whether you recognized the focus or became caught in extra checks. Keep those observations separate.",
+        "review": "September 21 checks SETUP: is the focus clear, and are the set and check-in agreed?\nAfter the agreed set, check USEFULNESS: what did the coach see, and what did you notice?\nNo set or check-in means the result is still untested.",
+        "stop_or_change": "Focus unclear? Ask your coach to show or explain it differently.\nFocus clear, but you still replay the turn? Ask about testing one brief reminder to return to the next length; avoid adding a list.\nIf extra work crowds school or recovery, stop and change the arrangement.",
+        "bos_fit": "A specific, private example gives your thinking a fair opening, and a visible first step often helps you try independently. Keeping it to one cue also respects the way detailed checking can overtake the next task. This fit is supported across swimming and maths, but the actual technical cue must come from your coach.",
+        "refs": [
+          "A04",
+          "A07",
+          "A08",
+          "A09",
+          "A10",
+          "A20",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:communication",
+          "BOS:pressure",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "You chose understanding one turn focus as your priority, and this action begins with your question rather than treating a coach suggestion as your agreement.",
+            "refs": [
+              "A07",
+              "A10",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "The discussion can replace five minutes of an existing Monday review and does not require another pool session.",
+            "refs": [
+              "A06",
+              "A10",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "Your coach, not this assessment or you alone, selects and demonstrates the technical cue after reviewing the example.",
+            "refs": [
+              "A08",
+              "COACH2",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The action adds no pool time and respects the revision slots, exam preparation, and family evening already protected in your week.",
+            "refs": [
+              "A07",
+              "A16",
+              "A20",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The technical cue is deliberately unknown until coach review; the action creates one example and one written statement that you can question before testing.",
+            "refs": [
+              "A08",
+              "A10",
+              "COACH2",
+              "COACH3"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "DIRECT",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "DIRECT",
+          "dependency_burden": "LOW"
+        },
+        "review_schedule": {
+          "purpose": "setup_check",
+          "setup_check": "September 21: agree the focus, the planned set, one visible next-length sign and the check-in. This checks the arrangement, not whether it helped.",
+          "progress_check": "Immediately after the agreed set: September 21 if tested Monday, or September 22 if tested Tuesday. Compare the coach’s observation with your experience before leaving that session. If the set or check-in does not happen, usefulness remains untested."
+        }
+      },
+      {
+        "candidate_id": "M2",
+        "domain": "mindset",
+        "action": "During Monday’s existing review, ask your coach to agree one brief next-length reset and where it could be tested in a planned set.",
+        "why": "The main mental problem is not the turn alone; it is replaying it while another length remains. You want a simple reset, but none is agreed. Planning a single-set test with your coach could show whether one brief action returns attention to the race, without claiming it will change your time.",
+        "when": "Ask at the next existing Monday review. If it is September 21, that day checks setup only; the test waits for an agreed place in an existing set.",
+        "who": "If your coach agrees to help, you choose wording you understand and the coach checks where it fits a planned set. Until then, the test is pending.",
+        "action_signal": "You and your coach can each state the reset, when it begins, when it ends, and where it can be tested.",
+        "progress_signal": "After an imperfect-feeling turn in an agreed existing set, notice whether attention returns to the next length with less replay. No suitable turn means no valid test yet.",
+        "review": "On September 21, review any valid test already completed. If you only arranged it that day, record not yet tested; agree a later check-in after an existing set before judging whether to continue, change or stop.",
+        "stop_or_change": "Change or stop if the reset is hard to recall, conflicts with the coach’s cue, creates more self-monitoring, or the coach advises against it. If no imperfect turn occurs, record no valid test.",
+        "bos_fit": "Under pressure, your attention can narrow while your words lag, so a brief action may suit race time better than an explanation. Your BOS also suggests one clear first step can reopen movement. This remains uncertain: you have no trusted reset yet, and what works the next day may not work mid-race.",
+        "refs": [
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A15",
+          "COACH1",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:communication",
+          "BOS:pressure"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "You explicitly want to test a simple reset, while the action preserves your right to reject wording that does not feel usable.",
+            "refs": [
+              "A14",
+              "A15",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "The request uses an existing review without extra pool time. Whether the coach can support a reset test is still to be agreed; the inquiry alone is feasible.",
+            "refs": [
+              "A06",
+              "A07",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "This pass covers asking for help only. A coached reset test stays pending until the coach accepts that role and identifies a suitable existing set. No technical correction is prescribed.",
+            "refs": [
+              "A08",
+              "COACH2",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The inquiry adds no session. Any later test must be placed inside an agreed existing set and preserve revision, recovery and family time; no test is assumed agreed now.",
+            "refs": [
+              "A07",
+              "A20",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "No reset is currently known, but the action itself is a clarification: agree its meaning, start, end, and test location before using it.",
+            "refs": [
+              "A13",
+              "A14",
+              "A15",
+              "COACH3"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "MATERIAL",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "MODERATE",
+          "execution_feasibility": "FEASIBLE",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "MATERIAL",
+          "dependency_burden": "MODERATE"
+        }
+      },
+      {
+        "candidate_id": "M3",
+        "domain": "school",
+        "action": "In both existing maths slots, use one worked mixed-question example, then attempt the next mixed question independently before checking.",
+        "why": "School is a positive goal, not just a limit on swimming. You already use two revision slots, and one worked example can support an independent attempt. This route tests your exact maths goal without adding study time, while showing whether hesitation is mainly at the first step or later in the question.",
+        "when": "Use the confirmed Wednesday and Sunday revision slots before 2026-09-21. If no suitable worked example exists, ask your maths teacher what source to use.",
+        "who": "You make the independent attempts; a teacher is only asked to identify or verify a suitable example if your current material is unclear.",
+        "action_signal": "In each slot, you move from one worked example to a mixed question without viewing that question’s first step.",
+        "progress_signal": "Across mixed questions, you choose a first step and continue independently more often before looking back at the model.",
+        "review": "On 2026-09-21, continue the example-then-attempt method if independence is growing; change the example source if stuck; stop if it does not fit mixed questions.",
+        "stop_or_change": "Change the method if the example does not match the topic, reliable checking is unavailable, or the questions are not genuinely mixed. Stop if it encourages copying rather than independent starts.",
+        "bos_fit": "One model followed by your own attempt matches a pattern already useful in maths and fits your preference for a visible foothold. Limiting it to existing slots protects family time and swimming. The uncertainty is topic-specific: this method may help procedural starts, but it may not solve a deeper concept gap.",
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "Independent mixed maths work is your confirmed school goal, and you already want to keep the two revision slots.",
+            "refs": [
+              "A18",
+              "A20",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "Wednesday and Sunday revision slots are already in your stated week, so the test does not require finding new time.",
+            "refs": [
+              "A06",
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "A worked example is already part of how you study maths; an unsuitable or unclear source triggers a teacher question rather than guessing at new content.",
+            "refs": [
+              "A17"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The action uses existing school time and preserves the four-session swimming limit and quiet family evening.",
+            "refs": [
+              "A16",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "You have already described the exact learning move—follow a worked example, then attempt a question independently—and named the independence you want.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "WEAK",
+          "causal_reach": "LOCAL",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "INDIRECT",
+          "dependency_burden": "NONE"
+        }
+      },
+      {
+        "candidate_id": "M4",
+        "domain": "training",
+        "action": "Add one extra solo pool session this week to rehearse several turn corrections.",
+        "why": "Extra repetition can sound like the fastest route, but you expressly do not want more pool hours during exams, and your coach plans the sessions. Rehearsing several corrections alone also bypasses the coach’s cue choice and risks strengthening the checking problem without evidence that it will improve your next-length response.",
+        "when": "This would occur before 2026-09-21, but the required pool access, supervision, technical plan, and school or recovery fit are not established.",
+        "who": "You would carry it alone; no coach-led technical plan or supervision for an extra session is confirmed.",
+        "action_signal": "An extra session is booked and multiple corrections are listed, although that would show added activity rather than useful learning.",
+        "progress_signal": "A valid signal would require clearer turn understanding and better next-length continuation, not simply more laps; no evidence says this route will provide that.",
+        "review": "On 2026-09-21, stop this option; reconsider only if you request it and coach, school, access, safety, and recovery conditions all change.",
+        "stop_or_change": "Do not start while you want no extra pool hours, exams require quiet revision, technical guidance is absent, or the extra work would replace recovery or family time.",
+        "bos_fit": "Repetition can suit your dependable craft, but this version misuses that strength: several unsupervised corrections invite the exact checking that can crowd your next action. It also ignores your wider values and need for clear rails during exams. Familiar cooking shows you can experiment safely there; that does not establish solo technical experimentation in swimming.",
+        "refs": [
+          "A06",
+          "A07",
+          "A09",
+          "A10",
+          "A16",
+          "A20",
+          "COACH2",
+          "COACH3"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:effort",
+          "BOS:pressure",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": false,
+            "reason": "You explicitly said you do not want to add pool hours during exams, so this alternative conflicts with your stated boundary and confirmed training goal.",
+            "refs": [
+              "A07",
+              "A10",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": false,
+            "reason": "Your confirmed week contains four coach-planned sessions and fits only if extra hours are not added; pool access and supervision are also unknown.",
+            "refs": [
+              "A06",
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": false,
+            "reason": "Your coach plans training and must choose the technical cue, but no coach-selected corrections or supervision are confirmed for a solo extra session.",
+            "refs": [
+              "A06",
+              "COACH2",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": false,
+            "reason": "Exams begin soon, you want more quiet revision, and the current week preserves maths and family time only if no extra pool hours are added.",
+            "refs": [
+              "A07",
+              "A16",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": false,
+            "reason": "Several corrections are undefined, and your own evidence says multiple turn questions can become confusing checks; the coach has not selected the technical content.",
+            "refs": [
+              "A09",
+              "COACH2"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "NONE",
+          "causal_reach": "SYMPTOM_ONLY",
+          "evidence_support": "NONE",
+          "execution_feasibility": "INFEASIBLE",
+          "time_to_signal": "LONG",
+          "reversibility_low_regret": "REVERSIBLE",
+          "trajectory_leverage": "NONE",
+          "dependency_burden": "HIGH"
+        }
+      }
+    ]
+  },
+  "status": "proposed",
+  "move": {
+    "candidate_id": "M1",
+    "domain": "training",
+    "action": "Ask your coach for one clear turn focus.",
+    "why": "Your priority is understanding one turn focus and carrying on with the next length. One clip previously helped you see and use one part, while several questions created checking. Your coach can replace five minutes of the existing review, choose the technical cue, and observe the next length without adding pool time.",
+    "when": "SETUP · September 21: ask your coach to demonstrate one focus and choose a planned set.\nTRY · Use that existing session if agreed; otherwise propose the existing September 22 session.\nCHECK · Agree a check-in after that set, before you leave.",
+    "who": "Ask your coach to show one focus, choose a set and name one visible next-length sign. Write that sign beside the focus. Your coach chooses the technique; you say whether you understand. Without agreement, the test waits.",
+    "action_signal": "You can explain the focus, have it written down, and know the agreed set and check-in. Without those agreements, setup is still pending.",
+    "progress_signal": "Your coach describes whether you carried on with the next length as planned. You say whether you recognized the focus or became caught in extra checks. Keep those observations separate.",
+    "review": "September 21 checks SETUP: is the focus clear, and are the set and check-in agreed?\nAfter the agreed set, check USEFULNESS: what did the coach see, and what did you notice?\nNo set or check-in means the result is still untested.",
+    "stop_or_change": "Focus unclear? Ask your coach to show or explain it differently.\nFocus clear, but you still replay the turn? Ask about testing one brief reminder to return to the next length; avoid adding a list.\nIf extra work crowds school or recovery, stop and change the arrangement.",
+    "bos_fit": "A specific, private example gives your thinking a fair opening, and a visible first step often helps you try independently. Keeping it to one cue also respects the way detailed checking can overtake the next task. This fit is supported across swimming and maths, but the actual technical cue must come from your coach.",
+    "refs": [
+      "A04",
+      "A07",
+      "A08",
+      "A09",
+      "A10",
+      "A20",
+      "COACH2",
+      "COACH3",
+      "CONFIRM"
+    ],
+    "bos_refs": [
+      "BOS:mind",
+      "BOS:communication",
+      "BOS:pressure",
+      "BOS:thriving"
+    ],
+    "gates": [
+      {
+        "id": "athlete_agency",
+        "pass": true,
+        "reason": "You chose understanding one turn focus as your priority, and this action begins with your question rather than treating a coach suggestion as your agreement.",
+        "refs": [
+          "A07",
+          "A10",
+          "CONFIRM"
+        ]
+      },
+      {
+        "id": "real_week",
+        "pass": true,
+        "reason": "The discussion can replace five minutes of an existing Monday review and does not require another pool session.",
+        "refs": [
+          "A06",
+          "A10",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "qualified_guidance",
+        "pass": true,
+        "reason": "Your coach, not this assessment or you alone, selects and demonstrates the technical cue after reviewing the example.",
+        "refs": [
+          "A08",
+          "COACH2",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "school_and_recovery",
+        "pass": true,
+        "reason": "The action adds no pool time and respects the revision slots, exam preparation, and family evening already protected in your week.",
+        "refs": [
+          "A07",
+          "A16",
+          "A20",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "understandable",
+        "pass": true,
+        "reason": "The technical cue is deliberately unknown until coach review; the action creates one example and one written statement that you can question before testing.",
+        "refs": [
+          "A08",
+          "A10",
+          "COACH2",
+          "COACH3"
+        ]
+      }
+    ],
+    "selection_signals": {
+      "constraint_leverage": "DIRECT",
+      "causal_reach": "MECHANISM_CHAIN",
+      "evidence_support": "STRONG",
+      "execution_feasibility": "READY",
+      "time_to_signal": "NEAR",
+      "reversibility_low_regret": "BOUNDED_TEST",
+      "trajectory_leverage": "DIRECT",
+      "dependency_burden": "LOW"
+    },
+    "review_schedule": {
+      "purpose": "setup_check",
+      "setup_check": "September 21: agree the focus, the planned set, one visible next-length sign and the check-in. This checks the arrangement, not whether it helped.",
+      "progress_check": "Immediately after the agreed set: September 21 if tested Monday, or September 22 if tested Tuesday. Compare the coach’s observation with your experience before leaving that session. If the set or check-in does not happen, usefulness remains untested."
+    }
+  },
+  "receipt": {
+    "selection_model_version": "one-move-v2-inspectable-rubric-v1",
+    "dimensions": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "execution_feasibility",
+      "time_to_signal",
+      "reversibility_low_regret",
+      "trajectory_leverage",
+      "dependency_burden"
+    ],
+    "arithmetic": "EQUAL_CATEGORICAL_CONTRIBUTIONS_0_TO_3_SUMMED",
+    "maximum_score": 24,
+    "tie_break_order": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "reversibility_low_regret",
+      "dependency_burden",
+      "time_to_signal",
+      "execution_feasibility",
+      "trajectory_leverage"
+    ],
+    "selected_candidate_id": "M1",
+    "ranked_candidates": [
+      {
+        "candidate_id": "M1",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "LOW",
+            "contribution": 2,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 22,
+        "rank": 1,
+        "selected": true,
+        "rejection_reason": null
+      },
+      {
+        "candidate_id": "M3",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "WEAK",
+            "contribution": 1,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "LOCAL",
+            "contribution": 1,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "INDIRECT",
+            "contribution": 1,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "NONE",
+            "contribution": 3,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 18,
+        "rank": 2,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on constraint leverage, causal reach, trajectory leverage."
+      },
+      {
+        "candidate_id": "M2",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "MODERATE",
+            "contribution": 2,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "FEASIBLE",
+            "contribution": 2,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "MODERATE",
+            "contribution": 1,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 17,
+        "rank": 3,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on constraint leverage, evidence support, execution feasibility."
+      }
+    ],
+    "explainability": "The selected candidate has the strongest inspectable causal, evidence, execution, learning, reversibility, trajectory, and dependency profile under the fixed rubric.",
+    "probability_semantics": "NONE_NOT_AN_INTERVENTION_PROBABILITY_MODEL",
+    "receipt_hash": "bb4f1bfc3669314e86633581e2351a2a51bd908b9e835950141f2512ed3cf961"
+  },
+  "audit": {
+    "pass": true,
+    "issues": [],
+    "checks": [
+      "Identity, age, pronouns, sport, synthetic status, assessment date, review date, and horizon/meet date were checked against the saved packet; no identity, age, grade, or meet-date substitution was found.",
+      "All four domain goal strings exactly reproduce the confirmed athlete goals: sport, training, mindset, and school.",
+      "The sport strength is supported by both athlete and coach observations of the last two coached race-pace sets, with no invented split numbers. The report correctly separates observed pacing from Eli's self-reported race thoughts and notes that the coach cannot know those thoughts exactly.",
+      "The training strength, gap, and proposed one-example/one-cue help are supported. The technical cue is not invented, and the report generally leaves technical selection with the coach while preserving Eli's ability to say whether the cue is understandable.",
+      "The mindset strength and gap are supported by Eli's account. The report correctly states that no reset has yet been selected, agreed, or shown to work, and it does not promise a time benefit. M2 nevertheless needs the agreement and eligibility correction identified above.",
+      "The school domain is positive and prominent: Grade 11, keeping up, biology going well, the one-sheet four-of-six result, the limitation that this is not a grade, the exact confirmed maths goal, and the existing Wednesday/Sunday revision slots are all visible.",
+      "The report distinguishes the known maths behavior from uncertain causes. It does not falsely decide whether hesitation comes from concept understanding, method selection, or early checking.",
+      "The accepted BOS is used as fit/context rather than rewritten. No imported personality diagnosis or revised BOS claim was found. Cooking, quiet processing, detail focus, broader identity, and private/specific feedback all occur in the accepted BOS.",
+      "The main-obstacle statement is explicitly labeled \"plausible,\" so it is presented as a hypothesis rather than as proven causation.",
+      "The coach view correctly treats the observations as aligned rather than inventing a disagreement. It also preserves the coach's stated limit: he can observe behavior but cannot know Eli's exact race thoughts.",
+      "All five futures were audited. They are substantively distinguishable: continuation of the current pattern, emerging technical feel, a better cue-plus-reset practice response, bold meet-day transfer, and a downside involving added checks/load. No pair is a substantive duplicate.",
+      "The futures avoid numerical odds and generally use conditions rather than guarantees. The bold future explicitly says the personal-best result is not promised, and the downside future is explicitly described as preventable rather than predicted.",
+      "The emerging future is separated from the better future by stating that technical feel alone would not establish a race reset. The bold future is further separated by meet-day whole-race transfer.",
+      "Candidate M1 has athlete agency, real-week fit, coach-controlled technical guidance, and no added pool hours. Its eligibility is reasonable as a bounded proposal, subject to the review-date sequencing correction.",
+      "Candidate M2 is athlete-requested and low-load as an inquiry, but the actual coached test is conditional on an unconfirmed coach agreement; its current gate wording overstates that part of eligibility.",
+      "Candidate M3 directly serves the confirmed school goal, uses the two existing 40-minute revision slots, preserves swimming/family time, and sends unsuitable or unclear materials to a maths teacher rather than inventing mathematical instruction.",
+      "Candidate M4 was checked despite being an unviable alternative. All five gates correctly fail, its signals mark it infeasible and unsupported, and its text explicitly says not to start. It conflicts with Eli's no-extra-pool-hours boundary and is not eligible.",
+      "M1 and M2 are not substantive duplicates: M1 concerns coach-selected technical understanding, while M2 concerns an athlete-understood next-length reset. They should nevertheless not be assumed to share the same five-minute window unless one is selected or combined by agreement.",
+      "The four 75-minute coach-planned pool sessions, the two existing 40-minute maths slots, exams, family time, and the short Saturday café shift were considered when checking load. The eligible proposals add no session or study hours; the only extra-pool proposal is M4, which is correctly gated out.",
+      "No parent coaching role was invented. The actions leave technical coaching with the coach, school attempts with Eli, and any teacher involvement conditional on needing a suitable maths source.",
+      "No specific turn mechanics, unsupervised technical correction, arbitrary performance odds, guaranteed personal best, or claim that a suggested reset has already worked was accepted.",
+      "All three previous material findings are resolved, and all four previous minor findings are resolved by the supplied patches.",
+      "M1 now separates setup from efficacy. If the cue is selected on 2026-09-21, the review records it as not yet tested and moves the efficacy judgment to a later check-in after an existing coached set. The progress signal also preserves the possibility that no suitable set has occurred.",
+      "M2 now separates the feasible inquiry from the conditional coached test. The who field makes coach involvement conditional, and the real-week, qualified-guidance, and school-and-recovery gate reasons explicitly state that no coached reset test is currently agreed.",
+      "M2's action is a request for agreement, not a claim that agreement already exists. Its action signal describes what would establish setup, while its progress and review fields require an agreed existing set and a valid imperfect-feeling turn before efficacy can be judged.",
+      "The revised M1 and M2 timing does not assume that the 2026-09-21 APA review follows pool work or that same-day setup supplies evidence. Neither candidate invents a later date or additional pool session.",
+      "The shorter M1 action headline is consistent with A08, COACH2, and COACH3. The adjacent when and who fields retain the omitted timing and role detail: the coach selects and demonstrates the technical cue, while Eli determines whether he understands it.",
+      "The M1 progress language does not claim that the focus has worked. It requires a suitable coached set and otherwise preserves the result as not yet tested.",
+      "The M2 progress language does not claim that a reset has worked or will improve time. It requires an imperfect-feeling turn in an agreed existing set and records the absence of a suitable turn as no valid test.",
+      "The revised better-future language preserves revision and family time as independently supported priorities and labels additional processing room as a possibility whose effect on the cue or reset remains unobserved.",
+      "The sport-domain wording now accurately says that no split sheet was supplied for this assessment; it no longer implies that a split sheet does not exist or is generally unavailable.",
+      "A10 has been added to the school-domain references, correctly tracing the exact 2026-10-05 exam-start statement.",
+      "The coach-view summary now preserves the source role allocation: the coach chooses the technical cue after coach and athlete review the example together. It also avoids inventing coach gender.",
+      "COACH2 has been added to both affected future reference lists, and A08 has also been added where the coach-selected technical-cue condition is stated.",
+      "No amended field introduces a new role, timing, causal, progress, source-traceability, or agreement inaccuracy. Unknown reset wording, coach acceptance, suitable-set availability, occurrence of an imperfect turn, later check-in date, and efficacy all remain unresolved where the packet leaves them unresolved.",
+      "The required category label \"Warrior Mindset\" is accepted as authorized product vocabulary and is not treated as an unsupported athlete or source claim.",
+      "Source fidelity: The revised action retains the coach’s supported role of selecting and demonstrating the technical cue after reviewing an example (COACH2–COACH3), while the athlete reports whether the cue makes sense rather than having silence treated as agreement (A08, A15).",
+      "Action headline and follow-through: The headline is accurately framed as a request at the September 21 review, not as a completed agreement or guaranteed result. The adjacent when, who, action-signal, and review fields appropriately supply the test, observation, and follow-up details omitted from the shorter headline.",
+      "Timing and sequencing: September 21 is the confirmed review date and, as supplied, is a Monday. Using the first five minutes of the existing Monday review is supported by COACH3. The sequence is clear: discuss and demonstrate the focus, confirm whether an existing set and follow-up can be agreed, conduct the set if available, and judge usefulness only afterward.",
+      "Conditional coach agreement: Observation and immediate follow-up are explicitly requested rather than assumed: the athlete asks which planned set could be used, whether a check-in can occur afterward, and whether the coach can watch. Mutual agreement on a suitable set and check-in is presented as an action-completion signal, not as an existing fact. The alternative-set language remains a proposed arrangement within existing training rather than a guaranteed opportunity.",
+      "Observation versus internal experience: The coach reports only the observable behavior of carrying on with the next length. The athlete separately reports recognizing the focus or becoming caught in additional checks. This respects COACH1’s limitation that the coach cannot know exactly what the athlete is thinking.",
+      "Setup versus progress: The action signal measures whether one focus has been understood, written down, and paired with a mutually agreed test and follow-up. It does not claim improved performance. Usefulness is judged only after the relevant set, and the review explicitly requires an untested status when no test has occurred.",
+      "No unsupported guarantees or health claims: The edits add no clock time, medical claim, promised personal best, extra pool time, or guaranteed technical outcome. The five-minute duration is directly supported by COACH3, and any set observation or immediate check-in remains subject to request, availability, and agreement.",
+      "Other patched wording: Replacing procedural phrases such as “race continuity” and “foothold” with “how you swim the next length” and “first step” preserves the supported meaning without adding new factual claims.",
+      "Changed headline: “One clear focus. Then swim the next length.” accurately condenses the confirmed priority to understand one turn focus and stay with the following length; it does not claim an outcome.",
+      "Changed sport-domain help: the proposed division of perspectives is supported. COACH2 supports the coach selecting a technical focus and observing continuation into the next length, while the athlete can report their own experience. “Could choose” keeps the proposal conditional and does not invent agreement.",
+      "Changed training-domain detail: replacing the gendered pronoun with “the coach” preserves the previously supported claim and avoids an unsupported gender assumption. The five-minute existing-review option, coach-selected cue, and absence of an agreed new turn plan remain accurate to COACH2 and COACH3.",
+      "Changed emerging-future headline and condition: one example helping the athlete understand the turn is supported by A08, and avoiding a long list of reminders is supported by A09. Continued coach use of one-part examples is stated as a condition, not an existing agreement.",
+      "Revised better future: the school path is independently useful and source-supported by A17, A18, A20, and CONFIRM. It explores choosing the first step on mixed maths questions without changing the athlete’s swimming priority or the selected training move.",
+      "Revised better-future evidence limits: four of six questions is correctly treated as evidence from one practice sheet rather than a grade, and the future expressly says it is not proof that every topic is secure. Solving one fresh question is a progress sign, not a promised grade.",
+      "Revised better-future dependencies: suitable examples, answer-checking methods, and a fresh question are framed as needed conditions; their availability is not asserted. The instruction to ask for help applies only if the athlete cannot choose a first step, and no helper’s availability or agreement is invented.",
+      "Five-future role check: the futures are genuinely differentiated as baseline continuation, emerging technical understanding, an independent school-development route, bold meet-day transfer, and a downside involving crowded attention and displaced time. They do not form a single linear swimming ladder.",
+      "Future-outcome check: no personal best, grade, or other result is guaranteed. The bold future explicitly says the result is not promised and depends on a familiar cue, a usable practice reset, and protected school and recovery commitments. The school future describes conditional skill development rather than a grade outcome.",
+      "Coach-agreement check across futures: continued examples, cue familiarity, observation, reset use, set selection, and check-ins are either future conditions or requests. No future states that the coach has agreed to a reset; this remains consistent with COACH3.",
+      "Changed selected-move timing: September 21 is Monday and matches the confirmed review date and existing Monday review. September 22 is Tuesday and matches an existing Tuesday pool session in A06. Tuesday is proposed only if no Monday set remains; availability and agreement are not asserted.",
+      "Changed selected-move role: coach selection of the technical focus is directly supported by COACH2 and COACH3. Asking the coach to name an already planned set is compatible with the coach-planned schedule in A06, and the text makes the observation and check-in dependent on agreement.",
+      "Changed action signal: the focus, written reminder, agreed set, and agreed check-in are appropriately treated as setup evidence. The explicit pending state prevents an unagreed arrangement from being presented as complete.",
+      "Changed review field: follow-through remains conditional on an agreed set. If the set or check-in does not occur, usefulness stays untested rather than being inferred. This avoids inventing coach availability, observation, or benefit.",
+      "Changed personality-profile wording: replacing “BOS” with “personality profile,” “foothold” with “starting point,” and “cue” with “written reminder” changes style only and preserves the previously source-checked interpretations.",
+      "Scope was limited to the five supplied patches: action, when, who, review, and stop_or_change. Unchanged report fields were not re-audited.",
+      "Source fidelity is maintained. The athlete asked for one useful turn change, a brief one-to-one explanation, and no added pool hours (A07, A10). The coach said they would show one turn focus, choose the technical cue after reviewing the example, observe the next length, and use five minutes of the existing Monday review without adding pool time (COACH2, COACH3). The coach also plans the pool sessions (A06), supporting the proposed request to choose a planned set.",
+      "The shorter action headline accurately states the initiating action—asking the coach for one clear turn focus—while the adjacent when and who fields supply the demonstration, set selection, observation, and check-in details. It does not claim that the request has already been accepted or completed.",
+      "The timing and sequencing are clear. September 21, 2026 is the confirmed Monday review and is used for setup. A same-session test is conditional on agreement; otherwise, the athlete only proposes using the existing Tuesday, September 22 session. The usefulness check occurs only after the agreed set. No clock time or guaranteed opportunity is introduced.",
+      "Progress remains untested when required. The review expressly states that no set or no check-in leaves the result untested, so setup completion is not confused with evidence of progress or usefulness.",
+      "Observation and internal experience are correctly separated. The coach reports what was externally observed about continuing into the next length, while the athlete reports whether the focus was recognized and whether attention became caught in additional checking. The coach is not assigned knowledge of the athlete’s internal thoughts or feelings.",
+      "Coach participation is explicitly requested rather than presumed: “Could you…” frames the demonstration, set choice, and observation as a proposal; the set and check-in must be agreed; and without agreement the test waits. The coach’s technical authority is consistent with COACH2 and COACH3.",
+      "The possible reset remains conditional and unagreed. The athlete is told to ask about testing one brief reminder only if the turn focus is clear but replay continues. This does not claim that a reset has been selected, accepted, tested, or effective, consistent with A14 and COACH3.",
+      "The revisions introduce no clock time, guaranteed training opportunity, performance promise, outcome claim, or medical claim.",
+      "The revised opening is source-faithful. Quiet competitiveness and the personal-best aim are supported by A02 and A11; the lack of interest in being the center of attention is supported by BOS:identity and BOS:effort. Beginning from a concrete example and then applying or adapting it is supported across swimming by A08, maths by A17–A18 and BOS:mind, and cooking by BOS:mind, BOS:effort and BOS:adaptability.",
+      "The short action headline accurately identifies the central first move—asking the coach for one turn focus. The adjacent when and who fields supply the necessary follow-through of selecting an existing set, naming an observable sign and arranging a check-in, so the shorter headline does not conceal a materially different action.",
+      "The new coach roles are supported and appropriately bounded. A06 establishes that the coach plans the pool sessions; COACH2 supports the coach selecting the technical cue, showing the focus and observing the next length; and COACH3 supports using five minutes of the existing Monday review and providing one written cue. Naming a visible sign is framed as something the athlete asks the coach to do, not as an already completed agreement.",
+      "The proposed arrangement is not represented as an existing agreement or outcome. The athlete is told to ask the coach, same-session testing is conditional on agreement, setup remains pending without the agreements, and the test waits without agreement. This is consistent with A15 and with COACH3's statement that no reset has yet been chosen or agreed.",
+      "The timing and review sequence are coherent. September 21 is the confirmed Monday review date and is used first for setup; a trial can occur later in that existing Monday session only if agreed. September 22 is correctly treated as the existing Tuesday-session alternative and only as a proposal. No clock time or guaranteed testing opportunity is invented.",
+      "Setup and usefulness are clearly separated. September 21 first checks whether the focus, existing set, visible sign and after-set check-in have been agreed. Usefulness is checked only after an agreed set, either on September 21 or conditionally on September 22.",
+      "Observation and internal experience remain separate. The coach reports the observable next-length behavior, consistent with COACH2, while the athlete reports recognizing the focus or becoming caught in extra checking, consistent with A04 and A09. The patch does not claim that the coach knows what the athlete thinks or feels.",
+      "The untested state is explicit: if the set or check-in does not occur, usefulness remains untested. The edits add no unsupported split, clock time, guaranteed opportunity, result, performance promise or medical claim."
+    ],
+    "previous_accepted_audit_sha256": "25451287bac3c811b71ce36124b449a89367decd55abece5740dafb344dea2ef",
+    "acceptance_method": "Previously accepted full source audit plus exact clarity-patch audit"
+  },
+  "receipts": [
+    {
+      "stage": "synthesis-futures-candidates",
+      "request": "3bbc5ea2e2785ce3618e4d25fa9b430b8cabc779e041ddad9d32370c49beceb8",
+      "output": "c7b610bd4d565a2194978808e03277c6bd8254272480709d14c315a331b7b2fd",
+      "response_id": "resp_088f9535cdfdc4aa016aa818002d6087d085cc275cc5308257"
+    },
+    {
+      "stage": "independent-source-audit",
+      "request": "a094f6b3b3d84243c67a8b7cecf0fe2f872e5df83429d0432fe6dec22639f955",
+      "output": "bb279a42cfa521c4dc916f3acdc7290115779ccaeea073718eec711ff108a6ad",
+      "response_id": "resp_09d0abfa134b15ba016aa81b7321b487d0a8373341689f0e8c"
+    },
+    {
+      "stage": "independent-patch-audit",
+      "request": "16f06857e967f9e4b86ba17a1bbcf1d648447ef0db07ce0b90f6ae29a855c441",
+      "output": "2c74b0b0694403d9eef429605fdf416120fec90b7fba6344621c440e014a0e7a",
+      "response_id": "resp_02e3d1593783c4a7016aa81f40bddc87d08f32599bfb5cb829"
+    },
+    {
+      "stage": "source-and-action-consistency",
+      "request": "b244768144480bb48f44d3de04c5457cf9cdbad847add05a20dcec2071b286e2",
+      "output": "41acce328f535b09bf1e3331e8a62e532902619c179eef978e0cfc65080e5010",
+      "response_id": "resp_0dcf4d5410e6b574016aa82265d18487d0a1363ed9994593a8"
+    },
+    {
+      "stage": "independent-futures-and-clarity-audit",
+      "request": "7b4b9f6f8120cbf39b7e868b25f7b17fd416584f3f7ae90b10571787f06f4dbd",
+      "output": "dce4b7755659d7537342c8e91704302975754d6cafcb6bee3e6c1b6161575c34",
+      "response_id": "resp_0b8fed52b764dc79016aa82658e8b087d0bd1443967b4c1ce4"
+    },
+    {
+      "stage": "source-and-action-consistency",
+      "request": "b7cfe75e0a11ea645605cc6e7518274b2ee7070664020f7346e78227edef4944",
+      "output": "1abd72d66ebe57b5d35ac9894e16f9418a72d055ddb69e180354a130655fe3f8",
+      "response_id": "resp_0a379a27bf6f609d016aa8284a518487d0905b5ba89f13b7c7"
+    },
+    {
+      "stage": "source-and-action-consistency",
+      "request": "0d3b195c5e09180b0fb4c4b9586afd1ea69919ba16e04e75ad7ebf52e2a03422",
+      "output": "5820db7a7fb452c63a9cda8604a8db6b496fd6319b6aa4fcb82df74bae8db733",
+      "response_id": "resp_009b03ddaa01d62d016aa829e6f17087d0b619d164082780d7"
+    }
+  ],
+  "created_at": "2026-09-14T17:10:40.503Z",
+  "artifact_sha256": "47f205ed57a9cebbd6fab40ad95290f586590e3a05163b09d6498c2a2af7db20"
+}

@@ -4,6 +4,14 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/darren-library",
+      "destination": "/api/internal/darren-demo-library?path=library"
+    },
+    {
+      "source": "/darren-library/:path*",
+      "destination": "/api/internal/darren-demo-library?path=:path*"
+    },
+    {
       "source": "/:path((?!api(?:/|$)).*)",
       "destination": "/"
     }
@@ -27,6 +35,10 @@
     "api/internal/subscription-v1-runtime.js": {
       "maxDuration": 800,
       "includeFiles": "api/engine/subscriptionV1/sourceLibrary/**"
+    },
+    "api/internal/darren-demo-library.js": {
+      "maxDuration": 180,
+      "includeFiles": "server/darrenLibraryV1/**"
     },
     "api/internal/athlete-living-consult-one-shot-v1.js": {
       "maxDuration": 800,

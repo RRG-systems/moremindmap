@@ -64,10 +64,15 @@ export function athleteConsultingDarrenDemoEnabled(env = globalThis.process?.env
     && env.ATHLETE_CONSULTING_DARREN_DEMO_ENABLED === 'true';
 }
 
+export function darrenDemoLibraryEnabled(env = globalThis.process?.env || {}) {
+  return leadershipDemoEnabled(env)
+    && env.DARREN_DEMO_LIBRARY_ENABLED === 'true';
+}
+
 export function sameOriginLeadershipDemoRequest(req, { allowMissingForGet = false } = {}) {
   const method = String(req.method || 'GET').toUpperCase();
   const supplied = String(req.headers?.origin || req.headers?.referer || '').trim();
-  if (!supplied && method === 'GET' && allowMissingForGet) return true;
+  if (!supplied && (method === 'GET' || method === 'HEAD') && allowMissingForGet) return true;
   try {
     return new URL(supplied).origin === requestOrigin(req);
   } catch {
@@ -125,6 +130,7 @@ export async function issueLeadershipLauncherCapability({ redis, req, env = glob
       ? ['recruiting', 'subscription', 'athlete-consulting-tool']
       : ['recruiting', 'subscription'],
     synthetic_only: true,
+    library_read_scope: darrenDemoLibraryEnabled(env) ? 'approved_saved_bos_v1' : null,
     issued_at: now.toISOString(),
     expires_at: new Date(now.getTime() + LAUNCHER_TTL_SECONDS * 1000).toISOString(),
     browser_binding_hash: clientKey(req),
@@ -148,6 +154,7 @@ export async function authenticateLeadershipLauncher({ redis, req, now = new Dat
     || capability.synthetic_only !== true || capability.browser_binding_hash !== clientKey(req)
     || ![['recruiting', 'subscription'], ['recruiting', 'subscription', 'athlete-consulting-tool']]
       .some((allowed) => JSON.stringify(capability.allowed_products) === JSON.stringify(allowed))
+    || ![null, 'approved_saved_bos_v1'].includes(capability.library_read_scope ?? null)
     || !isCurrent(capability.expires_at, now)) {
     return { ok: false, code: 'LEADERSHIP_DEMO_LAUNCHER_INVALID', status: 401 };
   }

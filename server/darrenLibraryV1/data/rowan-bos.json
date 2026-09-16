@@ -1,0 +1,1501 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-99A1DB45",
+  "intake_mode": "static",
+  "subject_sha256": "c6c8f3aac48bce98db3dc6978e5bafe90e37cfa14de636728c0c8f1a92bf0368",
+  "subject": {
+    "name": "Rowan Ellis",
+    "age": 17,
+    "gender": "nonbinary",
+    "pronouns": "they/them",
+    "sport": "Climbing"
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "C01",
+        "statement": "Outside sport, they report valuing making things, time alone, and a small number of trusted relationships. Engineering or repair work is one possible future interest, but they do not believe a hobby has to become a job and want room to become good at something useful.",
+        "kind": "direct",
+        "refs": [
+          "Q01"
+        ],
+        "alternative": "No alternative is needed; this records their stated values and possibilities rather than predicting a career.",
+        "confidence": "strong",
+        "contexts": [
+          "outside_sport",
+          "interests",
+          "future"
+        ]
+      },
+      {
+        "id": "C02",
+        "statement": "A supported interpretation is that usefulness and understanding how things work matter more to them than turning every interest into an achievement or public identity.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q03",
+          "Q10"
+        ],
+        "alternative": "Their interest in useful work could be practical career exploration rather than a broad identity theme, and the examples are concentrated in repair and technical activities.",
+        "confidence": "moderate",
+        "contexts": [
+          "outside_sport",
+          "interests",
+          "future"
+        ]
+      },
+      {
+        "id": "C03",
+        "statement": "They enjoy seeing a friend and can talk for a long time about a shared interest, but usually need space afterward. Groups are especially tiring when many conversations are happening at once.",
+        "kind": "direct",
+        "refs": [
+          "Q04"
+        ],
+        "alternative": "No alternative is needed; this is their reported social and recovery pattern.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "groups",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C04",
+        "statement": "Their connection style appears selective rather than generally distant: trust, shared focus, and one-to-one depth make interaction easier, while crowded or divided group attention raises the cost.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q04",
+          "Q19"
+        ],
+        "alternative": "The main factor may be noise and simultaneous input rather than relationship depth itself; unfamiliarity and group size have not been separated fully.",
+        "confidence": "moderate",
+        "contexts": [
+          "friendships",
+          "groups",
+          "outside_sport"
+        ]
+      },
+      {
+        "id": "C05",
+        "statement": "They report that requests for missing information are sometimes heard as rude. They say they care about the people involved but do not always know what response those people expect.",
+        "kind": "direct",
+        "refs": [
+          "Q02"
+        ],
+        "alternative": "No alternative is needed; this records both their intent and the feedback they report receiving without deciding which interpretation was correct.",
+        "confidence": "strong",
+        "contexts": [
+          "communication",
+          "groups",
+          "relationships"
+        ]
+      },
+      {
+        "id": "C06",
+        "statement": "Their communication often gives priority to explicit information and solving the immediate gap. That can make the content clear to them while leaving care, reassurance, or tone less visible to someone else.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q11",
+          "Q17"
+        ],
+        "alternative": "Some misunderstandings may come from particular receivers, unclear situations, or different expectations about politeness rather than a stable communication pattern.",
+        "confidence": "strong",
+        "contexts": [
+          "communication",
+          "friendships",
+          "school",
+          "groups"
+        ]
+      },
+      {
+        "id": "C07",
+        "statement": "They find feedback easiest to use when it states what is wrong and what the result needs to be. Written feedback helped, while hints that assume shared understanding are difficult for them to act on.",
+        "kind": "direct",
+        "refs": [
+          "Q11"
+        ],
+        "alternative": "No alternative is needed; this is a direct report of usable and less usable feedback formats.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "communication"
+        ]
+      },
+      {
+        "id": "C08",
+        "statement": "Diagrams, manuals, examples, photographs, and written notes appear to give them a stable object they can inspect, revisit, and question precisely before or alongside asking another person.",
+        "kind": "inference",
+        "refs": [
+          "Q10",
+          "Q11",
+          "Q14"
+        ],
+        "alternative": "These tools may mainly fit technical and school tasks; the packet does not show whether they prefer the same format for emotional or informal conversations.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "interests",
+          "sport",
+          "communication"
+        ]
+      },
+      {
+        "id": "C09",
+        "statement": "They are motivated by problems they can investigate, as shown by repairing an old speaker to find out why it failed. They find it harder to care about tasks when instructions change without an explanation.",
+        "kind": "direct",
+        "refs": [
+          "Q03"
+        ],
+        "alternative": "No alternative is needed; this records their stated motivation and difficulty, with the speaker repair treated as one event.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "school",
+          "effort"
+        ]
+      },
+      {
+        "id": "C10",
+        "statement": "Effort is most available when they can see a reason, discover something new, or affect the outcome. Repetition without learning and changing rules without reasons both weaken engagement.",
+        "kind": "inference",
+        "refs": [
+          "Q03",
+          "Q09"
+        ],
+        "alternative": "The online course may simply have been set at the wrong level, and unexplained instructions can reduce anyone's engagement; recurrence in less technical settings is not yet known.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "interests",
+          "effort"
+        ]
+      },
+      {
+        "id": "C11",
+        "statement": "With something unfamiliar, they tend to read enough to get started and then try it. Unfamiliar problems interest them more than unfamiliar social events, and a failed first solution can make a climbing route more interesting.",
+        "kind": "direct",
+        "refs": [
+          "Q07"
+        ],
+        "alternative": "No alternative is needed; this records a clear difference they report between practical and social novelty.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "sport",
+          "social"
+        ]
+      },
+      {
+        "id": "C12",
+        "statement": "Their comfort with uncertainty is domain-specific. Practical uncertainty is appealing when they can gather information, try something, and receive feedback; social uncertainty appears less attractive when the cues and expectations are less explicit.",
+        "kind": "inference",
+        "refs": [
+          "Q04",
+          "Q07",
+          "Q18"
+        ],
+        "alternative": "The difference may be driven more by noise, familiarity, or shared interests than by practical-versus-social uncertainty itself.",
+        "confidence": "moderate",
+        "contexts": [
+          "sport",
+          "interests",
+          "groups",
+          "social"
+        ]
+      },
+      {
+        "id": "C13",
+        "statement": "They prefer a clear sequence and a definition of what finished means. When a robotics connection failed, they changed the connection but retained the test plan, and they explicitly reject the idea that being organized means hating change.",
+        "kind": "direct",
+        "refs": [
+          "Q08",
+          "Q20"
+        ],
+        "alternative": "No alternative is needed; this preserves both the reported event and their explicit correction of a possible misreading.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "groups",
+          "identity"
+        ]
+      },
+      {
+        "id": "C14",
+        "statement": "Organization seems to function as a stable frame for adaptation rather than a demand that the first method survive. They are willing to revise the route while keeping the purpose, test, or completion standard steady.",
+        "kind": "inference",
+        "refs": [
+          "Q08",
+          "Q20"
+        ],
+        "alternative": "This may partly reflect a learned robotics testing process; examples from home, schoolwork, and relationships would show how broadly it applies.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "school",
+          "interests"
+        ]
+      },
+      {
+        "id": "C15",
+        "statement": "They say they continue when there is a reason, want to change an approach that repeatedly fails, and stopped an online course because most of it covered material they already knew.",
+        "kind": "direct",
+        "refs": [
+          "Q09"
+        ],
+        "alternative": "No alternative is needed; stopping is recorded as a choice about low learning value, not as evidence for or against general persistence.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "interests",
+          "effort"
+        ]
+      },
+      {
+        "id": "C16",
+        "statement": "Their persistence is conditional and experimental: they can stay with a worthwhile problem while replacing an unproductive method, and they are also willing to stop when the activity no longer offers a reason to continue.",
+        "kind": "inference",
+        "refs": [
+          "Q07",
+          "Q08",
+          "Q09",
+          "Q14",
+          "Q20"
+        ],
+        "alternative": "The strongest continuation examples come from activities they already find interesting, so persistence on necessary but less interesting work remains less clear.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "robotics",
+          "sport",
+          "effort"
+        ]
+      },
+      {
+        "id": "C17",
+        "statement": "For a difficult school choice, they compared what each option would actually involve, read a course outline, spoke with the teacher, and considered whether the subject would still interest them a year later.",
+        "kind": "direct",
+        "refs": [
+          "Q06"
+        ],
+        "alternative": "No alternative is needed; this is one reported decision and does not establish how every choice is made.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "future",
+          "decisions"
+        ]
+      },
+      {
+        "id": "C18",
+        "statement": "Their decision style appears grounded in concrete consequences and medium-term fit. They use other people as sources of relevant information, while the final comparison remains tied to their own criteria.",
+        "kind": "inference",
+        "refs": [
+          "Q06",
+          "Q10"
+        ],
+        "alternative": "The subject choice was consequential and may have prompted more research than an ordinary decision; speed and consultation may vary with stakes.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "future",
+          "decisions"
+        ]
+      },
+      {
+        "id": "C19",
+        "statement": "In a group, they speak when they think they can move the work forward. In robotics they proposed testing two designs, were content for someone else to present, and did not need to direct the entire group.",
+        "kind": "direct",
+        "refs": [
+          "Q05"
+        ],
+        "alternative": "No alternative is needed; this is their reported group role in one setting.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "groups"
+        ]
+      },
+      {
+        "id": "C20",
+        "statement": "They appear more interested in contributing a useful direction than in owning the spotlight or every decision. Their involvement is purposeful and selective rather than either passive or automatically in charge.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q15"
+        ],
+        "alternative": "Not presenting could reflect the role, confidence in that moment, or simple preference; more settings are needed before treating low interest in visibility as broad.",
+        "confidence": "moderate",
+        "contexts": [
+          "robotics",
+          "groups",
+          "school"
+        ]
+      },
+      {
+        "id": "C21",
+        "statement": "They say they help groups by breaking a large problem into smaller tests, finding and sharing useful information, and asking people which part they want to do because personally doing everything is too slow.",
+        "kind": "direct",
+        "refs": [
+          "Q15"
+        ],
+        "alternative": "No alternative is needed; this records how they describe their contribution rather than independently rating its effectiveness.",
+        "confidence": "strong",
+        "contexts": [
+          "groups",
+          "school",
+          "robotics"
+        ]
+      },
+      {
+        "id": "C22",
+        "statement": "Their preferred problem-solving is not purely solitary. They first make the question clear, then use documents, knowledgeable people, shared information, and divided work when those resources improve the result or save time.",
+        "kind": "inference",
+        "refs": [
+          "Q10",
+          "Q15"
+        ],
+        "alternative": "The evidence comes mainly from technical tasks and groups; they may rely more heavily on direct personal effort in other parts of life.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "groups",
+          "robotics"
+        ]
+      },
+      {
+        "id": "C23",
+        "statement": "They recognize that searching for an exact explanation can outlast the need for a merely workable one. While comparing parts, they spent long enough that an order deadline was nearly missed; after someone pointed out the time, they chose.",
+        "kind": "direct",
+        "refs": [
+          "Q16"
+        ],
+        "alternative": "No alternative is needed; this is a bounded example of a self-identified strength becoming costly, not proof that it happens often.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "groups",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C24",
+        "statement": "A plausible pressure point is that exact comparison can hold attention until the time cost becomes explicit. Once the deadline was made visible, they could shift from finding the best explanation to making a workable choice.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q16"
+        ],
+        "alternative": "The delay may have been a one-off result of unfamiliar parts or unclear ordering consequences rather than a recurring need for an external time cue.",
+        "confidence": "moderate",
+        "contexts": [
+          "robotics",
+          "decisions",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C25",
+        "statement": "When a robotics peer said they were dismissing an idea, they asked for an explanation and suggested testing both designs. They remain unsure whether the other person felt fully heard.",
+        "kind": "direct",
+        "refs": [
+          "Q13"
+        ],
+        "alternative": "No alternative is needed; the actions and uncertainty are reported directly, while the other person's internal experience remains unknown.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "conflict",
+          "groups"
+        ]
+      },
+      {
+        "id": "C26",
+        "statement": "They feel respected when words are clear and their answer is taken seriously. They try not to pretend agreement and acknowledge that they can offer a solution before noticing that someone first wanted to be listened to.",
+        "kind": "direct",
+        "refs": [
+          "Q17"
+        ],
+        "alternative": "No alternative is needed; this records their stated fairness standard and self-identified interpersonal limit.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "groups",
+          "communication"
+        ]
+      },
+      {
+        "id": "C27",
+        "statement": "In disagreement, their first move is often to define the exact issue or test the competing options. That can make the task fairer and clearer, while showing that they have listened may arrive later or less visibly than intended.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q13",
+          "Q17"
+        ],
+        "alternative": "They do ask others to explain and are uncertain about their impact, so the issue may be the order and visibility of listening rather than an absence of concern.",
+        "confidence": "strong",
+        "contexts": [
+          "robotics",
+          "friendships",
+          "conflict",
+          "communication"
+        ]
+      },
+      {
+        "id": "C28",
+        "statement": "When upset, they may give short answers or leave a conversation, even when they know they need time but have not said so. Under pressure they become more exact and less talkative; several questions at once make it harder to keep track, while one problem and time to think are more manageable.",
+        "kind": "direct",
+        "refs": [
+          "Q12",
+          "Q18"
+        ],
+        "alternative": "No alternative is needed; this is their reported change under upset and pressure, with the effect tied to the number of simultaneous demands.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "groups",
+          "pressure",
+          "communication"
+        ]
+      },
+      {
+        "id": "C29",
+        "statement": "A supported pressure pattern is that several things happening at once narrow their communication: answers shorten, speech reduces, and leaving becomes more likely. Because the need for time is not always signaled, another person may mistake reduced communication for anger or rejection.",
+        "kind": "inference",
+        "refs": [
+          "Q04",
+          "Q12",
+          "Q18",
+          "Q19"
+        ],
+        "alternative": "Some withdrawal may be a deliberate and useful pause rather than loss of communication range, and the reported misunderstanding came from one project occasion.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "groups",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C30",
+        "statement": "After disappointment, they value a clear account of what happened. On a climbing route they recorded the unsolved section and later tried another approach, though sometimes they simply want to go home. Quiet walking and working alone on something small are other reported ways of feeling more like themselves.",
+        "kind": "direct",
+        "refs": [
+          "Q14",
+          "Q19"
+        ],
+        "alternative": "No alternative is needed; this preserves both active review and the exception that they sometimes want to disengage.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "outside_sport",
+          "pressure",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C31",
+        "statement": "One plausible recovery sequence is to reduce incoming demands first and then regain footing through one small, understandable problem. Solitude may restore room to think before they re-enter a harder task or conversation.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q14",
+          "Q18",
+          "Q19"
+        ],
+        "alternative": "The packet does not report how quickly or completely these activities restore their usual range, so they may be preferred breaks rather than a reliable recovery sequence.",
+        "confidence": "tentative",
+        "contexts": [
+          "sport",
+          "pressure",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C32",
+        "statement": "Their current week is reported as okay. Even in this ordinary week, they still want some unplanned time despite generally liking plans.",
+        "kind": "current_context",
+        "refs": [
+          "Q19"
+        ],
+        "alternative": "No alternative is needed; this is a time-limited report and should not be generalized into a long-term energy or wellbeing conclusion.",
+        "confidence": "strong",
+        "contexts": [
+          "current_week",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C33",
+        "statement": "They explicitly add that they make terrible jokes with friends and do not speak like a manual all the time. Their precise task language therefore should not be mistaken for their whole social personality.",
+        "kind": "direct",
+        "refs": [
+          "Q20"
+        ],
+        "alternative": "No alternative is needed; this preserves their explicit correction and the humorous side of their self-description.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "identity"
+        ]
+      },
+      {
+        "id": "C34",
+        "statement": "Their answers repeatedly resist all-or-nothing descriptions: organized but willing to change, interested in people but needing space, persistent when there is a reason but willing to stop, analytical after disappointment but sometimes wanting to go home. This suggests they notice important conditions and exceptions in their own behavior.",
+        "kind": "inference",
+        "refs": [
+          "Q04",
+          "Q09",
+          "Q14",
+          "Q18",
+          "Q20"
+        ],
+        "alternative": "This may partly reflect a careful questionnaire response style; behavior across more settings would show whether the same qualification appears in action.",
+        "confidence": "strong",
+        "contexts": [
+          "self_description",
+          "identity",
+          "cross_context"
+        ]
+      }
+    ],
+    "open_questions": [
+      "What does being useful mean most to them: making something work, helping another person, being independent, building something lasting, or something else?",
+      "At an unfamiliar social event, what creates the most hesitation: noise, several conversations, unclear expectations, not knowing anyone, or not having a shared topic?",
+      "When they leave or become brief during an upsetting conversation, do they usually return to it later, and what makes that return easier or harder?",
+      "Do written feedback, clear sequences, and a definition of finished help equally in sport, home life, and friendships, or mainly in school and technical work?",
+      "How often does searching for the exact answer create a time problem, and can they usually notice the tradeoff themselves or only after someone points it out?",
+      "During disagreement, what helps them show that they have heard the person while still keeping the comparison honest and evidence-based?",
+      "Do a quiet walk or a small solo task actually restore their usual ability to talk, decide, or re-engage, and over what time frame?",
+      "At home, do they divide work and share information in the same way they describe in groups, or do they take a different role?"
+    ],
+    "event_overlaps": [
+      {
+        "refs": [
+          "Q03",
+          "Q10"
+        ],
+        "reason": "Both answers describe the same old-speaker repair. The repair, search for help, posted photograph, and missed connection are one episode rather than independent evidence."
+      },
+      {
+        "refs": [
+          "Q05",
+          "Q13"
+        ],
+        "reason": "Both answers appear to concern comparing two robotics designs and proposing a test. They may be the same group episode, so the testing behavior should not be counted twice without confirmation."
+      },
+      {
+        "refs": [
+          "Q07",
+          "Q14"
+        ],
+        "reason": "Both answers concern a climbing route, a failed first solution, and trying another approach. They may describe the same route or closely related retellings, so they provide limited independent support."
+      },
+      {
+        "refs": [
+          "Q08",
+          "Q16"
+        ],
+        "reason": "Both incidents may come from the same broader robotics project, although one concerns a broken connection and the other a near-missed parts-order deadline. They can support different bounded claims but may not be fully context-independent."
+      }
+    ]
+  },
+  "domains": {
+    "vectors": [
+      {
+        "id": "command",
+        "position": 2,
+        "claim_ids": [
+          "C17",
+          "C19",
+          "C20",
+          "C21"
+        ],
+        "interpretation": "You step in with a direction when you can make the work clearer or move it forward. You do not need to own every decision, role, or visible moment, so your direction-setting is selective and shared.",
+        "helps": "Clear decision rights let you propose a test, make your own choice, or divide the work without having to take charge of everything.",
+        "watch_for": "If nobody owns the final decision, your willingness to contribute without taking the whole lead could leave the last step unclear. When you do suggest a direction, making room for reactions can help others see that comparison is not the same as dismissal.",
+        "context": "This mixed position is supported by one personal school choice and several technical group examples. It is not a rating of leadership, confidence, or decisiveness in every setting."
+      },
+      {
+        "id": "tempo",
+        "position": 2,
+        "claim_ids": [
+          "C11",
+          "C17",
+          "C28",
+          "C29"
+        ],
+        "interpretation": "You often gather enough information to begin and then learn by trying, especially with a practical problem. With several questions, social pressure, or a consequential choice, you prefer more space before speaking or deciding.",
+        "helps": "A sequence of brief preparation, action, and feedback fits the way you describe approaching unfamiliar practical tasks. One question at a time and room to think protect the quality of your response when the situation is busy.",
+        "watch_for": "Environments that demand instant answers or switch rapidly between several inputs may make you quieter rather than faster. Other people may not realize that the pause is for processing unless you tell them.",
+        "context": "Your pace changes with the kind and number of demands: reversible practical experiments differ from crowded conversations or important choices. This position says nothing about intelligence, reaction time, or how quickly you can perform a learned skill."
+      },
+      {
+        "id": "relational_awareness",
+        "position": 1,
+        "claim_ids": [
+          "C05",
+          "C25",
+          "C26",
+          "C27",
+          "C29"
+        ],
+        "interpretation": "You usually begin with explicit words, the exact issue, and the problem that needs solving rather than relying on unspoken social meaning. You do check the human side by asking people to explain and wondering whether they felt heard, but that checking may happen after an impact is named.",
+        "helps": "Direct feedback gives you social information you can use, and your willingness to ask what the disagreement actually is can reopen a conversation instead of pretending there is no difference.",
+        "watch_for": "Care, respect, and listening may be less visible than you intend when a solution or evidence comparison arrives first. Short answers or leaving under pressure could also be read as anger or rejection even when that is not what you mean.",
+        "context": "Leaning toward clear messages does not mean that you do not care about people; you explicitly say that you do. The evidence shows when you notice and check impact, not whether any reading of another person's feelings is accurate."
+      },
+      {
+        "id": "precision",
+        "position": 4,
+        "claim_ids": [
+          "C07",
+          "C08",
+          "C23",
+          "C24",
+          "C28"
+        ],
+        "interpretation": "You naturally look for exact information, a clear result, and details that can be checked. You can accept a workable answer, but exact comparison may hold your attention until the time limit or practical tradeoff becomes visible.",
+        "helps": "Manuals, diagrams, photographs, written feedback, and clear specifications give you something stable to inspect and correct. This can make questions more precise and reduce guessing about what the finished result should be.",
+        "watch_for": "The search for the best explanation or part can sometimes use time that the group only has for a workable choice. Under pressure, becoming even more exact while speaking less may protect detail but reduce shared understanding.",
+        "context": "This clear right-pole position is strongest in technical tasks, school feedback, and the pressure examples provided. It describes your checking preference, not guaranteed correctness, ability, or perfection in every part of life."
+      },
+      {
+        "id": "leverage",
+        "position": 3,
+        "claim_ids": [
+          "C08",
+          "C18",
+          "C21",
+          "C22"
+        ],
+        "interpretation": "You are willing to combine your own investigation with diagrams, manuals, knowledgeable people, photographs, and divided group work. You seem to use help most readily when the question and each person's part can be made clear.",
+        "helps": "You can keep direct contact with a problem while using other people and tools to find missing information or avoid doing every part yourself. Sharing useful information and breaking work into parts can make the group's effort less dependent on one person.",
+        "watch_for": "Vague advice or unclear handoffs may not feel usable and could send you back into checking the work yourself. Coordination is likely to work best when the question, role, and expected result are explicit.",
+        "context": "The evidence mainly concerns repairs, school decisions, and technical group tasks, so your use of help in home life or personal conversations remains less clear. This position concerns shared effort and useful tools, not access to money, status, or authority."
+      },
+      {
+        "id": "adaptability",
+        "position": 4,
+        "claim_ids": [
+          "C13",
+          "C15",
+          "C16",
+          "C30",
+          "C34"
+        ],
+        "interpretation": "You change methods when a test, result, or new piece of information shows that the current route is not working. You usually keep the purpose or completion standard steady, so changing course is not the same as abandoning the goal.",
+        "helps": "You can preserve a useful test plan while replacing a failed connection, revisit an unsolved section from another angle, or stop investing in repetition that is no longer teaching you anything.",
+        "watch_for": "Unexplained rule changes may be much harder to accept than changes you can test and understand. If the reason for staying with a method is hidden, you may judge it as pointless repetition before its purpose has been made clear.",
+        "context": "This pattern appears across technical work, an online course, and a sport problem, although two route answers may describe the same occasion. It does not mean weak commitment or constant novelty-seeking; your own correction is that organization and change can work together."
+      },
+      {
+        "id": "structure",
+        "position": 3,
+        "claim_ids": [
+          "C07",
+          "C13",
+          "C14",
+          "C32",
+          "C34"
+        ],
+        "interpretation": "You prefer a clear sequence, a visible definition of finished, and information you can return to. You treat plans as useful rails rather than fixed rules, and you still want some time that has not been planned for you.",
+        "helps": "Written expectations, stable goals, and an agreed test plan can lower the effort spent guessing what other people mean. Once the frame is clear, you appear comfortable changing the method inside it.",
+        "watch_for": "A plan without an explained reason may feel controlling rather than useful, while too much scheduling could remove the open time you use to feel like yourself. Other people may also mistake your wish for clarity as resistance to change unless the distinction is stated.",
+        "context": "This leans toward structure without treating you as rigid. Your explicit exceptions matter: you change methods when evidence changes, and you want unplanned time even during an ordinary week."
+      },
+      {
+        "id": "perspective",
+        "position": 3,
+        "claim_ids": [
+          "C01",
+          "C17",
+          "C18"
+        ],
+        "interpretation": "You connect present choices to the life you may want later, such as whether a subject will still fit in a year or whether a hobby should stay separate from work. Your future thinking stays fairly concrete because you compare what the options would actually involve.",
+        "helps": "Considering medium-term fit can protect you from choosing only for the current moment or turning every interest into a future obligation. Talking with someone who knows the option and reading the details gives your future thinking a practical base.",
+        "watch_for": "Longer-term fit adds useful criteria, but it can also add more details to compare when a decision has a deadline. Separating what must be settled now from what can remain open may matter in time-limited choices.",
+        "context": "The evidence shows a concrete one-year horizon and some early thinking about future work, not a fixed career plan or proven forecasting skill. Distant system effects and very long-term decisions were not explored."
+      }
+    ],
+    "domains": [
+      {
+        "id": "identity",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C20",
+          "C33",
+          "C34"
+        ],
+        "insight": "You directly describe making things, private time, trusted relationships, and becoming good at something useful as important parts of life. A supported interpretation is that you want competence to have practical meaning without allowing every interest to become a public achievement, job, or complete identity; your distinction between a hobby and work is important. The same pattern may appear in groups, where you seem more interested in adding a useful direction than in owning the presentation or being in charge of everything. You also describe yourself through conditions rather than all-or-nothing labels: organized but changeable, social with trusted people but in need of space, and persistent when there is a reason. Your correction about terrible jokes matters too—your exact task language is one part of you, not your whole personality with friends.",
+        "counterpoint": "Most examples of usefulness come from repair, robotics, and practical problem-solving, so it is not yet clear whether this value has the same meaning in friendship, home life, or other interests. Wanting useful work may also be current career exploration rather than a permanent identity theme.",
+        "open_question": "When you say you want to be good at something useful, does useful mean making something work, helping another person, becoming more independent, building something lasting, or something else?"
+      },
+      {
+        "id": "mind",
+        "claim_ids": [
+          "C08",
+          "C11",
+          "C14",
+          "C17",
+          "C22",
+          "C24",
+          "C34"
+        ],
+        "insight": "Your reported problem-solving sequence is usually to get a stable picture of the problem, gather enough information to begin, try something, and then let the result change the next move. A supported interpretation is that you use structure as a base for experimentation: the goal, test, or definition of finished can remain steady while the method changes. Diagrams, manuals, examples, photographs, teachers, and knowledgeable people are not replacements for your decision; they give you evidence you can inspect and compare. Your school-subject decision shows the same practical style at a different scale—you considered what each option involved and whether it would still fit later. This describes a preferred reasoning process, not a fixed learning style or a judgment about ability.",
+        "counterpoint": "Your willingness to experiment is clearest in practical problems with visible feedback; unfamiliar social situations are less appealing, and several inputs at once can make it harder to track the question. One parts-order episode also suggests that exact comparison can sometimes continue longer than the decision requires, but a single deadline incident does not establish how often that happens.",
+        "open_question": "Do the same sequence, written information, and clear definition of finished help you with home responsibilities, essays, and personal conversations, or mainly with technical and practical tasks?"
+      },
+      {
+        "id": "communication",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C25",
+          "C27",
+          "C28",
+          "C29",
+          "C33"
+        ],
+        "insight": "You report communicating best through clear words: what is missing, what is wrong, what the result needs to be, and what the disagreement actually concerns. The main supported interpretation is an intent-versus-visibility gap. You may intend to understand or solve the issue, while another person may first receive a sharp question, an evidence comparison, or a solution without seeing the care behind it; you have been told that questions can sound rude, and one friend reportedly mistook project frustration for anger at them. You do have repair moves available—you ask for an explanation, can test both options, and wonder whether the other person felt heard—but listening may become visible later than the solution. Under pressure, your message becomes shorter and less complete, while with friends your humor shows that this compressed task voice is not your only voice.",
+        "counterpoint": "A misunderstanding is produced by a particular interaction, not by one person alone; receiver expectations, tone, context, and unclear situations may all contribute. You explicitly care about people and do ask them to explain, so the issue is better understood as the order and visibility of care rather than an absence of it.",
+        "open_question": "What is the shortest natural way for you to show either 'I heard you' or 'I need time and will come back' without feeling that you are pretending to agree?"
+      },
+      {
+        "id": "connection",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C12",
+          "C26",
+          "C27",
+          "C33"
+        ],
+        "insight": "Your reported way of belonging is selective and depth-based rather than simply distant. A trusted person, a shared interest, and one conversation you can follow may support hours of connection, while many conversations at once raise the cost and leave you needing space afterward. Clear words and having your answer taken seriously are part of feeling respected; in return, you try not to offer false agreement, which suggests that honesty matters more to you than smooth agreement for its own sake. A possible tension is that you may show respect by solving the actual problem and comparing ideas fairly, while someone else may first be looking for signs that their experience has been heard. The joking side you mention with friends shows that familiarity can bring out a looser and more playful version of you.",
+        "counterpoint": "Group tiredness may be driven mainly by noise and simultaneous input rather than by group size, unfamiliarity, or low interest in people. The packet does not fully separate those explanations, and it does not show how you connect in quieter unfamiliar groups.",
+        "open_question": "At an unfamiliar social event, what matters most: the noise, several conversations, unclear expectations, not knowing anyone, or not having a shared topic to begin with?"
+      },
+      {
+        "id": "effort",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C15",
+          "C16",
+          "C23"
+        ],
+        "insight": "Your effort appears to follow meaning, learning, and influence over the outcome. You directly say that a problem you can work out draws you in, that you continue when there is a reason, and that instructions changing without an explanation make it harder to care. A supported interpretation is that your persistence is experimental rather than automatic: you can stay loyal to a worthwhile problem while replacing a method that repeatedly fails, and you can stop when repetition is no longer adding value. Stopping an online course that mostly covered familiar material therefore should not be treated as evidence that you cannot persist; it was a stated judgment about its value. Clear goals help, although your wish for an exact explanation can sometimes spend more time than a merely workable decision allows.",
+        "counterpoint": "The strongest effort examples involve activities you chose or already found interesting, so the packet does not establish how you handle necessary work that is repetitive but still important. The online course may also have been a simple mismatch in level rather than evidence of a broad motivation pattern by itself.",
+        "open_question": "When a necessary task is boring but still matters, what reason, responsibility, deadline, or connection to a bigger purpose is most likely to keep your effort attached to it?"
+      },
+      {
+        "id": "pressure",
+        "claim_ids": [
+          "C24",
+          "C28",
+          "C29",
+          "C30",
+          "C31",
+          "C32"
+        ],
+        "insight": "You report a specific pressure change rather than becoming one completely different person: with several demands or questions at once, you become more exact, less talkative, and more likely to answer briefly or leave. With one defined problem and time to think, you say you are usually okay. A supported interpretation is that pressure narrows your communication before it removes your wish to solve the issue; because the need for time is not always stated, the reduced communication may be interpreted by someone else as anger or rejection. After disappointment, you sometimes create a clear account of what happened and later try another route, but you preserve the real exception that sometimes you simply want to go home. A tentative recovery hypothesis is that reducing incoming demands and doing one small, understandable thing may help you regain footing, although the packet does not show how reliably or quickly that happens. Your current context is ordinary rather than acute: you report that this week is okay.",
+        "counterpoint": "Leaving or going quiet can be a deliberate, useful pause rather than a loss of control, and the reported misunderstanding with a friend came from one occasion. Different kinds of pressure—time, conflict, evaluation, disappointment, or physical difficulty—may not produce the same pattern.",
+        "open_question": "When you take space during an upsetting conversation, do you usually return to it later, and what lets both you and the other person know that the conversation is paused rather than abandoned?"
+      },
+      {
+        "id": "strengths",
+        "claim_ids": [
+          "C14",
+          "C20",
+          "C21",
+          "C22",
+          "C23",
+          "C27"
+        ],
+        "insight": "The most specific contribution you describe is turning a large, uncertain problem into smaller tests that people can actually work on. You also find and share useful information, bring in tools or knowledgeable people, and divide the work rather than assuming you must personally carry every part. Combined with your selective direction-setting, this can let you move a group forward without needing the spotlight or ownership of the whole project. Your adaptability adds an important condition: the test or goal can stay steady while the route changes in response to evidence. The same combination has two possible costs already visible in your answers—exact comparison can delay a workable choice, and a fair solution process may arrive before another person can see that they were listened to. These are conditional tradeoffs, not a cancellation of the contribution.",
+        "counterpoint": "Most of this evidence comes from self-reported technical and school-group examples, so it supports a preferred contribution rather than an independent rating of effectiveness or ability. At home, with friends, or in less testable problems, you may take a different role.",
+        "open_question": "At home or in a non-technical group, do you still break work into parts and share information, or are you more likely to work alone, wait for a role, or contribute in another way?"
+      },
+      {
+        "id": "thriving",
+        "claim_ids": [
+          "C03",
+          "C07",
+          "C10",
+          "C13",
+          "C30",
+          "C31",
+          "C32"
+        ],
+        "insight": "The conditions most likely to support your everyday range are a meaningful reason, a clear definition of finished, information you can inspect, freedom to test another method, and enough response time to avoid several competing inputs at once. Trusted people and shared interests matter, but so do quiet and personal space; needing both is not a contradiction. Structure appears helpful when it creates clarity, while some unplanned time protects autonomy and lets you choose where to put your attention. Written feedback, diagrams, and access to someone knowledgeable are practical possibilities because they match the supports you already report using, not because you should have to work in only one format. A quiet walk or a small solo task may help after a difficult moment, but that recovery sequence remains a plausible hypothesis rather than a verified rule. In the present context, you say your week is okay while still wanting unplanned time.",
+        "counterpoint": "Solitude should not be mistaken for lack of interest in people, and liking plans should not be mistaken for wanting every hour scheduled. It is also still unknown whether quiet walking or a small task actually restores your usual ability to talk, decide, and reconnect, rather than simply being a preferred break.",
+        "open_question": "After a quiet walk or a small solo task, what changes—if anything—in your ability to speak, make a decision, return to a problem, or reconnect with someone?"
+      }
+    ]
+  },
+  "synthesis": {
+    "whole_person_model": "Directly reported: they value making things, time alone, and a few trusted relationships. Engineering or repair is a possible future direction, but they do not want every hobby turned into a job; becoming good at something useful matters more. They prefer clear endpoints, inspectable information, and practical problems they can begin after reading enough to try. They also explicitly correct an overly mechanical picture of themselves: with friends they can talk for ages about a shared interest and make terrible jokes.\n\nThree interacting mechanisms best explain the wider pattern. First, clarity appears to support change rather than prevent it. When the purpose, test, or definition of finished stays stable, they can replace a failed method, update after evidence, or stop repeating something unproductive. This explains how they can like plans while rejecting rigidity. Unexplained changes are different: without a visible reason, the task loses the logic that holds their effort. Second, useful influence seems more motivating than visibility. They investigate problems, bring information, divide work, and propose tests, yet are comfortable letting someone else present. This is a supported interpretation, not a claim that recognition never matters. The evidence is concentrated in technical and school settings, so practical interest or current career exploration remains a competing explanation.\n\nThird, their communication often solves the explicit information problem before showing the relationship work. They report caring about people, taking answers seriously, asking others to explain, and wondering whether someone felt heard. Even so, a missing-information question, design comparison, or quick solution may arrive before reassurance or acknowledgment becomes visible. When several questions, noise, or instant-response demands compete at once, they report becoming more exact and less talkative; short answers or leaving without naming the need for time can then be misread. This pattern is better understood as an order-and-visibility gap than as absence of care. Particular receivers, unclear situations, and simultaneous input could also explain some friction, so interpersonal impact cannot be assigned to them alone. A plausible but unverified recovery sequence is less input first, followed by a quiet walk or one small, understandable task. Their current week is reported as okay, and no longer-term state or trajectory should be inferred from it.",
+    "portrait_thread": "Make the important thing clear enough to test, useful enough to matter, and flexible enough to revise—while protecting room for trusted people, humor, quiet, and choices that remain their own.",
+    "signature_insights": [
+      {
+        "title": "A firm frame makes change easier, not rarer",
+        "meaning": "Their organization is not mainly about preserving the first method. A clear goal, sequence, or test gives them a stable reference point from which they can change the connection, try another route, or update their view when evidence changes. The boundary matters: change supported by a reason is usable, while changing instructions without an explanation can weaken engagement. This may be strongest in practical settings rather than a rule for every part of life.",
+        "claim_ids": [
+          "C10",
+          "C13",
+          "C14",
+          "C16",
+          "C34"
+        ]
+      },
+      {
+        "title": "They seem to want usefulness without turning it into a performance",
+        "meaning": "Repair curiosity, the wish to become good at something useful, the tendency to share information, and comfort with someone else presenting all point toward practical contribution carrying more weight than owning the spotlight. This also helps explain why they separate hobbies from jobs: an interest can matter without becoming a public achievement or total identity. This remains a supported interpretation because most examples come from technical activities.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C20",
+          "C21",
+          "C22"
+        ]
+      },
+      {
+        "title": "Their care may be present before it becomes visible",
+        "meaning": "They directly say they care and try not to offer false agreement, yet their first move often defines the missing information, exact disagreement, or test. That sequence can create task fairness while leaving another person uncertain about whether they were heard. Under simultaneous demands, reduced speech makes the gap larger. Their questions, willingness to hear an explanation, and uncertainty about impact are important counterexamples: the issue is likely the timing and visibility of listening, not a lack of concern.",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C25",
+          "C26",
+          "C27",
+          "C29"
+        ]
+      }
+    ],
+    "chapter_routes": [
+      {
+        "id": "identity",
+        "angle": "Useful, private, and more playful than the task voice suggests",
+        "new_value": "This chapter can show an identity that is built around practical meaning without requiring every interest to become a job, achievement, or public role. It should preserve the tension between wanting to become good at something and not needing the spotlight, while treating trusted relationships, solitude, and humor as equally real parts of the person. Their habit of adding conditions and exceptions also suggests that fixed labels feel less accurate than context-sensitive descriptions.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C20",
+          "C33",
+          "C34"
+        ]
+      },
+      {
+        "id": "mind",
+        "angle": "Build a stable picture, try something, and let reality edit the method",
+        "new_value": "This chapter adds the sequence behind their reasoning: inspect a diagram, example, outline, or knowledgeable source; define what the result needs to be; begin; then update from the test. Other people and tools supply usable evidence rather than replacing their own criteria. The same process appears in practical experimentation and a medium-term school choice, while exact comparison creating delay remains a bounded caution rather than a global claim. This is a preferred operating process, not an inference about intelligence or ability.",
+        "claim_ids": [
+          "C08",
+          "C14",
+          "C17",
+          "C18",
+          "C22",
+          "C24"
+        ]
+      },
+      {
+        "id": "communication",
+        "angle": "Explicit content comes naturally; relational meaning may need a separate signal",
+        "new_value": "This chapter can distinguish intention, message, and possible impact. They prefer communication that names the error, missing information, desired result, or exact disagreement, and written words are especially usable. The distinctive risk is not simple bluntness: it is that problem-solving may be encoded while care and listening remain implicit. Under pressure, even that explanation bandwidth narrows. Their humor with friends prevents the task-focused voice from being mistaken for their whole communication range.",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C27",
+          "C28",
+          "C29",
+          "C33"
+        ]
+      },
+      {
+        "id": "connection",
+        "angle": "Selective depth and honest respect rather than constant social availability",
+        "new_value": "This chapter adds why one-to-one connection can be rich while groups are costly. Trust, a shared focus, and one conversation they can follow support depth; noise and divided attention may matter more than the number of people itself. They experience respect through clear words and having their answer taken seriously, and they try to return that respect by not pretending agreement. A useful tension is that honest comparison may be their way of taking someone seriously even when that person first needs visible listening.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C12",
+          "C26",
+          "C27",
+          "C33"
+        ]
+      },
+      {
+        "id": "effort",
+        "angle": "Persistence stays attached to a reason, not automatically to the original route",
+        "new_value": "This chapter can explain continuation, switching, and stopping through one mechanism rather than treating them as contradictions. Learning, usefulness, and the chance to affect the result keep effort connected; repeated failure invites a method change, while repetition without new value can justify stopping. The near-deadline comparison episode adds a genuine tradeoff: exactness can remain meaningful after the situation only needs a workable choice. What remains unknown is how this pattern operates in necessary, repetitive work they did not choose.",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C15",
+          "C16",
+          "C23",
+          "C24"
+        ]
+      },
+      {
+        "id": "pressure",
+        "angle": "Concurrency narrows expression more clearly than difficulty alone",
+        "new_value": "This chapter can identify a specific pressure configuration: several questions, noise, or immediate responses compete for attention, after which exactness rises and speech reduces. One defined problem with time to think is reported as more manageable. Leaving may be a useful pause, but when the need for time is not stated, the pause can look like anger or rejection. Review, solitude, walking, or a small task may support re-entry, although actual recovery time and completeness are still unknown. The current week is reported as okay.",
+        "claim_ids": [
+          "C28",
+          "C29",
+          "C30",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "id": "strengths",
+        "angle": "Turn uncertainty into tests, resources, and shareable work",
+        "new_value": "This chapter can describe their group contribution as an architecture rather than a list of skills: break a large problem into smaller tests, locate useful information, involve knowledgeable people, divide the work, and change the method when evidence requires it. They can supply direction without needing to own the whole group or presentation. The same architecture has two conditional overuses supported by the packet: comparison can outlast the available time, and a solution-first sequence can make listening less visible.",
+        "claim_ids": [
+          "C14",
+          "C20",
+          "C21",
+          "C22",
+          "C23",
+          "C27"
+        ]
+      },
+      {
+        "id": "thriving",
+        "angle": "Clarity and autonomy work together when there is room to reduce input",
+        "new_value": "This chapter can bring the conditions together without turning them into a rigid formula: a meaningful reason, a visible endpoint, information they can inspect, freedom to revise the route, and enough time to answer one thing at a time. Trusted connection and solitude are complementary rather than opposing needs. Plans help when they remove guessing, while unplanned time preserves choice and lets attention settle. Quiet walking or one small solo task is a plausible recovery support, not yet a proven rule or prescription.",
+        "claim_ids": [
+          "C03",
+          "C07",
+          "C10",
+          "C13",
+          "C30",
+          "C31",
+          "C32"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Problem decomposition",
+        "helps": "Turns a large unknown into smaller tests and shareable parts.",
+        "overuse": "Exact comparison can continue after the group only needs a workable choice.",
+        "reset": "A visible deadline or agreed 'workable for now' line may help make the tradeoff easier to see.",
+        "claim_ids": [
+          "C21",
+          "C23",
+          "C24"
+        ]
+      },
+      {
+        "strength": "Structured adaptability",
+        "helps": "Keeps the purpose or test steady while replacing a method that failed.",
+        "overuse": "Unexplained changes can drain effort because the stable reason disappears.",
+        "reset": "Naming what stays fixed and why the change matters may preserve both clarity and flexibility.",
+        "claim_ids": [
+          "C10",
+          "C13",
+          "C14",
+          "C16"
+        ]
+      },
+      {
+        "strength": "Direct, useful contribution",
+        "helps": "Brings clear questions, information, and fair tests without requiring the spotlight.",
+        "overuse": "A solution-first sequence can hide care or listening that is present but unstated.",
+        "reset": "A brief acknowledgment before moving to the test may make both honesty and listening easier to see.",
+        "claim_ids": [
+          "C20",
+          "C22",
+          "C26",
+          "C27"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "Noise, several questions, or instant-response demands when more than one thing must be tracked.",
+      "interpretation": "Supported interpretation: narrowing toward one exact issue protects accuracy; silence or distance does not by itself show anger or rejection.",
+      "response": "More exact and less talkative; short answers, lost conversational tracking, or leaving without always explaining the need for time.",
+      "recovery": "Tentative possibility: reduce incoming demands first, then use a quiet walk or one small, understandable task before re-entry; baseline return is not yet verified.",
+      "claim_ids": [
+        "C28",
+        "C29",
+        "C30",
+        "C31"
+      ]
+    }
+  },
+  "reading": {
+    "editorial_version": "youth-bos-public-reading-v2",
+    "map_intro": "You like a clear goal because it gives you room to test, revise, and make something useful. You also protect a quieter side of life: trusted people, unplanned time, private interests, and humor that others may not immediately see.",
+    "portrait": {
+      "headline": "Clear enough to change course",
+      "paragraphs": [
+        "One of the clearest things about you is that order and flexibility belong together. You like knowing what the job is, what finished means, and what can be checked. Once that frame is solid, you are quite willing to replace a failed method, change your mind after a test, or stop repeating something that teaches you nothing. The plan gives you something steady enough to experiment against; it is not a promise to defend the first idea.",
+        "What draws you in is not difficulty for its own sake. A problem becomes interesting when you can understand it, affect the outcome, and learn something real from it. Repairing an old speaker mattered because you wanted to know why it had stopped working. More broadly, you seem to care about becoming good at something useful. At the same time, you do not want every interest turned into a job or public achievement. Making things can matter without taking over your whole identity.",
+        "That same balance appears in groups. You will speak when you think you can move the work forward, perhaps by naming a test, finding useful information, or breaking a large problem into smaller parts. You are also comfortable with someone else presenting, and you do not need to control every role. This suggests that useful influence often matters more to you than visibility. You are not purely a solo problem-solver either: once the question is clear, you will use manuals, examples, knowledgeable people, and divided work.",
+        "With people, you are selective rather than simply distant. A trusted friend and a shared interest can hold your attention for ages, while a group with several conversations at once can wear you out. After connection, you often need space. That space does not cancel the connection; it seems to protect your ability to return as yourself. Your friends also know a more playful version of you—the one who makes terrible jokes and definitely does not speak like a manual all the time.",
+        "One of the harder parts is that your care may exist before it becomes visible. You often start with the missing information, the exact point of disagreement, or the result that is needed. To you, that can be a serious and fair way to handle the problem. Someone else may first hear a sharp question or a solution and miss the concern underneath. You already notice this gap: you know you can solve before showing that you listened, and you sometimes wonder whether a person felt heard. The issue is not a lack of care; it is often the order in which care and problem-solving become visible.",
+        "Your pace changes with the situation. With a practical unknown, you often read enough to begin and then learn through action. With an important choice, you are more likely to compare what each option will really involve and whether it will still fit later. Unfamiliar social situations are less inviting, especially when expectations are unstated. Under several questions or demands for an instant answer, you become more exact and less talkative. Short answers or leaving can protect thinking space, but if you do not name that need, another person may read the pause as anger or rejection.",
+        "So you have both a quick experimental side and a slower, protective side. The first likes a clear problem, an early attempt, and honest feedback from the result. The second appears when the choice has longer consequences, the social meaning is unclear, or too many things arrive at once. Across both sides, you are protecting much the same things: accuracy, a reason you can respect, room to make your own judgment, and relationships where clear words and real trust matter. You are practical without being only serious, organized without being fixed, and connected without needing constant company."
+      ],
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C11",
+        "C12",
+        "C14",
+        "C16",
+        "C18",
+        "C20",
+        "C22",
+        "C27",
+        "C29",
+        "C33",
+        "C34"
+      ]
+    },
+    "chapters": [
+      {
+        "id": "identity",
+        "headline": "Useful without becoming a performance",
+        "paragraphs": [
+          "You do not describe yourself mainly through a title, a team role, or a future job. The things that matter to you—making things, time to yourself, and a few people you trust—suggest a life that feels worthwhile from the inside. Engineering or repair work may become part of that life, but you are keeping it as a possibility rather than turning it into a fixed plan.",
+          "Being good at something useful matters to you. That seems less about collecting attention and more about having skill that does something real. Your group choices fit that idea: you may offer a direction or useful test, then let somebody else present. Recognition may still matter sometimes, but you do not seem to need every contribution to become a performance.",
+          "You also protect the right for an interest to stay an interest. Saying that a hobby does not have to become your job leaves room for enjoyment, curiosity, and choice. It means your future does not have to swallow everything you like now. Trusted relationships and private time sit beside competence, not below it.",
+          "A flat label would miss you. You can like people and need space, enjoy a plan and change the method, keep going for a reason and stop when the reason disappears. You also make terrible jokes with friends. Your precise working voice is real, but it is not the whole person. You seem most yourself when usefulness, independence, closeness, and playfulness are all allowed to exist without one taking over."
+        ],
+        "takeaway": "You want skill to be useful without letting achievement become your whole identity.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C20",
+          "C33",
+          "C34"
+        ]
+      },
+      {
+        "id": "mind",
+        "headline": "Make it clear, then test it",
+        "paragraphs": [
+          "Your mind seems to work best when the problem can be made stable enough to inspect. You look for a diagram, manual, example, outline, or written note; gather enough to start; then let the result tell you what to change. You do not need every detail before the first attempt. What matters is having a clear enough picture to make the attempt informative.",
+          "Other people fit into this process as useful sources, not as substitutes for your judgment. You asked a teacher about a possible subject and asked someone knowledgeable about a repair after making the question clear. A photograph, written comment, or specific explanation gives you something you can revisit instead of having to guess what was meant.",
+          "When the choice matters beyond today, you slow the process down. In changing a school subject, you checked what each option would actually involve and asked whether it would still interest you a year later. That is practical future-thinking: you do not only imagine an outcome; you inspect the route that would lead there.",
+          "Your precision has a tradeoff. Sometimes the search for the exact explanation or best option can continue after the situation only needs a workable choice. When an order deadline became visible, you were able to choose, so exactness does not trap you completely. Your experimenting is clearest with problems that give usable feedback; crowded or unfamiliar social situations do not offer the same clean signals."
+        ],
+        "takeaway": "You build a clear enough picture to try, then let results change your next move.",
+        "claim_ids": [
+          "C08",
+          "C11",
+          "C14",
+          "C17",
+          "C18",
+          "C22",
+          "C24"
+        ]
+      },
+      {
+        "id": "communication",
+        "headline": "Let the human message show",
+        "paragraphs": [
+          "Clear communication, for you, usually means naming the thing itself. You can use feedback that says what is wrong and what the finished result needs to be. Written comments help because they stay still long enough to check. Hints that assume you already know what someone means are much harder when you genuinely do not know which part they expect you to supply.",
+          "The main misunderstanding is often between what you mean to do and what becomes visible. Asking for missing information may feel like the most honest route to understanding, yet you have been told it can sound rude. Care, patience, or reassurance may remain inside the message while the question itself lands first. Tone, timing, and the other person’s expectations also matter, but this explains why two people can leave the same exchange with different impressions.",
+          "In disagreement, you tend to define the exact difference and look for a fair way to compare the options. When a robotics teammate felt dismissed, you asked them to explain and suggested testing both ideas. That move treated both designs seriously, yet you were still unsure whether the person felt fully heard. For you, listening and testing may belong together; for someone else, the listening may need to become visible before the test.",
+          "When you are under strain, your communication gets narrower: fewer words, more exactness, and sometimes leaving the conversation. If you know you need time but do not say it, the pause can carry a meaning you never intended. A brief sign that you heard the person, or that you need time rather than agreement, may help your actual purpose survive the moment."
+        ],
+        "takeaway": "Your clearest words work best when your care and need for time are clear too.",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C07",
+          "C25",
+          "C27",
+          "C28",
+          "C29"
+        ]
+      },
+      {
+        "id": "connection",
+        "headline": "Depth, trust, and room afterward",
+        "paragraphs": [
+          "Your social life seems to depend more on the quality of attention than on simply being with or without people. You can talk for ages with someone you trust about a shared interest. A group becomes costly when several conversations compete at once, and afterward you often need space. That is selective depth, not a lack of interest in connection. Closeness and solitude are both real needs for you.",
+          "Trust appears to grow around clarity. You feel respected when people use clear words and take your answer seriously. You try to return that respect by not pretending to agree. Smoothness for its own sake matters less than knowing that both people are being real, even if the answer is inconvenient.",
+          "There is a tension here. You may show respect by taking an idea seriously enough to question it, solve it, or compare it fairly. Another person may experience respect first through being listened to without an immediate solution. Neither need cancel the other, but the order can affect whether your honesty feels connecting or distancing.",
+          "Unfamiliar social events interest you less than unfamiliar practical problems. The reason is not completely clear: noise, divided attention, unclear expectations, lack of a shared topic, or unfamiliar people could each matter. Familiarity changes your range. With friends, humor and long conversations appear; after the interaction, quiet helps you recover the room to be yourself again."
+        ],
+        "takeaway": "You connect deeply through trust and shared focus, then need space to recover your attention.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C12",
+          "C26",
+          "C27",
+          "C33"
+        ]
+      },
+      {
+        "id": "effort",
+        "headline": "A reason keeps effort attached",
+        "paragraphs": [
+          "Effort comes more easily when you can see why the task matters. A problem you can work out offers curiosity, control over the next move, and a real result. By contrast, instructions that change without any explanation weaken the logic of the task. It is not change itself that bothers you; it is being asked to follow a moving rule without understanding its purpose.",
+          "Once a reason is present, your persistence is flexible. You can stay with the problem while refusing to stay loyal to a method that repeatedly fails. A different connection, a new angle, or another source of information can keep the work alive. This is not constant novelty-seeking. You usually keep the goal or test steady while changing the route.",
+          "You are also willing to stop. You left an online course because it was mostly covering things you already knew, so continuing would not have offered much learning. That does not mean every boring task loses your effort. Necessary work can still be repetitive, and it is not yet clear which reasons—responsibility, deadline, usefulness to someone else, or a larger goal—keep you attached then.",
+          "Your standards can both power and slow your effort. Wanting the exact explanation can produce a better question and fewer guesses. It can also keep comparison going after the practical need has shifted to good enough for now. You can make that shift when the time cost is clear. The useful distinction for you seems to be whether more checking will change the outcome or only delay it."
+        ],
+        "takeaway": "A reason keeps you engaged; it does not require you to keep using a failing route.",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C15",
+          "C16",
+          "C23",
+          "C24"
+        ]
+      },
+      {
+        "id": "pressure",
+        "headline": "Too much at once makes you quieter",
+        "paragraphs": [
+          "Ordinarily, one clear problem and time to think leave you able to work through what is happening. Pressure changes you most when demands stack up: several questions, noise, or an expectation of an instant answer. The number of things to track seems more important than difficulty alone. A hard problem can still be manageable when it stays one problem.",
+          "In those busier moments, you become more exact and less talkative. Answers shorten, the conversation becomes harder to follow, and leaving may become the cleanest way to reduce input. That pause may be sensible, not a failure. The complication is that you do not always explain your need for time before you go.",
+          "Without that explanation, another person may fill in the blank. A friend once thought you were angry with them when your frustration was with the project. That does not mean every quiet moment will be misread. It shows how pressure can hide the difference between what you feel, what you are trying to protect, and what someone else can see.",
+          "After not finishing a climbing route, you wrote down the unsolved part and later tried another approach. At other times, you simply want to go home. Quiet walking or working alone on something small may give your attention room to settle, but you are still figuring out how reliably that helps you re-enter. Your current week is okay, so this describes a change under strain rather than your state all the time."
+        ],
+        "takeaway": "Too many inputs narrow your words; one clear problem and time make more of you available.",
+        "claim_ids": [
+          "C28",
+          "C29",
+          "C30",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "id": "strengths",
+        "headline": "Turning unknowns into workable parts",
+        "paragraphs": [
+          "One distinctive strength is your way of turning a large unknown into a set of smaller, answerable questions. Instead of treating the whole problem as one block, you look for tests, missing information, and parts that can be handled separately. This gives uncertainty a shape. It can also give a group a practical next move when discussion is circling.",
+          "You pair that with resourcefulness. You will investigate on your own, but you also use manuals, diagrams, examples, photographs, teachers, knowledgeable people, and shared roles. Asking who wants which part is not giving the problem away; it recognizes that doing everything yourself wastes time. Your independence includes knowing when another source can improve the result.",
+          "Another strength is structured adaptability. You can keep a purpose, test, or definition of finished steady while changing the route after a result proves the first method wrong. That allows you to be organized without being stuck. You do not change merely because something is new; you change when there is a reason you can inspect.",
+          "These strengths have honest tradeoffs. Breaking things down can become prolonged comparison when only a workable choice is needed. Moving quickly toward a fair test can make another person’s need to be heard less visible. Selective direction can also leave the final ownership unclear if everyone is waiting. None of these erase the strength. They show where your useful, exact approach may need a clearer time line, role, or human signal. You have mainly described this in technical groups; at home or elsewhere, you may contribute differently."
+        ],
+        "takeaway": "You make uncertainty workable by turning it into tests, resources, and shared parts.",
+        "claim_ids": [
+          "C14",
+          "C20",
+          "C21",
+          "C22",
+          "C23",
+          "C27"
+        ]
+      },
+      {
+        "id": "thriving",
+        "headline": "Clarity with room to choose",
+        "paragraphs": [
+          "You seem to have your widest range when clarity and choice work together. A meaningful reason, a visible endpoint, and information you can inspect reduce the energy spent guessing. Freedom to revise the method keeps that clarity from becoming a cage. This combination can fit schoolwork, making and repair, group projects, and sport problems, although the exact balance may differ in each place.",
+          "Your surroundings matter too. One question at a time and enough response time help you keep hold of what you want to say. Written feedback, a diagram, or a clear example can make school and practical tasks easier to enter. When advice or roles are vague, you may spend more effort decoding the request than doing the work itself.",
+          "With people, thriving does not mean constant company. You want a few trusted relationships, shared interests, and clear words, while also needing quiet afterward. Time alone is not the opposite of belonging for you; it helps preserve it. Unplanned time matters for a similar reason. Even though you like plans, not every part of the day needs to be assigned before you reach it.",
+          "After a difficult moment, you may turn toward less input, a quiet walk, or one small task before taking on more. The larger fit is not a perfect routine. It is a life with enough purpose to engage you, enough structure to orient you, enough freedom to change course, and enough space for trust, humor, and your own attention."
+        ],
+        "takeaway": "You thrive with clear purpose, adjustable methods, trusted people, and protected room that remains your own.",
+        "claim_ids": [
+          "C03",
+          "C07",
+          "C10",
+          "C13",
+          "C30",
+          "C31",
+          "C32"
+        ]
+      }
+    ],
+    "vectors": [
+      {
+        "id": "command",
+        "interpretation": "You step in when a direction can move the work forward, but you do not need every decision, role, or visible moment. You prefer shared ownership over taking charge of the whole group.",
+        "helps": "Clear roles let you propose a test, make your own choice, or divide work without owning everything.",
+        "watch_for": "If no one owns the final decision, the last step may stay unclear; reactions also need room.",
+        "context": "This is clearest in a school choice and technical groups, not every setting.",
+        "claim_ids": [
+          "C17",
+          "C19",
+          "C20",
+          "C21"
+        ]
+      },
+      {
+        "id": "tempo",
+        "interpretation": "You often read enough to begin and learn by trying. With an important choice, several questions, or social pressure, you prefer more room before speaking or deciding.",
+        "helps": "Brief preparation, action, and feedback suit practical problems; one question at a time protects your response when things get busy.",
+        "watch_for": "Instant answers and rapid switching may make you quieter, so others may miss that you are still thinking.",
+        "context": "Your pace changes with the stakes and number of demands; this is a preference, not an ability grade.",
+        "claim_ids": [
+          "C11",
+          "C17",
+          "C28",
+          "C29"
+        ]
+      },
+      {
+        "id": "relational_awareness",
+        "interpretation": "You begin with clear words and the exact issue more than unspoken social hints. You do check impact, especially when someone names it, but care may become visible after the solution.",
+        "helps": "Direct feedback gives you something usable, and asking what the disagreement is can reopen an honest conversation.",
+        "watch_for": "Solutions, short answers, or leaving may hide care and listening that you feel but have not shown.",
+        "context": "This describes where your attention starts, not how much you care or whether another person’s reading is correct.",
+        "claim_ids": [
+          "C05",
+          "C25",
+          "C26",
+          "C27",
+          "C29"
+        ]
+      },
+      {
+        "id": "precision",
+        "interpretation": "You naturally seek exact information, checkable details, and a clear result. You can accept a workable answer, but comparison may hold you until the time limit becomes obvious.",
+        "helps": "Manuals, diagrams, photographs, and written feedback give you stable details to inspect and correct.",
+        "watch_for": "The best explanation can take time needed for a workable choice, especially when pressure makes you even more exact.",
+        "context": "This is clearest in technical tasks and school feedback; it is a preference, not guaranteed correctness.",
+        "claim_ids": [
+          "C07",
+          "C08",
+          "C23",
+          "C24",
+          "C28"
+        ]
+      },
+      {
+        "id": "leverage",
+        "interpretation": "You combine your own investigation with useful tools, knowledgeable people, and divided work. Help fits best when the question, role, and expected result are clear.",
+        "helps": "You stay close to the problem while gathering missing information and avoiding the delay of doing every part yourself.",
+        "watch_for": "Vague advice or unclear handoffs may send you back into checking work yourself.",
+        "context": "Most examples come from repairs, school choices, and technical groups; personal situations may work differently.",
+        "claim_ids": [
+          "C08",
+          "C18",
+          "C21",
+          "C22"
+        ]
+      },
+      {
+        "id": "adaptability",
+        "interpretation": "You readily change a method when a test or new information shows it is not working. The purpose usually stays steady, so changing course is not abandoning the goal.",
+        "helps": "You can replace a failed route, revisit a hard section, or stop repetition that is no longer teaching you.",
+        "watch_for": "Unexplained changes are harder because you cannot see the reason for leaving the original method.",
+        "context": "This appears across technical work, study, and sport; it does not mean weak commitment or constant novelty.",
+        "claim_ids": [
+          "C13",
+          "C15",
+          "C16",
+          "C30",
+          "C34"
+        ]
+      },
+      {
+        "id": "structure",
+        "interpretation": "You like a clear sequence, a definition of finished, and information you can revisit. Plans are useful rails, not fixed rules, and you still want unplanned time.",
+        "helps": "Stable goals and written expectations reduce guessing while leaving room to change the method.",
+        "watch_for": "Unexplained plans may feel controlling, while too much scheduling can crowd out the open time you need.",
+        "context": "You lean toward structure without rigidity; your method changes when results change.",
+        "claim_ids": [
+          "C07",
+          "C13",
+          "C14",
+          "C32",
+          "C34"
+        ]
+      },
+      {
+        "id": "perspective",
+        "interpretation": "You connect present choices to medium-term life, asking what an option really involves and whether it will still fit later. Your future thinking stays practical rather than fixed.",
+        "helps": "Looking ahead can protect an interest from becoming an obligation and ground choices in real details.",
+        "watch_for": "Future fit adds comparison, so a deadline may require separating today’s decision from what can remain open.",
+        "context": "You described a one-year school choice and possible work interests, not a settled long-term plan.",
+        "claim_ids": [
+          "C01",
+          "C17",
+          "C18"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Breaking problems into tests",
+        "helps": "You turn a large unknown into smaller tests and shareable parts.",
+        "overuse": "Exact comparison can continue after the group only needs a workable choice.",
+        "reset": "A visible deadline or a shared workable-for-now line may make the tradeoff easier to see.",
+        "claim_ids": [
+          "C21",
+          "C23",
+          "C24"
+        ]
+      },
+      {
+        "strength": "Structured flexibility",
+        "helps": "You keep the goal steady while changing a method that failed.",
+        "overuse": "Unexplained changes can drain effort because the reason holding the task together disappears.",
+        "reset": "Naming what stays fixed and why the change matters may preserve both clarity and freedom.",
+        "claim_ids": [
+          "C10",
+          "C13",
+          "C14",
+          "C16"
+        ]
+      },
+      {
+        "strength": "Direct, useful contribution",
+        "helps": "You bring clear questions, information, and fair tests without needing the spotlight.",
+        "overuse": "Moving to the solution first can hide care or listening that is present.",
+        "reset": "A brief acknowledgment before the test may make both honesty and listening easier to see.",
+        "claim_ids": [
+          "C20",
+          "C22",
+          "C26",
+          "C27"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "Noise, several questions, or demands for an instant answer ask you to track too much at once.",
+      "interpretation": "You narrow toward one exact issue, perhaps to keep the problem manageable; going quiet does not necessarily mean anger.",
+      "response": "You become more exact and less talkative, give shorter answers, lose the thread, or leave without explaining your need for time.",
+      "recovery": "Less input, a quiet walk, or one small solo task may give you room to return; this is not certain.",
+      "claim_ids": [
+        "C28",
+        "C29",
+        "C30",
+        "C31"
+      ]
+    },
+    "closing": "This is a picture of how you seem to work, not a box you have to fit. Keep what feels true, and correct anything that changes with the people, place, or kind of problem."
+  },
+  "counts": {
+    "portrait_words": 631,
+    "chapter_words": [
+      {
+        "id": "identity",
+        "words": 252
+      },
+      {
+        "id": "mind",
+        "words": 238
+      },
+      {
+        "id": "communication",
+        "words": 273
+      },
+      {
+        "id": "connection",
+        "words": 231
+      },
+      {
+        "id": "effort",
+        "words": 257
+      },
+      {
+        "id": "pressure",
+        "words": 244
+      },
+      {
+        "id": "strengths",
+        "words": 257
+      },
+      {
+        "id": "thriving",
+        "words": 245
+      }
+    ],
+    "total_words": 2628
+  },
+  "receipts": [
+    {
+      "stage": "evidence",
+      "request_sha256": "8d96b288ad61c11b013f4e65088d63c4c20cda605099471ccfbab41a0078f3a9",
+      "output_sha256": "bfa8a6f65b02b00d4bc47c53fe940e6f103c99b1d2f266f0f362000244702c50",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 28097,
+        "input_tokens_details": {
+          "cache_write_tokens": 28094,
+          "cached_tokens": 0
+        },
+        "output_tokens": 11113,
+        "output_tokens_details": {
+          "reasoning_tokens": 5914
+        },
+        "total_tokens": 39210
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "domains",
+      "request_sha256": "7a54e8c478c7e92fb36eb49e62d68b43cda5dbb69e349cc11245b935ccf70d39",
+      "output_sha256": "015826462cc57194b9047e2ddea992efb788e8627a3083b29408730c1551e41d",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 32612,
+        "input_tokens_details": {
+          "cache_write_tokens": 31372,
+          "cached_tokens": 1237
+        },
+        "output_tokens": 9569,
+        "output_tokens_details": {
+          "reasoning_tokens": 5101
+        },
+        "total_tokens": 42181
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "synthesis",
+      "request_sha256": "62abd089ab176e306b665c7f7dc117eaa3e100adba1b3334769088cb050430e6",
+      "output_sha256": "9d52ba2b8935fd88eb48d91a9984f434f15cefa4e18451d273fa3d7491ae7922",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 35966,
+        "input_tokens_details": {
+          "cache_write_tokens": 35963,
+          "cached_tokens": 0
+        },
+        "output_tokens": 5851,
+        "output_tokens_details": {
+          "reasoning_tokens": 3106
+        },
+        "total_tokens": 41817
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "reading",
+      "request_sha256": "b8983b1371942a52efcd3ed89053b11e19b43e66a3a992298d6982122a9df36f",
+      "output_sha256": "70c107e0202d94821a51f86f0cfd73618fe373f2737cc9e5a6b1dfd0b388c303",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 14185,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 14182
+        },
+        "output_tokens": 17429,
+        "output_tokens_details": {
+          "reasoning_tokens": 11622
+        },
+        "total_tokens": 31614
+      },
+      "run": "editorial-static-v2-attempt-2",
+      "previous_artifact_sha256": "cad54236ec51f71ebc34f4ed02bf03df925e06bc5db5cee28f32f9d5ac1177d9"
+    }
+  ],
+  "created_at": "2026-09-14T06:54:28.280Z",
+  "artifact_sha256": "a3cb95ae41d56d065965b81a69fe011f4c789498b77687d6497362575c7606ba"
+}

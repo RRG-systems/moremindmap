@@ -1,0 +1,357 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-6184D6D9",
+  "slug": "sofia",
+  "name": "Sofia Chen",
+  "age": 19,
+  "gender": "woman",
+  "pronouns": "she/her",
+  "sport": "Soccer",
+  "answers": [
+    {
+      "question_id": "Q01",
+      "text": "Friends, music, and doing something that matters beyond me. I am studying environmental science. I can imagine a few different futures and do not want to choose my whole life yet.",
+      "event_root": "answer-Q01"
+    },
+    {
+      "question_id": "Q02",
+      "text": "People think easygoing means I do not have strong feelings. I do. I just do not always want every disagreement to become a big thing. I can be quite firm about things I care about.",
+      "event_root": "answer-Q02"
+    },
+    {
+      "question_id": "Q03",
+      "text": "Being part of something and seeing a reason for it. I helped organise a campus cleanup because it felt useful. I lose steam on work that feels like ticking boxes, even if I start excited.",
+      "event_root": "answer-Q03"
+    },
+    {
+      "question_id": "Q04",
+      "text": "Mostly energised. I like meeting people. But I sometimes book too much and realise I have no evening to myself. A walk on my own is good when that happens.",
+      "event_root": "answer-Q04"
+    },
+    {
+      "question_id": "Q05",
+      "text": "I bring people into the conversation and build on ideas. I am less keen to make the final choice. At the cleanup I did choose the meeting place because otherwise nobody was going to.",
+      "event_root": "answer-Q05"
+    },
+    {
+      "question_id": "Q06",
+      "text": "I talk it through and imagine what each option would feel like in daily life. I chose a module with fieldwork. I had reasons, but hearing a friend describe the actual week helped me decide.",
+      "event_root": "answer-Q06"
+    },
+    {
+      "question_id": "Q07",
+      "text": "I get curious quickly. I tried guitar with borrowed equipment before buying anything. I do not need to know all the steps, although I like knowing there is someone I can ask.",
+      "event_root": "answer-Q07"
+    },
+    {
+      "question_id": "Q08",
+      "text": "A rough plan is enough. I put deadlines in my calendar but not every hour. When rain changed the cleanup I messaged everyone and found an indoor task. I was relieved a friend handled the supply list.",
+      "event_root": "answer-Q08"
+    },
+    {
+      "question_id": "Q09",
+      "text": "I work better with someone else doing their own work nearby. Alone I can jump to something more interesting. I finished an essay after arranging a library session with a friend.",
+      "event_root": "answer-Q09"
+    },
+    {
+      "question_id": "Q10",
+      "text": "I ask someone to explain it another way, or find an example. I set up a shared document for our group project so we could see gaps. I do not want to redo everything on my own.",
+      "event_root": "answer-Q10"
+    },
+    {
+      "question_id": "Q11",
+      "text": "Honest, with enough context to understand it. I can use direct feedback if I know it is about the task. Being compared with a teammate makes it harder to hear the useful part.",
+      "event_root": "answer-Q11"
+    },
+    {
+      "question_id": "Q12",
+      "text": "I can seem cheerful and carry on. Sometimes I only notice how upset I am when I get home. After an argument I told a friend it was fine and later realised I needed to talk about it.",
+      "event_root": "answer-Q12"
+    },
+    {
+      "question_id": "Q13",
+      "text": "I usually try to understand their side first. I avoided saying a group member was leaving me extra work. Eventually I asked for a clearer split. They agreed, though we had to revisit it once.",
+      "event_root": "answer-Q13"
+    },
+    {
+      "question_id": "Q14",
+      "text": "Talking to someone who will listen before making a plan. After being left out of a starting lineup I called my sister. The next day I asked the coach what I could work on. I still felt disappointed.",
+      "event_root": "answer-Q14"
+    },
+    {
+      "question_id": "Q15",
+      "text": "I connect people and ideas. I noticed two classmates were researching similar things and introduced them. For the cleanup I got friends to own different jobs rather than trying to run all of them.",
+      "event_root": "answer-Q15"
+    },
+    {
+      "question_id": "Q16",
+      "text": "Saying yes and seeing possibilities. I end up with too much. But in music I can repeat a section for ages because I want it to sound right. I am not equally casual about everything.",
+      "event_root": "answer-Q16"
+    },
+    {
+      "question_id": "Q17",
+      "text": "Being asked instead of assumed available. I need to get better at doing that for myself. I try to notice when someone is being talked over and bring them back in.",
+      "event_root": "answer-Q17"
+    },
+    {
+      "question_id": "Q18",
+      "text": "I check how everyone else is doing and leave my own work late. During a busy project week I kept answering group messages instead of starting my part. Normally I can put my phone away more easily.",
+      "event_root": "answer-Q18"
+    },
+    {
+      "question_id": "Q19",
+      "text": "Being available all the time. Friends help me feel good, but a quiet walk or guitar without an audience helps too. This term I have fewer shifts at work and more room than last term.",
+      "event_root": "answer-Q19"
+    },
+    {
+      "question_id": "Q20",
+      "text": "I do not need an answer about my entire future. I want space to explore seriously. I have chosen my course and I care about football, but neither has to explain all of me. Also I can say no; I did to another committee this month.",
+      "event_root": "answer-Q20"
+    }
+  ],
+  "corrections": [],
+  "intake_mode": "static",
+  "questions": [
+    {
+      "id": "Q01",
+      "prompt": "What matters most to you outside sport?",
+      "followup": "What would you like your life to make room for, now or later?",
+      "chapters": [
+        "identity",
+        "thriving"
+      ],
+      "vectors": [
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q02",
+      "prompt": "What do people sometimes get wrong about you?",
+      "followup": "What would they understand better if they heard your side?",
+      "chapters": [
+        "identity",
+        "communication",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q03",
+      "prompt": "What makes you want to put effort into something?",
+      "followup": "Tell us about something you chose to do, and something you found hard to care about.",
+      "chapters": [
+        "identity",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q04",
+      "prompt": "After spending time with other people, how do you usually feel?",
+      "followup": "Is it different with close friends and an unfamiliar group?",
+      "chapters": [
+        "connection",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q05",
+      "prompt": "In a group, how do you usually get involved?",
+      "followup": "When do you speak up, choose a direction, or leave room for someone else?",
+      "chapters": [
+        "communication",
+        "connection"
+      ],
+      "vectors": [
+        "command",
+        "tempo"
+      ]
+    },
+    {
+      "id": "Q06",
+      "prompt": "When a choice is difficult, how do you decide?",
+      "followup": "Think of a recent choice. What mattered, and how long did you need?",
+      "chapters": [
+        "mind",
+        "identity"
+      ],
+      "vectors": [
+        "command",
+        "tempo",
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q07",
+      "prompt": "How do you approach something new or unfamiliar?",
+      "followup": "What makes you curious, and what makes you hold back?",
+      "chapters": [
+        "mind",
+        "effort"
+      ],
+      "vectors": [
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q08",
+      "prompt": "How much of a plan do you like before you start?",
+      "followup": "What happened the last time your plan changed?",
+      "chapters": [
+        "effort",
+        "mind"
+      ],
+      "vectors": [
+        "structure",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q09",
+      "prompt": "When something gets boring or difficult, what do you do?",
+      "followup": "Describe a time you kept going, changed your approach, or decided to stop.",
+      "chapters": [
+        "effort",
+        "strengths"
+      ],
+      "vectors": [
+        "tempo",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q10",
+      "prompt": "When you do not understand something, what do you try?",
+      "followup": "What happened the last time? Did another person or a tool help?",
+      "chapters": [
+        "mind",
+        "thriving"
+      ],
+      "vectors": [
+        "leverage",
+        "precision"
+      ]
+    },
+    {
+      "id": "Q11",
+      "prompt": "What kind of feedback is easiest for you to use?",
+      "followup": "Describe feedback that helped, and anything that made it harder to take in.",
+      "chapters": [
+        "communication",
+        "mind"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q12",
+      "prompt": "When you are upset, what might someone else notice?",
+      "followup": "What might they miss? Only tell us what you want to share.",
+      "chapters": [
+        "pressure",
+        "communication"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q13",
+      "prompt": "When you disagree with someone, what usually happens?",
+      "followup": "Can you remember an example, including what the other person actually said or did?",
+      "chapters": [
+        "connection",
+        "communication",
+        "pressure"
+      ],
+      "vectors": [
+        "command",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q14",
+      "prompt": "After a disappointment, what helps you find your footing?",
+      "followup": "What happened on one occasion? It is okay if you are still figuring this out.",
+      "chapters": [
+        "pressure",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q15",
+      "prompt": "What do you bring to a group that is useful?",
+      "followup": "Think of school, home, friends or sport. How do you share the work?",
+      "chapters": [
+        "strengths",
+        "connection"
+      ],
+      "vectors": [
+        "leverage",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q16",
+      "prompt": "When can one of your strengths get in your way?",
+      "followup": "How do you notice it, and is there a situation where it works differently?",
+      "chapters": [
+        "strengths",
+        "effort"
+      ],
+      "vectors": [
+        "precision"
+      ]
+    },
+    {
+      "id": "Q17",
+      "prompt": "What makes you feel respected or fairly treated?",
+      "followup": "How do you try to offer that to someone else?",
+      "chapters": [
+        "identity",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q18",
+      "prompt": "What changes about you when the pressure rises?",
+      "followup": "Compare an ordinary situation with a difficult one. What was going on around you?",
+      "chapters": [
+        "pressure",
+        "mind"
+      ],
+      "vectors": [
+        "tempo",
+        "precision",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q19",
+      "prompt": "What drains you, and what helps you feel like yourself again?",
+      "followup": "Is anything about your current week making a difference?",
+      "chapters": [
+        "thriving",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q20",
+      "prompt": "What else should MORE understand about you?",
+      "followup": "Where have your answers missed the full picture? What are you still figuring out?",
+      "chapters": [
+        "identity",
+        "mind",
+        "communication",
+        "connection",
+        "effort",
+        "pressure",
+        "strengths",
+        "thriving"
+      ],
+      "vectors": []
+    }
+  ]
+}

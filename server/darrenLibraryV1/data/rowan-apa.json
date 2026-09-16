@@ -1,0 +1,1382 @@
+{
+  "version": "youth-apa-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-99A1DB45",
+  "identity": {
+    "mm": "MM-20260913-99A1DB45",
+    "name": "Rowan Ellis",
+    "slug": "rowan",
+    "age": 17,
+    "gender": "nonbinary",
+    "pronouns": "they/them",
+    "sport": "Climbing",
+    "synthetic": true,
+    "reading_sha256": "5a706e0aea3f08c8dc8e239f9ec5f68c7c4f4cd9e5ffe4fd8bcd35dbb360a931"
+  },
+  "source_sha256": "3808d0161a55520d2af35c2d5f8951c44949ae7bdef98d8fdc0096bcc33d63f5",
+  "bos_sha256": "5a706e0aea3f08c8dc8e239f9ec5f68c7c4f4cd9e5ffe4fd8bcd35dbb360a931",
+  "confirmation": {
+    "goals": {
+      "sport": "Solve the blue overhang, or learn clearly what still blocks it.",
+      "training": "Use each session to test one useful idea.",
+      "mindset": "Try a reasonable idea before the explanation is perfect.",
+      "school": "Submit a workable design choice by September 25."
+    },
+    "priority": "Leave enough time to test an idea, in climbing and my design project.",
+    "assessment_date": "2026-09-14",
+    "review_date": "2026-09-21",
+    "horizon_date": "2026-11-02",
+    "confirmed": true
+  },
+  "sources": [
+    {
+      "id": "A01",
+      "text": "Climbing, indoor bouldering. Youth recreational group, not a performance squad. I do a friendly local competition sometimes, but I am not chasing a ranking.",
+      "source": "Athlete",
+      "question": "What sport are we focusing on right now?"
+    },
+    {
+      "id": "A02",
+      "text": "I want to finish the blue overhang problem I have been working on because solving it would feel good. I like hard problems. I do not want climbing to become a job.",
+      "source": "Athlete",
+      "question": "What would you love to achieve in your sport, and why does it matter to you?"
+    },
+    {
+      "id": "A03",
+      "text": "I can work out foot placements and change a method when the first one fails. Last Tuesday a different starting foot let me get one move farther on the blue problem.",
+      "source": "Athlete",
+      "question": "What feels strongest about the way you are performing right now?"
+    },
+    {
+      "id": "A04",
+      "text": "I can spend the whole session trying to explain one move and run out of time to try the next idea. On Thursday I watched and talked about the middle section, then had only one go left.",
+      "source": "Athlete",
+      "question": "What part of your performance would you most like to improve?"
+    },
+    {
+      "id": "A05",
+      "text": "By November 2 I would like to finish that problem, or be able to explain what I tried and which approach gets me farther. I would be disappointed not to finish, but learning something real still counts.",
+      "source": "Athlete",
+      "question": "What would make the next six to eight weeks feel successful in your sport?"
+    },
+    {
+      "id": "A06",
+      "text": "Tuesday and Thursday at the climbing gym, 90 minutes each. Saturday sometimes a walk with a friend. No extra finger training. My week is okay and I want to keep unplanned time.",
+      "source": "Athlete",
+      "question": "What does a normal training week look like for you?"
+    },
+    {
+      "id": "A07",
+      "text": "I want each session to answer one useful question about the climb. I do not want to collect exercises without knowing what they are for.",
+      "source": "Athlete",
+      "question": "What do you most want your training to help you do better?"
+    },
+    {
+      "id": "A08",
+      "text": "Writing the part I could not solve and trying another method next time helped on a previous route. Tuesday I changed the starting foot and got farther on this one.",
+      "source": "Athlete",
+      "question": "Which part of your training seems to be helping most?"
+    },
+    {
+      "id": "A09",
+      "text": "Several people call different suggestions while I am looking. I ask why and we can spend ages discussing. Last Thursday I ran out of time. Coach would like me to try first more often; I want to understand enough to choose.",
+      "source": "Athlete",
+      "question": "Which part feels confusing, hard to keep up with, or not useful?"
+    },
+    {
+      "id": "A10",
+      "text": "One clear question to explore, one person giving advice at a time, and enough of the same session left to actually climb. I do not want another session or a training spreadsheet.",
+      "source": "Athlete",
+      "question": "What would make your training week work better for you?"
+    },
+    {
+      "id": "A11",
+      "text": "I can be curious, try something that may fail, then change it. I am not thinking about explaining myself to everyone at once.",
+      "source": "Athlete",
+      "question": "When you are playing with confidence, what is different about you?"
+    },
+    {
+      "id": "A12",
+      "text": "I get exact and quiet when several people ask why I am stuck. On Thursday I stopped answering for a bit. I was frustrated with the problem, not necessarily angry with them.",
+      "source": "Athlete",
+      "question": "When the pressure goes up, what usually happens for you?"
+    },
+    {
+      "id": "A13",
+      "text": "Quiet and a clear account of the part that failed. A short pause away from the conversation can help. Sometimes I just want to go home, and I do not know a perfect reset.",
+      "source": "Athlete",
+      "question": "After a mistake or a bad performance, what helps you get back into it?"
+    },
+    {
+      "id": "A14",
+      "text": "Try a reasonable idea before I have the perfect explanation. I still want to know what we are testing. I do not want brave to mean ignoring the instructor.",
+      "source": "Athlete",
+      "question": "What would you most like to handle better mentally in your sport?"
+    },
+    {
+      "id": "A15",
+      "text": "Ask one question and give me time. State what result you mean. If people disagree about a method, I would rather compare ideas than pretend we all agree.",
+      "source": "Athlete",
+      "question": "What do you need from the people around you to compete at your best?"
+    },
+    {
+      "id": "A16",
+      "text": "Year 12. I like engineering and physics. I changed one subject after checking the course outline. School is mostly going okay.",
+      "source": "Athlete",
+      "question": "How is school going for you right now?"
+    },
+    {
+      "id": "A17",
+      "text": "I am good at diagrams and building a test. I can spend too long comparing options in the design project. We nearly missed a parts order before. For the current project, the design choice is due September 25.",
+      "source": "Athlete",
+      "question": "Which parts of school feel strongest, and which need help?"
+    },
+    {
+      "id": "A18",
+      "text": "Choose a workable design and submit it by September 25, then test and improve it. It does not have to be the best possible design in the world.",
+      "source": "Athlete",
+      "question": "What would you like to achieve in school this term?"
+    },
+    {
+      "id": "A19",
+      "text": "Possibly engineering or repair work. I want to be good at something useful. I am comparing college and apprenticeship routes; I have not chosen one.",
+      "source": "Athlete",
+      "question": "Where would you like school to lead for you?"
+    },
+    {
+      "id": "A20",
+      "text": "The two climbing sessions fit. I have a Friday project block for the design choice, and I want to keep it. I do not need MORE to fill every free hour.",
+      "source": "Athlete",
+      "question": "How are school and sport fitting together in your week?"
+    },
+    {
+      "id": "COACH1",
+      "text": "Rowan changed a starting foot on Tuesday and got one move farther. On Thursday the discussion took most of the available time and there was one attempt left. I do not know whether they were worried about failing or simply working through the explanation.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH2",
+      "text": "I prefer Rowan to try a reasonable option sooner. Rowan wants enough explanation to choose the test. Those are different priorities in how to begin, not evidence that they refuse to learn.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH3",
+      "text": "We can agree a short discussion followed by a normal attempt in the existing session. I supervise the climbing and choose what is appropriate. No new load, unsupervised technique or additional session is proposed. We have not agreed the discussion length with Rowan.",
+      "source": "Coach"
+    },
+    {
+      "id": "CONFIRM",
+      "source": "Athlete confirmation",
+      "text": "{\"goals\":{\"sport\":\"Solve the blue overhang, or learn clearly what still blocks it.\",\"training\":\"Use each session to test one useful idea.\",\"mindset\":\"Try a reasonable idea before the explanation is perfect.\",\"school\":\"Submit a workable design choice by September 25.\"},\"priority\":\"Leave enough time to test an idea, in climbing and my design project.\",\"assessment_date\":\"2026-09-14\",\"review_date\":\"2026-09-21\",\"horizon_date\":\"2026-11-02\",\"confirmed\":true}"
+    }
+  ],
+  "bos_sources": [
+    {
+      "id": "BOS:portrait",
+      "headline": "Clear enough to change course",
+      "text": "One of the clearest things about you is that order and flexibility belong together. You like knowing what the job is, what finished means, and what can be checked. Once that frame is solid, you are quite willing to replace a failed method, change your mind after a test, or stop repeating something that teaches you nothing. The plan gives you something steady enough to experiment against; it is not a promise to defend the first idea.\n\nWhat draws you in is not difficulty for its own sake. A problem becomes interesting when you can understand it, affect the outcome, and learn something real from it. Repairing an old speaker mattered because you wanted to know why it had stopped working. More broadly, you seem to care about becoming good at something useful. At the same time, you do not want every interest turned into a job or public achievement. Making things can matter without taking over your whole identity.\n\nThat same balance appears in groups. You will speak when you think you can move the work forward, perhaps by naming a test, finding useful information, or breaking a large problem into smaller parts. You are also comfortable with someone else presenting, and you do not need to control every role. This suggests that useful influence often matters more to you than visibility. You are not purely a solo problem-solver either: once the question is clear, you will use manuals, examples, knowledgeable people, and divided work.\n\nWith people, you are selective rather than simply distant. A trusted friend and a shared interest can hold your attention for ages, while a group with several conversations at once can wear you out. After connection, you often need space. That space does not cancel the connection; it seems to protect your ability to return as yourself. Your friends also know a more playful version of you—the one who makes terrible jokes and definitely does not speak like a manual all the time.\n\nOne of the harder parts is that your care may exist before it becomes visible. You often start with the missing information, the exact point of disagreement, or the result that is needed. To you, that can be a serious and fair way to handle the problem. Someone else may first hear a sharp question or a solution and miss the concern underneath. You already notice this gap: you know you can solve before showing that you listened, and you sometimes wonder whether a person felt heard. The issue is not a lack of care; it is often the order in which care and problem-solving become visible.\n\nYour pace changes with the situation. With a practical unknown, you often read enough to begin and then learn through action. With an important choice, you are more likely to compare what each option will really involve and whether it will still fit later. Unfamiliar social situations are less inviting, especially when expectations are unstated. Under several questions or demands for an instant answer, you become more exact and less talkative. Short answers or leaving can protect thinking space, but if you do not name that need, another person may read the pause as anger or rejection.\n\nSo you have both a quick experimental side and a slower, protective side. The first likes a clear problem, an early attempt, and honest feedback from the result. The second appears when the choice has longer consequences, the social meaning is unclear, or too many things arrive at once. Across both sides, you are protecting much the same things: accuracy, a reason you can respect, room to make your own judgment, and relationships where clear words and real trust matter. You are practical without being only serious, organized without being fixed, and connected without needing constant company.",
+      "takeaway": "Full accepted personality portrait",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C06",
+        "C11",
+        "C12",
+        "C14",
+        "C16",
+        "C18",
+        "C20",
+        "C22",
+        "C27",
+        "C29",
+        "C33",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:identity",
+      "headline": "Useful without becoming a performance",
+      "text": "You do not describe yourself mainly through a title, a team role, or a future job. The things that matter to you—making things, time to yourself, and a few people you trust—suggest a life that feels worthwhile from the inside. Engineering or repair work may become part of that life, but you are keeping it as a possibility rather than turning it into a fixed plan.\n\nBeing good at something useful matters to you. That seems less about collecting attention and more about having skill that does something real. Your group choices fit that idea: you may offer a direction or useful test, then let somebody else present. Recognition may still matter sometimes, but you do not seem to need every contribution to become a performance.\n\nYou also protect the right for an interest to stay an interest. Saying that a hobby does not have to become your job leaves room for enjoyment, curiosity, and choice. It means your future does not have to swallow everything you like now. Trusted relationships and private time sit beside competence, not below it.\n\nA flat label would miss you. You can like people and need space, enjoy a plan and change the method, keep going for a reason and stop when the reason disappears. You also make terrible jokes with friends. Your precise working voice is real, but it is not the whole person. You seem most yourself when usefulness, independence, closeness, and playfulness are all allowed to exist without one taking over.",
+      "takeaway": "You want skill to be useful without letting achievement become your whole identity.",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C20",
+        "C33",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:mind",
+      "headline": "Make it clear, then test it",
+      "text": "Your mind seems to work best when the problem can be made stable enough to inspect. You look for a diagram, manual, example, outline, or written note; gather enough to start; then let the result tell you what to change. You do not need every detail before the first attempt. What matters is having a clear enough picture to make the attempt informative.\n\nOther people fit into this process as useful sources, not as substitutes for your judgment. You asked a teacher about a possible subject and asked someone knowledgeable about a repair after making the question clear. A photograph, written comment, or specific explanation gives you something you can revisit instead of having to guess what was meant.\n\nWhen the choice matters beyond today, you slow the process down. In changing a school subject, you checked what each option would actually involve and asked whether it would still interest you a year later. That is practical future-thinking: you do not only imagine an outcome; you inspect the route that would lead there.\n\nYour precision has a tradeoff. Sometimes the search for the exact explanation or best option can continue after the situation only needs a workable choice. When an order deadline became visible, you were able to choose, so exactness does not trap you completely. Your experimenting is clearest with problems that give usable feedback; crowded or unfamiliar social situations do not offer the same clean signals.",
+      "takeaway": "You build a clear enough picture to try, then let results change your next move.",
+      "claim_ids": [
+        "C08",
+        "C11",
+        "C14",
+        "C17",
+        "C18",
+        "C22",
+        "C24"
+      ]
+    },
+    {
+      "id": "BOS:communication",
+      "headline": "Let the human message show",
+      "text": "Clear communication, for you, usually means naming the thing itself. You can use feedback that says what is wrong and what the finished result needs to be. Written comments help because they stay still long enough to check. Hints that assume you already know what someone means are much harder when you genuinely do not know which part they expect you to supply.\n\nThe main misunderstanding is often between what you mean to do and what becomes visible. Asking for missing information may feel like the most honest route to understanding, yet you have been told it can sound rude. Care, patience, or reassurance may remain inside the message while the question itself lands first. Tone, timing, and the other person’s expectations also matter, but this explains why two people can leave the same exchange with different impressions.\n\nIn disagreement, you tend to define the exact difference and look for a fair way to compare the options. When a robotics teammate felt dismissed, you asked them to explain and suggested testing both ideas. That move treated both designs seriously, yet you were still unsure whether the person felt fully heard. For you, listening and testing may belong together; for someone else, the listening may need to become visible before the test.\n\nWhen you are under strain, your communication gets narrower: fewer words, more exactness, and sometimes leaving the conversation. If you know you need time but do not say it, the pause can carry a meaning you never intended. A brief sign that you heard the person, or that you need time rather than agreement, may help your actual purpose survive the moment.",
+      "takeaway": "Your clearest words work best when your care and need for time are clear too.",
+      "claim_ids": [
+        "C05",
+        "C06",
+        "C07",
+        "C25",
+        "C27",
+        "C28",
+        "C29"
+      ]
+    },
+    {
+      "id": "BOS:connection",
+      "headline": "Depth, trust, and room afterward",
+      "text": "Your social life seems to depend more on the quality of attention than on simply being with or without people. You can talk for ages with someone you trust about a shared interest. A group becomes costly when several conversations compete at once, and afterward you often need space. That is selective depth, not a lack of interest in connection. Closeness and solitude are both real needs for you.\n\nTrust appears to grow around clarity. You feel respected when people use clear words and take your answer seriously. You try to return that respect by not pretending to agree. Smoothness for its own sake matters less than knowing that both people are being real, even if the answer is inconvenient.\n\nThere is a tension here. You may show respect by taking an idea seriously enough to question it, solve it, or compare it fairly. Another person may experience respect first through being listened to without an immediate solution. Neither need cancel the other, but the order can affect whether your honesty feels connecting or distancing.\n\nUnfamiliar social events interest you less than unfamiliar practical problems. The reason is not completely clear: noise, divided attention, unclear expectations, lack of a shared topic, or unfamiliar people could each matter. Familiarity changes your range. With friends, humor and long conversations appear; after the interaction, quiet helps you recover the room to be yourself again.",
+      "takeaway": "You connect deeply through trust and shared focus, then need space to recover your attention.",
+      "claim_ids": [
+        "C03",
+        "C04",
+        "C12",
+        "C26",
+        "C27",
+        "C33"
+      ]
+    },
+    {
+      "id": "BOS:effort",
+      "headline": "A reason keeps effort attached",
+      "text": "Effort comes more easily when you can see why the task matters. A problem you can work out offers curiosity, control over the next move, and a real result. By contrast, instructions that change without any explanation weaken the logic of the task. It is not change itself that bothers you; it is being asked to follow a moving rule without understanding its purpose.\n\nOnce a reason is present, your persistence is flexible. You can stay with the problem while refusing to stay loyal to a method that repeatedly fails. A different connection, a new angle, or another source of information can keep the work alive. This is not constant novelty-seeking. You usually keep the goal or test steady while changing the route.\n\nYou are also willing to stop. You left an online course because it was mostly covering things you already knew, so continuing would not have offered much learning. That does not mean every boring task loses your effort. Necessary work can still be repetitive, and it is not yet clear which reasons—responsibility, deadline, usefulness to someone else, or a larger goal—keep you attached then.\n\nYour standards can both power and slow your effort. Wanting the exact explanation can produce a better question and fewer guesses. It can also keep comparison going after the practical need has shifted to good enough for now. You can make that shift when the time cost is clear. The useful distinction for you seems to be whether more checking will change the outcome or only delay it.",
+      "takeaway": "A reason keeps you engaged; it does not require you to keep using a failing route.",
+      "claim_ids": [
+        "C09",
+        "C10",
+        "C15",
+        "C16",
+        "C23",
+        "C24"
+      ]
+    },
+    {
+      "id": "BOS:pressure",
+      "headline": "Too much at once makes you quieter",
+      "text": "Ordinarily, one clear problem and time to think leave you able to work through what is happening. Pressure changes you most when demands stack up: several questions, noise, or an expectation of an instant answer. The number of things to track seems more important than difficulty alone. A hard problem can still be manageable when it stays one problem.\n\nIn those busier moments, you become more exact and less talkative. Answers shorten, the conversation becomes harder to follow, and leaving may become the cleanest way to reduce input. That pause may be sensible, not a failure. The complication is that you do not always explain your need for time before you go.\n\nWithout that explanation, another person may fill in the blank. A friend once thought you were angry with them when your frustration was with the project. That does not mean every quiet moment will be misread. It shows how pressure can hide the difference between what you feel, what you are trying to protect, and what someone else can see.\n\nAfter not finishing a climbing route, you wrote down the unsolved part and later tried another approach. At other times, you simply want to go home. Quiet walking or working alone on something small may give your attention room to settle, but you are still figuring out how reliably that helps you re-enter. Your current week is okay, so this describes a change under strain rather than your state all the time.",
+      "takeaway": "Too many inputs narrow your words; one clear problem and time make more of you available.",
+      "claim_ids": [
+        "C28",
+        "C29",
+        "C30",
+        "C31",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:strengths",
+      "headline": "Turning unknowns into workable parts",
+      "text": "One distinctive strength is your way of turning a large unknown into a set of smaller, answerable questions. Instead of treating the whole problem as one block, you look for tests, missing information, and parts that can be handled separately. This gives uncertainty a shape. It can also give a group a practical next move when discussion is circling.\n\nYou pair that with resourcefulness. You will investigate on your own, but you also use manuals, diagrams, examples, photographs, teachers, knowledgeable people, and shared roles. Asking who wants which part is not giving the problem away; it recognizes that doing everything yourself wastes time. Your independence includes knowing when another source can improve the result.\n\nAnother strength is structured adaptability. You can keep a purpose, test, or definition of finished steady while changing the route after a result proves the first method wrong. That allows you to be organized without being stuck. You do not change merely because something is new; you change when there is a reason you can inspect.\n\nThese strengths have honest tradeoffs. Breaking things down can become prolonged comparison when only a workable choice is needed. Moving quickly toward a fair test can make another person’s need to be heard less visible. Selective direction can also leave the final ownership unclear if everyone is waiting. None of these erase the strength. They show where your useful, exact approach may need a clearer time line, role, or human signal. You have mainly described this in technical groups; at home or elsewhere, you may contribute differently.",
+      "takeaway": "You make uncertainty workable by turning it into tests, resources, and shared parts.",
+      "claim_ids": [
+        "C14",
+        "C20",
+        "C21",
+        "C22",
+        "C23",
+        "C27"
+      ]
+    },
+    {
+      "id": "BOS:thriving",
+      "headline": "Clarity with room to choose",
+      "text": "You seem to have your widest range when clarity and choice work together. A meaningful reason, a visible endpoint, and information you can inspect reduce the energy spent guessing. Freedom to revise the method keeps that clarity from becoming a cage. This combination can fit schoolwork, making and repair, group projects, and sport problems, although the exact balance may differ in each place.\n\nYour surroundings matter too. One question at a time and enough response time help you keep hold of what you want to say. Written feedback, a diagram, or a clear example can make school and practical tasks easier to enter. When advice or roles are vague, you may spend more effort decoding the request than doing the work itself.\n\nWith people, thriving does not mean constant company. You want a few trusted relationships, shared interests, and clear words, while also needing quiet afterward. Time alone is not the opposite of belonging for you; it helps preserve it. Unplanned time matters for a similar reason. Even though you like plans, not every part of the day needs to be assigned before you reach it.\n\nAfter a difficult moment, you may turn toward less input, a quiet walk, or one small task before taking on more. The larger fit is not a perfect routine. It is a life with enough purpose to engage you, enough structure to orient you, enough freedom to change course, and enough space for trust, humor, and your own attention.",
+      "takeaway": "You thrive with clear purpose, adjustable methods, trusted people, and protected room that remains your own.",
+      "claim_ids": [
+        "C03",
+        "C07",
+        "C10",
+        "C13",
+        "C30",
+        "C31",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:command",
+      "headline": "Your command pattern",
+      "text": "You step in when a direction can move the work forward, but you do not need every decision, role, or visible moment. You prefer shared ownership over taking charge of the whole group. Clear roles let you propose a test, make your own choice, or divide work without owning everything. If no one owns the final decision, the last step may stay unclear; reactions also need room. This is clearest in a school choice and technical groups, not every setting.",
+      "takeaway": "You step in when a direction can move the work forward, but you do not need every decision, role, or visible moment. You prefer shared ownership over taking charge of the whole group.",
+      "claim_ids": [
+        "C17",
+        "C19",
+        "C20",
+        "C21"
+      ]
+    },
+    {
+      "id": "BOS:tempo",
+      "headline": "Your tempo pattern",
+      "text": "You often read enough to begin and learn by trying. With an important choice, several questions, or social pressure, you prefer more room before speaking or deciding. Brief preparation, action, and feedback suit practical problems; one question at a time protects your response when things get busy. Instant answers and rapid switching may make you quieter, so others may miss that you are still thinking. Your pace changes with the stakes and number of demands; this is a preference, not an ability grade.",
+      "takeaway": "You often read enough to begin and learn by trying. With an important choice, several questions, or social pressure, you prefer more room before speaking or deciding.",
+      "claim_ids": [
+        "C11",
+        "C17",
+        "C28",
+        "C29"
+      ]
+    },
+    {
+      "id": "BOS:relational_awareness",
+      "headline": "Your relational awareness pattern",
+      "text": "You begin with clear words and the exact issue more than unspoken social hints. You do check impact, especially when someone names it, but care may become visible after the solution. Direct feedback gives you something usable, and asking what the disagreement is can reopen an honest conversation. Solutions, short answers, or leaving may hide care and listening that you feel but have not shown. This describes where your attention starts, not how much you care or whether another person’s reading is correct.",
+      "takeaway": "You begin with clear words and the exact issue more than unspoken social hints. You do check impact, especially when someone names it, but care may become visible after the solution.",
+      "claim_ids": [
+        "C05",
+        "C25",
+        "C26",
+        "C27",
+        "C29"
+      ]
+    },
+    {
+      "id": "BOS:precision",
+      "headline": "Your precision pattern",
+      "text": "You naturally seek exact information, checkable details, and a clear result. You can accept a workable answer, but comparison may hold you until the time limit becomes obvious. Manuals, diagrams, photographs, and written feedback give you stable details to inspect and correct. The best explanation can take time needed for a workable choice, especially when pressure makes you even more exact. This is clearest in technical tasks and school feedback; it is a preference, not guaranteed correctness.",
+      "takeaway": "You naturally seek exact information, checkable details, and a clear result. You can accept a workable answer, but comparison may hold you until the time limit becomes obvious.",
+      "claim_ids": [
+        "C07",
+        "C08",
+        "C23",
+        "C24",
+        "C28"
+      ]
+    },
+    {
+      "id": "BOS:leverage",
+      "headline": "Your leverage pattern",
+      "text": "You combine your own investigation with useful tools, knowledgeable people, and divided work. Help fits best when the question, role, and expected result are clear. You stay close to the problem while gathering missing information and avoiding the delay of doing every part yourself. Vague advice or unclear handoffs may send you back into checking work yourself. Most examples come from repairs, school choices, and technical groups; personal situations may work differently.",
+      "takeaway": "You combine your own investigation with useful tools, knowledgeable people, and divided work. Help fits best when the question, role, and expected result are clear.",
+      "claim_ids": [
+        "C08",
+        "C18",
+        "C21",
+        "C22"
+      ]
+    },
+    {
+      "id": "BOS:adaptability",
+      "headline": "Your adaptability pattern",
+      "text": "You readily change a method when a test or new information shows it is not working. The purpose usually stays steady, so changing course is not abandoning the goal. You can replace a failed route, revisit a hard section, or stop repetition that is no longer teaching you. Unexplained changes are harder because you cannot see the reason for leaving the original method. This appears across technical work, study, and sport; it does not mean weak commitment or constant novelty.",
+      "takeaway": "You readily change a method when a test or new information shows it is not working. The purpose usually stays steady, so changing course is not abandoning the goal.",
+      "claim_ids": [
+        "C13",
+        "C15",
+        "C16",
+        "C30",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:structure",
+      "headline": "Your structure pattern",
+      "text": "You like a clear sequence, a definition of finished, and information you can revisit. Plans are useful rails, not fixed rules, and you still want unplanned time. Stable goals and written expectations reduce guessing while leaving room to change the method. Unexplained plans may feel controlling, while too much scheduling can crowd out the open time you need. You lean toward structure without rigidity; your method changes when results change.",
+      "takeaway": "You like a clear sequence, a definition of finished, and information you can revisit. Plans are useful rails, not fixed rules, and you still want unplanned time.",
+      "claim_ids": [
+        "C07",
+        "C13",
+        "C14",
+        "C32",
+        "C34"
+      ]
+    },
+    {
+      "id": "BOS:perspective",
+      "headline": "Your perspective pattern",
+      "text": "You connect present choices to medium-term life, asking what an option really involves and whether it will still fit later. Your future thinking stays practical rather than fixed. Looking ahead can protect an interest from becoming an obligation and ground choices in real details. Future fit adds comparison, so a deadline may require separating today’s decision from what can remain open. You described a one-year school choice and possible work interests, not a settled long-term plan.",
+      "takeaway": "You connect present choices to medium-term life, asking what an option really involves and whether it will still fit later. Your future thinking stays practical rather than fixed.",
+      "claim_ids": [
+        "C01",
+        "C17",
+        "C18"
+      ]
+    }
+  ],
+  "existing_plan": null,
+  "report": {
+    "headline": "Make the question clear, then leave room for the answer",
+    "opening": "You already know how to turn a hard problem into a test. The next step is protecting enough time to run it.",
+    "domains": [
+      {
+        "id": "sport",
+        "goal": "Solve the blue overhang, or learn clearly what still blocks it.",
+        "strength": "You read movement problems well enough to adjust foot placement; changing the starting foot got you one move farther.",
+        "gap": "Discussion can consume the session before you test the next idea and learn from your own movement.",
+        "help": "If you and the coach agree it, a brief discussion with one adviser followed by a normal supervised attempt could preserve both choice and climbing time.",
+        "bos_connection": "Your broader pattern is to make a problem stable enough to inspect, then change the method when evidence changes. That fits climbing: a clear goal does not make you rigid; it lets a failed foot choice become information. The limit is that exact explanation can outlast the time available for movement.",
+        "detail": "Climbing matters because hard problems are satisfying, not because you are chasing a ranking or want the sport to become a job. Your November 2 success line is flexible but real: finish blue, or know which approaches were tried and what still blocks you. Tuesday showed that an actual test can move the problem forward; Thursday showed that watching and discussing can leave almost no evidence from your own attempt. The coach confirms both events but does not know whether hesitation, explanation, or something else drove the delay. A technical blocker may still remain for the coach to assess through supervised attempts, so organizing the conversation should not be treated as a technical fix.",
+        "unknowns": [
+          "The coach-assessed technical reason the middle section currently stops you.",
+          "Whether one adviser and a brief discussion would work in the recreational group, and what boundary would feel acceptable to you."
+        ],
+        "refs": [
+          "A01",
+          "A02",
+          "A03",
+          "A04",
+          "A05",
+          "COACH1",
+          "CONFIRM",
+          "A10",
+          "A15",
+          "COACH3"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:mind",
+          "BOS:effort"
+        ]
+      },
+      {
+        "id": "training",
+        "goal": "Use each session to test one useful idea.",
+        "strength": "Writing down an unsolved part and changing the next method has helped you learn, including the starting-foot change that got you farther.",
+        "gap": "Several people offering different suggestions can turn one useful choice into a long discussion that crowds out climbing.",
+        "help": "One clear question, one adviser at a time, and an attempt within the same session could make existing training more useful without adding load.",
+        "bos_connection": "You use help well when the question, role, and expected result are clear; you are not simply a solo learner. In a noisy advice stream, however, unclear handoffs can send you into more checking. One adviser and one test question could turn shared input back into useful help without filling your week.",
+        "detail": "Your current week already has a workable shape: Tuesday and Thursday climbing sessions, no extra finger work, and unplanned time you want to keep. The issue you named is therefore not a lack of commitment or amount of training. It is whether each existing session answers one useful question. A short note has helped you return to an unsolved section before, and Tuesday’s starting-foot change gave immediate information. By contrast, several people offering different ideas can turn a choice into a long discussion. The coach is willing to discuss a short-talk-then-attempt arrangement, but no length or adviser role has been agreed with you. Any new suggestion should remain inside the existing week rather than quietly becoming a spreadsheet or extra session.",
+        "unknowns": [
+          "Whether other climbers can practically limit suggestions to one person at a time in the group setting.",
+          "How much written review is useful to you before it starts feeling like unwanted tracking."
+        ],
+        "refs": [
+          "A06",
+          "A07",
+          "A08",
+          "A09",
+          "A10",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:strengths",
+          "BOS:connection",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "id": "mindset",
+        "goal": "Try a reasonable idea before the explanation is perfect.",
+        "strength": "When the setting feels clear, you can be curious, try something that may fail, and change it without defending the first idea.",
+        "gap": "Several questions at once can make you exact and quiet, and you do not yet have a reliable reset every time.",
+        "help": "A brief, chosen signal for one question or a short pause could make asking for help part of courage, not a retreat.",
+        "bos_connection": "Under several simultaneous demands, your words tend to narrow before your interest in solving the problem disappears. Because your care and need for time can stay invisible, quiet may be misread. A brief pause signal could protect both your accuracy and the relationship, though it is not yet a proven reset.",
+        "detail": "Your version of courage is specific: try something reasonable before the explanation is perfect, while still knowing what is being tested and respecting the instructor. That is not blind compliance. When confident, you are curious and willing to fail; when several people ask why you are stuck, you become quieter and more exact. Thursday’s silence may have protected thinking space, but neither you nor the coach has identified the cause with certainty. Resetting is also variable: quiet, a clear account of failure, or a short pause can help, while sometimes you want to leave. A useful mindset step would make both agency and communication visible—one question, one pause signal, or one request for time—without pretending you can always reset on demand.",
+        "unknowns": [
+          "Whether Thursday’s delay came from concern about failing, the effort of processing explanations, frustration, or a combination.",
+          "Which short reset reliably helps you return to climbing rather than simply ending the conversation."
+        ],
+        "refs": [
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A15",
+          "COACH1",
+          "COACH2",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:communication",
+          "BOS:connection"
+        ]
+      },
+      {
+        "id": "school",
+        "goal": "Submit a workable design choice by September 25.",
+        "strength": "You are good at diagrams and building a test, and you have already used a course outline to make a considered subject change.",
+        "gap": "Comparing design options can continue long enough to threaten the time needed for a workable decision.",
+        "help": "Using the real assignment requirements and Friday block as a workable-for-now line could leave room to test and improve.",
+        "bos_connection": "For important choices, you inspect real consequences and medium-term fit; that helped with a subject change. Your precision also has a known tradeoff: comparison can continue after the task only needs workable. A visible definition of finished can support action without asking you to stop caring about quality.",
+        "detail": "School is mostly going okay, and this project is a positive goal rather than something merely competing with climbing. Engineering and physics interest you; diagrams and building a test are current strengths. The immediate job is narrower than choosing a career or finding the best design in the world: select a workable design by September 25, then test and improve it. You have a Friday project block and want to protect it. The earlier near-missed parts order shows a real time tradeoff, but it does not prove you always delay decisions. Your subject change also shows that careful comparison can lead to action when the route and consequences are clear. We do not yet know the assignment requirements, which options are ready, or whether teacher clarification is available in the block.",
+        "unknowns": [
+          "The exact assignment requirements that define a workable design choice.",
+          "Which current design options already meet those requirements.",
+          "Whether a teacher will be available to clarify a missing requirement during the Friday block."
+        ],
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A19",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:identity"
+        ]
+      }
+    ],
+    "connection": "Climbing and design both reward your ability to define a problem, test a method, and change course from evidence. Tuesday’s foot change and your strength with diagrams show that working side of you. The pressure point is time: several climbing voices and long design comparisons can use the window meant for testing. Your mindset goal links courage to acting with enough understanding, not acting blindly. School is also a goal in its own right, while the two gym sessions, Friday project block, unplanned time, and mostly okay week set the real boundaries.",
+    "main_obstacle": "A plausible obstacle is that seeking enough explanation to choose well can use the limited window needed to run a test, especially when several voices or options arrive together.",
+    "what_we_dont_know": [
+      "What technical factor currently blocks the blue overhang and whether the problem will remain available through November 2.",
+      "What advice boundary you and the coach would both accept; no discussion length or new arrangement has been agreed.",
+      "Whether a current design already meets the school brief and what teacher clarification may be needed.",
+      "Whether a short pause, quiet, or written note reliably helps you re-enter after frustration.",
+      "Whether fewer simultaneous voices alone would create earlier attempts, or whether another factor is also delaying action."
+    ],
+    "coach_view": {
+      "status": "different_priorities",
+      "summary": "You and the coach report the same key events: the starting-foot change got you farther, while Thursday’s discussion left one attempt. The coach prefers a reasonable attempt sooner; you want enough explanation to choose what is being tested. Those are different priorities for how to begin, not evidence that you refuse to learn or a disagreement about what happened. The coach is open to discussing a short-talk-then-attempt arrangement, but no length has been agreed, and the reason Thursday expanded remains unknown.",
+      "refs": [
+        "A03",
+        "A04",
+        "A09",
+        "A14",
+        "COACH1",
+        "COACH2",
+        "COACH3"
+      ]
+    },
+    "futures": [
+      {
+        "role": "current_course",
+        "headline": "Useful learning continues, but some tests arrive late",
+        "what": "Through November 2, useful foot-placement tests continue, but some sessions leave little time to try. School remains mostly okay. From today, the September 25 submission timing cannot be predicted; a late choice could leave less time to test and improve the design.",
+        "conditions": "No clear limit is agreed for advice or comparison, while you keep the existing sessions, Friday project block, and unplanned time.",
+        "first_sign": "A session or project block produces plenty of explanation but only a late attempt or an unresolved choice.",
+        "details": "The current pattern contains progress, not automatic decline: Tuesday’s starting-foot change worked, and written review has helped before. The same precision can also hold attention when several suggestions or options compete. That could limit feedback from the wall and from the design itself, even while motivation stays intact. We do not know whether the blue problem’s main barrier is technical, conversational, emotional, or simply difficult, and we do not yet know the design’s remaining requirements.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A03",
+          "A04",
+          "A08",
+          "A09",
+          "A16",
+          "A17",
+          "A20",
+          "COACH1",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:pressure",
+          "BOS:effort"
+        ]
+      },
+      {
+        "role": "emerging_future",
+        "headline": "Your test-and-revise habit starts carrying more weight",
+        "what": "By 2026-11-02, the approach already visible on Tuesday becomes more consistent: you use a result to choose the next method. In school, “workable, then improve” begins replacing open-ended comparison.",
+        "conditions": "You carry one clear question into the next attempt or project decision, and you record enough of the result to avoid restarting the whole explanation.",
+        "first_sign": "You can name what one attempt ruled in or out, then choose the next test without reopening every option.",
+        "details": "Changing the starting foot and getting farther is early evidence that action can sharpen your explanation. Your previous route note also shows a usable way to carry learning forward. If that pattern transfers, climbing becomes a series of informative choices, while the design project moves from comparing to building and testing. The remaining uncertainty is consistency: one successful change does not show that every session will protect test time, and a stated school intention is not yet a submitted design.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A03",
+          "A05",
+          "A08",
+          "A14",
+          "A17",
+          "A18",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:strengths",
+          "BOS:effort"
+        ]
+      },
+      {
+        "role": "better_future",
+        "headline": "Clear boundaries give your ideas time to answer back",
+        "what": "By 2026-11-02, advice and comparison have clear stopping points, so you can run a coach-approved climbing test and make the school design choice while useful time remains.",
+        "conditions": "You and the coach agree an in-session advice arrangement, and you use the existing Friday block for a workable decision. No extra training or packed schedule is added.",
+        "first_sign": "The first sign is not finishing the climb; it is an informative attempt and a design decision happening before their windows close.",
+        "details": "This path relieves the supported obstacle without asking you to lower your standards or obey unexplained advice. A clear test protects judgment; a stopping point protects action. More climbing feedback can clarify the blue overhang, while an earlier workable school choice leaves room to test and improve the project. It still depends on coordination and actual assignment requirements. We do not know what discussion boundary you and the coach would accept, or whether a current design already meets the brief.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A04",
+          "A09",
+          "A10",
+          "A14",
+          "A17",
+          "A18",
+          "A20",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:thriving",
+          "BOS:communication",
+          "BOS:mind"
+        ]
+      },
+      {
+        "role": "bold_future",
+        "headline": "You solve blue and build a repeatable test rhythm",
+        "what": "By 2026-11-02, you solve the blue overhang and can explain the tests that led there. You also submit the workable design choice by September 25 and move into testing it, without turning every free hour into work.",
+        "conditions": "The climb must remain available with a coach-approved option in existing sessions. You try a reasonable idea before the explanation is perfect, knowing what is being tested; you may pause, ask or decline. The design must meet the actual brief, with school help if needed.",
+        "first_sign": "You willingly try a reasonable, supervised option while time remains, then use the result to refine—not defend—the next idea.",
+        "details": "This is bold because it joins your athlete-owned climbing stretch to the school promise of choosing, testing, and improving, without adding ranking or extra load. Confidence would mean acting with enough understanding and resetting from evidence. There is not enough evidence to say the blue is solvable for you within this window: the key technical blocker and route availability are unknown. The useful question is: which move and coach-observed factor currently limit your next safe attempt? Submitting a design also cannot predict a grade.",
+        "sufficient_evidence": false,
+        "refs": [
+          "A02",
+          "A05",
+          "A14",
+          "A18",
+          "A20",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:mind",
+          "BOS:effort"
+        ]
+      },
+      {
+        "role": "downside_future",
+        "headline": "Comparison keeps taking the time meant for testing",
+        "what": "By 2026-11-02, the blue problem may remain unfinished or poorly explained because too few ideas reach a useful attempt. A delayed design choice could also squeeze the time available to test and improve it.",
+        "conditions": "Several voices keep extending climbing discussion, and design comparison continues without a visible workable-for-now line. You keep the existing week, so a lost window is not simply added elsewhere.",
+        "first_sign": "Another session or Friday block ends with extensive comparison but no informative attempt or workable choice.",
+        "details": "This is a preventable risk, not a prediction of failure. Thursday already showed how discussion can leave one attempt, and the project has previously come close to a parts-order deadline. If the same time tradeoff repeats, accuracy-seeking blocks the feedback needed for accuracy. Motivation may still be high; the issue is unused test opportunity. We do not know whether upcoming advice will be quieter, whether the current designs are nearly ready, or whether you will notice the time tradeoff earlier.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A04",
+          "A09",
+          "A17",
+          "A20",
+          "COACH1",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:effort",
+          "BOS:thriving"
+        ]
+      }
+    ],
+    "candidates": [
+      {
+        "candidate_id": "M1",
+        "domain": "coordination",
+        "action": "Ask your coach for one adviser, a brief discussion, then an attempt.",
+        "why": "This addresses the exact point where your chosen priority is being lost: several suggestions and long explanation used most of Thursday’s session. It protects your need to understand the test without asking you to train more, and it keeps the coach responsible for deciding which climbing options are appropriate.",
+        "when": "Ask before the next Tuesday session begins; if the coach is unavailable, make the same request before Thursday’s existing session.",
+        "who": "You ask and decide whether the arrangement works. If agreed, your coach chooses suitable options and supervises while you try one reasonable idea. You may pause, ask a question or decline.",
+        "action_signal": "The coach gives a clear yes, no or alternative. If agreed, you know who advises first; then note whether a suitable supervised attempt actually happened.",
+        "progress_signal": "If a suitable supervised attempt occurs, check whether you got farther or whether the next blocker seems clearer; separately state whether you understood what was being tested and still had useful session time. If the coach agrees to comment, keep that observation separate; no coach debrief is assumed.",
+        "review": "On September 21, you start the check: was an arrangement agreed, did a suitable supervised attempt occur, and what—if anything—did you learn? If no suitable attempt occurred, leave climbing progress untested. You may stop or request a change; the coach may stop for safety or suitability, and any continuation or change remains conditional on both of you agreeing. Preserve school and unplanned time.",
+        "stop_or_change": "Change or stop if the coach cannot safely support it, the group setting prevents one-adviser input, you do not want it, or discussion still crowds out attempts.",
+        "bos_fit": "You tend to use knowledgeable people well when the question and roles are explicit, while several simultaneous inputs can narrow your speech. An ask-first arrangement gives you choice and a stable frame for experimentation. That fit is supported, but the exact discussion boundary and whether one adviser is practical in this group remain unknown.",
+        "refs": [
+          "A04",
+          "A09",
+          "A10",
+          "A14",
+          "A15",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:communication",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "The first step is your request, not an imposed arrangement, and you retain the right to accept, revise, or decline the coach’s response.",
+            "refs": [
+              "A10",
+              "A14",
+              "A15",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "It uses an existing Tuesday or Thursday climbing session and does not add another session.",
+            "refs": [
+              "A06",
+              "A20",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "The coach continues supervising and choosing what is appropriate; the request only changes how advice and attempt time are organized.",
+            "refs": [
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "It adds no training load and leaves the Friday project block and unplanned time intact.",
+            "refs": [
+              "A06",
+              "A20",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The request has a clear shape—one adviser, a brief discussion, then an attempt—while honestly leaving the exact discussion length to be agreed.",
+            "refs": [
+              "A10",
+              "COACH3"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "DIRECT",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "DIRECT",
+          "dependency_burden": "MODERATE"
+        }
+      },
+      {
+        "candidate_id": "M2",
+        "domain": "training",
+        "action": "Before leaving each existing climbing session this week, record the idea tried, what happened, and the single next question.",
+        "why": "Writing the unsolved part helped on a previous route, and Tuesday’s changed starting foot produced clearer evidence. A compact record can carry learning into the next session and reduce the need to reconstruct every explanation. It supports one useful question without adding a spreadsheet, another session, or choosing technique for you.",
+        "when": "Do it before leaving the existing Tuesday and Thursday sessions; it should remain part of the session rather than become extra homework.",
+        "who": "You write the note and may show it to the coach if you choose; the coach remains responsible for any climbing guidance.",
+        "action_signal": "A short note identifies the tested idea, the observed result, and one next question without becoming a full training log.",
+        "progress_signal": "At the next session, you can begin from previous evidence and test a more precise question instead of rebuilding the whole discussion.",
+        "review": "On 2026-09-21, continue if the note sharpened the next test; change its format if it became burdensome; stop if it added no useful clarity.",
+        "stop_or_change": "Change or stop if note-taking steals attempt time, becomes an unwanted spreadsheet, repeats information you already remember, or does not clarify the next test.",
+        "bos_fit": "A stable written note fits your preference for inspectable information and your demonstrated ability to revise a method after evidence. It also preserves independence without rejecting help. The caution is your dislike of unnecessary tracking: if this starts feeling like a spreadsheet or steals climbing time, the form no longer fits.",
+        "refs": [
+          "A03",
+          "A07",
+          "A08",
+          "A10",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:strengths",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "You choose the wording, decide whether to share it, and can stop if the note is not useful.",
+            "refs": [
+              "A07",
+              "A08",
+              "A10"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "It is attached to the two existing sessions rather than adding a session or separate training schedule.",
+            "refs": [
+              "A06",
+              "A10"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "The note records your question and result but does not prescribe technique; the coach still supervises climbing decisions.",
+            "refs": [
+              "A08",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "It stays inside existing gym time and is explicitly bounded so it does not take the Friday block or fill unplanned time.",
+            "refs": [
+              "A06",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The three parts are concrete: idea tried, what happened, and one next question.",
+            "refs": [
+              "A07",
+              "A08"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "MATERIAL",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "MODERATE",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "MATERIAL",
+          "dependency_burden": "NONE"
+        }
+      },
+      {
+        "candidate_id": "M3",
+        "domain": "school",
+        "action": "During Friday’s project block, check your design options against the actual assignment requirements.",
+        "why": "This directly advances your school goal and your wider priority of leaving time to test. Using the actual assignment requirements keeps “workable” grounded rather than arbitrary. Choosing during the protected block can leave the period before submission focused on building, testing, and improving instead of reopening every possible design.",
+        "when": "Use your protected Friday project block before the September 25 deadline; do not move it into extra free time unless you choose.",
+        "who": "You choose an option that meets the known brief. If a requirement is unclear, write one teacher question. If no option qualifies, record the unmet requirement and pause the choice for revision or school guidance.",
+        "action_signal": "You have a qualifying choice, one precise question about an unclear requirement, or a named requirement that current options fail. The last two mean the choice remains pending.",
+        "progress_signal": "The selected design is ready for submission by September 25, leaving project work focused on testing and improvement rather than continued comparison.",
+        "review": "On 2026-09-21, continue toward submission if a workable choice is identified; change by seeking clarification if not; stop this rule if the brief changes.",
+        "stop_or_change": "Change or stop if no current option meets the brief, the teacher says approval is required, the requirements change, or the Friday block becomes unavailable.",
+        "bos_fit": "Important choices often lead you to compare concrete consequences, and a visible deadline has helped you shift to a workable decision before. Anchoring the choice to the real brief respects precision rather than fighting it. The uncertainty is whether the brief is clear and whether any current option is ready, which is why teacher clarification remains a fallback.",
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "The goal and priority are confirmed as yours, and you retain ownership of the design choice rather than being given a design.",
+            "refs": [
+              "A18",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "A Friday project block already exists and you have said you want to keep it.",
+            "refs": [
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "The action uses the real assignment requirements rather than inventing design rules; if those are insufficient, it prepares a precise question for the teacher.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The action directly advances a positive school goal inside protected project time and does not claim additional free hours.",
+            "refs": [
+              "A18",
+              "A20",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The check ends with one of three clear outcomes: a qualifying choice, a precise clarification question, or an unmet requirement recorded for revision or school guidance.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "MATERIAL",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "FEASIBLE",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "MATERIAL",
+          "dependency_burden": "LOW"
+        }
+      },
+      {
+        "candidate_id": "M4",
+        "domain": "training",
+        "action": "Add a third weekly climbing session to create more attempts on the blue overhang.",
+        "why": "More opportunities can sound like the obvious answer to an unfinished climb, but the packet does not show that the amount of climbing is the current limit. You explicitly do not want another session and want unplanned time. The observed loss happened inside an existing session, so added load targets the wrong problem.",
+        "when": "Do not schedule it now; reconsider only if you later request more climbing and your actual school and recovery capacity changes.",
+        "who": "You would have to choose it, and a qualified coach and gym would need to confirm an appropriate arrangement. None exists now.",
+        "action_signal": "No action signal should be sought now because your agency gate fails; a future signal would be you independently requesting reconsideration.",
+        "progress_signal": "It would matter only if added supervised attempts produced clearer blue-problem evidence without reducing school or recovery time; current evidence does not show that.",
+        "review": "On 2026-09-21, stop this option; change to an in-session route unless you request reconsideration; do not continue without qualified approval.",
+        "stop_or_change": "Do not start while you prefer the current two sessions, want unplanned time, lack a supervised arrangement, or have unresolved school and recovery capacity.",
+        "bos_fit": "This conflicts with stronger current evidence about you: the existing two sessions fit, you want unplanned time, and you do not want another session. Your broader pattern also favors effort with a clear reason, not activity added for appearance. Your preference could change later, but it should not be overridden now.",
+        "refs": [
+          "A06",
+          "A10",
+          "A20",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:thriving",
+          "BOS:effort",
+          "BOS:identity"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": false,
+            "reason": "You explicitly said you do not want another session, so proposing one now would override your stated choice.",
+            "refs": [
+              "A10",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": false,
+            "reason": "The two existing sessions fit, but no third-session space or arrangement is reported, and you want unplanned time.",
+            "refs": [
+              "A06",
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": false,
+            "reason": "The coach only confirmed supervision within the existing sessions; no approval or supervised arrangement exists for an added session.",
+            "refs": [
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": false,
+            "reason": "There is no evidence that another session would protect the Friday project block, recovery, or the unplanned time you value.",
+            "refs": [
+              "A06",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The proposal itself is clear, even though the other gates show why it should not be started.",
+            "refs": [
+              "A06",
+              "A10"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "WEAK",
+          "causal_reach": "LOCAL",
+          "evidence_support": "WEAK",
+          "execution_feasibility": "INFEASIBLE",
+          "time_to_signal": "LONG",
+          "reversibility_low_regret": "REVERSIBLE",
+          "trajectory_leverage": "INDIRECT",
+          "dependency_burden": "HIGH"
+        }
+      }
+    ]
+  },
+  "status": "proposed",
+  "move": {
+    "candidate_id": "M1",
+    "domain": "coordination",
+    "action": "Ask your coach for one adviser, a brief discussion, then an attempt.",
+    "why": "This addresses the exact point where your chosen priority is being lost: several suggestions and long explanation used most of Thursday’s session. It protects your need to understand the test without asking you to train more, and it keeps the coach responsible for deciding which climbing options are appropriate.",
+    "when": "Ask before the next Tuesday session begins; if the coach is unavailable, make the same request before Thursday’s existing session.",
+    "who": "You ask and decide whether the arrangement works. If agreed, your coach chooses suitable options and supervises while you try one reasonable idea. You may pause, ask a question or decline.",
+    "action_signal": "The coach gives a clear yes, no or alternative. If agreed, you know who advises first; then note whether a suitable supervised attempt actually happened.",
+    "progress_signal": "If a suitable supervised attempt occurs, check whether you got farther or whether the next blocker seems clearer; separately state whether you understood what was being tested and still had useful session time. If the coach agrees to comment, keep that observation separate; no coach debrief is assumed.",
+    "review": "On September 21, you start the check: was an arrangement agreed, did a suitable supervised attempt occur, and what—if anything—did you learn? If no suitable attempt occurred, leave climbing progress untested. You may stop or request a change; the coach may stop for safety or suitability, and any continuation or change remains conditional on both of you agreeing. Preserve school and unplanned time.",
+    "stop_or_change": "Change or stop if the coach cannot safely support it, the group setting prevents one-adviser input, you do not want it, or discussion still crowds out attempts.",
+    "bos_fit": "You tend to use knowledgeable people well when the question and roles are explicit, while several simultaneous inputs can narrow your speech. An ask-first arrangement gives you choice and a stable frame for experimentation. That fit is supported, but the exact discussion boundary and whether one adviser is practical in this group remain unknown.",
+    "refs": [
+      "A04",
+      "A09",
+      "A10",
+      "A14",
+      "A15",
+      "COACH2",
+      "COACH3",
+      "CONFIRM"
+    ],
+    "bos_refs": [
+      "BOS:mind",
+      "BOS:communication",
+      "BOS:thriving"
+    ],
+    "gates": [
+      {
+        "id": "athlete_agency",
+        "pass": true,
+        "reason": "The first step is your request, not an imposed arrangement, and you retain the right to accept, revise, or decline the coach’s response.",
+        "refs": [
+          "A10",
+          "A14",
+          "A15",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "real_week",
+        "pass": true,
+        "reason": "It uses an existing Tuesday or Thursday climbing session and does not add another session.",
+        "refs": [
+          "A06",
+          "A20",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "qualified_guidance",
+        "pass": true,
+        "reason": "The coach continues supervising and choosing what is appropriate; the request only changes how advice and attempt time are organized.",
+        "refs": [
+          "COACH3"
+        ]
+      },
+      {
+        "id": "school_and_recovery",
+        "pass": true,
+        "reason": "It adds no training load and leaves the Friday project block and unplanned time intact.",
+        "refs": [
+          "A06",
+          "A20",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "understandable",
+        "pass": true,
+        "reason": "The request has a clear shape—one adviser, a brief discussion, then an attempt—while honestly leaving the exact discussion length to be agreed.",
+        "refs": [
+          "A10",
+          "COACH3"
+        ]
+      }
+    ],
+    "selection_signals": {
+      "constraint_leverage": "DIRECT",
+      "causal_reach": "MECHANISM_CHAIN",
+      "evidence_support": "STRONG",
+      "execution_feasibility": "READY",
+      "time_to_signal": "NEAR",
+      "reversibility_low_regret": "BOUNDED_TEST",
+      "trajectory_leverage": "DIRECT",
+      "dependency_burden": "MODERATE"
+    }
+  },
+  "receipt": {
+    "selection_model_version": "one-move-v2-inspectable-rubric-v1",
+    "dimensions": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "execution_feasibility",
+      "time_to_signal",
+      "reversibility_low_regret",
+      "trajectory_leverage",
+      "dependency_burden"
+    ],
+    "arithmetic": "EQUAL_CATEGORICAL_CONTRIBUTIONS_0_TO_3_SUMMED",
+    "maximum_score": 24,
+    "tie_break_order": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "reversibility_low_regret",
+      "dependency_burden",
+      "time_to_signal",
+      "execution_feasibility",
+      "trajectory_leverage"
+    ],
+    "selected_candidate_id": "M1",
+    "ranked_candidates": [
+      {
+        "candidate_id": "M1",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "MODERATE",
+            "contribution": 1,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 21,
+        "rank": 1,
+        "selected": true,
+        "rejection_reason": null
+      },
+      {
+        "candidate_id": "M2",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "MODERATE",
+            "contribution": 2,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "NONE",
+            "contribution": 3,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 20,
+        "rank": 2,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on constraint leverage, evidence support, trajectory leverage."
+      },
+      {
+        "candidate_id": "M3",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "FEASIBLE",
+            "contribution": 2,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "LOW",
+            "contribution": 2,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 19,
+        "rank": 3,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on constraint leverage, execution feasibility, trajectory leverage."
+      }
+    ],
+    "explainability": "The selected candidate has the strongest inspectable causal, evidence, execution, learning, reversibility, trajectory, and dependency profile under the fixed rubric.",
+    "probability_semantics": "NONE_NOT_AN_INTERVENTION_PROBABILITY_MODEL",
+    "receipt_hash": "50ab170138e49e66168152b7a7e838947b3bf6d6323a6629a1577a0269ae0438"
+  },
+  "audit": {
+    "pass": true,
+    "issues": [],
+    "checks": [
+      "Verified all four confirmed goal fields against CONFIRM: sport, training, mindset, and school are reproduced verbatim in the domain goal fields.",
+      "Checked every domain's goal, strength, gap, help, and BOS connection. The training, mindset, and school domain claims are substantively supported; the sport help/detail has the material proposal/provenance issue identified above.",
+      "Verified the sport observation chain: Rowan reported that the changed starting foot gained one move in A03, and the coach independently confirmed that result in COACH1. The report generally preserves uncertainty about why Thursday's discussion expanded rather than asserting fear, refusal, or a technical diagnosis.",
+      "Verified the current workload: two 90-minute climbing sessions on Tuesday and Thursday, no extra finger training, a Friday project block, and protected unplanned time. M1 and M2 stay within existing climbing sessions, M3 uses the existing school block, and M4 is correctly rejected as added load.",
+      "Checked calendar timing. The 2026-09-14 assessment is Monday; the next Tuesday, Thursday, and Friday are September 15, 17, and 18; the review is Monday, September 21; the school deadline is Friday, September 25; and the horizon is Monday, November 2. No action is scheduled after its relevant review or deadline.",
+      "Verified that school is positive and visible: the report retains that school is mostly going okay, names engineering, physics, diagrams, and test-building as strengths, preserves the September 25 goal, protects the Friday block, and does not reduce school to a burden on sport.",
+      "Checked grade treatment. The report makes no grade promise and explicitly states that submitting the design cannot predict a grade.",
+      "Audited all five futures. Current-course, emerging, better, bold, and downside roles are present and substantively distinct: mixed continuation, self-led test-and-revise consistency, coordinated boundaries, stretch outcomes, and repeated lost test windows. Current-course and downside use the same supported mechanism but differ materially in frequency and consequence rather than being duplicates.",
+      "Verified that the bold future is marked insufficient-evidence and explicitly acknowledges the unknown technical blocker and route availability. It is not presented with odds, but its compulsory mindset condition must still be corrected as identified above.",
+      "Audited candidate M1 in full. Its agency, real-week, qualified-guidance, school/recovery, and reversibility gates support conditional eligibility because it begins with Rowan asking, requires coach supervision, adds no session, and admits that no agreement exists yet. Only its action-signal logic needs the minor correction noted above.",
+      "Audited candidate M2 in full. The compact note is grounded in A08, remains inside existing session time, does not prescribe climbing technique, can remain private, and has explicit stop conditions if it becomes unwanted tracking or steals attempt time.",
+      "Audited candidate M3 in full. It directly advances the confirmed school goal inside the protected Friday block and does not invent a teacher-support agreement. Its overall gates can support a bounded school action, but the no-qualifying-design fallback should be separated from an unclear-requirement fallback.",
+      "Audited candidate M4 in full. Its athlete-agency, real-week, qualified-guidance, and school/recovery gates correctly fail because Rowan explicitly does not want another session, no third-session capacity or supervised arrangement exists, and unplanned time is protected. The report clearly says not to start it now.",
+      "Checked candidate and future duplication. M1 coordinates advice roles, M2 carries evidence between sessions, M3 advances the school decision, and M4 is a rejected added-load alternative; they are not substantive duplicates.",
+      "Verified proposed-versus-agreed status outside the identified sport-domain wording: the coach is described as open to a short-discussion-then-attempt arrangement, the report repeatedly says no length has been agreed, and M1 asks rather than presumes consent.",
+      "Verified BOS use. The report uses accepted patterns concerning precision, adaptable methods, communication under stacked inputs, inspectable information, and protected open time without adding a diagnosis or revising the BOS.",
+      "Checked for imported personal facts, arbitrary odds, guaranteed performance or grade outcomes, invented coach observations, unqualified climbing technique prescriptions, ranking pressure, and a fabricated existing plan. None was found beyond the material overstatement and source/proposal issues identified above.",
+      "Performed a delta review of the amended fields only; unchanged report fields retain the findings from the previous full audit.",
+      "Verified that the prior sport-domain material finding is resolved. The help now makes agreement conditional, the detail no longer claims supervised climbing is the only way to reveal a blocker, and A10, A15, and COACH3 were added to the refs.",
+      "Verified that the prior bold-future material finding is resolved. The condition now preserves a reasonable idea, incomplete explanation, knowledge of what is being tested, coach-approved options, existing sessions, and Rowan’s ability to pause, ask, or decline. It no longer requires repeated attempts before every explanation is complete.",
+      "Accepted the required category label \"Warrior Mindset\" as authorized product vocabulary; it is not an unsupported diagnosis or source claim.",
+      "Verified that the current-course future now separates present uncertainty from the November 2 scenario. \"From today\" preserves the September 14 assessment perspective, and \"could\" avoids predicting the effect of a late design choice.",
+      "Verified the amended M1 action headline against its adjacent fields. Although shorter, it validly defers timing to when and supervision, conditional agreement, suitable-option selection, and athlete choice to who.",
+      "Verified M1 timing: the request is made before the next Tuesday session, with Thursday as the existing-session fallback; both occur before the September 21 review and add no session.",
+      "Verified that M1 action_signal resolves the former logic problem: a refusal does not require an adviser designation or attempt, while adviser order and attempt occurrence are checked only if an arrangement is agreed.",
+      "Verified that M1 who preserves the distinction between a request and an agreement and accurately assigns option selection and supervision to the coach. The separate unsupported commitments introduced by progress_signal and review are identified as material above.",
+      "Verified that the revised M1 progress question does not guarantee getting farther or identifying a blocker and that the review leaves climbing progress untested when no suitable attempt occurs. The remaining defect is the unsupported assignment of reporting and joint-review duties to the coach.",
+      "Verified that all three amended M3 branches are now distinct: choose an option meeting the known brief, write one precise question if a requirement is unclear, or record a known unmet requirement and pause for revision or school guidance. The last two correctly leave the choice pending and do not claim that a teacher has agreed to respond.",
+      "Verified preservation of key unknowns in the other amendments: no discussion length is agreed, acceptance of M1 is unknown, the technical blocker is unknown, route availability is a bold-future condition rather than a guarantee, eventual submission timing is not predicted, and current design readiness and requirement clarity remain conditional.",
+      "The sole remaining coach-role finding was resolved using the reviewer’s exact prescribed field values."
+    ],
+    "resolution": {
+      "method": "Exact reviewer-prescribed wording applied and independently checked by deterministic equality; no further generation.",
+      "original_patch_audit_pass": false,
+      "issue": {
+        "severity": "material",
+        "location": "report.candidates[candidate_id=\"M1\"].progress_signal and report.candidates[candidate_id=\"M1\"].review",
+        "problem": "The amended language introduces unagreed coach commitments. \"Your coach describes what happened on the attempt\" assigns the coach a debrief and interpretation role that is neither included in Rowan’s request nor established by the source. \"Continue, change or stop together\" then presumes coach participation in the September 21 review and can imply that Rowan needs joint agreement to stop, contradicting the adjacent statements that Rowan may decline and that the first step is only an ask. Conditional agreement for the climbing arrangement does not establish either of these later commitments.",
+        "source_check": "COACH3 supports only the possibility of agreeing a short-discussion-then-normal-attempt arrangement and confirms the coach’s existing responsibility to supervise and choose appropriate options; it does not establish an agreement to describe the result afterward or attend the September 21 review. CONFIRM establishes the review date but not coach participation. A03 and COACH1 document one past result and observation, not an ongoing coach-reporting arrangement. A14-A15 and the amended who/stop language preserve Rowan’s ability to pause, ask, decline, or stop.",
+        "fix": "Replace progress_signal with: \"If a suitable supervised attempt occurs, check whether you got farther or whether the next blocker seems clearer; separately state whether you understood what was being tested and still had useful session time. If the coach agrees to comment, keep that observation separate; no coach debrief is assumed.\" Replace review with: \"On September 21, you start the check: was an arrangement agreed, did a suitable supervised attempt occur, and what—if anything—did you learn? If no suitable attempt occurred, leave climbing progress untested. You may stop or request a change; the coach may stop for safety or suitability, and any continuation or change remains conditional on both of you agreeing. Preserve school and unplanned time.\""
+      },
+      "before": {
+        "progress_signal": "Your coach describes what happened on the attempt: did you get farther or make the next blocker clearer? You say whether you understood the test and still had useful session time.",
+        "review": "On September 21, you start the check: did we agree, did I try it, and what did we learn? If no suitable attempt occurred, leave progress untested. Continue, change or stop together; preserve school and unplanned time."
+      },
+      "after": {
+        "progress_signal": "If a suitable supervised attempt occurs, check whether you got farther or whether the next blocker seems clearer; separately state whether you understood what was being tested and still had useful session time. If the coach agrees to comment, keep that observation separate; no coach debrief is assumed.",
+        "review": "On September 21, you start the check: was an arrangement agreed, did a suitable supervised attempt occur, and what—if anything—did you learn? If no suitable attempt occurred, leave climbing progress untested. You may stop or request a change; the coach may stop for safety or suitability, and any continuation or change remains conditional on both of you agreeing. Preserve school and unplanned time."
+      },
+      "all_other_fields_unchanged_from_audited_patches": true
+    },
+    "full_audit_sha256": "c166193bdf17a256a7c173b2a3efb14d6be542d80308fa2d25423805274b1bec",
+    "patch_audit_sha256": "4b9f6bc284885cdfcdc7f619d8487e10170cc43e8253440061e8cc486b8f29b4",
+    "acceptance_method": "Full model source audit + exact patch review + deterministic application of its sole remaining prescribed fix"
+  },
+  "receipts": [
+    {
+      "stage": "synthesis-futures-candidates",
+      "request": "0e980c1a786f3b603f5800e762531fd19e0165173671d3b8810b68540ad1e64c",
+      "output": "73642054a39d452612ee13e0efb2326aa69b9a05365441dc845f9aa82547f4ab",
+      "response_id": "resp_0a40d94fa481e768016aa81b2f44c887d0b4473cb33980fd56"
+    },
+    {
+      "stage": "independent-source-audit",
+      "request": "fe842aeb390c7eb40fceec94776e163a02561f30ac1414610e6a74ffa58cd5bd",
+      "output": "c166193bdf17a256a7c173b2a3efb14d6be542d80308fa2d25423805274b1bec",
+      "response_id": "resp_06abd348325465c5016aa81ecea0c087d08525e3faadbc58bc"
+    },
+    {
+      "stage": "independent-patch-audit",
+      "request": "777645bcbd49439c781a3484849247bd708daa93ac0d4111f23fde8e0cb0fee9",
+      "output": "4b9f6bc284885cdfcdc7f619d8487e10170cc43e8253440061e8cc486b8f29b4",
+      "response_id": "resp_0bff194eeb047f4c016aa8233de6f087d099a524e6d300d61b"
+    }
+  ],
+  "created_at": "2026-09-14T16:43:35.319Z",
+  "artifact_sha256": "08eb58f8860cf72b35ccc28c9b6caf4fcbfc78ba876dda0b15c46e9939d864d8"
+}

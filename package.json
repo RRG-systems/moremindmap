@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node server/darrenLibraryV1/build.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "release:foundation:validate": "node scripts/release-foundation/validate.mjs",

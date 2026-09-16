@@ -1,0 +1,1511 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-6184D6D9",
+  "intake_mode": "static",
+  "subject_sha256": "5b04c59f3cd2f04e667292a29b73fc8cf88a70f1eaf85ec8225352b6c562477d",
+  "subject": {
+    "name": "Sofia Chen",
+    "age": 19,
+    "gender": "woman",
+    "pronouns": "she/her",
+    "sport": "Soccer"
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "C01",
+        "statement": "They report that friends, music, and contributing to something beyond themselves matter outside sport; they are studying environmental science.",
+        "kind": "direct",
+        "refs": [
+          "Q01"
+        ],
+        "alternative": "No alternative is needed for the content of this self-report; how stable each priority is over time is not yet known.",
+        "confidence": "strong",
+        "contexts": [
+          "friends",
+          "interests",
+          "school",
+          "identity"
+        ]
+      },
+      {
+        "id": "C02",
+        "statement": "Their preferred identity is broad and still being built: they want to explore several futures seriously and resist having either their course or football explain all of them. This looks more like selective non-closure than lack of commitment, because they have already made choices they care about.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q20"
+        ],
+        "alternative": "This may partly reflect current life-stage uncertainty or outside pressure to specialize, rather than a lasting preference for keeping options open.",
+        "confidence": "moderate",
+        "contexts": [
+          "identity",
+          "school",
+          "sport",
+          "future"
+        ]
+      },
+      {
+        "id": "C03",
+        "statement": "Effort appears easier to mobilize when they can see usefulness and feel part of a shared purpose; the cleanup fits the same beyond-self value they describe elsewhere.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q03"
+        ],
+        "alternative": "The cleanup may also have been motivating because it was social, novel, or self-chosen, so purpose may be one condition rather than the only one.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "community",
+          "identity"
+        ]
+      },
+      {
+        "id": "C04",
+        "statement": "Their motivation is selective rather than uniformly high or low: they can begin with energy but lose momentum when a task feels like box-ticking or when something more interesting is available.",
+        "kind": "inference",
+        "refs": [
+          "Q03",
+          "Q09"
+        ],
+        "alternative": "Unclear expectations, working alone, or the design of those particular tasks could explain some of the drop in momentum.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "work",
+          "effort"
+        ]
+      },
+      {
+        "id": "C05",
+        "statement": "They report usually feeling energized by people and enjoying meeting others, while also sometimes booking so much that they are left without an evening alone; a solo walk is welcome then.",
+        "kind": "direct",
+        "refs": [
+          "Q04"
+        ],
+        "alternative": "No alternative is needed for the reported pattern; it is not enough evidence to establish a fixed social-energy level in every setting.",
+        "confidence": "strong",
+        "contexts": [
+          "friends",
+          "social",
+          "home"
+        ]
+      },
+      {
+        "id": "C06",
+        "statement": "A plausible recurring tension is that their readiness to join, help, and see possibilities can outrun their protection of private time. Social connection is both enjoyable and, when availability becomes constant, draining.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q04",
+          "Q16",
+          "Q19"
+        ],
+        "alternative": "This could be a temporary scheduling problem rather than a stable pattern, especially if the current mix of study, work, and activities is unusually demanding.",
+        "confidence": "moderate",
+        "contexts": [
+          "friends",
+          "school",
+          "work",
+          "interests"
+        ]
+      },
+      {
+        "id": "C07",
+        "statement": "In groups, they report bringing people into the conversation and building on ideas. They are less eager to make the final choice, although they chose the cleanup meeting place when no one else was doing so.",
+        "kind": "direct",
+        "refs": [
+          "Q05"
+        ],
+        "alternative": "No alternative is needed for the stated preference and episode; whether this repeats in higher-stakes groups is unknown.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C08",
+        "statement": "They seem to prefer influence through inclusion and idea-building over holding final authority, but direction-setting remains available when a group would otherwise stay stuck.",
+        "kind": "inference",
+        "refs": [
+          "Q05"
+        ],
+        "alternative": "The cleanup decision may have been a practical one-off response to urgency rather than evidence of a wider decision-vacuum pattern.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C09",
+        "statement": "For a difficult choice, they report talking it through and imagining what each option would feel like in ordinary life. A friend's description of the actual weekly experience helped settle their module choice.",
+        "kind": "direct",
+        "refs": [
+          "Q06"
+        ],
+        "alternative": "No alternative is needed for this reported decision process; one module choice does not establish how they decide in every domain.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friends",
+          "decisions"
+        ]
+      },
+      {
+        "id": "C10",
+        "statement": "Concrete previews appear to carry more decision weight for them than reasons left at an abstract level. Consultation seems to supply lived information rather than simply handing the choice to someone else.",
+        "kind": "inference",
+        "refs": [
+          "Q06"
+        ],
+        "alternative": "The friend's view may also have provided reassurance or social approval; the answer does not fully separate information-seeking from reassurance-seeking.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "friends",
+          "decisions"
+        ]
+      },
+      {
+        "id": "C11",
+        "statement": "They report becoming curious quickly, trying guitar with borrowed equipment before buying anything, and not needing every step in advance as long as someone is available to ask.",
+        "kind": "direct",
+        "refs": [
+          "Q07"
+        ],
+        "alternative": "No alternative is needed for the reported approach; borrowing equipment could also have been simple financial or practical caution.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "learning",
+          "new_situations"
+        ]
+      },
+      {
+        "id": "C12",
+        "statement": "Their exploration style appears to combine openness with limited-risk testing: begin before everything is known, keep the first commitment reversible, and retain access to help.",
+        "kind": "inference",
+        "refs": [
+          "Q07",
+          "Q08"
+        ],
+        "alternative": "These examples may reflect ordinary resourcefulness in low-stakes situations; unfamiliar situations with greater consequences could produce more caution.",
+        "confidence": "moderate",
+        "contexts": [
+          "interests",
+          "school",
+          "new_situations"
+        ]
+      },
+      {
+        "id": "C13",
+        "statement": "They prefer a rough plan, putting deadlines in a calendar rather than scheduling every hour. When rain disrupted the cleanup, they messaged the group and found an indoor task, while a friend managed the supply list.",
+        "kind": "direct",
+        "refs": [
+          "Q08"
+        ],
+        "alternative": "No alternative is needed for the reported planning preference and response; the cleanup evidence is one event rather than repeated proof.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C14",
+        "statement": "A small amount of structure seems useful to them when it protects essentials such as deadlines or visible gaps, but they leave room to improvise and do not need to own every detail.",
+        "kind": "inference",
+        "refs": [
+          "Q08",
+          "Q10"
+        ],
+        "alternative": "The light planning may reflect the particular tasks or confidence in other group members rather than a broad preference.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C15",
+        "statement": "They report working better when another person is doing their own work nearby. After arranging a library session with a friend, they completed an essay that had been easier to leave for something more interesting when alone.",
+        "kind": "direct",
+        "refs": [
+          "Q09"
+        ],
+        "alternative": "No alternative is needed for the episode; the library setting, deadline, or planned appointment may have mattered as much as the friend's presence.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friends",
+          "effort"
+        ]
+      },
+      {
+        "id": "C16",
+        "statement": "Quiet company may act as a commitment and attention anchor even when the other person is not directing them or collaborating on the same task.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q09"
+        ],
+        "alternative": "A change of location, fewer distractions, or deadline pressure could be the main mechanism instead of social presence.",
+        "confidence": "tentative",
+        "contexts": [
+          "school",
+          "friends",
+          "effort"
+        ]
+      },
+      {
+        "id": "C17",
+        "statement": "When they do not understand something, they report asking for another explanation or an example. In a group project, they created a shared document to reveal gaps rather than redoing everything alone.",
+        "kind": "direct",
+        "refs": [
+          "Q10"
+        ],
+        "alternative": "No alternative is needed for the reported actions; the outcome and other group members' contributions are not supplied.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "groups",
+          "learning"
+        ]
+      },
+      {
+        "id": "C18",
+        "statement": "They often look for ways to make learning and work easier to share—using another person, a simple tool, or distributed ownership instead of relying only on private effort.",
+        "kind": "inference",
+        "refs": [
+          "Q07",
+          "Q10",
+          "Q15"
+        ],
+        "alternative": "Most examples arose in naturally collaborative settings, so their default approach to genuinely solo work remains less clear.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "community",
+          "groups",
+          "learning"
+        ]
+      },
+      {
+        "id": "C19",
+        "statement": "They report using honest feedback best when enough context is given and the message is clearly about the task. Comparison with a teammate makes the useful part harder to hear.",
+        "kind": "direct",
+        "refs": [
+          "Q11"
+        ],
+        "alternative": "No alternative is needed for the stated preference; feedback source, timing, and relationship may also affect how well it lands.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "school",
+          "feedback"
+        ]
+      },
+      {
+        "id": "C20",
+        "statement": "They do not appear to require feedback to be softened, but they do need its purpose and target to stay clear. Social comparison may redirect attention from the task toward status or personal evaluation.",
+        "kind": "inference",
+        "refs": [
+          "Q11"
+        ],
+        "alternative": "The difficulty may come from particular comparison experiences rather than comparison itself, and the relationship with the feedback-giver may be more important.",
+        "confidence": "moderate",
+        "contexts": [
+          "sport",
+          "school",
+          "feedback"
+        ]
+      },
+      {
+        "id": "C21",
+        "statement": "When upset, they report that others may still see cheerfulness and normal activity. After an argument, they initially told a friend things were fine and only later, at home, realized they needed to talk.",
+        "kind": "direct",
+        "refs": [
+          "Q12"
+        ],
+        "alternative": "No alternative is needed for the episode; it does not show whether delayed recognition happens with every kind of emotion or pressure.",
+        "confidence": "strong",
+        "contexts": [
+          "friends",
+          "home",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C22",
+        "statement": "Their outward composure may sometimes arrive before full private recognition of what they feel. An early statement that things are fine may therefore be incomplete rather than deliberately misleading.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q02",
+          "Q12"
+        ],
+        "alternative": "They may recognize the feeling but choose temporary privacy or de-escalation; the answer does not fully distinguish delayed awareness from delayed disclosure.",
+        "confidence": "moderate",
+        "contexts": [
+          "friends",
+          "home",
+          "pressure",
+          "communication"
+        ]
+      },
+      {
+        "id": "C23",
+        "statement": "In one group disagreement, they first avoided naming that another member was leaving them extra work. They later requested a clearer split; the other person agreed, although the arrangement had to be revisited once.",
+        "kind": "direct",
+        "refs": [
+          "Q13"
+        ],
+        "alternative": "No alternative is needed for the reported sequence; the authority relationship and reasons for the initial delay are unknown.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "groups",
+          "conflict"
+        ]
+      },
+      {
+        "id": "C24",
+        "statement": "Their conflict approach appears relationally cautious at entry but capable of becoming firm and practical: understand the other side, avoid unnecessary escalation, then name a concrete process or boundary when the issue continues.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q13"
+        ],
+        "alternative": "The delay may have reflected uncertainty, unequal power, or this particular relationship rather than a general preference for cautious conflict entry.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "groups",
+          "friends",
+          "conflict"
+        ]
+      },
+      {
+        "id": "C25",
+        "statement": "After being left out of a starting lineup, they called their sister, then asked the coach the next day what they could work on. They state that they still felt disappointed.",
+        "kind": "direct",
+        "refs": [
+          "Q14"
+        ],
+        "alternative": "No alternative is needed for the sequence; one sport disappointment does not establish a universal response to setbacks.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "family",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C26",
+        "statement": "On that occasion, finding footing followed a connection-then-action sequence: first being heard, then seeking a practical next step. Taking action did not require pretending the disappointment had disappeared.",
+        "kind": "inference",
+        "refs": [
+          "Q14"
+        ],
+        "alternative": "The sequence may be specific to this disappointment and the availability of a trusted sister and coach; other setbacks may bring a different order.",
+        "confidence": "moderate",
+        "contexts": [
+          "sport",
+          "family",
+          "recovery"
+        ]
+      },
+      {
+        "id": "C27",
+        "statement": "They describe connecting people and ideas as a useful contribution: they introduced classmates researching similar topics and, during the cleanup, encouraged friends to own different jobs.",
+        "kind": "direct",
+        "refs": [
+          "Q15"
+        ],
+        "alternative": "No alternative is needed for the reported actions; their longer-term effects on those groups are not known.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C28",
+        "statement": "Their useful group role seems to be networked coordination: notice links, create visibility, and distribute work rather than becoming the person who personally carries every task.",
+        "kind": "inference",
+        "refs": [
+          "Q10",
+          "Q15"
+        ],
+        "alternative": "The group settings may simply have made sharing necessary; evidence from a situation where solo control was equally available would clarify the preference.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "community",
+          "groups"
+        ]
+      },
+      {
+        "id": "C29",
+        "statement": "They identify saying yes and seeing possibilities as a strength that can leave them with too much. They also report repeating a musical section for a long time when they want it to sound right.",
+        "kind": "direct",
+        "refs": [
+          "Q16"
+        ],
+        "alternative": "No alternative is needed for these self-observations; frequency and cost across other parts of life are not established.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "school",
+          "groups"
+        ]
+      },
+      {
+        "id": "C30",
+        "statement": "Their easygoing manner is not global looseness: personally valued music can bring patience and exactness, while declining another committee shows that refusal is available alongside openness. Their standards and boundaries appear strongly dependent on what matters and on the situation.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q16",
+          "Q20"
+        ],
+        "alternative": "Musical repetition may partly reflect enjoyment rather than exacting standards, and one recent refusal may not yet represent a stable boundary change.",
+        "confidence": "moderate",
+        "contexts": [
+          "interests",
+          "school",
+          "community",
+          "identity"
+        ]
+      },
+      {
+        "id": "C31",
+        "statement": "They feel respected when asked rather than assumed available. They try to return that respect by noticing when someone is talked over and bringing the person back into the conversation, while acknowledging that they need to do more of this for themselves.",
+        "kind": "direct",
+        "refs": [
+          "Q17"
+        ],
+        "alternative": "No alternative is needed for the stated respect standard and intention; how consistently it is enacted is not observed.",
+        "confidence": "strong",
+        "contexts": [
+          "friends",
+          "school",
+          "groups",
+          "identity"
+        ]
+      },
+      {
+        "id": "C32",
+        "statement": "There may be an imbalance between how quickly they protect other people's space and how quickly they protect their own availability. The same awareness that helps them include others can pull attention toward group needs before personal limits or tasks.",
+        "kind": "inference",
+        "refs": [
+          "Q17",
+          "Q18",
+          "Q19"
+        ],
+        "alternative": "The imbalance could mainly reflect the current workload and group expectations rather than a broader interpersonal pattern.",
+        "confidence": "moderate",
+        "contexts": [
+          "friends",
+          "school",
+          "work",
+          "groups"
+        ]
+      },
+      {
+        "id": "C33",
+        "statement": "Under a busy project week, they report checking how everyone else was doing and repeatedly answering group messages while leaving their own work late. They contrast this with ordinary periods, when putting the phone away is easier.",
+        "kind": "direct",
+        "refs": [
+          "Q18"
+        ],
+        "alternative": "No alternative is needed for the reported pressure-linked change; the urgency or expectations in that particular project may have driven it.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "groups",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C34",
+        "statement": "Their current term has fewer work shifts than the previous one, and they report having more room as a result. This is a current context condition and should not be mistaken for a settled personality change.",
+        "kind": "current_context",
+        "refs": [
+          "Q19"
+        ],
+        "alternative": "Other changes this term may also contribute to the greater sense of room; the effect of fewer shifts has not been isolated.",
+        "confidence": "strong",
+        "contexts": [
+          "work",
+          "school",
+          "current"
+        ]
+      }
+    ],
+    "open_questions": [
+      "Outside the campus cleanup, when a group has no clear decision-maker, do they usually take the final choice, keep facilitating, or wait for someone with clearer authority?",
+      "For required work that feels like box-ticking, what most often changes follow-through: seeing its purpose, working near someone, having a deadline, getting visible progress, or understanding the consequence?",
+      "When they talk a difficult choice through, does another person's view mainly add concrete information, help them hear their own preference, provide reassurance, or build agreement?",
+      "Does recognizing upset later happen across friendship, family, school, and sport situations, or mainly after interpersonal disagreement?",
+      "What changes when they name a workload or boundary issue early rather than after carrying it for a while?",
+      "Which activities besides music bring the same willingness to repeat details until they feel right, and which valued activities do not?",
+      "What made declining the additional committee possible this month, and was that refusal typical, newly learned, or unusually easy because of the circumstances?",
+      "Has having fewer work shifts changed their focus, social availability, or recovery in a sustained way, or does it currently feel more like temporary breathing room?"
+    ],
+    "event_overlaps": [
+      {
+        "refs": [
+          "Q03",
+          "Q05",
+          "Q08",
+          "Q15"
+        ],
+        "reason": "These answers explicitly refer to the same campus-cleanup episode. Its usefulness, meeting-place decision, rain response, and distribution of jobs are different parts of one event, not four independent examples."
+      },
+      {
+        "refs": [
+          "Q07",
+          "Q16",
+          "Q19"
+        ],
+        "reason": "All three refer to guitar or music as an ongoing interest. They support a consistent domain picture, but the packet does not establish three separate occasions of experimentation, exact practice, and restoration."
+      },
+      {
+        "refs": [
+          "Q10",
+          "Q18"
+        ],
+        "reason": "Both concern group-project activity and may refer to the same project, although this is not explicit. They should not be treated as clearly independent project episodes until clarified."
+      }
+    ]
+  },
+  "domains": {
+    "vectors": [
+      {
+        "id": "command",
+        "position": 1,
+        "claim_ids": [
+          "C07",
+          "C23",
+          "C30",
+          "C31"
+        ],
+        "interpretation": "You usually create movement by including people and building on ideas rather than claiming the final say. You can still choose a direction or set a boundary when leaving it open starts to cost the group or you.",
+        "helps": "This can make you a useful facilitator who keeps different voices involved without needing to control the outcome. Your direction-setting may be especially effective when there is a clear practical gap, a value you care about, or a boundary that needs protecting.",
+        "watch_for": "If everyone waits for someone else, you may carry extra work before deciding that the situation needs a clear owner. A boundary can also become harder to set once other people have started treating your availability as settled.",
+        "context": "This is a lean, not a rule. Most evidence comes from campus groups and reported boundary situations; your final-choice behavior in family, work, or higher-stakes settings is still open."
+      },
+      {
+        "id": "tempo",
+        "position": 2,
+        "claim_ids": [
+          "C11",
+          "C21",
+          "C23",
+          "C25",
+          "C33"
+        ],
+        "interpretation": "Your pace changes with the kind of demand. Curiosity and practical responses can move quickly, while conflict, difficult feelings, and final decisions often get more time before you act or speak fully.",
+        "helps": "You can begin exploring without waiting for a complete map, while still allowing more personal or socially sensitive matters to settle. After a disappointment, you may be able to pause, talk, and then return for a practical next step.",
+        "watch_for": "Under load, quick replies to other people can crowd out the start of your own work. In conflict, an early message that everything is fine or a delayed workload concern may leave someone acting on an incomplete version of what you eventually need.",
+        "context": "These are different kinds of situations, and no response times were measured. The pattern describes when you tend to move or wait, not how fast you think or how capable you are."
+      },
+      {
+        "id": "relational_awareness",
+        "position": 4,
+        "claim_ids": [
+          "C07",
+          "C27",
+          "C31",
+          "C33"
+        ],
+        "interpretation": "You naturally track who has space, who is being left out, and how a group is doing. Under pressure, that attention can become so strong that your own task or limit moves into the background.",
+        "helps": "You are likely to notice opportunities to reconnect a person to the conversation, introduce people with shared interests, or check the human side of group work. This can support inclusion and make useful links visible before anyone formally asks you to do it.",
+        "watch_for": "Attention to everyone else can make your own workload, feelings, or availability easier to postpone. It may help to distinguish a social signal worth checking from a group need that does not have to become your responsibility.",
+        "context": "The evidence shows repeated attention and checking, not proof that every social read is accurate. It is strongest in peer groups; unfamiliar, family, or authority-heavy settings could work differently."
+      },
+      {
+        "id": "precision",
+        "position": 2,
+        "claim_ids": [
+          "C13",
+          "C17",
+          "C29"
+        ],
+        "interpretation": "You usually protect the essentials instead of checking every detail. When the result matters personally, as in music, you can stay with fine adjustments for a long time.",
+        "helps": "This selective approach can keep ordinary planning light while still allowing deep care where quality has real meaning to you. Shared documents and examples also give you a practical way to expose gaps without personally checking or redoing every part.",
+        "watch_for": "A rough plan works best when the details being left open really are low-cost or owned by someone else. In personally important work, the opposite risk is spending a long time improving one part after it is already useful enough for the situation.",
+        "context": "This is genuinely context-dependent: rough planning and delegated details coexist with gap-checking and exact music practice. The packet does not show your checking level in high-stakes individual work."
+      },
+      {
+        "id": "leverage",
+        "position": 4,
+        "claim_ids": [
+          "C11",
+          "C15",
+          "C17",
+          "C27"
+        ],
+        "interpretation": "You readily use people, shared tools, borrowed equipment, and distributed jobs to make progress. You seem most comfortable when effort is connected rather than unnecessarily repeated alone.",
+        "helps": "You can make learning or group work more visible and shareable by asking for another explanation, trying a low-cost resource, arranging quiet company, or giving different people ownership. This can reduce duplicated effort while keeping more than one person involved in the result.",
+        "watch_for": "Shared effort only multiplies progress when ownership remains clear and your own part has protected attention. Support and coordination can turn into interruption if group messages or other people's needs remain continuously open.",
+        "context": "Most examples come from learning or naturally shared work, although the borrowed guitar and library session widen the pattern. This does not establish whether every handoff worked well or how you prefer to handle a genuinely solo task."
+      },
+      {
+        "id": "adaptability",
+        "position": 4,
+        "claim_ids": [
+          "C11",
+          "C13",
+          "C15",
+          "C29"
+        ],
+        "interpretation": "You are ready to start with an incomplete map and change route when conditions change. You can still stay with repetition when the activity matters and improvement is visible.",
+        "helps": "You can explore through a reversible first step, respond practically when a plan is disrupted, and change the setup when your first way of working is not holding your attention. This gives you options without requiring every plan to be abandoned.",
+        "watch_for": "The same readiness to see another possibility can make a boring but still important task easier to leave for something more interesting. Changing the route is most useful when it still serves the original purpose rather than only offering fresh stimulation.",
+        "context": "The clearest disruption example comes from the cleanup and should count as one event, not several. Your response to costly or irreversible change is not yet known, and valued music shows that switching is not automatic."
+      },
+      {
+        "id": "structure",
+        "position": 1,
+        "claim_ids": [
+          "C11",
+          "C13",
+          "C17",
+          "C23"
+        ],
+        "interpretation": "You prefer a few useful rails, such as deadlines, shared visibility, or a clearer split of work. You usually leave the rest open enough to adjust rather than mapping every step in advance.",
+        "helps": "Light structure can protect the essentials without making you feel tied to a plan that no longer fits. Calendars, shared documents, available help, and named ownership appear more useful to you than tightly scheduling every hour.",
+        "watch_for": "Fluid roles can become costly when everyone assumes someone else will cover a task or when you quietly absorb an uneven share. Waiting until that happens may make the later request for clarity carry more frustration or urgency.",
+        "context": "You are not anti-plan: calendars, shared documents, and clearer work splits all matter when they solve a real problem. The reading is about preferring light, useful structure rather than no structure."
+      },
+      {
+        "id": "perspective",
+        "position": 2,
+        "claim_ids": [
+          "C02",
+          "C09"
+        ],
+        "interpretation": "You let future possibilities matter without requiring a complete life map now. You often bring a big choice back to what ordinary daily life would actually be like.",
+        "helps": "This allows you to take possible futures seriously while testing them against real experience rather than only an attractive label. You can make a meaningful next choice without pretending that it has settled every later choice.",
+        "watch_for": "Keeping several paths open can become costly if a next-step decision genuinely needs an owner or deadline. The useful distinction may be between refusing an unnecessary whole-life answer and postponing a choice that is already ready to be made.",
+        "context": "The evidence shows future possibilities entering your choices, but not detailed long-range sequencing or prediction. Keeping several futures open may be especially linked to your current period rather than a permanent default."
+      }
+    ],
+    "domains": [
+      {
+        "id": "identity",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C03",
+          "C30",
+          "C31"
+        ],
+        "insight": "You directly name friends, music, environmental science, football, and contributing beyond yourself as meaningful, while resisting the idea that one course or sport should explain all of you. A supported reading is that you want belonging and purpose without giving away control of your choices: you like being part of useful things, but you also want to be asked rather than assumed available and want room to explore several futures seriously. This helps explain why being easygoing and being firm are not opposites for you; you may prefer not to enlarge every disagreement while still having strong standards about purpose, respect, and personal choice.",
+        "counterpoint": "Keeping options open should not be mistaken for avoiding commitment. You have chosen a course, care about football, organized useful work, practiced music closely, and recently declined another committee; however, that recent refusal may be a new or situation-specific boundary rather than an established pattern.",
+        "open_question": "When two worthwhile futures compete, which values tell you that one deserves a real commitment now and the other should remain only a possibility?"
+      },
+      {
+        "id": "mind",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C11",
+          "C12",
+          "C17",
+          "C18"
+        ],
+        "insight": "You often make an unknown more workable by turning it into something concrete: borrow equipment before buying, ask for another explanation or an example, create a shared view of gaps, or hear what a module's actual week is like. The supported interpretation is that you prefer exploration with a manageable first commitment, useful evidence from real life, and access to someone or something that can help if you get stuck. Talking a decision through seems to add lived information and help you picture the choice, although the packet cannot fully separate that from wanting reassurance.",
+        "counterpoint": "Most examples come from study, group projects, and an interest you could test at fairly limited risk. A costly or irreversible decision might bring more caution, and these preferences do not establish a fixed learning style or any level of ability.",
+        "open_question": "When another person helps with a difficult choice, are they mainly giving you facts, helping you hear your own preference, offering reassurance, or helping create agreement?"
+      },
+      {
+        "id": "communication",
+        "claim_ids": [
+          "C07",
+          "C19",
+          "C20",
+          "C21",
+          "C22",
+          "C24",
+          "C30"
+        ],
+        "insight": "Your usual communication move is to make room first: bring people into the conversation, build on ideas, and try to understand another side. You can use direct, honest feedback when its context and task focus are clear, so your preference is not simply for softened messages. When disagreement or upset has personal weight, however, your first signal may be less complete than your later view; someone could possibly hear that as agreement or closure, although no receiver reaction is reported here. Once you do raise the issue, you tend to make it practical by asking for a clearer split, a conversation, or a usable next step.",
+        "counterpoint": "You explicitly say you can be firm about things you care about, and your recent refusal of another committee supports the availability of a direct no. The open issue is therefore not whether you can speak plainly, but what affects how early your full message becomes available.",
+        "open_question": "When you say that something is fine and later want to revisit it, did you need time to recognize your own reaction, choose temporary privacy, avoid escalation, or some combination of these?"
+      },
+      {
+        "id": "connection",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C27",
+          "C30",
+          "C31",
+          "C32"
+        ],
+        "insight": "You report that people usually energize you and that you enjoy meeting them, but belonging seems to mean more than simply being around others. You connect classmates with related interests, bring a talked-over person back in, and value shared purpose, suggesting that your social contribution often involves helping a group become more connected and participative. A plausible tension is that you may protect other people's place in the group sooner than you protect your own availability; when connection becomes constant access, something enjoyable can also become draining.",
+        "counterpoint": "You also value a quiet walk and guitar without an audience, and you have shown that saying no is available. This is not a picture of someone who always needs company or always gives in, and the packet does not fully compare close friends with unfamiliar groups.",
+        "open_question": "What are the earliest signs that a socially full week has shifted from energizing connection into too much availability?"
+      },
+      {
+        "id": "effort",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C14",
+          "C15",
+          "C16",
+          "C29",
+          "C30"
+        ],
+        "insight": "Your effort appears selective rather than uniformly high or low. A clear reason, shared purpose, or personal interest can draw you in, while work that feels like box-ticking or competes with something more interesting is easier to leave. When interest alone is not enough, light supports such as a deadline, a library appointment, another person working nearby, or visible shared gaps can help hold the task in place. Music is an important exception to any idea that you always need company or novelty: when the sound matters to you, you can repeat a small section for a long time.",
+        "counterpoint": "The library episode does not prove that another person's presence was the main cause of finishing; the location, appointment, or deadline may have mattered just as much. Likewise, losing steam on poorly meaningful work does not establish a general problem with follow-through.",
+        "open_question": "For required work that feels empty, what most reliably changes your effort: understanding its purpose, seeing the consequence, working near someone, having a clear deadline, or making progress visible?"
+      },
+      {
+        "id": "pressure",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25",
+          "C26",
+          "C33",
+          "C34"
+        ],
+        "insight": "The packet gives a meaningful ordinary-versus-pressured contrast: normally you can put your phone away, but during a busy project week you kept checking the group and answering messages while your own work moved later. After interpersonal upset, you may continue cheerfully or initially say things are fine before privately recognizing that more needs to be said. A supported hypothesis is that pressure can send your attention outward first—toward other people, group continuity, or keeping things calm—before your own task, feeling, or boundary receives full attention. On the reported lineup disappointment, finding your footing followed a connection-then-action sequence: first being heard by your sister, then asking the coach for a practical next step, without pretending the disappointment had disappeared.",
+        "counterpoint": "These episodes involve different pressures and do not prove one universal response. You did eventually name the uneven workload, revisited the disagreement, and sought useful feedback after the lineup decision; fewer work shifts are also giving you more room this term, showing that current demands materially affect what is available.",
+        "open_question": "What changes when you name a workload problem, disappointment, or need for space early, before you have carried on for long enough that your own work or feelings move to the back?"
+      },
+      {
+        "id": "strengths",
+        "claim_ids": [
+          "C07",
+          "C08",
+          "C13",
+          "C17",
+          "C27",
+          "C28",
+          "C29",
+          "C32"
+        ],
+        "insight": "Your most distinctive contribution is the combination of connector, practical adapter, and organizer of shared effort. You notice links between people or ideas, create visibility through simple tools, invite others to own parts of the work, and can change the route when the original plan stops fitting. You do not need to hold final authority to influence how a group moves, although you can make a practical choice when nobody else is doing so. The conditional cost is that seeing possibilities and checking other people can create more commitments and messages than your own attention can comfortably carry.",
+        "counterpoint": "This is not a claim that you always want to coordinate, lead, or improvise. You are less keen on the final choice, your exactness rises sharply in selected areas such as music, and the longer-term outcomes of the groups you connected or organized are not supplied.",
+        "open_question": "When a group needs both inclusion and an unpopular final decision, what helps you decide that listening has done enough and it is time for someone—including you—to choose?"
+      },
+      {
+        "id": "thriving",
+        "claim_ids": [
+          "C01",
+          "C05",
+          "C06",
+          "C11",
+          "C14",
+          "C15",
+          "C19",
+          "C31",
+          "C34"
+        ],
+        "insight": "You are likely to have more of yourself available when life contains meaningful work, people you enjoy, freedom to explore, and a small amount of clear structure rather than a tightly fixed script. Honest feedback with context, access to someone who can explain or work nearby, visible ownership, and being asked rather than assumed available all fit the way you describe functioning. Social contact is important, but so is protected time in which nobody needs anything from you; you report that a walk or guitar without an audience helps after too much availability. Having fewer work shifts is creating more room this term, which is an important current condition rather than evidence that your personality has changed.",
+        "counterpoint": "Neither constant company nor complete independence appears to be the answer. Too much access to other people can drain or distract you, while working entirely alone can make an uninteresting task easier to leave; the useful mix may vary by task and week.",
+        "open_question": "As the term continues, does the extra room from fewer shifts mainly change your focus, your willingness to socialize, your ability to protect quiet time, or something else?"
+      }
+    ]
+  },
+  "synthesis": {
+    "whole_person_model": "Facts: They report that friends, music, environmental science, football, and doing something useful beyond themselves all matter. They have made real commitments, but they do not want any one commitment to become a complete explanation of who they are or what their future must be. They enjoy people, often contribute by connecting them, and also value time when nobody needs anything from them. Supported interpretation: this is better understood as selective non-closure than as an unwillingness to commit. They can choose a meaningful next step while leaving unnecessary whole-life conclusions open. Their way of exploring supports that reading: they turn uncertainty into something testable through borrowed equipment, concrete examples, descriptions of daily life, rough plans, or access to someone who can help. A plausible mechanism is that limited-risk experiments and lived information allow them to explore seriously without feeling trapped by a choice. Simple practicality and the uncertainty of their current period remain competing explanations, especially because the clearest examples involve fairly reversible choices.\n\nA second supported pattern is influence through connection rather than control. They bring people into conversations, introduce people with related interests, use shared tools to reveal gaps, and distribute jobs instead of carrying everything personally. They are less drawn to making the final choice, yet can do so when a group would otherwise remain stuck. This suggests that they often create movement sideways—through links, participation, and shared ownership—rather than from the top. Most evidence comes from naturally collaborative settings, so their preference in genuinely solo or higher-stakes work remains less certain.\n\nA third, more tentative mechanism concerns what happens under load. In a busy project week, attention moved toward group messages while their own work moved later. In disagreement, they initially kept the issue small or said things were fine, then later recognized or voiced a fuller need. One interpretation is that group continuity and other people's needs become noticeable before their own task, feeling, or boundary receives equal space. An alternative is that they already know what they feel but deliberately choose privacy or de-escalation first. Either way, easygoing presentation should not be mistaken for weak feelings, weak standards, or an inability to refuse: they can ask for a clearer split, seek direct task feedback, repeat music closely, choose when necessary, and have recently declined another committee.\n\nTheir effort is similarly selective rather than uniformly high or low. Purpose, participation, and personal interest help activate it; light supports such as a deadline, shared visibility, or quiet company may help when meaning is weaker. Music is an important counterexample to any simple picture of novelty-seeking or dependence on company, because personally valued quality can hold their attention through repetition. Current context matters: fewer work shifts are giving them more room this term. That should be treated as a change in demands, not a settled personality change.",
+    "portrait_thread": "They keep making room—for other people's voices, for useful possibilities, and for an identity larger than any one role—while learning to reserve enough room for their own work, feelings, and time.",
+    "signature_insights": [
+      {
+        "title": "Open options can contain real commitment",
+        "meaning": "They do not appear to avoid choosing altogether. Instead, they commit to meaningful next steps while resisting the idea that each choice must settle an entire future. Concrete previews and reversible first moves help them explore with seriousness rather than drifting. This reading is strengthened by their chosen course, commitment to football, module decision, guitar experiment, and recent committee refusal; it remains possible that some of the openness is specific to their current period.",
+        "claim_ids": [
+          "C02",
+          "C10",
+          "C12",
+          "C30"
+        ]
+      },
+      {
+        "title": "They create movement without needing the top position",
+        "meaning": "Their influence often comes from connecting people, making participation easier, and distributing ownership. They will make a practical choice when nobody else does, but final authority does not seem to be the main reward. This explains the combination of group usefulness and reluctance to own every decision better than either a simple leader label or a passive-participant label would.",
+        "claim_ids": [
+          "C08",
+          "C18",
+          "C28",
+          "C31"
+        ]
+      },
+      {
+        "title": "Under load, attention may travel outward before it returns inward",
+        "meaning": "A supported hypothesis is that pressure increases attention to other people, group continuity, and keeping things manageable, while their own task, feeling, or boundary becomes clearer later. That pattern could connect delayed personal work, cautious conflict entry, and an initially cheerful or fine presentation. It is not certain whether the delay is in recognizing the feeling or only in sharing it. When they do regain footing, being heard may help them move toward a practical conversation or next step without erasing disappointment.",
+        "claim_ids": [
+          "C22",
+          "C24",
+          "C26",
+          "C32",
+          "C33"
+        ]
+      }
+    ],
+    "chapter_routes": [
+      {
+        "id": "identity",
+        "angle": "A broad identity built through chosen commitments, not one totalizing label",
+        "new_value": "This chapter separates keeping a future open from refusing commitment. It shows how friends, music, environmental science, football, usefulness, respect, and personal choice can all matter without one being required to explain the rest. Easygoing behavior and firmness then become compatible: they may avoid making every disagreement large while still protecting purpose, consent, and the right to define themselves.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C03",
+          "C30",
+          "C31"
+        ]
+      },
+      {
+        "id": "mind",
+        "angle": "Turning an unknown into something concrete enough to try",
+        "new_value": "This chapter explains how they make choices and approach learning: picture ordinary daily life, ask for another example, borrow before buying, create shared visibility, and keep help within reach. Consultation appears to add usable information rather than automatically transfer the decision to someone else, although reassurance may also play a part. The pattern applies most clearly to study and limited-risk exploration, not every kind of decision.",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C11",
+          "C12",
+          "C17",
+          "C18"
+        ]
+      },
+      {
+        "id": "communication",
+        "angle": "Making room first, then becoming more explicit when the issue remains",
+        "new_value": "This chapter distinguishes a cautious opening from an inability to be direct. They include others and try to understand another side, yet can use honest feedback and make practical requests when purpose and task are clear. The important communication risk is timing: an early fine or softened disagreement may not contain the full message they later need to give. Delayed recognition, temporary privacy, and deliberate de-escalation all remain possible explanations.",
+        "claim_ids": [
+          "C19",
+          "C20",
+          "C21",
+          "C22",
+          "C24",
+          "C30"
+        ]
+      },
+      {
+        "id": "connection",
+        "angle": "Belonging means helping participation happen, not simply being around people",
+        "new_value": "This chapter adds the form their sociability takes. They do not only report enjoying company; they introduce people with shared interests, bring a talked-over person back in, and help groups share ownership. The tension is that the same openness can turn enjoyable connection into constant availability. Solitude is not rejection of people here—it can be a way to recover space after too much access.",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C27",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "id": "effort",
+        "angle": "Meaning starts the engine; light supports help hold the course",
+        "new_value": "This chapter explains why their effort can look uneven without reducing it to a fixed level of motivation. Useful purpose, shared participation, and personal interest can sustain investment, while box-ticking work or attractive alternatives can weaken it. A deadline, library appointment, nearby friend, or visible gap may anchor follow-through without requiring tight supervision. Music preserves the key exception: personally meaningful quality can support long, solitary repetition.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C15",
+          "C16",
+          "C29",
+          "C30"
+        ]
+      },
+      {
+        "id": "pressure",
+        "angle": "Pressure can narrow attention toward group continuity before personal needs",
+        "new_value": "This chapter identifies a change from ordinary conditions rather than treating pressure behavior as their whole personality. During a busy project week, group checking displaced their own start; after conflict, fuller emotion or a clearer boundary arrived later. On the reported sport disappointment, recovery followed connection and then action: being heard by their sister came before asking the coach for something workable. These are different pressures, so the shared mechanism remains a supported hypothesis rather than a universal rule.",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C25",
+          "C26",
+          "C33",
+          "C34"
+        ]
+      },
+      {
+        "id": "strengths",
+        "angle": "Connector, practical adapter, and organizer of shared effort",
+        "new_value": "This chapter combines contributions that are less useful when described separately. They notice links, make gaps visible, distribute jobs, include quieter voices, and change the route when conditions change. Their influence does not depend on personally doing everything or always owning the final choice. The conditional cost is that possibilities, people, and open channels can multiply faster than their own attention.",
+        "claim_ids": [
+          "C08",
+          "C18",
+          "C27",
+          "C28",
+          "C29",
+          "C32"
+        ]
+      },
+      {
+        "id": "thriving",
+        "angle": "Connected freedom, useful structure, and time that is not already claimed",
+        "new_value": "This chapter brings the environment together: meaningful work, enjoyable people, room to explore, honest task-focused feedback, and a few visible rails appear more supportive than either a rigid script or complete isolation. They may benefit from company when a dull task needs anchoring, while also needing walks or music without an audience after too much availability. Fewer work shifts are currently creating more room, making this term a context to observe rather than proof of permanent change.",
+        "claim_ids": [
+          "C01",
+          "C05",
+          "C06",
+          "C14",
+          "C15",
+          "C19",
+          "C31",
+          "C34"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Inclusive connection-making",
+        "helps": "Brings overlooked voices, related ideas, and shared ownership into view.",
+        "overuse": "Other people's gaps can receive attention before their own work or limits.",
+        "reset": "A possible reset is to ask whether a need requires their help, their coordination, or simply a clearly named owner.",
+        "claim_ids": [
+          "C07",
+          "C27",
+          "C28",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "strength": "Flexible, low-risk exploration",
+        "helps": "Lets them begin without a full map, learn from reality, and change route when conditions change.",
+        "overuse": "Fresh possibilities can pull attention from boring but important work or add too many commitments.",
+        "reset": "A possible reset is to keep one essential outcome fixed while remaining flexible about the route.",
+        "claim_ids": [
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C29"
+        ]
+      },
+      {
+        "strength": "Selective depth",
+        "helps": "Keeps ordinary planning light while allowing careful repetition when quality has personal meaning.",
+        "overuse": "A valued detail could receive more time than the situation needs, while low-meaning essentials receive too little.",
+        "reset": "A possible reset is to define what ready means for this particular situation before deciding how much detail it deserves.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C29",
+          "C30"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "Busy shared work, unresolved disagreement, or a visible disappointment",
+      "interpretation": "Supported hypothesis: other people's needs and keeping things steady become salient before their own task, feeling, or limit.",
+      "response": "More checking or availability; a cheerful or fine signal may come first; their own work or boundary may arrive later.",
+      "recovery": "On reported occasions, being heard or getting private space came before a clearer conversation or practical next step; disappointment did not have to disappear first.",
+      "claim_ids": [
+        "C21",
+        "C22",
+        "C23",
+        "C25",
+        "C26",
+        "C32",
+        "C33"
+      ]
+    }
+  },
+  "reading": {
+    "editorial_version": "youth-bos-public-reading-v2",
+    "map_intro": "You make room for people, possibilities, and work that feels worthwhile. Your easygoing side helps you stay open, while a firmer, more exact side appears when something truly matters or your limits need protecting.",
+    "portrait": {
+      "headline": "Room for People, Room for You",
+      "paragraphs": [
+        "You may look relaxed on the outside while carrying a much stronger opinion or feeling than people realize. You do not want every disagreement to become a major event, so you may begin by making room, keeping things friendly, or waiting until you know what really needs saying. That is not the same as having no line. When something touches purpose, fairness, or your right to choose, a firmer side is available. The question is often not whether you can be direct, but how soon your full answer comes forward.",
+        "You want your identity to have space around it. Friends, music, environmental science, football, and doing something useful beyond yourself all matter, but you do not want one of them to become the complete explanation of you. You have made real choices and commitments; you simply resist treating each one as an answer about your entire future. That looks less like drifting and more like wanting to explore seriously without pretending you already know every later version of your life.",
+        "When something is unknown, you often make it more concrete instead of waiting for total certainty. You picture what a choice would feel like in an ordinary week, ask for an example, try equipment before buying it, or keep someone available to ask. Talking things through seems to help you gather lived information and hear the choice more clearly. You are often willing to begin with an incomplete map when the first step is manageable and there is room to adjust.",
+        "People usually give you energy, and your social side is active rather than just friendly. You tend to help participation happen: bringing someone back into a conversation, linking people with related ideas, or sharing ownership instead of trying to carry a group alone. Your influence often travels through connections rather than authority. You are not especially drawn to making every final choice, but you can choose when nobody else is moving or when leaving the matter open has started to cost something.",
+        "The same attention that makes you useful to people can sometimes pull you away from yourself. You may notice who needs an answer, who is being left out, or what the group still needs before noticing your own unfinished work, limited time, or fuller reaction. Under strain, an early cheerful response can make your position look more settled than it really is. You may only understand the size of a feeling later, or you may understand it earlier and choose calm or privacy first. Both are possible from what you described.",
+        "Your effort is not equally available for everything. A useful purpose, shared involvement, or genuine interest can bring energy quickly. Work that feels like box-ticking is easier to leave, especially when something more interesting is nearby. Light supports can matter: a deadline, visible ownership, a shared document, or another person quietly working near you. Yet music shows another side. When the sound matters, you can repeat a small part for a long time. Your standards are selective, not absent, and your recent refusal of another committee shows that saying yes is not your only move.",
+        "You have both a fast side and a slower side. Curiosity, new possibilities, social replies, and practical changes can move quickly. Conflict, strong feelings, and choices with personal weight may need more time before your whole position appears. Neither side is more real. Together they describe someone who stays open without being empty, connects without always wanting control, and commits without wanting to be trapped by a label. A central part of your life right now may be keeping your generous space for people and possibilities while making sure your own work, feelings, and time also have a protected place."
+      ],
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C05",
+        "C06",
+        "C08",
+        "C10",
+        "C12",
+        "C18",
+        "C22",
+        "C24",
+        "C29",
+        "C30",
+        "C31",
+        "C32",
+        "C33"
+      ]
+    },
+    "chapters": [
+      {
+        "id": "identity",
+        "headline": "More Than One Role",
+        "paragraphs": [
+          "You do not describe yourself through one role. Friends, music, environmental science, football, and doing something useful beyond yourself all matter. These parts belong together, but none gets to become the title for your entire life. You want commitments that are real without turning each one into a permanent answer about who you must be.",
+          "That is why leaving several futures open does not look like refusing to choose. You have chosen a course and module, stayed involved in football and music, and taken part in useful group work. You simply do not think those choices have to settle every later choice. You seem most comfortable making an honest next commitment while keeping bigger questions open until life gives you more to work with.",
+          "Your easygoing manner also has a value behind it: not every difference needs to be enlarged. Still, you care about being asked rather than treated as automatically available. You try to offer similar respect by making space for someone who is being talked over. Freedom and respect seem connected for you—people should have a real place in the group without having their choices made for them.",
+          "Purpose matters too. Work is easier to care about when you can see whom or what it serves, although usefulness may not be the only thing that draws you in. Your recent no to another committee shows that openness is not endless agreement. It may be a growing boundary or a choice made easier by that particular situation, but it fits your wish to choose your commitments rather than have them chosen for you."
+        ],
+        "takeaway": "You want meaningful commitments without letting any one commitment define the whole of you.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C03",
+          "C09",
+          "C11",
+          "C30",
+          "C31"
+        ]
+      },
+      {
+        "id": "mind",
+        "headline": "Make the Unknown Concrete",
+        "paragraphs": [
+          "When a choice is difficult, you bring it down from labels to lived reality. For your fieldwork module, reasons mattered, but hearing what an actual week would be like helped you decide. Talking with someone seems to give you useful material for your own judgment rather than automatically handing them the choice. Sometimes reassurance may help as well; those two things are not always easy to separate.",
+          "You approach new interests in a similarly practical way. Trying guitar with borrowed equipment let you learn before making a bigger commitment. You do not need every step explained in advance, but it helps to know that a person or resource is available if you get stuck. Your openness is not necessarily reckless; you often make the first step small enough that you can learn and revise.",
+          "When you do not understand something, you ask for a different explanation or a clear example. In group work, you also use simple tools to make the problem visible, such as setting up a shared document so gaps can be seen. You seem to prefer making understanding easier to share over privately struggling through or redoing every part yourself.",
+          "This style lets you explore before you have a complete map. It also means concrete experience may carry more weight than an impressive-sounding option with little detail behind it. Most of your examples involve study, group work, or a fairly reversible experiment. A costly or hard-to-reverse decision could bring out more caution, so this is a usual approach rather than a rule for every choice."
+        ],
+        "takeaway": "You think more clearly when an option becomes something you can picture, test, or discuss in real life.",
+        "claim_ids": [
+          "C09",
+          "C10",
+          "C11",
+          "C12",
+          "C17",
+          "C18"
+        ]
+      },
+      {
+        "id": "communication",
+        "headline": "Room First, Clarity Next",
+        "paragraphs": [
+          "Your first communication move is often to make room. In groups, you bring people into the conversation and build on what is already there. When you disagree, you usually try to understand the other side before pushing your own. This can keep a discussion open, but it does not mean you have no position or that agreement matters more than everything else.",
+          "You can use honest, direct feedback when its purpose is clear and it stays focused on the task. You do not seem to need every message softened. What makes feedback harder is being compared with a teammate, because the comparison can pull attention away from the useful part and toward how you are being judged beside someone else. Context helps you know what to do with the message.",
+          "When the subject is more personal, your first signal may not contain your full reaction. You have described carrying on cheerfully and only later realizing that an argument still needed attention. That could mean the feeling becomes clearer in private, or that you know something is wrong but initially choose calm, time, or privacy. Either way, an early statement that things are fine may not be your final answer.",
+          "Your disagreement over an uneven workload shows the other half of your style. You delayed naming the problem, but you eventually asked for a clearer split and returned to it when the first agreement did not fully hold. Once you speak plainly, you often make the issue practical. Your communication is not simply indirect or direct; it tends to move from understanding and de-escalation toward clearer words when the problem remains."
+        ],
+        "takeaway": "You often listen and lower the temperature first, then become practical and firm if the issue still needs an answer.",
+        "claim_ids": [
+          "C07",
+          "C19",
+          "C20",
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C30"
+        ]
+      },
+      {
+        "id": "connection",
+        "headline": "Connection Without Constant Access",
+        "paragraphs": [
+          "You usually feel energized by people and enjoy meeting them. Your version of belonging, though, is not just having company around. You help people take part. You notice related interests, connect classmates who may be useful to each other, and bring someone back in when they are being talked over. Connection seems most satisfying when it creates real participation rather than just noise or a full calendar.",
+          "You also care about how connection feels. Being asked instead of assumed available matters because it leaves you with a choice. When you were disappointed about the lineup, you first wanted someone who would listen before turning immediately to a plan. At least in that moment, trust involved having room for the feeling without being rushed past it.",
+          "There is a tension here. You like people, see possibilities, and are ready to help, so your time can fill before you notice what has disappeared from it. You may protect another person's place in the conversation sooner than you protect your own evening or workload. When that happens, something genuinely enjoyable—friendship and shared activity—can start to feel like being available all the time.",
+          "A quiet walk or guitar without an audience gives you a different kind of space. That does not cancel your social side or mean you always need to withdraw. It suggests that solitude can restore choice after too much access. The useful difference for you may not be people versus being alone, but chosen connection versus a week in which everyone can reach you and nothing feels fully yours."
+        ],
+        "takeaway": "You enjoy belonging most when connection includes choice, participation, and some time that remains your own.",
+        "claim_ids": [
+          "C05",
+          "C06",
+          "C25",
+          "C27",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "id": "effort",
+        "headline": "Meaning Starts the Work",
+        "paragraphs": [
+          "Your effort is selective rather than simply high or low. You are more likely to invest when you can see a reason, feel part of something, or care about the result itself. Work that feels like ticking boxes can lose its hold even if you began with energy. When something more interesting appears, an unconvincing task has a harder time keeping your attention.",
+          "You do not seem to need a tightly controlled plan to work well. A rough plan, a real deadline, visible gaps, or clearly owned jobs may be enough. These are useful rails rather than a full timetable. They protect what must happen while leaving you room to change the route. If roles stay vague for too long, however, you may end up covering work before asking for a clearer split.",
+          "Working near someone can also help hold a task in place. You finished an essay after arranging a library session with a friend who was doing their own work. Their presence may have helped, but the location, appointment, or deadline could have mattered just as much. The broader point is that a light outer commitment can sometimes steady effort without anyone supervising or doing the task for you.",
+          "Music protects an important exception. When you care about how a section sounds, you can repeat it for a long time. That means novelty and company are not always required; personal meaning can sustain careful repetition. The tradeoff sits at both ends: seeing possibilities can create too many commitments, while a valued detail can sometimes receive more time than the wider situation needs."
+        ],
+        "takeaway": "Purpose draws you in, while light structure can keep less interesting work from slipping behind everything else.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C14",
+          "C15",
+          "C16",
+          "C29",
+          "C30"
+        ]
+      },
+      {
+        "id": "pressure",
+        "headline": "When Attention Moves Outward",
+        "paragraphs": [
+          "Pressure seems to change where your attention goes. In an ordinary week, you can put your phone away more easily. During a busy project week, you kept checking how everyone else was doing and answering group messages while your own part stayed late. The group became hard to tune out, even though your own work still needed a protected start.",
+          "Something similar may happen with feelings, although the reason is not completely clear. You can keep moving and appear cheerful before your own reaction has had full space. After an argument, you first said things were fine and later realized that you needed to talk. You may recognize the feeling late, or you may choose privacy and calm before sharing it; either route can delay the fuller message.",
+          "Disagreement can follow a related shape. You may begin by understanding the other side or trying not to make the situation bigger. If the problem continues, you can become concrete and firm, as when you asked for a clearer work split and later revisited it. The possible cost is carrying extra work or frustration during the time before the boundary becomes clear.",
+          "After the lineup disappointment, being heard by your sister came before asking your coach what you could work on. The practical step did not erase the disappointment, and it did not need to. On that occasion, recovery meant making space for the feeling and then finding something usable to do. Your current term also has fewer work shifts and more room, reminding you that pressure is shaped by what the week is asking, not just by personality."
+        ],
+        "takeaway": "Under strain, other people and group steadiness may get your attention first; your own feeling, task, or boundary can arrive later.",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25",
+          "C26",
+          "C32",
+          "C33",
+          "C34"
+        ]
+      },
+      {
+        "id": "strengths",
+        "headline": "Influence Through Useful Links",
+        "paragraphs": [
+          "One of your more distinctive strengths is the way you connect people, ideas, and pieces of work. You notice when two classmates have related interests, when someone needs bringing back into a conversation, or when a group needs a shared view of what is missing. These are practical links, not just friendly gestures. They can help participation and progress happen at the same time.",
+          "You also tend to organize shared effort without needing to own everything. You can give different people real jobs, use a simple tool to show gaps, and accept relief when someone else handles a detail. This is not the same as stepping away from responsibility. At your best, you help responsibility become visible and spread across the people who are meant to carry it.",
+          "Adaptability adds to that strength. You can start with a rough plan, respond when conditions change, and find another route instead of treating disruption as the end. You can also make a practical decision when nobody else is doing so. Your influence does not depend on always being the official leader, although groups may sometimes need you to decide sooner who actually owns the next move.",
+          "Every part of this combination has a tradeoff. Seeing links and possibilities can create extra invitations, open messages, and new commitments. Watching the group can draw attention away from your own part. Flexible planning can leave an important detail unnamed. Your selective exactness is useful here: when something truly matters, you can slow down and care closely. The challenge is deciding which details, needs, and possibilities genuinely deserve that attention."
+        ],
+        "takeaway": "You often help groups move by connecting what belongs together, sharing ownership, and changing the route when needed.",
+        "claim_ids": [
+          "C07",
+          "C08",
+          "C13",
+          "C17",
+          "C18",
+          "C27",
+          "C28",
+          "C29",
+          "C32"
+        ]
+      },
+      {
+        "id": "thriving",
+        "headline": "Freedom With a Few Rails",
+        "paragraphs": [
+          "You seem to have more of yourself available when life contains meaningful work, enjoyable people, and room to explore without requiring a complete future plan. You do not need every hour controlled, but total vagueness is not ideal either. A deadline, clear ownership, or visible next step can protect what matters while leaving enough space for curiosity and adjustment.",
+          "In learning and work, it helps when support is nearby without taking over. You may use another explanation, a practical example, a shared document, or someone quietly working beside you. Honest feedback can fit too, especially when you know its purpose and it stays focused on your task rather than comparing you with somebody else. Clear help appears more useful than either constant supervision or being left to redo everything alone.",
+          "Your social environment also works best as a mix. People often energize you, and shared purpose can increase your effort. Yet constant access can drain attention and leave no evening that belongs to you. Walks and guitar without an audience give you room to settle. Being asked rather than assumed available helps keep connection chosen, which may let your generosity stay genuine instead of becoming an automatic obligation.",
+          "This term, you have fewer work shifts and feel that you have more room than last term. Other changes may be helping too, so there is no need to turn that into a permanent rule. It is still a useful reminder that your surroundings matter. You are unlikely to fit one perfect setup for every task: dull work may benefit from company, personal practice may suit quiet, and uncertain choices may need conversation plus freedom to decide."
+        ],
+        "takeaway": "You tend to thrive with meaningful choice, clear but light support, enjoyable connection, and time that is not already claimed.",
+        "claim_ids": [
+          "C01",
+          "C05",
+          "C06",
+          "C11",
+          "C14",
+          "C15",
+          "C19",
+          "C31",
+          "C34"
+        ]
+      }
+    ],
+    "vectors": [
+      {
+        "id": "command",
+        "interpretation": "You usually move a group by including people and building on ideas, not by claiming the final say. You can still choose when nobody else does or when a boundary matters.",
+        "helps": "You can create movement while keeping more voices and owners involved.",
+        "watch_for": "Waiting to name an owner or boundary can leave you carrying work you did not choose.",
+        "context": "This lean is clearest in campus groups and boundary situations, not every setting.",
+        "claim_ids": [
+          "C07",
+          "C23",
+          "C30",
+          "C31"
+        ]
+      },
+      {
+        "id": "tempo",
+        "interpretation": "Curiosity and practical responses can move quickly, while conflict, strong feelings, and final decisions often get more time before you act or speak fully.",
+        "helps": "You can explore early without rushing the more personal parts.",
+        "watch_for": "Fast replies to others can delay your start; a quick calm answer may not express your full need.",
+        "context": "Your pace changes by situation; it is not a measure of how quickly you think.",
+        "claim_ids": [
+          "C11",
+          "C21",
+          "C23",
+          "C25",
+          "C33"
+        ]
+      },
+      {
+        "id": "relational_awareness",
+        "interpretation": "You readily notice who has space, who is left out, and how a group is doing. Under pressure, your own task or limit can fade behind those signals.",
+        "helps": "You can reconnect people, include quieter voices, and spot useful links.",
+        "watch_for": "Not every need you notice has to become your responsibility.",
+        "context": "Your attention is clear in peer groups, but that does not make every social reading automatically correct.",
+        "claim_ids": [
+          "C07",
+          "C27",
+          "C31",
+          "C33"
+        ]
+      },
+      {
+        "id": "precision",
+        "interpretation": "You usually protect the essentials rather than checking everything. When quality matters personally, as in music, you can stay with fine adjustments for much longer.",
+        "helps": "You can keep ordinary plans light while giving valued work closer care.",
+        "watch_for": "Open details can cause gaps; valued details can sometimes receive more time than the situation needs.",
+        "context": "Your level of detail changes sharply with the task and its meaning to you.",
+        "claim_ids": [
+          "C13",
+          "C17",
+          "C29"
+        ]
+      },
+      {
+        "id": "leverage",
+        "interpretation": "You readily combine your effort with people, shared tools, borrowed resources, and divided ownership. You prefer not to repeat alone what can sensibly be shared.",
+        "helps": "You make work and learning more visible, connected, and easier to divide.",
+        "watch_for": "Shared effort can become interruption when ownership is unclear or messages stay continuously open.",
+        "context": "Most examples come from learning and shared work; genuinely solo tasks may feel different.",
+        "claim_ids": [
+          "C11",
+          "C15",
+          "C17",
+          "C27"
+        ]
+      },
+      {
+        "id": "adaptability",
+        "interpretation": "You are comfortable starting without a complete map and changing route when conditions change. You can still repeat patiently when the result matters to you.",
+        "helps": "You can test possibilities, respond to disruption, and improve the setup rather than staying stuck.",
+        "watch_for": "A fresher option can pull you away from boring work that still matters.",
+        "context": "Your flexibility is clearest in manageable changes; costly or irreversible changes may bring more caution.",
+        "claim_ids": [
+          "C11",
+          "C13",
+          "C15",
+          "C29"
+        ]
+      },
+      {
+        "id": "structure",
+        "interpretation": "You prefer a few useful rails—deadlines, visible gaps, or clear ownership—while leaving the rest open enough to improvise and adjust.",
+        "helps": "Light structure protects essentials without trapping you in an overbuilt plan.",
+        "watch_for": "Fluid roles can leave you quietly covering work that nobody clearly owns.",
+        "context": "You are not against plans; you prefer plans that solve a real problem.",
+        "claim_ids": [
+          "C11",
+          "C13",
+          "C17",
+          "C23"
+        ]
+      },
+      {
+        "id": "perspective",
+        "interpretation": "You keep several futures open while bringing current choices back to what ordinary daily life would actually feel like.",
+        "helps": "You can make a meaningful next choice without pretending it settles your entire future.",
+        "watch_for": "Keeping options open can become costly when a ready next-step decision has a real deadline.",
+        "context": "This outlook may partly belong to your current stage of life rather than every future period.",
+        "claim_ids": [
+          "C02",
+          "C09"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Connecting people and ideas",
+        "helps": "Brings overlooked voices, related interests, and shared ownership into view.",
+        "overuse": "Other people's gaps can receive attention before your own work or limits.",
+        "reset": "A quick check of whether this needs your help, coordination, or only a named owner.",
+        "claim_ids": [
+          "C07",
+          "C27",
+          "C28",
+          "C31",
+          "C32"
+        ]
+      },
+      {
+        "strength": "Flexible exploration",
+        "helps": "Lets you begin, learn from reality, and change route when conditions change.",
+        "overuse": "Fresh possibilities can pull attention from important work or create too many commitments.",
+        "reset": "One fixed essential outcome, with freedom to change the route.",
+        "claim_ids": [
+          "C11",
+          "C12",
+          "C13",
+          "C14",
+          "C29"
+        ]
+      },
+      {
+        "strength": "Selective depth",
+        "helps": "Keeps ordinary planning light while allowing close repetition when quality has personal meaning.",
+        "overuse": "Valued details may get too much time while low-meaning essentials get too little.",
+        "reset": "A simple definition of ready before deciding how much detail this moment deserves.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C29",
+          "C30"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "You face busy shared work, unresolved disagreement, or a visible disappointment.",
+      "interpretation": "You may notice other people's needs or group steadiness before your own task, feeling, or limit.",
+      "response": "You may keep replying or seem cheerful while your own work or fuller message arrives later.",
+      "recovery": "After the lineup disappointment, your sister listened first. You later asked your coach what you could work on.",
+      "claim_ids": [
+        "C21",
+        "C22",
+        "C23",
+        "C25",
+        "C26",
+        "C32",
+        "C33"
+      ]
+    },
+    "closing": "If parts of this fit only in certain situations—or miss you completely—you can say so. Your correction and the context around it matter more than making the reading sound tidy."
+  },
+  "counts": {
+    "portrait_words": 619,
+    "chapter_words": [
+      {
+        "id": "identity",
+        "words": 265
+      },
+      {
+        "id": "mind",
+        "words": 258
+      },
+      {
+        "id": "communication",
+        "words": 270
+      },
+      {
+        "id": "connection",
+        "words": 260
+      },
+      {
+        "id": "effort",
+        "words": 264
+      },
+      {
+        "id": "pressure",
+        "words": 267
+      },
+      {
+        "id": "strengths",
+        "words": 264
+      },
+      {
+        "id": "thriving",
+        "words": 275
+      }
+    ],
+    "total_words": 2742
+  },
+  "receipts": [
+    {
+      "stage": "evidence",
+      "request_sha256": "35606b4be53ebd02ade89b5c1eb589bf32500b0fcd2bfa0d5d310af387f284d5",
+      "output_sha256": "b8b067e858310720ce62750426616542792958458492a12e70f9bbe1e152477e",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 28099,
+        "input_tokens_details": {
+          "cache_write_tokens": 28096,
+          "cached_tokens": 0
+        },
+        "output_tokens": 11171,
+        "output_tokens_details": {
+          "reasoning_tokens": 6214
+        },
+        "total_tokens": 39270
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "domains",
+      "request_sha256": "0f23f90d1b932d1f176e1430c2d2801a62c920f31adaf5cb401c1fba7cf2752e",
+      "output_sha256": "7d433f04c19b606e35cceb1081ea4bea37d7bd17deef76e0900d7df3b1be116b",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 32402,
+        "input_tokens_details": {
+          "cache_write_tokens": 31162,
+          "cached_tokens": 1237
+        },
+        "output_tokens": 11552,
+        "output_tokens_details": {
+          "reasoning_tokens": 7518
+        },
+        "total_tokens": 43954
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "synthesis",
+      "request_sha256": "48e76b6890554d3c21fa282c3069a76e5f5920832478732eb84252ed27cfc6f4",
+      "output_sha256": "fd2cda1c0e44778719a9a3033f4a46c2bef299c75db0366293b9bd123618752d",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 35320,
+        "input_tokens_details": {
+          "cache_write_tokens": 35317,
+          "cached_tokens": 0
+        },
+        "output_tokens": 5488,
+        "output_tokens_details": {
+          "reasoning_tokens": 2707
+        },
+        "total_tokens": 40808
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "reading",
+      "request_sha256": "644986b2391a8b7eaf9b21a7412fdcafc40cf0bd3fb694c0f2dfd02e6bbb2e7e",
+      "output_sha256": "9ad22b3a3207eeb85c1df07338a8fa7efc52f4a4c433f2e711eed6e9a4cfb4f0",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 13567,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 13564
+        },
+        "output_tokens": 11747,
+        "output_tokens_details": {
+          "reasoning_tokens": 5950
+        },
+        "total_tokens": 25314
+      },
+      "run": "editorial-static-v2-attempt-2",
+      "previous_artifact_sha256": "42b0c811473583e9199efcc79fe462d2c98b91446d1904fd02114a5cbe3ed47f"
+    },
+    {
+      "stage": "factual-editorial-correction",
+      "actor": "Design Spock",
+      "original_artifact_sha256": "5a9bb13ed996414379eba370e801ac669c205bfcf11533fc335bb7b188af2c6e",
+      "changes_sha256": "66ca607a1b2863aa050fe443d868a17f41ecb2e620117131dda78af87c78aabe",
+      "reason": "Bounded factual corrections after frozen blind evaluation; scores remain attached to original artifacts."
+    }
+  ],
+  "created_at": "2026-09-14T07:09:05.131Z",
+  "artifact_sha256": "0a1642978a1c37c7050e702a62900f8551e1109a110e51e2f41966d83e5276fe"
+}

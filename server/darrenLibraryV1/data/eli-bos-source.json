@@ -1,0 +1,357 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-6A49112B",
+  "slug": "eli",
+  "name": "Eli Moreno",
+  "age": 16,
+  "gender": "boy",
+  "pronouns": "he/him",
+  "sport": "Swimming",
+  "answers": [
+    {
+      "question_id": "Q01",
+      "text": "Family, a couple of close friends, cooking. I think I might want to cook for a living but I have only helped at a cafe twice. I want enough time for people even if sport gets more serious.",
+      "event_root": "answer-Q01"
+    },
+    {
+      "question_id": "Q02",
+      "text": "Quiet gets taken as not having an opinion. Usually I have one, I am working out how to say it. With my two best friends I am the one who talks most.",
+      "event_root": "answer-Q02"
+    },
+    {
+      "question_id": "Q03",
+      "text": "Getting something a little better and knowing people can rely on me. I made the same bread four weekends until it came out how I wanted. I do not care much about being the person everyone watches.",
+      "event_root": "answer-Q03"
+    },
+    {
+      "question_id": "Q04",
+      "text": "A small group is good. Big team days are fun and then I need an evening without plans. I like new people better if we are doing something together.",
+      "event_root": "answer-Q04"
+    },
+    {
+      "question_id": "Q05",
+      "text": "I listen first. If nobody has a plan I will suggest one, usually by asking if it works for everyone. In class I sometimes miss the chance because the conversation has moved on.",
+      "event_root": "answer-Q05"
+    },
+    {
+      "question_id": "Q06",
+      "text": "I write the options down and talk to one person. I chose fewer weekend shifts so I could keep swimming and see friends. It took a few days. I still wonder whether I should have saved more money.",
+      "event_root": "answer-Q06"
+    },
+    {
+      "question_id": "Q07",
+      "text": "I want to understand the first bit before trying. New recipes are fun because I can read the whole thing. I went kayaking without knowing much last summer because my friend was there and it was just for fun.",
+      "event_root": "answer-Q07"
+    },
+    {
+      "question_id": "Q08",
+      "text": "I like knowing the week. I keep a list on my phone. If a practice changes I move things around. A sudden change is annoying mainly because I may have promised someone else a time.",
+      "event_root": "answer-Q08"
+    },
+    {
+      "question_id": "Q09",
+      "text": "I usually finish if I said I would. I did a boring part of a class project because it was mine. Sometimes I spend too long making a small part perfect and start the next thing late.",
+      "event_root": "answer-Q09"
+    },
+    {
+      "question_id": "Q10",
+      "text": "An example I can work through. I asked a teacher to show one maths question, then checked mine against it. I use timers when baking. Asking in front of the class is harder.",
+      "event_root": "answer-Q10"
+    },
+    {
+      "question_id": "Q11",
+      "text": "Specific and preferably one to one. I appreciate an explanation. If someone only says good job I do not know what worked. I can take a direct correction once I have a moment to think.",
+      "event_root": "answer-Q11"
+    },
+    {
+      "question_id": "Q12",
+      "text": "I get even quieter and say I am fine too soon. Inside I might be replaying it. Last month a friend asked twice and I told him I was upset about a missed turn.",
+      "event_root": "answer-Q12"
+    },
+    {
+      "question_id": "Q13",
+      "text": "I put it off if it seems small. A friend kept changing our meeting time and I finally said it was messing up my plans. He said he had not realised. We agreed to decide the night before.",
+      "event_root": "answer-Q13"
+    },
+    {
+      "question_id": "Q14",
+      "text": "After a disappointing swim I look for the bit I can understand. That time I watched the turn with my coach the next day. On the night I just wanted dinner and no analysis.",
+      "event_root": "answer-Q14"
+    },
+    {
+      "question_id": "Q15",
+      "text": "I notice if someone has not had a turn to speak and ask them. I keep track of what we said we would do. I do not love assigning jobs, but I asked someone else to check our project references.",
+      "event_root": "answer-Q15"
+    },
+    {
+      "question_id": "Q16",
+      "text": "Checking things. I can check an email twice and still wait to send it. In cooking I am less careful with recipes I know. I change those just to see what happens.",
+      "event_root": "answer-Q16"
+    },
+    {
+      "question_id": "Q17",
+      "text": "People following through or telling me early if they cannot. I try to do that. I sometimes say yes because I do not want to cause trouble and then have to sort out too much.",
+      "event_root": "answer-Q17"
+    },
+    {
+      "question_id": "Q18",
+      "text": "I narrow in on one mistake. I can do the other parts but keep thinking about that bit. On a normal day I can leave it and move on. If someone wants an instant explanation I struggle to find words.",
+      "event_root": "answer-Q18"
+    },
+    {
+      "question_id": "Q19",
+      "text": "A packed weekend and lots of last minute messages. Cooking with music or walking with a friend helps. Exams are coming up so I need more quiet time than usual.",
+      "event_root": "answer-Q19"
+    },
+    {
+      "question_id": "Q20",
+      "text": "I do like competing. Being quiet does not mean I only want to participate. I want to improve my times, and I can be stubborn about a decision after I have thought it through.",
+      "event_root": "answer-Q20"
+    }
+  ],
+  "corrections": [],
+  "intake_mode": "static",
+  "questions": [
+    {
+      "id": "Q01",
+      "prompt": "What matters most to you outside sport?",
+      "followup": "What would you like your life to make room for, now or later?",
+      "chapters": [
+        "identity",
+        "thriving"
+      ],
+      "vectors": [
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q02",
+      "prompt": "What do people sometimes get wrong about you?",
+      "followup": "What would they understand better if they heard your side?",
+      "chapters": [
+        "identity",
+        "communication",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q03",
+      "prompt": "What makes you want to put effort into something?",
+      "followup": "Tell us about something you chose to do, and something you found hard to care about.",
+      "chapters": [
+        "identity",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q04",
+      "prompt": "After spending time with other people, how do you usually feel?",
+      "followup": "Is it different with close friends and an unfamiliar group?",
+      "chapters": [
+        "connection",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q05",
+      "prompt": "In a group, how do you usually get involved?",
+      "followup": "When do you speak up, choose a direction, or leave room for someone else?",
+      "chapters": [
+        "communication",
+        "connection"
+      ],
+      "vectors": [
+        "command",
+        "tempo"
+      ]
+    },
+    {
+      "id": "Q06",
+      "prompt": "When a choice is difficult, how do you decide?",
+      "followup": "Think of a recent choice. What mattered, and how long did you need?",
+      "chapters": [
+        "mind",
+        "identity"
+      ],
+      "vectors": [
+        "command",
+        "tempo",
+        "perspective"
+      ]
+    },
+    {
+      "id": "Q07",
+      "prompt": "How do you approach something new or unfamiliar?",
+      "followup": "What makes you curious, and what makes you hold back?",
+      "chapters": [
+        "mind",
+        "effort"
+      ],
+      "vectors": [
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q08",
+      "prompt": "How much of a plan do you like before you start?",
+      "followup": "What happened the last time your plan changed?",
+      "chapters": [
+        "effort",
+        "mind"
+      ],
+      "vectors": [
+        "structure",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q09",
+      "prompt": "When something gets boring or difficult, what do you do?",
+      "followup": "Describe a time you kept going, changed your approach, or decided to stop.",
+      "chapters": [
+        "effort",
+        "strengths"
+      ],
+      "vectors": [
+        "tempo",
+        "adaptability"
+      ]
+    },
+    {
+      "id": "Q10",
+      "prompt": "When you do not understand something, what do you try?",
+      "followup": "What happened the last time? Did another person or a tool help?",
+      "chapters": [
+        "mind",
+        "thriving"
+      ],
+      "vectors": [
+        "leverage",
+        "precision"
+      ]
+    },
+    {
+      "id": "Q11",
+      "prompt": "What kind of feedback is easiest for you to use?",
+      "followup": "Describe feedback that helped, and anything that made it harder to take in.",
+      "chapters": [
+        "communication",
+        "mind"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q12",
+      "prompt": "When you are upset, what might someone else notice?",
+      "followup": "What might they miss? Only tell us what you want to share.",
+      "chapters": [
+        "pressure",
+        "communication"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q13",
+      "prompt": "When you disagree with someone, what usually happens?",
+      "followup": "Can you remember an example, including what the other person actually said or did?",
+      "chapters": [
+        "connection",
+        "communication",
+        "pressure"
+      ],
+      "vectors": [
+        "command",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q14",
+      "prompt": "After a disappointment, what helps you find your footing?",
+      "followup": "What happened on one occasion? It is okay if you are still figuring this out.",
+      "chapters": [
+        "pressure",
+        "thriving"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q15",
+      "prompt": "What do you bring to a group that is useful?",
+      "followup": "Think of school, home, friends or sport. How do you share the work?",
+      "chapters": [
+        "strengths",
+        "connection"
+      ],
+      "vectors": [
+        "leverage",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q16",
+      "prompt": "When can one of your strengths get in your way?",
+      "followup": "How do you notice it, and is there a situation where it works differently?",
+      "chapters": [
+        "strengths",
+        "effort"
+      ],
+      "vectors": [
+        "precision"
+      ]
+    },
+    {
+      "id": "Q17",
+      "prompt": "What makes you feel respected or fairly treated?",
+      "followup": "How do you try to offer that to someone else?",
+      "chapters": [
+        "identity",
+        "connection"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q18",
+      "prompt": "What changes about you when the pressure rises?",
+      "followup": "Compare an ordinary situation with a difficult one. What was going on around you?",
+      "chapters": [
+        "pressure",
+        "mind"
+      ],
+      "vectors": [
+        "tempo",
+        "precision",
+        "relational_awareness"
+      ]
+    },
+    {
+      "id": "Q19",
+      "prompt": "What drains you, and what helps you feel like yourself again?",
+      "followup": "Is anything about your current week making a difference?",
+      "chapters": [
+        "thriving",
+        "effort"
+      ],
+      "vectors": []
+    },
+    {
+      "id": "Q20",
+      "prompt": "What else should MORE understand about you?",
+      "followup": "Where have your answers missed the full picture? What are you still figuring out?",
+      "chapters": [
+        "identity",
+        "mind",
+        "communication",
+        "connection",
+        "effort",
+        "pressure",
+        "strengths",
+        "thriving"
+      ],
+      "vectors": []
+    }
+  ]
+}

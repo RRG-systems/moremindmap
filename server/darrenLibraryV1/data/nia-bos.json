@@ -1,0 +1,1530 @@
+{
+  "version": "youth-bos-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-D702ACBF",
+  "intake_mode": "static",
+  "subject_sha256": "07595c8734e339034e9513c1b0156bc856d82bc98303a158322c34b2aad0b698",
+  "subject": {
+    "name": "Nia Brooks",
+    "age": 15,
+    "gender": "girl",
+    "pronouns": "she/her",
+    "sport": "Basketball"
+  },
+  "evidence": {
+    "claims": [
+      {
+        "id": "C01",
+        "statement": "The athlete names their little brother as one of the people who matters most outside sport.",
+        "kind": "direct",
+        "refs": [
+          "Q01"
+        ],
+        "alternative": "None needed for the report itself; it does not establish how they relate to every family member.",
+        "confidence": "strong",
+        "contexts": [
+          "home",
+          "family",
+          "identity"
+        ]
+      },
+      {
+        "id": "C02",
+        "statement": "They want to design clothes that people actually wear and say they would keep drawing even if nobody saw the work, showing that the interest is not dependent only on attention or praise.",
+        "kind": "direct",
+        "refs": [
+          "Q01"
+        ],
+        "alternative": "The long-term form of this interest remains open, but the current interest and its private value are explicit.",
+        "confidence": "strong",
+        "contexts": [
+          "interests",
+          "identity",
+          "future"
+        ]
+      },
+      {
+        "id": "C03",
+        "statement": "Effort appears to rise when they can claim authorship, personalize the result, or retain ownership after receiving a small amount of help.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q03",
+          "Q07",
+          "Q09"
+        ],
+        "alternative": "The stronger effort could partly reflect greater familiarity or enjoyment in art-related tasks, rather than authorship being the main factor in every domain.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "interests",
+          "effort"
+        ]
+      },
+      {
+        "id": "C04",
+        "statement": "Dense, passive, or externally imposed formats seem to reduce engagement: copying definitions, facing a huge list, and taking in a long video are all described as harder to stay with.",
+        "kind": "inference",
+        "refs": [
+          "Q03",
+          "Q08",
+          "Q10"
+        ],
+        "alternative": "The issue may be the amount or presentation of information rather than low interest in the underlying subject.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "learning",
+          "effort"
+        ]
+      },
+      {
+        "id": "C05",
+        "statement": "A fast move from idea to speech or action recurs across group work, personal choices, unfamiliar tasks, problem-solving, disagreement, and answering questions.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q06",
+          "Q07",
+          "Q09",
+          "Q10",
+          "Q13",
+          "Q16"
+        ],
+        "alternative": "The prompts often asked about starting and deciding, which may have made fast examples especially available, but the pattern still appears across several distinct settings.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friendships",
+          "interests",
+          "sport"
+        ]
+      },
+      {
+        "id": "C06",
+        "statement": "Before starting, they prefer the main objective and the deadline rather than a large step-by-step plan; too much advance structure can make them want to disengage.",
+        "kind": "direct",
+        "refs": [
+          "Q08"
+        ],
+        "alternative": "None needed for the stated preference; whether it applies to higher-stakes or unfamiliar projects is not yet known.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "sport",
+          "effort"
+        ]
+      },
+      {
+        "id": "C07",
+        "statement": "Changing route is readily available when new information or a practical obstacle appears: they accepted a friend's better project idea, played outside when the gym closed, and swapped stall jobs after hearing a friend's objection.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q08",
+          "Q15"
+        ],
+        "alternative": "These changes may have been easy because the choices were reversible; willingness to revise a major or deeply held decision is still unknown.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "sport",
+          "groups"
+        ]
+      },
+      {
+        "id": "C08",
+        "statement": "The cost of moving quickly is sometimes incomplete intake or checking: choosing a plan before others spoke, interrupting, grabbing a bag without checking, and answering before fully understanding all fit that tradeoff.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q08",
+          "Q13",
+          "Q16"
+        ],
+        "alternative": "Each mistake could have a local explanation, but the athlete explicitly identifies speed as a strength that can get in the way.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "sport",
+          "groups",
+          "communication"
+        ]
+      },
+      {
+        "id": "C09",
+        "statement": "Their attention to detail is selective rather than uniform: they may move approximately in some tasks but spend a long time refining a clothing detail when it matters to them.",
+        "kind": "inference",
+        "refs": [
+          "Q09",
+          "Q16"
+        ],
+        "alternative": "This may be specific to drawing or clothing design, where interest and familiarity support longer attention, rather than a general meaning-based detail pattern.",
+        "confidence": "moderate",
+        "contexts": [
+          "interests",
+          "effort"
+        ]
+      },
+      {
+        "id": "C10",
+        "statement": "They explicitly correct any impression that they never finish things, citing the completed jacket design and reliably collecting their brother on their assigned day.",
+        "kind": "direct",
+        "refs": [
+          "Q20"
+        ],
+        "alternative": "None needed; this correction must be preserved and rules out a global non-completion description.",
+        "confidence": "strong",
+        "contexts": [
+          "home",
+          "interests",
+          "identity"
+        ]
+      },
+      {
+        "id": "C11",
+        "statement": "Follow-through appears to depend strongly on personal importance and responsibility: a comic was left unfinished, while a design for a friend and a regular duty toward their brother were completed.",
+        "kind": "inference",
+        "refs": [
+          "Q09",
+          "Q20"
+        ],
+        "alternative": "Project length, difficulty, deadlines, or external expectations may also distinguish the completed and unfinished tasks.",
+        "confidence": "moderate",
+        "contexts": [
+          "home",
+          "interests",
+          "effort"
+        ]
+      },
+      {
+        "id": "C12",
+        "statement": "Their identity is not organized around sport alone: art received priority over an extra basketball session, drawing has value without an audience, and they are unsure what they want basketball to become long term.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q06",
+          "Q20"
+        ],
+        "alternative": "Choosing art on one schedule clash does not prove a stable priority order, but it does show that basketball does not automatically override every other valued interest.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "interests",
+          "identity",
+          "future"
+        ]
+      },
+      {
+        "id": "C13",
+        "statement": "Their creative interest has a practical and recipient-aware side: they imagine clothes people will use and revised the jacket design with a friend's likely response in mind.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q09"
+        ],
+        "alternative": "Wanting a friend to like a gift may reflect care for that particular relationship rather than a broader user-focused approach.",
+        "confidence": "moderate",
+        "contexts": [
+          "interests",
+          "friendships"
+        ]
+      },
+      {
+        "id": "C14",
+        "statement": "When stuck, they tend to try first, request a narrow piece of help, and then resume independently rather than hand over the whole problem.",
+        "kind": "inference",
+        "refs": [
+          "Q07",
+          "Q10"
+        ],
+        "alternative": "Both examples involved help that could be divided into one step; they may seek more extensive support when a task cannot be separated so neatly.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "learning",
+          "interests"
+        ]
+      },
+      {
+        "id": "C15",
+        "statement": "The feedback they find easiest to use identifies the exact part to change and points to the relevant moment.",
+        "kind": "direct",
+        "refs": [
+          "Q11"
+        ],
+        "alternative": "None needed for the stated preference; effectiveness with other feedback forms remains unknown.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "school",
+          "communication"
+        ]
+      },
+      {
+        "id": "C16",
+        "statement": "Their difficulty with correction is not correction itself so much as delivery and accumulation: a precise correction helped, while a public speech or being corrected repeatedly was harder to absorb.",
+        "kind": "inference",
+        "refs": [
+          "Q11",
+          "Q19"
+        ],
+        "alternative": "Topic, relationship, tone, and whether the correction felt accurate could also influence the response.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "sport",
+          "communication",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C17",
+        "statement": "When upset or embarrassed, visible signs can include speaking louder or making a joke; they recognize that this can be mistaken for not caring when the joke is actually shifting attention away from a mistake.",
+        "kind": "direct",
+        "refs": [
+          "Q12"
+        ],
+        "alternative": "None needed for the reported presentation episode; it is not evidence that every joke serves this function.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "pressure",
+          "communication"
+        ]
+      },
+      {
+        "id": "C18",
+        "statement": "Humor may serve two different functions for them: in ordinary difficulty it can help them restart, while under visible embarrassment it can also shield the mistake or redirect attention.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q12",
+          "Q18"
+        ],
+        "alternative": "Humor may simply be a familiar communication habit, and both answers partly refer to the same presentation event.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "pressure",
+          "communication"
+        ]
+      },
+      {
+        "id": "C19",
+        "statement": "When pressure rises, their usual speed appears to intensify into trying to fix everything at once, rushing speech, or wanting immediate corrective action.",
+        "kind": "inference",
+        "refs": [
+          "Q14",
+          "Q18"
+        ],
+        "alternative": "The pattern may be strongest after visible mistakes or sport disappointment and may not apply to every kind of pressure.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "sport",
+          "pressure"
+        ]
+      },
+      {
+        "id": "C20",
+        "statement": "After one bad game, they first wanted to practice immediately, then drew after being taken home, and found the disappointment felt less huge the next morning; they explicitly do not claim that drawing caused the change.",
+        "kind": "direct",
+        "refs": [
+          "Q14"
+        ],
+        "alternative": "Time, leaving the setting, sleep, family presence, drawing, or a combination could explain the shift.",
+        "confidence": "strong",
+        "contexts": [
+          "sport",
+          "home",
+          "recovery"
+        ]
+      },
+      {
+        "id": "C21",
+        "statement": "They usually want more time with friends, but a full day of unfamiliar social contact is tiring, and after a tournament they may prefer quiet company with their brother.",
+        "kind": "direct",
+        "refs": [
+          "Q04"
+        ],
+        "alternative": "None needed for the report; tournament fatigue may contribute to the preference for quiet afterward.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "home",
+          "sport",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C22",
+        "statement": "Their social participation is selective rather than simply outgoing or quiet: close friends can be energizing, unfamiliar groups can tire them, and older relatives can bring much less speech.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q04",
+          "Q13"
+        ],
+        "alternative": "Length of interaction, family hierarchy, prior conflict, and familiarity may each explain different parts of the variation.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "family",
+          "groups"
+        ]
+      },
+      {
+        "id": "C23",
+        "statement": "Feeling respected means being allowed to explain their side even when the listener still disagrees, and they report trying to offer that space to their brother.",
+        "kind": "direct",
+        "refs": [
+          "Q17"
+        ],
+        "alternative": "None needed for the stated value; how consistently it is enacted outside the sibling relationship remains open.",
+        "confidence": "strong",
+        "contexts": [
+          "home",
+          "school",
+          "relationships"
+        ]
+      },
+      {
+        "id": "C24",
+        "statement": "The relationship with their little brother appears to anchor several parts of their life: affection, quiet recovery, patience, and dependable responsibility.",
+        "kind": "inference",
+        "refs": [
+          "Q01",
+          "Q04",
+          "Q17",
+          "Q19",
+          "Q20"
+        ],
+        "alternative": "These answers may partly reflect current family routines and the brother's availability rather than a broader family-centered pattern.",
+        "confidence": "strong",
+        "contexts": [
+          "home",
+          "family",
+          "identity",
+          "thriving"
+        ]
+      },
+      {
+        "id": "C25",
+        "statement": "Directness changes with relationship and power: they tend to disagree immediately with peers but become quieter or wait with older relatives when speaking may prolong conflict.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q13"
+        ],
+        "alternative": "The difference could reflect family norms, previous experience with those particular relatives, or practical conflict avoidance rather than a stable response to age or authority.",
+        "confidence": "strong",
+        "contexts": [
+          "friendships",
+          "family",
+          "conflict"
+        ]
+      },
+      {
+        "id": "C26",
+        "statement": "In groups, they often contribute momentum by supplying the first direction and organizing who will do what rather than waiting for the group to become active on its own.",
+        "kind": "inference",
+        "refs": [
+          "Q02",
+          "Q05",
+          "Q15"
+        ],
+        "alternative": "They may step in mainly when a group is visibly stalled, so the pattern should not be read as a need to direct every group.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friendships",
+          "groups"
+        ]
+      },
+      {
+        "id": "C27",
+        "statement": "Their direction-setting can precede consultation: in both the science project and school stall, another person's idea or preference entered clearly only after the athlete had already chosen a route or assigned work.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q15"
+        ],
+        "alternative": "The examples may have been chosen precisely because consultation went wrong; other groups may show more advance listening.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friendships",
+          "groups"
+        ]
+      },
+      {
+        "id": "C28",
+        "statement": "Clear pushback can produce real updating rather than automatic defense: they backed up and accepted a friend's idea, apologized and let the friend finish, and swapped stall roles after an objection.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q13",
+          "Q15"
+        ],
+        "alternative": "The changes may partly have been practical ways to keep the work moving, but the apology and willingness to hear the idea support a relational repair component as well.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "friendships",
+          "communication",
+          "conflict"
+        ]
+      },
+      {
+        "id": "C29",
+        "statement": "A plausible internal calculation is that waiting without direction feels costly, so offering a provisional path is worthwhile; this reverses when an older relative is likely to turn disagreement into a long argument.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q02",
+          "Q05",
+          "Q13",
+          "Q15"
+        ],
+        "alternative": "The group behavior could instead reflect enjoyment of control or confidence in the task, while the family behavior could be specific to those relationships.",
+        "confidence": "moderate",
+        "contexts": [
+          "school",
+          "family",
+          "groups",
+          "conflict"
+        ]
+      },
+      {
+        "id": "C30",
+        "statement": "A possible responsibility pattern is quick commitment followed by worry about the group's reaction: after choosing art club rapidly, they worried about letting the team down even though nobody had said that.",
+        "kind": "hypothesis",
+        "refs": [
+          "Q06"
+        ],
+        "alternative": "This may have been ordinary uncertainty around one difficult schedule clash rather than a recurring tendency to assume disappointment.",
+        "confidence": "tentative",
+        "contexts": [
+          "sport",
+          "interests",
+          "decision-making"
+        ]
+      },
+      {
+        "id": "C31",
+        "statement": "This week includes two tests and the athlete reports being somewhat snappy; they explicitly distinguish this from how they are every week.",
+        "kind": "current_context",
+        "refs": [
+          "Q19"
+        ],
+        "alternative": "Other unreported parts of the week may also contribute, so the tests should be treated as context rather than proven cause.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "home",
+          "current_week"
+        ]
+      },
+      {
+        "id": "C32",
+        "statement": "There is a meaningful tension between valuing everyone's chance to explain and sometimes moving before others have had that chance; the evidence suggests the value is genuine, while listening is often more available after a clear cue than before the first move.",
+        "kind": "inference",
+        "refs": [
+          "Q05",
+          "Q13",
+          "Q15",
+          "Q17"
+        ],
+        "alternative": "The mismatch may be limited to rushed group tasks, since the athlete reports greater patience with their brother and may behave differently when time pressure is low.",
+        "confidence": "strong",
+        "contexts": [
+          "school",
+          "home",
+          "friendships",
+          "groups",
+          "communication"
+        ]
+      }
+    ],
+    "open_questions": [
+      "Outside art and clothing design, when does making a task your own increase effort, and when does it make no difference?",
+      "What usually separates an important project that gets finished from an interesting project that is left halfway?",
+      "In a group that is not stalled, do you still tend to offer the first plan, or are you more likely to hear everyone's ideas first?",
+      "When you ask for ideas before choosing a direction, does that improve the result, feel unnecessarily slow, or depend on the people involved?",
+      "Does worry about disappointing a team or group often arrive after a fast choice, or was the art-club decision unusual?",
+      "When a mistake is private rather than watched by a class or team, do you still speed up or joke, or is that mainly a response to being observed?",
+      "With older relatives, is waiting mainly about respect, expecting not to be heard, avoiding a long argument, or something else?",
+      "Across several disappointments, what reliably changes by the next day, and is drawing consistently part of that shift?",
+      "Is unfamiliar social contact tiring because the people are new, because the interaction lasts all day, or because there is little quiet time?",
+      "As basketball and clothing design develop, what would make either one feel like something you want to keep central rather than simply something important now?"
+    ],
+    "event_overlaps": [
+      {
+        "refs": [
+          "Q05",
+          "Q13"
+        ],
+        "reason": "Both answers describe the same science-project disagreement, including choosing a plan before the friend finished and then backing up, apologizing, and listening. They are one episode, not two independent confirmations."
+      },
+      {
+        "refs": [
+          "Q12",
+          "Q18"
+        ],
+        "reason": "Both answers refer to losing their place during the same class presentation and responding by joking or speaking faster under observation."
+      },
+      {
+        "refs": [
+          "Q03",
+          "Q09",
+          "Q16",
+          "Q20"
+        ],
+        "reason": "Q03, Q09, and Q20 clearly revisit the same jacket-design episode for a friend. Q16's sleeve-detail example may refer to the same clothing-design work, so it is not treated as clearly independent evidence for detail persistence."
+      }
+    ]
+  },
+  "domains": {
+    "vectors": [
+      {
+        "id": "command",
+        "position": 3,
+        "claim_ids": [
+          "C25",
+          "C26",
+          "C27",
+          "C28",
+          "C32"
+        ],
+        "interpretation": "You often turn a waiting group into movement by offering the first direction. You can also back up, apologize, or change roles when someone gives clear pushback.",
+        "helps": "This can give a stalled group a workable starting point and keep everyone from waiting for somebody else to act.",
+        "watch_for": "The first plan or job assignment can arrive before other people have had room to explain. That can make useful initiative feel bossy, even when your intention is simply to get started.",
+        "context": "This leaning is clearest in peer groups, especially when a task is stalled. You are much quieter with older relatives, and the evidence does not show that you want to direct every group."
+      },
+      {
+        "id": "tempo",
+        "position": 4,
+        "claim_ids": [
+          "C05",
+          "C08",
+          "C09",
+          "C19"
+        ],
+        "interpretation": "You usually move quickly from an idea into speaking, choosing, or trying. Under visible pressure, that pace can speed up further into rushing or trying to fix everything at once.",
+        "helps": "A fast start lets you create momentum, test an idea, and get real feedback instead of waiting for complete certainty.",
+        "watch_for": "Speed can reduce how much of a question, conversation, or basic check you take in before responding. Interrupting, choosing before everyone has spoken, and grabbing a bag without checking show different versions of that tradeoff.",
+        "context": "Fast pace is a preference, not a statement about the quality of your thinking or your self-control. Meaningful drawing can bring a much slower pace, and the pressure evidence is limited to sport disappointment and one watched presentation."
+      },
+      {
+        "id": "relational_awareness",
+        "position": 2,
+        "claim_ids": [
+          "C13",
+          "C17",
+          "C27",
+          "C28",
+          "C30",
+          "C32"
+        ],
+        "interpretation": "You often notice an impact once it becomes clear, and you are willing to adjust or repair. Before a fast group move, though, you may not yet have checked what everyone wants.",
+        "helps": "Thinking about whether a friend will like a design and responding seriously to clear objections can help you make work that fits both the task and the person.",
+        "watch_for": "Concern about other people can sometimes become an untested guess, as when you worried that choosing art had let the team down even though nobody had said that. A direct check gives stronger information than trying to work out an unspoken reaction alone.",
+        "context": "This is genuinely mixed and relationship-dependent: care for a friend or your brother can bring people into focus, while advance checking in group tasks is less consistent. It does not show that guesses about unspoken feelings are always accurate."
+      },
+      {
+        "id": "precision",
+        "position": 2,
+        "claim_ids": [
+          "C08",
+          "C09",
+          "C14",
+          "C15"
+        ],
+        "interpretation": "You are selective about detail rather than detailed in the same way everywhere. You can refine one meaningful design feature for a long time, while speed can make you skip a check or answer before the full question lands.",
+        "helps": "When the detail has a clear purpose, you can focus closely and make use of exact information about what needs to change.",
+        "watch_for": "Attention can become uneven: an important sleeve detail may receive a long check while a simple bag check or the full wording of a question is missed. The key tradeoff is not caring versus not caring, but where your attention decides exactness is worth the time.",
+        "context": "The clearest fine-detail example comes from clothing design and may partly reflect interest or experience. The lower-check examples appear in school and group tasks, so no single accuracy level fits every setting."
+      },
+      {
+        "id": "leverage",
+        "position": 2,
+        "claim_ids": [
+          "C14",
+          "C26",
+          "C27",
+          "C28"
+        ],
+        "interpretation": "You use other people best for a clear piece of help or a shared job, then keep hold of your own part. You can divide work to create momentum, although checking people's preferred roles may come after the first assignment.",
+        "helps": "A teacher or friend can unlock one stuck step without taking over, while sharing jobs lets several people contribute at the same time.",
+        "watch_for": "Assigning work before asking about preferences can create avoidable friction. At the other extreme, wanting to do the rest yourself may make it harder to widen the help when a problem cannot be solved through one small question.",
+        "context": "The evidence covers teachers, friends, and simple task-sharing. It does not yet show how you use broader tools or ongoing support when a problem cannot be divided into one neat step."
+      },
+      {
+        "id": "adaptability",
+        "position": 4,
+        "claim_ids": [
+          "C07",
+          "C09",
+          "C28"
+        ],
+        "interpretation": "You readily change route when a better idea, a closed gym, or another person's objection changes the situation. Revising the route does not seem to mean dropping the goal; you often keep moving with a new method or role.",
+        "helps": "This makes it easier to recover when the original plan no longer fits and to use better information without treating the first idea as something you must defend.",
+        "watch_for": "Changing parts can improve the result, but repeated changes can also stretch out the middle of a project or make the current direction less clear.",
+        "context": "The clearest examples involve reversible school, sport, and group choices. How readily you would revise a major commitment or a deeply held view remains open."
+      },
+      {
+        "id": "structure",
+        "position": 1,
+        "claim_ids": [
+          "C04",
+          "C06",
+          "C10",
+          "C26"
+        ],
+        "interpretation": "You prefer light structure: the main goal, the deadline, and room to work out the route. Long lists and dense instructions can push you away, but a clear responsibility can still hold your follow-through.",
+        "helps": "A simple frame leaves room for initiative, adjustment, and making the work your own instead of spending too much energy following a large set of steps.",
+        "watch_for": "With only a main goal and deadline, small checks, role preferences, or handoff details can be missed. Too much structure is draining for you, but too little clarity can leave other people unsure of what has already been decided.",
+        "context": "This left lean is strongest in school and sport setup, and it is not a claim that you cannot use routines. Reliably collecting your brother on your assigned day is a real exception to any idea that light structure means unreliability."
+      },
+      {
+        "id": "perspective",
+        "position": 2,
+        "claim_ids": [
+          "C02",
+          "C12",
+          "C30"
+        ],
+        "interpretation": "You have a real future picture around making clothes that people will use, while basketball's long-term place is still open. In some immediate choices, the decision comes first and wider group consequences enter just afterward.",
+        "helps": "You can take a meaningful next step without pretending that every part of the distant future is already settled, while still keeping a longer-term creative possibility in view.",
+        "watch_for": "A fast choice can work for the present but leave you with a second round of worry about people or future tradeoffs. That worry may reflect a real consequence, or it may be an assumption that needs checking.",
+        "context": "This is a tentative mixed reading: there is a future aim in clothing design, but little evidence yet of detailed long-range planning or regular several-step forecasting. Uncertainty about basketball's future is an open choice, not a lack of ambition."
+      }
+    ],
+    "domains": [
+      {
+        "id": "identity",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C03",
+          "C12",
+          "C23",
+          "C24",
+          "C32"
+        ],
+        "insight": "Two strong identity anchors appear across your answers: caring for people you feel responsible for, especially your little brother, and making things that carry your own ideas. You directly say that drawing clothes would still matter without an audience, and you picture clothes that people would really use. A supported interpretation is that making something your own is part of the reward, not just a route to praise. Basketball matters, but choosing art during one schedule clash and leaving basketball's long-term place open show that being an athlete is not your only important identity. There is also a revealing tension in how you define fairness: being allowed to explain your side is central to respect for you, while your fast group starts can sometimes reduce that same space for classmates until you notice and repair it.",
+        "counterpoint": "Art may draw effort partly because you enjoy it or know it well, so making something your own may not explain every difference in motivation. One schedule clash does not set a permanent order between art and basketball, and the future form of clothing design is still open.",
+        "open_question": "As art, basketball, friendships, and family responsibilities change, which parts do you want to keep central because they feel most like your own choice?"
+      },
+      {
+        "id": "mind",
+        "claim_ids": [
+          "C04",
+          "C05",
+          "C07",
+          "C14",
+          "C15",
+          "C30"
+        ],
+        "insight": "Across sewing, maths, group work, and choices, your working preference is often to act soon enough to create useful information: try something, find the exact snag, ask a narrow question, and continue yourself. This is evidence about a preferred process, not a claim about ability or a fixed learning style. Concise information tied to the current step seems easier for you to use than copying material, facing a huge list, or taking in a long video all at once. You also update quickly when a better idea or a practical obstacle appears. In one difficult schedule choice, you decided quickly and only then worried about the effect on the team, so a plausible interpretation is that some consequences enter during review rather than all being weighed before action.",
+        "counterpoint": "The sewing and maths problems could both be separated into one helpful step, and several changes involved reversible choices. A difficult choice that cannot easily be undone might bring out a different process. The amount or presentation of information may also matter more than whether the subject itself interests you.",
+        "open_question": "When a choice is important and hard to reverse, do you still prefer to move and learn from the result, or do you naturally create more thinking time first?"
+      },
+      {
+        "id": "communication",
+        "claim_ids": [
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C25",
+          "C27",
+          "C28",
+          "C32"
+        ],
+        "insight": "With peers, your communication often leads with the idea or disagreement rather than a long lead-in. That clarity can get work moving, but people have sometimes understood the speed as bossiness or interruption; those are reported reactions, not proof that you meant to control them. You find feedback easiest to use when it identifies the exact moment or part to change. A long public speech or correction repeated over and over is harder to take in and can make answering back more likely. In one watched presentation, speaking faster and joking followed embarrassment and a wish to move attention away from the mistake, even though somebody else could read the joke as not caring. Your repair side is important too: when a friend clearly named the interruption, you apologized, let her finish, and updated the plan.",
+        "counterpoint": "You are not equally direct with everyone. You barely speak with older cousins and wait rather than disagreeing immediately with your uncle, so peer-group directness should not be turned into a description of every conversation. That difference may come from family expectations or the history of those particular relationships.",
+        "open_question": "If you present your first idea as one possible starting point and ask for other ideas before choosing, does that still feel fast enough for you and change how people respond?"
+      },
+      {
+        "id": "connection",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25",
+          "C28",
+          "C32"
+        ],
+        "insight": "Your social pattern is selective rather than simply outgoing or quiet. You usually want more time with close friends, while a full day with unfamiliar people can be tiring; after a tournament, quiet company with your brother may fit better than more conversation. Your brother appears as an especially steady relationship across affection, patience, responsibility, and low-pressure time together. Disagreement also changes with the relationship: you tend to speak immediately with peers, but you wait with an older relative when you expect speaking up to prolong an argument. Being heard even when someone disagrees is part of what makes a relationship feel respectful to you, and you report making a special effort to give your brother that space. A supported interpretation is that belonging for you includes both active involvement and closeness that does not demand constant talking.",
+        "counterpoint": "Tournament tiredness may partly explain wanting quiet afterward, while the length of the unfamiliar social day may matter as much as the people being new. Your quieter behavior with older relatives could be specific to those family relationships rather than a broad response to authority.",
+        "open_question": "When an unfamiliar group drains you, is the biggest factor that the people are new, that the interaction lasts too long, or that there is not enough quiet space during it?"
+      },
+      {
+        "id": "effort",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C06",
+          "C09",
+          "C10",
+          "C11"
+        ],
+        "insight": "Effort appears to rise when you can make the result your own, see who it matters to, or feel a real responsibility attached to it. The strongest pattern is not that you always finish or never finish. You explicitly corrected the idea that you do not complete things: one jacket project was finished for a friend, and your regular duty to collect your brother is a separate example of dependable follow-through. At the same time, you start quickly and can lose interest in the middle, as happened with the unfinished comic. Rote copying, oversized lists, and long passive explanations also seem to make engagement harder. A supported interpretation is that a visible personal reason helps carry you through the less exciting middle, while importance that feels distant or imposed does less to hold your attention.",
+        "counterpoint": "The jacket answers all describe one project and should not be counted as several separate completions. Deadlines, project length, familiarity, and other expectations may also distinguish it from the unfinished comic, so personal meaning is likely one contributor rather than the only cause.",
+        "open_question": "What usually tells you that a project is important enough to finish when its exciting beginning has passed?"
+      },
+      {
+        "id": "pressure",
+        "claim_ids": [
+          "C16",
+          "C17",
+          "C18",
+          "C19",
+          "C20",
+          "C31"
+        ],
+        "insight": "Your clearest pressure change is acceleration. You report that you can usually laugh and start again, but when the class was watching and you lost your place, you spoke faster and used humor while wanting attention off the mistake. After a bad game, your first urge was also immediate corrective action through more practice. A plausible interpretation is that embarrassment or disappointment can shorten your pause because doing something quickly feels like a way to reduce the size of the mistake. That is an interpretation, not a proven motive for every fast response. On the bad-game occasion, going home, drawing, the passing of time, family presence, and the next morning all came before the disappointment felt less huge; you correctly avoid claiming that drawing alone caused the change. Right now, two tests are part of the context for feeling somewhat snappy, and you explicitly say that this is not every week.",
+        "counterpoint": "The two presentation answers describe the same watched mistake, so they are one episode rather than two confirmations. The available pressure examples mainly involve public school performance and sport disappointment, and private mistakes or different kinds of conflict may bring out another response. The reason the bad game felt smaller the next day remains unknown.",
+        "open_question": "When a mistake is private and nobody is watching, do you still rush to fix it or joke, or is the speed increase mainly connected to being observed?"
+      },
+      {
+        "id": "strengths",
+        "claim_ids": [
+          "C03",
+          "C07",
+          "C08",
+          "C10",
+          "C13",
+          "C14",
+          "C26",
+          "C28"
+        ],
+        "insight": "Your most distinctive contribution is the combination of momentum and updating. You often create a starting point, split up work, or try the unfamiliar thing instead of waiting, but clear new information can still change your path. That means your useful group contribution is not only having the first idea; it also includes backing up, apologizing, swapping jobs, or accepting a better idea without abandoning the whole task. In sewing and maths, a small piece of help was enough for you to resume ownership of your part. Your clothing ideas add another side: you can combine private interest in making with attention to whether another person would actually like or use the result. The conditional cost is that momentum sometimes arrives before consultation or basic checking, while care about one meaningful detail can hold your attention for much longer.",
+        "counterpoint": "Your detail and completion patterns are selective, not universal, and the jacket material describes one especially meaningful project. Updating after clear pushback also does not establish how you respond in every disagreement, particularly when the decision is less reversible or the relationship is different.",
+        "open_question": "In groups, what would let you keep your useful starting energy while giving other people a real chance to shape the plan before jobs are assigned?"
+      },
+      {
+        "id": "thriving",
+        "claim_ids": [
+          "C03",
+          "C06",
+          "C14",
+          "C15",
+          "C16",
+          "C20",
+          "C21",
+          "C24",
+          "C31"
+        ],
+        "insight": "A helpful everyday fit for you is likely to combine a clear main target with freedom over the route. You tend to respond well when you know what matters and when it is due, can make part of the work your own, and can get one exact piece of help without somebody taking over. Feedback is easier to use when it is short, specific, and connected to the moment, while repeated correction or a whole speech in front of everyone can crowd out the useful point. Close friends provide social energy, and your brother offers both meaningful connection and quiet company after an intense day. Drawing gives you a valued activity outside sport and was present during one period of settling after disappointment, although its exact recovery effect is not known. Having room for art, basketball, friendship, and family responsibility may fit the fact that no single role currently describes your whole life. This week, the two tests are a temporary demand that may be making ordinary friction feel sharper rather than revealing a permanent change in you.",
+        "counterpoint": "These are supported possibilities, not guaranteed conditions for every setting. More detailed planning may become useful for a larger or less familiar project, quiet after a tournament may partly reflect the demands of the day, and the bad-game episode does not prove that drawing reliably changes disappointment.",
+        "open_question": "What is the smallest amount of planning, feedback, and help that gives you enough clarity to begin without making the task feel taken over?"
+      }
+    ]
+  },
+  "synthesis": {
+    "whole_person_model": "Direct self-report in this packet shows a person whose life is not organized around sport alone. Basketball matters, but so do drawing clothes, imagining designs people would actually use, close friends, and a dependable relationship with their little brother. They say drawing would still matter without an audience, chose art club during one clash with an extra basketball session, reliably collect their brother on their assigned day, and remain unsure what place basketball will have long term. The strongest supported model has three interacting parts. First, they often use action to create information: get the main target, begin, discover the exact snag, ask a focused question, and then take ownership again. Large lists, copied definitions, and long passive explanations are harder to stay with, while a small practical unlock can be useful. Second, their group sequence is often direction first and social updating second. When people are waiting, they supply a plan or divide the work; this creates momentum but can reduce consultation. Clear pushback can then produce genuine change, including listening, apologizing, accepting a better idea, or swapping jobs. This matters because being allowed to explain is one of their stated meanings of respect. The tension is not evidence that the value is false; it suggests that the value is sometimes enacted more reliably after a clear cue than before the first move. Third, personal meaning changes both their pace and follow-through. They can move approximately through a low-interest task yet spend a long time on one clothing detail, complete work connected to a friend, and keep a family responsibility. Their own correction therefore rules out a global description of them as someone who never finishes. Under pressure, their ordinary speed appears to intensify: a watched mistake led to faster speech and humor, and a bad game brought an immediate urge to practise. A plausible hypothesis is that rapid action makes a mistake feel more manageable, but the evidence is limited and does not establish this motive across situations. Competing explanations remain important: art may hold attention because of enjoyment or familiarity as well as authorship; completed and unfinished projects may differ in length, deadlines, or difficulty; their demonstrated route changes were mostly reversible; and quietness with older relatives may reflect those relationships or family expectations rather than authority in general. Their social life is similarly conditional rather than contradictory: close friends can be energizing, unfamiliar social contact can become tiring, and quiet company with their brother can feel right after an intense day. Current context also matters: two tests are present during a somewhat snappy week, which they explicitly distinguish from their usual weeks. Still open are how they handle major irreversible choices, whether pressure also speeds them up in private, what reliably carries them through the middle of projects, and how art and basketball will fit into their future.",
+    "portrait_thread": "They seem most engaged when they can turn an idea into something personally owned and useful for someone who matters: they move first, learn from contact, and, when the response is clear, reshape the route without giving up the goal.",
+    "signature_insights": [
+      {
+        "title": "Action is one of their ways of finding the real question",
+        "meaning": "They do not always want every step explained before beginning. Across sewing, maths, choices, and planning, the supported sequence is often start, encounter the specific obstacle, get one relevant piece of information, and continue independently. This explains why a main target and deadline may help more than a large list, and why a pointed correction can be easier to use than a long speech. It is a preference about how they enter a task, not evidence about ability or unwillingness to accept help. It may work differently when a choice is difficult to reverse or a problem cannot be divided into one clear step.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C14",
+          "C15"
+        ]
+      },
+      {
+        "title": "Their social awareness often becomes most active after the first move",
+        "meaning": "In peer groups, they frequently solve the cost of waiting by offering the first direction or assigning a starting role. Other people's preferences have sometimes entered only after that move. The important counterweight is that clear feedback can change their behavior: they have backed up, listened, apologized, accepted another idea, and swapped jobs. A likely interpersonal effect is that useful initiative can feel bossy when the starting idea is heard as a decision rather than an opening. Their stated respect value makes this especially meaningful: they want room to explain and try to give that room to their brother, yet speed can temporarily narrow it for peers. A plausible explanation is that waiting without direction feels costly; enjoyment of control or the particular examples chosen remain alternatives. Their much quieter behavior with older relatives also shows that this is not a need to direct every room.",
+        "claim_ids": [
+          "C23",
+          "C25",
+          "C26",
+          "C27",
+          "C28",
+          "C29",
+          "C32"
+        ]
+      },
+      {
+        "title": "Importance changes their speed, detail, and finish line",
+        "meaning": "Their fast pace is not uniform. When a result has personal or relational meaning, they can slow down, revise details, and carry work through a less exciting middle. The jacket material is one meaningful episode rather than several independent proofs, but the separate responsibility of collecting their brother supports the wider point that commitment can become dependable when another person or a clear duty matters. The unfinished comic and difficulty with passive school tasks preserve the other side: interest at the beginning does not always hold the middle. The best current interpretation is meaning-sensitive follow-through, not either permanent inconsistency or universal persistence. Familiarity, project length, deadlines, and enjoyment could also account for some of the difference.",
+        "claim_ids": [
+          "C02",
+          "C03",
+          "C09",
+          "C10",
+          "C11",
+          "C13",
+          "C24"
+        ]
+      }
+    ],
+    "chapter_routes": [
+      {
+        "id": "identity",
+        "angle": "A maker, responsible sibling, friend, and athlete whose future is not confined to one role",
+        "new_value": "Their clothing interest combines two different forms of value: it matters privately even without attention, and it has a practical picture of making something people would use. Their little brother also represents more than affection; he appears in patience, dependable responsibility, and quiet time together. Basketball is important without automatically overriding art or determining the future. A further identity value is voice: respect includes being allowed to explain even when agreement does not follow. The open question is not which single label defines them, but which chosen responsibilities and interests they will want to keep central as circumstances change.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C10",
+          "C12",
+          "C23",
+          "C24"
+        ]
+      },
+      {
+        "id": "mind",
+        "angle": "Concrete attempts, narrow questions, and rapid revision",
+        "new_value": "Their reported thinking process often becomes clearest through contact with the task. They try, locate the part that is blocking progress, seek a specific explanation, and then resume their own work. Concise information attached to the current step appears easier to use than dense material delivered all at once. They also revise readily when a better peer idea or a practical obstacle changes the situation. This is evidence about a preferred reasoning sequence, not intelligence or a fixed learning style. The demonstrated changes were mostly reversible, so a major commitment may bring more advance consideration. The art-club choice tentatively suggests that some social consequences are reviewed after a fast decision rather than fully settled beforehand.",
+        "claim_ids": [
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C14",
+          "C15",
+          "C30"
+        ]
+      },
+      {
+        "id": "communication",
+        "angle": "Fast, direct messages work best when the useful point stays specific",
+        "new_value": "With peers, their idea or disagreement often arrives before a long explanation. That can create clarity and movement, but it can also compress turn-taking enough that someone experiences interruption or a settled decision. Their easiest feedback format is equally direct but more precise: identify the actual part and relevant moment. Public speeches or correction repeated over and over can crowd out the useful information and increase the urge to answer back. In the one watched presentation episode, faster speech and humor followed embarrassment; the joke redirected attention but could also signal less concern than they actually felt. Communication repair is a genuine part of the picture because they can acknowledge an interruption and change what happens next. Their quietness with older relatives limits any claim that they communicate this directly everywhere.",
+        "claim_ids": [
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C25",
+          "C27",
+          "C28",
+          "C32"
+        ]
+      },
+      {
+        "id": "connection",
+        "angle": "Closeness can mean active involvement or comfortable quiet",
+        "new_value": "They are neither simply outgoing nor simply reserved. More time with close friends is usually welcome, while an entire day of unfamiliar interaction can be tiring. After a tournament, being beside their brother without much conversation can still count as meaningful connection. Their voice also changes with relational history and power: disagreement tends to be immediate with peers, while they wait with an uncle when they expect another long argument. This may be practical conflict management rather than general deference. Their brother appears to be a particularly steady relational anchor because affection, patience, responsibility, and low-demand company all meet in that relationship. What remains unknown is whether unfamiliar groups are tiring mainly because of novelty, duration, or too little quiet space.",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25"
+        ]
+      },
+      {
+        "id": "effort",
+        "angle": "Personal ownership starts effort; purpose and responsibility help carry the middle",
+        "new_value": "Their effort pattern is more conditional than a simple strong-or-weak work habit. Making the result their own, knowing who it matters to, or holding a clear responsibility appears to increase investment. Rote copying, oversized instructions, and passive information make engagement harder, and a fast, exciting beginning does not guarantee that the middle will remain interesting. Their explicit correction must be preserved: the unfinished comic does not mean they never finish. A design for a friend was completed, and collecting their brother on the assigned day is a separate example of reliable follow-through. Personal meaning is the best current explanation connecting these differences, but deadlines, familiarity, project length, and expectations may also matter.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C06",
+          "C09",
+          "C10",
+          "C11"
+        ]
+      },
+      {
+        "id": "pressure",
+        "angle": "Pressure appears to turn up their normal speed and narrow the pause before repair",
+        "new_value": "The strongest pressure evidence is acceleration rather than withdrawal. During one watched presentation mistake, they talked faster and used humor while embarrassed; after a bad game, their first wish was immediate practice. A plausible reading is that doing something quickly makes the problem feel less exposed or unfinished, but this is not proven across pressure situations. The two presentation answers describe the same episode and therefore count as one event. On the bad-game occasion, leaving the setting, drawing, family context, time, and the night all preceded the disappointment feeling smaller the next morning; they appropriately do not claim that drawing alone caused the change. Two current tests are a temporary source of load during a somewhat snappy week, not evidence of a permanent personality change.",
+        "claim_ids": [
+          "C16",
+          "C17",
+          "C18",
+          "C19",
+          "C20",
+          "C31"
+        ]
+      },
+      {
+        "id": "strengths",
+        "angle": "Their useful combination is starting momentum without being permanently attached to the first route",
+        "new_value": "They can give a stalled group a workable beginning, divide a task, try an unfamiliar tool, or turn a vague problem into one specific question. Just as importantly, new information can lead to a real update rather than automatic defense. This makes their contribution more flexible than simply being the person with the first idea. Their clothing interest adds practical recipient awareness: they care about whether a person would like or use the result, not only about producing an idea. The conditional cost is sequence. Momentum may arrive before consultation or a basic check, while exact attention appears later when a detail becomes meaningful. The strength is therefore strongest when beginning and updating remain connected.",
+        "claim_ids": [
+          "C07",
+          "C08",
+          "C13",
+          "C14",
+          "C26",
+          "C27",
+          "C28"
+        ]
+      },
+      {
+        "id": "thriving",
+        "angle": "Clear destinations, flexible routes, exact help, varied roles, and relationships that allow both energy and quiet",
+        "new_value": "A likely supportive fit is enough clarity to know the main target and deadline, with room to choose or revise the route. One exact piece of help can preserve ownership better than somebody taking over, and specific private or in-the-moment feedback may leave more room to use the point than a public speech. Their life also appears to benefit from having more than one meaningful lane: art offers privately valued making, basketball matters without having to settle the distant future, friends offer active social time, and their brother offers responsibility as well as quiet connection. These are fit hypotheses rather than guaranteed rules. Larger unfamiliar projects may need more planning, and drawing or quiet company should not be treated as proven recovery methods from one occasion. The current test-heavy week is a reminder to separate temporary load from the person as a whole.",
+        "claim_ids": [
+          "C02",
+          "C06",
+          "C12",
+          "C14",
+          "C15",
+          "C20",
+          "C21",
+          "C24",
+          "C31"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Starter energy that can still update",
+        "helps": "Turns waiting into a first workable direction and keeps moving when plans change.",
+        "overuse": "The first idea or job assignment may arrive before other people have supplied useful information.",
+        "reset": "Possible reset: present the first idea as a draft and leave a short opening for another route before roles are settled.",
+        "claim_ids": [
+          "C07",
+          "C26",
+          "C27",
+          "C28"
+        ]
+      },
+      {
+        "strength": "Independent work after a precise unlock",
+        "helps": "Tries first, asks a focused question, and resumes ownership instead of handing over the whole problem.",
+        "overuse": "A one-step-help preference may be too narrow when the task needs fuller context; long explanations may be rejected before the useful part is found.",
+        "reset": "Possible reset: after the first answer, check whether one hidden next step could change the whole task.",
+        "claim_ids": [
+          "C04",
+          "C14",
+          "C15"
+        ]
+      },
+      {
+        "strength": "Meaning-led craft and responsibility",
+        "helps": "Supports careful attention and follow-through when a person, purpose, or dependable duty matters.",
+        "overuse": "Routine middle sections and low-salience checks may lose attention even when they still affect the final result.",
+        "reset": "Possible reset: connect the dull middle to who or what the result serves, then name one essential check rather than creating a huge list.",
+        "claim_ids": [
+          "C02",
+          "C09",
+          "C10",
+          "C11",
+          "C13",
+          "C24"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "A watched mistake, a sport disappointment, or correction that is public or repeated. Two tests are a temporary load this week, not the baseline.",
+      "interpretation": "Possible reading: immediate action makes the problem feel as though it is being handled, while humor can either help restart or move attention away from embarrassment. This is not established for every kind of pressure.",
+      "response": "Speech speeds up; they may try to fix everything at once, want immediate practice, speak louder, joke, or feel an urge to answer back.",
+      "recovery": "In one bad-game sequence, leaving the setting, drawing, time, family context, and the next morning came before the disappointment felt smaller. Quiet company with their brother is preferred after some intense days, but no single recovery cause is proven.",
+      "claim_ids": [
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C21",
+        "C24",
+        "C31"
+      ]
+    }
+  },
+  "reading": {
+    "editorial_version": "youth-bos-public-reading-v2",
+    "map_intro": "You are quick to turn an idea into action, yet you can slow down deeply for work and people that matter. You work best when starting energy leaves room to listen, revise, and make the result your own.",
+    "portrait": {
+      "headline": "Fast to begin, careful where it counts",
+      "paragraphs": [
+        "You are often the person who turns waiting into movement. In a peer group, your first idea can be out before everyone else has finished deciding whether to speak. That can be useful, and it can also feel bossy to someone whose idea has not yet had room. What matters is that you are not stuck on being in charge: when a friend explains a better route or says you interrupted, you can back up, apologize, and change course. Your speed is clearest in stalled peer groups; with older cousins or an uncle, you can become much quieter.",
+        "Acting is also one of the ways you think. You like enough information to begin, then you find the exact snag. With the sewing machine and the maths problem, one specific piece of help let you take the work back yourself. Large lists, copied definitions, and long videos are harder to stay with, perhaps because the useful point gets buried. This does not mean you cannot think carefully. It means you often understand more once the task is real and you can do something with the information.",
+        "That quick side has a slower partner. When a detail feels connected to your idea or to somebody you care about, you can stay with it for a long time. You kept changing parts of one jacket design for a friend, and you can spend ages on a sleeve. Your wish to make clothes people actually wear gives creativity a practical side, while drawing even if nobody sees it shows that the interest also belongs privately to you. Attention is not simply high or low for you; purpose helps decide where exactness is worth the time.",
+        "This is why the unfinished comic cannot stand for everything. You finish important things. The jacket was completed, and collecting your brother on your day is a separate, dependable responsibility. The exciting start may not always carry you through a dull middle, but personal meaning, a real person, or a clear duty can give the middle more weight. Other things, such as project length or deadlines, may matter too, so your effort is better understood as selective than unreliable.",
+        "Your life does not narrow down to athlete. Basketball matters, yet you chose art club when it clashed with an extra session, and you are still deciding what basketball should mean later. The worry that followed your quick choice is important too: you wondered whether you had let the team down even though nobody had said that. Maybe responsibility to a group stays with you after a decision. It may also have been ordinary doubt in one difficult choice. Either way, uncertainty about the future is not the same as lacking commitment now.",
+        "With people, you are neither always loud nor always quiet. Close friends often leave you wanting more time, while a full day of unfamiliar people can be tiring. After an intense tournament, sitting quietly with your brother can feel more fitting than another conversation. He seems to hold several parts of your life together: affection, patience, dependable care, and a place where company does not require constant talking. You are more patient with him than with classmates, which shows that your social style changes with the relationship and the situation.",
+        "Being respected means getting to explain your side even if the other person still disagrees. You try to give that chance to your brother. There is an honest tension here: when your own idea comes fast, classmates may not receive that same room until they object. That does not cancel the value. It shows where your speed and fairness can pull against each other. The same need for clarity appears in feedback. One exact change is useful, while a long public speech or repeated correction can make you want to answer back.",
+        "Under pressure, your normal speed can turn up. During one watched presentation mistake, you talked faster and joked because you felt embarrassed and wanted attention off the mistake; someone could mistake that joke for not caring. After a bad game, your first urge was to practise immediately. You went home and drew; the game felt smaller by morning, though you are not sure what helped. This week, two tests are also part of why you may be snappier, not a definition of you. Taken together, your fast side gets life moving, while your slower side protects care, craft, and responsibility. You are most fully yourself when neither side has to erase the other."
+      ],
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C05",
+        "C08",
+        "C10",
+        "C12",
+        "C14",
+        "C16",
+        "C17",
+        "C19",
+        "C20",
+        "C21",
+        "C23",
+        "C24",
+        "C28",
+        "C31",
+        "C32"
+      ]
+    },
+    "chapters": [
+      {
+        "id": "identity",
+        "headline": "More than one important role",
+        "paragraphs": [
+          "You are building a life with more than one center. Basketball matters, but so do making clothes, being a friend, and showing up for your little brother. Drawing has a special place because it is both private and useful: you would do it without an audience, yet you also imagine clothes that real people would choose to wear. That suggests you care about having your own idea and giving it a life beyond the page.",
+          "Your brother is not just someone you name as important. He appears in the way you settle after intense days, the patience you try to offer when he is upset, and the regular job of collecting him on your day. That makes care concrete for you. It is affection, but it is also quiet company and doing what you said you would do.",
+          "Another part of you is the value you place on having a voice. Respect means being allowed to explain, even when agreement never comes. You try to give that room to your brother. In fast peer groups, though, your plan can arrive before classmates get the same chance. That does not cancel the value. It shows where your speed and fairness can pull against each other, and why listening before a decision is different from repairing afterward.",
+          "Choosing art club over one extra basketball session did not settle which matters more forever. It did show that athlete is not the only role allowed to guide your choices. You can care deeply about basketball now without already knowing its long-term place. Your clothing ideas can be serious without having to become a finished life plan at fifteen. What feels most like you may keep being the mix of chosen interests, relationships, and responsibilities rather than one label."
+        ],
+        "takeaway": "You are a maker, sibling, friend, and athlete; none of those roles gets to erase the others.",
+        "claim_ids": [
+          "C01",
+          "C02",
+          "C10",
+          "C12",
+          "C23",
+          "C24",
+          "C32"
+        ]
+      },
+      {
+        "id": "mind",
+        "headline": "You learn by getting into it",
+        "paragraphs": [
+          "You often understand a task by entering it rather than standing outside it for a long time. You try the sewing machine, attempt the maths problem, or put forward a starting idea. Once something goes wrong, the question becomes clearer. Then you can ask for the exact missing step and continue. This is not about refusing help; it is about wanting help that returns the work to your hands instead of replacing your part in it.",
+          "Information seems easier to use when it is short, specific, and connected to what is happening now. Copying definitions, facing a huge list, or watching a long explanation can make the useful point harder to find. The amount and presentation may matter as much as the subject itself. A coach pointing to the exact moment of a late pass worked because you could connect the message to a real decision, not because you need every task made easy.",
+          "Your choices can happen quickly too. You chose art club fast, then worried that the team might feel let down, although nobody had said that. In that one decision, the wider social question became louder after the choice. That may happen at other times, or it may have been normal doubt around a difficult clash. How you decide when the choice is major and hard to undo is still open.",
+          "Speed does not make you closed-minded. A friend's better project idea, a closed gym, or a problem with a first attempt can all lead you to change route. You seem comfortable treating a first move as something that can teach you, not something you must defend forever. Most examples so far were easy to revise, so bigger commitments may bring out a more deliberate side."
+        ],
+        "takeaway": "Your thinking often opens up once you can try, find the snag, and use one clear piece of information.",
+        "claim_ids": [
+          "C04",
+          "C05",
+          "C06",
+          "C07",
+          "C14",
+          "C15",
+          "C30"
+        ]
+      },
+      {
+        "id": "communication",
+        "headline": "Direct works best with room",
+        "paragraphs": [
+          "With peers, your message often begins with the actual idea or disagreement. You do not need a long introduction before saying what you think. That directness can clear away confusion and get a task moving. It can also make a possible starting point sound like a finished decision. You know people sometimes read you as bossy, and you honestly admit that sometimes you are being bossy. At other times, you are trying to end the waiting rather than control everyone.",
+          "Your listening side is easiest to see when another person gives you a clear signal. When your friend said she had a different science-project idea, you backed up and liked her route after hearing it. When she named the interruption, you apologized and let her finish. That is real flexibility. The next step for your communication is not becoming less direct; it is making room for useful information before the objection has to become sharp.",
+          "You use feedback best when it names the exact part and moment to change. A long speech in front of everyone, or correction piled on top of correction, can make you want to defend yourself before the useful point has landed. That does not mean correction itself is the problem. The difference between a precise comment that helped and public or repeated messages that drained you shows how much delivery affects what you can take in.",
+          "When embarrassment rises, your outside message may also hide part of the inside one. Talking louder or joking can look as if the mistake does not matter, even when you care and want attention moved away from it. This came from one watched presentation, so it need not describe every joke. Your quietness with older relatives also shows that fast, outspoken communication is not how you speak in every relationship."
+        ],
+        "takeaway": "Your point lands better when directness includes a real pause for the other person's side.",
+        "claim_ids": [
+          "C15",
+          "C16",
+          "C17",
+          "C18",
+          "C25",
+          "C27",
+          "C28",
+          "C32"
+        ]
+      },
+      {
+        "id": "connection",
+        "headline": "Close can be lively or quiet",
+        "paragraphs": [
+          "You often want more time with close friends, so being social is not simply something that drains you. What seems tiring is a whole day of unfamiliar contact, especially when there may be little quiet space. After a tournament, you can prefer sitting beside your brother and watching something without much conversation. For you, connection can mean shared energy or calm company; closeness does not always need talking.",
+          "Your brother appears to be a steady point across several parts of life. You care about him, collect him when it is your responsibility, try to hear him when he is upset, and turn toward his company after some intense days. You also say you are more patient with him than with classmates. That exception matters: your patience and warmth are affected by trust, responsibility, and the particular relationship, not switched on at the same level everywhere.",
+          "Being heard is central to how respect feels for you. You do not require another person to agree, but you want a real chance to explain. With peers, you tend to speak up immediately during disagreement. With your uncle, you may wait because you expect another long argument. That may be practical self-protection in that relationship rather than quietness around every older person. Your voice changes according to whether speaking seems likely to create understanding or only extend the conflict.",
+          "In groups, you often connect by doing something useful: supplying a first direction, arranging the work, or getting people started. The risk is that involvement can become direction before everyone has found a place in the plan. Your willingness to swap roles and repair after an objection shows that belonging matters alongside progress. The fuller version of your group style includes both movement and room for other people to shape what happens."
+        ],
+        "takeaway": "You can want active friendship and quiet closeness; both are real forms of belonging for you.",
+        "claim_ids": [
+          "C21",
+          "C22",
+          "C23",
+          "C24",
+          "C25",
+          "C28",
+          "C32"
+        ]
+      },
+      {
+        "id": "effort",
+        "headline": "Meaning carries the middle",
+        "paragraphs": [
+          "You get more involved when you can put something of yourself into the result. Drawing clothes, adapting a design for a friend, or trying the rest of a task after one helpful explanation all leave space for your choices. Work becomes harder to care about when it mainly involves copying, following a huge list, or receiving information without doing much with it. Enjoyment and familiarity may help too, but personal ownership seems to be an important part of the pull.",
+          "Your effort should not be described as either always persistent or never finishing. You left a comic halfway, and you also completed the jacket design. That jacket is one project, so it cannot promise the same ending every time. Still, it directly shows that you can work through repeated changes when the result matters. Collecting your brother on your assigned day is a separate kind of follow-through: less about creative excitement and more about dependable responsibility.",
+          "The middle of a task is where your energy may change. You can start fast, but once the newness fades, a weak reason may not carry you. Meaning can also slow you down in a useful way. You might answer another question before taking in every word, then spend ages refining one sleeve because that detail feels connected to the whole design. Your standards are selective: exactness rises when you can see why a detail deserves it.",
+          "You prefer the main goal and deadline over a long map of every step. That light structure gives you room to adapt and make the route yours. It can also leave small checks behind, such as checking a bag or asking what role another person wants. The useful balance for you is probably not more instructions everywhere. It is enough clarity to protect the important checks without burying the reason you wanted to begin."
+        ],
+        "takeaway": "You do finish; purpose, people, and clear responsibility help the less exciting middle matter.",
+        "claim_ids": [
+          "C03",
+          "C04",
+          "C06",
+          "C09",
+          "C10",
+          "C11"
+        ]
+      },
+      {
+        "id": "pressure",
+        "headline": "Pressure turns up your speed",
+        "paragraphs": [
+          "In ordinary difficulty, you say you can often laugh and start again. Under visible pressure, that same speed and humor can change shape. When you lost your place during a class presentation, you began talking faster and joked while feeling embarrassed. The joke moved attention away from the mistake, but it could also make your concern harder to see. That was one watched event, so private mistakes or different kinds of pressure may look different.",
+          "After a bad game, your first urge was to practise immediately. That fits the wider way you often deal with a problem by doing something. Under strain, though, action may become an attempt to fix everything at once rather than a useful first experiment. It is possible that immediate action makes the mistake feel more manageable or less exposed. You have not said that directly, so it remains one possible explanation rather than the answer to every fast response.",
+          "On that bad-game occasion, you went home, drew for a while, and found that the disappointment felt less huge the next morning. Drawing, being at home, and time were all part of that evening. You are not sure which part helped. What is clear is that the first urgent feeling did not stay at the same size. Some distance from the moment gave another view a chance to appear, even though the exact reason is unknown.",
+          "Correction can add pressure when it is public, repeated, or much longer than the useful point. One exact change is easier for you to use. This week also includes two tests, and you have noticed yourself being somewhat snappy. You were clear that this is not every week. Temporary load can turn up an existing reaction without becoming your whole personality."
+        ],
+        "takeaway": "Pressure may turn speed into rushing, while time and distance can make the problem feel less huge.",
+        "claim_ids": [
+          "C16",
+          "C17",
+          "C18",
+          "C19",
+          "C20",
+          "C31"
+        ]
+      },
+      {
+        "id": "strengths",
+        "headline": "You start, then reshape",
+        "paragraphs": [
+          "One of your strongest combinations is that you can begin without needing the first route to stay untouched. You give a waiting group something to react to, try an unfamiliar tool, or keep a changed activity moving when the gym closes. Then, if a friend offers a better idea or points out a problem, you can revise. Starting and changing course belong together for you. That is more useful than simply being the person who speaks first.",
+          "You are also good at turning a vague blockage into a focused question. With sewing and maths, you first found where you were stuck, then used one piece of help and finished the next part yourself. This lets support help without taking the work away from you. The tradeoff is that not every problem fits into one neat question. Sometimes the wider explanation may matter even when a long explanation is not your favorite format.",
+          "Your creative side joins imagination with care about real use. You do not only want to draw clothes as ideas; you picture people actually wearing them. While designing for a friend, her likely response helped you keep adjusting the result. Your brother shows this practical care in another form: you offer patience, quiet company, and reliable action. These examples suggest that care becomes especially strong for you when it can take a visible form rather than staying as a general feeling.",
+          "Each strength has a timing cost. Your first direction can arrive before other people speak. Your speed can skip a basic check. Your close attention can gather around one meaningful detail while routine parts receive less. None of that cancels the strength. It shows that your most distinctive ability is not speed by itself, but speed joined to checking, listening, and a willingness to reshape what you started."
+        ],
+        "takeaway": "Your strongest contribution joins a quick start with a real willingness to change course.",
+        "claim_ids": [
+          "C03",
+          "C07",
+          "C08",
+          "C10",
+          "C13",
+          "C14",
+          "C26",
+          "C28"
+        ]
+      },
+      {
+        "id": "thriving",
+        "headline": "Clarity without being boxed in",
+        "paragraphs": [
+          "You seem to fit situations that make the destination clear without controlling every step. Knowing the main goal and when it is due gives you something to move toward. Room to choose the route lets you experiment, make the result your own, and adjust when circumstances change. A larger or unfamiliar project may sometimes need more planning, but a huge list at the beginning can hide the point that would actually get you started.",
+          "Help works well when it is exact and leaves you with a real part to do. The same is true of feedback: one clear moment or change is easier to use than a public speech or repeated correction. In group work, another kind of clarity matters too. If your first idea is understood as a starting option rather than the final answer, you can keep your useful pace while other people still have a real chance to affect the plan.",
+          "Your social fit needs some variety. Close friends can give you energy, while a whole day of unfamiliar people can tire you. After an intense event, quiet company with your brother may suit you better than more conversation. That does not mean you always need people or always need space. It means the right amount depends on familiarity, how long the interaction lasts, and what else the day has already asked from you.",
+          "It also helps that your life has several meaningful places to stand. Basketball matters, drawing gives you something you value without an audience, friends offer shared energy, and your brother brings affection and responsibility. Drawing was present while one disappointment settled, but it is not a proven answer to every hard day. This test-heavy week may make ordinary friction sharper for a while. A setting that sees your current load and your different interests is more likely to see the whole you than one role or one difficult moment."
+        ],
+        "takeaway": "You tend to fit settings with a clear point, a flexible route, exact help, and room for different parts of life.",
+        "claim_ids": [
+          "C02",
+          "C03",
+          "C06",
+          "C14",
+          "C15",
+          "C16",
+          "C20",
+          "C21",
+          "C24",
+          "C31"
+        ]
+      }
+    ],
+    "vectors": [
+      {
+        "id": "command",
+        "interpretation": "You often choose a starting direction when peers are waiting. Clear pushback can make you pause, apologize, or change the plan, so the first move is not always the final one.",
+        "helps": "You can turn a stalled group into a task people can begin.",
+        "watch_for": "A starting idea can sound settled before others have had room to explain.",
+        "context": "This shows most with peers; you are quieter with older relatives and may not direct a group that is already moving.",
+        "claim_ids": [
+          "C25",
+          "C26",
+          "C27",
+          "C28",
+          "C32"
+        ]
+      },
+      {
+        "id": "tempo",
+        "interpretation": "You usually move quickly from an idea into speaking, choosing, or trying. Meaningful drawing can bring a much slower pace, while visible pressure may speed you up further.",
+        "helps": "A fast start creates momentum and gives you something real to learn from.",
+        "watch_for": "You may answer, interrupt, or act before the full question or basic check has landed.",
+        "context": "This is not a grade on how well you think; your pace changes with meaning, detail, and pressure.",
+        "claim_ids": [
+          "C05",
+          "C08",
+          "C09",
+          "C19"
+        ]
+      },
+      {
+        "id": "relational_awareness",
+        "interpretation": "You often respond to people through clear messages rather than guessing first. Once someone explains their view, you can adjust; before a fast group move, you may not have checked everyone's preference.",
+        "helps": "Clear messages help you notice an impact, make repairs, and fit the work better to the person.",
+        "watch_for": "You can miss an unspoken preference or worry about a reaction nobody has actually given.",
+        "context": "Care shows strongly with your brother and friends; advance checking is less steady in fast peer tasks.",
+        "claim_ids": [
+          "C13",
+          "C17",
+          "C27",
+          "C28",
+          "C30",
+          "C32"
+        ]
+      },
+      {
+        "id": "precision",
+        "interpretation": "You are selective with detail. A meaningful design can hold careful attention for a long time, while speed may lead you past a routine check or the full wording of a question.",
+        "helps": "When a detail has a clear purpose, you can focus closely and use exact feedback.",
+        "watch_for": "One meaningful detail can get a long look while a simple check or full question is missed.",
+        "context": "Your clearest fine-detail example comes from clothing design, so interest and experience may help create that slower pace.",
+        "claim_ids": [
+          "C08",
+          "C09",
+          "C14",
+          "C15"
+        ]
+      },
+      {
+        "id": "leverage",
+        "interpretation": "You like to try first, ask for one clear piece of help, then continue yourself. In groups, you can share jobs to create movement.",
+        "helps": "Focused help can unlock a snag without taking the task out of your hands.",
+        "watch_for": "Some problems need more context, and assigned roles work better when people can say what suits them.",
+        "context": "This is clearest with teachers, friends, and simple shared tasks; broader tools or longer support are still unknown.",
+        "claim_ids": [
+          "C14",
+          "C26",
+          "C27",
+          "C28"
+        ]
+      },
+      {
+        "id": "adaptability",
+        "interpretation": "You readily change route when a better idea, closed gym, or someone's objection changes the situation. You usually keep the goal while changing the method or role.",
+        "helps": "You can recover from a blocked plan without treating the first idea as something you must defend.",
+        "watch_for": "Repeated changes can stretch the middle or make the current direction harder for other people to follow.",
+        "context": "Your clearest changes involved choices that were easy to revise; major commitments may bring out a different pace.",
+        "claim_ids": [
+          "C07",
+          "C09",
+          "C28"
+        ]
+      },
+      {
+        "id": "structure",
+        "interpretation": "You prefer light structure: know the main goal and deadline, then work out the route. Long lists can push you away, though clear responsibilities can still hold.",
+        "helps": "A simple frame leaves room for initiative, personal choices, and changing the route when needed.",
+        "watch_for": "Small checks and other people's role preferences can be missed when the route stays mostly in your head.",
+        "context": "Light structure does not mean unreliability; collecting your brother on your assigned day is a clear exception.",
+        "claim_ids": [
+          "C04",
+          "C06",
+          "C10",
+          "C26"
+        ]
+      },
+      {
+        "id": "perspective",
+        "interpretation": "You have a future picture around making useful clothes, while basketball's long-term place is still open. In quick choices, wider consequences may enter your thinking just afterward.",
+        "helps": "You can take a meaningful next step without pretending that your entire future is already decided.",
+        "watch_for": "A fast choice can be followed by worry about people or later tradeoffs that have not been checked.",
+        "context": "You have a real creative direction, but little is known yet about how much long-range planning you usually want.",
+        "claim_ids": [
+          "C02",
+          "C12",
+          "C30"
+        ]
+      }
+    ],
+    "strength_visual": [
+      {
+        "strength": "Starting and changing course",
+        "helps": "You get a group moving and can use a better idea without abandoning the goal.",
+        "overuse": "You may decide or assign roles before people have shared what they know or want.",
+        "reset": "It may help to call your first idea a draft and invite one other route.",
+        "claim_ids": [
+          "C07",
+          "C26",
+          "C27",
+          "C28",
+          "C32"
+        ]
+      },
+      {
+        "strength": "Focused help, your own work",
+        "helps": "You try first, ask a clear question, and continue without handing over the whole problem.",
+        "overuse": "Looking only for one step may miss a bigger issue when the problem cannot be neatly divided.",
+        "reset": "It may help to ask whether one more piece of context would change the next step.",
+        "claim_ids": [
+          "C04",
+          "C14",
+          "C15"
+        ]
+      },
+      {
+        "strength": "Care that carries effort",
+        "helps": "Meaning, responsibility, or a real person can hold your attention through slower parts.",
+        "overuse": "Small routine checks may disappear when they feel separate from the reason you care.",
+        "reset": "It may help to link one dull step to the person or purpose it serves.",
+        "claim_ids": [
+          "C02",
+          "C09",
+          "C10",
+          "C11",
+          "C13",
+          "C24"
+        ]
+      }
+    ],
+    "pressure_visual": {
+      "trigger": "Pressure may rise for you after a watched mistake, sport disappointment, or public or repeated correction; this week's tests may add temporary strain.",
+      "interpretation": "You may read the moment as needing immediate repair, especially when a mistake feels exposed; that reason is still uncertain.",
+      "response": "You may speed up, talk louder, joke, answer back, or try to fix everything at once.",
+      "recovery": "You went home and drew after the game. It felt smaller by morning; you are not sure what helped.",
+      "claim_ids": [
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C21",
+        "C24",
+        "C31"
+      ]
+    },
+    "closing": "Keep what feels accurate, and correct anything that misses you or only fits one situation. Your side matters here; more context can change the picture without making either version a failure."
+  },
+  "counts": {
+    "portrait_words": 748,
+    "chapter_words": [
+      {
+        "id": "identity",
+        "words": 294
+      },
+      {
+        "id": "mind",
+        "words": 289
+      },
+      {
+        "id": "communication",
+        "words": 301
+      },
+      {
+        "id": "connection",
+        "words": 297
+      },
+      {
+        "id": "effort",
+        "words": 307
+      },
+      {
+        "id": "pressure",
+        "words": 291
+      },
+      {
+        "id": "strengths",
+        "words": 301
+      },
+      {
+        "id": "thriving",
+        "words": 316
+      }
+    ],
+    "total_words": 3144
+  },
+  "receipts": [
+    {
+      "stage": "evidence",
+      "request_sha256": "b6e8bb1ada5eb929644e2e910916fef4c2b5bf36c1bdf152d382d5595c9c816b",
+      "output_sha256": "ca8a194bf4c1904d795e3ca1f5cc40ac85b0112e15913f836baec77498844124",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 28105,
+        "input_tokens_details": {
+          "cache_write_tokens": 28102,
+          "cached_tokens": 0
+        },
+        "output_tokens": 9896,
+        "output_tokens_details": {
+          "reasoning_tokens": 5178
+        },
+        "total_tokens": 38001
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "domains",
+      "request_sha256": "c62d25e3883e0d5492bac62b927432a1aa184ed26a59a00345c20356e2da1acc",
+      "output_sha256": "1b55d7c95fbc294ac9bc5f4b6191673460b430b2753119f86009b584a0d6b27e",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 32187,
+        "input_tokens_details": {
+          "cache_write_tokens": 32184,
+          "cached_tokens": 0
+        },
+        "output_tokens": 15662,
+        "output_tokens_details": {
+          "reasoning_tokens": 11361
+        },
+        "total_tokens": 47849
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "synthesis",
+      "request_sha256": "09bb5cb8e8faf60f9adcfa7c665725d004a601f2efc97085f5b2141942f8d307",
+      "output_sha256": "535ce898d19b6cef42d73d3b4f5ee268e8065442c9cc22bf6a360c48cb46f79f",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 35364,
+        "input_tokens_details": {
+          "cache_write_tokens": 35361,
+          "cached_tokens": 0
+        },
+        "output_tokens": 8868,
+        "output_tokens_details": {
+          "reasoning_tokens": 5282
+        },
+        "total_tokens": 44232
+      },
+      "run": "recovery-static-v1"
+    },
+    {
+      "stage": "reading",
+      "request_sha256": "c16f270749d8e053ebd64b865f2cc5b1903b686a9babd76e9b9123828a557e23",
+      "output_sha256": "bc3955136668c1554e41ce9377f79df7a613cd0000bf39bbd495b23d3f8106ca",
+      "model": "gpt-5.6-sol",
+      "usage": {
+        "input_tokens": 14390,
+        "input_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 14387
+        },
+        "output_tokens": 16210,
+        "output_tokens_details": {
+          "reasoning_tokens": 9778
+        },
+        "total_tokens": 30600
+      },
+      "run": "editorial-static-v2-attempt-2",
+      "previous_artifact_sha256": "c68da8bcae7497c821fe3336d39f51861c8b6774cb4fcab5fbb3d36e61045c00"
+    },
+    {
+      "stage": "factual-editorial-correction",
+      "actor": "Design Spock",
+      "original_artifact_sha256": "a6816552b09382f496270a5a88070ecf6825c805eec474dee9a3324d0d123129",
+      "changes_sha256": "56eed7ab371fe9bf6df92d5c55cdd9ae273577d572dd28b53cf87e09cd450232",
+      "reason": "Bounded factual corrections after frozen blind evaluation; scores remain attached to original artifacts."
+    }
+  ],
+  "created_at": "2026-09-14T07:09:05.122Z",
+  "artifact_sha256": "de694227af2cbf7c41798aef0e725e1435bfa3f18e9b91333e2f3c52ff1fb519"
+}

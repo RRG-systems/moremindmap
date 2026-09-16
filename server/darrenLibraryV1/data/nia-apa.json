@@ -1,0 +1,1453 @@
+{
+  "version": "youth-apa-v2.0.0",
+  "synthetic": true,
+  "mm": "MM-20260913-D702ACBF",
+  "identity": {
+    "mm": "MM-20260913-D702ACBF",
+    "name": "Nia Brooks",
+    "slug": "nia",
+    "age": 15,
+    "gender": "girl",
+    "pronouns": "she/her",
+    "sport": "Basketball",
+    "synthetic": true,
+    "reading_sha256": "61a9676d2a5bd224e2e397237a3955339fc2df9c15d8c256bc7681d0cdb5d481"
+  },
+  "source_sha256": "619040012bdb1abf60fd804712a421b698bd785093c85804ddef709ae2cf3b00",
+  "bos_sha256": "61a9676d2a5bd224e2e397237a3955339fc2df9c15d8c256bc7681d0cdb5d481",
+  "confirmation": {
+    "goals": {
+      "sport": "Earn trust with the ball in a close game.",
+      "training": "Practice calmer passing decisions inside the team week.",
+      "mindset": "Make the next useful play after a mistake.",
+      "school": "Hand in maths homework on time for three weeks."
+    },
+    "priority": "Reset after a turnover, so I can choose the next pass.",
+    "assessment_date": "2026-09-14",
+    "review_date": "2026-09-21",
+    "horizon_date": "2026-11-02",
+    "confirmed": true
+  },
+  "sources": [
+    {
+      "id": "A01",
+      "text": "Basketball. I am a guard on my school junior varsity team. We are in the early part of the season. I also play outside with friends, but this is about the school team.",
+      "source": "Athlete",
+      "question": "What sport are we focusing on right now?"
+    },
+    {
+      "id": "A02",
+      "text": "I want teammates to trust me with the ball late in close games. I like making things happen. I do not know if I want basketball to be my whole future. I still want art club.",
+      "source": "Athlete",
+      "question": "What would you love to achieve in your sport, and why does it matter to you?"
+    },
+    {
+      "id": "A03",
+      "text": "I get us moving after a rebound and find people running ahead. Last game two of my passes led straight to baskets. I like seeing a play before it happens.",
+      "source": "Athlete",
+      "question": "What feels strongest about the way you are performing right now?"
+    },
+    {
+      "id": "A04",
+      "text": "I rush after I lose the ball. Last game I threw another pass before looking properly and lost it again. I want to make the next play instead of fixing the last one all at once.",
+      "source": "Athlete",
+      "question": "What part of your performance would you most like to improve?"
+    },
+    {
+      "id": "A05",
+      "text": "By November 2 I want to play the next possession properly after a mistake, and have my coach trust me in one close finish. I know I do not choose the lineup.",
+      "source": "Athlete",
+      "question": "What would make the next six to eight weeks feel successful in your sport?"
+    },
+    {
+      "id": "A06",
+      "text": "Team practice Monday, Wednesday and Friday for 90 minutes. Usually a Saturday game. Tuesday is art club. Sunday is family time. I sometimes add shooting on Wednesday after practice, but it is not required.",
+      "source": "Athlete",
+      "question": "What does a normal training week look like for you?"
+    },
+    {
+      "id": "A07",
+      "text": "I want practice to help me choose a pass when the game speeds up. I do not need a new pile of drills.",
+      "source": "Athlete",
+      "question": "What do you most want your training to help you do better?"
+    },
+    {
+      "id": "A08",
+      "text": "The small-sided game at the end of practice helps. My coach points to a late pass, I try the next play, and I can feel the difference. Last Wednesday I looked first on the next go.",
+      "source": "Athlete",
+      "question": "Which part of your training seems to be helping most?"
+    },
+    {
+      "id": "A09",
+      "text": "After a bad game I want to add shooting, even if the problem was a rushed pass. I tried twenty extra minutes twice and was late starting homework. It did not tell me whether my decisions were better.",
+      "source": "Athlete",
+      "question": "Which part feels confusing, hard to keep up with, or not useful?"
+    },
+    {
+      "id": "A10",
+      "text": "Keep the team week and art club. Use something inside practice. I do not want another session. I collect my brother after school on Thursday.",
+      "source": "Athlete",
+      "question": "What would make your training week work better for you?"
+    },
+    {
+      "id": "A11",
+      "text": "I see teammates, call for the ball and choose quickly without feeling chased. I can enjoy making a simple pass too.",
+      "source": "Athlete",
+      "question": "When you are playing with confidence, what is different about you?"
+    },
+    {
+      "id": "A12",
+      "text": "After a turnover I speed up. Sometimes I joke when I am embarrassed and it looks like I do not care. My last two mistakes together felt like that.",
+      "source": "Athlete",
+      "question": "When the pressure goes up, what usually happens for you?"
+    },
+    {
+      "id": "A13",
+      "text": "One short reminder helps more than a speech. In Wednesday practice my coach said next play, I took one breath and looked up. It helped that time; I have not tried it in a game deliberately.",
+      "source": "Athlete",
+      "question": "After a mistake or a bad performance, what helps you get back into it?"
+    },
+    {
+      "id": "A14",
+      "text": "I want to reset after a mistake without pretending it does not bother me. Brave for me is taking the next useful play, not trying a hero pass.",
+      "source": "Athlete",
+      "question": "What would you most like to handle better mentally in your sport?"
+    },
+    {
+      "id": "A15",
+      "text": "One clear thing from the coach. My mum cheering is good. If the coach and someone on the sideline are both telling me what to do, I get annoyed. Please let me explain too.",
+      "source": "Athlete",
+      "question": "What do you need from the people around you to compete at your best?"
+    },
+    {
+      "id": "A16",
+      "text": "Grade 10. Art is going well. I am keeping up in most classes. Two tests this week make the week feel squeezed.",
+      "source": "Athlete",
+      "question": "How is school going for you right now?"
+    },
+    {
+      "id": "A17",
+      "text": "I finish the design work I care about. I handed in two maths homework tasks late in the last fortnight. I can do the examples with one step of help, then lose time putting it off. I do not want to guess a grade.",
+      "source": "Athlete",
+      "question": "Which parts of school feel strongest, and which need help?"
+    },
+    {
+      "id": "A18",
+      "text": "Hand in my maths homework on time for the next three weeks. I want to ask for the step I need instead of leaving the whole thing.",
+      "source": "Athlete",
+      "question": "What would you like to achieve in school this term?"
+    },
+    {
+      "id": "A19",
+      "text": "I am curious about clothing design. I want to keep my choices open and take art seriously. I have not picked a college or job.",
+      "source": "Athlete",
+      "question": "Where would you like school to lead for you?"
+    },
+    {
+      "id": "A20",
+      "text": "Monday and Friday practice fit. Extra Wednesday shooting was where homework got pushed. I want the reset practice to stay in team time so art, collecting my brother and homework still fit.",
+      "source": "Athlete",
+      "question": "How are school and sport fitting together in your week?"
+    },
+    {
+      "id": "COACH1",
+      "text": "Nia brings energy and sees runners early. I saw two rushed passes in a row in the last game. In Wednesday small-sided practice she responded to next play and looked before passing. That is one practice example, not a match pattern yet.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH2",
+      "text": "My priority is her next decision after losing the ball. Her attacking instinct is useful; I do not want to coach that out of her. Lineup decisions will also depend on the other players and game.",
+      "source": "Coach"
+    },
+    {
+      "id": "COACH3",
+      "text": "We can use the small-sided game already in Monday and Wednesday practice. No extra session is needed. I can observe a few next possessions and give one brief private comment. We have not agreed a new plan with Nia yet.",
+      "source": "Coach"
+    },
+    {
+      "id": "CONFIRM",
+      "source": "Athlete confirmation",
+      "text": "{\"goals\":{\"sport\":\"Earn trust with the ball in a close game.\",\"training\":\"Practice calmer passing decisions inside the team week.\",\"mindset\":\"Make the next useful play after a mistake.\",\"school\":\"Hand in maths homework on time for three weeks.\"},\"priority\":\"Reset after a turnover, so I can choose the next pass.\",\"assessment_date\":\"2026-09-14\",\"review_date\":\"2026-09-21\",\"horizon_date\":\"2026-11-02\",\"confirmed\":true}"
+    }
+  ],
+  "bos_sources": [
+    {
+      "id": "BOS:portrait",
+      "headline": "Fast to begin, careful where it counts",
+      "text": "You are often the person who turns waiting into movement. In a peer group, your first idea can be out before everyone else has finished deciding whether to speak. That can be useful, and it can also feel bossy to someone whose idea has not yet had room. What matters is that you are not stuck on being in charge: when a friend explains a better route or says you interrupted, you can back up, apologize, and change course. Your speed is clearest in stalled peer groups; with older cousins or an uncle, you can become much quieter.\n\nActing is also one of the ways you think. You like enough information to begin, then you find the exact snag. With the sewing machine and the maths problem, one specific piece of help let you take the work back yourself. Large lists, copied definitions, and long videos are harder to stay with, perhaps because the useful point gets buried. This does not mean you cannot think carefully. It means you often understand more once the task is real and you can do something with the information.\n\nThat quick side has a slower partner. When a detail feels connected to your idea or to somebody you care about, you can stay with it for a long time. You kept changing parts of one jacket design for a friend, and you can spend ages on a sleeve. Your wish to make clothes people actually wear gives creativity a practical side, while drawing even if nobody sees it shows that the interest also belongs privately to you. Attention is not simply high or low for you; purpose helps decide where exactness is worth the time.\n\nThis is why the unfinished comic cannot stand for everything. You finish important things. The jacket was completed, and collecting your brother on your day is a separate, dependable responsibility. The exciting start may not always carry you through a dull middle, but personal meaning, a real person, or a clear duty can give the middle more weight. Other things, such as project length or deadlines, may matter too, so your effort is better understood as selective than unreliable.\n\nYour life does not narrow down to athlete. Basketball matters, yet you chose art club when it clashed with an extra session, and you are still deciding what basketball should mean later. The worry that followed your quick choice is important too: you wondered whether you had let the team down even though nobody had said that. Maybe responsibility to a group stays with you after a decision. It may also have been ordinary doubt in one difficult choice. Either way, uncertainty about the future is not the same as lacking commitment now.\n\nWith people, you are neither always loud nor always quiet. Close friends often leave you wanting more time, while a full day of unfamiliar people can be tiring. After an intense tournament, sitting quietly with your brother can feel more fitting than another conversation. He seems to hold several parts of your life together: affection, patience, dependable care, and a place where company does not require constant talking. You are more patient with him than with classmates, which shows that your social style changes with the relationship and the situation.\n\nBeing respected means getting to explain your side even if the other person still disagrees. You try to give that chance to your brother. There is an honest tension here: when your own idea comes fast, classmates may not receive that same room until they object. That does not cancel the value. It shows where your speed and fairness can pull against each other. The same need for clarity appears in feedback. One exact change is useful, while a long public speech or repeated correction can make you want to answer back.\n\nUnder pressure, your normal speed can turn up. During one watched presentation mistake, you talked faster and joked because you felt embarrassed and wanted attention off the mistake; someone could mistake that joke for not caring. After a bad game, your first urge was to practise immediately. You went home and drew; the game felt smaller by morning, though you are not sure what helped. This week, two tests are also part of why you may be snappier, not a definition of you. Taken together, your fast side gets life moving, while your slower side protects care, craft, and responsibility. You are most fully yourself when neither side has to erase the other.",
+      "takeaway": "Full accepted personality portrait",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C05",
+        "C08",
+        "C10",
+        "C12",
+        "C14",
+        "C16",
+        "C17",
+        "C19",
+        "C20",
+        "C21",
+        "C23",
+        "C24",
+        "C28",
+        "C31",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:identity",
+      "headline": "More than one important role",
+      "text": "You are building a life with more than one center. Basketball matters, but so do making clothes, being a friend, and showing up for your little brother. Drawing has a special place because it is both private and useful: you would do it without an audience, yet you also imagine clothes that real people would choose to wear. That suggests you care about having your own idea and giving it a life beyond the page.\n\nYour brother is not just someone you name as important. He appears in the way you settle after intense days, the patience you try to offer when he is upset, and the regular job of collecting him on your day. That makes care concrete for you. It is affection, but it is also quiet company and doing what you said you would do.\n\nAnother part of you is the value you place on having a voice. Respect means being allowed to explain, even when agreement never comes. You try to give that room to your brother. In fast peer groups, though, your plan can arrive before classmates get the same chance. That does not cancel the value. It shows where your speed and fairness can pull against each other, and why listening before a decision is different from repairing afterward.\n\nChoosing art club over one extra basketball session did not settle which matters more forever. It did show that athlete is not the only role allowed to guide your choices. You can care deeply about basketball now without already knowing its long-term place. Your clothing ideas can be serious without having to become a finished life plan at fifteen. What feels most like you may keep being the mix of chosen interests, relationships, and responsibilities rather than one label.",
+      "takeaway": "You are a maker, sibling, friend, and athlete; none of those roles gets to erase the others.",
+      "claim_ids": [
+        "C01",
+        "C02",
+        "C10",
+        "C12",
+        "C23",
+        "C24",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:mind",
+      "headline": "You learn by getting into it",
+      "text": "You often understand a task by entering it rather than standing outside it for a long time. You try the sewing machine, attempt the maths problem, or put forward a starting idea. Once something goes wrong, the question becomes clearer. Then you can ask for the exact missing step and continue. This is not about refusing help; it is about wanting help that returns the work to your hands instead of replacing your part in it.\n\nInformation seems easier to use when it is short, specific, and connected to what is happening now. Copying definitions, facing a huge list, or watching a long explanation can make the useful point harder to find. The amount and presentation may matter as much as the subject itself. A coach pointing to the exact moment of a late pass worked because you could connect the message to a real decision, not because you need every task made easy.\n\nYour choices can happen quickly too. You chose art club fast, then worried that the team might feel let down, although nobody had said that. In that one decision, the wider social question became louder after the choice. That may happen at other times, or it may have been normal doubt around a difficult clash. How you decide when the choice is major and hard to undo is still open.\n\nSpeed does not make you closed-minded. A friend's better project idea, a closed gym, or a problem with a first attempt can all lead you to change route. You seem comfortable treating a first move as something that can teach you, not something you must defend forever. Most examples so far were easy to revise, so bigger commitments may bring out a more deliberate side.",
+      "takeaway": "Your thinking often opens up once you can try, find the snag, and use one clear piece of information.",
+      "claim_ids": [
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C14",
+        "C15",
+        "C30"
+      ]
+    },
+    {
+      "id": "BOS:communication",
+      "headline": "Direct works best with room",
+      "text": "With peers, your message often begins with the actual idea or disagreement. You do not need a long introduction before saying what you think. That directness can clear away confusion and get a task moving. It can also make a possible starting point sound like a finished decision. You know people sometimes read you as bossy, and you honestly admit that sometimes you are being bossy. At other times, you are trying to end the waiting rather than control everyone.\n\nYour listening side is easiest to see when another person gives you a clear signal. When your friend said she had a different science-project idea, you backed up and liked her route after hearing it. When she named the interruption, you apologized and let her finish. That is real flexibility. The next step for your communication is not becoming less direct; it is making room for useful information before the objection has to become sharp.\n\nYou use feedback best when it names the exact part and moment to change. A long speech in front of everyone, or correction piled on top of correction, can make you want to defend yourself before the useful point has landed. That does not mean correction itself is the problem. The difference between a precise comment that helped and public or repeated messages that drained you shows how much delivery affects what you can take in.\n\nWhen embarrassment rises, your outside message may also hide part of the inside one. Talking louder or joking can look as if the mistake does not matter, even when you care and want attention moved away from it. This came from one watched presentation, so it need not describe every joke. Your quietness with older relatives also shows that fast, outspoken communication is not how you speak in every relationship.",
+      "takeaway": "Your point lands better when directness includes a real pause for the other person's side.",
+      "claim_ids": [
+        "C15",
+        "C16",
+        "C17",
+        "C18",
+        "C25",
+        "C27",
+        "C28",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:connection",
+      "headline": "Close can be lively or quiet",
+      "text": "You often want more time with close friends, so being social is not simply something that drains you. What seems tiring is a whole day of unfamiliar contact, especially when there may be little quiet space. After a tournament, you can prefer sitting beside your brother and watching something without much conversation. For you, connection can mean shared energy or calm company; closeness does not always need talking.\n\nYour brother appears to be a steady point across several parts of life. You care about him, collect him when it is your responsibility, try to hear him when he is upset, and turn toward his company after some intense days. You also say you are more patient with him than with classmates. That exception matters: your patience and warmth are affected by trust, responsibility, and the particular relationship, not switched on at the same level everywhere.\n\nBeing heard is central to how respect feels for you. You do not require another person to agree, but you want a real chance to explain. With peers, you tend to speak up immediately during disagreement. With your uncle, you may wait because you expect another long argument. That may be practical self-protection in that relationship rather than quietness around every older person. Your voice changes according to whether speaking seems likely to create understanding or only extend the conflict.\n\nIn groups, you often connect by doing something useful: supplying a first direction, arranging the work, or getting people started. The risk is that involvement can become direction before everyone has found a place in the plan. Your willingness to swap roles and repair after an objection shows that belonging matters alongside progress. The fuller version of your group style includes both movement and room for other people to shape what happens.",
+      "takeaway": "You can want active friendship and quiet closeness; both are real forms of belonging for you.",
+      "claim_ids": [
+        "C21",
+        "C22",
+        "C23",
+        "C24",
+        "C25",
+        "C28",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:effort",
+      "headline": "Meaning carries the middle",
+      "text": "You get more involved when you can put something of yourself into the result. Drawing clothes, adapting a design for a friend, or trying the rest of a task after one helpful explanation all leave space for your choices. Work becomes harder to care about when it mainly involves copying, following a huge list, or receiving information without doing much with it. Enjoyment and familiarity may help too, but personal ownership seems to be an important part of the pull.\n\nYour effort should not be described as either always persistent or never finishing. You left a comic halfway, and you also completed the jacket design. That jacket is one project, so it cannot promise the same ending every time. Still, it directly shows that you can work through repeated changes when the result matters. Collecting your brother on your assigned day is a separate kind of follow-through: less about creative excitement and more about dependable responsibility.\n\nThe middle of a task is where your energy may change. You can start fast, but once the newness fades, a weak reason may not carry you. Meaning can also slow you down in a useful way. You might answer another question before taking in every word, then spend ages refining one sleeve because that detail feels connected to the whole design. Your standards are selective: exactness rises when you can see why a detail deserves it.\n\nYou prefer the main goal and deadline over a long map of every step. That light structure gives you room to adapt and make the route yours. It can also leave small checks behind, such as checking a bag or asking what role another person wants. The useful balance for you is probably not more instructions everywhere. It is enough clarity to protect the important checks without burying the reason you wanted to begin.",
+      "takeaway": "You do finish; purpose, people, and clear responsibility help the less exciting middle matter.",
+      "claim_ids": [
+        "C03",
+        "C04",
+        "C06",
+        "C09",
+        "C10",
+        "C11"
+      ]
+    },
+    {
+      "id": "BOS:pressure",
+      "headline": "Pressure turns up your speed",
+      "text": "In ordinary difficulty, you say you can often laugh and start again. Under visible pressure, that same speed and humor can change shape. When you lost your place during a class presentation, you began talking faster and joked while feeling embarrassed. The joke moved attention away from the mistake, but it could also make your concern harder to see. That was one watched event, so private mistakes or different kinds of pressure may look different.\n\nAfter a bad game, your first urge was to practise immediately. That fits the wider way you often deal with a problem by doing something. Under strain, though, action may become an attempt to fix everything at once rather than a useful first experiment. It is possible that immediate action makes the mistake feel more manageable or less exposed. You have not said that directly, so it remains one possible explanation rather than the answer to every fast response.\n\nOn that bad-game occasion, you went home, drew for a while, and found that the disappointment felt less huge the next morning. Drawing, being at home, and time were all part of that evening. You are not sure which part helped. What is clear is that the first urgent feeling did not stay at the same size. Some distance from the moment gave another view a chance to appear, even though the exact reason is unknown.\n\nCorrection can add pressure when it is public, repeated, or much longer than the useful point. One exact change is easier for you to use. This week also includes two tests, and you have noticed yourself being somewhat snappy. You were clear that this is not every week. Temporary load can turn up an existing reaction without becoming your whole personality.",
+      "takeaway": "Pressure may turn speed into rushing, while time and distance can make the problem feel less huge.",
+      "claim_ids": [
+        "C16",
+        "C17",
+        "C18",
+        "C19",
+        "C20",
+        "C31"
+      ]
+    },
+    {
+      "id": "BOS:strengths",
+      "headline": "You start, then reshape",
+      "text": "One of your strongest combinations is that you can begin without needing the first route to stay untouched. You give a waiting group something to react to, try an unfamiliar tool, or keep a changed activity moving when the gym closes. Then, if a friend offers a better idea or points out a problem, you can revise. Starting and changing course belong together for you. That is more useful than simply being the person who speaks first.\n\nYou are also good at turning a vague blockage into a focused question. With sewing and maths, you first found where you were stuck, then used one piece of help and finished the next part yourself. This lets support help without taking the work away from you. The tradeoff is that not every problem fits into one neat question. Sometimes the wider explanation may matter even when a long explanation is not your favorite format.\n\nYour creative side joins imagination with care about real use. You do not only want to draw clothes as ideas; you picture people actually wearing them. While designing for a friend, her likely response helped you keep adjusting the result. Your brother shows this practical care in another form: you offer patience, quiet company, and reliable action. These examples suggest that care becomes especially strong for you when it can take a visible form rather than staying as a general feeling.\n\nEach strength has a timing cost. Your first direction can arrive before other people speak. Your speed can skip a basic check. Your close attention can gather around one meaningful detail while routine parts receive less. None of that cancels the strength. It shows that your most distinctive ability is not speed by itself, but speed joined to checking, listening, and a willingness to reshape what you started.",
+      "takeaway": "Your strongest contribution joins a quick start with a real willingness to change course.",
+      "claim_ids": [
+        "C03",
+        "C07",
+        "C08",
+        "C10",
+        "C13",
+        "C14",
+        "C26",
+        "C28"
+      ]
+    },
+    {
+      "id": "BOS:thriving",
+      "headline": "Clarity without being boxed in",
+      "text": "You seem to fit situations that make the destination clear without controlling every step. Knowing the main goal and when it is due gives you something to move toward. Room to choose the route lets you experiment, make the result your own, and adjust when circumstances change. A larger or unfamiliar project may sometimes need more planning, but a huge list at the beginning can hide the point that would actually get you started.\n\nHelp works well when it is exact and leaves you with a real part to do. The same is true of feedback: one clear moment or change is easier to use than a public speech or repeated correction. In group work, another kind of clarity matters too. If your first idea is understood as a starting option rather than the final answer, you can keep your useful pace while other people still have a real chance to affect the plan.\n\nYour social fit needs some variety. Close friends can give you energy, while a whole day of unfamiliar people can tire you. After an intense event, quiet company with your brother may suit you better than more conversation. That does not mean you always need people or always need space. It means the right amount depends on familiarity, how long the interaction lasts, and what else the day has already asked from you.\n\nIt also helps that your life has several meaningful places to stand. Basketball matters, drawing gives you something you value without an audience, friends offer shared energy, and your brother brings affection and responsibility. Drawing was present while one disappointment settled, but it is not a proven answer to every hard day. This test-heavy week may make ordinary friction sharper for a while. A setting that sees your current load and your different interests is more likely to see the whole you than one role or one difficult moment.",
+      "takeaway": "You tend to fit settings with a clear point, a flexible route, exact help, and room for different parts of life.",
+      "claim_ids": [
+        "C02",
+        "C03",
+        "C06",
+        "C14",
+        "C15",
+        "C16",
+        "C20",
+        "C21",
+        "C24",
+        "C31"
+      ]
+    },
+    {
+      "id": "BOS:command",
+      "headline": "Your command pattern",
+      "text": "You often choose a starting direction when peers are waiting. Clear pushback can make you pause, apologize, or change the plan, so the first move is not always the final one. You can turn a stalled group into a task people can begin. A starting idea can sound settled before others have had room to explain. This shows most with peers; you are quieter with older relatives and may not direct a group that is already moving.",
+      "takeaway": "You often choose a starting direction when peers are waiting. Clear pushback can make you pause, apologize, or change the plan, so the first move is not always the final one.",
+      "claim_ids": [
+        "C25",
+        "C26",
+        "C27",
+        "C28",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:tempo",
+      "headline": "Your tempo pattern",
+      "text": "You usually move quickly from an idea into speaking, choosing, or trying. Meaningful drawing can bring a much slower pace, while visible pressure may speed you up further. A fast start creates momentum and gives you something real to learn from. You may answer, interrupt, or act before the full question or basic check has landed. This is not a grade on how well you think; your pace changes with meaning, detail, and pressure.",
+      "takeaway": "You usually move quickly from an idea into speaking, choosing, or trying. Meaningful drawing can bring a much slower pace, while visible pressure may speed you up further.",
+      "claim_ids": [
+        "C05",
+        "C08",
+        "C09",
+        "C19"
+      ]
+    },
+    {
+      "id": "BOS:relational_awareness",
+      "headline": "Your relational awareness pattern",
+      "text": "You often respond to people through clear messages rather than guessing first. Once someone explains their view, you can adjust; before a fast group move, you may not have checked everyone's preference. Clear messages help you notice an impact, make repairs, and fit the work better to the person. You can miss an unspoken preference or worry about a reaction nobody has actually given. Care shows strongly with your brother and friends; advance checking is less steady in fast peer tasks.",
+      "takeaway": "You often respond to people through clear messages rather than guessing first. Once someone explains their view, you can adjust; before a fast group move, you may not have checked everyone's preference.",
+      "claim_ids": [
+        "C13",
+        "C17",
+        "C27",
+        "C28",
+        "C30",
+        "C32"
+      ]
+    },
+    {
+      "id": "BOS:precision",
+      "headline": "Your precision pattern",
+      "text": "You are selective with detail. A meaningful design can hold careful attention for a long time, while speed may lead you past a routine check or the full wording of a question. When a detail has a clear purpose, you can focus closely and use exact feedback. One meaningful detail can get a long look while a simple check or full question is missed. Your clearest fine-detail example comes from clothing design, so interest and experience may help create that slower pace.",
+      "takeaway": "You are selective with detail. A meaningful design can hold careful attention for a long time, while speed may lead you past a routine check or the full wording of a question.",
+      "claim_ids": [
+        "C08",
+        "C09",
+        "C14",
+        "C15"
+      ]
+    },
+    {
+      "id": "BOS:leverage",
+      "headline": "Your leverage pattern",
+      "text": "You like to try first, ask for one clear piece of help, then continue yourself. In groups, you can share jobs to create movement. Focused help can unlock a snag without taking the task out of your hands. Some problems need more context, and assigned roles work better when people can say what suits them. This is clearest with teachers, friends, and simple shared tasks; broader tools or longer support are still unknown.",
+      "takeaway": "You like to try first, ask for one clear piece of help, then continue yourself. In groups, you can share jobs to create movement.",
+      "claim_ids": [
+        "C14",
+        "C26",
+        "C27",
+        "C28"
+      ]
+    },
+    {
+      "id": "BOS:adaptability",
+      "headline": "Your adaptability pattern",
+      "text": "You readily change route when a better idea, closed gym, or someone's objection changes the situation. You usually keep the goal while changing the method or role. You can recover from a blocked plan without treating the first idea as something you must defend. Repeated changes can stretch the middle or make the current direction harder for other people to follow. Your clearest changes involved choices that were easy to revise; major commitments may bring out a different pace.",
+      "takeaway": "You readily change route when a better idea, closed gym, or someone's objection changes the situation. You usually keep the goal while changing the method or role.",
+      "claim_ids": [
+        "C07",
+        "C09",
+        "C28"
+      ]
+    },
+    {
+      "id": "BOS:structure",
+      "headline": "Your structure pattern",
+      "text": "You prefer light structure: know the main goal and deadline, then work out the route. Long lists can push you away, though clear responsibilities can still hold. A simple frame leaves room for initiative, personal choices, and changing the route when needed. Small checks and other people's role preferences can be missed when the route stays mostly in your head. Light structure does not mean unreliability; collecting your brother on your assigned day is a clear exception.",
+      "takeaway": "You prefer light structure: know the main goal and deadline, then work out the route. Long lists can push you away, though clear responsibilities can still hold.",
+      "claim_ids": [
+        "C04",
+        "C06",
+        "C10",
+        "C26"
+      ]
+    },
+    {
+      "id": "BOS:perspective",
+      "headline": "Your perspective pattern",
+      "text": "You have a future picture around making useful clothes, while basketball's long-term place is still open. In quick choices, wider consequences may enter your thinking just afterward. You can take a meaningful next step without pretending that your entire future is already decided. A fast choice can be followed by worry about people or later tradeoffs that have not been checked. You have a real creative direction, but little is known yet about how much long-range planning you usually want.",
+      "takeaway": "You have a future picture around making useful clothes, while basketball's long-term place is still open. In quick choices, wider consequences may enter your thinking just afterward.",
+      "claim_ids": [
+        "C02",
+        "C12",
+        "C30"
+      ]
+    }
+  ],
+  "existing_plan": null,
+  "report": {
+    "headline": "See the next play. Leave the last mistake.",
+    "opening": "Your quick reads create chances for teammates. After a mistake, the challenge is looking before the next pass instead of rushing to make up for it.",
+    "domains": [
+      {
+        "id": "sport",
+        "goal": "Earn trust with the ball in a close game.",
+        "strength": "You see runners early, start transition after rebounds and create scoring chances for teammates.",
+        "gap": "After a turnover, you can rush the next pass before looking properly, turning one mistake into another.",
+        "help": "You could ask for one next-play reminder and a brief private comment during a small-sided practice game.",
+        "bos_connection": "Your quick-start strength helps you turn rebounds into early chances, and your willingness to change course means one turnover does not have to decide the next possession. The tradeoff is that pressure can turn speed into passing before looking, so a short look before acting protects rather than removes your attacking instinct.",
+        "detail": "Your goal is not simply fewer turnovers; it is being someone teammates and your coach can rely on when the game is tight. The evidence already shows why that is realistic to work toward: you see runners, move the team after rebounds and made two passes that led directly to baskets. The important gap is narrower. After a turnover, you sometimes speed into another pass before looking, as happened last game. Your coach sees the same contrast and wants to protect your attacking instinct, not remove it. Trust and lineup time are not yours alone to decide, so the most honest evidence will be the quality of your next possessions; a close-finish opportunity may or may not appear by 2026-11-02.",
+        "unknowns": [
+          "How often does a rushed second decision happen across several games, rather than in the last game alone?",
+          "What specific next-possession signs does your coach use when deciding whether to trust a guard in a close finish?",
+          "Will there be a suitable close-game opportunity before 2026-11-02?"
+        ],
+        "refs": [
+          "A01",
+          "A02",
+          "A03",
+          "A04",
+          "A05",
+          "COACH1",
+          "COACH2",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:strengths",
+          "BOS:pressure",
+          "BOS:mind"
+        ]
+      },
+      {
+        "id": "training",
+        "goal": "Practice calmer passing decisions inside the team week.",
+        "strength": "The small-sided game already gives you an immediate chance to use feedback and try the next decision differently.",
+        "gap": "Extra shooting after a poor game has taken homework time without showing whether your passing decisions improved.",
+        "help": "You could ask your coach whether one short cue and brief private feedback can be tested inside the small-sided game already in practice.",
+        "bos_connection": "You usually use information best when it is brief, specific and attached to a real attempt. That matches the small-sided game: one late-pass comment can lead straight into another go. You also protect several important roles, so fitting the test inside team practice respects how basketball, art, school and family share your week.",
+        "detail": "Your regular week already contains three team practices, usually a Saturday game, art club, collecting your brother and family time. You have been clear that you do not want another session or a new pile of drills. That is not avoiding work; it is choosing training that answers the actual question. Small-sided play is relevant because it places passing decisions inside a live situation, and Wednesday gave one encouraging example when you looked first on the next go. Your coach says the existing Monday and Wednesday game could be used without adding a session and could include one brief private comment. That is available support, not an agreed plan. The next step would need your agreement as well as the coach's basketball judgment.",
+        "unknowns": [
+          "Whether the same small-sided game will run in both relevant practices this week.",
+          "Which observation would be most useful to both you and your coach without overloading the moment.",
+          "Whether calmer practice decisions will transfer to a match."
+        ],
+        "refs": [
+          "A06",
+          "A07",
+          "A08",
+          "A09",
+          "A10",
+          "A20",
+          "COACH1",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:identity",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "id": "mindset",
+        "goal": "Make the next useful play after a mistake.",
+        "strength": "When confident, you see teammates, call for the ball and can value a simple pass as well as an attacking one.",
+        "gap": "Embarrassment after a turnover can speed you up, and joking may hide how much the mistake matters to you.",
+        "help": "A short reminder followed by your one-breath, look-up reset may create enough room to choose the next useful play.",
+        "bos_connection": "Visible pressure can turn up your normal speed and humor, but that is not your only response: you can also accept a clear cue, restart and change course. Because long or repeated correction can crowd the useful point, one precise reminder may give your courage and decision-making more room than a speech would.",
+        "detail": "Your version of brave is specific: take the next useful play instead of trying a hero pass or pretending the turnover did not bother you. That is a clear Warrior Mindset target because it combines courage, focus and reset rather than demanding that you feel nothing. In Wednesday practice, the coach said next play, you took one breath and looked up. It helped once, which makes it worth examining but not proven. You have not deliberately used it in a game. Your joking after mistakes may sometimes be an embarrassment response, although the evidence does not show that every joke means this. The useful question is whether a brief reset keeps your vision available when the mistake is public and the game is still moving.",
+        "unknowns": [
+          "Can you start the reset yourself in a game, or did Wednesday depend on hearing the coach's cue?",
+          "Does a private mistake speed you up in the same way as a mistake everyone sees?",
+          "Will one breath feel usable at match speed without making you hesitate too long?"
+        ],
+        "refs": [
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A15",
+          "COACH1",
+          "COACH2",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:communication",
+          "BOS:portrait"
+        ]
+      },
+      {
+        "id": "school",
+        "goal": "Hand in maths homework on time for three weeks.",
+        "strength": "You are keeping up in most classes, art is going well and one exact maths explanation can help you continue independently.",
+        "gap": "When one maths step blocks you, you can put off the whole task, and two recent homework tasks were late.",
+        "help": "A possibility is to circle the exact stuck step and ask your maths teacher one focused question before leaving the task.",
+        "bos_connection": "You often learn by trying, finding the exact snag and using one clear piece of help before taking the work back yourself. That fits the maths evidence better than a large study plan. Purpose and responsibility also support your follow-through, so linking the question to an actual submission deadline may help carry the less interesting middle.",
+        "detail": "School has a genuine goal here, not merely a job of staying out of basketball's way. You want three weeks of on-time maths homework because leaving one uncertain step has been delaying the whole task. You can do the examples after a small amount of help, which suggests the first useful question is often narrower than the entire assignment. At the same time, one-step help may not be enough if there is a broader understanding gap; your teacher would need to judge that. This week also contains two tests, and extra Wednesday shooting has previously pushed homework later. Protecting homework time supports your wish to take art seriously and keep future choices open without inventing a grade or requiring you to settle a career now.",
+        "unknowns": [
+          "The actual maths homework due dates during the three-week goal window.",
+          "When and through which approved school route your maths teacher is available for a short question.",
+          "Whether the delay comes mainly from the first stuck step or also from other demands during this test-heavy week."
+        ],
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A19",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:identity"
+        ]
+      }
+    ],
+    "connection": "Your sport, training and mindset goals meet in the possession after a turnover: you already see runners early, but embarrassment can speed up the next pass. The small-sided game gives you a real place to practise a short reset without adding work. That matters because extra Wednesday shooting has pushed maths later, while art club, collecting your brother and family time are chosen parts of your life, not distractions. A clear target, one clear reminder and room to act fit how you often learn, but you still need to notice what helps in each area.",
+    "main_obstacle": "After a turnover, you sometimes try to make up for it too quickly and pass before looking. That seems to be the main obstacle to the next play you want.",
+    "what_we_dont_know": [
+      "Can you deliberately use the one-breath, look-up reset during a game, or did Wednesday depend on the coach supplying the cue?",
+      "How your coach defines close-game trust beyond the quality of one next possession.",
+      "Whether a close finish that gives you a fair opportunity will occur before 2026-11-02.",
+      "Which maths deadlines fall before the review and how quickly qualified school help is available.",
+      "How often extra training urges appear after disappointment when school load is lighter."
+    ],
+    "coach_view": {
+      "status": "aligned_observations",
+      "summary": "Your coach independently identifies the same priority: your next decision after losing the ball. The coach also sees your early vision and attacking instinct as strengths worth protecting, and confirms that the Wednesday response was only one practice example. The observations are aligned, but no new cue, feedback routine or practice plan has been agreed with you yet.",
+      "refs": [
+        "A03",
+        "A04",
+        "A13",
+        "COACH1",
+        "COACH2",
+        "COACH3"
+      ]
+    },
+    "futures": [
+      {
+        "role": "current_course",
+        "headline": "Your vision stays useful, but resets remain uneven",
+        "what": "By 2026-11-02, you keep creating early passing chances, while some turnovers are still followed by a rushed next decision. Basketball, art, family responsibilities and school remain in the same basic balance.",
+        "conditions": "This is the path if no deliberate reset is used consistently and the current mix of normal team practice, occasional extra shooting and informal feedback continues.",
+        "first_sign": "The next practices or games show the familiar mix: early vision in some possessions and an immediate rushed pass to make up for the mistake after some turnovers.",
+        "details": "The present pattern is that a mistake raises embarrassment, your pace increases, and the next pass can become an attempt to erase the previous one. Your early vision and attacking instinct still create value, so this path is uneven rather than a decline. When extra shooting follows a bad game, it can take homework time without answering the passing question. We do not know how often any part of this pattern occurs across matches.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A03",
+          "A04",
+          "A06",
+          "A09",
+          "A12",
+          "A20",
+          "COACH1",
+          "COACH2"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:identity",
+          "BOS:strengths"
+        ]
+      },
+      {
+        "role": "emerging_future",
+        "headline": "The breath and look start helping in practice",
+        "what": "By 2026-11-02, the breath-and-look response begins appearing deliberately in small-sided practice after turnovers, giving you several real examples of calmer next decisions without adding training time.",
+        "conditions": "This path requires you to try the reset intentionally inside normal practice and enough turnover situations to reveal whether it remains usable when play speeds up.",
+        "first_sign": "After a practice turnover, the next possession includes a look up and a useful choice rather than an immediate rushed pass to make up for the mistake.",
+        "details": "This branch has already begun in one Wednesday practice: the coach said next play, you took a breath, looked up and used the next go differently. Repeating that inside small-sided play could connect mindset to a real passing choice while leaving the rest of the week intact. The uncertainty is transfer: one practice response does not show that you can summon it deliberately in a close game.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A08",
+          "A10",
+          "A13",
+          "A20",
+          "COACH1",
+          "COACH3"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:thriving",
+          "BOS:adaptability"
+        ]
+      },
+      {
+        "role": "better_future",
+        "headline": "Maths gets unstuck, with basketball still inside team time",
+        "what": "Through November 2, school gets its own attention: you ask about the exact maths step that stopped you, continue the work, and aim for your three weeks of on-time homework. Basketball stays in team time, leaving room for art and family.",
+        "conditions": "This path needs useful maths help when you are stuck, enough time before the real due dates, and optional shooting staying out of homework time. We still need to know when help is available.",
+        "first_sign": "After getting help with one stuck step, you continue the assignment and hand it in by its actual due date.",
+        "details": "This path improves school directly; it does not depend on first becoming a calmer basketball player. You already say that one step of help can let you continue. That fits your preference for useful, specific feedback followed by your own attempt. Protecting homework time addresses a different part of the problem: extra Wednesday shooting pushed it later. We do not yet know the due dates, available help or whether some topics need more explanation. On-time work would be the evidence; asking alone would not be.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A09",
+          "A16",
+          "A17",
+          "A18",
+          "A19",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:identity"
+        ]
+      },
+      {
+        "role": "bold_future",
+        "headline": "You make useful game decisions when the pressure matters",
+        "what": "By November 2, you handle the next possession properly after a mistake while keeping maths, art and family commitments intact. You hope that leads to a close-finish opportunity, if the game and your coach’s selection allow it.",
+        "conditions": "A close-finish chance needs an actual close game and your coach’s lineup decision. Useful decisions may give the coach more to judge, but their trust criteria are unknown. Your school, art and family commitments must still fit.",
+        "first_sign": "After a game turnover, you make a useful next decision and remain ready for the next responsibility instead of trying to win trust back immediately.",
+        "details": "This path joins all four areas without making basketball erase the others. Repeated calmer decisions in team practice may give the coach stronger evidence, while on-time maths and the existing weekly boundaries keep the effort sustainable. A close finish must actually occur, and the coach controls who plays based on the game and other players. The useful question is whether your next possession stays clear when the chance is real.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A02",
+          "A05",
+          "A10",
+          "A14",
+          "A18",
+          "A20",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:identity",
+          "BOS:strengths",
+          "BOS:thriving"
+        ]
+      },
+      {
+        "role": "downside_future",
+        "headline": "Extra shooting takes homework time without fixing the passing problem",
+        "what": "By 2026-11-02, the urge to fix poor games with extra shooting could keep using homework time while leaving the passing reset untested. Your normal strengths remain, but the added effort answers the wrong question.",
+        "conditions": "This risk grows only if disappointment repeatedly triggers optional extra work, especially on Wednesday, without checking whether that work targets the rushed next decision.",
+        "first_sign": "Extra shooting returns after a passing mistake, and maths starts later without any clearer evidence about the next passing choice.",
+        "details": "This risk is supported by two past attempts, not a prediction that it will continue. The urge to act after disappointment can send effort toward shooting even when the mistake was a rushed pass. That crowds the maths goal and produces little information about the reset. The preventable part is the mismatch: if extra work begins again, ask whether it tests the next decision or only quiets the urge to repair.",
+        "sufficient_evidence": true,
+        "refs": [
+          "A04",
+          "A09",
+          "A10",
+          "A17",
+          "A20"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:effort",
+          "BOS:identity"
+        ]
+      }
+    ],
+    "candidates": [
+      {
+        "candidate_id": "M1",
+        "domain": "coordination",
+        "action": "Ask your coach to try a next-play reset in practice.",
+        "why": "This addresses the exact moment you and your coach both named without adding a session. The cue already helped once, and the coach has said the existing game can be used, but no arrangement exists yet. Asking first protects your voice, lets the coach set basketball details, and makes consent visible.",
+        "when": "Before Wednesday practice, ask: “Can I try next play after a turnover, get one brief private comment, and check it with you before Monday’s practice?” No extra session.",
+        "who": "If your coach agrees, you take one breath, look up, then choose the next useful pass. Your coach observes the next possession and keeps feedback brief and private.",
+        "action_signal": "After practice, jot one short line: agreed or pending; reset tried or no turnover; next pass useful or rushed. Add whether the reminder helped you.",
+        "progress_signal": "Your coach describes one next possession: did you look and choose a useful pass, or rush to make up for the mistake? You say whether the reminder helped you settle.",
+        "review": "On September 21 before practice, start the brief check if your coach agreed; otherwise review your own note and ask when they can comment. No suitable turnover means untested. Continue, adjust or stop; keep maths and recovery time.",
+        "stop_or_change": "Change or stop if the coach declines, the small-sided game is unavailable, the cue becomes distracting or public, or the arrangement adds time that crowds school or recovery.",
+        "bos_fit": "You prefer one exact point, private delivery and room to explain, and you often learn once the task is live. A short request before practice fits those patterns and your willingness to revise a first route. That fit is not certainty: basketball authority stays with the coach, and you may decide a shared cue feels less useful than the one practice example suggested.",
+        "refs": [
+          "A08",
+          "A10",
+          "A13",
+          "A15",
+          "A20",
+          "COACH1",
+          "COACH2",
+          "COACH3",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:communication",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "The first action is your request, not an arrangement made for you; you have asked to explain your side and no plan has yet been agreed.",
+            "refs": [
+              "A15",
+              "COACH3",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "The request concerns the small-sided game already available in Monday and Wednesday team practice and adds no separate session.",
+            "refs": [
+              "A06",
+              "A10",
+              "A20",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "Your coach would choose what basketball decision to observe and how to comment; the candidate does not prescribe passing technique.",
+            "refs": [
+              "COACH1",
+              "COACH2",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The proposed test stays inside team time, matching your request to preserve art, brother collection, homework and family time.",
+            "refs": [
+              "A06",
+              "A10",
+              "A17",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The request has one cue, one existing practice setting and one brief private feedback boundary, matching the support format you said helps.",
+            "refs": [
+              "A13",
+              "A15",
+              "COACH3"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "DIRECT",
+          "causal_reach": "SYSTEMIC",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "DIRECT",
+          "dependency_burden": "MODERATE"
+        }
+      },
+      {
+        "candidate_id": "M2",
+        "domain": "mindset",
+        "action": "During Monday and Wednesday team practice, after a turnover, use one breath and look up before choosing your next play.",
+        "why": "This tests the same reset that helped once while leaving the pass itself to your reading and coaching. It gives your speed a small checkpoint inside live practice. Because it happens only after a turnover in the regular session, it can reveal whether the idea is usable without changing the team week or claiming game transfer.",
+        "when": "Use it only after turnovers in the remaining Monday or Wednesday practices before September 21. Do not add repetitions.",
+        "who": "You own the reset; your coach retains authority over basketball technique and may give normal practice feedback, but this does not assume new monitoring.",
+        "action_signal": "After a turnover, you can identify whether you deliberately took the breath and looked up before making the next choice.",
+        "progress_signal": "The next possession begins to show available teammates, a calmer choice and willingness to make the useful simple play rather than force immediate repair.",
+        "review": "2026-09-21: continue if the reset feels usable and supports the next decision; change the wording or timing if awkward; stop if it disrupts play.",
+        "stop_or_change": "Change or stop if the breath creates hesitation, feels uncomfortable, conflicts with coach guidance, or there are no suitable turnover situations to test it honestly.",
+        "bos_fit": "Your normal strength is quick action plus updating; the breath-and-look reset adds a check without asking you to become passive. It also matches your preference for light structure and ownership. The uncertainty is visible pressure: the reset has worked once in practice, and nobody yet knows whether deliberate use will feel natural at match speed.",
+        "refs": [
+          "A08",
+          "A11",
+          "A12",
+          "A13",
+          "A14",
+          "A20",
+          "COACH1",
+          "COACH2"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:strengths",
+          "BOS:structure"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "You choose whether to use the reset, and its meaning—taking the next useful play rather than a hero pass—comes directly from your stated goal.",
+            "refs": [
+              "A13",
+              "A14",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "It occurs inside Monday and Wednesday team practice, with no new session or change to art, family or school commitments.",
+            "refs": [
+              "A06",
+              "A10",
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "This is a coach-observed practice example that you reported helped once, not an agreed new routine. Passing technique stays with your coach; change or stop if it conflicts with their guidance.",
+            "refs": [
+              "A13",
+              "COACH1",
+              "COACH2"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "The reset takes place during existing practice and avoids the optional extra shooting that previously delayed homework.",
+            "refs": [
+              "A09",
+              "A10",
+              "A17",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "One breath, look up and choose the next play is short, concrete and already familiar from Wednesday practice.",
+            "refs": [
+              "A13",
+              "COACH1"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "DIRECT",
+          "causal_reach": "MECHANISM_CHAIN",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "READY",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "MATERIAL",
+          "dependency_burden": "NONE"
+        }
+      },
+      {
+        "candidate_id": "M3",
+        "domain": "school",
+        "action": "At the first stuck maths step this week, circle it and ask your maths teacher one exact question before putting the homework away.",
+        "why": "This treats school as its own target and addresses the point where one uncertain step becomes delay. It uses the help format that has worked for you before while leaving the rest of the maths in your hands. Timelier progress could also reduce the conflict that appeared when optional shooting pushed homework later.",
+        "when": "Use it at the first maths homework snag before 2026-09-21; if no maths task is set, do not manufacture a test.",
+        "who": "You form the question; your maths teacher supplies the qualified explanation. If unavailable, write the question for the next class or approved school channel.",
+        "action_signal": "The stuck step is circled and a specific question is asked or prepared for the next available approved contact with your teacher.",
+        "progress_signal": "The related homework is handed in by its actual deadline, with the questioned step understood well enough for you to continue your own work.",
+        "review": "2026-09-21: continue if exact questions support timely work; change the help route if access is slow; stop the test if no assignment occurred.",
+        "stop_or_change": "Change the approach if the teacher is unavailable, the question reveals a wider maths gap, or one-step help does not let you continue; ask the teacher what broader support fits.",
+        "bos_fit": "You often make progress by trying, finding the exact snag and asking for one narrow piece of help, then taking the work back. This form also gives the homework a clear purpose and deadline without a huge plan. The limit is that one-step help may be too small if the maths difficulty is broader.",
+        "refs": [
+          "A16",
+          "A17",
+          "A18",
+          "A20",
+          "CONFIRM"
+        ],
+        "bos_refs": [
+          "BOS:mind",
+          "BOS:effort",
+          "BOS:thriving"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": true,
+            "reason": "You identify the stuck step and ask the question yourself, matching your stated wish to seek the needed step rather than leave the whole task.",
+            "refs": [
+              "A17",
+              "A18",
+              "CONFIRM"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": true,
+            "reason": "Maths homework is a current three-week goal, and the action is attached to the next real task rather than a fabricated study session; exact due dates remain unknown.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": true,
+            "reason": "The candidate directs the maths question to your teacher and does not invent an unqualified tutor or support arrangement.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": true,
+            "reason": "It directly supports the school goal and may prevent one blocked step from expanding into a late start after an already squeezed week.",
+            "refs": [
+              "A16",
+              "A17",
+              "A18",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The action is one visible stuck step and one exact question, matching the way you described using help effectively.",
+            "refs": [
+              "A17",
+              "A18"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "MATERIAL",
+          "causal_reach": "LOCAL",
+          "evidence_support": "STRONG",
+          "execution_feasibility": "FEASIBLE",
+          "time_to_signal": "NEAR",
+          "reversibility_low_regret": "BOUNDED_TEST",
+          "trajectory_leverage": "INDIRECT",
+          "dependency_burden": "LOW"
+        }
+      },
+      {
+        "candidate_id": "M4",
+        "domain": "training",
+        "action": "After Wednesday practice, add twenty minutes of shooting whenever a bad game or rushed pass makes you want extra work.",
+        "why": "This may feel like an immediate way to repair a poor performance, but it does not test the passing decision you chose as the priority. Your previous attempts delayed homework and gave no useful answer about calmer choices. It is a tempting but poor-fit alternative and should not become a plan on the current evidence.",
+        "when": "It would happen after Wednesday practice, the same time that previously pushed homework later; that known conflict is why this route is rejected.",
+        "who": "You would carry it out without a new coach agreement, even though the coach has said no extra session is needed for the current priority.",
+        "action_signal": "The action signal would only be completion of extra shooting; that would not count as evidence that your next passing decision improved.",
+        "progress_signal": "A valid progress signal would still need to be a calmer, looked-up next decision after a turnover, which prior extra shooting did not reveal.",
+        "review": "2026-09-21: stop this route unless you want it, school time is protected and the coach identifies a decision-related reason; current evidence does not.",
+        "stop_or_change": "Do not start under the current facts: you do not want another session, homework was delayed before, and the activity does not answer the chosen passing question.",
+        "bos_fit": "This route matches the pressure tendency to do something immediately, but it does not match your fuller pattern: you value art, school, family duties and a team week with room around it. Because meaningful action matters to you, extra effort can feel responsible even when it tests the wrong thing; that explanation remains possible, not proven.",
+        "refs": [
+          "A04",
+          "A06",
+          "A07",
+          "A09",
+          "A10",
+          "A17",
+          "A20",
+          "COACH2",
+          "COACH3"
+        ],
+        "bos_refs": [
+          "BOS:pressure",
+          "BOS:identity",
+          "BOS:effort"
+        ],
+        "gates": [
+          {
+            "id": "athlete_agency",
+            "pass": false,
+            "reason": "You explicitly said you do not want another session or pile of drills and want the reset work to remain inside team time.",
+            "refs": [
+              "A07",
+              "A10",
+              "A20"
+            ]
+          },
+          {
+            "id": "real_week",
+            "pass": false,
+            "reason": "Although extra Wednesday shooting has happened, it previously delayed homework and conflicts with the weekly balance you asked to preserve.",
+            "refs": [
+              "A06",
+              "A09",
+              "A10",
+              "A20"
+            ]
+          },
+          {
+            "id": "qualified_guidance",
+            "pass": false,
+            "reason": "No coach has recommended extra shooting for the passing issue; the coach instead identified the next decision and said no extra session is needed.",
+            "refs": [
+              "A07",
+              "A09",
+              "COACH2",
+              "COACH3"
+            ]
+          },
+          {
+            "id": "school_and_recovery",
+            "pass": false,
+            "reason": "The same action has already pushed homework later during a week that includes current school demands.",
+            "refs": [
+              "A09",
+              "A16",
+              "A17",
+              "A20"
+            ]
+          },
+          {
+            "id": "understandable",
+            "pass": true,
+            "reason": "The extra-shooting action is easy to understand, and its mismatch with the calmer-passing goal is also clear from your own evidence.",
+            "refs": [
+              "A07",
+              "A09"
+            ]
+          }
+        ],
+        "selection_signals": {
+          "constraint_leverage": "NONE",
+          "causal_reach": "SYMPTOM_ONLY",
+          "evidence_support": "NONE",
+          "execution_feasibility": "DIFFICULT",
+          "time_to_signal": "DISTANT",
+          "reversibility_low_regret": "REVERSIBLE",
+          "trajectory_leverage": "NONE",
+          "dependency_burden": "NONE"
+        }
+      }
+    ]
+  },
+  "status": "proposed",
+  "move": {
+    "candidate_id": "M1",
+    "domain": "coordination",
+    "action": "Ask your coach to try a next-play reset in practice.",
+    "why": "This addresses the exact moment you and your coach both named without adding a session. The cue already helped once, and the coach has said the existing game can be used, but no arrangement exists yet. Asking first protects your voice, lets the coach set basketball details, and makes consent visible.",
+    "when": "Before Wednesday practice, ask: “Can I try next play after a turnover, get one brief private comment, and check it with you before Monday’s practice?” No extra session.",
+    "who": "If your coach agrees, you take one breath, look up, then choose the next useful pass. Your coach observes the next possession and keeps feedback brief and private.",
+    "action_signal": "After practice, jot one short line: agreed or pending; reset tried or no turnover; next pass useful or rushed. Add whether the reminder helped you.",
+    "progress_signal": "Your coach describes one next possession: did you look and choose a useful pass, or rush to make up for the mistake? You say whether the reminder helped you settle.",
+    "review": "On September 21 before practice, start the brief check if your coach agreed; otherwise review your own note and ask when they can comment. No suitable turnover means untested. Continue, adjust or stop; keep maths and recovery time.",
+    "stop_or_change": "Change or stop if the coach declines, the small-sided game is unavailable, the cue becomes distracting or public, or the arrangement adds time that crowds school or recovery.",
+    "bos_fit": "You prefer one exact point, private delivery and room to explain, and you often learn once the task is live. A short request before practice fits those patterns and your willingness to revise a first route. That fit is not certainty: basketball authority stays with the coach, and you may decide a shared cue feels less useful than the one practice example suggested.",
+    "refs": [
+      "A08",
+      "A10",
+      "A13",
+      "A15",
+      "A20",
+      "COACH1",
+      "COACH2",
+      "COACH3",
+      "CONFIRM"
+    ],
+    "bos_refs": [
+      "BOS:mind",
+      "BOS:communication",
+      "BOS:thriving"
+    ],
+    "gates": [
+      {
+        "id": "athlete_agency",
+        "pass": true,
+        "reason": "The first action is your request, not an arrangement made for you; you have asked to explain your side and no plan has yet been agreed.",
+        "refs": [
+          "A15",
+          "COACH3",
+          "CONFIRM"
+        ]
+      },
+      {
+        "id": "real_week",
+        "pass": true,
+        "reason": "The request concerns the small-sided game already available in Monday and Wednesday team practice and adds no separate session.",
+        "refs": [
+          "A06",
+          "A10",
+          "A20",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "qualified_guidance",
+        "pass": true,
+        "reason": "Your coach would choose what basketball decision to observe and how to comment; the candidate does not prescribe passing technique.",
+        "refs": [
+          "COACH1",
+          "COACH2",
+          "COACH3"
+        ]
+      },
+      {
+        "id": "school_and_recovery",
+        "pass": true,
+        "reason": "The proposed test stays inside team time, matching your request to preserve art, brother collection, homework and family time.",
+        "refs": [
+          "A06",
+          "A10",
+          "A17",
+          "A20"
+        ]
+      },
+      {
+        "id": "understandable",
+        "pass": true,
+        "reason": "The request has one cue, one existing practice setting and one brief private feedback boundary, matching the support format you said helps.",
+        "refs": [
+          "A13",
+          "A15",
+          "COACH3"
+        ]
+      }
+    ],
+    "selection_signals": {
+      "constraint_leverage": "DIRECT",
+      "causal_reach": "SYSTEMIC",
+      "evidence_support": "STRONG",
+      "execution_feasibility": "READY",
+      "time_to_signal": "NEAR",
+      "reversibility_low_regret": "BOUNDED_TEST",
+      "trajectory_leverage": "DIRECT",
+      "dependency_burden": "MODERATE"
+    }
+  },
+  "receipt": {
+    "selection_model_version": "one-move-v2-inspectable-rubric-v1",
+    "dimensions": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "execution_feasibility",
+      "time_to_signal",
+      "reversibility_low_regret",
+      "trajectory_leverage",
+      "dependency_burden"
+    ],
+    "arithmetic": "EQUAL_CATEGORICAL_CONTRIBUTIONS_0_TO_3_SUMMED",
+    "maximum_score": 24,
+    "tie_break_order": [
+      "constraint_leverage",
+      "causal_reach",
+      "evidence_support",
+      "reversibility_low_regret",
+      "dependency_burden",
+      "time_to_signal",
+      "execution_feasibility",
+      "trajectory_leverage"
+    ],
+    "selected_candidate_id": "M1",
+    "ranked_candidates": [
+      {
+        "candidate_id": "M1",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "SYSTEMIC",
+            "contribution": 3,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "MODERATE",
+            "contribution": 1,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 22,
+        "rank": 1,
+        "selected": true,
+        "rejection_reason": null
+      },
+      {
+        "candidate_id": "M2",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "DIRECT",
+            "contribution": 3,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "MECHANISM_CHAIN",
+            "contribution": 2,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "READY",
+            "contribution": 3,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "NONE",
+            "contribution": 3,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 22,
+        "rank": 2,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on causal reach, trajectory leverage."
+      },
+      {
+        "candidate_id": "M3",
+        "selection_components": [
+          {
+            "dimension_id": "constraint_leverage",
+            "categorical_level": "MATERIAL",
+            "contribution": 2,
+            "meaning": "How directly the intervention weakens the governing constraint."
+          },
+          {
+            "dimension_id": "causal_reach",
+            "categorical_level": "LOCAL",
+            "contribution": 1,
+            "meaning": "How far the intervention reaches through the supported causal chain."
+          },
+          {
+            "dimension_id": "evidence_support",
+            "categorical_level": "STRONG",
+            "contribution": 3,
+            "meaning": "Strength of governed evidence for the intervention hypothesis."
+          },
+          {
+            "dimension_id": "execution_feasibility",
+            "categorical_level": "FEASIBLE",
+            "contribution": 2,
+            "meaning": "Whether execution can realistically start with present capability and authority."
+          },
+          {
+            "dimension_id": "time_to_signal",
+            "categorical_level": "NEAR",
+            "contribution": 3,
+            "meaning": "How soon a truthful leading signal can be observed."
+          },
+          {
+            "dimension_id": "reversibility_low_regret",
+            "categorical_level": "BOUNDED_TEST",
+            "contribution": 3,
+            "meaning": "How bounded, reversible, and low-regret the intervention is."
+          },
+          {
+            "dimension_id": "trajectory_leverage",
+            "categorical_level": "INDIRECT",
+            "contribution": 1,
+            "meaning": "How materially the intervention changes the mechanisms beneath the five trajectories."
+          },
+          {
+            "dimension_id": "dependency_burden",
+            "categorical_level": "LOW",
+            "contribution": 2,
+            "meaning": "The degree to which execution avoids outside dependencies and coordination burden."
+          }
+        ],
+        "selection_score": 17,
+        "rank": 3,
+        "selected": false,
+        "rejection_reason": "Lower deterministic standing on constraint leverage, causal reach, execution feasibility."
+      }
+    ],
+    "explainability": "The selected candidate has the strongest inspectable causal, evidence, execution, learning, reversibility, trajectory, and dependency profile under the fixed rubric.",
+    "probability_semantics": "NONE_NOT_AN_INTERVENTION_PROBABILITY_MODEL",
+    "receipt_hash": "a681e68fc022c6341a60705ad34144e591402031a8377722cac49f48ff33c66e"
+  },
+  "audit": {
+    "pass": true,
+    "issues": [],
+    "checks": [
+      "Exact goals: all four domain goal fields reproduce the athlete-confirmed wording exactly—sport, training, mindset, and school—without revising or substituting a coach goal.",
+      "Sport domain: the strength is supported by A03 and COACH1; the rushed-next-pass gap is supported by A04, A12, and COACH1; the help is correctly framed as possible rather than agreed; and the BOS fit preserves both quick-start value and the pressure-related checking tradeoff.",
+      "Training domain: the useful small-sided setting, one encouraging Wednesday example, lack of value from extra shooting for the passing question, and the requirement to remain inside the team week are all supported. The report expressly distinguishes available coach support from an agreed plan.",
+      "Mindset domain: the confidence strength comes from A11; the next-useful-play target comes from A14 and CONFIRM; the one-breath/look-up example is limited to one practice occurrence; and game transfer remains explicitly unknown. The minor framework-label issue does not alter the underlying evidence.",
+      "School domain: school is positive, visible, and treated as an independent goal. The report includes Grade 10 context without inventing marks, notes that art is going well and most classes are on track, identifies the two late maths tasks accurately, and routes any maths explanation to the qualified teacher.",
+      "School timing: the confirmed goal is three weeks of on-time maths homework. The report does not invent due dates and correctly lists them as unknown. M3 is a first-week bounded action rather than a false claim that the full three-week outcome has already been achieved.",
+      "Dates and horizon: 2026-09-21 is consistently used as the review date and 2026-11-02 as the future horizon. No future is presented as having already occurred. The only date issue is the minor same-day Monday timing ambiguity identified above.",
+      "Weekly load: the report preserves the three 90-minute team-practice week, usual Saturday game, Tuesday art club, Thursday brother collection, Sunday family time, homework, and current test load. It does not add a required session. The rejected M4 route accurately identifies the prior twenty-minute Wednesday conflict.",
+      "Recovery and role balance: art, school, family responsibilities, and family time remain visible rather than being subordinated to basketball. The report does not force a long-term athlete identity and respects the accepted BOS statement that basketball's future place remains open.",
+      "Coach observation: the report correctly attributes two rushed game passes and the Wednesday looked-before-passing example to COACH1, the next-decision priority and lineup contingency to COACH2, and the possible small-sided observation/private comment to COACH3.",
+      "Athlete observation: the two passes leading directly to baskets, the rushed follow-up pass, the one-breath response, embarrassment/joking account, extra-shooting attempts, homework delay, and school goals remain traceable to Nia's own sources rather than being falsely attributed to the coach.",
+      "Agreement status: coach and athlete observations are aligned, but no cue, monitoring routine, private-feedback routine, or new practice plan is represented as currently agreed. M1 asks for agreement; M2 is presented as an athlete-owned bounded test without assuming monitoring; COACH3's explicit non-agreement is retained.",
+      "Disagreement versus uncertainty: there is no invented coach-athlete disagreement. Uncertain causes and transfer questions are generally kept uncertain through terms such as \"appears,\" \"may,\" \"possible,\" and explicit unknowns. The report does not claim that embarrassment, drawing, a cue, or extra work has a universal causal effect.",
+      "Main obstacle: the urge to repair immediately is labeled as an apparent obstacle and is grounded in A04 and A09. It is not elevated into a diagnosis or claimed as the sole cause of every rushed decision.",
+      "Future 1—current course: this is a conditional continuation scenario, not a guaranteed decline. It preserves the attacking strength, limits the rushed pattern to some possessions, and admits that match frequency is unknown.",
+      "Future 2—emerging: this is specifically the deliberate appearance of the athlete's reset in ordinary small-sided practice. It is limited to practice evidence and does not claim close-game transfer.",
+      "Future 3—better: this is distinguished from the emerging future by mutual cue agreement, coach observation, and private feedback. Its conditions require athlete-coach agreement and no added session; match transfer remains unknown.",
+      "Future 4—bold: this joins the athlete's stated close-finish aspiration with the next-possession target while explicitly preserving school, art, and family commitments. The coach/game dependency is stated, subject only to the minor \"athlete-owned\" wording issue identified above.",
+      "Future 5—downside: this is a conditional recurrence of optional extra shooting that crowds homework while failing to test passing decisions. It is based on two past attempts and explicitly says it is not a prediction that the behavior will continue.",
+      "Future distinction: current uneven continuation, athlete-initiated practice reset, mutually coordinated cue and feedback, contingent close-game stretch outcome, and school-crowding downside are substantively distinct. The emerging and better futures are related but not duplicates because one tests self-use and the other adds an agreed coach-feedback system.",
+      "Future evidence gates: each `sufficient_evidence:true` value is defensible for inclusion as a scenario. The emerging future has one directly observed precursor; the better future has coach-confirmed feasibility but remains conditional; the bold future is the athlete's own stated aspiration with external dependencies disclosed; and the downside has two relevant past examples.",
+      "Candidate M1: all gates are substantively justified. It begins with the athlete asking, uses an existing coach-confirmed setting, leaves basketball observation and feedback to the coach, adds no session, protects school/recovery boundaries, and has clear change/stop rules.",
+      "Candidate M2: the action is a reversible, athlete-owned reset test based on one athlete-reported and coach-observed practice example. It adds no repetitions or session, leaves tactical and technical correction with the coach, and includes stop conditions for hesitation, discomfort, or conflict with coach guidance. The local \"coach-supported\" wording should be narrowed as noted.",
+      "Candidate M3: all gates are justified. It is tied to a real maths snag, does not invent an assignment or deadline, directs subject help to the maths teacher or an approved school route, preserves athlete agency, and changes course if the issue is broader than one step.",
+      "Candidate M4: ineligibility is correctly established rather than hidden. Athlete-agency, real-week fit, qualified-guidance, and school/recovery gates fail for source-supported reasons. Its text repeatedly says the route is rejected and should not start, so the presence of an action description is not an active prescription.",
+      "Candidate distinction: M1 coordinates with the coach, M2 tests the athlete's own reset, M3 supports the independent school goal, and M4 documents a rejected mismatch. They are not substantive duplicates.",
+      "Technical and qualified guidance: the report does not prescribe a passing technique, drill stack, shooting correction, or maths method outside qualified guidance. Coach authority is retained for basketball decisions, teacher authority for maths, and the only extra-shooting instruction appears in an explicitly ineligible candidate.",
+      "Agency: the report protects Nia's voice, requires her agreement for a shared routine, does not assume consent, acknowledges that she cannot choose the lineup or manufacture a close finish, and provides stop/change options for every eligible candidate.",
+      "No unsupported certainty: there are no arbitrary odds, promised lineup decisions, guaranteed close finishes, guaranteed transfer from practice to games, invented coach commitments, academic grade guesses, personality diagnoses, or claims that a proposed action has already worked repeatedly.",
+      "BOS fidelity: the report uses accepted patterns—quick starts, pressure increasing speed, exact/private feedback, learning through a live attempt, light structure, multiple important roles, and willingness to revise—without replacing the BOS or turning its caveats into fixed personality diagnoses.",
+      "Overall eligibility: M1, M2, and M3 remain eligible bounded proposals; M4 is clearly ineligible and rejected. No blocker or material issue undermines the report, its futures, or the action-gate conclusions.",
+      "Review was limited to the amended fields and their immediate consistency with the unchanged adjacent action, role, signal, review and stop/change fields; the unchanged assessment was not re-audited.",
+      "The prior M1 timing finding is resolved. \"Ask before the next available Monday or Wednesday practice\" handles the unknown assessment time, and \"If September 14 practice has passed, ask before Wednesday practice\" preserves a feasible post-assessment opportunity without adding a session.",
+      "The prior M2 timing finding is resolved. \"Remaining Monday or Wednesday practices before September 21\" excludes elapsed opportunities and keeps the bounded test before the 2026-09-21 review. A06 supports those practice days, and the wording does not invent a practice or assessment time.",
+      "The shortened M1 action remains source-consistent when read with the adjacent fields. It asks the coach rather than asserting an agreement; `why` states that no arrangement exists, `who` leaves whether and how to use the cue, observe and comment to the coach, and `action_signal` permits an agreed, adjusted or declined answer. COACH3 supports feasibility but not an existing commitment.",
+      "The M1 role language does not transfer basketball authority to the athlete. The coach retains discretion over use of the cue, observation and private feedback, while Nia owns only the request. The prospective progress signal does not claim that qualifying possessions have already been observed.",
+      "The revised M2 qualified-guidance reason resolves the prior endorsement ambiguity. It accurately distinguishes a coach-observed example that Nia reported helped once from an agreed routine, retains coach authority over passing guidance and includes a conflict-based change/stop rule. This matches A13, COACH1, COACH2 and COACH3.",
+      "The revised M2 timing, role and progress language remains internally consistent: the reset is athlete-owned, normal coach feedback is possible but new monitoring is not assumed, repetitions are not added, and the progress wording is a prospective signal rather than a claim that deliberate use or match transfer has already succeeded.",
+      "The revised bold-future wording resolves the prior agency-label problem. Handling the next possession is stated separately from the hoped-for close-finish opportunity, and \"You hope,\" together with \"if the game and your coach’s selection allow it,\" preserves uncertainty rather than promising a causal or lineup outcome. The unchanged surrounding future fields retain the previously audited external dependencies.",
+      "No amended action, timing, role, causal-uncertainty or progress wording introduces a false coach agreement, guaranteed transfer, invented practice time, added session, prescribed passing technique or completed outcome.",
+      "The only remaining material defect is deletion of the required \"Warrior Mindset\" category label. Because that explicit requirement is unmet, the patch set cannot pass as submitted.",
+      "The sole remaining label finding was resolved using the reviewer’s exact prescribed sentence.",
+      "Source fidelity: the proposed cue, one-breath response, look up, and next useful play/pass are supported by A13, A14, the confirmed priority, and the confirmed training goal. The edit does not promote the one successful practice example into an established match pattern.",
+      "Action headline versus follow-through: the shortened headline remains an explicit request to test a reset rather than a claim that the reset has been adopted. The adjacent when and who fields supply the actual sequence: request permission, then—if agreed—breathe, look up, and choose the next useful pass.",
+      "Coach role and conditional agreement: COACH3 supports the coach being able to observe next possessions and provide one brief private comment, while also stating that no plan has yet been agreed. The revised candidate preserves that status by making athlete follow-through conditional on coach agreement and by recording agreed, adjusted, or declined as distinct possible responses rather than a predetermined result.",
+      "Timing and review sequencing: the request can be made before the September 14 Monday practice if it has not passed, or before Wednesday practice if it has. The confirmed review remains Monday, September 21. No clock time is invented.",
+      "Observation versus experience: the coach is assigned the visible basketball description—whether Nia looked and made a useful choice or rushed—while Nia reports the internal effect of the reminder on whether she felt more settled. The rushed-repair wording is supported by A04 and A12, and the coach's ability to observe the next decision is supported by COACH1–COACH3.",
+      "Untested-progress protection: agreement, attempt, and opportunity are separated. If the coach does not agree, if no turnover occurs, or if no suitable moment arises, the text does not claim that the reset was tested or that progress occurred.",
+      "Review clarity: Nia owns starting the September 21 check, and the sequence asks whether there was agreement, an actual attempt, and an observable next event before any continue, adjust, or stop decision. The capacity check remains a proposed review of school and recovery time, not a claim that either improved.",
+      "Future-sign edits: replacing “repair pass/attempt” with an immediate rushed pass intended to make up for the mistake is faithful to A04's description of rushing and trying to fix the last play all at once. Replacing “next-possession choice” with “next passing choice” remains supported by the passing-focused goal and A04, A07, and A09.",
+      "No edited field invents a guaranteed turnover, guaranteed practice opportunity, clock time, medical condition, or achieved outcome.",
+      "Changed /headline is an imperative framing rather than an unsupported result claim. It accurately reflects the athlete’s stated aim to make the next play instead of trying to repair the last mistake all at once (A04, A14, CONFIRM).",
+      "Changed /opening is supported: Nia’s early reads have created direct scoring chances for teammates, while after a mistake she has passed again before looking properly (A03, A04, COACH1). It does not overstate the two observed assists as a stable match pattern.",
+      "Changed /main_obstacle remains a qualified interpretation—“seems to be”—of the supported pattern of trying to make up for a turnover too quickly and passing before looking (A04, A12, A14, COACH1).",
+      "Changed /domains/0/help proposes that the athlete ask for a next-play reminder and brief private comment. This is supported by the one helpful prior reminder and the coach’s stated ability to observe and comment during existing small-sided practice, while not asserting that a new arrangement has been agreed (A08, A13, A15, COACH3).",
+      "Changed /domains/1/detail correctly says there is usually, rather than invariably, a Saturday game (A06). Its statements about Monday and Wednesday small-sided play, no added session, and the absence of an agreed plan remain accurate (COACH3).",
+      "The revised emerging future is supported by one Wednesday practice example in which a breath, look up, and next-play reminder helped. Its future development remains contingent on intentional use and sufficient turnover opportunities, and it explicitly preserves uncertainty about match transfer (A08, A13, COACH1, COACH3).",
+      "The revised better future is genuinely independent of the basketball-reset progression: it gives the confirmed maths-homework goal its own useful path while retaining basketball inside team time. Asking for one exact step, continuing the work, protecting homework from optional shooting, and using actual on-time submission as evidence are supported by A09, A17, A18, A20, and CONFIRM. Unknown due dates and help availability are expressly acknowledged.",
+      "The better future does not promise a grade. It aims for the athlete-confirmed three weeks of on-time homework and treats submission by the actual due date as evidence rather than guaranteeing it. Its November 2 horizon does not redefine the three-week school target.",
+      "The better future does not replace the confirmed sport priority or selected One Move. It states that the school route does not depend on first becoming calmer in basketball, while the selected move remains the request to test a reset inside normal team practice (CONFIRM, selected_move).",
+      "The revised bold future separates athlete-controlled decisions from coach-controlled selection. A close-finish opportunity is expressly conditional on an actual close game and the coach’s lineup decision; the coach’s trust criteria are correctly identified as unknown, and no selection or coach trust is promised (A02, A05, COACH2).",
+      "The revised downside headline accurately identifies the supported mismatch: two previous extra-shooting attempts used homework time and did not show whether passing decisions improved. The future remains a conditional risk rather than a prediction (A04, A09, A17, A20).",
+      "The five futures have distinct functions rather than forming one linear ladder: continuation of the uneven current pattern, an emerging practice reset, an independently useful maths path, a conditional game-pressure stretch, and a downside involving mismatched extra shooting. The school future also preserves art and family roles rather than narrowing the athlete’s identity to basketball (A02, A06, A10, A19, A20, BOS:identity).",
+      "The revised timing is calendar-consistent. With assessment on Monday, September 14, 2026, the proposed Wednesday practice is September 16; the check before Monday practice is September 21, the confirmed review date. No revised action incorrectly uses Tuesday, September 22.",
+      "The revised /selected_move/when is a request concerning an existing Wednesday practice and a proposed check before the existing Monday practice. Its question form does not assert coach availability or agreement, which is consistent with COACH3’s statement that the support is possible but no plan has yet been agreed.",
+      "The selected move’s implementation remains conditional: /who begins “If your coach agrees,” /action_signal records agreement as agreed or pending, /review starts the shared check only if the coach agreed, and /stop_or_change requires changing or stopping if the coach declines. A missing turnover is correctly treated as no opportunity or an untested reset rather than failed execution (COACH3).",
+      "The revised action signal remains a light observation record and does not claim that the coach agreed, that a turnover will occur, or that the next pass will be useful. The coach remains responsible for basketball observation, while the athlete records whether the reminder helped.",
+      "Changed /domains/0/bos_connection accurately replaces abstract “incomplete checking” with the directly supported behavior of passing before looking, while preserving the coach-supported point that Nia’s attacking instinct remains useful (A03, A04, COACH2).",
+      "Changed /connection remains source-supported: embarrassment and pressure can increase Nia’s speed after mistakes; small-sided play offers a live decision setting without another session; optional Wednesday shooting has pushed homework later; and art, sibling, school, and family commitments are legitimate parts of the week (A09, A10, A12, A20, BOS:identity, BOS:pressure).",
+      "Across the revised futures and selected move, there is no promised grade, lineup place, close-game appearance, coach trust, match transfer, or guaranteed performance result. Coach participation and close-finish selection remain conditional, and unknowns are retained rather than filled with invented agreement.",
+      "No changed wording conflicts with the accepted BOS portrait or uses disallowed product language. Warrior Mindset is not used in a problematic way."
+    ],
+    "acceptance_method": "Previously accepted source audit plus exact futures and clarity delta audit",
+    "previous_audit_sha256": "59026c54d094259a6bb4bef788dc52158d9d157f7f32ce0b4b60ee0f98b3e60b"
+  },
+  "receipts": [
+    {
+      "stage": "synthesis-futures-candidates",
+      "request": "8e5ed14e24b73a1e0cdab9db705c90d1542ecbdc6c7ab4fca7100bd0a6fa5f4a",
+      "output": "e2add7891727b14884534494849760d44a91d9ddf18d3e1dd56b37a2e7ac3db2",
+      "response_id": "resp_0c03e2ca8c7616d4016aa8167c1a1487d09b91837f0eca33b6"
+    },
+    {
+      "stage": "independent-source-audit",
+      "request": "d4264cc7d155bf7fc31214ebd30105cd80fa25cf5cd103a6284c0c17a9f38a44",
+      "output": "2fb829fa64d910f8327348b4424d70f7f60e1e7e4ed977a8cd9f5ec92ecacb90",
+      "response_id": "resp_05998b25f39d1d9a016aa81a0ba41c87d09b118cf4e620dd92"
+    },
+    {
+      "stage": "independent-patch-audit",
+      "request": "253cfc0ee2d61bb3a8d291fe5c2746f3d954ba07eceabd2393ecdf6375d467d2",
+      "output": "7d1c2251e9f71613c0bdbf00de607d1818bb2224fd29bb4e8ef03a47a94d4186",
+      "response_id": "resp_0a8ecdfbb08e0925016aa81e81457487d0addac906005ac02f"
+    },
+    {
+      "stage": "source-and-action-consistency",
+      "request": "a4a1cf5466b8be5b046a24d6fdfc2c6b326a021f8154e590c821d51cf081ae09",
+      "output": "e110b7e66ee89937ff33376bbe0967cd3f5236d349b626a2dab2fc2b78f2ac9e",
+      "response_id": "resp_0541d5b9f057684f016aa821b5a0f887d09389a35d3960c772"
+    },
+    {
+      "stage": "independent-futures-and-clarity-audit",
+      "request": "65be3473717b70ed81dff7751349fce1b90af7d45dfa91db432f7f92b1645ca9",
+      "output": "de986103bdd1c046b189cdfeed1d3d0810dca26166af54bb96fed432ba2344b4",
+      "response_id": "resp_06cd1f46768cce99016aa825993ba087d083c6164db02e5363"
+    }
+  ],
+  "created_at": "2026-09-14T16:52:40.639Z",
+  "artifact_sha256": "e0048f09ebc943bb3224135156baf9cf8922faba4ca24ccb1c6c3658af35d023"
+}
