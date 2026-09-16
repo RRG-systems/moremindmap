@@ -143,7 +143,7 @@ export default function LeadershipDemo() {
         <section className={`mt-12 grid gap-6 ${availableProducts.length === 4 ? 'lg:grid-cols-2 xl:grid-cols-4' : 'lg:grid-cols-3'}`} aria-label="Product demos">
           {availableProducts.map((original) => {
             const product = original.id === 'athlete-consulting-tool' && athleteVersion === 2
-              ? { ...original, description: original.description.replace('Mika and Avery', 'Nia and Sofia'), detail: 'Ages 15 and 19 · Synthetic fixtures only · No customer access' }
+              ? { ...original, title: 'ATHLETE CONSULTING TOOL V2', description: original.description.replace('Mika and Avery', 'Nia and Sofia'), detail: 'Ages 15 and 19 · Synthetic fixtures only · No customer access' }
               : original
             return (
             <button

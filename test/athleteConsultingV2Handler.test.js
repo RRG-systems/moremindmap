@@ -87,6 +87,7 @@ test('real shared Leadership entry and launcher issue Nia/Sofia under V2 using o
   const launcher = await invoke(leadershipEntry, req({ cookie: launcherCookie, url: '/api/internal/leadership-demo-entry?view=launcher' }));
   assert.deepEqual(launcher.body.choices.map((item) => item.id), ['recruiting', 'subscription-model-1', 'subscription-model-2', 'athlete-consulting-tool']);
   assert.equal(launcher.body.choices.find(item => item.id === 'athlete-consulting-tool').version, 2);
+  assert.equal(launcher.body.choices.find(item => item.id === 'athlete-consulting-tool').title, 'ATHLETE CONSULTING TOOL V2');
   process.env.ATHLETE_CONSULTING_V2_ENABLED = 'false';
   const legacyLauncher = await invoke(leadershipEntry, req({ cookie: launcherCookie, url: '/api/internal/leadership-demo-entry?view=launcher' }));
   assert.deepEqual(legacyLauncher.body.choices.find(item => item.id === 'athlete-consulting-tool'), { id: 'athlete-consulting-tool', title: 'ATHLETE CONSULTING TOOL' });
