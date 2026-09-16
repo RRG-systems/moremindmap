@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import LivingBusinessTwinApp from '../lab/subscriptionLivingBusinessRelationshipV1/LivingBusinessTwinApp.jsx'
 import SubscriptionS2GuRenderer from '../subscriptionS2/SubscriptionS2GuRenderer.jsx'
 import { prepareBlindDemoRequestProof } from './blindDemoRequestProof.js'
+import { openingSafeStopMessage } from './safeOpeningDiagnostic.js'
 import '../lab/baProgressiveDisclosureV1/styles.css'
 import '../lab/subscriptionLivingBusinessRelationshipV1/styles.css'
 import './internalDev.css'
@@ -415,7 +416,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       setSession(result.session); setPreSession(false)
       onCurrent({ view_model: result.view_model, publication: result.publication })
       episodeStartedAt.current = Date.now()
-    } catch { setError(durableConversation ? 'We could not confirm the session opening. Reload to check your session before trying again.' : 'The session did not start because the required opening view could not be established safely. Nothing was changed or consumed.') } finally { startSessionLockRef.current = false; setBusy(false) }
+    } catch (failure) { setError(openingSafeStopMessage({ durableConversation, syntheticQaConversation, failure })) } finally { startSessionLockRef.current = false; setBusy(false) }
   }
 
   return <aside className="living-conversation internal-dev-conversation" aria-label="Talk with MORE" data-coaching-episode-phase={session.coaching_episode_phase || 'IDLE'} data-session-learning-status={sessionLearning?.status || 'NOT_READY'}>
