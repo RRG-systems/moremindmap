@@ -14,6 +14,7 @@ import { pinnedSubscriptionSources, pinnedLoanOriginatorSubscriptionSources } fr
 import { syntheticQaScope } from '../api/engine/subscriptionV1/syntheticQaRuntimeInfrastructure.js';
 import { createSyntheticQaProviderBoundary, syntheticQaProviderEnabled, syntheticQaProviderCandidateSha256,
   SYNTHETIC_QA_GRANT_DOMAIN, SYNTHETIC_QA_COACHING_RENEWAL_DOMAIN,
+  SYNTHETIC_QA_COACHING_SECOND_RENEWAL_DOMAIN,
   SYNTHETIC_QA_RENEWAL_CONTINUITY } from '../api/engine/subscriptionV1/syntheticQaProviderBoundary.js';
 import { SYNTHETIC_QA_CAMPAIGN, SYNTHETIC_QA_ALLOCATION, SYNTHETIC_QA_BUDGET_KEYS,
   syntheticQaBudgetCustody, syntheticQaBudgetGrantSha256, createSyntheticQaProviderBudget } from '../api/engine/subscriptionV1/syntheticQaProviderBudget.js';
@@ -515,6 +516,70 @@ function mutateAndResignRenewal(fixture, mutate) {
     .update('\0').update(canonicalJson(envelope.renewal)).digest('hex');
   fixture.env[RENEWAL_ENV] = JSON.stringify(envelope);
 }
+
+const SECOND_RENEWAL_APPROVED_AT = '2026-09-16T22:59:44.502Z';
+const SECOND_RENEWAL_EXPIRES_AT = '2026-09-17T22:59:44.000Z';
+const SECOND_RENEWAL_ENV = 'MOREMINDMAP_SERVER_ONLY_SUBSCRIPTION_SYNTHETIC_QA_COACHING_RENEWAL_V2';
+function secondRenewedFixture({ nowValue = Date.parse('2026-09-17T12:00:00.000Z') } = {}) {
+  const fixture = renewedFixture({ nowValue, authorityExpiresAt: SECOND_RENEWAL_EXPIRES_AT });
+  mutateAndResignRenewal(fixture, prior => {
+    prior.stage_grant_sha256 = '2b2e867c6003a3732630e85a09f169d7809a4318271f461788f2ac66444c19e2';
+    prior.candidate_sha256 = 'c994624fabd9f048df9525e17b052212609b7b5207848d89de05827e658525d9';
+  });
+  const prior = JSON.parse(fixture.env[RENEWAL_ENV]).renewal;
+  const renewal = {
+    ...prior,
+    approved_at: SECOND_RENEWAL_APPROVED_AT,
+    authorization_receipt_canonical_sha256: '9f15080df57c963eb5cb24fc5f9eae6b28716d151cab475db7005012aa5f2406',
+    authorization_receipt_file_sha256: 'a3e1918761116d6b261eede363bf9af6a8f9f5bf30ef2b6b78cf54fd1639bb19',
+    candidate_sha256: fixture.grant.candidate_sha256,
+    contract: 'SYNTHETIC_QA_CASEY_COACHING_RENEWAL_V2',
+    expires_at: SECOND_RENEWAL_EXPIRES_AT,
+    prior_candidate_sha256: prior.candidate_sha256,
+    prior_effective_deadline: prior.expires_at,
+    prior_manifest_sha256: prior.manifest_sha256,
+    prior_renewal_sha256: hashCanonicalJson(prior),
+    prior_stage_grant_sha256: prior.stage_grant_sha256,
+    stage_grant_sha256: hashCanonicalJson(fixture.grant),
+  };
+  const signature = createHmac('sha256', FAKE_SIGNING_KEY).update(SYNTHETIC_QA_COACHING_SECOND_RENEWAL_DOMAIN)
+    .update('\0').update(canonicalJson(renewal)).digest('hex');
+  fixture.env[SECOND_RENEWAL_ENV] = JSON.stringify({ renewal, signature });
+  return { ...fixture, secondRenewal: renewal };
+}
+
+test('second signed Casey renewal carries the same budget ledger and allows only the renewed window', async () => {
+  const fixture = secondRenewedFixture();
+  const before = fixture.redis.state();
+  assert.equal(before.attempts.length, 0);
+  assert.equal(fixture.secondRenewal.additional_budget, false);
+  assert.equal(fixture.secondRenewal.budget_reset, false);
+  assert.equal(fixture.secondRenewal.native_regeneration, false);
+  assert.equal(fixture.secondRenewal.provider_assignment_changed, false);
+  await fixture.transport()(request('CONVERSATION', 'second renewal Casey coaching'), { stage: 'CONVERSATION' });
+  assert.equal(fixture.calls(), 1);
+  assert.equal(fixture.redis.state().attempts[0].case_id, 'COHORT-V1-LO-A');
+  assert.equal(fixture.redis.state().grant_sha256, before.grant_sha256);
+  const expired = secondRenewedFixture({ nowValue: Date.parse(SECOND_RENEWAL_EXPIRES_AT) });
+  assert.throws(() => expired.transport(), /BUDGET_NOT_AUTHORIZED/);
+  assert.equal(expired.redis.reads, 0); assert.equal(expired.calls(), 0);
+});
+
+test('second renewal rejects missing, malformed, unsigned, drifted or non-continuous control before Redis/provider', () => {
+  for (const mutate of [
+    fixture => { delete fixture.env[SECOND_RENEWAL_ENV]; },
+    fixture => { fixture.env[SECOND_RENEWAL_ENV] = '{}'; },
+    fixture => { fixture.env[RENEWAL_ENV] = '{}'; },
+    fixture => { const value = JSON.parse(fixture.env[SECOND_RENEWAL_ENV]); value.signature = hash('wrong'); fixture.env[SECOND_RENEWAL_ENV] = JSON.stringify(value); },
+    fixture => { const value = JSON.parse(fixture.env[SECOND_RENEWAL_ENV]); value.renewal.prior_renewal_sha256 = hash('wrong'); fixture.env[SECOND_RENEWAL_ENV] = JSON.stringify(value); },
+    fixture => { const value = JSON.parse(fixture.env[SECOND_RENEWAL_ENV]); value.renewal.additional_budget = true; fixture.env[SECOND_RENEWAL_ENV] = JSON.stringify(value); },
+  ]) {
+    const fixture = secondRenewedFixture(); mutate(fixture);
+    assert.throws(() => fixture.transport(), /BUDGET_NOT_AUTHORIZED/);
+    assert.equal(fixture.redis.reads, 0); assert.equal(fixture.redis.writes, 0);
+    assert.equal(fixture.calls(), 0); assert.equal(fixture.factories(), 0);
+  }
+});
 
 test('signed Casey renewal extends only the effective coaching window and preserves base budget/native identity', async () => {
   const fixture = renewedFixture();

@@ -19,10 +19,18 @@ import { SYNTHETIC_QA_ALLOCATION, SYNTHETIC_QA_CAMPAIGN, createSyntheticQaProvid
 export const SYNTHETIC_QA_PROVIDER_HOLD = 'SUBSCRIPTION_V1_SYNTHETIC_QA_PROVIDER_BUDGET_NOT_AUTHORIZED';
 export const SYNTHETIC_QA_GRANT_DOMAIN = 'more-subscription-synthetic-qa-provider-grant-v1';
 export const SYNTHETIC_QA_COACHING_RENEWAL_DOMAIN = 'more-subscription-synthetic-qa-casey-coaching-renewal-v1';
+export const SYNTHETIC_QA_COACHING_SECOND_RENEWAL_DOMAIN = 'more-subscription-synthetic-qa-casey-coaching-renewal-v2';
 const GRANT_ENV = 'MOREMINDMAP_SERVER_ONLY_SUBSCRIPTION_SYNTHETIC_QA_PROVIDER_GRANT';
 const RENEWAL_ENV = 'MOREMINDMAP_SERVER_ONLY_SUBSCRIPTION_SYNTHETIC_QA_COACHING_RENEWAL';
+const SECOND_RENEWAL_ENV = 'MOREMINDMAP_SERVER_ONLY_SUBSCRIPTION_SYNTHETIC_QA_COACHING_RENEWAL_V2';
 const RENEWAL_APPROVED_AT = '2026-09-15T21:49:52.000Z';
 const RENEWAL_EXPIRES_AT = '2026-09-16T21:49:52.000Z';
+const SECOND_RENEWAL_APPROVED_AT = '2026-09-16T22:59:44.502Z';
+const SECOND_RENEWAL_EXPIRES_AT = '2026-09-17T22:59:44.000Z';
+const SECOND_RENEWAL_RECEIPT_FILE_SHA256 = 'a3e1918761116d6b261eede363bf9af6a8f9f5bf30ef2b6b78cf54fd1639bb19';
+const SECOND_RENEWAL_RECEIPT_CANONICAL_SHA256 = '9f15080df57c963eb5cb24fc5f9eae6b28716d151cab475db7005012aa5f2406';
+const PREVIOUS_STAGE_GRANT_SHA256 = '2b2e867c6003a3732630e85a09f169d7809a4318271f461788f2ac66444c19e2';
+const PREVIOUS_CANDIDATE_SHA256 = 'c994624fabd9f048df9525e17b052212609b7b5207848d89de05827e658525d9';
 export const SYNTHETIC_QA_RENEWAL_CONTINUITY = Object.freeze({
   authorizationReceiptCanonicalSha256: 'e7c17053ff3d7c927de68c81a24ab7fe19957f83d92cca4a1fe2347b184e6912',
   authorizationReceiptFileSha256: '69585b12685bf61d1e59beb96dbbd0eb6b8febfc69feeffcc048b13fd775e31a',
@@ -142,6 +150,9 @@ function validateCoachingRenewal({ env, now, grant, grantSha256, manifest, signi
     || !continuityKeys.filter(key => key !== 'previousDeadline').every(key => isHash(continuity[key]))
     || !Number.isFinite(Date.parse(continuity.previousDeadline))
     || new Date(continuity.previousDeadline).toISOString() !== continuity.previousDeadline) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  if (env[SECOND_RENEWAL_ENV] !== undefined) {
+    return validateSecondCoachingRenewal({ env, now, grant, grantSha256, manifest, signingKey, continuity });
+  }
   const raw = env[RENEWAL_ENV];
   if (typeof raw !== 'string' || !raw || Buffer.byteLength(raw) > 24_000) fail(SYNTHETIC_QA_PROVIDER_HOLD);
   let envelope; try { envelope = JSON.parse(raw); } catch { fail(SYNTHETIC_QA_PROVIDER_HOLD); }
@@ -187,6 +198,94 @@ function validateCoachingRenewal({ env, now, grant, grantSha256, manifest, signi
     || renewal.approved_at !== RENEWAL_APPROVED_AT || renewal.expires_at !== RENEWAL_EXPIRES_AT
     || !Number.isFinite(approvedAt) || !Number.isFinite(expiresAt) || expiresAt - approvedAt !== 86_400_000
     || !Number.isFinite(now) || now < approvedAt || now >= expiresAt
+    || renewal.coaching_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.live_coaching_micro_usd
+    || renewal.total_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.total_micro_usd
+    || renewal.additional_budget !== false || renewal.additional_budget_micro_usd !== 0
+    || renewal.budget_reset !== false || renewal.native_regeneration !== false
+    || renewal.provider_assignment_changed !== false || !authority || authority.status !== 'active'
+    || authority.authority_id !== renewal.authority_id || authority.custody_sha256 !== renewal.custody_sha256
+    || Date.parse(authority.expires_at) < expiresAt) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  return { effectiveDeadline: expiresAt, renewalSha256: hashCanonicalJson(renewal) };
+}
+
+function validateSecondCoachingRenewal({ env, now, grant, grantSha256, manifest, signingKey, continuity }) {
+  const priorRaw = env[RENEWAL_ENV];
+  if (typeof priorRaw !== 'string' || !priorRaw || Buffer.byteLength(priorRaw) > 24_000) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  let priorEnvelope; try { priorEnvelope = JSON.parse(priorRaw); } catch { fail(SYNTHETIC_QA_PROVIDER_HOLD); }
+  const prior = priorEnvelope?.renewal;
+  if (!prior || typeof prior !== 'object' || Array.isArray(prior)) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  const priorSignature = createHmac('sha256', signingKey).update(SYNTHETIC_QA_COACHING_RENEWAL_DOMAIN)
+    .update('\0').update(canonicalJson(prior)).digest('hex');
+  if (!exact(Object.keys(priorEnvelope || {}).sort(), ['renewal', 'signature'])
+    || !equalHash(priorEnvelope.signature, priorSignature)
+    || prior?.contract !== 'SYNTHETIC_QA_CASEY_COACHING_RENEWAL_V1'
+    || prior.status !== 'APPROVED' || prior.approved_at !== RENEWAL_APPROVED_AT
+    || prior.expires_at !== RENEWAL_EXPIRES_AT
+    || prior.stage_grant_sha256 !== PREVIOUS_STAGE_GRANT_SHA256
+    || prior.candidate_sha256 !== PREVIOUS_CANDIDATE_SHA256
+    || prior.budget_grant_sha256 !== continuity.budgetGrantSha256
+    || prior.approval_sha256 !== continuity.originalApprovalSha256
+    || prior.authorization_receipt_file_sha256 !== continuity.authorizationReceiptFileSha256
+    || prior.authorization_receipt_canonical_sha256 !== continuity.authorizationReceiptCanonicalSha256
+    || prior.prior_stage_grant_sha256 !== continuity.priorStageGrantSha256
+    || prior.prior_candidate_sha256 !== continuity.priorCandidateSha256
+    || prior.prior_manifest_sha256 !== continuity.priorManifestSha256
+    || prior.prior_casey_pair_sha256 !== continuity.caseyPairSha256
+    || prior.prior_casey_keyset_sha256 !== continuity.caseyKeysetSha256
+    || prior.previous_deadline !== continuity.previousDeadline
+    || prior.additional_budget !== false || prior.additional_budget_micro_usd !== 0
+    || prior.budget_reset !== false || prior.native_regeneration !== false
+    || prior.provider_assignment_changed !== false
+    || prior.total_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.total_micro_usd
+    || prior.coaching_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.live_coaching_micro_usd) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+
+  const raw = env[SECOND_RENEWAL_ENV];
+  if (typeof raw !== 'string' || !raw || Buffer.byteLength(raw) > 24_000) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  let envelope; try { envelope = JSON.parse(raw); } catch { fail(SYNTHETIC_QA_PROVIDER_HOLD); }
+  const renewal = envelope?.renewal;
+  if (!renewal || typeof renewal !== 'object' || Array.isArray(renewal)) fail(SYNTHETIC_QA_PROVIDER_HOLD);
+  const expected = createHmac('sha256', signingKey).update(SYNTHETIC_QA_COACHING_SECOND_RENEWAL_DOMAIN)
+    .update('\0').update(canonicalJson(renewal)).digest('hex');
+  const fields = ['additional_budget', 'additional_budget_micro_usd', 'approval_sha256', 'approved_at', 'authority_id',
+    'authorization_receipt_canonical_sha256', 'authorization_receipt_file_sha256', 'budget_grant_sha256',
+    'budget_reset', 'campaign_id', 'candidate_sha256', 'case_id', 'coaching_cap_micro_usd', 'contract',
+    'custody_sha256', 'expires_at', 'ledger_initialization_id', 'manifest_sha256', 'native_regeneration',
+    'previous_deadline', 'prior_candidate_sha256', 'prior_casey_keyset_sha256', 'prior_casey_pair_sha256',
+    'prior_effective_deadline', 'prior_manifest_sha256', 'prior_renewal_sha256', 'prior_stage_grant_sha256',
+    'provider_assignment_changed', 'scope_sha256', 'stage_grant_sha256', 'status', 'total_cap_micro_usd'];
+  const authority = manifest.entries.find(entry => entry.case_id === 'COHORT-V1-LO-A');
+  const approvedAt = Date.parse(renewal?.approved_at), expiresAt = Date.parse(renewal?.expires_at);
+  if (!exact(Object.keys(envelope || {}).sort(), ['renewal', 'signature'])
+    || !equalHash(envelope.signature, expected) || !renewal || !exact(Object.keys(renewal).sort(), fields.sort())
+    || grant.contract !== 'SYNTHETIC_QA_MODEL2_PROVIDER_GRANT_V2'
+    || grant.cohort.length !== 1 || grant.cohort[0].case_id !== 'COHORT-V1-LO-A'
+    || renewal.contract !== 'SYNTHETIC_QA_CASEY_COACHING_RENEWAL_V2' || renewal.status !== 'APPROVED'
+    || renewal.campaign_id !== SYNTHETIC_QA_CAMPAIGN || renewal.case_id !== grant.cohort[0].case_id
+    || renewal.scope_sha256 !== grant.cohort[0].scope_sha256
+    || renewal.authority_id !== grant.cohort[0].authority_id
+    || renewal.custody_sha256 !== grant.cohort[0].custody_sha256
+    || renewal.stage_grant_sha256 !== grantSha256
+    || renewal.budget_grant_sha256 !== continuity.budgetGrantSha256
+    || syntheticQaBudgetGrantSha256(grant) !== continuity.budgetGrantSha256
+    || renewal.approval_sha256 !== continuity.originalApprovalSha256
+    || grant.approval_sha256 !== continuity.originalApprovalSha256
+    || grant.native_approval_sha256 !== continuity.originalApprovalSha256
+    || renewal.ledger_initialization_id !== grant.ledger_initialization_id
+    || renewal.manifest_sha256 !== manifest.manifest_sha256 || renewal.manifest_sha256 !== grant.manifest_sha256
+    || renewal.candidate_sha256 !== grant.candidate_sha256
+    || renewal.previous_deadline !== grant.deadline || grant.deadline !== continuity.previousDeadline
+    || renewal.prior_renewal_sha256 !== hashCanonicalJson(prior)
+    || renewal.prior_effective_deadline !== prior.expires_at
+    || renewal.prior_stage_grant_sha256 !== prior.stage_grant_sha256
+    || renewal.prior_candidate_sha256 !== prior.candidate_sha256
+    || renewal.prior_manifest_sha256 !== prior.manifest_sha256
+    || renewal.prior_casey_pair_sha256 !== continuity.caseyPairSha256
+    || renewal.prior_casey_keyset_sha256 !== continuity.caseyKeysetSha256
+    || renewal.authorization_receipt_file_sha256 !== SECOND_RENEWAL_RECEIPT_FILE_SHA256
+    || renewal.authorization_receipt_canonical_sha256 !== SECOND_RENEWAL_RECEIPT_CANONICAL_SHA256
+    || renewal.approved_at !== SECOND_RENEWAL_APPROVED_AT || renewal.expires_at !== SECOND_RENEWAL_EXPIRES_AT
+    || !Number.isFinite(approvedAt) || !Number.isFinite(expiresAt)
+    || expiresAt - approvedAt !== 86_399_498 || !Number.isFinite(now) || now < approvedAt || now >= expiresAt
     || renewal.coaching_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.live_coaching_micro_usd
     || renewal.total_cap_micro_usd !== SYNTHETIC_QA_ALLOCATION.total_micro_usd
     || renewal.additional_budget !== false || renewal.additional_budget_micro_usd !== 0
