@@ -1,0 +1,1058 @@
+{
+  "contract": "SYNTHETIC_QA_PROVIDER_CANDIDATE_CLOSURE_V3",
+  "closure_roots": [
+    "api/internal/subscription-v1-runtime.js"
+  ],
+  "excluded_dynamic_edges": [
+    {
+      "from": "api/internal/subscription-v1-runtime.js",
+      "specifier": "../engine/subscriptionS2/demoSubscriberLoader.js",
+      "reason": "UNREACHABLE_AFTER_EXACT_SYNTHETIC_QA_AUTHORITY_SELECTION"
+    },
+    {
+      "from": "api/internal/subscription-v1-runtime.js",
+      "specifier": "../engine/subscriptionBlindDemo/runtime.js",
+      "reason": "NON_SYNTHETIC_QA_ROUTE_BRANCH"
+    },
+    {
+      "from": "api/internal/subscription-v1-runtime.js",
+      "specifier": "../engine/subscriptionV1/paidRuntimeComposition.js",
+      "reason": "NON_SYNTHETIC_QA_ROUTE_BRANCH"
+    }
+  ],
+  "generation_method": "RECURSIVE_LITERAL_ESM_CLOSURE_WITH_EXACT_NON_QA_ROUTE_EXCLUSIONS_PLUS_HASH_PINNED_RUNTIME_AUTHORITIES_AND_DEPENDENCY_IDENTITY_V2",
+  "files": [
+    {
+      "path": "api/business-assessment/shared.js",
+      "sha256": "cb8b3d1d8a7d855656304aac503017dac6ee506069b96ba37c30a5aa56eb9552"
+    },
+    {
+      "path": "api/business-assessment/verticalBinding.js",
+      "sha256": "0c4812f8a7ba58eda84e34a07165b60d9889bbb535eb6239edb3db356f1efae6"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/canonicalReader.js",
+      "sha256": "7532acac80deaa99f69bb3f3d804e5b5626fa74fba720dd543596da1576436ce"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/compatibility.js",
+      "sha256": "7c2a65430c58b052c564d6dad97aa3cf02838664d3eb0ed75d44c71444e39a20"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/completeness.js",
+      "sha256": "2225eab5d6859ac4a3c202c63fd2153c064115e2fbb7372cdb7c139c19b48c47"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/config.js",
+      "sha256": "3209fef164018e692147496af06f3242b79e0d0d0f1c20d1e39ac22bd1bb8957"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/evidenceSufficiency.js",
+      "sha256": "4bac5c134fb72381038f75827ad1141c9723a3c6f51c30cff0f3370fe456b3ff"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/frozenAuthority.js",
+      "sha256": "6c0988235e491953356de42788a4928528aa656d620011485b63d26ecc439b01"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/fusionAssembler.js",
+      "sha256": "e8f349d1ddac9c95642707d06146118a06369f807a97fb6766768bdc7622f784"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/fusionContract.js",
+      "sha256": "a65661d3e559c58f18777a5984fd23e39a7f869073ca616e78fa3ac7f96ac90a"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/launchSafeRealizationStore.js",
+      "sha256": "b1c72cee2670bc95dfe4fb98c31fa1678830f70324092cbc706bebdae28d4820"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/loanOriginatorFusionEvidence.js",
+      "sha256": "9d04b918d0b8ed2b785e97538644b4497c36fe1397c6256487eb3e336ef1f9e1"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/loanOriginatorProjectionAdapter.js",
+      "sha256": "fd5bfc5554a4f71d1bdbacebb788f3e11f6316e4b23d54495302c941fd7ad307"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/pinnedAuthority/AMBER_BOS_FUSION_AUTHORITY_V1.json",
+      "sha256": "528caf2bcd07138ac5fadc55ca4de68caff2911476d9e0cfe22358233b845405"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/pinnedAuthority/PATRICIA_BOS_FUSION_AUTHORITY_V1.json",
+      "sha256": "8ea0b677a0f92de4ff1fd55c82e929f82deefbc6b77a09901ea2fc07536b8785"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/pinnedAuthority/WALLY_BOS_FUSION_AUTHORITY_V1.json",
+      "sha256": "5f7c643621a24c41e32b15cb81f11c6e1241d4cde7737bb171f8c0abcfb7dc98"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/realProfileProjectionAdapter.js",
+      "sha256": "ac78166bcdb3adcdd866dfbc5ef5dbfd34f3d0e84407862f5601453baec9607b"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/realizationIdentity.js",
+      "sha256": "5f04ae514e857dad9292eb634b8a342085ddb91c527ac785d4aef3e163c1435d"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/scopedLoanOriginatorGeneration.js",
+      "sha256": "eeab7ed4da93a56aabf03e29206def2e1416f029180c0f371cd135e859f1e647"
+    },
+    {
+      "path": "api/engine/newBaProductionReadinessV1/stable.js",
+      "sha256": "577280c57983fcec73cb4472e1edfef86eb77c60db269eb0ef227eb8f31ede33"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/canonicalAdapter.js",
+      "sha256": "f82e1b45da2e10f757cc73d35c5413c4139d274606e368a3e3f763fa4482b7b2"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/compatibility.js",
+      "sha256": "587954a238f68dc3920902439c2a0859214fa9d6e6bab41e79768b7bbff65880"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/completeness.js",
+      "sha256": "cf0a7dd92508840e5bad1a86f4ce6b3a99c020d8e4d053a7db70f725d5fd9c6b"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/derivedArtifactStore.js",
+      "sha256": "e544669b34a98cadb4351e27019b08a3b7db753a4cba49bb66b74b38ac2043cf"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/launchSafeRealizationStore.js",
+      "sha256": "c7395de325b295e5e60fab4844b2d27025d9ebfb6bcc151fee12edc1724b3e2b"
+    },
+    {
+      "path": "api/engine/newBosProductionReadinessV1/realizationIdentity.js",
+      "sha256": "eb24cb2225e0825f773b93d37feb3db3e7ccb7d9bb6c2e821a71ca578959a138"
+    },
+    {
+      "path": "api/engine/subscriptionS2/demoSubjectAuthority.js",
+      "sha256": "79ddf3da35b2505b52637172caee45f511d9cfbaacf0d4304dd1c43d902a2aeb"
+    },
+    {
+      "path": "api/engine/subscriptionS2/guRuntime.js",
+      "sha256": "ef7706cc229c6e1799de7ddbb0242afce1efb98d8c4af49e487edaffc979398f"
+    },
+    {
+      "path": "api/engine/subscriptionS2/openAiTransport.js",
+      "sha256": "3ac1c9d410ed698ae7aa5d4a8178b75bf62dbaebe5dd8460250791400d6bb62c"
+    },
+    {
+      "path": "api/engine/subscriptionV1/fullPersonQaAccess.js",
+      "sha256": "02b1fdf6ca7cfc929b3b2e4e786425c1624ecce7960e7d75cb25ce9f1fee9032"
+    },
+    {
+      "path": "api/engine/subscriptionV1/internalDevInfrastructure.js",
+      "sha256": "212e182e00e979d99dd5f38649721d2eeb94568c2d27bfe610d35e1ad99fb24a"
+    },
+    {
+      "path": "api/engine/subscriptionV1/liveDemoOpenAiTransport.js",
+      "sha256": "e81a068120bb9913251a3fdaa71d4da7709b20280aafc2948cbbc37bc7287bd9"
+    },
+    {
+      "path": "api/engine/subscriptionV1/paidConversationHistory.js",
+      "sha256": "cd6baf43adbc42c45b6565d3208b1f151e8832571ddd2b4a381c47496c1a86a3"
+    },
+    {
+      "path": "api/engine/subscriptionV1/paidRuntimeHandler.js",
+      "sha256": "1b72ee6ddef74500eb45f8a6e8e446ed412d539f27589c7fc9c5de18f5c3cb10"
+    },
+    {
+      "path": "api/engine/subscriptionV1/paidRuntimeInfrastructure.js",
+      "sha256": "4d97986832a5bfc64fedd1a78fcc752d1356929d4d1c8584a374f79a74c1566f"
+    },
+    {
+      "path": "api/engine/subscriptionV1/paidSubscriberCustody.js",
+      "sha256": "5e9b6ff0d274556d9319f39a93f7ac40f2f3daf5ede9c07f8f3ab19efd26b3e7"
+    },
+    {
+      "path": "api/engine/subscriptionV1/paidSubscriberLoader.js",
+      "sha256": "73e2000665e01ce609a26ac46686850712c90329b4c2d49d127c675534dbcfd6"
+    },
+    {
+      "path": "api/engine/subscriptionV1/pinnedSources.js",
+      "sha256": "8cf799c9fd4165313d8c39a145697b9f2c2852e48e03054ab5e9b6c7ed7ad614"
+    },
+    {
+      "path": "api/engine/subscriptionV1/readOnlySources.js",
+      "sha256": "16fd32d47949064a7d05a8cbc44dac25f3d318c6066f0eb830a8dd9d18f9765e"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceConversationTransport.js",
+      "sha256": "b9fd6e201516aa0426904778a94e07fbc23acee5e40738947ad875e5b7f57b06"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/DJ_REAL_ESTATE_FIELD_DOCTRINE_COMPATIBLE_EXCERPT.md",
+      "sha256": "55b6caeaca491a7de1af8c4ccf7d2b224715266f11a60be2931247b01616735e"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/LOAN_ORIGINATOR_SOURCE_REGISTRY.json",
+      "sha256": "a0e411e21a053578724dd686bab09986c677402c599220bcc6111e41d6162974"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/SOURCE_REGISTRY.json",
+      "sha256": "15043182d49e76620fc76115a88309cbfe2d3ba5f74f2d543be0cb95f1c222ad"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/02_CANONICAL_LO_PRODUCT_DOCTRINE_V1.md",
+      "sha256": "788d76a8c69567e1dfebe9d86e25bd6da3dc90109cd6e7b24634778ed9828c67"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/03_CANONICAL_LO_INTAKE_QUESTION_CONTRACT_V1.md",
+      "sha256": "e3ba0de40e066a2fbd9ad6c4febb95d2509c15d1b4e39c570feb93287aa29f46"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/06_CANONICAL_LO_TERMINOLOGY_REGISTRY_V1.md",
+      "sha256": "c4d9ce4d15d0ffc14c6980cc06034eac36f5410a079bf964b9af57fd2a1b0719"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/07_CANONICAL_LO_EVENT_OBSERVATION_WINDOW_REGISTRY_V1.md",
+      "sha256": "bce6d4d5d3654512d4afbe29221651227c3c71fd665b0dc99ccf74e1bed78fac"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/08_CANONICAL_LO_OSN_CRN_CONTRACT_V1.md",
+      "sha256": "660607f9bd39aea7a330173775f283c74cc89c5a6ec62cb2be052677288870f8"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/09_CANONICAL_LO_SYSTEMS_MEASUREMENT_CONTRACT_V1.md",
+      "sha256": "0996535830dee468c5ea582370d1cd85a26afb9efaeb31c28570b89c41e28bdc"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/10_CANONICAL_LO_GOAL_BACKSOLVE_ECONOMICS_CONTRACT_V1.md",
+      "sha256": "b2f653867ed4f2396d49f4cc3367ee541318b03c65afbb636c2ae19ba5f8bb8b"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/11_CANONICAL_LO_SUFFICIENCY_CONSTRAINT_CONTRACT_V1.md",
+      "sha256": "a3b6f42b562ada19303d98affe946d501b75476dab29126145e149641d8d65a6"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/12_CANONICAL_LO_FOUNDER_ONE_MOVE_CONTRACT_V1.md",
+      "sha256": "ae99620ae3c495271e1caa1955caa89355835b4ec47f65bee9590f9f45b32ec9"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/13_CANONICAL_LO_EVIDENCE_TRUTH_CONTRACT_V1.md",
+      "sha256": "82df2f5c0c98e17b355ac01991e164e1a9533323b27f691f084cde01be222d90"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/14_CANONICAL_LO_BOX_1_PROJECTION_CONTRACT_V1.md",
+      "sha256": "dbd59e1e7c8ce691f7340a49de27157659ee56d3e6587b5b4329f0390429faa9"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/15_CANONICAL_LO_DURABLE_AUTHORITY_MODULE_BINDINGS_V1.md",
+      "sha256": "ea624fea3cf43fd869f1b6a93703bace91bc198c601e0487ae465f38e472fd6e"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/16_CANONICAL_UNIVERSAL_COACHING_TO_LO_TRANSLATION_V1.md",
+      "sha256": "b6e8cc7dcea03c631208f40e311567042bd459c8f8a34f6df58a25eb3b76c19a"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/17_CANONICAL_LO_DOWNSTREAM_PROJECTION_CONTRACT_V1.md",
+      "sha256": "e4dc28d789363912331d3341029b475000cea4dabaa9cc756add076a1371fe5e"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/18_CANONICAL_LO_PRIVACY_COMPLIANCE_SCOPE_BOUNDARY_V1.md",
+      "sha256": "f62ac7fbdf87624d88bb1044c6619b936567077aaa906f083a9e87568a45cda2"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/19_CANONICAL_LO_DOMAIN_EXPERT_UPDATE_ENVELOPE_V1.md",
+      "sha256": "d5414d36babbfb5423831e5a5c8709ad50efa6ce710cc3f994f8ad304d12896f"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/loanOriginatorPin.js",
+      "sha256": "4b5672ed218192cea2a7200845e3d269acfc789aa3bcf870828ac02a417f2c75"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/pin.js",
+      "sha256": "efd7c4a23b47b5781aa3768a5abcb3c04ede58872c8544f11786d911e774e5d7"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "sha256": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "sha256": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "sha256": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "sha256": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "sha256": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "sha256": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "sha256": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "sha256": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "sha256": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "sha256": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "sha256": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "sha256": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "sha256": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "sha256": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "sha256": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182"
+    },
+    {
+      "path": "api/engine/subscriptionV1/sourceLibrary/real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "sha256": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a"
+    },
+    {
+      "path": "api/engine/subscriptionV1/syntheticQaProviderBoundary.js",
+      "sha256": "fa32318936b6630aa2e04cb2ebe35665dbfb050f1a08ad7742028b2b865f6ff0"
+    },
+    {
+      "path": "api/engine/subscriptionV1/syntheticQaProviderBudget.js",
+      "sha256": "047a9bb43fd8e3e5d614b405a8ac124fec5ce1d385918592a87f6567dc937f50"
+    },
+    {
+      "path": "api/engine/subscriptionV1/syntheticQaRuntimeAuth.js",
+      "sha256": "6847532e853123ce1352447d1f412e11d5dfac880006875ac895df39ea96b493"
+    },
+    {
+      "path": "api/engine/subscriptionV1/syntheticQaRuntimeComposition.js",
+      "sha256": "d984cc64af83ac52365022d3613c43eb86dbd3e6883cb4870eabc4f34155b93d"
+    },
+    {
+      "path": "api/engine/subscriptionV1/syntheticQaRuntimeInfrastructure.js",
+      "sha256": "a4a851480ec826e795a45586ad6aac08d94c7a04504beb5ba7a352e737ce7617"
+    },
+    {
+      "path": "api/engine/subscriptionV1/winnerIntake.js",
+      "sha256": "f7be665324073e3c382db68aa33e3938fb88dc0437c6f6427fd28b3fc4a26ec0"
+    },
+    {
+      "path": "api/internal/subscription-v1-runtime.js",
+      "sha256": "aa6064c856d0b2a07a1e643d3740a9a5ee2ec4ad87838de22695371399fcf99d"
+    },
+    {
+      "path": "api/stripe/shared.js",
+      "sha256": "1c94e6d377701980edfa06a34bac067b3e73e524afeed4dabd5ffb6402231108"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/MASTER_ARTIFACT_INDEX_V1.md",
+      "sha256": "204b7747c280b2f69ac31cacca41994d5104a0ab600f37b706c25e7c9c4a9aad"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/cross-authority-interactions/REAL_ESTATE_CROSS_CASSETTE_INTERACTION_REGISTRY_V1.json",
+      "sha256": "6bce35050e50653ddaf1db21e6d4c4a340f2c7a1b6ab8ed21c414cc4dc5f742e"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/cross-authority-interactions/UNIVERSAL_CROSS_AUTHORITY_INTERACTION_REGISTRY_V1.json",
+      "sha256": "43213946903bd65294685d8d727adae6e8e3e63427b0f4b40e91fdd977e4c274"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/dynamic-research-hooks/DYNAMIC_RESEARCH_HOOK_REGISTRY_V1.json",
+      "sha256": "38e756097e7e0d70d14edd69e099f4ff7dd56f37c8a15b16e6097f8142b2b35b"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/dynamic-research-hooks/INTERNET_RESEARCH_AND_GAP_REGISTER_V1.json",
+      "sha256": "c7258bb3b8a34687236fa3b6ccd27fdd562de36473cf77cafaac5ade6fb6fc94"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/evaluation-generalization/CONTRACT_VALIDATION_RECEIPT_V1.json",
+      "sha256": "1080d1c1855d9ccb86531e7f1f7c7a2ed17a70481828fc3a2d1e6181bd084a05"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/evaluation-generalization/GENERALIZATION_VALIDATION_REPORT_V1.md",
+      "sha256": "02286695f0452b2d2dfaeefe1037846e0e20f541bd4833f74bb3d941b9637a74"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/evaluation-generalization/REAL_ESTATE_GENERALIZATION_HARNESS_V1.json",
+      "sha256": "758dfaa64573ad8f5db7714c5624c9251c207dcfe85e5f15db717b1fa65bed01"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/evaluation-generalization/UNIVERSAL_GENERALIZATION_HARNESS_V1.json",
+      "sha256": "bb90823a508349cab367b1ea0a99f17606f717a89c69ca73e1a83efe31597d8f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/five-futures-hooks/FIVE_FUTURES_PROTECTION_VERDICT_V1.md",
+      "sha256": "23260d02e10a8a883efe5965bcf14398fc7e7f6cece2fd95508ef9f9592d3f8a"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/five-futures-hooks/FIVE_FUTURES_STATE_CONTRIBUTION_CONTRACT_V1.json",
+      "sha256": "820809571270c926cb8bf75fd836bc8b7bc222b0e70de438e7f3f2e029a5600b"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/freeze/ARTIFACT_SHA256SUMS_V1.txt",
+      "sha256": "e225183ab3b25074c917bfe77a1f7b6aee5153a2681da4cba757f37568b51706"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/freeze/BA_INTELLIGENCE_AUTHORITY_LIBRARY_MANIFEST_V1.json",
+      "sha256": "3318185d0023dc460f22320b96bff3b025effedcf4b4f1552bd34d0028a53e31"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/freeze/FINAL_FREEZE_REPORT_V1.md",
+      "sha256": "3bfce34e761f43820dd7ffcb9b868ea126b46987c0fc7a0f1963e53374f8d09d"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/freeze/REAL_ESTATE_CASSETTE_MANIFEST_V1.json",
+      "sha256": "e9d2e0f35644f6afcc2135f738eaff8b53076482fe1e5d41b1a92874ad84a7d1"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/freeze/UNIVERSAL_BIBLE_MANIFEST_V1.json",
+      "sha256": "5b6d803cb440c96e71e1be18ab2a62c58ec5a95df0ebfe41593b996ffd24c594"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/handoffs/AI_HANDOFF_V1.json",
+      "sha256": "ce71dd55995012ffff0879b5b519f32047526725d1295177096b108079e61efa"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/handoffs/EXECUTIVE_HANDOFF_V1.md",
+      "sha256": "7d47a50c5e28bbbcb0947e79d0d754da72830fe4d9c074e2c1829d3171d93626"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_01_RESIDENTIAL_REAL_ESTATE_BUSINESS_MODEL_AND_TRANSACTION_ECONOMICS_V1.md",
+      "sha256": "2215c16e3f8196a00e6a2003bf159c3ed4800488bc3679731748dd95062d3f3d"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_02_RELATIONSHIP_MET_DATABASE_ASSET_INTELLIGENCE_V1.md",
+      "sha256": "e61d179601f266db2176918d97a251e5747f181b0976bc6cb43fb6547767c0ec"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_03_SHORT_TERM_MINDSHARE_AND_RELATIONSHIP_QUALIFICATION_V1.md",
+      "sha256": "9a08347b97cff911b537945ce49cae863de46bbfdf989eb861da4c51710adc96"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_04_LONG_TERM_RELATIONSHIP_REPEAT_AND_REFERRAL_SYSTEM_V1.md",
+      "sha256": "238e3d558070e3541e7f9f9ab9b535c80eb11602fb68cc414ed974035758e2ed"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_05_REAL_ESTATE_DEMAND_GENERATION_PORTFOLIO_AND_AGENT_CHANNEL_FIT_V1.md",
+      "sha256": "e68beb286b1f8ef3fa0f725ae54b6e82a3dc2854f6a7c4d6423d9d618a94d157"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_06_LEAD_CONVERSION_FOLLOW_UP_AND_PIPELINE_INTELLIGENCE_V1.md",
+      "sha256": "a23e06558e0fe43f98958f2b0d23496dfe2119b130e630c3b0af08d3ec97889f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_07_GEOGRAPHIC_FARMING_INTELLIGENCE_V1.md",
+      "sha256": "c2b39b4bf25cd27c75c7e0a95875e7e78e9477eebd54cb4a5d30c9688da53efb"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_08_OPEN_HOUSE_OPPORTUNITY_INTELLIGENCE_V1.md",
+      "sha256": "3411d502ab6412a731efce99ff8d13fc8229623eb8debb9f9dc6f35ab76a7d03"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_09_LISTING_BUSINESS_INTELLIGENCE_V1.md",
+      "sha256": "24fa04f7020e30b481ca0d314fcb6dd375b42c46d297bdfafa907623a3f30359"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_10_BUYER_REPRESENTATION_AND_SERVICE_INTELLIGENCE_V1.md",
+      "sha256": "f1820f0fa70da704801d5388a68bbe8a13f046ef6be941578843f592e7ca765b"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_11_RESIDENTIAL_TRANSACTION_AND_CLIENT_DELIVERY_INTELLIGENCE_V1.md",
+      "sha256": "cb16dc14d61b19ce9d25e0b3959e9436a0411f3a843bcb55932bfdaf5aa9c437"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_12_AGENT_OPERATING_RHYTHM_AND_E_TO_P_INTELLIGENCE_V1.md",
+      "sha256": "540a855d1aa7972bc29b981a74d685ce27200b8ab6a5435b62ddc9cb253c1d4d"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_13_AGENT_STAGE_GROWTH_AND_LEVERAGE_READINESS_V1.md",
+      "sha256": "27640af2e98270c46b006ccecac7d238e3239690e529cd5e38af3d0806c4ad5c"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_14_TEAM_ECONOMICS_ORGANIZATION_AND_PRODUCTIVITY_V1.md",
+      "sha256": "cc74ac757935932bf1528b66768d0394440c3e94db8d5b0fc8683d706aea212b"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_15_RECRUITING_ONBOARDING_AND_AGENT_DEVELOPMENT_V1.md",
+      "sha256": "f80c0f01cc9d96d0079391c015ad51f6d2b6cc4e6e1abedbfa64c334e942e182"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/real-estate-cassette/RE_16_FINANCIAL_PROFITABILITY_AND_COMMISSION_TO_WEALTH_TRANSITION_V1.md",
+      "sha256": "6bbe5c7dc64de8a5b85a7e3c00ac9354cc40b5717a79c32d280ecfa37fe66c0a"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/registries/BA_INTELLIGENCE_AUTHORITY_LIBRARY_REGISTRY_V1.json",
+      "sha256": "0cedc55f2888e3a7855dbb85d46d9676a3d9c71eae75e7303a1c1c55fe03f364"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/registries/REAL_ESTATE_CASSETTE_REGISTRY_V1.json",
+      "sha256": "68b48a79241aece3d41f2cd685dd24074dcb1aae321a8ee217f5b05902229812"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/registries/REAL_ESTATE_SCRIPT_REGISTRY_V1.json",
+      "sha256": "2dcca632efd98b5f120cace9ab402e1de6e79e503a7a0d3565f5157354a677c9"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/registries/UNIVERSAL_BUSINESS_BIBLE_REGISTRY_V1.json",
+      "sha256": "48c10f82d19fa1886f61c05bc466cb42c2e26c3eaa4af38942f22561d845385e"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/routing-metadata/BA_AUTHORITY_ROUTER_METADATA_V1.json",
+      "sha256": "945873b2fe51b21bd9736648004d5a5e664f3b1cd425bdac842beb455f8945e1"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/script-conversation-library/REAL_ESTATE_SCRIPT_AND_CONVERSATION_LIBRARY_V1.md",
+      "sha256": "f7b2c6dec03c19260ec5a42cf0b34e75310133a7ef38a0d15b020137aab325e7"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-catalogues/BA_AUTHORITY_LIBRARY_SOURCE_CATALOGUE_V1.json",
+      "sha256": "a4da95751e985385cdfc3463ecc85f796bdb003c9d5d45aff36ea08d7022fbf4"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-catalogues/inherited/REAL_ESTATE_INTERNAL_SOURCE_CATALOGUE_V1.md",
+      "sha256": "b432b1e3616945f14843ada680429a624a373ba612eb8630d596716249ebea67"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-catalogues/inherited/UNIVERSAL_INTERNAL_SOURCE_CATALOGUE_V1.md",
+      "sha256": "5dd6c585b4228e614428df28aac65d55e7f230211aa789c5f45b4c41ca285b3f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-claim-maps/BA_AUTHORITY_LIBRARY_SOURCE_TO_CLAIM_MAP_V1.json",
+      "sha256": "2c7c182e4f61accc9eb4892eed6465e4709437486760ae53d4b06edcf537484b"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-claim-maps/inherited/REAL_ESTATE_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "sha256": "ab37e015190c1c913975c520f2b2ccdd709f081a63c0994b37b958c56df00b81"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/source-claim-maps/inherited/UNIVERSAL_INTERNAL_SOURCE_CLAIM_MAP_V1.json",
+      "sha256": "b774ff2ca2424dff79f7f4cbdfc9d7e6237c837990bc628ce873a9a12563db76"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/team-socket/TEAM_MULTI_PERSON_SOCKET_CONTRACT_V1.json",
+      "sha256": "b8ded4aff85e59059938b08184d50b58ffcdd83d151a946d8768dde1e8670a17"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_01_BUSINESS_MODEL_ARCHITECTURE_AND_VALUE_CREATION_V1.md",
+      "sha256": "1fc00e105b10f36edd457667d0ef471ceb0c83d8809590f4072ea7d3a8fd88e3"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_02_FINANCIAL_AND_UNIT_ECONOMICS_V1.md",
+      "sha256": "4391bd6fd4fd8de4971ed8663eb4a5c259219221107c73985f711a26ab2c445f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_03_CONSTRAINT_AND_THROUGHPUT_DYNAMICS_V1.md",
+      "sha256": "3b6473727968c0588bd8ded0513e76be1a90f4317514ff3b00220b754fce0018"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_04_DEMAND_SYSTEM_ARCHITECTURE_V1.md",
+      "sha256": "c55d11e1796e41c6807380677577dc602567a84e94c754704120c9ed05734f92"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_05_OFFER_POSITIONING_AND_PRICING_POWER_V1.md",
+      "sha256": "f2149e2eb4a74da43127a2fc1e9876185b476a74ff25bf928f31cd3dacb42c22"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_06_SALES_AND_CONVERSION_MECHANICS_V1.md",
+      "sha256": "216bda47fa917bf7582ef16ddb015edaab7066af6ebfdf97cd05c43a350643a9"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_07_CUSTOMER_LIFETIME_RETENTION_AND_REFERRAL_ECONOMICS_V1.md",
+      "sha256": "b644ffbee586ee3baf2b6734ce9a6bb0000b373356f165b391db7b3bbbe1387f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_08_OPERATIONS_SYSTEMS_AND_CAPACITY_UTILIZATION_V1.md",
+      "sha256": "aa9873877f925992ffd435a600c1fe267f3c1639834fbf54100dd899248fcf5f"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_09_ACCOUNTABILITY_OWNERSHIP_AND_EXECUTION_FIDELITY_V1.md",
+      "sha256": "ac7bab7c42e4021e391406e6275ca9a73c3c11df6ead5acd83a39bb265f05c51"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_10_CAPACITY_LEVERAGE_AND_ORGANIZATIONAL_DESIGN_V1.md",
+      "sha256": "3983d9cd544b5f816132a7fd4c14dbd25b5b0d90d1f48aec5f945f36e87a9cf1"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_11_GROWTH_SCALE_AND_RESILIENCE_V1.md",
+      "sha256": "3518b668dbe3758cd1c6cd83920b04111aeeb3e3dc90240c68daaaed9437df19"
+    },
+    {
+      "path": "docs/ba-intelligence-authority-library-v1/universal-bibles/UB_12_TRUTH_MEASUREMENT_AND_EVIDENCE_V1.md",
+      "sha256": "ab1d13f5c70110f4553e2618d1986b672239763d1622f4ca2e23152f9eaa8e63"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/02_CANONICAL_LO_PRODUCT_DOCTRINE_V1.md",
+      "sha256": "788d76a8c69567e1dfebe9d86e25bd6da3dc90109cd6e7b24634778ed9828c67"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/03_CANONICAL_LO_INTAKE_QUESTION_CONTRACT_V1.md",
+      "sha256": "e3ba0de40e066a2fbd9ad6c4febb95d2509c15d1b4e39c570feb93287aa29f46"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/04_CANONICAL_LO_TYPED_ANSWER_EVIDENCE_REGISTRY_V1.json",
+      "sha256": "40f23557b3f7e0f91a3128f7f64b30334488425841a8a545f502255033891982"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/05_CANONICAL_LO_BRANCHING_APPLICABILITY_SKIP_CONTRACT_V1.json",
+      "sha256": "b8d34a2a012c2c9a3c9a2f68011d318d84b74493bc4e821ceab3177d54089f24"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/06_CANONICAL_LO_TERMINOLOGY_REGISTRY_V1.md",
+      "sha256": "c4d9ce4d15d0ffc14c6980cc06034eac36f5410a079bf964b9af57fd2a1b0719"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/07_CANONICAL_LO_EVENT_OBSERVATION_WINDOW_REGISTRY_V1.md",
+      "sha256": "bce6d4d5d3654512d4afbe29221651227c3c71fd665b0dc99ccf74e1bed78fac"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/08_CANONICAL_LO_OSN_CRN_CONTRACT_V1.md",
+      "sha256": "660607f9bd39aea7a330173775f283c74cc89c5a6ec62cb2be052677288870f8"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/09_CANONICAL_LO_SYSTEMS_MEASUREMENT_CONTRACT_V1.md",
+      "sha256": "0996535830dee468c5ea582370d1cd85a26afb9efaeb31c28570b89c41e28bdc"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/10_CANONICAL_LO_GOAL_BACKSOLVE_ECONOMICS_CONTRACT_V1.md",
+      "sha256": "b2f653867ed4f2396d49f4cc3367ee541318b03c65afbb636c2ae19ba5f8bb8b"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/11_CANONICAL_LO_SUFFICIENCY_CONSTRAINT_CONTRACT_V1.md",
+      "sha256": "a3b6f42b562ada19303d98affe946d501b75476dab29126145e149641d8d65a6"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/12_CANONICAL_LO_FOUNDER_ONE_MOVE_CONTRACT_V1.md",
+      "sha256": "ae99620ae3c495271e1caa1955caa89355835b4ec47f65bee9590f9f45b32ec9"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/13_CANONICAL_LO_EVIDENCE_TRUTH_CONTRACT_V1.md",
+      "sha256": "82df2f5c0c98e17b355ac01991e164e1a9533323b27f691f084cde01be222d90"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/14_CANONICAL_LO_BOX_1_PROJECTION_CONTRACT_V1.md",
+      "sha256": "dbd59e1e7c8ce691f7340a49de27157659ee56d3e6587b5b4329f0390429faa9"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/15_CANONICAL_LO_DURABLE_AUTHORITY_MODULE_BINDINGS_V1.md",
+      "sha256": "ea624fea3cf43fd869f1b6a93703bace91bc198c601e0487ae465f38e472fd6e"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/16_CANONICAL_UNIVERSAL_COACHING_TO_LO_TRANSLATION_V1.md",
+      "sha256": "b6e8cc7dcea03c631208f40e311567042bd459c8f8a34f6df58a25eb3b76c19a"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/17_CANONICAL_LO_DOWNSTREAM_PROJECTION_CONTRACT_V1.md",
+      "sha256": "e4dc28d789363912331d3341029b475000cea4dabaa9cc756add076a1371fe5e"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/18_CANONICAL_LO_PRIVACY_COMPLIANCE_SCOPE_BOUNDARY_V1.md",
+      "sha256": "f62ac7fbdf87624d88bb1044c6619b936567077aaa906f083a9e87568a45cda2"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/19_CANONICAL_LO_DOMAIN_EXPERT_UPDATE_ENVELOPE_V1.md",
+      "sha256": "d5414d36babbfb5423831e5a5c8709ad50efa6ce710cc3f994f8ad304d12896f"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/20_CANONICAL_LO_SYNTHETIC_ACCEPTANCE_REGISTRY_V1.json",
+      "sha256": "6a1c1d6362d630fc66693b17c94a713904c4fba558d93e77d723b513b9f2674a"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/21_CANONICAL_LO_BOX_1_SYNTHETIC_PROJECTION_PROOF_V1.json",
+      "sha256": "fce70fed0135f6acf7465bbc72c8084102ef08691a3475f1e209aedf27ae9fb6"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/22_CANONICAL_AUTHORITY_ID_REGISTRY_V1.json",
+      "sha256": "c6e94e348fd487451fd983a473a111da507a3d1b201354c236a0238453bb297c"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/23_AUTHORITY_DEPENDENCY_MANIFEST_V1.json",
+      "sha256": "1d1b5b04705e453716bcd4fbc73ab080f1c4981570ec6df7026b4d0c4b09cc8d"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/24_CANONICAL_AUTHORITY_ROOT_V1.json",
+      "sha256": "46cf05d0f287bdb0823c9c9848bd4b8689d4937c3446a14c14b76d3f762319dc"
+    },
+    {
+      "path": "docs/lo-cassette-2-final-canonical-authority-v1/SOURCE_EQUIVALENCE_RECEIPT.json",
+      "sha256": "ff5b5a05bb7da3d1506c7acc8589d4f9c0329e79788c531bb7ee94d1577791c7"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "2b637fc5d05c15516bbcd11e0357874591679253ed342fac976860e006fba2e6"
+    },
+    {
+      "path": "package.json",
+      "sha256": "6115759515ecd85ec87d7a24e79a1bab4702df6c85c9c83a087c0f8ab904f241"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/index.js",
+      "sha256": "d64816fea414dce6c0e3e0d3cca4de40e8833c0e64c471b1fef82f7accb92f7a"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/plan135.js",
+      "sha256": "05644c6a0e60a57091312bb6a6f886a525b16acb292076686de43db600d0739e"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/probability.js",
+      "sha256": "d79cd1b3d77830fd69856789518891d387cb196d70ef15e310a7d67865f65057"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/projection.js",
+      "sha256": "cfa8f607d7d396d089e66d5c4095dc0249dc8060337fa6f8004c5032e4f3e9f4"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/utils.js",
+      "sha256": "67590fe04fc8de98a6f14ae9278d200a0019c272e688445c40608d1422e4b6d5"
+    },
+    {
+      "path": "src/lib/baProgressiveDisclosureV1/verticalScope.js",
+      "sha256": "0ec3f11b8f1f1238e2d3406ef6cae4baffa9f7b33d5abfbaf6c432ea946e1738"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/contracts.js",
+      "sha256": "7dd03724409d990b5a1ffce92d3663fc332ae419617232a281cff7196b5cbaf7"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/index.js",
+      "sha256": "775d8ccc2fc8e26aac331b73314120bad5a7766a8650c9a1e23488f8c23ce4be"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/loanOriginatorCassette.js",
+      "sha256": "bd97b106f75c0c35ef79b6870c4c2310046767d5335d7fad02f083d1a78b972f"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/loanOriginatorEvidence.js",
+      "sha256": "3551389e33fa210d4e04aac640d2edb83a0e093c6d46a94b223321dafc89d52f"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/loanOriginatorQuestionContract.generated.json",
+      "sha256": "f9a1ccd1712ef5649eec17e5291a9aefaaa741654b14c9faf5dbae755a2267d5"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/realEstateCassette.js",
+      "sha256": "246161c0ddf7958f9080d9795739c31eecbe8dc287d4af82c30d7766185eac78"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/registry.js",
+      "sha256": "8c5898125b8e1ba7d423236a8dbf0e4371a780161051c69ae45255cd08073af1"
+    },
+    {
+      "path": "src/lib/baVerticalCassettesV1/subscriptionAdapter.js",
+      "sha256": "0e2c79211512c660e2e68626d78e5c774072c332fee2e1f9fd6c72116019bf36"
+    },
+    {
+      "path": "src/lib/canonicalSha256.js",
+      "sha256": "5e21bb9a3bb53604630fc52c0c61d88100860b2b69c4c36a5ba2af320b03134e"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/constants.js",
+      "sha256": "b106e7f488c09596780724df2e217cb7c8b737adcec130a23627e0b2975624ae"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/hashing.js",
+      "sha256": "a062c0ff9434416f371c4601a6e07402384589bcaeb01aace5c4a6e3adcffa8e"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/runtime/causalBoundaries.js",
+      "sha256": "ad1ee1fa1ab295473ac221c4d22f96e1d05f359e10068ff32bb6a4bd65b5ef4f"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/runtime/outcomeValidation.js",
+      "sha256": "42c8e9f94d77fad3c0be0174a08af7be376b9d9ffe6c408814159d11cda70c72"
+    },
+    {
+      "path": "src/lib/intelligenceFabric/validation.js",
+      "sha256": "b57b6885c73a8af4eab6343e1813b0eaf671ac884f47a84f94ba7377bce20755"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/constants.js",
+      "sha256": "39cf6fd3a3e02fcb5dd3bb6dfbb0169216f224578255bd289317481d92deaba4"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/contracts.js",
+      "sha256": "1b2e9996fc5dc48bea1a3c0d5319f9df26c759fa03f78c5a233bed7e012c39fe"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/domainContracts.js",
+      "sha256": "0efa265f0ceb36706d1260160e010545e8499dcd4ebe10e7f507ce4c114bcc9b"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/engine.js",
+      "sha256": "048fd27794b6eb750c812381246ac183a4a03e84b0785ecffd30f69bc4ca7154"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/humanRealization.js",
+      "sha256": "efd258c9577b215cb240ce8c5330a5b388dd0641155043b1223d3356dae05016"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/index.js",
+      "sha256": "98798e98b007056c2e61b81987504399b8f2c1ed2a9fd8ebe9227cc3abd39c96"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/libraryRegistry.js",
+      "sha256": "64920fca755b190734e01fe3059e29d61cf7fccdf2224f0f4a2306e6f39a1c5b"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/renderingAssembly.js",
+      "sha256": "12b801cc2a0eed123ab40944293d9e582f135b4707aeb4d280e6dcef88e03c32"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/richSyntheticFixture.js",
+      "sha256": "87dc5303a4150bc5ba000644c5823941062a9872e61ee859698e7cda8089db3a"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/runtimeOrchestrator.js",
+      "sha256": "b43002c2baaf96bf67e1da376524f670d6fd8dcf332b3e1063ab400f2db54629"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/schemas.js",
+      "sha256": "98ddb22c2203e746a4b860818cdb998a330d964be5beebc25379bd16a826d2ac"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/surfaceProjector.js",
+      "sha256": "0b340afad5ac663054055198e68091e41b72671dc087d8ad92d85d38bd8064d8"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/syntheticFixtures.js",
+      "sha256": "c26a5e10100c7c03d701912c7282e5bb2d199b797ab677591f34ad8c0201b0a3"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/topProjection.js",
+      "sha256": "8cbe03ac81f28c3955bc706b4e62ab2595ab6043745c0f7bc256f974f7916292"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/truthValidator.js",
+      "sha256": "2ef9e6a27fac5d9afc2eda52f907a341d0b5d36926b4f8e0ff88e5d4ed3312de"
+    },
+    {
+      "path": "src/lib/newBosPersonalityDnaV1/visualBosModel.js",
+      "sha256": "2aa86628bc83d0d9068ccf120cfc1d15ddc1480b393f02f034d7a39373bfe5b6"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/contracts.js",
+      "sha256": "6280442114f9abb0fbf686e878d461910b2a719caa5beed4ef3adc8906f881eb"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/productBoundary.js",
+      "sha256": "77bd7f806f59df7c6753bd0d6b34ed085a7be7ed3c34d483fc190621d644af27"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/profileOwnership.js",
+      "sha256": "ef4591aa7432dc132a5ee4ea4b0863ce2099cce48649d426ffd0b5e53111f5a2"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/publicSiteOrigin.js",
+      "sha256": "b147453c9833a05294aa7889fe764277a0b29e5f5318c64a2e40827fc5148576"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/redisStore.js",
+      "sha256": "0cdae02875ad198ad6d2d8d3422e7746d5ad3f972cf4b08c0d4b37bbc79a58c6"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/resendInquiryTransport.js",
+      "sha256": "c7cf9a1683f4e3289ee2430d9d14c80c2f8c3d8d53a647cdfa349aa753ac3dbf"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/resendOwnershipTransport.js",
+      "sha256": "c64bb6b863b47dcb7c8e52d94dc8551e7f8be7a62c5c77813ef3a849171b1c04"
+    },
+    {
+      "path": "src/lib/publicSiteAirlockV1/security.js",
+      "sha256": "7685d709ef9cc336786e9b6cf7d957b9c0424beacdb2f496eeeeee6e61df1fad"
+    },
+    {
+      "path": "src/lib/recruitingV2/creationLanguage.js",
+      "sha256": "9ace7f8611b408e9e8ce185188d2e4ee2ad4b05263cbc5f4edd46595c8b490ec"
+    },
+    {
+      "path": "src/lib/subscriptionS2/guContract.js",
+      "sha256": "3b944be242bd2c5e1136f4ee4f5127075c33b8d0a2fbd660cc089658b467e193"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/benchmark.js",
+      "sha256": "9a3b0b16e366eb2220466997e1cf796641d1c2cd31f3190ed2ec6d9b327613ba"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/constants.js",
+      "sha256": "3bed3d99179a44ce44cf51cb377527ac6147e3dee4c3ee5b72221d78bbb789a3"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/contracts.js",
+      "sha256": "833c6a9898a81f2ebf3033e4a46f0fd7a581bc34bf9e91b6e81efadf35d88432"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/doctrine.js",
+      "sha256": "74fe39b8fd459007414da6498eaa66f27a6a9485e5ff6a25e0492509e858fb85"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/externalEvidenceBroker.js",
+      "sha256": "663066b71547488171b5628b3e1d731935c36a9281e2099d89772a095c11f247"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/index.js",
+      "sha256": "f162feb12e44aabea7b42cf7dde8a7255bfb3a9118625368be327f13c05c5fa0"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/privacyMembrane.js",
+      "sha256": "a0c0eccd8d093aedf925a94fa7d9c04e4ef09c2d97a622a39bae2b973805ae36"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw04/providerRuntime.js",
+      "sha256": "ec6eb38d82770fe025c3ac340788fe7e069a5cb566282963306049a6d8f19580"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/constants.js",
+      "sha256": "1b2b1afce963c57650e988bae20d03e20ae9cc31f93b97f6e12c0993c284148d"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/contracts.js",
+      "sha256": "787c87204b48469e50675b16d0d124f0e28e13229fe355136982cae061ebf843"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/correctionTargets.js",
+      "sha256": "eec0be3c99ca04e31e0ca2d60181b969f75aa5efbc245628091dbc975c1e7b07"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/personalRslMutation.js",
+      "sha256": "5e8061220f0ee0ac30178603124d4a6e07dbde11b5863d92741b7249f4d4425b"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/recomputation.js",
+      "sha256": "c9e99b30d28ca57f242473a842d57a8147e7cf0f52dfb75d278ff47695120acc"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw05/store.js",
+      "sha256": "5ff15027b2e65cd889d96c291331ab34bdbfb7ece81a6f3097774e7726a829d9"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw06/conversationController.js",
+      "sha256": "45cd884c4ac6458b3317161747104a293720c2f50023293e3eb28f7b57e0614c"
+    },
+    {
+      "path": "src/lib/subscriptionV1/afw06/viewModelProjection.js",
+      "sha256": "5cefd4a581e434acc627b2df668bdcaab98e5b2422811e9be4b2c91047702572"
+    },
+    {
+      "path": "src/lib/subscriptionV1/coachingState.js",
+      "sha256": "b257120066e749a21fd3976cd74a9e705aa1c3db1fe04f84b40496be382489f2"
+    },
+    {
+      "path": "src/lib/subscriptionV1/constants.js",
+      "sha256": "7c2d39c477ef72c3d93e9bd0e8a58c22827b3e199115aaeb313647e3148b35e9"
+    },
+    {
+      "path": "src/lib/subscriptionV1/contracts.js",
+      "sha256": "3267ea9fe485c14b5a8986e372a8b5044532bcb14429d435ad890a4b693b95df"
+    },
+    {
+      "path": "src/lib/subscriptionV1/entitlement.js",
+      "sha256": "b0f6f62dfeaa636bbb502157fb810f984f33780ceb0dbb1143a4e314a5472f2c"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/catastrophicIntegrity.js",
+      "sha256": "4c98711ac190dba9e9efd2e619b28bddc852058fa8c34342bf86e9af73e63318"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/constants.js",
+      "sha256": "3dbf988ca358de87de065fd667a90103f131a4a5339075b636cae95a65071063"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/contracts.js",
+      "sha256": "b34eec9163f4babef91631adcd28f1ca948351ae4b33097ee7380d955cfe0ea8"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/livingRelationshipRuntime.js",
+      "sha256": "f6acfd401520f093fa3a8c74f2c4d39d2a3836231227f6b2ea3cfeee8d858b4e"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/providerSeams.js",
+      "sha256": "aa40121d1ce351fe138a71ff220c9841248c33bf9cd3ee2795252e1fa65efdaf"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/purposeRankedContext.js",
+      "sha256": "289294c0a00c028e2c9bbade06cf2ed485966611ae4ee2253faad79211741cc4"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/relationshipContinuity.js",
+      "sha256": "fdd1472f067e7f7d9dfcd1b5d4134839c68349c5cb461598b1154f5d7cd272bd"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/sessionEpisode.js",
+      "sha256": "5f1b2f4a4276d626f6ecda7258e8b77a9b978894901ad23ad911834d5c9c42c9"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/temporalState.js",
+      "sha256": "f230085582fa8a92bbfee3cfcc839fac0b4f73259a1079fd6e9c22c1171c9602"
+    },
+    {
+      "path": "src/lib/subscriptionV1/freeGptV2/wholeCoachingPacket.js",
+      "sha256": "e9c4b2c8edb2565fac2cf4bfdd44ba3273711d13d7a270a80e960973944676aa"
+    },
+    {
+      "path": "src/lib/subscriptionV1/lineage.js",
+      "sha256": "d8350c27801d07b109ed87f5041ed550479ed76d114deedca90782842f93ac4d"
+    },
+    {
+      "path": "src/lib/subscriptionV1/personalRsl.js",
+      "sha256": "a168bad44f66dfe422177fb9b2663355cb012415d93e5346e0425c2dc9c608d6"
+    },
+    {
+      "path": "src/lib/subscriptionV1/retrieval.js",
+      "sha256": "f0f4a280d33d8929477da1d2b624f4a75345a09b2c73ac727d49e28a05db9a10"
+    },
+    {
+      "path": "src/lib/subscriptionV1/sessionLearning.js",
+      "sha256": "d794cec9ffb203c111f7da3678bc56d6fba1480b1ec782498301f76d3d89bafc"
+    },
+    {
+      "path": "src/lib/subscriptionV1/sessionLedger.js",
+      "sha256": "fd4bc4d3b79af3bef09866a222f87ead4e0c9465258d7208ca6abb77a4b2db5e"
+    },
+    {
+      "path": "src/lib/subscriptionV1/universalCandidates.js",
+      "sha256": "74e370aa45b4b89c3c8213f9bda88e721bfccee35c72deb5f9ab479509cd8c32"
+    },
+    {
+      "path": "src/lib/wholeBusinessModelV1/authorityLibrary.js",
+      "sha256": "a23574fe7035cf7698885358c7ffbdbc99dafcb49329b8920e465a75df4e4f06"
+    },
+    {
+      "path": "src/lib/wholeBusinessModelV1/canonical.js",
+      "sha256": "f17deffb09626d7cc796d03ee47e35934e0539212a7f507c30287609f7fc04db"
+    },
+    {
+      "path": "src/lib/wholeBusinessModelV1/constants.js",
+      "sha256": "1628e88608c7c1b07f4e6f583d9bcd6c5be22583e3681621e938d9e21327f075"
+    },
+    {
+      "path": "src/lib/wholeBusinessModelV1/errors.js",
+      "sha256": "5995ec30940371d040f7dc5384552b8b18040786f40d4798e34144874318c564"
+    },
+    {
+      "path": "src/lib/wholeBusinessModelV1/loanOriginatorAuthorityLibrary.js",
+      "sha256": "d18aeb697c7027ec750acb6f7ce966ed2899ff77f3c4f4a13fdd257b4d6fb7bd"
+    },
+    {
+      "path": "vercel.json",
+      "sha256": "04553e9e3d5af5d5c2910fdee9b4252747a2ca412fc6bd946b0c1b71a3f71307"
+    }
+  ]
+}

@@ -1,10 +1,8 @@
 import { hashCanonicalJson } from '../../src/lib/intelligenceFabric/hashing.js';
-import {
-  coachingEpisodeProjection,
-  createRelationshipEpisodeEvent,
-  entitlementAllowsCoaching,
-  validateSessionCloseOutputV1,
-} from '../../src/lib/subscriptionV1/index.js';
+import { entitlementAllowsCoaching } from '../../src/lib/subscriptionV1/entitlement.js';
+import { createRelationshipEpisodeEvent } from '../../src/lib/subscriptionV1/lineage.js';
+import { validateSessionCloseOutputV1 } from '../../src/lib/subscriptionV1/freeGptV2/contracts.js';
+import { coachingEpisodeProjection } from '../../src/lib/subscriptionV1/freeGptV2/sessionEpisode.js';
 import { SESSION_LEARNING_FIELDS, summarizeSessionLearning } from '../../src/lib/subscriptionV1/sessionLearning.js';
 import {
   appendDiagnostics,
@@ -24,6 +22,11 @@ import {
 } from '../engine/subscriptionV1/internalDevInfrastructure.js';
 import { createSubscriptionS2GuRuntime } from '../engine/subscriptionS2/guRuntime.js';
 import { hasDarrenDemoAuthority } from '../engine/subscriptionS2/demoSubjectAuthority.js';
+import {
+  authenticateSyntheticQaRuntimeRequest,
+  syntheticQaRuntimeEnabled,
+} from '../engine/subscriptionV1/syntheticQaRuntimeAuth.js';
+import { fullPersonQaCapabilityCookiePresent } from '../engine/subscriptionV1/fullPersonQaAccess.js';
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
@@ -363,7 +366,7 @@ function deterministicMapChangeReceipt({ loaded, keys, mapDelta, providerError }
   };
 }
 
-async function generateS2Gu({ event, loaded, keys, sessionLearning = null, mapDelta = null, currentExchange = null, env = globalThis.process?.env || {} }) {
+export async function generateS2Gu({ event, loaded, keys, sessionLearning = null, mapDelta = null, currentExchange = null, env = globalThis.process?.env || {} }) {
   const current = loaded.controller.current();
   if (!current.ok) throw new Error(current.code || 'SUBSCRIPTION_S2_CURRENT_STATE_REQUIRED');
   const packet = loaded.controller.wholeUnderstandingPacket();
@@ -472,6 +475,8 @@ export function createSubscriptionV1RuntimeHandler({
   resolveKeys = internalDevKeys,
   resolvePreloadScope = null,
   firstSessionSyntheticOnly = true,
+  issueCsrf = issueRuntimeCsrf,
+  consumeCsrf = consumeRuntimeCsrf,
   env = globalThis.process?.env || {},
 } = {}) {
   return async function handler(req, res) {
@@ -516,7 +521,7 @@ export function createSubscriptionV1RuntimeHandler({
     }
 
     if (req.method === 'GET' && req.query?.view === 'diagnostics') {
-      const csrf_token = await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash });
+      const csrf_token = await issueCsrf({ redis, capabilityHash: auth.capability_hash });
       const diagnostics = await readDiagnostics({ redis, key: keys.diagnostics });
       return send(res, 200, { ok: true, code: 'SUBSCRIPTION_V1_DIAGNOSTICS_READY', csrf_token, diagnostics, raw_provider_payloads: false });
     }
@@ -539,7 +544,7 @@ export function createSubscriptionV1RuntimeHandler({
       if (!availability.session || availability.session.state === 'RESERVED') {
         const firstSessionEstablished = Boolean(firstRelationshipEvent.event);
         const allowanceExhausted = firstSessionEstablished && availability.allowance.standard_slots_available < 1;
-        const csrf_token = allowanceExhausted ? null : await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash });
+        const csrf_token = allowanceExhausted ? null : await issueCsrf({ redis, capabilityHash: auth.capability_hash });
         return send(res, 200, {
           ok: true,
           code: allowanceExhausted ? 'SUBSCRIPTION_V1_RELATIONSHIP_READY_ALLOWANCE_EXHAUSTED' : 'SUBSCRIPTION_S2_PRE_SESSION_READY',
@@ -571,7 +576,7 @@ export function createSubscriptionV1RuntimeHandler({
         initial_conversation: [],
         env,
       });
-      const csrf_token = await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash });
+      const csrf_token = await issueCsrf({ redis, capabilityHash: auth.capability_hash });
       return send(res, 200, {
         ok: true,
         code: 'SUBSCRIPTION_V1_PRODUCTION_INTENDED_SUBSCRIBER_READY',
@@ -593,9 +598,9 @@ export function createSubscriptionV1RuntimeHandler({
     }
 
     if (req.method !== 'POST') return send(res, 405, { ok: false, code: 'METHOD_NOT_ALLOWED' });
-    const csrfOk = await consumeRuntimeCsrf({ redis, capabilityHash: auth.capability_hash, proof: req.headers?.['x-subscription-runtime-csrf'] });
+    const csrfOk = await consumeCsrf({ redis, capabilityHash: auth.capability_hash, proof: req.headers?.['x-subscription-runtime-csrf'] });
     if (!csrfOk) return send(res, 403, { ok: false, code: 'SUBSCRIPTION_V1_RUNTIME_CSRF_DENIED' });
-    const nextCsrf = await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash });
+    const nextCsrf = await issueCsrf({ redis, capabilityHash: auth.capability_hash });
     const action = String(req.body?.action || '');
 
     if (['START_MY_FIRST_SESSION', 'START_SESSION'].includes(action)) {
@@ -1043,7 +1048,7 @@ export function createSubscriptionV1RuntimeHandler({
       customer_evidence_logged: false,
     }));
     let csrf_token = null;
-    try { if (auth?.ok) csrf_token = await issueRuntimeCsrf({ redis, capabilityHash: auth.capability_hash }); } catch { csrf_token = null; }
+    try { if (auth?.ok) csrf_token = await issueCsrf({ redis, capabilityHash: auth.capability_hash }); } catch { csrf_token = null; }
     return send(res, 503, { ok: false, code: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE', detail: code, csrf_token, mutation_performed: false });
   }
   };
@@ -1061,19 +1066,59 @@ async function defaultPaidRuntimeFactory({ redis, env }) {
   return createPaidSubscriptionV1RuntimeComposition({ redis, env });
 }
 
+async function defaultSyntheticQaRuntimeFactory({ redis, env }) {
+  const { createSyntheticQaSubscriptionV1RuntimeComposition } = await import('../engine/subscriptionV1/syntheticQaRuntimeComposition.js');
+  return createSyntheticQaSubscriptionV1RuntimeComposition({ redis, env });
+}
+
 export function createSubscriptionV1RuntimeEntry({
   ordinary = ordinaryHandler,
   getRedis = getSubscriptionRedis,
   authenticateInternal = authenticateInternalDevRequest,
+  authenticateSyntheticQa = authenticateSyntheticQaRuntimeRequest,
   blindDemoHandler = defaultBlindDemoHandler,
   paidRuntimeFactory = defaultPaidRuntimeFactory,
+  syntheticQaRuntimeFactory = defaultSyntheticQaRuntimeFactory,
   env = globalThis.process?.env || {},
 } = {}) {
   return async function subscriptionRuntimeEntry(req, res) {
     let redis;
     let auth = null;
+    if (syntheticQaRuntimeEnabled(env)) {
+      const syntheticQaSelected = fullPersonQaCapabilityCookiePresent(req);
+      let syntheticQaAuth = null;
+      try {
+        redis = getRedis(env);
+        syntheticQaAuth = await authenticateSyntheticQa({ redis, req, env });
+      } catch {
+        syntheticQaAuth = {
+          ok: false,
+          status: 503,
+          code: 'SUBSCRIPTION_V1_SYNTHETIC_QA_RUNTIME_UNAVAILABLE',
+        };
+      }
+      if (syntheticQaAuth?.ok === true) {
+        try {
+          const syntheticQa = await syntheticQaRuntimeFactory({ redis, env });
+          return await syntheticQa(req, res);
+        } catch {
+          return send(res, 503, {
+            ok: false,
+            code: 'SUBSCRIPTION_V1_SYNTHETIC_QA_RUNTIME_UNAVAILABLE',
+          });
+        }
+      }
+      if (syntheticQaSelected) {
+        const status = Number(syntheticQaAuth?.status);
+        return send(res, [401, 409, 503].includes(status) ? status : 503, {
+          ok: false,
+          code: syntheticQaAuth?.code || 'SUBSCRIPTION_V1_SYNTHETIC_QA_RUNTIME_UNAVAILABLE',
+          reentry_required: status === 401 || status === 409,
+        });
+      }
+    }
     try {
-      redis = getRedis(env);
+      redis ||= getRedis(env);
       auth = await authenticateInternal({ redis, req });
     } catch {
       // A customer entrance must still be allowed to reach the separately
@@ -1091,7 +1136,7 @@ export function createSubscriptionV1RuntimeEntry({
       if (!redis) return send(res, 503, { ok: false, code: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE' });
       try {
         const paid = await paidRuntimeFactory({ redis, env });
-        return paid(req, res);
+        return await paid(req, res);
       } catch {
         return send(res, 503, { ok: false, code: 'SUBSCRIPTION_V1_PAID_RUNTIME_UNAVAILABLE' });
       }

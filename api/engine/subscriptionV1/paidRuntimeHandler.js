@@ -36,6 +36,60 @@ const PRIVATE_IDENTIFIER_KEYS = new Set([
 ]);
 
 const SHA256_PATTERN = /^[a-f0-9]{64}$/u;
+const PRIVATE_RUNTIME_FAMILY_TEXT = /\b(?:openai|xai|anthropic|codex|claude(?:[\s._-]*[a-z0-9]+)*|deepseek(?:[\s._-]*[a-z0-9]+)*|gemini(?:[\s._-]*[a-z0-9]+)*|gpt(?:[\s._-]*[a-z0-9]+)*|grok(?:[\s._-]*[a-z0-9]+)*|llama(?:[\s._-]*[a-z0-9]+)*|mistral(?:[\s._-]*[a-z0-9]+)*|qwen(?:[\s._-]*[a-z0-9]+)*|o[1-9](?:[\s._-]*[a-z0-9]+)*)\b/iu;
+const PRIVATE_RUNTIME_ASSIGNMENT_TEXT = /\b(?:(?:internal\s+)?assignment\s*:\s*(?:model|provider|engine|backend|deployment)|(?:assigned|routed)\s+(?:to|through|via)\b|(?:inference|runtime)\s+(?:backend|engine|provider|model|deployment)\b|(?:backend|engine|deployment)\s+(?:assignment|selection|arm|route|routing)\b|(?:provider|model)\s+(?:assignment|selection|arm|route|routing)\b|(?:provider|model)\s+[a-z0-9._-]+\s+(?:handled|served|generated|processed)\b)/iu;
+const PRIVATE_RUNTIME_DIRECT_ASSIGNMENT_TEXT = /\b(?:(?:we\s+)?(?:used|selected|chose)\s+(?:the\s+)?(?:model|provider|engine|backend|deployment)\b|(?:model|provider|engine|backend|deployment)\s+(?:used|selected|chosen)\s*:?|(?:model|provider|engine|backend|deployment)\s*:\s*[a-z0-9]|(?:generated|served|processed|handled)\s+by\s+(?:the\s+)?(?:model|provider|engine|backend|deployment)\b|open\s+ai\s+deployment\b)/iu;
+const PRIVATE_RUNTIME_DECLARATIVE_ASSIGNMENT_TEXT = /\b(?:(?:model|provider|backend|engine|deployment|runtime)\s+(?:is|was)\s+[a-z0-9]|(?:using|uses|chosen|assigned)\s+(?:the\s+)?(?:model|provider|backend|engine|deployment|runtime)\b|(?:running\s+on|powered\s+by)\s+(?:the\s+)?(?:model|provider|backend|engine|deployment|runtime)\b|runtime\s*:\s*[a-z0-9]|(?:generated|served|processed|handled)\s+by\s+[a-z0-9._-]+\s+(?:model|provider|backend|engine|deployment)\b|[a-z0-9._-]+\s+(?:model|provider|backend|engine|deployment)\s+(?:handled|served|generated|processed)\b)/iu;
+const PRIVATE_RUNTIME_JOINED_ASSIGNMENT_TEXT = /\b(?:(?:model|provider|backend|engine|deployment|runtime)\s*(?:=|-|\/)\s*[a-z0-9][a-z0-9._-]*|(?:via|using|used|uses|run|runs|chose|chosen|current|our|selected|assigned|on|running\s+on|powered\s+by)\s+(?:the\s+)?(?:(?:model|provider|backend|engine|deployment|runtime)\s+[a-z0-9][a-z0-9._-]*|[a-z0-9][a-z0-9._-]*\s+(?:model|provider|backend|engine|deployment|runtime))\b)/iu;
+const PRIVATE_RUNTIME_REPLACEMENT = 'Private runtime configuration is not exposed.';
+const OPAQUE_PUBLIC_CONTROL_FIELDS = new Set(['csrf_token']);
+const OPAQUE_PUBLIC_CONTROL_VALUE = /^[A-Za-z0-9_-]{32,512}$/u;
+const SAFE_PUBLIC_BUSINESS_RUNTIME_KEYS = new Set([
+  'business_model',
+  'business_model_analysis',
+  'business_engine',
+  'business_growth_engine',
+  'causal_model',
+  'confidence_engine',
+  'deployment_of_staff_capacity',
+  'engine_of_business_growth',
+  'growth_engine',
+  'model_home',
+  'model_home_sales',
+  'model_date',
+  'operating_model',
+  'operating_model_design',
+  'operating_engine',
+  'primary_engine',
+  'service_provider',
+  'service_provider_relationships',
+  'staff_deployment',
+  'staff_deployment_capacity',
+  'view_model',
+]);
+const PRIVATE_RUNTIME_CONFIG_KEY_TOKEN = /(?:^|_)(?:model|provider|backend|engine|deployment|runtime|inference)(?:$|_)/u;
+
+function containsPrivateRuntimeAssignmentText(value) {
+  const withoutSafeBusinessLanguage = value
+    .replace(/\bbusiness\s+model\b/giu, 'business construct')
+    .replace(/\boperating\s+model\s+design\b/giu, 'operating construct design')
+    .replace(/\bmodel\s+home\s+sales\b/giu, 'residential home sales')
+    .replace(/\bservice\s+provider\s+relationships\b/giu, 'service partner relationships')
+    .replace(/\bdeployment\s+of\s+staff\s+capacity\b/giu, 'allocation of staff capacity')
+    .replace(/\bengine\s+of\s+business\s+growth\b/giu, 'driver of business growth');
+  return PRIVATE_RUNTIME_FAMILY_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_DIRECT_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_DECLARATIVE_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage)
+    || PRIVATE_RUNTIME_JOINED_ASSIGNMENT_TEXT.test(withoutSafeBusinessLanguage);
+}
+
+function opaquePublicControlValue(value, path) {
+  return typeof value === 'string'
+    && path.length === 1
+    && OPAQUE_PUBLIC_CONTROL_FIELDS.has(path[0])
+    && OPAQUE_PUBLIC_CONTROL_VALUE.test(value);
+}
 
 function setPrivateHeaders(res) {
   res.setHeader('Cache-Control', 'no-store, private, max-age=0');
@@ -44,10 +98,19 @@ function setPrivateHeaders(res) {
   res.setHeader('Referrer-Policy', 'same-origin');
 }
 
+function normalizePrivateRuntimeKey(key) {
+  return String(key)
+    .replace(/([a-z0-9])([A-Z])/gu, '$1_$2')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '_')
+    .replace(/^_+|_+$/gu, '');
+}
+
 function sensitiveDetailKey(key) {
   const normalized = String(key).toLowerCase();
-  return normalized.includes('provider')
-    || normalized === 'authority'
+  const normalizedRuntimeKey = normalizePrivateRuntimeKey(key);
+  if (SAFE_PUBLIC_BUSINESS_RUNTIME_KEYS.has(normalizedRuntimeKey)) return false;
+  return normalized === 'authority'
     || normalized === 'auth_bindings'
     || normalized === 'membership_binding'
     || normalized === 'membership_context'
@@ -61,10 +124,7 @@ function sensitiveDetailKey(key) {
     || (normalized.startsWith('stripe_') && normalized !== 'stripe_mutation')
     || normalized === 'architecture'
     || normalized.endsWith('_architecture')
-    || normalized === 'model'
-    || normalized === 'models'
-    || normalized.startsWith('model_')
-    || normalized.includes('_model_assignment')
+    || PRIVATE_RUNTIME_CONFIG_KEY_TOKEN.test(normalizedRuntimeKey)
     || normalized === 'context_selection'
     || ['internal_source_calls', 'internal_source_receipts', 'source_library',
       'transport_trace', 'governed_reference_material'].includes(normalized)
@@ -77,6 +137,10 @@ function sensitiveCode(value) {
 }
 
 function copyPublicValue(value, seen, path = []) {
+  if (opaquePublicControlValue(value, path)) return value;
+  if (typeof value === 'string' && containsPrivateRuntimeAssignmentText(value)) {
+    return PRIVATE_RUNTIME_REPLACEMENT;
+  }
   if (value === null || typeof value !== 'object') return value;
   if (seen.has(value)) throw new Error('SUBSCRIPTION_V1_PAID_RESPONSE_CYCLE_DENIED');
   seen.add(value);
@@ -88,7 +152,7 @@ function copyPublicValue(value, seen, path = []) {
   const entries = [];
   for (const [key, child] of Object.entries(value)) {
     const normalized = key.toLowerCase();
-    if (sensitiveDetailKey(normalized) || PRIVATE_IDENTIFIER_KEYS.has(normalized)) continue;
+    if (sensitiveDetailKey(key) || PRIVATE_IDENTIFIER_KEYS.has(normalized)) continue;
     if (/^(?:auth|authority|internal|private)_.*(?:id|key|hash|ref)$/u.test(normalized)) continue;
     if (normalized === 'source_event_ids' || normalized === 'provider_subject' || normalized === 'provider_subject_hash') continue;
     if (normalized === 'code' && sensitiveCode(child)) {
@@ -105,7 +169,7 @@ function copyPublicValue(value, seen, path = []) {
   return Object.fromEntries(entries);
 }
 
-function paidGetProjection(payload) {
+export function paidGetProjection(payload) {
   const projected = { ...payload };
   delete projected.demo_subject;
   delete projected.demo_subject_switching;
@@ -129,14 +193,23 @@ function paidFailureProjection(payload) {
   return payload;
 }
 
-export function redactPaidRuntimePayload(payload, { successful_get = false } = {}) {
+export function redactPaidRuntimePayload(payload, {
+  successful_get = false,
+  successful_get_projector = paidGetProjection,
+  failure_projector = paidFailureProjection,
+} = {}) {
   const projected = successful_get && payload?.ok === true
-    ? paidGetProjection(payload)
-    : paidFailureProjection(payload);
+    ? successful_get_projector(payload)
+    : failure_projector(payload);
   return copyPublicValue(projected, new Set());
 }
 
-function responseBoundary(res, { successfulGet, transform }) {
+function responseBoundary(res, {
+  successfulGet,
+  successfulGetProjector,
+  failureProjector,
+  transform,
+}) {
   let statusCode = Number(res.statusCode || 200);
   let pending = '';
   let queue = Promise.resolve();
@@ -155,11 +228,16 @@ function responseBoundary(res, { successfulGet, transform }) {
     return enqueue(async () => {
       const clean = redactPaidRuntimePayload(value, {
         successful_get: successfulGet && originalStatus >= 200 && originalStatus < 300,
+        successful_get_projector: successfulGetProjector,
+        failure_projector: failureProjector,
       });
       const result = await transform(clean, originalStatus);
+      const finalPayload = redactPaidRuntimePayload(result.payload, {
+        failure_projector: failureProjector,
+      });
       res.status(result.status);
-      if (json && !streaming) res.json(result.payload);
-      else res.write(`${JSON.stringify(result.payload)}\n`);
+      if (json && !streaming) res.json(finalPayload);
+      else res.write(`${JSON.stringify(finalPayload)}\n`);
     });
   }
 
@@ -257,6 +335,12 @@ export function createPaidSubscriptionV1RuntimeHandler({
   resolveEntitlement,
   resolveKeys,
   generateGu,
+  resolveAccessContext = paidMembershipContext,
+  projectSuccessfulGet = paidGetProjection,
+  projectFailure = paidFailureProjection,
+  firstSessionSyntheticOnly = false,
+  issueCsrf = null,
+  consumeCsrf = null,
   env = {},
 } = {}) {
   if (!redis || typeof redis !== 'object') throw new Error('SUBSCRIPTION_V1_PAID_REDIS_REQUIRED');
@@ -264,6 +348,13 @@ export function createPaidSubscriptionV1RuntimeHandler({
   requireFunction(loadSubscriber, 'SUBSCRIPTION_V1_PAID_SUBSCRIBER_LOADER_REQUIRED');
   requireFunction(resolveEntitlement, 'SUBSCRIPTION_V1_PAID_ENTITLEMENT_RESOLVER_REQUIRED');
   requireFunction(resolveKeys, 'SUBSCRIPTION_V1_PAID_KEYS_RESOLVER_REQUIRED');
+  requireFunction(resolveAccessContext, 'SUBSCRIPTION_V1_RUNTIME_ACCESS_CONTEXT_RESOLVER_REQUIRED');
+  requireFunction(projectSuccessfulGet, 'SUBSCRIPTION_V1_RUNTIME_RESPONSE_PROJECTOR_REQUIRED');
+  requireFunction(projectFailure, 'SUBSCRIPTION_V1_RUNTIME_FAILURE_PROJECTOR_REQUIRED');
+  if (issueCsrf !== null || consumeCsrf !== null) {
+    requireFunction(issueCsrf, 'SUBSCRIPTION_V1_RUNTIME_CSRF_ISSUER_REQUIRED');
+    requireFunction(consumeCsrf, 'SUBSCRIPTION_V1_RUNTIME_CSRF_CONSUMER_REQUIRED');
+  }
   if (generateGu != null) requireFunction(generateGu, 'SUBSCRIPTION_V1_PAID_GU_GENERATOR_INVALID');
 
   return async function paidSubscriptionRuntimeHandler(req, res) {
@@ -290,22 +381,23 @@ export function createPaidSubscriptionV1RuntimeHandler({
       if (!SHA256_PATTERN.test(result.capability_hash || '')) {
         throw new Error('SUBSCRIPTION_V1_PAID_CAPABILITY_HASH_REQUIRED');
       }
-      const membership_context = paidMembershipContext(result);
+      const membership_context = resolveAccessContext(result);
       authenticated = {
         ...result,
         membership_context,
         capability: {
           ...(result.capability || {}),
           authenticated: true,
-          membership_verified: true,
-          binding_source: 'AUTHENTICATED_SERVER_CONTEXT',
+          membership_verified: membership_context.membership_verified === true,
+          ...(membership_context.capability_verified === true ? { capability_verified: true } : {}),
+          binding_source: membership_context.binding_source,
           scope: membership_context.scope,
           membership_context,
         },
       };
       return authenticated;
     };
-    const membershipContext = () => paidMembershipContext(authenticated);
+    const membershipContext = () => resolveAccessContext(authenticated);
     const paidLoadSubscriber = async (args) => {
       if (!historyStore) {
         historyStore = createPaidConversationHistory({ redis, scope: membershipContext().scope, keys: runtimeKeys });
@@ -365,8 +457,15 @@ export function createPaidSubscriptionV1RuntimeHandler({
       runtimeKeys = resolveKeys({ ...args, scope: membershipContext().scope, membership_context: membershipContext() });
       return runtimeKeys;
     };
+    const scopedResolveEntitlement = (args) => resolveEntitlement({
+      ...args,
+      auth: authenticated,
+      membership_context: membershipContext(),
+    });
     output = responseBoundary(res, {
       successfulGet: req.method === 'GET',
+      successfulGetProjector: projectSuccessfulGet,
+      failureProjector: projectFailure,
       transform: async (payload, status) => {
         if (payload.csrf_token) nextCsrf = payload.csrf_token;
         if (duplicate) return { ...duplicate, payload: { ...duplicate.payload, csrf_token: nextCsrf } };
@@ -403,10 +502,11 @@ export function createPaidSubscriptionV1RuntimeHandler({
       getRedis: () => redis,
       authenticate: paidAuthenticate,
       loadSubscriber: paidLoadSubscriber,
-      resolveEntitlement,
+      resolveEntitlement: scopedResolveEntitlement,
       resolveKeys: paidResolveKeys,
       resolvePreloadScope: () => membershipContext().scope,
-      firstSessionSyntheticOnly: false,
+      firstSessionSyntheticOnly,
+      ...(issueCsrf ? { issueCsrf, consumeCsrf } : {}),
       ...(generateGu ? { generateGu } : {}),
       env,
     });
@@ -414,11 +514,14 @@ export function createPaidSubscriptionV1RuntimeHandler({
       await inner(forwarded, output.boundary);
       await output.settle();
     } catch {
-      const failure = { ok: false, code: 'SUBSCRIPTION_V1_PAID_HISTORY_UNAVAILABLE', csrf_token: nextCsrf, reload_required: true };
+      const failure = redactPaidRuntimePayload(
+        { ok: false, code: 'SUBSCRIPTION_V1_PAID_HISTORY_UNAVAILABLE', csrf_token: nextCsrf, reload_required: true },
+        { failure_projector: projectFailure },
+      );
       if (output.isStreaming()) {
         if (!res.headersSent) res.status(503);
         res.end(`${JSON.stringify(failure)}\n`);
-      } else res.status(503).json(failure);
+      } else if (!res.headersSent) res.status(503).json(failure);
     } finally {
       await historyStore?.release();
     }

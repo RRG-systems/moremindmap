@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "authority_package_id": "loan-originator-canonical-authority-package-v1",
+  "cassette_id": "loan-originator-cassette-v1",
+  "status": "CANONICAL_AUTHORITY_FROZEN",
+  "hash_algorithm": "SHA-256",
+  "root_basis_file": "23_AUTHORITY_DEPENDENCY_MANIFEST_V1.json",
+  "root_basis_artifact_count": 22,
+  "root_authority_sha256": "1d1b5b04705e453716bcd4fbc73ab080f1c4981570ec6df7026b4d0c4b09cc8d",
+  "approved_candidate_zip_sha256": "859edd59809e68776fee4a1a5ba10d333df0d06ed3cf351aca011f5f2605224a",
+  "approved_question_architecture_fingerprint": "a01b65214f47b5bc999ea1312618ef53cec277b48deda34ce7bf5f3df69b8207",
+  "authorization_page_id": "3c9c0cd7-28dc-8177-ab99-c04d75f4ef3f",
+  "authority_semantics": [
+    "ROOT_HASH_BINDS_EXACT_DEPENDENCY_MANIFEST_BYTES",
+    "DEPENDENCY_MANIFEST_BINDS_EXACT_CANONICAL_SEMANTIC_ARTIFACT_BYTES",
+    "PACKAGE_ZIP_HASH_BINDS_THE_COMPLETE_EVIDENCE_DELIVERY",
+    "ANY_CHANGED_BOUND_ARTIFACT_REQUIRES_DEPENDENCY_AND_ROOT_HASH_REGENERATION",
+    "THIS_AUTHORITY_ROOT_DOES_NOT_REGISTER_OR_IMPLEMENT_RUNTIME"
+  ]
+}

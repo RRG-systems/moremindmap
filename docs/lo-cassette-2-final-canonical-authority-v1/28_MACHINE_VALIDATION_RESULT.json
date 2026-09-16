@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0.0",
+  "authority_package_id": "loan-originator-canonical-authority-package-v1",
+  "validator": "27_CANONICAL_AUTHORITY_VALIDATOR.mjs",
+  "result": "PASS",
+  "check_count": 21,
+  "pass_count": 21,
+  "fail_count": 0,
+  "question_architecture_fingerprint": "a01b65214f47b5bc999ea1312618ef53cec277b48deda34ce7bf5f3df69b8207",
+  "structured_field_count": 145,
+  "dependency_manifest_entry_count": 22,
+  "root_authority_sha256": "1d1b5b04705e453716bcd4fbc73ab080f1c4981570ec6df7026b4d0c4b09cc8d",
+  "checks": [
+    { "name": "canonical_id_registry", "status": "PASS", "detail": { "count": 51, "unique": 51 } },
+    { "name": "exact_question_architecture", "status": "PASS", "detail": { "missions": 15, "questions": 15 } },
+    { "name": "exact_core_conditional_order", "status": "PASS", "detail": { "core": 12, "conditional": 3 } },
+    { "name": "typed_field_registry", "status": "PASS", "detail": { "screens": 15, "fields": 145 } },
+    { "name": "truth_envelope", "status": "PASS" },
+    { "name": "branching_contract", "status": "PASS", "detail": { "fresh_max": 15, "hard_ceiling": 20 } },
+    { "name": "period_and_event_rules", "status": "PASS", "detail": { "canonical_events": 10 } },
+    { "name": "osn_crn_separation", "status": "PASS" },
+    { "name": "four_sufficiency_states", "status": "PASS" },
+    { "name": "eight_constraint_families", "status": "PASS" },
+    { "name": "founder_one_move_exact", "status": "PASS" },
+    { "name": "exact_box1_surfaces", "status": "PASS", "detail": { "surfaces": 5 } },
+    { "name": "synthetic_acceptance", "status": "PASS", "detail": { "cases": 10, "paths": 11 } },
+    { "name": "box1_all_paths", "status": "PASS", "detail": { "paths": 11 } },
+    { "name": "durable_domains_and_modules", "status": "PASS", "detail": { "domains": 16, "modules": 4 } },
+    { "name": "downstream_single_truth", "status": "PASS" },
+    { "name": "privacy_scope", "status": "PASS" },
+    { "name": "darren_update_seam", "status": "PASS" },
+    { "name": "protected_flags", "status": "PASS" },
+    { "name": "dependency_manifest_replay", "status": "PASS", "detail": { "entries": 22, "bad": 0 } },
+    { "name": "root_authority_hash", "status": "PASS" }
+  ],
+  "separate_delivery_seal_checks": [
+    "EVIDENCE_MANIFEST_REPLAY",
+    "SHA256SUMS_REPLAY",
+    "ZIP_CRC",
+    "ZIP_SIDECAR_SHA256",
+    "FRESH_EXTRACTION_REPLAY"
+  ],
+  "scope_attestation": {
+    "lo_runtime_implemented": false,
+    "production_mutated": false,
+    "customer_or_provider_data_accessed": false,
+    "provider_called": false,
+    "deployed": false,
+    "committed_pushed_merged_or_tagged": false
+  }
+}

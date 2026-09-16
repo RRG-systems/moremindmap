@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "loan-originator-synthetic-acceptance-v1",
+  "authority_status": "CANONICAL_ACCEPTANCE_AUTHORITY_FROZEN",
+  "data_status": "FICTIONAL_SYNTHETIC_EVIDENCE_ONLY",
+  "source_suite_status": "LO_SYNTHETIC_ACCEPTANCE_CASE_SUITE_V1_FROZEN",
+  "source_suite_cases": 10,
+  "executed_paths": 11,
+  "focus": "POST_SYNTHETIC_FOUNDER_LOCKS_AND_EXACT_12_CORE_3_CONDITIONAL_WORDING",
+  "core_screen_coverage": {
+    "LO_CORE_01_BUSINESS_SCOPE": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10A","CASE_10B"],
+    "LO_CORE_02_PRIMARY_GOAL": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_03_PRODUCTION_WINDOWS": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_04_PURPOSE_APPLICABILITY": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_07_OPPORTUNITY_FUNNEL": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_08_RELATIONSHIP_SYSTEMS": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_09_TEAM_CAPACITY": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_10_PLATFORM_CAPABILITY": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_11_OPERATOR_DIAGNOSIS": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"],
+    "LO_CORE_12_ACCOUNTABILITY_EXECUTION": ["CASE_01","CASE_02","CASE_03","CASE_04","CASE_05","CASE_06","CASE_07","CASE_08","CASE_09","CASE_10B"]
+  },
+  "conditional_screen_coverage": {
+    "LO_COND_13_CONVERSION_FALLOUT_CYCLE": ["CASE_02","CASE_04","CASE_05"],
+    "LO_COND_14_ECONOMICS": ["CASE_09"],
+    "LO_COND_15_CONTRADICTION_CLARIFICATION": ["CASE_08"]
+  },
+  "paths": [
+    {"id":"CASE_01","shown_core":12,"conditionals":[],"question_count":12,"sufficiency":"OPPORTUNITY_GAP","primary":"OPPORTUNITY_SUPPLY","secondary":["RELATIONSHIP_ACTIVATION"],"box1":"FULL_5","result":"PASS_NO_CONVERSION_FOLLOWUP_WITHOUT_MATERIAL_EXPLANATION_NEED"},
+    {"id":"CASE_02","shown_core":12,"conditionals":["LO_COND_13_CONVERSION_FALLOUT_CYCLE"],"question_count":13,"sufficiency":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT","primary":"CONVERSION","secondary":["EXECUTION_SYSTEMS"],"box1":"FULL_5","result":"PASS_DERIVED_DROP_THEN_MATERIAL_EXPLANATION"},
+    {"id":"CASE_03","shown_core":12,"conditionals":[],"question_count":12,"sufficiency":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT","primary":"CAPACITY_LEVERAGE","secondary":["OPPORTUNITY_SUPPLY_CONCENTRATION"],"box1":"FULL_5","result":"PASS_NO_PROCESSOR_FIRST_AND_NO_UNNEEDED_CONVERSION_SCREEN"},
+    {"id":"CASE_04","shown_core":12,"conditionals":["LO_COND_13_CONVERSION_FALLOUT_CYCLE"],"question_count":13,"sufficiency":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT","primary":"PULL_THROUGH_FALLOUT","secondary":[],"box1":"FULL_5","result":"PASS_PURCHASE_STAGES_NOT_APPLICABLE_AND_CRN_PROVENANCE"},
+    {"id":"CASE_05","shown_core":12,"conditionals":["LO_COND_13_CONVERSION_FALLOUT_CYCLE"],"question_count":13,"sufficiency":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT","primary":"PLATFORM_CAPABILITY","secondary":[],"box1":"FULL_5","result":"PASS_EXPLANATION_MATERIAL_TO_CONTROL_OWNER_WITH_NO_RECRUITING"},
+    {"id":"CASE_06","shown_core":12,"conditionals":[],"question_count":12,"sufficiency":"ON_TRACK","primary":null,"secondary":[],"box1":"FULL_5_ON_TRACK","result":"PASS_OPERATOR_STRENGTH_MOMENTUM_BRANCH_AND_NO_MANUFACTURED_PROBLEM"},
+    {"id":"CASE_07","shown_core":12,"conditionals":[],"question_count":12,"sufficiency":"INSUFFICIENT_EVIDENCE","primary":null,"secondary":[],"box1":"NARROW_OR_ABSTAIN_5","result":"PASS_UNDEFINED_LEADS_DO_NOT_BECOME_OPPORTUNITIES_AND_NO_AUDIT_FOLLOWUP"},
+    {"id":"CASE_08","shown_core":12,"conditionals":["LO_COND_15_CONTRADICTION_CLARIFICATION"],"question_count":13,"sufficiency":"INSUFFICIENT_EVIDENCE","primary":null,"secondary":[],"box1":"CONTRADICTORY_OR_ABSTAIN_5","result":"PASS_ONE_ATTEMPT_NO_CONVERSION_SCREEN_ON_UNRESOLVED_INCOMPATIBLE_COUNTS"},
+    {"id":"CASE_09","shown_core":12,"conditionals":["LO_COND_14_ECONOMICS"],"question_count":13,"sufficiency":"OPPORTUNITY_SUFFICIENT_OTHER_CONSTRAINT","primary":"ECONOMICS_BUSINESS_MODEL","secondary":["CAPACITY_LEVERAGE"],"box1":"FULL_5","result":"PASS_MINIMUM_ECONOMICS_AND_SENSITIVITY"},
+    {"id":"CASE_10A","shown_core":1,"conditionals":[],"question_count":1,"sufficiency":null,"primary":null,"secondary":[],"box1":"OUT_OF_SCOPE_5","result":"PASS_STOP_BEFORE_BUSINESS_EVIDENCE"},
+    {"id":"CASE_10B","shown_core":12,"conditionals":[],"question_count":12,"sufficiency":"ON_TRACK","primary":null,"secondary":[],"box1":"FULL_OR_NARROW_5","result":"PASS_AGGREGATE_ONLY_SPREADSHEET_REJECTED_AND_AUTHORITY_MISSING_VISIBLE"}
+  ],
+  "trajectory_overlays": [
+    {"path":"CASE_01","overlay":"FICTIONAL_90D_FUNDED_5_WITH_COMPATIBLE_DEFINITION","effect":"DERIVED_20_UNIT_ANNUALIZED_DIRECTION_ONLY_GOAL_GAP_UNCHANGED"},
+    {"path":"CASE_06","overlay":"FICTIONAL_90D_FUNDED_20_WITH_COMPATIBLE_DEFINITION","effect":"DERIVED_80_UNIT_ANNUALIZED_DIRECTION_ONLY_ON_TRACK_UNCHANGED"},
+    {"path":"CASE_08","overlay":"EXISTING_30D_90D_12M_INCOMPATIBLE_STAGE_COUNTS","effect":"CONTRADICTION_NO_ARITHMETIC"},
+    {"path":"CASE_09","overlay":"FICTIONAL_90D_FUNDED_36_WITH_COMPATIBLE_DEFINITION","effect":"STABLE_TRAJECTORY_ECONOMICS_CONSTRAINT_UNCHANGED"}
+  ],
+  "evidence_satisfied_skip_control": {
+    "id":"RETURNING_CASE_06_COMPATIBLE_GOVERNED_EVIDENCE",
+    "questions_shown":1,
+    "screens_skipped_evidence_satisfied":11,
+    "conditionals":0,
+    "result":"PASS_WITH_EXACT_BINDING_FRESHNESS_DEFINITION_PERIOD_COHORT_SCOPE_PROVENANCE_AND_NO_CONTRADICTION"
+  },
+  "producing_count_distribution": {"min":12,"median_conventional":12.5,"median_upper":13,"max":13,"mean":12.5},
+  "theoretical_fresh_maximum":15,
+  "hard_ceiling":20,
+  "all_four_sufficiency_states":true,
+  "all_eight_constraint_families":true,
+  "all_five_box1_surfaces_per_path":true,
+  "no_real_estate_leakage":true,
+  "no_borrower_pii_underwriting_protected_class_requirement":true,
+  "no_recruiting_contamination":true,
+  "no_second_truth_store_or_coaching_engine":true,
+  "result":"PASS"
+}

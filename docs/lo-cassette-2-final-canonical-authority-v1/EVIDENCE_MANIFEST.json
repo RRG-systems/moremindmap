@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0.0",
+  "authority_package_id": "loan-originator-canonical-authority-package-v1",
+  "status": "CANONICAL_AUTHORITY_FROZEN",
+  "hash_algorithm": "SHA-256",
+  "substantive_artifact_count": 31,
+  "root_authority_sha256": "1d1b5b04705e453716bcd4fbc73ab080f1c4981570ec6df7026b4d0c4b09cc8d",
+  "artifacts": [
+    {
+      "path": "00_FINAL_HANDOFF.md",
+      "bytes": 5886,
+      "sha256": "d7ebb35c265dad81f5eb5191979e64c9585dca474186ada703127e3a191e02bc"
+    },
+    {
+      "path": "01_AUTHORITY_CUSTODY_AND_FREEZE_METHOD.md",
+      "bytes": 4026,
+      "sha256": "b548cd5345a69ab684543f5adfa516b50ab948956912fd6e8abef3f40af99ea5"
+    },
+    {
+      "path": "02_CANONICAL_LO_PRODUCT_DOCTRINE_V1.md",
+      "bytes": 6789,
+      "sha256": "788d76a8c69567e1dfebe9d86e25bd6da3dc90109cd6e7b24634778ed9828c67"
+    },
+    {
+      "path": "03_CANONICAL_LO_INTAKE_QUESTION_CONTRACT_V1.md",
+      "bytes": 22237,
+      "sha256": "e3ba0de40e066a2fbd9ad6c4febb95d2509c15d1b4e39c570feb93287aa29f46"
+    },
+    {
+      "path": "04_CANONICAL_LO_TYPED_ANSWER_EVIDENCE_REGISTRY_V1.json",
+      "bytes": 27957,
+      "sha256": "40f23557b3f7e0f91a3128f7f64b30334488425841a8a545f502255033891982"
+    },
+    {
+      "path": "05_CANONICAL_LO_BRANCHING_APPLICABILITY_SKIP_CONTRACT_V1.json",
+      "bytes": 6328,
+      "sha256": "b8d34a2a012c2c9a3c9a2f68011d318d84b74493bc4e821ceab3177d54089f24"
+    },
+    {
+      "path": "06_CANONICAL_LO_TERMINOLOGY_REGISTRY_V1.md",
+      "bytes": 6267,
+      "sha256": "c4d9ce4d15d0ffc14c6980cc06034eac36f5410a079bf964b9af57fd2a1b0719"
+    },
+    {
+      "path": "07_CANONICAL_LO_EVENT_OBSERVATION_WINDOW_REGISTRY_V1.md",
+      "bytes": 3991,
+      "sha256": "bce6d4d5d3654512d4afbe29221651227c3c71fd665b0dc99ccf74e1bed78fac"
+    },
+    {
+      "path": "08_CANONICAL_LO_OSN_CRN_CONTRACT_V1.md",
+      "bytes": 4314,
+      "sha256": "660607f9bd39aea7a330173775f283c74cc89c5a6ec62cb2be052677288870f8"
+    },
+    {
+      "path": "09_CANONICAL_LO_SYSTEMS_MEASUREMENT_CONTRACT_V1.md",
+      "bytes": 3123,
+      "sha256": "0996535830dee468c5ea582370d1cd85a26afb9efaeb31c28570b89c41e28bdc"
+    },
+    {
+      "path": "10_CANONICAL_LO_GOAL_BACKSOLVE_ECONOMICS_CONTRACT_V1.md",
+      "bytes": 5004,
+      "sha256": "b2f653867ed4f2396d49f4cc3367ee541318b03c65afbb636c2ae19ba5f8bb8b"
+    },
+    {
+      "path": "11_CANONICAL_LO_SUFFICIENCY_CONSTRAINT_CONTRACT_V1.md",
+      "bytes": 3612,
+      "sha256": "a3b6f42b562ada19303d98affe946d501b75476dab29126145e149641d8d65a6"
+    },
+    {
+      "path": "12_CANONICAL_LO_FOUNDER_ONE_MOVE_CONTRACT_V1.md",
+      "bytes": 2870,
+      "sha256": "ae99620ae3c495271e1caa1955caa89355835b4ec47f65bee9590f9f45b32ec9"
+    },
+    {
+      "path": "13_CANONICAL_LO_EVIDENCE_TRUTH_CONTRACT_V1.md",
+      "bytes": 3539,
+      "sha256": "82df2f5c0c98e17b355ac01991e164e1a9533323b27f691f084cde01be222d90"
+    },
+    {
+      "path": "14_CANONICAL_LO_BOX_1_PROJECTION_CONTRACT_V1.md",
+      "bytes": 5862,
+      "sha256": "dbd59e1e7c8ce691f7340a49de27157659ee56d3e6587b5b4329f0390429faa9"
+    },
+    {
+      "path": "15_CANONICAL_LO_DURABLE_AUTHORITY_MODULE_BINDINGS_V1.md",
+      "bytes": 5734,
+      "sha256": "ea624fea3cf43fd869f1b6a93703bace91bc198c601e0487ae465f38e472fd6e"
+    },
+    {
+      "path": "16_CANONICAL_UNIVERSAL_COACHING_TO_LO_TRANSLATION_V1.md",
+      "bytes": 4499,
+      "sha256": "b6e8cc7dcea03c631208f40e311567042bd459c8f8a34f6df58a25eb3b76c19a"
+    },
+    {
+      "path": "17_CANONICAL_LO_DOWNSTREAM_PROJECTION_CONTRACT_V1.md",
+      "bytes": 5288,
+      "sha256": "e4dc28d789363912331d3341029b475000cea4dabaa9cc756add076a1371fe5e"
+    },
+    {
+      "path": "18_CANONICAL_LO_PRIVACY_COMPLIANCE_SCOPE_BOUNDARY_V1.md",
+      "bytes": 3058,
+      "sha256": "f62ac7fbdf87624d88bb1044c6619b936567077aaa906f083a9e87568a45cda2"
+    },
+    {
+      "path": "19_CANONICAL_LO_DOMAIN_EXPERT_UPDATE_ENVELOPE_V1.md",
+      "bytes": 2882,
+      "sha256": "d5414d36babbfb5423831e5a5c8709ad50efa6ce710cc3f994f8ad304d12896f"
+    },
+    {
+      "path": "20_CANONICAL_LO_SYNTHETIC_ACCEPTANCE_REGISTRY_V1.json",
+      "bytes": 6801,
+      "sha256": "6a1c1d6362d630fc66693b17c94a713904c4fba558d93e77d723b513b9f2674a"
+    },
+    {
+      "path": "21_CANONICAL_LO_BOX_1_SYNTHETIC_PROJECTION_PROOF_V1.json",
+      "bytes": 7667,
+      "sha256": "fce70fed0135f6acf7465bbc72c8084102ef08691a3475f1e209aedf27ae9fb6"
+    },
+    {
+      "path": "22_CANONICAL_AUTHORITY_ID_REGISTRY_V1.json",
+      "bytes": 3607,
+      "sha256": "c6e94e348fd487451fd983a473a111da507a3d1b201354c236a0238453bb297c"
+    },
+    {
+      "path": "23_AUTHORITY_DEPENDENCY_MANIFEST_V1.json",
+      "bytes": 12374,
+      "sha256": "1d1b5b04705e453716bcd4fbc73ab080f1c4981570ec6df7026b4d0c4b09cc8d"
+    },
+    {
+      "path": "24_CANONICAL_AUTHORITY_ROOT_V1.json",
+      "bytes": 1077,
+      "sha256": "46cf05d0f287bdb0823c9c9848bd4b8689d4937c3446a14c14b76d3f762319dc"
+    },
+    {
+      "path": "25_IMPLEMENTATION_RECONCILIATION_HANDOFF.md",
+      "bytes": 3457,
+      "sha256": "c2c014d5f06d3f0e23d234baa2b453d90d62700d97f686779b26016c23e79216"
+    },
+    {
+      "path": "26_REQUIREMENT_COMPLETION_MATRIX.md",
+      "bytes": 2706,
+      "sha256": "d358cb85ad839e084325e306949c10021de99365bd2aad456507d835c8e19b7d"
+    },
+    {
+      "path": "27_CANONICAL_AUTHORITY_VALIDATOR.mjs",
+      "bytes": 10670,
+      "sha256": "54d689d4a5a4c68c91877943dcf82e0a10d5b11462cfd49b9cc5c2affb927a7c"
+    },
+    {
+      "path": "28_MACHINE_VALIDATION_RESULT.json",
+      "bytes": 2629,
+      "sha256": "aa211ba2b3fa6df10a96581ef376569c3ea7c869bd0fed897ee030d90e5702e4"
+    },
+    {
+      "path": "29_AUTHORITY_SOURCE_REGISTRY.md",
+      "bytes": 3292,
+      "sha256": "b6dce8715de730f93d5d03ef1cb54801534e60569ce24a574ca868ba75ed91f9"
+    },
+    {
+      "path": "SOURCE_EQUIVALENCE_RECEIPT.json",
+      "bytes": 1455,
+      "sha256": "ff5b5a05bb7da3d1506c7acc8589d4f9c0329e79788c531bb7ee94d1577791c7"
+    }
+  ]
+}

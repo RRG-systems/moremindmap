@@ -33,3 +33,11 @@ api/engine/athleteLivingConsultV1/**
 # this final so the global markdown/text exclusions above cannot remove it.
 !docs/ba-intelligence-authority-library-v1/
 !docs/ba-intelligence-authority-library-v1/**
+
+# Release 4 Subscription validates the sealed source library and Loan
+# Originator authority at runtime. Keep these final so the global markdown and
+# text exclusions above cannot remove required server-only custody inputs.
+!api/engine/subscriptionV1/sourceLibrary/
+!api/engine/subscriptionV1/sourceLibrary/**
+!docs/lo-cassette-2-final-canonical-authority-v1/
+!docs/lo-cassette-2-final-canonical-authority-v1/**

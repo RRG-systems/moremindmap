@@ -1,3 +1,4 @@
+import { loanOriginatorFusionEvidenceMap } from './loanOriginatorFusionEvidence.js';
 import { normalizeAssessmentId, normalizeProfileId, sha256Stable } from './stable.js';
 import { NEW_BA_BOS_FUSION_PROOF_CONTRACT, validateBosFusionAuthority, validateFusionRelationship } from './fusionContract.js';
 
@@ -19,8 +20,9 @@ function resolveWholePersonClaimReferences(source, artifact, authority, relation
     ? source.business_evidence.answers
     : source.business_evidence?.answer_sha256 || {};
   const sourceAnswerKeys = Object.keys(sourceAnswerInventory).sort((left, right) => Number(left.slice(1)) - Number(right.slice(1)));
-  const canonicalBusinessEvidenceRefs = new Set(sourceAnswerKeys.map((key) => `${source.assessment_id}-${key}`));
-  const providerBusinessEvidenceRefs = sourceAnswerKeys.map((_, index) => `BE-${String(index + 1).padStart(2, '0')}`);
+  const loEvidenceMap = loanOriginatorFusionEvidenceMap(source);
+  const canonicalBusinessEvidenceRefs = loEvidenceMap ? new Set(loEvidenceMap.values()) : new Set(sourceAnswerKeys.map((key) => `${source.assessment_id}-${key}`));
+  const providerBusinessEvidenceRefs = loEvidenceMap ? [...loEvidenceMap.keys()] : sourceAnswerKeys.map((_, index) => `BE-${String(index + 1).padStart(2, '0')}`);
   const wbmEvidenceRefs = artifact.business_reality?.source_integrity?.evidence_refs || artifact.business_reality?.governed_business_evidence?.map((item) => item.evidence_ref);
   const usesProviderBusinessEvidenceNamespace = Array.isArray(wbmEvidenceRefs)
     && JSON.stringify(wbmEvidenceRefs) === JSON.stringify(providerBusinessEvidenceRefs);
@@ -28,7 +30,7 @@ function resolveWholePersonClaimReferences(source, artifact, authority, relation
   if (needsProviderBusinessEvidenceResolution) {
     const fullTwelve = JSON.stringify(sourceAnswerKeys) === JSON.stringify(Array.from({ length: 12 }, (_, index) => `q${index + 1}`));
     const evidenceSufficient = source.business_evidence?.evidence_sufficiency?.status === 'PASS';
-    invariant((fullTwelve || evidenceSufficient) && sourceAnswerKeys.length > 0 && sourceAnswerKeys.every((key) => /^q(?:[1-9]|1[0-2])$/u.test(key)), 'new_ba_bos_fusion_business_evidence_source_invalid');
+    invariant(loEvidenceMap ? evidenceSufficient : (fullTwelve || evidenceSufficient) && sourceAnswerKeys.length > 0 && sourceAnswerKeys.every((key) => /^q(?:[1-9]|1[0-2])$/u.test(key)), 'new_ba_bos_fusion_business_evidence_source_invalid');
     invariant(usesProviderBusinessEvidenceNamespace, 'new_ba_bos_fusion_business_evidence_namespace_drift');
   }
   return Object.freeze(relationships.map((relationship) => {
@@ -44,7 +46,7 @@ function resolveWholePersonClaimReferences(source, artifact, authority, relation
       invariant(usesProviderBusinessEvidenceNamespace, `new_ba_bos_fusion_business_evidence_scope_invalid:${relationship?.relationship_id || 'unknown'}`);
       const index = providerBusinessEvidenceRefs.indexOf(evidenceRef);
       invariant(index >= 0, `new_ba_bos_fusion_business_evidence_scope_invalid:${relationship?.relationship_id || 'unknown'}`);
-      return `${source.assessment_id}-${sourceAnswerKeys[index]}`;
+      return loEvidenceMap ? loEvidenceMap.get(evidenceRef) : `${source.assessment_id}-${sourceAnswerKeys[index]}`;
     });
     return Object.freeze({ ...relationship, whole_person_claim_ref: wholePersonClaimRef, business_evidence_refs: Object.freeze(businessEvidenceRefs) });
   }));
@@ -113,7 +115,9 @@ export function assembleBosBaFusionProof({ source, artifact } = {}) {
   const resolvedRelationships = hasCanonicalWbmRelationships
     ? resolveWholePersonClaimReferences(source, artifact, authority, rawRelationships)
     : rawRelationships;
-  const relationships = Object.freeze(resolvedRelationships.map((relationship) => validateFusionRelationship(relationship, authority, assessment)));
+  const loEvidenceMap = loanOriginatorFusionEvidenceMap(source);
+  const relationshipScope = loEvidenceMap ? { approvedBusinessEvidenceRefs: [...loEvidenceMap.values()] } : undefined;
+  const relationships = Object.freeze(resolvedRelationships.map((relationship) => validateFusionRelationship(relationship, authority, assessment, relationshipScope)));
   const result = {
     contract_id: NEW_BA_BOS_FUSION_PROOF_CONTRACT,
     version: '1.0.0',

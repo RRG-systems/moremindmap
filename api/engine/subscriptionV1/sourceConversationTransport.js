@@ -1,4 +1,5 @@
 import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.js';
+import { Buffer } from 'node:buffer';
 import { MORE_SOURCE_TOOLS, SOURCE_ACCESS_LIMITS, SOURCE_REFERENCE_BOUNDARY, sourceToolName } from './readOnlySources.js';
 
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -15,6 +16,11 @@ export async function runSourceEnabledConversation({ request, client, library, t
   if (!webSearchEnabled && (Object.hasOwn(request, 'max_tool_calls') || Object.hasOwn(request, 'tool_choice')
     || request.include?.some(value => String(value).startsWith('web_search_call')))) fail('MORE_SOURCE_DISABLED_WEB_FIELDS_DENIED');
   if (!library?.info || typeof library.execute !== 'function') fail('MORE_SOURCE_LIBRARY_UNAVAILABLE');
+  const sourceTools = Array.isArray(library.tools) ? library.tools : MORE_SOURCE_TOOLS;
+  if (sourceTools.length !== 2
+    || !sourceTools.every((tool) => tool?.type === 'function' && sourceToolName(tool.name, sourceTools))) {
+    fail('MORE_SOURCE_TOOL_CONTRACT_INVALID');
+  }
   const started = Date.now(), seenCalls = new Set(), sourceReceipts = [], responseHashes = [], requestHashes = [];
   const researchEvidence = new Map();
   const usage = { input_tokens: 0, cached_input_tokens: 0, output_tokens: 0 };
@@ -24,7 +30,7 @@ export async function runSourceEnabledConversation({ request, client, library, t
   while (step < SOURCE_ACCESS_LIMITS.providerSteps) {
     const tools = [
       ...(webSearchEnabled && hostedCalls < SOURCE_ACCESS_LIMITS.hostedCalls ? [{ type: 'web_search' }] : []),
-      ...(localCalls < SOURCE_ACCESS_LIMITS.internalCalls ? copy(MORE_SOURCE_TOOLS) : []),
+      ...(localCalls < SOURCE_ACCESS_LIMITS.internalCalls ? copy(sourceTools) : []),
     ];
     const wire = { ...copy(request), input, tools, parallel_tool_calls: false,
       include: [...new Set([...(request.include || []), 'reasoning.encrypted_content'])] };
@@ -68,7 +74,7 @@ export async function runSourceEnabledConversation({ request, client, library, t
     if (!functions.length) break;
     if (functions.length !== 1 || localCalls >= SOURCE_ACCESS_LIMITS.internalCalls) fail('MORE_SOURCE_INTERNAL_TOOL_LIMIT');
     const call = functions[0];
-    if (!sourceToolName(call.name) || !tools.some(tool => tool.name === call.name)
+    if (!sourceToolName(call.name, sourceTools) || !tools.some(tool => tool.name === call.name)
       || typeof call.call_id !== 'string' || call.call_id.length > 200 || !call.call_id
       || seenCalls.has(call.call_id) || typeof call.arguments !== 'string'
       || Buffer.byteLength(call.arguments) > SOURCE_ACCESS_LIMITS.argumentBytes) fail('MORE_SOURCE_TOOL_CALL_DENIED');

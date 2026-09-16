@@ -2,12 +2,18 @@ import { hashCanonicalJson } from '../../../src/lib/intelligenceFabric/hashing.j
 import { deepFreeze } from '../../../src/lib/intelligenceFabric/validation.js';
 import { normalizeProfileId as normalizePaidProfileId } from '../../../src/lib/publicSiteAirlockV1/contracts.js';
 import { resolveBundledBosAuthority } from '../newBaProductionReadinessV1/canonicalReader.js';
-import { validateCompleteNewBaRealization } from '../newBaProductionReadinessV1/completeness.js';
+import {
+  NEW_BA_COMPLETENESS_STATUS,
+  validateCompleteNewBaRealization,
+} from '../newBaProductionReadinessV1/completeness.js';
 import {
   projectBosFusionAuthorityFromArtifact,
   validateBosFusionAuthority,
 } from '../newBaProductionReadinessV1/fusionContract.js';
-import { validateLaunchSafeNewBaEnvelope } from '../newBaProductionReadinessV1/launchSafeRealizationStore.js';
+import {
+  NEW_BA_LAUNCH_SAFE_ENVELOPE_VERSION,
+  validateLaunchSafeNewBaEnvelope,
+} from '../newBaProductionReadinessV1/launchSafeRealizationStore.js';
 import {
   isSha256,
   normalizeProfileId as normalizeNewBaProfileId,
@@ -33,6 +39,57 @@ function canonicalTimestamp(value, code) {
 function assertHash(value, code) {
   requireCondition(isSha256(value), code);
   return value;
+}
+
+export const PAID_SUBSCRIBER_COMPLETENESS_POLICY = Object.freeze({
+  COMPLETE_ONLY: 'COMPLETE_ONLY',
+  CANONICAL_PAID_LO_OPEN_PLAN: 'CANONICAL_PAID_LO_OPEN_PLAN',
+  SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN: 'SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN',
+});
+
+export function paidSubscriberCompletenessPolicy({ verticalId, syntheticOnly = false } = {}) {
+  if (verticalId === 'loan_originator') {
+    return syntheticOnly
+      ? PAID_SUBSCRIBER_COMPLETENESS_POLICY.SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN
+      : PAID_SUBSCRIBER_COMPLETENESS_POLICY.CANONICAL_PAID_LO_OPEN_PLAN;
+  }
+  return PAID_SUBSCRIBER_COMPLETENESS_POLICY.COMPLETE_ONLY;
+}
+
+export function isPaidSubscriberCompletenessAccepted({
+  validation,
+  record,
+  policy = PAID_SUBSCRIBER_COMPLETENESS_POLICY.COMPLETE_ONLY,
+} = {}) {
+  if (validation?.status === NEW_BA_COMPLETENESS_STATUS.COMPLETE) {
+    return !record?.artifact
+      || record.completeness?.status === NEW_BA_COMPLETENESS_STATUS.COMPLETE;
+  }
+  if (![PAID_SUBSCRIBER_COMPLETENESS_POLICY.CANONICAL_PAID_LO_OPEN_PLAN,
+    PAID_SUBSCRIBER_COMPLETENESS_POLICY.SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN].includes(policy)
+    || validation?.status !== NEW_BA_COMPLETENESS_STATUS.VALID_ANALYSIS_WITH_OPEN_PLAN
+    || !record?.artifact) {
+    return false;
+  }
+  const artifact = record.artifact;
+  const receipt = record.completeness;
+  return record.envelope_version === NEW_BA_LAUNCH_SAFE_ENVELOPE_VERSION
+    && artifact.cassette_binding?.vertical_id === 'loan_originator'
+    && artifact.business_reality?.assessment_identity?.vertical === 'loan_originator'
+    && artifact.lineage?.vertical_id === 'loan_originator'
+    && artifact.customer_view_model?.vertical?.vertical_id === 'loan_originator'
+    && artifact.plan_135?.plan_state === 'LO_OPEN_DRAFT'
+    && validation.plan_state === 'LO_OPEN_DRAFT'
+    && validation.plan_customer_commitment === false
+    && validation.customer_plan_status === 'OPEN_NOT_CUSTOMER_AGREED'
+    && validation.customer_plan_complete === false
+    && validation.storage_eligible === true
+    && receipt?.status === NEW_BA_COMPLETENESS_STATUS.VALID_ANALYSIS_WITH_OPEN_PLAN
+    && receipt.plan_state === validation.plan_state
+    && receipt.plan_customer_commitment === false
+    && receipt.customer_plan_status === validation.customer_plan_status
+    && receipt.customer_plan_complete === false
+    && receipt.storage_eligible === true;
 }
 
 export function assertCanonicalLineage(artifact, realizationIdentity = null) {
@@ -91,20 +148,29 @@ export function assertPaidBusinessScope(scope, assessmentId, verticalBindingSha2
   requireCondition(scope.business_id === expectedBusinessId, 'PAID_SUBSCRIBER_ASSESSMENT_BUSINESS_BINDING_MISMATCH');
 }
 
-export function completedRealization(record, profileId, suppliedAssessmentId = null) {
+export function completedRealization(
+  record,
+  profileId,
+  suppliedAssessmentId = null,
+  { completenessPolicy = PAID_SUBSCRIBER_COMPLETENESS_POLICY.COMPLETE_ONLY } = {},
+) {
   requireCondition(record && typeof record === 'object', 'PAID_SUBSCRIBER_COMPLETED_REALIZATION_REQUIRED');
   if (record.envelope_version) validateLaunchSafeNewBaEnvelope(record, { profileId });
   const artifact = record.artifact || record;
   requireCondition(artifact?.contract_id === 'new-ba-production-realization-v2', 'PAID_SUBSCRIBER_REALIZATION_V2_REQUIRED');
   const assessmentId = artifact.assessment_id;
   const validation = validateCompleteNewBaRealization(artifact, { profileId, assessmentId });
-  requireCondition(validation.status === 'PASS'
+  requireCondition(isPaidSubscriberCompletenessAccepted({
+    validation,
+    record,
+    policy: completenessPolicy,
+  })
     && validation.fusion_validated === true
     && artifact.profile_id === profileId, 'PAID_SUBSCRIBER_COMPLETE_BOS_BA_REQUIRED');
   if (record.artifact) {
     requireCondition(record.profile_id === profileId
       && record.assessment_id === assessmentId
-      && record.completeness?.status === 'PASS'
+      && record.completeness?.status === validation.status
       && ['A', 'B'].includes(record.compatibility?.class)
       && record.provider_accounting?.store === false
       && record.artifact_sha256 === sha256Stable(artifact), 'PAID_SUBSCRIBER_LAUNCH_SAFE_REALIZATION_REQUIRED');
@@ -182,10 +248,13 @@ export function validatePaidSubscriberRuntimeCustody({
   assessment_id,
   realization_record,
   bos_realization_record,
+  completeness_policy = PAID_SUBSCRIBER_COMPLETENESS_POLICY.COMPLETE_ONLY,
   resolveBundledBosAuthorityForProfile = resolveBundledBosAuthority,
 } = {}) {
   const profileId = normalizeNewBaProfileId(profile_id);
-  const completed = completedRealization(realization_record, profileId, assessment_id);
+  const completed = completedRealization(realization_record, profileId, assessment_id, {
+    completenessPolicy: completeness_policy,
+  });
   const hashes = assertCanonicalLineage(
     completed.artifact,
     realization_record?.realization_identity || null,

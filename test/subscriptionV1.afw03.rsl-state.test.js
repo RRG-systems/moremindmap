@@ -19,6 +19,7 @@ import {
   testScope,
   testWholePersonContext,
 } from './subscriptionV1.testFixtures.js';
+import { hashCanonicalJson } from '../src/lib/intelligenceFabric/hashing.js';
 
 const scope = testScope();
 const appendedAt = '2026-08-10T00:02:00.000Z';
@@ -29,6 +30,137 @@ function storeWithOneEvent() {
   assert.equal(created.ok, true, created.code);
   assert.equal(store.append({ scope, event: created.event, appended_at: appendedAt }).ok, true);
   return { store, event: created.event };
+}
+
+function openPlanArtifacts(scopeOverrides = {}, mutate = () => {}, authorityClass = 'synthetic') {
+  const synthetic = authorityClass === 'synthetic';
+  const openPlanScope = testScope({
+    ...(synthetic ? { tenant_id: 'synthetic_qa' } : {}),
+    ...scopeOverrides,
+  });
+  const artifacts = testArtifacts(openPlanScope);
+  const verticalBindingHash = 'b'.repeat(64);
+  const completenessPolicy = synthetic
+    ? 'SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN'
+    : 'CANONICAL_PAID_LO_OPEN_PLAN';
+  const authoritySource = synthetic
+    ? 'CANONICAL_SYNTHETIC_QA_PROFILE_COMPLETED_REALIZATION'
+    : 'CANONICAL_OWNED_PROFILE_COMPLETED_REALIZATION';
+  const baIndex = artifacts.findIndex(({ artifact_type: artifactType }) => artifactType === 'NEW_BA');
+  artifacts[baIndex] = {
+    ...artifacts[baIndex],
+    bindings: {
+      ...artifacts[baIndex].bindings,
+      vertical_id: 'loan_originator',
+      vertical_binding_hash: verticalBindingHash,
+      completeness_policy: completenessPolicy,
+    },
+    domain_boundary: {
+      source: authoritySource,
+      raw_profile_forwarded: false,
+    },
+  };
+  const planIndex = artifacts.findIndex(({ artifact_type: artifactType }) => artifactType === 'PLAN_135');
+  const current = artifacts[planIndex];
+  const payload = {
+    contract_id: 'generalized-1-3-5-plan-v1',
+    version: '1.0.0',
+    plan_state: 'LO_OPEN_DRAFT',
+    bindings: { verticalId: 'loan_originator' },
+    ways: [1, 2, 3].map((position) => ({
+      way_id: `way-${position}`,
+      status: 'OPEN',
+      title: null,
+      destination_state: null,
+      strategies: [],
+      open_strategy_positions: 5,
+    })),
+    strategies: [],
+    open_strategy_positions: 15,
+    one_move: {
+      status: 'ALONGSIDE_PLAN_NOT_A_STRATEGY',
+      proposal_status: 'PROPOSED_NOT_CUSTOMER_AGREED',
+    },
+    customer_boundary: {
+      proposed_plan_not_customer_commitment: true,
+      customer_agreed: false,
+      all_ways_intentionally_open: true,
+      subscription_runtime_active: false,
+    },
+    validation: {
+      selected_way_count: 0,
+      strategy_count: 0,
+      open_strategy_positions: 15,
+    },
+  };
+  const sourceHash = 'c'.repeat(64);
+  const openPlan = {
+    ...current,
+    status: 'OPEN_NOT_CUSTOMER_AGREED',
+    validation_status: 'PASS_WITH_OPEN_PLAN',
+    compatibility_status: 'COMPATIBLE',
+    domain_boundary: {
+      source: authoritySource,
+      raw_profile_forwarded: false,
+    },
+    bindings: {
+      ...current.bindings,
+      vertical_id: 'loan_originator',
+      vertical_binding_hash: verticalBindingHash,
+      completeness_policy: completenessPolicy,
+      plan_state: 'LO_OPEN_DRAFT',
+      customer_plan_status: 'OPEN_NOT_CUSTOMER_AGREED',
+      customer_plan_complete: false,
+    },
+    authority: {
+      authority_id: 'canonical_real_profile_plan_135',
+      authority_version: current.version,
+      authority_hash: sourceHash,
+    },
+    content_hash: hashCanonicalJson({
+      contract: 'paid-subscriber-canonical-artifact-projection-v1',
+      artifact_type: 'PLAN_135',
+      source_sha256: sourceHash,
+      payload,
+    }),
+    payload,
+  };
+  mutate(openPlan);
+  artifacts[planIndex] = openPlan;
+  return { artifacts, scope: openPlanScope, plan: openPlan };
+}
+
+const syntheticOpenPlanArtifacts = (scopeOverrides = {}, mutate = () => {}) => (
+  openPlanArtifacts(scopeOverrides, mutate, 'synthetic')
+);
+
+const paidOpenPlanArtifacts = (scopeOverrides = {}, mutate = () => {}) => (
+  openPlanArtifacts(scopeOverrides, mutate, 'paid')
+);
+
+function assembleSyntheticOpenPlan({ artifacts, scope }) {
+  const store = new InMemoryPersonalRslStore();
+  const created = testRslEvent(scope);
+  assert.equal(created.ok, true, created.code);
+  assert.equal(store.append({ scope, event: created.event, appended_at: appendedAt }).ok, true);
+  const history = retrieveRelevantPersonalHistory({
+    store,
+    scope,
+    purpose: 'WEEKLY_COACHING',
+    active_lens: 'PLAN',
+    as_of_at: TEST_TIME,
+  });
+  return assembleCoachingStatePacket({
+    scope,
+    session_id: 'session_fixture_alpha',
+    purpose: 'WEEKLY_COACHING',
+    active_lens: 'PLAN',
+    artifacts,
+    personal_history: history,
+    business_truth: testBusinessTruth(),
+    whole_person_execution_context: testWholePersonContext(),
+    assembled_at: TEST_TIME,
+  });
 }
 
 test('AFW-03 Personal RSL rejects raw transcripts and coach-authored canonical truth', () => {
@@ -153,6 +285,192 @@ test('AFW-03 state assembler selects newest compatible authorities and preserves
   assert.equal(result.domain_boundary.personality_as_business_cause_allowed, false);
   assert.equal(result.provider_execution, 'NOT_IMPLEMENTED_STOP_BEFORE_AFW_04');
   assert.equal(result.coaching_doctrine_insertion_point.implementation_status, 'RESERVED_FOR_AFW_04');
+});
+
+test('AFW-03 accepts the exact synthetic LO open plan without inflating its customer-agreement status', () => {
+  const fixture = syntheticOpenPlanArtifacts();
+  const result = assembleSyntheticOpenPlan(fixture);
+  assert.equal(result.ok, true, result.code);
+  assert.equal(result.selection_receipt.PLAN_135.selected_artifact_id, fixture.plan.artifact_id);
+  const selectedLineage = result.packet.artifact_lineage.find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135');
+  assert.equal(selectedLineage.content_hash, fixture.plan.content_hash);
+  assert.equal(fixture.plan.status, 'OPEN_NOT_CUSTOMER_AGREED');
+  assert.equal(fixture.plan.validation_status, 'PASS_WITH_OPEN_PLAN');
+  assert.equal(fixture.plan.payload.customer_boundary.customer_agreed, false);
+  assert.equal(fixture.plan.payload.strategies.length, 0);
+});
+
+test('AFW-03 accepts exact canonical paid LO open plans but rejects paid/synthetic authority crossover', () => {
+  const paid = paidOpenPlanArtifacts();
+  const accepted = assembleSyntheticOpenPlan(paid);
+  assert.equal(accepted.ok, true, accepted.code);
+  assert.equal(accepted.selection_receipt.PLAN_135.selected_artifact_id, paid.plan.artifact_id);
+  assert.equal(paid.plan.payload.customer_boundary.customer_agreed, false);
+
+  for (const [label, mutate] of [
+    ['paid using synthetic policy', (fixture) => {
+      fixture.plan.bindings.completeness_policy = 'SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN';
+      fixture.artifacts.find(({ artifact_type: type }) => type === 'NEW_BA').bindings.completeness_policy = 'SYNTHETIC_QA_RELEASE_4_LO_OPEN_PLAN';
+    }],
+    ['synthetic using paid policy', (fixture) => {
+      fixture.plan.bindings.completeness_policy = 'CANONICAL_PAID_LO_OPEN_PLAN';
+      fixture.artifacts.find(({ artifact_type: type }) => type === 'NEW_BA').bindings.completeness_policy = 'CANONICAL_PAID_LO_OPEN_PLAN';
+    }],
+  ]) {
+    const fixture = label.startsWith('paid') ? paidOpenPlanArtifacts() : syntheticOpenPlanArtifacts();
+    mutate(fixture);
+    const result = assembleSyntheticOpenPlan(fixture);
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, 'NEWEST_COMPATIBLE_ARTIFACT_MISSING', label);
+  }
+});
+
+test('AFW-03 rejects every incomplete or inflated synthetic LO open-plan boundary and never falls back to stale completion', () => {
+  const mutations = [
+    ['ordinary tenant', (_plan, fixture) => {
+      fixture.scope.tenant_id = 'tenant_test';
+      fixture.artifacts.forEach((artifact) => { artifact.scope.tenant_id = 'tenant_test'; });
+    }],
+    ['source authority', (plan) => { plan.domain_boundary.source = 'UNVERIFIED_SYNTHETIC_SOURCE'; }],
+    ['vertical marker', (plan) => { plan.bindings.vertical_id = 'real_estate'; }],
+    ['vertical hash', (plan) => { plan.bindings.vertical_binding_hash = 'd'.repeat(64); }, 'PLAN_VERTICAL_AUTHORITY_BINDING_INVALID'],
+    ['completeness policy', (plan) => { plan.bindings.completeness_policy = 'COMPLETE_ONLY'; }],
+    ['plan state binding', (plan) => { plan.bindings.plan_state = 'COMPLETE'; }],
+    ['customer plan status', (plan) => { plan.bindings.customer_plan_status = 'COMPLETE'; }],
+    ['customer complete flag', (plan) => { plan.bindings.customer_plan_complete = true; }],
+    ['payload vertical', (plan) => { plan.payload.bindings.verticalId = 'real_estate'; }],
+    ['way completeness', (plan) => { plan.payload.ways[0].status = 'SELECTED_COMPLETE'; }],
+    ['strategy inflation', (plan) => { plan.payload.strategies.push({ strategy_id: 'not-customer-agreed' }); }],
+    ['customer agreement', (plan) => { plan.payload.customer_boundary.customer_agreed = true; }],
+    ['one move inflation', (plan) => { plan.payload.one_move.proposal_status = 'CUSTOMER_AGREED'; }],
+    ['validation inflation', (plan) => { plan.payload.validation.selected_way_count = 1; }],
+    ['authority id', (plan) => { plan.authority.authority_id = 'foreign_plan_authority'; }],
+    ['authority hash', (plan) => { plan.authority.authority_hash = 'd'.repeat(64); }],
+    ['content hash', (plan) => { plan.content_hash = 'd'.repeat(64); }],
+    ['BA vertical authority', (_plan, fixture) => {
+      fixture.artifacts.find(({ artifact_type: artifactType }) => artifactType === 'NEW_BA').bindings.vertical_id = 'real_estate';
+    }, 'PLAN_VERTICAL_AUTHORITY_BINDING_INVALID'],
+    ['compatibility', (plan) => { plan.compatibility_status = 'INCOMPATIBLE'; }],
+    ['top-level completion inflation', (plan) => {
+      plan.status = 'COMPLETE';
+      plan.validation_status = 'PASS';
+    }],
+  ];
+  for (const [label, mutate, expectedCode = 'NEWEST_COMPATIBLE_ARTIFACT_MISSING'] of mutations) {
+    const fixture = syntheticOpenPlanArtifacts();
+    mutate(fixture.plan, fixture);
+    const staleComplete = {
+      ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135'),
+      artifact_id: `stale_complete_${label.replaceAll(' ', '_')}`,
+      created_at: '2026-08-01T00:00:00.000Z',
+    };
+    const result = assembleSyntheticOpenPlan({ ...fixture, artifacts: [...fixture.artifacts, staleComplete] });
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, expectedCode, label);
+    if (expectedCode === 'NEWEST_COMPATIBLE_ARTIFACT_MISSING') {
+      assert.equal(result.artifact_type, 'PLAN_135', label);
+    }
+  }
+});
+
+test('AFW-03 selects a newer exact synthetic LO open plan over an older completed plan', () => {
+  const fixture = syntheticOpenPlanArtifacts();
+  fixture.plan.created_at = '2026-08-19T00:00:00.000Z';
+  const staleComplete = {
+    ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135'),
+    artifact_id: 'plan_135_stale_complete',
+    created_at: '2026-08-01T00:00:00.000Z',
+  };
+  const result = assembleSyntheticOpenPlan({ ...fixture, artifacts: [...fixture.artifacts, staleComplete] });
+  assert.equal(result.ok, true, result.code);
+  assert.equal(result.selection_receipt.PLAN_135.selected_artifact_id, fixture.plan.artifact_id);
+  assert.deepEqual(result.selection_receipt.PLAN_135.rejected_artifact_ids, [staleComplete.artifact_id]);
+});
+
+test('AFW-03 lets a newer customer-agreed plan supersede an older exact LO open draft', () => {
+  const fixture = syntheticOpenPlanArtifacts();
+  fixture.plan.created_at = '2026-08-01T00:00:00.000Z';
+  const completedPlan = {
+    ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135'),
+    artifact_id: 'plan_135_customer_agreed_newer',
+    created_at: '2026-08-19T00:00:00.000Z',
+    supersedes_artifact_id: fixture.plan.artifact_id,
+    domain_boundary: { ...fixture.plan.domain_boundary },
+    bindings: {
+      ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135').bindings,
+      vertical_id: 'loan_originator',
+      vertical_binding_hash: fixture.plan.bindings.vertical_binding_hash,
+      completeness_policy: fixture.plan.bindings.completeness_policy,
+      plan_state: 'CUSTOMER_AGREED',
+      customer_plan_status: 'CUSTOMER_AGREED',
+      customer_plan_complete: true,
+    },
+    payload: {
+      plan_state: 'CUSTOMER_AGREED',
+      customer_boundary: { customer_agreed: true },
+      one_move: { proposal_status: 'CUSTOMER_AGREED' },
+    },
+  };
+  const result = assembleSyntheticOpenPlan({
+    ...fixture,
+    artifacts: [...fixture.artifacts, completedPlan],
+  });
+  assert.equal(result.ok, true, result.code);
+  assert.equal(result.selection_receipt.PLAN_135.selected_artifact_id, completedPlan.artifact_id);
+  assert.deepEqual(result.selection_receipt.PLAN_135.rejected_artifact_ids, [fixture.plan.artifact_id]);
+});
+
+test('AFW-03 denies an unproven completed-plan transition instead of falling back to its older LO draft', () => {
+  const mutations = [
+    ['false agreement', (plan) => { plan.payload.customer_boundary.customer_agreed = false; }],
+    ['missing agreement', (plan) => { delete plan.payload.customer_boundary.customer_agreed; }],
+    ['wrong predecessor', (plan) => { plan.supersedes_artifact_id = 'different_open_plan'; }],
+    ['missing predecessor', (plan) => { plan.supersedes_artifact_id = null; }],
+  ];
+  for (const [label, mutate] of mutations) {
+    const fixture = syntheticOpenPlanArtifacts();
+    fixture.plan.created_at = '2026-08-01T00:00:00.000Z';
+    const completedPlan = {
+      ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135'),
+      artifact_id: `plan_135_unproven_${label.replaceAll(' ', '_')}`,
+      created_at: '2026-08-19T00:00:00.000Z',
+      supersedes_artifact_id: fixture.plan.artifact_id,
+      domain_boundary: { ...fixture.plan.domain_boundary },
+      bindings: {
+        ...testArtifacts(fixture.scope).find(({ artifact_type: artifactType }) => artifactType === 'PLAN_135').bindings,
+        vertical_id: 'loan_originator',
+        vertical_binding_hash: fixture.plan.bindings.vertical_binding_hash,
+        completeness_policy: fixture.plan.bindings.completeness_policy,
+        plan_state: 'CUSTOMER_AGREED',
+        customer_plan_status: 'CUSTOMER_AGREED',
+        customer_plan_complete: true,
+      },
+      payload: {
+        plan_state: 'CUSTOMER_AGREED',
+        customer_boundary: { customer_agreed: true },
+        one_move: { proposal_status: 'CUSTOMER_AGREED' },
+      },
+    };
+    mutate(completedPlan);
+    const result = assembleSyntheticOpenPlan({
+      ...fixture,
+      artifacts: [...fixture.artifacts, completedPlan],
+    });
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, 'NEWEST_COMPATIBLE_ARTIFACT_MISSING', label);
+    assert.equal(result.artifact_type, 'PLAN_135', label);
+  }
+});
+
+test('AFW-03 reports a missing PLAN_135 through the governed fail-closed receipt', () => {
+  const fixture = syntheticOpenPlanArtifacts();
+  const result = assembleSyntheticOpenPlan({
+    ...fixture,
+    artifacts: fixture.artifacts.filter(({ artifact_type: artifactType }) => artifactType !== 'PLAN_135'),
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.code, 'NEWEST_COMPATIBLE_ARTIFACT_MISSING');
+  assert.equal(result.artifact_type, 'PLAN_135');
 });
 
 test('AFW-03 state assembler rejects cross-profile, exact-100 and causal-boundary violations', () => {

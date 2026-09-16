@@ -38,6 +38,7 @@ export const ONE_MOVE_V2_SCHEMA = Object.freeze({
     primary_mechanism_ids: stringArray,
     supporting_evidence_refs: stringArray,
     counterevidence_refs: stringArray,
+    script_intelligence_refs: stringArray,
     assumptions: stringArray,
     prerequisites: stringArray,
     bounded_execution_steps: { type: 'array', minItems: 1, maxItems: 5, items: { type: 'string' } },
@@ -57,4 +58,3 @@ export const ONE_MOVE_V2_SCHEMA = Object.freeze({
     selection_model_version: { const: ONE_MOVE_SELECTION_MODEL_VERSION },
   },
 });
-

@@ -127,6 +127,36 @@ function validateEntitlement(value) {
   return finalize(errors);
 }
 
+function validateSyntheticQaEntitlement(value) {
+  const errors = [];
+  validateHeader(value, 'synthetic_qa_entitlement', errors);
+  validateAllowedKeys(value, [
+    'contract_id', 'schema_version', 'entitlement_id', 'scope', 'authority_id',
+    'manifest_version', 'manifest_sha256', 'state', 'billing_cycle_start',
+    'billing_cycle_end', 'access_ends_at', 'projected_at', 'policy_version',
+    'billing_evidence', 'stripe_subscription_created', 'synthetic_only',
+  ], errors);
+  validateScope(value?.scope, '$.scope', errors);
+  if (!isString(value?.entitlement_id, 8, 128)) errors.push({ code: 'ENTITLEMENT_ID_INVALID', path: '$.entitlement_id' });
+  if (!isString(value?.authority_id, 8, 160)) errors.push({ code: 'SYNTHETIC_QA_AUTHORITY_INVALID', path: '$.authority_id' });
+  if (!isString(value?.manifest_version, 1, 80) || !isHash(value?.manifest_sha256)) {
+    errors.push({ code: 'SYNTHETIC_QA_MANIFEST_AUTHORITY_INVALID', path: '$' });
+  }
+  if (value?.state !== 'ACTIVE') errors.push({ code: 'SYNTHETIC_QA_ENTITLEMENT_STATE_INVALID', path: '$.state' });
+  if (!isTimestamp(value?.billing_cycle_start) || !isTimestamp(value?.billing_cycle_end)
+    || !isTimestamp(value?.access_ends_at) || !isTimestamp(value?.projected_at)) {
+    errors.push({ code: 'ENTITLEMENT_TIMESTAMPS_INVALID', path: '$' });
+  }
+  if (Date.parse(value?.billing_cycle_end) > Date.parse(value?.access_ends_at)) {
+    errors.push({ code: 'SYNTHETIC_QA_ACCESS_WINDOW_INVALID', path: '$.access_ends_at' });
+  }
+  if (!isString(value?.policy_version, 1, 100)) errors.push({ code: 'ENTITLEMENT_POLICY_INVALID', path: '$.policy_version' });
+  if (value?.billing_evidence !== false || value?.stripe_subscription_created !== false || value?.synthetic_only !== true) {
+    errors.push({ code: 'SYNTHETIC_QA_NONBILLING_TRUTH_INVALID', path: '$' });
+  }
+  return finalize(errors);
+}
+
 function validateLedger(value) {
   const errors = [];
   validateHeader(value, 'session_allowance_ledger', errors);
@@ -246,6 +276,7 @@ export const SUBSCRIPTION_V1_CONTRACT_REGISTRY = deepFreeze({
   canonical_customer_subject: { authority: 'identity_authority', validator: validateSubject },
   business_membership: { authority: 'membership_authority', validator: validateMembership },
   paid_entitlement: { authority: 'stripe_lifecycle_projector', validator: validateEntitlement },
+  synthetic_qa_entitlement: { authority: 'exact_synthetic_qa_manifest', validator: validateSyntheticQaEntitlement },
   session_allowance_ledger: { authority: 'deterministic_session_ledger', validator: validateLedger },
   active_coaching_session: { authority: 'deterministic_session_ledger', validator: validateSession },
   personal_rsl_event: { authority: 'personal_rsl_authority', validator: validateRslEvent },

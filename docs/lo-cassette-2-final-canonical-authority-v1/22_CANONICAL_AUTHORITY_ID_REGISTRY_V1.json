@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "status": "CANONICAL_AUTHORITY_FROZEN",
+  "cassette_id": "loan-originator-cassette-v1",
+  "authority_package_id": "loan-originator-canonical-authority-package-v1",
+  "dependency_manifest_id": "loan-originator-authority-dependency-manifest-v1",
+  "contracts": {
+    "product_doctrine": "loan-originator-product-doctrine-v1",
+    "intake_question_contract": "loan-originator-business-assessment-intake-v1",
+    "governed_evidence_schema": "loan-originator-governed-business-evidence-v1",
+    "evidence_routing": "loan-originator-business-evidence-routing-v1",
+    "event_definition_registry": "loan-originator-business-event-definitions-v1",
+    "osn_crn_authority": "loan-originator-osn-crn-authority-v1",
+    "systems_measurement": "loan-originator-systems-measurement-v1",
+    "goal_backsolve_economics": "loan-originator-goal-backsolve-economics-v1",
+    "sufficiency_constraint": "loan-originator-sufficiency-constraint-v1",
+    "founder_one_move": "loan-originator-founder-one-move-v1",
+    "evidence_truth": "loan-originator-evidence-truth-v1",
+    "box_1_projection": "loan-originator-box-1-projection-v1",
+    "whole_business_route": "loan-originator-whole-business-route-v1",
+    "universal_coaching_translation": "loan-originator-universal-coaching-translation-v1",
+    "subscription_context": "loan-originator-subscription-context-v1",
+    "durable_intelligence_authority": "loan-originator-intelligence-authority-v1",
+    "privacy_compliance_scope": "loan-originator-privacy-compliance-scope-v1",
+    "domain_expert_update_envelope": "loan-originator-domain-expert-evidence-v1",
+    "synthetic_acceptance": "loan-originator-synthetic-acceptance-v1"
+  },
+  "durable_modules": {
+    "business_machine": "loan-originator-intelligence-module-business-machine-v1",
+    "systems_capacity_constraints": "loan-originator-intelligence-module-systems-capacity-constraints-v1",
+    "context_boundaries_evidence": "loan-originator-intelligence-module-context-boundaries-evidence-v1",
+    "translation_coaching": "loan-originator-intelligence-module-translation-coaching-v1"
+  },
+  "mission_ids": {
+    "core": [
+      "LO_CORE_01_BUSINESS_SCOPE",
+      "LO_CORE_02_PRIMARY_GOAL",
+      "LO_CORE_03_PRODUCTION_WINDOWS",
+      "LO_CORE_04_PURPOSE_APPLICABILITY",
+      "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK",
+      "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK",
+      "LO_CORE_07_OPPORTUNITY_FUNNEL",
+      "LO_CORE_08_RELATIONSHIP_SYSTEMS",
+      "LO_CORE_09_TEAM_CAPACITY",
+      "LO_CORE_10_PLATFORM_CAPABILITY",
+      "LO_CORE_11_OPERATOR_DIAGNOSIS",
+      "LO_CORE_12_ACCOUNTABILITY_EXECUTION"
+    ],
+    "conditional": [
+      "LO_COND_15_CONTRADICTION_CLARIFICATION",
+      "LO_COND_13_CONVERSION_FALLOUT_CYCLE",
+      "LO_COND_14_ECONOMICS"
+    ]
+  },
+  "event_ids": [
+    "lo.opportunity.v1",
+    "lo.application.v1",
+    "lo.purchase.qualified-preapproved.v1",
+    "lo.purchase.active-transaction.v1",
+    "lo.refinance.qualified.v1",
+    "lo.refinance.active-loan.v1",
+    "lo.approval.v1",
+    "lo.lock.v1",
+    "lo.close-fund.v1",
+    "lo.explicit-non-funded-outcome.v1"
+  ],
+  "locked_box_1_surfaces": [
+    "Your Business Now",
+    "Where Your Business Comes From",
+    "Your Business Pipeline",
+    "Your System & Capacity",
+    "What’s Holding You Back"
+  ],
+  "identity_rules": [
+    "ALL_IDS_ARE_EXACT_CASE_SENSITIVE_AND_VERSIONED",
+    "NO_RUNTIME_REGISTRATION_IS_CREATED_BY_THIS FREEZE",
+    "ANY_SEMANTIC_CHANGE_REQUIRES_NEW_VERSION_AND_DEPENDENT_HASH_REGENERATION",
+    "LATER_IMPLEMENTATION_MUST_FAIL_CLOSED_ON_UNKNOWN_OR_MISMATCHED_AUTHORITY_ID"
+  ]
+}

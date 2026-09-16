@@ -130,8 +130,23 @@ function governedMetricSemantics(card) {
   };
 }
 
-function governedMetricDrawer(card) {
+function governedMetricDrawer(card, source) {
   const semantic = governedMetricSemantics(card);
+  const specific = source?.verticalBinding?.vertical_id === 'loan_originator' ? source.inspectors?.[card.inspectorId] : null;
+  if (specific?.source_binding?.contract_id === 'lo-quick-fact-evidence-binding-v1') {
+    const values = pattern => (specific.level2 || []).filter(section => pattern.test(section.title)).flatMap(section => section.items || []);
+    return {
+      epistemicClass: semantic.epistemicClass, confidence: card.qualifier,
+      sections: [
+        { id: 'what-this-is', title: 'What This Is', items: [specific.level1.meaning] },
+        { id: 'source-evidence', title: 'Source / Evidence', items: [...values(/what we know/iu), ...values(/what is still missing/iu)] },
+        { id: 'interpretation', title: 'How MORE Interprets It', items: [specific.level1.goal] },
+        { id: 'missing', title: "What's Missing", items: values(/what is still missing/iu).length ? values(/what is still missing/iu) : ['Independent corroboration may strengthen the saved customer report.'] },
+        { id: 'confidence', title: 'Confidence', items: [card.qualifier] },
+        { id: 'mind-change', title: 'What Would Change It', items: values(/what would change/iu) },
+      ],
+    };
+  }
   return {
     epistemicClass: semantic.epistemicClass,
     confidence: card.qualifier,
@@ -180,7 +195,7 @@ function applyGovernedMetricProjection(customer, source) {
     const next = display(id);
     const card = byId.get(id);
     if (object && next && card) {
-      const drawer = governedMetricDrawer(card);
+      const drawer = governedMetricDrawer(card, source);
       object.display_payload = next;
       object.epistemic_class = drawer.epistemicClass;
       object.confidence = drawer.confidence;
@@ -229,7 +244,7 @@ function applyGovernedMetricProjection(customer, source) {
     const next = display(id);
     const card = byId.get(id);
     if (object && next && card) {
-      const drawer = governedMetricDrawer(card);
+      const drawer = governedMetricDrawer(card, source);
       object.display_payload = next;
       object.epistemic_class = drawer.epistemicClass;
       object.confidence = drawer.confidence;
@@ -338,10 +353,13 @@ function realProfilePlan({ source, base, mode }) {
 }
 
 export function createRealProfileProjectionV2({ sourceViewModel, bindings }) {
+  const lo = sourceViewModel?.verticalBinding?.vertical_id === 'loan_originator';
+  if (lo !== (bindings?.verticalId === 'loan_originator')) throw new Error('real_profile_projection_vertical_scope_mismatch');
+  if (lo && (!bindings.verticalAuthorityRefs?.length || bindings.verticalAuthorityRefs.some(id => !id.startsWith('loan-originator-intelligence-module-')))) throw new Error('real_profile_projection_loan_originator_authority_required');
   const customerProjectionInput = sanitizeCustomerProjectionInput(structuredClone(sourceViewModel));
   const frozenBase = createBaProgressiveDisclosureV1({ sourceViewModel: customerProjectionInput, bindings });
-  const mode = modeFor(customerProjectionInput);
-  const plan135 = realProfilePlan({ source: customerProjectionInput, base: frozenBase.plan135, mode });
+  const mode = lo ? 'LO_GOVERNED_SOURCE_PLAN' : modeFor(customerProjectionInput);
+  const plan135 = lo ? frozenBase.plan135 : realProfilePlan({ source: customerProjectionInput, base: frozenBase.plan135, mode });
   const projected = buildProgressiveBusinessTwin({ sourceViewModel: customerProjectionInput, probability: frozenBase.probability, plan135, bindings });
   const customer = structuredClone(projected.customerViewModel);
   applyGovernedMetricProjection(customer, customerProjectionInput);
@@ -362,7 +380,14 @@ export function createRealProfileProjectionV2({ sourceViewModel, bindings }) {
     probability: frozenBase.probability,
     plan135,
     customerViewModel,
-    internalTrace: projected.internalTrace,
+    internalTrace: lo ? deepFreeze({
+      ...projected.internalTrace,
+      objects: Object.fromEntries(Object.entries(projected.internalTrace.objects).map(([id, object]) => {
+        const inspector = sourceViewModel.inspectors?.[object.source_authority];
+        return [id, inspector?.source_binding?.contract_id === 'lo-quick-fact-evidence-binding-v1'
+          ? { ...object, source_binding: inspector.source_binding } : object];
+      })),
+    }) : projected.internalTrace,
     validation: {
       ...projected.validation,
       real_profile_adapter: 'PASS',

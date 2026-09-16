@@ -156,10 +156,139 @@ function governedDisplayMetrics(source) {
   });
 }
 
+function loTypedDisplay(field, fallback = 'Not measured') {
+  if (field?.question_state !== 'ANSWERED') return fallback;
+  if (typeof field.value === 'number') return field.value.toLocaleString('en-US');
+  if (typeof field.value === 'string') return field.value;
+  if (Array.isArray(field.value) && field.value.every(item => typeof item === 'string')) return field.value.join(', ');
+  return 'Recorded structured evidence';
+}
+
+function loPeriod(field) {
+  const period = field?.period_or_not_temporal;
+  if (period && typeof period === 'object') return [period.unit, period.start && period.end ? `${period.start} to ${period.end}` : null, period.as_of ? `as of ${period.as_of}` : null].filter(Boolean).join(' · ');
+  return typeof period === 'string' ? period.replaceAll('_', ' ').toLowerCase() : 'Observation window not established';
+}
+
+function loanOriginatorQuickFacts(source, addInspector) {
+  const fields = source.business_evidence.typed_evidence.fields;
+  function sourceInspector(id, label, fieldIds, { withheld = false, desired = false } = {}) {
+    const selected = fieldIds.map(fieldId => {
+      const field = fields[fieldId];
+      invariant(field, `new_ba_lo_metric_field_missing:${fieldId}`);
+      return { fieldId, field };
+    });
+    const known = selected.filter(({ field }) => field.question_state === 'ANSWERED').map(({ fieldId, field }) =>
+      `${fieldId.replaceAll('_', ' ')}: ${loTypedDisplay(field)}. ${loPeriod(field)}. Customer reported${desired ? ' desired state' : ''}.`);
+    const missing = selected.filter(({ field }) => field.question_state !== 'ANSWERED').map(({ fieldId, field }) =>
+      `${fieldId.replaceAll('_', ' ')}: ${field.question_state === 'NOT_APPLICABLE' ? 'explicitly not applicable' : 'not established'}. Expected scope: ${loPeriod(field)}.`);
+    if (withheld) missing.unshift(`${label} has not been established by an accepted comparable measure or calculation. Supplied inputs do not by themselves establish this result.`);
+    const sourceBinding = deepFreeze({
+      contract_id: 'lo-quick-fact-evidence-binding-v1',
+      profile_id: normalizeProfileId(source.profile_id), assessment_id: source.assessment_id,
+      business_evidence_sha256: source.business_evidence.evidence_sha256,
+      result_state: withheld ? 'NOT_ESTABLISHED' : desired ? 'CUSTOMER_REPORTED_GOAL' : missing.length ? 'MISSING' : 'CUSTOMER_REPORTED',
+      fields: selected.map(({ fieldId, field }) => ({
+        field_id: fieldId, source_ref: `business_assessment.inputs.typed_evidence.fields.${fieldId}`,
+        question_state: field.question_state, value: field.value,
+        definition_id: field.definition_id, period_or_not_temporal: field.period_or_not_temporal,
+        subject_scope: field.subject_scope, provenance: field.provenance,
+        field_sha256: sha256Stable(field),
+      })),
+    });
+    const entry = inspector(`lo-fact-${id}`, { title: label, kicker: 'Saved Loan Originator assessment',
+        status: withheld || missing.length ? 'MISSING' : desired ? 'DESIRED' : 'REPORTED',
+        meaning: withheld ? `${label} remains unestablished.` : known.join(' '),
+        why: 'This view refers to the specific saved fields supporting this claim.',
+        goal: desired ? 'The customer stated this goal; it is not current performance or a commitment to an action.' : 'Keep current facts, desired goals and missing evidence separate.',
+        known, missing,
+        mindChange: ['A customer-approved correction or comparable observation with the same definition, period and subject scope.'],
+        connection: 'These are assessment statements or explicit missing fields, not independent proof of business causes.',
+      });
+    return addInspector(deepFreeze({
+      ...entry,
+      level2: entry.level2.map(section => section.title === 'What we know' ? { ...section, items: known } : section.title === 'What is still missing' ? { ...section, items: missing } : section),
+      source_binding: sourceBinding,
+    }));
+  }
+  const metric = (id, label, fieldId) => {
+    const field = fields[fieldId];
+    return card(id, label, loTypedDisplay(field), field?.question_state === 'ANSWERED' ? `Customer reported · ${loPeriod(field)}` : 'Missing governed evidence', sourceInspector(fieldId, label, [fieldId]));
+  };
+  const goal = fields.goal_target_value?.question_state === 'ANSWERED'
+    ? [loTypedDisplay(fields.goal_target_value), loTypedDisplay(fields.goal_unit_currency, 'unit not established')].join(' ')
+    : 'Not numerically stated';
+  const unestablished = (id, label, value, qualifier, fieldIds) => card(id, label, value, qualifier, sourceInspector(id, label, fieldIds, { withheld: true }));
+  return [
+    metric('combined-soi-current', 'Funded loans', 'funded_units_12m'),
+    metric('attributed-contacts-estimate', 'Funded principal volume', 'funded_volume_12m'),
+    metric('top-of-mind-current', 'Opportunity sources', 'osn_sources'),
+    card('monthly-closing-goal', 'Customer business goal', goal, `Desired state · ${loPeriod(fields.goal_target_value)}`, sourceInspector('customer-goal', 'Customer business goal', ['goal_metric', 'goal_target_value', 'goal_unit_currency', 'goal_subject_scope'], { desired: true })),
+    metric('annual-closing-goal', 'Goal priority', 'goal_priority'),
+    metric('current-live-contacts', 'Customer relationship network size', 'crn_meaningful_size'),
+    unestablished('current-active-pipeline', 'Comparable opportunity pipeline', 'Not measured', 'Counts, purpose, definition and cohort must be established together', ['funnel_purpose', 'funnel_window', 'funnel_cohort_basis', 'opportunity_count_definition', 'application_count_definition', 'purchase_active_transaction', 'refinance_active_loan', 'close_fund_count_definition']),
+    unestablished('relationship-asset-target', 'Required opportunity flow', 'Not modeled from current evidence', 'No governed backsolve has been accepted', ['goal_metric', 'goal_target_value', 'goal_unit_currency', 'funnel_cohort_basis', 'conversion_displayed_derived_rate', 'conversion_affected_scope']),
+    unestablished('live-contact-goal-pace', 'Required conversion', 'Not modeled from current evidence', 'No governed conversion requirement has been accepted', ['goal_metric', 'goal_target_value', 'opportunity_count_definition', 'close_fund_count_definition', 'conversion_displayed_derived_rate']),
+    unestablished('combined-pipeline-target', 'Required sustainable capacity', 'Not modeled from current evidence', 'Current capacity and required capacity remain distinct', ['goal_target_value', 'work_load', 'sustainable_capacity', 'economic_sustainable_capacity', 'work_ownership_rows']),
+  ];
+}
+
 function currentState(wbm, domain) {
   const direct = wbm.current_business_reality?.[domain]?.state;
   const state = wbm.domain_states.find((item) => item.domain_id === domain);
   return sentence(direct || state?.claims?.[0]?.meaning || state?.strengths?.[0] || state?.failure_modes?.[0]);
+}
+
+function loanOriginatorDomainInterpretations({ source, wbm, inspectors, domainClaimInspectorIds, add, goalState }) {
+  const missions = {
+    operations: ['LO_CORE_08_RELATIONSHIP_SYSTEMS', 'LO_CORE_10_PLATFORM_CAPABILITY'],
+    capacity: ['LO_CORE_09_TEAM_CAPACITY', 'LO_CORE_12_ACCOUNTABILITY_EXECUTION'],
+  };
+  const evidenceIds = new Set(wbm.source_integrity.evidence_refs);
+  return deepFreeze(Object.fromEntries(Object.entries(missions).map(([domain, missionIds]) => {
+    // Interpretation custody comes from the full accepted WBM, independently of
+    // the eight engines selected for display. Missing claims stay missing.
+    const domainMatches = wbm.domain_states
+      .map((state, index) => ({ state, index }))
+      .filter(({ state }) => state.domain_id === domain);
+    invariant(domainMatches.length <= 1, `lo_domain_interpretation_domain_duplicate:${domain}`);
+    const domainIndex = domainMatches[0]?.index ?? -1;
+    const domainState = domainMatches[0]?.state;
+    const claimIndex = domainState?.claims?.findIndex(item => item.meaning?.trim()
+      && !['INSUFFICIENT_EVIDENCE', 'ABSTAINED'].includes(item.epistemic_class)) ?? -1;
+    const claim = domainState?.claims?.[claimIndex] || null;
+    if (claim) invariant(claim.evidence_refs?.length
+      && claim.evidence_refs.every(ref => evidenceIds.has(ref)), `lo_domain_interpretation_evidence_invalid:${domain}`);
+    const fields = Object.values(source.business_evidence.typed_evidence.fields)
+      .filter(field => missionIds.includes(field.mission_id)).sort((a, b) => a.field_id.localeCompare(b.field_id));
+    invariant(fields.length > 0, `lo_domain_interpretation_fields_missing:${domain}`);
+    invariant(missionIds.every(missionId => fields.some(field => field.mission_id === missionId)),
+      `lo_domain_interpretation_mission_fields_missing:${domain}`);
+    const inspectorId = claim ? domainClaimInspectorIds.get(`${domainIndex}:${claimIndex}`) : add(inspector(`lo-${domain}-interpretation-unestablished`, {
+      title: `${titleCase(domain)} interpretation not established`, status: 'MISSING',
+      meaning: `The accepted business model does not establish an ${domain} interpretation.`,
+      why: 'Reported business facts and an accepted interpretation are different things.', goal: goalState,
+      known: fields.filter(field => field.question_state === 'ANSWERED').map(field => `${titleCase(field.field_id)}: ${loTypedDisplay(field)}. ${loPeriod(field)}.`),
+      missing: [`No accepted ${domain} interpretation.`, ...fields.filter(field => field.question_state !== 'ANSWERED').map(field => `${titleCase(field.field_id)}: ${field.question_state === 'NOT_APPLICABLE' ? 'customer marked not applicable' : 'not supplied'}.`)],
+    }));
+    invariant(inspectorId && inspectors[inspectorId], `lo_domain_interpretation_inspector_missing:${domain}`);
+    const binding = deepFreeze({
+      contract_id: 'lo-domain-interpretation-binding-v1', domain_id: domain,
+      profile_id: normalizeProfileId(source.profile_id), assessment_id: source.assessment_id,
+      business_evidence_sha256: source.business_evidence.evidence_sha256,
+      whole_business_model_sha256: wbm.state_hash,
+      state: claim ? 'ACCEPTED_CLAIM' : 'NOT_ESTABLISHED',
+      claim: claim ? structuredClone(claim) : null, claim_sha256: claim ? sha256Stable(claim) : null,
+      inspector_id: inspectorId,
+      inspector_content_sha256: sha256Stable(inspectors[inspectorId]),
+      fields: fields.map(field => ({ field_id: field.field_id, field_sha256: sha256Stable(field), question_state: field.question_state,
+        source_ref: `business_assessment.inputs.typed_evidence.fields.${field.field_id}`,
+        value: field.value, definition_id: field.definition_id, period_or_not_temporal: field.period_or_not_temporal,
+        subject_scope: field.subject_scope, provenance: field.provenance })),
+    });
+    inspectors[inspectorId] = deepFreeze({ ...inspectors[inspectorId], source_binding: binding });
+    return [domain, binding];
+  })));
 }
 
 function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
@@ -171,6 +300,8 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
   invariant(oneMove.five_futures_binding?.hash === futures.artifact_hash, 'new_ba_real_profile_move_futures_binding_invalid');
 
   const display = sentence(displayName, 'Customer', 60);
+  const verticalBinding = source.business_evidence?.vertical_binding;
+  const isLoanOriginator = verticalBinding?.vertical_id === 'loan_originator';
   const wholePersonAdjustments = wholePersonExecutionAdjustments(oneMove.whole_person_execution_considerations);
   const goalState = currentState(wbm, 'goals');
   const relationshipState = currentState(wbm, 'relationship');
@@ -200,6 +331,7 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
   })));
 
   const claimInspectorIds = new Map();
+  const domainClaimInspectorIds = new Map();
   wbm.domain_states.forEach((state, stateIndex) => {
     (state.claims || []).forEach((claim, claimIndex) => {
       const id = `domain-${stateIndex + 1}-claim-${claimIndex + 1}`;
@@ -220,8 +352,13 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
         mindChange: [claim.falsifier],
         connection: `This claim belongs to ${titleCase(state.domain_id)} and connects to causal mechanisms only by governed reference.`,
       })));
+      domainClaimInspectorIds.set(`${stateIndex}:${claimIndex}`, id);
     });
   });
+
+  const domainInterpretations = isLoanOriginator
+    ? loanOriginatorDomainInterpretations({ source, wbm, inspectors, domainClaimInspectorIds, add, goalState })
+    : null;
 
   const mechanismInspectorIds = wbm.causal_model.mechanisms.map((mechanism, index) => add(inspector(`mechanism-${index + 1}`, {
     kicker: `Causal mechanism ${index + 1}`,
@@ -323,7 +460,7 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
   }));
 
   const counts = evidenceCategoryCounts(wbm);
-  const displayMetrics = governedDisplayMetrics(source);
+  const displayMetrics = isLoanOriginator ? {} : governedDisplayMetrics(source);
   const categorySpecs = [
     ['known', 'What we know', counts.known, 'Customer-reported or strongly supported business reality.', 'green'],
     ['inferred', 'What we infer', counts.inferred, 'Supported business interpretation, not direct observation.', 'violet'],
@@ -357,7 +494,7 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
     notice: 'No subscription, tracking, or activation is implied here.',
   }));
 
-  const quickFacts = [
+  const quickFacts = isLoanOriginator ? loanOriginatorQuickFacts(source, add) : [
     card('combined-soi-current', 'Combined SOI / Contacts', displayMetrics.totalContacts || 'Not measured', displayMetrics.totalContacts ? 'Current / operator reported' : 'Missing current count', evidenceInspectorIds[2] || evidenceInspectorIds[0], 'green'),
     card('attributed-contacts-estimate', 'Current closed units', displayMetrics.currentUnits || 'Not measured', displayMetrics.currentUnits ? 'Current / operator reported' : 'Missing current production count', evidenceInspectorIds[8] || evidenceInspectorIds[0], 'green'),
     card('top-of-mind-current', 'Verified true relationships', displayMetrics.trueRelationships || 'Not measured', displayMetrics.trueRelationships ? 'Current / operator reported' : 'Not separately verified', evidenceInspectorIds[2] || evidenceInspectorIds[0], 'green'),
@@ -370,15 +507,15 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
     card('combined-pipeline-target', 'Active opportunity requirement', 'Not modeled from current evidence', 'Goal-supporting model withheld', constraintInspectorId, 'teal'),
   ];
 
-  const engines = wbm.domain_states.slice(0, 8).map((state) => ({
+  const engines = wbm.domain_states.slice(0, 8).map((state, stateIndex) => ({
     id: state.domain_id,
     code: titleCase(state.domain_id).slice(0, 4).toUpperCase(),
     title: titleCase(state.domain_id),
     tone: DOMAIN_TONES[state.domain_id] || 'blue',
     status: state.epistemic_summary || state.claims?.[0]?.epistemic_class || 'Evidence-bound',
     summary: sentence(state.claims?.[0]?.meaning || state.failure_modes?.[0]),
-    metrics: (state.claims || []).slice(0, 4).map((claim) => ({ label: sentence(claim.meaning, titleCase(state.domain_id), 80), value: claim.epistemic_class, qualifier: 'Business state', tone: DOMAIN_TONES[state.domain_id] || 'blue', inspectorId: claimInspectorIds.get(claim.claim_id) })),
-    inspectorId: claimInspectorIds.get(state.claims?.[0]?.claim_id) || constraintInspectorId,
+    metrics: (state.claims || []).slice(0, 4).map((claim, claimIndex) => ({ label: sentence(claim.meaning, titleCase(state.domain_id), 80), value: claim.epistemic_class, qualifier: 'Business state', tone: DOMAIN_TONES[state.domain_id] || 'blue', inspectorId: isLoanOriginator ? domainClaimInspectorIds.get(`${stateIndex}:${claimIndex}`) : claimInspectorIds.get(claim.claim_id) })),
+    inspectorId: (isLoanOriginator ? domainClaimInspectorIds.get(`${stateIndex}:0`) : claimInspectorIds.get(state.claims?.[0]?.claim_id)) || constraintInspectorId,
   }));
 
   const firstMechanism = wbm.causal_model.mechanisms[0];
@@ -390,12 +527,12 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
   ];
 
   return deepFreeze({
-    identity: { firstName: display, business: `${display}’s Real Estate Business`, vertical: 'Residential Real Estate' },
+    identity: { firstName: display, business: `${display}’s ${isLoanOriginator ? 'Loan Origination' : 'Real Estate'} Business`, vertical: isLoanOriginator ? 'Residential Loan Originator' : 'Residential Real Estate' },
     hero: { eyebrow: `${display}’s Business Twin`, title: 'Your business. Quantified. Diagnosed. Designed to move.', subtitle: 'One map. Five destinations. Every decision with confidence.', state: wbm.governing_constraint.epistemic_class },
     nav: ['now', 'why', 'futures', 'move', 'plan', 'evidence'].map((id, index) => ({ id, label: id.toUpperCase(), order: index + 1 })),
     quickFacts,
     businessMap: {
-      center: { title: `${display}’s Real Estate Business`, model: sentence(wbm.business_model.value_creation, 'Real Estate business'), system: sentence(wbm.business_model.leverage), goal: goalState, inspectorId: constraintInspectorId },
+      center: { title: `${display}’s ${isLoanOriginator ? 'Loan Origination' : 'Real Estate'} Business`, model: sentence(wbm.business_model.value_creation, isLoanOriginator ? 'Loan origination business' : 'Real Estate business'), system: sentence(wbm.business_model.leverage), goal: goalState, inspectorId: constraintInspectorId },
       engines,
       trajectory: { value: titleCase(wbm.momentum.direction), label: 'Evidence-bound direction of travel', inspectorId: constraintInspectorId },
       helping: wbm.assets.slice(0, 4).map((item) => ({ label: item.meaning, inspectorId: constraintInspectorId })),
@@ -443,8 +580,10 @@ function makeSourceViewModel({ source, displayName, wbm, futures, oneMove }) {
     bos: { label: 'BOS integrated', headline: 'Whole-Person Authority + Business Reality', boundary: 'Execution modifier only; never a fabricated business cause.', adjustments: wholePersonAdjustments, inspectorId: bosInspectorId },
     livingMap: { headline: 'Keep your Business Map alive as the business changes.', copy: 'This assessment captured the governed business at this moment.', action: 'What a Living Map would mean', inspectorId: livingInspectorId },
     inspectors,
-    internal: { profile_id: profileId, assessment_id: source.assessment_id, business_evidence_sha256: source.business_evidence.evidence_sha256 },
+    internal: { profile_id: profileId, assessment_id: source.assessment_id, business_evidence_sha256: source.business_evidence.evidence_sha256,
+      ...(isLoanOriginator ? { whole_business_model_sha256: wbm.state_hash } : {}) },
     currentStates: { relationshipState, demandState, operationsState, capacityState, financialState },
+    ...(isLoanOriginator ? { verticalBinding, loanOriginator: { typedEvidence: source.business_evidence.typed_evidence, domainInterpretations } } : {}),
   });
 }
 
@@ -472,18 +611,20 @@ function buildLineage({ source, wbm, futures, oneMove, projection }) {
   return deepFreeze({ ...withoutHash, lineage_sha256: sha256Stable(withoutHash) });
 }
 
-export function buildRealProfileNewBaRealization({ source, displayName, wbm, futures, oneMove, providerAccounting }) {
+export function buildRealProfileNewBaRealization({ source, displayName, wbm, futures, oneMove, providerAccounting, cassetteRegistry, projectionAdapters }) {
   invariant(providerAccounting?.store === false, 'new_ba_real_profile_store_false_required');
   invariant(Number(providerAccounting?.accepted_calls) === 3, 'new_ba_real_profile_three_accepted_stages_required');
   const sourceViewModel = makeSourceViewModel({ source, displayName, wbm, futures, oneMove });
   const verticalBinding = source.business_evidence.vertical_binding;
   const projection = projectNewBaBox1ThroughCassette({
+    registry: cassetteRegistry, adapters: projectionAdapters,
     verticalBinding,
     sourceViewModel,
     bindings: {
       subjectKey: normalizeProfileId(source.profile_id),
       modelDate: source.business_evidence.updated_at || source.business_evidence.created_at,
-      verticalAuthorityRefs: [verticalBinding.cassette_id],
+      ...(verticalBinding.vertical_id === 'loan_originator' ? { verticalId: 'loan_originator' } : {}),
+      verticalAuthorityRefs: verticalBinding.vertical_id === 'loan_originator' ? Object.keys(wbm.source_integrity.authority_hashes).filter(id => id.startsWith('loan-originator-intelligence-module-')) : [verticalBinding.cassette_id],
       sourceAuthority: 'REAL_PROFILE_WBM_V1_FIVE_FUTURES_V2_ONE_MOVE_V2',
     },
   });

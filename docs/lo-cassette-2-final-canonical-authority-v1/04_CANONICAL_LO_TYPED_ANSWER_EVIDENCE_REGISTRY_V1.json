@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0.0",
+  "status": "CANONICAL_AUTHORITY_FROZEN",
+  "contract_id": "loan-originator-governed-business-evidence-v1",
+  "field_contract": {
+    "question_states": ["ANSWERED", "UNANSWERED", "NOT_APPLICABLE"],
+    "evidence_classes": ["OBSERVED", "DERIVED", "MODELED_REQUIREMENT", "BENCHMARK", "SCENARIO", "MISSING"],
+    "required_metadata": ["provenance", "confidence", "applicability", "definition_id", "period_or_not_temporal", "subject_scope", "captured_at", "contradiction_links", "missing_reason"],
+    "presentation_states": ["SHOWN", "SKIPPED_EVIDENCE_SATISFIED", "SKIPPED_NOT_APPLICABLE", "TERMINATED_OUT_OF_SCOPE"],
+    "rules": [
+      "CUSTOMER_STATED_IS_PROVENANCE_NOT_AN_INDEPENDENT_EVIDENCE_CLASS",
+      "NOT_APPLICABLE_IS_NOT_ZERO_OR_MISSING",
+      "UNANSWERED_IS_NOT_ZERO_NONE_SOLO_OR_NOT_APPLICABLE",
+      "CONTRADICTION_PRESERVES_EACH_SOURCE_CLAIM_AND_INVALIDATES_UNSAFE_DERIVATION",
+      "EVERY_METRIC_RETAINS_UNIT_PERIOD_COHORT_DEFINITION_SUBJECT_SCOPE_AND_PROVENANCE"
+    ]
+  },
+  "screens": [
+    {
+      "id": "LO_CORE_01_BUSINESS_SCOPE",
+      "kind": "CORE",
+      "fields": [
+        {"id":"vertical_confirmation","type":"enum:LOAN_ORIGINATOR_CONFIRMED|OTHER|UNSURE","required":"REQUIRED","applicability":"ALL_ENTRIES","period_rule":"NOT_TEMPORAL"},
+        {"id":"producing_status","type":"enum:PRODUCING|NON_PRODUCING|MIXED|UNSURE","required":"REQUIRED","applicability":"ALL_ENTRIES","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"role_types","type":"enum_set:INDIVIDUAL_PRODUCER|PRODUCING_TEAM_LEADER|PRODUCING_BRANCH_LEADER|OTHER","required":"REQUIRED","applicability":"CONFIRMED_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"platform_models","type":"enum_set:RETAIL_DIRECT|MORTGAGE_BROKER|BANK|HYBRID_OTHER","required":"REQUIRED","applicability":"CONFIRMED_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"business_subject_scope","type":"enum:INDIVIDUAL|TEAM|BRANCH|OTHER","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"opportunity_generation_model","type":"enum:SELF_GENERATED|COMPANY_GENERATED|BLENDED|UNSURE","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"decision_control_scope","type":"enum_set:LO_CONTROL|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"other_residential_purposes","type":"string_set","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"}
+      ]
+    },
+    {
+      "id": "LO_CORE_02_PRIMARY_GOAL",
+      "kind": "CORE",
+      "fields": [
+        {"id":"goal_metric","type":"enum:FUNDED_UNITS|FUNDED_VOLUME|BUSINESS_INCOME|OTHER_MEASURABLE|NARRATIVE_ONLY|UNKNOWN","required":"REQUIRED_FOR_BACKSOLVE","applicability":"PRODUCING_LO","period_rule":"FORWARD_12_MONTHS"},
+        {"id":"goal_target_value","type":"number","required":"REQUIRED_FOR_BACKSOLVE","applicability":"NUMERIC_GOAL","period_rule":"FORWARD_12_MONTHS"},
+        {"id":"goal_unit_currency","type":"string","required":"REQUIRED_FOR_BACKSOLVE","applicability":"NUMERIC_GOAL","period_rule":"FORWARD_12_MONTHS"},
+        {"id":"goal_subject_scope","type":"enum:INDIVIDUAL|TEAM|BRANCH|OTHER","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"FORWARD_12_MONTHS"},
+        {"id":"goal_purpose_scope","type":"enum_set:PURCHASE|REFINANCE|OTHER|ALL_APPLICABLE","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"FORWARD_12_MONTHS"},
+        {"id":"goal_why_narrative","type":"string","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"NOT_TEMPORAL"},
+        {"id":"goal_priority","type":"enum:PRIMARY|SECONDARY|UNSURE","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"}
+      ]
+    },
+    {
+      "id": "LO_CORE_03_PRODUCTION_WINDOWS",
+      "kind": "CORE",
+      "fields": [
+        {"id":"funded_units_12m","type":"integer_nonnegative","required":"MINIMUM_BOX1_WHEN_KNOWN","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"funded_volume_12m","type":"currency_nonnegative","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"funded_units_90d","type":"integer_nonnegative","required":"OPTIONAL_TRAJECTORY","applicability":"PRODUCING_LO","period_rule":"TRAILING_90_DAYS"},
+        {"id":"funded_volume_90d","type":"currency_nonnegative","required":"OPTIONAL_TRAJECTORY","applicability":"PRODUCING_LO","period_rule":"TRAILING_90_DAYS"},
+        {"id":"funded_terminal_definition","type":"definition_ref","required":"REQUIRED_IF_PRODUCTION_SUPPLIED","applicability":"PRODUCING_LO","period_rule":"CURRENT_DEFINITION"},
+        {"id":"production_as_of_date","type":"date","required":"REQUIRED_IF_PRODUCTION_SUPPLIED","applicability":"PRODUCING_LO","period_rule":"AS_OF_DATE"},
+        {"id":"production_subject_scope","type":"enum:INDIVIDUAL|TEAM|BRANCH|OTHER","required":"REQUIRED_IF_PRODUCTION_SUPPLIED","applicability":"PRODUCING_LO","period_rule":"SAME_AS_METRIC"},
+        {"id":"production_purpose_segments","type":"metric_map","required":"OPTIONAL","applicability":"MIXED_PURPOSE","period_rule":"TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS"},
+        {"id":"production_data_source","type":"enum:CUSTOMER_RECALL|CUSTOMER_REPORT|AUTHORIZED_AGGREGATE_SYSTEM|OTHER","required":"REQUIRED_IF_PRODUCTION_SUPPLIED","applicability":"PRODUCING_LO","period_rule":"NOT_TEMPORAL"},
+        {"id":"production_precision","type":"enum:EXACT|APPROXIMATE|RANGE|UNKNOWN","required":"REQUIRED_IF_PRODUCTION_SUPPLIED","applicability":"PRODUCING_LO","period_rule":"NOT_TEMPORAL"}
+      ]
+    },
+    {
+      "id": "LO_CORE_04_PURPOSE_APPLICABILITY",
+      "kind": "CORE",
+      "fields": [
+        {"id":"purchase_applicability","type":"enum:APPLICABLE|NOT_APPLICABLE|UNKNOWN","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"refinance_applicability","type":"enum:APPLICABLE|NOT_APPLICABLE|UNKNOWN","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"other_purpose_applicability","type":"string_enum_map","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"funded_units_by_purpose_12m","type":"metric_map","required":"OPTIONAL","applicability":"KNOWN_PURPOSE_MIX","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"funded_volume_by_purpose_12m","type":"metric_map","required":"OPTIONAL","applicability":"KNOWN_PURPOSE_MIX","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"funded_units_by_purpose_90d","type":"metric_map","required":"OPTIONAL","applicability":"KNOWN_PURPOSE_MIX","period_rule":"TRAILING_90_DAYS"},
+        {"id":"mixed_cohort_separability","type":"enum:SEPARABLE|PARTLY_SEPARABLE|NOT_SEPARABLE|UNKNOWN","required":"REQUIRED_IF_MIXED","applicability":"PURCHASE_AND_REFINANCE_APPLICABLE","period_rule":"SAME_AS_METRIC"},
+        {"id":"purpose_stage_applicability","type":"definition_state_map","required":"REQUIRED","applicability":"PRODUCING_LO","period_rule":"CURRENT_DEFINITION"}
+      ]
+    },
+    {
+      "id": "LO_CORE_05_OPPORTUNITY_SOURCE_NETWORK",
+      "kind": "CORE",
+      "fields": [
+        {"id":"osn_sources","type":"row_set","required":"REQUIRED_OR_EXPLICIT_NONE_UNKNOWN","applicability":"PRODUCING_LO","period_rule":"TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS"},
+        {"id":"osn_source_type","type":"enum:REALTOR|BUILDER|FINANCIAL_PROFESSIONAL|OTHER_PROFESSIONAL|COMPANY_BRANCH|DIRECT_DIGITAL|SELF_GENERATED|OTHER","required":"REQUIRED_PER_ROW","applicability":"OSN_ROW","period_rule":"CURRENT_CLASSIFICATION"},
+        {"id":"osn_relationship_or_channel","type":"enum:RELATIONSHIP|CHANNEL|BLENDED","required":"REQUIRED_PER_ROW","applicability":"OSN_ROW","period_rule":"CURRENT_CLASSIFICATION"},
+        {"id":"osn_control_owner","type":"enum:LO|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"REQUIRED_PER_ROW","applicability":"OSN_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"osn_meaningful_size_or_scope","type":"number_or_string","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"osn_active_measure","type":"metric_with_window","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"osn_productive_measure","type":"metric_with_window","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"osn_outcomes","type":"metric_map","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS"},
+        {"id":"osn_activity_cadence","type":"structured_activity","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"osn_attribution_quality","type":"enum:HIGH|MEDIUM|LOW|CONTRADICTORY|UNKNOWN","required":"REQUIRED_IF_OUTCOMES_SUPPLIED","applicability":"OSN_ROW","period_rule":"NOT_TEMPORAL"},
+        {"id":"osn_system_link","type":"id_ref","required":"OPTIONAL","applicability":"OSN_ROW","period_rule":"NOT_TEMPORAL"}
+      ]
+    },
+    {
+      "id": "LO_CORE_06_CUSTOMER_RELATIONSHIP_NETWORK",
+      "kind": "CORE",
+      "fields": [
+        {"id":"crn_meaningful_size","type":"integer_nonnegative_or_range","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_categories","type":"enum_set:PAST_CUSTOMER|CURRENT_CUSTOMER|OTHER_LAWFUL_CATEGORY","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_maintained_state","type":"metric_with_window","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"DECLARED_WINDOW"},
+        {"id":"crn_repeat_refi_referral_outcomes","type":"metric_map","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"TRAILING_12_MONTHS_AND_OPTIONAL_90_DAYS"},
+        {"id":"crn_system_link","type":"id_ref","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"NOT_TEMPORAL"},
+        {"id":"crn_contact_use_authority","type":"enum:CONFIRMED|PARTIAL|NOT_AUTHORIZED|UNKNOWN|NOT_APPLICABLE","required":"REQUIRED_IF_ACTION_CONCLUSION","applicability":"CRN_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_data_owner","type":"enum:LO|COMPANY|SHARED|THIRD_PARTY|UNKNOWN","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_servicing_owner","type":"enum:COMPANY|THIRD_PARTY|MIXED|UNKNOWN|NOT_APPLICABLE","required":"OPTIONAL","applicability":"CRN_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_recapture_authority","type":"enum:CONFIRMED|PARTIAL|NOT_AUTHORIZED|UNKNOWN|NOT_APPLICABLE","required":"REQUIRED_IF_RECAPTURE_CONCLUSION","applicability":"CRN_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"crn_authority_source_date","type":"source_date","required":"REQUIRED_IF_AUTHORITY_CONFIRMED","applicability":"CRN_PRESENT","period_rule":"AS_OF_DATE"}
+      ]
+    },
+    {
+      "id": "LO_CORE_07_OPPORTUNITY_FUNNEL",
+      "kind": "CORE",
+      "fields": [
+        {"id":"funnel_purpose","type":"enum:PURCHASE|REFINANCE|OTHER","required":"REQUIRED_PER_FUNNEL","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"funnel_window","type":"enum:TRAILING_12_MONTHS|TRAILING_90_DAYS|CUSTOM_COMPATIBLE","required":"REQUIRED_PER_FUNNEL","applicability":"PURPOSE_APPLICABLE","period_rule":"DECLARED_WINDOW"},
+        {"id":"funnel_cohort_basis","type":"enum:ENTERED_WINDOW|COMPLETED_WINDOW|MATURE_ENTRY_COHORT|POINT_IN_TIME|OTHER","required":"REQUIRED_PER_FUNNEL","applicability":"PURPOSE_APPLICABLE","period_rule":"DECLARED_COHORT"},
+        {"id":"opportunity_count_definition","type":"metric_definition","required":"REQUIRED_FOR_FUNNEL","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"application_count_definition","type":"metric_definition","required":"OPTIONAL","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"purchase_qualified_preapproved","type":"metric_definition","required":"OPTIONAL","applicability":"PURCHASE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"purchase_active_transaction","type":"metric_definition","required":"OPTIONAL","applicability":"PURCHASE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"refinance_qualified","type":"metric_definition","required":"OPTIONAL","applicability":"REFINANCE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"refinance_active_loan","type":"metric_definition","required":"OPTIONAL","applicability":"REFINANCE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"approval_count_definition","type":"metric_definition","required":"OPTIONAL","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"lock_count_definition","type":"metric_definition","required":"OPTIONAL","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"close_fund_count_definition","type":"metric_definition","required":"REQUIRED_IF_KNOWN","applicability":"PURPOSE_APPLICABLE","period_rule":"SAME_AS_FUNNEL"},
+        {"id":"pending_open_share","type":"ratio_or_count","required":"OPTIONAL","applicability":"OPEN_COHORT","period_rule":"AS_OF_DATE"},
+        {"id":"funnel_data_source","type":"enum:CUSTOMER_RECALL|CUSTOMER_REPORT|AUTHORIZED_AGGREGATE_SYSTEM|OTHER","required":"REQUIRED_IF_COUNTS_SUPPLIED","applicability":"PURPOSE_APPLICABLE","period_rule":"NOT_TEMPORAL"}
+      ]
+    },
+    {
+      "id": "LO_CORE_08_RELATIONSHIP_SYSTEMS",
+      "kind": "CORE",
+      "fields": [
+        {"id":"relationship_systems","type":"row_set","required":"REQUIRED_OR_EXPLICIT_NONE_UNKNOWN","applicability":"PRODUCING_LO","period_rule":"CURRENT_AND_DECLARED_REVIEW_WINDOW"},
+        {"id":"system_network_audience","type":"enum:OSN|CRN|BOTH_WITH_SEPARATE_MEASURES","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"CURRENT_SCOPE"},
+        {"id":"system_action","type":"string","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"NOT_TEMPORAL"},
+        {"id":"system_frequency","type":"frequency","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_delivery_channel","type":"enum_set:VOICE|FACE_TO_FACE|HANDWRITTEN|EVENT|EMAIL|TEXT|SOCIAL|DIGITAL_OTHER","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_automation_personal","type":"enum:PERSONAL|AUTOMATED|BLENDED","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_relationship_depth","type":"enum:ONE_WAY|TWO_WAY|PERSONAL|COLLABORATIVE|UNKNOWN","required":"OPTIONAL","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_segmentation","type":"string_set","required":"OPTIONAL","applicability":"SYSTEM_ROW","period_rule":"CURRENT_SCOPE"},
+        {"id":"system_owner","type":"string_or_role","required":"REQUIRED_PER_ROW","applicability":"SYSTEM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"system_tool","type":"string","required":"OPTIONAL","applicability":"SYSTEM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"system_leading_measure","type":"metric_definition","required":"REQUIRED_TO_CALL_MEASURED_SYSTEM","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_observed_outcome","type":"metric_definition","required":"OPTIONAL","applicability":"SYSTEM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"system_stop_adapt_condition","type":"string","required":"OPTIONAL","applicability":"SYSTEM_ROW","period_rule":"NOT_TEMPORAL"}
+      ]
+    },
+    {
+      "id": "LO_CORE_09_TEAM_CAPACITY",
+      "kind": "CORE",
+      "fields": [
+        {"id":"team_support_state","type":"enum:SOLO|SUPPORTED|TEAM|BRANCH|UNKNOWN","required":"REQUIRED_OR_UNANSWERED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"work_ownership_rows","type":"row_set","required":"REQUIRED_OR_EXPLICIT_UNKNOWN","applicability":"PRODUCING_LO","period_rule":"CURRENT_AND_DECLARED_WINDOW"},
+        {"id":"work_category","type":"enum:RELATIONSHIPS|OPPORTUNITY_INTAKE|APPLICATION_PREAPPROVAL|FILE_COORDINATION|PROCESSING_UNDERWRITING_FOLLOWUP|CLOSING|CUSTOMER_FOLLOWUP|OTHER","required":"REQUIRED_PER_ROW","applicability":"WORK_ROW","period_rule":"CURRENT_SCOPE"},
+        {"id":"work_owner_handoff","type":"structured_owner_handoff","required":"REQUIRED_PER_ROW","applicability":"WORK_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"work_load","type":"metric_definition","required":"OPTIONAL","applicability":"WORK_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"sustainable_capacity","type":"metric_definition","required":"OPTIONAL","applicability":"WORK_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"overflow_backlog","type":"metric_definition","required":"OPTIONAL","applicability":"WORK_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"service_quality_effect","type":"structured_observation","required":"OPTIONAL","applicability":"WORK_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"highest_value_lo_work","type":"string_set","required":"OPTIONAL","applicability":"PRODUCING_LO","period_rule":"CURRENT_SCOPE"},
+        {"id":"capacity_control_owner","type":"enum:LO|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"REQUIRED_IF_CONSTRAINT_CANDIDATE","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"}
+      ]
+    },
+    {
+      "id": "LO_CORE_10_PLATFORM_CAPABILITY",
+      "kind": "CORE",
+      "fields": [
+        {"id":"platform_limits","type":"row_set_or_explicit_none_unknown","required":"REQUIRED_OR_UNANSWERED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AND_DECLARED_WINDOW"},
+        {"id":"platform_limit_category","type":"enum:PRODUCT_PROGRAM|PRICING|UNDERWRITING_OPERATIONS|TURN_TIME|TECHNOLOGY|LEAD_DISTRIBUTION|GEOGRAPHY|POLICY|OTHER","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"CURRENT_SCOPE"},
+        {"id":"platform_limit_description","type":"string","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"platform_affected_scope","type":"structured_scope","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"platform_business_effect","type":"structured_observation","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"platform_materiality","type":"enum:MATERIAL|POSSIBLE|IMMATERIAL|UNKNOWN","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"platform_control_owner","type":"enum:LO|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"platform_workaround","type":"string","required":"OPTIONAL","applicability":"PLATFORM_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"platform_volatile_fact_flag","type":"boolean","required":"REQUIRED_PER_ROW","applicability":"PLATFORM_ROW","period_rule":"AS_OF_DATE"}
+      ]
+    },
+    {
+      "id": "LO_CORE_11_OPERATOR_DIAGNOSIS",
+      "kind": "CORE",
+      "fields": [
+        {"id":"operator_hypothesis_type","type":"enum:CONSTRAINT|STRENGTH|MOMENTUM|OPPORTUNITY|EVIDENCE_NEED|NONE|UNSURE","required":"REQUIRED_OR_UNANSWERED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"operator_hypothesis_description","type":"string","required":"OPTIONAL_IF_NONE_UNSURE","applicability":"PRODUCING_LO","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"operator_affected_scope","type":"structured_scope","required":"OPTIONAL","applicability":"HYPOTHESIS_PRESENT","period_rule":"CURRENT_SCOPE"},
+        {"id":"operator_supporting_observations","type":"evidence_ref_set_or_string","required":"OPTIONAL","applicability":"HYPOTHESIS_PRESENT","period_rule":"DECLARED_WINDOW"},
+        {"id":"operator_alternative_explanations","type":"string_set","required":"OPTIONAL","applicability":"HYPOTHESIS_PRESENT","period_rule":"NOT_TEMPORAL"},
+        {"id":"operator_control_owner","type":"enum:LO|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"OPTIONAL","applicability":"HYPOTHESIS_PRESENT","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"operator_confidence","type":"enum:HIGH|MEDIUM|LOW|UNSURE","required":"REQUIRED_IF_HYPOTHESIS_PRESENT","applicability":"HYPOTHESIS_PRESENT","period_rule":"NOT_TEMPORAL"},
+        {"id":"operator_desired_compounding_outcome","type":"string","required":"OPTIONAL","applicability":"STRENGTH_MOMENTUM_OPPORTUNITY","period_rule":"FORWARD_LOOKING"}
+      ]
+    },
+    {
+      "id": "LO_CORE_12_ACCOUNTABILITY_EXECUTION",
+      "kind": "CORE",
+      "fields": [
+        {"id":"accountability_priorities","type":"row_set_or_explicit_none_unknown","required":"REQUIRED_OR_UNANSWERED","applicability":"PRODUCING_LO","period_rule":"CURRENT_AND_TRAILING_90_DAYS"},
+        {"id":"priority_commitment","type":"string","required":"REQUIRED_PER_ROW","applicability":"PRIORITY_ROW","period_rule":"CURRENT_COMMITMENT_WINDOW"},
+        {"id":"priority_strategy_system_link","type":"id_ref_set","required":"OPTIONAL","applicability":"PRIORITY_ROW","period_rule":"NOT_TEMPORAL"},
+        {"id":"priority_owner","type":"string_or_role","required":"REQUIRED_PER_ROW","applicability":"PRIORITY_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"priority_target_cadence","type":"metric_or_frequency","required":"REQUIRED_PER_ROW","applicability":"PRIORITY_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"priority_actual_execution","type":"metric_or_structured_observation","required":"OPTIONAL","applicability":"PRIORITY_ROW","period_rule":"TRAILING_90_DAYS_OR_DECLARED_WINDOW"},
+        {"id":"priority_outcome","type":"structured_outcome","required":"OPTIONAL","applicability":"PRIORITY_ROW","period_rule":"TRAILING_90_DAYS_OR_DECLARED_WINDOW"},
+        {"id":"priority_miss_reason","type":"string","required":"OPTIONAL","applicability":"MISSED_OR_PARTIAL","period_rule":"DECLARED_WINDOW"},
+        {"id":"priority_learning","type":"string","required":"OPTIONAL","applicability":"PRIORITY_ROW","period_rule":"DECLARED_WINDOW"},
+        {"id":"priority_next_review","type":"date","required":"OPTIONAL","applicability":"ACTIVE_PRIORITY","period_rule":"FUTURE_DATE"},
+        {"id":"priority_state","type":"enum:CONTINUE|CHANGE|STOP|COMPLETE|UNSURE","required":"OPTIONAL","applicability":"PRIORITY_ROW","period_rule":"CURRENT_AS_OF_CAPTURE"}
+      ]
+    },
+    {
+      "id": "LO_COND_13_CONVERSION_FALLOUT_CYCLE",
+      "kind": "CONDITIONAL",
+      "fields": [
+        {"id":"conversion_trigger_evidence","type":"evidence_ref_set","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_TRIGGER"},
+        {"id":"conversion_affected_scope","type":"structured_stage_scope","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_TRIGGER"},
+        {"id":"conversion_displayed_derived_rate","type":"ratio","required":"REQUIRED_IF_DERIVED_TRIGGER","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_TRIGGER"},
+        {"id":"fallout_reason_categories","type":"enum_set:CUSTOMER_DROPOFF|INCOMPLETE_APPLICATION|QUALIFICATION_PREAPPROVAL|PROPERTY_SEARCH|PROCESS_APPROVAL|LOCK_FUNDING|CYCLE_DELAY|OTHER|UNKNOWN","required":"OPTIONAL","applicability":"CONDITIONAL_ACTIVE","period_rule":"DECLARED_WINDOW"},
+        {"id":"conversion_customer_explanation","type":"string","required":"OPTIONAL","applicability":"CONDITIONAL_ACTIVE","period_rule":"DECLARED_WINDOW"},
+        {"id":"fallout_count","type":"integer_nonnegative","required":"OPTIONAL","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_TRIGGER"},
+        {"id":"cycle_aging_measure","type":"metric_definition","required":"OPTIONAL","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_TRIGGER"},
+        {"id":"conversion_control_owner","type":"enum:LO|SHARED|PLATFORM|EXTERNAL|UNKNOWN","required":"REQUIRED_IF_CAUSAL_CLAIM","applicability":"CONDITIONAL_ACTIVE","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"conversion_materiality","type":"enum:MATERIAL|POSSIBLE|IMMATERIAL|UNKNOWN","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"CURRENT_AS_OF_CAPTURE"}
+      ]
+    },
+    {
+      "id": "LO_COND_14_ECONOMICS",
+      "kind": "CONDITIONAL",
+      "fields": [
+        {"id":"economic_scope","type":"enum:INDIVIDUAL_GROSS|INDIVIDUAL_NET_BUSINESS|TEAM|BRANCH|SALARY_DRAW|OTHER","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"TRAILING_AND_FORWARD_12_MONTHS"},
+        {"id":"compensation_revenue_basis","type":"string_or_enum","required":"REQUIRED_FOR_CALCULATION","applicability":"CONDITIONAL_ACTIVE","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"gross_amount_per_funded_or_period","type":"currency_metric","required":"REQUIRED_FOR_CALCULATION","applicability":"CONDITIONAL_ACTIVE","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"variable_business_cost_per_funded","type":"currency_metric","required":"OPTIONAL","applicability":"ECONOMIC_SCOPE_REQUIRES","period_rule":"TRAILING_12_MONTHS"},
+        {"id":"fixed_business_cost","type":"currency_metric","required":"OPTIONAL","applicability":"ECONOMIC_SCOPE_REQUIRES","period_rule":"TRAILING_OR_FORWARD_12_MONTHS"},
+        {"id":"salary_draw_branch_distinctions","type":"structured_economic_terms","required":"OPTIONAL","applicability":"ECONOMIC_SCOPE_REQUIRES","period_rule":"TRAILING_OR_FORWARD_12_MONTHS"},
+        {"id":"economic_currency_units","type":"string","required":"REQUIRED_IF_VALUE_SUPPLIED","applicability":"CONDITIONAL_ACTIVE","period_rule":"NOT_TEMPORAL"},
+        {"id":"economic_sustainable_capacity","type":"metric_definition","required":"OPTIONAL","applicability":"FEASIBILITY_TEST","period_rule":"DECLARED_WINDOW"},
+        {"id":"economic_assumption_source","type":"provenance_ref","required":"REQUIRED_IF_MODELED","applicability":"CONDITIONAL_ACTIVE","period_rule":"NOT_TEMPORAL"},
+        {"id":"economic_sensitivity_range","type":"numeric_range","required":"OPTIONAL","applicability":"MODELED_OR_SCENARIO","period_rule":"FORWARD_12_MONTHS"}
+      ]
+    },
+    {
+      "id": "LO_COND_15_CONTRADICTION_CLARIFICATION",
+      "kind": "CONDITIONAL",
+      "fields": [
+        {"id":"contradiction_evidence_ids","type":"evidence_ref_set","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"SAME_AS_CONFLICTING_CLAIMS"},
+        {"id":"contradiction_type","type":"enum:DEFINITION|PERIOD|COHORT|UNIT|SUBJECT_SCOPE|PURPOSE|ATTRIBUTION|DUPLICATE_VALUE|OTHER","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"NOT_TEMPORAL"},
+        {"id":"contradiction_explanation","type":"string","required":"OPTIONAL","applicability":"CONDITIONAL_ACTIVE","period_rule":"NOT_TEMPORAL"},
+        {"id":"contradiction_corrected_claim","type":"structured_claim","required":"OPTIONAL","applicability":"CUSTOMER_RESOLVES","period_rule":"DECLARED_BY_CORRECTION"},
+        {"id":"contradiction_supersession_link","type":"evidence_ref","required":"REQUIRED_IF_CORRECTED","applicability":"CUSTOMER_RESOLVES","period_rule":"NOT_TEMPORAL"},
+        {"id":"contradiction_resolution_state","type":"enum:RESOLVED|PARTIALLY_RESOLVED|UNRESOLVED|CUSTOMER_UNSURE","required":"REQUIRED","applicability":"CONDITIONAL_ACTIVE","period_rule":"CURRENT_AS_OF_CAPTURE"},
+        {"id":"contradiction_unresolved_reason","type":"string","required":"OPTIONAL","applicability":"UNRESOLVED","period_rule":"NOT_TEMPORAL"}
+      ]
+    }
+  ]
+}

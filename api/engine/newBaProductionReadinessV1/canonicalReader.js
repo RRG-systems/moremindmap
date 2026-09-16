@@ -15,6 +15,7 @@ import {
 import { classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
 import { resolveAssessmentVerticalBinding } from '../../business-assessment/verticalBinding.js';
 import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../../../src/lib/baVerticalCassettesV1/index.js';
+import { validateLoanOriginatorTypedEvidence } from '../../../src/lib/baVerticalCassettesV1/loanOriginatorEvidence.js';
 
 export const PATRICIA_PROFILE_ID = 'MM-20260708-DSST020Z';
 export const PATRICIA_ASSESSMENT_ID = 'ba-20260714-64ca0783';
@@ -135,14 +136,14 @@ export function isGovernedNewBaAssessmentState(value) {
   return NEW_BA_GOVERNED_ASSESSMENT_STATES.includes(String(value || ''));
 }
 
-export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
+export function normalizeGovernedAssessmentRecord(record, expectedProfileId, { cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, generationContext = null } = {}) {
   const profileId = normalizeProfileId(record?.owner_profile_id);
   if (profileId !== expectedProfileId) throw new Error('new_ba_canonical_reader_profile_mismatch');
   const assessmentId = normalizeAssessmentId(record?.assessment_id);
   if (!isGovernedNewBaAssessmentState(record?.status)) throw new Error('new_ba_canonical_reader_assessment_state_unsupported');
   if (record?.version !== 'business_assessment_v1_intake') throw new Error('new_ba_canonical_reader_assessment_version_unsupported');
-  const verticalBinding = resolveAssessmentVerticalBinding(record);
-  const cassette = PRODUCTION_BA_CASSETTE_REGISTRY.resolveVertical(verticalBinding.vertical_id);
+  const verticalBinding = resolveAssessmentVerticalBinding(record, { registry: cassetteRegistry });
+  const cassette = cassetteRegistry.resolveVertical(verticalBinding.vertical_id);
   const cassetteQuestionKeys = cassette.intake_contract.questions.map((question) => question.key);
   const answers = {};
   const answerSha256 = {};
@@ -164,9 +165,34 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
   const explicitQuestionStates = record?.inputs?.question_states && typeof record.inputs.question_states === 'object'
     ? record.inputs.question_states
     : undefined;
+  const isLoanOriginator = cassette.vertical_id === 'loan_originator';
+  const typedEvidence = isLoanOriginator ? validateLoanOriginatorTypedEvidence(record?.inputs?.typed_evidence) : null;
+  if (isLoanOriginator) {
+    const expected = generationContext;
+    const { sha256: ignored, ...core } = expected || {};
+    void ignored;
+    if (expected?.contract_id !== 'scoped-lo-native-generation-context-v1'
+      || expected.vertical_id !== 'loan_originator'
+      || expected.authority_root_sha256 !== verticalBinding.cassette_manifest_sha256
+      || expected.sha256 !== sha256Stable(core)
+      || sha256Stable(record.generation_context) !== sha256Stable(expected)) {
+      throw new Error('new_ba_loan_originator_generation_context_invalid');
+    }
+    if (sha256Stable(explicitQuestionStates) !== sha256Stable(typedEvidence.question_states)) {
+      throw new Error('new_ba_loan_originator_question_state_mismatch');
+    }
+  }
+  // Mission completeness follows validated native field states; prose is retained separately.
+  const sufficiencyAnswers = typedEvidence
+    ? Object.fromEntries(Object.entries(typedEvidence.question_states)
+      .filter(([, state]) => state.state === 'ANSWERED').map(([key]) => [key, 'GOVERNED_TYPED_EVIDENCE_PRESENT']))
+    : answers;
+  const sufficiencyHashes = typedEvidence
+    ? Object.fromEntries(Object.entries(sufficiencyAnswers).map(([key, value]) => [key, sha256Text(value)]))
+    : answerSha256;
   const evidenceSufficiency = classifyBaEvidenceSufficiency({
-    answers,
-    answerSha256,
+    answers: sufficiencyAnswers,
+    answerSha256: sufficiencyHashes,
     explicit_question_states: explicitQuestionStates,
     questionAuthority: cassette.evidence_contract.question_authority,
     questionKeys: cassetteQuestionKeys,
@@ -185,6 +211,7 @@ export function normalizeGovernedAssessmentRecord(record, expectedProfileId) {
     completed_at: record.completed_at || null,
     answers: Object.freeze(answers),
     answer_sha256: Object.freeze(answerSha256),
+    ...(typedEvidence ? { typed_evidence: Object.freeze(structuredClone(typedEvidence)), generation_context: Object.freeze(structuredClone(generationContext)) } : {}),
     ...(explicitQuestionStates ? { question_states: Object.freeze(structuredClone(explicitQuestionStates)) } : {}),
     read_only: true,
     excluded_fields: Object.freeze(['output', 'business_intelligence_draft', 'briefing', 'five_futures_v1', 'one_move_v1', 'profile_context', 'presentation']),
@@ -243,7 +270,7 @@ async function readBosAuthority(redis, bosNamespace, profileId) {
   });
 }
 
-export function createReadOnlyBaAuthorityReader({ redis, bosNamespace, fixtureReader = null } = {}) {
+export function createReadOnlyBaAuthorityReader({ redis, bosNamespace, fixtureReader = null, cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY, generationContext = null } = {}) {
   if (typeof redis?.get !== 'function') throw new Error('new_ba_canonical_reader_redis_required');
   async function readWithSourceGuards(profileId, { expectedAssessmentId = null, expectedRelationshipRef = null } = {}) {
     const profile = normalizeProfileId(profileId);
@@ -284,7 +311,7 @@ export function createReadOnlyBaAuthorityReader({ redis, bosNamespace, fixtureRe
     if (expectedRelationship && relationshipRef !== expectedRelationship) {
       throw new Error('new_ba_manager_preparation_relationship_authority_mismatch');
     }
-    const businessEvidence = normalizeGovernedAssessmentRecord(record, profile);
+    const businessEvidence = normalizeGovernedAssessmentRecord(record, profile, { cassetteRegistry, generationContext });
     const bosRead = await readBosAuthority(redis, bosNamespace, profile);
     return Object.freeze({
       source: Object.freeze({

@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
 
-import { sha256 } from '../wholeBusinessModelV1/canonical.js';
+import { isSha256, sha256 } from '../wholeBusinessModelV1/canonical.js';
 import { SCRIPT_ROUTE_BY_DOMAIN } from './constants.js';
 import { integrity } from './errors.js';
 
@@ -41,6 +41,25 @@ export function loadFrozenScriptIntelligence({ libraryRoot = DEFAULT_LIBRARY_ROO
   });
 }
 
+// A missing vertical-owned catalog is an explicit source limitation. Its source
+// root is real custody; null script hashes do not pretend a catalog was loaded.
+export function bindScopedScriptAbsence(selection, library, vertical) {
+  integrity(selection?.contract_id === 'one-move-cassette-script-selection-v1'
+    && selection.mode === 'NO_APPROVED_SCRIPT_LIBRARY', 'AUTHORITY_CORRUPTION', 'Explicit scoped script absence is required');
+  integrity(selection.vertical_id === vertical && library.vertical_id === vertical,
+    'AUTHORITY_CORRUPTION', 'Script selection belongs to a different vertical');
+  integrity(isSha256(selection.authority_root_hash)
+    && selection.authority_root_hash === library.vertical_authority_root_sha256,
+  'AUTHORITY_CORRUPTION', 'Script absence must bind the supplied vertical authority root');
+  integrity(typeof selection.reason === 'string' && selection.reason.trim().length > 0,
+    'AUTHORITY_CORRUPTION', 'Script absence requires an explicit reason');
+  integrity(Object.keys(selection).sort().join('|') === [
+    'authority_root_hash', 'contract_id', 'mode', 'reason', 'vertical_id',
+  ].sort().join('|'), 'AUTHORITY_CORRUPTION', 'Script absence may not conceal catalog contents or routing');
+  return Object.freeze({ registry_hash: null, library_hash: null, scripts: Object.freeze([]),
+    selection: Object.freeze({ ...selection }) });
+}
+
 function routeIds(context) {
   const mechanism = context.wbm.causal_model.mechanisms[0];
   const route = mechanism.affected_domains.flatMap((domain) => SCRIPT_ROUTE_BY_DOMAIN[domain] || []);
@@ -61,4 +80,3 @@ export function selectRelevantScriptIntelligence(context, library, limit = 3) {
     return Object.freeze({ ...script, use: 'ADAPTABLE_RESOURCE_NOT_MANDATORY_WORDING' });
   });
 }
-

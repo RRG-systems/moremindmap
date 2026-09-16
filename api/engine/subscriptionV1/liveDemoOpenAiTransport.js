@@ -86,7 +86,7 @@ function researchTrace(response, retrievedAt) {
 }
 
 export function createSubscriptionLiveDemoOpenAiTransport({ apiKey, timeoutMs = 180000, maxTransportRetries = 1, client: suppliedClient = null, sourceLibrary = null }) {
-  if (!apiKey) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_OPENAI_API_KEY_REQUIRED');
+  if (!apiKey && !suppliedClient) throw new TypeError('SUBSCRIPTION_LIVE_DEMO_OPENAI_API_KEY_REQUIRED');
   const client = suppliedClient || new OpenAI({ apiKey, maxRetries: 0, timeout: timeoutMs });
   return async function subscriptionLiveDemoTransport(request, { stage }) {
     assertRequest(request, stage);

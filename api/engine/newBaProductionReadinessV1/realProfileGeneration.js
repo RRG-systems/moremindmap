@@ -37,6 +37,11 @@ import { validateBaProviderEgressPayload } from './privacyEgress.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
 import { classifyBaEvidenceSufficiency } from './evidenceSufficiency.js';
 import { PRODUCTION_BA_CASSETTE_REGISTRY } from '../../../src/lib/baVerticalCassettesV1/index.js';
+import {
+  assertLoanOriginatorPrivacyBoundary,
+  projectLoanOriginatorEvidenceForWbm,
+  validateLoanOriginatorTypedEvidence,
+} from '../../../src/lib/baVerticalCassettesV1/loanOriginatorEvidence.js';
 import { resolveAssessmentVerticalBinding } from '../../business-assessment/verticalBinding.js';
 
 const WHOLE_PERSON_DOMAINS = Object.freeze({
@@ -108,6 +113,12 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt, cassette
   invariant(source.bos_authority?.profile_id === profileId, 'new_ba_real_profile_bos_profile_mismatch');
   const verticalBinding = resolveAssessmentVerticalBinding(source.business_evidence, { registry: cassetteRegistry });
   const cassette = cassetteRegistry.resolveVertical(verticalBinding.vertical_id);
+  if (cassette.vertical_id === 'loan_originator') {
+    assertLoanOriginatorPrivacyBoundary({
+      answers: source.business_evidence.answers,
+      typed_evidence: source.business_evidence.typed_evidence,
+    }, { path: 'business_assessment.inputs' });
+  }
   const questionAuthority = cassette.evidence_contract.question_authority;
   const evidenceSufficiency = source.business_evidence?.evidence_sufficiency || classifyBaEvidenceSufficiency({
     answers: source.business_evidence?.answers,
@@ -116,7 +127,7 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt, cassette
     questionKeys: cassette.intake_contract.questions.map((question) => question.key),
     requiredMissions: cassette.evidence_contract.sufficiency_missions,
   });
-  const evidence = Object.entries(source.business_evidence.answers).map(([key, value], index) => deepFreeze({
+  let evidence = Object.entries(source.business_evidence.answers).map(([key, value], index) => deepFreeze({
     evidence_id: `BE-${String(index + 1).padStart(2, '0')}`,
     business_id: `business-${source.assessment_id}`,
     profile_id: profileId.toLowerCase(),
@@ -128,6 +139,38 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt, cassette
     units: null,
     period: 'assessment-time-self-report',
   }));
+  let missingTypedEvidence = [];
+  if (cassette.vertical_id === 'loan_originator') {
+    const typed = validateLoanOriginatorTypedEvidence(source.business_evidence.typed_evidence);
+    const projected = projectLoanOriginatorEvidenceForWbm(typed);
+    const typedFacts = projected.map((item, index) => {
+      const fieldId = item.source_ref.split('.').at(-1);
+      const field = typed.fields[fieldId];
+      return deepFreeze({
+        evidence_id: `LO-TYPED-${String(index + 1).padStart(3, '0')}`,
+        business_id: `business-${source.assessment_id}`, profile_id: profileId.toLowerCase(),
+        domain: item.domain, evidence_class: 'OPERATOR_REPORTED', source_ref: item.source_ref,
+        observed_at: field.captured_at, value: item.value,
+        units: field.units ?? null, period: field.period_or_not_temporal,
+        native_field_id: fieldId, mission_id: field.mission_id,
+        source_evidence_class: field.evidence_class, confidence: field.confidence,
+        provenance: field.provenance, definition_id: field.definition_id,
+        subject_scope: field.subject_scope, applicability: field.applicability,
+        contradiction_links: field.contradiction_links,
+        related_mission_prose_refs: [`stored_business_assessment:inputs.answers.${field.mission_id}`],
+      });
+    });
+    evidence = [...evidence, ...typedFacts];
+    missingTypedEvidence = Object.values(typed.fields).filter(field => field.question_state !== 'ANSWERED').map(field => deepFreeze({
+      missing_id: `LO-MISSING-${field.field_id}`, domain: questionAuthority[field.mission_id].primary_domain,
+      question: `${field.field_id} remains ${field.question_state === 'NOT_APPLICABLE' ? 'explicitly not applicable' : 'not established'} in governed Loan Originator intake.`,
+      decision_impact: 'Do not invent this value, infer it from personality, or substitute another period or business definition.',
+      native_field_id: field.field_id, mission_id: field.mission_id, question_state: field.question_state,
+      source_ref: `business_assessment.inputs.typed_evidence.fields.${field.field_id}`,
+      definition_id: field.definition_id, period_or_not_temporal: field.period_or_not_temporal,
+      subject_scope: field.subject_scope, applicability: field.applicability,
+    }));
+  }
   invariant(evidenceSufficiency.status === 'PASS', 'new_ba_real_profile_business_evidence_sufficiency_required');
   const missingEvidence = [
     ['ME-01', 'operations', 'Which current direct operating records corroborate the customer-reported systems and execution state?', 'Could strengthen, weaken, or replace cross-domain operating mechanisms.'],
@@ -144,6 +187,7 @@ export function buildGovernedRealProfileWbmInput({ source, requestedAt, cassette
       decision_impact: `Keep ${consequence.primary_domain} claims and affected customer surfaces explicitly bounded until governed evidence is supplied.`,
     }));
   }
+  missingEvidence.push(...missingTypedEvidence);
   const materialDomains = unique(Object.values(questionAuthority).flatMap((item) => [item.primary_domain, ...item.secondary_domains])).filter((domain) => WBM_DOMAINS.includes(domain));
   const claims = wholePersonClaims(source);
   return deepFreeze({
@@ -210,6 +254,10 @@ function preflightRequestShape({ stage, mission, schema, schemaName, maxOutputTo
 
 export function createRealProfileGenerationContext({ source, displayName, requestedAt = source?.business_evidence?.updated_at || source?.business_evidence?.created_at, library = loadFrozenAuthorityLibrary(), cassetteRegistry = PRODUCTION_BA_CASSETTE_REGISTRY }) {
   const input = buildGovernedRealProfileWbmInput({ source, requestedAt, cassetteRegistry });
+  if (input.assessment_identity.vertical === 'loan_originator') {
+    invariant(library?.vertical_id === 'loan_originator' && library.vertical_authority_root_sha256 === source.business_evidence.vertical_binding.cassette_manifest_sha256, 'new_ba_loan_originator_library_binding_required');
+    invariant(library.vertical_bibles?.every(item => item.authority_id.startsWith('loan-originator-intelligence-module-')) && library.vertical_bibles.length > 0, 'new_ba_loan_originator_library_scope_invalid');
+  }
   const context = assembleWholeBusinessContext(input, { library, cassetteRegistry });
   const mission = applyWbmFieldMissionOwnership(buildWholeBusinessSynthesisMission(context));
   const schema = wbmSchemaFromMission(mission);
@@ -363,7 +411,7 @@ export async function generateRealProfileFutures({ source, displayName, apiKey, 
   return deepFreeze({ result, provider: { accepted_calls: provider.acceptedCallCount(), submissions: provider.callCount(), receipts: provider.receipts(), attempts: provider.attemptReceipts(), transport: streaming.traces() } });
 }
 
-export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), backgroundResponseStore = null, generationIdentitySha256 = null, assertCurrentAuthority = async () => {} }) {
+export async function generateRealProfileOneMove({ source, displayName, apiKey, wbm, futures, library = loadFrozenAuthorityLibrary(), oneMoveContextOptions = {}, backgroundResponseStore = null, generationIdentitySha256 = null, assertCurrentAuthority = async () => {} }) {
   const identityTokens = providerIdentityTokens({ source, displayName });
   const { provider, streaming } = makeProvider({ apiKey, identityTokens, startingStage: 'one_move_v2', backgroundResponseStore, generationIdentitySha256, profileId: source.profile_id, assertCurrentAuthority });
   const candidateAdapter = createCandidateGenerationAdapter({ generate: async ({ mission }) => {
@@ -379,7 +427,7 @@ export async function generateRealProfileOneMove({ source, displayName, apiKey, 
     const result = await callWithRetry(provider, { stage: 'one_move_v2', mission: providerSafeMission(governedMission, identityTokens), schema, schemaName: 'real_profile_one_move_v2_candidates', maxOutputTokens: 30_000 });
     return normalizeOneMoveCandidateContract(result.parsed.candidates);
   } });
-  const result = await buildOneMoveV2(wbm, futures, { candidateAdapter, library });
+  const result = await buildOneMoveV2(wbm, futures, { candidateAdapter, library, ...oneMoveContextOptions });
   return deepFreeze({ result, provider: { accepted_calls: provider.acceptedCallCount(), submissions: provider.callCount(), receipts: provider.receipts(), attempts: provider.attemptReceipts(), transport: streaming.traces() } });
 }
 

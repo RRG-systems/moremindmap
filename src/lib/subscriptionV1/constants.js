@@ -6,6 +6,7 @@ export const SUBSCRIPTION_V1_CONTRACT_VERSIONS = deepFreeze({
   canonical_customer_subject: SUBSCRIPTION_V1_FOUNDATION_VERSION,
   business_membership: SUBSCRIPTION_V1_FOUNDATION_VERSION,
   paid_entitlement: SUBSCRIPTION_V1_FOUNDATION_VERSION,
+  synthetic_qa_entitlement: SUBSCRIPTION_V1_FOUNDATION_VERSION,
   session_allowance_ledger: SUBSCRIPTION_V1_FOUNDATION_VERSION,
   active_coaching_session: SUBSCRIPTION_V1_FOUNDATION_VERSION,
   personal_rsl_event: SUBSCRIPTION_V1_FOUNDATION_VERSION,

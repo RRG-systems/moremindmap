@@ -1,5 +1,5 @@
 import { classifyNewBaCompatibility } from './compatibility.js';
-import { validateCompleteNewBaRealization } from './completeness.js';
+import { NEW_BA_COMPLETENESS_STATUS, validateCompleteNewBaRealization } from './completeness.js';
 import { buildLaunchSafeNewBaEnvelope } from './launchSafeRealizationStore.js';
 import {
   buildSanitizedStageReceipt,
@@ -11,6 +11,7 @@ import {
 import { buildRealProfileNewBaRealization } from './realProfileRealizationFactory.js';
 import { buildNewBaRealizationIdentityV3, sameNewBaRealizationIdentity } from './realizationIdentity.js';
 import { normalizeProfileId, sha256Stable } from './stable.js';
+import { assertScopedLoanOriginatorGenerationContext } from './scopedLoanOriginatorGeneration.js';
 
 const REFERENCE_PROFILES = Object.freeze({
   'MM-20260617-YBNWT0KS': Object.freeze({ display_name: 'Amber', assessment_id: 'ba-20260722-881ba54d' }),
@@ -210,7 +211,7 @@ function aggregateProviderAccounting(checkpoints) {
   });
 }
 
-export function createRealProfileNewBaGenerationCampaign({ config, redis, authorityReader, realizationStore, backgroundResponseStore = null, apiKey }) {
+export function createRealProfileNewBaGenerationCampaign({ config, redis, authorityReader, realizationStore, backgroundResponseStore = null, apiKey, cassetteRegistry, library, projectionAdapters, oneMoveContextOptions = {}, generationContext = null }) {
   invariant(config?.staged && (config.customerActive || config.canaryEnabled) && config.providerEnabled && config.persistenceEnabled, 'new_ba_real_profile_campaign_runtime_not_enabled');
   invariant(config.providerModel === 'gpt-5.6-sol', 'new_ba_real_profile_campaign_model_invalid');
   invariant(typeof redis?.get === 'function' && typeof redis?.set === 'function' && typeof redis?.rpush === 'function' && typeof redis?.llen === 'function', 'new_ba_real_profile_campaign_redis_invalid');
@@ -225,6 +226,10 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       : { source: await authorityReader.read(profile.profile, expectedAuthority || undefined), sourceGuards: [] };
     const source = authorityRead.source;
     invariant(source.profile_id === profile.profile, 'new_ba_real_profile_campaign_source_identity_mismatch');
+    if (source.business_evidence?.vertical_binding?.vertical_id === 'loan_originator') {
+      assertScopedLoanOriginatorGenerationContext({ cassetteRegistry, library, oneMoveContextOptions, generationContext });
+      invariant(generationContext?.sha256 && sha256Stable(source.business_evidence.generation_context) === sha256Stable(generationContext), 'new_ba_loan_originator_campaign_context_mismatch');
+    }
     if (profile.assessment_id) invariant(source.assessment_id === profile.assessment_id, 'new_ba_real_profile_campaign_reference_assessment_mismatch');
     invariant(source.business_evidence.profile_id === profile.profile && source.bos_authority.profile_id === profile.profile, 'new_ba_real_profile_campaign_cross_profile_source');
     const compatibility = classifyNewBaCompatibility(source);
@@ -302,7 +307,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
 
   async function preflight(profileId, expectedAuthority = null) {
     const { profile, source } = await contextFor(profileId, expectedAuthority);
-    const generation = createRealProfileGenerationContext({ source, displayName: profile.display_name });
+    const generation = createRealProfileGenerationContext({ source, displayName: profile.display_name, library, cassetteRegistry });
     return deepFreeze({
       status: 'PASS',
       profile_id: profile.profile,
@@ -316,6 +321,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       bos_evidence_boundary_sha256: source.bos_authority.evidence_boundary_sha256,
       universal_authority_count: generation.library.universal_bibles.length,
       real_estate_authority_count: generation.library.real_estate_bibles.length,
+      ...(source.business_evidence.vertical_binding.vertical_id === 'loan_originator' ? { loan_originator_authority_count: generation.library.vertical_bibles.length } : {}),
       provider_egress: generation.providerPreflight,
       direct_identity_in_provider_payload: false,
       raw_bos_scores_in_provider_payload: false,
@@ -367,7 +373,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       let generated;
       if (stage === 'whole_business_model_v1') {
         await assertCurrentAuthority();
-        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
+        generated = await generateRealProfileWbm({ source, displayName: profile.display_name, apiKey, library, cassetteRegistry, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
       } else if (stage === 'five_futures_v2') {
         const wbm = await readCheckpoint(redis, config, profile, generationIdentitySha256, 'whole_business_model_v1');
         invariant(wbm, 'new_ba_real_profile_campaign_wbm_checkpoint_required');
@@ -380,7 +386,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
         ]);
         invariant(wbm && futures, 'new_ba_real_profile_campaign_upstream_checkpoints_required');
         await assertCurrentAuthority();
-        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
+        generated = await generateRealProfileOneMove({ source, displayName: profile.display_name, apiKey, library, oneMoveContextOptions, wbm: wbm.artifact, futures: futures.artifact, backgroundResponseStore, generationIdentitySha256, assertCurrentAuthority });
       }
       const artifact = stage === 'whole_business_model_v1' ? generated.result.model : stage === 'five_futures_v2' ? generated.result.artifact : generated.result.one_move;
       const receipt = buildSanitizedStageReceipt({ profileId: profile.profile, stage, artifact, provider: generated.provider });
@@ -406,7 +412,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     invariant(checkpoints.every(Boolean), 'new_ba_real_profile_campaign_all_checkpoints_required');
     const providerAccounting = aggregateProviderAccounting(checkpoints);
     const artifact = buildRealProfileNewBaRealization({
-      source,
+      source, cassetteRegistry, projectionAdapters,
       displayName: profile.display_name,
       wbm: checkpoints[0].artifact,
       futures: checkpoints[1].artifact,
@@ -452,9 +458,10 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
       }
     }
     const candidate = await assembleCandidate(profile.profile, expectedAuthority, expectedRealizationIdentity);
+    const openPlan = candidate.validation.status === NEW_BA_COMPLETENESS_STATUS.VALID_ANALYSIS_WITH_OPEN_PLAN;
     return deepFreeze({
       complete: true,
-      status: 'COMPLETE',
+      status: openPlan ? 'COMPLETE_WITH_OPEN_PLAN' : 'COMPLETE',
       artifact: candidate.artifact,
       provider_accounting: candidate.providerAccounting,
       validation: candidate.validation,
@@ -468,7 +475,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     const before = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
     if (before.state === 'current') {
       invariant(before.current.artifact_sha256 === sha256Stable(artifact), 'new_ba_real_profile_campaign_existing_current_conflict');
-      return deepFreeze({ status: 'PASS', path: 'current_fast_path', profile_id: profile.profile, assessment_id: profile.assessment_id, realization_id: before.pointer, artifact_sha256: before.current.artifact_sha256, validation, provider_accounting: providerAccounting });
+      return deepFreeze({ status: validation.status, path: 'current_fast_path', profile_id: profile.profile, assessment_id: profile.assessment_id, realization_id: before.pointer, artifact_sha256: before.current.artifact_sha256, validation, provider_accounting: providerAccounting });
     }
     const envelope = buildLaunchSafeNewBaEnvelope({ profileId: profile.profile, realizationIdentity: identity, artifact, compatibility, providerAccounting });
     await assertSourceAuthorityCurrent(profile, candidate.source, expectedAuthority, expectedRealizationIdentity);
@@ -483,7 +490,7 @@ export function createRealProfileNewBaGenerationCampaign({ config, redis, author
     const after = await realizationStore.inspect({ profileId: profile.profile, desiredIdentity: identity });
     invariant(after.state === 'current' && after.pointer === envelope.realization_id, 'new_ba_real_profile_campaign_atomic_publication_failed');
     return deepFreeze({
-      status: 'PASS', path: before.state === 'missing' ? 'published_missing' : 'published_stale',
+      status: validation.status, path: before.state === 'missing' ? 'published_missing' : 'published_stale',
       profile_id: profile.profile, assessment_id: profile.assessment_id,
       realization_id: envelope.realization_id, realization_sha256: envelope.realization_identity.sha256,
       artifact_sha256: envelope.artifact_sha256, completeness: envelope.completeness.status,

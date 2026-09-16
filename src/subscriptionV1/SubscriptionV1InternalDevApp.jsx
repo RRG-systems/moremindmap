@@ -57,6 +57,102 @@ function readEphemeralMessages(subject) {
   } catch { return [] }
 }
 
+async function requestSyntheticQaEntryProof() {
+  const response = await fetch('/api/internal/subscription-v1-qa-entry', {
+    credentials: 'same-origin',
+    cache: 'no-store',
+  })
+  const body = await response.json().catch(() => null)
+  if (!response.ok
+    || body?.ok !== true
+    || body.code !== 'SUBSCRIPTION_V1_SYNTHETIC_QA_ENTRY_READY'
+    || body.synthetic_only !== true
+    || body.billing_evidence !== false
+    || typeof body.csrf_token !== 'string') return null
+  return body.csrf_token
+}
+
+function SyntheticQaEntryForm({ initialProof, compact = false, activeSynthetic = false }) {
+  const [proof, setProof] = useState(initialProof)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const inputId = compact ? 'subscription-synthetic-qa-switch-profile-id' : 'subscription-synthetic-qa-profile-id'
+
+  async function submit(event) {
+    event.preventDefault()
+    if (submitting || !proof) return
+    const input = event.currentTarget.elements.namedItem('profile_id')
+    let profileId = String(input?.value || '').trim()
+    if (!profileId) {
+      setError('Enter an authorized synthetic MM ID.')
+      return
+    }
+    if (input) input.value = ''
+    const requestBody = JSON.stringify({ profile_id: profileId })
+    profileId = ''
+    const requestProof = proof
+    setProof(null)
+    setSubmitting(true)
+    setError('')
+    try {
+      const response = await fetch('/api/internal/subscription-v1-qa-entry', {
+        method: 'POST',
+        credentials: 'same-origin',
+        cache: 'no-store',
+        headers: {
+          'content-type': 'application/json',
+          'x-subscription-qa-entry-csrf': requestProof,
+        },
+        body: requestBody,
+      })
+      const body = await response.json().catch(() => null)
+      if (response.ok
+        && body?.ok === true
+        && body.code === 'SUBSCRIPTION_V1_SYNTHETIC_QA_ENTITLEMENT_ISSUED'
+        && body.synthetic_only === true
+        && body.billing_evidence === false) {
+        globalThis.location.reload()
+        return
+      }
+      setError('That MM ID could not open this synthetic QA session. Check the ID and try again.')
+    } catch {
+      setError('Synthetic QA access is temporarily unavailable. Try again.')
+    }
+    try { setProof(await requestSyntheticQaEntryProof()) } catch { setProof(null) }
+    setSubmitting(false)
+  }
+
+  const form = <form className={compact ? 'synthetic-qa-switch-form' : undefined} onSubmit={submit}>
+    <label htmlFor={inputId}>MM ID</label>
+    <input id={inputId} name="profile_id" type="text" inputMode="text" autoComplete="off" autoCapitalize="none" spellCheck="false" required disabled={submitting || !proof} />
+    <button type="submit" disabled={submitting || !proof}>{submitting ? 'OPENING…' : 'OPEN SUBSCRIPTION'}</button>
+  </form>
+
+  if (compact) return <details className="synthetic-qa-switch">
+    <summary>{activeSynthetic ? 'Switch synthetic QA person' : 'Open synthetic QA person'}</summary>
+    <div>
+      <p>Enter an authorized synthetic MM ID. Your current relationship remains unchanged.</p>
+      {form}
+      {error && <p className="synthetic-qa-entry-error" role="alert">{error}</p>}
+      <small>Synthetic QA · No paid subscription</small>
+    </div>
+  </details>
+
+  return <main className="subscription-entry-state synthetic-qa-entry" role="main">
+    <span aria-hidden="true">✦</span>
+    <p className="synthetic-qa-entry-kicker">SYNTHETIC QA</p>
+    <h1>Open a synthetic Subscription person.</h1>
+    <p>Enter an authorized synthetic MM ID.</p>
+    {form}
+    {error && <p className="synthetic-qa-entry-error" role="alert">{error}</p>}
+    <small>No paid subscription</small>
+  </main>
+}
+
+const paidSourceLibraryLabel = (vertical) => ['loan_originator', 'Loan Originator', 'Residential Loan Originator'].includes(String(vertical || '').trim())
+  ? 'Loan Originator'
+  : 'Real Estate'
+
 function AllowanceBoundary({ session }) {
   return <aside className="living-conversation internal-dev-conversation allowance-boundary" aria-label="Subscription allowance state">
     <header><div><span className="living-presence" aria-hidden="true" /><p>MORE · LIVING RELATIONSHIP</p><h2>Your Business Twin is current.</h2></div><span className="living-state-label">allowance complete</span></header>
@@ -70,7 +166,13 @@ function AllowanceBoundary({ session }) {
 function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLost, onBusyChange, ephemeralStorageEnabled = true }) {
   const initiallyPreSession = Boolean(bootstrap.session?.pre_session_state)
   const paidConversation = bootstrap.subscriber?.kind === 'PAID_SUBSCRIBER'
-  const [messages, setMessages] = useState(() => bootstrap.blind_demo || bootstrap.subscriber?.kind === 'PAID_SUBSCRIBER'
+  const syntheticQaConversation = bootstrap.subscriber?.kind === 'SYNTHETIC_QA_SUBSCRIBER'
+  const durableConversation = paidConversation || syntheticQaConversation
+  if (syntheticQaConversation) {
+    demoSubject = null
+    ephemeralStorageEnabled = false
+  }
+  const [messages, setMessages] = useState(() => bootstrap.blind_demo || durableConversation
     ? (bootstrap.conversation || [])
     : initiallyPreSession || !ephemeralStorageEnabled ? [] : readEphemeralMessages(demoSubject))
   const [draft, setDraft] = useState('')
@@ -246,7 +348,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       if (result.gu_error) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated, but the new visual could not be shown safely.' }])
     } catch (failure) {
       if (failure?.status === 401 && failure?.reentryRequired === true) return
-      setError(paidConversation
+      setError(durableConversation
         ? 'We could not finish this turn safely. Reload to check your saved conversation and map before trying again.'
         : coachDelivered
           ? 'You received the coaching response, but the follow-up check failed closed. Nothing was proposed or changed.'
@@ -271,7 +373,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       setMessages((current) => [...current, { role: 'system', content: result.mutation_performed ? 'Your Business Twin is updated. We’ll continue from this new view.' : decision === 'REJECT' ? 'Understood. That proposed change was not used.' : 'No change was made. We can return to it later.' }])
       if (result.gu_plan) setMessages((current) => [...current, { role: 'gu', plan: result.gu_plan }])
       if (result.gu_error) setMessages((current) => [...current, { role: 'system', content: 'Your Business Twin is updated, but the new visual could not be shown safely.' }])
-    } catch { setError(paidConversation ? 'We could not confirm the saved result. Reload to check your map before trying the update again.' : 'That update could not be applied safely. Your prior Business Twin remains current.') } finally { setBusy(false) }
+    } catch { setError(durableConversation ? 'We could not confirm the saved result. Reload to check your map before trying the update again.' : 'That update could not be applied safely. Your prior Business Twin remains current.') } finally { setBusy(false) }
   }
 
   async function endSession(closeDecision = null) {
@@ -299,7 +401,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
         setPreSession(Boolean(result.next_pre_session))
         if (result.next_pre_session) episodeStartedAt.current = null
       }
-    } catch { setError(paidConversation ? 'We could not confirm the session close. Reload to check the saved session before trying again.' : 'The session could not be closed cleanly yet. Your governed state remains safe.') } finally { endSessionLockRef.current = false; setBusy(false) }
+    } catch { setError(durableConversation ? 'We could not confirm the session close. Reload to check the saved session before trying again.' : 'The session could not be closed cleanly yet. Your governed state remains safe.') } finally { endSessionLockRef.current = false; setBusy(false) }
   }
 
   async function startSession() {
@@ -313,7 +415,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
       setSession(result.session); setPreSession(false)
       onCurrent({ view_model: result.view_model, publication: result.publication })
       episodeStartedAt.current = Date.now()
-    } catch { setError(paidConversation ? 'We could not confirm the session opening. Reload to check your session before trying again.' : 'The session did not start because the required opening view could not be established safely. Nothing was changed or consumed.') } finally { startSessionLockRef.current = false; setBusy(false) }
+    } catch { setError(durableConversation ? 'We could not confirm the session opening. Reload to check your session before trying again.' : 'The session did not start because the required opening view could not be established safely. Nothing was changed or consumed.') } finally { startSessionLockRef.current = false; setBusy(false) }
   }
 
   return <aside className="living-conversation internal-dev-conversation" aria-label="Talk with MORE" data-coaching-episode-phase={session.coaching_episode_phase || 'IDLE'} data-session-learning-status={sessionLearning?.status || 'NOT_READY'}>
@@ -352,6 +454,7 @@ function RemoteConversation({ bootstrap, onCurrent, demoSubject, onEntitlementLo
 
 export default function SubscriptionV1InternalDevApp({ allowModelSelection = true } = {}) {
   const [state, setState] = useState({ loading: true, error: null, bootstrap: null })
+  const [qaEntry, setQaEntry] = useState({ checking: false, proof: null })
   const [current, setCurrent] = useState(null)
   const [resetVersion, setResetVersion] = useState(0)
   const [resetting, setResetting] = useState(false)
@@ -373,6 +476,18 @@ export default function SubscriptionV1InternalDevApp({ allowModelSelection = tru
       .catch(() => live && setState({ loading: false, error: 'SUBSCRIPTION_V1_RUNTIME_UNAVAILABLE', bootstrap: null }))
     return () => { live = false }
   }, [resetVersion])
+  useEffect(() => {
+    if (state.loading) {
+      setQaEntry({ checking: false, proof: null })
+      return undefined
+    }
+    let live = true
+    setQaEntry({ checking: true, proof: null })
+    requestSyntheticQaEntryProof()
+      .then((proof) => live && setQaEntry({ checking: false, proof }))
+      .catch(() => live && setQaEntry({ checking: false, proof: null }))
+    return () => { live = false }
+  }, [state.loading, state.error, state.bootstrap])
   async function selectModel(selection) {
     const blind = state.bootstrap?.blind_demo
     if (!allowModelSelection || !blind || switching || coachingBusy || selection === blind.selection) return
@@ -417,18 +532,25 @@ export default function SubscriptionV1InternalDevApp({ allowModelSelection = tru
     } finally { setResetting(false) }
   }
   if (state.loading) return <main className="subscription-entry-state"><span>✦</span><h1>Opening the Living Business Relationship…</h1><p>Verifying your entitlement and governed state.</p></main>
+  if (state.error && qaEntry.checking) return <main className="subscription-entry-state"><span>✦</span><h1>Checking synthetic QA access…</h1><p>Verifying the protected entry lane.</p></main>
+  if (state.error && qaEntry.proof) return <SyntheticQaEntryForm initialProof={qaEntry.proof} />
   if (/^(?:SUBSCRIPTION_V1_PAID_|ENTITLEMENT_)/u.test(String(state.error || ''))) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Subscription access required.</h1><p>Return to your Profile to verify ownership and active membership, then enter Subscription again.</p><Link to="/profile">Return to Profile</Link></main>
   if (state.error || !current?.view_model) return <main className="subscription-entry-state denied" role="alert"><span>▢</span><h1>Internal Subscription access required.</h1><p>Enter the authorized synthetic access code through the Leadership Portal.</p><Link to="/leadership">Return to Leadership Portal</Link></main>
   const handleEntitlementLost = (code) => setState({ loading: false, error: code || 'SUBSCRIPTION_V1_INTERNAL_ENTITLEMENT_REQUIRED', bootstrap: null })
   const paidSubscriber = state.bootstrap?.subscriber?.kind === 'PAID_SUBSCRIBER'
+  const syntheticQaSubscriber = state.bootstrap?.subscriber?.kind === 'SYNTHETIC_QA_SUBSCRIBER'
+  const paidLibrary = paidSourceLibraryLabel(current.view_model.identity?.vertical)
   const content = <>
-    {paidSubscriber && <p className="subscription-capability-note" role="note">Your coach can use MORE’s Real Estate library. Live web research is not available in this version.</p>}
-    {!paidSubscriber && <nav className="s2-demo-toolbar" aria-label="Synthetic Subscription demonstration"><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{allowModelSelection && state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</nav>}
+    {qaEntry.proof && <SyntheticQaEntryForm initialProof={qaEntry.proof} compact activeSynthetic={syntheticQaSubscriber} />}
+    {paidSubscriber && <p className="subscription-capability-note" role="note">Your coach can use MORE’s {paidLibrary} library. Live web research is not available in this version.</p>}
+    {!paidSubscriber && <nav className="s2-demo-toolbar" aria-label={syntheticQaSubscriber ? 'Synthetic QA Subscription person' : 'Synthetic Subscription demonstration'}>{syntheticQaSubscriber
+      ? <div className="s2-synthetic-qa-label"><strong>SYNTHETIC QA</strong><span>No paid subscription</span></div>
+      : <><div><strong>SYNTHETIC JORDAN</strong><span>Demo-only relationship</span></div>{allowModelSelection && state.bootstrap.blind_demo && <div className="s2-blind-selector" role="group" aria-label="Choose your coach">{['1', '2'].map((selection) => <button type="button" key={selection} aria-pressed={state.bootstrap.blind_demo.selection === selection} disabled={switching || coachingBusy} onClick={() => selectModel(selection)}>MODEL {selection}</button>)}</div>}{switchError && <p role="status">{switchError}</p>}{state.bootstrap.demo_reset_enabled === true && <button type="button" data-demo-only-control="true" disabled={resetting} onClick={resetDemo}>{resetting ? 'RESETTING…' : 'RESET DEMO'}</button>}</>}</nav>}
     <div className="living-twin-column"><LivingBusinessTwinApp viewModel={current.view_model} /></div>
     {state.bootstrap.coaching_available === false
       ? <AllowanceBoundary session={state.bootstrap.session} />
       : <RemoteConversation key={`${paidSubscriber ? 'paid' : DEMO_SUBJECT}:${state.bootstrap.blind_demo?.selection || 'ordinary'}:${resetVersion}`} bootstrap={state.bootstrap} demoSubject={paidSubscriber ? null : DEMO_SUBJECT} ephemeralStorageEnabled={!paidSubscriber} onCurrent={setCurrent} onEntitlementLost={handleEntitlementLost} onBusyChange={setCoachingBusy} />}
   </>
   if (paidSubscriber) return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="false" data-layer-max="2">{content}</main>
-  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-demo-subject={DEMO_SUBJECT} data-layer-max="2">{content}</main>
+  return <main className="living-relationship-app production-intended-subscription" data-runtime="production-intended" data-synthetic-only="true" data-synthetic-qa={syntheticQaSubscriber ? 'true' : undefined} data-demo-subject={syntheticQaSubscriber ? undefined : DEMO_SUBJECT} data-layer-max="2">{content}</main>
 }
