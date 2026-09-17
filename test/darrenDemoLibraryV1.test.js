@@ -12,6 +12,7 @@ const ENABLED = Object.freeze({
   RECRUITING_DARREN_SYNTHETIC_DEMO_ENABLED: 'true',
   SUBSCRIPTION_V1_INTERNAL_DEV_ENABLED: 'true',
   DARREN_DEMO_LIBRARY_ENABLED: 'true',
+  DARREN_LIBRARY_MEDIA_STORE_ID: 'store_S5qe0BacKoM3GVxo',
 });
 
 function request(route, { method = 'GET', origin = 'https://moremindmap.com', cookie = '', agent = 'Library test browser' } = {}) {
@@ -29,13 +30,14 @@ function response() {
     statusCode: 200,
     setHeader(name, value) { headers.set(name.toLowerCase(), value); },
     getHeader(name) { return headers.get(name.toLowerCase()); },
-    end(value) { this.body = value ? Buffer.from(value) : Buffer.alloc(0); },
+    write(value) { this.body = Buffer.concat([this.body || Buffer.alloc(0), Buffer.from(value)]); return true; },
+    end(value) { if (value) this.write(value); else this.body ||= Buffer.alloc(0); },
     json() { return JSON.parse(this.body.toString('utf8')); },
   };
 }
 
-function handler({ env = ENABLED, getRedis = () => ({ getBuffer: async () => null }), authenticate = async () => ({ ok: true, capability: { library_read_scope: 'approved_saved_bos_v1' } }), readFile = fs.promises.readFile, privateReading = null } = {}) {
-  return createDarrenDemoLibraryHandler({ env, getRedis, authenticate, readFile, privateReading });
+function handler({ env = ENABLED, getRedis = () => ({ getBuffer: async () => null }), authenticate = async () => ({ ok: true, capability: { library_read_scope: 'approved_saved_bos_v1' } }), readFile = fs.promises.readFile, getFilm, privateReading = null } = {}) {
+  return createDarrenDemoLibraryHandler({ env, getRedis, authenticate, readFile, getFilm, privateReading });
 }
 
 class FakeRedis {
@@ -120,6 +122,92 @@ test('authenticated pages and bundled assets remain server-routed, no-store and 
   assert.equal(head.statusCode, 200);
   assert.equal(head.body.length, 0);
   assert.ok(Number(head.getHeader('content-length')) > 0);
+  const poster = files.find(name => name.endsWith('.jpg'));
+  assert.ok(poster, 'Ava film poster is bundled as a protected asset');
+  const posterResponse = response();
+  await handler()(request(`assets/${poster}`), posterResponse);
+  assert.equal(posterResponse.statusCode, 200);
+  assert.equal(posterResponse.getHeader('content-type'), 'image/jpeg');
+  const captions = response();
+  await handler()(request('media/whole-story-ava.vtt'), captions);
+  assert.equal(captions.statusCode, 200);
+  assert.equal(captions.getHeader('content-type'), 'text/vtt; charset=utf-8');
+  assert.match(captions.body.toString('utf8'), /^WEBVTT/u);
+});
+
+test('approved Ava film is scoped, range-seekable and never fetched before Leadership authorization', async () => {
+  const filmEtag = '"b0ef42b4358fd041f9d4b29c55432a5a-7"';
+  const size = 54014685;
+  const calls = [];
+  const getFilm = async (pathname, options) => {
+    calls.push({ pathname, options });
+    const match = /^bytes=(\d+)-(\d+)$/u.exec(options.headers.Range);
+    assert.ok(match);
+    const start = Number(match[1]);
+    const end = Number(match[2]);
+    const body = Buffer.alloc(end - start + 1, 65);
+    return {
+      blob: { etag: filmEtag },
+      headers: new Headers({ 'content-length': String(body.length), 'content-range': `bytes ${start}-${end}/${size}` }),
+      stream: new ReadableStream({ start(controller) { controller.enqueue(body); controller.close(); } }),
+    };
+  };
+  const media = handler({ getFilm });
+
+  const unauthorized = response();
+  await handler({ getFilm, authenticate: async () => ({ ok: false, status: 401, code: 'NO_SESSION' }) })(request('media/whole-story-ava.mp4'), unauthorized);
+  assert.equal(unauthorized.statusCode, 401);
+  assert.equal(calls.length, 0);
+
+  const wrongStore = response();
+  await handler({ env: { ...ENABLED, DARREN_LIBRARY_MEDIA_STORE_ID: 'store_wrong' }, getFilm })(request('media/whole-story-ava.mp4'), wrongStore);
+  assert.equal(wrongStore.statusCode, 503);
+  assert.equal(calls.length, 0);
+
+  const head = response();
+  await media(request('media/whole-story-ava.mp4', { method: 'HEAD' }), head);
+  assert.equal(head.statusCode, 200);
+  assert.equal(head.getHeader('content-length'), String(size));
+  assert.equal(head.getHeader('accept-ranges'), 'bytes');
+  assert.equal(head.body.length, 0);
+  assert.equal(calls.length, 0);
+
+  const rangedHead = response();
+  await media({ ...request('media/whole-story-ava.mp4', { method: 'HEAD' }), headers: { ...request('media/whole-story-ava.mp4').headers, range: 'bytes=100-103' } }, rangedHead);
+  assert.equal(rangedHead.statusCode, 206);
+  assert.equal(rangedHead.getHeader('content-range'), `bytes 100-103/${size}`);
+  assert.equal(rangedHead.body.length, 0);
+  assert.equal(calls.length, 0);
+
+  const first = response();
+  await media({ ...request('media/whole-story-ava.mp4'), headers: { ...request('media/whole-story-ava.mp4').headers, range: 'bytes=0-3' } }, first);
+  assert.equal(first.statusCode, 206);
+  assert.equal(first.getHeader('content-range'), `bytes 0-3/${size}`);
+  assert.equal(first.getHeader('content-length'), '4');
+  assert.equal(first.getHeader('cache-control'), 'no-store, private, max-age=0');
+  assert.equal(first.body.toString('utf8'), 'AAAA');
+  assert.equal(calls[0].pathname, 'darren-library/whole-story-ava-0ce33da6.mp4');
+  assert.equal(calls[0].options.access, 'private');
+  assert.equal(calls[0].options.storeId, ENABLED.DARREN_LIBRARY_MEDIA_STORE_ID);
+
+  const seek = response();
+  await media({ ...request('media/whole-story-ava.mp4'), headers: { ...request('media/whole-story-ava.mp4').headers, range: 'bytes=-4' } }, seek);
+  assert.equal(seek.statusCode, 206);
+  assert.equal(seek.getHeader('content-range'), `bytes ${size - 4}-${size - 1}/${size}`);
+  assert.equal(seek.body.length, 4);
+
+  const openEnded = response();
+  await media({ ...request('media/whole-story-ava.mp4'), headers: { ...request('media/whole-story-ava.mp4').headers, range: 'bytes=100-' } }, openEnded);
+  assert.equal(openEnded.statusCode, 206);
+  assert.equal(openEnded.getHeader('content-length'), String(2 * 1024 * 1024));
+  assert.equal(openEnded.getHeader('content-range'), `bytes 100-${100 + 2 * 1024 * 1024 - 1}/${size}`);
+
+  for (const invalid of ['bytes=999999999-', 'bytes=4-3', 'bytes=0-1,3-4', 'bytes=']) {
+    const denied = response();
+    await media({ ...request('media/whole-story-ava.mp4'), headers: { ...request('media/whole-story-ava.mp4').headers, range: invalid } }, denied);
+    assert.equal(denied.statusCode, 416, invalid);
+  }
+  assert.equal(calls.length, 3);
 });
 
 test('synthetic reports preserve their own MM identity and BOS evidence source', async () => {

@@ -48,8 +48,8 @@ const products = [
     number: '05',
     eyebrow: 'The story. The whole person.',
     title: 'PRESENTATIONS & ATHLETE REPORTS',
-    description: 'View Lisa’s and Darren’s presentations. Explore the complete Youth BOS and APA reports, one athlete at a time.',
-    detail: '2 presentations · 5 BOS reports · 4 APA reports',
+    description: 'Watch MORE ATHLETE — The Whole Story with Ava. View Lisa’s and Darren’s presentations, then explore the complete Youth BOS and APA reports, one athlete at a time.',
+    detail: '1 film · 2 presentations · 5 BOS reports · 4 APA reports',
     tone: 'gold',
   },
 ]
@@ -148,7 +148,7 @@ export default function LeadershipDemo() {
       <main className="relative z-10 mx-auto max-w-7xl px-6 py-16 md:py-24">
         <section className="max-w-4xl">
           <div className="inline-flex rounded-full border border-emerald-300/25 bg-emerald-400/10 px-4 py-2 text-xs uppercase tracking-[0.28em] text-emerald-100">Darren’s demo area</div>
-          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProducts.length === 5 ? 'Four product demos. Presentations and athlete reports.' : `${availableProducts.length} products. One bounded demo area.`}</h1>
+          <h1 className="mt-7 text-5xl font-semibold tracking-tight md:text-7xl">{availableProducts.length === 5 ? 'Four product demos. Film, presentations and athlete reports.' : `${availableProducts.length} products. One bounded demo area.`}</h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-white/66 md:text-xl">Choose what you’d like to explore. Each experience stays inside the protected DarrenDemo boundary.</p>
         </section>
 

@@ -1,8 +1,11 @@
 import React,{useCallback,useEffect,useState,useRef} from 'react';
 import {createRoot} from 'react-dom/client';
 import './style.css';
+import './film.css';
+import avaPoster from './whole-story-ava-poster.jpg';
 const decks=[{slug:'lisa',name:'Youth Sports',audience:'Lisa’s presentation',file:'MORE_Youth_Sports_v05_School',count:16,description:'The whole athlete. One clear direction. The vision for youth sports and an enterprise rollout.'},{slug:'darren',name:'The Technical Vision',audience:'Darren’s presentation',file:'MORE_Athlete_Darren_Technical_Vision_v1',count:26,description:'How MORE brings the athlete, their people, and their goals into one coaching experience.'}];
 const people=[{slug:'nia',name:'Nia Brooks',sport:'Basketball',age:15},{slug:'eli',name:'Eli Moreno',sport:'Swimming',age:16},{slug:'rowan',name:'Rowan Ellis',sport:'Climbing',age:17},{slug:'sofia',name:'Sofia Chen',sport:'Soccer',age:19}];
+const filmChapters=[['Everyone Sees Something',0],['Start With The Person',54.083],['Turn Understanding Into Coaching',216.625],['Build On What Happened',298.625],['More Than One Source Of Help',349.167],['Learn Carefully From Experience',402.958],['Keep The Individual Central',472.167],['Earn The Next Stage',525.417],['The Future They Choose',601.125]];
 const BASE='/darren-library';
 function Header({back=false}){return <header className="header"><a href="/leadership-demo" className="brand">MORE<span> / LEADERSHIP</span></a><div>{back&&<a href="/leadership-demo">← DarrenDemo</a>}<span className="preview">Protected library</span></div></header>}
 function ReportCard({p,kind}){return <a className={'report-card '+(kind==='bos'?'blue':'green')} href={`${BASE}/${kind}.html?athlete=${p.slug}`}><div className="report-symbol" aria-hidden="true">{kind==='bos'?'✳':'◎'}</div><div className="report-type">YOUTH {kind.toUpperCase()}</div><h3>{p.name}</h3><p>{p.sport} · {p.age}</p><span className="report-label">Synthetic athlete</span><strong>Open full {kind.toUpperCase()} <span>→</span></strong></a>}
@@ -12,18 +15,26 @@ function PrivateReportCard(){
  if(!card)return <div className="report-card blue" aria-label="Private report unavailable"><div className="report-symbol" aria-hidden="true">✳</div><div className="report-type">YOUTH BOS</div><h3>Private participant</h3><p>Protected reading</p><span className="report-label">Not available right now</span><strong>Access held</strong></div>;
  return <a className="report-card blue" href={card.href}><div className="report-symbol" aria-hidden="true">✳</div><div className="report-type">YOUTH BOS</div><h3>{card.subject.name}</h3><p>{card.subject.sport} · {card.subject.age}</p><span className="report-label">Private participant</span><strong>Open full BOS <span>→</span></strong></a>;
 }
+function FilmFeature(){
+ const player=useRef(null),[failed,setFailed]=useState(false);
+ function seek(time){const video=player.current;if(!video)return;const go=()=>{video.currentTime=time;video.play().catch(()=>{});};if(video.readyState===0){video.addEventListener('loadedmetadata',go,{once:true});video.load();}else go();}
+ return <section id="film" className="library-section film-section"><div className="section-heading"><div><span className="eyebrow gold-text">01 / FILM</span><h2>The whole story.</h2></div><p>A complete MORE ATHLETE explainer, narrated by Ava.</p></div>
+   <div className="film-card"><div className="film-screen"><video ref={player} controls playsInline preload="none" poster={avaPoster} aria-label="MORE ATHLETE — The Whole Story, Ava voiceover" onError={()=>setFailed(true)}><source src={`${BASE}/media/whole-story-ava.mp4`} type="video/mp4"/><track src={`${BASE}/media/whole-story-ava.vtt`} kind="captions" srcLang="en" label="English captions" default/>Your browser cannot play this video.</video></div><div className="film-info"><div><p className="eyebrow gold-text">FULL EXPLAINER · AVA VOICE · 10:46</p><h3>MORE ATHLETE — The Whole Story</h3><p>From understanding the whole athlete to useful coaching, shared learning, and the future they choose.</p></div><span className="film-access">Protected DarrenDemo viewing</span></div>{failed&&<p className="film-error" role="alert">The film could not load. Please refresh this protected library or sign in again through Leadership.</p>}<div className="film-chapters" aria-label="Film chapters"><span className="eyebrow">CHAPTERS</span><div>{filmChapters.map(([title,time],i)=><button key={title} type="button" onClick={()=>seek(time)}><span>{String(i+1).padStart(2,'0')}</span>{title}</button>)}</div></div></div>
+ </section>;
+}
 function Library(){return <><Header back/><main className="container library">
-  <span className="eyebrow gold-text">DARRENDEMO LIBRARY</span><h1>Presentations &<br/>Athlete Reports</h1><p className="intro">See the vision. Get to know the athletes.</p>
-  <nav className="library-nav" aria-label="Library sections"><a href="#presentations">Presentations <span>02</span></a><a href="#bos">Youth BOS <span>05</span></a><a href="#apa">Youth APA <span>04</span></a></nav>
-  <section id="presentations" className="library-section"><div className="section-heading"><div><span className="eyebrow gold-text">01 / PRESENTATIONS</span><h2>The bigger picture.</h2></div><p>Read here, present full screen, or download.</p></div>
+  <span className="eyebrow gold-text">DARRENDEMO LIBRARY</span><h1>Film, Presentations &<br/>Athlete Reports</h1><p className="intro">Watch the story. Explore the vision. Get to know the athletes.</p>
+  <nav className="library-nav" aria-label="Library sections"><a href="#film">Film <span>01</span></a><a href="#presentations">Presentations <span>02</span></a><a href="#bos">Youth BOS <span>05</span></a><a href="#apa">Youth APA <span>04</span></a></nav>
+  <FilmFeature/>
+  <section id="presentations" className="library-section"><div className="section-heading"><div><span className="eyebrow gold-text">02 / PRESENTATIONS</span><h2>The bigger picture.</h2></div><p>Read here, present full screen, or download.</p></div>
     <div className="deck-grid">{decks.map(d=><article className="deck-card" key={d.slug}><a className="deck-cover" href={`${BASE}/presentation/${d.slug}`}><img src={`${BASE}/decks/${d.slug}/slide-1.webp`} alt={d.audience+' — cover slide'}/><span className="cover-cta">View presentation →</span></a><div className="deck-info"><p className="eyebrow gold-text">{d.audience} · {d.count} slides</p><h3>{d.name}</h3><p>{d.description}</p><div className="deck-links"><a className="primary" href={`${BASE}/presentation/${d.slug}`}>Open slides →</a><a href={`${BASE}/decks/${d.slug}/${d.file}.pptx`} download>PowerPoint ↓</a><a href={`${BASE}/decks/${d.slug}/${d.file}.pdf`} target="_blank" rel="noreferrer">PDF ↗</a></div></div></article>)}</div>
   </section>
-  <section id="bos" className="library-section"><div className="section-heading"><div><span className="eyebrow blue-text">02 / YOUTH BOS</span><h2>Meet the whole person.</h2></div><p>Personality map. This Is You. All eight chapters.</p></div>
+  <section id="bos" className="library-section"><div className="section-heading"><div><span className="eyebrow blue-text">03 / YOUTH BOS</span><h2>Meet the whole person.</h2></div><p>Personality map. This Is You. All eight chapters.</p></div>
     <div className="report-grid">{people.map(p=><ReportCard key={p.slug} p={p} kind="bos"/>)}</div>
     <div className="private-report"><div><span className="eyebrow">A REAL PARTICIPANT’S READING</span><h3>Protected BOS</h3><p>One saved personality profile, kept separate from the fictional athlete examples and available only inside DarrenDemo.</p></div><PrivateReportCard/></div>
   </section>
-  <section id="apa" className="library-section"><div className="section-heading"><div><span className="eyebrow green-text">03 / YOUTH APA</span><h2>See their next chapter.</h2></div><p>Four areas. Five Futures. One Move.<br/>The complete assessment for each athlete.</p></div><div className="report-grid">{people.map(p=><ReportCard key={p.slug} p={p} kind="apa"/>)}</div></section>
-  <footer className="library-footer"><a href="/leadership-demo">← Back to DarrenDemo</a><a href="#presentations">Back to top ↑</a></footer>
+  <section id="apa" className="library-section"><div className="section-heading"><div><span className="eyebrow green-text">04 / YOUTH APA</span><h2>See their next chapter.</h2></div><p>Four areas. Five Futures. One Move.<br/>The complete assessment for each athlete.</p></div><div className="report-grid">{people.map(p=><ReportCard key={p.slug} p={p} kind="apa"/>)}</div></section>
+  <footer className="library-footer"><a href="/leadership-demo">← Back to DarrenDemo</a><a href="#film">Back to top ↑</a></footer>
 </main></>}
 function SlideViewer({deck}){
  const clamp=useCallback(n=>Math.min(deck.count,Math.max(1,n)),[deck.count]);
@@ -37,4 +48,4 @@ function SlideViewer({deck}){
 const path=location.pathname;const deck=decks.find(d=>path===`${BASE}/presentation/${d.slug}`);
 function App(){useEffect(()=>{if(!deck&&location.hash)document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView({behavior:'instant'});},[]);return deck?<SlideViewer deck={deck}/>:<Library/>;}
 createRoot(document.getElementById('root')).render(<App/>);
-export { Header, ReportCard, PrivateReportCard, Library, SlideViewer, App };
+export { Header, ReportCard, PrivateReportCard, FilmFeature, Library, SlideViewer, App };
