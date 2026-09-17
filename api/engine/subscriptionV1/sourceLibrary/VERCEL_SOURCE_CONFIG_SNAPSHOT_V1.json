@@ -1,0 +1,51 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/darren-library",
+      "destination": "/api/internal/darren-demo-library?path=library"
+    },
+    {
+      "source": "/darren-library/:path*",
+      "destination": "/api/internal/darren-demo-library?path=:path*"
+    },
+    {
+      "source": "/:path((?!api(?:/|$)).*)",
+      "destination": "/"
+    }
+  ],
+  "functions": {
+    "api/moremindmap/new-bos.js": {
+      "maxDuration": 800
+    },
+    "api/moremindmap/new-ba.js": {
+      "maxDuration": 800,
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
+    },
+    "api/moremindmap/new-ba-generation.js": {
+      "maxDuration": 800,
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
+    },
+    "api/recruiting/runtime.js": {
+      "maxDuration": 800,
+      "includeFiles": "docs/ba-intelligence-authority-library-v1/**"
+    },
+    "api/internal/subscription-v1-runtime.js": {
+      "maxDuration": 800,
+      "includeFiles": "{api/engine/subscriptionV1/{syntheticQaProviderCandidate.json,sourceLibrary/**},docs/{ba-intelligence-authority-library-v1/**,lo-cassette-2-final-canonical-authority-v1/{0[2-9]_*,1?_*,2[0-4]_*,SOURCE*}},package*.json,vercel.json}"
+    },
+    "api/internal/darren-demo-library.js": {
+      "maxDuration": 180,
+      "includeFiles": "server/darrenLibraryV1/**"
+    },
+    "api/internal/athlete-living-consult-one-shot-v1.js": {
+      "maxDuration": 800,
+      "includeFiles": "server/athleteLivingConsultOneShotV1/fixtures/**"
+    },
+    "api/**/*.js": {
+      "maxDuration": 180
+    }
+  }
+}

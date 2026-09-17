@@ -45,6 +45,7 @@ export const SYNTHETIC_QA_RENEWAL_CONTINUITY = Object.freeze({
 });
 const CASES = ['COHORT-V1-LO-A', 'COHORT-V1-LO-B', 'COHORT-V1-RE-A', 'COHORT-V1-RE-B'];
 const CANDIDATE_CLOSURE_ROOTS = ['api/internal/subscription-v1-runtime.js'];
+const RUNTIME_CONFIG_SOURCE_SNAPSHOT = 'api/engine/subscriptionV1/sourceLibrary/VERCEL_SOURCE_CONFIG_SNAPSHOT_V1.json';
 const CANDIDATE_EXCLUDED_DYNAMIC_EDGES = [{
   from: 'api/internal/subscription-v1-runtime.js',
   specifier: '../engine/subscriptionS2/demoSubscriberLoader.js',
@@ -75,6 +76,7 @@ const REQUIRED_CANDIDATE_PATHS = [
   'package.json',
   'package-lock.json',
   'vercel.json',
+  RUNTIME_CONFIG_SOURCE_SNAPSHOT,
 ];
 const WINNER = '2186522347323e4576b559bf55f7db3904a8a66d3d4ced177c89dfc76a96b9a3';
 const STAGES = Object.freeze({
@@ -132,10 +134,14 @@ export function syntheticQaProviderCandidateSha256() {
   const paths = new Set(manifest.files.map(file => file.path));
   if (REQUIRED_CANDIDATE_PATHS.some(path => !paths.has(path))) fail('SYNTHETIC_QA_CANDIDATE_CLOSURE_INCOMPLETE');
   for (const file of manifest.files) {
+    // Vercel may rewrite its special vercel.json inside a function package.
+    // The byte-identical source snapshot is included as a normal, immutable
+    // runtime asset and separately pinned in this same closure.
+    const runtimePath = file.path === 'vercel.json' ? RUNTIME_CONFIG_SOURCE_SNAPSHOT : file.path;
     if (!(/^(api|src|docs)\/[a-zA-Z0-9_./-]+$/.test(file.path)
         || ['package.json', 'package-lock.json', 'vercel.json'].includes(file.path))
       || file.path.split('/').includes('..')
-      || !isHash(file.sha256) || sha(readFileSync(resolve(process.cwd(), file.path))) !== file.sha256) {
+      || !isHash(file.sha256) || sha(readFileSync(resolve(process.cwd(), runtimePath))) !== file.sha256) {
       fail('SYNTHETIC_QA_CANDIDATE_BYTES_CHANGED');
     }
   }

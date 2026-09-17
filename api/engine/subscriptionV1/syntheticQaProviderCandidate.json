@@ -195,6 +195,10 @@
       "sha256": "15043182d49e76620fc76115a88309cbfe2d3ba5f74f2d543be0cb95f1c222ad"
     },
     {
+      "path": "api/engine/subscriptionV1/sourceLibrary/VERCEL_SOURCE_CONFIG_SNAPSHOT_V1.json",
+      "sha256": "04553e9e3d5af5d5c2910fdee9b4252747a2ca412fc6bd946b0c1b71a3f71307"
+    },
+    {
       "path": "api/engine/subscriptionV1/sourceLibrary/loan-originator-cassette/02_CANONICAL_LO_PRODUCT_DOCTRINE_V1.md",
       "sha256": "788d76a8c69567e1dfebe9d86e25bd6da3dc90109cd6e7b24634778ed9828c67"
     },
@@ -332,7 +336,7 @@
     },
     {
       "path": "api/engine/subscriptionV1/syntheticQaProviderBoundary.js",
-      "sha256": "365ec150a54d1d23e4848dfc2f59c555d40c726cbdc526896c872cca9eefb69b"
+      "sha256": "476ed2d69e8774974ebf78117d591296adee9e5f8d9fd0c1f394518953999e34"
     },
     {
       "path": "api/engine/subscriptionV1/syntheticQaProviderBudget.js",

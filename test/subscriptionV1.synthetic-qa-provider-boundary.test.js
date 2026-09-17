@@ -60,7 +60,8 @@ const EXPECTED_EXCLUDED_DYNAMIC_EDGES = [{
 }];
 const REGISTRY_PATHS = ['api/engine/subscriptionV1/sourceLibrary/SOURCE_REGISTRY.json',
   'api/engine/subscriptionV1/sourceLibrary/LOAN_ORIGINATOR_SOURCE_REGISTRY.json'];
-const DEPENDENCY_IDENTITY_PATHS = ['package.json', 'package-lock.json', 'vercel.json'];
+const CONFIG_SNAPSHOT_PATH = 'api/engine/subscriptionV1/sourceLibrary/VERCEL_SOURCE_CONFIG_SNAPSHOT_V1.json';
+const DEPENDENCY_IDENTITY_PATHS = ['package.json', 'package-lock.json', 'vercel.json', CONFIG_SNAPSHOT_PATH];
 const BA_AUTHORITY_ROOT = 'docs/ba-intelligence-authority-library-v1';
 const BA_AUTHORITY_MANIFEST = `${BA_AUTHORITY_ROOT}/freeze/BA_INTELLIGENCE_AUTHORITY_LIBRARY_MANIFEST_V1.json`;
 const LO_AUTHORITY_ROOT = 'docs/lo-cassette-2-final-canonical-authority-v1';
@@ -307,6 +308,7 @@ test('explicit function packaging includes candidate manifest and every hashed s
 
 test('candidate custody is the exact reachable QA import closure plus file-loaded authorities and dependency identity',()=>{
   const root=process.cwd();
+  assert.deepEqual(readFileSync(resolve(root,CONFIG_SNAPSHOT_PATH)),readFileSync(resolve(root,'vercel.json')));
   const candidate=JSON.parse(readFileSync(resolve(root,'api/engine/subscriptionV1/syntheticQaProviderCandidate.json'),'utf8'));
   assert.equal(candidate.contract,'SYNTHETIC_QA_PROVIDER_CANDIDATE_CLOSURE_V3');
   assert.deepEqual(candidate.closure_roots,EXPECTED_CLOSURE_ROOTS);
@@ -338,6 +340,17 @@ test('custody executes from a copied function-package root and denies a missing 
       writeFileSync(destination,Buffer.concat([original,Buffer.from('\nOFFLINE_TAMPER')]));
       assert.throws(()=>syntheticQaProviderCandidateSha256(),/CANDIDATE_BYTES_CHANGED/,path);
       writeFileSync(destination,original);assert.equal(syntheticQaProviderCandidateSha256(),expected);}
+    const packagedConfig=resolve(bundleRoot,'vercel.json');
+    const sourceConfig=readFileSync(packagedConfig);
+    writeFileSync(packagedConfig,Buffer.from('{"vercel_runtime_rewrite":true}\n'));
+    assert.equal(syntheticQaProviderCandidateSha256(),expected);
+    writeFileSync(packagedConfig,sourceConfig);
+    const snapshot=resolve(bundleRoot,CONFIG_SNAPSHOT_PATH);
+    const originalSnapshot=readFileSync(snapshot);
+    writeFileSync(snapshot,Buffer.from('{"tampered":true}\n'));
+    assert.throws(()=>syntheticQaProviderCandidateSha256(),/CANDIDATE_BYTES_CHANGED/);
+    writeFileSync(snapshot,originalSnapshot);
+    assert.equal(syntheticQaProviderCandidateSha256(),expected);
     unlinkSync(resolve(bundleRoot,candidate.files[0].path));
     assert.throws(()=>syntheticQaProviderCandidateSha256(),/ENOENT|CUSTODY|BYTES_CHANGED/);
   } finally {process.chdir(originalRoot);rmSync(bundleRoot,{recursive:true,force:true});}
