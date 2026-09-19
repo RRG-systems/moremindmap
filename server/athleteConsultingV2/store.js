@@ -1,5 +1,6 @@
 import { Buffer } from 'node:buffer';
 import { randomUUID } from 'node:crypto';
+import { captureContextMessage } from './capture.js';
 import { withAthleteConsultingSessionLeaseV1 } from '../athleteLivingConsultOneShotV1/durableInfrastructure.js';
 import { hash, initial, requireThat, validatePlan, applyOutput, applyLocalAction } from './state.js';
 
@@ -81,7 +82,7 @@ function seal(envelope) {
   return { ...unsigned, envelope_hash: hash(unsigned) };
 }
 
-export function createStore({ redis, bundles, coach, scopeId }) {
+export function createStore({ redis, bundles, coach, scopeId, localAction = applyLocalAction }) {
   requireThat(redis && typeof redis.get === 'function' && typeof redis.set === 'function' && typeof redis.eval === 'function', 'ATHLETE_V2_STORAGE_REQUIRED');
   requireThat(typeof coach === 'function', 'ATHLETE_V2_COACH_REQUIRED');
   const context = (slug) => {
@@ -181,7 +182,7 @@ export function createStore({ redis, bundles, coach, scopeId }) {
         saved = await persist(ctx, lease, saved.raw, envelope);
         await lease.assertOwned();
         let output, failure;
-        try { output = await coach(clone(ctx.bundle), clone(state), task); }
+        try { const inputState = clone(state); inputState.messages = inputState.messages.map(captureContextMessage); output = await coach(clone(ctx.bundle), inputState, task); }
         catch (error) { failure = error; }
         // No response can publish after lease ownership has changed.
         await lease.assertOwned();
@@ -196,7 +197,7 @@ export function createStore({ redis, bundles, coach, scopeId }) {
           state.events.push({ type: 'coach_failed', code: safeCode(failure), task, at: new Date().toISOString() });
         }
         delete state.pending;
-      } else applyLocalAction(state, body, ctx.bundle);
+      } else localAction(state, body, ctx.bundle);
       state.revision++;
       state.processed = [...state.processed, body.requestId].slice(-200);
       envelope.operations[body.requestId] = { ...envelope.operations[body.requestId], hash: requestHash, status, started_at: started, completed_at: new Date().toISOString(), revision: state.revision };

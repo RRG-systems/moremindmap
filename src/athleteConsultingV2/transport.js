@@ -4,7 +4,8 @@ export async function api(path, body, proof) {
   const query = new URLSearchParams({ kind, ...(slug ? { athlete: slug } : {}) });
   let requestBody = body;
   if (body) {
-    const role = body.action === 'approve' ? body.actor === 'athlete' ? 'athlete' : 'instructor'
+    const role = body.action === 'capture_demo' ? body.capture?.role === 'coach' ? 'instructor' : 'athlete'
+      : body.action === 'approve' ? body.actor === 'athlete' ? 'athlete' : 'instructor'
       : ['draft','discard','reset'].includes(body.action) ? 'shared_editor'
         : ['feedback','remember','forget','finish'].includes(body.action) ? 'athlete' : 'conversation';
     if (!proof?.actors?.[role]) throw Error('Reopen through Leadership to continue.');

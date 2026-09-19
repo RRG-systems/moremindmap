@@ -54,7 +54,7 @@ async function capability(redis, selectedEnv = env) {
 function setup(redis = new FakeRedis()) {
   const calls = [];
   const coach = async (bundle, state, task) => {
-    calls.push({ slug: bundle.person.slug, task, messages: state.messages.length });
+    calls.push({ slug: bundle.person.slug, task, messages: state.messages.length, inputMessages: state.messages });
     return { reply: `Offline structural ${task} for ${bundle.person.slug}.`, plan: null, plan_change: 'none', retire_draft: false, learning: [], recap: task === 'CLOSE' ? 'Offline structural recap.' : '' };
   };
   return { redis, calls, handler: createAthleteConsultingV2Handler({ env, redis, coach }) };
@@ -294,4 +294,56 @@ test('fake Redis enforces expiry and owner checks used by actual authority and s
   redis.advance(101);
   assert.equal(await redis.get('lease'), null);
   assert.equal(await redis.pttl('lease'), -2);
+});
+
+test('live capture uses actual protected actor and CSRF contracts, preserves plan and isolates athletes', async () => {
+  const {redis,handler,calls}=setup(), issued=await capability(redis);
+  const nia=await stateOf(handler,issued.cookie), sofia=await stateOf(handler,issued.cookie,'sofia');
+  const capture={subject:'nia',source:'Coach Alex (synthetic)',role:'coach',kind:'text',text:'Synthetic bridge proof: Nia reset after a missed pass.',attachments:[],reviewed:true};
+  const denied=await act(handler,issued.cookie,nia,'capture_demo','capture-denied',{capture},'conversation');
+  assert.equal(denied.body.error,'ACTOR_AUTHORITY_DENIED');
+  const saved=await act(handler,issued.cookie,nia,'capture_demo','capture-proof',{capture},'instructor');
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  assert.equal(saved.body.messages.at(-1).capture.bridge,'darren_demo_same_scope_v1');
+  for(const field of ['plan','draft','learning','status','sessions'])assert.deepEqual(saved.body[field],nia[field]);
+  assert.equal(calls.length,0);
+  const reopened=await stateOf(setup(redis).handler,issued.cookie);
+  assert.deepEqual(reopened.messages,saved.body.messages);
+  assert.equal((await stateOf(handler,issued.cookie,'sofia')).revision,sofia.revision);
+  const repeated=await act(handler,issued.cookie,reopened,'capture_demo','capture-proof',{capture},'instructor');
+  assert.equal(repeated.body.messages.length,1);
+  const wrong=await act(handler,issued.cookie,repeated.body,'capture_demo','capture-cross',{capture:{...capture,subject:'sofia'}},'instructor');
+  assert.equal(wrong.status,422);
+  assert.equal((await stateOf(handler,issued.cookie)).messages.length,1);
+  const {coachingInput}=await import('../server/athleteConsultingV2/coach.js');
+  assert.match(coachingInput(bundles.nia,reopened,'OPENING').conversation.at(-1).text,/reset after a missed pass/);
+});
+
+test('live capture accepts bounded media, strips untrusted metadata and excludes binary from coaching input', async () => {
+  const {redis,handler,calls}=setup(), issued=await capability(redis);
+  const initial=await stateOf(handler,issued.cookie);
+  const data=Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),Buffer.alloc(50000)]).toString('base64');
+  const capture={subject:'nia',source:bundles.nia.person.name+' (synthetic)',role:'athlete',kind:'photo',text:'Synthetic photo note for human review.',attachments:[{mime:'image/png',data}],reviewed:true,transcription:{engine:'fabricated-certified-engine'}};
+  const saved=await act(handler,issued.cookie,initial,'capture_demo','capture-photo',{capture},'athlete');
+  assert.equal(saved.status,200,JSON.stringify(saved.body));
+  assert.equal(saved.body.messages.at(-1).capture.transcription,null);
+  assert.equal(saved.body.messages.at(-1).capture.attachments[0].data,data);
+  const {coachingInput}=await import('../server/athleteConsultingV2/coach.js');
+  const opened=await act(handler,issued.cookie,saved.body,'start','capture-photo-open');
+  assert.equal(opened.status,200);
+  const input=coachingInput(bundles.nia,{...saved.body,messages:calls[0].inputMessages},'OPENING');
+  assert.equal(input.conversation.at(-1).capture.attachments[0].data,undefined);
+  assert.match(input.conversation.at(-1).capture.media_interpretation,/No image or audio analysis/);
+  assert.equal(calls.length,1);
+});
+
+test('live capture requires review and refuses spoofed sources and oversize media without writing',async()=>{
+  const {redis,handler}=setup(),issued=await capability(redis);
+  const capture={subject:'nia',source:'Coach Alex (synthetic)',role:'coach',kind:'text',text:'Synthetic limits proof.',attachments:[],reviewed:true};
+  for(const change of [{reviewed:false},{source:'Real coach'},{attachments:[{mime:'image/png',data:'A'.repeat(360004)}]}]){
+    const s=await stateOf(handler,issued.cookie);
+    const result=await act(handler,issued.cookie,s,'capture_demo','invalid-capture',{capture:{...capture,...change}},'instructor');
+    assert.equal(result.status,422);
+    assert.equal((await stateOf(handler,issued.cookie)).messages.length,0);
+  }
 });

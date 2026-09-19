@@ -41,3 +41,7 @@ api/engine/athleteLivingConsultV1/**
 !api/engine/subscriptionV1/sourceLibrary/**
 !docs/lo-cassette-2-final-canonical-authority-v1/
 !docs/lo-cassette-2-final-canonical-authority-v1/**
+
+# Local-only mobile harness and evidence are never hosted.
+capture-demo/
+mobile/
