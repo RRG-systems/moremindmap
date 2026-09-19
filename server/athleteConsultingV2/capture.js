@@ -33,7 +33,7 @@ export function applyCapture(state, body, bundle) {
   state.events.push({type:'demo_capture_received',id:body.requestId,subject:c.subject,source:c.source,at,media_hashes:attachments.map(a=>a.sha256)});
 }
 export function captureSummaries(state) {
-  return state.messages.filter(m=>m.capture).map(m=>({id:m.id,text:m.text,at:m.at,...m.capture,attachments:m.capture.attachments.map(({data:_data,...a})=>a)}));
+  return state.messages.filter(m=>m.capture).map(m=>({id:m.id,text:m.text,at:m.at,...m.capture,attachments:m.capture.attachments.map(a=>({mime:a.mime,sha256:a.sha256}))}));
 }
 
 // Hosted capture remains inside the existing synthetic Leadership capability.
@@ -57,5 +57,5 @@ export function captureContextMessage(message) {
   if (!message.capture) return message;
   return {...message, capture:{...message.capture,
     media_interpretation:'Attachments are preserved for human review. No image or audio analysis has been performed. Use the reviewed source text only.',
-    attachments:message.capture.attachments.map(({data:_data,...metadata}) => metadata)}};
+    attachments:message.capture.attachments.map(a => ({mime:a.mime,sha256:a.sha256}))}};
 }
