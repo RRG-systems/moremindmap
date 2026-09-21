@@ -1,4 +1,5 @@
 import test from 'node:test';
+import {displayMove} from '../src/athleteAcademyV1/apa/display.js';
 import {candidateDisposition,selectMove} from '../server/athleteAcademyV1/apa/contract.js';
 import {stageRequest,APA_STAGES} from '../server/athleteAcademyV1/assessment.js';
 import assert from 'node:assert/strict';
@@ -37,4 +38,12 @@ test('APA audit sees the actual single-proposal selector and never invented athl
  assert.deepEqual(stageRequest('apa',APA_STAGES[2],input,records).input.findings,latest);
  const audit=stageRequest('apa',APA_STAGES[3],input,records);
  assert.deepEqual(audit.input.previous_findings,latest);assert.deepEqual(audit.input.candidate_disposition,disposition);
+});
+
+test('APA reader translates internal labels without changing the saved move or its conditions',()=>{
+ const move={candidate_id:'M2',when:'SELECTED PROPOSAL, NOT ATHLETE-AGREED: if you choose it, TRY at practice. CHECK on 2026-09-28; do not run M1.',action_signal:'Record whether you accepted M2.',refs:['A10'],gates:[{id:'agency',pass:true}]},before=JSON.stringify(move);
+ const shown=displayMove(move);
+ assert.equal(shown.when,'If you choose it, try at practice. Review on 2026-09-28; try one approach at a time.');
+ assert.equal(shown.action_signal,'Record whether you accepted this suggestion.');
+ assert.equal(JSON.stringify(move),before);assert.equal(shown.candidate_id,'M2');assert.deepEqual(shown.refs,move.refs);assert.deepEqual(shown.gates,move.gates);
 });
