@@ -100,9 +100,14 @@ function isLocalEngineModule(requestUrl = '') {
 }
 
 export default defineConfig({
+  cacheDir: '.cache/athlete-vite',
   build: {
     rollupOptions: { input: {
       main: new URL('./index.html', import.meta.url).pathname,
+      academy: new URL('./athlete/workspace/index.html', import.meta.url).pathname,
+      academyBos: new URL('./athlete/workspace/bos.html', import.meta.url).pathname,
+      academyApa: new URL('./athlete/workspace/apa.html', import.meta.url).pathname,
+      academyCoach: new URL('./athlete/workspace/coach.html', import.meta.url).pathname,
       athleteWorkspace: new URL('./athlete-consulting-tool/demo/workspace.html', import.meta.url).pathname,
       athleteApa: new URL('./athlete-consulting-tool/demo/apa-reading.html', import.meta.url).pathname,
     } },
@@ -114,6 +119,7 @@ export default defineConfig({
   ],
   server: {
     proxy: {
+      '/api/athlete/academy': {target:'http://127.0.0.1:5322',changeOrigin:false},
       '/api/': {
         target: 'https://moremindmap.com',
         changeOrigin: true,

@@ -1,0 +1,8 @@
+import fs from 'node:fs/promises';import Redis from 'ioredis';import {createAcademyRuntime} from '../../server/athleteAcademyV1/runtime.js';import {digest} from '../../server/athleteAcademyV1/repository.js';
+const redis=new Redis('redis://127.0.0.1:6394',{maxRetriesPerRequest:0,enableOfflineQueue:false});await new Promise((r,j)=>{redis.once('ready',r);redis.once('error',j);});
+const env={ATHLETE_ACADEMY_ENABLED:'1',ATHLETE_ACADEMY_ORIGIN:'http://127.0.0.1:5321',ATHLETE_ACADEMY_LOCAL_PREVIEW:'1',ATHLETE_ACADEMY_SYNTHETIC_PREVIEW:'1',ATHLETE_ACADEMY_MAIL_ENABLED:'1',ATHLETE_ACADEMY_NAMESPACE:'more:athlete-academy:{test-founder-review-v1}',ATHLETE_ACADEMY_BEYOND_TODAY_CODE_SHA256:digest('darrendemo1')};
+const r=createAcademyRuntime({env,redis});const email='alex-review@test.invalid',password='Athlete-review-only-2026';
+let a;const existing=await r.repo.read('email:'+digest(email));
+if(!existing){const signed=await r.auth.signup({email,password,displayName:'Alex Rivera',dateOfBirth:'2007-03-10',sport:'Soccer',region:'US-CA',institutionId:'beyond-today-sports-institute',institutionCode:'darrendemo1'});const m=await r.repo.read('mail:'+signed.mailId);await r.auth.verifyEmail(m.token);}a=(await r.auth.login({email,password})).session.account;
+await r.academy.acceptParticipation(a,{requestId:'review-participation-01',accepted:true,policyVersion:'candidate-review-v1'});
+await fs.writeFile('../evidence/REVIEW_ACCOUNT.json',JSON.stringify({synthetic:true,name:a.displayName,email,password,mm:a.mm,scope:'isolated local candidate only',reports:'not generated yet'},null,2),{mode:0o600});console.log(JSON.stringify({name:a.displayName,mm:a.mm,synthetic:true,ready:true}));await redis.quit();

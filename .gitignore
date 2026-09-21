@@ -33,3 +33,6 @@ dist-ssr
 # Browser profiles contain cookies, sessions, caches, and machine-local state.
 lab_outputs/**/.chrome-*/
 .vercel
+
+# Local Athlete candidate tool cache; no participant records belong in this repo.
+.cache/athlete-vite/

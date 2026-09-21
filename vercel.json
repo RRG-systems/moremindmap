@@ -17,6 +17,15 @@
     }
   ],
   "functions": {
+    "api/athlete/academy.js": {
+      "maxDuration": 800
+    },
+    "api/athlete/academy-worker.js": {
+      "maxDuration": 800
+    },
+    "api/athlete/academy-mail-worker.js": {
+      "maxDuration": 480
+    },
     "api/moremindmap/new-bos.js": {
       "maxDuration": 800
     },

@@ -25,9 +25,9 @@ const requiredCopy = [
   'WHAT HAPPENS NEXT BECOMES PART OF THE UNDERSTANDING.',
 ]
 
-test('registers the bounded Athlete public preview only at /athlete', () => {
+test('registers one Athlete route and preserves the bounded public preview when academy activation is off', () => {
   assert.match(main, /import AthletePublicSiteV1 from '\.\/AthletePublicSiteV1\.jsx'/u)
-  assert.ok(main.includes('<Route path="/athlete" element={<AthletePublicSiteV1 />} />'))
+  assert.ok(main.includes('<Route path="/athlete" element={import.meta.env.VITE_ATHLETE_ACADEMY_V1_ENABLED === \'true\' ? <AthleteAcademyRoute /> : <AthletePublicSiteV1 />} />'))
   assert.equal((main.match(/path="\/athlete"/gu) || []).length, 1)
 })
 
