@@ -83,6 +83,12 @@ export function createAccessHandler({ serviceFactory, env = process.env } = {}) 
       await runtime.service.enforceRateLimit({ scope: 'access', identity: requestFingerprint(req), limit: 30 });
       const requestContext = { cookie_header: req.headers?.cookie };
       if (body.action === 'lookup') return res.status(200).json({ ok: true, ...(await runtime.service.lookupEntry(body, requestContext)) });
+      if (body.action === 'enter_subscription') {
+        return res.status(200).json({
+          ok: true,
+          ...(await runtime.service.enterMonthlySubscription(body, requestContext)),
+        });
+      }
       if (body.action === 'redeem') {
         if (!runtimeFlags(env).complimentary_redemption_enabled) return res.status(404).json({ ok: false, error: 'not_found' });
         // Direct redemption remains the established BOS path. BA must use the

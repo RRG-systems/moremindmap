@@ -455,6 +455,7 @@ export function createPublicSiteService({
   complimentaryManifest = '[]',
   complimentaryFlowAudience,
   profileStateReader = async () => ({ bos: 'unknown', ba: 'unknown' }),
+  currentBusinessAssessmentReadinessReader = null,
   ownershipVerifier = async () => false,
   monthlyMembershipBinder = null,
   monthlyCheckoutEnabled = false,
@@ -988,15 +989,85 @@ export function createPublicSiteService({
     if (!product || product.product_key === 'more_monthly_intelligence') {
       throw new Error('product_not_found');
     }
+    let businessAssessmentState = profileState?.ba || 'missing';
+    if (product.product_key === 'business_assessment'
+      && businessAssessmentState !== 'ready'
+      && typeof currentBusinessAssessmentReadinessReader === 'function') {
+      const assessmentId = await store.get(`business_assessment_by_profile:${profileId}`);
+      const assessment = assessmentId
+        ? parse(await store.get(`business_assessment:${boundedText(assessmentId, 80)}`))
+        : null;
+      if (assessment) {
+        try {
+          const readiness = await currentBusinessAssessmentReadinessReader({
+            profile_id: profileId,
+            assessment,
+          });
+          if (readiness?.ready === true) businessAssessmentState = 'ready';
+        } catch {
+          // A current-product custody defect must not be interpreted as ready.
+        }
+      }
+    }
     return {
       state: product.product_key === 'business_assessment'
-        ? (profileState?.ba || 'missing')
+        ? businessAssessmentState
         : (profileState?.bos || 'missing'),
       profile_id: profileId,
       behavior_operating_system_state: profileState?.bos || 'missing',
-      business_assessment_state: profileState?.ba || 'missing',
+      business_assessment_state: businessAssessmentState,
       ownership_verified: true,
       destination: product.destination,
+    };
+  }
+
+  async function enterMonthlySubscription(input = {}, requestContext = {}) {
+    const profileId = normalizeProfileId(input.profile_id);
+    if (!profileId) throw new Error('valid_profile_id_required');
+    const verified = await ownershipVerifier({
+      profile_id: profileId,
+      cookie_header: requestContext.cookie_header,
+    });
+    if (!verified) return { state: 'ownership_verification_required' };
+
+    const grantIds = await store.smembers(`access_grant_by_profile:${profileId}`);
+    const activeMonthlyGrants = (await Promise.all((grantIds || []).map(async (grantId) => {
+      const grant = parse(await store.get(`access_grant:${boundedText(grantId, 180)}`));
+      return grant
+        && grant.grant_id === grantId
+        && grant.product_key === 'more_monthly_intelligence'
+        && grant.profile_id === profileId
+        && grant.status === 'active'
+        ? grant
+        : null;
+    }))).filter(Boolean);
+
+    if (activeMonthlyGrants.length === 0) {
+      const profileState = await profileStateReader(profileId);
+      return {
+        state: 'not_subscribed',
+        profile_id: profileId,
+        behavior_operating_system_state: profileState?.bos || 'missing',
+        business_assessment_state: profileState?.ba || 'missing',
+        ownership_verified: true,
+      };
+    }
+    if (activeMonthlyGrants.length !== 1) {
+      throw new Error('paid_entitlement_reconciliation_required');
+    }
+
+    const grant = activeMonthlyGrants[0];
+    await requireMonthlyEntitlement(grant);
+    const token = await createStartTokenForGrant({ grant_id: grant.grant_id });
+    const started = await startProduct({ start_token: token.start_token, profile_id: profileId });
+    return {
+      state: 'ready',
+      profile_id: profileId,
+      destination: started.destination,
+      start_token: token.start_token,
+      expires_at_ms: token.expires_at_ms,
+      renewable_until_ms: token.renewable_until_ms,
+      idempotent: token.idempotent && started.idempotent,
     };
   }
 
@@ -1226,6 +1297,7 @@ export function createPublicSiteService({
     redeemComplimentary,
     redeemPreparedComplimentary,
     lookupEntry,
+    enterMonthlySubscription,
     createStartTokenForGrant,
     createStartTokenForSession,
     renewStartToken,

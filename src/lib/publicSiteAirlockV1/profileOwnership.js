@@ -17,6 +17,8 @@ const ALLOWED_RETURN_PATHS = new Set([
   '/step-1',
   '/step-2',
   '/step-2?continue=complimentary',
+  '/step-2?continue=retrieval',
+  '/step-3',
   '/recruiting/continue',
 ]);
 

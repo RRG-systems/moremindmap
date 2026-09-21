@@ -17,6 +17,18 @@ import { resolvePaidEntitlementFromStore } from '../../../api/engine/subscriptio
 
 export function createPublicRuntime(env = process.env, options = {}) {
   const store = options.store || createRedisPublicStore(env);
+  let currentNewBaReadinessReader = options.currentNewBaReadinessReader || null;
+  if (!currentNewBaReadinessReader && env.NEW_BA_DERIVED_NAMESPACE && env.NEW_BA_BOS_NAMESPACE) {
+    try {
+      currentNewBaReadinessReader = createCurrentNewBaMembershipReadinessReader({
+        store,
+        namespace: env.NEW_BA_DERIVED_NAMESPACE,
+        bosNamespace: env.NEW_BA_BOS_NAMESPACE,
+      });
+    } catch {
+      currentNewBaReadinessReader = null;
+    }
+  }
   const ownerReader = options.ownerReader || createCanonicalProfileOwnerReader(store);
   const profileStateReader = options.profileStateReader || createProfileStateReader(store);
   const ownership = options.ownership || createProfileOwnershipAdapter({
@@ -35,12 +47,6 @@ export function createPublicRuntime(env = process.env, options = {}) {
     || (publicInquiryTransportConfigured(env) ? createResendInquiryTransportFromEnv(env) : null);
   const flags = runtimeFlags(env);
   const ownershipVerifier = options.ownershipVerifier || ((input) => ownership.verifyRequest(input));
-  const currentNewBaReadinessReader = options.currentNewBaReadinessReader
-    || (flags.subscription_checkout_enabled ? createCurrentNewBaMembershipReadinessReader({
-      store,
-      namespace: env.NEW_BA_DERIVED_NAMESPACE,
-      bosNamespace: env.NEW_BA_BOS_NAMESPACE,
-    }) : null);
   const monthlyMembershipBinder = options.monthlyMembershipBinder
     || (flags.subscription_checkout_enabled ? createPaidMembershipBinder({
       store,
@@ -57,6 +63,7 @@ export function createPublicRuntime(env = process.env, options = {}) {
     complimentaryManifest: env.MOREMINDMAP_SERVER_ONLY_COMPLIMENTARY_MANIFEST || '[]',
     complimentaryFlowAudience: options.complimentaryFlowAudience || resolvePublicSiteOrigin(env),
     profileStateReader,
+    currentBusinessAssessmentReadinessReader: currentNewBaReadinessReader,
     ownershipVerifier,
     monthlyMembershipBinder,
     monthlyCheckoutEnabled: flags.subscription_checkout_enabled,

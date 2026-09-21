@@ -860,7 +860,7 @@
     },
     {
       "path": "src/lib/publicSiteAirlockV1/profileOwnership.js",
-      "sha256": "ef4591aa7432dc132a5ee4ea4b0863ce2099cce48649d426ffd0b5e53111f5a2"
+      "sha256": "825e010583deb64be6847f8c1f2d11217662321cdc6a57ed1b3fb180163014c5"
     },
     {
       "path": "src/lib/publicSiteAirlockV1/publicSiteOrigin.js",
