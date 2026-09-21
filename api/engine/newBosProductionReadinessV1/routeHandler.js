@@ -5,6 +5,7 @@ import { isReadOnlyCustomerAuthority } from '../../../src/lib/publicSiteAirlockV
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_bos_canonical_profile_not_found',
   'new_bos_modernization_requires_evidence_or_review',
+  'public_product_current_artifact_unavailable',
 ]);
 
 function tokenFromRequest(request) {

@@ -68,6 +68,15 @@ test('uses legacy only for explicit governed incompatibility or missing current 
   assert.equal(ba.status, 'governed_fallback');
 });
 
+test('uses the saved legacy report when a read-only request has no current artifact', async () => {
+  const bos = await resolveOrdinaryBosEntry('MM-20260708-BQCCS6WF', async () =>
+    response(404, { safe_code: 'public_product_current_artifact_unavailable' }));
+  const ba = await resolveOrdinaryBaEntry('MM-20260630-SALZGBU4', async () =>
+    response(404, { safe_code: 'public_product_current_artifact_unavailable' }));
+  assert.equal(bos.status, 'governed_fallback');
+  assert.equal(ba.status, 'governed_fallback');
+});
+
 test('fails closed instead of silently rendering legacy on unknown runtime or identity defects', async () => {
   const runtime = await resolveOrdinaryBosEntry('MM-20260617-YBNWT0KS', async () =>
     response(500, { safe_code: 'new_bos_route_redis_binding_missing' }));

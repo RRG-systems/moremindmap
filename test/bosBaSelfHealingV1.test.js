@@ -1287,6 +1287,15 @@ test('machinery failures return generic customer codes while governed truth fail
   })({ method: 'GET', query: { id: PROFILE }, headers: {} }, truth);
   assert.equal(truth.body.safe_code, 'new_bos_modernization_requires_evidence_or_review');
 
+  const bosReadOnlyUnavailable = makeResponse();
+  await createNewBosProductionRouteHandler({
+    config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
+    serviceFactory: async () => ({ retrieve: async () => { throw new Error('public_product_current_artifact_unavailable'); } }),
+  })({ method: 'GET', query: { id: PROFILE }, headers: {} }, bosReadOnlyUnavailable);
+  assert.equal(bosReadOnlyUnavailable.statusCode, 404);
+  assert.equal(bosReadOnlyUnavailable.body.safe_code, 'public_product_current_artifact_unavailable');
+
   const baMachinery = makeResponse();
   await createNewBaRouteHandler({
     config: { staged: true, canaryEnabled: false, customerActive: true },
@@ -1296,6 +1305,15 @@ test('machinery failures return generic customer codes while governed truth fail
   assert.equal(baMachinery.body.safe_code, 'new_ba_temporarily_unavailable');
   assert.deepEqual(Object.keys(baMachinery.body).sort(), ['error', 'safe_code']);
   assert.doesNotMatch(JSON.stringify(baMachinery.body), /upstream_detail|TRANSIENT_INFRASTRUCTURE/u);
+
+  const baReadOnlyUnavailable = makeResponse();
+  await createNewBaRouteHandler({
+    config: { staged: true, canaryEnabled: false, customerActive: true },
+    authorizeCustomerRead: async () => true,
+    serviceFactory: async () => ({ service: { retrieve: async () => { throw new Error('public_product_current_artifact_unavailable'); } } }),
+  })({ method: 'GET', query: { id: PROFILE }, headers: {} }, baReadOnlyUnavailable);
+  assert.equal(baReadOnlyUnavailable.statusCode, 404);
+  assert.equal(baReadOnlyUnavailable.body.safe_code, 'public_product_current_artifact_unavailable');
 });
 
 test('New BOS archives one terminal checkpoint and permits exactly one replacement submission', async () => {

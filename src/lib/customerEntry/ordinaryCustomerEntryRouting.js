@@ -3,12 +3,14 @@ const PROFILE_ID_PATTERN = /^MM-\d{8}-[A-Z0-9]{8}$/;
 const BOS_GOVERNED_FALLBACK_CODES = new Set([
   'new_bos_canonical_profile_not_found',
   'new_bos_modernization_requires_evidence_or_review',
+  'public_product_current_artifact_unavailable',
 ]);
 
 const BA_GOVERNED_FALLBACK_CODES = new Set([
   'new_ba_business_assessment_not_found',
   'new_ba_compatible_bos_authority_missing',
   'new_ba_modernization_requires_evidence_or_review',
+  'public_product_current_artifact_unavailable',
 ]);
 
 export const ORDINARY_CUSTOMER_ENTRY_UNAVAILABLE_MESSAGE =

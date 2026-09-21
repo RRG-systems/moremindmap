@@ -6,6 +6,7 @@ const GOVERNED_CUSTOMER_CODES = new Set([
   'new_ba_business_assessment_not_found',
   'new_ba_compatible_bos_authority_missing',
   'new_ba_modernization_requires_evidence_or_review',
+  'public_product_current_artifact_unavailable',
 ]);
 
 function tokenFromRequest(request) {
