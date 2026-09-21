@@ -1,5 +1,6 @@
 import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
 import { timingSafeHeaderMatch } from '../../../src/lib/publicSiteAirlockV1/security.js';
+import { isReadOnlyCustomerAuthority } from '../../../src/lib/publicSiteAirlockV1/temporaryProfileIdOnlyRetrieval.js';
 
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_ba_business_assessment_not_found',
@@ -92,10 +93,10 @@ export function createNewBaRouteHandler({ config, serviceFactory, onCanonicalSer
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
         platformProtected: operatorOperation && platformProtected,
-        readOnly: customerAuthority?.mode === 'profile_owner_receipt',
+        readOnly: isReadOnlyCustomerAuthority(customerAuthority),
       });
       if (operation === 'retrieve'
-        && customerAuthority?.mode !== 'profile_owner_receipt'
+        && !isReadOnlyCustomerAuthority(customerAuthority)
         && !result?.pending
         && result?.artifact
         && typeof onCanonicalServed === 'function') {

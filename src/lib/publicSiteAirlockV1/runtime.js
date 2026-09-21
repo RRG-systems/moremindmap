@@ -14,6 +14,7 @@ import { publicSubscriptionAccessConfigured, runtimeFlags } from './security.js'
 import { createPaidMembershipBinder } from '../../../api/stripe/paidMembership.js';
 import { createCurrentNewBaMembershipReadinessReader } from '../../../api/stripe/paidMembershipReadiness.js';
 import { resolvePaidEntitlementFromStore } from '../../../api/engine/subscriptionV1/paidRuntimeInfrastructure.js';
+import { temporaryProfileIdOnlyReadEnabled } from './temporaryProfileIdOnlyRetrieval.js';
 
 export function createPublicRuntime(env = process.env, options = {}) {
   const store = options.store || createRedisPublicStore(env);
@@ -65,6 +66,10 @@ export function createPublicRuntime(env = process.env, options = {}) {
     profileStateReader,
     currentBusinessAssessmentReadinessReader: currentNewBaReadinessReader,
     ownershipVerifier,
+    temporaryProfileIdOnlyReadEnabled: temporaryProfileIdOnlyReadEnabled(
+      env,
+      'behavior_operating_system',
+    ),
     monthlyMembershipBinder,
     monthlyCheckoutEnabled: flags.subscription_checkout_enabled,
     monthlyEntitlementResolver: options.monthlyEntitlementResolver || resolvePaidEntitlementFromStore,

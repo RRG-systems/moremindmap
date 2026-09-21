@@ -23,6 +23,7 @@ const handler = createNewBosProductionRouteHandler({
         read: true,
         force: true,
         allowProfileBoundBosRead: true,
+        allowTemporaryProfileIdOnlyRead: true,
       });
     } finally {
       await redis.quit().catch(() => {});

@@ -125,6 +125,7 @@ export default async function handler(req, res) {
       profileId: parsedProfile.normalized,
       read: true,
       allowProfileBoundBaRead: true,
+      allowTemporaryProfileIdOnlyRead: true,
     });
     const assessmentId = await redis.get(businessAssessmentByProfileKey(parsedProfile.normalized));
 
@@ -161,6 +162,7 @@ export default async function handler(req, res) {
       relationshipRef: assessment.metadata?.recruiting_relationship_ref || '',
       assessmentId,
       read: true,
+      allowTemporaryProfileIdOnlyRead: true,
     });
     return res.status(200).json(buildRetrieveResponse(assessment, parsedProfile.normalized));
   } catch (error) {

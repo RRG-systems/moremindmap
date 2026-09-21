@@ -15,6 +15,7 @@ import {
   readVerifiedProfileOwnerRequest,
   resolveProfileOwnershipAudience,
 } from '../../../src/lib/publicSiteAirlockV1/profileOwnership.js';
+import { temporaryProfileIdOnlyReadAuthority } from '../../../src/lib/publicSiteAirlockV1/temporaryProfileIdOnlyRetrieval.js';
 
 const INVITE_COOKIE = '__Host-more_recruiting_invite';
 const BOS_JOB_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{2,179}$/iu;
@@ -138,6 +139,7 @@ export async function authorizePublicOrRecruitingProductRequest({
   allowUnboundBosStart = false,
   allowProfileBoundBosRead = false,
   allowProfileBoundBaRead = false,
+  allowTemporaryProfileIdOnlyRead = false,
 } = {}) {
   const recruitingResourceBound = Boolean(
     allowUnboundBosStart
@@ -163,7 +165,23 @@ export async function authorizePublicOrRecruitingProductRequest({
     }
   }
   const authorizePublic = read ? authorizeExistingProductRead : authorizeProductRequest;
-  return authorizePublic({ req, store, productKey, profileId, env, force });
+  const temporaryAuthority = read
+    ? temporaryProfileIdOnlyReadAuthority({
+      env,
+      productKey,
+      profileId,
+      allowed: allowTemporaryProfileIdOnlyRead,
+    })
+    : null;
+  try {
+    const authority = await authorizePublic({ req, store, productKey, profileId, env, force });
+    return temporaryAuthority && authority?.mode === 'legacy_rollout_disabled'
+      ? temporaryAuthority
+      : authority;
+  } catch (error) {
+    if (temporaryAuthority) return temporaryAuthority;
+    throw error;
+  }
 }
 
 /**

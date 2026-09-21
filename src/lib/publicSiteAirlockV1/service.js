@@ -457,6 +457,7 @@ export function createPublicSiteService({
   profileStateReader = async () => ({ bos: 'unknown', ba: 'unknown' }),
   currentBusinessAssessmentReadinessReader = null,
   ownershipVerifier = async () => false,
+  temporaryProfileIdOnlyReadEnabled = false,
   monthlyMembershipBinder = null,
   monthlyCheckoutEnabled = false,
   monthlyEntitlementResolver = null,
@@ -979,16 +980,17 @@ export function createPublicSiteService({
     const raw = boundedText(input.value, 240);
     const profileId = normalizeProfileId(raw);
     if (!profileId) return { state: 'capability_or_locator_unrecognized' };
-    const verified = await ownershipVerifier({
+    const product = productForKey(input.product_key || 'behavior_operating_system');
+    if (!product || product.product_key === 'more_monthly_intelligence') {
+      throw new Error('product_not_found');
+    }
+    const temporaryRead = temporaryProfileIdOnlyReadEnabled === true;
+    const verified = temporaryRead || await ownershipVerifier({
       profile_id: profileId,
       cookie_header: requestContext.cookie_header,
     });
     if (!verified) return { state: 'ownership_verification_required' };
     const profileState = await profileStateReader(profileId);
-    const product = productForKey(input.product_key || 'behavior_operating_system');
-    if (!product || product.product_key === 'more_monthly_intelligence') {
-      throw new Error('product_not_found');
-    }
     let businessAssessmentState = profileState?.ba || 'missing';
     if (product.product_key === 'business_assessment'
       && businessAssessmentState !== 'ready'
@@ -1016,7 +1018,8 @@ export function createPublicSiteService({
       profile_id: profileId,
       behavior_operating_system_state: profileState?.bos || 'missing',
       business_assessment_state: businessAssessmentState,
-      ownership_verified: true,
+      ownership_verified: !temporaryRead,
+      ...(temporaryRead ? { temporary_profile_id_only_read: true } : {}),
       destination: product.destination,
     };
   }

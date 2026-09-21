@@ -1,5 +1,6 @@
 import { classifyRecoveryFailure, REALIZATION_RECOVERY_STATES } from '../realizationRecoveryV1/recoveryContract.js';
 import { timingSafeHeaderMatch } from '../../../src/lib/publicSiteAirlockV1/security.js';
+import { isReadOnlyCustomerAuthority } from '../../../src/lib/publicSiteAirlockV1/temporaryProfileIdOnlyRetrieval.js';
 
 const GOVERNED_CUSTOMER_CODES = new Set([
   'new_bos_canonical_profile_not_found',
@@ -134,7 +135,7 @@ export function createNewBosProductionRouteHandler({ config, serviceFactory, aut
         profileId: request.query?.id,
         suppliedToken: tokenFromRequest(request),
         platformProtected: operatorOperation && platformProtected,
-        readOnly: customerAuthority?.mode === 'profile_owner_receipt',
+        readOnly: isReadOnlyCustomerAuthority(customerAuthority),
         ...(operation === 'replaceStaleSurfaceRouting' ? {
           expectedCampaignSha256: request.body?.expected_campaign_sha256,
           expectedUnitIdentitySha256: request.body?.expected_unit_identity_sha256,

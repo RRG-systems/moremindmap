@@ -68,6 +68,7 @@ export default async function handler(req, res) {
           profileId: id,
           read: true,
           allowProfileBoundBosRead: true,
+          allowTemporaryProfileIdOnlyRead: true,
         });
       } catch {
         await redis.disconnect();

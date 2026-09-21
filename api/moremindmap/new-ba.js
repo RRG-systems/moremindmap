@@ -43,6 +43,7 @@ const handler = createNewBaRouteHandler({
         assessmentId: relationshipRef ? assessmentId : '',
         read: true,
         force: true,
+        allowTemporaryProfileIdOnlyRead: true,
       });
     } finally {
       await redis.quit().catch(() => {});
