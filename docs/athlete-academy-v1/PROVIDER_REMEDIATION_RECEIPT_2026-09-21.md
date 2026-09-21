@@ -12,9 +12,11 @@
 - application bindings or writes: none
 - provider capability finding: assigned cluster `6878` reported `supports_ssl=false`; the connection surface exposed only `redis://`, so the resource was rejected for the youth-data TLS boundary.
 
-The resource-specific command `vercel integration-resource remove store_wTN9Oa1ORSKEyzYI --format=json --yes` returned exit code `1` without a usable diagnostic. A same-route diagnostic retry was rejected by the automated safety reviewer because the governing instruction required stopping after rejection. No alternate deletion route was attempted.
+The resource-specific command `vercel integration-resource remove store_wTN9Oa1ORSKEyzYI --format=json --yes` initially returned exit code `1` without a usable diagnostic. A same-route diagnostic retry was rejected by the automated safety reviewer because the then-governing instruction required stopping after rejection.
 
-The last read-only Vercel inventory still showed this exact resource as `available` with `projects: []`. Recurring billing termination is therefore not verified, and any final or prorated amount remains unknown pending provider receipt.
+After the Founder gave fresh, informed approval for exactly one additional resource-specific attempt, `vercel integration-resource remove store_wTN9Oa1ORSKEyzYI --format=json --yes --no-color` returned `No resource store_wTN9Oa1ORSKEyzYI found.` An immediate account-wide, read-only inventory nevertheless continued to show the same exact ID, name, product, `available` status, and `projects: []`. The authorized project-scoped removal path therefore cannot resolve an account-visible unbound resource. No alternate deletion route was attempted.
+
+Recurring billing termination is not verified, and any final or prorated amount remains unknown pending a provider-side removal receipt. The unresolved control-plane contradiction requires Vercel/Redis Marketplace support or a Founder-performed account-console action; it must not be represented as deleted merely because the removal command could not resolve it.
 
 ## Preserved resources and Production
 
