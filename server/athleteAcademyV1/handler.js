@@ -10,7 +10,7 @@ export function createAcademyHandler({config,auth,academy,coaching,deliver}){
    requireValue(config.enabled,'ATHLETE_ACADEMY_NOT_ACTIVE',503);requireValue(config.origin,'ACADEMY_ORIGIN_NOT_CONFIGURED',503);
    requireValue(['GET','POST'].includes(req.method),'METHOD_NOT_ALLOWED',405);
    const fetchSite=req.headers['sec-fetch-site'];requireValue(!fetchSite||['same-origin','none'].includes(fetchSite),'SAME_ORIGIN_REQUIRED',403);
-   if(req.method==='POST')requireValue(req.headers.origin===config.origin,'SAME_ORIGIN_REQUIRED',403);
+   if(req.method==='POST')requireValue(config.allowedOrigins.has(req.headers.origin),'SAME_ORIGIN_REQUIRED',403);
    const raw=String(req.headers.cookie||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='))?.slice(COOKIE.length+1);let s=await auth.session(raw);
    if(req.method==='GET'){
     if(!s){await auth.limited('bootstrap:'+String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0],100,3600000);const created=await auth.createSession();s=created.session;res.setHeader('Set-Cookie',cookie(created.raw));}

@@ -14,7 +14,9 @@ export function createAcademyRuntime({env,redis,assessmentTransport,coachTranspo
  let client;const ai=()=>{requireValue(env.OPENAI_API_KEY,'GENERATION_NOT_CONFIGURED',503);return client||=new OpenAI({apiKey:env.OPENAI_API_KEY,maxRetries:0,timeout:720000});};
  const transport=assessmentTransport|| (config.providerEnabled&&env.OPENAI_API_KEY?request=>ai().responses.create(request,{maxRetries:0,signal:AbortSignal.timeout(720000)}):null);
  const coach=coachTransport||(config.providerEnabled&&env.OPENAI_API_KEY?(request,options)=>ai().responses.create(request,{...options,maxRetries:0}):null);
- const mail=mailTransport||(config.mailEnabled&&env.RESEND_API_KEY&&env.ATHLETE_ACADEMY_MAIL_FROM?resendTransport({key:env.RESEND_API_KEY,from:env.ATHLETE_ACADEMY_MAIL_FROM}):null);
+ const mailKey=env.RESEND_API_KEY||env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY;
+ const mailFrom=env.ATHLETE_ACADEMY_MAIL_FROM||env.PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM;
+ const mail=mailTransport||(config.mailEnabled&&mailKey&&mailFrom?resendTransport({key:mailKey,from:mailFrom}):null);
  config.providerEnabled=Boolean(config.providerEnabled&&transport&&coach);config.mailEnabled=Boolean(config.mailEnabled&&mail);
  const auth=createAuth({repo,config,now}),academy=createAcademyService({repo,config,auth,transport,now}),coaching=createCoachingService({repo,config,academy,transport:coach,now}),deliver=createDelivery({repo,config,transport:mail,now});
  return {repo,config,auth,academy,coaching,deliver,handler:createAcademyHandler({config,auth,academy,coaching,deliver})};

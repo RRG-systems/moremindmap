@@ -7,13 +7,31 @@ export const INSTITUTIONS = Object.freeze([
   Object.freeze({ id: 'horizon-academy', name: 'Horizon Sports Institute', enrollment: 'directory_example_only', synthetic: true }),
 ]);
 export const COHORT = Object.freeze({ region: 'US-CA', minimumAge: 17, guardianRequiredUnder: 18, maximumAge: null, ageInterpretation: 'Actual age is retained. These are source-based interpretations, not age-normed scores.' });
+function exactOrigin(value,{allowInsecureLocalhost=false}={}){
+  const raw=String(value||'').trim();if(!raw)return null;
+  if(raw.includes('*'))return null;
+  let parsed;try{parsed=new URL(raw);}catch{return null;}
+  if(parsed.origin!==raw||parsed.username||parsed.password)return null;
+  if(parsed.protocol==='https:')return raw;
+  return allowInsecureLocalhost&&/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(raw)?raw:null;
+}
 export function academyConfig(env = {}) {
   const origin = env.ATHLETE_ACADEMY_ORIGIN || '';
-  if(env.ATHLETE_ACADEMY_ENABLED==='1'){let parsed;try{parsed=new URL(origin);}catch{requireValue(false,'ACADEMY_ORIGIN_NOT_CONFIGURED',503);}requireValue(parsed.origin===origin&&!parsed.username&&!parsed.password&&(parsed.protocol==='https:'||(env.ATHLETE_ACADEMY_LOCAL_PREVIEW==='1'&&/^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin))),'ACADEMY_ORIGIN_INVALID',503);}
+  const allowInsecureLocalhost=env.ATHLETE_ACADEMY_LOCAL_PREVIEW==='1';
+  const canonicalOrigin=exactOrigin(origin,{allowInsecureLocalhost});
+  if(env.ATHLETE_ACADEMY_ENABLED==='1')requireValue(canonicalOrigin,origin?'ACADEMY_ORIGIN_INVALID':'ACADEMY_ORIGIN_NOT_CONFIGURED',503);
+  const allowedOrigins=new Set(canonicalOrigin?[canonicalOrigin]:[]);
+  for(const candidate of String(env.ATHLETE_ACADEMY_ALLOWED_ORIGINS||'').split(',')){
+    const resolved=exactOrigin(candidate);requireValue(!candidate.trim()||resolved,'ACADEMY_ALLOWED_ORIGIN_INVALID',503);if(resolved)allowedOrigins.add(resolved);
+  }
+  for(const hostname of [env.VERCEL_URL,env.VERCEL_PROJECT_PRODUCTION_URL]){
+    const resolved=exactOrigin(hostname&&`https://${String(hostname).trim()}`);if(resolved)allowedOrigins.add(resolved);
+  }
   return {
     enabled: env.ATHLETE_ACADEMY_ENABLED === '1',
     origin,
-    allowInsecureLocalhost: env.ATHLETE_ACADEMY_LOCAL_PREVIEW === '1' && /^http:\/\/(127\.0\.0\.1|localhost):\d+$/.test(origin),
+    allowedOrigins,
+    allowInsecureLocalhost: allowInsecureLocalhost && Boolean(canonicalOrigin?.startsWith('http://')),
     syntheticPreview: env.ATHLETE_ACADEMY_SYNTHETIC_PREVIEW === '1',
     cohort: { region: 'US-CA', minAge: 17 },
     realYouthEnabled: env.ATHLETE_ACADEMY_REAL_YOUTH_ENABLED === '1',

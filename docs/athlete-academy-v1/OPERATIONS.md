@@ -12,14 +12,15 @@ Build both the main application and the existing private Darren library using th
 |---|---|
 | ATHLETE_ACADEMY_ENABLED=1 | Activate private Academy API |
 | ATHLETE_ACADEMY_ORIGIN | Exact HTTPS site origin; no path |
+| ATHLETE_ACADEMY_ALLOWED_ORIGINS | Optional comma-separated exact HTTPS aliases; never use wildcards |
 | ATHLETE_ACADEMY_REDIS_URL | Dedicated or explicitly approved Redis binding using TLS |
 | ATHLETE_ACADEMY_NAMESPACE | Omit for canonical namespace; never use the local test namespace in real enrollment |
 | ATHLETE_ACADEMY_BEYOND_TODAY_CODE_SHA256 | SHA256 of the Founder-approved institute enrollment code |
 | ATHLETE_ACADEMY_PROVIDER_ENABLED=1 | Permit explicitly requested generation/coaching |
 | OPENAI_API_KEY | Existing approved server-side BOS connection |
 | ATHLETE_ACADEMY_MAIL_ENABLED=1 | Permit transactional verification/recovery/guardian delivery |
-| RESEND_API_KEY | Approved transactional provider binding |
-| ATHLETE_ACADEMY_MAIL_FROM | Verified institute/product sender |
+| RESEND_API_KEY | Approved transactional provider binding; the existing server-only profile-ownership binding is accepted without copying its value |
+| ATHLETE_ACADEMY_MAIL_FROM | Verified institute/product sender; the existing profile-ownership sender binding is accepted when this variable is absent |
 | ATHLETE_ACADEMY_REVIEWED_POLICY_VERSION | Version of the participation material approved for this cohort |
 | ATHLETE_ACADEMY_REAL_YOUTH_ENABLED=1 | Activate actual17-year-old participation after its setup is accepted |
 | ATHLETE_ACADEMY_WORKER_ENABLED=1 | Permit the assessment continuation worker |

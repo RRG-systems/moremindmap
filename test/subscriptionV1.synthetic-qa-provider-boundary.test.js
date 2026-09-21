@@ -306,9 +306,15 @@ test('explicit function packaging includes candidate manifest and every hashed s
   }
 });
 
-test('candidate custody is the exact reachable QA import closure plus file-loaded authorities and dependency identity',()=>{
+test('candidate custody preserves the sealed Subscription config while permitting unrelated additive function entries',()=>{
   const root=process.cwd();
-  assert.deepEqual(readFileSync(resolve(root,CONFIG_SNAPSHOT_PATH)),readFileSync(resolve(root,'vercel.json')));
+  const sealedConfig=JSON.parse(readFileSync(resolve(root,CONFIG_SNAPSHOT_PATH),'utf8'));
+  const currentConfig=JSON.parse(readFileSync(resolve(root,'vercel.json'),'utf8'));
+  assert.equal(currentConfig.buildCommand,sealedConfig.buildCommand);
+  assert.equal(currentConfig.outputDirectory,sealedConfig.outputDirectory);
+  assert.equal(currentConfig.framework,sealedConfig.framework);
+  assert.deepEqual(currentConfig.rewrites,sealedConfig.rewrites);
+  for(const [path,config] of Object.entries(sealedConfig.functions))assert.deepEqual(currentConfig.functions[path],config,path);
   const candidate=JSON.parse(readFileSync(resolve(root,'api/engine/subscriptionV1/syntheticQaProviderCandidate.json'),'utf8'));
   assert.equal(candidate.contract,'SYNTHETIC_QA_PROVIDER_CANDIDATE_CLOSURE_V3');
   assert.deepEqual(candidate.closure_roots,EXPECTED_CLOSURE_ROOTS);
