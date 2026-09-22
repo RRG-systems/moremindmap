@@ -44,6 +44,17 @@ test('rendered enrollment follows the server cohort and existing youth receive a
  assert.match(transport,/PILOT_CALIFORNIA_18_PLUS:'This first test is for adults age 18 or older in California\.'/);
 });
 
+test('adult Academy report chrome uses athlete-facing BOS and APA labels',async()=>{
+ const bos=await readFile(path.join(root,'src/athleteAcademyV1/bos/App.jsx'),'utf8');
+ const reports=await readFile(path.join(root,'src/athleteAcademyV1/coach/Reports.jsx'),'utf8');
+ assert.match(bos,/’s Athlete BOS/);
+ assert.doesNotMatch(bos,/’s Youth BOS/);
+ assert.match(reports,/YOU · ATHLETE BOS V2/);
+ assert.match(reports,/Accepted Athlete BOS V2/);
+ assert.match(reports,/— Athlete APA/);
+ assert.doesNotMatch(reports,/YOU · YOUTH BOS V2|Accepted Youth BOS V2|— Youth APA/);
+});
+
 test('adult pilot readiness requires its explicit Redis binding and accepts approved server-only mail aliases',async()=>{
  const runtime=await readFile(path.join(root,'server/athleteAcademyV1/runtime.js'),'utf8'),readiness=await readFile(path.join(root,'scripts/athlete-academy/readiness.mjs'),'utf8');
  assert.match(runtime,/const url=env\.ATHLETE_ACADEMY_REDIS_URL;requireValue\(url,'ACADEMY_STORAGE_REQUIRED'/);

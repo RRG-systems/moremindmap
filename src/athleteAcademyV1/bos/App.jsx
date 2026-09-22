@@ -65,7 +65,7 @@ export default function App() {
  const [data,setData]=useState(null),[error,setError]=useState(''),[modal,setModal]=useState(null);
  useEffect(()=>{call('get_report',{service:'bos',mm:new URLSearchParams(location.search).get('mm')}).then(setData).catch(e=>setError(e.message));},[]);
  const artifact=data?.artifact,source=data?.source;
- useEffect(()=>{if(artifact)document.title=`MORE · ${artifact.subject.name.split(' ')[0]}’s Youth BOS`;},[artifact]);
+ useEffect(()=>{if(artifact)document.title=`MORE · ${artifact.subject.name.split(' ')[0]}’s Athlete BOS`;},[artifact]);
  if(!artifact)return <main className="waiting"><h1>{error||'Opening your personality profile…'}</h1><a href="/athlete/workspace/index.html#home">Your Athlete home</a></main>;
  return <><header className="topbar"><a className="brand" href="/athlete/workspace/index.html#home">MORE<span> ATHLETE</span></a><a href="/athlete/workspace/index.html#home">← Your Athlete home</a></header>
       <section className="hero"><div><span className="eyebrow">Your Behavioral Operating System</span><h1>{artifact.subject.name.split(' ')[0]},<span>this is you.</span></h1><p>A closer look at what makes you who you are.</p></div><div className="identity"><span>{artifact.subject.age} · {artifact.subject.sport}</span><code>{artifact.mm}</code><a href="/athlete/workspace/index.html#bos">Review my answers ↗</a><button className="text-link" onClick={() => setModal({ type:'answers' })}>Your answers ↗</button><button className="text-link" onClick={() => window.print()}>Print / save PDF ↗</button></div></section>
