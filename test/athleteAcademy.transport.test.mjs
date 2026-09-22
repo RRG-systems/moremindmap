@@ -26,6 +26,29 @@ test('a stale forgot-password CSRF token is re-bootstrapped and retried exactly 
  assert.equal(replies.length,0);
 });
 
+test('a stale login form from another tab is re-bootstrapped and retried exactly once',async t=>{
+ const originalFetch=globalThis.fetch;
+ const requests=[];
+ const replies=[
+  response(200,{ok:true,csrfToken:'csrf-old'}),
+  response(403,{ok:false,error:{code:'SESSION_OR_FORM_EXPIRED'}}),
+  response(200,{ok:true,csrfToken:'csrf-current'}),
+  response(200,{ok:true,csrfToken:'csrf-authenticated',account:{mm:'MM-SYNTHETIC'}})
+ ];
+ globalThis.fetch=async (url,options={})=>{requests.push({url,options});return replies.shift();};
+ t.after(()=>{globalThis.fetch=originalFetch;});
+ const {call}=await import(`../src/athleteAcademyV1/transport.js?login-stale=${Date.now()}`);
+ const result=await call('login',{email:'fictional@test.invalid',password:'fictional-password'});
+ assert.equal(result.account.mm,'MM-SYNTHETIC');
+ assert.deepEqual(requests.map(x=>x.options.method||'GET'),['GET','POST','GET','POST']);
+ assert.equal(requests[1].options.headers['X-CSRF-Token'],'csrf-old');
+ assert.equal(requests[3].options.headers['X-CSRF-Token'],'csrf-current');
+ const first=JSON.parse(requests[1].options.body),retry=JSON.parse(requests[3].options.body);
+ assert.equal(retry.requestId,first.requestId,'the safe retry preserves request identity');
+ assert.deepEqual(retry,first,'the safe retry preserves the exact credentials request');
+ assert.equal(replies.length,0);
+});
+
 test('a repeated CSRF rejection is surfaced without a retry loop',async t=>{
  const originalFetch=globalThis.fetch;
  const requests=[];

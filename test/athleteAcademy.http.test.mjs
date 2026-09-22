@@ -38,6 +38,19 @@ test('stale forgot-password CSRF is rejected before mail; the fresh retry sends 
  await Promise.all(pending.splice(0));assert.equal(mailbox.length,before+1,'fresh retry dispatches one message');
  assert.equal(mailbox.at(-1).email,'browser@test.invalid');assert.equal(mailbox.at(-1).kind,'reset_password');
 });
+test('stale cross-tab login is rejected before authentication and succeeds with the refreshed session',async()=>{
+ const tabA=await http(),tabB=await http(),cookieB=tabB.headers['Set-Cookie'].split(';')[0],requestId=randomUUID();
+ const body={action:'login',requestId,email:'browser@test.invalid',password:'Fictional-browser-password'};
+ const rejected=await http({method:'POST',headers:{cookie:cookieB,'x-csrf-token':tabA.body.csrfToken},body});
+ assert.equal(rejected.status,403);assert.equal(rejected.body.error.code,'SESSION_OR_FORM_EXPIRED');
+ const refreshed=await http({headers:{cookie:cookieB}});
+ assert.equal(refreshed.status,200);assert.equal(refreshed.body.account,null);
+ const accepted=await http({method:'POST',headers:{cookie:cookieB,'x-csrf-token':refreshed.body.csrfToken},body});
+ assert.equal(accepted.status,200);assert.equal(accepted.body.account.mm,mm);assert.notEqual(accepted.headers['Set-Cookie'].split(';')[0],cookieB);
+ const authenticatedCookie=accepted.headers['Set-Cookie'].split(';')[0];
+ const dossier=await http({method:'POST',headers:{cookie:authenticatedCookie,'x-csrf-token':accepted.body.csrfToken},body:{action:'get_dossier',requestId:randomUUID(),mm}});
+ assert.equal(dossier.status,200);assert.equal(dossier.body.dossier.mm,mm);
+});
 test('public acknowledgements never wait for a matching email provider; outbox survives interruption',async()=>{
  let release;const transportGate=new Promise(resolve=>{release=resolve;});let calls=0;
  const isolated=createAcademyRuntime({env:{...env,ATHLETE_ACADEMY_NAMESPACE:`more:athlete-academy:{test-${randomUUID()}}`},redis,mailTransport:async()=>{calls++;await transportGate;return {status:'rejected'};}});
