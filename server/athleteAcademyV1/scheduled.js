@@ -11,6 +11,7 @@ export function createScheduledHandler({env,getRuntime,lane}){
    workerAuthorized(env,req.headers.authorization);
    if(!['GET','POST'].includes(req.method))return res.status(405).json({ok:false});
    const runtime=getRuntime();
+   if(typeof runtime.ready==='function')await runtime.ready();
    const result=lane==='mail'?await runMailQueue(runtime):await runAssessmentQueue(runtime);
    return res.status(200).json({ok:true,...result});
   }catch(e){return res.status(e.status||503).json({ok:false,error:/^[A-Z_]+$/.test(e.code||'')?e.code:'WORKER_UNAVAILABLE'});}
