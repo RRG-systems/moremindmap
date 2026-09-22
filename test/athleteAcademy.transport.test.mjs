@@ -3,20 +3,20 @@ import assert from 'node:assert/strict';
 
 const response=(status,body)=>({ok:status>=200&&status<300,status,async json(){return body;}});
 
-test('a stale browser CSRF token is re-bootstrapped and retried exactly once',async t=>{
+test('a stale forgot-password CSRF token is re-bootstrapped and retried exactly once',async t=>{
  const originalFetch=globalThis.fetch;
  const requests=[];
  const replies=[
   response(200,{ok:true,csrfToken:'csrf-old'}),
   response(403,{ok:false,error:{code:'SESSION_OR_FORM_EXPIRED'}}),
   response(200,{ok:true,csrfToken:'csrf-current'}),
-  response(200,{ok:true,reset:true})
+  response(200,{ok:true,requested:true})
  ];
  globalThis.fetch=async (url,options={})=>{requests.push({url,options});return replies.shift();};
  t.after(()=>{globalThis.fetch=originalFetch;});
  const {call}=await import(`../src/athleteAcademyV1/transport.js?stale=${Date.now()}`);
- const result=await call('reset_password',{token:'fictional-token',password:'fictional-password'});
- assert.equal(result.reset,true);
+ const result=await call('request_password_reset',{email:'fictional@test.invalid'});
+ assert.equal(result.requested,true);
  assert.deepEqual(requests.map(x=>x.options.method||'GET'),['GET','POST','GET','POST']);
  assert.equal(requests[1].options.headers['X-CSRF-Token'],'csrf-old');
  assert.equal(requests[3].options.headers['X-CSRF-Token'],'csrf-current');

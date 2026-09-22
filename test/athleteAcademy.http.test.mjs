@@ -27,6 +27,17 @@ test('public recovery and duplicate signup have the same response for known and 
  const existing=await http({method:'POST',headers,body:{action:'signup',email:'browser@test.invalid',password:'Fictional-browser-password',displayName:'Browser Test',dateOfBirth:'2000-01-01',sport:'Soccer',region:'US-CA'}});
  assert.equal(existing.status,200);assert.deepEqual(existing.body,{ok:true,verificationRequired:true});
 });
+test('stale forgot-password CSRF is rejected before mail; the fresh retry sends exactly one message',async()=>{
+ const before=mailbox.length,stale=await http(),current=await http(),requestId=randomUUID(),body={action:'request_password_reset',requestId,email:'browser@test.invalid'};
+ const cookieNow=current.headers['Set-Cookie'].split(';')[0];
+ const rejected=await http({method:'POST',headers:{cookie:cookieNow,'x-csrf-token':stale.body.csrfToken},body});
+ assert.equal(rejected.status,403);assert.equal(rejected.body.error.code,'SESSION_OR_FORM_EXPIRED');
+ await Promise.all(pending.splice(0));assert.equal(mailbox.length,before,'rejected stale form dispatches no mail');
+ const accepted=await http({method:'POST',headers:{cookie:cookieNow,'x-csrf-token':current.body.csrfToken},body});
+ assert.equal(accepted.status,200);assert.deepEqual(accepted.body,{ok:true,requested:true});
+ await Promise.all(pending.splice(0));assert.equal(mailbox.length,before+1,'fresh retry dispatches one message');
+ assert.equal(mailbox.at(-1).email,'browser@test.invalid');assert.equal(mailbox.at(-1).kind,'reset_password');
+});
 test('public acknowledgements never wait for a matching email provider; outbox survives interruption',async()=>{
  let release;const transportGate=new Promise(resolve=>{release=resolve;});let calls=0;
  const isolated=createAcademyRuntime({env:{...env,ATHLETE_ACADEMY_NAMESPACE:`more:athlete-academy:{test-${randomUUID()}}`},redis,mailTransport:async()=>{calls++;await transportGate;return {status:'rejected'};}});
