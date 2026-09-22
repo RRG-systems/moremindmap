@@ -32,6 +32,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   let redis;
   let firstConnectionError;
+  let stage = 'authorization';
   try {
     workerAuthorized(process.env, req.headers.authorization);
     if (req.method !== 'GET') return res.status(405).json({ok: false, error: 'METHOD_NOT_ALLOWED'});
@@ -45,6 +46,7 @@ export default async function handler(req, res) {
       caCertificates: (ca.match(/-----BEGIN CERTIFICATE-----/g) || []).length,
     };
     if (!shape.tlsUrl || shape.caCertificates < 1) return res.status(503).json({ok: false, stage: 'configuration', error: 'TLS_CONFIGURATION_INVALID', ...shape});
+    stage = 'connection';
     redis = new Redis(raw, {
       lazyConnect: true,
       maxRetriesPerRequest: 0,
@@ -58,9 +60,14 @@ export default async function handler(req, res) {
       redis.connect().then(() => redis.ping()),
       new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error('PING_TIMEOUT'), {code: 'ETIMEDOUT'})), 15000)),
     ]);
-    return res.status(200).json({ok: pong === 'PONG', stage: 'ping', ...shape});
+    stage = 'read';
+    const diagnosticKey = `${process.env.ATHLETE_ACADEMY_NAMESPACE || 'more:athlete-academy:{v1}'}:diagnostic`;
+    await redis.get(diagnosticKey);
+    stage = 'script';
+    await redis.eval("return redis.call('GET', KEYS[1])", 1, diagnosticKey);
+    return res.status(200).json({ok: pong === 'PONG', stage: 'script', ...shape});
   } catch (error) {
-    return res.status(error?.status || 503).json({ok: false, stage: 'ping', error: safeFailure(firstConnectionError || error)});
+    return res.status(error?.status || 503).json({ok: false, stage, error: safeFailure(firstConnectionError || error)});
   } finally {
     redis?.disconnect();
   }
