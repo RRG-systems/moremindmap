@@ -1,12 +1,12 @@
 # MORE Athlete academy foundation — candidate
 
-This is the Founder-approved California, age-17-and-up institute pilot implementation. Stripe and automated billing are excluded. Founder browser review and a separate Home Base release approval are required before promotion.
+This is the Founder-approved California institute pilot implementation. Its current default release is 18-and-up. The preserved age-17-and-up guardian design activates only when `ATHLETE_ACADEMY_REAL_YOUTH_ENABLED=1` after its separate acceptance. Stripe and automated billing are excluded. Founder browser review and a separate Home Base release approval are required before promotion.
 
 The accepted baseline is the Plan MORE ATHLETE architecture prototype, the locked Youth BOS V2.1 twenty-question bank, the complete Youth BOS V2 reading, the five-box Youth APA, and Athlete Consulting Tool V2. Existing Leadership / DarrenDemo Box04 and Box05 remain separate and unchanged.
 
 ## Participant journey
 
-MORE Athlete → find Beyond Today Sports Institute → institution code → individual verified account → participation / separate guardian approval at17 → BOS → APA → continuing coaching.
+Current pilot: MORE Athlete → find Beyond Today Sports Institute → institution code → individual verified 18+ account → participation → BOS → APA → personal Athlete Consulting Tool → Start my first session. The preserved flag-on youth journey adds separate guardian approval at17 before BOS.
 
 Horizon Sports Institute is a separate fictional directory example. It has no active enrollment. The institution code grants service access only; it never identifies a person or grants access to a report. Every participant receives their own permanent MM, including adult partner testers who use their real age.
 

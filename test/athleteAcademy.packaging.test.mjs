@@ -31,6 +31,32 @@ test('successful password reset replaces the invalidated session before normal s
  assert.match(app,/call\('reset_password',\{token:privateToken\.current,password\}\);privateToken\.current='';await refresh\(\);navigate\('login'\);/s);
 });
 
+test('rendered enrollment follows the server cohort and existing youth receive a preserved-record hold',async()=>{
+ const app=await readFile(path.join(root,'src/athleteAcademyV1/App.jsx'),'utf8'),transport=await readFile(path.join(root,'src/athleteAcademyV1/transport.js'),'utf8');
+ assert.match(app,/max=\{latestBirthDate\(session\.cohort\.minimumAge\)\}/);
+ assert.match(app,/California residents age \{session\.cohort\.minimumAge\} and older/);
+ assert.match(app,/function AdultPilotHold\(\{d,run,busy,onRefresh\}\).*saved records are preserved.*Read your saved BOS.*Read your saved APA.*abandon_assessment/s);
+ assert.match(app,/page==='guardian'&&!session\.capabilities\.realYouth/);
+ assert.match(app,/w\.status==='withdrawn'\?'Participation paused\.':!session\.capabilities\.realYouth\?'Youth processing is paused; saved records are preserved\.':w\.status==='authorized'/);
+ assert.equal((app.match(/<AdultPilotHold d=\{d\} run=\{run\} busy=\{busy\} onRefresh=\{refresh\}\/?>/g)||[]).length,2);
+ assert.match(app,/title:'Your Athlete Consulting Tool\.',label:'PERSONAL ATHLETE CONSULTING'/);
+ assert.match(app,/href=\{workspaceLink\('coach',d\.mm\)\}>Start my first session →<\/a>/);
+ assert.match(transport,/PILOT_CALIFORNIA_18_PLUS:'This first test is for adults age 18 or older in California\.'/);
+});
+
+test('adult pilot readiness requires its explicit Redis binding and accepts approved server-only mail aliases',async()=>{
+ const runtime=await readFile(path.join(root,'server/athleteAcademyV1/runtime.js'),'utf8'),readiness=await readFile(path.join(root,'scripts/athlete-academy/readiness.mjs'),'utf8');
+ assert.match(runtime,/const url=env\.ATHLETE_ACADEMY_REDIS_URL;requireValue\(url,'ACADEMY_STORAGE_REQUIRED'/);
+ assert.doesNotMatch(runtime,/ATHLETE_ACADEMY_REDIS_URL\|\|env\.REDIS_URL/);
+ assert.match(readiness,/tls_redis:\(e\.ATHLETE_ACADEMY_REDIS_URL\|\|''\)\.startsWith\('rediss:\/\/'\)/);
+ assert.match(readiness,/MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY/);
+ assert.match(readiness,/PUBLIC_PROFILE_OWNERSHIP_EMAIL_FROM/);
+ assert.match(readiness,/adult_only_lock:e\.ATHLETE_ACADEMY_REAL_YOUTH_ENABLED!=='1'/);
+ assert.match(readiness,/informational=\{youth_activation:e\.ATHLETE_ACADEMY_REAL_YOUTH_ENABLED==='1'\}/);
+ assert.match(readiness,/worker_binding:e\.ATHLETE_ACADEMY_WORKER_ENABLED==='1'&&\(e\.CRON_SECRET\|\|''\)\.length>=32/);
+ assert.doesNotMatch(readiness,/worker_binding:.*ATHLETE_ACADEMY_WORKER_SECRET/);
+});
+
 test('APA audit sees the actual single-proposal selector and never invented athlete agreement',async()=>{
  const fixture=JSON.parse(await readFile(new URL('../server/athleteConsultingV2/fixtures/sofia.json',import.meta.url))),report=fixture.apa.report;
  const disposition=candidateDisposition(report),selection=selectMove(report);

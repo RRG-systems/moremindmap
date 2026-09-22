@@ -10,7 +10,11 @@ export function renderMail(m,origin){
 export function createDelivery({repo,config,transport,now=Date.now}){return async id=>{
  if(!id)return null;
  requireValue(config.mailEnabled&&transport,'EMAIL_SERVICE_UNAVAILABLE',503);
- const key=`mail:${id}`,attempt=randomUUID(),qk='queue:mail';
+ const key=`mail:${id}`,attempt=randomUUID(),qk='queue:mail',pqk='queue:mail:paused-youth';
+ const queued=await repo.read(key);
+ // A queued guardian message from an earlier flag-on runtime remains durable,
+ // but the adult-only runtime must not send or consume it.
+ if(queued?.kind==='guardian_invite'&&!config.realYouthEnabled)return repo.transact([key,qk,pqk],s=>{const q=s[qk]||{ids:[]},paused=s[pqk]||{ids:[]};return {writes:{[qk]:{ids:q.ids.filter(x=>x!==id)},[pqk]:{ids:[...new Set([...paused.ids,id])]}},result:{status:'paused'}};});
  const claimed=await repo.transact([key,qk],s=>{
   const m=s[key],q=s[qk]||{ids:[]};
   const close=status=>({writes:{...(m?{[key]:{...m,status}}:{}),[qk]:{ids:q.ids.filter(x=>x!==id)}},result:{status}});
@@ -34,8 +38,12 @@ export function createDelivery({repo,config,transport,now=Date.now}){return asyn
 };}
 export async function runMailQueue(runtime){
  if(!runtime.config.mailEnabled)return {processed:0,paused:true};
- const queue=await runtime.repo.read('queue:mail');let processed=0;
- for(const id of (queue?.ids||[]).slice(0,20)){await runtime.deliver(id);processed++;}
- return {processed};
+ if(runtime.config.realYouthEnabled)await runtime.repo.transact(['queue:mail','queue:mail:paused-youth'],s=>{const active=s['queue:mail']||{ids:[]},paused=s['queue:mail:paused-youth']||{ids:[]};return {writes:paused.ids.length?{'queue:mail':{ids:[...new Set([...active.ids,...paused.ids])]},'queue:mail:paused-youth':{ids:[]}}:{},result:true};});
+ const queue=await runtime.repo.read('queue:mail');let processed=0,pausedCount=0;
+ // Paused guardian records do not consume the 20-message delivery budget. Scan
+ // the bounded durable queue so eligible verification/recovery mail behind them
+ // cannot be starved; each paused ID is atomically moved out of the active queue.
+ for(const id of (queue?.ids||[])){if(processed>=20)break;const result=await runtime.deliver(id);if(result?.status==='paused')pausedCount++;else processed++;}
+ return {processed,...(pausedCount?{paused:true,pausedCount}:{})};
 }
 export function resendTransport({key,from,fetchImpl=fetch}){return async m=>{requireValue(key&&from,'EMAIL_SERVICE_UNAVAILABLE',503);const r=await fetchImpl('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':m.id},body:JSON.stringify({from,to:[m.email],subject:m.subject,text:m.text}),signal:AbortSignal.timeout(20000)});const body=await r.json().catch(()=>null);return r.ok&&body?.id?{status:'sent',receipt:body.id}:{status:r.status>=400&&r.status<500?'rejected':'unknown'};};}

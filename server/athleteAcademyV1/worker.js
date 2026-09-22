@@ -51,7 +51,10 @@ export async function runAssessmentQueue(runtime) {
   return { advanced: 0, waiting };
 }
 export function workerAuthorized(env, authorization) {
-  const secret = env.ATHLETE_ACADEMY_WORKER_SECRET || env.CRON_SECRET;
+  // Native Vercel cron requests use CRON_SECRET. A legacy/private scheduler may
+  // fall back only when CRON_SECRET is absent; an empty or invalid binding must
+  // never silently downgrade to the fallback secret.
+  const secret = env.CRON_SECRET === undefined ? env.ATHLETE_ACADEMY_WORKER_SECRET : env.CRON_SECRET;
   requireValue(typeof secret === 'string' && secret.length >= 32 && typeof authorization === 'string', 'WORKER_AUTH_REQUIRED', 401);
   requireValue(timingSafeEqual(Buffer.from(digest(authorization)), Buffer.from(digest(`Bearer ${secret}`))), 'WORKER_AUTH_REQUIRED', 401);
   requireValue(env.ATHLETE_ACADEMY_WORKER_ENABLED === '1', 'WORKER_NOT_ACTIVE', 503);

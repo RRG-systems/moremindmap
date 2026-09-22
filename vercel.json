@@ -16,6 +16,16 @@
       "destination": "/"
     }
   ],
+  "crons": [
+    {
+      "path": "/api/athlete/academy-worker",
+      "schedule": "* * * * *"
+    },
+    {
+      "path": "/api/athlete/academy-mail-worker",
+      "schedule": "* * * * *"
+    }
+  ],
   "functions": {
     "api/athlete/academy.js": {
       "maxDuration": 800

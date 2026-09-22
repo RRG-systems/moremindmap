@@ -1,5 +1,5 @@
 import {requireValue} from './repository.js';
-import {INSTITUTIONS,COHORT,resolveInstitution} from './config.js';
+import {INSTITUTIONS,resolveInstitution} from './config.js';
 import {publicAccount} from './auth.js';
 const COOKIE='more_athlete_academy';
 export function createAcademyHandler({config,auth,academy,coaching,deliver}){
@@ -15,7 +15,7 @@ export function createAcademyHandler({config,auth,academy,coaching,deliver}){
    if(req.method==='GET'){
     if(!s){await auth.limited('bootstrap:'+String(req.headers['x-forwarded-for']||req.socket?.remoteAddress||'unknown').split(',')[0],100,3600000);const created=await auth.createSession();s=created.session;res.setHeader('Set-Cookie',cookie(created.raw));}
     let athletes=[];if(s.account){const {dossier}=await academy.getDossier(s.account,{mm:s.account.mm});athletes=[{mm:dossier.mm,name:dossier.person.name}];}
-    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:COHORT,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled}});
+    return res.status(200).json({ok:true,csrfToken:s.csrf,account:publicAccount(s.account),athletes,institutions:INSTITUTIONS,cohort:config.cohort,policyVersion:config.reviewedPolicyVersion||'candidate-review-v1',capabilities:{generation:config.providerEnabled,email:config.mailEnabled,syntheticPreview:config.syntheticPreview,realYouth:config.realYouthEnabled}});
    }
    requireValue(s&&req.headers['x-csrf-token']===s.csrf,'SESSION_OR_FORM_EXPIRED',403);requireValue(String(req.headers['content-type']||'').includes('application/json'),'JSON_REQUIRED',415);
    const b=req.body;requireValue(b&&typeof b==='object'&&!Array.isArray(b)&&JSON.stringify(b).length<=200000,'REQUEST_INVALID',413);
