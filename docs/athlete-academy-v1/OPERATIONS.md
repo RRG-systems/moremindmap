@@ -14,6 +14,7 @@ Build both the main application and the existing private Darren library using th
 | ATHLETE_ACADEMY_ORIGIN | Exact HTTPS site origin; no path |
 | ATHLETE_ACADEMY_ALLOWED_ORIGINS | Optional comma-separated exact HTTPS aliases; never use wildcards |
 | ATHLETE_ACADEMY_REDIS_URL | Dedicated or explicitly approved Redis binding using TLS |
+| ATHLETE_ACADEMY_REDIS_CA_PEM | Redis Cloud public CA bundle used to authenticate the TLS server; required with `rediss://` |
 | ATHLETE_ACADEMY_NAMESPACE | Omit for canonical namespace; never use the local test namespace in real enrollment |
 | ATHLETE_ACADEMY_BEYOND_TODAY_CODE_SHA256 | SHA256 of the Founder-approved institute enrollment code |
 | ATHLETE_ACADEMY_PROVIDER_ENABLED=1 | Permit explicitly requested generation/coaching |

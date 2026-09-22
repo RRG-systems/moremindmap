@@ -1,11 +1,12 @@
 import {runMailQueue} from '../server/athleteAcademyV1/delivery.js';
 import test from 'node:test';import assert from 'node:assert/strict';import {randomUUID} from 'node:crypto';import Redis from 'ioredis';
-import {createAcademyRuntime} from '../server/athleteAcademyV1/runtime.js';import {digest} from '../server/athleteAcademyV1/repository.js';
+import {createAcademyRedis,createAcademyRuntime} from '../server/athleteAcademyV1/runtime.js';import {digest} from '../server/athleteAcademyV1/repository.js';
 import {academyConfig} from '../server/athleteAcademyV1/config.js';
 const redis=new Redis('redis://127.0.0.1:6394',{maxRetriesPerRequest:0,enableOfflineQueue:false});await new Promise((r,j)=>{redis.once('ready',r);redis.once('error',j);});
 const env={ATHLETE_ACADEMY_ENABLED:'1',ATHLETE_ACADEMY_ORIGIN:'http://127.0.0.1:5321',ATHLETE_ACADEMY_LOCAL_PREVIEW:'1',ATHLETE_ACADEMY_SYNTHETIC_PREVIEW:'1',ATHLETE_ACADEMY_MAIL_ENABLED:'1',ATHLETE_ACADEMY_NAMESPACE:`more:athlete-academy:{test-${randomUUID()}}`,ATHLETE_ACADEMY_BEYOND_TODAY_CODE_SHA256:digest('darrendemo1')};
 const pending=[];
 const mailbox=[],r=createAcademyRuntime({env,redis,mailTransport:async m=>{mailbox.push(m);return {status:'sent',receipt:'test-only'};}});
+test('hosted TLS storage requires the Redis Cloud CA bundle',()=>{assert.throws(()=>createAcademyRedis('rediss://default:secret@example.db.redis.io:12345'),/TLS_CA_REQUIRED/);});
 async function http({method='GET',body={},headers={}}={},runtime=r){const out={status:200,headers:{}};const res={setHeader(k,v){out.headers[k]=v;},status(c){out.status=c;return this;},json(b){out.body=b;return out;}};await runtime.handler({method,body,headers:{origin:env.ATHLETE_ACADEMY_ORIGIN,'sec-fetch-site':'same-origin','content-type':'application/json',...headers},socket:{remoteAddress:'127.0.0.1'}},res,{defer:p=>pending.push(p)});return out;}
 let cookie,csrf,mm;
 test('public directory has no account, MM, roster or code; private responses are no-store',async()=>{const x=await http();cookie=x.headers['Set-Cookie'].split(';')[0];csrf=x.body.csrfToken;assert.equal(x.status,200);assert.equal(x.body.account,null);assert.deepEqual(x.body.athletes,[]);assert.equal(x.body.institutions.length,2);assert.equal(JSON.stringify(x.body).includes('darrendemo1'),false);assert.equal(x.headers['Cache-Control'],'no-store, private');assert.match(x.headers['Set-Cookie'],/HttpOnly; SameSite=Strict/);});
