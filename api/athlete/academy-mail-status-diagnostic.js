@@ -34,7 +34,21 @@ export default async function handler(req, res) {
       if (record.receipt) receiptPresent++;
       if (record.status === 'sent' && record.token === null) sentTokensCleared++;
     }
-    return res.status(200).json({ok: true, total: records.length, queued: queue.ids?.length || 0, byStatus, byKind, receiptPresent, sentTokensCleared});
+    const mailKey = process.env.RESEND_API_KEY || process.env.MOREMINDMAP_SERVER_ONLY_PROFILE_OWNERSHIP_RESEND_API_KEY;
+    const byProviderEvent = {};
+    let providerInspected = 0;
+    for (const record of records) {
+      if (!record.receipt || !mailKey) continue;
+      const response = await fetch(`https://api.resend.com/emails/${encodeURIComponent(record.receipt)}`, {
+        headers: {Authorization: `Bearer ${mailKey}`},
+        signal: AbortSignal.timeout(20000),
+      });
+      const body = await response.json().catch(() => null);
+      const event = response.ok && /^[a-z_]{2,40}$/.test(body?.last_event || '') ? body.last_event : `http_${response.status}`;
+      byProviderEvent[event] = (byProviderEvent[event] || 0) + 1;
+      providerInspected++;
+    }
+    return res.status(200).json({ok: true, total: records.length, queued: queue.ids?.length || 0, byStatus, byKind, receiptPresent, sentTokensCleared, providerInspected, byProviderEvent});
   } catch (error) {
     const code = /^[A-Z0-9_]+$/.test(error?.code || error?.message || '') ? error.code || error.message : 'DIAGNOSTIC_UNAVAILABLE';
     return res.status(error?.status || 503).json({ok: false, error: code});
