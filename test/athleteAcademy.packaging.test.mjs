@@ -25,6 +25,12 @@ test('participant intake and report engine use the same locked twenty-question r
  assert.equal(QUESTIONNAIRE_VERSION,'youth-bos-v2.1.0');assert.equal(serverQuestions.length,20);assert.deepEqual(clientQuestions,serverQuestions);
 });
 
+test('successful password reset replaces the invalidated session before normal sign-in',async()=>{
+ const app=await readFile(path.join(root,'src/athleteAcademyV1/App.jsx'),'utf8');
+ assert.match(app,/async function refresh\(\).*else\{setD\(null\);setWards\(\[\]\);\}return s;/s);
+ assert.match(app,/call\('reset_password',\{token:privateToken\.current,password\}\);privateToken\.current='';await refresh\(\);navigate\('login'\);/s);
+});
+
 test('APA audit sees the actual single-proposal selector and never invented athlete agreement',async()=>{
  const fixture=JSON.parse(await readFile(new URL('../server/athleteConsultingV2/fixtures/sofia.json',import.meta.url))),report=fixture.apa.report;
  const disposition=candidateDisposition(report),selection=selectMove(report);
