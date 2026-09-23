@@ -44,6 +44,13 @@ test('rendered enrollment follows the server cohort and existing youth receive a
  assert.match(transport,/PILOT_CALIFORNIA_18_PLUS:'This first test is for adults age 18 or older in California\.'/);
 });
 
+test('BOS extra-review progress keeps the profile ID visible and does not promise the usual wait',async()=>{
+ const app=await readFile(path.join(root,'src/athleteAcademyV1/App.jsx'),'utf8');
+ assert.match(app,/job\.service==='bos'&&job\.totalStages>5/);
+ assert.match(app,/A factual check requested one careful correction and an independent re-check/);
+ assert.match(app,/Profile ID: \{job\.mm\}/);
+});
+
 test('adult Academy report chrome uses athlete-facing BOS and APA labels',async()=>{
  const bos=await readFile(path.join(root,'src/athleteAcademyV1/bos/App.jsx'),'utf8');
  const reports=await readFile(path.join(root,'src/athleteAcademyV1/coach/Reports.jsx'),'utf8');

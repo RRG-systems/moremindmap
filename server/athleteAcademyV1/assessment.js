@@ -5,14 +5,14 @@ import { QUESTIONS, QUESTIONNAIRE_VERSION } from './bos/questions.js';
 import { getAuthority } from './bos/authority.js';
 import { stagePrompt } from './bos/prompts.js';
 import { publicReadingPrompt, validatePublicReading } from './bos/publicReading.js';
-import { readingAuditPrompt, validateReadingAudit } from './bos/readingAudit.js';
+import { readingAuditPrompt, validateReadingAudit, requireReadingAuditPass, readingCorrectionPrompt, applyReadingCorrection } from './bos/readingAudit.js';
 import * as apa from './apa/contract.js';
 import { QUESTIONS as APA_QUESTIONS, DOMAINS } from './apa/design.js';
 import { REPORT_SCHEMA,AUDIT_SCHEMA } from './apa/schema.js';
 import { GENERATE,AUDIT } from './apa/prompts.js';
 import { SELECTION_DIMENSIONS } from '../../src/lib/oneMoveV2/constants.js';
 import { digest,requireValue } from './repository.js';
-export const BOS_STAGES=['evidence','domains','synthesis','reading','audit'];
+export const BOS_STAGES=['evidence','domains','synthesis','reading','audit','targeted-reading-correction','independent-correction-audit'];
 export const APA_STAGES=['synthesis-futures-candidates','independent-source-audit','targeted-source-correction','independent-correction-audit'];
 export function validateAnswers(service, answers, complete=false) {
  const qs=service==='bos'?QUESTIONS:APA_QUESTIONS;requireValue(['bos','apa'].includes(service),'SERVICE_INVALID');
@@ -31,11 +31,13 @@ export function buildSource(dossier, service, canonicalBos=null, bosInput=null){
  const accepted=apa.validateIntake(source,registry,bytes);return {source,packet:apa.sourcePacket(source,accepted,registry),bos:canonicalBos,bosInput};
 }
 const issues=a=>!a.pass||a.issues.some(i=>['material','blocker'].includes(i.severity));
-export function nextStage(service,records){if(service==='bos')return BOS_STAGES.find(s=>!records[s])||null;if(!records[APA_STAGES[0]])return APA_STAGES[0];if(!records[APA_STAGES[1]])return APA_STAGES[1];if(!issues(records[APA_STAGES[1]].output))return null;if(!records[APA_STAGES[2]])return APA_STAGES[2];if(!records[APA_STAGES[3]])return APA_STAGES[3];return null;}
+export function nextStage(service,records){if(service==='bos'){const first=BOS_STAGES.slice(0,5).find(s=>!records[s]);if(first)return first;if(records.audit.output.pass)return null;return BOS_STAGES.slice(5).find(s=>!records[s])||null;}if(!records[APA_STAGES[0]])return APA_STAGES[0];if(!records[APA_STAGES[1]])return APA_STAGES[1];if(!issues(records[APA_STAGES[1]].output))return null;if(!records[APA_STAGES[2]])return APA_STAGES[2];if(!records[APA_STAGES[3]])return APA_STAGES[3];return null;}
 export function stageRequest(service,stage,input,records){
  if(service==='bos'){
   const subject=input.subject,prior=Object.fromEntries(Object.entries(records).map(([k,v])=>[k,v.output]));
   const intake={synthetic:subject.synthetic,age:subject.age,questions:subject.questions,answers:subject.answers,corrections:subject.corrections};
+  if(stage==='targeted-reading-correction')return {instructions:readingCorrectionPrompt(),input:{intake,reference_metadata:{pronouns:subject.pronouns},reading:prior.reading,evidence:prior.evidence,audit:prior.audit},maxTokens:6000};
+  if(stage==='independent-correction-audit')return {instructions:readingAuditPrompt(),input:{intake,reference_metadata:{pronouns:subject.pronouns},reading:applyReadingCorrection(prior.reading,prior['targeted-reading-correction'],prior.audit,prior.evidence)},maxTokens:24000};
   return {instructions:(stage==='reading'?publicReadingPrompt():stage==='audit'?readingAuditPrompt():stagePrompt(stage))+(input.contractRepair?.stage===stage?'\nCONTRACT REPAIR: Correct only the supplied failed synthesis against its exact existing evidence. Preserve supported meanings. Every claim_ids list, including pressure_visual.claim_ids, must contain actual supplied evidence claim IDs. If a meaning has no support, revise that meaning instead of inventing evidence. Return the complete object.':''),schema:stage==='synthesis'?SYNTHESIS_SCHEMA:undefined,input:stage==='audit'?{intake,reference_metadata:{pronouns:subject.pronouns},reading:prior.reading}:{version:'youth-bos-v2.0.0',intake,authority:stage==='reading'?[]:getAuthority(),...prior,...(input.contractRepair?.stage===stage?{contract_repair:input.contractRepair}:{})},maxTokens:stage==='reading'?28000:24000};
  }
  const packet=input.packet,auditPacket={...packet,full_accepted_bos:undefined};
@@ -49,14 +51,22 @@ export function validateStage(service,stage,output,input,records){
   if(stage==='domains')bos.validateDomains(output,records.evidence.output);
   if(stage==='synthesis')bos.validateSynthesis(output,records.evidence.output);
   if(stage==='reading'){bos.validateReading(output,records.evidence.output);validatePublicReading(output,records.evidence.output);}
-  if(stage==='audit')validateReadingAudit(output);
+  if(stage==='audit')validateReadingAudit(output,records.reading.output,input.subject);
+  if(stage==='targeted-reading-correction')applyReadingCorrection(records.reading.output,output,records.audit.output,records.evidence.output);
+  if(stage==='independent-correction-audit')validateReadingAudit(output,applyReadingCorrection(records.reading.output,records['targeted-reading-correction'].output,records.audit.output,records.evidence.output),input.subject);
  }else if(stage.includes('audit'))requireValue(typeof output?.pass==='boolean'&&Array.isArray(output.issues)&&output.issues.every(x=>['minor','material','blocker'].includes(x.severity)),'AUDIT_INVALID');
  else apa.validateReport(output,input.packet);
 }
 export function assembleReport(service,input,records){
  requireValue(!nextStage(service,records),'STAGES_INCOMPLETE');
  const receipts=Object.entries(records).map(([stage,r])=>({stage,request_sha256:r.request_sha256,output_sha256:r.output_sha256,model:r.model,usage:r.usage,response_id:r.response_id}));
- if(service==='bos'){validateReadingAudit(records.audit.output);return bos.assemble(input.subject,records.evidence.output,records.domains.output,records.synthesis.output,records.reading.output,receipts);}
+ if(service==='bos'){
+  const original=records.reading.output,firstAudit=validateReadingAudit(records.audit.output,original,input.subject);
+  if(firstAudit.pass){requireReadingAuditPass(firstAudit);return bos.assemble(input.subject,records.evidence.output,records.domains.output,records.synthesis.output,original,receipts);}
+  const corrected=applyReadingCorrection(original,records['targeted-reading-correction'].output,firstAudit,records.evidence.output);
+  requireReadingAuditPass(validateReadingAudit(records['independent-correction-audit'].output,corrected,input.subject));
+  return bos.assemble(input.subject,records.evidence.output,records.domains.output,records.synthesis.output,corrected,receipts);
+ }
  const report=(records[APA_STAGES[2]]||records[APA_STAGES[0]]).output,audit=(records[APA_STAGES[3]]||records[APA_STAGES[1]]).output;
  return apa.assemble(input.source,input.packet,report,receipts,audit);
 }
