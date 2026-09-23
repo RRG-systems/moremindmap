@@ -34,6 +34,8 @@ export function academyConfig(env = {}) {
   for(const hostname of [env.VERCEL_URL,env.VERCEL_PROJECT_PRODUCTION_URL]){
     const resolved=exactOrigin(hostname&&`https://${String(hostname).trim()}`);if(resolved)allowedOrigins.add(resolved);
   }
+  const preservedBosRecoveryJobHash=env.ATHLETE_ACADEMY_PRESERVED_BOS_RECOVERY_JOB_SHA256||null;
+  requireValue(!preservedBosRecoveryJobHash||/^[a-f0-9]{64}$/.test(preservedBosRecoveryJobHash),'ACADEMY_RECOVERY_CONFIG_INVALID',503);
   return {
     enabled: env.ATHLETE_ACADEMY_ENABLED === '1',
     origin,
@@ -46,6 +48,7 @@ export function academyConfig(env = {}) {
     providerEnabled: env.ATHLETE_ACADEMY_PROVIDER_ENABLED === '1',
     mailEnabled: env.ATHLETE_ACADEMY_MAIL_ENABLED === '1',
     institutionCodeHash: env.ATHLETE_ACADEMY_BEYOND_TODAY_CODE_SHA256 || null,
+    preservedBosRecoveryJobHash,
   };
 }
 export function resolveInstitution(config, { institutionId, code }) {
