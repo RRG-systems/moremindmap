@@ -74,9 +74,11 @@ export function draft(state, plan, source = 'conversation') {
 export function applyOutput(state, output, task) {
   validateOutput(output);
   const next = structuredClone(state);
-  if (output.retire_draft && next.draft) { next.events.push({ type: 'draft_declined', draft: next.draft }); next.draft = null; }
+  // An opening can carry a reviewed coach note, but cannot silently retire a
+  // human's pending plan choice or stage learning on that note's authority.
+  if (task !== 'OPENING' && output.retire_draft && next.draft) { next.events.push({ type: 'draft_declined', draft: next.draft }); next.draft = null; }
   if (output.plan && task === 'CHAT') draft(next, output.plan);
-  if (output.learning.length) next.suggestedLearning = [...new Set(output.learning)].slice(0, 4);
+  if (task !== 'OPENING' && output.learning.length) next.suggestedLearning = [...new Set(output.learning)].slice(0, 4);
   next.messages.push({ id: randomUUID(), role: 'assistant', text: output.reply, at: new Date().toISOString() });
   if (task === 'OPENING') { next.opening = output.reply; next.status = 'active'; next.sessionStart = next.messages.length - 1; }
   if (task === 'CLOSE') { next.closing = { id: randomUUID(), summary: output.reply, continuity: output.recap }; next.status = 'review'; }

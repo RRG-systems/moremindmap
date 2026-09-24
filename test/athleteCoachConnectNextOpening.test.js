@@ -151,6 +151,23 @@ test('failed opening retains pending note for a later successful opening', async
   assert.equal(state.events.filter((event) => event.type === 'coach_note_opened').length, 1);
 });
 
+test('coach-note opening cannot retire a pending draft or stage learning from model output', async () => {
+  const proposal = { title: 'Synthetic next step', why: 'A fictional practice choice.',
+    steps: [{ action: 'Pause after a missed pass.', when: 'At practice.',
+      notice: 'A calmer reset.', owner: 'athlete' }], review: 'Next session.' };
+  const { store } = fixture(async () => ({ ...output(), plan: proposal,
+    retire_draft: true, learning: ['Coach observation is now a preference.'] }));
+  let state = await act(store, 'nia', { action: 'draft', plan: proposal });
+  const originalDraft = structuredClone(state.draft);
+  state = await act(store, 'nia', { action: 'capture_demo', capture: capture('coach', 'nia', 'A reviewed fictional reset note.') });
+  state = await act(store, 'nia', { action: 'start' });
+  assert.deepEqual(state.draft, originalDraft);
+  assert.equal(state.plan, null);
+  assert.deepEqual(state.learning, []);
+  assert.deepEqual(state.suggestedLearning, []);
+  assert.equal(state.coachNoteHandoff.pending_count, 0);
+});
+
 test('unknown opening outcome cannot consume a pending note or call the model again automatically', async () => {
   let calls = 0, losePendingAck = true;
   const { redis, store } = fixture(async () => { calls++; return output(); });
